@@ -1,73 +1,157 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "blocked",
-  "skeleton": true,
+  "status": "implemented",
+  "skeleton": false,
   "phases_completed": 11,
   "phases_total": 17,
-  "sorry_inventory": [
-    {
-      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "line": 2080,
-      "declaration": "blockedRedirect_boxctx_mem",
-      "reason": "Witness-collision sub-case: (s', phi') = (Sign.pos, psi) means the origin mint of wBlock was itself diamond-positive on this same psi (T(diamond psi)@u permanent), which does not give T(box psi)@u -- no landed invariant connects the two. Documented with a concrete reachable configuration in the inline comment and in the plan's Phase 12 completion notes."
-    },
-    {
-      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "line": 2125,
-      "declaration": "blockedRedirect_diaNeg_mem",
-      "reason": "Mirror-image witness collision for the dual (box-negative origin mint, diamond-negative query). Same root cause as the box-context sorry above."
-    }
-  ],
-  "summary": "Phase 12 (Redirect-Inertness) attempted against the v2 plan and BLOCKED, per the phase's own escalation criterion. Landed and fully proved, sorry-free: keysRootEmpty/keysRootEmpty_entry (new small auxiliary in LoopChecking.lean, threaded like keysOriginS4, ruling out keysOriginS4's root disjunct once wBlock's recorded key is shown non-empty); the case-(b) route and root-world case in both blockedRedirect_boxctx_mem and blockedRedirect_diaNeg_mem; blockedRedirect_propAdequate (FrameSoundness.lean, new public import of LoopChecking.lean added -- confirmed acyclic -- the full mechanical composition into branchPropAdequateIn's edge-conjunct shape, itself sorry-free). BLOCKED: Phase 10's R1 verdict ('case (a), the witness collision, does not bite') does not survive direct proof attempt -- confirmed via lean_goal at the actual sorry site, not just manual analysis. A concrete, reachable configuration is documented (an unrelated redirect source v happening to share both its own diamond-positive mint trigger AND an independently-true box-positive formula with wBlock's origin mint's witness formula) under which nothing in the landed invariants (S4KeyedHintikkaInv, keysOriginS4, S4LoopInv) forces T(box psi)@wBlock. Per the plan's own instruction, the conclusion was NOT weakened to the unwrapped form; the gap is discharged via two documented sorry placeholders instead. This is a Route-P-level finding requiring R2 (strengthen keysOriginS4) or R3 (a scheduling side condition, reopening the termination-vs-completeness question) before Phase 12 can close, or reconsideration of Route P itself.",
+  "sorry_inventory": [],
+  "summary": "Scoped cleanup dispatch (not a plan phase): removed three lemmas whose statements the divergence audit (reports/02_redirect-inertness-divergence-audit.md) machine-checked as FALSE, not merely unproven -- blockedRedirect_boxctx_mem and blockedRedirect_diaNeg_mem (LoopChecking.lean) and blockedRedirect_propAdequate (FrameSoundness.lean), the latter's own ambient-model-reuse proof strategy independently refuted by a 4-world counterexample. Each removal site carries a durable inline comment citing the audit report and the reachable counterexample state; two adjacent doc comments (LoopChecking.lean's 'Witness Disjunct' R1-verdict passage and FrameSoundness.lean's branchPropAdequateIn_s4FC_boxPos_trans_mem docstring) that asserted claims the audit refuted were also corrected in place, since leaving them would misinform the re-plan. Cslib/Logics/Modal/Tableau/ goes from 2 documented sorries to 0 (measured: grep for standalone `sorry` tactic lines returns zero in Tableau/). FrameSoundness.lean's public import of LoopChecking.lean (added in Phase 12 solely for blockedRedirect_propAdequate) was removed and lake shake confirms no remaining need for it in either direction. Full CI green: lake build (project-wide, no errors), lake exe checkInitImports (clean), lake lint (exactly one error, the pre-existing Cslib/Logics/Temporal/Tableau/Saturation.lean baseline, unrelated to this task and unchanged), lake exe lint-style (clean), lake exe mk_all --module ('No update necessary' -- Cslib.lean untouched, concurrent session's territory left alone), lake shake on both touched files (no findings), lake test (all suites built including CslibTests.S4LoopGuardRegression, which per the audit's own note stays valid since the boxed-driver question is orthogonal to this removal). Axiom count unchanged (grep '^axiom' count: 26).",
+  "measured_counters": {
+    "modal_tableau_sorry_count_before": 2,
+    "modal_tableau_sorry_count_after": 0,
+    "repo_sorry_census_after_removal_lean_sorry_census_sh": 40,
+    "repo_sorry_census_measurement_note": "The dispatch brief predicted the repo census would return from 41 to 39. Running .claude/scripts/lean-sorry-census.sh Cslib/ after removal measures 40, not 39. Reported as measured, not adjusted to match the prediction; the census was not independently re-run before removal to isolate the discrepancy. Likely explanation (not independently confirmed): the concurrent session's territory, Cslib/Logics/Modal/Metalogic/Constructive/Nested/, contains exactly one live sorry (Nested/Soundness.lean:1315) that this dispatch did not touch and whose count may have shifted since the 41-baseline figure was set. This task's own removal target (2 sorries in Modal/Tableau/) is unambiguous and independently verified: both are gone.",
+    "axiom_count": 26
+  },
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md"
-    }
-  ],
-  "blockers": [
+      "type": "report",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md",
+      "note": "Pre-existing artifact from the prior divergence-audit dispatch (uncommitted when this dispatch started); this dispatch's code comments cite it, so it is included in this dispatch's commit to keep the citation valid history."
+    },
     {
-      "phase": 12,
-      "declaration": "blockedRedirect_boxctx_mem / blockedRedirect_diaNeg_mem",
-      "goal_verbatim": "case inr.inl ... hwitness : (s', phi') = (Sign.pos, psi) ... hkey : (wBlock, successorBirthContent phi0 b s phi v) in keys ... hedge : acc.hasEdge u wBlock = true ... heBoxOnlyNeg, hmint (modalNonMintCandidates = []) ... goal: { sign := Sign.pos, formula := box psi, label := wBlock } in b",
-      "root_cause": "keysOriginS4's witness disjunct ((s', phi') = (Sign.pos, psi)) records only that the origin mint's trigger was T(diamond psi)@u, which is independent of T(box psi)@u. No landed invariant ties a world's diamond-positive mint trigger to its own box-positive status for the same formula.",
-      "what_was_tried": "Direct case-split assembly using keysOriginS4 + a direct filter-membership derivation of (pos,psi) in key(wBlock) from v's own box-context; confirmed via lean_goal that no available hypothesis closes the goal; considered a semantic (rather than syntactic) bridge via branchPropAdequateIn's model but the plan's own framing (and Phase 9's hb-based consumption pattern) requires the syntactic T(box psi)@wBlock membership.",
-      "what_is_needed": "Either R2 (a strengthened keysOriginS4 that also pins down box-status at the witness formula) or R3 (a scheduling-side condition excluding this redirect configuration, which would require re-running Phase 8's empirical termination gate), or a decision to re-examine Route P itself per the phase's own third-strike criterion."
+      "type": "artifact",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4witness.lean",
+      "note": "Pre-existing reachability probe cited by the audit report; included for the same reason as above."
+    },
+    {
+      "type": "artifact",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4boxed.lean",
+      "note": "Pre-existing boxed-key executable variant cited by the audit report; included for the same reason as above."
     }
   ],
-  "requires_user_review": true,
-  "next_action_hint": "spawn-or-revise",
+  "blockers": [],
+  "orphan_report": {
+    "instruction": "Item 3 of the dispatch: decide and report on now-possibly-orphaned support code. None of the following were deleted in this dispatch -- they are sorry-free and TRUE, and removing true, proven content is a planning decision, not cleanup.",
+    "confirmed_unreferenced_outside_own_docs_and_mutual_cross_references": [
+      {
+        "name": "keysOriginS4",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1279",
+        "status": "orphaned candidate",
+        "why": "Sole external consumers were the two removed lemmas and modalStepBranchS4Keyed(Ordered)_preserves_keysOriginS4 (self-referential chain, see below)."
+      },
+      {
+        "name": "keysOriginS4_entry",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1294",
+        "status": "orphaned candidate"
+      },
+      {
+        "name": "keysOriginS4_mono_branch",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1306",
+        "status": "orphaned candidate",
+        "why": "Used only within the keysOriginS4 preservation chain (modalStepBranchS4Keyed(Ordered)_preserves_keysOriginS4)."
+      },
+      {
+        "name": "keysOriginS4_mono_acc",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1327",
+        "status": "orphaned candidate",
+        "why": "Same as keysOriginS4_mono_branch."
+      },
+      {
+        "name": "keysRootEmpty",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2009",
+        "status": "orphaned candidate",
+        "why": "Sole consumer was blockedRedirect_boxctx_mem, now removed. Section doc comment updated in place to record this."
+      },
+      {
+        "name": "keysRootEmpty_entry",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2015",
+        "status": "orphaned candidate"
+      },
+      {
+        "name": "modalStepBranchS4Keyed_preserves_keysOriginS4",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:4558",
+        "status": "orphaned candidate",
+        "why": "grep found zero external callers outside its own docstring and the Ordered variant's cross-reference comment."
+      },
+      {
+        "name": "modalStepBranchS4KeyedOrdered_preserves_keysOriginS4",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:4775",
+        "status": "orphaned candidate, but see next entry",
+        "why": "Its one external caller is modalStepBranchS4KeyedOrdered_preserves_S4LoopInv's fourth conjunct/hypothesis (below) -- not itself called elsewhere in the repo (grep confirmed zero external callers of that theorem too)."
+      },
+      {
+        "name": "modalStepBranchS4Keyed_result_acc_eq",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2406",
+        "status": "orphaned candidate",
+        "why": "Only used internally within modalStepBranchS4Keyed(Ordered)_preserves_keysOriginS4's own proof body."
+      },
+      {
+        "name": "the fourth hypothesis (hKO : keysOriginS4 b acc keys) and fourth conclusion conjunct (keysOriginS4 preservation) threaded into modalStepBranchS4KeyedOrdered_preserves_S4LoopInv",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:7667-7688",
+        "status": "orphaned candidate",
+        "why": "This extension was added in Phase 11 specifically to feed the two now-removed lemmas. grep confirms modalStepBranchS4KeyedOrdered_preserves_S4LoopInv itself has zero external callers anywhere in the repo currently -- it is not yet wired into a soundness theorem, so the whole theorem (not just its fourth conjunct) is presently unreferenced. Left untouched; the theorem's other three conjuncts (S4LoopInv preservation proper, keysWorldsKnown, worldsContiguousS4) may still be load-bearing for the re-plan even if the keysOriginS4 conjunct is dropped."
+      }
+    ],
+    "additional_finding_beyond_the_dispatch_brief_list": [
+      {
+        "name": "blockedRedirect_boxctx_mem_of_boxOrigin",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1466",
+        "status": "orphaned candidate -- not in the dispatch's explicit list, flagged here because it is accurate and the audit report itself (Question 3, 'Assets orphaned') names it",
+        "why": "Sole caller was blockedRedirect_boxctx_mem, now removed. This lemma is TRUE and sorry-free -- not deleted."
+      },
+      {
+        "name": "blockedRedirect_diaNeg_mem_of_diaOrigin",
+        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1506",
+        "status": "orphaned candidate, same reasoning",
+        "why": "Sole caller was blockedRedirect_diaNeg_mem, now removed. TRUE and sorry-free -- not deleted."
+      }
+    ],
+    "recommendation": "All items above are sunk-cost candidates for the re-plan to adjudicate (delete, or repurpose under ancestor-only blocking / the boxed-key route). None were touched in this dispatch."
+  },
+  "import_cleanup": {
+    "removed": "public import Cslib.Logics.Modal.Tableau.LoopChecking from FrameSoundness.lean",
+    "reason": "Added in Phase 12 solely to support blockedRedirect_propAdequate's dependency on keysOriginS4/keysRootEmpty/blockingWorldS4Keyed/modalNonMintCandidates from LoopChecking.lean; with that lemma removed, grep confirms no remaining code use of any LoopChecking.lean identifier in FrameSoundness.lean (only prose mentions in comments remain).",
+    "verified_by": "lake build (clean) and lake shake --add-public --keep-implied --keep-prefix on both files (zero findings for either file)."
+  },
+  "territory_respected": [
+    "Did not touch Cslib/Logics/Modal/Metalogic/Constructive/Nested/** (concurrent session).",
+    "Did not touch the pending Cslib.lean diff from that concurrent session -- confirmed via lake exe mk_all --module reporting 'No update necessary', i.e. no change made to Cslib.lean.",
+    "Did not modify specs/553_.../plans/02_origin-edge-invariant-revision.md's stray uncommitted Phase 13 status flip (NOT STARTED -> IN PROGRESS), pre-existing before this dispatch and not part of the removal mandate -- left as-is, not staged in this commit, flagged here for the re-plan/team-lead's awareness since it looks inconsistent with abandoning Route P."
+  ],
+  "requires_user_review": false,
+  "next_action_hint": "await_replan",
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
     "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "decisions_made": [
-    "Added keysRootEmpty (new auxiliary invariant, def + entry lemma only, no step-preservation proved yet) to close the keysOriginS4 root-disjunct case -- threaded the same way as keysOriginS4 itself (extra hypothesis, not an S4LoopInv field). Its single-step preservation is not yet proved and will be needed by whichever phase does the full inductive threading (Phase 13).",
-    "blockedRedirect_propAdequate placed in FrameSoundness.lean per the plan's own suggestion; added a new public import of LoopChecking.lean there (previously no import relationship existed in either direction between the two files) -- confirmed acyclic by a full green lake build.",
-    "Did NOT weaken blockedRedirect_boxctx_mem/_diaNeg_mem's conclusions to the unwrapped form despite the residual gap -- per the plan's explicit prohibition on this. Used documented sorry instead."
+    "Removed the two false LoopChecking.lean lemmas and their sorries entirely rather than annotating, per the user-authorized mandate: a sorry standing in for a false statement is an unsound foundation, not a documented limitation.",
+    "Corrected two adjacent doc-comment passages (the 'Witness Disjunct' R1 verdict, and branchPropAdequateIn_s4FC_boxPos_trans_mem's docstring reference) that asserted claims the audit refuted -- left as historical record of the refuted reasoning, not deleted, but clearly marked refuted.",
+    "Did not delete keysOriginS4/keysRootEmpty and their supporting lemmas, nor blockedRedirect_boxctx_mem_of_boxOrigin/_diaNeg_mem_of_diaOrigin -- all TRUE and sorry-free; reported as orphan candidates for the re-plan instead.",
+    "Removed FrameSoundness.lean's public import of LoopChecking.lean after confirming (lake build + lake shake) it has no remaining use.",
+    "Included the divergence-audit's own pre-existing uncommitted artifacts (report + two probe files) in this commit, since this dispatch's new code comments cite the report by path and leaving the citation target uncommitted would be a dangling reference.",
+    "Did not commit the pre-existing, unrelated stray edit to plans/02_origin-edge-invariant-revision.md (Phase 13 status marker) -- out of this dispatch's mandate."
   ],
   "flagged_theorem_changes": [
-    "No landed declaration (Phases 1-11) modified. All changes are additive: two new small LoopChecking.lean declarations (keysRootEmpty/_entry), two new LoopChecking.lean lemmas each carrying one documented sorry (blockedRedirect_boxctx_mem, blockedRedirect_diaNeg_mem), one new sorry-free FrameSoundness.lean lemma (blockedRedirect_propAdequate) plus a new import line."
-  ],
-  "dead_ends": [
-    "Phase 10's R1 verdict ('case (a) does not bite') cannot be used as-is; the docstring's own reasoning ('the consumer only ever queries the witness case through the same unwrapped-membership fact') does not correspond to any actual discharge path once the full generality of blockedRedirect_boxctx_mem's conclusion (quantified over all psi, not just the mint's own trigger) is taken literally, as the plan's task list requires.",
-    "Do not attempt to derive T(box psi)@u from T(diamond psi)@u (the origin mint's trigger persisting on the branch) -- these are independent facts about u; no S4KeyedHintikkaInv/keysOriginS4 field connects diamond-positive and box-positive status for the same formula at the same world."
+    "No landed sorry-free declaration was weakened or altered in behavior. Three declarations were deleted outright (all previously sorry-bearing or dependent on sorry-bearing lemmas): blockedRedirect_boxctx_mem, blockedRedirect_diaNeg_mem, blockedRedirect_propAdequate. All other declarations in both files are byte-for-byte unchanged except doc-comment corrections (no proof-term changes)."
   ],
   "continuation_context": {
     "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
     "phases_completed": 11,
     "phases_total": 17,
-    "next_phase": 12,
-    "next_phase_name": "Redirect-Inertness",
-    "requires_user_review": true,
+    "next_phase": "re-plan pending (Route P being reconsidered in favour of ancestor-only blocking per user-authorized mandate change; this cleanup dispatch was explicitly scoped to precede that re-plan, not to perform it)",
+    "requires_user_review": false,
     "read_first": [
-      "plans/02_origin-edge-invariant-revision.md Phase 12's completion notes (this dispatch) -- the full R1 retraction, the concrete counterexample configuration, and the R2/R3 options",
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2059-2130 -- the two documented sorry sites with inline configuration writeups",
-      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1448-1478 -- blockedRedirect_propAdequate, the sorry-free assembly consuming the two blocked lemmas"
+      "reports/02_redirect-inertness-divergence-audit.md -- full audit, recommended route (boxed birth-content keys) and the separate section-5.1 defect (hready discharge, Phase 13) the re-plan must also address",
+      "This handoff's orphan_report -- inventory of sunk-cost-candidate declarations for the re-plan to adjudicate",
+      "Cslib/Logics/Modal/Tableau/LoopChecking.lean's 'Redirect-Inertness Assembly -- REMOVED' comment and 'keysRootEmpty' section doc -- what was removed and why",
+      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean's 'blockedRedirect_propAdequate ... REMOVED' comment -- why the assembly's own proof strategy was independently dead"
     ]
   },
-  "plan_markers_verified": true
+  "plan_markers_verified": false,
+  "plan_markers_note": "This dispatch is explicitly cleanup, not a plan phase per the dispatch mandate -- no plan file phase markers were touched."
 }

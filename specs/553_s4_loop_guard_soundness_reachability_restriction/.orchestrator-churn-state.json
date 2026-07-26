@@ -1,0 +1,8 @@
+{
+  "total_churn": 2,
+  "target_churn": {
+    "phase-10-blockedRedirect_boxctx_mem": 2
+  },
+  "adversarial_triggers": 0,
+  "audit_dispatches": 1
+}

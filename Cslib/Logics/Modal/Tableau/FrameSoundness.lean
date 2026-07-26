@@ -10,7 +10,6 @@ public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.S5Simplification
 public import Cslib.Logics.Modal.Tableau.FiveSimplification
-public import Cslib.Logics.Modal.Tableau.LoopChecking
 import Cslib.Foundations.Relation.Euclidean
 import Mathlib.Data.List.Forall2
 
@@ -1231,8 +1230,14 @@ edge already recorded *out of* `w'` -- without `hready` the bare analogue is fal
 `hready` is exactly what the S4-keyed ordered driver's mint-readiness discipline
 (`LoopChecking.lean`, Phase 4's `_mintReady`) is designed to supply at every real call site: a
 world only ever acquires an outgoing (redirect) edge once it is mint-ready, i.e. once its own
-box-content has already stabilized. Phase 10's `blockedRedirect_boxctx_mem` establishes the
-redirect-edge instance of this discharge obligation. -/
+box-content has already stabilized. The redirect-edge instance of this discharge obligation was
+to have been established by `blockedRedirect_boxctx_mem`, but that lemma was false as stated and
+has been removed (`LoopChecking.lean`'s "Redirect-Inertness Assembly" comment;
+`reports/02_redirect-inertness-divergence-audit.md` §2.2) -- `hready`'s discharge for redirect
+edges is an open obligation pending the re-plan. The audit's §5.1 additionally flags that even a
+corrected `hready` discharge cannot rely on this invariant's edge conjunct as currently stated for
+plain mint-edge chains either (a transient gap, not specific to redirects); see that section for
+the disjunctive-edge-conjunct repair under consideration. -/
 lemma branchPropAdequateIn_s4FC_boxPos_trans_mem
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
     (h : branchPropAdequateIn s4FC b acc)
@@ -1445,43 +1450,20 @@ lemma modalClosed_unsat_propAdequateIn [DecidableEq Atom]
         | pos => exact absurd hsf hpos
         | neg => simp [hsf, Sign.isPos] at hsfcond
 
-/-- **`blockedRedirect_propAdequate`** (Phase 12 assembly): the redirect edge `v → wBlock`
-licensed by the keys-aware guard's `some` output satisfies `branchPropAdequateIn`'s edge
-conjunct for this specific pair, given an ambient `branchPropAdequateIn s4FC b acc` witness.
-Composes `blockedRedirect_boxctx_mem`/`blockedRedirect_diaNeg_mem`
-(`LoopChecking.lean`, Phase 12) with the ambient model's branch-formula conjunct `hb`, exactly
-as `branchSatisfiableIn_imp_branchPropAdequateIn` composes the analogous mint-edge case.
-**Inherits `blockedRedirect_boxctx_mem`/`_diaNeg_mem`'s documented witness-collision `sorry`** --
-this assembly itself is a complete, mechanical composition; the residual gap is entirely in the
-two consumed lemmas (see their docstrings/phase notes for the full analysis and the R1 re-audit
-this phase surfaced). -/
-lemma blockedRedirect_propAdequate [DecidableEq Atom] [Hashable Atom] (φ₀ : Proposition Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
-    (s : Sign) (φ : Proposition Atom) (v wBlock : WorldIndex)
-    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
-    (hKO : keysOriginS4 b acc keys)
-    (hK0 : keysRootEmpty keys)
-    (heBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ', sf.formula = .box ψ' → sf.sign = .neg)
-    (heDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ', sf.formula = .diamond ψ' → sf.sign = .pos)
-    (hmint : modalNonMintCandidates φ₀ keys b e acc = [])
-    (hblock : blockingWorldS4Keyed φ₀ b keys s φ v = some wBlock)
-    (h : branchPropAdequateIn s4FC b acc) :
-    ∃ (W : Type) (m : Model W Atom) (f : WorldIndex → W), s4FC m.r ∧
-      (∀ ψ, (⟨.pos, .box ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-        Satisfies m (f wBlock) (.box ψ)) ∧
-      (∀ ψ, (⟨.neg, .diamond ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-        ¬ Satisfies m (f wBlock) (.diamond ψ)) := by
-  obtain ⟨W, m, f, hFC, _, hb⟩ := h
-  refine ⟨W, m, f, hFC, ?_, ?_⟩
-  · intro ψ hbox
-    have hmem := blockedRedirect_boxctx_mem φ₀ b e acc keys s φ v wBlock hbClosure hKO hK0
-      heBoxOnlyNeg hmint hblock ψ hbox
-    exact (hb _ hmem).1 rfl
-  · intro ψ hdia
-    have hmem := blockedRedirect_diaNeg_mem φ₀ b e acc keys s φ v wBlock hbClosure hKO hK0
-      heDiamondOnlyPos hmint hblock ψ hdia
-    exact (hb _ hmem).2 rfl
+/-! **`blockedRedirect_propAdequate` (Phase 12 assembly) -- REMOVED.** It composed
+`blockedRedirect_boxctx_mem`/`blockedRedirect_diaNeg_mem` (`LoopChecking.lean`, since removed --
+both were **false as stated**, see that file's "Redirect-Inertness Assembly" comment and
+`reports/02_redirect-inertness-divergence-audit.md` §2.2) with the ambient model's branch-formula
+conjunct. Beyond inheriting the two false premises, this assembly's own proof strategy is
+independently dead: it discards the ambient edge conjunct (`_` in `obtain ⟨W, m, f, hFC, _, hb⟩
+:= h`) and reuses the ambient model `m` unchanged. The audit refutes that strategy directly
+(§3.1): a 4-world reflexive-transitive counterexample (`W = {a0,a1,a2,a3}`, `r` = the
+reflexive-transitive closure of `{(a0,a1),(a0,a2),(a1,a3)}`, `p` false at `a3`) satisfies the
+branch and every `acc` edge conjunct while falsifying `□p` at `f 1` -- so no repair of the two
+consumed lemmas alone would have made this assembly's proof go through; any replacement needs a
+different route entirely (the report recommends boxed birth-content keys, making the whole
+argument a direct consequence of `S4LoopInv.keyLowerBd`). Do not re-attempt this composition as
+written. -/
 
 /-! ## B (Symmetric Frame) -/
 

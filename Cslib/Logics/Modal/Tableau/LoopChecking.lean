@@ -1544,21 +1544,16 @@ lemma blockedRedirect_diaNeg_mem_of_diaOrigin (φ₀ : Proposition Atom)
 `successorBirthContent φ₀ b s φ w = insert (s, φ) (filter ...)` inserts the witness pair `(s, φ)`
 **unconditionally**, so `(Sign.pos, ψ) ∈ key(wBlock)` splits into case (b) (closed above, via
 `blockedRedirect_boxctx_mem_of_boxOrigin`) and case (a): `(pos, ψ)` is the origin mint's own
-witness, i.e. the origin shape was `T(◇ψ)@u`, and `T(□ψ)@u` need not be on the branch. Resolution
-(**R1 -- case (a) is unreachable**): the origin mint's witness pair recorded at `wBlock` is
-`(s', φ')` in `keysOriginS4`'s existential. A diamond-positive mint (`T(◇ψ)@u`) records the
-POSITIVE witness `(Sign.pos, ψ)`; per `successorBirthContent`, this is placed on the branch
-UNWRAPPED as `T(ψ)@wBlock`, exactly the content `blockingWorldS4Keyed_eq_birthContent` +
-`S4LoopInv.keyLowerBd` already recover (see "The Corrected Argument" in the plan) -- the witness
-disjunct of `keysOriginS4` never needs to supply the BOXED form `T(□ψ)@wBlock`, because the
-consumer (`branchPropAdequateIn`'s edge conjunct, `FrameSoundness.lean`) only ever queries the
-witness case through the SAME unwrapped-membership fact `blockedRedirect_boxctx_mem`'s case-(b)
-argument establishes; the boxed form is required only when a DISTINCT `T(□ψ)@v ∈ b` is queried at
-`v`, which routes through case (b) (a box-context pair, not the witness pair) by definition of
-`successorBirthContent`'s filter. Hence case (a) never arises as an obligation on the boxed form
-in the first place -- it is vacuous for `blockedRedirect_boxctx_mem`'s actual proof obligation,
-not merely "unreachable" as a separate side lemma. **Verdict: R1, case (a) does not bite.** No
-empirical gate re-run is needed (R3 was not taken). -/
+witness, i.e. the origin shape was `T(◇ψ)@u`, and `T(□ψ)@u` need not be on the branch. This
+section originally recorded a verdict that **case (a) is unreachable ("R1")**, reasoning that the
+witness disjunct of `keysOriginS4` never needs to supply the boxed form `T(□ψ)@wBlock` because
+the only consumer queries the unwrapped witness content instead. That verdict was **refuted** by
+`reports/02_redirect-inertness-divergence-audit.md` (§2.2): case (a) is exactly the
+witness-collision configuration that made `blockedRedirect_boxctx_mem` false (a reachable state
+where an unrelated world independently acquires both the diamond mint-trigger and the
+box-context formula, collapsing to the same singleton key). Case (a) does bite; R1 was wrong --
+see the removed-lemma comment above (`### Redirect-Inertness Assembly`) for the corrected
+analysis. -/
 
 /-! ## Minting-Content Groundwork: towards `successorBirthContent` matching the actual
 K-minting payload
@@ -1995,15 +1990,18 @@ private lemma mem_signedSubfmls_of_formula_S4 {φ₀ : Proposition Atom} (s : Si
 
 /-! ### `keysRootEmpty` -- the Root World Never Re-Mints
 
-A small standalone bookkeeping fact `blockedRedirect_boxctx_mem` (below) needs and
-`keysOriginS4` itself does not supply: `keysOriginS4`'s root disjunct (`w = 0`) says nothing
-about the recorded key at `0`, but the driver's actual seed `keys := [(0, ∅)]` combined with the
-fact that world `0` is never freshly minted (new entries are always `(modalNextWorld b, ...)`,
-strictly greater than every existing label, hence never `0`) means `0`'s recorded key is
-*always* `∅`. This lets `blockedRedirect_boxctx_mem` rule out the root disjunct whenever the
-recorded key at `wBlock` is non-empty -- which `successorBirthContent`'s `insert` always makes
-it. Threaded the same way as `keysOriginS4` itself: an extra hypothesis, never an `S4LoopInv`
-field. -/
+A small standalone bookkeeping fact that `keysOriginS4` itself does not supply: `keysOriginS4`'s
+root disjunct (`w = 0`) says nothing about the recorded key at `0`, but the driver's actual seed
+`keys := [(0, ∅)]` combined with the fact that world `0` is never freshly minted (new entries are
+always `(modalNextWorld b, ...)`, strictly greater than every existing label, hence never `0`)
+means `0`'s recorded key is *always* `∅`. Threaded the same way as `keysOriginS4` itself: an
+extra hypothesis, never an `S4LoopInv` field.
+
+**Now possibly orphaned**: this fact's sole consumer, `blockedRedirect_boxctx_mem`, was removed
+above (it was false as stated -- see the "Redirect-Inertness Assembly" section) along with
+`keysOriginS4` and its supporting lemmas. Left in place, not deleted, pending the re-plan
+(Route P is being reconsidered in favour of ancestor-only blocking); see the removal comment
+above and the task's orchestrator handoff for the full orphan inventory. -/
 
 /-- **`keysRootEmpty`**: every key recorded for world `0` is empty. -/
 def keysRootEmpty
@@ -2018,113 +2016,24 @@ lemma keysRootEmpty_entry :
   simp only [List.mem_singleton, Prod.mk.injEq] at hk
   exact hk.2
 
-/-! ### Redirect-Inertness Assembly (Phase 12) -/
+/-! ### Redirect-Inertness Assembly (Phase 12) -- REMOVED
 
-/-- **`blockedRedirect_boxctx_mem`**: assembles the guard's `some` output with `keysOriginS4` and
-case-(b)'s conditional derivation (`blockedRedirect_boxctx_mem_of_boxOrigin`, above) into the
-full obligation: every `T(□ψ)@v ∈ b` (the redirect source's box-context) has `T(□ψ)@wBlock ∈ b`
-(the block target's). Root case (`wBlock = 0`) is ruled out by `keysRootEmpty` against the
-non-empty recorded key. -/
-lemma blockedRedirect_boxctx_mem (φ₀ : Proposition Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
-    (s : Sign) (φ : Proposition Atom) (v wBlock : WorldIndex)
-    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
-    (hKO : keysOriginS4 b acc keys)
-    (hK0 : keysRootEmpty keys)
-    (heBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ', sf.formula = .box ψ' → sf.sign = .neg)
-    (hmint : modalNonMintCandidates φ₀ keys b e acc = [])
-    (hblock : blockingWorldS4Keyed φ₀ b keys s φ v = some wBlock)
-    (ψ : Proposition Atom)
-    (hbox : (⟨.pos, .box ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
-    (⟨.pos, .box ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ v wBlock hblock
-  have hψsub : ψ ∈ modalSubfmls φ₀ := by
-    have h1 : (Proposition.box ψ) ∈ modalSubfmls φ₀ :=
-      modalUniverseS4_mem_formula (hbClosure _ hbox)
-    have h2 : ψ ∈ modalSubfmls (Proposition.box ψ) :=
-      List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
-    exact modalSubfmls_trans_S4 h2 h1
-  have hmem_k : ((Sign.pos, ψ) : Sign × Proposition Atom) ∈
-      successorBirthContent φ₀ b s φ v := by
-    unfold successorBirthContent
-    apply Finset.mem_insert_of_mem
-    rw [Finset.mem_filter]
-    exact ⟨mem_signedSubfmls_of_formula_S4 .pos hψsub, Or.inl ⟨rfl, by simp [hbox]⟩⟩
-  rcases hKO wBlock _ hkey with hroot | ⟨u, s', φ', hedge, hpos, _⟩
-  · exfalso
-    have hempty := hK0 _ (hroot ▸ hkey)
-    rw [hempty] at hmem_k
-    exact absurd hmem_k (by simp)
-  · rcases hpos ψ hmem_k with hwitness | hboxu
-    · -- **Residual gap (documented, not silently discharged): the witness-collision
-      -- sub-case.** `hwitness : (s', φ') = (Sign.pos, ψ)` means the ORIGIN mint that gave
-      -- birth to `wBlock` was itself diamond-positive on this SAME `ψ` (`T(◇ψ)@u ∈ b`,
-      -- permanent). This does NOT give `T(□ψ)@u ∈ b` -- diamond-positive and box-positive are
-      -- independent facts about `u`, and nothing in `S4KeyedHintikkaInv`/`keysOriginS4` ties
-      -- them together. A concrete reachable configuration: world `u` mints `wBlock` via
-      -- `T(◇ψ)@u` with an EMPTY box-context (so `key(wBlock) = {(pos, ψ)}`); later, an
-      -- UNRELATED world `v` has BOTH `T(◇ψ)@v` (its own mint trigger, same `ψ`) AND,
-      -- independently, `T(□ψ)@v` (e.g. from ordinary propositional decomposition of `v`'s own
-      -- birth content, unrelated to the box/diamond propagation machinery) -- `v`'s
-      -- prospective `successorBirthContent` is then ALSO `{(pos, ψ)}` (the filter
-      -- redundantly re-derives the same singleton from `T(□ψ)@v`), so the guard redirects
-      -- `v → wBlock`. Mint-readiness at `v` is satisfied vacuously (`v` has no successors yet,
-      -- so `modalFourBoxProp` has nothing to propagate). Nothing in the landed invariants
-      -- forces `T(□ψ)@wBlock ∈ b` in this configuration -- `wBlock`'s only established content
-      -- is the unwrapped witness `T(ψ)@wBlock`. This is the Phase-10 "case (a)" the R1 verdict
-      -- claimed does not bite; re-examination during this phase indicates it CAN bite, for the
-      -- reason above. Flagged for escalation rather than silently weakened or discharged by
-      -- `sorry`-free means that do not exist yet -- see the phase notes/handoff for the R1
-      -- re-audit and the R2/R3 options this leaves open.
-      sorry
-    · exact blockedRedirect_boxctx_mem_of_boxOrigin φ₀ b e acc keys u wBlock ψ hedge hboxu
-        heBoxOnlyNeg hmint
-
-/-- **`blockedRedirect_diaNeg_mem`**: dual of `blockedRedirect_boxctx_mem` for the
-diamond-negative shape -- every `F(◇ψ)@v ∈ b` has `F(◇ψ)@wBlock ∈ b`. Same structure, same
-residual gap in the witness-collision sub-case (see `blockedRedirect_boxctx_mem`'s documented
-`sorry` for the full analysis; here the collision is with a box-NEGATIVE origin mint, since
-`(s', φ') = (Sign.neg, ψ)` only arises from that shape). -/
-lemma blockedRedirect_diaNeg_mem (φ₀ : Proposition Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
-    (s : Sign) (φ : Proposition Atom) (v wBlock : WorldIndex)
-    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
-    (hKO : keysOriginS4 b acc keys)
-    (hK0 : keysRootEmpty keys)
-    (heDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ', sf.formula = .diamond ψ' → sf.sign = .pos)
-    (hmint : modalNonMintCandidates φ₀ keys b e acc = [])
-    (hblock : blockingWorldS4Keyed φ₀ b keys s φ v = some wBlock)
-    (ψ : Proposition Atom)
-    (hdia : (⟨.neg, .diamond ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
-    (⟨.neg, .diamond ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ v wBlock hblock
-  have hψsub : ψ ∈ modalSubfmls φ₀ := by
-    have h1 : (Proposition.diamond ψ) ∈ modalSubfmls φ₀ :=
-      modalUniverseS4_mem_formula (hbClosure _ hdia)
-    have h2 : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
-      List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
-    exact modalSubfmls_trans_S4 h2 h1
-  have hmem_k : ((Sign.neg, ψ) : Sign × Proposition Atom) ∈
-      successorBirthContent φ₀ b s φ v := by
-    unfold successorBirthContent
-    apply Finset.mem_insert_of_mem
-    rw [Finset.mem_filter]
-    exact ⟨mem_signedSubfmls_of_formula_S4 .neg hψsub, Or.inr ⟨rfl, by simp [hdia]⟩⟩
-  rcases hKO wBlock _ hkey with hroot | ⟨u, s', φ', hedge, _, hneg⟩
-  · exfalso
-    have hempty := hK0 _ (hroot ▸ hkey)
-    rw [hempty] at hmem_k
-    exact absurd hmem_k (by simp)
-  · rcases hneg ψ hmem_k with hwitness | hdiau
-    · -- Same residual gap as `blockedRedirect_boxctx_mem`'s witness-collision sub-case,
-      -- mirrored: `hwitness : (s', φ') = (Sign.neg, ψ)` means the origin mint was box-negative
-      -- on this same `ψ`, giving `F(□ψ)@u ∈ b` permanently -- unrelated to `F(◇ψ)@u`, which is
-      -- what would be needed here. See `blockedRedirect_boxctx_mem` for the full writeup.
-      sorry
-    · exact blockedRedirect_diaNeg_mem_of_diaOrigin φ₀ b e acc keys u wBlock ψ hedge hdiau
-        heDiamondOnlyPos hmint
+`blockedRedirect_boxctx_mem` and `blockedRedirect_diaNeg_mem` were removed here: both were
+**FALSE as stated**, not merely unproven, so their `sorry`s were an unsound foundation rather
+than a documented gap. Machine-checked in
+`reports/02_redirect-inertness-divergence-audit.md` (§2.2): driving
+`modalStepBranchS4KeyedOrdered` on `φ₀ = ¬(◇p ∧ ◇(□p ∧ ◇p))` from the seed state reaches a step
+at which every hypothesis of `blockedRedirect_boxctx_mem` holds -- including `keysOriginS4`,
+`keysRootEmpty`, mint-readiness, and the guard's `some` output
+(`blockingWorldS4Keyed φ₀ b keys .pos p 2 = some 1`, redirecting `2 → 1`) -- while its conclusion
+`T(□p)@1 ∈ b` evaluates to `false`. `blockedRedirect_diaNeg_mem` fails by the symmetric
+construction (argued in the report, not independently machine-checked). Do not re-attempt either
+statement as worded, and do not try to close the gap by strengthening `keysOriginS4`/adding a
+guard side-condition: the audit's Question (3) shows both routes are dead ends (the former has no
+target since the conclusion is false; the latter breaks `keysDistinct` and the pigeonhole world
+bound). The report's recommended repair (recording box-context keys in *boxed* form) replaces
+this argument outright with a three-line consequence of the already-landed
+`S4LoopInv.keyLowerBd`. -/
 
 /-- **`keyLowerBd`'s minting case, box-negative shape**: the prospective birth content computed
 PRE-step (`successorBirthContent`) is a subset of the freshly-minted world's relevant set

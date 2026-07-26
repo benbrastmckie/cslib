@@ -26,16 +26,35 @@ Figure 2's rules display a `Γ{ }` schema whose hole is filled with either LHS-t
 exactly four hole-filling operations (Observation 2.2), and which one a given rule needs is
 forced by the *type* of what fills the hole, not a free stylistic choice:
 
-* **LHS-typed hole content** (`id`, `⊥•`, `∧•`, `∨•`, `⊃•`'s second premise and conclusion, `□•`,
-  `♦•`, `c`): `OutputCtx.fillLhs` alone only yields a bare `NestedLhs`, not a full sequent, so
-  these rules need the extra output-formula companion `Definition 2.3`'s `InputCtx` supplies.
-  Every one of these rules therefore takes `ctx : InputCtx Atom` and is stated via `ctx.fillLhs`,
-  with `ctx.π` playing the role of the rule's (possibly implicit, possibly explicit) companion
-  `Π°`. This also explains, for free, why `⊥•` and `∨•`'s side condition ("the output formula
-  must be in the same subtree as the principal formula", noted in the source directly after
-  Figure 2) needs no separate Lean-level hypothesis: `InputCtx.fillLhs`'s definition (`ctx.Γ'
-  .fillRhs (.box (ctx.Λ.fillLhs Δ) ctx.π)`) *always* places the hole and `ctx.π` as the two direct
-  children of one shared `box`, i.e. the same subtree, by construction.
+* **A companion output formula shown *inside the same braces* as the principal formula**
+  (`⊥•`: `Γ{⊥•,Π°}`; `id`: `Γ{a•,a°}`; `∨•`: `Γ{A•,Π°}` / `Γ{B•,Π°}` / `Γ{A∨B•,Π°}`): the
+  companion is written as a comma-pair *inside* the hole, not elsewhere in the tree -- exactly
+  Observation 2.2's "filling the hole of an output context with a full sequent yields a full
+  sequent". These rules therefore take `ctx : OutputCtx Atom` and are stated via `ctx.fillFull`,
+  with the companion RHS content an explicit parameter (fixed to `a°` for `id`, universally
+  quantified as `Π` for `∨•`). **Repair note (post-Phase-12 defect fix)**: `id` and `∨•` (`orL`)
+  were originally landed via `InputCtx.fillLhs` (the *next* bullet's family), reading the
+  companion as sitting *elsewhere in the tree* via a genuinely-nested `Λ`. Cross-checked against
+  Lemma 4.2 ("let `Γ{ }` be an *output* context... `fm(Γ{a•,a°})`... provable") and Lemma 4.9's
+  proof ("For the `∧°`- and `∨•`-rules, this follows immediately from Lemma 4.8", itself stated
+  for `Γ{ }` an *output* context) -- both lemmas the paper actually uses to prove these two rules
+  sound -- this was an over-generalization: the `InputCtx.fillLhs` reading is strictly more
+  general than what the rules and their own soundness lemmas need, and that extra generality is
+  *false* for `id` (needs `⊢ ◇a ⊃ a`) and would need `kdisj` for `∨•`, neither a `CS5` theorem.
+  The `OutputCtx.fillFull` reading below is the literally-correct transcription; both rules are
+  now sound at arbitrary depth via `lemma4_2_id`/`lemma4_8` with no diamond ever appearing (both
+  `fillFull`'s and `lemma4_8`'s recursions are box-only). `⊥•` (`botL`) is untouched by this
+  repair: its current `InputCtx.fillLhs` reading is *also* more general than Lemma 4.2's minimal
+  scope, but (unlike `id`/`∨•`) the extra generality stays true, since `⊥` trivially implies
+  everything regardless of any `◇`-wrapping -- a stronger-but-still-sound statement, not a defect,
+  so it is left as-is (already proven, no `sorry`).
+* **LHS-typed hole content, companion elsewhere in the tree** (`∧•`, `⊃•`'s second premise and
+  conclusion, `□•`, `♦•`, `c`): `OutputCtx.fillLhs` alone only yields a bare `NestedLhs`, not a
+  full sequent, so these rules need the extra output-formula companion `Definition 2.3`'s
+  `InputCtx` supplies. Every one of these rules therefore takes `ctx : InputCtx Atom` and is
+  stated via `ctx.fillLhs`, with `ctx.π` playing the role of the rule's implicit companion `Π°`,
+  possibly nested arbitrarily deep via `ctx.Λ` (Lemma 4.5's genuine `Λ`-induction; `⊃•`'s own
+  induction-on-`n`, page 10).
 * **RHS-typed hole content** (`∧°`, `∨°` (both injections), `⊃°`'s premise, `□°`): `OutputCtx
   .fillRhs`/`.fillFull` already close a bare output context directly into a full sequent, with no
   extra companion needed. These rules take `ctx : OutputCtx Atom`.
@@ -174,11 +193,12 @@ an `OutputCtx`. -/
 inductive NestedProof : NestedFull Atom → Type u where
   /-- `⊥•`: `Γ{⊥•,Π°}` is an axiom, for every input context `ctx`. -/
   | botL (ctx : InputCtx Atom) : NestedProof (ctx.fillLhs (.atom .bot))
-  /-- `id`: `Γ{a•,a°}` is an axiom, for every atomic `a : Atom` and every choice of the
-  surrounding output-context shells `Γ'`, `Λ` (the input context's `π` component is forced to be
-  `a°` itself, matching the rule's own `a` appearing on both sides). -/
-  | id (Γ' Λ : OutputCtx Atom) (a : Atom) :
-      NestedProof ((⟨Γ', Λ, .atom (.atom a)⟩ : InputCtx Atom).fillLhs (.atom (.atom a)))
+  /-- `id`: `Γ{a•,a°}` is an axiom, for every atomic `a : Atom` and every output context `ctx`,
+  filled via `OutputCtx.fillFull` with the full sequent `(a•,a°)` (Lemma 4.2's own scope -- see
+  the module docstring's repair note for why this is `OutputCtx.fillFull`, not `InputCtx
+  .fillLhs`). -/
+  | id (ctx : OutputCtx Atom) (a : Atom) :
+      NestedProof (ctx.fillFull (.atom (.atom a), .atom (.atom a)))
   /-- `∧•`: from the comma of both input conjuncts, derive their conjunction. -/
   | andL (ctx : InputCtx Atom) (A B : Proposition Atom) :
       NestedProof (ctx.fillLhs (.comma (.atom A) (.atom B))) →
@@ -187,10 +207,13 @@ inductive NestedProof : NestedFull Atom → Type u where
   | andR (ctx : OutputCtx Atom) (A B : Proposition Atom) :
       NestedProof (ctx.fillRhs (.atom A)) → NestedProof (ctx.fillRhs (.atom B)) →
       NestedProof (ctx.fillRhs (.atom (A.and B)))
-  /-- `∨•`: case-split input disjunction, the shared companion `Π°` is `ctx.π`. -/
-  | orL (ctx : InputCtx Atom) (A B : Proposition Atom) :
-      NestedProof (ctx.fillLhs (.atom A)) → NestedProof (ctx.fillLhs (.atom B)) →
-      NestedProof (ctx.fillLhs (.atom (A.or B)))
+  /-- `∨•`: case-split output-context disjunction, with the shared companion (spelled `π`,
+  lowercase, not `Π` -- see `Nested/Context.lean`'s docstring for why capital `Π` is unusable as
+  a plain identifier here) an explicit `NestedRhs` parameter (Lemma 4.8/4.9's own scope -- see the
+  module docstring's repair note for why this is `OutputCtx.fillFull`, not `InputCtx.fillLhs`). -/
+  | orL (ctx : OutputCtx Atom) (A B : Proposition Atom) (π : NestedRhs Atom) :
+      NestedProof (ctx.fillFull (.atom A, π)) → NestedProof (ctx.fillFull (.atom B, π)) →
+      NestedProof (ctx.fillFull (.atom (A.or B), π))
   /-- `∨°` (left injection): from a proof of `A°`, derive `(A ∨ B)°`. -/
   | orRLeft (ctx : OutputCtx Atom) (A B : Proposition Atom) :
       NestedProof (ctx.fillRhs (.atom A)) → NestedProof (ctx.fillRhs (.atom (A.or B)))
@@ -276,7 +299,7 @@ def NestedProof.height : ∀ {Γ : NestedFull Atom}, NestedProof Γ → Nat
   | _, .id .. => 0
   | _, .andL _ _ _ p => p.height + 1
   | _, .andR _ _ _ p q => max p.height q.height + 1
-  | _, .orL _ _ _ p q => max p.height q.height + 1
+  | _, .orL _ _ _ _ p q => max p.height q.height + 1
   | _, .orRLeft _ _ _ p => p.height + 1
   | _, .orRRight _ _ _ p => p.height + 1
   | _, .impL _ _ _ p q => max p.height q.height + 1
@@ -322,17 +345,19 @@ why these are illustrative examples rather than a source transcription. -/
 context `ctx`, with no premises. -/
 example (ctx : InputCtx Atom) : NestedProof (ctx.fillLhs (.atom .bot)) := .botL ctx
 
-/-- `id` axiom instance for a fixed atom `a`, at the trivial (`Γ' = Λ = []`) surrounding context:
-`Γ{a•,a°}` typechecks directly as an axiom application. -/
+/-- `id` axiom instance for a fixed atom `a`, at the trivial (`ctx = []`) surrounding output
+context: `Γ{a•,a°}` typechecks directly as an axiom application. -/
 example (a : Atom) :
-    NestedProof ((⟨[], [], .atom (.atom a)⟩ : InputCtx Atom).fillLhs (.atom (.atom a))) :=
-  .id [] [] a
+    NestedProof (OutputCtx.fillFull ([] : OutputCtx Atom) (.atom (.atom a), .atom (.atom a))) :=
+  .id [] a
 
-/-- A genuine multi-rule derivation (not a bare axiom): `∨•` applied to two `⊥•` instances derives
-`Γ{(⊥ ∨ ⊥)•,Π°}`, for any input context `ctx`, confirming the propositional rules combine with
-the axioms as expected. -/
-example (ctx : InputCtx Atom) :
-    NestedProof (ctx.fillLhs (.atom (Proposition.bot.or Proposition.bot))) :=
-  .orL ctx .bot .bot (.botL ctx) (.botL ctx)
+/-- A genuine multi-rule derivation (not a bare axiom): `∨•` applied to two `id` instances (at the
+same atom `a`, doubling as both disjuncts and the shared companion) derives `Γ{(a ∨ a)•,a°}`, for
+any output context `ctx`, confirming the propositional rules combine with the axioms as
+expected. -/
+example (ctx : OutputCtx Atom) (a : Atom) :
+    NestedProof (ctx.fillFull (.atom ((Proposition.atom a).or (Proposition.atom a)),
+      .atom (.atom a))) :=
+  .orL ctx (.atom a) (.atom a) (.atom (.atom a)) (.id ctx a) (.id ctx a)
 
 end Cslib.Logic.Modal

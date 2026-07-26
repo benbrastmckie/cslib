@@ -725,40 +725,41 @@ of this phase's ten target constructors).
 `OutputCtx.fillRhs`'s recursions both bottom out through `.box`, and `tBox` (`□X ⊃ X`) is exactly
 the tool that reconciles the "extra box" `fillFull`'s base case carries.
 
-**`id` and `orL`: a genuine gap, not merely deferred work.** Both are documented below as strategic
-holes rather than attempted corollaries of existing lemmas, because this phase's investigation
-found a *mathematical* obstruction, not a missing combinator:
+**`id` and `orL`: repaired, not a genuine gap.** A follow-up defect-repair dispatch verified this
+phase's diagnosis against the recovered source PDF directly (Figure 2, page 6; Lemma 4.2, page 9;
+Lemma 4.8/4.9 and their proofs, page 10) and found the diagnosis **confirmed but the conclusion
+sharpened**: the obstruction was not real mathematics but a Phase 9 over-generalization, for
+*both* `id` and `orL`, with the identical root cause.
 
-* **`id`** (`Γ' Λ : OutputCtx`, `a : Atom`, zero premises): soundness needs
-  `⊢ (ctx.Λ.fillLhs (a•)).fm ⊃ a` for `ctx.π := a°`. `OutputCtx.fillLhs`'s own recursion inserts a
-  `.dia` (not `.box`) at each layer past length 1, so the general-`Λ` step needs
-  `⊢ ◇X ⊃ a` from `⊢ X ⊃ a` -- i.e., a "diamond can be shed" step. Unlike `tBox` (`□X ⊃ X`, used
-  freely above for the *box* side, e.g. in `fillFull_imp_fillRhs`'s base case), **no dual axiom
-  `◇X ⊃ X` exists in `CS5ModalAxiom`** (this would collapse modal distinctions and is not even a
-  reasonable schema for `T`). Concretely: instantiating `Γ' := []`, `Λ := [.empty, .empty]` makes
-  `(ctx.Λ.fillLhs (.atom (.atom a))).fm` propositionally-simplify to `◇(Proposition.atom a)`, so
-  soundness of *this one* `id` instance would require `⊢ ◇a ⊃ a` as a bare `CS5` theorem for an
-  arbitrary atom `a` -- false in any non-degenerate frame (it would force every accessible world to
-  agree with the root on every atom). **This is a concrete counterexample against `id`'s current
-  fully-general `(Γ' Λ : OutputCtx)` signature in `Rules.lean`**, not a proof this phase failed to
-  find; flagged for follow-up (likely: `id` needs its `Λ` parameter restricted, or the axiom should
-  be re-derived directly against a bare `OutputCtx` via `.fillFull`, mirroring Lemma 4.2's own
-  scope, rather than through the general `InputCtx` split).
-* **`orL`** (branching, `∨•`): soundness needs, at `Λ`-depth ≥ 2, the fact
-  `⊢ ◇(X ∨ Y) ⊃ (◇X ∨ ◇Y)` for arbitrary `X, Y` (to combine the two premises' `◇`-wrapped
-  consequences). This is *exactly* `kdisj` (`Intuitionistic/IS5.lean`'s
-  `◇(φ ∨ ψ) ⊃ (◇φ ∨ ◇ψ)`), which is an `IS5`-only axiom, deliberately **not** present in
-  `CS5ModalAxiom` (this development's Research Integration notes record this as one of the
-  additions distinguishing `IS5` from `CS5`). At `Λ`-depth ≤ 1 (the base and singleton cases) `orL`
-  *is* fully provable by pure propositional reasoning (`orE`, and-distributes-over-or) with no
-  diamond involved at all -- only the depth-≥2 general case is blocked, the same shape of
-  obstruction as `id`'s, confirming this is a structural fact about `InputCtx.fillLhs`'s unbounded
-  `Λ`, not an `orL`-specific defect.
+Figure 2 writes `id`'s and `⊥•`'s rules with the companion output formula *inside the same
+braces* as the principal formula (`Γ{a•,a°}`, `Γ{⊥•,Π°}`), and Lemma 4.2 makes this precise:
+*"let `Γ{ }` be an output context... `fm(Γ{a•,a°})`... [is] provable"* -- `Γ{ }` here is an
+`OutputCtx`, filled via `OutputCtx.fillFull` with the pair as one full-sequent filler, not an
+`InputCtx` with a separately-nested `Λ`. `∨•`'s rule (`Γ{A•,Π°}`/`Γ{B•,Π°}`/`Γ{A∨B•,Π°}`) uses the
+*identical* braces-together notation, and Lemma 4.9's proof confirms the same reading: *"For the
+`∧°`- and `∨•`-rules, this follows immediately from Lemma 4.8"* -- Lemma 4.8 is likewise stated
+for `Γ{ }` an output context. Phase 9 instead encoded both `id` and `orL` via `InputCtx.fillLhs`
+(the family that genuinely needs a separately-tracked, arbitrarily-nested `Λ`, correct for rules
+like `∧•`/`⊃•`/`□•` whose Figure-2 notation shows *only* the principal formula, companion
+elsewhere) -- a strictly more general reading than the paper's own rule, and the extra generality
+is exactly what manufactured the apparent obstruction: `OutputCtx.fillLhs`'s recursion (unlike
+`OutputCtx.fillFull`'s) inserts a genuine `.dia` past depth 1, and no dual axiom `◇X ⊃ X` exists
+in `CS5ModalAxiom` (nor should it). Repaired in `Rules.lean`: `id` now takes
+`(ctx : OutputCtx Atom) (a : Atom)` with conclusion `ctx.fillFull (a•,a•)`; `orL` now takes
+`(ctx : OutputCtx Atom) (A B : Proposition Atom) (π : NestedRhs Atom)` with premises/conclusion
+`ctx.fillFull (A•, π)` / `(B•, π)` / `((A∨B)•, π)`. Both are now closed below via `lemma4_2_id`
+and `lemma4_8` respectively, already landed in this file for exactly this purpose (`lemma4_8`'s
+own docstring: "Lemma 4.9's proof for `∧°`/`∨•` cites this lemma directly") -- **no `kdisj`, no new
+axiom, and no diamond ever appears**, since both `OutputCtx.fillFull`'s and `lemma4_8`'s
+recursions are box-only.
 
-Both holes are `strategic` per the anti-analysis contract's five-condition test: each is a single,
-tightly-scoped `theorem` (not a whole file or module), documented with the exact obstruction above,
-tracked in this dispatch's `sorry_inventory`, and the module remains build-green with these two
-`sorry`s present. -/
+`⊥•` (`botL`) is *not* touched by this repair: it has the identical braces-together shape and the
+identical `InputCtx`-vs-`OutputCtx` mismatch relative to Lemma 4.2's minimal scope, but the extra
+generality it carries stays *true* (not merely provable-by-accident): `⊥` implies everything via
+`efq` regardless of how many `◇`s wrap it, so `nested_sound_botL`'s existing proof (via
+`lemma_botL_lambda_core`'s `◇`-bridging induction, closing with `cs5DerivDiaBotElim`) is a
+strictly *stronger*, still-sound theorem -- a generalization that happens to remain true is not a
+defect, so it is left exactly as Phase 12 landed it. -/
 
 /-- **Disjunction elimination combinator**: from `⊢ A ⊃ C` and `⊢ B ⊃ C`, derive `⊢ (A ∨ B) ⊃ C`
 (`orE`'s curried schema, applied via two `modus_ponens` steps). -/
@@ -963,37 +964,61 @@ theorem nested_sound_impR (ctx : OutputCtx Atom) (A B : Proposition Atom)
   obtain ⟨dimp⟩ := fillFull_imp_fillRhs ctx A B
   exact ⟨.modus_ponens _ _ _ dimp d⟩
 
-/-! ## `id` and `∨•` (`orL`): Strategic Holes
+/-! ## `id` and `∨•` (`orL`): Closed via the Constructor Repair
 
-See the module docstring's "`id` and `orL`: a genuine gap, not merely deferred work" section for
-the full mathematical argument. Each `sorry` below is tightly scoped to exactly one theorem,
-documents its assumption and the reason it is deferred, and is tracked in this dispatch's
-`sorry_inventory` with `strategic: true` and a `follow_up_task`. -/
+See the module docstring's "`id` and `orL`: repaired, not a genuine gap" section: both
+constructors now take an `OutputCtx` (not `InputCtx`) and fill via `.fillFull`, matching Lemma
+4.2/4.8's own scope exactly, so both close directly from already-landed lemmas with no new
+axiom. -/
 
-/-- **Soundness of `id`** (Figure 2's `id` axiom): `fm(Γ{a•,a°})` for every input context
-`ctx := ⟨Γ', Λ, a°⟩`. -- sorry: assumes `⊢ (ctx.Λ.fillLhs (a•)).fm ⊃ a` is provable for arbitrary
-`Λ`; deferred because this needs "a diamond can be shed" step (`◇X ⊃ X`) that is not a `CS5`
-theorem and is false in general (counterexample: `Γ' := []`, `Λ := [.empty, .empty]` reduces the
-needed fact to `⊢ ◇a ⊃ a`) -- see the module docstring; follow-up: a task revisiting `id`'s
-`(Γ' Λ : OutputCtx)` signature in `Rules.lean`, or re-deriving it directly against a bare
-`OutputCtx` via `.fillFull` (mirroring `lemma4_2_id`'s scope) instead of through `InputCtx`. -/
-theorem nested_sound_id (Γ' Λ : OutputCtx Atom) (a : Atom) :
+/-- **Disjunction-elimination schema**: `⊢ ((A ⊃ C) ∧ (B ⊃ C)) ⊃ ((A ∨ B) ⊃ C)`, for arbitrary
+`A, B, C` -- the closed propositional fact Lemma 4.9's proof cites for `∨•` ("provable formula
+`((A ⊃ C) ∧ (B ⊃ C)) ⊃ ((A ∨ B) ⊃ C)`"), built via one `deductionTheorem` discharge of the
+and-hypothesis, projecting `A ⊃ C`/`B ⊃ C` via `andE1`/`andE2` before applying the curried
+`orE` axiom. -/
+private theorem cs5DerivOrElimSchema (A B C : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) (((A.imp C).and (B.imp C)).imp ((A.or B).imp C)) := by
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] ((A.imp C).and (B.imp C)) ((A.or B).imp C) ?_⟩
+  set Hyp := (A.imp C).and (B.imp C)
+  have hHyp : DerivationTree (@CS5ModalAxiom Atom) [Hyp] Hyp :=
+    .assumption _ _ (List.mem_singleton.mpr rfl)
+  have hAC : DerivationTree (@CS5ModalAxiom Atom) [Hyp] (A.imp C) :=
+    .modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andE1 (A.imp C) (B.imp C))) (fun _ h => nomatch h)) hHyp
+  have hBC : DerivationTree (@CS5ModalAxiom Atom) [Hyp] (B.imp C) :=
+    .modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andE2 (A.imp C) (B.imp C))) (fun _ h => nomatch h)) hHyp
+  have hOrE : DerivationTree (@CS5ModalAxiom Atom) [Hyp] ((B.imp C).imp ((A.or B).imp C)) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.orE A B C)) (fun _ h => nomatch h)) hAC
+  exact .modus_ponens _ _ _ hOrE hBC
+
+/-- **Soundness of `id`** (Figure 2's `id` axiom, repaired signature): `fm(ctx.fillFull (a•,a°))`
+for every output context `ctx` and atom `a` -- exactly `lemma4_2_id`'s statement, Lemma 4.2's own
+scope. -/
+theorem nested_sound_id (ctx : OutputCtx Atom) (a : Atom) :
     Derivable (@CS5ModalAxiom Atom)
-      ((⟨Γ', Λ, .atom (.atom a)⟩ : InputCtx Atom).fillLhs (.atom (.atom a))).fm := by
-  sorry
+      (ctx.fillFull (.atom (.atom a), .atom (.atom a))).fm :=
+  lemma4_2_id a ctx
 
-/-- **Soundness of `∨•`** (`orL`): from both premises' soundness facts, `fm(ctx.fillLhs ((A ∨
-B)•))`. -- sorry: assumes `⊢ ◇(X ∨ Y) ⊃ (◇X ∨ ◇Y)` for the arbitrary formulas `X, Y` arising at
-`ctx.Λ`-depth ≥ 2; deferred because this is exactly `kdisj`
-(`Intuitionistic/IS5.lean`'s `◇(φ ∨ ψ) ⊃ (◇φ ∨ ◇ψ)`), an `IS5`-only axiom deliberately absent from
-`CS5ModalAxiom` -- see the module docstring; the `ctx.Λ`-depth ≤ 1 cases are fully provable by pure
-propositional reasoning (`orE`) alone, only the general case is blocked; follow-up: the same
-`Rules.lean` follow-up task as `id`, since both are instances of the same `InputCtx.fillLhs`
-unbounded-`Λ` structural issue. -/
-theorem nested_sound_orL (ctx : InputCtx Atom) (A B : Proposition Atom)
-    (hA : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom A)).fm)
-    (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom B)).fm) :
-    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.or B))).fm := by
-  sorry
+/-- **Soundness of `∨•`** (`orL`, repaired signature): from both premises' soundness facts,
+`fm(ctx.fillFull ((A ∨ B)•, π))`. Combines the closed `cs5DerivOrElimSchema` (instantiated at
+`C := π.fm`) with Lemma 4.8's output-context lift (`lemma4_8`), then `modus_ponens` against the
+premises' conjunction -- exactly Lemma 4.9's own proof for `∨•` ("this follows immediately from
+Lemma 4.8"). No diamond ever appears (both `.fillFull` and `lemma4_8`'s recursions are box-only),
+so no `kdisj`-like fact is needed. -/
+theorem nested_sound_orL (ctx : OutputCtx Atom) (A B : Proposition Atom) (π : NestedRhs Atom)
+    (hA : Derivable (@CS5ModalAxiom Atom) (ctx.fillFull (.atom A, π)).fm)
+    (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillFull (.atom B, π)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillFull (.atom (A.or B), π)).fm := by
+  obtain ⟨dA⟩ := hA
+  obtain ⟨dB⟩ := hB
+  obtain ⟨dimp⟩ :=
+    lemma4_8 (Δ₁ := (.atom A, π)) (Δ₂ := (.atom B, π)) (Θ := (.atom (A.or B), π))
+      (cs5DerivOrElimSchema A B π.fm) ctx
+  have hand : DerivationTree (@CS5ModalAxiom Atom) []
+      ((ctx.fillFull (.atom A, π)).fm.and (ctx.fillFull (.atom B, π)).fm) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _ (.ax [] _ (.andI _ _)) dA) dB
+  exact ⟨.modus_ponens _ _ _ dimp hand⟩
 
 end Cslib.Logic.Modal

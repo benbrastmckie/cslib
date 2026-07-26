@@ -380,6 +380,45 @@ def NestedProof.CutFree : ∀ {Γ : NestedFull Atom}, NestedProof Γ → Prop
   | _, .bStruct _ _ _ p => p.CutFree
   | _, .cut _ _ _ _ => False
 
+/-! ## `InputCtx`'s Unconditional `.box` Shape
+
+Recorded here as a **permanent, verified fact** discovered while attempting Phase 14's
+Proposition 3.1 (general `id`): every `InputCtx`-shaped constructor (`botL`, `cut`, `contract`,
+`andL`, `boxL`, `diaL`, `tL`, `fourL`, `bStruct`, and the eq. (3.1) `w` rule if it is later added,
+since it shares the same `Γ{∅}/Γ{Δ•}` `InputCtx.fillLhs`/`fillEmpty` shape) has a conclusion whose
+RHS (`NestedRhs`) component is *unconditionally* `.box`-shaped, **never** `.atom`-shaped,
+regardless of the context's `Γ'`/`Λ` length or content. This blocks any attempt to derive a bare,
+`.atom`-shaped conclusion (as needed by `impR`'s premise, hence by any `CS5ModalAxiom` schema
+whose formula is an implication) from an `InputCtx`-shaped starting point such as `botL`: general
+`id` (`Γ{A•,A°}` derivable for arbitrary, not just atomic, `A`) is blocked at `A = ⊥` since `botL`
+is the sole introduction rule for `⊥` and cannot supply the required bare RHS -- which blocks
+`efq` directly and, transitively, every other schema whose derivation depends on general `id`. -/
+
+/-- If `Ψ` is already `.box`-shaped, so is `buildRhsChain l Ψ`, for any list `l`. -/
+theorem buildRhsChain_box_shape (l : List (NestedLhs Atom)) (Φ : NestedLhs Atom)
+    (Ψ : NestedRhs Atom) :
+    ∃ Φ' Ψ', buildRhsChain l (.box Φ Ψ) = .box Φ' Ψ' := by
+  cases l with
+  | nil => exact ⟨Φ, Ψ, rfl⟩
+  | cons Γ rest => exact ⟨Γ, buildRhsChain rest (.box Φ Ψ), rfl⟩
+
+/-- `InputCtx.fillLhs`'s RHS component is always `.box`-shaped, never `.atom`-shaped. -/
+theorem InputCtx_fillLhs_snd_box (ctx : InputCtx Atom) (Δ : NestedLhs Atom) :
+    ∃ Φ' Ψ', (ctx.fillLhs Δ).2 = .box Φ' Ψ' := by
+  unfold InputCtx.fillLhs OutputCtx.fillRhs
+  cases ctx.Γ' with
+  | nil => exact ⟨ctx.Λ.fillLhs Δ, ctx.π, rfl⟩
+  | cons Γ rest => exact buildRhsChain_box_shape rest (ctx.Λ.fillLhs Δ) ctx.π
+
+/-- `InputCtx.fillEmpty`'s RHS component is always `.box`-shaped, never `.atom`-shaped. Same
+argument as `InputCtx_fillLhs_snd_box`, for the `cut`/`w`-style conclusion shape. -/
+theorem InputCtx_fillEmpty_snd_box (ctx : InputCtx Atom) :
+    ∃ Φ' Ψ', ctx.fillEmpty.2 = .box Φ' Ψ' := by
+  unfold InputCtx.fillEmpty OutputCtx.fillRhs
+  cases ctx.Γ' with
+  | nil => exact ⟨ctx.Λ.fillEmpty, ctx.π, rfl⟩
+  | cons Γ rest => exact buildRhsChain_box_shape rest ctx.Λ.fillEmpty ctx.π
+
 /-! ## Smoke-Test Derivations
 
 See the module docstring's "Smoke-Test Derivations, Not a Literal §3 Transcription" section for

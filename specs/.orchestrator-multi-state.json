@@ -1,44 +1,50 @@
 {
-  "session_id": "sess_1785007897_038307",
+  "session_id": "sess_1785046950_33beb4",
   "task_numbers": [
+    552,
     553,
-    554,
-    555
+    554
   ],
   "waves": [
     [
+      552,
       553,
-      554,
-      555
+      554
     ]
   ],
   "dependency_graph": {
+    "552": [],
     "553": [],
-    "554": [],
-    "555": []
+    "554": []
   },
   "max_cycles": 15,
-  "cycle_count": 7,
+  "cycle_count": 15,
+  "hard_mode": true,
+  "lit_flag": true,
   "failed_tasks": [],
-  "completed_tasks": [],
+  "completed_tasks": [
+    552
+  ],
   "current_statuses": {
-    "555": "partial",
-    "554": "partial",
-    "553": "partial"
+    "552": "completed",
+    "553": "planned",
+    "554": "partial"
   },
   "task_dirs": {
+    "552": "specs/552_tableau_calculus_conformance_rule_completeness_repair",
     "553": "specs/553_s4_loop_guard_soundness_reachability_restriction",
-    "554": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research",
-    "555": "specs/555_literature_search_fidelity_schema_quarantine"
+    "554": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research"
   },
   "research_agents": {
-    "553": "cslib-research-agent",
-    "554": "cslib-research-agent",
-    "555": "general-research-agent"
+    "552": "cslib-research-hard-agent",
+    "553": "cslib-research-hard-agent",
+    "554": "cslib-research-hard-agent"
   },
   "implement_agents": {
-    "553": "cslib-implementation-agent",
-    "554": "cslib-implementation-agent",
-    "555": "general-implementation-agent"
-  }
+    "552": "cslib-implementation-hard-agent",
+    "553": "cslib-implementation-hard-agent",
+    "554": "cslib-implementation-hard-agent"
+  },
+  "exit_status": "partial",
+  "max_cycles_reached": true
 }

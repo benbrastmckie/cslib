@@ -1,53 +1,35 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-26T14:00:00Z",
-  "completed_at": "2026-07-26T16:00:00Z",
+  "status": "partial",
+  "started_at": "2026-07-26T00:00:00Z",
+  "completed_at": "2026-07-26T18:30:00Z",
   "artifacts": [
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"},
-    {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-13-handoff-20260726.md"},
-    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-13-progress.json"}
+    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean", "type": "code", "summary": "Added cut + NestedProof.CutFree; added buildRhsChain_box_shape / InputCtx_fillLhs_snd_box / InputCtx_fillEmpty_snd_box verifying InputCtx-shaped rules always produce a .box-shaped RHS"},
+    {"path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md", "type": "plan", "summary": "Phase 14 marked [BLOCKED] with a documented blocker note"},
+    {"path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-14-handoff-20260726.md", "type": "handoff", "summary": "Full writeup of the general-id / efq blocker, what was tried, what not to try, recommended next steps"},
+    {"path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-14-progress.json", "type": "progress", "summary": "Objective-level progress: cut+CutFree done; general id and the 17 axiom derivations blocked"}
   ],
+  "phases_completed": 13,
+  "phases_total": 32,
   "partial_progress": {
-    "stage": "phase13_complete_skeleton",
-    "details": "Phase 13 (Theorem 4.1, modal and structural cases) COMPLETED as a skeleton: all 9 of the phase's own target constructors (boxL, boxR, diaL, diaR, tR, tL, fourR, fourL, bStruct) fully proven; nested_sound assembled over all 19 NestedProof constructors; impL landed as one documented strategic sorry (not in this phase's own task list, deferred per Phase 11's note). 13/32 phases done.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 13,
-    "last_completed_phase": "Phase 13: Theorem 4.1, modal and structural cases (skeleton)"
+    "stage": "blocked",
+    "details": "cut rule and CutFree landed (verified, committed). Proposition 3.1 (general id), needed by all 17 axiom derivations, is blocked at A = bottom: rigorously verified in Lean that every InputCtx-shaped NestedProof constructor produces an unconditionally .box-shaped RHS, never .atom-shaped, so botL cannot supply impR's bare-atom premise. requires_user_review: true."
   },
   "memory_candidates": [
-    "Nested-sequent fillRhs-vs-fillFull bridge lemmas (impR/diaR/fourR family) must index their inner recursive helper by an explicit head/tail pair (e.g. Gamma2 : NestedLhs, rest : List NestedLhs), never a bare l : List NestedLhs -- the bare-list empty case can be mathematically FALSE for kdia-flavoured bridges even though the analogous case is true for tBox-flavoured ones (impR), since Lean's exhaustiveness checker forces a proof attempt at l=[] regardless of whether that value is ever reached by the caller. Confirmed the hard way: a first draft indexed by bare l required box(Delta.fm imp A) imp box(dia Delta.fm imp A), which is not K-valid.",
-    "Anticipated proof obstructions flagged in a plan/docstring (e.g. Phase 11's 'boxL case-split' speculation) should still be checked directly against already-landed lemmas before assuming they hold -- boxL turned out to need no case-split at all, closing via the same Lemma-4.5-plus-cs5DerivBoxDiaDistrib pattern already used for contract/andL/diaL/tL."
+    "InputCtx.fillLhs / InputCtx.fillEmpty always produce a .box-shaped RHS component, regardless of context length -- a structural invariant of this nested-sequent encoding worth remembering before attempting any 'bare id' or 'general ex falso' derivation in this codebase.",
+    "NestedLhs.comma is a raw, non-quotiented constructor; OutputCtx.fillFull's single-element case always puts the filled formula first in the comma, context-head second -- any derivation needing the opposite order needs an explicit comma-commutativity lemma, not yet landed."
   ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 42,
-    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/. Breakdown: 41 (repo baseline entering this dispatch, per the delegation briefing) + 1 (this phase's single documented strategic sorry, nested_sound_impL, Soundness.lean:1315). No other file touched.",
-    "vacuous_count": 0,
-    "axiom_count": 26,
-    "axiom_count_note": "Unchanged from baseline (grep -rn '^axiom ' Cslib/ | wc -l); zero new axioms introduced. lean_verify on nested_sound reports exactly {propext, sorryAx, Classical.choice, Quot.sound}.",
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "ci_steps": {
-      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness), 1 documented sorry warning only",
-      "full_build": "pass (3259/3259 jobs)",
-      "checkInitImports": "pass (exit 0)",
-      "lake_lint": "pass for Nested/ (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory, same as Phases 10-12's own note)",
-      "lint_style": "pass (no warnings)",
-      "mk_all_module": "pass (no update necessary)",
-      "shake": "pass for this file specifically (only the known Cslib.Init false-positive pattern already documented by every prior phase in this file)",
-      "full_test_suite": "pass (lake test, exit 0)"
-    }
-  },
   "metadata": {
     "session_id": "sess_1785046950_33beb4_554",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "compliance_check": "passed",
-    "phase_number": 13,
-    "phases_completed": 13,
-    "phases_total": 32
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 1,
+    "vacuous_count": 0,
+    "axiom_count": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial (scoped build + checkInitImports + lint-style + mk_all verified green; full lake test/lake lint not re-run this dispatch, no full-project changes beyond Rules.lean)"
   }
 }

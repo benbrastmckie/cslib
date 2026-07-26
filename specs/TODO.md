@@ -39,7 +39,7 @@ next_project_number: 558
     └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-553 [IMPLEMENTING] — Determine whether the S4 keyed loop-check guard can be made sound
+553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
   └─ 557 [NOT STARTED] — Refactor and restructure the modal Tableau subsystem to library-p
 554 [PARTIAL] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
@@ -132,7 +132,7 @@ next_project_number: 558
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535
@@ -141,6 +141,7 @@ next_project_number: 558
   - [553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md]
+  - [553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md]
 - **Research**:
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md]

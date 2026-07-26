@@ -1542,7 +1542,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [
         535
@@ -1555,7 +1555,7 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-07-26T19:52:41Z",
+      "last_updated": "2026-07-26T20:34:02Z",
       "session_id": "sess_1785084826_a33d36",
       "topic": "Modal Logic",
       "artifacts": [
@@ -1591,7 +1591,12 @@
         {
           "type": "plan",
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-          "summary": "v4 subtractive blocking + completeness-only red channel: 12 phases, FULL branchSatisfiableIn s4FC strength retained. Blocked arm emits (.linear [], acc) — no edge — so soundness preservation at a blocked step is id. Two parallel decision gates in wave 2 (Phase 2 consumption / Phase 3 establishment), each with written kill criteria and no-sorry rule. Phase 8 carries a grep-based falsification test."
+          "summary": "[ABANDONED] v4 subtractive blocking + red channel; Phases 1-2 COMPLETED (bifurcated predicate, modalTruthLemmaS4Sub). Phase 3 Decision Gate B BLOCKED: the free transfer yields only an UNWRAPPED fact at the redirect target and unwrapped facts have no persistence mechanism in the Hintikka apparatus. Post-Gate-B triage kept route-independent assets, reverted red-channel-only machinery. Superseded by plans/05_pinned-witness-truth-lemma.md."
+        },
+        {
+          "type": "plan",
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
+          "summary": "v5 pinned-witness truth lemma (route 1): 12 phases, full branchSatisfiableIn s4FC strength. Two new mechanisms — accPinnedBy (upper bound on the witness relation, converting ambient predecessors into acc-ancestors) and boxed birth content (making the redirect-target transfer wrapped). Four kill gates, three parallel in wave 1. Terminal condition hands off to the refactoring task rather than proposing a fifth route."
         }
       ],
       "mandate_change": {
@@ -1606,15 +1611,13 @@
       },
       "plan_metadata": {
         "phases": 12,
-        "total_effort_hours": 36,
+        "total_effort_hours": 42,
         "complexity": "complex",
         "research_integrated": true,
-        "plan_version": 4,
+        "plan_version": 5,
         "dependency_waves": [
           [
-            1
-          ],
-          [
+            1,
             2,
             3
           ],
@@ -1622,41 +1625,45 @@
             4
           ],
           [
-            5,
-            7
+            5
           ],
           [
-            6,
-            8,
-            9,
-            12
+            6
+          ],
+          [
+            7,
+            8
+          ],
+          [
+            9
           ],
           [
             10
           ],
           [
-            11
+            11,
+            12
           ]
         ],
         "reports_integrated": [
           {
             "path": "reports/01_s4-keyed-guard-soundness-falsified.md",
-            "integrated_in_plan_version": 4,
+            "integrated_in_plan_version": 5,
             "integrated_date": "2026-07-26"
           },
           {
             "path": "reports/02_redirect-inertness-divergence-audit.md",
-            "integrated_in_plan_version": 4,
+            "integrated_in_plan_version": 5,
             "integrated_date": "2026-07-26"
           },
           {
             "path": "reports/03_soundness-strength-necessity.md",
-            "integrated_in_plan_version": 4,
+            "integrated_in_plan_version": 5,
             "integrated_date": "2026-07-26"
           },
           {
             "path": "reports/04_massacci-subtractive-blocking-priced.md",
-            "integrated_in_plan_version": 4,
+            "integrated_in_plan_version": 5,
             "integrated_date": "2026-07-26"
           }
         ],

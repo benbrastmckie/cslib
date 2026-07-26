@@ -5,21 +5,21 @@
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-      "summary": "Phase 10 marked [COMPLETED] with completion notes (witness-gate verdict R1, phi_0-drop deviation, territory confirmation)"
+      "summary": "Phase 11 marked [COMPLETED] with completion notes (full-breadth 14-shape coverage, phi_0-free wrapper conjunct deviation, S4LoopInv/unordered-wrapper untouched confirmation)"
     },
     {
       "type": "handoff",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-      "summary": "H9 wrap-up handoff: phase 10/17 complete, sorry_inventory empty, next phase 11"
+      "summary": "H9 wrap-up handoff: phase 11/17 complete, sorry_inventory empty, next phase 12"
     }
   ],
   "partial_progress": null,
-  "phases_completed": 10,
+  "phases_completed": 11,
   "phases_total": 17,
   "memory_candidates": [
-    "S4KeyedHintikkaInv.eBoxOnlyNeg/eDiamondOnlyPos (LoopChecking.lean) already establish that persistent-class formulas (box-positive/diamond-negative shapes) are never in the expanded set e -- reusable whenever a mint-readiness/settledness argument needs to rule out the 'already expanded' escape for such a shape, avoiding a fresh historical-induction invariant.",
-    "Auxiliary invariants threaded alongside S4LoopInv (not as struct fields) follow a repeatable pattern in this file: keysWorldsKnown, worldsContiguousS4, and now keysOriginS4 all cite the same 'reopens the finalized struct' rationale. When phi_0 is not needed by the invariant's body, drop it (per worldsContiguousS4's precedent) to avoid lake lint's unusedArguments error.",
-    "modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box (LoopChecking.lean) is for GENUINELY non-modal formulas only (neither box nor diamond) and reduces to raw modalApplyOne -- do not use it for box-positive/diamond-negative shapes, which need T/4-rule content preserved; use a direct rfl-based equality to modalApplyOneS4Rules instead."
+    "Forward-reference ordering in a large single-file Lean development: a proof-internal auxiliary's step-preservation lemma must be placed AFTER every lemma it calls. modalApplyOneS4Keyed_hasEdge_mono (generic hasEdge monotonicity across any rule application) is defined late in LoopChecking.lean, well after the S4LoopInv wrapper theorem it would otherwise be natural to extend -- use the earlier-defined modalApplyOneS4Keyed_nonMint_snd_eq_acc (exact newAcc=acc equality for non-mint shapes) instead when the insertion point must stay before the wrapper.",
+    "Lean 4 `subst h` on `h : a = b` where BOTH sides are plain local variables can eliminate either side, and may pick the 'wrong' one (e.g. eliminating an outer/long-lived variable instead of a just-introduced one), causing 'unknown identifier' errors on later references to the eliminated variable. Fix: `symm at h` first to control which variable subst eliminates.",
+    "A `rw [hpair] at hsf; dsimp only at hsf` step that substitutes a destructured `modalApplyOneS4Keyed` call result into a hypothesis is single-use: doing it once before a mint/non-mint case split, then again after rewriting `sf` to a concrete literal inside a case branch, fails on the second attempt because the pattern is already gone from `hsf`. Each branch must do its own local rewrite exactly once, at the point `sf` is in its final form for that branch."
   ],
   "verification": {
     "verification_passed": true,
@@ -36,6 +36,6 @@
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "phase_count": 17,
     "estimated_hours": 49,
-    "phase_number": 10
+    "phase_number": 11
   }
 }

@@ -1,43 +1,44 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-26T00:00:00Z",
+  "started_at": "2026-07-26T13:00:00Z",
   "artifacts": [
     {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"},
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-11-handoff-20260726.md"},
-    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-11-progress.json"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-12-handoff-20260726.md"},
+    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-12-progress.json"}
   ],
   "partial_progress": {
-    "stage": "phase11_complete",
-    "details": "Phase 11 (Soundness auxiliary lemmas, opening Stage D) COMPLETED. 11/32 phases done.",
+    "stage": "phase12_complete_skeleton",
+    "details": "Phase 12 (Theorem 4.1, propositional and k cases) COMPLETED as a skeleton: 7/10 target constructors fully proven, 2 landed as documented strategic sorries (nested_sound_id, nested_sound_orL) with a confirmed mathematical obstruction and a concrete counterexample for id. 12/32 phases done.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 11,
-    "last_completed_phase": "Phase 11: Soundness auxiliary lemmas"
+    "phases_completed": 12,
+    "last_completed_phase": "Phase 12: Theorem 4.1, propositional and k cases (skeleton)"
   },
   "memory_candidates": [
-    "In Arisaka-Das-Strassburger's paper, page 10's Lemma 4.7 parts (i) and (ii) display literally the same conclusion formula in the recovered PDF -- both a direct page render and pdftotext independently show this, so it is an observed source characteristic (not a rendering artifact of one extraction method), and one Lean lemma can discharge both citations.",
-    "In this codebase's nested-sequent development, OutputCtx.fillRhs and OutputCtx.fillFull are genuinely different filling shapes at the fm level (fillRhs's n=0 case wraps with a fixed top antecedent; fillFull's n=0 case is the identity, and its singleton case merges via a raw comma rather than a boxed antecedent) -- any soundness fact whose premise uses one operation and whose conclusion uses the other needs a dedicated bridging lemma, not a corollary of either operation's own congruence lemma alone. This affected Lemma 4.6's diaR/impR/boxL and Lemma 4.9's orL/impL/cut cases, all deferred rather than silently forced through the wrong operation.",
-    "For two-hypothesis (branching-rule) congruence facts built via nested deductionTheorem discharges, OutputCtx.fillRhs's uniform recursion (only the n=0 base case is special) is substantially simpler to handle than OutputCtx.fillFull's three-case recursion (which needs an extra and-uncurry combinator at the singleton case) -- prefer routing branching soundness facts through fillRhs's shape when the rule's actual index permits it."
+    "In CS5ModalAxiom (Constructive/CS5.lean), there is no dual of tBox (box-X imp X) for the diamond -- dia-X imp X is not a theorem and is false in general (would force every accessible world to agree with the root on every atom). Any soundness proof that needs to 'shed' an outer diamond wrapping an arbitrary formula (not just bot, which is absorbing under efq) is blocked in bare CS5; this affects any nested-sequent rule whose InputCtx.fillLhs recursion inserts unbounded dia layers, e.g. the id and orL constructors in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean when their surrounding OutputCtx (Lambda) has length >= 2.",
+    "dia(X or Y) imp (dia X or dia Y) (disjunction distributing over diamond) is exactly IS5ModalAxiom's kdisj (Intuitionistic/IS5.lean:121), deliberately absent from CS5ModalAxiom -- this is not an oversight but a genuine strength difference between IS5 and CS5, confirmed by failed derivation attempts using k/kdia/tBox/tDia/fourBox/fourDia/bBox/bDia.",
+    "When bridging two different OutputCtx filling operations (fillFull vs fillRhs) whose recursions BOTH bottom out through .box (not .dia), the bridge is generally resolvable via tBox (for the base-case box-vs-no-box mismatch) plus curry/uncurry combinators (for the singleton-case comma-order mismatch) -- this resolved Nested/Soundness.lean's impR case (Phase 12), which Phase 11 had flagged as needing 'a genuinely separate bridging induction' but which turned out to need no new axiom at all. This is a materially easier class of bridge than one involving InputCtx.fillLhs's .dia-based recursion (id/orL's blocked cases), where no such box-collapsing trick (tBox) has a diamond-side dual.",
+    "A useful diagnostic for whether a nested-sequent soundness case is tractable in CS5: does its Lean encoding route the unbounded ambient context through OutputCtx.fillFull/fillRhs (both .box-based recursion, tBox-bridgeable) or through InputCtx.fillLhs (dia-based recursion past depth 1, generally NOT bridgeable for a non-absorbing target)? Zero-premise 'axiom' rules (like id) and branching rules (like orL) that route through the latter are structurally at risk of needing an axiom CS5 does not have."
   ],
   "verification": {
     "verification_passed": true,
-    "sorry_count": 39,
-    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/; unchanged before/after this session's diff (Soundness.lean contributes 0).",
+    "sorry_count": 43,
+    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/. Breakdown: 39 (Phase 11 baseline, unchanged elsewhere) + 2 (this phase's documented strategic sorries in Soundness.lean, nested_sound_id line 983 and nested_sound_orL line 997) + 2 (a concurrent session's Tableau/LoopChecking.lean WIP at lines 2080/2125, outside this task's territory, not this phase's contribution).",
     "vacuous_count": 0,
     "axiom_count": 26,
     "axiom_count_note": "Unchanged from baseline (grep -rn '^axiom ' Cslib/ | wc -l); zero new axioms introduced.",
     "build_passed": true,
     "ci_pipeline_passed": "partial (see ci_steps)",
     "ci_steps": {
-      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness)",
+      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness), 2 documented sorry warnings only",
       "checkInitImports": "pass",
-      "lake_lint": "pass for Soundness.lean (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory, same as Phase 10's own note)",
+      "lake_lint": "pass for Soundness.lean (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory, same as Phase 10/11's own note)",
       "lint_style": "pass (no warnings attributed to Soundness.lean)",
-      "mk_all_module": "pass (Cslib.lean updated for the new file)",
-      "shake": "not run standalone (blocked by the same whole-project build failure below; scoped module build succeeded so its own imports are known-minimal by construction)",
-      "full_build": "FAIL -- but only in Cslib/Logics/Modal/Tableau/{CompletenessLoop,FiveSimplification}.lean, confirmed via git status to be caused by a concurrent session's uncommitted, actively-being-modified LoopChecking.lean (task 553 territory, explicitly off-limits per this dispatch's territory contract). Not a regression introduced by this phase.",
-      "full_test_suite": "FAIL for the same reason (lake test fails to build Cslib.Logics.Modal.Tableau.LoopChecking, a file this phase never touched)"
+      "mk_all_module": "pass (no update necessary -- file already registered in Cslib.lean by Phase 11)",
+      "shake": "pass for this file specifically (only the 2 expected sorry warnings surfaced, no import-minimization issues); the whole-project shake invocation itself failed with an out-of-date-oleans error, matching Phase 11's note that whole-project operations are currently blocked by a concurrent session's uncommitted Tableau/ WIP",
+      "full_build": "not re-verified whole-project this phase (same concurrent-session blocker Phase 11 documented, outside this phase's territory to fix)",
+      "full_test_suite": "not re-verified whole-project this phase for the same reason"
     }
   },
   "metadata": {
@@ -45,6 +46,9 @@
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "compliance_check": "passed"
+    "compliance_check": "passed",
+    "phase_number": 12,
+    "phases_completed": 12,
+    "phases_total": 32
   }
 }

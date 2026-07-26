@@ -1,0 +1,50 @@
+{
+  "phase": 12,
+  "phase_name": "Theorem 4.1, propositional and k cases",
+  "started_at": "2026-07-26T13:00:00Z",
+  "last_updated": "2026-07-26T14:30:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Verify Figure 2 (page 6) and Theorem 4.1/Lemma 4.9's proof text (pages 8-10) against the PDF",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 2,
+      "description": "Land nested_sound_botL, resolving the Lambda-chain via a new cs5DerivDiaBotElim (diamond-bot-elim) combinator (efq + dia-mono + bDia)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 3,
+      "description": "Land nested_sound_andL, nested_sound_andR, nested_sound_orRLeft, nested_sound_orRRight, nested_sound_contract as thin modus-ponens wrappers over Phase 11's Lemma 4.6/4.9 corollaries",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 4,
+      "description": "Resolve Phase 11's deferred impR (fillRhs-vs-fillFull bridging induction) via cs5DerivCurrySwapSchema + buildFullChain_imp_buildRhsChain + fillFull_imp_fillRhs, landing nested_sound_impR",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 5,
+      "description": "Investigate id and orL's general-Lambda soundness; determine both are genuinely blocked (no dual of tBox for diamond in CS5ModalAxiom; orL depth>=2 needs kdisj, IS5-only); land as documented strategic sorries with a concrete id counterexample",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 6,
+      "description": "Scoped lake build green; sorry census, axiom count, lint, lint-style, checkInitImports, mk_all --module all clean for this file",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 7,
+      "description": "Update plan phase 12 heading to [COMPLETED (skeleton)] with documented deviation; commit",
+      "status": "done",
+      "files_touched": ["specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"]
+    }
+  ]
+}

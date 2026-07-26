@@ -1971,7 +1971,7 @@
     {
       "project_number": 559,
       "project_name": "tableau_measured_baseline_doc_corrections",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Land the measured Tableau baseline and correct four documentation defects",
       "topic": "Modal Logic",
@@ -1985,9 +1985,9 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:30:00Z",
+      "last_updated": "2026-07-26T23:13:42Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1785105096_50f3c7",
       "parent_task": null
     },
     {
@@ -2013,7 +2013,7 @@
     {
       "project_number": 561,
       "project_name": "tableau_abstraction_decision_record",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "REVIEW GATE: decision record adopting or rejecting box-plus birth keys and RuleApplySt",
       "topic": "Modal Logic",
@@ -2033,10 +2033,11 @@
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:20:00Z",
+      "last_updated": "2026-07-26T23:13:26Z",
       "next_artifact_number": 2,
       "session_id": "sess_1785105096_50f3c7",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Produced the modal-tableau abstraction decision record (the programme's review gate) at specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md, 645 lines. Seven explicit verdicts D1-D7, no DEFERs: box-plus birth keys ACCEPTED scoped to at-most-2-of-8-bridges with the reachability defect untouched; RuleApplySt ACCEPTED additive-first with its six-step migration order binding; Boneyard eligibility ACCEPTED subject to an execution-time audit re-run with both carve-outs (FrameSoundness.lean:1220-1244 IMMOVABLE, keysOriginS4 NOT eligible) restated verbatim; the seam table ACCEPTED only as PROVISIONAL. Rejected as non-reproducible or drift: the 77 re-derivation count (retired in favour of 55, with the work recorded as LARGER not smaller, drawing from two source files), the 'ModalTableauResult spans 11 modules' figure (original 8 restored), and the 'keysOriginS4 has 22 consumers' figure (conclusion unchanged with a large margin). Retired premises (a)-(d) recorded as binding non-reinstatable. No .lean file created, moved, or edited. NOTE: tasks 562-567 remain gated until a human signs the record's section 12 sign-off block as ACCEPTED."
     },
     {
       "project_number": 562,

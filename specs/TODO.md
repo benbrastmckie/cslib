@@ -11,12 +11,11 @@ next_project_number: 572
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,555,557,558,559,560,561,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,400,430,450,456,497,537,551,562,563,568,571 | 36,37,181,317,425,465,530,554,561 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,511,553,564 | 39,40,375,562,563 | foundations, modal logic, code hygiene |
-| 4 | 506,548,565,566 | 511,564 | modal logic |
-| 5 | 300,567 | 506,558,559,565,566 | modal logic |
-| 6 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,555,557,558,559,560,562,563,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,400,430,450,456,497,511,537,551,553,564,568,571 | 36,37,181,317,425,465,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,506,548,565,566 | 39,40,375,511,564 | foundations, modal logic, code hygiene |
+| 4 | 300,567 | 506,558,559,565,566 | modal logic |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -43,22 +42,21 @@ next_project_number: 572
 557 [BLOCKED] — Refactor and restructure the modal Tableau subsystem to library-p
 558 [NOT STARTED] — [Task A of the modal-tableau refactor programme; P0, highest valu
   └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
-559 [NOT STARTED] — [Task B of the modal-tableau refactor programme; P0, no dependenc
+559 [IMPLEMENTING] — [Task B of the modal-tableau refactor programme; P0, no dependenc
   └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
-561 [IMPLEMENTING] — [Task C of the modal-tableau refactor programme; P1. THIS IS THE 
-  └─ 562 [NOT STARTED] — [Task D of the modal-tableau refactor programme; P2. Gated on the
-    └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
-      └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
-        └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
-      └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
-        └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
-  └─ 563 [NOT STARTED] — [Task E of the modal-tableau refactor programme; P2. Gated on the
-    └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-      └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-        └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-      └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-    └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
-    └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the (see above)
+562 [NOT STARTED] — [Task D of the modal-tableau refactor programme; P2. Gated on the
+  └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
+    └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
+      └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
+    └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
+      └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
+563 [NOT STARTED] — [Task E of the modal-tableau refactor programme; P2. Gated on the
+  └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+    └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+      └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+    └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+  └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+  └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the (see above)
 
 ### Temporal Logic
 
@@ -216,7 +214,7 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 561. REVIEW GATE: decision record adopting or rejecting box-plus birth keys and RuleApplySt
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -237,7 +235,7 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 559. Land the measured Tableau baseline and correct four documentation defects
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

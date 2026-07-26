@@ -1,0 +1,45 @@
+{
+  "status": "implemented",
+  "summary": "Produced the modal-tableau abstraction decision record (task 561, the programme's REVIEW GATE) at specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md. Seven explicit verdicts (D1-D7), no DEFERs: ACCEPT the edge-vs-identification diagnosis as diagnostic-only; ACCEPT box-plus birth keys scoped to at-most-2-of-8-bridges with the reachability defect untouched; ACCEPT RuleApplySt additive-first with its six-step migration order binding; ACCEPT Boneyard eligibility with both mandatory carve-outs restated verbatim; ACCEPT the seam table as PROVISIONAL subject to re-cutting; ACCEPT four documentation defects with seven TRUE sites left alone; BINDING S4-scoping of box-plus (no lift into Foundations/) and de-duplication-first sequencing. Recorded as binding: the Corrected Figures table verbatim, ModalTableauResult spanning 8 Tableau modules (report 2's 'measured 11' is drift), the 55-not-77 re-derivation count together with the three per-lemma undercounts, LoopChecking's omitted 14 sites, the two-source-file extraction requirement, retired premises (a)-(d), and the Build Gate. No .lean file created, moved, or edited.",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "skeleton": false,
+  "blockers": [],
+  "sorry_inventory": [],
+  "artifacts": [
+    {
+      "path": "specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md",
+      "type": "summary",
+      "summary": "Decision record adjudicating report 01 sections 3-8: seven verdicts (D1-D7), the Corrected Figures table verbatim, the corrected re-derivation accounting, retired premises (a)-(d) as non-reinstatable, the S4-scoping constraint on box-plus, the de-duplication-first sequencing decision, the disposition of downstream consumers 553 and 506/511, and a Build Gate section recording that every 'checkInitImports clean' gate in this programme is currently vacuous. Ends with a review sign-off block pending human acceptance."
+    }
+  ],
+  "next_action_hint": "This record is the review gate: tasks 562-567 stay gated until a human signs the §12 sign-off block as ACCEPTED. Task 558 (de-duplication into Support/ modules) is sequenced first by D7 and requires no abstraction decision, so it may be dispatched independently — but note §2.3: it must extract from TWO source files (hasEdge_addEdge_cases originates in Soundness.lean:75, not FmpMeasure.lean) and covers LoopChecking.lean's 14 omitted sites. Task 559 (baseline + four documentation defects) and 560 (literature sub-index) are also independent of the abstraction chain. The build gate (Soundness.lean:1329) remains owned by tasks 554/570 and must clear before any V6 acceptance gate carries meaning.",
+  "modified_files": [
+    "specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md",
+    "specs/561_tableau_abstraction_decision_record/.orchestrator-handoff.json",
+    "specs/561_tableau_abstraction_decision_record/.return-meta.json",
+    "specs/state.json",
+    "specs/TODO.md"
+  ],
+  "verdicts": {
+    "accepted": [
+      "D1 — report 3: edge-addition vs world-identification diagnosis, ACCEPTED as the recorded primary finding, diagnostic only; no repair implemented in this programme",
+      "D2 — report 4: Lemmon box-plus birth keys (boxPlusPair, BoxPlusClosed, enriched successorBirthContent), ACCEPTED with the scoped-down expectation that at most 2 of 8 bridges collapse and the reachability defect is untouched",
+      "D3 — report 5: RuleApplySt sigma with RuleApply = RuleApplySt Unit, ACCEPTED additive-first with the six-step migration order binding",
+      "D4 — report 6: Boneyard eligibility list, ACCEPTED subject to an execution-time audit re-run, with both mandatory carve-outs restated verbatim (FrameSoundness.lean:1220-1244 IMMOVABLE; keysOriginS4 NOT eligible)",
+      "D5 — report 7: Seam-2 module table, ACCEPTED AS PROVISIONAL, explicitly subject to re-cutting before any split",
+      "D6 — report 8: four documentation defects to correct, seven TRUE verdicts left alone (LoopChecking.lean:951-953 recorded separately as TRUE but superseded by the D3 migration)",
+      "D7 — S4-scoping of box-plus is BINDING (no lift into Foundations/); de-duplication precedes every abstraction change"
+    ],
+    "rejected": [
+      "The 77 local-re-derivation count (not reproducible by any obvious command; retired in favour of 55, with the work recorded as LARGER not smaller)",
+      "The 'ModalTableauResult spans 11 Tableau modules' figure (drift; the task description's original 8 is restored as binding)",
+      "The 'keysOriginS4 has 22 code consumers' figure (not reproducible; measured 61 textual / 55 non-comment-leading — carve-out conclusion unchanged with a large margin)",
+      "Retired premise (a): the 'interval theorem' as a numbered theorem or as a basis for any inference",
+      "Retired premise (b): reliance on Massacci2000 Theorem 8.1 as a proved result",
+      "Retired premise (c): treating Theorem 5.51 as covering S4 via filtration",
+      "Retired premise (d): locating box-plus in chunk_0248"
+    ],
+    "deferred": []
+  }
+}

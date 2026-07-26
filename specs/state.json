@@ -2024,11 +2024,17 @@
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
         "Cslib/Logics/Modal/Tableau/Saturation.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md",
+          "type": "summary",
+          "summary": "Decision record for the modal-tableau refactor programme: seven verdicts (D1-D7, no DEFERs) on report 01 sections 3-8, the Corrected Figures table verbatim, the corrected re-derivation accounting (55 sites but LARGER work), retired premises (a)-(d) as non-reinstatable, the S4-scoping constraint on box-plus, de-duplication-first sequencing, downstream dispositions for 553 and 506/511, and a Build Gate section."
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:05:45Z",
-      "next_artifact_number": 1,
+      "last_updated": "2026-07-26T23:20:00Z",
+      "next_artifact_number": 2,
       "session_id": "sess_1785105096_50f3c7",
       "parent_task": null
     },

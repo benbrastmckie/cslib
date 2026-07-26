@@ -1,0 +1,42 @@
+{
+  "status": "implemented",
+  "started_at": "2026-07-26T23:10:00Z",
+  "completed_at": "2026-07-26T23:20:00Z",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "path": "specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md",
+      "type": "summary",
+      "summary": "Modal-tableau abstraction decision record: seven verdicts (D1-D7, no DEFERs) on report 01 sections 3-8, the Corrected Figures table verbatim, the corrected re-derivation accounting, retired premises (a)-(d), the S4-scoping constraint on box-plus, the de-duplication-first sequencing decision, downstream dispositions, and a Build Gate section."
+    }
+  ],
+  "partial_progress": null,
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": null,
+    "ci_pipeline_passed": null,
+    "notes": "Build-independent deliverable: one markdown decision record, no .lean file created, moved, or edited (git status --porcelain shows no .lean entries). The CSLib CI pipeline was deliberately NOT run: the repository does not build (Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329:2, owned by tasks 554/570) and repairing it is explicitly outside this task's territory. That build gate is itself recorded as section 1 of the deliverable."
+  },
+  "memory_candidates": [
+    {
+      "title": "A shrinking headline count can hide growing work",
+      "content": "In the CSLib modal Tableau subsystem, an adversarial re-verification pass corrected a '77 local re-derivation sites' figure down to 55 exact-phrase occurrences — while simultaneously finding that every per-lemma spot-check was an UNDERCOUNT (modalSubfmls_trans 4x not 3x, modalKnownWorlds_fold_spec 6x not 4x, hasEdge_addEdge_cases 7x not 4x), that the per-file distribution omitted the largest file's 14 sites entirely, and that extraction must draw from two source files rather than one (hasEdge_addEdge_cases originates in Soundness.lean, not FmpMeasure.lean). When a headline metric is corrected downward, re-derive the scope from the component measurements rather than reading the smaller number as a scope reduction.",
+      "keywords": ["measurement", "verification", "scope-estimation", "cslib", "refactor"]
+    },
+    {
+      "title": "A review-gate decision record is build-independent and can land on a red tree",
+      "content": "When a repository does not build for a reason outside the current task's territory, work whose entire evidence base is source-text measurement plus literature reading is still valid and should land rather than block. Record the build gate explicitly — including that every downstream acceptance gate reading 'checkInitImports clean' is vacuous until the owner clears it — and state that the record itself is build-independent. This keeps a red tree from stalling decision work while preventing anyone downstream from mistaking a command that fails for an unrelated reason for a passing gate.",
+      "keywords": ["build-gate", "decision-record", "orchestration", "blocked-tasks", "cslib"]
+    }
+  ],
+  "metadata": {
+    "session_id": "sess_1785105096_50f3c7",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
+}

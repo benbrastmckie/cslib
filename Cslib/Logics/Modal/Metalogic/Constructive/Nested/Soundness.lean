@@ -172,6 +172,25 @@ private theorem cs5DerivTopIntro (X : Proposition Atom) :
     Derivable (@CS5ModalAxiom Atom) (X.imp Proposition.top) :=
   cs5DerivImpOfDerivable X (cs5DerivImpSelf Proposition.bot)
 
+/-- **Uncurry**: from `⊢ P ⊃ (Q ⊃ R)`, derive `⊢ (P ∧ Q) ⊃ R`. Built via nested `deductionTheorem`
+discharge of the single hypothesis `P ∧ Q`, projecting `P`/`Q` via `andE1`/`andE2` before
+re-applying the (weakened) curried fact. -/
+private theorem cs5DerivUncurry {P Q R : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) (P.imp (Q.imp R))) :
+    Derivable (@CS5ModalAxiom Atom) ((P.and Q).imp R) := by
+  obtain ⟨d⟩ := h
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] (P.and Q) R ?_⟩
+  have hP : DerivationTree (@CS5ModalAxiom Atom) [P.and Q] P :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 P Q)) (fun _ h => nomatch h))
+      (.assumption [P.and Q] _ (List.mem_singleton.mpr rfl))
+  have hQ : DerivationTree (@CS5ModalAxiom Atom) [P.and Q] Q :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 P Q)) (fun _ h => nomatch h))
+      (.assumption [P.and Q] _ (List.mem_singleton.mpr rfl))
+  have hd : DerivationTree (@CS5ModalAxiom Atom) [P.and Q] (P.imp (Q.imp R)) :=
+    .weakening [] _ _ d (fun _ h => nomatch h)
+  exact .modus_ponens _ _ _ (.modus_ponens _ _ _ hd hP) hQ
+
 /-- **Uncurry, swapped order**: from `⊢ Q ⊃ (P ⊃ R)`, derive `⊢ (P ∧ Q) ⊃ R`. Built via nested
 `deductionTheorem` discharge of the single hypothesis `P ∧ Q`, projecting `P`/`Q` via
 `andE1`/`andE2` before re-applying the (weakened) curried fact. -/
@@ -469,5 +488,169 @@ theorem lemma4_6_diaL (ctx : InputCtx Atom) (A : Proposition Atom) :
         (ctx.fillLhs (.atom (Proposition.diamond A))).fm) :=
   lemma4_5 ctx (Δ := .dia (.atom A)) (Θ := .atom (Proposition.diamond A))
     (cs5DerivImpSelf (Proposition.diamond A))
+
+/-! ## Lemma 4.7 (page 10): Branching-Rule Congruence Facts
+
+See the module docstring's "Lemma 4.7(i)/(ii): A Documented Source Duplication" section: both
+parts share the same conclusion here. -/
+
+/-- **`(D ⊃ ·)`-congruence under a shared hypothesis**: from `⊢ (A ∧ B) ⊃ C`, derive
+`⊢ ((D ⊃ A) ∧ (D ⊃ B)) ⊃ (D ⊃ C)`, for any fixed `D`. Built directly via three nested
+`deductionTheorem` discharges: the outer two project `D ⊃ A`/`D ⊃ B` from the assumed conjunction
+and `D` from the innermost assumption, combine `A`/`B` via `andI`, then apply the (weakened)
+hypothesis. This is Lemma 4.7(i) *and* (ii) (see the module docstring). -/
+theorem lemma4_7_i_ii (D : Proposition Atom) {A B C : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((A.and B).imp C)) :
+    Derivable (@CS5ModalAxiom Atom) (((D.imp A).and (D.imp B)).imp (D.imp C)) := by
+  obtain ⟨d⟩ := h
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] ((D.imp A).and (D.imp B)) (D.imp C) ?_⟩
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [(D.imp A).and (D.imp B)] D C ?_
+  -- context: [D, (D.imp A).and (D.imp B)]
+  set Hyp := (D.imp A).and (D.imp B)
+  have hHyp : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] Hyp :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_singleton.mpr rfl)))
+  have hD : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] D :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hDA : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] (D.imp A) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 (D.imp A) (D.imp B)))
+      (fun _ h => nomatch h)) hHyp
+  have hDB : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] (D.imp B) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 (D.imp A) (D.imp B)))
+      (fun _ h => nomatch h)) hHyp
+  have hA : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] A := .modus_ponens _ _ _ hDA hD
+  have hB : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] B := .modus_ponens _ _ _ hDB hD
+  have hAB : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] (A.and B) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andI A B)) (fun _ h => nomatch h)) hA) hB
+  have hd : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] ((A.and B).imp C) :=
+    .weakening [] _ _ d (fun _ h => nomatch h)
+  exact .modus_ponens _ _ _ hd hAB
+
+/-- **`□`-distributivity over `∧`**: `⊢ (□A ∧ □B) ⊃ □(A ∧ B)`, via necessitated `andI` composed
+with the `k`-axiom, then uncurried. -/
+private theorem cs5DerivBoxAndDistrib (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((Proposition.box A).and (Proposition.box B)).imp (Proposition.box (A.and B))) :=
+  cs5DerivUncurry (cs5DerivImpTrans (cs5DerivBoxMono ⟨.ax [] _ (.andI A B)⟩)
+    ⟨.ax [] _ (.k B (A.and B))⟩)
+
+/-- **`□`-`◇` distributivity over `∧`**: `⊢ (□A ∧ ◇B) ⊃ ◇(A ∧ B)`, via necessitated `andI`
+composed with the `kdia`-axiom, then uncurried. -/
+private theorem cs5DerivBoxDiaDistrib (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((Proposition.box A).and (◇B)).imp (◇(A.and B))) :=
+  cs5DerivUncurry (cs5DerivImpTrans (cs5DerivBoxMono ⟨.ax [] _ (.andI A B)⟩)
+    ⟨.ax [] _ (.kdia B (A.and B))⟩)
+
+/-- **Lemma 4.7(iii)**: from `⊢ (A ∧ B) ⊃ C`, derive `⊢ (□A ∧ □B) ⊃ □C`. -/
+theorem lemma4_7_iii {A B C : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((A.and B).imp C)) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((Proposition.box A).and (Proposition.box B)).imp (Proposition.box C)) :=
+  cs5DerivImpTrans (cs5DerivBoxAndDistrib A B) (cs5DerivBoxMono h)
+
+/-- **Lemma 4.7(iv)**: from `⊢ (A ∧ B) ⊃ C`, derive `⊢ (□A ∧ ◇B) ⊃ ◇C`. -/
+theorem lemma4_7_iv {A B C : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((A.and B).imp C)) :
+    Derivable (@CS5ModalAxiom Atom) (((Proposition.box A).and (◇B)).imp (◇C)) :=
+  cs5DerivImpTrans (cs5DerivBoxDiaDistrib A B) (cs5DerivDiaMono h)
+
+/-- **Two-hypothesis and-uncurry congruence, under a shared extra conjunct `D`**: from
+`⊢ ((Φ₁ ⊃ Ψ₁) ∧ (Φ₂ ⊃ Ψ₂)) ⊃ (Φ₃ ⊃ Ψ₃)`, derive
+`⊢ (((Φ₁ ∧ D) ⊃ Ψ₁) ∧ ((Φ₂ ∧ D) ⊃ Ψ₂)) ⊃ ((Φ₃ ∧ D) ⊃ Ψ₃)`. This is Lemma 4.8's singleton-context
+step (the branching analogue of `cs5DerivAndImpCongr`): built via nested `deductionTheorem`
+discharges of the outer and-hypothesis and `Φ₃ ∧ D`, reconstructing `Φ₁ ⊃ Ψ₁` and `Φ₂ ⊃ Ψ₂` each
+via their own local discharge of `Φᵢ` (combined with the shared, already-available `D`) before
+re-applying the (weakened) branching hypothesis. -/
+private theorem cs5DerivAndImpCongr2 {Φ₁ Ψ₁ Φ₂ Ψ₂ Φ₃ Ψ₃ D : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom)
+      (((Φ₁.imp Ψ₁).and (Φ₂.imp Ψ₂)).imp (Φ₃.imp Ψ₃))) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((((Φ₁.and D).imp Ψ₁).and ((Φ₂.and D).imp Ψ₂)).imp ((Φ₃.and D).imp Ψ₃)) := by
+  obtain ⟨dh⟩ := h
+  set Hyp := ((Φ₁.and D).imp Ψ₁).and ((Φ₂.and D).imp Ψ₂)
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] Hyp ((Φ₃.and D).imp Ψ₃) ?_⟩
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [Hyp] (Φ₃.and D) Ψ₃ ?_
+  -- context: [Φ₃.and D, Hyp]
+  have hAndAssum : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] (Φ₃.and D) :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hΦ₃ : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] Φ₃ :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 Φ₃ D)) (fun _ h => nomatch h))
+      hAndAssum
+  have hD : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] D :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 Φ₃ D)) (fun _ h => nomatch h))
+      hAndAssum
+  have hHyp : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] Hyp :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_singleton.mpr rfl)))
+  have hH1 : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] ((Φ₁.and D).imp Ψ₁) :=
+    .modus_ponens _ _ _ (.weakening [] _ _
+      (.ax [] _ (.andE1 ((Φ₁.and D).imp Ψ₁) ((Φ₂.and D).imp Ψ₂))) (fun _ h => nomatch h)) hHyp
+  have hH2 : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] ((Φ₂.and D).imp Ψ₂) :=
+    .modus_ponens _ _ _ (.weakening [] _ _
+      (.ax [] _ (.andE2 ((Φ₁.and D).imp Ψ₁) ((Φ₂.and D).imp Ψ₂))) (fun _ h => nomatch h)) hHyp
+  have hΦ₁ImpΨ₁ : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] (Φ₁.imp Ψ₁) := by
+    refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+      [Φ₃.and D, Hyp] Φ₁ Ψ₁ ?_
+    -- context: [Φ₁, Φ₃.and D, Hyp]
+    have hΦ₁assum : DerivationTree (@CS5ModalAxiom Atom) [Φ₁, Φ₃.and D, Hyp] Φ₁ :=
+      .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+    have hDweak : DerivationTree (@CS5ModalAxiom Atom) [Φ₁, Φ₃.and D, Hyp] D :=
+      .weakening [Φ₃.and D, Hyp] _ _ hD (fun x hx => List.mem_cons_of_mem _ hx)
+    have hAndΦ₁D : DerivationTree (@CS5ModalAxiom Atom) [Φ₁, Φ₃.and D, Hyp] (Φ₁.and D) :=
+      .modus_ponens _ _ _ (.modus_ponens _ _ _
+        (.weakening [] _ _ (.ax [] _ (.andI Φ₁ D)) (fun _ h => nomatch h)) hΦ₁assum) hDweak
+    have hH1weak : DerivationTree (@CS5ModalAxiom Atom) [Φ₁, Φ₃.and D, Hyp] ((Φ₁.and D).imp Ψ₁) :=
+      .weakening [Φ₃.and D, Hyp] _ _ hH1 (fun x hx => List.mem_cons_of_mem _ hx)
+    exact .modus_ponens _ _ _ hH1weak hAndΦ₁D
+  have hΦ₂ImpΨ₂ : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] (Φ₂.imp Ψ₂) := by
+    refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+      [Φ₃.and D, Hyp] Φ₂ Ψ₂ ?_
+    -- context: [Φ₂, Φ₃.and D, Hyp]
+    have hΦ₂assum : DerivationTree (@CS5ModalAxiom Atom) [Φ₂, Φ₃.and D, Hyp] Φ₂ :=
+      .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+    have hDweak : DerivationTree (@CS5ModalAxiom Atom) [Φ₂, Φ₃.and D, Hyp] D :=
+      .weakening [Φ₃.and D, Hyp] _ _ hD (fun x hx => List.mem_cons_of_mem _ hx)
+    have hAndΦ₂D : DerivationTree (@CS5ModalAxiom Atom) [Φ₂, Φ₃.and D, Hyp] (Φ₂.and D) :=
+      .modus_ponens _ _ _ (.modus_ponens _ _ _
+        (.weakening [] _ _ (.ax [] _ (.andI Φ₂ D)) (fun _ h => nomatch h)) hΦ₂assum) hDweak
+    have hH2weak : DerivationTree (@CS5ModalAxiom Atom) [Φ₂, Φ₃.and D, Hyp] ((Φ₂.and D).imp Ψ₂) :=
+      .weakening [Φ₃.and D, Hyp] _ _ hH2 (fun x hx => List.mem_cons_of_mem _ hx)
+    exact .modus_ponens _ _ _ hH2weak hAndΦ₂D
+  have hAnd12 : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp]
+      ((Φ₁.imp Ψ₁).and (Φ₂.imp Ψ₂)) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andI (Φ₁.imp Ψ₁) (Φ₂.imp Ψ₂))) (fun _ h => nomatch h))
+      hΦ₁ImpΨ₁) hΦ₂ImpΨ₂
+  have hdWeak : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp]
+      (((Φ₁.imp Ψ₁).and (Φ₂.imp Ψ₂)).imp (Φ₃.imp Ψ₃)) := .weakening [] _ _ dh (fun _ h => nomatch h)
+  have hΦ₃ImpΨ₃ : DerivationTree (@CS5ModalAxiom Atom) [Φ₃.and D, Hyp] (Φ₃.imp Ψ₃) :=
+    .modus_ponens _ _ _ hdWeak hAnd12
+  exact .modus_ponens _ _ _ hΦ₃ImpΨ₃ hΦ₃
+
+/-! ## Lemma 4.8 (page 10): `OutputCtx` Branching Congruence -/
+
+/-- **Lemma 4.8** (page 10): let `Δ₁, Δ₂, Σ` be full sequents and `Γ{ }` an output context. If
+`(fm(Δ₁) ∧ fm(Δ₂)) ⊃ fm(Σ)` is provable, so is `(fm(Γ{Δ₁}) ∧ fm(Γ{Δ₂})) ⊃ fm(Γ{Σ})`. Proved by
+induction on the structure of `Γ{ }`, using Lemma 4.7(i) and (iii), matching the source's proof
+exactly. -/
+theorem lemma4_8 {Δ₁ Δ₂ Θ : NestedFull Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((Δ₁.fm.and Δ₂.fm).imp Θ.fm)) :
+    ∀ (Γ : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom)
+        (((Γ.fillFull Δ₁).fm.and (Γ.fillFull Δ₂).fm).imp (Γ.fillFull Θ).fm)
+  | [] => h
+  | [Γ₁] => cs5DerivAndImpCongr2 (D := Γ₁.fm) h
+  | Γ :: (Γ₂ :: rest) => by
+      have hIH := lemma4_8 h (Γ₂ :: rest)
+      change Derivable (@CS5ModalAxiom Atom)
+        (((Γ.fm.imp (buildFullChain (Γ₂ :: rest) Δ₁).fm).and
+            (Γ.fm.imp (buildFullChain (Γ₂ :: rest) Δ₂).fm)).imp
+          (Γ.fm.imp (buildFullChain (Γ₂ :: rest) Θ).fm))
+      rw [buildFullChain_fm, buildFullChain_fm, buildFullChain_fm]
+      exact lemma4_7_i_ii Γ.fm (lemma4_7_iii hIH)
 
 end Cslib.Logic.Modal

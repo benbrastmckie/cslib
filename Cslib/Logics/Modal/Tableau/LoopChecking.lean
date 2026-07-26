@@ -2263,6 +2263,33 @@ private lemma modalStepBranchS4Keyed_result_keys_eq
   · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.2.symm
   · rw [hres] at hsf; simp at hsf
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Reusable result-shape-agnostic accessibility extraction**, dual of
+`modalStepBranchS4Keyed_result_keys_eq`: whatever `result` turns out to be, the 3rd tuple
+component of the inner `match result with ...` is always the same `newAcc0`. Needed by
+`keysOriginS4`'s preservation (Phase 11) at the 12 non-minting shapes, where `result` may be any
+of `.linear`/`.branching`/`.persistent` but the accessibility component is uniformly `newAcc0`
+regardless. -/
+private lemma modalStepBranchS4Keyed_result_acc_eq
+    (result : RuleResult (Proposition Atom) WorldIndex)
+    (newAcc0 : Accessibility)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (keysLocal : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hsf : (match result with
+      | .linear nf => some ([nf ++ b], [e ++ [sf]], newAcc0, keysLocal)
+      | .branching brs => some (brs.map (· ++ b), brs.map (fun _ => e ++ [sf]), newAcc0, keysLocal)
+      | .persistent nf => some ([nf ++ b], [e], newAcc0, keysLocal)
+      | .notApplicable => none) = some (newBs, newExps, newAcc, keys')) :
+    newAcc = newAcc0 := by
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.1.symm
+  · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.1.symm
+  · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.1.symm
+  · rw [hres] at hsf; simp at hsf
+
 /-- **`keyLowerBd`'s driver-level preservation**: every key
 recorded after an S4Keyed step remains a lower bound on its live relevant set, over EVERY
 branch the step produces. Assembles `modalStepBranchS4Keyed_branch_superset` (handles every
@@ -4378,6 +4405,461 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysWorldsKnown (φ₀ : Propositi
         exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
+
+/-! ### Origin-Edge Invariant — Step Preservation (Phase 11)
+
+`keysOriginS4` (defined above, alongside its entry and monotonicity lemmas) survives a single
+`modalStepBranchS4Keyed`/`modalStepBranchS4KeyedOrdered` step, over every branch produced.
+Mirrors `keysWorldsKnown`'s preservation shape (proof-internal auxiliary, threaded as an extra
+hypothesis/conclusion, never an `S4LoopInv` field): twelve of the fourteen `sf.sign`/
+`sf.formula` shapes are free -- `modalApplyOneS4Keyed_nonMint_snd_eq_acc` gives `newAcc = acc`
+outright and the `keys'`-defining match falls to its `_, _ => keys` catch-all -- so
+`keysOriginS4_mono_branch`/`_mono_acc` alone close them. The blocked-mint sub-case adds an edge
+but no key, closed the same way via a direct `Accessibility.addEdge`/`hasEdge` unfolding. Only
+the unblocked-mint sub-case establishes a genuinely new key, by construction: the new entry is
+`(modalNextWorld b, successorBirthContent φ₀ b s φ v)`, born together with the freshly-added
+edge `v → modalNextWorld b`, so `u := v` and the witness pair is `(s, φ)` itself -- exactly the
+`insert (s, φ) (...)` head of `successorBirthContent`. -/
+
+/-- **`keysOriginS4`'s single-step preservation.** -/
+lemma modalStepBranchS4Keyed_preserves_keysOriginS4 (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (haK : accTargetsKnown b acc)
+    (hKO : keysOriginS4 b acc keys)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, keysOriginS4 b' newAcc keys' := by
+  have hsuper := modalStepBranchS4Keyed_branch_superset φ₀ b e acc keys newBs newExps newAcc
+    keys' hstep
+  have hstep0 := hstep
+  unfold modalStepBranchS4Keyed at hstep0
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep0
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · -- box-negative minting shape
+      have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hsf hpair
+      rw [hpair] at hsf
+      dsimp only at hsf
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · -- unblocked: establishes the new key
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_boxNeg_witness b acc ψ sf.label
+        have hAOeq := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear
+            ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+              rest) := (congrArg Prod.fst (hpair.symm.trans hAOeq)).trans hwfst
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label (modalNextWorld b) := by
+          have hsndeq := congrArg Prod.snd (hpair.symm.trans hAOeq)
+          rwa [hwsnd] at hsndeq
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        have hold := keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+        intro w k hmem
+        rcases List.mem_append.mp hmem with hmemold | hmemnew
+        · exact hold w k hmemold
+        · simp only [List.mem_singleton, Prod.mk.injEq] at hmemnew
+          obtain ⟨rfl, rfl⟩ := hmemnew
+          refine Or.inr ⟨sf.label, .neg, ψ, ?_, ?_, ?_⟩
+          · rw [hnewAcc0eq]
+            simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons]
+            simp
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact absurd heq (by simp)
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact absurd hcon (by simp)
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact Or.inl heq.symm
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+              · exact absurd hcon (by simp)
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+      · -- blocked: keys unchanged, edge added
+        have hAOeq := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock
+          hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans hAOeq)
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label wBlock :=
+          congrArg Prod.snd (hpair.symm.trans hAOeq)
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        symm at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        exact keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+    · -- diamond-positive minting shape (symmetric)
+      have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hsf hpair
+      rw [hpair] at hsf
+      dsimp only at hsf
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · -- unblocked: establishes the new key
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_diamondPos_witness b acc ψ sf.label
+        have hAOeq := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear
+            ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+              rest) := (congrArg Prod.fst (hpair.symm.trans hAOeq)).trans hwfst
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label (modalNextWorld b) := by
+          have hsndeq := congrArg Prod.snd (hpair.symm.trans hAOeq)
+          rwa [hwsnd] at hsndeq
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        have hold := keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+        intro w k hmem
+        rcases List.mem_append.mp hmem with hmemold | hmemnew
+        · exact hold w k hmemold
+        · simp only [List.mem_singleton, Prod.mk.injEq] at hmemnew
+          obtain ⟨rfl, rfl⟩ := hmemnew
+          refine Or.inr ⟨sf.label, .pos, ψ, ?_, ?_, ?_⟩
+          · rw [hnewAcc0eq]
+            simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons]
+            simp
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact Or.inl heq.symm
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact absurd hcon (by simp)
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact absurd heq (by simp)
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+              · exact absurd hcon (by simp)
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+      · -- blocked: keys unchanged, edge added
+        have hAOeq := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock
+          hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans hAOeq)
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label wBlock :=
+          congrArg Prod.snd (hpair.symm.trans hAOeq)
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        symm at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        exact keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+  · -- non-mint: keys' = keys, newAcc = newAcc0 = acc, regardless of which of the 12 shapes fired
+    rw [hpair] at hsf
+    dsimp only at hsf
+    have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have hnewAcc0eq : newAcc0 = acc :=
+      (congrArg Prod.snd hpair).symm.trans
+        (modalApplyOneS4Keyed_nonMint_snd_eq_acc φ₀ keys sf b acc hsfmem haK hnbd)
+    have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+      rw [hnewAcc0eq]; exact fun u w h => h
+    have hold : ∀ b' ∈ newBs, keysOriginS4 b' newAcc0 keys := fun b' hb' =>
+      keysOriginS4_mono_acc b' acc newAcc0 keys haccsub
+        (keysOriginS4_mono_branch b b' acc keys (hsuper b' hb') hKO)
+    have hkeq0 := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+      newAcc keys' hsf
+    have haccEq := modalStepBranchS4Keyed_result_acc_eq result newAcc0 b e sf _ newBs newExps
+      newAcc keys' hsf
+    have hkeq : keys' = keys := by
+      rw [hkeq0]
+      rcases hs : sf.sign with _ | _ <;>
+        rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]
+      · exact absurd ⟨hs, ψ, hf⟩ hnbd.2
+      · exact absurd ⟨hs, ψ, hf⟩ hnbd.1
+    intro b' hb'
+    rw [haccEq, hkeq]
+    exact hold b' hb'
+
+/-- **`keysOriginS4`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4Keyed_preserves_keysOriginS4` against the ordered stepper, via
+`modalStepBranchS4KeyedOrdered_selected_mem`/`modalStepBranchS4KeyedOrdered_branch_superset` in
+place of their unordered counterparts. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (haK : accTargetsKnown b acc)
+    (hKO : keysOriginS4 b acc keys)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, keysOriginS4 b' newAcc keys' := by
+  have hsuper := modalStepBranchS4KeyedOrdered_branch_superset φ₀ b e acc keys newBs newExps
+    newAcc keys' hstep
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · -- box-negative minting shape
+      have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hsf hpair
+      rw [hpair] at hsf
+      dsimp only at hsf
+      rw [hsfeq] at hsfmem
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · -- unblocked: establishes the new key
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_boxNeg_witness b acc ψ sf.label
+        have hAOeq := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear
+            ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+              rest) := (congrArg Prod.fst (hpair.symm.trans hAOeq)).trans hwfst
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label (modalNextWorld b) := by
+          have hsndeq := congrArg Prod.snd (hpair.symm.trans hAOeq)
+          rwa [hwsnd] at hsndeq
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        have hold := keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+        intro w k hmem
+        rcases List.mem_append.mp hmem with hmemold | hmemnew
+        · exact hold w k hmemold
+        · simp only [List.mem_singleton, Prod.mk.injEq] at hmemnew
+          obtain ⟨rfl, rfl⟩ := hmemnew
+          refine Or.inr ⟨sf.label, .neg, ψ, ?_, ?_, ?_⟩
+          · rw [hnewAcc0eq]
+            simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons]
+            simp
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact absurd heq (by simp)
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact absurd hcon (by simp)
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact Or.inl heq.symm
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+              · exact absurd hcon (by simp)
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+      · -- blocked: keys unchanged, edge added
+        have hAOeq := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock
+          hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans hAOeq)
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label wBlock :=
+          congrArg Prod.snd (hpair.symm.trans hAOeq)
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        symm at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        exact keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+    · -- diamond-positive minting shape (symmetric)
+      have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hsf hpair
+      rw [hpair] at hsf
+      dsimp only at hsf
+      rw [hsfeq] at hsfmem
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · -- unblocked: establishes the new key
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_diamondPos_witness b acc ψ sf.label
+        have hAOeq := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear
+            ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+              rest) := (congrArg Prod.fst (hpair.symm.trans hAOeq)).trans hwfst
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label (modalNextWorld b) := by
+          have hsndeq := congrArg Prod.snd (hpair.symm.trans hAOeq)
+          rwa [hwsnd] at hsndeq
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        have hold := keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+        intro w k hmem
+        rcases List.mem_append.mp hmem with hmemold | hmemnew
+        · exact hold w k hmemold
+        · simp only [List.mem_singleton, Prod.mk.injEq] at hmemnew
+          obtain ⟨rfl, rfl⟩ := hmemnew
+          refine Or.inr ⟨sf.label, .pos, ψ, ?_, ?_, ?_⟩
+          · rw [hnewAcc0eq]
+            simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons]
+            simp
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact Or.inl heq.symm
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact absurd hcon (by simp)
+          · intro ψ' hψ'
+            simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
+            rcases hψ' with heq | ⟨-, hdisj⟩
+            · exact absurd heq (by simp)
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+              · exact absurd hcon (by simp)
+              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+      · -- blocked: keys unchanged, edge added
+        have hAOeq := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock
+          hblock
+        rw [hblock] at hsf
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans hAOeq)
+        have hnewAcc0eq : newAcc0 = acc.addEdge sf.label wBlock :=
+          congrArg Prod.snd (hpair.symm.trans hAOeq)
+        have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+          intro u w h
+          rw [hnewAcc0eq]
+          simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+          simp [h]
+        rw [hresulteq] at hsf
+        simp only [List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc, hnewKeys⟩ := hsf
+        intro b' hb'
+        have hb'_mem := hb'
+        rw [← hnewBs] at hb'
+        simp only [List.mem_singleton] at hb'
+        symm at hb'
+        subst hb'
+        subst hnewAcc
+        rw [← hnewKeys]
+        exact keysOriginS4_mono_acc _ acc newAcc0 keys haccsub
+          (keysOriginS4_mono_branch b _ acc keys (hsuper _ hb'_mem) hKO)
+  · -- non-mint: keys' = keys, newAcc = newAcc0 = acc, regardless of which of the 12 shapes fired
+    rw [hpair] at hsf
+    dsimp only at hsf
+    have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have hnewAcc0eq : newAcc0 = acc :=
+      (congrArg Prod.snd hpair).symm.trans
+        (modalApplyOneS4Keyed_nonMint_snd_eq_acc φ₀ keys sf b acc hsfmem haK hnbd)
+    have haccsub : ∀ u w, acc.hasEdge u w = true → newAcc0.hasEdge u w = true := by
+      rw [hnewAcc0eq]; exact fun u w h => h
+    have hold : ∀ b' ∈ newBs, keysOriginS4 b' newAcc0 keys := fun b' hb' =>
+      keysOriginS4_mono_acc b' acc newAcc0 keys haccsub
+        (keysOriginS4_mono_branch b b' acc keys (hsuper b' hb') hKO)
+    have hkeq0 := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+      newAcc keys' hsf
+    have haccEq := modalStepBranchS4Keyed_result_acc_eq result newAcc0 b e sf _ newBs newExps
+      newAcc keys' hsf
+    have hkeq : keys' = keys := by
+      rw [hkeq0]
+      rcases hs : sf.sign with _ | _ <;>
+        rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]
+      · exact absurd ⟨hs, ψ, hf⟩ hnbd.2
+      · exact absurd ⟨hs, ψ, hf⟩ hnbd.1
+    intro b' hb'
+    rw [haccEq, hkeq]
+    exact hold b' hb'
 
 /-- **`outDegEq`'s driver-level preservation**: the out-degree/expanded-set correspondence
 survives an S4Keyed step, for every branch it produces. At the 12 non-minting shapes, `acc` is

@@ -3,46 +3,87 @@
   "agent_type": "cslib-research-hard-agent",
   "task_number": 553,
   "session_id": "sess_1785084826_a33d36",
-  "artifacts": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md"
-  ],
-  "findings_count": 12,
+  "effort_flag": "hard",
+  "lit_flag": true,
+  "orchestrator_mode": true,
+  "report_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/04_massacci-subtractive-blocking-priced.md",
+  "findings_count": 11,
   "adversarial_verification_triggered": true,
+  "adversarial_verification_outcome": "Four attempted refutations were upheld in part (outDegEq falsity under variant S1; pure-subtractive completeness having no construction; the Massacci Def 8.2 guard divergence; condition (d)'s 40 failures). Each was resolved by a further verified fact or a further measurement rather than by argument. One drafted conclusion was overturned by measurement: condition (d) was written up as the route-killer, then demoted to a statement-shape constraint after the exact obligation (F*)/(G*) measured 0 failures. Report 03's recommendation of route (2') is reversed.",
   "reference_grounding_tier": 1,
-  "bibkey_verification_status": "all_verified",
+  "bibkey_verification_status": "verified",
   "bibkeys_verified": [
-    "Massacci2000",
-    "Gore1999",
-    "Blackburn2001",
-    "ChagrovZakharyaschev1997",
-    "Fitting1983"
+    { "key": "Massacci2000", "line": "references.bib:1010" },
+    { "key": "ChagrovZakharyaschev1997", "line": "references.bib:75" },
+    { "key": "Gore1999", "line": "references.bib:1023" }
   ],
-  "files_edited": [],
-  "verdict": "WEAKENING IS SAFE for every enumerated consumer. Evidence-supported route is (2') -- the branchPropAdequateIn target entered via the disjunctive edge conjunct, with the report-02 section-5.1 hready repair as mandatory Phase 1.",
+  "verdict": "Route (3) is VIABLE at approximately 9 phases versus route (2')'s 7-8; recommend route (3).",
+  "modified_files": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/04_massacci-subtractive-blocking-priced.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive2.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+  ],
+  "library_files_edited": [],
+  "sorry_inventory": {
+    "cslib_tableau_directory_total": 1,
+    "locations": ["Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1244"],
+    "delta_this_dispatch": 0,
+    "note": "Untouched per explicit user decision. The recommended route retires it in its phase 5."
+  },
   "key_measurements": {
-    "branchPropAdequateIn_occurrences_outside_FrameSoundness": 0,
-    "branchSatisfiableIn_s4FC_occurrences_outside_FrameSoundness": 0,
-    "landed_decidability_instances_referencing_any_branch_invariant": 0,
-    "landed_decidability_instances_total": 6,
-    "branchSatisfiableIn_imp_branchPropAdequateIn_axioms": [],
-    "modalClosed_unsat_propAdequateIn_axioms": ["propext", "Quot.sound"]
+    "differential_sweep_corpora_formulas": 159561,
+    "guard_fired_on_formulas": 23182,
+    "open_to_closed_completeness_regressions": 0,
+    "closed_to_open_all_corpora": 2,
+    "closed_to_open_ordered_variant": 0,
+    "cex_shipped_unordered": "closed (unsound)",
+    "cex_shipped_ordered": "open",
+    "cex_subtractive": "open",
+    "keysDistinct_breakage": "0 / 8532",
+    "fuel_exhaustion_shipped_vs_subtractive_1atom_size8": "2 vs 0",
+    "terminal_open_leaves_checked": 110741,
+    "recorded_redirects_checked": 24314,
+    "exact_truth_lemma_obligation_failures": 0,
+    "wrapped_proxy_condition_d_failures": 40
+  },
+  "completeness_cost": {
+    "s4_keyed_decls_reachable_from_complete": 43,
+    "s4_keyed_lines": 1983,
+    "needs_new_proof_decls": 4,
+    "needs_new_proof_lines": 1036,
+    "needs_restatement_decls": 10,
+    "needs_restatement_lines": 186,
+    "survives_unchanged_lines": 1188,
+    "edge_existence_clause_lines": 17
   },
   "memory_candidates": [
     {
-      "title": "Branch-invariant strength is proof-internal in the CSLib modal tableau line",
-      "content": "All six landed Decidable (xValid phi) instances (K, T, B, S5, Five, KB5) consume only 'modalTableauX phi = .closed <-> xValid phi'. Any branch satisfiability invariant is existentially quantified inside the soundness proof and never appears in an exported type, so 'does a downstream consumer need the stronger invariant?' is answerable by grep on the invariant name.",
-      "keywords": ["cslib", "modal", "tableau", "soundness", "invariant", "decidability"]
+      "title": "A loop-checking guard that ADDS a redirect edge manufactures a soundness obligation the source calculus does not have",
+      "body": "Massacci2000 Technique 8.2 blocks by withholding the pi-rule and adding nothing, which is why its loop-checking theorem (Thm 8.1) is completeness-side only. A driver that instead records the redirect in the same accessibility structure the soundness invariant quantifies over turns a completeness-side model-construction artifact into a per-step soundness obligation, typically unprovable against an existentially arbitrary witness model. The fix is to split the bookkeeping: a soundness-tracked structure holding only justified edges, plus a completeness-only channel. General principle: an artifact needed only by the model-construction direction must not live in a structure the soundness invariant reads.",
+      "keywords": ["loop checking", "tableau", "soundness", "completeness", "redirect edge", "Massacci2000", "modal logic", "S4"],
+      "tags": ["formalization-pattern", "proof-architecture"]
     },
     {
-      "title": "Massacci2000 loop-checking is subtractive, not additive",
-      "content": "Massacci2000 Technique 8.2 blocks by WITHHOLDING the pi-rule at a copy prefix; it adds no formula, world, or edge. Its loop-checking theorem (Thm 8.1) is completeness-side only, because a blocked branch is a subset of an unblocked one. A driver that instead adds a redirect edge to the accessibility relation manufactures a soundness obligation the source calculus does not have.",
-      "keywords": ["massacci", "loop-checking", "tableau", "soundness", "blocking", "literature"]
+      "title": "Relocating an obligation from per-step to terminal-state can convert a FALSE lemma into a true one",
+      "body": "Counterexamples to per-step invariant preservation in saturating tableau drivers are frequently transient: the branch is repaired one step later. The same statement restricted to terminal saturated branches can hold. Before abandoning a route because a lemma was refuted, check at which state the counterexample lives. Measured instance: blockedRedirect_boxctx_mem was refuted at step 6 of a 5-step trace, yet its conclusion holds with 0 failures over 24,314 recorded blocking decisions at terminal open leaves.",
+      "keywords": ["invariant", "per-step preservation", "terminal state", "saturated branch", "counterexample", "tableau"],
+      "tags": ["proof-strategy", "debugging-formal-proofs"]
     },
     {
-      "title": "S5 witness-reuse soundness is symmetry-driven and does not transfer to S4",
-      "content": "accReachableInv_related_s5 (FrameSoundness.lean:1858) relates any two known worlds via Relation.RightEuclidean, so S5 redirect/reuse edges are genuine model edges for free. s4FC = Std.Refl and IsTrans has no symmetry conjunct, so the S5 reuse pattern never transfers to S4 by structural analogy.",
-      "keywords": ["s5", "s4", "euclidean", "symmetry", "witness-reuse", "frame-condition"]
+      "title": "Weakening a branch invariant can make its frame-condition requirements STRONGER",
+      "body": "In CSLib's modal tableau line the full-strength branchSatisfiableIn 4-rule lemmas need IsTrans only (FrameSoundness.lean:1085-1100, :1106-1123: hrefl is destructured and never used) and the K box-positive lemma needs no frame condition at all (SoundnessStep.lean:446-459 has no FC parameter). The weakened branchPropAdequateIn line by contrast needs Std.Refl (:1454) plus an hready side hypothesis (:1449-1450), because the weak edge conjunct delivers box-phi at the target rather than an edge. Consequence: weakening the invariant blocks reuse by non-reflexive transitive corners (K4/K45/D4/D45), while full strength does not.",
+      "keywords": ["branchSatisfiableIn", "branchPropAdequateIn", "frame condition", "reflexivity", "transitivity", "K4", "S4", "invariant strength"],
+      "tags": ["cslib", "modal-logic", "invariant-design"]
+    },
+    {
+      "title": "When auditing a decision procedure's differential, build an independent semantic oracle and prove the feature under test actually fires",
+      "body": "A direct Bool evaluator over all reflexive-transitive frames up to size 3-4 is about 40 lines, calibrates against a known countermodel from a docstring, and upgrades 'the verdict changed on N formulas' into 'the driver was unsound on N1 and lost completeness on N2'. Equally important: verify the feature under test actually triggers on the corpus, since verdict agreement over a corpus where the guard never fires is worthless. An exact classifier is often available from the implementation's own shape: a blocked step is the unique case where acc.edges grows while keys.length does not.",
+      "keywords": ["empirical probe", "semantic oracle", "differential testing", "decision procedure", "validity", "countermodel", "measurement"],
+      "tags": ["methodology", "verification"]
     }
   ],
-  "next_steps": "Run /plan 553 to create implementation plan for route (2') -- disjunctive edge conjunct first"
+  "next_steps": "Run /plan 553 to create an implementation plan for route (3) (Massacci subtractive blocking plus a completeness-only redirect channel), with phase 1 fixing the Hintikka clauses in the forward-cone (F*)/(G*) form."
 }

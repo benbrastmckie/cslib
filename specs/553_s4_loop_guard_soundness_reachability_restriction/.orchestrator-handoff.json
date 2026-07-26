@@ -6,66 +6,102 @@
   "plan_version": 3,
   "next_phase": null,
   "next_phase_name": null,
-  "next_action_hint": "ROUTE DECISION SUPPORTED BY EVIDENCE: option (2) -- weakening the S4 soundness target from branchSatisfiableIn s4FC to branchPropAdequateIn s4FC -- is SAFE for every downstream consumer. Verdict grounded in a repo-wide reference census: branchPropAdequateIn has ZERO occurrences outside FrameSoundness.lean; branchSatisfiableIn has ZERO s4FC occurrences outside it; and all six landed Decidable (xValid phi) instances (K/T/B/S5/Five/KB5) consume only 'modalTableauX phi = .closed <-> xValid phi', a statement in which no branch invariant occurs. Both endpoints of the weak invariant's chain are already landed sorry-free (branchSatisfiableIn_imp_branchPropAdequateIn at FrameSoundness.lean:1284, ZERO axioms; modalClosed_unsat_propAdequateIn at :1481). Therefore option (1)'s full driver-dependent Hintikka/canonical-model truth lemma is NOT justified by consumer requirements. HOWEVER: safe is not feasible. branchPropAdequateIn has its own unresolved preservation defect (report 02 section 5.1: the hready side condition fails on plain mint-edge chains, not just redirects). Any plan built for option (2) MUST sequence that repair -- most plausibly the disjunctive edge conjunct '(m.r (f w) (f w')) OR (propagation-adequacy clause)' -- as its FIRST phase. Recommended: /plan 553 for route (2'), i.e. option (2)'s target entered via the disjunctive edge conjunct. Two further items for the user: (a) task 548's non-reflexive transitive corners (K4/K45/D4/D45) are the ONE genuine risk, because branchPropAdequateIn_boxPos_mem uses s4FC's reflexive half at FrameSoundness.lean:1454 -- rated real but deferred and routable (548 is not_started, doubly blocked, and its acceptance permits FMP routing or per-corner out-of-scope notes); (b) a third, literature-grounded route exists that was not among the options offered -- Massacci2000 Technique 8.2 blocks by WITHHOLDING the pi-rule and adds NO edge, which would make soundness trivial at full strength, at the cost of redoing the landed modalTableauS4Keyed_complete against a quotient/copy extraction. Do NOT spawn a literature-acquisition phase; the Gore1999 gap is confirmed settled and is not the blocker.",
-  "summary": "Decision-support research dispatch answering the literal question 'is the current strength of soundness necessary?'. VERDICT: WEAKENING IS SAFE. Enumerated every consumer of the S4 soundness line by reference (grep + lean_verify + full reads), not by assumption: C1 instDecidableS4Valid/s4Valid_decides (does not exist yet; would mirror FrameCompleteness.lean:2407-2421), C2 the unwritten soundness capstone, C3 modalTableauS4Keyed_complete (:4265), C4 the landed 4-rule adequacy lemmas, C5 the S4LoopInv/termination line (LoopChecking.lean, ZERO invariant occurrences across 10352 lines), C6 CslibTests/S4LoopGuardRegression.lean, C7 the K/T/B/S5/Five/KB5 lines. NONE requires branchSatisfiableIn s4FC. The decidability instance specifically cannot even observe which invariant was used, because the invariant is existentially quantified inside a proof and never surfaces in a type; the codebase states the requirement in exactly these terms at FrameCompleteness.lean:4174-4177 ('remains out of scope until both a genuine soundness theorem and this completeness theorem exist for the same driver'). Verified the three obligations the weak invariant must support: initial-config (free via :1284, zero axioms), closed-leaf (landed at :1481 -- this is the obligation weakening COULD have broken, and it does not, because the refuting branch-formula conjunct is byte-identical across both definitions), preservation (open in BOTH routes). S5 PRECEDENT: S5 does target full branchSatisfiableIn s5FC (:3306, :3328) but got it FOR FREE via accReachableInv_related_s5 (:1858), which is rightEuclidean/symmetry-driven -- s4FC has no symmetry, so this is refuted as evidence for necessity; note S5's own induction runs on a bespoke composite S5SoundInv, not bare branchSatisfiableIn. Characterized the gap with a concrete hand-checked separator (b = [T(box p)@0, F(p)@2], acc = {0->1,1->2}, identity relation on {x,y,z}): the weak edge conjunct is local and does not compose along chains. Two middle options found in the existing record (not invented): the disjunctive edge conjunct from report 02 section 5.1 (strictly between; recommended), and Massacci2000's subtractive blocking (full strength for free, but redoes completeness). H4 adversarial pass ran 12 refutation attempts; 2 changed the conclusion (the safe-vs-feasible qualification, and promoting the disjunctive form to the recommended route); 1 was only partially refuted (the task-548 reflexivity dependence) and is reported as a live risk rather than dismissed.",
+  "next_action_hint": "ROUTE (3) IS THE EVIDENCE-SUPPORTED ROUTE. Run /plan 553 for route (3): Massacci2000 Technique 8.2 subtractive blocking (blocked minting arm emits (.linear [], acc) -- NO EDGE) PLUS a separate completeness-only redirect channel `red` threaded alongside `keys`, with countermodel extraction over ReflTransGen (acc UNION red). This REVERSES report 03's recommendation of route (2'). Reasons, all cited in report 04: (i) soundness closes at FULL branchSatisfiableIn s4FC strength trivially -- a blocked step is the identity on (b, acc) and neither invariant mentions `e` -- retiring the sorry at FrameSoundness.lean:1244 in plan phase 5; (ii) TERMINATION SURVIVES INTACT: the pigeonhole chain guard -> keysDistinct -> modalWorldBoundS4 is edge-independent and the guard is UNCHANGED, modalExpMeasure_step_lt_S4Keyed (LoopChecking.lean:9502-9520) does not take outDegEq, and outDegEq itself has ZERO consumers in the S4 line so it can be DROPPED from S4LoopInv rather than re-proved (saving the 188-line modalStepBranchS4_preserves_outDegEq); Massacci's own depth bound (chunk_0065.md:48-49) is NOT needed; (iii) COMPLETENESS COST IS BOUNDED AND COUNTED: 4 declarations / 1036 lines need new proofs (LoopChecking.lean:9006-9340, :9860-10209, :4917-5104; FrameCompleteness.lean:232-394), 10 decls / 186 lines need restatement, 1188 lines survive, and the ENTIRE semantic dependence on the redirect edge is 17 lines in 4 clauses (LoopChecking.lean:6557-6562, :8756-8759, :8763-8766); (iv) the decisive point -- route (3) RELOCATES the hard obligation from a per-step invariant to a TERMINAL-LEAF obligation, and every landed counterexample in this task's record refutes it at a TRANSIENT INTERMEDIATE state (report 02 section 2.2 refutes blockedRedirect_boxctx_mem at step [6] of a 5-step trace, with report 02's own note that b is 'repaired one step later'). Measured at terminal open leaves the exact truth-lemma obligation has ZERO failures over 24314 recorded blocking decisions and 110741 open leaves in 3 corpora, including closure under redirect CHAINS; (v) route (3) DISSOLVES the task-548 reflexivity risk entirely (modalApplyOne_boxPos_sound at SoundnessStep.lean:446-459 has NO frame-condition parameter, and the 4-rule lemmas at FrameSoundness.lean:1085-1100 / :1106-1123 use htrans.trans only, with hrefl destructured and never used), which route (2') carries. WHY NOT ROUTE (2'): its single load-bearing phase (preservation across redirect steps) has BOTH disjuncts' available proof strategies refuted by landed counterexamples -- the left disjunct m.r (f src) (f wBlock) by plan v3's Phase 2 Verdict and the sorry docstring at FrameSoundness.lean:1215-1219, the right disjunct by report 02 section 3.1 row 6's 4-world model (CONFIRMED, 'cannot recover'). Report 02 is correct that this refutes the proof strategy rather than the invariant -- which is precisely the bad news: preservation is true-but-requires-constructing-a-new-witness-model, and it must be constructed at EVERY intermediate state inside the fuel induction over an existentially arbitrary ambient model. That is route (1)'s cost paid n times, so route (2')'s 7-8 phase count is NOT comparable to route (3)'s 9. MANDATORY PLAN CONSTRAINTS: (a) phase 1 must fix the restated Hintikka clauses in the FORWARD-CONE form (payload correct at every world reachable from wBlock in acc UNION red), NEVER the wrapped-formula-at-the-target form, which has 40 MEASURED counterexamples out of 24314; (b) the ORDERED stepper (modalStepBranchS4KeyedOrdered) is MANDATORY -- the unordered subtractive variant loses 2 closures on the 1-atom size<=8 corpus; (c) introduce the subtractive driver as a PARALLEL definition per this file's own convention (LoopChecking.lean:459-464, :992-996) so the landed modalTableauS4Keyed_complete stays green; (d) note that the landed completeness line is for the PLAIN driver only -- the entire ordered family is absent from the BFS closure of modalTableauS4Keyed_complete (30 of 73 S4Key-named decls unreachable, all Ordered), so route (3)'s completeness work is the FIRST completeness proof the ordered driver will have, not a regression. Do NOT spawn a literature-acquisition phase; the Gore1999 gap is confirmed settled and is not the blocker.",
+  "summary": "Scoping dispatch pricing route (3) (Massacci2000 Technique 8.2 subtractive blocking) against route (2'), with three new executable probes rather than analysis. VERDICT: route (3) is VIABLE at ~9 phases vs route (2')'s 7-8, and route (3) is RECOMMENDED because the phase counts are not comparable -- route (2')'s critical phase requires exactly the construction two landed counterexamples have refuted, while route (3)'s equivalent obligation measures 0 failures over 24314 machine-checked instances. Q1 (completeness cost) answered with counts and line ranges from a mechanical declaration parse plus reference-graph BFS rooted at modalTableauS4Keyed_complete: 157 reachable declarations, 43 S4-keyed-specific totalling 1983 lines, of which 4 decls / 1036 lines NEED NEW PROOFS, 10 decls / 186 lines need restatement, and 1188 lines survive; the entire semantic dependence on the redirect edge is 17 lines. Q2 (termination) answered YES-INTACT three ways: structurally (all four keys fields of S4LoopInv are acc-free and keysDistinct's sole establisher blockingWorldS4Keyed_none_fresh is about the UNCHANGED guard), by consumer-tracing (modalExpMeasure_step_lt_S4Keyed takes no outDegEq; .outDegEq is provided at :7546/:7610 and consumed nowhere in the S4 line, so the field is droppable), and by measurement (keysDistinct breakage 0/8532; fuel exhaustion 0 vs the shipped driver's 2 on 95730 formulas). Q3 (empirical) answered by three new probes: cex OPEN under all four subtractive variants while the baseline closes it; T/4/K all CLOSED; differential sweep over 3 corpora / 159561 formulas with open->closed = 0 EVERYWHERE and the guard confirmed firing on 23182 formulas (so verdict agreement is not vacuous); the established 1650/6882/0 baseline reproduced exactly; a new INDEPENDENT semantic validity oracle over all reflexive-transitive frames calibrated by returning least-countermodel-size 3 for cex, exactly matching the 3-world countermodel in blockingWorldS4Keyed's own docstring. Q4 (comparison) priced both routes phase-by-phase on one scale. Q5 (task-548 risk) answered YES-DISSOLVED by reading the full-strength analogues. Two findings changed the plan shape: variant S1 (consume) vs S2 (withhold) differ on outDegEq (false vs preserved) though they agree on all 8532 verdicts; and the ORDERED stepper is mandatory because the unordered subtractive driver loses 2 closures. One control measurement reframes the whole task: the SHIPPED ORDERED driver already leaves cex OPEN, so the empirical unsoundness is already gone and what remains is purely a proof problem. H4 adversarial pass ran 14 refutation attempts; 4 were upheld in part and each was resolved by a further verified fact or a further measurement rather than by argument; 1 drafted conclusion was OVERTURNED by measurement (condition (d)'s 40 failures were written up as the route-killer, then demoted to a statement-shape constraint once the exact obligation measured 0); and report 03's own recommendation was reversed.",
   "reference_grounding": {
     "tier": 1,
     "bibkeys_verified_against_references_bib": {
       "Massacci2000": "references.bib:1010",
-      "Gore1999": "references.bib:1023",
-      "Blackburn2001": "references.bib:65",
       "ChagrovZakharyaschev1997": "references.bib:75",
-      "Fitting1983": "references.bib:211"
+      "Gore1999": "references.bib:1023"
     },
     "literature_chunks_read": [
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0029.md (section 8.1, loop checking, Def 8.1)",
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0030.md (Technique 8.1/8.2, Theorem 8.1, Def 8.2 modal copy)",
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0031.md (Pruning Lemma 8.2)"
+      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0029.md (section 8.1, loop checking, Def 8.1 copy / pi-completed)",
+      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0030.md (Technique 8.1/8.2, proof-confluence remark, Theorem 8.1, Def 8.2 modal copy)",
+      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0031.md (Ftree, Pruning Lemma 8.2, Table III input-size parameters)",
+      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0065.md:40-56 (Prop B.5, the S4 prefix bound hbL-1 = 1+dp+p*n at :48-49, Prop 8.2)"
     ],
-    "note": "literature-search.sh returned {\"results\":[],\"degraded\":true} for this query; chunks were located and read directly from the corpus directory instead."
+    "key_divergence_recorded": "Massacci's Def 8.2 copy relation is on the SOURCE prefix's nu-formulas, whereas CSLib's blockingWorldS4Keyed (LoopChecking.lean:506-511) compares the PROSPECTIVE SUCCESSOR's birth content (successorBirthContent, :384-391). These are different relations, so Massacci's copy-folding quotient does not transfer verbatim. This is why route (3) is designed with a completeness-only redirect channel rather than a quotient, and why it retains CSLib's pigeonhole world bound instead of importing Massacci's depth bound. Route (3) is literature-GUIDED, not literature-transcribed, and the divergence is deliberate and cost-motivated."
   },
   "key_measurements": {
-    "branchPropAdequateIn_occurrences_outside_FrameSoundness": 0,
-    "branchSatisfiableIn_s4FC_occurrences_outside_FrameSoundness": 0,
-    "landed_decidability_instances_total": 6,
-    "landed_decidability_instances_referencing_any_branch_invariant": 0,
-    "branchSatisfiableIn_imp_branchPropAdequateIn_axioms": [],
-    "modalClosed_unsat_propAdequateIn_axioms": ["propext", "Quot.sound"],
-    "landed_branchPropAdequateIn_lemmas_reusable_by_route_2": 7
+    "differential_sweep_total_formulas": 159561,
+    "differential_corpora": "2 atoms size<=6 (8532), 2 atoms size<=7 (55299), 1 atom size<=8 (95730), all fuel 100",
+    "baseline_reproduced_exactly": "1650 closed / 6882 open / 0 fuel-exhausted on 2 atoms size<=6",
+    "open_to_closed_completeness_regressions": 0,
+    "closed_to_open_unordered_subtractive": 2,
+    "closed_to_open_ordered_subtractive": 0,
+    "guard_fired_on_formulas": 23182,
+    "max_recorded_redirects_on_one_path": 39,
+    "cex_shipped_unordered": "closed (the known unsoundness)",
+    "cex_shipped_ordered": "OPEN",
+    "cex_subtractive_all_four_variants": "OPEN",
+    "T_4_K_axioms_all_variants": "CLOSED",
+    "oracle_calibration": "least countermodel size for cex = 3, matching blockingWorldS4Keyed's docstring at LoopChecking.lean:473-476; T/4/K not falsifiable",
+    "keysDistinct_breakage": "0 / 8532",
+    "fuel_exhaustion_shipped_vs_subtractive_1atom_size8": "2 vs 0",
+    "terminal_open_leaves_checked": 110741,
+    "recorded_redirects_checked": 24314,
+    "exact_truth_lemma_obligation_failures_acc_reachability": 0,
+    "exact_truth_lemma_obligation_failures_acc_union_red_reachability": 0,
+    "wrapped_proxy_condition_d_failures": 40,
+    "completeness_needs_new_proof_decls": 4,
+    "completeness_needs_new_proof_lines": 1036,
+    "completeness_needs_restatement_decls": 10,
+    "completeness_survives_lines": 1188,
+    "edge_existence_clause_lines": 17
   },
   "artifacts": [
     {
       "type": "report",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md",
-      "note": "Decision-ready report. Verdict stated first; sections: reference grounding + source-to-implementation mapping, both invariant definitions quoted with a concrete separator, consumer-by-consumer table, the decidability instance sub-question, the S5 precedent, related blocked tasks (300/506/511/548) with real-coupling assessment, middle options, a four-row decision table, the literal answer, and a 12-row Adversarial Self-Verification table with confidence levels."
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/04_massacci-subtractive-blocking-priced.md",
+      "note": "Decision-ready report, 774 lines. Verdict first; sections: reference grounding with a 7-row source-to-implementation mapping, what route (3) is precisely (with the S1/S2 variant table and the S5Gen apply-parametric reuse asset), Q1 completeness census with per-declaration classification, Q2 termination argued structurally + by consumer-tracing + by measurement, Q3 empirical with three corpora and the new semantic oracle, Q4 phase-by-phase comparison of both routes on one scale, Q5 the task-548 risk, a five-row decision table, and a 14-row Adversarial Self-Verification table with confidence levels."
+    },
+    {
+      "type": "probe",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive.lean",
+      "note": "Variants S1 (consume) and S2 (withhold), ordered and unordered; measurements A (cex soundness), B (T/4/K validity), C (differential sweep), D (termination stats: worlds, depth, out-degree, edges, keysDistinct), E (an independent semantic validity oracle over all reflexive-transitive frames up to size 3-4, self-calibrating against cex). Definitions and #eval only; no proofs, no sorry, no axioms."
+    },
+    {
+      "type": "probe",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive2.lean",
+      "note": "Closes the vacuity gap: exact per-step classification of blocked vs minted vs non-minting steps in the SHIPPED driver (a blocked step is the unique case where acc.edges grows while keys.length does not), giving a per-formula count of redirect edges. Plus two deeper corpora (1 atom size<=8 = 95730 formulas, 2 atoms size<=7 = 55299)."
+    },
+    {
+      "type": "probe",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
+      "note": "The decisive completeness-recoverability probe: threads the blocking decisions in a completeness-only channel and tests seven conditions at EVERY terminal open leaf (the DFS deliberately visits all of them), including the exact truth-lemma obligations over acc-reachability and over the full acc UNION red relation closed under redirect chains. Also the control showing the SHIPPED ORDERED driver already leaves cex OPEN, and the semantic-oracle adjudication of the four deeper-corpus disagreements."
     }
   ],
   "modified_files": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/04_massacci-subtractive-blocking-priced.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive2.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
   ],
   "territory_respected": [
-    "READ-ONLY on Cslib/** as instructed -- no Lean source was edited.",
-    "The sorry at Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1244 was NOT removed or modified, per the user's explicit decision that it stays as a documented marker.",
+    "READ-ONLY on Cslib/** as instructed -- no library Lean source was edited.",
+    "The sorry at Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1244 was NOT removed or modified, per the user's explicit decision. Verified by grep that it remains the ONLY sorry in Cslib/Logics/Modal/Tableau/ across all 14 files.",
     "Wrote only inside specs/553_s4_loop_guard_soundness_reachability_restriction/.",
-    "Did not edit plans/03_ancestor-only-blocking.md -- its [BLOCKED] Phase 2 Verdict is preserved verbatim as a research input."
+    "Did not edit plans/03_ancestor-only-blocking.md -- its [BLOCKED] Phase 2 Verdict and Phase 1 Measurements are preserved verbatim as research inputs.",
+    "Did not edit reports 01-03; report 04 is additive and states explicitly where it reverses report 03's recommendation."
   ],
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
       "line": 1244,
       "lemma": "branchSatisfiableIn_s4FC_ancestor_redirect",
-      "reason": "Pre-existing, user-authorized documented marker from the plan-v3 Phase 2 decision gate. Deliberately untouched by this read-only research dispatch."
+      "reason": "Pre-existing, user-authorized documented marker from the plan-v3 Phase 2 decision gate. Deliberately untouched by this read-only research dispatch. The recommended route retires it in plan phase 5, where the blocked arm's preservation obligation becomes the identity function."
     }
   ],
   "requires_user_review": true,
   "user_decision_pending": {
-    "question": "Choose the soundness route now that consumer-sufficiency is settled.",
+    "question": "Confirm route (3) (subtractive blocking plus a completeness-only redirect channel) as the route to plan, superseding report 03's route (2') recommendation.",
     "options": [
-      "(1) Full driver-dependent Hintikka/canonical-model truth lemma targeting branchSatisfiableIn s4FC -- NOT required by any consumer; choose only if judged more likely to close than route (2)'s preservation obligation.",
-      "(2') RECOMMENDED BY THE EVIDENCE: accept the weakened target, entered via the disjunctive edge conjunct, with the report-02 section-5.1 hready repair as Phase 1.",
-      "(3) Literature-standard subtractive blocking (Massacci2000 Technique 8.2): emit (.linear [], acc) with no redirect edge, keeping full strength for free, at the cost of redoing modalTableauS4Keyed_complete against a quotient/copy extraction."
+      "(3) RECOMMENDED BY THE EVIDENCE: Massacci2000 Technique 8.2 subtractive blocking with a completeness-only redirect channel. ~9 phases. Full-strength soundness for free, termination intact, retires the sorry at FrameSoundness.lean:1244, dissolves the task-548 reflexivity risk, literature-backed, and its load-bearing obligation measures 0 failures over 24314 instances at terminal open leaves.",
+      "(2') Report 03's prior recommendation: the disjunctive edge conjunct. ~7-8 phases nominal, but its redirect-step preservation phase has BOTH disjuncts' available proof strategies refuted by landed counterexamples and requires constructing a new witness model at every intermediate state inside the fuel induction -- route (1)'s cost paid n times.",
+      "(1) Full driver-dependent Hintikka/canonical-model truth lemma. 10+ phases. The honest fallback if route (3)'s phase 1 cannot state the Hintikka clauses in a form that feeds modalTruthLemmaS4."
     ]
   }
 }

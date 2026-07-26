@@ -1162,6 +1162,288 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
 
+/-! ### Propagation-Adequacy Invariant (S4-Keyed)
+
+The S4-keyed ordered driver's loop guard (`LoopChecking.lean`'s `blockingWorldS4Keyed`) can add a
+*redirect* edge `v → wBlock` that is not a genuine `m.r` edge of any witnessing model: `wBlock` is
+an existing (possibly much older) world being reused rather than a freshly minted one. This
+breaks `branchSatisfiableIn`'s edge conjunct `acc.hasEdge w w' → m.r (f w) (f w')` outright for
+such an edge. `branchPropAdequateIn` below is the weakened invariant Route P's soundness argument
+uses instead: the edge conjunct is replaced by a branch-content-driven one that only demands the
+box/diamond propagation payload an edge could ever transmit is already correct at its target, not
+that the edge is a real `m.r` edge. The branch-formula conjunct is unchanged. -/
+
+/-- **The propagation-adequacy invariant.** Weakens `branchSatisfiableIn s4FC`'s edge conjunct
+`acc.hasEdge w w' → m.r (f w) (f w')` to: for every recorded edge `w → w'`, `f w'` satisfies
+`□ψ` for every `T(□ψ)@w ∈ b`, and falsifies `◇ψ` for every `F(◇ψ)@w ∈ b`. The branch-formula
+conjunct is verbatim unchanged from `branchSatisfiableIn`. `branchSatisfiableIn_imp_
+branchPropAdequateIn` below shows this costs nothing for a genuine `branchSatisfiableIn s4FC`
+witness (in particular one built purely from mint edges); the weakening only matters once a
+redirect edge is present. -/
+def branchPropAdequateIn (FC : FrameCondition)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  ∃ (W : Type) (m : Model W Atom) (f : WorldIndex → W),
+    FC m.r ∧
+    (∀ w w', acc.hasEdge w w' = true →
+      (∀ ψ, (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        Satisfies m (f w') (.box ψ)) ∧
+      (∀ ψ, (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        ¬ Satisfies m (f w') (.diamond ψ))) ∧
+    ∀ sf ∈ b,
+      (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+      (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula)
+
+/-- A genuine `branchSatisfiableIn s4FC` witness already satisfies the weaker
+`branchPropAdequateIn s4FC`: the mint-edge case is free. Proved by the identical
+transitivity argument as `branchSatisfiableIn_s4FC_boxPos_trans_mem`/`_diaNeg_trans_mem`
+above, generalized from "the one new formula being added" to "every edge already recorded in
+`acc`" (available uniformly here since a real `branchSatisfiableIn` edge conjunct, unlike
+`branchPropAdequateIn`'s, does not depend on branch membership at all). -/
+lemma branchSatisfiableIn_imp_branchPropAdequateIn
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn s4FC b acc) :
+    branchPropAdequateIn s4FC b acc := by
+  obtain ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, hb⟩ := h
+  refine ⟨W, m, f, ⟨hrefl, htrans⟩, ?_, hb⟩
+  intro w w' hedge
+  refine ⟨?_, ?_⟩
+  · intro ψ hmem
+    have hbox : Satisfies m (f w) (.box ψ) := (hb _ hmem).1 rfl
+    intro u hu
+    exact hbox u (htrans.trans (f w) (f w') u (hedges w w' hedge) hu)
+  · intro ψ hmem
+    have hdianeg : ¬ Satisfies m (f w) (.diamond ψ) := (hb _ hmem).2 rfl
+    intro hdia'
+    apply hdianeg
+    obtain ⟨u, hu, hφu⟩ := Satisfies.diamond_iff.mp hdia'
+    exact Satisfies.diamond_iff.mpr ⟨u, htrans.trans (f w) (f w') u (hedges w w' hedge) hu, hφu⟩
+
+/-- Adequacy analogue of `branchSatisfiableIn_s4FC_boxPos_trans_mem`: adding `T(□φ)@w'` to a
+branch witnessing `branchPropAdequateIn s4FC` preserves `branchPropAdequateIn s4FC`, given
+`T(□φ)@w ∈ b` and a recorded edge `w → w'`, **provided** `w'` is already "box-ready" for `φ`
+along every edge it already has recorded (`hready`): for every existing successor `v` of `w'`,
+`T(□φ)@v` is already on the branch. Unlike `branchSatisfiableIn` (whose edge conjunct is
+branch-independent, so untouched by adding a new element), `branchPropAdequateIn`'s edge conjunct
+is driven by branch membership, so adding `T(□φ)@w'` reopens the conjunct's obligation at every
+edge already recorded *out of* `w'` -- without `hready` the bare analogue is false in general.
+`hready` is exactly what the S4-keyed ordered driver's mint-readiness discipline
+(`LoopChecking.lean`, Phase 4's `_mintReady`) is designed to supply at every real call site: a
+world only ever acquires an outgoing (redirect) edge once it is mint-ready, i.e. once its own
+box-content has already stabilized. Phase 10's `blockedRedirect_boxctx_mem` establishes the
+redirect-edge instance of this discharge obligation. -/
+lemma branchPropAdequateIn_s4FC_boxPos_trans_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchPropAdequateIn s4FC b acc)
+    {φ : Proposition Atom} {w w' : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge w w' = true)
+    (hready : ∀ v, acc.hasEdge w' v = true →
+      (⟨.pos, .box φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchPropAdequateIn s4FC (⟨.pos, .box φ, w'⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedgeconj, hb⟩ := h
+  have hboxw' : Satisfies m (f w') (.box φ) := (hedgeconj w w' hedge).1 φ hmem
+  refine ⟨W, m, f, hFC, ?_, ?_⟩
+  · intro u u' huedge
+    refine ⟨?_, ?_⟩
+    · intro ψ hmem'
+      simp only [List.mem_cons, SignedFormula.mk.injEq] at hmem'
+      rcases hmem' with ⟨-, hformeq, hueq⟩ | hold
+      · have hψ : ψ = φ := (Proposition.box.injEq _ _).mp hformeq
+        subst hueq; subst hψ
+        exact (hb _ (hready u' huedge)).1 rfl
+      · exact (hedgeconj u u' huedge).1 ψ hold
+    · intro ψ hmem'
+      simp only [List.mem_cons, SignedFormula.mk.injEq] at hmem'
+      rcases hmem' with ⟨hsigneq, -, -⟩ | hold
+      · exact absurd hsigneq (by simp)
+      · exact (hedgeconj u u' huedge).2 ψ hold
+  · intro sf hmem'
+    rcases List.mem_cons.mp hmem' with rfl | hold
+    · exact ⟨fun _ => hboxw', fun hcontra => by simp at hcontra⟩
+    · exact hb sf hold
+
+/-- Dual of `branchPropAdequateIn_s4FC_boxPos_trans_mem` for the diamond-negative shape:
+adding `F(◇φ)@w'` to a branch witnessing `branchPropAdequateIn s4FC` preserves it, given
+`F(◇φ)@w ∈ b`, a recorded edge `w → w'`, and the analogous "diamond-ready" hypothesis for `w'`. -/
+lemma branchPropAdequateIn_s4FC_diaNeg_trans_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchPropAdequateIn s4FC b acc)
+    {φ : Proposition Atom} {w w' : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge w w' = true)
+    (hready : ∀ v, acc.hasEdge w' v = true →
+      (⟨.neg, .diamond φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchPropAdequateIn s4FC (⟨.neg, .diamond φ, w'⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedgeconj, hb⟩ := h
+  have hdianegw' : ¬ Satisfies m (f w') (.diamond φ) := (hedgeconj w w' hedge).2 φ hmem
+  refine ⟨W, m, f, hFC, ?_, ?_⟩
+  · intro u u' huedge
+    refine ⟨?_, ?_⟩
+    · intro ψ hmem'
+      simp only [List.mem_cons, SignedFormula.mk.injEq] at hmem'
+      rcases hmem' with ⟨hsigneq, -, -⟩ | hold
+      · exact absurd hsigneq (by simp)
+      · exact (hedgeconj u u' huedge).1 ψ hold
+    · intro ψ hmem'
+      simp only [List.mem_cons, SignedFormula.mk.injEq] at hmem'
+      rcases hmem' with ⟨-, hformeq, hueq⟩ | hold
+      · have hψ : ψ = φ := (Proposition.diamond.injEq _ _).mp hformeq
+        subst hueq; subst hψ
+        exact (hb _ (hready u' huedge)).2 rfl
+      · exact (hedgeconj u u' huedge).2 ψ hold
+  · intro sf hmem'
+    rcases List.mem_cons.mp hmem' with rfl | hold
+    · exact ⟨fun hcontra => by simp at hcontra, fun _ => hdianegw'⟩
+    · exact hb sf hold
+
+/-- Rule-level adequacy soundness for the box-positive 4-rule arm: every formula produced by
+`modalFourBoxProp` (given `T(□φ)@w` already on the branch), under the `hready` side condition at
+every target successor, preserves `branchPropAdequateIn s4FC` when added to the branch.
+Adequacy analogue of `modalFourBoxProp_sound`. -/
+lemma modalFourBoxProp_sound_adequate [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchPropAdequateIn s4FC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hready : ∀ w' v, acc.hasEdge w w' = true → acc.hasEdge w' v = true →
+      (⟨.pos, .box φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalFourBoxProp b acc φ w, branchPropAdequateIn s4FC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalFourBoxProp at hsf
+  simp only [List.mem_filterMap] at hsf
+  obtain ⟨w', hw', hsf⟩ := hsf
+  by_cases hcase :
+      b.any (· == (⟨.pos, .box φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
+    subst hsf
+    have hedge := mem_successorsOf_hasEdge' hw'
+    exact branchPropAdequateIn_s4FC_boxPos_trans_mem h hmem hedge
+      (fun v hv => hready w' v hedge hv)
+
+/-- Rule-level adequacy soundness for the diamond-negative 4-rule arm: dual of
+`modalFourBoxProp_sound_adequate`. -/
+lemma modalFourDiaNegProp_sound_adequate [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchPropAdequateIn s4FC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hready : ∀ w' v, acc.hasEdge w w' = true → acc.hasEdge w' v = true →
+      (⟨.neg, .diamond φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalFourDiaNegProp b acc φ w, branchPropAdequateIn s4FC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalFourDiaNegProp at hsf
+  simp only [List.mem_filterMap] at hsf
+  obtain ⟨w', hw', hsf⟩ := hsf
+  by_cases hcase :
+      b.any (· == (⟨.neg, .diamond φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
+    subst hsf
+    have hedge := mem_successorsOf_hasEdge' hw'
+    exact branchPropAdequateIn_s4FC_diaNeg_trans_mem h hmem hedge
+      (fun v hv => hready w' v hedge hv)
+
+/-- Adequacy analogue of the K box-positive rule's propagation payload
+(`modalApplyOne_boxPos_sound`), the third `branchPropAdequateIn` consumer named by the research
+alongside the two 4-rules above: adding `T(φ)@w'` (the *unwrapped* body, not `T(□φ)@w'`) to a
+branch witnessing `branchPropAdequateIn s4FC` preserves it, given `T(□φ)@w ∈ b` and a recorded
+edge `w → w'`. `s4FC`'s reflexive half (`Std.Refl m.r`, a genuine semantic fact about the
+witness model, untouched by the edge conjunct's weakening) gives `Satisfies m (f w') φ` directly
+from `Satisfies m (f w') (.box φ)` (itself immediate from the edge conjunct at `(w, w')`) -- no
+`acc`-chasing needed for `sf` itself. If `φ` is itself box-shaped, `sf` reopens the edge
+conjunct's obligation exactly as in the 4-rule case above; `hready` supplies it (vacuously true
+when `φ` is not box-shaped). -/
+lemma branchPropAdequateIn_boxPos_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchPropAdequateIn s4FC b acc)
+    {φ : Proposition Atom} {w w' : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge w w' = true)
+    (hready : ∀ ψ, φ = .box ψ → ∀ v, acc.hasEdge w' v = true →
+      (⟨.pos, .box ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchPropAdequateIn s4FC (⟨.pos, φ, w'⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedgeconj, hb⟩ := h
+  have hboxw' : Satisfies m (f w') (.box φ) := (hedgeconj w w' hedge).1 φ hmem
+  have hsatw' : Satisfies m (f w') φ := hboxw' (f w') (hFC.1.refl (f w'))
+  refine ⟨W, m, f, hFC, ?_, ?_⟩
+  · intro u u' huedge
+    refine ⟨?_, ?_⟩
+    · intro ψ hmem'
+      simp only [List.mem_cons, SignedFormula.mk.injEq] at hmem'
+      rcases hmem' with ⟨-, hformeq, hueq⟩ | hold
+      · subst hueq
+        exact (hb _ (hready ψ hformeq.symm u' huedge)).1 rfl
+      · exact (hedgeconj u u' huedge).1 ψ hold
+    · intro ψ hmem'
+      simp only [List.mem_cons, SignedFormula.mk.injEq] at hmem'
+      rcases hmem' with ⟨hsigneq, -, -⟩ | hold
+      · exact absurd hsigneq (by simp)
+      · exact (hedgeconj u u' huedge).2 ψ hold
+  · intro sf hmem'
+    rcases List.mem_cons.mp hmem' with rfl | hold
+    · exact ⟨fun _ => hsatw', fun hcontra => by simp at hcontra⟩
+    · exact hb sf hold
+
+/-- The `branchPropAdequateIn` transfer of `modalClosed_unsatIn`: a classically closed branch is
+not `branchPropAdequateIn`-satisfiable. Direct transcription of `modalClosed_unsat`
+(`SoundnessStep.lean:92`): that proof's closure argument consumes only the branch-formula
+conjunct (its own `intro ⟨W, m, f, _, hb⟩` discards the edge witness entirely), which is
+byte-for-byte the same shape in `branchPropAdequateIn` as in `branchSatisfiable`/
+`branchSatisfiableIn`, so the same tactic script applies verbatim against the extra-discarded
+edge-adequacy witness. -/
+lemma modalClosed_unsat_propAdequateIn [DecidableEq Atom]
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hclosed : isModalClosed b = true) (acc : Accessibility) :
+    ¬ branchPropAdequateIn s4FC b acc := by
+  intro ⟨W, m, f, _, _, hb⟩
+  simp only [isModalClosed, ClosureCondition.isClosed, ClosureCondition.findClosure] at hclosed
+  have hsome : (ClosureCondition.findClosure b).isSome = true := hclosed
+  rw [Option.isSome_iff_exists] at hsome
+  obtain ⟨cr, hcr⟩ := hsome
+  cases hfind : b.find? (fun sf => sf.isPos && sf.formula == (HasBot.bot : Proposition Atom)) with
+  | some sf =>
+    have hmem := List.mem_of_find?_eq_some hfind
+    have hpred := List.find?_some hfind
+    simp only [Bool.and_eq_true, SignedFormula.isPos] at hpred
+    obtain ⟨hpos, hbot⟩ := hpred
+    have hsat := (hb sf hmem).1 (by
+      cases h : sf.sign with
+      | pos => rfl
+      | neg => simp [h, Sign.isPos] at hpos)
+    have hformbot : sf.formula = (HasBot.bot : Proposition Atom) :=
+      LawfulBEq.eq_of_beq hbot
+    rw [hformbot] at hsat
+    change False at hsat
+    exact hsat
+  | none =>
+    simp only [hfind, ClosureCondition.findClosure] at hcr
+    cases hcontra : Branch.findContradiction b with
+    | none => simp [hfind, hcontra, ClosureCondition.findClosure] at hclosed
+    | some pair =>
+      obtain ⟨phi, l⟩ := pair
+      simp only [Branch.findContradiction] at hcontra
+      obtain ⟨sf, hsfmem, hsfcond⟩ := List.exists_of_findSome?_eq_some hcontra
+      simp only [SignedFormula.isPos] at hsfcond
+      by_cases hpos : sf.sign = .pos
+      · simp only [hpos, Sign.isPos, ite_true, Option.ite_some_none_eq_some] at hsfcond
+        obtain ⟨hany, _⟩ := hsfcond
+        have htrue := (hb sf hsfmem).1 (by simp [hpos])
+        obtain ⟨sf_neg, hmemneg, hsfneg⟩ := List.any_eq_true.mp hany
+        simp only [Bool.and_eq_true] at hsfneg
+        obtain ⟨⟨hsneg, hformEq⟩, hlabEq⟩ := hsfneg
+        have hneg : sf_neg.sign = .neg := by
+          cases h : sf_neg.sign with
+          | pos => simp [h] at hsneg
+          | neg => rfl
+        have hformfeq : sf_neg.formula = sf.formula := LawfulBEq.eq_of_beq hformEq
+        have hlabfeq : sf_neg.label = sf.label := LawfulBEq.eq_of_beq hlabEq
+        have hfalse := (hb sf_neg hmemneg).2 (by simp [hneg])
+        rw [hformfeq, hlabfeq] at hfalse
+        exact absurd htrue hfalse
+      · cases hsf : sf.sign with
+        | pos => exact absurd hsf hpos
+        | neg => simp [hsf, Sign.isPos] at hsfcond
+
 /-! ## B (Symmetric Frame) -/
 
 /-- The symmetric frame condition: `Std.Symm m.r`. Instantiates `frameValid`/

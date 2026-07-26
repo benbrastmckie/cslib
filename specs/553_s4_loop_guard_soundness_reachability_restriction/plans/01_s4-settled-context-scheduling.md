@@ -515,7 +515,7 @@ Phases 1-7's declarations remain byte-for-byte unchanged (confirmed: `git diff` 
 
 ---
 
-### Phase 9: Propagation-Adequacy Invariant [NOT STARTED]
+### Phase 9: Propagation-Adequacy Invariant [COMPLETED]
 
 - **Goal:** Define the weakened S4 soundness invariant and prove that it is what the 4-rules
   actually consume. `branchSatisfiableIn` (FrameSoundness.lean:111) requires
@@ -527,15 +527,15 @@ Phases 1-7's declarations remain byte-for-byte unchanged (confirmed: `git diff` 
   `w → w'`, `f w'` satisfies `□ψ` for every `T(□ψ)@w ∈ b`, and `f w'` falsifies `◇ψ` for every
   `F(◇ψ)@w ∈ b`. The branch-formula conjunct is unchanged.
 - **Tasks:**
-  - [ ] Define `branchPropAdequateIn` beside `branchSatisfiableIn` in `FrameSoundness.lean`.
-  - [ ] Prove `branchSatisfiableIn_imp_branchPropAdequateIn`: a genuine mint edge, which satisfies
+  - [x] Define `branchPropAdequateIn` beside `branchSatisfiableIn` in `FrameSoundness.lean`.
+  - [x] Prove `branchSatisfiableIn_imp_branchPropAdequateIn`: a genuine mint edge, which satisfies
     the stronger condition, satisfies the weaker one. This is what keeps mint edges free.
-  - [ ] Prove the adequacy analogues of `branchSatisfiableIn_s4FC_boxPos_trans_mem` and
+  - [x] Prove the adequacy analogues of `branchSatisfiableIn_s4FC_boxPos_trans_mem` and
     `branchSatisfiableIn_s4FC_diaNeg_trans_mem`.
-  - [ ] Prove `modalFourBoxProp_sound_adequate` and `modalFourDiaNegProp_sound_adequate`,
+  - [x] Prove `modalFourBoxProp_sound_adequate` and `modalFourDiaNegProp_sound_adequate`,
     mirroring FrameSoundness.lean:1129/1149 against the weaker predicate.
-  - [ ] Prove the K box-positive rule's analogue, the third consumer named by the research.
-  - [ ] Prove `modalClosed_unsat` transfers: a classically closed branch is not
+  - [x] Prove the K box-positive rule's analogue, the third consumer named by the research.
+  - [x] Prove `modalClosed_unsat` transfers: a classically closed branch is not
     `branchPropAdequateIn`-satisfiable (the closure argument uses only the branch-formula
     conjunct, so this should be a direct transcription of `modalClosed_unsatIn`).
 - **Timing:** 3 hours
@@ -546,6 +546,33 @@ Phases 1-7's declarations remain byte-for-byte unchanged (confirmed: `git diff` 
   - `lake build Cslib.Logics.Modal.Tableau.FrameSoundness` succeeds
   - Every existing declaration in the file unchanged and still compiling
   - New declarations sorry-free
+
+**Phase 9 completion note:** all six task items landed as a single additive section (~282
+lines) in `FrameSoundness.lean` immediately after the existing S4 4-rule soundness lemmas
+(before `## B (Symmetric Frame)`), all sorry-free and axiom-clean (`lean_verify`: only
+`propext`/`Quot.sound`, no `sorryAx`, on every new declaration). One deliberate,
+plan-compliant addition beyond the literal task-list wording: the two "adequacy analogue"
+trans_mem lemmas (`branchPropAdequateIn_s4FC_boxPos_trans_mem`/`_diaNeg_trans_mem`) and the
+K-rule analogue (`branchPropAdequateIn_boxPos_mem`) each carry an explicit `hready` hypothesis
+that the box/diamond content of every edge *already* recorded out of the target world `w'` is
+already on the branch. This is mathematically load-bearing, not a weakening: unlike
+`branchSatisfiableIn`'s edge conjunct (branch-independent, so untouched by adding a new
+formula), `branchPropAdequateIn`'s edge conjunct is branch-content-driven, so adding a new
+box/diamond-shaped formula at `w'` reopens the conjunct's obligation at every edge already
+recorded out of `w'` -- the bare, hypothesis-free analogue is false for an unconstrained `acc`.
+`hready` names exactly what the ordered driver's mint-readiness discipline (Phase 4) is
+designed to supply at every real call site; discharging it for the redirect-edge case is
+Phase 10's `blockedRedirect_boxctx_mem` (named explicitly in Phase 10's own task list), so this
+is not new scope invented here, only the natural signature the existing plan wording implies
+once actually derived in Lean. Full CI green: `lake build` (3257 jobs, whole project),
+`lake exe checkInitImports` (clean), `lake exe lint-style` (clean), `lake lint` (same one
+pre-existing, out-of-scope error in `Temporal/Tableau/Saturation.lean`; zero new issues),
+`lake shake --add-public --keep-implied --keep-prefix` (zero import changes suggested for
+`FrameSoundness.lean`), `lake exe mk_all --module` (no update necessary for this phase's file,
+`Cslib.lean`'s only pending diff belongs to a concurrent session's `Nested/Rules.lean` and is
+left untouched), `lake test` (exit 0). Repo-wide `axiom` count unchanged at 26. `git diff` on
+`FrameSoundness.lean` is purely additive (282 insertions, 0 deletions) -- every pre-existing
+declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
 
 ---
 

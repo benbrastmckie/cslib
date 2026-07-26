@@ -2013,7 +2013,7 @@
     {
       "project_number": 561,
       "project_name": "tableau_abstraction_decision_record",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "REVIEW GATE: decision record adopting or rejecting box-plus birth keys and RuleApplySt",
       "topic": "Modal Logic",
@@ -2027,9 +2027,9 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:30:00Z",
+      "last_updated": "2026-07-26T23:05:45Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1785105096_50f3c7",
       "parent_task": null
     },
     {

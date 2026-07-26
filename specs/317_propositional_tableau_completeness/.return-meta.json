@@ -1,47 +1,64 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-13T18:51:47Z",
-  "completed_at": "2026-07-13T19:45:00Z",
-  "phases_completed": 7,
-  "phases_total": 11,
+  "status": "researched",
+  "summary": "Team research completed with 4 teammates. Verified the 4-sorry baseline and both resolved-blocker claims, but refuted the 'assembly only' framing: items (2)/(3) share a missing measure/fuel invariant not threaded through intExpandBranches_openBranch_sat, and item (4) likely needs an additional upward-closure argument the task's four-item list does not name. The mandated parametric abstraction (IntMinScheme) already exists and needs no refactor budget.",
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
-      "type": "plan",
-      "summary": "Phase 6 section updated: containment sub-deliverable COMPLETE; world-bound sub-deliverable given a precise, verified continuation."
+      "type": "research",
+      "path": "specs/317_propositional_tableau_completeness/reports/11_team-research.md",
+      "summary": "Synthesized research from 4 teammates"
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/summaries/09_phase6-2-containment-worldbound-summary.md",
-      "type": "summary",
-      "summary": "Phase 6.2 dispatch summary: containment landed in full, world-bound continuation recorded."
+      "type": "research",
+      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-a-findings.md",
+      "summary": "Primary route, phase decomposition, claim verification"
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Overwritten with Phase 6.2 status, sorry_inventory, blockers, and continuation_context."
+      "type": "research",
+      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-b-findings.md",
+      "summary": "Prior art, alternatives, Mathlib leverage assessment"
+    },
+    {
+      "type": "research",
+      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-c-findings.md",
+      "summary": "Adversarial claim audit, territory risk, conformance-guard gap"
+    },
+    {
+      "type": "research",
+      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-d-findings.md",
+      "summary": "Downstream consumer analysis and strategic sequencing"
     }
   ],
-  "memory_candidates": [
-    "Intuitionistic F-signed formulas never propagate via persistence (posFormulasAt/propagatePersistence/intTImpRule are .pos-only) -- this is the key fact enabling a positional-injection world-bound argument for tableau calculi with world-creating rules.",
-    "F-or (.neg,.or) is an ALPHA/linearResult rule in the intuitionistic tableau, not BETA -- this means a single world can accumulate multiple independent F-imp obligations, breaking naive depth-only world-count arguments."
+  "team_execution": {
+    "enabled": true,
+    "wave_count": 1,
+    "teammates_spawned": 4,
+    "teammates_completed": 4,
+    "teammates_failed": 0,
+    "token_usage_multiplier": 5.0,
+    "degraded_to_single": false
+  },
+  "teammate_results": [
+    { "letter": "a", "angle": "primary", "status": "completed", "confidence": "medium-high" },
+    { "letter": "b", "angle": "alternatives", "status": "completed", "confidence": "high" },
+    { "letter": "c", "angle": "critic", "status": "completed", "confidence": "medium" },
+    { "letter": "d", "angle": "horizons", "status": "completed", "confidence": "medium" }
   ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 118,
-    "task_317_sorry_count": 4,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true
+  "synthesis": {
+    "conflicts_found": 4,
+    "conflicts_resolved": 4,
+    "gaps_identified": 5,
+    "wave_2_triggered": false
   },
-  "partial_progress": {
-    "stage": "phase_6_containment_complete_world_bound_continuation_recorded",
-    "details": "Commit 1 (bb4ffa3c): intApplyRuleFull_outputs_subset + supporting containment infrastructure, sorry-free, load-bearing for Phase 10. Commit 2 (015f81c1): intSubfmls_impCount_le supporting lemma, sorry-free. intExpandBranches_world_bound itself NOT landed -- precise continuation recorded in plan + handoff after genuine investigation determined it requires a new ~500-800 line positional-tracking induction exceeding H8's single-dispatch threshold."
-  },
+  "memory_candidates": [
+    "Mathlib has no formalization of intuitionistic Kripke semantics, tableau calculi, or fuel/fixpoint-sufficiency measures -- Heyting algebras exist but connect to nothing Kripke- or tableau-shaped. Do not budget research time searching for a Mathlib shortcut on these.",
+    "A lemma being locally sorry-free does not mean it is usable: applyPersistenceFixpoint_genuine_of_count_le_fuel is sorry-free but dead code, and its hb/hfuel hypotheses require invariant plumbing that does not exist in the caller's signature. Check call sites, not just sorry-freeness, when assessing whether a landed lemma closes a gap.",
+    "When two docstrings in one file contradict each other about whether a gap is blocked, git blame settles it: the later commit wins, and the commit that landed the enabling code is the authoritative one."
+  ],
   "metadata": {
-    "session_id": "sess_1783962327_d9c0b3",
-    "agent_type": "cslib-implementation-hard-agent",
+    "session_id": "sess_1785106431_e662fa",
+    "agent_type": "skill-team-research",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+    "delegation_path": ["orchestrator", "research", "skill-team-research"]
+  },
+  "session_id": "sess_1785106431_e662fa"
 }

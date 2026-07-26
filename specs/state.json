@@ -1542,7 +1542,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [
         535
@@ -1555,21 +1555,107 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-07-26T06:23:59Z",
+      "last_updated": "2026-07-26T15:57:46Z",
       "session_id": "sess_1785046950_33beb4_553",
       "topic": "Modal Logic",
       "artifacts": [
+        {
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
+          "type": "plan",
+          "summary": "Route P settled-context scheduling, 15 phases: global non-recursive settledness predicate (discharges risk c), parallel ordered stepper keeps landed completeness green at every checkpoint"
+        },
+        {
+          "type": "plan",
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
+          "summary": "[ABANDONED] v2 origin-edge invariant revision; Phase 12 redirect-inertness lemmas machine-checked FALSE and removed. Superseded by plans/03_ancestor-only-blocking.md."
+        },
+        {
+          "type": "plan",
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+          "summary": "v3 ancestor-only blocking: 14 phases, two front-loaded decision gates (executable ancestor probe; ancestor back-edge justification lemma). Global keysDistinct abandoned for spine-local distinctness; world bound re-derived on a depth-times-branching geomCap basis. Origin-edge machinery repurposed as spine data rather than retired."
+        },
         {
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md",
           "type": "report",
           "summary": "Keyed S4 soundness theorem is FALSE: machine-checked counterexample (node-size 19 formula closed by modalTableauS4Keyed with explicit 3-world refl-trans countermodel). Reachability restriction rejected — 96.7% of blocking decisions target non-reachable worlds, so the world bound fails. Driver re-architecture required."
         },
         {
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-          "type": "plan",
-          "summary": "Route P settled-context scheduling, 15 phases: global non-recursive settledness predicate (discharges risk c), parallel ordered stepper keeps landed completeness green at every checkpoint"
+          "type": "report",
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md",
+          "summary": "Divergence audit: redirect-inertness lemmas are FALSE at a reachable state; Route P survives via bounded modification (R-new); central prediction retired"
         }
-      ]
+      ],
+      "mandate_change": {
+        "authorized_by": "user",
+        "date": "2026-07-26",
+        "session_id": "sess_1785046950_33beb4_553",
+        "from_route": "Route P (ordered stepper / settled-context scheduling)",
+        "to_route": "ancestor-only blocking (reachability restriction)",
+        "rationale": "Divergence audit machine-checked blockedRedirect_boxctx_mem/_diaNeg_mem as FALSE at a reachable ordered-driver state. Invariant-strengthening and accept-as-limitation both eliminated. User chose the audit fallback (c) over the recommended bounded modification (b): higher phase cost, lower proof risk, dissolves the separate branchPropAdequateIn transitivity defect, and matches the task title.",
+        "discards": "Phases 1-12 approach; origin-edge machinery (keysOriginS4, keysRootEmpty)",
+        "false_lemmas_to_remove": [
+          "blockedRedirect_boxctx_mem",
+          "blockedRedirect_diaNeg_mem",
+          "blockedRedirect_propAdequate"
+        ]
+      },
+      "plan_metadata": {
+        "phases": 14,
+        "total_effort_hours": 30,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 3,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3,
+            5,
+            6
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            8
+          ],
+          [
+            9
+          ],
+          [
+            10
+          ],
+          [
+            11
+          ],
+          [
+            12
+          ],
+          [
+            13,
+            14
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_s4-keyed-guard-soundness-falsified.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-07-26"
+          },
+          {
+            "path": "reports/02_redirect-inertness-divergence-audit.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-07-26"
+          }
+        ],
+        "skeleton": false,
+        "follow_up_tasks": []
+      }
     },
     {
       "project_number": 554,

@@ -1,157 +1,76 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
-  "status": "implemented",
+  "phase": "plan",
+  "status": "planned",
   "skeleton": false,
-  "phases_completed": 11,
-  "phases_total": 17,
+  "phases_completed": 0,
+  "phases_total": 14,
   "sorry_inventory": [],
-  "summary": "Scoped cleanup dispatch (not a plan phase): removed three lemmas whose statements the divergence audit (reports/02_redirect-inertness-divergence-audit.md) machine-checked as FALSE, not merely unproven -- blockedRedirect_boxctx_mem and blockedRedirect_diaNeg_mem (LoopChecking.lean) and blockedRedirect_propAdequate (FrameSoundness.lean), the latter's own ambient-model-reuse proof strategy independently refuted by a 4-world counterexample. Each removal site carries a durable inline comment citing the audit report and the reachable counterexample state; two adjacent doc comments (LoopChecking.lean's 'Witness Disjunct' R1-verdict passage and FrameSoundness.lean's branchPropAdequateIn_s4FC_boxPos_trans_mem docstring) that asserted claims the audit refuted were also corrected in place, since leaving them would misinform the re-plan. Cslib/Logics/Modal/Tableau/ goes from 2 documented sorries to 0 (measured: grep for standalone `sorry` tactic lines returns zero in Tableau/). FrameSoundness.lean's public import of LoopChecking.lean (added in Phase 12 solely for blockedRedirect_propAdequate) was removed and lake shake confirms no remaining need for it in either direction. Full CI green: lake build (project-wide, no errors), lake exe checkInitImports (clean), lake lint (exactly one error, the pre-existing Cslib/Logics/Temporal/Tableau/Saturation.lean baseline, unrelated to this task and unchanged), lake exe lint-style (clean), lake exe mk_all --module ('No update necessary' -- Cslib.lean untouched, concurrent session's territory left alone), lake shake on both touched files (no findings), lake test (all suites built including CslibTests.S4LoopGuardRegression, which per the audit's own note stays valid since the boxed-driver question is orthogonal to this removal). Axiom count unchanged (grep '^axiom' count: 26).",
-  "measured_counters": {
-    "modal_tableau_sorry_count_before": 2,
-    "modal_tableau_sorry_count_after": 0,
-    "repo_sorry_census_after_removal_lean_sorry_census_sh": 40,
-    "repo_sorry_census_measurement_note": "The dispatch brief predicted the repo census would return from 41 to 39. Running .claude/scripts/lean-sorry-census.sh Cslib/ after removal measures 40, not 39. Reported as measured, not adjusted to match the prediction; the census was not independently re-run before removal to isolate the discrepancy. Likely explanation (not independently confirmed): the concurrent session's territory, Cslib/Logics/Modal/Metalogic/Constructive/Nested/, contains exactly one live sorry (Nested/Soundness.lean:1315) that this dispatch did not touch and whose count may have shifted since the 41-baseline figure was set. This task's own removal target (2 sorries in Modal/Tableau/) is unambiguous and independently verified: both are gone.",
-    "axiom_count": 26
+  "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+  "plan_version": 3,
+  "next_phase": 1,
+  "next_phase_name": "Executable ancestor-only probe and four measurements",
+  "next_action_hint": "dispatch_phase_1",
+  "summary": "v3 plan for task 553 implementing the user-authorized mandate change from Route P to ancestor-only blocking. 14 phases, of which the first two are hard decision gates that can terminate the route cheaply. Both v1 and v2 are stamped [ABANDONED] with Superseded-by pointers (plan-format has no [SUPERSEDED] marker); v2's stray Phase 13 [IN PROGRESS] marker is reverted. All nine preserved-asset groups from v1/v2 Phases 1-9 are individually adjudicated in the plan's Preserved Assets table, and the cleanup dispatch's twelve orphan candidates are adjudicated in an Orphan-Report Adjudication table: the decision is to REPURPOSE the origin-edge family (keysOriginS4 and friends) as the ancestor spine's data/invariant basis rather than retire it, since origin-edge data is exactly a parent-pointer record. Only one retirement is planned (Phase 9's branchPropAdequateIn machinery) and it is gated behind the Phase 2 verdict, so no true proven content is deleted on an unverified premise.",
+  "central_risk_resolution": {
+    "question": "Does the guard-filter -> blockingWorldS4Keyed_none_fresh -> keysDistinct -> pigeonhole world bound -> bClosure -> fuel-sufficiency chain survive ancestor-only blocking?",
+    "verdict": "NO, and it cannot be repaired by key enrichment. The plan says so at Phase 1 rather than discovering it at Phase 8.",
+    "detail": "blockingWorldS4Keyed_none_fresh does not survive as stated; its ancestor-restricted analogue does survive with the same five-line List.min?_eq_none_iff proof (verified: LoopChecking.lean:544-555 uses nothing about which list is filtered), but concludes distinctness only against spine-ancestor keys. Global keysDistinct therefore becomes false, and keysUpdate_preserves_keysDistinct (:566-593) has _none_fresh as its sole feeder (verified by reading its proof), so it has no repair. The ancestor test is irreducibly relational in the pair (src, wBlock), so it cannot be re-expressed as key enrichment (the audit's chain-preserving alternative). Replacement basis: keysDistinctAlongSpine bounds spine DEPTH by (signedSubfmls).powerset.card; S4LoopInv.outDegEq (already landed, :7061) plus eNodup/eClosure bounds BRANCHING; a geomCap tree count then bounds world count. This is Phases 5, 6 and 7 -- three separate bounded phases, not a footnote.",
+    "template_found": "K's world bound is already exactly this branching^depth shape (modalWorldBound = (2C+1)^(C+1), FmpMeasure.lean:144) with a working generic proof (modalStepBranch_worldBound_gen, FmpMeasure.lean:2659; modalMaxWorld_lt_worldBound_of_phiBound, CompletenessLoop.lean:199-227), and geomCap/geomCap_le_pow exist at Cslib/Foundations/Logic/Tableau/Measure.lean:57,94. So the re-derivation has an in-repo template. It is NOT a drop-in: K's rankEdge (FmpMeasure.lean:2340) is an exact equality over ALL acc edges (rank w' + 1 = rank w) and is false for back-edges, so any rank map must be tied to spine edges only. This caveat is written into Phase 7."
   },
-  "artifacts": [
-    {
-      "type": "report",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md",
-      "note": "Pre-existing artifact from the prior divergence-audit dispatch (uncommitted when this dispatch started); this dispatch's code comments cite it, so it is included in this dispatch's commit to keep the citation valid history."
-    },
-    {
-      "type": "artifact",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4witness.lean",
-      "note": "Pre-existing reachability probe cited by the audit report; included for the same reason as above."
-    },
-    {
-      "type": "artifact",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4boxed.lean",
-      "note": "Pre-existing boxed-key executable variant cited by the audit report; included for the same reason as above."
-    }
-  ],
-  "blockers": [],
-  "orphan_report": {
-    "instruction": "Item 3 of the dispatch: decide and report on now-possibly-orphaned support code. None of the following were deleted in this dispatch -- they are sorry-free and TRUE, and removing true, proven content is a planning decision, not cleanup.",
-    "confirmed_unreferenced_outside_own_docs_and_mutual_cross_references": [
-      {
-        "name": "keysOriginS4",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1279",
-        "status": "orphaned candidate",
-        "why": "Sole external consumers were the two removed lemmas and modalStepBranchS4Keyed(Ordered)_preserves_keysOriginS4 (self-referential chain, see below)."
-      },
-      {
-        "name": "keysOriginS4_entry",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1294",
-        "status": "orphaned candidate"
-      },
-      {
-        "name": "keysOriginS4_mono_branch",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1306",
-        "status": "orphaned candidate",
-        "why": "Used only within the keysOriginS4 preservation chain (modalStepBranchS4Keyed(Ordered)_preserves_keysOriginS4)."
-      },
-      {
-        "name": "keysOriginS4_mono_acc",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1327",
-        "status": "orphaned candidate",
-        "why": "Same as keysOriginS4_mono_branch."
-      },
-      {
-        "name": "keysRootEmpty",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2009",
-        "status": "orphaned candidate",
-        "why": "Sole consumer was blockedRedirect_boxctx_mem, now removed. Section doc comment updated in place to record this."
-      },
-      {
-        "name": "keysRootEmpty_entry",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2015",
-        "status": "orphaned candidate"
-      },
-      {
-        "name": "modalStepBranchS4Keyed_preserves_keysOriginS4",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:4558",
-        "status": "orphaned candidate",
-        "why": "grep found zero external callers outside its own docstring and the Ordered variant's cross-reference comment."
-      },
-      {
-        "name": "modalStepBranchS4KeyedOrdered_preserves_keysOriginS4",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:4775",
-        "status": "orphaned candidate, but see next entry",
-        "why": "Its one external caller is modalStepBranchS4KeyedOrdered_preserves_S4LoopInv's fourth conjunct/hypothesis (below) -- not itself called elsewhere in the repo (grep confirmed zero external callers of that theorem too)."
-      },
-      {
-        "name": "modalStepBranchS4Keyed_result_acc_eq",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2406",
-        "status": "orphaned candidate",
-        "why": "Only used internally within modalStepBranchS4Keyed(Ordered)_preserves_keysOriginS4's own proof body."
-      },
-      {
-        "name": "the fourth hypothesis (hKO : keysOriginS4 b acc keys) and fourth conclusion conjunct (keysOriginS4 preservation) threaded into modalStepBranchS4KeyedOrdered_preserves_S4LoopInv",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:7667-7688",
-        "status": "orphaned candidate",
-        "why": "This extension was added in Phase 11 specifically to feed the two now-removed lemmas. grep confirms modalStepBranchS4KeyedOrdered_preserves_S4LoopInv itself has zero external callers anywhere in the repo currently -- it is not yet wired into a soundness theorem, so the whole theorem (not just its fourth conjunct) is presently unreferenced. Left untouched; the theorem's other three conjuncts (S4LoopInv preservation proper, keysWorldsKnown, worldsContiguousS4) may still be load-bearing for the re-plan even if the keysOriginS4 conjunct is dropped."
-      }
-    ],
-    "additional_finding_beyond_the_dispatch_brief_list": [
-      {
-        "name": "blockedRedirect_boxctx_mem_of_boxOrigin",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1466",
-        "status": "orphaned candidate -- not in the dispatch's explicit list, flagged here because it is accurate and the audit report itself (Question 3, 'Assets orphaned') names it",
-        "why": "Sole caller was blockedRedirect_boxctx_mem, now removed. This lemma is TRUE and sorry-free -- not deleted."
-      },
-      {
-        "name": "blockedRedirect_diaNeg_mem_of_diaOrigin",
-        "location": "Cslib/Logics/Modal/Tableau/LoopChecking.lean:1506",
-        "status": "orphaned candidate, same reasoning",
-        "why": "Sole caller was blockedRedirect_diaNeg_mem, now removed. TRUE and sorry-free -- not deleted."
-      }
-    ],
-    "recommendation": "All items above are sunk-cost candidates for the re-plan to adjudicate (delete, or repurpose under ancestor-only blocking / the boxed-key route). None were touched in this dispatch."
+  "second_risk_raised": {
+    "issue": "The audit's Section 5 claim that ancestor-only blocking 'restores branchSatisfiableIn outright' is marked NOT-YET-VERIFIED and this plan's reading of the obligation suggests it is too optimistic.",
+    "detail": "The redirect edge is src -> wBlock with wBlock an ANCESTOR of src, so soundness needs m.r (f src) (f wBlock) -- the UPWARD relation. The reflexive-transitive closure of spine (parent -> child) edges supplies only the DOWNWARD relation, and S4 gives neither symmetry nor a conversion. The justification therefore needs a cluster construction (S4 frames admit cycles, so the back-edge is frame-legal), and the cluster's box-propagation obligation is the same shape that killed Route P. Massacci's PROPOSITION 8.1 supplies ancestor -> descendant box monotonicity, which is the wrong direction; the descendant -> ancestor direction must come from key equality via keyLowerBd, and successorBirthContent's UNWRAPPED box-context (:387) yields only T(psi)@wBlock, not T(box psi)@wBlock.",
+    "planning_consequence": "The ancestor route MAY need the audit's boxed-birth-content refinement as a sub-component. This is not a re-argument for option (b) as a substitute for (c) -- it is the observation that (b) and (c) are composable and (c) may not close without (b)'s key change. Phase 2 is a hard gate that settles this before any driver surgery and has an explicit branch for adopting boxed keys inside the ancestor route, plus an escalation branch for acquiring Gore1999 if Massacci's treatment proves insufficient."
   },
-  "import_cleanup": {
-    "removed": "public import Cslib.Logics.Modal.Tableau.LoopChecking from FrameSoundness.lean",
-    "reason": "Added in Phase 12 solely to support blockedRedirect_propAdequate's dependency on keysOriginS4/keysRootEmpty/blockingWorldS4Keyed/modalNonMintCandidates from LoopChecking.lean; with that lemma removed, grep confirms no remaining code use of any LoopChecking.lean identifier in FrameSoundness.lean (only prose mentions in comments remain).",
-    "verified_by": "lake build (clean) and lake shake --add-public --keep-implied --keep-prefix on both files (zero findings for either file)."
+  "literature_verification": {
+    "directive": "SUBINDEX_PRESENT (20 entries, >= threshold 3; per-repo briefing mode, orchestrator_mode true, no AskUserQuestion)",
+    "source_read": "massacci_2000_single_step_tableaux_for_modal_logics, chunks 0030, 0031, 0065, 0066 (read directly; literature-search.sh FTS returned degraded/empty for loop-checking queries, so navigation was via --toc plus grep over the chunk directory)",
+    "attribution_correction": "The audit flagged the ancestor-only attribution as unverified. Verified result: Massacci's blocking discipline is Technique 8.2 -- 'before reducing a pi-formula, check whether the corresponding prefix is not a copy of a SHORTER prefix' -- sharpened for K4/S4 by DEFINITION 8.2 to MODAL copy (same nu-formulae). It is SHORTER-prefix blocking, NOT ancestor-only. Ancestry (initial subsequence, Ftree) enters via the separate Pruning Lemma 8.2. Ancestor-restriction implies shorter-prefix, so this route is a sound-edge REFINEMENT of Massacci's discipline rather than a departure from it -- that is the honest grounding, and it is recorded as such in the plan's Source-to-Implementation Mapping.",
+    "additional_grounding": "PROPOSITION 8.1 (ancestor -> descendant box monotonicity in a saturated branch) and the S4 prefix-length bound hbL - 1 = 1 + dp + p x n (a DEPTH bound) both corroborate the depth-times-branching strategy Phases 5-7 adopt.",
+    "gore1999": "still not ingested (references.bib:1023, paywalled). Acquisition is an explicit escalation branch of Phase 2, not a background assumption."
+  },
+  "divergence_from_state_json_mandate_record": {
+    "field": "mandate_change.discards",
+    "recorded": "Phases 1-12 approach; origin-edge machinery (keysOriginS4, keysRootEmpty)",
+    "plan_decision": "The origin-edge family is REPURPOSED as the ancestor spine's data/invariant basis, not discarded. keysOriginS4 records, for each key, the minting world, the witness, and the acc edge -- i.e. a parent-pointer record, exactly what the spine needs. keysRootEmpty is the base case of Phase 5's depth chain. The dispatch mandate explicitly left retirement of true proven content to the planner, so this is a sanctioned planning decision rather than a deviation from the user's route choice; the route (ancestor-only blocking) is implemented as authorized.",
+    "requires_user_review": false
+  },
+  "h8_deviation_declared": {
+    "issue": "14 phases exceeds the hard-mode 8-phase ceiling for complex tasks.",
+    "justification": "The dispatching mandate explicitly authorised 10+ phases for this route and instructed that it not be compressed to look cheaper. Every phase independently passes the bounded-unit test with a concrete stopping condition, and three phases (7, 9, 14) carry explicit pre-declared split points (7.1/7.2, 9.1/9.2, 14.1/14.2) instead of being allowed to grow.",
+    "skeleton_considered_and_rejected": "A strategic-sorry skeleton was rejected because the two riskiest obligations are the FIRST two phases, so there is no long green prefix to skeletonise, and a strategic sorry at either gate would be a sorry standing in for a possibly-false statement -- the exact failure this task has already suffered once."
+  },
+  "standing_invariants_carried_into_every_phase": {
+    "axiom_count": 26,
+    "sorry_count_tableau": 0,
+    "repo_sorry_census": 40,
+    "lake_lint_baseline": "exactly one pre-existing error, Cslib/Logics/Temporal/Tableau/Saturation.lean",
+    "empirical_gate_baseline": "8532-formula sweep: 1650 closed, 6882 open, 0 fuel-exhausted, identical between shipped drivers; cex OPEN under ordered, CLOSED under unordered"
   },
   "territory_respected": [
-    "Did not touch Cslib/Logics/Modal/Metalogic/Constructive/Nested/** (concurrent session).",
-    "Did not touch the pending Cslib.lean diff from that concurrent session -- confirmed via lake exe mk_all --module reporting 'No update necessary', i.e. no change made to Cslib.lean.",
-    "Did not modify specs/553_.../plans/02_origin-edge-invariant-revision.md's stray uncommitted Phase 13 status flip (NOT STARTED -> IN PROGRESS), pre-existing before this dispatch and not part of the removal mandate -- left as-is, not staged in this commit, flagged here for the re-plan/team-lead's awareness since it looks inconsistent with abandoning Route P."
+    "No Cslib/** file modified in this planning dispatch.",
+    "Did not touch Cslib/Logics/Modal/Metalogic/Constructive/Nested/** or Cslib.lean (concurrent session).",
+    "Did not stage or modify task 554's files, which the concurrent session has dirty in the working tree."
   ],
-  "requires_user_review": false,
-  "next_action_hint": "await_replan",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+      "note": "v3, 14 phases, status headings set so a [NOT STARTED|PARTIAL|IN PROGRESS] scan resolves to Phase 1"
+    }
+  ],
   "modified_files": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
+    "specs/state.json",
+    "specs/TODO.md"
   ],
-  "decisions_made": [
-    "Removed the two false LoopChecking.lean lemmas and their sorries entirely rather than annotating, per the user-authorized mandate: a sorry standing in for a false statement is an unsound foundation, not a documented limitation.",
-    "Corrected two adjacent doc-comment passages (the 'Witness Disjunct' R1 verdict, and branchPropAdequateIn_s4FC_boxPos_trans_mem's docstring reference) that asserted claims the audit refuted -- left as historical record of the refuted reasoning, not deleted, but clearly marked refuted.",
-    "Did not delete keysOriginS4/keysRootEmpty and their supporting lemmas, nor blockedRedirect_boxctx_mem_of_boxOrigin/_diaNeg_mem_of_diaOrigin -- all TRUE and sorry-free; reported as orphan candidates for the re-plan instead.",
-    "Removed FrameSoundness.lean's public import of LoopChecking.lean after confirming (lake build + lake shake) it has no remaining use.",
-    "Included the divergence-audit's own pre-existing uncommitted artifacts (report + two probe files) in this commit, since this dispatch's new code comments cite the report by path and leaving the citation target uncommitted would be a dangling reference.",
-    "Did not commit the pre-existing, unrelated stray edit to plans/02_origin-edge-invariant-revision.md (Phase 13 status marker) -- out of this dispatch's mandate."
-  ],
-  "flagged_theorem_changes": [
-    "No landed sorry-free declaration was weakened or altered in behavior. Three declarations were deleted outright (all previously sorry-bearing or dependent on sorry-bearing lemmas): blockedRedirect_boxctx_mem, blockedRedirect_diaNeg_mem, blockedRedirect_propAdequate. All other declarations in both files are byte-for-byte unchanged except doc-comment corrections (no proof-term changes)."
-  ],
-  "continuation_context": {
-    "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-    "phases_completed": 11,
-    "phases_total": 17,
-    "next_phase": "re-plan pending (Route P being reconsidered in favour of ancestor-only blocking per user-authorized mandate change; this cleanup dispatch was explicitly scoped to precede that re-plan, not to perform it)",
-    "requires_user_review": false,
-    "read_first": [
-      "reports/02_redirect-inertness-divergence-audit.md -- full audit, recommended route (boxed birth-content keys) and the separate section-5.1 defect (hready discharge, Phase 13) the re-plan must also address",
-      "This handoff's orphan_report -- inventory of sunk-cost-candidate declarations for the re-plan to adjudicate",
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean's 'Redirect-Inertness Assembly -- REMOVED' comment and 'keysRootEmpty' section doc -- what was removed and why",
-      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean's 'blockedRedirect_propAdequate ... REMOVED' comment -- why the assembly's own proof strategy was independently dead"
-    ]
-  },
-  "plan_markers_verified": false,
-  "plan_markers_note": "This dispatch is explicitly cleanup, not a plan phase per the dispatch mandate -- no plan file phase markers were touched."
+  "blockers": [],
+  "requires_user_review": false,
+  "plan_markers_verified": true,
+  "plan_markers_note": "All 14 phase headings are [NOT STARTED]; the first heading a status scan encounters is Phase 1, the intended first dispatch."
 }

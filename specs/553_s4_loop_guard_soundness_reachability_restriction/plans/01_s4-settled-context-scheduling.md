@@ -1,7 +1,12 @@
 # Implementation Plan: S4 Keyed Driver Repair via Settled-Context Scheduling
 
 - **Task**: 553 - Repair the false keyed S4 soundness theorem (Route P driver re-architecture)
-- **Status**: [IMPLEMENTING]
+- **Status**: [ABANDONED]
+- **Superseded by**: `plans/03_ancestor-only-blocking.md` (v3). Route P is abandoned per a
+  user-authorized mandate change in favour of ancestor-only blocking; see
+  `reports/02_redirect-inertness-divergence-audit.md` §5. Phases 1-9 of this plan landed
+  sorry-free content that v3 preserves — see v3's "Preserved Assets" table. Retained as a
+  historical record; do not implement from this file.
 - **Effort**: 42 hours
 - **Dependencies**: 535 (completeness-line task; its landed keyed completeness results are inputs here)
 - **Research Inputs**: `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md`

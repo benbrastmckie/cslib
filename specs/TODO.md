@@ -39,7 +39,7 @@ next_project_number: 557
     └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-553 [IMPLEMENTING] — Determine whether the S4 keyed loop-check guard can be made sound
+553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
 554 [IMPLEMENTING] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
@@ -121,12 +121,17 @@ next_project_number: 557
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535
-- **Research**: [553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md]
-- **Plan**: [553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md]
+- **Plan**:
+  - [553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md]
+  - [553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md]
+  - [553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md]
+- **Research**:
+  - [553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md]
+  - [553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md]
 
 **Description**: Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.
 

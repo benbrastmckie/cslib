@@ -1,79 +1,44 @@
 {
-  "status": "implemented",
+  "status": "planned",
   "task_number": 553,
-  "agent_type": "cslib-implementation-hard-agent",
+  "agent_type": "planner-hard-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
   "session_id": "sess_1785046950_33beb4_553",
   "started": "2026-07-26",
-  "mode": "false_lemma_removal",
-  "focus_prompt": "scoped cleanup: remove three lemmas machine-checked as false, per the divergence audit",
+  "completed": "2026-07-26",
+  "mode": "replan_v3_ancestor_only",
+  "trigger": "mandate_change",
+  "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+  "plan_version": 3,
+  "phase_count": 14,
+  "estimated_hours": 30,
+  "postmortem_rules_count": 9,
+  "settled_decisions_count": 6,
+  "dependency_waves": [[1],[2],[3,5,6],[4,7],[8],[9],[10],[11],[12],[13,14]],
   "report_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md",
   "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-  "phases_completed": 11,
-  "phases_total": 17,
-  "cslib_files_modified": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
+  "superseded_plans": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md"
   ],
+  "h8_ceiling_deviation": "14 phases vs the 8-phase complex-task ceiling; declared and justified in the plan and handoff (dispatch mandate authorised 10+; every phase passes the bounded-unit test; three phases carry pre-declared split points)",
+  "skeleton": false,
+  "follow_up_tasks": [],
+  "central_risk_verdict": "The _none_fresh -> keysDistinct -> pigeonhole -> bClosure -> fuel-sufficiency chain does NOT survive ancestor-only blocking and cannot be repaired by key enrichment; replacement is a spine-depth x branching geomCap bound (Phases 5-7). Stated at Phase 1, not deferred.",
+  "second_risk_verdict": "The audit's claim that ancestor-only 'restores branchSatisfiableIn outright' is NOT-YET-VERIFIED and likely too optimistic (the edge needs the upward relation; refl-trans closure gives only downward). Phase 2 is a hard gate with a boxed-key branch and a Gore1999-acquisition escalation branch.",
+  "literature_attribution_corrected": "Massacci 2000 Technique 8.2 / DEFINITION 8.2 is SHORTER-(modal)-copy blocking, not ancestor-only; ancestry enters via Pruning Lemma 8.2. Ancestor-restriction implies shorter-prefix, so this route is a refinement of Massacci's discipline. Verified by direct chunk reads (0030, 0031, 0065, 0066).",
+  "cslib_files_modified": [],
   "files_modified": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
+    "specs/state.json",
+    "specs/TODO.md"
   ],
   "axiom_count": 26,
   "sorry_count_tableau": 0,
-  "sorry_count_tableau_before": 2,
-  "repo_sorry_census_lean_sorry_census_sh": 40,
-  "repo_sorry_census_note": "Dispatch predicted 41 -> 39; measured 40 after removal. Not independently re-measured before removal to isolate the 1-off discrepancy. See .orchestrator-handoff.json's measured_counters for the full note (likely explanation: a live sorry in the concurrent session's territory, Nested/Soundness.lean:1315, not touched by this dispatch).",
-  "removal_verdict": {
-    "removed": [
-      "Cslib.Logics.Modal.Tableau.LoopChecking.blockedRedirect_boxctx_mem",
-      "Cslib.Logics.Modal.Tableau.LoopChecking.blockedRedirect_diaNeg_mem",
-      "Cslib.Logics.Modal.Tableau.FrameSoundness.blockedRedirect_propAdequate"
-    ],
-    "reason": "All three were FALSE as stated (machine-checked reachable counterexample for the first, argued by symmetry for the second, and an independently refuted proof strategy for the third), per reports/02_redirect-inertness-divergence-audit.md",
-    "orphan_candidates_reported_not_deleted": [
-      "keysOriginS4", "keysOriginS4_entry", "keysOriginS4_mono_branch", "keysOriginS4_mono_acc",
-      "keysRootEmpty", "keysRootEmpty_entry",
-      "modalStepBranchS4Keyed_preserves_keysOriginS4", "modalStepBranchS4KeyedOrdered_preserves_keysOriginS4",
-      "modalStepBranchS4Keyed_result_acc_eq",
-      "modalStepBranchS4KeyedOrdered_preserves_S4LoopInv's fourth conjunct/hypothesis",
-      "blockedRedirect_boxctx_mem_of_boxOrigin (additional finding, not in dispatch's explicit list)",
-      "blockedRedirect_diaNeg_mem_of_diaOrigin (additional finding, not in dispatch's explicit list)"
-    ],
-    "import_removed": "FrameSoundness.lean's public import of LoopChecking.lean (Phase 12's addition, now unused; confirmed by lake build + lake shake)"
-  },
-  "ci_pipeline_passed": {
-    "lake_build": true,
-    "checkInitImports": true,
-    "lake_lint": "1 pre-existing baseline error (Temporal/Tableau/Saturation.lean, unrelated, unchanged)",
-    "lint_style": true,
-    "mk_all_module": "no update necessary (Cslib.lean untouched)",
-    "shake_scoped": "zero findings for either touched file",
-    "lake_test": true
-  },
-  "memory_candidates": [
-    {
-      "title": "Lossy key projections make loop-guard inertness unprovable",
-      "content": "In a tableau loop-checking guard, if the recorded per-world key stores box-context in unwrapped form (psi for T(box psi)@w), the witness pair can collide with a box-context pair and the redirect-inertness obligation becomes FALSE, not merely unproven. Recording the boxed pair keeps the comparison plain key equality (so the freshness/pigeonhole chain survives) and makes inertness a direct consequence of the key-lower-bound invariant.",
-      "keywords": ["tableau", "loop check", "blocking", "S4", "birth key", "redirect inertness"]
-    },
-    {
-      "title": "Distinguish false lemma from unproven lemma before strengthening invariants",
-      "content": "Two dispatches were spent seeking an invariant strengthening for an obligation whose conclusion was false at a reachable state. A cheap executable probe that drives the actual stepper from the seed and prints every decidable hypothesis at each step settles reachability in one dispatch and rules out whole families of proposed repairs.",
-      "keywords": ["divergence audit", "formal verification", "reachability probe", "sorry"]
-    },
-    {
-      "title": "Fuel-bounded drivers: exhaustion is a completeness not soundness risk",
-      "content": "When a tableau driver recurses structurally on fuel and its fuel=0 arm returns closed only from genuine closure checks, fuel exhaustion can never fabricate a closed verdict. Termination is free; the guard-sensitive quantity is fuel sufficiency, which is a completeness property. Predictions framed as 'termination rather than completeness' invert the dependency.",
-      "keywords": ["termination", "fuel", "tableau", "soundness", "completeness"]
-    },
-    {
-      "title": "A sorry standing in for a false statement is not a documented limitation",
-      "content": "When a divergence audit machine-checks a sorry-bearing lemma's conclusion as false at a reachable state (not merely unproven), removal -- not annotation -- is the correct response, even though the sorry was previously 'documented' with an inline writeup. A downstream consumer that composes the false lemma into a larger theorem inherits an unsound foundation that would still type-check, silently making the eventual soundness theorem worthless despite compiling cleanly.",
-      "keywords": ["sorry", "zero-debt", "divergence audit", "unsound foundation", "false lemma"]
-    }
-  ],
   "requires_user_review": false,
-  "next_steps": "Re-plan (v3) pending: reconsider Route P in favour of ancestor-only blocking per the user-authorized mandate change. See .orchestrator-handoff.json's orphan_report and continuation_context for what the re-plan should read first."
+  "next_steps": "Dispatch Phase 1 (executable ancestor-only probe, four measurements, no Cslib change). Phase 2 is a hard gate that may terminate the route; do not dispatch Phase 3 until its verdict is recorded."
 }

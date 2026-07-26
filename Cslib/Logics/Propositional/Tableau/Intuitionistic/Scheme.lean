@@ -99,6 +99,13 @@ structure IBranchSaturation (Atom : Type*) [DecidableEq Atom] [Hashable Atom]
       ∃ (w' : Nat), w ≤ w' ∧
         b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
         b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
+  /-- T(φ→ψ)@w ∈ b → F(φ)@w ∈ b ∨ T(ψ)@w ∈ b (Fitting Ch. 4 split, beta-rule, reflexive at the
+  same world `w` this copy of T(φ→ψ) is labeled at — realized by `intApplyRuleFull`'s `.pos, .imp`
+  branching arm, `Rules.lean:274-275`). -/
+  sat_timp : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .pos && sf.formula == .imp φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∨
+      b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w) = true
 
 /-! ## IntMinScheme Structure -/
 
@@ -967,6 +974,18 @@ private lemma IExpandedConsistent_sat
     simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
     obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
     have hsfeq : sf = ⟨.neg, .imp φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+  · -- sat_timp: T(φ→ψ)@w ∈ b → F(φ)@w ∈ b ∨ T(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.pos, .imp φ ψ, w⟩ := by cases sf; simp_all
     have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
       rw [hsfeq]; simp [intApplyRuleFull]
     have hsat := compound_sat sf hsfb hcomp

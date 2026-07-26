@@ -294,7 +294,7 @@ plan.**
 - **Timing:** 1 hour
 - **Depends on:** none
 
-### Phase 1: `sat_timp` field on `IBranchSaturation` + mechanical discharge [NOT STARTED]
+### Phase 1: `sat_timp` field on `IBranchSaturation` + mechanical discharge [COMPLETED]
 
 - **Goal:** Add the reflexive `sat_timp` field and discharge it at `IExpandedConsistent_sat`, the
   sole construction site, leaving the file scoped-green.

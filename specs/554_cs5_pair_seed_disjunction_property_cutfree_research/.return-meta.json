@@ -1,45 +1,48 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-25T00:00:00Z",
+  "started_at": "2026-07-26T06:24:55Z",
   "artifacts": [
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean"},
+    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"},
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-8-handoff-20260725.md"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-9-handoff-20260726.md"}
   ],
   "partial_progress": {
-    "stage": "phase8_complete",
-    "details": "Phase 8 (fm compositionality over contexts) COMPLETED. Stage B (Phases 6-8) fully complete. 8/32 phases done.",
+    "stage": "phase9_complete",
+    "details": "Phase 9 (NCK' rules) COMPLETED. Stage C now 1/2 complete (Phase 10 remains). 9/32 phases done.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 8,
-    "last_completed_phase": "Phase 8: fm compositionality over contexts"
+    "phases_completed": 9,
+    "last_completed_phase": "Phase 9: NCK' rules"
   },
+  "memory_candidates": [
+    "InputCtx.fillLhs (Nested/Context.lean, Arisaka-Das-Strassburger nested-sequent formalization) structurally forces exactly one box between its hole and the fixed pi companion, even at Gamma'=Lambda=[] -- it can never produce a flat, box-free (A-input,A-output) pair. This is a genuine feature of Definition 2.3, not a bug, and it is why Proposition 3.1 (general id-rule derivability) needs a real induction rather than a one-step smoke test.",
+    "In Lean 4, when defining a height/size function over an inductive family indexed by a value (e.g. `NestedProof : Index -> Type`) where recursive premises carry a DIFFERENT index than the constructor's own conclusion, fixing the index via `variable {Γ : Index}` before the def breaks recursive calls ('expected NestedProof Γ, got NestedProof (different index)'). Fix: write the def as `∀ {Γ}, NestedProof Γ → Nat` (universal quantification inside the type), not `variable`-fixed."
+  ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 39,
-    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/; unchanged before/after this session's diff (Translation.lean contributes 0). Delegation context stated a baseline of 5, which does not match this script's output and predates this session -- documented in the Phase 8 handoff, not introduced by this session.",
+    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/; unchanged before/after this session's diff (Rules.lean contributes 0).",
     "vacuous_count": 0,
-    "vacuous_count_note": "One coarse regex match (Cslib/Computability/URM/Basic.lean:92, `theorem J_IsJump ... := trivial`) is a legitimate non-vacuous proof closing a real statement, pre-existing, unrelated to this session's file.",
     "axiom_count": 26,
-    "axiom_count_note": "Unchanged from baseline; zero new axioms introduced.",
+    "axiom_count_note": "Unchanged from baseline (grep -rn '^axiom ' Cslib/ | wc -l); zero new axioms introduced.",
     "build_passed": true,
     "ci_pipeline_passed": true,
     "ci_steps": {
-      "cache_get": "skipped (cache already warm; scoped and full lake build both succeeded without a fetch)",
-      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Translation)",
+      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Rules)",
       "checkInitImports": "pass",
-      "lake_lint": "pass (1 pre-existing unrelated error in Cslib/Logics/Temporal/Tableau/Saturation.lean, not touched this session)",
-      "lint_style": "pass",
-      "shake": "pass (Translation.lean's only suggestion is 'remove import Cslib.Init', an expected false positive matching its sibling files Context.lean/Syntax.lean, which keep the import deliberately per the mandatory Cslib.Init house rule)",
+      "lake_lint": "pass (no warnings attributed to Rules.lean)",
+      "lint_style": "pass (no warnings attributed to Rules.lean)",
+      "shake": "pass (Rules.lean's only suggestion is 'remove import Cslib.Init', an expected false positive matching sibling files Context.lean/Syntax.lean, which keep the import deliberately per the mandatory Cslib.Init house rule)",
       "mk_all_module": "pass (Cslib.lean updated with the new barrel import)",
+      "full_build": "pass (lake build, exit 0, 3258 jobs)",
       "full_test_suite": "pass (lake test, exit 0)"
     }
   },
   "metadata": {
-    "session_id": "sess_1785007897_038307_554",
-    "agent_type": "cslib-implementation-agent",
+    "session_id": "sess_1785046950_33beb4_554",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "compliance_check": "passed"
   }
 }

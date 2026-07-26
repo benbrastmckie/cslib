@@ -1,53 +1,54 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "partial",
-  "phases_completed": 8,
+  "status": "implemented",
+  "skeleton": false,
+  "phases_completed": 9,
   "phases_total": 32,
-  "summary": "Phase 8 (Stage B's third and final phase) landed: fm compositionality over contexts, in a new Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean module. Fully general covariant lemmas for OutputCtx (buildRhsChain_fm_mono, fillRhs_fm_mono, fillLhs_fm_mono) and a fully general contravariant lemma for InputCtx (fillLhs_fm_antitone), all stated against Derivable (@CS5ModalAxiom Atom) per the plan's verification note. The pruning relation (task 2) is landed restricted to ctx.Lambda = [] (InputCtx.fillEmpty_imp_outputPruning_fillRhs): the unrestricted version is genuinely not CS5-Hilbert-derivable (two independent K-invalid countermodels documented), not merely unproved, so the restriction is an honest, fully-documented deviation rather than a placeholder. Stage B (Phases 6-8) now fully complete. 8/32 phases done. Stages C-G not started.",
+  "sorry_inventory": [],
+  "summary": "Phase 9 (Stage C's first phase, NCK' rules) landed: Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean defines NestedProof : NestedFull Atom -> Type u, an inductive proof-tree family indexed by conclusion, covering all 13 rules of Figure 2 (botL/id/andL/andR/orL/orRLeft/orRRight/impL/impR/boxL/boxR/diaL/diaR/contract). Each rule uses InputCtx or OutputCtx per a type-necessity argument documented in the module docstring (LHS-typed hole content needs InputCtx.fillLhs to close to a full sequent; RHS-typed content uses OutputCtx.fillRhs/fillFull directly). NestedProof.height is landed via a universally-quantified-index recursion (fixing the index via `variable` first breaks the recursive calls, since every premise has a different NestedFull index than its conclusion -- hit and fixed this session). Three smoke-test derivations landed (bare boL/id axiom instances plus one orL-on-two-botL multi-rule derivation), documented as illustrative since the source's own Section 3 text gives no literal derivation trees between Figure 2 and Proposition 3.1 to transcribe (grepped the whole PDF for 'Example' to confirm). Stage C now 1/2 complete.",
   "artifacts": [
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-8-handoff-20260725.md"},
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-9-handoff-20260726.md"},
+    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"}
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-9-progress.json",
     "Cslib.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean"
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"
   ],
   "decisions_made": [
-    "The pruning-relation theorem (InputCtx.fillEmpty_imp_outputPruning_fillRhs) is restricted to ctx.Lambda = [] rather than proved unconditionally: the unrestricted version needs either box(A -> B) -> (A -> box B) or (dia A -> B) -> box(A -> B) at the general induction step, and both are invalid in bare K (two-world countermodels documented in Translation.lean's module docstring). The restriction covers every InputCtx example this development has actually built (e.g. Phase 7's gamma2Ctx).",
-    "Built a small local, private Hilbert-combinator toolkit (cs5DerivImpTrans, cs5DerivBoxMono, cs5DerivDiaMono, cs5DerivImpCongrRight, cs5DerivImpCongrLeft, cs5DerivAndCongrRight, etc.) rather than importing Constructive/Labelled/Soundness.lean's public cs5_deriv_* family (which proves near-identical lemmas): importing would pull the unrelated labelled-sequent subsystem's graph/label apparatus into Nested/'s dependency graph for no benefit, since CS5.lean's own private cs5_impTrans/cs5_box_mono precedent already establishes local duplication as this codebase's norm for this kind of small plumbing.",
-    "InputCtx.fillLhs_fm_antitone (task 3's contravariance requirement) is fully general in ctx (no restriction), composed directly from the covariant OutputCtx lemmas plus one new contravariant congruence combinator (cs5DerivImpCongrLeft) -- no separate case analysis needed, unlike the pruning relation."
+    "InputCtx.fillLhs is the correct (and only well-typed) home for the 8 rules whose displayed hole-content is LHS-typed (id, botL, andL, orL, impL's 2nd premise+conclusion, boxL, diaL, contract); OutputCtx.fillRhs/fillFull for the 5 whose hole-content is RHS-typed or a full pair (andR, orRLeft/orRRight, impR, boxR) -- this is forced by argument-type necessity, not a stylistic choice, and it is what makes the botL/orL 'same subtree' side condition (noted in the source right after Figure 2) automatically satisfied with no extra Lean hypothesis.",
+    "diaR's conclusion (Gamma{diamond A-degree, [Delta]}) genuinely needs OutputCtx.fillFull, not fillRhs: NestedRhs has no comma constructor, so an RHS leaf and an LHS bracket cannot be packaged as a single fillRhs filler -- confirmed by checking NestedRhs's two constructors (atom, box) in Syntax.lean before committing to this encoding.",
+    "The plan's 'k' task-list item is read as the propositional rule family already covered by the same bullet (Figure 2 has no rule literally labelled k; that name is reserved for the Hilbert K-axiom in Constructive/CS5.lean), not a distinct rule -- documented as a plan deviation inline.",
+    "The plan's smoke-test-derivations item is scoped down to illustrative axiom/rule-combination instances rather than Proposition 3.1's full induction, because Proposition 3.1's base case needs the atomic id axiom reachable from a flat, box-free Gamma{A-input,A-output} at ctx=[], which InputCtx.fillLhs structurally cannot produce (confirmed by direct computation) -- this is a genuine standalone induction-over-formula-structure theorem, not same-phase smoke-test material."
   ],
   "dead_ends": [
-    "Marin-Morales-Strassburger labIK-le: base is IK not CK, settles IS5 not CS5. Not planned.",
-    "Any route needing box(A or B) -> (box A or box B): not a theorem of classical S5. No phase attempts it.",
-    "Relabeling retractions: every one is forced to identify the two tag copies. Bound landed as an asset only.",
-    "Product model over IS5: closed by the CS5ToIS5.lean route-closure theorem (Phase 5) -- reduces to the unadopted CS5=IS5 collapse, machine-checked.",
-    "InputCtx.pi as Proposition (bare atomic formula): forced compound by Example 2.1's Gamma2{} -- see Phase 7 handoff. Do not re-attempt this typing without re-deriving against the source.",
-    "General (unrestricted-Lambda) pruning-relation theorem: not CS5-Hilbert-derivable -- see decisions_made above. Any future attempt should either restrict scope further (as this phase did) or switch to a semantic (non-Hilbert-schema) argument, not re-attempt the same box-distribution/dia-to-box-shift proof strategies."
+    "Bare OutputCtx.fillLhs for any rule whose companion Pi must survive to close a full sequent: fillLhs alone only yields a NestedLhs, not a NestedFull -- type error, not a design choice.",
+    "Building diaR's conclusion via OutputCtx.fillRhs applied to some crafted NestedRhs term mixing Delta and the diamond-atom: impossible, NestedRhs has only atom/box constructors, no comma -- confirmed by direct inspection of Syntax.lean before attempting this route.",
+    "Proving Gamma{A-input,A-output} derivable via impR+id at ctx=[] as a 'quick' smoke test for a general formula A: fails structurally, since InputCtx.fillLhs always forces one mandatory box between the hole and ctx.pi, so id's conclusion is never flat/box-free -- this is Proposition 3.1's actual base-case obstruction, not a shortcut worth re-attempting without the full induction machinery."
   ],
   "continuation_context": {
-    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-8-handoff-20260725.md",
-    "phases_completed": 8,
+    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-9-handoff-20260726.md",
+    "phases_completed": 9,
     "phases_total": 32,
     "orchestrator_mode": true,
-    "resume_at": "Stage C, Phase 9 (NCK' rules). Depends on Phase 7 (done). New file: check the plan's stated filename for Phase 9 before creating anything.",
+    "resume_at": "Stage C, Phase 10 (NCS5 = NCK' + {t,4}#_G + {b}[]). Depends on Phase 9 (done). Same file, Rules.lean.",
     "stage_map": {
       "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
       "B": "Phases 6-8 - nested sequent syntax - COMPLETE (all 3 phases)",
-      "C": "Phases 9-10 - the rule systems - NOT STARTED",
+      "C": "Phases 9-10 - the rule systems - Phase 9 COMPLETE, Phase 10 NOT STARTED",
       "D": "Phases 11-13 - soundness (Theorem 4.1) - NOT STARTED",
       "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - NOT STARTED",
       "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
       "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
     },
-    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable. Page 5 covers eq. 2.1, fm, Example 2.1, Observation 2.2, Definition 2.3. Pages 6-7 (rendered this session) cover Figure 2 (System NCK, needed for Phase 9), Figure 3 (d/t/4 rules), and the nec/w/cut structural rules of eq. (3.1) -- the cut rule's text explicitly ties output pruning to the same convention Phase 7 already landed (Gamma' ++ Lambda, not just dropping Pi), corroborating Phase 7's reading against this specific paper.",
-    "existing_infra_pointers": "CS5ModalAxiom is defined at Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:168. Constructive/Labelled/Soundness.lean:1500-1940 has a public 'P-generic Hilbert combinator toolkit' (cs5_deriv_imp_trans, cs5_deriv_box_mono, cs5_deriv_imp_congr_right, cs5_deriv_curry/uncurry, etc.) that is a close cousin of what Translation.lean built locally/privately -- worth checking before inventing new combinator shapes in future phases, but importing that whole file is not recommended (see decisions_made).",
-    "invariants": "Cslib/ sorry count and axiom count must not increase from this commit's baseline (lean-sorry-census.sh Cslib/ reports 39, not the 5 previously stated -- see the Phase 8 handoff's 'Sorry-Count Baseline Discrepancy' section; the discrepancy predates this session and was not introduced by it). Axiom count must stay exactly 26. Zero new axioms. No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports/lake exe lint-style/lake exe mk_all --module/scoped lake shake green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files. Never use capital Pi (Π) as a Lean identifier in this codebase (Mathlib Pi-type delaborator conflict) -- use lowercase pi (π) instead."
+    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable; pdftotext silently drops the box glyph in this PDF's font encoding (reconfirmed this session on Figure 2's boxL/boxR rules) -- direct page render is authoritative for any box-bearing rule. Page 5 re-rendered this session to re-verify Definition 2.3's exact shape. Page 7 (Figure 3, t/4 rules) and page 8 (Figure 4, b[] structural rule) are what Phase 10 needs next; page 8 not yet rendered this or last session.",
+    "existing_infra_pointers": "CS5ModalAxiom is defined at Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:168. NestedProof.height (this phase) is what Phase 10's height-non-increasing weakening/.mono transport statements will be about.",
+    "invariants": "Cslib/ sorry count and axiom count must not increase from this commit's baseline (lean-sorry-census.sh Cslib/ reports 39; grep -rn '^axiom ' Cslib/ | wc -l reports 26 -- both unchanged this session). No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports/lake exe lint-style/lake exe mk_all --module/scoped lake shake green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files (observed modified again this session at FrameSoundness.lean, not touched). Never use capital Pi (Π) as a Lean identifier in this codebase (Mathlib Pi-type delaborator conflict) -- use lowercase pi (π) instead."
   },
   "plan_markers_verified": true
 }

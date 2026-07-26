@@ -1,115 +1,55 @@
 {
-  "status": "planned",
-  "agent_type": "planner-hard-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+  "status": "implemented",
+  "agent_type": "cslib-implementation-hard-agent",
+  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
   "task_number": 553,
   "task_type": "cslib",
   "session_id": "sess_1785084826_a33d36",
   "effort_flag": "hard",
   "lit_flag": true,
   "orchestrator_mode": true,
-  "plan_version": 4,
+  "started_at": "2026-07-26T18:45:00Z",
+  "completed_at": "2026-07-26T19:40:00Z",
   "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-  "supersedes": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-  "route": "(3) Massacci2000 Technique 8.2 subtractive blocking + completeness-only redirect channel `red`, at full branchSatisfiableIn s4FC strength",
-  "phase_count": 12,
-  "estimated_hours": 36,
-  "postmortem_rules_count": 16,
-  "h8_compliance": {
-    "ceiling_declared_exceeded": true,
-    "ceiling": 8,
-    "actual": 12,
-    "priced_by_research": 9,
-    "justification": "Three phases above report 04's price, each declared in the plan: (1) statement-shape design separated per report 04 section 9's mandatory condition; (2) the single load-bearing obligation split into two independent standalone gates (consumption / establishment) so both run in wave 2 rather than one hiding behind the other; (3) the empirical regression gate separated as a measurement in CslibTests/ territory. Every phase passes the bounded-unit test (one definition family / lemma family / measurement, concrete stopping condition, <=400 lines with a declared split rule).",
-    "skeleton_considered_and_rejected": "The two riskiest obligations are phases 2 and 3, so there is no long green prefix to skeletonise, and a strategic sorry at a gate stands in for a possibly-false statement -- the failure this task has suffered twice (v2's removed inertness lemmas; v3's FrameSoundness.lean:1244)."
-  },
-  "decision_gates": [
+  "plan_version": 4,
+  "phase_number": 1,
+  "phases_completed": 1,
+  "phases_total": 12,
+  "artifacts": [
     {
-      "phase": 2,
-      "name": "GATE A (consumption) -- modalTruthLemmaS4Sub over ReflTransGen (acc union red)",
-      "standalone": true,
-      "kill_criterion": "If the box-positive or diamond-negative truth-lemma case cannot be derived from the forward-cone conjuncts (F*)/(G*), route (3) is dead; revert the attempt committing no sorry, mark [BLOCKED], escalate. Honest fallback is route (1), NOT route (2')."
+      "type": "summary",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/04_phase1-red-channel-bifurcated-hintikka-summary.md"
     },
     {
-      "phase": 3,
-      "name": "GATE B (establishment) -- standalone redirect forward-cone transfer lemma",
-      "standalone": true,
-      "kill_criterion": "Three-way verdict: (i) provable from the two free unwrapped transfers plus acc-saturation -> proceed; (ii) needs a nameable extra threaded invariant -> add phase 3b, do NOT proceed to phase 4; (iii) needs a fact no threaded invariant can supply, or only the box half closes -> revert (no sorry), [BLOCKED], escalate. Do NOT fall back to the wrapped (d) form (40 measured counterexamples)."
+      "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
     }
   ],
-  "plan_metadata": {
-    "phases": 12,
-    "total_effort_hours": 36,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 4,
-    "dependency_waves": [[1], [2, 3], [4], [5, 7], [6, 8, 9, 12], [10], [11]],
-    "reports_integrated": [
-      { "path": "reports/01_s4-keyed-guard-soundness-falsified.md", "integrated_in_plan_version": 4, "integrated_date": "2026-07-26" },
-      { "path": "reports/02_redirect-inertness-divergence-audit.md", "integrated_in_plan_version": 4, "integrated_date": "2026-07-26" },
-      { "path": "reports/03_soundness-strength-necessity.md", "integrated_in_plan_version": 4, "integrated_date": "2026-07-26" },
-      { "path": "reports/04_massacci-subtractive-blocking-priced.md", "integrated_in_plan_version": 4, "integrated_date": "2026-07-26" }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
-  },
-  "reference_grounding": {
-    "tier": 1,
-    "bibkey_verification_status": "verified",
-    "bibkeys_verified": [{ "key": "Massacci2000", "line": "references.bib:1010" }],
-    "literature_chunks_read": [
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0029.md (section 8.1, Def 8.1 copy, p. 336)",
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0030.md (Technique 8.1/8.2, proof-confluence remark, Thm 8.1, Def 8.2, Ftree, p. 337)",
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0031.md (Pruning Lemma 8.2, Table III, p. 338)",
-      "~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/chunk_0065.md (Prop 8.1, Prop B.4/B.5, Prop 8.2, the hbL-1 prefix bound, Appendix B)"
-    ],
-    "mapping_table_present": true,
-    "mapping_table_format": "5-column lean4 override (Source / Prop+page / Lean identifier / type signature / status)",
-    "declared_divergence": "Massacci's copy relation (Def 8.1 p.336, Def 8.2 p.337) is on the SOURCE prefix's nu-formulas, so he folds onto a shorter prefix and inherits its successors -- a quotient with no edge. CSLib's guard compares the PROSPECTIVE SUCCESSOR's birth content. Route (3) therefore keeps CSLib's guard and moves the redirect out of the soundness-tracked structure rather than quotienting; Massacci's depth bound (Prop 8.2 / B.5) is deliberately NOT imported because the pigeonhole modalWorldBoundS4 is retained. Route (3) is literature-GUIDED, not literature-transcribed."
-  },
-  "plan_time_findings": [
-    "REFUTED AT PLAN TIME: the cheapest-looking design -- materialize `red` into an Accessibility and reuse `modalHintikkaSetS4` verbatim at the union, inheriting modalTruthLemmaS4 and the whole FrameCompleteness assembly free -- is exactly the (b)/(d)-shaped statement with 40 measured counterexamples. Reason: modalHintikkaSetS4's conjunct 2 evaluates modalApplyOneS4, whose box-positive/diamond-negative arms propagate along every edge of the acc handed to them (modalFourBoxProp b acc), so handing it the union demands T(box chi)@wBlock and F(dia chi)@wBlock. The plan adopts a BIFURCATED predicate instead: conjunct 2 over `acc` only, conjuncts 3/4 over `accWithReds acc red`, plus two forward-cone conjuncts (F*)/(G*).",
-    "CONFIRMED SAVING: Accessibility is a bare list of edge pairs (Branch.lean:55-57), so `red` can be materialized into an Accessibility and extractModelS4 plus all five extractModelS4* lemmas (FrameCompleteness.lean:143-189) are reused VERBATIM -- no extractModelS4Sub is needed, removing one of report 04's estimated phases' worth of work.",
-    "MANDATORY, verified: hintikkaS4_box_pos_step (LoopChecking.lean:6599) destructures its hypothesis as <_, hrule, _> -- it consumes ONLY conjunct 2. Generalizing the six hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen} bridges to take the bare saturation conjunct is a mechanical hypothesis-weakening and is REQUIRED, because conjuncts 3/4 over bare acc are false for the subtractive driver.",
-    "VERIFIED cheap win: hintikka_congr_S4Sub is a 13-line transcription of hintikka_congr_S4 (:7821-7833), because modalHintikkaSetS4's conjunct 2 is definitionally True at exactly the two minting shapes (:6549-6551) and the subtractive rule differs from modalApplyOneS4 only there.",
-    "VERIFIED derivation chain for Gate B's two FREE transfers (conditions (c)/(e), each 0 failures / 24,314): blockingWorldS4Keyed_eq_birthContent (:514) + successorBirthContent (:384-391) + keyLowerBd + relevantSetFinset (:333-337) give the UNWRAPPED payload at wBlock by near-transcription of modalStepBranchS4Keyed_blocked_witness_mem's 15-line proof (:8806-8824). The genuinely unproven part is the extension to wBlock's FORWARD CONE, which is what Gate B exists to settle.",
-    "ARCHITECTURAL CONSTRAINT discovered: ModalTableauResult (Saturation.lean:82) carries only (b, acc) and is consumed by 8 files, so it is read-only. Phase 7 carries two pre-designed options for surfacing `red` at the leaf (union-at-return, default; or an S4-keyed-local result type with a projecting entry point), neither of which edits Saturation.lean.",
-    "RISK CORRECTION to report 04: the S5 apply-parametric ladder is a TEMPLATE, not a drop-in. modalExpandBranchesGen_closed_unsatIn (:731) and modalTableauS5Gen_sound (:3317) are stated over modalTableauGen/modalExpandBranchesGen, which thread neither keys nor red, whereas every keyed driver threads keys. Phase 8 is scoped as writing the fuel induction for the subtractive expander's own shape.",
-    "AXIOM-COUNT CORRECTION: v3 asserted a repo axiom count of exactly 26. Measured in this planning run, `grep -rn '^axiom' Cslib/ | wc -l` returns 47 across 37 files. The plan refuses to propagate the unverified number and instead requires a per-phase captured baseline plus lean_verify on every new top-level theorem."
-  ],
-  "sorry_inventory": {
-    "cslib_tableau_directory_total": 1,
-    "locations": ["Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1244"],
-    "delta_this_dispatch": 0,
-    "note": "Untouched per explicit user decision. DETERMINATION REQUESTED BY THE DISPATCH: the lemma holding it (branchSatisfiableIn_s4FC_ancestor_redirect) DOES become obsolete under route (3) -- no blocked step ever adds an edge to acc, so the soundness capstone never invokes an edge-justification lemma of any shape. Per the user's decision the sorry STAYS and NO phase touches it; three options are recorded in the plan's 'Flagged for User Decision' section for the user to choose, sequenced after phase 8 so obsolescence is verified by the absence of a consumer rather than asserted."
-  },
-  "preserved_assets_count": 12,
-  "territory": {
-    "write": [
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "CslibTests/S4LoopGuardRegression.lean",
-      "specs/553_s4_loop_guard_soundness_reachability_restriction/**"
-    ],
-    "read_only": [
-      "Cslib/Logics/Modal/Tableau/Rules.lean",
-      "Cslib/Logics/Modal/Tableau/Saturation.lean",
-      "Cslib/Logics/Modal/Tableau/Branch.lean",
-      "Cslib/Logics/Modal/Tableau/SoundnessStep.lean"
-    ],
-    "forbidden": [
-      "Cslib/Logics/Modal/Metalogic/Constructive/Nested/**",
-      "Cslib.lean"
-    ]
-  },
   "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/04_phase1-red-channel-bifurcated-hintikka-summary.md",
+    "specs/TODO.md",
+    "specs/state.json"
   ],
-  "library_files_edited": [],
-  "state_updates_pending": "state.json was deliberately NOT modified (the dispatch restricts staging to the task directory). Postflight should: register the v4 plan artifact, replace plan_metadata with the object above, append a mandate_change_history entry recording the route change from (1) 'driver-dependent Hintikka/canonical-model truth lemma' to (3) 'subtractive blocking + completeness-only redirect channel', and update the v3 artifact summary to note the [ABANDONED] stamp.",
-  "next_steps": "Run /implement 553 --hard. Wave 1 is phase 1 alone (statement-shape design + probe realignment). Waves must not be reordered: phases 2 and 3 are the route's decision gates and no later phase may be dispatched until both return a positive verdict."
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 1,
+    "sorry_count_baseline": 1,
+    "sorry_count_delta": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial (module-scoped build, checkInitImports, lint-style all clean; full-project lake lint/lake test/lake shake/mk_all not run this dispatch -- see partial_progress note)"
+  },
+  "memory_candidates": [
+    "Lean4 gotcha: a zero-argument `abbrev Foo := List (... Atom ...)` referencing an ambient section `variable {Atom : Type*}` fails to elaborate at every use site with 'don't know how to synthesize implicit argument Atom', because autoBound only scans the syntax of the declaration that *directly* mentions the variable, not nested uses through an already-elaborated abbrev. Fix: give the abbrev an explicit `(Atom : Type*) [...]` parameter and apply it (`Foo Atom`) at every use site.",
+    "`List.any_map`'s stated form leaves a `p ∘ f` vs `fun a => p (f a)` residual goal after `simp only [List.any_map]`; `Function.comp_def` closes it (needed alongside `List.any_append`, `List.any_map` for an `(l1 ++ l2.map f).any p` unfolding bridge)."
+  ],
+  "partial_progress": {
+    "stage": "phase_1_complete",
+    "details": "Phase 1 (statement shapes) landed and validated. Full-project CI steps (lake lint, lake test, lake exe mk_all --module, lake shake) were not run this dispatch: lake shake attempted a whole-project rebuild and failed on unrelated out-of-date oleans from concurrent sessions (task 552-554 all active), not from this phase's own files. Module-scoped build (lake build Cslib.Logics.Modal.Tableau.LoopChecking), lake exe checkInitImports, and lake exe lint-style (scoped to LoopChecking.lean) all passed clean, satisfying the plan's own Phase 1 done-when criterion."
+  },
+  "requires_user_review": false
 }

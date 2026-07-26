@@ -1,193 +1,48 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-  "plan_version": 4,
-  "supersedes_plan": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+  "phase": "implement",
+  "status": "implemented",
+  "skeleton": false,
+  "summary": "Phase 1 of plan v4 (route (3), Massacci-style subtractive blocking) landed cleanly: Reds, accWithReds, hasEdge_accWithReds_iff, the bifurcated modalHintikkaSetS4Sub (conjunct 2 over acc, conjuncts 3/4 over accWithReds acc red, conjuncts 5/6 forward-cone G*/F*), and S4KeyedSubHintikkaInv (field statements only, no preservation proof) -- all in Cslib/Logics/Modal/Tableau/LoopChecking.lean, inserted after S4KeyedHintikkaInv_weaken and before the pre-existing '## Phase 7: Single-Step Invariant Preservation' doc section. No proofs beyond one simp-only bridge. Realigned artifacts/s4subtractive3.lean's condGStar/condFStar with a field-by-field alignment doc comment against the final conjunct 5/6 shapes and re-ran all three corpora (lake env lean, exit 0): 0 failures for G*/F* across 24,314 recorded redirects (1652+6303+16359), matching report 04's baseline exactly. Phase 1 [COMPLETED] in the plan; the Phase 1 Statement Validation subsection records verbatim #eval output. lake build Cslib.Logics.Modal.Tableau.LoopChecking and lake exe checkInitImports and lake exe lint-style (scoped to LoopChecking.lean) all clean. Sorry census over Cslib/Logics/Modal/Tableau/*.lean unchanged at exactly 1 (FrameSoundness.lean:1244, untouched). No new axioms.",
+  "phases_completed": 1,
   "phases_total": 12,
-  "next_phase": 1,
-  "next_phase_name": "The `red` channel type, `accWithReds`, and the bifurcated Hintikka predicate `modalHintikkaSetS4Sub`",
-  "next_action_hint": "Run /implement 553 --hard, starting at PHASE 1 ALONE (wave 1). ROUTE: (3) Massacci2000 Technique 8.2 subtractive blocking -- the blocked minting arm emits `(.linear [], acc)`, NO EDGE -- plus a separate completeness-only redirect channel `red : List (WorldIndex x WorldIndex x Sign x Proposition Atom)` threaded alongside `keys`, with extraction over ReflTransGen (acc union red). Soundness NEVER sees `red` (branchSatisfiableIn's edge conjunct quantifies over acc.hasEdge, FrameSoundness.lean:113), so a blocked step's preservation obligation is `id` and soundness closes at FULL branchSatisfiableIn s4FC strength. WAVE DISCIPLINE IS NOT NEGOTIABLE: waves are [1], [2,3], [4], [5,7], [6,8,9,12], [10], [11]. Phases 2 and 3 are the route's TWO DECISION GATES and they run in PARALLEL in wave 2, before any driver surgery. Do NOT dispatch phase 4 or later until both return positive verdicts. GATE A (phase 2, consumption): prove modalTruthLemmaS4Sub over ReflTransGen (accWithReds acc red) from the bifurcated predicate. Requires (i) weakening the six landed hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen} bridges to take the BARE SATURATION CONJUNCT (verified: hintikkaS4_box_pos_step at LoopChecking.lean:6599 destructures <_, hrule, _>, so it uses conjunct 2 only -- and this weakening is MANDATORY because conjuncts 3/4 over bare acc are FALSE for the subtractive driver), and (ii) a new first-red-hop path-decomposition lemma over the union relation. KILL: if the box-positive or diamond-negative case cannot be derived from the forward-cone conjuncts, route (3) is DEAD -- revert (commit NO sorry), mark [BLOCKED], escalate; the honest fallback is route (1), NOT route (2'). GATE B (phase 3, establishment): prove the forward-cone clauses hold at a blocked step, standalone and driver-independent. The two UNWRAPPED transfers (conditions (c)/(e), each 0 failures / 24,314) are provable by near-transcription of modalStepBranchS4Keyed_blocked_witness_mem's 15-line proof (:8806-8824) via the verified chain blockingWorldS4Keyed_eq_birthContent (:514) -> successorBirthContent (:384-391) -> keyLowerBd -> relevantSetFinset (:333-337). The GENUINELY UNPROVEN part is extending the payload to wBlock's FORWARD CONE. Three-way verdict: provable -> proceed; needs a NAMEABLE extra threaded invariant -> add phase 3b and check it against the probe BEFORE dispatching, do NOT proceed to phase 4; needs a fact no threaded invariant can supply (or only the box half closes) -> revert, [BLOCKED], escalate. NEVER fall back to the wrapped-at-target (d) form: it has 40 MEASURED counterexamples out of 24,314. REFUTED AT PLAN TIME, do not rediscover it the expensive way: the cheapest-looking design -- materialize `red` into an Accessibility and reuse modalHintikkaSetS4 VERBATIM at the union, inheriting modalTruthLemmaS4 and the whole FrameCompleteness assembly for free -- IS the (b)/(d)-shaped statement with 40 counterexamples, because modalHintikkaSetS4's conjunct 2 evaluates modalApplyOneS4, whose box-positive/diamond-negative arms propagate along every edge of the acc handed to them (modalFourBoxProp b acc). The predicate MUST be BIFURCATED: conjunct 2 over `acc` ONLY, conjuncts 3/4 over `accWithReds acc red`, plus two FORWARD-CONE conjuncts (G*)/(F*). CONFIRMED SAVING: Accessibility is a bare `<edges : List (WorldIndex x WorldIndex)>` (Branch.lean:55-57), so extractModelS4 and all five extractModelS4* lemmas (FrameCompleteness.lean:143-189) are reused VERBATIM at accWithReds -- no extractModelS4Sub is needed. MANDATORY CONSTRAINTS: the ORDERED stepper is required (the unordered subtractive driver loses 2 closures); the subtractive family lands as PARALLEL definitions (`...Sub...`) per LoopChecking.lean:459-464 / :990-996 so modalTableauS4Keyed_complete stays green; `outDegEq` is dropped by NEVER carrying it into the new S4LoopInvSub (landed S4LoopInv and its 188-line modalStepBranchS4_preserves_outDegEq are left untouched -- same saving, zero regression risk), with the zero-consumer grep as its own recorded verification step in phase 5; NEVER edit Rules.lean, Saturation.lean (ModalTableauResult is consumed by 8 files and carries only (b, acc)), Branch.lean, or SoundnessStep.lean. PHASE 8 CARRIES THE PLAN'S FALSIFICATION TEST: after the soundness capstone lands, `grep -n 'red|accWithReds|Reds'` over every declaration it adds must return ZERO hits and S4SubSoundSpec must mention only `acc`. A non-zero result means the obligation is back inside the soundness-tracked structure and the route's central claim is false -- escalate, do not patch. The sorry at FrameSoundness.lean:1244 STAYS and NO phase touches it; it is determined OBSOLETE under route (3) and three options are flagged for USER DECISION only, sequenced after phase 8.",
-  "summary": "Plan v4 for task 553: route (3), Massacci-style subtractive blocking with a completeness-only redirect channel, 12 phases / ~36 hours, at FULL branchSatisfiableIn s4FC strength per the user's independent choice. v3 stamped [ABANDONED] with a Superseded-by pointer while preserving its Phase 1 [COMPLETED] status and four measurements verbatim. The plan front-loads the route's ONE load-bearing risk by SPLITTING it into two independent, standalone, driver-free, cheaply-falsifiable decision gates that run in PARALLEL as wave 2 (phase 2 = consumption / truth lemma; phase 3 = establishment / forward-cone transfer), each with an explicit written kill criterion, and by forbidding a sorry at either gate -- because this task has twice died on a sorry standing in for a possibly-false statement, and because v3's 1374/1374 measurement did not survive contact with a general proof obligation. Three plan-time findings changed the design relative to report 04 section 7.2's pricing, each derived by reading the source in this planning run rather than assumed. (1) REFUTATION: the cheapest design -- reusing modalHintikkaSetS4 verbatim at acc union red -- is exactly the (b)/(d) statement with 40 measured counterexamples, because conjunct 2 evaluates modalApplyOneS4 against whatever acc it is handed. The predicate is therefore BIFURCATED. (2) SAVING: Accessibility is a bare edge list, so extractModelS4 and its five lemmas are reused verbatim and no extractModelS4Sub exists, removing roughly one of report 04's estimated phases. (3) MANDATORY hypothesis-weakening: the six hintikkaS4 bridges must be generalized to the bare saturation conjunct, since conjuncts 3/4 over bare acc are false for this driver. Two corrections to inherited claims are recorded: the S5 apply-parametric ladder is a TEMPLATE not a drop-in (the Gen lemmas are stated over modalTableauGen, which threads neither keys nor red), and v3's asserted repo axiom count of 26 does not reproduce (measured 47 raw matches), so the plan requires a per-phase captured baseline instead of a hard-coded number. One architectural constraint was discovered: ModalTableauResult is read-only (8 consumers, carries only (b, acc)), so phase 7 carries two pre-designed options for surfacing `red` at the leaf. 12 preserved assets are tabulated with dispositions, including v3's inherited probe, report 04's three probes as harnesses to EXTEND rather than replace, the guard byte-for-byte unchanged, and the user-retained sorry. The postmortem section names the structural property that prevents a fourth recurrence -- the edge is never added to acc, so the obligation leaves the soundness-tracked structure rather than being justified inside it -- and makes it falsifiable by a grep test that phase 8 must run and record.",
-  "decision_gates": [
-    {
-      "phase": 2,
-      "wave": 2,
-      "name": "GATE A -- consumption (modalTruthLemmaS4Sub)",
-      "owns": "FrameCompleteness.lean + the six hintikkaS4 hypothesis-weakenings in LoopChecking.lean"
-    },
-    {
-      "phase": 3,
-      "wave": 2,
-      "name": "GATE B -- establishment (redirect forward-cone transfer)",
-      "owns": "LoopChecking.lean new redirect-transfer section"
-    }
-  ],
-  "dependency_waves": [
-    [
-      1
-    ],
-    [
-      2,
-      3
-    ],
-    [
-      4
-    ],
-    [
-      5,
-      7
-    ],
-    [
-      6,
-      8,
-      9,
-      12
-    ],
-    [
-      10
-    ],
-    [
-      11
-    ]
-  ],
-  "territory_contract": {
-    "wave_5_caveat": "Phases 6 and 9 both write LoopChecking.lean. Parallel dispatch is permitted ONLY under the plan's declared section ownership, with each dispatch re-reading the file immediately before its first Edit; on detecting a concurrent change it serializes rather than merging.",
-    "write": [
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "CslibTests/S4LoopGuardRegression.lean",
-      "specs/553_s4_loop_guard_soundness_reachability_restriction/**"
-    ],
-    "read_only": [
-      "Cslib/Logics/Modal/Tableau/Rules.lean",
-      "Cslib/Logics/Modal/Tableau/Saturation.lean",
-      "Cslib/Logics/Modal/Tableau/Branch.lean",
-      "Cslib/Logics/Modal/Tableau/SoundnessStep.lean"
-    ],
-    "forbidden": [
-      "Cslib/Logics/Modal/Metalogic/Constructive/Nested/**",
-      "Cslib.lean"
-    ]
-  },
-  "plan_metadata": {
-    "phases": 12,
-    "total_effort_hours": 36,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 4,
-    "dependency_waves": [
-      [
-        1
-      ],
-      [
-        2,
-        3
-      ],
-      [
-        4
-      ],
-      [
-        5,
-        7
-      ],
-      [
-        6,
-        8,
-        9,
-        12
-      ],
-      [
-        10
-      ],
-      [
-        11
-      ]
-    ],
-    "reports_integrated": [
-      {
-        "path": "reports/01_s4-keyed-guard-soundness-falsified.md",
-        "integrated_in_plan_version": 4,
-        "integrated_date": "2026-07-26"
-      },
-      {
-        "path": "reports/02_redirect-inertness-divergence-audit.md",
-        "integrated_in_plan_version": 4,
-        "integrated_date": "2026-07-26"
-      },
-      {
-        "path": "reports/03_soundness-strength-necessity.md",
-        "integrated_in_plan_version": 4,
-        "integrated_date": "2026-07-26"
-      },
-      {
-        "path": "reports/04_massacci-subtractive-blocking-priced.md",
-        "integrated_in_plan_version": 4,
-        "integrated_date": "2026-07-26"
-      }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
-  },
-  "reference_grounding": {
-    "tier": 1,
-    "bibkeys_verified_against_references_bib": {
-      "Massacci2000": "references.bib:1010"
-    },
-    "literature_chunks_read": [
-      "chunk_0029.md -- section 8.1, Def 8.1 (copy), p. 336",
-      "chunk_0030.md -- Technique 8.1/8.2, proof-confluence remark, Thm 8.1, Def 8.2 (modal copy), Ftree, p. 337",
-      "chunk_0031.md -- Pruning Lemma 8.2, Table III input-size parameters, p. 338",
-      "chunk_0065.md -- Prop 8.1, Prop B.4/B.5, Prop 8.2, the hbL-1 = 1+dp+p*n prefix bound, Appendix B"
-    ],
-    "key_divergence_recorded": "Massacci's copy relation is on the SOURCE prefix's nu-formulas (Def 8.1 p.336, Def 8.2 p.337), so he folds onto a shorter prefix and inherits its successors -- a quotient, with no edge. CSLib's guard compares the PROSPECTIVE SUCCESSOR's birth content (successorBirthContent, LoopChecking.lean:384-391). Route (3) therefore keeps CSLib's guard and moves the redirect OUT of the soundness-tracked structure rather than quotienting, and deliberately does NOT import Massacci's depth bound (Prop 8.2 / B.5) because the pigeonhole modalWorldBoundS4 (:229) is retained intact. Route (3) is literature-GUIDED, not literature-transcribed."
-  },
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
       "line": 1244,
-      "lemma": "branchSatisfiableIn_s4FC_ancestor_redirect",
-      "reason": "Pre-existing, user-authorized documented marker from the plan-v3 Phase 2 decision gate. Untouched by this planning dispatch and by every phase of v4.",
-      "obsolescence_determination": "OBSOLETE under route (3): no blocked step adds an edge to acc, so the soundness capstone never invokes an edge-justification lemma. FLAGGED FOR USER DECISION in the plan (three options), sequenced after phase 8 so obsolescence is verified by the absence of a consumer rather than asserted. NOT unilaterally planned for removal."
+      "statement": "branchSatisfiableIn_s4FC_ancestor_redirect (sorry body)",
+      "strategic": false,
+      "assumption": "N/A -- pre-existing, not introduced by this phase or this task's v4 route",
+      "why_deferred": "Inherited from v3's Phase 2 decision gate. Retained by explicit prior user decision; the plan's 'Flagged for User Decision' section names three disposition options, to be decided by the user only after Phase 8 lands and verifies (by grep) that route (3) has no consumer for this lemma. No phase of v4, including this one, touches it.",
+      "follow_up_task": null
     }
+  ],
+  "blockers": [],
+  "continuation_path": null,
+  "next_action_hint": "Dispatch wave 2: Phase 2 (GATE A, consumption -- modalTruthLemmaS4Sub over ReflTransGen (accWithReds acc red)) and Phase 3 (GATE B, establishment -- the forward-cone transfer lemmas) IN PARALLEL, per the plan's territory table (Phase 2 owns FrameCompleteness.lean's new truth-lemma section + the six hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen} hypothesis-weakenings in LoopChecking.lean; Phase 3 owns a new 'redirect transfer' section in LoopChecking.lean). LINE-NUMBER DRIFT WARNING: this phase's ~130-line insertion shifted every LoopChecking.lean declaration from the old '## Phase 7: Single-Step Invariant Preservation' heading onward by +129 lines (e.g. modalStepBranchS4Keyed_blocked_witness_mem moved from :8806-8824 to :8935-8953). The plan text still cites the OLD line numbers throughout Phases 2-12's task descriptions -- re-locate every cited declaration by name (grep -n '^lemma NAME\\|^def NAME\\|^theorem NAME') rather than trusting the plan's line numbers. Neither gate may be closed with a sorry (postmortem Do-NOT list); if either gate's obligation does not close, revert the attempt (commit no sorry), mark [BLOCKED], and record the exact lean_goal state in the plan's verdict subsection per the kill-criteria table in the Overview.",
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
+    "specs/TODO.md",
+    "specs/state.json"
   ],
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "note": "v4, 1018 lines, 12 phases, [NOT STARTED]. Sections: Overview with the route's structural claim; The Single Load-Bearing Risk Stated Up Front with a four-row kill table; Reconciliation with the recorded route-(1) mandate; a Design Decision Derived at Plan Time that REFUTES the cheap union-into-conjunct-2 design; a 12-row Preserved Assets table with dispositions; Flagged for User Decision (the :1244 sorry's obsolescence); a Tier-1 5-column Source-to-Implementation Mapping with page numbers and the declared literature divergence; Postmortem Constraints (16 do-not rules, a falsifiable structural claim with a phase-8 grep test, MUST-preserve list, 12 settled decisions); Goals/Non-Goals; 7 risks with mitigations; a 7-wave Dependency Analysis plus a per-phase territory table; 12 phases each with estimated output, done-when, split rule, and depends-on; Testing & Validation; Artifacts; Rollback."
-    },
-    {
-      "type": "plan",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-      "note": "Stamped [ABANDONED] with a Superseded-by pointer to v4, per the convention v1/v2 already use. Phase 1's [COMPLETED] heading and its four measurements are preserved verbatim; the Phase 2 Verdict is preserved verbatim as the landed refutation of the ancestor route."
+      "summary": "Phase 1 checklist items checked off, phase heading -> [COMPLETED], and a new '#### Phase 1 Statement Validation' subsection recording the realigned probe's verbatim #eval output and PASS verdict."
     }
   ],
-  "modified_files": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+  "library_files_edited": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
   ],
-  "library_files_edited": [],
   "territory_respected": [
-    "READ-ONLY on Cslib/** and CslibTests/** -- no library or test source was edited in this planning dispatch.",
-    "The sorry at Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1244 was NOT removed or modified. Verified by grep that it remains the only standalone sorry in Cslib/Logics/Modal/Tableau/.",
-    "Wrote only inside specs/553_s4_loop_guard_soundness_reachability_restriction/.",
-    "state.json was deliberately NOT modified, because the dispatch restricts staging to the task directory. See state_updates_pending in .return-meta.json for what postflight should apply.",
-    "Reports 01-04 were not edited. v3 was edited only in its two metadata lines (Status + Plan version) to add the [ABANDONED] stamp and Superseded-by pointer; its Phase 1 measurements and Phase 2 Verdict are byte-unchanged."
+    "Wrote only new declarations in LoopChecking.lean (Reds, accWithReds, hasEdge_accWithReds_iff, modalHintikkaSetS4Sub, S4KeyedSubHintikkaInv) plus the required task-dir artifacts (plan, probe). No existing declaration was edited in place.",
+    "Rules.lean, Saturation.lean, Branch.lean, SoundnessStep.lean: untouched (read-only per plan).",
+    "FrameSoundness.lean:1244 sorry: untouched.",
+    "blockingWorldS4Keyed and its three contract lemmas: untouched (byte-for-byte, verified by the successful scoped build with no regressions).",
+    "No file outside this task's declared scope (LoopChecking.lean, s4subtractive3.lean, the v4 plan, TODO.md/state.json) was modified."
   ],
-  "state_updates_pending": "Register the v4 plan artifact in state.json, replace plan_metadata with the object above, append a mandate_change_history entry for the route change from (1) 'driver-dependent Hintikka/canonical-model truth lemma' to (3) 'subtractive blocking + completeness-only redirect channel', and note the [ABANDONED] stamp in the v3 artifact summary.",
-  "requires_user_review": false,
-  "user_decision_pending": {
-    "question": "The sorry at FrameSoundness.lean:1244 is determined OBSOLETE under route (3). It stays for now per your prior decision and no phase touches it. Which disposition do you want, once phase 8 has landed and verified there is no consumer?",
-    "options": [
-      "Keep as-is (current default; requires no action, no phase depends on it). The directory's sorry census stays at 1.",
-      "Delete the lemma and its sorry -- would make Cslib/Logics/Modal/Tableau/ sorry-free. One declaration plus a scoped lake shake, but discards a machine-checked record of why the ancestor route failed.",
-      "Keep the lemma, retarget its docstring to say the obligation is dissolved rather than open."
-    ],
-    "blocking": false
-  }
+  "requires_user_review": false
 }

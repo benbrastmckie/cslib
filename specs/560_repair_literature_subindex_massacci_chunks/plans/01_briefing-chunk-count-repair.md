@@ -289,7 +289,7 @@ precedence was implemented inverted — restore child-count-first before proceed
 
 ---
 
-### Phase 2: Tier-3 fallback — count on-disk `chunk_*.md` files when both child count and `chunk_count` field are absent [NOT STARTED]
+### Phase 2: Tier-3 fallback — count on-disk `chunk_*.md` files when both child count and `chunk_count` field are absent [COMPLETED]
 
 **Goal**: Add a third fallback tier that counts `chunk_*.md` files in the document's resolved
 source directory when Tier 1 (child count) and Tier 2 (parent `chunk_count` field) both yield 0.
@@ -379,6 +379,50 @@ re-apply Phase 1 only. Phase 1 is independently valuable and shippable: if Tier 
 to work, stopping after Phase 1 leaves 8 documents repaired (including Massacci) and 13 still
 under-reporting, which is a defensible partial outcome — record it as `[PARTIAL]` rather than
 reverting Phase 1.
+
+**Verification record (observed)**:
+
+```
+1. Regression sentinel:
+   6 chunk(s), ~329042 tokens | dir: .../sources/chagrovzakharyaschev_1997_modallogic   -- PASS
+
+2. Tier-2 precedence preserved:
+   massacci_2000_single_step_tableaux_for_modal_logics: 77 chunk(s), ~30656 tokens       -- PASS
+   pacheco_2024_collapsingconstructiveandintuitionisticmodallogics: 19 chunk(s), ~7179   -- PASS
+
+3. Full-34 diff vs. Phase 1: 34 rows total, tokens unchanged (TOKENS UNCHANGED: OK),
+   exactly 11 rows changed.                                                              -- PASS
+
+4. The 11 changed rows (Phase-1 value -> Phase-2 value):
+   bentzen_2023        1 -> 33
+   burgess_1982_i       1 -> 25
+   burgess_1982_ii      1 -> 24
+   from_2022            1 -> 34
+   gabbay_1994_ch10     1 -> 12
+   henkin_1949          1 -> 27
+   hodkinson_2006       1 -> 8
+   johansson_1937       1 -> 24
+   post_1921            1 -> 46
+   rabinovich_2014      1 -> 30
+   trufas_2024          1 -> 48
+   All match the expected values exactly.                                                -- PASS
+
+5. Known residual: venema_1993 and venema_1993_since remain at 1 chunk (their on-disk
+   files are sec*.md, not chunk_*.md, confirmed via `ls` — 0 chunk_*.md files present,
+   no error emitted, clean degrade to the literal 1).                                    -- PASS
+
+6. Global index untouched: ~/Projects/Literature/index.json mtime unchanged across two
+   script invocations (before=1785105012, after=1785105012 -- identical). Pre-existing
+   `git status --porcelain` diffs in ~/Projects/Literature belong to unrelated concurrent
+   work in that shared corpus, not to this script (script performs no writes there).      -- PASS
+
+7. `<!-- lit-coverage ... -->` marker unchanged: `mode=repo seg_count=34 sparse=false
+   threshold=3` (counts documents, not chunks).                                          -- PASS
+
+8. stderr check: script run with `2>&1 >/dev/null` produced no output — no errors.       -- PASS
+```
+
+All 8 verification checks PASS.
 
 ---
 

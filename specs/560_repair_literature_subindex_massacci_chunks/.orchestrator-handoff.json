@@ -1,0 +1,14 @@
+{
+  "status": "researched",
+  "summary": "Mechanism/data-shape confirmed exactly as described, but true scope is 8-of-34 fixable documents (not 19) and the description's fix precedence is unsafe as literally stated -- it would regress chagrovzakharyaschev_1997_modallogic from 6 to 997 chunks; corrected precedence (child-count-first, chunk_count-field-second) given.",
+  "artifacts": [
+    {
+      "path": "specs/560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md",
+      "type": "report",
+      "summary": "Verified mechanism (literature-briefing.sh:203-225) and Massacci data shape; corrected scope to 8-of-34 documents genuinely fixable via chunk_count field, identified a regression risk (chagrovzakharyaschev_1997_modallogic), confirmed global mode and lit-coverage marker are unaffected, confirmed no duplicate consumers elsewhere."
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "modified_files": []
+}

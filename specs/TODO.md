@@ -26,7 +26,7 @@ next_project_number: 572
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [PLANNED] — Fill the remaining propositional/intuitionistic tableau completen
+317 [IMPLEMENTING] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
@@ -91,7 +91,7 @@ next_project_number: 572
 
 ### Literature Infrastructure
 
-560 [NOT STARTED] — [Task B2 of the modal-tableau refactor programme; P0, no dependen
+560 [RESEARCHED] — [Task B2 of the modal-tableau refactor programme; P0, no dependen
 
 ### Bimodal And Temporal Logic
 
@@ -223,10 +223,11 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 560. Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: meta
 - **Topic**: Literature Infrastructure
 - **Dependencies**: None
+- **Research**: [560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md]
 
 **Description**: [Task B2 of the modal-tableau refactor programme; P0, no dependency. REWRITTEN 2026-07-26: the original premise was verified INCORRECT and is retired.] RETIRED PREMISE, do not reinstate: the original description claimed specs/literature-index.json reports the massacci_2000_single_step_tableaux_for_modal_logics corpus as 1 chunk and needs repair. It does not. specs/literature-index.json is REFERENCE-ONLY (doc_id plus relevance; it stores no chunk counts at all) and validates clean at 34/34 doc_ids resolving against the global index. THE ACTUAL DEFECT: the '1 chunk' figure is GENERATED at briefing-build time by .claude/scripts/literature-briefing.sh:203-206, which derives a chunk count by counting global-index CHILD entries whose parent_doc equals the doc_id, with a chunk_count=1 fallback at :224. Massacci has 77 chunk_*.md files on disk and chunk_count:77 recorded on its PARENT entry, but ZERO child entries, so the child-entry count returns 0 and the fallback renders 1. The defect is SYSTEMIC, not Massacci-specific: 19 of 34 sub-index documents under-report identically, spanning 848 chunk files (simpson_1994:206, massacci:77, biermandepaiva_2000:53, alechina_2001:52, marin_2021:51, trufas_2024:48, post_1921:46, arisaka_2015:40, wijesekera_1990:38, from_2022:34, bentzen_2023:33, rabinovich_2014:30, henkin_1949:27, burgess_1982_i:25, burgess_1982_ii:24, johansson_1937:24, pacheco_2024:20, gabbay_1994_ch10:12, hodkinson_2006:8). CONSEQUENCE: every --lit briefing built over these documents understates available material by up to two orders of magnitude, which plausibly contributed to earlier under-use of the Massacci corpus. FIX (preferred, lowest risk): in .claude/scripts/literature-briefing.sh, prefer the parent entry's existing chunk_count field over the derived child-entry count, falling back to the child count only when the parent carries no chunk_count. This repairs all 19 documents without mutating corpus data. DO NOT fix this by rewriting ~/Projects/Literature/index.json: that is the user's SHARED global corpus, outside this repository, and mutating it affects every project on this machine. VERIFICATION: after the change, a briefing over massacci_2000_single_step_tableaux_for_modal_logics must report 77 chunks, and the sparse-coverage marker (<!-- lit-coverage ... -->) must reflect the corrected count; spot-check at least three further documents from the list above. Provenance: diagnosed during the modal-tableau refactor programme's baseline-capture phase; see specs/557_modal_tableau_refactor_abstractions_boneyard/artifacts/baseline.md.
 
@@ -705,7 +706,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 552

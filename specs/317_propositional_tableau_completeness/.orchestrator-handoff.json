@@ -2,36 +2,50 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Landed real, sorry-free progress on Phase 9's GAP 1 (fuel entanglement): a genuine termination bound for applyPersistenceFixpoint's own recursion (applyPersistenceFixpoint_genuine_of_count_le_fuel + 2 supporting lemmas, Scheme.lean, commit a0a16c4b). GAP 2 (determinacy) confirmed BLOCKED by a sharper finding: the persistent T(->) rule is .pos-only, so Sub(phi0) bivalence at every world is not derivable from the existing rule set -- it needs a new tableau branching rule, a calculus-level change out of Phase 10's completeness-side scope. Four inventory sorries unchanged; scoped builds green.",
+  "summary": "Plan v11, Phases 0-1 completed and committed (verification spike; sat_timp field added to IBranchSaturation and mechanically discharged at IExpandedConsistent_sat, the sole construction site). Phase 2 (universe/measure invariant threading) blocked on two compounding, verified obstacles: (1) intUniverse/intExpMeasure are declared ~450-950 lines after intExpandBranches_openBranch_sat in Scheme.lean, a genuine forward-reference confirmed by a real build error -- this independently corroborates a prior v6-plan handoff's own decision note about the same forward-declaration constraint; (2) maintaining universe-membership across the F-imp world-creating recursive step needs an intExpandBranches_world_bound lemma (nextWorld <= phi0.complexity + 1) that Scheme.lean documents in three places as an unbuilt 'continuation, see handoff' item, not a mechanical assembly step. No sorry/axiom/vacuous statement was introduced; a broken in-progress edit was reverted (git checkout --) back to the Phase-1-committed green state. Phases 3-7 not attempted (transitively blocked). A positive finding: Phase 3's zero case is easy given the invariant (intExpMeasure <= 0 forces branches = [], contradicting the openBranch result) -- simpler than the plan's own description.",
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md"
+      "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/317_propositional_tableau_completeness/summaries/11_tableau-completeness-assembly-summary.md"
     }
   ],
   "blockers": [
     {
-      "description": "Determinacy (Sub(phi0) bivalence at every reachable world) is not a byproduct of the existing tableau rule set (Rules.lean's 5 decomposition rules + 1 world-creating rule): the persistent T(->) rule is .pos-only and never plants F-tags across worlds. Closing this needs a NEW tableau branching rule (Lindenbaum-style 'decide undecided Sub(phi0) member' step) added to Rules.lean/Expansion.lean, then a soundness re-audit (task 316 territory) -- a calculus redesign, not a Scheme.lean-internal fix. Recommend spinning off a new research+plan task for this before further /implement dispatch on Phase 9/10.",
-      "phase": "phase-10",
+      "description": "Phase 2's universe/measure invariant threading is blocked by (a) a forward-reference: intUniverse/intExpMeasure are declared after intExpandBranches_openBranch_sat, requiring relocation of ~950 lines of already-landed code; and (b) a missing intExpandBranches_world_bound lemma (nextWorld <= phi0.complexity + 1) needed to maintain universe-membership across the F-imp world-creating step, explicitly documented in-file (Scheme.lean:2025-2038, :2052-2055, :2536-2538) as an unbuilt continuation requiring a new injective worlds-to-imp-positions argument. See handoffs/11_phase2-blocker-findings.md for full evidence and a re-plan recommendation.",
+      "phase": "phase-2",
       "severity": "hard"
     }
   ],
   "next_action_hint": "plan",
   "files_modified": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md"
+    "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md"
   ],
   "decisions_made": [
-    "Placed the new gap-1 lemmas after intExpMeasure_init_le_fuel (end of file) rather than near the STOP-gate prose, since their dependencies (intUniverse, applyAllTImpRules_subset, intCount_notMem_append_drop/_mono) are defined later in the file and Lean requires forward declaration.",
-    "Did not add a sat_timp field (even in the weak, fixpoint-provable form) since it would sit unused until GAP 2 has a resolution -- avoids unused scaffolding masquerading as progress."
+    "Reverted the broken in-progress Phase 2 edit via git checkout -- rather than leaving a non-building state or forcing a sorry/workaround.",
+    "Did not attempt the ~950-line intUniverse/intExpMeasure relocation or invent intExpandBranches_world_bound within this dispatch: both are separately-sized units of work, not slack inside Phase 2/3's stated budget.",
+    "Recorded that Phase 3's zero case is easy given the invariant (a short contradiction from intExpMeasure <= 0), simpler than the plan's own described argument, so a future dispatch does not re-derive this."
   ],
   "dead_ends": [
-    "Do not attempt to discharge GAP 2 via sorry, a vacuous statement, or by weakening truthLemma's T-imp case -- it requires new tableau infrastructure, not a proof trick."
+    "Do not add phi0-dependent hypotheses (hUniv/hMeasure) to intExpandBranches_openBranch_sat's signature without first relocating intUniverse/intExpMeasure earlier in the file -- confirmed via a real build error (Function expected at intUniverse/intExpMeasure), not a hypothesis.",
+    "Do not assume Phase 2 and Phase 3 are separable at the Lean level: Lean's `induction ... generalizing` automatically sweeps any new hypothesis depending on the generalized variables into the reverted set, so adding hUniv/hMeasure to the signature immediately forces every existing ih/ih_inner call site to supply them -- there is no way to add the hypotheses in Phase 2 and defer their use to Phase 3."
   ],
   "continuation_context": {
     "handoff_path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-    "phases_completed": 8,
-    "phases_total": 11
+    "phases_completed": 2,
+    "phases_total": 8
   },
   "plan_markers_verified": true
 }

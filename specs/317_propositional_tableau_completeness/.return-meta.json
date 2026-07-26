@@ -1,61 +1,67 @@
 {
-  "status": "planned",
-  "summary": "Hard-mode plan v7 written to plans/11_tableau-completeness-assembly.md. Eight H8-sized phases (0-7) opening with a mandated lean_goal verification spike, explicitly superseding plan v6's [BLOCKED] Phases 9/10 with a preserved-assets table of 17 landed components. Refutes the task description's 'assembly only' framing: items (2)/(3) require new universe/measure invariant threading through intExpandBranches_openBranch_sat (split across Phases 2-3 per research guidance), and item (4) needs an atom-persistence obligation plus a premise narrowing on tableau_complete. Surfaces a new load-bearing finding the research missed: tableau_complete's hvalid premise quantifies over arbitrary edges/b, making both bridge sorries unprovable at their current statement independent of persistence machinery. Not a skeleton plan; rationale for declining the strategic-sorry route is recorded in Rollback/Contingency.",
+  "status": "partial",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md",
-      "summary": "Hard-mode implementation plan v7: 8 phases, verification spike first, invariant threading split, preserved-assets accounting against v6, 12 postmortem constraints, measurable sorry baseline (4 in-tree / 29 repo-wide via strict scan)"
+      "path": "specs/317_propositional_tableau_completeness/summaries/11_tableau-completeness-assembly-summary.md",
+      "type": "summary",
+      "summary": "Phases 0-1 complete (sat_timp field landed, mechanically discharged); Phase 2 blocked on a forward-reference and a missing world-bound lemma, with a re-plan recommendation"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md",
+      "type": "handoff",
+      "summary": "Phase 0 verification spike decision record"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md",
+      "type": "handoff",
+      "summary": "Phase 2 blocker: forward-reference + missing intExpandBranches_world_bound lemma, with a positive finding on Phase 3's zero case"
     }
   ],
-  "postmortem_rules_count": 12,
-  "plan_metadata": {
-    "phases": 8,
-    "total_effort_hours": 18,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 7,
-    "dependency_waves": [[0], [1], [2], [3], [4], [5], [6], [7]],
-    "reports_integrated": [
+  "phases_completed": 2,
+  "phases_total": 8,
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+  ],
+  "sorry_inventory": {
+    "before": 4,
+    "after": 4,
+    "remaining": [
       {
-        "path": "specs/317_propositional_tableau_completeness/reports/11_team-research.md",
-        "integrated_in_plan_version": 7,
-        "integrated_date": "2026-07-26"
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "line": 599,
+        "goal": "truthLemma T-imp case (needs sat_timp + ITimpAccess, Phase 4/5)"
       },
       {
-        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-a-findings.md",
-        "integrated_in_plan_version": 7,
-        "integrated_date": "2026-07-26"
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "line": 1517,
+        "goal": "intExpandBranches_openBranch_sat fuel=0 base case (needs the blocked Phase 2 invariant; zero-case argument itself shown easy given the invariant)"
       },
       {
-        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-b-findings.md",
-        "integrated_in_plan_version": 7,
-        "integrated_date": "2026-07-26"
+        "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+        "line": 133,
+        "goal": "intuitionisticTableau_complete bridge (needs Phase 7 premise narrowing)"
       },
       {
-        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-c-findings.md",
-        "integrated_in_plan_version": 7,
-        "integrated_date": "2026-07-26"
-      },
-      {
-        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-d-findings.md",
-        "integrated_in_plan_version": 7,
-        "integrated_date": "2026-07-26"
+        "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+        "line": 125,
+        "goal": "minimalTableau_complete bridge (needs Phase 7 premise narrowing)"
       }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
+    ]
+  },
+  "ci_status": {
+    "lake_build": "pass (scoped: Intuitionistic.Scheme, Intuitionistic.Completeness, Minimal.Completeness); full lake build fails due to an unrelated pre-existing task-554 breakage in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean, verified via clean git status on that path",
+    "lake_test": "pass (scoped: CslibTests.TableauConformance, the 43-row regression guard)",
+    "checkInitImports": "fail (transitively, only because the unrelated full-project build failure prevents oleans from existing; not evaluable independently)",
+    "lint_style": "not run (blocked by the unrelated pre-existing full-build failure)",
+    "shake": "not run (blocked by the unrelated pre-existing full-build failure)"
   },
   "memory_candidates": [
-    "A sorry-free Lean lemma with zero call sites is not usable work: check whether its hypotheses can be supplied at the intended use point before treating it as closing an obligation. Task 317's intExpMeasure_* family and applyPersistenceFixpoint_genuine_of_count_le_fuel were all sorry-free and all dead code.",
-    "Contradictory in-file Lean docstrings are settled by `git blame` commit ordering, not by judgment about which reads more authoritative. In Scheme.lean the 'RESOLVED' note at :488 postdates the 'BLOCKED' note at :3001 by fifteen hours and was written by the commit that landed the missing rule.",
-    "When a completeness theorem's validity premise is universally quantified over arbitrary structures (e.g. `forall edges b, IForces ...`), the caller's bridge obligation may be outright false; the premise must be narrowed with the witness the proof actually produces before the bridge sorry becomes provable.",
-    "Read-only import dependencies are a real territory hazard under concurrent sessions: pin the dependency file's SHA and re-check it at every phase start, rather than assuming a file is inert because the task never writes to it.",
-    "Repo-wide `grep -rn sorry` over a Lean codebase conflates tactic uses with prose; a strict scan (`^[[:space:]]+sorry[[:space:]]*(--.*)?$` plus `(:=|by|<;>|;)[[:space:]]+sorry`) plus a `#print axioms` sorryAx check is the usable measurement."
+    "In Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean, intUniverse/intExpMeasure/intSubfmls/intWork are declared AFTER intExpandBranches_openBranch_sat and after tableau_complete. Any future work needing to reference intUniverse/intExpMeasure in intExpandBranches_openBranch_sat's own signature will hit a forward-reference build error and must relocate that block first. A prior (superseded) v6-plan handoff independently hit and noted this same constraint when placing new lemmas 'after intExpMeasure_init_le_fuel... since Lean requires forward declaration.'",
+    "Lean's `induction ... generalizing x y z` automatically reverts (and forces case-by-case re-proof of) any hypothesis in context that depends on x/y/z, even if not named in the generalizing list. This means a plan that splits 'add new invariant hypotheses to a recursive lemma's signature' (one phase) from 'maintain them across the recursive cases' (a later phase) is not actually separable once those hypotheses are added -- the moment they exist and mention a generalized variable, every existing recursive call site must supply them.",
+    "intExpandBranches_world_bound (nextWorld <= phi0.complexity + 1, needed to bound freshly-created tableau worlds within the fixed finite intUniverse) is explicitly documented in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean (three places: ~2025-2038, ~2052-2055, ~2536-2538) as an unbuilt 'continuation, see handoff' -- it requires a new injection argument (worlds created -> distinct .imp-node positions of phi0's parse tree, using the already-proven intSubfmls_impCount_le as the combinatorial ingredient) and should be budgeted as its own phase, not assumed available inside adjacent invariant-threading work.",
+    "For the intuitionistic tableau's base-3 damped worklist measure (intExpMeasure = sum of 3^intWork per branch), every summand is >= 1 unconditionally (3^n >= 1 for all n:Nat). This means 'measure <= fuel' with fuel=0 forces the branches list to be EMPTY, not merely 'fully saturated' -- the fuel=0 base case of a measure-driven termination argument closes by a short contradiction (nonempty branches -> measure >= 1 > 0) whenever the caller's postcondition (e.g. .openBranch b) itself requires a nonempty branches list, rather than needing the more elaborate 'measure=0 implies every cell already recorded' argument one might first reach for."
   ],
-  "metadata": {
-    "session_id": "sess_1785107692_362f1e",
-    "agent_type": "planner-hard-agent",
-    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"]
+  "completion_data": {
+    "completion_summary": "Plan v11 Phases 0-1 completed and committed (verification spike; sat_timp field added to IBranchSaturation and mechanically discharged). Phase 2 blocked on a verified forward-reference plus a missing intExpandBranches_world_bound lemma explicitly flagged in-file as an unbuilt continuation; recommend re-planning Phases 2-7 as a new round. No sorry/axiom/vacuous statements introduced; task-tree sorry count unchanged at 4."
   }
 }

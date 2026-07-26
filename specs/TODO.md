@@ -1,5 +1,5 @@
 ---
-next_project_number: 558
+next_project_number: 572
 ---
 
 # TODO
@@ -11,10 +11,12 @@ next_project_number: 558
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,400,409,425,440,465,466,511,530,534,554,555,556,557 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,430,450,456,497,506,537,548,551,553 | 36,37,181,317,425,511,554,557 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,506 | foundations, modal logic, code hygiene |
-| 4 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,555,558,559,560,561,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,400,430,450,456,497,537,551,562,563,568,571 | 36,37,181,317,425,465,530,554,561 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,511,553,564 | 39,40,375,562,563 | foundations, modal logic, code hygiene |
+| 4 | 506,548,565,566 | 511,564 | modal logic |
+| 5 | 300,567 | 506,558,559,565,566 | modal logic |
+| 6 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -25,45 +27,58 @@ next_project_number: 558
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [NOT STARTED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
-400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
 
-511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-  └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-    └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-  └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-554 [PARTIAL] — Research-only task: establish or refute the CS5 pair-seed disjunc
+554 [RESEARCHED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-557 [RESEARCHED] — Refactor and restructure the modal Tableau subsystem to library-p
-  └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+558 [NOT STARTED] — [Task A of the modal-tableau refactor programme; P0, highest valu
+  └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
+559 [NOT STARTED] — [Task B of the modal-tableau refactor programme; P0, no dependenc
+  └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
+561 [NOT STARTED] — [Task C of the modal-tableau refactor programme; P1. THIS IS THE 
+  └─ 562 [NOT STARTED] — [Task D of the modal-tableau refactor programme; P2. Gated on the
+    └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
+      └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
+        └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
+      └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
+        └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
+  └─ 563 [NOT STARTED] — [Task E of the modal-tableau refactor programme; P2. Gated on the
+    └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+      └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+        └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+      └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+    └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+    └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the (see above)
 
 ### Temporal Logic
 
-425 [BLOCKED] — [Decomposed from task 301, blocker C.] Establish the finite model
+425 [NOT STARTED] — [Decomposed from the temporal tableau umbrella, blocker C.] BLOCK
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+569 [NOT STARTED] — [Created by the blocked-task review to break a two-task deadlock.
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
 ### Bimodal Logic
 
-36 [BLOCKED] — Port discrete completeness (completeness_discrete theorem) and We
-  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
+36 [NOT STARTED] — Port discrete completeness (completeness_discrete) from upstream 
+  └─ 215 [BLOCKED] — Fill the discrete-gated sorry declarations in Cslib/Logics/Bimoda
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
-  └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
+  └─ 571 [BLOCKED] — [Carved off the bimodal sorry task by the blocked-task review. Ho
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
 
 ### Code Hygiene
 
-530 [BLOCKED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
+530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
@@ -77,9 +92,17 @@ next_project_number: 558
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
-### Temporal Tableau Saturation
+### Literature Infrastructure
 
-556 [NOT STARTED] — Discharge the Phase 3 STOP-gate left open by design in the tempor
+560 [NOT STARTED] — [Task B2 of the modal-tableau refactor programme; P0, small, no d
+
+### Bimodal And Temporal Logic
+
+568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
+
+### Constructive Modal Logic
+
+570 [NOT STARTED] — [Created by the blocked-task review: this sorry was flagged in-co
 
 ### Uncategorized
 
@@ -87,24 +110,158 @@ next_project_number: 558
 
 ## Tasks
 
+### 571. Fill the strict-Until/Since-gated Bimodal sorries (SuccRelation, UntilSinceCoherence)
+- **Status**: [BLOCKED]
+- **Task Type**: cslib
+- **Topic**: Bimodal Logic
+- **Dependencies**: Task 37
+
+**Description**: [Carved off the bimodal sorry task by the blocked-task review. Holding both halves as one task pinned the tractable discrete half behind this intractable one; they have different external gates and different prospects.] Fill the sorries gated on the strict Until/Since semantics gap in Cslib/Logics/Bimodal/Metalogic/:
+- Bundle/SuccRelation.lean: 7 sorries (lines 257, 263, 270, 277, 284, 289, 294)
+- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 38, 43)
+
+All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T axioms) under the strict Until/Since reading. They are therefore not merely unproved -- the statements may need restating before they are provable at all. Gated on the bimodal continuous port, which is itself gated on upstream BimodalLogic tasks 390/391 (Dedekind carrier construction and FrameClass scaffolding), both [NOT STARTED] upstream. Line numbers are as measured 2026-07-26. BEFORE PLANNING, establish whether the 9 obligations are stated soundly under the current semantics: if the removed axioms were genuinely unsound, some of these may need to be restated or retired rather than proved, and that determination should precede any port dependency.
+
+---
+
+### 570. Discharge nested_sound_impL via the source's induction over the Lambda chain
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Constructive Modal Logic
+- **Dependencies**: None
+
+**Description**: [Created by the blocked-task review: this sorry was flagged in-code as needing 'a dedicated later phase (not yet numbered in the plan)' and had NO tracking task.] Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315 carries a documented strategic sorry in nested_sound_impL (soundness of the nested-sequent rule impL / imp-bullet). THE OBLIGATION: the source needs its own induction on n over the Lambda{ } chain (the L_X, L_Y, L_Z construction, page 10), mixing ctx.outputPruning.fillRhs-shaped and ctx.fillLhs-shaped premises against a ctx.fillLhs-shaped conclusion. It does NOT reduce to the already-landed congruence lemmas 4.4 / 4.5 / 4.8 alone -- that was checked and is why it was deferred rather than attempted. Build the Lambda-chain induction, then discharge the rule. Note the cut rule and NestedProof.CutFree are already landed and verified. INVARIANTS: no new axioms; the Cslib/ bare-sorry count must go DOWN by one; lake build and lake test green.
+
+---
+
+### 569. Establish whether continuous time needs axioms beyond density (Burgess 1982)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Temporal Logic
+- **Dependencies**: None
+
+**Description**: [Created by the blocked-task review to break a two-task deadlock.] RESEARCH ONLY. Both the temporal and bimodal continuous-completeness tasks are recorded as blocked on 'the continuous case has not been developed upstream' -- but their SHARED real blocker is a literature question that depends on neither, and can be answered today: DO CONTINUOUS (Dedekind-complete) FRAMES REQUIRE ANY AXIOM BEYOND DENSITY? The standard result attributed to Burgess 1982 is that the Until/Since temporal logic over the reals has exactly the same theorems as over the rationals, which would make density sufficient and collapse both continuous tasks to near-trivial transports of the already-landed dense completeness. That equivalence is precisely what has never been checked here. DETERMINE: (1) the exact statement and proof strategy of the Burgess result, from the source -- not from secondary recollection; (2) whether it applies to THIS repository's Until/Since temporal language and frame conditions, or only to a variant; (3) if it applies, the cheapest sound route to a Continuous frame class and its completeness theorem, and whether the bimodal continuous port is needed at all or can be bypassed; (4) if it does NOT apply, which additional axiom schema (Dedekind completeness or equivalent) is required, and what that costs. Run with --lit. A negative or 'genuinely open' verdict is a valid deliverable. CONSUMERS: the temporal continuous-completeness task (which may be re-scoped or unblocked outright on the verdict) and the bimodal continuous port (which may turn out to be unnecessary as a dependency).
+
+---
+
+### 568. Research the highest-quality Chronicle-structure refactor for Bimodal/Temporal dedup
+- **Status**: [BLOCKED]
+- **Task Type**: cslib
+- **Topic**: Bimodal and Temporal Logic
+- **Dependencies**: Task 530
+
+**Description**: [Follow-on created by the blocked-task review, at explicit user request, to run AFTER the Chronicle consolidation task closes as a descoped partial.] RESEARCH ONLY -- produce a recommendation, do not implement. THE QUESTION: the Bimodal and Temporal Chronicle trees remain ~89% duplicated. The consolidation task successfully lifted ChronicleInterface, generic Types, the RRelation shared core and the CEE Structures + BurgessHelpers, then hit a hard wall: C5ForwardWalkResult, C5BackwardWalkResult, EliminationResult and ChronicleConstruction are indexed by each tree's LOCAL Chronicle Atom structure, and two independent deep investigations confirmed that generically bridging that indexing breaks downstream rcases/simp proofs. Descoping was the right call for a task mandated as 'structural dedup, not a proof change'; it does not answer what the RIGHT architecture is. DETERMINE: whether a Chronicle-type-alias architecture, a parameterization over the label type, a typeclass-mediated indexing, or some fourth option lets the walk-result and construction layers be shared without perturbing the proof scripts that consume them -- and what each would cost. Establish this against the actual proof scripts that broke, not against the type signatures alone; the failure mode was rcases/simp behaviour, so a design that type-checks is not evidence. REPORTING CONTRACT: deliver either (a) a concrete architecture with a phase-sized implementation sketch and an honest cost, or (b) a reasoned finding that the duplication is the correct steady state for this subsystem, with the reason stated in terms a future reader can act on. (b) is a valid and useful deliverable -- do not manufacture a refactor to avoid it. CONSTRAINTS: preserve every landed sorry-free result; do not entangle the discrete-completeness sorries in the bimodal tree, which are gated on a separate external port.
+
+---
+
+### 567. Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 558, Task 559, Task 561, Task 562, Task 563, Task 564, Task 565, Task 566
+
+**Description**: [Task I of the modal-tableau refactor programme; P4, final acceptance gate. Depends on every other task in the programme.] Run the seven-step CI order from .claude/rules/cslib.md against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md and CODE_OF_CONDUCT.md. It has never been run on this subsystem. PREREQUISITE, budget for it: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear that before verification against the stated gate is meaningful. ACCEPTANCE CRITERIA: behaviour preservation demonstrated by modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) remaining green; the Tableau sorry census not rising above its measured baseline of exactly 1; no new axioms above the measured subsystem baseline of zero; checkInitImports and lint-style clean; and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean, 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts EXACTLY.
+
+---
+
+### 566. Create Boneyard/ with its convention and move only re-verified zero-consumer declarations
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 564
+
+**Description**: [Task H of the modal-tableau refactor programme; P3.] Create Boneyard/ at the repository root (it does not currently exist here; the convention is borrowed from the upstream repository, where it holds roughly 27k lines and 29 sorries excluded from porting, censuses and the build). Document the convention in Boneyard/README.md: quarantined, never imported by Cslib/, excluded from lake build, mk_all, lint-style, shake and all sorry/axiom censuses, retained for provenance rather than use. MOVE, never delete. RE-RUN THE CONSUMER AUDIT AT EXECUTION TIME -- the recorded audit is dated and this is a multi-task programme. Eligible subject to that re-check: blockedRedirect_diaNeg_mem_of_diaOrigin, blockedRedirect_boxctx_mem_of_boxOrigin, the keysRootEmpty / keysRootEmpty_entry pair, and the two outDegEq preservation lemmas ONLY if the migration task actually landed the field removal. TWO CARVE-OUTS ARE MANDATORY. (1) FrameSoundness.lean:1220-1244 (branchSatisfiableIn_s4FC_ancestor_redirect) is IMMOVABLE despite being zero-consumer: it carries the retained sorry that is an explicit user decision, and the rule protecting proven-and-consumed code does not by itself protect it. (2) keysOriginS4 is NOT eligible -- it has 22 code consumers, and the comment at LoopChecking.lean:2001-2002 claiming it was removed is FALSE. Nothing whose deletion cannot be justified by a re-verified zero-consumer check may be moved, and nothing proven and consumed may be moved at all. Also NOT eligible, these are route-independent assets to be PLACED by the abstraction decision rather than quarantined: modalS4Saturated (7 consumers), the strictly-weakened hintikkaS4 bridges (the set is 8, measured, not 10), hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_{boxPos,diaNeg}_mem transfers with their Reds / accWithReds packaging.
+
+---
+
+### 565. Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 561, Task 563, Task 564
+
+**Description**: [Task G of the modal-tableau refactor programme; P3. Depends on the review gate, box-plus and the migration, because the seams MOVE if box-plus is adopted.] Split LoopChecking.lean (10,540 lines / 230 declarations, measured) into an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules. Note that these clusters' current source ranges are DISCONTIGUOUS -- itself the evidence that a line-count split would be wrong. DO NOT split mechanically by line count. Conform to ORGANISATION.md and NOTATION.md, preserve import acyclicity, and UPDATE ORGANISATION.md, which currently gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. The Support-module dedup task should land first: it shrinks the files before the seams are cut.
+
+---
+
+### 564. Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated keys' derivation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 562, Task 563
+
+**Description**: [Task F of the modal-tableau refactor programme; P3.] Migrate the S4 Keyed and KeyedOrdered drivers onto the RuleApplySt / St ladder and retire the duplicated keys' re-derivation -- the stepper currently re-derives the blockingWorldS4Keyed decision that modalApplyOneS4Keyed already made internally (LoopChecking.lean:951-953). Retiring that double derivation is where the unquantified line-count reduction actually lives. This task, NOT the Boneyard task, owns any removal of the S4LoopInv.outDegEq field. That removal is NOT a pure deletion: outDegEq has zero code consumers but its preservation proof is 386 lines across two variants (LoopChecking.lean:4917-5105 and an undocumented second ordered variant at :5111-5307), and it has THREE provision sites -- LoopChecking.lean:7569, :7633, and a POSITIONAL anonymous-constructor site inside modalTableauS4Keyed_initial at FrameCompleteness.lean:4217-4218, i.e. inside the landed completeness capstone. Run lake build before and after; if the cascade into the four other invariant proofs that destructure the structure is large, KEEP the field -- 386 lines are not worth a regression.
+
+---
+
+### 563. Adopt Lemmon box-plus pairing at the birth-key level
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 561
+
+**Description**: [Task E of the modal-tableau refactor programme; P2. Gated on the review gate. This task is the live gate for BOTH the S4 termination follow-on and the S4 keyed soundness task -- keys and mint payload both change here, so land it before either resumes.] Add boxPlusPair and BoxPlusClosed; enrich successorBirthContent (LoopChecking.lean:384-393) to emit BOTH members of each pair -- {(pos, psi), (pos, box psi)} where it currently emits only the unwrapped (pos, psi) for T(box psi)@w -- and extend the two _preserves_keyLowerBd proofs accordingly. The enriched key stays inside the existing codomain signedSubfmls phi0 (modalSubfmls (.box a) = .box a :: modalSubfmls a, FmpMeasure.lean:79), so signedSubfmls_card_le, signedSubfmls_powerset_card_le, modalWorldBoundS4 and the pigeonhole argument are UNCHANGED -- box-plus is free in the world bound. The source never iterates box-plus beyond depth 1; where more discriminating power is needed it enlarges the filter Sigma instead, which WOULD change the codomain and is therefore expensive -- enrich with box-plus, not with the filter. Prior art to reuse: modalFourBoxProp (FrameRules.lean:133-138) and boxDiamondPersistence (Bimodal Tableau.lean:344) are already box-plus at the RULE level; only the key level is missing. THE ONE REAL RISK, and the mandatory gate: enriching keys changes which steps block, so modalTableauS4Keyed_complete may break. Gate on lake build Cslib.Logics.Modal.Tableau.FrameCompleteness. If it breaks, the completeness proof is quantified over driver behaviour (modalExpandBranchesS4Keyed_hintikka) and should transport -- but that must be DEMONSTRATED, not assumed. If it cannot be repaired sorry-free, mark [BLOCKED]; do NOT add a sorry. Box-plus is S4-scoped (the Lemmon filtration and ChagrovZakharyaschev Proposition 3.6 are stated for TRANSITIVE models only, satisfied by s4FC) and MUST NOT be lifted into Foundations/.
+
+---
+
+### 562. Introduce RuleApplySt additively and bridge modalExpandBranchesGen
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 561
+
+**Description**: [Task D of the modal-tableau refactor programme; P2. Gated on the review gate.] MANDATORY FIRST STEP, non-negotiable per the programme constraint: a consumer audit of Saturation.lean before any edit. Then generalise RuleApply (Saturation.lean:107-111) to RuleApplySt sigma, with RuleApply = RuleApplySt Unit, added PURELY ADDITIVELY as new declarations -- modalExpandBranchesGen is never edited -- and prove modalExpandBranchesGen_eq_St. Zero risk to landed theorems by construction: because nothing existing is edited, none of the six true-rfl driver bridges (modalTableauB_eq, modalTableauS5_eq, modalTableauFive_eq, modalTableauKb5_eq, modalTableauKb5''_eq, modalExpandBranchesB_eq) can break. Migration onto the ladder and retirement of the double derivation are a SEPARATE, later task -- do not start them here.
+
+---
+
+### 561. REVIEW GATE: decision record adopting or rejecting box-plus birth keys and RuleApplySt
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: [Task C of the modal-tableau refactor programme; P1. THIS IS THE REVIEW GATE. No file may be moved or split, and no abstraction may be implemented, until this decision record is reviewed and ACCEPTED.] Produce an explicit decision record adopting or rejecting (a) Lemmon box-plus birth keys and (b) the RuleApplySt generalization, on the evidence in the refactor research report's sections 3-5. Its input already exists -- this task has no research dependency. For (a): successorBirthContent (LoopChecking.lean:384-393) records only the unwrapped (pos, psi) when T(box psi)@w is on the branch, while relevantSetFinset records both wrapped and unwrapped forms; that asymmetry IS the wrapped/unwrapped mismatch that killed one of the dead soundness routes. Box-plus is licensed for S4 BY NAME (ChagrovZakharyaschev1997 Corollary 5.32) and is FREE in the world bound (modalSubfmls (.box a) = .box a :: modalSubfmls a, FmpMeasure.lean:79, keeps the enriched key inside signedSubfmls, leaving the cardinality lemmas, modalWorldBoundS4 and the pigeonhole argument untouched). Scope the expectation down: it subsumes none of the 8 bridges outright, collapses AT MOST 2 (the box_pos_self and dia_neg_self reflexive instances), and does NOT touch the reachability defect. It is S4-scoped and MUST NOT be lifted into Foundations/. For (b): exactly ONE driver family of nine forks off modalTableauGen / modalExpandBranchesGen -- the S4 Keyed and KeyedOrdered pair -- and only because RuleApply (Saturation.lean:107-111) has no slot for per-driver state, forcing the stepper to RE-DERIVE the blockingWorldS4Keyed decision modalApplyOneS4Keyed already made internally (admitted at LoopChecking.lean:951-953). The record must also state the disposition of the two downstream consumers waiting on it: the S4 termination follow-on and the S4 keyed soundness task, whose keys and mint payload both change under (a). Blocks every implementation task in this programme.
+
+---
+
+### 560. Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Literature Infrastructure
+- **Dependencies**: None
+
+**Description**: [Task B2 of the modal-tableau refactor programme; P0, small, no dependency.] specs/literature-index.json reports massacci_2000_single_step_tableaux_for_modal_logics as having 1 chunk; the corpus directory holds 77 (chunk_0001-chunk_0077) plus a full-text file. A --lit briefing built on that entry understates the available material by two orders of magnitude, which plausibly contributed to earlier S4 soundness dispatches working from relevance notes rather than from the source -- a direct, traceable cost to four failed routes. Run /literature --validate, repair the entry, and sweep the rest of the sub-index for the same class of undercount. Also verify the BibKey/doc_id mismatch noted in the refactor research: the Blackburn corpus doc_id is blackburn_2002 while the repository BibKey is Blackburn2001 -- decide and record which is canonical rather than leaving both live.
+
+---
+
+### 559. Land the measured Tableau baseline and correct four documentation defects
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: [Task B of the modal-tableau refactor programme; P0, no dependency, runs in parallel with the Support dedup task.] Land the measured baseline table (with its exact reproduction commands) into the modal Tableau subsystem's module documentation, so the asserted-vs-actual drift that this programme's research found cannot recur. Measured figures: LoopChecking.lean 10,540 lines / 230 declarations; FrameSoundness.lean 5,317; FrameCompleteness.lean 4,307; three-file total 20,164; redirect semantic surface 4 clauses / 14 code lines at LoopChecking.lean:6557-6562; the hintikkaS4 bridge set is 8, not ten; subsystem axiom declarations 0; subsystem sorry census exactly 1. CORRECT EXACTLY FOUR ADJUDICATED DEFECTS, leaving the seven verified-TRUE claims alone: (1) LoopChecking.lean:2001-2002 -- the claim that keysOriginS4 was removed is FALSE (it has 22 code consumers); (2) LoopChecking.lean:8911-8912 -- stale references to the two _boxed reflTransGen bridge variants, removed in commit c4b33f63; (3) LoopChecking.lean:2000-2004 -- resolve the 'possibly orphaned' hedge on keysRootEmpty using the consumer audit as evidence; (4) FrameSoundness.lean:1215-1219 -- add BOTH the zero-consumer fact AND the finding that Massacci2000 Theorem 8.1 (blocking preserves satisfiability) is STATED AND NEVER PROVED there (Appendix B.2 proves only Theorem 8.4; section 10.2 defers 8.1 to Gore's model graphs), because that changes how a future reader assesses the obstruction and prevents another route from trying to reconstruct a proof its cited source does not contain. Documentation-only: no proof or definition may change.
+
+---
+
+### 558. Extract re-derived private Tableau facts into public Support modules
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: [Task A of the modal-tableau refactor programme; P0, highest value/risk ratio in the whole programme, NO dependency on any other task.] Cslib/Logics/Modal/Tableau/ contains 77 comment-attested 'Local re-derivation of X (unavailable across files)' sites, root-caused by FmpMeasure.lean marking 50 declarations private: modalSubfmls_trans is re-derived in three files (S5Simplification.lean:97, FiveSimplification.lean:736, BDriver.lean:211), modalKnownWorlds_fold_spec in four, hasEdge_addEdge_cases in four. Extract those facts as PUBLIC declarations into Cslib/Logics/Modal/Tableau/Support/{Subfmls,KnownWorlds,Accessibility}.lean and DELETE the 77 re-derivations. This is mechanical and behaviour-preserving by construction, requires no abstraction decision, and it shrinks the oversized files BEFORE any split seams are chosen -- so it must precede the module split. Verify with lake build, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix. Constraint: do not edit Rules.lean, Saturation.lean or Branch.lean. Preserve every proven, consumed result; modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) must be green at every commit. Subsystem sorry census must stay at exactly 1 (FrameSoundness.lean:1244, retained by explicit user decision) and axiom count at 0.
+
+---
+
 ### 557. Modal tableau refactor abstractions boneyard
-- **Status**: [RESEARCHED]
+- **Status**: [EXPANDED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [557_modal_tableau_refactor_abstractions_boneyard/reports/01_tableau-abstraction-boneyard-analysis.md]
 
 **Description**: Refactor and restructure the modal Tableau subsystem to library-publication quality, identifying the correct abstractions and module divisions, archiving unnecessary code to a new Boneyard/ quarantine, and systematically discharging the documentation debt. MOTIVATION: four successive soundness routes for the S4 keyed loop-check guard have failed at the same obligation by four different mechanisms (Route P: redirect-inertness lemmas machine-checked FALSE at a reachable state; origin-edge invariant revision: abandoned; ancestor-only blocking: defeated by the existentially arbitrary branchSatisfiableIn witness model; subtractive blocking with a completeness-only redirect channel: its free transfer yields only an UNWRAPPED branch fact at the redirect target). This task treats the factoring as a first-class defect rather than continuing to route around it. It is NOT a soundness-proof task and must not attempt the soundness obligation. THE DEFECT, RELOCATED BY THE COMPLETED HARD-MODE ANALYSIS (reports/01_tableau-abstraction-boneyard-analysis.md): the mis-factoring is edge-addition where both source calculi identify worlds, not the bridge set. A blocked minting step has modalApplyOneS4Keyed return (.linear [], acc.addEdge sf.label wBlock) -- two lines, LoopChecking.lean:753 and :757 -- creating the obligation m.r (f src) (f wBlock) against branchSatisfiableIn's existentially arbitrary witness model (FrameSoundness.lean:110), whereas Massacci2000 Definition 10.2's SST-interpretation is explicitly NOT required injective (identify the blocked world with its shorter modal copy rather than relate them) and Pruning Lemma 8.2 instead DELETES the descendant-closed subtree Ftree(sigma.n). The real seam: completeness already CONSTRUCTS its model, extractModelS4 b acc = extractModelWith Relation.ReflTransGen b acc (FrameCompleteness.lean:143-146), while soundness quantifies EXISTENTIALLY, so containment is an obligation rather than a construction step, where ChagrovZakharyaschev1997 Theorem 5.51 discharges the same condition by building its relation inside the ambient one. The guard docstring already names this as NO REACHABILITY RESTRICTION (LoopChecking.lean:491-493) and the mechanism is recorded at FrameSoundness.lean:1183-1190. This REPLACES the earlier diagnosis that the absence of a persistence mechanism for unwrapped facts was the single most valuable thing to name: that absence is real and is verbatim the obstruction at LoopChecking.lean:8830-8832, but it is only the CONTENT half, and :478-501 already says fixing one of the two named defects does not fix the other. RETIRED PREMISES, do not reinstate: (a) there is no theorem numbered interval theorem -- chunk_0246.md:43-65 (print p. 141) is unnumbered prose after Theorem 5.23 and an UNPROVED authorial remark with no counterexample frame supplied, and its finest and coarsest relations live on the filtration QUOTIENT, so its nontransitivity sentence, accurate as a quotation, is NOT precisely the failure mode of a subtractive or redirect-channel design; cite it by chunk and page, never as a theorem, and build no inference on it; (b) Massacci2000 Theorem 8.1, that blocking preserves satisfiability, is STATED AND NEVER PROVED there -- Appendix B.2 proves only Theorem 8.4, and section 10.2 defers 8.1 to Gore's model graphs (chunk_0054.md:3-7) -- so the four dead routes were reconstructing a proof their cited source does not contain, and this belongs in FrameSoundness.lean's documentation; (c) Theorem 5.51 concerns Grz via SELECTIVE filtration, not S4 via filtration; (d) box-plus is defined in Chapter 3 (chunk_0173.md:11-14, print p. 98) as the syntactic analogue of reflexivization, not in chunk_0248, which holds the Lemmon filtration itself (:24-31, print p. 142, also unnumbered). MEASURED BASELINE replacing every asserted figure, with reproduction commands in section 2 of report 01. LoopChecking.lean 10,540 lines / 230 declarations (asserted 10,674 / 150); FrameSoundness.lean 5,317 (exact); FrameCompleteness.lean 4,307 (asserted 4,532); three-file total 20,164. Redirect semantic surface 4 clauses / 14 code lines at LoopChecking.lean:6557-6562 (exact) plus :8779-8782 and :8786-8789 (asserted locations shifted +23). The hintikkaS4 bridge set is 8, not ten, and the asserted ten WAS correct when written: the two _boxed reflTransGen variants were removed in commit c4b33f63, and the comment at :8911-8912 still references them. The axiom drift was a SCOPE CONFUSION, not a drift -- the Tableau subsystem has ZERO axiom declarations and 3 raw axiom word matches, while repo-wide Cslib/ has 26 declarations and 1,701 raw matches -- so fix it by recording the measured baseline with its command, never by adjusting a number. Sorry census: the whole Tableau subsystem is exactly 1, at FrameSoundness.lean:1244, inside a ZERO-consumer declaration; repo-wide Cslib/ is 10. Tags confirmed exact: 0 FIX/TODO/NOTE/QUESTION in the three files, 11 TODO and 8 NOTE repo-wide. outDegEq: zero code consumers of S4LoopInv.outDegEq re-verified, but its preservation proof is 386 lines, not 188 (:4917-5105 at 189 plus an undocumented second ordered variant at :5111-5307 at 197), and it has THREE provision sites -- LoopChecking.lean:7569, :7633, and a POSITIONAL anonymous-constructor site inside modalTableauS4Keyed_initial at FrameCompleteness.lean:4217-4218, i.e. inside the landed completeness capstone -- so removing the field is NOT a pure deletion. ModalTableauResult is referenced across 11 Tableau modules (asserted 8), though its (b, acc) shape claim holds. The amplification figures (4 declarations / 1,036 lines, 43 / 1,983 reachable from modalTableauS4Keyed_complete) were NOT re-measured -- they need an elaborated-environment dependency query, not a text scan -- and no substitute was fabricated; the qualitative claim stands on the verified 4-clause surface plus 85 private lemmas in LoopChecking.lean and 50 in FmpMeasure.lean. Boneyard/ confirmed absent; CslibTests/S4LoopGuardRegression.lean confirmed at 197 lines; the six landed Decidable instances confirmed as exactly K/T/B/S5/Five/KB5. PREREQUISITE: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear it before verification against that stated gate is meaningful. SCOPE. A. ABSTRACTIONS AND UNIFICATION: adopt the Lemmon box-plus pairing at the BIRTH-KEY level. successorBirthContent (LoopChecking.lean:384-393) records only the unwrapped (pos, psi) when T(box psi)@w is on the branch while relevantSetFinset records both forms, and that asymmetry IS the wrapped/unwrapped mismatch; add boxPlusPair and BoxPlusClosed and emit both members of each pair. It is licensed for S4 BY NAME (Corollary 5.32 names K4, D4 and S4 as admitting filtration via the transitive closure of the finest filtration or the Lemmon filtration) and it is FREE in the world bound, because modalSubfmls (.box a) = .box a :: modalSubfmls a (FmpMeasure.lean:79) keeps the enriched key inside the existing codomain signedSubfmls, leaving the cardinality lemmas, modalWorldBoundS4 and the pigeonhole argument untouched; the one path by which it could have cost anything, iteration to depth greater than 1, is closed negatively from the source. But SCOPE THE EXPECTATION DOWN: box-plus subsumes none of the 8 bridges outright and collapses AT MOST 2 (the box_pos_self and dia_neg_self reflexive instances), and it does NOT touch the reachability defect. The other six are faithful transcriptions of Massacci Proposition 8.1 and ChagrovZakharyaschev Proposition 3.6 plus two orthogonal witness conjuncts, and the weakened hypotheses were a minimisation from modalHintikkaSetS4 to modalS4Saturated -- a factoring improvement that already happened, not a wrong abstraction. Box-plus is S4-scoped (the Lemmon filtration and Proposition 3.6 are stated for TRANSITIVE models only, satisfied by s4FC) and MUST NOT be lifted into Foundations/; note that enlarging the FILTER instead, as the source must for K4.1/S4.1/K5, would change modalWorldBoundS4 where box-plus enrichment is free. Prior art to reuse: modalFourBoxProp (FrameRules.lean:133-138) and boxDiamondPersistence (Bimodal Tableau.lean:344) are already box-plus at the RULE level, and MonotoneEdges (Intuitionistic Soundness.lean:367-369) is already a persistence-carrying soundness-invariant predicate; only the key level is missing. Second unification target: exactly ONE driver family of nine forks off modalTableauGen / modalExpandBranchesGen -- the S4 Keyed and KeyedOrdered pair, the unkeyed S4 driver already being generic -- and only because RuleApply (Saturation.lean:107-111) has no slot for per-driver state, forcing the stepper to RE-DERIVE the blockingWorldS4Keyed decision modalApplyOneS4Keyed already made internally, as the code admits at LoopChecking.lean:951-953. Generalise to RuleApplySt sigma with RuleApply = RuleApplySt Unit, added ADDITIVELY first so the six true-rfl driver bridges cannot break, then bridged, then migrated; retiring the double derivation is where the unquantified line-count reduction lives. The one landed theorem at risk is modalTableauS4Keyed_complete, since enriching keys changes which steps block; gate on lake build and, if it cannot be repaired sorry-free, mark BLOCKED rather than adding a sorry. B. MODULE DIVISION: FIRST, and independent of every abstraction decision, discharge the highest-value item the original scope omitted -- 77 comment-attested LOCAL RE-DERIVATION sites, root-caused by FmpMeasure.lean's 50 private declarations being unavailable across files (modalSubfmls_trans re-derived in three files, modalKnownWorlds_fold_spec in four, hasEdge_addEdge_cases in four). Extract those facts as PUBLIC declarations into Tableau/Support/{Subfmls,KnownWorlds,Accessibility}.lean and delete the re-derivations: mechanical, behaviour-preserving by construction, needing no abstraction decision, and it shrinks the oversized files BEFORE split seams are chosen. Then split along the real seams identified (an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules, whose current source ranges are DISCONTIGUOUS -- itself evidence a line-count split would be wrong), conforming to ORGANISATION.md and NOTATION.md, preserving import acyclicity, and UPDATING ORGANISATION.md, which gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. Do not split mechanically by line count. C. BONEYARD: create Boneyard/ at the repository root -- it does NOT currently exist here; it is a convention borrowed from the source repository, where it held roughly 27k lines and 29 sorries excluded from porting, censuses, and the build. Document the convention in Boneyard/README.md: quarantined, never imported by Cslib/, excluded from lake build, mk_all, lint-style, shake, and all sorry/axiom censuses, retained for provenance rather than use. Move there rather than deleting, and only after RE-RUNNING the consumer audit at execution time because the recorded one is dated: blockedRedirect_diaNeg_mem_of_diaOrigin, blockedRedirect_boxctx_mem_of_boxOrigin, the keysRootEmpty / keysRootEmpty_entry pair, and the two outDegEq preservation lemmas only once the field removal has actually landed. TWO CARVE-OUTS ARE MANDATORY: FrameSoundness.lean:1220-1244 (branchSatisfiableIn_s4FC_ancestor_redirect) is IMMOVABLE despite being zero-consumer, because it carries the retained sorry that is an explicit user decision and the rule protecting proven-and-consumed code does not by itself protect it; and keysOriginS4 is NOT eligible, having 22 code consumers, so the comment at LoopChecking.lean:2001-2002 claiming it was removed is FALSE. Nothing whose deletion cannot be justified by a re-verified zero-consumer check may be moved, and nothing proven and consumed may be moved at all. D. DOCUMENTATION: the debt in the three modal Tableau files is prose-shaped, not tag-shaped. Seven adjudicated claims verified TRUE must be LEFT ALONE; four defects must be corrected: LoopChecking.lean:2001-2002 (the keysOriginS4 removal claim is FALSE), :8911-8912 (stale _boxed bridge references), :2000-2004 (resolve the possibly-orphaned hedge on keysRootEmpty with the audit as evidence), and FrameSoundness.lean:1215-1219 (add both the zero-consumer fact and the Massacci Theorem 8.1 gap, which change how a future reader assesses the obstruction). Land the measured baseline table with its exact commands into the subsystem documentation so the same drift cannot recur, and repair the per-repo literature index, which reports the Massacci corpus as 1 chunk where it holds 77 plus a full text: run /literature --validate. CONSTRAINTS. Never edit Rules.lean, Saturation.lean (ModalTableauResult carries only (b, acc)), or Branch.lean without an explicit consumer audit first; a Saturation.lean change IS proposed (RuleApplySt) and its audit is a mandatory gate. Preserve every proven, consumed result: this is a restructuring task and must be behaviour-preserving on all landed theorems, with modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) green at every commit. The sorry at FrameSoundness.lean:1244 is retained by explicit user decision and its disposition is a separate decision, not this task's to make. Route-independent assets deliberately kept from the subtractive attempt -- modalS4Saturated (7 consumers, not eligible), the strictly-weakened hintikkaS4 bridges (the set is 8, measured, not 10), hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_{boxPos,diaNeg}_mem transfers, together with the Reds / accWithReds packaging they are stated over -- are inputs to be placed correctly by the abstraction decision, not candidates for the Boneyard. Run the CSLib vetting pipeline against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md, and CODE_OF_CONDUCT.md as an acceptance gate; it has never been run on this subsystem. VERIFICATION: behaviour preservation demonstrated by the landed capstones and Decidable instances remaining green, the Tableau sorry census not rising above its measured baseline of exactly 1, no new axioms above the measured subsystem baseline of zero, checkInitImports and lint-style clean after the stale-build repair above, and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean at 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts exactly. Expect this task to need expansion into several tasks. The abstraction analysis is now COMPLETE (report 01) and must be REVIEWED AND ACCEPTED in an explicit decision record before any file is moved or split and before any abstraction is implemented.
-
----
-
-### 556. Temporal tableau sat timp fuel sufficiency measure
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Topic**: temporal tableau saturation
-- **Dependencies**: None
-
-**Description**: Discharge the Phase 3 STOP-gate left open by design in the temporal tableau conformance work: IBranchSaturation's sat_timp field and truthLemma's pre-existing T-imp sorry. THE OBLIGATION: both are blocked on the SAME missing ingredient -- a fuel-sufficiency measure for applyPersistenceFixpoint's own recursion, analogous to the existing step-lt measure but for the persistence fixpoint rather than the step relation. See the 'sat_timp discharge STOP-gate' comment block in Cslib/Logics/Temporal/Tableau/Scheme.lean for the precise statement of what is missing. SCOPE NOTE: the determinacy half of this gap (Gap 2) was already resolved by the branching-rule redesign that landed with the conformance work; the fuel half (Gap 1) is untouched and pre-existing. This was sized by the originating dispatch as a dedicated phase-sized undertaking on its own, explicitly NOT a quick follow-up -- expect to need a new measure definition, its well-foundedness proof, and the two discharge sites. INVARIANTS: repo-wide axiom count must stay at 26 with zero new axioms; the Cslib/ bare-sorry count must go DOWN (this task's whole purpose is removing two of them), never up; whole-project lake build and lake test must stay green; the 43-row CslibTests/TableauConformance.lean regression guard must stay green (it is a pure regression guard now -- a row moving away from its mathematically correct verdict is a stop-the-line regression, never a guard string to rewrite).
 
 ---
 
@@ -121,14 +278,26 @@ next_project_number: 558
 ---
 
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [PARTIAL]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md]
 - **Plan**: [554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md]
 
-**Description**: Research-only task: establish or refute the CS5 pair-seed disjunction property, which is the single remaining obligation of the native-Hilbert CS5 completeness route. THE OBLIGATION, already isolated sorry-free as a named Prop in Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean, is the seed-exclusion statement that the left-tagged box of A joined with the right-tagged A is not in the closure of the two-sided seed. Equivalently it is the constructive disjunction property of the pair axiom set under the box-inverse cross-constraint. This is Pacheco 2024 Lemma 16, which is UNSOUND AS PUBLISHED, and it has NO semantic witness. TWO DEAD ENDS, recorded as Non-Goals, must not be re-proposed: the semantic route via pair-axiom soundness is circular because it presupposes the truth lemma being built; and the signature-collapse route via a sum-elimination retraction fails because the first cross axiom's image, box B implies B, is not an instance of the modal axiom schema, so the retraction is not schema-compatible. RECOMMENDED APPROACH: a cut-free or nested-sequent proof system for CS5, following Marin, Morales and Strassburger 2021 on fully labelled proof systems for intuitionistic modal logics, and Arisaka, Das and Strassburger 2015 on nested sequents for constructive modal logics. Both are present in the literature corpus. The aim is to repair Pacheco Lemma 16 and 17, or to establish that the property fails. REPORTING CONTRACT: deliver either (a) a proof strategy concrete enough to discharge the named Prop, or (b) a refutation with a countermodel, or (c) a reasoned statement that the property is open, with the specific obstruction named. A negative or open result is a valid and useful deliverable. FALLBACK if the property is refuted or judged unreachable: the deferred collapse route, which proves that CS5 derives the idb axiom (currently absent from every constructive CS5 file), then the CS5-to-IS5 derivability and validity bridges, composing the already-landed IS5 completeness theorem. Adopting that route is a mandate change requiring explicit user authorization. Evidence: the parent task's reports on the conservativity blocker route decision and on remaining obligations and path.  SECOND CONSUMER (widened brief): this research also gates the labelled CS5 general-soundness biconditional task, which hit the SAME obstruction family from an independent direction. Its Phase 9 probe gate failed definitively after three dispatches on the non-theorem box(A-or-B) implies (box-A or box-B) -- box failing to distribute over disjunction, which is the same constructive-disjunction-property wall as the pair-seed obligation above. Machine-checked evidence lives in that task under probes/theta_place_validation.lean, probes/theta_place_layered.lean, and probes/theta_place_final_gate.lean; all three compile clean with no sorryAx and are durable assets for this research. Because two independent formalization fronts converged on the same wall, a cut-free or nested-sequent treatment that recovers disjunction-property reasoning would unblock BOTH. When reporting, state explicitly what each consumer would gain: for the pair-seed task, whether the named open Prop can be discharged; for the labelled-soundness task, whether a context-fold that splits compound context facts is derivable without the box-over-disjunction bridge.
+**Description**: [RESCOPED 2026-07-26 by explicit user decision, adopting report 02 section 8.] Research on the CS5 pair-seed disjunction property is COMPLETE; two rounds of probes and a literature-grounded assessment are landed. The adopted route is section 8.2's narrow probe plus section 8.1's zero-risk landings. NOTHING ELSE IS IN SCOPE.
+
+LAND NOW (mechanical, no research risk, do these first and independently):
+(1) Fix the refutable statement per section 1.1 -- the named Prop CS5PairSeedDisjunctionProperty (Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean) is REFUTABLE AS STATED and needs the `A not-in cl_CS5 (boxInv H)` hypothesis. Land probe_refute_disjunctionProperty as a regression test so the unconditioned form can never be reintroduced.
+(2) Land round 1 section 4.1's promotions under the corrected statement: the hOpen <-> hR equivalence, hR -> hL, single-hypothesis derivExcludes, the retraction bound.
+(3) Land cs5Axiom_to_is5Axiom / cs5_deriv_to_is5 / cs5_closure_subset_is5_closure -- small, library-grade, load-bearing for the product-model route.
+(4) Docstring corrections: [Marin2021] is for IK, not CK, so drop the 'a correct proof is expected to require a cut-free/nested-sequent argument ([Marin2021])' claim; the applicable cut-free system is [ADS15] but at prohibitive cost (section 5.4 cost table); drop 'No semantic witness exists' (the product model is a genuine candidate); correct Non-Goal 2's stated reason.
+
+THEN THE SINGLE PROBE (section 8.2, de-risk R-a before any planning): does every IS5-consistent set have an is5FC model with TOTAL r? This one decidable-by-probe question determines the whole product-model route. If R-a holds, the product construction is ~200-400 lines of standard induction and the task reduces to R-b. If R-a fails, the route is dead and this task closes [BLOCKED] with the section 5.4 cost table as justification -- a negative result is a valid deliverable.
+
+EXPLICITLY NOT ADOPTED, do not re-propose: (a) opening a nested-sequent or labelled-calculus formalisation task (section 8.3, prohibitive cost); (b) the fallback collapse route deriving idb then bridging CS5 -> IS5 -- still not adopted, and section 6 adds an independent reason for wariness, namely that its published basis (Pacheco's CS5 = IS5) rests on the same unsound Lemma 16; (c) the two recorded dead ends (the circular semantic route via pair-axiom soundness, and the signature-collapse retraction).
+
+TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to know whether the named open Prop can be discharged; the labelled CS5 general-soundness task needs to know whether a context-fold that splits compound context facts is derivable without the box-over-disjunction bridge. Report on both explicitly. Machine-checked durable assets from the labelled front live under that task's probes/theta_place_*.lean (all compile clean, no sorryAx).
 
 ---
 
@@ -136,7 +305,7 @@ next_project_number: 558
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 535, Task 557
+- **Dependencies**: Task 535, Task 561, Task 563
 - **Plan**:
   - [553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md]
@@ -223,7 +392,7 @@ next_project_number: 558
 ---
 
 ### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
@@ -231,7 +400,7 @@ next_project_number: 558
 - **Plan**: [530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md]
 - **Summary**: [530_consolidate_chronicle_construction_bimodal_temporal/summaries/01_chronicle-consolidation-summary.md]
 
-**Description**: REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them.
+**Description**: REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them. [USER SCOPING DECISION 2026-07-26 -- path (B), descope]: phases 3b, 3c, 4a and 4b are DESCOPED. Do not attempt further generic lifting of c5ForwardWalk / c5BackwardWalk, the Phase 3c elimination driver, or Phase 4a/4b ChronicleConstruction. Two deep investigations (Phase 1 and Phase 3b) independently confirmed that generically bridging types indexed by each tree's LOCAL Chronicle Atom structure breaks downstream rcases/simp proofs, and repairing that exceeds this task's own 'structural dedup, not a proof change' mandate. Keep every landed lift (ChronicleInterface skeleton, generic Types, RRelation shared core, CEE Structures + BurgessHelpers -- all sorry-free, committed, full lake test green), run Phase 5 cleanup, annotate the plan file's 3b-4b headings as [DESCOPED] with a pointer to this decision, and close as a partial consolidation. Run /revise first to produce the descoped plan version, then /implement. The deeper Chronicle-structure question -- what the highest-quality refactor actually is, given that the walk-result types are structurally the obstacle -- is carried by a dedicated follow-on research task and is NOT to be attempted here.
 
 ---
 
@@ -259,7 +428,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 535
+- **Dependencies**: Task 535, Task 561, Task 563
 - **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
 - **Research**:
   - [511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md]
@@ -302,7 +471,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: PR & Upstreaming
-- **Dependencies**: Task 467
+- **Dependencies**: None
 - **Research**: [466_record_zulip_settlement_pr_648/reports/01_pr-review-research.md]
 - **Plan**: [466_record_zulip_settlement_pr_648/plans/01_pr648-rereview-comment.md]
 - **Pr_response**: [466_record_zulip_settlement_pr_648/pr-comment-draft.md]
@@ -462,7 +631,7 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 552
@@ -472,7 +641,7 @@ After implementation:
 - **Summary**: [425_temporal_tableau_ptl_fmp_decidability/summaries/01_ptl-fmp-summary.md]
 - **Research**: [425_temporal_tableau_ptl_fmp_decidability/reports/04_island-vs-periodic-strategic-decision.md]
 
-**Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
+**Description**: [Decomposed from the temporal tableau umbrella, blocker C.] BLOCKER CLEARED 2026-07-26: the shared conformance/rule-completeness repair this was gated on is COMPLETE. It landed the per-branch eventuality tracker (temporalStepBranch now returns one tracker per output branch, so untlPos's branch1/branch2 genuinely diverge in their pending sets), the temporal rule arms (seriality, G/H duality, transitive propagation), cap removal and fuel raise, and fixed two real directional defects in ancestorTimes / allPastPosAt. Cslib/Logics/Temporal/Tableau/Completeness.lean:127-140 now marks remaining-work items 1, 2 and 2a as Done. REMAINING SCOPE, restated: prove the fuel-sufficiency/pigeonhole theorem -- that temporalFuel guarantees isSubsetBlocked holds among a fuel-exhausted branch's own labels whenever pending eventualities remain. That is the sole prerequisite for wiring extractModelZPeriodic / periodicReducePast in as the real extractModelZ, and then discharging temporalTruthLemma_untl / _snce, openBranch_branchSat, eventualityDefect_unsat, temporalTableau_sound, temporalTableau_complete and the final instDecidableValid. NOTE THIS IS A DISTINCT OBLIGATION from the intuitionistic persistence-fixpoint fuel measure (that one is closed); do not conflate them. Mirror COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP -- reuse its pattern where possible. RESEARCH FIRST: Completeness.lean:138-140 explicitly recommends a dedicated research pass before further planning; run /research before /plan. Gates the temporal tableau umbrella.
 
 ---
 
@@ -511,7 +680,7 @@ After implementation:
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 465
 - **Research**:
   - [400_reconcile_connectives_pr607/reports/01_pr607-engagement.md]
   - [400_reconcile_connectives_pr607/reports/02_engagement-strategy.md]
@@ -536,7 +705,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 552
@@ -571,7 +740,7 @@ After implementation:
   - [317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md]
   - [317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md]
 
-**Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
+**Description**: Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.
 
 ---
 
@@ -579,7 +748,7 @@ After implementation:
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 426, Task 425
+- **Dependencies**: Task 425
 - **Research**: [301_temporal_tableau/reports/01_temporal-tableau-decision-procedure.md]
 - **Plan**: [301_temporal_tableau/plans/01_temporal-tableau-decision-procedure.md]
 
@@ -654,22 +823,18 @@ After implementation:
 
 ---
 
-### 215. Fill sorry declarations in Bimodal BXCanonical and Bundle files
+### 215. Fill the discrete-gated Bimodal sorries (BXCanonical Chronicle and Frame)
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
-- **Dependencies**: Task 36, Task 37
+- **Dependencies**: Task 36
 - **Research**: [215_fill_bimodal_sorries/reports/01_sorry-analysis.md]
 
-**Description**: Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal/Metalogic/:
-- Bundle/SuccRelation.lean: 7 sorries (lines 253, 258, 263, 269, 275, 281, 285)
-- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 10 sorries (lines 66, 143, 144, 147, 153, 157, 163, 171, 172, 177)
-- Bundle/UntilSinceCoherence.lean: 2 sorries (lines 37, 41)
-- BXCanonical/Frame.lean: 1 sorry (line 159)
+**Description**: Fill the discrete-gated sorry declarations in Cslib/Logics/Bimodal/Metalogic/:
+- BXCanonical/Chronicle/ChronicleToCountermodel.lean: 12 sorries (lines 75, 145, 146, 152, 157, 162, 172, 173, 174, 175, 176, 187)
+- BXCanonical/Frame.lean: 1 sorry (line 161)
 
-Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) carved off to task 231.
-
-9 sorries blocked on task 37 (strict Until/Since semantics gap: BX8/BX9/temporal-T axioms removed as unsound). 11 sorries blocked on task 36 (discrete completeness pipeline requires unported GoodStructuresModelSurgery infrastructure).
+All are gated on the discrete completeness pipeline (discrete_embed_strictMono, gap_contradicts_prior, the discrete FMCS construction), which the discrete port task delivers. Counts above are as measured 2026-07-26, superseding the earlier asserted figures. The strict-Until/Since sorries are tracked separately. Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) were carved off previously and remain out of scope.
 
 ---
 
@@ -749,7 +914,7 @@ Estimated scope: ~500-700 lines (new axioms + discrete soundness + discrete comp
 - **Status**: [BLOCKED]
 - **Task Type**: lean4
 - **Topic**: Bimodal Logic
-- **Dependencies**: Task BimodalLogic:continuous_extension
+- **Dependencies**: None
 
 **Description**: Port continuous extension completeness once developed upstream. The continuous case (FrameClass for continuous/real-valued time) has not been started in BimodalLogic. This task is blocked pending upstream development of continuous frame completeness.
 
@@ -761,14 +926,9 @@ Estimated scope: ~500-700 lines (new axioms + discrete soundness + discrete comp
 ---
 
 ### 36. Port discrete completeness bimodal
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: lean4
 - **Topic**: Bimodal Logic
-- **Dependencies**: Task BimodalLogic:discrete_sorry_elimination
+- **Dependencies**: None
 
-**Description**: Port discrete completeness (completeness_discrete theorem) and WeakCanonical/IntegerModel/ infrastructure (~6 files). The discrete branch constructs countermodels on Int via the Reynolds pipeline. Currently blocked: upstream BimodalLogic has sorryAx tracing through chronicle_gap_contradiction → succ_cofinal → limitDomSubtype_isSuccArchimedean → succ_embed_surjective. Port after upstream sorry elimination completes.
-
-**Source**: BimodalLogic/Theories/Bimodal/Metalogic/WeakCanonical/IntegerModel/ (~6 files), discrete branch of BXCanonical/Completeness.lean
-**Target**: Cslib/Logics/Bimodal/Metalogic/
-**Blocker**: Upstream BimodalLogic discrete completeness sorry elimination (36 sorries across IntegerModel/)
-**Parent task**: 8 (expanded)
+**Description**: Port discrete completeness (completeness_discrete) from upstream BimodalLogic. EXTERNAL BLOCKER CLEARED 2026-07-26 (verified directly against the upstream working tree, not against prior notes): upstream Theories/Bimodal/Metalogic/BXCanonical/Completeness.lean:302 now documents completeness_discrete as sorryAx-free, with #print axioms giving exactly [propext, Classical.choice, Quot.sound]. The chain this task was blocked on (chronicle_gap_contradiction -> succ_cofinal -> limitDomSubtype_isSuccArchimedean -> succ_embed_surjective) was DEAD CODE on no live call path and has been archived upstream to Boneyard/DeadChronicleGapElimination/. succ_cofinal itself remains provably unfixable (Z+Z counterexample) and is correctly bypassed. SCOPE HAS CHANGED -- DO NOT PORT FROM THE OLD DESCRIPTION. The live discrete path is countermodel_discrete_reynolds_v2 (WeakCanonical/IntegerModel/ReynoldsBridge.lean:739) -> limitdom_is_good -> no_gaps_discrete_model_surgery -> US_expressively_complete_over_prior -> kamp_prior_expressive_completeness -> nf_characterizable_temporal_prior -> nf_nvar_exist_all_depths, with the formerly-sorry |_k+2 arm retired by the zeta wire kampArm_zeta (ZetaUniformExtract.lean, the unary E[Sigma]-atom re-architecture of Rabinovich Def 4.1 / Prop 4.3 / Thm 4.4). The port surface is therefore ReynoldsBridge + the Kamp/KampPrior/ZetaUniformExtract cluster, NOT the '~6 IntegerModel files' originally scoped. Note that IntegerModel/GoodStructuresModelSurgery.lean still carries two sorries (gap_prior_UZ_contradiction / gap_prior_SZ_contradiction, Reynolds Lemmas 6-13) -- confirm at port time whether the live path depends on them or whether they sit on the alternative route. RUN /research AND /revise BEFORE /implement: the port map must be re-derived against the current upstream tree before any plan is written. Target: Cslib/Logics/Bimodal/Metalogic/. Unblocks 12 of the bimodal sorries and the temporal discrete completeness task.

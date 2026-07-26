@@ -44,7 +44,7 @@
     },
     {
       "doc_id": "blackburn_2002_book",
-      "relevance": "Blackburn, de Rijke, Venema, Modal Logic (2002 Cambridge ed.) — model-theoretic and structural methods for the structure-first MPL argument (task 464); also Loewenheim-Skolem, bounded morphisms, and model-theoretic transfer methods relevant to the countermodel-transport strategy (task 445)."
+      "relevance": "Blackburn, de Rijke, Venema, Modal Logic (2002 Cambridge ed.) — model-theoretic and structural methods for the structure-first MPL argument (task 464); also Loewenheim-Skolem, bounded morphisms, and model-theoretic transfer methods relevant to the countermodel-transport strategy (task 445). For the modal-tableau abstraction question: chapters 2 and 6 cover filtration, the finite model property and decidability, giving a second independent presentation of the filtration/box-plus machinery to cross-check Chagrov-Zakharyaschev against. Fidelity: verified_conversion; 35 chapter/section child entries."
     },
     {
       "doc_id": "wijesekera_1990_constructivemodallogicsi",
@@ -52,7 +52,7 @@
     },
     {
       "doc_id": "chagrovzakharyaschev_1997_modallogic",
-      "relevance": "Chagrov & Zakharyaschev, Modal Logic (Oxford Logic Guides 35, 1997): reference for intermediate/superintuitionistic logics; now locally backed, so the ChagrovZakharyaschev1997 citation in references.bib is no longer an orphan (task 499)."
+      "relevance": "Chagrov & Zakharyaschev, Modal Logic (Oxford Logic Guides 35, 1997). PRIMARY SOURCE for the modal-tableau abstraction question: the wrapped-vs-unwrapped formula distinction that the S4 loop-check work kept colliding with has a standard name and definition here. The interval theorem (chunk_0246.md L43-65) carries the explicit warning that a relation S between S and S-bar may be NONTRANSITIVE even when the original R is transitive — the exact failure a subtractive/redirect-channel design hits — and the standard remedy is the Lemmon filtration s box-plus operator, box-plus(phi) = phi AND box(phi) (chunk_0248.md L24-31), which IS wrapped-plus-unwrapped. Theorem 5.51 (chunk_0267.md) builds a model whose relation is the reflexive-transitive closure of generated edges and discharges box-propagation via a containment of the generated relation in the ambient one. Chapter-level reading: p02_kripke-semantics.md (canonical models, filtration, selective filtration). Also the reference for intermediate/superintuitionistic logics, and the local backing for the ChagrovZakharyaschev1997 citation in references.bib. Fidelity: verified_conversion, ratio 1.0209; six per-Part child entries carry page ranges."
     },
     {
       "doc_id": "biermandepaiva_2000_onanintuitionisticmodallogic",
@@ -80,7 +80,7 @@
     },
     {
       "doc_id": "massacci_2000_single_step_tableaux_for_modal_logics",
-      "relevance": "Massacci, Single Step Tableaux for Modal Logics (JAR 24(3):319-364, 2000). Terminating single-step/prefixed tableau calculi uniformly across the modal cube incl. S5/K5/KB5; loop-checking & prefix-management termination where the edge-local modal-depth-decrement measure fails. Primary source for task 514/515 (unblocking task 504 S5 termination obstruction, modalApplyOneS5_rankStep_not_dischargeable). BibKey Massacci2000."
+      "relevance": "Massacci, Single Step Tableaux for Modal Logics (JAR 24(3):319-364, 2000). Terminating single-step/prefixed tableau calculi uniformly across the modal cube incl. S5/K5/KB5; loop-checking & prefix-management termination where the edge-local modal-depth-decrement measure fails. Primary source for task 514/515 (unblocking task 504 S5 termination obstruction, modalApplyOneS5_rankStep_not_dischargeable). BibKey Massacci2000. For the modal-tableau abstraction question, the load-bearing results are: Technique 8.1/8.2 and Definition 8.2 (blocking by SHORTER MODAL COPY, not by ancestry — chunk_0029.md-chunk_0031.md), Pruning Lemma 8.2 (where ancestry actually enters, via Ftree), Proposition 8.1 (ancestor-to-descendant box propagation, chunk_0065.md), and the S4 prefix-length bound hbL-1 = 1 + dp + p*n (a DEPTH bound, chunk_0065.md L48-49). Note Massacci s copy relation is on the SOURCE prefix s nu-formulae, whereas the CSLib guard relates the prospective successor to the blocking world — a deliberate divergence to preserve when factoring the guard. Fidelity: verified_conversion, ratio 1.0258."
     },
     {
       "doc_id": "bentzen_2023",

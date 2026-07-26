@@ -1,7 +1,7 @@
 # Implementation Plan: Ancestor-Only Blocking for the S4 Keyed Loop Guard (v3)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 26-34 hours (14 phases, two of which are decision gates that may terminate the route)
 - **Dependencies**: None (no other task blocks this)
 - **Research Inputs**:
@@ -334,27 +334,27 @@ exact failure this task has already suffered once.
 
 ---
 
-### Phase 1: Executable ancestor-only probe and four measurements [NOT STARTED]
+### Phase 1: Executable ancestor-only probe and four measurements [COMPLETED]
 
 - **Goal:** Settle empirically, with no Lean proof work and no `Cslib/**` change, whether the
   ancestor-only driver behaves acceptably and what the invariant damage actually is.
 - **Tasks:**
-  - [ ] Write `specs/553_.../artifacts/s4ancestor.lean` in the style of the existing
+  - [x] Write `specs/553_.../artifacts/s4ancestor.lean` in the style of the existing
         `s4witness.lean` / `s4boxed.lean` probes (definitions and `#eval` only — no proofs, no
         `sorry`, no axioms): an executable spine-tracking state, an ancestor-restricted guard
         `bwAnc`, and ordered + unordered stepper variants.
-  - [ ] **Measurement A (soundness)**: `cex` must be OPEN under the ancestor-ordered driver.
-  - [ ] **Measurement B (validity)**: the T, 4, and K axiom instances must be CLOSED.
-  - [ ] **Measurement C (differential sweep)**: rerun Phase 8's exhaustive harness — 2 atoms,
+  - [x] **Measurement A (soundness)**: `cex` must be OPEN under the ancestor-ordered driver.
+  - [x] **Measurement B (validity)**: the T, 4, and K axiom instances must be CLOSED.
+  - [x] **Measurement C (differential sweep)**: rerun Phase 8's exhaustive harness — 2 atoms,
         size <= 6, 8532 formulas, fuel 100, both orderings — and report `open -> closed` (must be
         0) and `closed -> open` counts against the 1650-closed / 6882-open / 0-fuel-exhausted
         baseline.
-  - [ ] **Measurement D (invariant damage)**: instrument the probe to report, per formula,
+  - [x] **Measurement D (invariant damage)**: instrument the probe to report, per formula,
         (i) whether any two recorded keys are ever equal (does global `keysDistinct` actually
         break?), (ii) max spine depth observed, (iii) max out-degree observed, and (iv) for every
         blocked redirect, whether `∀ψ, T(□ψ)@src ∈ b → T(□ψ)@wBlock ∈ b` holds — the upward
         box-propagation test.
-  - [ ] Record all four verdicts verbatim in this plan under a new `#### Phase 1 Measurements`
+  - [x] Record all four verdicts verbatim in this plan under a new `#### Phase 1 Measurements`
         subsection, and in the dispatch handoff.
 - **Estimated output:** ~250 lines of probe Lean plus a ~40-line measurement record.
 - **Done when:** `lake env lean specs/553_.../artifacts/s4ancestor.lean` runs to completion and all
@@ -362,6 +362,52 @@ exact failure this task has already suffered once.
   0; if it is not, the phase ends `[BLOCKED]` and the route is escalated immediately.
 - **Timing:** 2-3 hours (the sweep alone runs ~20 minutes).
 - **Depends on:** none
+
+#### Phase 1 Measurements
+
+Probe: `specs/553_.../artifacts/s4ancestor.lean`. `lake env lean` on it runs to completion, no
+errors, no warnings, no sorries, no axioms. All four measurements below are verbatim `#eval`
+output from that run.
+
+- **Measurement A (soundness) — PASS.** `cex` (report 01's counterexample, node-size 19):
+  baseline (shipped, unrestricted keyed driver) closes it (`some true`, confirming the known
+  unsoundness); the ancestor-ordered driver leaves it **OPEN** (`some false`), fuel 400 both
+  drivers. The soundness defect this route targets is fixed for this counterexample.
+- **Measurement B (validity) — PASS.** T, 4, and K axiom instances all **CLOSE** under the
+  ancestor-ordered driver, fuel 400: `some true`, `some true`, `some true`.
+- **Measurement C (differential sweep) — PASS, gate satisfied.** 2 atoms, size <= 6, 8532
+  formulas, fuel 100:
+  - baseline (shipped unrestricted keyed driver): closed=1650, open=6882, fuelExhausted=0
+    (reproduces the established baseline exactly).
+  - ancestor-unordered: closed=1650, open=6873, fuelExhausted=**9**. `open -> closed` = 0,
+    `closed -> open` = 0 against baseline (gate satisfied), but 9 formulas that terminated
+    cleanly under the baseline now exhaust fuel 100 under the unordered ancestor stepper — a
+    mild termination cost specific to the unordered variant.
+  - ancestor-ordered: closed=1650, open=6882, fuelExhausted=0 — **identical** to baseline on
+    every count. `open -> closed` = 0, `closed -> open` = 0 (gate satisfied) and no termination
+    cost at all for the ordered variant at this size/fuel.
+  - **Gate verdict**: `open -> closed` (the completeness-regression trigger) is 0 for both
+    orderings — the phase is NOT `[BLOCKED]`.
+- **Measurement D (invariant damage) — as predicted, with one reassuring result.**
+  - (i) **Global `keysDistinct` is broken**: in **63 of 8532** formulas (0.74%), two distinct
+    worlds are recorded with equal keys at some reachable state — confirming report 01/02's
+    prediction that ancestor-only blocking does not preserve the global freshness invariant.
+  - (ii) **Max spine depth observed**: 6 (across the whole corpus, ancestor-ordered driver,
+    short-circuit-visited leaves only).
+  - (iii) **Max out-degree observed**: 3.
+  - (iv) **Upward box-propagation test** (`∀ψ, T(□ψ)@src ∈ b → T(□ψ)@wBlock ∈ b` for every
+    blocked redirect): **1374 pass, 0 fail**, across every blocked redirect encountered on every
+    visited leaf in the whole corpus. Every observed ancestor-restricted redirect satisfied the
+    obligation Phase 2's decision-gate lemma needs — a positive empirical signal for that gate,
+    though (per report 01's own caveat, repeated here) absence of failure at size <= 6 is not
+    evidence of validity at any size: `cex` itself is size 19 and was excluded from this sweep.
+
+**Overall verdict**: no `[BLOCKED]` trigger. The ancestor-only route is empirically viable to
+continue past Phase 2's decision gate: soundness is restored on the known counterexample,
+validity is preserved on the three control axioms, the differential sweep shows zero
+completeness or soundness regressions (with a small, ordering-dependent termination cost that
+disappears under settled-context scheduling), and the box-propagation obligation Phase 2 must
+prove held in every one of 1374 observed instances.
 
 ### Phase 2: Decision gate — the ancestor back-edge justification lemma [NOT STARTED]
 

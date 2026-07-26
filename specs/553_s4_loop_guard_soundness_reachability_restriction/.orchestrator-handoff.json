@@ -1,76 +1,65 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
+  "phase": "implement",
+  "status": "implemented",
   "skeleton": false,
-  "phases_completed": 0,
+  "phases_completed": 1,
   "phases_total": 14,
   "sorry_inventory": [],
   "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
   "plan_version": 3,
-  "next_phase": 1,
-  "next_phase_name": "Executable ancestor-only probe and four measurements",
-  "next_action_hint": "dispatch_phase_1",
-  "summary": "v3 plan for task 553 implementing the user-authorized mandate change from Route P to ancestor-only blocking. 14 phases, of which the first two are hard decision gates that can terminate the route cheaply. Both v1 and v2 are stamped [ABANDONED] with Superseded-by pointers (plan-format has no [SUPERSEDED] marker); v2's stray Phase 13 [IN PROGRESS] marker is reverted. All nine preserved-asset groups from v1/v2 Phases 1-9 are individually adjudicated in the plan's Preserved Assets table, and the cleanup dispatch's twelve orphan candidates are adjudicated in an Orphan-Report Adjudication table: the decision is to REPURPOSE the origin-edge family (keysOriginS4 and friends) as the ancestor spine's data/invariant basis rather than retire it, since origin-edge data is exactly a parent-pointer record. Only one retirement is planned (Phase 9's branchPropAdequateIn machinery) and it is gated behind the Phase 2 verdict, so no true proven content is deleted on an unverified premise.",
-  "central_risk_resolution": {
-    "question": "Does the guard-filter -> blockingWorldS4Keyed_none_fresh -> keysDistinct -> pigeonhole world bound -> bClosure -> fuel-sufficiency chain survive ancestor-only blocking?",
-    "verdict": "NO, and it cannot be repaired by key enrichment. The plan says so at Phase 1 rather than discovering it at Phase 8.",
-    "detail": "blockingWorldS4Keyed_none_fresh does not survive as stated; its ancestor-restricted analogue does survive with the same five-line List.min?_eq_none_iff proof (verified: LoopChecking.lean:544-555 uses nothing about which list is filtered), but concludes distinctness only against spine-ancestor keys. Global keysDistinct therefore becomes false, and keysUpdate_preserves_keysDistinct (:566-593) has _none_fresh as its sole feeder (verified by reading its proof), so it has no repair. The ancestor test is irreducibly relational in the pair (src, wBlock), so it cannot be re-expressed as key enrichment (the audit's chain-preserving alternative). Replacement basis: keysDistinctAlongSpine bounds spine DEPTH by (signedSubfmls).powerset.card; S4LoopInv.outDegEq (already landed, :7061) plus eNodup/eClosure bounds BRANCHING; a geomCap tree count then bounds world count. This is Phases 5, 6 and 7 -- three separate bounded phases, not a footnote.",
-    "template_found": "K's world bound is already exactly this branching^depth shape (modalWorldBound = (2C+1)^(C+1), FmpMeasure.lean:144) with a working generic proof (modalStepBranch_worldBound_gen, FmpMeasure.lean:2659; modalMaxWorld_lt_worldBound_of_phiBound, CompletenessLoop.lean:199-227), and geomCap/geomCap_le_pow exist at Cslib/Foundations/Logic/Tableau/Measure.lean:57,94. So the re-derivation has an in-repo template. It is NOT a drop-in: K's rankEdge (FmpMeasure.lean:2340) is an exact equality over ALL acc edges (rank w' + 1 = rank w) and is false for back-edges, so any rank map must be tied to spine edges only. This caveat is written into Phase 7."
+  "next_phase": 2,
+  "next_phase_name": "Decision gate — the ancestor back-edge justification lemma",
+  "next_action_hint": "Dispatch Phase 2: prove the ancestor back-edge justification lemma in FrameSoundness.lean over abstract hypotheses, no driver dependency (see plan's Phase 2 section and its Gore1999/Massacci escalation branch). Phase 1's D(iv) result (1374/1374 box-propagation checks passed empirically, 0 failures) is a positive but non-binding empirical signal for that lemma's obligation -- it does not substitute for the proof and does not prove validity at all formula sizes (cex itself is size 19 and was outside the size<=6 sweep).",
+  "summary": "Phase 1 complete: an empirical-only measurement phase (no Lean proof work, no Cslib/** change). Built specs/553_.../artifacts/s4ancestor.lean -- an ancestor-restricted guard bwAnc (candidates filtered to w :: spineAncestors spine w), explicit spine (child,parent) tracking, and unordered+ordered ancestor steppers, all reusing the shipped modalApplyOne/modalApplyOneS4/Accessibility/blockingWorldS4Keyed-style machinery rather than reimplementing it. `lake env lean` on the probe runs to completion: no errors, no warnings, no sorries, no axioms. All four measurements recorded verbatim in the plan under a new '#### Phase 1 Measurements' subsection (Phase 1 heading moved [IN PROGRESS] -> [COMPLETED]): A (soundness) PASS -- cex closes under the shipped baseline (some true, confirming the known unsoundness) but is OPEN (some false) under the ancestor-ordered driver, fuel 400. B (validity) PASS -- T, 4, K axiom instances all close under the ancestor-ordered driver, fuel 400. C (differential sweep, 2 atoms, size<=6, 8532 formulas, fuel 100) PASS, gate satisfied -- baseline reproduces exactly (1650 closed/6882 open/0 fuel-exhausted); ancestor-ordered is IDENTICAL to baseline on every count (1650/6882/0, 0 open->closed, 0 closed->open); ancestor-unordered has 0/0 regressions but 9/8532 formulas newly fuel-exhausted (a mild ordering-dependent termination cost that vanishes under settled-context scheduling). D (invariant damage), as report 01/02 predicted -- global keysDistinct actually breaks in 63/8532 formulas (0.74%); max spine depth observed 6; max out-degree observed 3; but the upward box-propagation test (the exact obligation Phase 2's decision-gate lemma must prove) passed on every one of 1374 observed blocked redirects across the whole corpus, 0 failures. No BLOCKED trigger: C's completeness-regression gate (open->closed must be 0) is 0 for both orderings, so the route is empirically viable to proceed to Phase 2.",
+  "phase_1_measurements": {
+    "A_soundness": {"baseline_cex_fuel400": "some true (unsound, as expected)", "ancestor_ordered_cex_fuel400": "some false (OPEN, fix confirmed)"},
+    "B_validity": {"T_axiom": "some true", "four_axiom": "some true", "K_axiom": "some true"},
+    "C_differential_sweep": {
+      "total_formulas": 8532,
+      "baseline": {"closed": 1650, "open": 6882, "fuel_exhausted": 0},
+      "ancestor_unordered": {"closed": 1650, "open": 6873, "fuel_exhausted": 9, "open_to_closed": 0, "closed_to_open": 0},
+      "ancestor_ordered": {"closed": 1650, "open": 6882, "fuel_exhausted": 0, "open_to_closed": 0, "closed_to_open": 0},
+      "gate_verdict": "PASS -- open_to_closed is 0 for both orderings, phase not BLOCKED"
+    },
+    "D_invariant_damage": {
+      "keysDistinct_broken_formula_count": 63,
+      "keysDistinct_broken_denominator": 8532,
+      "max_spine_depth_observed": 6,
+      "max_out_degree_observed": 3,
+      "box_propagation_test": {"pass": 1374, "fail": 0}
+    }
   },
-  "second_risk_raised": {
-    "issue": "The audit's Section 5 claim that ancestor-only blocking 'restores branchSatisfiableIn outright' is marked NOT-YET-VERIFIED and this plan's reading of the obligation suggests it is too optimistic.",
-    "detail": "The redirect edge is src -> wBlock with wBlock an ANCESTOR of src, so soundness needs m.r (f src) (f wBlock) -- the UPWARD relation. The reflexive-transitive closure of spine (parent -> child) edges supplies only the DOWNWARD relation, and S4 gives neither symmetry nor a conversion. The justification therefore needs a cluster construction (S4 frames admit cycles, so the back-edge is frame-legal), and the cluster's box-propagation obligation is the same shape that killed Route P. Massacci's PROPOSITION 8.1 supplies ancestor -> descendant box monotonicity, which is the wrong direction; the descendant -> ancestor direction must come from key equality via keyLowerBd, and successorBirthContent's UNWRAPPED box-context (:387) yields only T(psi)@wBlock, not T(box psi)@wBlock.",
-    "planning_consequence": "The ancestor route MAY need the audit's boxed-birth-content refinement as a sub-component. This is not a re-argument for option (b) as a substitute for (c) -- it is the observation that (b) and (c) are composable and (c) may not close without (b)'s key change. Phase 2 is a hard gate that settles this before any driver surgery and has an explicit branch for adopting boxed keys inside the ancestor route, plus an escalation branch for acquiring Gore1999 if Massacci's treatment proves insufficient."
-  },
-  "literature_verification": {
-    "directive": "SUBINDEX_PRESENT (20 entries, >= threshold 3; per-repo briefing mode, orchestrator_mode true, no AskUserQuestion)",
-    "source_read": "massacci_2000_single_step_tableaux_for_modal_logics, chunks 0030, 0031, 0065, 0066 (read directly; literature-search.sh FTS returned degraded/empty for loop-checking queries, so navigation was via --toc plus grep over the chunk directory)",
-    "attribution_correction": "The audit flagged the ancestor-only attribution as unverified. Verified result: Massacci's blocking discipline is Technique 8.2 -- 'before reducing a pi-formula, check whether the corresponding prefix is not a copy of a SHORTER prefix' -- sharpened for K4/S4 by DEFINITION 8.2 to MODAL copy (same nu-formulae). It is SHORTER-prefix blocking, NOT ancestor-only. Ancestry (initial subsequence, Ftree) enters via the separate Pruning Lemma 8.2. Ancestor-restriction implies shorter-prefix, so this route is a sound-edge REFINEMENT of Massacci's discipline rather than a departure from it -- that is the honest grounding, and it is recorded as such in the plan's Source-to-Implementation Mapping.",
-    "additional_grounding": "PROPOSITION 8.1 (ancestor -> descendant box monotonicity in a saturated branch) and the S4 prefix-length bound hbL - 1 = 1 + dp + p x n (a DEPTH bound) both corroborate the depth-times-branching strategy Phases 5-7 adopt.",
-    "gore1999": "still not ingested (references.bib:1023, paywalled). Acquisition is an explicit escalation branch of Phase 2, not a background assumption."
-  },
-  "divergence_from_state_json_mandate_record": {
-    "field": "mandate_change.discards",
-    "recorded": "Phases 1-12 approach; origin-edge machinery (keysOriginS4, keysRootEmpty)",
-    "plan_decision": "The origin-edge family is REPURPOSED as the ancestor spine's data/invariant basis, not discarded. keysOriginS4 records, for each key, the minting world, the witness, and the acc edge -- i.e. a parent-pointer record, exactly what the spine needs. keysRootEmpty is the base case of Phase 5's depth chain. The dispatch mandate explicitly left retirement of true proven content to the planner, so this is a sanctioned planning decision rather than a deviation from the user's route choice; the route (ancestor-only blocking) is implemented as authorized.",
-    "requires_user_review": false
-  },
-  "h8_deviation_declared": {
-    "issue": "14 phases exceeds the hard-mode 8-phase ceiling for complex tasks.",
-    "justification": "The dispatching mandate explicitly authorised 10+ phases for this route and instructed that it not be compressed to look cheaper. Every phase independently passes the bounded-unit test with a concrete stopping condition, and three phases (7, 9, 14) carry explicit pre-declared split points (7.1/7.2, 9.1/9.2, 14.1/14.2) instead of being allowed to grow.",
-    "skeleton_considered_and_rejected": "A strategic-sorry skeleton was rejected because the two riskiest obligations are the FIRST two phases, so there is no long green prefix to skeletonise, and a strategic sorry at either gate would be a sorry standing in for a possibly-false statement -- the exact failure this task has already suffered once."
-  },
-  "standing_invariants_carried_into_every_phase": {
-    "axiom_count": 26,
-    "sorry_count_tableau": 0,
-    "repo_sorry_census": 40,
-    "lake_lint_baseline": "exactly one pre-existing error, Cslib/Logics/Temporal/Tableau/Saturation.lean",
-    "empirical_gate_baseline": "8532-formula sweep: 1650 closed, 6882 open, 0 fuel-exhausted, identical between shipped drivers; cex OPEN under ordered, CLOSED under unordered"
+  "literature_note": {
+    "directive": "SUBINDEX_PRESENT this run",
+    "issue": "Nine modal-logic doc_ids in specs/literature-index.json (including massacci_2000_single_step_tableaux_for_modal_logics, simpson_1994_intuitionistic_modal_logic, chagrovzakharyaschev_1997_modallogic) are absent from the global Literature index and were NOT retrievable this run.",
+    "impact_this_phase": "None -- Phase 1 is purely empirical and needed no literature.",
+    "impact_next_phase": "Phase 2's escalation branch and the prior planning dispatch's literature_verification cite Massacci's Technique 8.2/Def 8.2/Prop 8.1/Pruning Lemma 8.2 as already-read and grounded (see this file's git history / the prior plan-phase handoff), so this gap may not block Phase 2 if that grounding is trusted from the planning dispatch -- but the next dispatch should not assume fresh retrieval will succeed."
   },
   "territory_respected": [
-    "No Cslib/** file modified in this planning dispatch.",
-    "Did not touch Cslib/Logics/Modal/Metalogic/Constructive/Nested/** or Cslib.lean (concurrent session).",
-    "Did not stage or modify task 554's files, which the concurrent session has dirty in the working tree."
+    "Only wrote specs/553_.../artifacts/s4ancestor.lean and the Phase 1 section of the plan file.",
+    "No Cslib/** file touched.",
+    "Did not touch any other phase's section of the plan file (verified via git diff --stat before editing: only Phase 1's lines changed by this dispatch)."
   ],
   "artifacts": [
     {
+      "type": "probe",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4ancestor.lean",
+      "note": "Definitions and #eval only. No proofs, no sorry, no axioms. Compiles and runs to completion."
+    },
+    {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-      "note": "v3, 14 phases, status headings set so a [NOT STARTED|PARTIAL|IN PROGRESS] scan resolves to Phase 1"
+      "note": "Phase 1 heading [IN PROGRESS] -> [COMPLETED], all Phase 1 checklist items checked, new '#### Phase 1 Measurements' subsection added."
     }
   ],
   "modified_files": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4ancestor.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-    "specs/state.json",
-    "specs/TODO.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
   ],
   "blockers": [],
   "requires_user_review": false,
   "plan_markers_verified": true,
-  "plan_markers_note": "All 14 phase headings are [NOT STARTED]; the first heading a status scan encounters is Phase 1, the intended first dispatch."
+  "plan_markers_note": "Phase 1 heading is [COMPLETED]; Phase 2 heading is [NOT STARTED] and is the next dispatch target."
 }

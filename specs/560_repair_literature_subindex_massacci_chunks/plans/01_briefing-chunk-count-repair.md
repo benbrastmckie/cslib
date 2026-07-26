@@ -1,7 +1,7 @@
 # Implementation Plan: Repair per-document chunk-count under-reporting in literature-briefing.sh
 
 - **Task**: 560 - Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md`
@@ -184,7 +184,7 @@ produces 34 rows.
 
 ---
 
-### Phase 1: Tier-2 fallback — use the parent entry's `chunk_count` field when child count is 0 [NOT STARTED]
+### Phase 1: Tier-2 fallback — use the parent entry's `chunk_count` field when child count is 0 [COMPLETED]
 
 **Goal**: In `.claude/scripts/literature-briefing.sh`, insert a second fallback tier into the
 `else` branch at lines 219-225 so that a document with zero registered children uses its parent
@@ -261,6 +261,25 @@ Note on `pacheco_2024`: the correct expected value is **19**, the parent `chunk_
 value. The task description said 20 and the research report's verification section repeated 20
 while itself recording the field as 19; 19 is the value this tier reads and is correct. The
 off-by-one against the on-disk glob is pre-existing corpus metadata, not introduced here.
+
+**Observed verification output (Phase 1, executed)**:
+```
+1. Massacci: 77 chunk(s), ~30656 tokens | dir: .../sources/massacci_2000_single_step_tableaux_for_modal_logics
+2. Regression sentinel: 6 chunk(s), ~329042 tokens | dir: .../sources/chagrovzakharyaschev_1997_modallogic  (unchanged, PASS)
+3. Full-34 diff: 34 rows; TOKENS UNCHANGED: OK; 8 rows changed
+4. Exact 8 changed rows (all match expected):
+   alechinamendlerdepaivaritter_2001_categorical_and_kripke_semantics_for_constructive_s4  52
+   arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics                  40
+   biermandepaiva_2000_onanintuitionisticmodallogic                                        53
+   marinmoralesstrassburger_2021_fully_labelled_proof_system_intuitionistic_modal           51
+   massacci_2000_single_step_tableaux_for_modal_logics                                     77
+   pacheco_2024_collapsingconstructiveandintuitionisticmodallogics                         19
+   simpson_1994_intuitionisticmodallogic                                                  206
+   wijesekera_1990_constructivemodallogicsi                                                38
+5. Coverage marker: <!-- lit-coverage mode=repo seg_count=34 sparse=false threshold=3 --> (unchanged, PASS)
+6. Global mode smoke check: GLOBAL MODE OK
+```
+All six verification steps PASS.
 
 **Rollback/Contingency**: The change is confined to the `else` branch of one `if` block. Revert
 with `git checkout HEAD -- .claude/scripts/literature-briefing.sh` (safe: the working tree

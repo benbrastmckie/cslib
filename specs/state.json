@@ -331,13 +331,28 @@
       "topic": "Propositional Logic",
       "description": "Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-26T23:32:09Z",
+      "last_updated": "2026-07-26T23:55:00Z",
       "next_artifact_number": 12,
       "artifacts": [
         {
           "type": "plan",
           "path": "plans/03_b2-fuel-sufficiency.md",
           "summary": "B2 fuel-sufficiency + none-case wiring plan (v3)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/handoffs/01_phase1-continuation.md",
+          "type": "summary",
+          "summary": "Phase 1 partial: edge-accessibility monotonicity infra committed (6e24520d), build green, 0/11 phases, 4 baseline sorries. Continuation design for atomic Phases 1-4."
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md",
+          "type": "handoff",
+          "summary": "Phase 0 verification spike decision record"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md",
+          "type": "handoff",
+          "summary": "Phase 2 blocker: forward-reference + missing intExpandBranches_world_bound lemma, with a positive finding on Phase 3's zero case"
         },
         {
           "path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md",
@@ -370,14 +385,9 @@
           "summary": "route a frame plumbing (backfilled by --sync)"
         },
         {
-          "path": "specs/317_propositional_tableau_completeness/handoffs/01_phase1-continuation.md",
-          "type": "summary",
-          "summary": "Phase 1 partial: edge-accessibility monotonicity infra committed (6e24520d), build green, 0/11 phases, 4 baseline sorries. Continuation design for atomic Phases 1-4."
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md",
-          "type": "report",
-          "summary": "Fable+hard de-risk: GO on atomic Wave A, no design change. WIP (~80% done, live worker t317-impl-1) uses improved IFimpAccess companion predicate. Exact drop-in code for 2 remaining build errors + Completeness mirrors + ~10 lint fixes. Wave A closes 0/4 sorries but reshapes 3-4 to edge-frame Phase-10 goals."
+          "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md",
+          "type": "plan",
+          "summary": "Hard-mode plan v7: 8 phases, verification spike first, invariant threading split, preserved-assets accounting against v6, 12 postmortem constraints"
         },
         {
           "path": "specs/317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md",
@@ -418,6 +428,16 @@
           "path": "specs/317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md",
           "type": "report",
           "summary": "phase2 escape routes (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md",
+          "type": "report",
+          "summary": "Fable+hard de-risk: GO on atomic Wave A, no design change. WIP (~80% done, live worker t317-impl-1) uses improved IFimpAccess companion predicate. Exact drop-in code for 2 remaining build errors + Completeness mirrors + ~10 lint fixes. Wave A closes 0/4 sorries but reshapes 3-4 to edge-frame Phase-10 goals."
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/11_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates"
         },
         {
           "path": "specs/317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase1-summary.md",
@@ -470,14 +490,9 @@
           "summary": "phase6 2 containment worldbound summary (backfilled by --sync)"
         },
         {
-          "path": "specs/317_propositional_tableau_completeness/reports/11_team-research.md",
-          "type": "research",
-          "summary": "Team research with 4 teammates"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md",
-          "type": "plan",
-          "summary": "Hard-mode plan v7: 8 phases, verification spike first, invariant threading split, preserved-assets accounting against v6, 12 postmortem constraints"
+          "path": "specs/317_propositional_tableau_completeness/summaries/11_tableau-completeness-assembly-summary.md",
+          "type": "summary",
+          "summary": "Phases 0-1 complete (sat_timp field landed, mechanically discharged); Phase 2 blocked on a forward-reference and a missing world-bound lemma, with a re-plan recommendation"
         }
       ],
       "dependencies": [
@@ -491,7 +506,13 @@
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
         "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean"
       ],
-      "researched": "2026-07-26T23:05:31Z"
+      "researched": "2026-07-26T23:05:31Z",
+      "memory_candidates": [
+        "In Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean, intUniverse/intExpMeasure/intSubfmls/intWork are declared AFTER intExpandBranches_openBranch_sat and after tableau_complete. Any future work needing to reference intUniverse/intExpMeasure in intExpandBranches_openBranch_sat's own signature will hit a forward-reference build error and must relocate that block first. A prior (superseded) v6-plan handoff independently hit and noted this same constraint when placing new lemmas 'after intExpMeasure_init_le_fuel... since Lean requires forward declaration.'",
+        "Lean's `induction ... generalizing x y z` automatically reverts (and forces case-by-case re-proof of) any hypothesis in context that depends on x/y/z, even if not named in the generalizing list. This means a plan that splits 'add new invariant hypotheses to a recursive lemma's signature' (one phase) from 'maintain them across the recursive cases' (a later phase) is not actually separable once those hypotheses are added -- the moment they exist and mention a generalized variable, every existing recursive call site must supply them.",
+        "intExpandBranches_world_bound (nextWorld <= phi0.complexity + 1, needed to bound freshly-created tableau worlds within the fixed finite intUniverse) is explicitly documented in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean (three places: ~2025-2038, ~2052-2055, ~2536-2538) as an unbuilt 'continuation, see handoff' -- it requires a new injection argument (worlds created -> distinct .imp-node positions of phi0's parse tree, using the already-proven intSubfmls_impCount_le as the combinatorial ingredient) and should be budgeted as its own phase, not assumed available inside adjacent invariant-threading work.",
+        "For the intuitionistic tableau's base-3 damped worklist measure (intExpMeasure = sum of 3^intWork per branch), every summand is >= 1 unconditionally (3^n >= 1 for all n:Nat). This means 'measure <= fuel' with fuel=0 forces the branches list to be EMPTY, not merely 'fully saturated' -- the fuel=0 base case of a measure-driven termination argument closes by a short contradiction (nonempty branches -> measure >= 1 > 0) whenever the caller's postcondition (e.g. .openBranch b) itself requires a nonempty branches list, rather than needing the more elaborate 'measure=0 implies every cell already recorded' argument one might first reach for."
+      ]
     },
     {
       "project_number": 300,
@@ -2005,7 +2026,7 @@
     {
       "project_number": 560,
       "project_name": "repair_literature_subindex_massacci_chunks",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "meta",
       "title": "Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)",
       "topic": "Literature Infrastructure",
@@ -2028,7 +2049,7 @@
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:50:32Z",
+      "last_updated": "2026-07-26T23:50:52Z",
       "next_artifact_number": 2,
       "session_id": "sess_1785108997_9eb575",
       "parent_task": null

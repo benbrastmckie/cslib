@@ -91,7 +91,7 @@ next_project_number: 572
 
 ### Literature Infrastructure
 
-560 [PLANNED] — [Task B2 of the modal-tableau refactor programme; P0, no dependen
+560 [IMPLEMENTING] — [Task B2 of the modal-tableau refactor programme; P0, no dependen
 
 ### Bimodal And Temporal Logic
 
@@ -223,7 +223,7 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 560. Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: meta
 - **Topic**: Literature Infrastructure
 - **Dependencies**: None
@@ -732,8 +732,11 @@ After implementation:
   - [317_propositional_tableau_completeness/summaries/07_expmeasure-phase7_2-and-phase8-blocked-summary.md]
   - [317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md]
   - [317_propositional_tableau_completeness/summaries/09_phase6-2-containment-worldbound-summary.md]
+  - [317_propositional_tableau_completeness/summaries/11_tableau-completeness-assembly-summary.md]
+- **Handoff**:
+  - [317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md]
+  - [317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md]
 - **Research**:
-  - [317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md]
   - [317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md]
   - [317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md]
   - [317_propositional_tableau_completeness/reports/04_fuel-sufficiency-measure.md]
@@ -742,6 +745,7 @@ After implementation:
   - [317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md]
   - [317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md]
   - [317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md]
+  - [317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md]
   - [317_propositional_tableau_completeness/reports/11_team-research.md]
 
 **Description**: Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.

@@ -1,7 +1,7 @@
 # Implementation Plan: Modal Tableau Refactor — Abstractions, Module Division, Boneyard, Documentation
 
 - **Task**: 557 - modal_tableau_refactor_abstractions_boneyard
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 27 phases; ~60-80 hours across multiple dispatch cycles (expansion expected — see Risks, "Cut line")
 - **Dependencies**: None. Task 553 (S4 keyed loop-guard soundness) is downstream by explicit user decision and is NOT touched by this plan.
 - **Research Inputs**:
@@ -354,7 +354,7 @@ must therefore **never** run concurrently with any phase owning those files.
 
 ---
 
-### Phase 1: Abstraction Decision Record [NOT STARTED]
+### Phase 1: Abstraction Decision Record [IN PROGRESS]
 
 **Goal**: Produce the explicit decision record the task description requires before any file is
 moved or split and before any abstraction is implemented. This is the review gate.
@@ -397,7 +397,21 @@ under `specs/`).
 
 ---
 
-### Phase 2: Stale-Build Clearance, Baseline Capture, and Literature Index Repair [NOT STARTED]
+### Phase 2: Stale-Build Clearance, Baseline Capture, and Literature Index Repair [BLOCKED]
+
+**Blocker (recorded 2026-07-26)**: `lake build` fails on a **genuine compile error outside the
+Tableau subsystem** — `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329:2`,
+`Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)`. The missing
+`Nested/Soundness.olean` is a *consequence* of this error, not a stale artifact, so
+`lake exe checkInitImports` cannot be cleared by rebuilding and **V6 is not established**. The
+failing file is committed work belonging to an in-flight constructive nested-sequent task
+(commit `88b198bf`), outside this task's territory; per this phase's own carve-out it was recorded
+rather than repaired. Baseline capture (V4) and the sorry census (V5) **did** complete — see
+`artifacts/baseline.md`. The literature-index task could not be completed as written: the defect
+is not in `specs/literature-index.json` (which is reference-only and validates clean, 34/34
+entries resolving) but in the global `~/Projects/Literature/index.json`, which lacks `parent_doc`
+child entries for 19 of 34 documents; root cause and exact repair are recorded in
+`artifacts/baseline.md` §12.
 
 **Goal**: Make `lake exe checkInitImports` a meaningful acceptance gate, and capture the measured
 baseline every later phase verifies against.

@@ -1,22 +1,54 @@
 {
-  "status": "planned",
-  "summary": "27-phase hard-mode plan created for the modal Tableau refactor. Phase 1 is the mandatory abstraction decision record (no .lean edits permitted); Phase 2 clears the stale build and repairs the per-repo literature index. Scope B mechanical de-duplication (Phases 3-7) precedes every abstraction change, as the task description orders. Scope A follows as an additive-first sequence: Saturation.lean consumer audit (Phase 8, its own gate deliverable), RuleApplySt additive introduction and bridge (9-10), box-plus birth keys additive then enriched (11-12), St-ladder migration and duplication retirement (13-14), outDegEq field removal (15). Module division (16-23) begins with a seam re-cut manifest because the abstractions move the seams. Boneyard (24-25), documentation (26), vetting gate (27). Every phase is bound by a Standing Verification Contract V1-V7 encoding the non-negotiables: modalTableauS4Keyed_complete and the six Decidable instances green at every commit, Tableau sorry census exactly 1, zero new axioms, both Boneyard carve-outs immovable. No sorry may be added anywhere; blocked is the correct outcome instead. IMPORTANT COORDINATION FINDING: tasks 558-567 already exist in state.json and already implement this exact programme (report 01's Tasks A-I with their dependency DAG intact). This plan and those tasks describe the same work; dispatching both duplicates every phase. The plan carries a 'Relationship to the Spawned Programme Tasks 558-567' subsection with the exact phase-to-task mapping. Only Phase 2's stale-build clearance is unowned by any spawned task, and every task that verifies against 'checkInitImports clean' is verifying against nothing until it is cleared. Recommended: run Phase 2 under 557, then execute 558-567 in dependency order using this plan's phase bodies as their implementation detail; otherwise mark 558-567 ABANDONED before 557 executes the full plan. Do not dispatch both.",
-  "artifacts": [
+  "status": "partial",
+  "summary": "Phase 2 measurements complete and committed; build gate BLOCKED. lake exe cache get succeeded. lake build FAILS on a genuine compile error OUTSIDE Tableau (Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329:2 'Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)'), committed by 88b198bf under an unrelated in-flight constructive nested-sequent task. The missing Nested/Soundness.olean is a consequence of that error, not a stale artifact, so checkInitImports cannot be cleared by rebuilding and V6 is NOT established. Per the phase carve-out the error was recorded, not repaired: no sorry added, no revert, no unrelated subsystem touched. artifacts/baseline.md was written in full with a reproduction command per row (V4 PASS, V5 PASS). The literature-index task could not be completed as specified: its premise is wrong. specs/literature-index.json is reference-only (doc_id + relevance, no chunk counts) and validates clean at 34/34 entries resolving; the '1 chunk' figure originates in literature-briefing.sh:203-206, which counts global-index child entries with parent_doc set and falls back to chunk_count=1 at :224. Massacci has 77 chunk files on disk and chunk_count:77 on its parent entry but 0 child entries. The defect is systemic: 19 of 34 documents (848 chunk files) under-report identically. The repair targets the user's shared global ~/Projects/Literature/index.json, outside this phase's declared territory, so it was located and documented rather than applied.",
+  "phases_completed": 2,
+  "phases_total": 27,
+  "skeleton": false,
+  "blockers": [
     {
-      "path": "specs/557_modal_tableau_refactor_abstractions_boneyard/plans/01_tableau-refactor-abstractions-boneyard.md",
-      "type": "plan",
-      "summary": "27 H8-sized phases with per-phase territory contracts, estimated output lines, and done-criteria; postmortem constraints with 19 do-not rules; preserved-assets table; H3 source-to-implementation mapping; explicit cut line after Phase 15 for task expansion."
+      "phase": 2,
+      "gate": "V6 (lake exe checkInitImports clean)",
+      "kind": "build_error_outside_territory",
+      "file": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+      "line": 1329,
+      "verbatim": "error: Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329:2: Missing cases:\n_, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)",
+      "downstream": "uncaught exception: object file '.../Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.olean' of module Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness does not exist",
+      "provenance": "commit 88b198bf 'task 554 phase 13.1' - committed, not a local edit; outside the Tableau subsystem",
+      "owner": "constructive nested-sequent task, NOT this task",
+      "impact": "Every later acceptance gate in this plan reading 'checkInitImports clean' currently verifies against nothing.",
+      "attempted_repair": false,
+      "reason_not_repaired": "Phase body explicitly carves this out: 'If the build surfaces genuine errors outside Tableau, record them and mark [BLOCKED]; do not repair unrelated subsystems under this task.'"
+    },
+    {
+      "phase": 2,
+      "gate": "literature index repair",
+      "kind": "task_premise_incorrect_plus_out_of_territory",
+      "finding": "specs/literature-index.json is reference-only and holds no chunk counts; it validates clean (34/34 doc_ids resolve). The '1 chunk' rendering originates in .claude/scripts/literature-briefing.sh:203-206 (counts global-index entries with parent_doc == doc_id) with a chunk_count=1 fallback at :224. Massacci: 77 chunk_*.md on disk, chunk_count:77 on the parent entry, 0 child entries.",
+      "systemic_extent": "19 of 34 sub-index documents under-report, spanning 848 chunk files (simpson_1994:206, massacci:77, biermandepaiva_2000:53, alechina_2001:52, marin_2021:51, trufas_2024:48, post_1921:46, arisaka_2015:40, wijesekera_1990:38, from_2022:34, bentzen_2023:33, rabinovich_2014:30, henkin_1949:27, burgess_1982_i:25, burgess_1982_ii:24, johansson_1937:24, pacheco_2024:20, gabbay_1994_ch10:12, hodkinson_2006:8)",
+      "repair_target": "~/Projects/Literature/index.json (user's shared global corpus) or literature-briefing.sh's counting logic",
+      "attempted_repair": false,
+      "reason_not_repaired": "Outside declared territory (.lake/, specs/literature-index.json, artifacts/baseline.md) and outside the cslib repository; mutating the shared global corpus affects every project on this machine. Suggested lower-risk fix: prefer the parent entry's existing chunk_count over the child-entry count in literature-briefing.sh, which repairs all 19 documents without rewriting corpus data."
     }
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
-  "phases_total": 27,
-  "phases_completed": 0,
+  "sorry_inventory": [],
+  "artifacts": [
+    {
+      "path": "specs/557_modal_tableau_refactor_abstractions_boneyard/artifacts/baseline.md",
+      "type": "summary",
+      "summary": "Measured baseline for the modal Tableau subsystem, 14 sections, one reproduction command per row, captured at commit 7eb51f69 on Lean 4.31.0. Confirms verbatim: three-file line counts 10,540/5,317/4,307 (total 20,164); LoopChecking 230 declarations; Tableau sorry census 1 at FrameSoundness.lean:1244; Tableau axioms 0 declarations (3 raw) vs repo-wide 26 declarations (1,701 raw), recorded as a SCOPE DISTINCTION not a corrected number; tags 0/0/0/0 in the three files and 11 TODO / 8 NOTE repo-wide; re-derivation sites 55 with the per-file distribution INCLUDING LoopChecking's 14; ModalTableauResult span 8 Tableau modules / 9 repo-wide; hintikkaS4_* bridges 8 at the exact preserved-asset line numbers; S4LoopInv header :7070, outDegEq field :7084, provision sites LoopChecking :7569, :7633 and FrameCompleteness :4217-4218; regression corpus 197 lines; Boneyard/ absent. Repo-wide sorry census recorded AS MEASURED at 29 code-position sorries where the plan carried 10, with all three competing measurement definitions given (29 code-position / 158 CI-grep / 5 build warnings) and the build-warning figure flagged as an undercount because the incremental build never re-elaborated the cached Tableau modules. Amplification figures (4 decls / 1,036 lines; 43 / 1,983 reachable from modalTableauS4Keyed_complete) explicitly NOT re-measured, with no substitute number fabricated, because reachability analysis needs a green build."
+    }
+  ],
+  "next_action_hint": "Do NOT dispatch Phase 3 expecting a green gate. The V6 blocker is owned by the constructive nested-sequent task that introduced Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329 (commit 88b198bf) - it needs a NestedProof.cut case added to the match at that site. Either sequence this task behind that repair, or spawn a task scoped to it. Until then, any phase whose acceptance gate reads 'checkInitImports clean' is unverifiable and phases depending on the un-re-measured amplification figures must say so explicitly. The literature finding wants a separately-scoped owner; the cheapest fix is in literature-briefing.sh, not in the corpus data.",
   "modified_files": [
+    "specs/557_modal_tableau_refactor_abstractions_boneyard/artifacts/baseline.md",
     "specs/557_modal_tableau_refactor_abstractions_boneyard/plans/01_tableau-refactor-abstractions-boneyard.md",
-    "specs/557_modal_tableau_refactor_abstractions_boneyard/.return-meta.json",
     "specs/557_modal_tableau_refactor_abstractions_boneyard/.orchestrator-handoff.json",
-    "specs/state.json",
-    "specs/TODO.md"
-  ]
+    "specs/557_modal_tableau_refactor_abstractions_boneyard/.return-meta.json"
+  ],
+  "build_green": false,
+  "checkinitimports_clean": false,
+  "massacci_chunks_before": 1,
+  "massacci_chunks_after": 1,
+  "massacci_chunks_true_on_disk": 77,
+  "cslib_files_modified": 0
 }

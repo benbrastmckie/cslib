@@ -1,109 +1,42 @@
 {
-  "status": "planned",
+  "status": "partial",
+  "started_at": "2026-07-26T00:00:00Z",
+  "completed_at": "2026-07-26T00:00:00Z",
+  "phases_completed": 2,
+  "phases_total": 27,
+  "requires_user_review": true,
   "artifacts": [
     {
-      "path": "specs/557_modal_tableau_refactor_abstractions_boneyard/plans/01_tableau-refactor-abstractions-boneyard.md",
-      "type": "plan",
-      "summary": "27-phase hard-mode plan. Phase 1 is the mandatory abstraction decision record (no .lean edits); Phase 2 clears the stale build so checkInitImports is a meaningful gate and repairs the literature index. Scope B de-duplication (Phases 3-7, 55 measured re-derivation sites across two source files) runs before any abstraction. Scope A follows: Saturation.lean consumer audit as its own gate phase (8), additive RuleApplySt (9-10), box-plus birth keys additive-then-enriched (11-12), St-ladder migration (13-14), outDegEq removal (15). Then split seam re-cut plus module extraction (16-23), Boneyard creation and audited moves (24-25), documentation corrections (26), vetting acceptance gate (27). Standing verification contract V1-V7 binds every phase."
+      "path": "specs/557_modal_tableau_refactor_abstractions_boneyard/artifacts/baseline.md",
+      "type": "summary",
+      "summary": "Measured baseline for the modal Tableau subsystem with a reproduction command per row; captured at commit 7eb51f69."
     }
   ],
-  "summary": "Hard-mode implementation plan for task 557 written. 27 H8-sized phases, each bounded to one dispatch and named for the exact artifact it produces. 19 postmortem do-not rules encoded, including the absolute prohibitions on attempting the S4 soundness obligation, adding any sorry, splitting by line count, editing Saturation.lean without the Phase 8 audit, and moving either Boneyard carve-out. Preserved-assets table lists 10 landed components. Source-to-implementation mapping cites Massacci2000 and ChagrovZakharyaschev1997 by chunk and page for every load-bearing decision. Five report-01 figures corrected by the adversarial pass are recorded in the plan and mandated into the Phase 1 decision record. Phase count exceeds one orchestration run; the Risks section names the cut line explicitly (after Phase 15, Scope A complete) with four follow-up task groups. IMPORTANT COORDINATION FINDING: tasks 558-567 already exist in state.json and already implement this exact programme (report 01's Tasks A-I with their dependency DAG intact). This plan and those tasks describe the same work; dispatching both duplicates every phase. The plan carries a 'Relationship to the Spawned Programme Tasks 558-567' subsection with the exact phase-to-task mapping. Only Phase 2's stale-build clearance is unowned by any spawned task, and every task that verifies against 'checkInitImports clean' is verifying against nothing until it is cleared. Recommended: run Phase 2 under 557, then execute 558-567 in dependency order using this plan's phase bodies as their implementation detail; otherwise mark 558-567 ABANDONED before 557 executes the full plan. Do not dispatch both.",
-  "next_steps": "Run /implement 557 --hard. Phases 1 and 2 can run in parallel; Phase 8 can run in parallel with Phase 3. Everything else is sequential by file territory.",
+  "partial_progress": {
+    "stage": "phase 2 blocked",
+    "details": "Baseline captured (V4 PASS) and Tableau sorry census confirmed at 1 (V5 PASS). V6 BLOCKED: lake build fails on a genuine compile error outside Tableau at Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329 (commit 88b198bf, unrelated task). Literature index repair not applicable as specified - defect is in the global corpus index, not the per-repo sub-index."
+  },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count_tableau": 1,
+    "sorry_count_repo_wide": 29,
+    "sorry_introduced_by_this_phase": 0,
+    "vacuous_count": 0,
+    "axiom_count_tableau": 0,
+    "axioms_introduced_by_this_phase": 0,
+    "build_passed": false,
+    "checkinitimports_clean": false,
+    "ci_pipeline_passed": false,
+    "cslib_files_modified": 0
+  },
+  "memory_candidates": [
+    "lake exe checkInitImports failing with 'object file ... does not exist' is a downstream symptom, not a diagnosis: run lake build first and read the actual compile error, since a missing .olean is usually the consequence of a module that fails to elaborate rather than a stale build product.",
+    "literature-briefing.sh derives its chunk count from global-index entries whose parent_doc matches the doc_id, falling back to 1 when none exist - so a corpus can show 'chunk_count: 77' on its parent entry and 77 files on disk while the briefing renders '1 chunk(s)'. The per-repo specs/literature-index.json is reference-only and can never be the site of this defect."
+  ],
   "metadata": {
     "session_id": "sess_1785105096_50f3c7",
-    "agent_type": "planner-hard-agent",
-    "delegation_path": [
-      "orchestrator",
-      "plan",
-      "planner-hard-agent"
-    ],
-    "phase_count": 27,
-    "estimated_hours": 78,
-    "postmortem_rules_count": 19,
-    "complexity": "complex",
-    "reports_integrated": [
-      "reports/01_tableau-abstraction-boneyard-analysis.md"
-    ],
-    "skeleton": false,
-    "dependency_waves": [
-      [
-        1,
-        2
-      ],
-      [
-        3,
-        8
-      ],
-      [
-        4
-      ],
-      [
-        5
-      ],
-      [
-        6
-      ],
-      [
-        7
-      ],
-      [
-        9
-      ],
-      [
-        10
-      ],
-      [
-        11
-      ],
-      [
-        12
-      ],
-      [
-        13
-      ],
-      [
-        14
-      ],
-      [
-        15
-      ],
-      [
-        16
-      ],
-      [
-        17
-      ],
-      [
-        18
-      ],
-      [
-        19
-      ],
-      [
-        20
-      ],
-      [
-        21
-      ],
-      [
-        22
-      ],
-      [
-        23
-      ],
-      [
-        24
-      ],
-      [
-        25
-      ],
-      [
-        26
-      ],
-      [
-        27
-      ]
-    ]
-  },
-  "session_id": "sess_1785105096_50f3c7"
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

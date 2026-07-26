@@ -153,13 +153,14 @@ The `index.json` file in this directory is the master registry for `--lit` injec
 | `summary` | string | One-sentence description |
 
 All files live under `sources/`. Book-length files are split into chapter subdirectories
-(e.g., `sources/chagrov_1997/p01_introduction.md`).
+(e.g., `sources/gentzen_1935/`).
 Paper-length files are in their own directory (e.g., `sources/burgess_1982_i/burgess_1982_i.md`).
 
 ## Modal Logic (Foundations shared with Propositional)
 
 - **Chagrov & Zakharyaschev 1997** [ChagrovZakharyaschev1997] `[MD]`: *Modal Logic*. Oxford Logic Guides 35.
-  Directory: `chagrov_1997/` (p00_front-matter.md, p01_introduction.md, p02_kripke-semantics.md, p03_adequate-semantics.md, p04_properties-of-logics.md, p05_algorithmic-problems.md).
+  Migrated to the global corpus as `chagrovzakharyaschev_1997_modallogic` (997 FTS chunks
+  plus six curated per-Part child entries); the local duplicate was removed.
   Primary reference for CSLib (cited as "CZ" throughout). Key sections:
   - Chapter 1: Classical propositional logic, truth tables, tautologies, completeness (Thm 1.16)
   - Section 2.2: Kripke semantics, persistence (Prop 2.1)

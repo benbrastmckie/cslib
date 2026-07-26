@@ -81,6 +81,62 @@
     {
       "doc_id": "massacci_2000_single_step_tableaux_for_modal_logics",
       "relevance": "Massacci, Single Step Tableaux for Modal Logics (JAR 24(3):319-364, 2000). Terminating single-step/prefixed tableau calculi uniformly across the modal cube incl. S5/K5/KB5; loop-checking & prefix-management termination where the edge-local modal-depth-decrement measure fails. Primary source for task 514/515 (unblocking task 504 S5 termination obstruction, modalApplyOneS5_rankStep_not_dischargeable). BibKey Massacci2000."
+    },
+    {
+      "doc_id": "bentzen_2023",
+      "relevance": "Verified completeness in Henkin-style for intuitionistic propositional logic — First verified Henkin-style completeness proof for intuitionistic propositional logic following Troelstra and van Dalen's method, implemented in Lean with prime extension lemma."
+    },
+    {
+      "doc_id": "church_1956",
+      "relevance": "Introduction to Mathematical Logic — Front Matter — migrated from the repository-local literature directory"
+    },
+    {
+      "doc_id": "from_2022",
+      "relevance": "SeCaV: A Sequent Calculus Verifier in Isabelle/HOL — Formalizes soundness and completeness for sequent calculus in Isabelle/HOL, relevant as comparative prior art for CSLib's proof system."
+    },
+    {
+      "doc_id": "gabbay_1994_ch10",
+      "relevance": "Temporal Logic: Mathematical Foundations — Chapter 10: Temporal Logic over the Integers — Chapter 10 of GHR94: Separation Theorem for temporal logic over integers (Theorem 10.2.9) and completeness proof for the Until-Since tense logic over ℤ; basis for CSLib's bimodal separation proof."
+    },
+    {
+      "doc_id": "gentzen_1935",
+      "relevance": "Investigations into Logical Deduction — Synopsis and Notation — Synopsis and notation for Gentzen's foundational paper introducing natural deduction (NJ, NK) and sequent calculus (LJ, LK)."
+    },
+    {
+      "doc_id": "henkin_1949",
+      "relevance": "The Completeness of the First-Order Functional Calculus — Original Henkin completeness proof for first-order logic using maximal consistent set extension, the method adapted in CSLib for propositional and modal completeness proofs."
+    },
+    {
+      "doc_id": "hughes_1996",
+      "relevance": "A New Introduction to Modal Logic — Preface and Contents — Preface and TOC for Hughes & Cresswell's introduction to modal logic."
+    },
+    {
+      "doc_id": "johansson_1937",
+      "relevance": "Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus — Defines minimal logic by removing ex falso quodlibet from Heyting's intuitionistic system, retaining falsum as a primitive and negation defined as A→⊥."
+    },
+    {
+      "doc_id": "mendelson_2016",
+      "relevance": "Introduction to Mathematical Logic (6th ed.) — Front Matter — Front matter for Mendelson's standard mathematical logic textbook (6th edition)."
+    },
+    {
+      "doc_id": "negri_von_plato_2001",
+      "relevance": "Structural Proof Theory — Front matter: preface, table of contents, overview"
+    },
+    {
+      "doc_id": "post_1921",
+      "relevance": "Introduction to a General Theory of Elementary Propositions — Proved functional completeness of propositional connectives and introduced truth tables systematically; foundational for CSLib's Evaluate/Tautology definitions."
+    },
+    {
+      "doc_id": "troelstra_schwichtenberg_2000",
+      "relevance": "Basic Proof Theory — Front matter: preface, table of contents, notation"
+    },
+    {
+      "doc_id": "trufas_2024",
+      "relevance": "Intuitionistic Propositional Logic in Lean — Formalizes strong completeness for intuitionistic propositional logic in Lean with both Kripke and algebraic semantics, directly comparable to CSLib's approach."
+    },
+    {
+      "doc_id": "zakharyaschev_2001",
+      "relevance": "Advanced Modal Logic — Introduction — Introduction to the Advanced Modal Logic handbook chapter, providing historical overview and roadmap for unimodal, polymodal, and superintuitionistic logic sections."
     }
   ]
 }

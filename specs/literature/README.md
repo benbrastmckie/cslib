@@ -135,26 +135,29 @@ All files follow the naming convention `{author}_{year}.md` (first author surnam
 
 ## Index and Retrieval
 
-The `index.json` file in this directory is the master registry for `--lit` injection via
-`literature-retrieve.sh`. Schema:
+**Content no longer lives in this directory.** All full-text literature is held centrally in the
+global corpus at `~/Projects/Literature/sources/<doc_id>/`, which owns the markdown, the chunk
+files, the `chunks.json` manifests, the source PDFs, and the authoritative metadata in
+`~/Projects/Literature/index.json`. This directory keeps only prose: this file and `SOURCES.md`.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique identifier (`author_year[_section]`) |
-| `bib_key` | string\|null | BibTeX key in `references.bib` |
-| `title` | string | Full title |
-| `authors` | string | Author(s) |
-| `year` | integer | Publication year |
-| `section` | string\|null | Section/chapter description |
-| `path` | string | Path relative to `specs/literature/` |
-| `page_range` | string\|null | Original page range |
-| `token_count` | integer | Estimated tokens (words × 1.3) |
-| `keywords` | array | 6-10 keywords for retrieval matching |
-| `summary` | string | One-sentence description |
+What is local to this repository is a *reference* sub-index, one level up at
+`specs/literature-index.json`. It is deliberately reference-only — each entry carries just a
+`doc_id` pointer into the global index plus a `relevance` note explaining why this repository cares
+about that document. No titles, authors, paths, or token counts are cached here; duplicating them
+is what previously let the two indices drift apart.
 
-All files live under `sources/`. Book-length files are split into chapter subdirectories
-(e.g., `sources/gentzen_1935/`).
-Paper-length files are in their own directory (e.g., `sources/burgess_1982_i/burgess_1982_i.md`).
+`--lit` reads that sub-index, resolves each `doc_id` against the global index, and emits a compact
+`<literature-briefing>` block. Agents then navigate on demand:
+
+- `bash .claude/scripts/literature-search.sh "query"` — FTS5 search across the whole corpus
+- `bash .claude/scripts/literature-search.sh --toc <doc_id>` — browse a document's structure
+- `Read` a specific chunk path from the briefing
+
+Search results are gated on `provenance_fidelity`: documents whose conversion has not been verified
+against a source PDF are quarantined from default ranked output, reachable with
+`--include-unverified` or by direct `--read`/`--toc`. Run
+`bash .claude/scripts/literature-fidelity-audit.sh --dry-run` to see how each document is
+classified. A document with no source PDF at all cannot be adjudicated, and stays quarantined.
 
 ## Modal Logic (Foundations shared with Propositional)
 

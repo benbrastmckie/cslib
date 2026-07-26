@@ -1,20 +1,20 @@
 ---
-next_project_number: 556
+next_project_number: 557
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-25. Generated from state.json dependency graph.*
+*Updated 2026-07-26. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,440,465,466,511,530,534,552,553,554,555 | -- | propositional logic, modal logic, bimodal logic, ... |
-| 2 | 39,40,215,317,425,450,506,537,548,551 | 36,37,181,511,552,554 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,301,375,430,456,497 | 39,40,317,425,506 | foundations, propositional logic, modal logic, ... |
-| 4 | 413,414 | 181,215,300,301,375 | code hygiene |
+| 1 | 36,37,181,226,317,400,409,425,440,465,466,511,530,534,553,554,555,556 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,430,450,456,497,506,537,548,551 | 36,37,181,317,425,511,554 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,413 | 39,40,375,506 | foundations, modal logic, code hygiene |
+| 4 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -25,11 +25,11 @@ next_project_number: 556
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
+400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
@@ -39,19 +39,17 @@ next_project_number: 556
     └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-552 [PARTIAL] — Shared calculus-conformance and rule-completeness repair unblocki
-553 [PARTIAL] — Determine whether the S4 keyed loop-check guard can be made sound
-554 [PARTIAL] — Research-only task: establish or refute the CS5 pair-seed disjunc
+553 [IMPLEMENTING] — Determine whether the S4 keyed loop-check guard can be made sound
+554 [IMPLEMENTING] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
 
+425 [BLOCKED] — [Decomposed from task 301, blocker C.] Establish the finite model
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-425 [BLOCKED] — [Decomposed from task 301, blocker C.] Establish the finite model
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
 
 ### Bimodal Logic
 
@@ -78,11 +76,25 @@ next_project_number: 556
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Temporal Tableau Saturation
+
+556 [NOT STARTED] — Discharge the Phase 3 STOP-gate left open by design in the tempor
+
 ### Uncategorized
 
 555 [PARTIAL] — Repair literature search visibility for index entries written und
 
 ## Tasks
+
+### 556. Temporal tableau sat timp fuel sufficiency measure
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: temporal tableau saturation
+- **Dependencies**: None
+
+**Description**: Discharge the Phase 3 STOP-gate left open by design in the temporal tableau conformance work: IBranchSaturation's sat_timp field and truthLemma's pre-existing T-imp sorry. THE OBLIGATION: both are blocked on the SAME missing ingredient -- a fuel-sufficiency measure for applyPersistenceFixpoint's own recursion, analogous to the existing step-lt measure but for the persistence fixpoint rather than the step relation. See the 'sat_timp discharge STOP-gate' comment block in Cslib/Logics/Temporal/Tableau/Scheme.lean for the precise statement of what is missing. SCOPE NOTE: the determinacy half of this gap (Gap 2) was already resolved by the branching-rule redesign that landed with the conformance work; the fuel half (Gap 1) is untouched and pre-existing. This was sized by the originating dispatch as a dedicated phase-sized undertaking on its own, explicitly NOT a quick follow-up -- expect to need a new measure definition, its well-foundedness proof, and the two discharge sites. INVARIANTS: repo-wide axiom count must stay at 26 with zero new axioms; the Cslib/ bare-sorry count must go DOWN (this task's whole purpose is removing two of them), never up; whole-project lake build and lake test must stay green; the 43-row CslibTests/TableauConformance.lean regression guard must stay green (it is a pure regression guard now -- a row moving away from its mathematically correct verdict is a stop-the-line regression, never a guard string to rewrite).
+
+---
 
 ### 555. Literature search fidelity schema quarantine
 - **Status**: [PARTIAL]
@@ -97,7 +109,7 @@ next_project_number: 556
 ---
 
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -109,7 +121,7 @@ next_project_number: 556
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535
@@ -121,7 +133,7 @@ next_project_number: 556
 ---
 
 ### 552. Tableau calculus conformance rule completeness repair
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

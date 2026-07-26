@@ -1,0 +1,45 @@
+{
+  "phase": 9,
+  "phase_name": "NCK' rules",
+  "status": "done",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Verify NCK' rule figure against recovered PDF",
+      "status": "done"
+    },
+    {
+      "id": 2,
+      "description": "Define NestedProof : NestedFull Atom -> Type with all 13 Figure 2 rules",
+      "status": "done"
+    },
+    {
+      "id": 3,
+      "description": "Define NestedProof.height",
+      "status": "done"
+    },
+    {
+      "id": 4,
+      "description": "Land smoke-test derivations",
+      "status": "done"
+    },
+    {
+      "id": 5,
+      "description": "lake build (scoped) and full CI pipeline",
+      "status": "done"
+    }
+  ],
+  "files_touched": [
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
+    "Cslib.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"
+  ],
+  "verification": {
+    "build_passed": true,
+    "sorry_count": 39,
+    "sorry_count_delta": 0,
+    "axiom_count": 26,
+    "axiom_count_delta": 0,
+    "ci_pipeline_passed": true
+  }
+}

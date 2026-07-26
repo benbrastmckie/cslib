@@ -586,18 +586,37 @@ define `Γ{∆}`, `Γ{∅}`, and `Γ⇓`.
 
 ## Stage C — The Rule Systems
 
-### Phase 9: `NCK′` rules [NOT STARTED]
+### Phase 9: `NCK′` rules [COMPLETED]
 
 **Goal**: The base nested-sequent system as an inductive proof-tree type.
 
 **Tasks**:
-- [ ] Verify the `NCK′` rule figure against the recovered PDF before writing
-- [ ] Define `NestedProof : NestedFull Atom → Type` with the `NCK′` rules (identity/axiom, the
+- [x] Verify the `NCK′` rule figure against the recovered PDF before writing -- rendered page 6
+      directly (Figure 2) and cross-checked against `pdftotext -f 6 -l 7 -layout` (which drops the
+      `□` glyph in this PDF's font encoding, confirmed again this phase); also rendered page 5 to
+      re-verify Definition 2.3's exact `Γ'{Λ{ },Π°}` shape before committing to which rules need
+      `InputCtx` vs `OutputCtx`
+- [x] Define `NestedProof : NestedFull Atom → Type` with the `NCK′` rules (identity/axiom, the
       propositional input/output rules, `⊥•`, the modal `□•`/`□◦`/`♦•`/`♦◦` rules, `k`, and the
-      explicit contraction rule the paper flags as necessary in the constructive setting)
-- [ ] Define `NestedProof.height`
-- [ ] Land the smoke-test derivations the paper gives in §3
-- [ ] `lake build`
+      explicit contraction rule the paper flags as necessary in the constructive setting) --
+      **deviation**: the plan's "`k`" item is the `∧•`/`∧°`/`∨•`/`∨°`/`⊃•`/`⊃°` propositional
+      family already listed separately in this same bullet, not a distinct rule; Figure 2 has no
+      rule literally labelled `k` (that name is reserved for the `K`-axiom in the Hilbert system,
+      `Constructive/CS5.lean`). All 13 rules of Figure 2 (`⊥•`, `id`, `∧•`, `∧°`, `∨•`, `∨°`
+      (both injections), `⊃•`, `⊃°`, `□•`, `□°`, `♦•`, `◇°`, `c`) are landed as `NestedProof`
+      constructors
+- [x] Define `NestedProof.height`
+- [x] Land the smoke-test derivations the paper gives in §3 -- **deviation**: the source's own §3
+      text (grepped across the whole PDF for "Example") gives no concrete derivation trees between
+      Figure 2 and Proposition 3.1 to transcribe verbatim; Prop 3.1 itself ("the general `id`-rule
+      is derivable... by a straightforward induction") is a genuine standalone induction over
+      formula structure, out of scope for a single phase's smoke test (its base case needs the
+      atomic `id` axiom reachable from a *flat*, box-free `Γ{A•,A°}` at `ctx = []`, which
+      `InputCtx.fillLhs` cannot produce -- confirmed by direct computation, see the module
+      docstring). Landed instead: bare `⊥•` and `id` axiom instances, plus one genuine multi-rule
+      derivation (`∨•` applied to two `⊥•` instances), all documented as illustrative, not literal
+      transcription
+- [x] `lake build`
 
 **Timing**: 3 hours
 
@@ -607,7 +626,10 @@ define `Γ{∆}`, `Γ{∅}`, and `Γ⇓`.
 - `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean` (new)
 
 **Verification**:
-- Module builds, no `sorry`; the §3 example derivations typecheck
+- Module builds, no `sorry`; the §3 example derivations typecheck -- confirmed: scoped build
+  green, whole-project `lake build`/`lake test`/`lake lint`/`lake exe checkInitImports`/
+  `lake exe lint-style`/`lake exe mk_all --module`/`lake shake` all green; `Cslib/` sorry census
+  unchanged at 39; axiom count unchanged at 26 (`grep -rn "^axiom " Cslib/ | wc -l`)
 
 ---
 

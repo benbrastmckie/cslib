@@ -633,21 +633,37 @@ define `Γ{∆}`, `Γ{∅}`, and `Γ⇓`.
 
 ---
 
-### Phase 10: `NCS5 = NCK′ + {t,4}#_G + {b}[]` [NOT STARTED]
+### Phase 10: `NCS5 = NCK′ + {t,4}#_G + {b}[]` [COMPLETED]
 
 **Goal**: The `CS5` instance of the safe-pair scheme, plus the structural transport lemmas the
 later inductions need.
 
 **Tasks**:
-- [ ] Verify the `t•`, `t◦`, `4•`, `4◦` (logical) and `b[]` (structural) rule figures against the
-      PDF
-- [ ] Extend the rule inductive to `NCS5`, with the axiom-set parameterisation kept explicit so a
-      later cube generalisation is additive
-- [ ] Record in a docstring why this is the right instance: safe pair `X = {t,4}`, `Y = {b}` —
-      `5 ∉ Y` makes the first side condition vacuous, and `b ∈ Y` with `4 ∈ X` satisfies the
-      second (Theorem 5.2, which names `CS5` in its covered list)
-- [ ] Land weakening/`.mono` transport and the height bounds it preserves
-- [ ] `lake build`
+- [x] Verify the `t•`, `t◦`, `4•`, `4◦` (logical) and `b[]` (structural) rule figures against the
+      PDF -- rendered page 7 (Figure 3, `d`/`t`/`4`) and page 8 (Figure 4, structural rules)
+      directly this phase; re-rendered page 6 (Figure 2) to confirm `4•`/`4◦` reposition an
+      already-formed `□A•`/`◇A°` (unlike `NCK`'s own `□•`/`◇°`, which build the modal formula
+      fresh from a bare leaf) -- genuinely distinct rules, not duplicates
+- [x] Extend the rule inductive to `NCS5`, with the axiom-set parameterisation kept explicit so a
+      later cube generalisation is additive -- landed as five additional `NestedProof`
+      constructors (`tR`, `tL`, `fourR`, `fourL`, `bStruct`) on the *same* inductive, not a new
+      indexed type; the module docstring records the full `X, Y ⊆ {d,t,b,4,5}` parameterisation
+      even though only the `CS5` instance's five constructors are landed
+- [x] Record in a docstring why this is the right instance -- **verified against page 14**
+      (Theorem 5.2's exact statement, not just the plan's own paraphrase): `X ⊆ {d,t,4}`,
+      `Y ⊆ {d,b,5}`, side conditions "if `t∈X` and `5∈Y` then `b∈Y`" (vacuous: `5∉Y`) and "if
+      `b∈Y` then `4∈X`" (holds: `b,4` both present); Theorem 5.2 explicitly lists `CS5` among the
+      covered logics
+- [x] Land weakening/`.mono` transport and the height bounds it preserves -- **deviation,
+      documented in the module docstring**: landed `NestedProof.mono` as the index-equality
+      transport precursor (height-preserving, hence non-increasing, matching this phase's own
+      verification bullet literally), not yet Figure `(3.1)`'s full content-weakening admissible
+      rule -- the plan's own Phase 19 ("Height-preserving admissibility of the structural rules")
+      explicitly names its first task "extend Phase 10's `.mono` to the height-preserving
+      statement," confirming Phase 10's version is the narrower, budget-appropriate precursor,
+      not a premature attempt at the 18-constructor admissibility induction Phase 19 is
+      separately scoped (3 hours, dedicated `Admissibility.lean`) to prove
+- [x] `lake build`
 
 **Timing**: 2.5 hours
 
@@ -657,7 +673,15 @@ later inductions need.
 - `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean`
 
 **Verification**:
-- Module builds, no `sorry`; `.mono` is height-non-increasing (stated and proved)
+- Module builds, no `sorry`; `.mono` is height-non-increasing (stated and proved) -- confirmed:
+  scoped build green, whole-project `lake build`/`lake test`/`lake lint`/`lake exe
+  checkInitImports`/`lake exe lint-style`/`lake exe mk_all --module`/`lake shake` all green
+  (`lake lint`'s one reported error is in `Temporal/Tableau/Saturation.lean`, outside this
+  phase's territory and file scope, pre-existing/concurrent-session in origin); `Cslib/` sorry
+  census unchanged at 39 (`bash .claude/scripts/lean-sorry-census.sh Cslib/`); axiom count
+  unchanged at 26 (`grep -rn "^axiom " Cslib/ | wc -l`); `mk_all --module` reported "No update
+  necessary" (no new file this phase); `lake shake`'s only note for this file is the known
+  `Cslib.Init` false positive shared with the two sibling `Nested/` modules
 
 ---
 

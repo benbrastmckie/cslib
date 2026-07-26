@@ -1,0 +1,41 @@
+{
+  "phase": 10,
+  "phase_name": "NCS5 = NCK' + {t,4}#_G + {b}[]",
+  "started_at": "2026-07-26T06:48:47Z",
+  "last_updated": "2026-07-26T07:20:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Verify t*, t-deg, 4*, 4-deg (logical) and b[] (structural) rule figures against the PDF",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 2,
+      "description": "Extend the rule inductive to NCS5 (five new NestedProof constructors: tR, tL, fourR, fourL, bStruct)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"]
+    },
+    {
+      "id": 3,
+      "description": "Record in a docstring why CS5's safe pair X={t,4}, Y={b} is the right instance, verified against Theorem 5.2 (page 14)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"]
+    },
+    {
+      "id": 4,
+      "description": "Land weakening/.mono transport and the height bounds it preserves (NestedProof.mono index-equality transport + NestedProof.mono_height)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"]
+    },
+    {
+      "id": 5,
+      "description": "lake build (scoped) plus full CI pipeline",
+      "status": "done",
+      "files_touched": []
+    }
+  ],
+  "current_objective": 5,
+  "approaches_tried": [],
+  "handoff_count": 0
+}

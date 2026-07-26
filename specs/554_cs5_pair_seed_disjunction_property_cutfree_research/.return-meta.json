@@ -1,22 +1,23 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-26T06:24:55Z",
+  "started_at": "2026-07-26T06:48:47Z",
   "artifacts": [
     {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"},
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-9-handoff-20260726.md"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-10-handoff-20260726.md"},
+    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-10-progress.json"}
   ],
   "partial_progress": {
-    "stage": "phase9_complete",
-    "details": "Phase 9 (NCK' rules) COMPLETED. Stage C now 1/2 complete (Phase 10 remains). 9/32 phases done.",
+    "stage": "phase10_complete",
+    "details": "Phase 10 (NCS5 = NCK' + {t,4}#_G + {b}[]) COMPLETED. Stage C now fully complete (2/2). 10/32 phases done.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 9,
-    "last_completed_phase": "Phase 9: NCK' rules"
+    "phases_completed": 10,
+    "last_completed_phase": "Phase 10: NCS5 = NCK' + {t,4}#_G + {b}[]"
   },
   "memory_candidates": [
-    "InputCtx.fillLhs (Nested/Context.lean, Arisaka-Das-Strassburger nested-sequent formalization) structurally forces exactly one box between its hole and the fixed pi companion, even at Gamma'=Lambda=[] -- it can never produce a flat, box-free (A-input,A-output) pair. This is a genuine feature of Definition 2.3, not a bug, and it is why Proposition 3.1 (general id-rule derivability) needs a real induction rather than a one-step smoke test.",
-    "In Lean 4, when defining a height/size function over an inductive family indexed by a value (e.g. `NestedProof : Index -> Type`) where recursive premises carry a DIFFERENT index than the constructor's own conclusion, fixing the index via `variable {Γ : Index}` before the def breaks recursive calls ('expected NestedProof Γ, got NestedProof (different index)'). Fix: write the def as `∀ {Γ}, NestedProof Γ → Nat` (universal quantification inside the type), not `variable`-fixed."
+    "Arisaka-Das-Strassburger's Theorem 5.2 (page 14) has DISJOINT axiom-set domains: X subset {d,t,4} and Y subset {d,b,5} -- t and 4 only ever belong to X (Figure 3's logical rules), b and 5 only ever to Y (Figure 4's structural rules), and d can go in either. This resolves any ambiguity about which figure a given safe-pair member's rule comes from without needing to check both.",
+    "In this codebase's nested-sequent Lean encoding, Mathlib reserves BOTH capital Pi (Pi-type delaborator) and capital Sigma (sigma-type binder notation) as unusable plain identifiers -- use lowercase pi/sigma instead when transcribing paper notation that uses capital Greek letters for arbitrary sequents/structures."
   ],
   "verification": {
     "verification_passed": true,
@@ -30,10 +31,10 @@
     "ci_steps": {
       "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Rules)",
       "checkInitImports": "pass",
-      "lake_lint": "pass (no warnings attributed to Rules.lean)",
+      "lake_lint": "pass for Rules.lean (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory)",
       "lint_style": "pass (no warnings attributed to Rules.lean)",
-      "shake": "pass (Rules.lean's only suggestion is 'remove import Cslib.Init', an expected false positive matching sibling files Context.lean/Syntax.lean, which keep the import deliberately per the mandatory Cslib.Init house rule)",
-      "mk_all_module": "pass (Cslib.lean updated with the new barrel import)",
+      "shake": "pass (Rules.lean's only suggestion is the known 'remove import Cslib.Init' false positive shared with sibling Context.lean/Syntax.lean)",
+      "mk_all_module": "pass (no update necessary, no new file this phase)",
       "full_build": "pass (lake build, exit 0, 3258 jobs)",
       "full_test_suite": "pass (lake test, exit 0)"
     }

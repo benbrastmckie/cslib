@@ -3,52 +3,47 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": false,
-  "phases_completed": 9,
+  "phases_completed": 10,
   "phases_total": 32,
   "sorry_inventory": [],
-  "summary": "Phase 9 (Stage C's first phase, NCK' rules) landed: Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean defines NestedProof : NestedFull Atom -> Type u, an inductive proof-tree family indexed by conclusion, covering all 13 rules of Figure 2 (botL/id/andL/andR/orL/orRLeft/orRRight/impL/impR/boxL/boxR/diaL/diaR/contract). Each rule uses InputCtx or OutputCtx per a type-necessity argument documented in the module docstring (LHS-typed hole content needs InputCtx.fillLhs to close to a full sequent; RHS-typed content uses OutputCtx.fillRhs/fillFull directly). NestedProof.height is landed via a universally-quantified-index recursion (fixing the index via `variable` first breaks the recursive calls, since every premise has a different NestedFull index than its conclusion -- hit and fixed this session). Three smoke-test derivations landed (bare boL/id axiom instances plus one orL-on-two-botL multi-rule derivation), documented as illustrative since the source's own Section 3 text gives no literal derivation trees between Figure 2 and Proposition 3.1 to transcribe (grepped the whole PDF for 'Example' to confirm). Stage C now 1/2 complete.",
+  "summary": "Phase 10 (Stage C's second phase, closing Stage C) landed: five additional NestedProof constructors on the same Rules.lean inductive from Phase 9 -- tR/tL (t deg/t-input, Figure 3), fourR/fourL (4 deg/4-input, Figure 3), bStruct (b structural rule, Figure 4) -- realising CS5's safe pair X={t,4}, Y={b}, verified against Theorem 5.2's exact statement (page 14) rather than just the plan's paraphrase. NestedProof.height extended with the five new cases. NestedProof.mono (index-equality transport) + NestedProof.mono_height (height-non-increasing) landed as the documented precursor to Phase 19's full weakening admissibility. Stage C now COMPLETE (2/2).",
   "artifacts": [
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-9-handoff-20260726.md"},
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-10-handoff-20260726.md"},
     {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"}
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-9-progress.json",
-    "Cslib.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-10-progress.json",
     "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"
   ],
   "decisions_made": [
-    "InputCtx.fillLhs is the correct (and only well-typed) home for the 8 rules whose displayed hole-content is LHS-typed (id, botL, andL, orL, impL's 2nd premise+conclusion, boxL, diaL, contract); OutputCtx.fillRhs/fillFull for the 5 whose hole-content is RHS-typed or a full pair (andR, orRLeft/orRRight, impR, boxR) -- this is forced by argument-type necessity, not a stylistic choice, and it is what makes the botL/orL 'same subtree' side condition (noted in the source right after Figure 2) automatically satisfied with no extra Lean hypothesis.",
-    "diaR's conclusion (Gamma{diamond A-degree, [Delta]}) genuinely needs OutputCtx.fillFull, not fillRhs: NestedRhs has no comma constructor, so an RHS leaf and an LHS bracket cannot be packaged as a single fillRhs filler -- confirmed by checking NestedRhs's two constructors (atom, box) in Syntax.lean before committing to this encoding.",
-    "The plan's 'k' task-list item is read as the propositional rule family already covered by the same bullet (Figure 2 has no rule literally labelled k; that name is reserved for the Hilbert K-axiom in Constructive/CS5.lean), not a distinct rule -- documented as a plan deviation inline.",
-    "The plan's smoke-test-derivations item is scoped down to illustrative axiom/rule-combination instances rather than Proposition 3.1's full induction, because Proposition 3.1's base case needs the atomic id axiom reachable from a flat, box-free Gamma{A-input,A-output} at ctx=[], which InputCtx.fillLhs structurally cannot produce (confirmed by direct computation) -- this is a genuine standalone induction-over-formula-structure theorem, not same-phase smoke-test material."
+    "CS5's safe pair is X={t,4}, Y={b}, confirmed against Theorem 5.2's exact side conditions (page 14): X subset {d,t,4}, Y subset {d,b,5} are disjoint domains; 't in X and 5 in Y implies b in Y' is vacuous (5 not in Y); 'b in Y implies 4 in X' holds. Only tR/tL/fourR/fourL/bStruct are landed -- d^[], t^[], 4^[], 5^[] (Figure 4) and the naive eq.(3.2)/(3.3) b-rules are out of scope for this instance.",
+    "4-degree/4-input (fourR/fourL) are genuinely distinct rules from NCK's own diamond-output/box-input (diaR/boxL, Phase 9), not duplicates: Figure 2's rules build the modal formula fresh from a bare leaf, Figure 3's 4-rules reposition an already-formed modal formula out of a shared box -- confirmed by re-rendering page 6 and comparing premises directly.",
+    "bStruct's sigma/Delta are generic NestedLhs, not Proposition: Figure 4 is genuinely structural (no polarity marker in the source), unlike Figure 2/3's formula-building rules. Spelled lowercase sigma, not capital Sigma: Mathlib binds capital Sigma as sigma-type binder notation, unusable as a plain identifier -- same clash class as Pi/pi documented in Context.lean (Phase 7).",
+    "NestedProof.mono is landed as the index-equality transport precursor (Eq-cast, height-preserving hence non-increasing), not yet Figure (3.1)'s full content-weakening admissible rule -- the plan's own Phase 19 explicitly says its first task is to 'extend Phase 10's .mono to the height-preserving statement', confirming this is the intended narrower scope for this phase's 2.5-hour budget, not a premature attempt at the 18-constructor admissibility induction. Documented as an inline plan-file annotation, not a silent substitution."
   ],
-  "dead_ends": [
-    "Bare OutputCtx.fillLhs for any rule whose companion Pi must survive to close a full sequent: fillLhs alone only yields a NestedLhs, not a NestedFull -- type error, not a design choice.",
-    "Building diaR's conclusion via OutputCtx.fillRhs applied to some crafted NestedRhs term mixing Delta and the diamond-atom: impossible, NestedRhs has only atom/box constructors, no comma -- confirmed by direct inspection of Syntax.lean before attempting this route.",
-    "Proving Gamma{A-input,A-output} derivable via impR+id at ctx=[] as a 'quick' smoke test for a general formula A: fails structurally, since InputCtx.fillLhs always forces one mandatory box between the hole and ctx.pi, so id's conclusion is never flat/box-free -- this is Proposition 3.1's actual base-case obstruction, not a shortcut worth re-attempting without the full induction machinery."
-  ],
+  "dead_ends": [],
   "continuation_context": {
-    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-9-handoff-20260726.md",
-    "phases_completed": 9,
+    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-10-handoff-20260726.md",
+    "phases_completed": 10,
     "phases_total": 32,
     "orchestrator_mode": true,
-    "resume_at": "Stage C, Phase 10 (NCS5 = NCK' + {t,4}#_G + {b}[]). Depends on Phase 9 (done). Same file, Rules.lean.",
+    "resume_at": "Stage D, Phase 11 (Soundness auxiliary lemmas, Theorem 4.1's Lemma 4.2-4.9 family). Depends on Phases 8 and 10 (both done). New file per the plan (check Phase 11's exact filename before starting).",
     "stage_map": {
       "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
       "B": "Phases 6-8 - nested sequent syntax - COMPLETE (all 3 phases)",
-      "C": "Phases 9-10 - the rule systems - Phase 9 COMPLETE, Phase 10 NOT STARTED",
+      "C": "Phases 9-10 - the rule systems - COMPLETE (both phases)",
       "D": "Phases 11-13 - soundness (Theorem 4.1) - NOT STARTED",
       "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - NOT STARTED",
       "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
       "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
     },
-    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable; pdftotext silently drops the box glyph in this PDF's font encoding (reconfirmed this session on Figure 2's boxL/boxR rules) -- direct page render is authoritative for any box-bearing rule. Page 5 re-rendered this session to re-verify Definition 2.3's exact shape. Page 7 (Figure 3, t/4 rules) and page 8 (Figure 4, b[] structural rule) are what Phase 10 needs next; page 8 not yet rendered this or last session.",
-    "existing_infra_pointers": "CS5ModalAxiom is defined at Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:168. NestedProof.height (this phase) is what Phase 10's height-non-increasing weakening/.mono transport statements will be about.",
-    "invariants": "Cslib/ sorry count and axiom count must not increase from this commit's baseline (lean-sorry-census.sh Cslib/ reports 39; grep -rn '^axiom ' Cslib/ | wc -l reports 26 -- both unchanged this session). No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports/lake exe lint-style/lake exe mk_all --module/scoped lake shake green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files (observed modified again this session at FrameSoundness.lean, not touched). Never use capital Pi (Π) as a Lean identifier in this codebase (Mathlib Pi-type delaborator conflict) -- use lowercase pi (π) instead."
+    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable; pdftotext silently drops/garbles box and diamond glyphs in this PDF's font encoding (reconfirmed this session) -- direct page render is authoritative for any modal-glyph-bearing rule. Pages 6 (Figure 2), 7 (Figure 3), 8 (Figure 4), and 14 (Theorem 5.1/5.2) rendered this session.",
+    "existing_infra_pointers": "CS5ModalAxiom is defined at Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:168. NestedProof.height and NestedProof.mono (this phase) are what Phase 19's height-preserving weakening/contraction admissibility will build on. Phase 11 will need Hilbert-derivability facts about contexts, likely consuming Phase 6's fm translation and Phase 8's context-compositionality lemmas.",
+    "invariants": "Cslib/ sorry count and axiom count must not increase from this commit's baseline (lean-sorry-census.sh Cslib/ reports 39; grep -rn '^axiom ' Cslib/ | wc -l reports 26 -- both unchanged this session). No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports/lake exe lint-style/lake exe mk_all --module/scoped lake shake green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files. Never use capital Pi (Π) or capital Sigma (Σ) as a Lean identifier in this codebase (Mathlib binder-notation conflicts) -- use lowercase π/σ instead."
   },
   "plan_markers_verified": true
 }

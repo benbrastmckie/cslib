@@ -21,12 +21,12 @@
 
 ## RESUME HERE
 
-Tenth resume (cycle 10 closure), **rescoped**. Status as of this pass: **Phases 1, 2, 3, 4, 6, 7,
-8 all COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 163 sites done.**
+Eleventh resume (cycle 11 closure), rescoped. Status as of this pass: **Phases 1, 2, 3, 4, 6, 7,
+8 all COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 173 sites done.**
 
-**READ FIRST — the scope changed.** Phase 5 is no longer "repo-wide, unbounded". It now covers
-**local-only files only**: **264 blanket suppressions across 96 files**, a finite worklist
-(~10 more cycles at the observed ~27 sites/cycle). The 12 blanket suppressions in files shared
+**READ FIRST — the scope changed (as of cycle 11's start).** Phase 5 is no longer "repo-wide,
+unbounded". It now covers **local-only files only**: **254 blanket suppressions across 94 files**
+remain in scope, a finite worklist. The 12 blanket suppressions in files shared
 with the `upstream` remote are **carved out** — route them to an upstream PR instead of editing
 them here. Gate every candidate file with `git cat-file -e upstream/main:<path>`, which must
 **FAIL** for the file to be in scope. Full rationale and the measured split: "Upstream-exposure
@@ -42,8 +42,8 @@ To pick this up cold:
    ```
    If either differs, something landed from another session — reconcile before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them.
-3. **Only Phase 5 remains.** 23 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10 sub-entries for the complete per-file list) — do not revisit any of them.
+3. **Only Phase 5 remains.** 25 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11 sub-entries for the complete per-file list) — do not revisit any of them.
    Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry, then
    **filter it through the local-only gate above** before picking a target. Prioritize the smaller
    count-5 files it lists (several under 300 lines) ahead of the larger count-6 files, using the
@@ -524,7 +524,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 163 sites done; 264 blanket suppressions across 96 local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 173 sites done; 254 blanket suppressions across 94 local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -952,6 +952,111 @@ suppression instead).
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.
 
+**Done (cycle 11)**: rescope-aware resume. Re-verified the worst-offender list first (matched
+the cycle-10 addendum exactly, no drift) and confirmed via `git cat-file -e upstream/main:<path>`
+that both selected targets are local-only (in scope under the new upstream-exposure carve-out).
+Processed the 2 smallest files of the count-5 tier's 500+-line remainder, each committed
+individually after a clean scoped rebuild plus downstream-importer rebuilds —
+`Temporal/Metalogic/Chronicle/PointInsertion/Seeds.lean` (5→0, 519 lines, fully clean:
+`unusedSimpArgs`/`style.emptyLine`/`style.setOption`/`flexible` all vestigial; `style.longLine`
+(13 sites) fixed mechanically by wrapping `have`/`exact` type ascriptions and arguments onto
+indented continuation lines), `Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Seeds.lean`
+(5→1 declaration-scoped, 525 lines: `unusedSimpArgs`/`style.emptyLine`/`style.setOption` all
+vestigial; `style.longLine` (7 sites) fixed mechanically; `flexible` (2 sites, both inside
+`dcs_neg_union_consistent`) narrowed to one declaration-scoped
+`set_option linter.flexible false in`). Suppression-audit progress: 163 → 173 sites audited
+cumulative (25 files fully processed cumulative — see the do-not-revisit list below). Repo-wide
+blanket suppression lines (ratchet-tracked): 276 → 266 (254 local-only in-scope + 12
+upstream-carved-out, unchanged). Re-baselined the suppression ratchet after each file
+(`bash scripts/check-lint-suppressions.sh --update`), in the same commit as the file, per the
+per-file ratchet-gate requirement. Full CSLib CI pipeline run once at cycle end: `lake build
+--wfail --iofail` (exactly 5 baseline sorry warnings — `FrameSoundness.lean:1252`,
+`Intuitionistic/Scheme.lean:568,2581`, `Intuitionistic/Completeness.lean:124`,
+`Minimal/Completeness.lean:118` — zero new anywhere), `lake exe checkInitImports` (clean), `lake
+lint` ("Linting passed for Cslib"), `lake exe lint-style` (clean, no output), `lake shake
+--add-public --keep-implied --keep-prefix` (clean, only the same 5 baseline sorry replays), `lake
+exe mk_all --module` ("No update necessary"), `lake test` (exit 0, same 5 baseline sorry warnings
+plus the same one pre-existing unrelated `backward.privateInPublic` warning in
+`CslibTests/FreeMonad.lean`). Naive repo-wide sorry grep at 168 (documented as unreliable — the
+`--wfail --iofail` count of exactly 5 is authoritative); vacuous-def grep unchanged at the single
+pre-existing false positive (`Computability/URM/Basic.lean:92`); axiom count unchanged at 26.
+
+**New safety finding (cycle 11) — the linter's own "Try this" `simp only [...]` suggestion for a
+`flexible` warning is not always trustworthy, even though it looks purely mechanical.** On
+`Bimodal/BXCanonical/Chronicle/PointInsertion/Seeds.lean`, the build's `flexible` warning at the
+original line 434 included an inline hint: `Try this: [apply] simp only [ne_eq] at h_mem`.
+Applying it verbatim (`simp only [ne_eq] at h_mem; exact h_mem.2`) compiled but then failed with
+`` `simp` made no progress `` once actually built — `lean_goal` at that position showed
+`h_mem : ψ ∈ L ∧ (!decide (ψ = φ.neg)) = true`, and `ne_eq` (`a ≠ b ↔ ¬(a = b)`) simply does not
+match that `Bool`-valued equation at all. The likely cause: full (non-`only`) `simp`'s
+`Bool`/`decide` normalization is partly driven by simp-procs, not named lemmas, so the "Try
+this" minimal-recreate hint can under-report what is actually needed to reproduce the same
+effect — confirmed independently via `lean_multi_attempt`, where three different plausible
+`simp only [...]` lemma combinations (including the linter's own suggestion) each left a
+different, non-matching residual goal. **Lesson for future Phase 5 cycles**: never trust a
+`flexible` linter's "Try this" `simp only [...]` hint without an actual rebuild; if it does not
+compile cleanly, revert the site to its original `simp`/`simp [...]` form (verified working,
+since the file built successfully before the suppression was removed) and fall back to a
+declaration-scoped `set_option linter.flexible false in` on the enclosing top-level declaration
+— consistent with, and now further evidenced support for, the cycle-9 finding that `flexible`
+often "exceeds the sanctioned mechanical edit set" and is safer narrowed than rewritten. The
+file's *other* `flexible` site (originally line 442, `by simp; exact heq`) was reverted the same
+way without separately re-attempting its own "Try this" hint, since both sites live inside the
+same single theorem and one declaration-scoped `set_option` line covers both.
+
+**Resume point (cycle 11 close)**: the 2 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10 are done — do not revisit (25 files total: ... Bimodal/Metalogic/BXCanonical/Chronicle/
+CounterexampleElimination/Structures.lean [cycle 10], BurgessHelpers.lean [cycle 10],
+Temporal/Metalogic/Chronicle/PointInsertion/Since.lean [cycle 10],
+Temporal/Metalogic/Chronicle/PointInsertion/Seeds.lean [cycle 11],
+Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Seeds.lean [cycle 11] — see the cycle
+1/5/6/7/8/9/10 sub-entries above for the remaining 20). Re-verify the worst-offender list before
+starting the next cycle, since resolutions only ever remove entries, and re-gate every candidate
+through `git cat-file -e upstream/main:<path>` (must FAIL) per the upstream-exposure rescope:
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 11's end (266 total remaining blanket suppression lines, 254 local-only in-scope),
+the count-6 tier is unchanged from cycles 8-10 (all confirmed local-only in prior cycles):
+`Temporal/Metalogic/Chronicle/CounterexampleElimination/{RecursiveWalks (1125 lines),
+MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/FrameClassVariants.lean` (931
+lines), `Bimodal/Metalogic/Separation/Eliminations.lean` (849 lines), `Bimodal/Metalogic/
+BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048 lines — do not pick this
+one first), `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean` (1208
+lines). The count-5 tier's smallest-first remainder (all re-verified local-only via
+`git cat-file` at cycle-11 start): `Bimodal/Metalogic/Separation/TemporalClosure.lean` (527
+lines) is now the smallest remaining count-5 file, followed by `Bimodal/Metalogic/
+BXCanonical/Chronicle/PointInsertion/Since.lean` (602 lines, distinct file from the two
+now-fully-processed `Seeds.lean`/`Since.lean` files), `Bimodal/Metalogic/Algebraic/
+UltrafilterMCS.lean` (662 lines), `Bimodal/Metalogic/BXCanonical/Quasimodel/Construction.lean`
+(670 lines), `Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean` (765 lines),
+`Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean` (870 lines), `Bimodal/Metalogic/
+BXCanonical/Chronicle/PointInsertion/Burgess.lean` (987 lines), `Bimodal/Metalogic/Decidability/
+CountermodelExtraction.lean` (1088 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+PointInsertion/XuGuard.lean` (1146 lines), `Temporal/Metalogic/Chronicle/ChronicleConstruction.
+lean` (1435 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleConstruction.lean` (1532
+lines) — all in the 500-1500+ line range, expect roughly 2-3x cycle-1-through-10's smaller-file
+effort per file; budget 1-2 files per cycle. Apply the same method: remove all of a file's
+suppressions, rebuild, categorize what surfaces into vestigial / mechanically-fixable /
+needs-real-proof-work, fix what's mechanical, narrow the rest to declaration-scope, re-baseline
+the ratchet in the same commit — carrying forward every safety lesson from cycles 6-11
+(elaboration-changing `omit`/`open` constructs need an immediate rebuild before trusting them;
+prefer `set_option ... in` over `omit ... in` for `unusedSectionVars`; `set_option .../omit ...
+in` goes before a declaration's doc comment, never between; never retype existing proof-body
+content inside an Edit's `new_string` — edit only boundary lines and re-read before building;
+expect possible follow-up rounds of newly-surfaced warnings after the first round of fixes
+narrows a covering suppression; a persistent-`open`-dependent linter site needs a non-`in`
+`set_option` line, not a `set_option ... in` wrapper; `unusedSimpArgs`-only fixes are mechanical
+— drop the linter-named unused argument; and, new this cycle, **never trust a `flexible`
+linter's "Try this" `simp only [...]` hint without a rebuild — if it fails, revert to the
+original tactic and use a declaration-scoped suppression instead**).
+
+**Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
+suppression is load-bearing.
+
 ### Phase 6: Sorry visibility [COMPLETED]
 
 - `ChronicleToCountermodel.lean:46` was the **only file-scoped `warn.sorry` in the repo** (the
@@ -1225,14 +1330,14 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
 - ~~Suppression audit outcome recorded per site (repo-wide, ~570).~~ **Restated (upstream-exposure
   rescope)**: suppression audit outcome recorded per site **for local-only files**; blanket
   suppressions in files shared with `upstream` are recorded for a follow-up upstream PR rather
-  than edited here. **[PARTIAL]** — 163 sites done (23 files fully processed cumulative); **264
-  blanket suppressions across 96 local-only files remain in scope**, and 12 across 12 shared
-  files are carved out. See Phase 5's resume point. This criterion is now **bounded** — roughly
-  10 more cycles at the observed rate — where the original repo-wide wording was open-ended.
+  than edited here. **[PARTIAL]** — 173 sites done (25 files fully processed cumulative); **254
+  blanket suppressions across 94 local-only files remain in scope**, and 12 across 12 shared
+  files are carved out. See Phase 5's resume point. This criterion is now **bounded** — where the
+  original repo-wide wording was open-ended.
 - `pre-pr-check.sh` can actually fail. **[MET]**
 - **No hygiene edit lands in a file shared with `upstream`.** **[MET]** — verified at rescope
-  time: all 23 files processed to date are local-only (`Logics/{Bimodal,Temporal,Modal}` are
-  0-of-139, 0-of-53, 0-of-142 upstream respectively).
+  time and re-verified each cycle since: all 25 files processed to date are local-only
+  (`Logics/{Bimodal,Temporal,Modal}` are 0-of-139, 0-of-53, 0-of-142 upstream respectively).
 
 ## Rollback/Contingency
 

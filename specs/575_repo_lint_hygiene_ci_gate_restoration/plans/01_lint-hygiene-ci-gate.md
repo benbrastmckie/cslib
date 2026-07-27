@@ -2,7 +2,7 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~9h spent; Phase 5 is the sole remaining workstream (bounded by the
+- **Effort**: ~9.5h spent; Phase 5 is the sole remaining workstream (bounded by the
   upstream-exposure rescope below — no longer unbounded)
 - **Dependencies**: none blocking. Phases 3, 4, 7, 8's live-task coordination concerns are
   resolved (see Phase 3's closure notes) — no further coordination needed with 317/425/553.
@@ -21,32 +21,52 @@
 
 ## RESUME HERE
 
-Eleventh resume (cycle 11 closure), rescoped. Status as of this pass: **Phases 1, 2, 3, 4, 6, 7,
-8 all COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 173 sites done.**
+Twelfth resume (cycle 12 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+COMPLETED (Phase 3 re-closed this cycle after its own reopen). Only Phase 5 (suppression audit)
+remains, PARTIAL at 183 sites done.**
 
-**READ FIRST — the scope changed (as of cycle 11's start).** Phase 5 is no longer "repo-wide,
-unbounded". It now covers **local-only files only**: **254 blanket suppressions across 94 files**
-remain in scope, a finite worklist. The 12 blanket suppressions in files shared
-with the `upstream` remote are **carved out** — route them to an upstream PR instead of editing
-them here. Gate every candidate file with `git cat-file -e upstream/main:<path>`, which must
-**FAIL** for the file to be in scope. Full rationale and the measured split: "Upstream-exposure
-scope" under Constraints. Everything Phase 5 has already touched is local-only, so no prior work
-needs revisiting on account of this change.
+**READ FIRST — a baseline regression was found and flagged, not fixed, this cycle.** The
+`lake build --wfail --iofail` gate now reports **12 warnings across 7 modules**, not the
+previously-documented 5: 2 new `defLemma`-style warnings (`Modal/Tableau/SoundnessStep.lean:74`,
+`Propositional/NaturalDeduction/Normalization/Termination.lean:47`) and 5 new
+`'simp_wf' tactic does nothing` warnings in `Propositional/SequentCalculus/LJ/
+CutElimination.lean`. None of these three files were touched by any Phase 3/5 edit this cycle or
+any prior cycle — the regression appears to have landed via the `merge main into the upstream
+sync branch` / `merge origin/main` commits that occurred after this task's cycle-11 pause (see
+`git log --oneline` around `310271a6`..`20712f65`). This is a Phase 1 regression, genuinely out
+of scope for a Phase 3/5-scoped dispatch (Phase 1 is COMPLETED and was not reopened) — flag it
+for a dedicated follow-up rather than silently absorbing it into this cycle's numbers. **Do not**
+assume the old "exactly 5" figure without re-running the gate first.
 
-To pick this up cold:
+**Phase 3 was reopened, fully re-closed this cycle.** 47 of the reopen's ~50 sites fixed across 7
+files (`Minimal/Completeness.lean`, `Temporal/Tableau/Completeness.lean`, `Nested/Context.lean`,
+`Intuitionistic/Completeness.lean`, `Nested/Rules.lean`, `CS5Completeness.lean`,
+`Nested/Soundness.lean`, `Scheme.lean`); 20 repo-wide sites remain, all individually accounted
+for as verbatim plan-text quotes, task-management metadata pending relocation to `specs/`, a
+held-back file (`LoopChecking.lean`, Modal/Tableau refactor coordination), or confirmed false
+positives (`TemporalConservativity.lean`, `DiegoEmbedding.lean`). See Phase 3's own section for
+the full per-file breakdown. No further Phase 3 action is expected unless a future audit finds
+new sites.
 
-1. Confirm the baseline still holds (2 commands, ~5 min):
+To pick Phase 5 up cold:
+
+1. Confirm the baseline (2 commands, ~5 min) — **expect 12 warnings, not 5**, per the regression
+   noted above, until that regression is separately fixed:
    ```bash
-   lake build --wfail --iofail   # expect exit 1 with EXACTLY 5 warnings, all "declaration uses sorry"
+   lake build --wfail --iofail   # expect exit 1; 12 warnings across 7 modules as of cycle 12
    lake test                     # expect exit 0, 0 errors
    ```
-   If either differs, something landed from another session — reconcile before proceeding.
-2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them.
-3. **Only Phase 5 remains.** 25 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10/11 sub-entries for the complete per-file list) — do not revisit any of them.
+   If the warning count or file set differs from the above, something else landed — reconcile
+   before proceeding.
+2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them (Phase 1's
+   `[COMPLETED]` marker stands even though its own closure criterion is currently falsified by
+   the regression above — that regression needs its own dedicated cycle, not folded into Phase 5
+   work).
+3. **Only Phase 5 remains.** 27 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11/12 sub-entries for the complete per-file list) — do not revisit any of them.
    Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry, then
    **filter it through the local-only gate above** before picking a target. Prioritize the smaller
-   count-5 files it lists (several under 300 lines) ahead of the larger count-6 files, using the
+   count-5 files it lists ahead of the larger count-6 files, using the
    method Phase 5's section documents: remove all of a file's suppressions, rebuild, categorize
    what surfaces, fix the mechanical categories, narrow the rest to declaration/usage-site scope.
    **Read the `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using
@@ -56,15 +76,18 @@ To pick this up cold:
    warning. **Also read the cycle-8 finding**: a small file's line count is not a reliable
    effort proxy on its own — after the initial suppression removal, further declaration-scoped
    fixes can surface additional previously-hidden warnings on other declarations; rebuild after
-   each round, not just once.
+   each round, not just once. **Also read the cycle-12 finding**: a `set_option ... in` line
+   placed next to a doc comment must come *before* the doc comment, not after — the reverse order
+   is a hard parse error, caught only by rebuilding before commit.
 4. No items require a user decision to make further Phase 5 progress. The three items formerly
    listed as blocking (see "Open decisions" below) are all genuinely out of scope for 575, not
    blockers to continuing Phase 5.
 
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
 (also implemented in `scripts/pre-pr-check.sh`). True census: 28 (excl. `warn.sorry`-suppressed
-lines, comments stripped); the `--wfail --iofail` build reconfirmed exactly 5 baseline sorry
-warnings at cycle 8's end.
+lines, comments stripped); the `--wfail --iofail` build reconfirmed exactly 5 baseline
+*sorry* warnings at cycle 8's end and again at cycle 12's end (the regression above adds 7
+non-sorry warnings on top, unrelated to the sorry census).
 **Phase 3 is closed** — its task/phase/report-string census is no longer a live worklist; see its
 section for the final fixed/excluded/false-positive breakdown instead of re-deriving one.
 
@@ -175,25 +198,29 @@ that actually caught it.
 |------|--------------|-----|
 | `lake build` | green 3259/3259 | green |
 | `lake test` | green, 0 errors | green, 0 errors |
-| `lake build --wfail --iofail` | **exit 1**, 27 modules, 460 warnings | **exit 1**, 4 modules, **5 warnings — all genuine sorries** |
+| `lake build --wfail --iofail` | **exit 1**, 27 modules, 460 warnings | **exit 1**, 7 modules, **12 warnings — 5 genuine sorries + a 7-warning regression flagged in RESUME HERE, unrelated to this task's edits** |
 | `lake exe mk_all --check` | pass | pass |
 | `lake exe checkInitImports` | pass | pass |
 | `lake shake` | 94 files flagged (CI step disabled) | unchanged |
-| Linter sites | 240 | **0** |
-| `set_option linter.*` | 511 | 482 |
+| Linter sites | 240 | **0** (Phase 1 scope; see the cycle-12 regression note in RESUME HERE for 3 newly-affected files outside Phase 1's original worklist) |
+| `set_option linter.*` | 511 | see Phase 5's live ratchet count (258 blanket suppressions as of cycle 12) |
 | `@[nolint]` | 118 | 88 |
-| Task-tracker refs in `Cslib/**` | 376 (undercounted; see Phase 3 census-regex fix) | 359 (399 by the corrected regex, minus 40 sites across 19 files fixed this session) |
+| Task-tracker refs in `Cslib/**` | 376 (undercounted; see Phase 3 census-regex fix) | 20 (all individually accounted for as exclusions — see Phase 3's cycle-12 closure) |
 | Doubled public names | 6 cross-module leaks | **0** |
 | Bare sorries (correct method) | 28 | 28 (unchanged by design) |
 
-The 5 remaining warnings, which are the correct end state:
+The 5 sorry warnings, which are the correct end state for the sorry census specifically:
 ```
-Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1253            declaration uses `sorry`
-Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:568    declaration uses `sorry`
-Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2580   declaration uses `sorry`
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1252             declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:570   declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583  declaration uses `sorry`
 Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:124  declaration uses `sorry`
-Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118     declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118    declaration uses `sorry`
 ```
+
+As of cycle 12, 7 additional non-sorry warnings also appear in the `--wfail --iofail` gate,
+unrelated to any Phase 3/5 edit — see RESUME HERE's "baseline regression" note for the file list
+and provenance hypothesis (an unrelated upstream-sync merge). Flagged, not fixed, by this cycle.
 
 ### Measurement notes — two independent causes of this repo's recurring sorry-count error
 
@@ -653,7 +680,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 173 sites done; 254 blanket suppressions across 94 local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 183 sites done; 244 blanket suppressions across local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -1182,6 +1209,93 @@ narrows a covering suppression; a persistent-`open`-dependent linter site needs 
 — drop the linter-named unused argument; and, new this cycle, **never trust a `flexible`
 linter's "Try this" `simp only [...]` hint without a rebuild — if it fails, revert to the
 original tactic and use a declaration-scoped suppression instead**).
+
+**Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
+suppression is load-bearing.
+
+**Done (cycle 12)**: processed the 2 smallest remaining count-5 files, each committed
+individually after a clean scoped rebuild plus downstream-importer rebuilds —
+`Bimodal/Metalogic/Separation/TemporalClosure.lean` (5→0, 527 lines: `style.emptyLine`/
+`unusedSectionVars`/`style.setOption` all vestigial; `style.longLine` (2 sites) fixed
+mechanically; `linter.flexible` (47 sites across 10 declarations) narrowed to 10
+declaration-scoped `set_option linter.flexible false in` lines — each site's `simp`-modifies-
+`h`/goal pattern would need an individually simp?-verified `simp only [...]` rewrite, exceeding
+the sanctioned mechanical edit set per the cycle-9/11 lesson), `Bimodal/Metalogic/BXCanonical/
+Chronicle/PointInsertion/Since.lean` (5→0, 602 lines: `unusedSimpArgs`/`style.emptyLine`/
+`style.setOption` all vestigial; `style.longLine` (1 site) fixed mechanically; `linter.flexible`
+(2 sites) narrowed to 2 declaration-scoped suppressions). Suppression-audit progress: 173 → 183
+sites audited cumulative (27 files fully processed cumulative). Repo-wide blanket suppression
+lines (ratchet-tracked): 266 → 258 (10 fewer; re-baselined in each file's own commit via
+`bash scripts/check-lint-suppressions.sh --update`, per the per-file ratchet-gate requirement).
+
+**New safety finding (cycle 12) — `set_option ... in` must precede the declaration's doc
+comment, not follow it.** On `PointInsertion/Since.lean`, inserting
+`/-- doc -/ \n set_option linter.flexible false in \n private theorem foo ...` (doc comment
+first, `set_option ... in` second) produced a hard parse error:
+`` unexpected token 'set_option'; expected 'lemma' `` — caught immediately by the mandatory
+scoped rebuild before commit, so no broken state was ever staged. The fix is to swap the order:
+`set_option ... in \n /-- doc -/ \n private theorem foo ...` (`set_option ... in` first, doc
+comment second), which parses and elaborates correctly — this is the order already used
+throughout `TemporalClosure.lean`'s 10 sites earlier in this same cycle, confirmed correct by a
+clean, warning-free rebuild. **Lesson for future Phase 5 cycles**: when placing a
+declaration-scoped `set_option ... in` next to a doc comment, put the `set_option ... in` line
+*first*, immediately above the doc comment, never between the doc comment and the declaration
+itself.
+
+**Also confirmed this cycle**: a full-repo scan for the broken ordering pattern (a `-/`-terminated
+line immediately followed by a `set_option ... in` line) found zero remaining instances anywhere
+in `Cslib/**` — the one instance introduced mid-edit this cycle was caught and fixed before
+commit, not left in the tree.
+
+**Baseline noise found, NOT part of this phase's scope, flagged for the record**: the
+`lake build --wfail --iofail` gate now reports **12 warnings across 7 modules**, not the
+documented 5 — 2 new `defLemma`-style warnings (`SoundnessStep.lean:74`,
+`Normalization/Termination.lean:47`, both "Definition ... is a proposition; use theorem instead
+of def") and 5 new `'simp_wf' tactic does nothing` warnings in
+`Propositional/SequentCalculus/LJ/CutElimination.lean` (lines 223/349/460/540/649), none in files
+this phase (or Phase 3) touched. These appear to have landed via the unrelated
+`merge main into the upstream sync branch` / `merge origin/main` commits that occurred after this
+task's prior pause, not from any Phase 3/5 edit in this cycle — confirmed by `git blame`-adjacent
+reasoning (none of the three affected files appear in this cycle's `git log`). This is a Phase 1
+regression, out of scope for a Phase 3/5-scoped dispatch; recorded here rather than silently
+fixed or silently ignored, per this task's own measurement-discipline lesson. **Phase 1's
+`[COMPLETED]` marker is not touched by this finding** (its own closure criterion — the `--wfail`
+gate reporting nothing beyond the baseline sorry warnings — is now falsified and needs a
+dedicated follow-up cycle to either fix the 3 newly-affected files or re-open Phase 1
+explicitly).
+
+**Resume point (cycle 12 close)**: the 2 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10, 11 are done — do not revisit (27 files total). Re-verify the worst-offender list before
+starting the next cycle, since resolutions only ever remove entries, and re-gate every candidate
+through `git cat-file -e upstream/main:<path>` (must FAIL) per the upstream-exposure rescope:
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 12's end (258 total remaining blanket suppression lines, 244 local-only in-scope per
+a live re-count against `upstream/main`), the count-6 tier is unchanged from cycles 8-11 (all
+confirmed local-only in prior cycles): `Temporal/Metalogic/Chronicle/CounterexampleElimination/
+{RecursiveWalks (1125 lines), MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/
+FrameClassVariants.lean` (931 lines), `Bimodal/Metalogic/Separation/Eliminations.lean` (849
+lines), `Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048
+lines — do not pick this one first), `Bimodal/Metalogic/BXCanonical/Chronicle/
+ChronicleToCountermodelBasic.lean` (1208 lines). The count-5 tier's smallest-first remainder:
+`Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean` (765 lines), `Temporal/Metalogic/
+Chronicle/PointInsertion/Burgess.lean` (870 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+PointInsertion/Burgess.lean` (987 lines), `Bimodal/Metalogic/Decidability/
+CountermodelExtraction.lean` (1088 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+PointInsertion/XuGuard.lean` (1146 lines), `Temporal/Metalogic/Chronicle/ChronicleConstruction.
+lean` (1435 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleConstruction.lean` (1532
+lines), `Bimodal/Metalogic/BXCanonical/Quasimodel/Construction.lean` (670 lines),
+`Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean` (662 lines) — re-verify exact line counts with
+`wc -l` before picking, since counts only ever go down. Apply the same method: remove all of a
+file's suppressions, rebuild, categorize what surfaces into vestigial / mechanically-fixable /
+needs-real-proof-work, fix what's mechanical, narrow the rest to declaration-scope, re-baseline
+the ratchet in the same commit — carrying forward every safety lesson from cycles 6-12 (see the
+cycle-11 addendum above for the full list through cycle 11, plus this cycle's `set_option ... in`
+ordering lesson).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

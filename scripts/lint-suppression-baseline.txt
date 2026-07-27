@@ -43,7 +43,6 @@
 2 Cslib/Logics/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean
 2 Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 2 Cslib/Logics/Bimodal/Metalogic/BXCanonical/CanonicalChain.lean
-6 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean
 3 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean
 1 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean
 6 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean

@@ -21,7 +21,7 @@ via both direct rendering and `pdftotext -layout`, page 5).
 Observation 2.2: "Every output context `Γ{ }` is of the shape `Γ•₁, [Γ•₂, […, [Γ•ₙ, { }] …]]` for
 some `n ≥ 0`." This is encoded as `OutputCtx Atom := List (NestedLhs Atom)`, read outer-to-inner
 (`Γ₁` first, the hole innermost); well-formedness of the shape is then definitional (no separate
-side condition), matching this directory's Phase 6 design choice for `NestedLhs`/`NestedRhs`.
+side condition), matching this file's design choice for `NestedLhs`/`NestedRhs`.
 
 Four filler operations are defined, matching the source's stated typing (Observation 2.2: "Filling
 the hole of an output context with a RHS or full sequent yields a full sequent, and filling it
@@ -54,8 +54,8 @@ indicate that they are LHS or RHS, respectively." `Π` is Greek, so `Π◦` deno
 input context"), and decomposing it per eq. (2.3) forces `Γ' = [C]`, `Λ = []` (the hole sits
 directly at the outer box's LHS slot, with nothing further nested), and therefore
 `Π = [B•, C◦] = box(B, C)` — a genuinely compound `NestedRhs` term, not a bare atom. Typing `Π`
-as `Proposition` would make this cited example (which Phase 7's own verification criterion
-requires to be expressible) inexpressible.
+as `Proposition` would make this cited example (which `Nested/Rules.lean`'s own verification
+criterion requires to be expressible) inexpressible.
 
 (The Lean field itself is spelled `π`, lowercase, not `Π`: Mathlib's `Delaborators.lean` binds
 capital `Π` as a delaborator token for Pi-types, which makes it unusable as a plain identifier —
@@ -63,8 +63,8 @@ confirmed by a parse failure when first attempted. Lowercase `π` has only `scop
 notations elsewhere in Mathlib (e.g. `Real.pi`), none open in this file, so it is safe here.)
 
 Verified: the resulting `InputCtx.fillEmpty` and
-`InputCtx.fillLhs` computations below reproduce Example 2.1's `Γ2{∅}` and (independently) the
-Phase 6 module's already-`rfl`-verified `Γ2{Δ2}` term exactly (see the examples at the end of this
+`InputCtx.fillLhs` computations below reproduce Example 2.1's `Γ2{∅}` and (independently) this
+file's already-`rfl`-verified `Γ2{Δ2}` term exactly (see the examples at the end of this
 file), which is strong corroborating evidence the decomposition is right.
 
 ## Output Pruning (Definition 2.3)
@@ -146,7 +146,7 @@ def OutputCtx.fillRhs : OutputCtx Atom → NestedRhs Atom → NestedFull Atom
 /-- Build the nested box chain ending in a full-sequent filler `(Φ, Ψ)`, merging `Φ` (via comma,
 using the source's assumed associativity/commutativity of `,`) into the deepest LHS layer and
 placing `Ψ` as that box's output. The recursive engine behind `OutputCtx.fillFull`; verified to
-reproduce the Phase 6 module's `Γ1{Δ1}` term exactly (see the examples below). -/
+reproduce this file's `Γ1{Δ1}` term exactly (see the examples below). -/
 def buildFullChain : List (NestedLhs Atom) → NestedFull Atom → NestedRhs Atom
   | [], (Φ, Ψ) => .box Φ Ψ
   | [Γ], (Φ, Ψ) => .box (.comma Φ Γ) Ψ
@@ -238,7 +238,7 @@ example (B C : Proposition Atom) :
       (.comma (.atom C) (.dia (.dia (.comma (.atom B) (.atom C)))) : NestedLhs Atom) := rfl
 
 /-- `Γ1{Δ1} = C•,[A•,[B◦],[B•,C•]]` (Example 2.1), computed via the generic `OutputCtx.fillFull`
-from `γ₁Ctx` and `Δ1 = A•,[B◦]`. Reproduces the Phase 6 module's independently-landed, `rfl`-
+from `γ₁Ctx` and `Δ1 = A•,[B◦]`. Reproduces this file's independently-landed, `rfl`-
 verified concrete term exactly, cross-validating both constructions. -/
 example (A B C : Proposition Atom) :
     (γ₁Ctx B C).fillFull (.atom A, .box .empty (.atom B)) =
@@ -259,7 +259,7 @@ example (B C : Proposition Atom) :
       ((.atom C, .box .empty (.box (.atom B) (.atom C))) : NestedFull Atom) := rfl
 
 /-- `Γ2{Δ2} = C•,[A•,[B•],[B•,C◦]]` (Example 2.1), computed via the generic `InputCtx.fillLhs`
-from `γ₂Ctx` and `Δ2 = A•,[B•]`. Reproduces the Phase 6 module's independently-landed, `rfl`-
+from `γ₂Ctx` and `Δ2 = A•,[B•]`. Reproduces this file's independently-landed, `rfl`-
 verified concrete term exactly. -/
 example (A B C : Proposition Atom) :
     (γ₂Ctx B C).fillLhs (.comma (.atom A) (.dia (.atom B))) =

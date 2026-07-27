@@ -21,7 +21,7 @@ encoding -- confirmed again this phase).
 ## Which Context Kind Each Rule Uses
 
 Figure 2's rules display a `Γ{ }` schema whose hole is filled with either LHS-typed content
-(`A•`), RHS-typed content (`A°`), or a full-sequent pair. Phase 7's `Nested/Context.lean` built
+(`A•`), RHS-typed content (`A°`), or a full-sequent pair. `Nested/Context.lean` built
 exactly four hole-filling operations (Observation 2.2), and which one a given rule needs is
 forced by the *type* of what fills the hole, not a free stylistic choice:
 
@@ -31,7 +31,7 @@ forced by the *type* of what fills the hole, not a free stylistic choice:
   Observation 2.2's "filling the hole of an output context with a full sequent yields a full
   sequent". These rules therefore take `ctx : OutputCtx Atom` and are stated via `ctx.fillFull`,
   with the companion RHS content an explicit parameter (fixed to `a°` for `id`, universally
-  quantified as `Π` for `∨•`). **Repair note (post-Phase-12 defect fix)**: `id` and `∨•` (`orL`)
+  quantified as `Π` for `∨•`). **Repair note (defect fix)**: `id` and `∨•` (`orL`)
   were originally landed via `InputCtx.fillLhs` (the *next* bullet's family), reading the
   companion as sitting *elsewhere in the tree* via a genuinely-nested `Λ`. Cross-checked against
   Lemma 4.2 ("let `Γ{ }` be an *output* context... `fm(Γ{a•,a°})`... provable") and Lemma 4.9's
@@ -83,7 +83,8 @@ here as a primitive `NestedProof` constructor, not derived.
 The source's own §3 text, between Figure 2 and Proposition 3.1 ("the general `id`-rule ... is
 derivable [by] a straightforward induction"), does not display any concrete derivation trees to
 transcribe verbatim (confirmed by a full-document grep for "Example", which surfaces only
-Example 2.1 -- already landed in Phase 6/7 -- and much later, unrelated examples in §6). Proposition
+Example 2.1 -- already landed elsewhere in this development -- and much later, unrelated
+examples in §6). Proposition
 3.1 itself is a genuine standalone induction over formula structure (deferred to a later phase,
 not landed here as a "smoke test"): its base case needs the *atomic* `id` axiom to be reachable
 from a bare top-level goal `Γ{A•,A°}` at `ctx = []`, but `InputCtx.fillLhs` structurally forces
@@ -120,7 +121,7 @@ sound-but-incomplete on page 8) are all out of scope for this instance. Landed a
 generalisation over other `X, Y` only adds constructors, never rewrites existing ones.
 
 Verified against direct renders of PDF pages 7 (Figure 3) and 8 (Figure 4); `pdftotext` was cross-
-checked and, consistent with Phase 9's finding, silently drops or garbles the `□`/`◇` glyphs at
+checked and, consistent with an earlier finding, silently drops or garbles the `□`/`◇` glyphs at
 several of these rules' positions, so the direct page render is the authoritative source used
 below, not the `pdftotext` extraction.
 
@@ -151,7 +152,7 @@ below, not the `pdftotext` extraction.
 
 ## `NestedProof.mono`: Index-Transport Precursor to Phase 19's Weakening
 
-The plan's Phase 10 task list asks to "land weakening/`.mono` transport," mirroring the
+The plan's task list asks to "land weakening/`.mono` transport," mirroring the
 `SeqProof.mono`/`LJProof.mono`/`CutFreeLJProof.mono` weakening-transport family in
 `Cslib/Logics/Propositional/SequentCalculus/LJ/Basic.lean`. This module lands `NestedProof.mono`
 as the **index-equality transport** (`Γ = Γ' → NestedProof Γ → NestedProof Γ'`), height-preserving
@@ -164,7 +165,7 @@ confirming this phase's `.mono` is deliberately the narrower precursor, not a pr
 unbudgeted, within this phase's 2.5-hour scope) attempt at the full admissibility induction over
 all eighteen constructors, which is Phase 19's dedicated `Admissibility.lean`. Separately, and for
 free: since `NCS5` is realised as five *additional* constructors on the same `NestedProof`
-inductive rather than a new type, every `NCK′` (Phase 9) proof is automatically an `NCS5` proof
+inductive rather than a new type, every `NCK′` proof is automatically an `NCS5` proof
 of unchanged height with no transport lemma needed for that inclusion direction.
 
 ## References
@@ -383,8 +384,8 @@ def NestedProof.CutFree : ∀ {Γ : NestedFull Atom}, NestedProof Γ → Prop
 
 /-! ## `InputCtx`'s Unconditional `.box` Shape
 
-Recorded here as a **permanent, verified fact** discovered while attempting Phase 14's
-Proposition 3.1 (general `id`): every `InputCtx`-shaped constructor (`botL`, `cut`, `contract`,
+Recorded here as a **permanent, verified fact** discovered while attempting Proposition 3.1
+(general `id`): every `InputCtx`-shaped constructor (`botL`, `cut`, `contract`,
 `andL`, `boxL`, `diaL`, `tL`, `fourL`, `bStruct`, and the eq. (3.1) `w` rule if it is later added,
 since it shares the same `Γ{∅}/Γ{Δ•}` `InputCtx.fillLhs`/`fillEmpty` shape) has a conclusion whose
 RHS (`NestedRhs`) component is *unconditionally* `.box`-shaped, **never** `.atom`-shaped,

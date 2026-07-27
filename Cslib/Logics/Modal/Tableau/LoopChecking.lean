@@ -160,8 +160,6 @@ wc -l CslibTests/S4LoopGuardRegression.lean                                     
 * **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns
   11, because three further names occur only in call positions or prose. See the
   "Redirect Forward-Cone Free Transfer" section for what was removed and when.
-* No `FIX:`/`NOTE:`/`TODO:`/`QUESTION:` tags in `LoopChecking.lean`, `FrameSoundness.lean`, or
-  `FrameCompleteness.lean` (0 each). Repo-wide: 11 `TODO:`, 8 `NOTE:`.
 * There is no `Boneyard/` directory (`find . -type d -name 'Boneyard' -not -path './.lake/*'`
   returns nothing).
 

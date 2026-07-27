@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional/Intuitionistic Tableau Completeness — World-Bound Prerequisite, Invariant Threading, and Bridge Assembly
 
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Effort**: 24 hours total (2.5 hours already landed in Phases 0-1; ~21.5 hours remaining)
 - **Dependencies**: 552 (completed — landed the `.pos, .imp` branching arm)
 - **Research Inputs**:
@@ -444,7 +444,7 @@ earlier. Territory contract: **one `Scheme.lean` writer at a time, for the whole
 - **Depends on:** 1
 - **Completed:** 2026-07-26
 
-### Phase 3: World-budget accounting invariant — definition and local step facts [NOT STARTED]
+### Phase 3: World-budget accounting invariant — definition and local step facts [BLOCKED]
 
 - **Goal:** Build the first half of `intExpandBranches_world_bound` (R10): the accounting invariant
   that makes "worlds created so far ≤ number of distinct `.imp` nodes of φ0" expressible, plus the
@@ -487,8 +487,32 @@ earlier. Territory contract: **one `Scheme.lean` writer at a time, for the whole
   whatever is green, mark `[PARTIAL]`, and record the exact resisting goal plus which of the three
   local step facts failed. Do not introduce a `sorry`, do not weaken the bound to a vacuous
   statement, and do not proceed to Phase 4.
-- **Timing:** 3 hours
+- **Outcome (BLOCKED):** The timeboxed alternative check escalated into a decisive negative
+  result. Local step fact (ii) — "each [world-creating] firing is associated with a distinct
+  `.imp`-node position of φ0" — is **false**, verified by direct computation (not hand-proof
+  attempt) against the real, unmodified `intuitionisticTableau`/`intApplyRuleFull` functions via
+  `lean_run_code`, not by stalling on a proof attempt. Concrete counterexample: for
+  `φ0 = ((p→q)→r ∧ (s→t)) → ((u1→v1)∨(u2→v2)∨(u3→v3))` (complexity 10), the single static
+  position `p→q` fires the world-creating rule at **eight** distinct labels (1 through 8), not
+  once, because `T(p→q→r)` — being `.pos`-signed — is copied to every sibling world created from
+  world 1 by both `propagatePersistence` (at world-creation) and `applyAllTImpRules`'s broader
+  accessible-world copy channel (`Expansion.lean:117-147`, run to fixpoint every `go` step), and
+  each fresh copy independently BETA-resolves and re-fires world-creation. The docstring premise
+  ("F-signed formulas never propagate") is true but irrelevant: the *T-signed* antecedent
+  propagates, and each copy's own resolution mints a fresh F-signed instance at its own label.
+  Full derivation, evidence, and candidate re-plan directions in
+  `handoffs/12_world-bound-decision.md`. Whether the target bound
+  `nextWorld ≤ φ0.complexity + 1` itself holds is **not resolved either way** — the counterexample
+  above still satisfies it (8 events vs. bound 11) — only the plan's specific proof *route* is
+  refuted. Two follow-on stress tests intended to compound the effect timed out in the `#eval`
+  sandbox before returning a result (not confirmed as non-termination vs. merely slow). No Lean
+  file under `Cslib/` was edited for this phase; the investigation was conducted entirely via
+  throwaway `#eval` snippets, per the plan's prohibition on writing speculative Lean against a
+  strategy already known unsound. **Phases 4-9 are transitively blocked; this task requires
+  re-planning before Phase 3/4 can be attempted again** (candidate directions in the handoff).
+- **Timing:** 3 hours (actual: investigation only, no proof artifact produced)
 - **Depends on:** 2
+- **Blocked:** 2026-07-26
 
 ### Phase 4: Thread the world budget; conclude `intExpandBranches_world_bound` [NOT STARTED]
 

@@ -47,10 +47,6 @@ temporal analogue).
 * Burgess 1982: "Axioms for tense logic II: Time periods"
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.dupNamespace false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
@@ -87,7 +83,8 @@ theorem mcs_to_base {fc : FrameClass} {A : Set (Formula Atom)}
       · exact absurd h hphi
       · exact h
     intro h_cons
-    exact set_consistent_not_both h_cons phi (Set.mem_insert phi A) (Set.mem_insert_of_mem phi h_neg)
+    exact set_consistent_not_both h_cons phi (Set.mem_insert phi A)
+      (Set.mem_insert_of_mem phi h_neg)
 
 /-! ## `ChronicleInterface` Instance Family
 
@@ -129,7 +126,8 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
     exact SetMaximalConsistent.closed_under_derivation hmcs L hL hd
   theoremInMcs := by
     intro Ω hmcs φ hd
-    exact SetMaximalConsistent.closed_under_derivation hmcs [] (fun _ h => absurd h List.not_mem_nil) hd
+    exact SetMaximalConsistent.closed_under_derivation hmcs []
+      (fun _ h => absurd h List.not_mem_nil) hd
   negationComplete := fun hmcs φ => SetMaximalConsistent.negation_complete hmcs φ
   negExcludes := by
     intro Ω hmcs φ hneg hmem
@@ -142,12 +140,18 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
   sinceP := fun γ δ => DerivationTree.axiom [] _ (Axiom.since_P γ δ) trivial
   absorbUntil := fun β γ => DerivationTree.axiom [] _ (Axiom.absorb_until β γ) trivial
   absorbSince := fun β γ => DerivationTree.axiom [] _ (Axiom.absorb_since β γ) trivial
-  leftMonoUntilG := fun β₁ β₂ γ => DerivationTree.axiom [] _ (Axiom.left_mono_until_G β₁ β₂ γ) trivial
-  leftMonoSinceH := fun β₁ β₂ γ => DerivationTree.axiom [] _ (Axiom.left_mono_since_H β₁ β₂ γ) trivial
-  rightMonoUntil := fun a b pivot => DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_until a b pivot) trivial
-  rightMonoSince := fun a b pivot => DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_since a b pivot) trivial
-  enrichmentUntil := fun β ψ α => DerivationTree.axiom (fc := fc) [] _ (Axiom.enrichment_until β ψ α) trivial
-  enrichmentSince := fun β ψ γ => DerivationTree.axiom (fc := fc) [] _ (Axiom.enrichment_since β ψ γ) trivial
+  leftMonoUntilG := fun β₁ β₂ γ =>
+    DerivationTree.axiom [] _ (Axiom.left_mono_until_G β₁ β₂ γ) trivial
+  leftMonoSinceH := fun β₁ β₂ γ =>
+    DerivationTree.axiom [] _ (Axiom.left_mono_since_H β₁ β₂ γ) trivial
+  rightMonoUntil := fun a b pivot =>
+    DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_until a b pivot) trivial
+  rightMonoSince := fun a b pivot =>
+    DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_since a b pivot) trivial
+  enrichmentUntil := fun β ψ α =>
+    DerivationTree.axiom (fc := fc) [] _ (Axiom.enrichment_until β ψ α) trivial
+  enrichmentSince := fun β ψ γ =>
+    DerivationTree.axiom (fc := fc) [] _ (Axiom.enrichment_since β ψ γ) trivial
   connectFuture := fun α => DerivationTree.axiom (fc := fc) [] _ (Axiom.connect_future α) trivial
   connectPast := fun γ => DerivationTree.axiom (fc := fc) [] _ (Axiom.connect_past γ) trivial
   futureNecessitation := fun _ d => DerivationTree.temporal_necessitation _ d
@@ -162,7 +166,9 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
   negAllPastNegToSomePast := by
     intro Ω hmcs α h
     have h_dne_P : Formula.somePast (α.neg.neg) ∈ Ω := by
-      have h_dne : DerivationTree fc [] ((Formula.somePast α.neg.neg).neg.neg.imp (Formula.somePast α.neg.neg)) :=
+      have h_dne :
+          DerivationTree fc [] ((Formula.somePast α.neg.neg).neg.neg.imp
+            (Formula.somePast α.neg.neg)) :=
         Propositional.doubleNegation (Formula.somePast α.neg.neg)
       exact SetMaximalConsistent.implication_property hmcs (theoremInMcsFc hmcs h_dne) h
     have h_dne_ax : DerivationTree fc [] (α.neg.neg.imp α) := Propositional.doubleNegation α
@@ -177,7 +183,9 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
   negAllFutureNegToSomeFuture := by
     intro Ω hmcs γ h
     have h_dne_F : Formula.someFuture (γ.neg.neg) ∈ Ω := by
-      have h_dne : DerivationTree fc [] ((Formula.someFuture γ.neg.neg).neg.neg.imp (Formula.someFuture γ.neg.neg)) :=
+      have h_dne :
+          DerivationTree fc [] ((Formula.someFuture γ.neg.neg).neg.neg.imp
+            (Formula.someFuture γ.neg.neg)) :=
         Propositional.doubleNegation (Formula.someFuture γ.neg.neg)
       exact SetMaximalConsistent.implication_property hmcs (theoremInMcsFc hmcs h_dne) h
     have h_dne_ax : DerivationTree fc [] (γ.neg.neg.imp γ) := Propositional.doubleNegation γ
@@ -186,7 +194,8 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
     have h_bx3 : DerivationTree fc [] ((γ.neg.neg.imp γ).allFuture.imp
         ((Formula.untl Formula.top γ.neg.neg).imp (Formula.untl Formula.top γ))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until γ.neg.neg γ Formula.top) trivial
-    have h_F_mono : DerivationTree fc [] ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ)) :=
+    have h_F_mono :
+        DerivationTree fc [] ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dne
     exact SetMaximalConsistent.implication_property hmcs (theoremInMcsFc hmcs h_F_mono) h_dne_F
   someFutureHNegGPAbsurd := by
@@ -197,16 +206,27 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
     have h_bx3' : DerivationTree fc [] ((α.imp α.neg.neg).allPast.imp
         ((Formula.snce Formula.top α).imp (Formula.snce Formula.top α.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_since α α.neg.neg Formula.top) trivial
-    have h_P_to_Pnn : DerivationTree fc [] ((Formula.somePast α).imp (Formula.somePast α.neg.neg)) :=
+    have h_P_to_Pnn :
+        DerivationTree fc [] ((Formula.somePast α).imp (Formula.somePast α.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3' h_H_dni
-    have h_dni_P : DerivationTree fc [] ((Formula.somePast α.neg.neg).imp (Formula.somePast α.neg.neg).neg.neg) :=
+    have h_dni_P :
+        DerivationTree fc []
+          ((Formula.somePast α.neg.neg).imp (Formula.somePast α.neg.neg).neg.neg) :=
       dni (Formula.somePast α.neg.neg)
-    have h_P_to_neg_H : DerivationTree fc [] ((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α)))) :=
+    have h_P_to_neg_H :
+        DerivationTree fc []
+          ((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α)))) :=
       impTrans h_P_to_Pnn h_dni_P
-    have h_G_imp : DerivationTree fc [] (Formula.allFuture ((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α))))) :=
+    have h_G_imp :
+        DerivationTree fc []
+          (Formula.allFuture
+            ((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α))))) :=
       DerivationTree.temporal_necessitation _ h_P_to_neg_H
-    have h_kd : DerivationTree fc [] (((Formula.somePast α).imp (Formula.neg (Formula.allPast (Formula.neg α)))).allFuture.imp
-        ((Formula.somePast α).allFuture.imp (Formula.neg (Formula.allPast (Formula.neg α))).allFuture)) :=
+    have h_kd : DerivationTree fc []
+        (((Formula.somePast α).imp
+          (Formula.neg (Formula.allPast (Formula.neg α)))).allFuture.imp
+        ((Formula.somePast α).allFuture.imp
+          (Formula.neg (Formula.allPast (Formula.neg α))).allFuture)) :=
       liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived (Atom := Atom)
         (Formula.somePast α) (Formula.neg (Formula.allPast (Formula.neg α))))
     have h_G_P_imp_G_neg_H : DerivationTree fc [] ((Formula.somePast α).allFuture.imp
@@ -223,17 +243,29 @@ noncomputable def bimodalChronicleInterface (fc : FrameClass) :
     have h_bx3 : DerivationTree fc [] ((γ.imp γ.neg.neg).allFuture.imp
         ((Formula.untl Formula.top γ).imp (Formula.untl Formula.top γ.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until γ γ.neg.neg Formula.top) trivial
-    have h_F_to_Fnn : DerivationTree fc [] ((Formula.someFuture γ).imp (Formula.someFuture γ.neg.neg)) :=
+    have h_F_to_Fnn :
+        DerivationTree fc [] ((Formula.someFuture γ).imp (Formula.someFuture γ.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
-    have h_dni_F : DerivationTree fc [] ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ.neg.neg).neg.neg) :=
+    have h_dni_F :
+        DerivationTree fc []
+          ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ.neg.neg).neg.neg) :=
       dni (Formula.someFuture γ.neg.neg)
-    have h_F_to_neg_G : DerivationTree fc [] ((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ)))) :=
+    have h_F_to_neg_G :
+        DerivationTree fc []
+          ((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ)))) :=
       impTrans h_F_to_Fnn h_dni_F
-    have h_H_imp : DerivationTree fc [] (Formula.allPast ((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ))))) :=
+    have h_H_imp :
+        DerivationTree fc []
+          (Formula.allPast
+            ((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ))))) :=
       Cslib.Logic.Bimodal.Theorems.pastNecessitation _ h_F_to_neg_G
-    have h_kd : DerivationTree fc [] (((Formula.someFuture γ).imp (Formula.neg (Formula.allFuture (Formula.neg γ)))).allPast.imp
-        ((Formula.someFuture γ).allPast.imp (Formula.neg (Formula.allFuture (Formula.neg γ))).allPast)) :=
-      Cslib.Logic.Bimodal.Theorems.pastKDist (Formula.someFuture γ) (Formula.neg (Formula.allFuture (Formula.neg γ)))
+    have h_kd : DerivationTree fc []
+        (((Formula.someFuture γ).imp
+          (Formula.neg (Formula.allFuture (Formula.neg γ)))).allPast.imp
+        ((Formula.someFuture γ).allPast.imp
+          (Formula.neg (Formula.allFuture (Formula.neg γ))).allPast)) :=
+      Cslib.Logic.Bimodal.Theorems.pastKDist (Formula.someFuture γ)
+        (Formula.neg (Formula.allFuture (Formula.neg γ)))
     have h_H_F_imp_H_neg_G : DerivationTree fc [] ((Formula.someFuture γ).allPast.imp
         (Formula.neg (Formula.allFuture (Formula.neg γ))).allPast) :=
       DerivationTree.modus_ponens [] _ _ h_kd h_H_imp
@@ -286,14 +318,16 @@ theorem dcs_modus_ponens {fc : FrameClass} {Omega : Set (Formula Atom)}
 /-- A CUD set is closed under conjunction. -/
 theorem cud_conj_closed {fc : FrameClass} {Omega : Set (Formula Atom)}
     (h : ClosedUnderDerivation fc Omega)
-    {phi psi : Formula Atom} (h_phi : phi ∈ Omega) (h_psi : psi ∈ Omega) : Formula.and phi psi ∈ Omega :=
+    {phi psi : Formula Atom} (h_phi : phi ∈ Omega) (h_psi : psi ∈ Omega) :
+    Formula.and phi psi ∈ Omega :=
   Cslib.Logic.Metalogic.Chronicle.cud_conj_closed
     (bimodalChronicleInterface fc) (Omega := Omega) h (phi := phi) (psi := psi) h_phi h_psi
 
 /-- A DCS is closed under conjunction. -/
 theorem dcs_conj_closed {fc : FrameClass} {Omega : Set (Formula Atom)}
     (h : SetDeductivelyClosed fc Omega)
-    {phi psi : Formula Atom} (h_phi : phi ∈ Omega) (h_psi : psi ∈ Omega) : Formula.and phi psi ∈ Omega :=
+    {phi psi : Formula Atom} (h_phi : phi ∈ Omega) (h_psi : psi ∈ Omega) :
+    Formula.and phi psi ∈ Omega :=
   cud_conj_closed h.2 h_phi h_psi
 
 /-- A CUD set with a non-member is SDC. -/
@@ -305,7 +339,8 @@ theorem cud_not_mem_is_sdc {fc : FrameClass} {B : Set (Formula Atom)}
 
 /-! ## Adjacency predicate -/
 
-/-- Two rationals are adjacent in `dom` if they are consecutive elements with no point between them. -/
+/-- Two rationals are adjacent in `dom` if they are consecutive elements with no point
+between them. -/
 abbrev Adjacent (dom : Finset Rat) (x y : Rat) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.Adjacent dom x y
 
@@ -316,7 +351,8 @@ which are `fc`-independent formula constructors, so any interface family member 
 `FrameClass.Base`) may be used to witness them -- exactly as `bimodalSinceInterface
 FrameClass.Base` is used for the `fc`-independent `l27s*` helpers in `Since.lean`. -/
 
-/-- The r-relation holds between sets `A` and `B` if every until-formula in `A` is witnessed in `B` (Burgess Lemma 2.3). -/
+/-- The r-relation holds between sets `A` and `B` if every until-formula in `A` is
+witnessed in `B` (Burgess Lemma 2.3). -/
 abbrev rRelation (A B : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.rRelation (bimodalChronicleInterface FrameClass.Base) A B
 
@@ -334,19 +370,23 @@ abbrev r3RelationSince (A B C : Set (Formula Atom)) : Prop :=
 
 /-! ## R-Maximality -/
 
-/-- A set `B` is r-maximal for `A` if it is deductively closed, r-relates to `A`, and no proper extension also r-relates to `A`. -/
+/-- A set `B` is r-maximal for `A` if it is deductively closed, r-relates to `A`, and
+no proper extension also r-relates to `A`. -/
 abbrev rMaximal (fc : FrameClass) (A B : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.rMaximal (bimodalChronicleInterface fc) A B
 
-/-- The since-variant of r-maximality: `B` is deductively closed, r-since-relates to `A`, and no proper extension does. -/
+/-- The since-variant of r-maximality: `B` is deductively closed, r-since-relates to
+`A`, and no proper extension does. -/
 abbrev rMaximalSince (fc : FrameClass) (A B : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.rMaximalSince (bimodalChronicleInterface fc) A B
 
-/-- A set `B` is R3-maximal for `(A, C)` if it is deductively closed, r3-relates to `(A, C)`, and no proper extension does. -/
+/-- A set `B` is R3-maximal for `(A, C)` if it is deductively closed, r3-relates to
+`(A, C)`, and no proper extension does. -/
 abbrev R3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.R3Maximal (bimodalChronicleInterface fc) A B C
 
-/-- The since-variant of R3-maximality: `B` r3-since-relates to `(A, C)` and no proper extension does. -/
+/-- The since-variant of R3-maximality: `B` r3-since-relates to `(A, C)` and no proper
+extension does. -/
 abbrev R3MaximalSince (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.R3MaximalSince (bimodalChronicleInterface fc) A B C
 
@@ -363,19 +403,24 @@ abbrev burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula
 abbrev burgessRSet (A B C : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.ciBurgessRSet (bimodalChronicleInterface FrameClass.Base) A B C
 
-/-- Since-variant of the content-based Burgess r-relation: every `gamma` in `C` satisfies `snce gamma beta ∈ A`. -/
-abbrev burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSince (bimodalChronicleInterface FrameClass.Base) A beta C
+/-- Since-variant of the content-based Burgess r-relation: every `gamma` in `C`
+satisfies `snce gamma beta ∈ A`. -/
+abbrev burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom)
+    (C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSince (bimodalChronicleInterface FrameClass.Base)
+    A beta C
 
 /-- Since-variant of `burgessRSet`: every pivot in `B` since-relates `A` to `C`. -/
 abbrev burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
-  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSetSince (bimodalChronicleInterface FrameClass.Base) A B C
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSetSince (bimodalChronicleInterface FrameClass.Base)
+    A B C
 
 /-- Combined Burgess r3-relation: `burgessRSet A B C` and `burgessRSetSince C B A`. -/
 abbrev burgessR3 (A B C : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.ciBurgessR3 (bimodalChronicleInterface FrameClass.Base) A B C
 
-/-- A set `B` is Burgess-R3-maximal for `(A, C)` if it is CUD, burgessR3-relates to `(A, C)`, and no proper extension does. -/
+/-- A set `B` is Burgess-R3-maximal for `(A, C)` if it is CUD, burgessR3-relates to
+`(A, C)`, and no proper extension does. -/
 abbrev BurgessR3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
   Cslib.Logic.Metalogic.Chronicle.CIBurgessR3Maximal (bimodalChronicleInterface fc) A B C
 
@@ -400,7 +445,9 @@ proof body resists generic abstraction), the `Chronicle`-structure layer stays l
 DCS/r-relation/r-maximality/Burgess layers above (which do NOT touch the `Chronicle`
 structure) remain fully generic. -/
 
-/-- A chronicle: a finite rational domain with point-sets `f` and interval-sets `g` (Burgess 1982, Section 2). -/
+set_option linter.dupNamespace false in
+/-- A chronicle: a finite rational domain with point-sets `f` and interval-sets `g`
+(Burgess 1982, Section 2). -/
 structure Chronicle (Atom : Type*) where
   /-- Point-set function assigning a formula set to each rational point. -/
   f : Rat → Set (Formula Atom)
@@ -412,29 +459,39 @@ structure Chronicle (Atom : Type*) where
 
 /-! ## Chronicle Conditions -/
 
+set_option linter.dupNamespace false in
 /-- Condition c0: every point in the domain carries a maximal consistent set. -/
 def Chronicle.c0 (fc : FrameClass) (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom, SetMaximalConsistent fc (chi.f x)
 
+set_option linter.dupNamespace false in
 /-- Condition c1: every interval-set `g x y` is closed under derivation. -/
 def Chronicle.c1 (fc : FrameClass) (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → ClosedUnderDerivation fc (chi.g x y)
 
-/-- Condition c2: the interval-set `g x y` r3-relates the point-sets at each pair of domain points. -/
+set_option linter.dupNamespace false in
+/-- Condition c2: the interval-set `g x y` r3-relates the point-sets at each pair of
+domain points. -/
 def Chronicle.c2 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → r3Relation (chi.f x) (chi.g x y) (chi.f y)
 
-/-- Condition c2': the interval-set is Burgess-R3-maximal at each adjacent pair of domain points. -/
+set_option linter.dupNamespace false in
+/-- Condition c2': the interval-set is Burgess-R3-maximal at each adjacent pair of
+domain points. -/
 def Chronicle.c2' (fc : FrameClass) (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, Adjacent chi.dom x y →
     BurgessR3Maximal fc (chi.f x) (chi.g x y) (chi.f y)
 
-/-- Condition c3: the interval-set over `[x,z]` decomposes as `g x y ∩ f y ∩ g y z` for intermediate `y`. -/
+set_option linter.dupNamespace false in
+/-- Condition c3: the interval-set over `[x,z]` decomposes as `g x y ∩ f y ∩ g y z` for
+intermediate `y`. -/
 def Chronicle.c3 (chi : Chronicle Atom) : Prop :=
   ∀ x y z : Rat, x ∈ chi.dom → y ∈ chi.dom → z ∈ chi.dom →
     x < y → y < z → chi.g x z = chi.g x y ∩ chi.f y ∩ chi.g y z
 
-/-- Condition c4: if `¬(delta U gamma) ∈ f x` and `delta ∈ f y` then some intermediate point witnesses `¬gamma`. -/
+set_option linter.dupNamespace false in
+/-- Condition c4: if `¬(delta U gamma) ∈ f x` and `delta ∈ f y` then some intermediate
+point witnesses `¬gamma`. -/
 def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y →
     ∀ (gamma delta : Formula Atom),
@@ -442,7 +499,9 @@ def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, x < z ∧ z < y ∧ gamma.neg ∈ chi.f z
 
-/-- Condition c4': the since-variant of c4, witnessing `¬gamma` between `y` and `x` in the past direction. -/
+set_option linter.dupNamespace false in
+/-- Condition c4': the since-variant of c4, witnessing `¬gamma` between `y` and `x` in
+the past direction. -/
 def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → y < x →
     ∀ (gamma delta : Formula Atom),
@@ -450,7 +509,9 @@ def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, y < z ∧ z < x ∧ gamma.neg ∈ chi.f z
 
-/-- Condition c5: if `delta U gamma ∈ f x` then some future `y` witnesses `delta` with `gamma` holding at all intermediate points. -/
+set_option linter.dupNamespace false in
+/-- Condition c5: if `delta U gamma ∈ f x` then some future `y` witnesses `delta` with
+`gamma` holding at all intermediate points. -/
 def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
@@ -459,7 +520,9 @@ def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
         ∀ z ∈ chi.dom, x < z → z < y →
           gamma ∈ chi.f z ∧ Formula.untl gamma delta ∈ chi.f z
 
-/-- Condition c5': the since-variant of c5, witnessing `delta` in the past with `gamma` at all intermediate points. -/
+set_option linter.dupNamespace false in
+/-- Condition c5': the since-variant of c5, witnessing `delta` in the past with `gamma`
+at all intermediate points. -/
 def Chronicle.c5' (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
@@ -504,7 +567,8 @@ theorem c3_interval_subset_right (chi : Chronicle Atom) (h_c3 : chi.c3)
 
 /-! ## ChronicleInvariant Bundle -/
 
-/-- Bundle of the core chronicle invariants (c0, c1, c2', c3) used throughout the canonicity argument. -/
+/-- Bundle of the core chronicle invariants (c0, c1, c2', c3) used throughout the
+canonicity argument. -/
 structure ChronicleInvariant (fc : FrameClass) (chi : Chronicle Atom) : Prop where
   hc0 : chi.c0 fc
   hc1 : chi.c1 fc

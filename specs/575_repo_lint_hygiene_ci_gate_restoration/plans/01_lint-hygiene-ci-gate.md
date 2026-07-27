@@ -21,22 +21,32 @@
 
 ## RESUME HERE
 
-Twelfth resume (cycle 12 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
-COMPLETED (Phase 3 re-closed this cycle after its own reopen). Only Phase 5 (suppression audit)
-remains, PARTIAL at 183 sites done.**
+Thirteenth resume (cycle 13 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+COMPLETED (Phase 1's regression re-closed this cycle; Phase 3 was re-closed in cycle 12 after its
+own reopen). Only Phase 5 (suppression audit) remains, PARTIAL at 183 sites done.**
 
-**READ FIRST — a baseline regression was found and flagged, not fixed, this cycle.** The
-`lake build --wfail --iofail` gate now reports **12 warnings across 7 modules**, not the
-previously-documented 5: 2 new `defLemma`-style warnings (`Modal/Tableau/SoundnessStep.lean:74`,
-`Propositional/NaturalDeduction/Normalization/Termination.lean:47`) and 5 new
-`'simp_wf' tactic does nothing` warnings in `Propositional/SequentCalculus/LJ/
-CutElimination.lean`. None of these three files were touched by any Phase 3/5 edit this cycle or
-any prior cycle — the regression appears to have landed via the `merge main into the upstream
-sync branch` / `merge origin/main` commits that occurred after this task's cycle-11 pause (see
-`git log --oneline` around `310271a6`..`20712f65`). This is a Phase 1 regression, genuinely out
-of scope for a Phase 3/5-scoped dispatch (Phase 1 is COMPLETED and was not reopened) — flag it
-for a dedicated follow-up rather than silently absorbing it into this cycle's numbers. **Do not**
-assume the old "exactly 5" figure without re-running the gate first.
+**RESOLVED this cycle — the baseline regression flagged (not fixed) at cycle 12's close is now
+fixed.** `lake build --wfail --iofail` had regressed to **12 warnings across 7 modules**; it is
+back to exactly the 5 documented baseline sorry warnings, zero others, confirmed by a fresh gate
+run at this cycle's end. Fixed: `Modal/Tableau/SoundnessStep.lean` (`Proposition.beqToEq`,
+`def` -> `theorem`, commit `6619c058`), `Propositional/NaturalDeduction/Normalization/
+Termination.lean` (`liftGrounded`, `def` -> `theorem`; the linter attributed the warning to line
+47, a neighboring docstring, not `liftGrounded`'s own line 66 -- confirmed by elimination and by
+the fix landing cleanly, commit `e47ea1cd`), `Propositional/SequentCalculus/LJ/
+CutElimination.lean` (5 identical vestigial `simp_wf;` deletions inside `decreasing_by`, commit
+`6b4a5c89`). All 3 files confirmed local-only before editing. **One finding worth flagging for
+future defLemma warnings**: `Termination.lean` has a second `def` ending in `: Prop`
+(`conclusionGrounded`) that looks superficially identical to `liftGrounded` but canNOT become
+`theorem` -- its codomain, after full application, is the literal type `Prop` (a predicate
+family, Type-sorted per Lean's impredicativity rule) rather than an instantiated Prop term like
+`liftGrounded`'s `Or (Exists ...) (Exists ...)` conclusion; Lean's own elaborator rejects
+`theorem` for it ("type of theorem ... is not a proposition"), verified with a minimal standalone
+repro, not a codebase quirk. `conclusionGrounded` was correctly left as `def` (it was never the
+warning's actual target). **Future defLemma fixes**: before converting `def` -> `theorem`, check
+whether the final codomain (after all binders) is a literal `Prop`-typed identifier/parameter
+(cannot convert) vs. an already-instantiated Prop expression like an `Eq`/`Or`/`Exists`
+(can convert) -- rebuild after the edit either way, since the elaborator will reject an invalid
+conversion outright rather than silently miscompiling.
 
 **Phase 3 was reopened, fully re-closed this cycle.** 47 of the reopen's ~50 sites fixed across 7
 files (`Minimal/Completeness.lean`, `Temporal/Tableau/Completeness.lean`, `Nested/Context.lean`,
@@ -50,18 +60,16 @@ new sites.
 
 To pick Phase 5 up cold:
 
-1. Confirm the baseline (2 commands, ~5 min) — **expect 12 warnings, not 5**, per the regression
-   noted above, until that regression is separately fixed:
+1. Confirm the baseline (2 commands, ~5 min) — **expect exactly 5 warnings, all documented
+   sorries, as of cycle 13** (the cycle-12 regression is fixed):
    ```bash
-   lake build --wfail --iofail   # expect exit 1; 12 warnings across 7 modules as of cycle 12
+   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 13
    lake test                     # expect exit 0, 0 errors
    ```
    If the warning count or file set differs from the above, something else landed — reconcile
    before proceeding.
-2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them (Phase 1's
-   `[COMPLETED]` marker stands even though its own closure criterion is currently falsified by
-   the regression above — that regression needs its own dedicated cycle, not folded into Phase 5
-   work).
+2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's closure criterion is once again
+   empirically satisfied (no further action needed on any of them).
 3. **Only Phase 5 remains.** 27 files are fully processed cumulative (see Phase 5's cycle
    1/5/6/7/8/9/10/11/12 sub-entries for the complete per-file list) — do not revisit any of them.
    Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry, then
@@ -86,8 +94,8 @@ To pick Phase 5 up cold:
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
 (also implemented in `scripts/pre-pr-check.sh`). True census: 28 (excl. `warn.sorry`-suppressed
 lines, comments stripped); the `--wfail --iofail` build reconfirmed exactly 5 baseline
-*sorry* warnings at cycle 8's end and again at cycle 12's end (the regression above adds 7
-non-sorry warnings on top, unrelated to the sorry census).
+*sorry* warnings at cycle 8's end, again at cycle 12's end, and again at cycle 13's end (after
+the regression fix above).
 **Phase 3 is closed** — its task/phase/report-string census is no longer a live worklist; see its
 section for the final fixed/excluded/false-positive breakdown instead of re-deriving one.
 
@@ -198,11 +206,11 @@ that actually caught it.
 |------|--------------|-----|
 | `lake build` | green 3259/3259 | green |
 | `lake test` | green, 0 errors | green, 0 errors |
-| `lake build --wfail --iofail` | **exit 1**, 27 modules, 460 warnings | **exit 1**, 7 modules, **12 warnings — 5 genuine sorries + a 7-warning regression flagged in RESUME HERE, unrelated to this task's edits** |
+| `lake build --wfail --iofail` | **exit 1**, 27 modules, 460 warnings | **exit 1**, 5 modules, **exactly 5 genuine sorry warnings** (a transient cycle-12 regression of 7 additional non-sorry warnings across 3 local-only files was fixed in cycle 13 — see Phase 1's cycle-13 closure note) |
 | `lake exe mk_all --check` | pass | pass |
 | `lake exe checkInitImports` | pass | pass |
 | `lake shake` | 94 files flagged (CI step disabled) | unchanged |
-| Linter sites | 240 | **0** (Phase 1 scope; see the cycle-12 regression note in RESUME HERE for 3 newly-affected files outside Phase 1's original worklist) |
+| Linter sites | 240 | **0** (Phase 1 scope; the cycle-12 regression's 3 newly-affected files are fixed as of cycle 13 — see Phase 1's cycle-13 closure note) |
 | `set_option linter.*` | 511 | see Phase 5's live ratchet count (258 blanket suppressions as of cycle 12) |
 | `@[nolint]` | 118 | 88 |
 | Task-tracker refs in `Cslib/**` | 376 (undercounted; see Phase 3 census-regex fix) | 20 (all individually accounted for as exclusions — see Phase 3's cycle-12 closure) |
@@ -218,9 +226,10 @@ Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:124  declara
 Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118    declaration uses `sorry`
 ```
 
-As of cycle 12, 7 additional non-sorry warnings also appear in the `--wfail --iofail` gate,
-unrelated to any Phase 3/5 edit — see RESUME HERE's "baseline regression" note for the file list
-and provenance hypothesis (an unrelated upstream-sync merge). Flagged, not fixed, by this cycle.
+At cycle 12's close, 7 additional non-sorry warnings appeared in the `--wfail --iofail` gate,
+unrelated to any Phase 3/5 edit — traced to an unrelated upstream-sync merge. Flagged, not fixed,
+at cycle 12. **Fixed at cycle 13** — see Phase 1's cycle-13 closure note and RESUME HERE for the
+per-file fix breakdown; the gate is back to exactly 5 warnings as of this cycle's end.
 
 ### Measurement notes — two independent causes of this repo's recurring sorry-count error
 
@@ -241,16 +250,37 @@ The project's own "41 -> 40" figures were wrong in both ways. Correct method: st
 
 ### Phase 1: Linter sites [COMPLETED]
 
-**Exclusion audit: no exclusions claimed, close stands — pending one empirical re-verification.**
+**Cycle 13: regression re-closed.** The cycle-12 baseline regression (7 new non-sorry warnings
+in 3 local-only files, landed via an unrelated upstream-sync merge while the task was paused) is
+now fixed. `SoundnessStep.lean:83` (`Proposition.beqToEq`) and `Termination.lean:66`
+(`liftGrounded`, misattributed to line 47 by the linter's own position reporting -- confirmed by
+elimination, since the file's only other `def`, `conclusionGrounded`, cannot become `theorem`:
+its codomain is the literal type `Prop` rather than an instantiated Prop term, which Lean's own
+type checker rejects for `theorem` -- verified with a minimal standalone repro, not a
+codebase-specific issue) both converted `def` -> `theorem` (defLemma category: both conclude an
+actual Prop instance after full application). `CutElimination.lean`'s 5 identical
+`decreasing_by all_goals (simp_wf; simp [...]; try omega)` sites (lines 223/349/460/540/649) had
+the vestigial `simp_wf;` deleted (unusedTactic category, same "unnecessary tactic" recipe as
+below). All 3 files confirmed local-only (`git cat-file -e upstream/main:<path>` fails for all
+three) before editing. Each file rebuilt individually plus all of its downstream importers
+(`SoundnessStep` -> `Soundness.lean`, `FmpMeasure.lean`; `Termination.lean` ->
+`SubformulaProperty.lean`, `Normalization.lean`, `CurryHoward/Reduction.lean`;
+`CutElimination.lean` -> `OrImpConservative.lean`, `LJ.lean`, `LJ/SubformulaProperty.lean`,
+`LJ/Interpolation.lean`) before each of the 3 commits. Re-ran the full gate afterward:
+`lake build --wfail --iofail` now reports exactly the 5 documented baseline sorry warnings again,
+zero others -- **the empirical re-verification below is now satisfied, not merely pending.**
+
+**Exclusion audit: no exclusions claimed, close stands — empirically re-verified this cycle.**
 This phase reported all 240 distinct sites cleared with no carve-out, so there is no
 exclusion-by-finding to re-audit. Its claim is directly falsifiable by the gate
-(`lake build --wfail --iofail` reporting nothing beyond the baseline sorry warnings); that
-re-verification is folded into the task's final gate rather than run separately, since a
-concurrent Phase 5 dispatch holds the build.
+(`lake build --wfail --iofail` reporting nothing beyond the baseline sorry warnings); re-run this
+cycle after fixing the regression above, confirming exactly 5 warnings (the documented sorries)
+and no others.
 
 240 distinct source sites across 27 files (460 raw warnings; one recurring flexible-simp pattern
 accounted for 241 warnings at only 42 sites). Cleared in 23 individually-verified commits
-(`1475b0a4` … `a4cdbe64`).
+(`1475b0a4` … `a4cdbe64`); regression re-closed in 3 more commits this cycle
+(`6619c058`, `e47ea1cd`, `6b4a5c89`).
 
 Fix recipes used, for reference if warnings reappear:
 - "simp argument is unused" -> delete the argument from the `simp only [...]` list
@@ -1247,22 +1277,20 @@ line immediately followed by a `set_option ... in` line) found zero remaining in
 in `Cslib/**` — the one instance introduced mid-edit this cycle was caught and fixed before
 commit, not left in the tree.
 
-**Baseline noise found, NOT part of this phase's scope, flagged for the record**: the
-`lake build --wfail --iofail` gate now reports **12 warnings across 7 modules**, not the
+**Baseline noise found, NOT part of this phase's scope, flagged for the record — RESOLVED cycle
+13**: the `lake build --wfail --iofail` gate reported **12 warnings across 7 modules**, not the
 documented 5 — 2 new `defLemma`-style warnings (`SoundnessStep.lean:74`,
 `Normalization/Termination.lean:47`, both "Definition ... is a proposition; use theorem instead
 of def") and 5 new `'simp_wf' tactic does nothing` warnings in
 `Propositional/SequentCalculus/LJ/CutElimination.lean` (lines 223/349/460/540/649), none in files
-this phase (or Phase 3) touched. These appear to have landed via the unrelated
+this phase (or Phase 3) touched. These landed via the unrelated
 `merge main into the upstream sync branch` / `merge origin/main` commits that occurred after this
 task's prior pause, not from any Phase 3/5 edit in this cycle — confirmed by `git blame`-adjacent
-reasoning (none of the three affected files appear in this cycle's `git log`). This is a Phase 1
+reasoning (none of the three affected files appear in this cycle's `git log`). This was a Phase 1
 regression, out of scope for a Phase 3/5-scoped dispatch; recorded here rather than silently
-fixed or silently ignored, per this task's own measurement-discipline lesson. **Phase 1's
-`[COMPLETED]` marker is not touched by this finding** (its own closure criterion — the `--wfail`
-gate reporting nothing beyond the baseline sorry warnings — is now falsified and needs a
-dedicated follow-up cycle to either fix the 3 newly-affected files or re-open Phase 1
-explicitly).
+fixed or silently ignored, per this task's own measurement-discipline lesson. **Fixed in cycle
+13** (see Phase 1's cycle-13 closure note and RESUME HERE) — the gate is back to exactly 5
+warnings.
 
 **Resume point (cycle 12 close)**: the 2 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
 10, 11 are done — do not revisit (27 files total). Re-verify the worst-offender list before

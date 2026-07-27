@@ -1214,8 +1214,9 @@ theorem modalExpandBranchesGen_openBranch_gen
                 hAll_new bR aR hinner
 
 /-- **Top-loop propagation of `accSourcesKnown`** -- zero-regression re-derivation from the
-generic form above at `P := accSourcesKnown`, `hPresP := modalStepBranchGen_preserves_accSourcesKnown
-apply hFreshLocal`. Exact name and statement unchanged from the pre-generalization version. -/
+generic form above at `P := accSourcesKnown`,
+`hPresP := modalStepBranchGen_preserves_accSourcesKnown apply hFreshLocal`. Exact name and
+statement unchanged from the pre-generalization version. -/
 theorem modalExpandBranchesGen_openBranch_accSourcesKnown
     (apply : RuleApply Atom)
     (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)

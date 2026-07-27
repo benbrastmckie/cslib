@@ -133,7 +133,7 @@ theorem minimalTableau_sound (φ : Proposition Atom)
     [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
       (by
         intro b edges nw hmem
-        simp only [List.zip_cons_cons, List.zip_nil_right, List.zip_nil_left,
+        simp only [List.zip_cons_cons, List.zip_nil_right,
           List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
         obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
         subst hb; subst he; subst hnw

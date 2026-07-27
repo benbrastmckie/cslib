@@ -462,7 +462,7 @@ theorem modalStepBranchGen_knownWorlds
 `modalStepBranch_eClosure_gen`, `FmpMeasure.lean`, which needs no `spec` field at all -- see its
 docstring). -/
 theorem modalStepBranchGen_eClosure
-    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (apply : RuleApply Atom) (_spec : RuleApplicationSpec apply)
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))

@@ -1,0 +1,240 @@
+Cslib/Computability/Automata/DA/Conversions.lean:1:0: The current module only contains private declarations.
+Cslib/Foundations/Logic/Tableau/Measure.lean:101:4: try 'simp' instead of 'simpa'
+Cslib/Logics/LTL/ModelChecking.lean:136:30: This simp argument is unused:
+Cslib/Logics/LTL/ModelChecking.lean:144:32: This simp argument is unused:
+Cslib/Logics/Modal/Basic.lean:177:16: `simp [Proposition.map] at h` is a flexible tactic modifying `h`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Basic.lean:183:16: `simp [Proposition.map] at h` is a flexible tactic modifying `h`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Basic.lean:186:16: `simp [Proposition.map] at h` is a flexible tactic modifying `h`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Basic.lean:189:16: `simp [Proposition.map] at h` is a flexible tactic modifying `h`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Basic.lean:192:16: `simp [Proposition.map] at h` is a flexible tactic modifying `h`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Basic.lean:195:16: `simp [Proposition.map] at h` is a flexible tactic modifying `h`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Metalogic/Constructive/Labelled/CanonicalModel.lean:69:5: please avoid 'open (scoped) Classical' statements: this can hide theorem statements which would be better stated with explicit decidability statements.
+Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean:75:5: please avoid 'open (scoped) Classical' statements: this can hide theorem statements which would be better stated with explicit decidability statements.
+Cslib/Logics/Modal/Tableau/BDriver.lean:1217:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/Completeness.lean:116:4: `simp [SignedFormula.isPos, Sign.isPos] at hno` is a flexible tactic modifying `hno`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/Completeness.lean:169:2: `simp [Option.getD_none] at hcond
+Cslib/Logics/Modal/Tableau/Completeness.lean:188:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:188:6: `simp [if_neg hinb] at hnil` is a flexible tactic modifying `hnil`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/Completeness.lean:249:2: `simp [Option.getD_none] at hcond` is a flexible tactic modifying `hcond`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/Completeness.lean:322:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_imp_pos`:
+Cslib/Logics/Modal/Tableau/Completeness.lean:339:14: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:339:18: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:340:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:350:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_imp_neg`:
+Cslib/Logics/Modal/Tableau/Completeness.lean:367:14: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:367:18: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:368:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:377:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_and_pos`:
+Cslib/Logics/Modal/Tableau/Completeness.lean:387:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_and_neg`:
+Cslib/Logics/Modal/Tableau/Completeness.lean:398:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_or_pos`:
+Cslib/Logics/Modal/Tableau/Completeness.lean:409:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_or_neg`:
+Cslib/Logics/Modal/Tableau/Completeness.lean:506:36: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:537:34: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:551:34: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/Completeness.lean:86:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.extractModel_atomPos_sat`:
+Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:195:0: `modalMaxWorld_lt_worldBound_of_phiBound` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:2193:14: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:343:0: `ModalLoopAuxK_bounds` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FiveSimplification.lean:2066:4: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/FiveSimplification.lean:587:4: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1003:19: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1011:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.boxPos_rank_bound`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1028:15: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1035:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.diamondNeg_rank_bound`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1056:15: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1142:21: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1142:44: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1156:23: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1156:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:116:0: `modalDepth_le_complexity` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:117:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalDepth_le_complexity`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1178:21: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1178:44: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1192:23: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1192:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1349:0: `isMintingShaped_not_prop_applicable` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1354:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.isMintingShaped_not_prop_applicable`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:154:0: `modalUniverse_length_le` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1588:0: `isMintingShaped_inv` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1592:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.isMintingShaped_inv`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1600:0: `filter_map_eq_filterMap` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1605:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.filter_map_eq_filterMap`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1614:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1614:30: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1615:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1615:30: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1617:0: `outDeg_le_of_expandedNodup` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1648:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1649:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1650:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1657:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1658:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1659:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1710:0: `modalKnownWorlds_fold_spec` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1710:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.modalKnownWorlds_fold_spec`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1752:0: `modalKnownWorlds_nodup` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1756:0: `mem_modalKnownWorlds` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1763:0: `modalKnownWorlds_le_modalMaxWorld` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1770:0: `modalNextWorld_not_mem_modalKnownWorlds` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1778:0: `modalKnownWorlds_toFinset_append` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1793:0: `modalKnownWorlds_mono_append` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1801:0: `modalKnownWorlds_perm_append_of_subset` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1816:0: `modalKnownWorlds_perm_append_single` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1835:0: `modalMaxWorld_foldl_le` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1837:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.modalMaxWorld_foldl_le`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1848:0: `modalMaxWorld_le_of_forall_le` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1853:0: `modalMaxWorld_append_eq_of_forall_le` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1867:0: `modalMaxWorld_append_single` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:1986:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.mintGroup_label_eq_freshWorld`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:2589:0: `modalSf_pos` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:2594:0: `modalSf_one_imp_depth_zero` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:262:0: `modalSubfmls_self_mem` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:266:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalSubfmls_self_mem`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:269:0: `modalApplyOne_prop_outputs_subset` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:2936:41: `simp` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:294:23: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:294:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:2977:41: `simp` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:3379:0: `label_mem_modalKnownWorlds` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:82:0: `modalSubfmls_length_le` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:83:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalSubfmls_length_le`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:936:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.boxProps_rank_bound`:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:964:17: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FmpMeasure.lean:973:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.FmpMeasure.0.Cslib.Logic.Modal.Tableau.diaNegProps_rank_bound`:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:120:0: `branchSatisfiableIn_trivial_imp` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1246:6: declaration uses `sorry`
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1534:36: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2725:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2726:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2740:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2764:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2777:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2801:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2928:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2950:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2967:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2980:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:2990:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:335:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:336:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:350:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:3643:2: `push_neg` has been deprecated. Prefer using `push Not` instead.
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:374:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:3812:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:387:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:3969:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:3970:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:3984:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4008:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4021:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4045:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:411:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4172:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4194:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4211:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4224:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4234:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4705:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4706:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4720:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4744:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4757:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4781:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4908:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4930:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4947:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4960:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:4970:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:538:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:560:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:577:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:590:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/FrameSoundness.lean:600:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/GenericDriver.lean:465:30: Variable name `spec` is not explicitly referenced.
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:1402:0: `keysOriginS4_entry` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:1405:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.keysOriginS4_entry`:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:1414:0: `keysOriginS4_mono_branch` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:1417:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.keysOriginS4_mono_branch`:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:143:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:1435:0: `keysOriginS4_mono_acc` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:1438:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.keysOriginS4_mono_acc`:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:2124:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:351:0: `modalUniverseS4_length_le` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:3625:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:3739:15: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:3739:19: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:3782:15: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:3782:19: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5135:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5139:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5201:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5205:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5226:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5233:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5336:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5340:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5402:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5406:16: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5427:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:5434:12: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:9062:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:94:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:952:0: `modalMintShape_boxNeg` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:954:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalMintShape_boxNeg`:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:958:0: `modalMintShape_diaPos` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:960:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalMintShape_diaPos`:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:964:0: `modalMintShape_eq_false_of_not_boxNeg_diaPos` does not use the following hypothesis in its type:
+Cslib/Logics/Modal/Tableau/LoopChecking.lean:966:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalMintShape_eq_false_of_not_boxNeg_diaPos`:
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:1177:8: automatically included section variable(s) unused in theorem `_private.Cslib.Logics.Modal.Tableau.S5Simplification.0.Cslib.Logic.Modal.Tableau.modalApplyOneS5_fresh_local_local`:
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:1193:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:1753:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:281:4: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:384:13: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:386:4: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:569:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:821:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOneS5w_diamondPos_tag_mem`:
+Cslib/Logics/Modal/Tableau/S5Simplification.lean:831:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOneS5w_boxNeg_tag_mem`:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:1048:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:123:36: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:446:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_boxPos_sound`:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:490:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalApplyOne_diaNeg_sound`:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:541:0: automatically included section variable(s) unused in theorem `Cslib.Logic.Modal.Tableau.modalStepBranch_preserves_sat`:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:577:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:578:46: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:593:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:619:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:633:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:655:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:701:10: This simp argument is unused:
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:840:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:863:8: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:881:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:895:10: `simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+Cslib/Logics/Modal/Tableau/SoundnessStep.lean:906:10: This simp argument is unused:
+Cslib/Logics/Propositional/Metalogic/IntDecidability.lean:108:10: extra space in the source
+Cslib/Logics/Propositional/Metalogic/IntDecidability.lean:146:6: Variable name `w₁` is not explicitly referenced.
+Cslib/Logics/Propositional/Metalogic/IntDecidability.lean:146:9: Variable name `w₂` is not explicitly referenced.
+Cslib/Logics/Propositional/SequentCalculus/LJ/Completeness.lean:308:4: Try this: intro ⟨d⟩ World _ val v_uc w
+Cslib/Logics/Propositional/SequentCalculus/LK/Completeness.lean:382:4: Try this: intro ⟨d⟩ v
+Cslib/Logics/Propositional/SequentCalculus/LK/Soundness.lean:109:28: `simp [Evaluate_imp] at this` is a flexible tactic modifying `this`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Propositional/SequentCalculus/LK/Soundness.lean:52:28: `simp [Evaluate_and] at this` is a flexible tactic modifying `this`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Propositional/SequentCalculus/LK/Soundness.lean:54:28: `simp [Evaluate_and] at this` is a flexible tactic modifying `this`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Propositional/SequentCalculus/LK/Soundness.lean:80:28: `simp [Evaluate_or] at this` is a flexible tactic modifying `this`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Propositional/SequentCalculus/LM/Completeness.lean:323:4: Try this: intro ⟨d⟩ World _ val bot_forces v_uc bf_uc w
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:124:8: declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean:196:4: `simp [hexp] at hsf` is a flexible tactic modifying `hsf`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:1093:10: The `show` tactic should only be used to indicate intermediate goal states for readability.
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:1122:10: The `show` tactic should only be used to indicate intermediate goal states for readability.
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:1150:10: The `show` tactic should only be used to indicate intermediate goal states for readability.
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:1152:10: The `show` tactic should only be used to indicate intermediate goal states for readability.
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2574:14: declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:562:6: declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:799:37: This simp argument is unused:
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:851:55: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:863:55: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:900:21: This simp argument is unused:
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean:1341:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean:1444:37: This simp argument is unused:
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean:1528:100: This line exceeds the 100 character limit, please shorten it!
+Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118:8: declaration uses `sorry`
+Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean:136:59: This simp argument is unused:

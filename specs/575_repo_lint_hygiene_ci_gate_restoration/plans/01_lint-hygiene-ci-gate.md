@@ -471,7 +471,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 59 of ~570 done]
+### Phase 5: Suppression audit [PARTIAL — 90 of ~570 done]
 
 **Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
 line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
@@ -573,30 +573,66 @@ file-scoped) — no action needed, prior cycles had already fixed this.
   positive (`Computability/URM/Basic.lean:92`, unrelated to this task); axiom count unchanged
   at 26.
 
-**Resume point**: the 4 files above are done — do not revisit. Live worst-offender list
-after cycle 6 (re-verify with the file-scoped-suppression-count one-liner below before
-starting, since file resolutions can shift what's "worst" only by removing entries, never by
-changing another file's count):
+**Done (cycle 7)**: processed 5 more files, all committed individually after a clean scoped
+rebuild — `Separation/Hierarchy/HierarchyCompletion.lean` (7→21 declaration-scoped, 1000 lines,
+the largest/most suppression-dense file left at cycle-6 close), `Temporal/Metalogic/Chronicle/
+CounterexampleElimination/Structures.lean` (6→0, fully clean), `Temporal/Metalogic/Chronicle/
+CounterexampleElimination/Elimination.lean` (6→0, fully clean), `Separation/SeparationThm.lean`
+(6→31 declaration-scoped), `Separation/Hierarchy/HierarchyCaseSep.lean` (6→27
+declaration-scoped). All five files: zero blanket file-scoped suppressions remain; every
+`style.emptyLine`/`style.setOption` suppression proved vestigial on removal-and-rebuild across
+all five files (consistent with cycle 1/5 findings — these two categories are essentially never
+load-bearing); `flexible` was vestigial in 3 of 5 files and genuinely load-bearing (narrowed to
+declaration scope) in the other 2. `style.longLine` sites (23 total across the five files) were
+all fixed mechanically by rewrapping. `unusedSectionVars` and `unusedDecidableInType` remain the
+two categories requiring per-declaration narrowing at scale (this cycle alone touched ~70
+individual declarations across the five files).
+
+**New safety lesson (cycle 7)**: a manual `old_string`/`new_string` Edit-tool replacement on a
+multi-branch proof body (`and_left_congr_hier` in `HierarchyCaseSep.lean`) briefly dropped a
+bound hypothesis (`hφ`) from one branch's closing term while retyping the branch to insert a
+`set_option` line above the declaration. Caught immediately by re-reading the edited region
+before the next build (not by the build itself, which had not yet been run) and corrected
+before any verification step touched it — no broken state was ever built or committed. Lesson
+for future cycles: when an edit's `new_string` must reproduce an existing multi-line proof body
+verbatim (e.g. because a preceding line in the same hunk needs modification), prefer editing
+only the minimal preceding/following boundary lines in separate Edit calls rather than
+retyping proof-body lines inside the same `old_string`/`new_string` pair — retyping is where
+transcription slips happen. When a proof body must be reproduced, re-read the edited region
+immediately after the Edit call and diff it mentally against the original before proceeding to
+build.
+
+**Resume point**: the 9 files above (4 from cycle 6, 5 from cycle 7) are done — do not
+revisit. Live worst-offender list after cycle 7 (re-verify with the file-scoped-suppression
+-count one-liner below before starting, since file resolutions can shift what's "worst" only
+by removing entries, never by changing another file's count):
 ```bash
 grep -rln "set_option linter\." Cslib/ | while read f; do
   fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
   echo "$fs $f"
 done | sort -rn | head -20
 ```
-Next targets as of cycle 6 end: `Separation/Hierarchy/HierarchyCompletion.lean` (7, 1000
-lines — expect a HierarchyInduction.lean-sized effort), then a cluster of 6-suppression files
-(`Temporal/Metalogic/Chronicle/CounterexampleElimination/{Structures,RecursiveWalks,
-MainElimination,Elimination}.lean`, `Bimodal/Metalogic/Soundness/FrameClassVariants.lean`,
-`Bimodal/Metalogic/Separation/{SeparationThm,Hierarchy/HierarchyCaseSep,Eliminations}.lean`).
-Apply the same method: remove all of a file's suppressions, rebuild, categorize what surfaces
-into vestigial / mechanically-fixable / needs-real-proof-work, fix what's mechanical, narrow
-the rest to declaration-scope — **always rebuild after using `omit [...] in` specifically**
+Next targets as of cycle 7 end (all tied at 6, ordered by line count — smallest first is
+usually fastest): `Temporal/Metalogic/Chronicle/CounterexampleElimination/{RecursiveWalks
+(1125 lines), MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/
+FrameClassVariants.lean` (931 lines), `Bimodal/Metalogic/Separation/Eliminations.lean` (849
+lines), `Bimodal/Metalogic/ConservativeExtension/Lifting.lean`, `Bimodal/Metalogic/
+BXCanonical/Quasimodel/HintikkaPoint.lean`, `Bimodal/Metalogic/BXCanonical/Chronicle/
+CounterexampleElimination/Interface.lean`, `Bimodal/Metalogic/BXCanonical/Chronicle/
+ChronicleToCountermodelBasic.lean`, `Bimodal/Metalogic/BXCanonical/CanonicalModel.lean` — check
+line counts with `wc -l` before picking, since cycle 7 confirmed smaller files (200-600 lines)
+process in roughly 1/3 the effort of 900-1700-line files for the same suppression count. Apply
+the same method: remove all of a file's suppressions, rebuild, categorize what surfaces into
+vestigial / mechanically-fixable / needs-real-proof-work, fix what's mechanical, narrow the
+rest to declaration-scope — **always rebuild after using `omit [...] in` specifically**
 (elaboration-changing, unlike `set_option linter.X false in` which is warning-only and always
 safe to add/remove) — **and prefer `set_option ... in` over `omit ... in` for
 unusedSectionVars whenever the task's constraints forbid theorem-statement changes** (see
 cycle 6 finding above) — **and always place `set_option .../omit ... in` before a
-declaration's doc comment, never between the doc comment and the declaration** (see cycle 6
-parse-hazard finding above).
+declaration's doc comment (and before any preceding `open X in` modifier, if present), never
+between the doc comment and the declaration** (see cycle 6 parse-hazard finding above) — **and
+never retype existing proof-body lines inside an Edit's new_string; edit only boundary lines
+and re-read the region before building** (see cycle 7 finding above).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

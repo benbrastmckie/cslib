@@ -541,14 +541,12 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompletenessGeneric
-public import Cslib.Logics.Propositional.Semantics.Algebra.CanAlgComplete
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativityInstances
-public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentGeneric
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko

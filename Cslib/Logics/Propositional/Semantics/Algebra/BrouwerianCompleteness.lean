@@ -149,12 +149,9 @@ The restriction to `IsOrBotFree` is necessary: `bot` is vacuously Brouwerian-val
 (since `BrouwerianEvaluate v bot = ⊤` by definition) but not derivable in `ConjImpAxiom`
 (no EFQ axiom is available).
 
-**Terminal-interface note**: this theorem is a load-bearing *internal input* to
-`CanAlgComplete` (`CanAlgComplete.lean`), which is the single documented terminal interface
-for fragment algebraic completeness — see `canAlgCompleteIsOrBotFree`, and (via
-`fragmentConservativityConjImp`) the `FragmentConservativity` instance in
-`FragmentConservativityInstances.lean`. It stays public (14+ use-sites); only its role in the
-completeness stack is being reclassified here, not its visibility, name, or signature. -/
+This theorem is public and is the completeness result for the `IsOrBotFree` fragment,
+complementing the `FragmentConservativity` instance `fragmentConservativityConjImp`
+(`FragmentConservativityInstances.lean`). -/
 theorem conjImp_brouwerian_completeness {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsOrBotFree = true)
     (h : BrouwerianValid.{u, u} φ) :

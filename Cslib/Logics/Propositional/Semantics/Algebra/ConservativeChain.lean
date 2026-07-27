@@ -275,8 +275,7 @@ theorem hilbertMplConservativeOverConjImp {Atom : Type u} {φ : PL.Proposition A
 (The biconditionals `impAxiom_iff_chain` / `conjImpAxiom_iff_chain` / `orImpAxiom_iff_chain` /
 `minAxiom_iff_chain` are not restated here: each is a `.symm` of an already-public
 biconditional (`hilbertIplConservativeOverX_iff` / the `minAxiom` case) with no external
-use-site, so a restatement here would add no new content. See `CanAlgComplete.lean` for the
-documented terminal fragment-completeness interface these biconditionals ultimately feed.) -/
+use-site, so a restatement here would add no new content.) -/
 
 /-- **Theory-parametric Glivenko (strength wrapper)**: if every axiom of `A_cl` is a
 `PropositionalAxiom` (classical soundness), and every `IntPropAxiom` is an axiom of `A_int`

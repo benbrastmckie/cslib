@@ -11,7 +11,7 @@ next_project_number: 580
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573,575,578 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573,575 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574 | 36,37,181,425,465,530,554,562,563,573 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,456,506,548,565,566,576 | 39,40,511,564,568,574 | foundations, modal logic, bimodal and temporal logic, ... |
 | 4 | 300,317,567 | 456,506,558,565,566 | propositional logic, modal logic |
@@ -98,10 +98,6 @@ next_project_number: 580
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
-### Uncategorized
-
-578 [NOT STARTED] — Untrack and gitignore the 35 ephemeral orchestrator runtime files
-
 ## Tasks
 
 ### 579. Lint suppression ratchet gate
@@ -114,9 +110,12 @@ next_project_number: 580
 ---
 
 ### 578. Untrack ephemeral orchestrator runtime files
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Dependencies**: None
+- **Research**: [578_untrack_ephemeral_orchestrator_runtime_files/reports/01_untrack-ephemeral-runtime-files.md]
+- **Plan**: [578_untrack_ephemeral_orchestrator_runtime_files/plans/01_untrack-ephemeral-runtime-files.md]
+- **Summary**: [578_untrack_ephemeral_orchestrator_runtime_files/summaries/01_untrack-ephemeral-runtime-files-summary.md]
 
 **Description**: Untrack and gitignore the 35 ephemeral orchestrator runtime files currently committed in this repository, applying the consumer-repo remediation that the agent-system policy work defined but could not deliver here. VERIFIED PROBLEM: .claude/scripts/check-runtime-file-tracking.sh (shipped by the policy work, present and executable in this repo) FAILS two of its three checks. Check A: 10 ephemeral-class patterns are missing from this repo root .gitignore, which contains ZERO orchestrator/runtime lines. Check C passes, so the durable class is correctly configured and must stay that way. Check B: 35 ephemeral-class files are tracked -- 18 .orchestrator-loop-guard, 7 .orchestrator-churn-state.json, 5 variant .return-meta-{research,teammate-a,lit-05,orchestrate}.json, 2 .drift-inspection.json, 2 .return-meta-multi*.json, 1 .orchestrator-multi-state.json, 1 specs/557_.../.lock/ directory, and specs/.events.lock. WHY THIS IS A CORRECTNESS HAZARD, NOT REPO NOISE: per .claude/context/standards/orchestrator-runtime-files.md, the ephemeral class is read with NO freshness gate -- skill-orchestrate Stage 2 reads cycle_count and infra_failures from whatever loop guard is on disk with no session_id and no mtime comparison. A guard restored by checkout, clone, or branch switch therefore makes a fresh /orchestrate believe it is already mid-run at a stale cycle count. LIVE INSTANCES OBSERVED: specs/317_propositional_tableau_completeness/.orchestrator-loop-guard is committed at cycle_count 11 of max_cycles 16 with hard_mode true; specs/575_repo_lint_hygiene_ci_gate_restoration/.orchestrator-loop-guard was committed at cycle_count 5 of max_cycles 5, which made every subsequent /orchestrate 575 resume at 5/5 and exit having done no work -- permanently killing the documented "run /orchestrate {N} to continue" resume affordance until the guard was reset by hand. 537 and 557 hold further committed guards. REQUIRED WORK: (1) add the ephemeral-class block to this repo OWN root /.gitignore, copying it verbatim from the "Consumer Repo Setup" section of .claude/context/standards/orchestrator-runtime-files.md -- note that the standard explains the source store CANNOT deliver a repo-root .gitignore contribution automatically, because a specs/* pattern placed in .claude/ would resolve relative to .claude/ and silently match nothing, which is exactly why this must be done by hand once. (2) Untrack all 35 files using git rm --cached (and git rm -r --cached for the .lock directory), which preserves them on disk so any in-flight orchestration is not disrupted -- check-runtime-file-tracking.sh prints the exact per-file remediation command. (3) Do NOT untrack or ignore .orchestrator-handoff.json or .return-meta.json: those are the DURABLE class, are freshness-gated by their consumers, and MUST stay tracked -- Check C currently passes and must still pass afterwards. CONSTRAINT: do not delete any file from disk; this is a git-index and .gitignore change only. DEFINITION OF DONE: bash .claude/scripts/check-runtime-file-tracking.sh exits with all three checks passing.
 

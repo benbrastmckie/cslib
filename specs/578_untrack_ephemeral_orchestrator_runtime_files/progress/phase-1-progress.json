@@ -1,0 +1,23 @@
+{
+  "phase": 1,
+  "phase_name": "Add the ephemeral-class block to root .gitignore",
+  "started_at": "2026-07-27T00:00:00Z",
+  "last_updated": "2026-07-27T00:05:00Z",
+  "objectives": [
+    {"id": 1, "description": "Copy verbatim ephemeral-class block from standard's Consumer Repo Setup section", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Append block to root /.gitignore after blank-line separator", "status": "done", "files_touched": [".gitignore"]},
+    {"id": 3, "description": "Confirm no durable-class pattern introduced", "status": "done", "files_touched": []}
+  ],
+  "current_objective": 3,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "1.verification",
+      "description": "Phase 1 verification expected 'Check A passed' immediately after the .gitignore append.",
+      "type": "altered",
+      "reason": "check-runtime-file-tracking.sh probes Check A for two of the nine patterns (.orchestrator-multi-state.json, .events.lock) at their real specs/ root path rather than a synthetic specs/000_probe/ path, because no probe copy exists for those singleton files. Both real paths are still git-tracked at this point in the run, and git check-ignore reports a currently-tracked path as NOT ignored regardless of pattern match (verified independently in a throwaway repo). The other 7 of 9 patterns correctly report OK. This is a script-probe artifact, not a .gitignore defect: both paths are already on Phase 2's Check-B remediation list, so untracking them in Phase 2 resolves this Check A anomaly as a side effect.",
+      "annotation": "n/a (verification-only observation, not a plan task deviation)"
+    }
+  ]
+}

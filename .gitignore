@@ -17,3 +17,19 @@
 .DS_Store
 # .claude tracked files are allowed; ignore only generated/local state
 .claude/settings.local.json
+
+# Ephemeral orchestrator runtime state: per-dispatch scratch, mutex directories, and loop
+# guards. Ignored because these have no freshness gate on read — a git-restored copy would
+# silently corrupt in-flight cycle/churn state. See
+# agent-system/extensions/core/context/standards/orchestrator-runtime-files.md for the full
+# two-class policy and rationale. Deliberately does NOT include .orchestrator-handoff.json or
+# .return-meta.json — those are durable, freshness-gated provenance and MUST stay tracked.
+**/.lock/
+**/.orchestrator-loop-guard
+**/.continuation-loop-guard
+**/.orchestrator-churn-state.json
+**/.postflight-loop-guard
+**/.orchestrator-multi-state.json
+**/.drift-inspection.json
+**/.return-meta-*.json
+**/.events.lock

@@ -2,9 +2,10 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~6h spent; ~5-8h remaining (Phase 3's big files and Phase 5 dominate)
+- **Effort**: ~7h spent; ~4-6h remaining (Phase 3's live-task-blocked files and Phase 5 dominate)
 - **Dependencies**: none blocking. Coordinate with 557/558 (Modal/Tableau refactor) before large
-  edits to `Modal/Tableau/`; coordinate with 317 before edits to `Propositional/Tableau/`.
+  edits to `Modal/Tableau/`; coordinate with 317 before edits to `Propositional/Tableau/`;
+  coordinate with 425 before edits to `Temporal/Tableau/` and `Temporal/Semantics/Validity.lean`.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
   shared infrastructure) conducted 2026-07-27; findings inlined below rather than filed as
   separate reports.
@@ -20,8 +21,8 @@
 
 ## RESUME HERE
 
-Third resume. Status as of this pass: **Phase 1, 2, 6, 8 COMPLETED; Phase 3 and 7 PARTIAL;
-Phase 4 and 5 NOT STARTED.** To pick this up cold:
+Fourth resume. Status as of this pass: **Phase 1, 2, 4, 6, 7, 8 COMPLETED; Phase 3 IN PROGRESS
+(293 sites remain, down from 359); Phase 5 PARTIAL (18 of ~570).** To pick this up cold:
 
 1. Confirm the baseline still holds (2 commands, ~5 min):
    ```bash
@@ -29,32 +30,39 @@ Phase 4 and 5 NOT STARTED.** To pick this up cold:
    lake test                     # expect exit 0, 0 errors
    ```
    If either differs, something landed from another session — reconcile before proceeding.
-2. **Phase 8 is now CLOSED** (9/10 rows, 1 excluded by finding — see the phase section for the
-   full resolution of the wrapper/lemma rows and why the aggregator-modules row is excluded, not
-   deferred). No further action needed on Phase 8.
-3. Continue **Phase 3** (task-number references). The census regex now catches both `task N` and
-   `task-N` forms with an optional letter suffix (see the phase section) — **use it, not the
-   plan's historical figures, which predate the fix**. 26 files are done across four dispatches
-   (399 -> 359 sites live count). The worst-offender files (`Intuitionistic/Scheme.lean` 94,
-   `LoopChecking.lean` 51, `Nested/Soundness.lean` 28, `ChronicleToCountermodel.lean` 22,
-   `Temporal/Tableau/Completeness.lean` 19, plus several more at 8-17) dominate the remaining 359
-   and were deliberately left for a dispatch with a larger budget — each requires reading real
-   mathematical context per site, not mechanical substitution. **Do not touch
-   `Modal/Tableau/FrameSoundness.lean`'s 9 sites without first checking whether task 553 is still
-   active** — see the explicit skip note in the phase section.
-4. Phase 7 has 2 of 3 items done (`pre-pr-check.sh`, the `LoopChecking.lean` stale census). The
-   `ORGANISATION.md` refresh and the `NOTATION.md` `S`->`Sys` rename (24 files in
-   `Foundations/Logic/`, 231 named-argument call sites across 18 files — see the Phase 7
-   re-scoping finding) were not attempted; the rename is Tier 4/atomic and must not be started
-   unless a dispatch can finish it in one shot.
-5. Phase 4 (shake) and Phase 5 (suppression audit, 18 of ~570 done) are both still essentially
-   untouched and independent of Phase 3/7; any order works among all of these.
-6. Two items still need a **user decision before work starts** — see "Open decisions" at the
-   bottom (the Chronicle namespace/structure coincidence, item 3, was addressed by an explicit
-   user decision: Phase 2 is CLOSED at 7/10 files, and the coincidence itself is routed to a
-   separate follow-up task rather than blocking this one further).
+2. **Phase 4 and Phase 7 are now CLOSED.** No further action needed on either. `lake shake` is
+   clean (re-verify with `lake shake --add-public --keep-implied --keep-prefix Cslib`, expect
+   exit 0) and its CI step is uncommented.
+3. Continue **Phase 3**. Before touching ANY worst-offender file, check its cited task number's
+   live status in `specs/state.json` / `specs/archive/` — this cycle found that roughly a third
+   of the remaining sites belong to genuinely live, in-progress work where a "fix" would corrupt
+   active provenance, not clean up stale debt:
+   - **Task 317** (`Propositional/Tableau/{Scheme,Expansion,Completeness}.lean` +
+     `Minimal/Completeness.lean`, ~134 sites): live/blocked, recent report activity. This plan's
+     own dependency line already says to coordinate with 317 before large edits here.
+   - **Task 425** (`Temporal/Tableau/{Completeness,Rules,Saturation,Soundness}.lean`,
+     `TimeOrdering.lean`'s remaining 3 sites, `Temporal/Semantics/Validity.lean`, ~33 sites):
+     status field says `not_started` but has 4 reports + 3 plans dated within the last 3 days —
+     treat as active.
+   - **An unidentified multi-phase development** (`Constructive/Nested/{Soundness,Rules,Context,
+     Translation}.lean`, `CS5Completeness.lean`, `Labelled/Soundness.lean`, ~68 sites): no task
+     number found; references "the governing plan" and forward-references not-yet-written
+     phases. Investigate (search `specs/**/*.md`) or ask the user before touching.
+   - **`LoopChecking.lean`** (51 sites, task 553 -- confirmed NOT concurrent, but 9800+ lines
+     with 51 disparate citations needing individual grounding): a scale problem, needs its own
+     dedicated dispatch budget.
+   - **`TemporalConservativity.lean` and `DiegoEmbedding.lean`** (4+4 sites): confirmed FALSE
+     POSITIVES — their `Phase N` occurrences are the file's own internal section headings, not
+     task-tracker citations. No fix needed; exclude from future census totals.
+4. Phase 5 (suppression audit, 18 of ~570 done) is unchanged this cycle and remains the
+   orchestrator's stated lowest-priority workstream — pick it up once Phase 3 needs user
+   coordination or is otherwise exhausted for now.
+5. Two items still need a **user decision before work starts** — see "Open decisions" at the
+   bottom.
 
-**Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes".
+**Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
+(also implemented in `scripts/pre-pr-check.sh`). True census: 28 (excl. `warn.sorry`-suppressed
+lines, comments stripped), reconfirmed this cycle.
 **Do not** re-derive the task-tracker-reference census with the old, letter-suffix/hyphen-blind
 regex — use the fixed one in the Phase 3 section.
 

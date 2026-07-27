@@ -133,9 +133,9 @@ for two compounding reasons:
 3. Prove the fuel-sufficiency/pigeonhole theorem documented above (item 3 in "Blocked
    Obligations"): that `temporalFuel` guarantees `isSubsetBlocked` holds among a fuel-exhausted
    branch's own labels whenever pending eventualities remain. This is the prerequisite for
-   wiring `extractModelℤPeriodic`/`periodicReducePast` in as the real `extractModelℤ` (Phase 4c)
-   and completing Phases 5-7 (`temporalTruthLemma_untl`/`_snce`, `openBranch_branchSat`,
-   `temporalTableau_complete`). Recommend a dedicated research pass before further planning.
+   wiring `extractModelℤPeriodic`/`periodicReducePast` in as the real `extractModelℤ` and
+   completing `temporalTruthLemma_untl`/`_snce`, `openBranch_branchSat`, and
+   `temporalTableau_complete`. Recommend a dedicated research pass before further planning.
 
 ## References
 

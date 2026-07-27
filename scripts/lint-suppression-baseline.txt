@@ -65,7 +65,6 @@
 1 Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Defs.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Distributivity.lean
-3 Cslib/Logics/Bimodal/Metalogic/Separation/DualEliminations.lean
 3 Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/FormulaOps.lean

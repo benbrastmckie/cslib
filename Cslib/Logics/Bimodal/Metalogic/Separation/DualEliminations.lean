@@ -26,9 +26,6 @@ Each theorem concludes `isSeparable`, which follows directly from
 - These are obtained by temporal duality (swapTemporal)
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -37,6 +34,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Infinite Atom]
 
 open Cslib.Logic.Bimodal
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 1 DUAL: U(a ^ S(A,B), q) where a, q, A, B are U-free and S-free.
     Derived from elim_case_1 via swapTemporal. -/
 theorem elim_case_1_dual (a q A B : Formula Atom)
@@ -47,6 +45,7 @@ theorem elim_case_1_dual (a q A B : Formula Atom)
     isSeparable (.untl q (Formula.and a (.snce B A))) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 2 DUAL: U(a ^ not S(A,B), q). -/
 theorem elim_case_2_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)
@@ -56,6 +55,7 @@ theorem elim_case_2_dual (a q A B : Formula Atom)
     isSeparable (.untl q (Formula.and a (Formula.neg (.snce B A)))) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 3 DUAL: U(a, q v S(A,B)). -/
 theorem elim_case_3_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)
@@ -65,6 +65,7 @@ theorem elim_case_3_dual (a q A B : Formula Atom)
     isSeparable (.untl (Formula.or q (.snce B A)) a) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 4 DUAL: U(a, q v not S(A,B)). -/
 theorem elim_case_4_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)
@@ -74,6 +75,7 @@ theorem elim_case_4_dual (a q A B : Formula Atom)
     isSeparable (.untl (Formula.or q (Formula.neg (.snce B A))) a) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 5 DUAL: U(a ^ S(A,B), q v S(A,B)). -/
 theorem elim_case_5_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)
@@ -83,6 +85,7 @@ theorem elim_case_5_dual (a q A B : Formula Atom)
     isSeparable (.untl (Formula.or q (.snce B A)) (Formula.and a (.snce B A))) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 6 DUAL: U(a ^ not S(A,B), q v S(A,B)). -/
 theorem elim_case_6_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)
@@ -93,6 +96,7 @@ theorem elim_case_6_dual (a q A B : Formula Atom)
       (Formula.and a (Formula.neg (.snce B A)))) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 7 DUAL: U(a ^ S(A,B), q v not S(A,B)). -/
 theorem elim_case_7_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)
@@ -103,6 +107,7 @@ theorem elim_case_7_dual (a q A B : Formula Atom)
       (Formula.and a (.snce B A))) :=
   all_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- CASE 8 DUAL: U(a ^ not S(A,B), q v not S(A,B)). -/
 theorem elim_case_8_dual (a q A B : Formula Atom)
     (_ha : isUFree a = true) (_hq : isUFree q = true)

@@ -102,7 +102,6 @@
 6 Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/RecursiveWalks.lean
 1 Cslib/Logics/Temporal/Metalogic/Chronicle/OrderedSeedConsistency.lean
 5 Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean
-5 Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean
 2 Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean
 3 Cslib/Logics/Temporal/Metalogic/MCS.lean
 1 Cslib/Logics/Temporal/Metalogic/MetricCompleteness.lean

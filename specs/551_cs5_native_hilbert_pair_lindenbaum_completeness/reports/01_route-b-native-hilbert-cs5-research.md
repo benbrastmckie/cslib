@@ -1,6 +1,6 @@
 # Research Report: CS5 Completeness via a Native Hilbert Canonical Model over Fallible `CKValid` (Route B)
 
-- **Task**: 539 — cs5_native_hilbert_pair_lindenbaum_completeness (owns the native Hilbert
+- **Task**: 551 — cs5_native_hilbert_pair_lindenbaum_completeness (owns the native Hilbert
   canonical-model completeness for constructive CS5, over the fallible-world `CKValid` semantics)
 - **Date**: 2026-07-24
 - **Session**: session_013h2qsatYrD4BG7EE4C8niu
@@ -311,10 +311,10 @@ before any library edit.
   of the pair-construction technique (Lemma 18); its primeness step (Lemma 16) is unsound here and
   must be replaced.
 
-## Artifacts (planned outputs of task 539)
+## Artifacts (planned outputs of task 551)
 
-- `specs/539_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md` (this report)
-- `specs/539_.../probes/cs5-pair-combined-atomsum.lean` (planned — de-risk R1 before library edits)
-- `specs/539_.../plans/01_route-b-native-hilbert-plan.md` (planned)
+- `specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md` (this report)
+- `specs/551_.../probes/cs5-pair-combined-atomsum.lean` (planned — de-risk R1 before library edits)
+- `specs/551_.../plans/01_route-b-native-hilbert-plan.md` (planned)
 - library target: `cs5_completeness''` / `cs5_soundness_completeness''` in
   `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean` (or a new `CS5Completeness.lean`)

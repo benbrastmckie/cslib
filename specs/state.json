@@ -1317,6 +1317,11 @@
       "next_artifact_number": 2,
       "artifacts": [
         {
+          "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md",
+          "type": "report",
+          "summary": "Route B (native Hilbert CS5 completeness) research report: obstruction, mechanized negatives, and the Atom-sum pair-primeness repair"
+        },
+        {
           "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/probes/cs5-pair-combined-atomsum.lean",
           "type": "probe",
           "summary": "Phase 1 R1 de-risking probe: CS5PairAxiom sound + cl-stable over Atom ⊕ Atom, sorry-free"

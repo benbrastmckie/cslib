@@ -20,11 +20,6 @@ abstraction, semantic correctness, preservation lemmas, count properties, and
 junction-depth monotonicity.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -69,14 +64,14 @@ theorem u_free_has_single_U_type {φ x y : Formula Atom} (h : isUFree φ = true)
   | atom _ => trivial
   | bot => trivial
   | imp ψ₁ ψ₂ ih1 ih2 =>
-    simp [isUFree] at h
+    simp only [isUFree, Bool.and_eq_true] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
   | box ψ ih =>
-    simp [isUFree] at h
+    simp only [isUFree] at h
     exact ih h
   | untl _ _ => simp [isUFree] at h
   | snce ψ₂ ψ₁ ih2 ih1 =>
-    simp [isUFree] at h
+    simp only [isUFree, Bool.and_eq_true] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
 
 /-! ## Single-S-Type Predicate (dual of hasSingleUType) -/
@@ -98,24 +93,26 @@ theorem s_free_has_single_S_type {φ x y : Formula Atom} (h : isSFree φ = true)
   | atom _ => trivial
   | bot => trivial
   | imp ψ₁ ψ₂ ih1 ih2 =>
-    simp [isSFree] at h
+    simp only [isSFree, Bool.and_eq_true] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
   | box ψ ih =>
-    simp [isSFree] at h
+    simp only [isSFree] at h
     exact ih h
   | snce _ _ => simp [isSFree] at h
   | untl ψ₂ ψ₁ ih2 ih1 =>
-    simp [isSFree] at h
+    simp only [isSFree, Bool.and_eq_true] at h
     exact ⟨ih1 h.1, ih2 h.2⟩
 
 /-! ## Lemma 10.2.5: Single-U Formula Separability -/
 
+set_option linter.flexible false in
 /-- Helper: Formula.neg preserves hasSingleUType. -/
 theorem has_single_U_type_neg {φ x y : Formula Atom} (h : hasSingleUType φ x y) :
     hasSingleUType (Formula.neg φ) x y := by
   simp [Formula.neg, PropositionalConnectives.neg, hasSingleUType]
   exact h
 
+set_option linter.flexible false in
 /-- Helper: Formula.and preserves hasSingleUType. -/
 theorem has_single_U_type_and {φ ψ x y : Formula Atom}
     (h1 : hasSingleUType φ x y) (h2 : hasSingleUType ψ x y) :
@@ -123,6 +120,7 @@ theorem has_single_U_type_and {φ ψ x y : Formula Atom}
   simp [hasSingleUType]
   exact ⟨h1, h2⟩
 
+set_option linter.flexible false in
 /-- Helper: Formula.or preserves hasSingleUType. -/
 theorem has_single_U_type_or {φ ψ x y : Formula Atom}
     (h1 : hasSingleUType φ x y) (h2 : hasSingleUType ψ x y) :
@@ -178,6 +176,7 @@ def abstractUntl (phi x y : Formula Atom) (p : Atom) : Formula Atom :=
 
 /-! ### Syntactic Roundtrip: abstract then substitute back -/
 
+set_option linter.flexible false in
 /-- Substituting U(A,B) for atom p in the abstracted formula recovers the original,
     provided p does not appear in the original formula. -/
 theorem abstract_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
@@ -211,6 +210,7 @@ theorem abstract_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
 
 /-! ### Semantic Correctness of Abstraction -/
 
+set_option linter.flexible false in
 /-- Semantic correctness: truth of φ in structure M is equivalent to truth of
     the abstracted formula in M with atom p interpreted as the truth set of U(A,B). -/
 theorem abstract_untl_correct (phi x y : Formula Atom) (p : Atom)
@@ -341,6 +341,7 @@ theorem count_U_zero_iff_U_free (phi : Formula Atom) :
   | snce d c ih2 ih1 =>
     simp [countUSubformulas, isUFree, ih1, ih2]
 
+set_option linter.flexible false in
 /-- abstractUntl does not increase the U-subformula count. -/
 theorem abstract_untl_count_le (phi x y : Formula Atom) (p : Atom) :
     countUSubformulas (abstractUntl phi x y p) ≤ countUSubformulas phi := by
@@ -422,6 +423,7 @@ theorem abstract_snce_correct (phi x y : Formula Atom) (p : Atom)
         exact ⟨s, hst, (ih1 s).mpr hc,
           fun r hr1 hr2 => (ih2 r).mpr (hd r hr1 hr2)⟩
 
+set_option linter.flexible false in
 /-- Substituting S(A,B) for atom p in the abstracted formula recovers the original. -/
 theorem abstract_snce_subst_roundtrip (phi x y : Formula Atom) (p : Atom)
     (hfresh : ¬ (p ∈ phi.atoms)) :
@@ -545,7 +547,8 @@ theorem junction_depth_bounds (φ : Formula Atom) :
   | imp a b ih1 ih2 =>
     simp only [junctionDepth, junctionDepthU, junctionDepthS]
     omega
-  | box a ih => simp [junctionDepth, junctionDepthU, junctionDepthS, ih.1, ih.2.1, ih.2.2.1, ih.2.2.2]
+  | box a ih =>
+    simp [junctionDepth, junctionDepthU, junctionDepthS, ih.1, ih.2.1, ih.2.2.1, ih.2.2.2]
   | untl b a ih2 ih1 =>
     simp only [junctionDepth, junctionDepthU, junctionDepthS]
     omega
@@ -608,6 +611,7 @@ theorem abstract_untl_preserves_U_free (phi x y : Formula Atom) (p : Atom)
     isUFree (abstractUntl phi x y p) = true := by
   rw [abstract_untl_identity_on_U_free phi x y p h]; exact h
 
+set_option linter.flexible false in
 /-- abstractUntl preserves syntactic separation. -/
 theorem abstract_untl_preserves_separated (phi x y : Formula Atom) (p : Atom)
     (hsep : isSyntacticallySeparated phi = true) :
@@ -812,7 +816,8 @@ theorem imp_separable_with_type {a b x y : Formula Atom}
 theorem u_free_separable_with_type {φ x y : Formula Atom} (h : isUFree φ = true) :
     isSeparableWithUType φ x y := by
   haveI : DecidableEq Atom := Classical.decEq Atom
-  have hsep := separated_imp_separable φ (restricted_u_free_separated φ (has_no_allpast_allfuture_true φ) h)
+  have hsep := separated_imp_separable φ
+    (restricted_u_free_separated φ (has_no_allpast_allfuture_true φ) h)
   obtain ⟨ψ, hsep_ψ, hequiv⟩ := hsep
   exact ⟨φ, by {
     exact restricted_u_free_separated φ (has_no_allpast_allfuture_true φ) h
@@ -922,6 +927,7 @@ theorem replace_untl_args_preserves_S_free (ψ x_new y_new : Formula Atom)
     simp [replaceUntlArgs, isSFree, hx, hy]
   | snce _ _ => simp [isSFree] at h
 
+set_option linter.flexible false in
 /-- `replaceUntlArgs` preserves `isSyntacticallySeparated`. -/
 theorem replace_untl_args_preserves_separated (ψ x_new y_new : Formula Atom)
     (h_sep : isSyntacticallySeparated ψ = true)

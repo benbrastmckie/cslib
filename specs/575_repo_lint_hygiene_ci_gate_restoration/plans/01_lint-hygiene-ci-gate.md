@@ -538,6 +538,25 @@ blanket suppressions is a finite worklist, and at the observed ~27 sites/cycle i
 more cycles rather than open-ended. The historical progress figures below (counted against the
 old ~570 denominator) are left unrewritten as an accurate record of what each cycle did.
 
+**Lock in every reduction — new required step.** A ratchet gate now enforces that blanket
+suppression counts may only decrease (`scripts/check-lint-suppressions.sh`, run by CI's
+`Lint Hygiene` workflow and as step 6 of `pre-pr-check.sh`; policy in
+`docs/lint-suppression-policy.md`). After each file this phase reduces, re-baseline and commit
+the result **in the same commit as the file**:
+
+```bash
+bash scripts/check-lint-suppressions.sh --update   # rewrites scripts/lint-suppression-baseline.txt
+```
+
+Without this the gate keeps allowing the old, higher ceiling and the gain can silently drift
+back. The baseline was captured at **276 blanket suppressions across 108 files** — the same 276
+this section splits into 264 in-scope / 12 carved out — so it is the authoritative live counter
+for this phase's remaining work. `--list` ranks the current worst offenders and **supersedes the
+ad-hoc `grep`+`sort` pipeline** quoted in the cycle entries below, which counts the same thing
+less precisely. Note the gate is independent of the `--wfail` build gate: a blanket suppression
+makes `--wfail` pass by hiding the warning, so a green build never proves suppressions did not
+grow.
+
 **Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
 line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
 zero new warnings, confirming they suppressed nothing.

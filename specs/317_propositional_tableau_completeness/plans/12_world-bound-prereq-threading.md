@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional/Intuitionistic Tableau Completeness — World-Bound Prerequisite, Invariant Threading, and Bridge Assembly
 
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 24 hours total (2.5 hours already landed in Phases 0-1; ~21.5 hours remaining)
 - **Dependencies**: 552 (completed — landed the `.pos, .imp` branching arm)
 - **Research Inputs**:
@@ -368,7 +368,7 @@ earlier. Territory contract: **one `Scheme.lean` writer at a time, for the whole
 - **Depends on:** 0
 - **Completed:** 2026-07-26
 
-### Phase 2: Relocate the universe/measure/persistence block before `intExpandBranches_openBranch_sat` [NOT STARTED]
+### Phase 2: Relocate the universe/measure/persistence block before `intExpandBranches_openBranch_sat` [COMPLETED]
 
 - **Goal:** Make the Phase 5 invariant *statable* at all. Pure code motion — no proof changes, no
   statement changes, no new declarations. This phase closes no sorry and adds no mathematics; its
@@ -382,31 +382,31 @@ earlier. Territory contract: **one `Scheme.lean` writer at a time, for the whole
   `intExpandBranches_openBranch_sat` (`:1499`), `openBranch_countermodel` (`:1890`), and
   `tableau_complete` (`:1946`), all three of which need it.
 - **Tasks:**
-  - [ ] Pinned-SHA check (R1) + `git log -1 -- Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (R7).
-  - [ ] Re-grep the current line numbers of the four anchors: the section header, the end of
+  - [x] Pinned-SHA check (R1) + `git log -1 -- Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (R7).
+  - [x] Re-grep the current line numbers of the four anchors: the section header, the end of
         `applyPersistenceFixpoint_genuine_of_count_le_fuel`, `intExpandBranches_openBranch_sat`'s
         docstring start, and the trailing `/-! ### GAP 2 investigation` block.
-  - [ ] **Verify self-containment before moving** (R11 — the v11 handoff asserts it; re-check, do
+  - [x] **Verify self-containment before moving** (R11 — the v11 handoff asserts it; re-check, do
         not assume). Extract the identifier set the block references and confirm none is declared
         in the `:1478-1958` region. Specifically confirm: no reference to
         `intExpandBranches_openBranch_sat`, `openBranch_countermodel`, `tableau_complete`,
         `IExpandedAccessConsistent_sat`, `IAllAccessConsistent_map`, or any `private` lemma in that
         window. If any reference exists, STOP and re-scope — the move is not a simple block move.
-  - [ ] Move the block **whole**. Do not move the universe/measure part while leaving the
+  - [x] Move the block **whole**. Do not move the universe/measure part while leaving the
         persistence part (`:2779-3019`) behind: Phase 6 needs
         `applyPersistenceFixpoint_genuine_of_count_le_fuel` inside
         `intExpandBranches_openBranch_sat`'s proof, so a partial move only defers the same work.
-  - [ ] Carry `omit [DecidableEq Atom] [Hashable Atom] in` / `omit [Hashable Atom] in` prefix lines
+  - [x] Carry `omit [DecidableEq Atom] [Hashable Atom] in` / `omit [Hashable Atom] in` prefix lines
         and any `variable`/`section` scoping with their declarations. These are the most likely
         silent breakage in a block move.
-  - [ ] Leave the trailing `/-! ### GAP 2 investigation ... determinacy remains BLOCKED` module-doc
+  - [x] Leave the trailing `/-! ### GAP 2 investigation ... determinacy remains BLOCKED` module-doc
         block (`~:3020-3041`) where it is, or carry it with the persistence block — either is fine;
         Phase 7 rewrites it regardless. Do not delete it here (that is Phase 7's mandatory task and
         must be a reviewable edit, not a side effect of code motion).
-  - [ ] Scoped build: `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme 2>&1 | grep -E "error|Build completed"`.
-  - [ ] `git diff --stat` sanity check: added ≈ removed for `Scheme.lean`; no other file touched.
+  - [x] Scoped build: `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme 2>&1 | grep -E "error|Build completed"`.
+  - [x] `git diff --stat` sanity check: added ≈ removed for `Scheme.lean`; no other file touched.
         Spot-check `git diff` for any non-motion hunk (Postmortem 13).
-  - [ ] Commit (scoped staging, task-scoped message) **immediately** at green — do not carry an
+  - [x] Commit (scoped staging, task-scoped message) **immediately** at green — do not carry an
         uncommitted 1,000-line reorg into another phase (R7).
 - **Expected output:** ~1,060 lines relocated; net new content ≈ 0.
 - **Done when:** `Intuitionistic.Scheme` builds green, `intUniverse`/`intExpMeasure`/`intSubfmls`/
@@ -417,8 +417,32 @@ earlier. Territory contract: **one `Scheme.lean` writer at a time, for the whole
 - **Stopping condition (R11):** if self-containment fails, or if any moved declaration needs an
   edit to compile, mark `[BLOCKED]`, record which declaration and why, and re-plan. Do not patch
   the declaration to make the move work.
-- **Timing:** 2 hours
+- **Outcome:** Pinned SHA re-verified matching (`facba1f42469805b666d6eca78156ac4d7be5c71`).
+  Pre-move anchors matched the plan's stated line numbers exactly: section header `:1959`,
+  `applyPersistenceFixpoint_genuine_of_count_le_fuel` start `:2931` (ending `:3018`, blank
+  separator `:3019`), `intExpandBranches_openBranch_sat` docstring start `:1478`, GAP 2 block
+  `:3020`. Self-containment re-verified by grep: zero references inside `:1959-3019` to
+  `intExpandBranches_openBranch_sat`, `openBranch_countermodel`, `tableau_complete`, or the
+  third private lemma in the `:1478-1958` window (`intExpandBranches_openBranch_initial_mem`,
+  found by a broader declaration scan than the plan's named list — also zero references).
+  Move executed via a verified pure-Python line-slice splice (not manual Edit), because a
+  1,060-line reorder is far less error-prone as an exact array rearrangement than a sequence of
+  tool edits; the moved span was concatenated with no character-level changes to any line. Proof
+  of pure motion: sorting all lines of the pre-move (git HEAD) and post-move file and diffing the
+  sorted outputs shows **zero** differences — an exact multiset-of-lines identity, the strongest
+  available confirmation that this is code motion and not a content edit. New anchor positions
+  post-move: universe/measure section header `:1478`, `applyPersistenceFixpoint_genuine_of_count_le_fuel`
+  `:2450`, `intExpandBranches_openBranch_sat` `:2560`, `tableau_complete` `:3007`, GAP 2 block
+  `:3020` (unchanged — it was outside the moved span). Scoped builds green:
+  `Intuitionistic.Scheme`, `Intuitionistic.Completeness`, `Minimal.Completeness` (807 jobs, no
+  errors; only pre-existing lint-style warnings and the two expected `declaration uses 'sorry'`
+  warnings at the two Scheme.lean sorry sites). Sorry count unchanged at 4 in the task tree (one
+  shifted position: `Scheme.lean:1517` → `Scheme.lean:2578`, exactly the +1061 line shift from the
+  relocation); 29 repo-wide, unchanged. `git diff --stat`: 1472 insertions / 1472 deletions in
+  `Scheme.lean` only, no other file touched — matches "added ≈ removed" (here, exact equality).
+- **Timing:** 2 hours (actual: ~1 hour)
 - **Depends on:** 1
+- **Completed:** 2026-07-26
 
 ### Phase 3: World-budget accounting invariant — definition and local step facts [NOT STARTED]
 

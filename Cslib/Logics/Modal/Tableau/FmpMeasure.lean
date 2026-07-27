@@ -79,6 +79,7 @@ def modalSubfmls : Proposition Atom → List (Proposition Atom)
   | .box a   => .box a :: modalSubfmls a
   | .diamond a => .diamond a :: modalSubfmls a
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The subformula list has length at most `2 * modalComplexity φ + 1`. -/
 lemma modalSubfmls_length_le (φ : Proposition Atom) :
     (modalSubfmls φ).length ≤ 2 * modalComplexity φ + 1 := by
@@ -113,6 +114,7 @@ def modalDepth : Proposition Atom → Nat
   | .box a => 1 + modalDepth a
   | .diamond a => 1 + modalDepth a
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Modal depth is bounded by structural complexity. -/
 lemma modalDepth_le_complexity (φ : Proposition Atom) :
     modalDepth φ ≤ modalComplexity φ := by
@@ -151,6 +153,7 @@ def modalUniverse (φ : Proposition Atom) :
   (List.range (modalWorldBound φ + 1)).flatMap (fun w =>
     (modalSubfmls φ).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The universe has length at most `2 * (2 * modalComplexity φ + 1) * (modalWorldBound φ + 1)`. -/
 lemma modalUniverse_length_le (φ : Proposition Atom) :
     (modalUniverse φ).length ≤
@@ -201,6 +204,7 @@ def modalExpMeasure (U : List (SignedFormula (Proposition Atom) WorldIndex))
 
 /-! ## Entry-Point Bridge -/
 
+omit [Hashable Atom] in
 /-- At the tableau entry point, the worklist measure over the universe `U(φ)` is
 bounded by `modalFuel φ`. This connects the counting measure defined here to the
 closed-form fuel bound in `Saturation.lean`, which is stated purely over
@@ -259,6 +263,7 @@ successor. This is the closure fact needed for the rule kinds that cannot breach
 bound, so no world-bound hypothesis is consumed here. The two fresh-world-minting rules
 (`diamondPos`, `boxNeg`) and the top-level dispatch lemma are handled in the next section. -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every `Proposition Atom` is a member of its own structural subformula list (the list
 always begins with the formula itself). Marked `@[simp]` so it discharges nested
 `modalSubfmls` membership goals as a rewrite. -/
@@ -266,6 +271,7 @@ always begins with the formula itself). Marked `@[simp]` so it discharges nested
 lemma modalSubfmls_self_mem (φ : Proposition Atom) : φ ∈ modalSubfmls φ := by
   cases φ <;> simp [modalSubfmls]
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every formula emitted by a propositional (α/β) rule application via `tryAllPropRules` is a
 structural subformula of `sf.formula`, at the unchanged world label `sf.label`. Mirrors the
 case-split shape of `classicalApplyOne_output_complexity`
@@ -291,7 +297,7 @@ lemma modalApplyOne_prop_outputs_subset
           · simp
           · obtain rfl := modalNegOf?_eq hN
             intro z hz
-            simp only [SignedFormula.formula, SignedFormula.label, List.mem_cons,
+            simp only [List.mem_cons,
               List.not_mem_nil, or_false] at hz ⊢
             subst hz
             simp [modalSubfmls]
@@ -338,6 +344,7 @@ lemma modalApplyOne_prop_outputs_subset
       obtain ⟨t, ht, hzt⟩ := hz
       rcases ht with rfl | rfl <;> simp_all [modalSubfmls]
 
+omit [Hashable Atom] in
 /-- `boxPos`: `T(□ψ)@w` propagates `T(ψ)@w'` for each recorded successor `w'` of `w`
 (`boxPropagation`, `Branch.lean:194-199`). Every emitted formula's formula-component is `ψ`, a
 structural subformula of the source `.box ψ`, at a world label that is an existing recorded
@@ -356,6 +363,7 @@ lemma modalApplyOne_boxPos_outputs_subset
     subst hxeq
     exact ⟨by simp [modalSubfmls], hw'⟩
 
+omit [Hashable Atom] in
 /-- `diamondNeg`: `F(◇φ)@w` emits `F(φ)@w'` for each recorded successor `w'` of `w`
 (`Rules.lean:144-153`). Every emitted formula's formula-component is `φ`, a structural
 subformula of the native source formula `◇φ`, at a world label that is an existing recorded
@@ -489,6 +497,7 @@ private lemma mem_boxPositivesOf {b : List (SignedFormula (Proposition Atom) Wor
     · simp at hsfeq
   · simp at hsfeq
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the `boxProps` group propagated by both fresh-world rules
 (`diamondPos`, `Rules.lean:97-102`; `boxNeg`, `Rules.lean:123-128`): each propagated
 `T(ψ)@w'` comes from a `T(□ψ)@w ∈ b`, hence `ψ` is a subformula of `φ0`. Factored out since
@@ -520,6 +529,7 @@ private lemma boxProps_outputs_subset (φ0 : Proposition Atom)
       exact mem_modalUniverse_of hwbound (modalSubfmls_trans hψmem hψsub)
   · simp at heq
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the `diaNegProps` group propagated by both fresh-world rules
 (`diamondPos`, `Rules.lean:107-115`; `boxNeg`, `Rules.lean:132-140`): each propagated
 `F(ψ)@w'` comes from an `F(◇ψ)@w) ∈ b` (native `diamond` constructor), hence `ψ`
@@ -557,6 +567,7 @@ private lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
     · simp at heq
   · simp at heq
 
+omit [Hashable Atom] in
 /-- `diamondPos`: `T(◇φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
 groups at `w'` (`Rules.lean:93-116`): the witness `T(φ)@w'`, propagated box-positives
 `T(ψ)@w'` (from `T(□ψ)@w ∈ b`), and propagated diamond-negatives `F(ψ)@w'`
@@ -601,6 +612,7 @@ lemma modalApplyOne_diamondPos_outputs_subset
   · exact boxProps_outputs_subset φ0 b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset φ0 b w hb hwbound x hdia
 
+omit [Hashable Atom] in
 /-- `boxNeg`: `F(□φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
 groups at `w'` (`Rules.lean:119-141`): the witness `F(φ)@w'`, propagated box-positives
 `T(ψ)@w'` (from `T(□ψ)@w ∈ b`), and propagated diamond-negatives `F(ψ)@w'` (from
@@ -658,6 +670,7 @@ private lemma mem_successorsOf_hasEdge {acc : Accessibility} {w w' : WorldIndex}
     exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
   · simp at heq
 
+omit [Hashable Atom] in
 /-- **Top-level dispatch**: every signed formula emitted by `modalApplyOne sf b acc` stays
 inside `U(φ0)`, given: the branch invariant `hb`, the source membership `hsf`, the
 freshness invariant `hInv` (bounding `acc`'s recorded successors by `modalMaxWorld b`, needed
@@ -929,6 +942,7 @@ private lemma modalDepth_le_of_mem_modalSubfmls {ψ φ : Proposition Atom}
     · exact le_refl _
     · have := iha ha; simp only [modalDepth]; omega
 
+omit [Hashable Atom] in
 /-- Rank bound for the `boxProps` group propagated by both fresh-world rules (shared shape
 between `diamondPos` and `boxNeg`, `Rules.lean:97-102`/`123-128`): each propagated `T(ψ)@freshW`
 is exactly at label `freshW` and has `modalDepth ψ ≤ rank w − 1`, derived from the source
@@ -961,10 +975,11 @@ private lemma boxProps_rank_bound
       subst hsrcw
       simp only [modalDepth] at hdep
       refine ⟨rfl, ?_⟩
-      simp only [SignedFormula.formula]
+      simp only []
       omega
   · rw [if_neg hsw] at heq; simp at heq
 
+omit [Hashable Atom] in
 /-- Rank bound for the `diaNegProps` group propagated by both fresh-world rules (shared shape
 between `diamondPos` and `boxNeg`, `Rules.lean:107-115`/`132-140`): each propagated `F(ψ)@freshW`
 is exactly at label `freshW` and has `modalDepth ψ ≤ rank w − 1`, derived from the source
@@ -1000,11 +1015,12 @@ private lemma diaNegProps_rank_bound
         rw [hform] at hdep
         simp only [modalDepth] at hdep
         refine ⟨rfl, ?_⟩
-        simp only [SignedFormula.formula]
+        simp only []
         omega
     · simp at heq
   · simp at heq
 
+omit [Hashable Atom] in
 /-- Rank bound for `boxPos`'s output (propagation to *existing* successors, `Rules.lean:83-88`):
 `T(□ψ)@w`'s propagated `T(ψ)@w'` (for `w' ∈ acc.successorsOf w`) has `modalDepth ψ ≤ rank w'`,
 transported across the recorded edge `w → w'` via the rank-edge invariant. -/
@@ -1025,9 +1041,10 @@ private lemma boxPos_rank_bound
     have hedge' : acc.hasEdge w w' = true := mem_successorsOf_hasEdge hw'
     have hdep : modalDepth (Proposition.box ψ) ≤ rank w := hbound _ hψbox
     have hre : rank w' + 1 = rank w := hedge w w' hedge'
-    simp only [SignedFormula.formula, modalDepth] at hdep ⊢
+    simp only [modalDepth] at hdep ⊢
     omega
 
+omit [Hashable Atom] in
 /-- Rank bound for `diamondNeg`'s output (propagation to *existing* successors,
 `Rules.lean:144-153`): `F(◇φ)@w`'s propagated `F(φ)@w'` (for `w' ∈ acc.successorsOf w`) has
 `modalDepth φ ≤ rank w'`, transported across the recorded edge `w → w'` (`diamond`
@@ -1053,7 +1070,7 @@ private lemma diamondNeg_rank_bound
     have hedge' : acc.hasEdge w w' = true := mem_successorsOf_hasEdge hw'
     have hdep : modalDepth (Proposition.diamond φ) ≤ rank w := hbound _ hφdia
     have hre : rank w' + 1 = rank w := hedge w w' hedge'
-    simp only [SignedFormula.formula, modalDepth] at hdep ⊢
+    simp only [modalDepth] at hdep ⊢
     omega
 
 omit [DecidableEq Atom] [Hashable Atom] in
@@ -1069,6 +1086,7 @@ private lemma hasEdge_addEdge_cases_local {acc : Accessibility} {w w' a a' : Wor
   · exact Or.inl ⟨hw.symm, hw'.symm⟩
   · exact Or.inr h
 
+omit [Hashable Atom] in
 /-- **Generic per-call rank-step obligation**: the single-call rank-preservation fact
 `modalStepBranch_exists_rank'`'s proof needs about `modalApplyOne` at each firing, extracted as
 its own lemma so the surrounding driver-unfolding argument (rule-agnostic: it only inspects the
@@ -1139,7 +1157,7 @@ lemma modalApplyOne_rank_step
           Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
         have hsfd' : 1 + modalDepth φ ≤ rank l := by
           have h := hsfd
-          simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
+          simp only [modalDepth] at h
           omega
         refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
           fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
@@ -1153,7 +1171,7 @@ lemma modalApplyOne_rank_step
         · intro x hx
           simp only [List.mem_cons, List.mem_append] at hx
           rcases hx with (rfl | hx) | hx
-          · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
+          · simp only [Function.update_self]
             omega
           · obtain ⟨hxlab, hxdep⟩ :=
               boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
@@ -1175,7 +1193,7 @@ lemma modalApplyOne_rank_step
                   Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
         have hsfd' : 1 + modalDepth φ ≤ rank l := by
           have h := hsfd
-          simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
+          simp only [modalDepth] at h
           omega
         refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
           fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
@@ -1189,7 +1207,7 @@ lemma modalApplyOne_rank_step
         · intro x hx
           simp only [List.mem_cons, List.mem_append] at hx
           rcases hx with (rfl | hx) | hx
-          · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
+          · simp only [Function.update_self]
             omega
           · obtain ⟨hxlab, hxdep⟩ :=
               boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
@@ -1346,6 +1364,7 @@ isMintingShaped at w}|`, then derives `outDeg acc w ≤ Sf` from `e`'s `Nodup`-n
 (`modalStepBranch_preserves_expandedNodup`, P2-obl-a) and the closure fact
 `e ⊆ modalUniverse φ0`. -/
 
+omit [DecidableEq Atom] in
 omit [Hashable Atom] in
 /-- A `isMintingShaped` (i.e. `boxNeg`-shaped, `.neg, .box _`) formula can never fire via a
 propositional rule: `.box` is a distinct top-level constructor from every prop-rule pattern's
@@ -1585,6 +1604,7 @@ lemma modalStepBranch_preserves_outDegEq
     b e acc newBs newExps newAcc hstep houtdeg
 
 
+omit [DecidableEq Atom] in
 omit [Hashable Atom] in
 /-- Inversion for `isMintingShaped`: a minting-shaped signed formula is either `boxNeg`-shaped
 (sign `.neg`, formula a box) or `diamondPos`-shaped (sign `.pos`, formula a diamond; the
@@ -1597,6 +1617,7 @@ private lemma isMintingShaped_inv
   obtain ⟨s, ff, l⟩ := sf
   rcases s with _ | _ <;> rcases ff with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩ | ψ | ψ <;> simp_all
 
+omit [DecidableEq Atom] in
 omit [Hashable Atom] in
 /-- Bridging fact: filtering then mapping equals a single `filterMap` with the predicate
 folded into the `Option`-valued function. Used to invoke `List.Nodup.filterMap`'s
@@ -1611,9 +1632,10 @@ private lemma filter_map_eq_filterMap
   | nil => simp
   | cons x xs ih =>
     by_cases h : p x = true
-    · simp [List.filter_cons, List.filterMap_cons, h, ih]
-    · simp [List.filter_cons, List.filterMap_cons, h, ih]
+    · simp [h, ih]
+    · simp [h, ih]
 
+omit [DecidableEq Atom] in
 omit [Hashable Atom] in
 /-- **P2-obl-c** (final): given `e.Nodup` (P2-obl-a) and the closure fact `e ⊆ modalUniverse φ0`,
 `outDeg acc w` is bounded by `Sf(φ0) := (modalSubfmls φ0).length`. The injective map is
@@ -1645,18 +1667,18 @@ lemma outDeg_le_of_expandedNodup
       rcases isMintingShaped_inv ha'mint with ⟨ha'sign, ψa', ha'form⟩ | ⟨ha'sign, ψa', ha'form⟩
     · obtain ⟨as, af, al⟩ := a
       obtain ⟨a's, a'f, a'l⟩ := a'
-      simp only [SignedFormula.sign] at hasign ha'sign
-      simp only [SignedFormula.formula] at hform
-      simp only [SignedFormula.label] at hlab
+      simp only [] at hasign ha'sign
+      simp only [] at hform
+      simp only [] at hlab
       subst hasign; subst ha'sign; subst hform; subst hlab
       rfl
     · rw [haform, ha'form] at hform; exact absurd hform (by simp)
     · rw [haform, ha'form] at hform; exact absurd hform (by simp)
     · obtain ⟨as, af, al⟩ := a
       obtain ⟨a's, a'f, a'l⟩ := a'
-      simp only [SignedFormula.sign] at hasign ha'sign
-      simp only [SignedFormula.formula] at hform
-      simp only [SignedFormula.label] at hlab
+      simp only [] at hasign ha'sign
+      simp only [] at hform
+      simp only [] at hlab
       subst hasign; subst ha'sign; subst hform; subst hlab
       rfl
   have hsub : ∀ x ∈ e.filterMap (fun x =>
@@ -1707,6 +1729,7 @@ General, `modalStepBranch`-independent facts about `modalKnownWorlds`/`modalMaxW
 append, needed to show the potential `Φ` is exactly preserved (up to the single fresh-world
 term) across a step. -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_fold_spec
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
     (hws0 : ws0.Nodup) :
@@ -1749,10 +1772,12 @@ private lemma modalKnownWorlds_fold_spec
           · exact Or.inl (hfeq ▸ List.mem_cons_self)
           · exact Or.inr ⟨sf', hsf', hfeq⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_nodup
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
   (modalKnownWorlds_fold_spec l [] List.nodup_nil).1
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma mem_modalKnownWorlds
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
     x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
@@ -1760,6 +1785,7 @@ private lemma mem_modalKnownWorlds
   have h := (modalKnownWorlds_fold_spec l [] List.nodup_nil).2 x
   simpa using h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_le_modalMaxWorld
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
     (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
@@ -1767,6 +1793,7 @@ private lemma modalKnownWorlds_le_modalMaxWorld
   obtain ⟨sf, hsf, rfl⟩ := h
   exact label_le_modalMaxWorld hsf
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalNextWorld_not_mem_modalKnownWorlds
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     modalNextWorld b ∉ modalKnownWorlds b := by
@@ -1775,6 +1802,7 @@ private lemma modalNextWorld_not_mem_modalKnownWorlds
   unfold modalNextWorld at hle
   exact Nat.not_succ_le_self _ hle
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_toFinset_append
     (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     (modalKnownWorlds (xs ++ b)).toFinset =
@@ -1790,6 +1818,7 @@ private lemma modalKnownWorlds_toFinset_append
     · exact ⟨sf, Or.inl hsf, rfl⟩
     · exact ⟨sf, Or.inr hsf, rfl⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_mono_append
     (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     modalKnownWorlds b ⊆ modalKnownWorlds (xs ++ b) := by
@@ -1798,6 +1827,7 @@ private lemma modalKnownWorlds_mono_append
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- If all labels of `xs` are already known worlds of `b`, appending `xs` doesn't change the
 known-worlds set (up to `Perm`). -/
 private lemma modalKnownWorlds_perm_append_of_subset
@@ -1813,6 +1843,7 @@ private lemma modalKnownWorlds_perm_append_of_subset
     simpa using h sf hsf
   exact Finset.union_eq_right.mpr hsub
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- If `xs` is nonempty and all its labels equal a fresh world `w'` not already known,
 appending `xs` prepends `w'` to the known-worlds set (up to `Perm`). -/
 private lemma modalKnownWorlds_perm_append_single
@@ -1832,6 +1863,7 @@ private lemma modalKnownWorlds_perm_append_single
       exact ⟨sf, hsf, hxeq ▸ (hxs sf hsf)⟩
   rw [hxseq, List.toFinset_cons, Finset.singleton_union]
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Bound on a `max`-fold: if the accumulator and every element's label are `≤ M`, the fold
 stays `≤ M`. -/
 private lemma modalMaxWorld_foldl_le
@@ -1845,11 +1877,13 @@ private lemma modalMaxWorld_foldl_le
     exact ih (max c sf.label) (max_le hc (h sf List.mem_cons_self))
       (fun x hx => h x (List.mem_cons_of_mem _ hx))
 
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalMaxWorld_le_of_forall_le
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) (M : Nat)
     (h : ∀ sf ∈ l, sf.label ≤ M) : modalMaxWorld l ≤ M :=
   modalMaxWorld_foldl_le l 0 M (Nat.zero_le _) h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- If every label of `xs` is already `≤ modalMaxWorld b`, appending `xs` doesn't change
 `modalMaxWorld`. -/
 private lemma modalMaxWorld_append_eq_of_forall_le
@@ -1864,6 +1898,7 @@ private lemma modalMaxWorld_append_eq_of_forall_le
     · exact label_le_modalMaxWorld hb
   · exact modalMaxWorld_le_append xs b
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- If `xs` is nonempty and all its labels equal a fresh world `w'` strictly greater than
 `modalMaxWorld b`, appending `xs` sets `modalMaxWorld` to exactly `w'`. -/
 private lemma modalMaxWorld_append_single
@@ -1977,6 +2012,7 @@ lemma modalStepBranch_preserves_accTargetsKnown
   exact modalStepBranch_preserves_accTargetsKnown_gen modalApplyOne modalApplyOne_fresh_local
     b e acc newBs newExps newAcc hstep hknown
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the fresh-world-minting groups (`diamondPos`'s live shape and
 `boxNeg`'s live shape, `Rules.lean:93-141`; `diamondPos` is native and genuinely
 mints): every emitted formula's label is exactly `modalNextWorld b`, since the witness,
@@ -2026,6 +2062,7 @@ private lemma mintGroup_label_eq_freshWorld
       · simp at heq
     · simp at heq
 
+omit [Hashable Atom] in
 /-- **Generic per-call knownWorlds-step obligation**: the single-call known-worlds
 dichotomy `modalStepBranch_knownWorlds`'s proof needs about `modalApplyOne` at each firing,
 extracted as its own lemma so the surrounding driver-unfolding argument (rule-agnostic: it only
@@ -2586,11 +2623,13 @@ lemma modalStepBranch_potential_step
 
 /-! ## World-Count Bound (obligation e — final composition) -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `Sf(φ0) := (modalSubfmls φ0).length` is always positive: `φ0` is always a member of its own
 subformula list via `modalSubfmls_self_mem`. -/
 lemma modalSf_pos (φ0 : Proposition Atom) : 1 ≤ (modalSubfmls φ0).length :=
   List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem φ0))
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `Sf(φ0) := (modalSubfmls φ0).length` can only equal `1` when `φ0` has no proper structural
 subformula distinct from itself, i.e. `φ0` is an atom or `⊥` (`imp`/`box` both strictly grow the
 subformula list, since each of their immediate constituents already contributes `≥ 1` via
@@ -2933,7 +2972,7 @@ private lemma applyPropRule_ne_persistent {F L : Type*}
     applyPropRule andOf? orOf? impOf? negOf? sf rule ≠ .persistent nf := by
   unfold applyPropRule
   obtain ⟨s, φ, l⟩ := sf
-  cases rule <;> rcases s with _ | _ <;> simp <;>
+  cases rule <;> rcases s with _ | _ <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true] <;>
     first
       | (rcases andOf? φ with _ | ⟨_, _⟩ <;> simp)
       | (rcases orOf? φ with _ | ⟨_, _⟩ <;> simp)
@@ -2974,11 +3013,14 @@ private lemma applyPropRule_branching_length {F L : Type*}
   unfold applyPropRule at h
   obtain ⟨s, φ, l⟩ := sf
   revert h
-  cases rule <;> rcases s with _ | _ <;> simp <;>
+  cases rule <;> rcases s with _ | _ <;> simp only [reduceCtorEq, IsEmpty.forall_iff] <;>
     first
-      | (rcases andOf? φ with _ | ⟨_, _⟩ <;> simp)
-      | (rcases orOf? φ with _ | ⟨_, _⟩ <;> simp)
-      | (rcases impOf? φ with _ | ⟨_, _⟩ <;> simp)
+      | (rcases andOf? φ with _ | ⟨_, _⟩ <;>
+          simp only [reduceCtorEq, IsEmpty.forall_iff, RuleResult.branching.injEq])
+      | (rcases orOf? φ with _ | ⟨_, _⟩ <;>
+          simp only [reduceCtorEq, IsEmpty.forall_iff, RuleResult.branching.injEq])
+      | (rcases impOf? φ with _ | ⟨_, _⟩ <;>
+          simp only [reduceCtorEq, IsEmpty.forall_iff, RuleResult.branching.injEq])
       | (rcases negOf? φ with _ | _ <;> simp)
   all_goals (intro h; simp [← h])
 
@@ -3376,6 +3418,7 @@ lemma modalUniverse_mem_of_sameWorld_subfml {φ0 : Proposition Atom}
   have hform : sf.formula ∈ modalSubfmls φ0 := modalUniverse_mem_formula (hb sf hsf)
   exact mem_modalUniverse_of' hlabel (modalSubfmls_trans hψ hform)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Membership in `modalKnownWorlds`: the label of any branch member is a known world of that
 branch. -/
 lemma label_mem_modalKnownWorlds

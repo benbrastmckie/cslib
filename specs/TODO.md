@@ -118,6 +118,7 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 - **Task Type**: cslib
 - **Topic**: Constructive Modal Logic
 - **Dependencies**: None
+- **Research**: [570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md]
 
 **Description**: [Created by the blocked-task review: this sorry was flagged in-code as needing 'a dedicated later phase (not yet numbered in the plan)' and had NO tracking task.] Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315 carries a documented strategic sorry in nested_sound_impL (soundness of the nested-sequent rule impL / imp-bullet). THE OBLIGATION: the source needs its own induction on n over the Lambda{ } chain (the L_X, L_Y, L_Z construction, page 10), mixing ctx.outputPruning.fillRhs-shaped and ctx.fillLhs-shaped premises against a ctx.fillLhs-shaped conclusion. It does NOT reduce to the already-landed congruence lemmas 4.4 / 4.5 / 4.8 alone -- that was checked and is why it was deferred rather than attempted. Build the Lambda-chain induction, then discharge the rule. Note the cut rule and NestedProof.CutFree are already landed and verified. INVARIANTS: no new axioms; the Cslib/ bare-sorry count must go DOWN by one; lake build and lake test green.
 

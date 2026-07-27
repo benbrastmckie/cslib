@@ -1,0 +1,8 @@
+{
+  "session_id": "sess_1785113705_bcf38a",
+  "task_number": 570,
+  "operation": "orchestrate",
+  "acquired_at": "2026-07-27T00:55:05Z",
+  "heartbeat_at": "2026-07-27T00:55:05Z",
+  "command": "/orchestrate 570"
+}

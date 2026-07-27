@@ -1,0 +1,12 @@
+{
+  "session_id": "sess_1785113705_bcf38a",
+  "cycle_count": 1,
+  "max_cycles": 13,
+  "current_state": "researched",
+  "hard_mode": true,
+  "burnout_signals_this_session": 0,
+  "infra_failures": 0,
+  "max_infra_failures": 3,
+  "started": "2026-07-27T00:55:33Z",
+  "last_updated": "2026-07-27T01:14:15Z"
+}

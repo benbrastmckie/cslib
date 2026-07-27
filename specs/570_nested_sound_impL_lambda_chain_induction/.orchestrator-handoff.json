@@ -1,0 +1,71 @@
+{
+  "status": "researched",
+  "phase": "research",
+  "task_number": 570,
+  "session_id": "sess_1785113705_bcf38a",
+  "agent_type": "cslib-research-hard-agent",
+  "orchestrator_mode": true,
+  "summary": "The Lambda-chain induction the task asks for is real, small, and now PROVED sorry-free (three cases, via the source's own Lemma 4.7(ii)+(iv) recipe; compiled with zero diagnostics). But discharging Soundness.lean:1315 is blocked by three pre-existing defects, each established with Lean-verified evidence: (D1) Lemma 4.7(ii) was never landed - the module docstring's claim that page 10 displays 4.7(i) and (ii) with 'literally the same visible formula' is refuted by a direct pdftotext -layout render, and 4.7(ii) is the exact ingredient the source names for this induction; (D2) InputCtx.outputPruning (= Gamma' ++ Lambda) is off by one nesting level when ctx.Lambda = [], which makes nested_sound_impL FALSE as stated, not merely unproved (counterexample: ctx = <[C], [], P>, C := A, B := bot - both premises Lean-proved derivable, conclusion A -> box((A -> bot) -> P) fails in a 2-world classical S5 model and every CS5 theorem is classically S5-valid); (D3) nested_sound is non-exhaustive (missing the NestedProof.cut case), so lake build of the target module currently FAILS on a clean tree - the baseline is RED, contradicting the task brief's 'lake build green' premise. With D1 and D2 repaired, the complete sorry-free discharge of the rule was assembled and compiled end-to-end during research. Eight existing declarations are reused; exactly one new definition-level change is needed (a one-line repair to outputPruning). No new axioms, no sorry deferral.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md",
+      "description": "Tier-1 research report: source-to-implementation mapping (BibKey ArisakaDasStrassburger2015, verified at references.bib:939), verbatim page-10 source text, exact fm shapes at the sorry (all rfl-verified in Lean), three defect findings with counterexamples, proposed Lean statements with the induction motive spelled out, six-phase decomposition, and the H4 Claim Verification Table."
+    },
+    {
+      "type": "metadata",
+      "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/.return-meta.json",
+      "description": "Return metadata with baseline metrics, defect inventory, and three memory candidates."
+    }
+  ],
+  "blockers": [
+    {
+      "id": "D1",
+      "severity": "blocking",
+      "title": "Lemma 4.7(ii) is missing from Soundness.lean",
+      "detail": "page 10: (i) is ((D imp A) and (D imp B)) imp (D imp C); (ii) is ((D imp A) and (D and B)) imp (D and C). These differ. lemma4_7_i_ii (Soundness.lean:503) covers (i) only. The docstring paragraph at Soundness.lean:35-45 asserting duplication must be corrected. Resolution: land lemma4_7_ii (proved sorry-free during research, ~20 lines, structural clone of lemma4_7_i_ii).",
+      "resolvable_in_task": true
+    },
+    {
+      "id": "D2",
+      "severity": "blocking",
+      "title": "InputCtx.outputPruning is defective at ctx.Lambda = [] - the theorem is refutable as stated",
+      "detail": "Context.lean:188. InputCtx.fillLhs places the hole inside an extra .box; Gamma' ++ Lambda does not account for it when Lambda = []. Hole-depth table verified by rfl at |Lambda| = 0,1,2. Fix: outputPruning ctx := ctx.Gamma' ++ (ctx.Lambda.headD NestedLhs.empty :: ctx.Lambda.tail) - identity on non-empty Lambda, and on Lambda = [] it reproduces the source's own Example 2.1 decomposition. Corroborating evidence: Translation.lean:300's Lambda = []-restricted tBox bridge collapses to reflexivity under the fix, i.e. the tBox was papering over exactly this gap. This is a scope EXPANSION beyond the task brief and the plan must own it.",
+      "resolvable_in_task": true
+    },
+    {
+      "id": "D3",
+      "severity": "blocking",
+      "title": "Baseline lake build is RED - nested_sound is missing the NestedProof.cut case",
+      "detail": "lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness fails: '1329:2: Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)'. Committed state at 88b198bf; Cslib/ working tree clean. The task's 'lake build green' invariant is therefore unreachable by discharging impL alone. Resolution path sized in the report: reuse the repaired impL argument with B := A plus 'A imp A is always provable' (the source's own one-liner), routed through the already-landed InputCtx.fillLhs_fm_antitone, plus one small bridging induction OutputCtx.fillLhs_empty_imp_fillEmpty. This is the one piece not yet compiled.",
+      "resolvable_in_task": true
+    }
+  ],
+  "verified_artifacts_compiled": [
+    "lemma4_7_ii",
+    "mpAnd",
+    "topBase",
+    "lambdaChain_XZ_imp_Y",
+    "lambdaChain_step2",
+    "psiX_fm",
+    "primeRhs_fm",
+    "andMP",
+    "impL_repaired (end-to-end)",
+    "hA_derivable",
+    "hB_derivable"
+  ],
+  "baseline": {
+    "sorry_count": 41,
+    "sorry_census_command": "bash .claude/scripts/lean-sorry-census.sh Cslib",
+    "target_sorry": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315",
+    "lake_build": "RED",
+    "lake_test": "not_run"
+  },
+  "exit_criteria_for_implementation": [
+    "sorry census 41 -> 40, with the Soundness.lean:1315 entry gone from the inventory",
+    "lake build RED -> green (requires the cut case, D3)",
+    "no new axioms; #print axioms nested_sound_impL free of sorryAx",
+    "lake exe checkInitImports, lake lint, lake exe lint-style, lake test all green"
+  ],
+  "next_action_hint": "Run /plan 570 --hard. The plan MUST expand scope beyond the task brief to cover D1 (land lemma4_7_ii), D2 (repair InputCtx.outputPruning), and D3 (discharge NestedProof.cut and add its arm to nested_sound) - the brief's stated scope alone is necessary but not sufficient, and would land an unsound theorem against a still-red build. Recommended six-phase decomposition is in the report's 'Recommended Phase Decomposition' section; each phase is one agent run and ends green. Highest residual risk: D3's fillLhs-empty/fillEmpty bridging induction is the only piece not compiled during research, and the blast radius of the D2 definition change was grep-checked (confined to Nested/) but not build-checked."
+}

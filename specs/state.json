@@ -2271,13 +2271,21 @@
       "description": "[Created by the blocked-task review: this sorry was flagged in-code as needing 'a dedicated later phase (not yet numbered in the plan)' and had NO tracking task.] Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315 carries a documented strategic sorry in nested_sound_impL (soundness of the nested-sequent rule impL / imp-bullet). THE OBLIGATION: the source needs its own induction on n over the Lambda{ } chain (the L_X, L_Y, L_Z construction, page 10), mixing ctx.outputPruning.fillRhs-shaped and ctx.fillLhs-shaped premises against a ctx.fillLhs-shaped conclusion. It does NOT reduce to the already-landed congruence lemmas 4.4 / 4.5 / 4.8 alone -- that was checked and is why it was deferred rather than attempted. Build the Lambda-chain induction, then discharge the rule. Note the cut rule and NestedProof.CutFree are already landed and verified. INVARIANTS: no new axioms; the Cslib/ bare-sorry count must go DOWN by one; lake build and lake test green.",
       "file_scope": [
         "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
-        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"
+        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md",
+          "summary": "Lambda-chain induction research: source mapping (ArisakaDasStrassburger2015), three blocking defect findings (D1 missing lemma 4.7(ii), D2 outputPruning off-by-one, D3 red baseline missing cut case), six-phase decomposition"
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-27T01:13:44Z",
-      "next_artifact_number": 1,
+      "last_updated": "2026-07-27T01:14:10Z",
+      "next_artifact_number": 2,
       "session_id": "sess_1785113705_bcf38a",
       "parent_task": null
     },

@@ -814,7 +814,7 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
   is explicitly unbounded — see the task description and "Testing & Validation").
 - `pre-pr-check.sh` can actually fail. **[MET]**
 
-## Rollback / Contingency
+## Rollback/Contingency
 
 Every commit is verified green before landing, so `git revert <sha>` is safe. Under the
 risk-tiered protocol a commit covers a verified batch rather than a single file, so a revert

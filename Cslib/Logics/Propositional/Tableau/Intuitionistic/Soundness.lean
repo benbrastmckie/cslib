@@ -1338,7 +1338,8 @@ lemma intExpandBranches_closed_unsat
                       have hnw'eq := intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
                       have hlabels :=
                         intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
-                      have hfreshNew : FreshAbove (Branch.extendMany bPers newForms) edgesP nw' := by
+                      have hfreshNew :
+                          FreshAbove (Branch.extendMany bPers newForms) edgesP nw' := by
                         rw [hnw'eq]
                         exact freshAbove_extendMany bPers edgesP nwH newForms hfreshAbove_pers
                           (fun sf' h' => hlabels sf' h' ▸ hfreshAbove_pers.1 sf hsf_mem)
@@ -1441,7 +1442,7 @@ lemma intExpandBranches_closed_unsat
                           · exact hfreshTail b e nw h_back
                         have hmono_new : MonotoneEdges worldOf' (edgesP ++ [e_val]) := by
                           rw [he]
-                          simp only [hnE, he] at hord
+                          simp only [he] at hord
                           have hwo'_eq : worldOf' = Function.update wo nwH (worldOf' nwH) := by
                             funext k
                             by_cases hk : k = nwH
@@ -1525,7 +1526,8 @@ lemma intExpandBranches_closed_unsat
                       have hnw'eq := intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
                       have hlabels :=
                         intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
-                      have hfreshNew : FreshAbove (Branch.extendMany bPers newForms) edgesH nw' := by
+                      have hfreshNew :
+                          FreshAbove (Branch.extendMany bPers newForms) edgesH nw' := by
                         rw [hnw'eq]
                         exact freshAbove_extendMany bPers edgesH nwH newForms hfreshAbove_pers
                           (fun sf' h' => hlabels sf' h' ▸ hfreshAbove_pers.1 sf hsf_mem)

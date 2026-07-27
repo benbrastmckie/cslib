@@ -121,7 +121,7 @@ theorem minimalTableau_complete (φ : Proposition Atom)
   intro edges _b
   -- Bridge: MValid φ → IForces (intExtractValuation b) (minBranchBotForces b) 0 φ at the
   -- intAccessPreorder edges frame. Requires: upward-closure of intExtractValuation b and
-  -- minBranchBotForces b ALONG THAT FRAME (task 317 phase 9/10 fuel-sufficiency fixpoint).
+  -- minBranchBotForces b ALONG THAT FRAME (the fuel-sufficiency fixpoint).
   sorry
 
 end Cslib.Logic.PL

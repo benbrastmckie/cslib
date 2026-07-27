@@ -1,21 +1,26 @@
 {
   "status": "partial",
-  "started_at": "2026-07-27T23:05:14Z",
+  "started_at": "2026-07-27T23:21:47Z",
   "artifacts": [
-    "Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Core/RestrictedMCS.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Completeness.lean",
-    "Cslib/Logics/Temporal/Metalogic/Chronicle/ChronicleTypes.lean",
-    "Cslib/Logics/Temporal/Metalogic/MCS.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Soundness/Soundness.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Decidability/Saturation.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean",
+    "Cslib/Foundations/Logic/Metalogic/Chronicle/SinceSeedConsistency.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Bundle/FMCSDef.lean",
+    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/CanonicalChain.lean",
+    "Cslib/Logics/Bimodal/FrameConditions/Compatibility.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Bundle/Construction.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Bundle/BFMCS.lean",
+    "scripts/lint-suppression-baseline.txt",
     "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md",
-    "specs/575_repo_lint_hygiene_ci_gate_restoration/handoffs/06_cycle-21-phase5-progress.md"
+    "specs/575_repo_lint_hygiene_ci_gate_restoration/handoffs/07_cycle-22-phase5-progress.md"
   ],
   "partial_progress": {
     "stage": "phase5_suppression_audit",
-    "details": "Cycle 21: processed 5 files, all in the count-3 tier, all 3->0 blanket suppressions cleared, each verified by scoped rebuild of the file plus every direct downstream importer before commit (5 individual commits). Duality.lean (420 lines, 2 flexible sites narrowed to declaration-scoped suppressions), RestrictedMCS.lean (437 lines, 2 flexible sites manually reconstructed as simp only [Set.mem_insert_iff]), Completeness.lean (483 lines, all 3 suppressions unnecessary, zero warnings on removal), Temporal ChronicleTypes.lean (522 lines, 24 longLine wraps + 13 dupNamespace sites narrowed to 10 declaration-scoped suppressions on the Chronicle structure/c0-c5' conditions, deliberately namespace-colliding by design, renaming out of hygiene-only scope), Temporal MCS.lean (538 lines, 3 identical unusedSimpArgs sites reduced via one replace_all edit to simp only [Formula.swapTemporal]). Live re-derived remainder: 96 blanket suppressions across 59 local-only files (down from 111/64 at cycle 20 close). Full CSLib CI pipeline re-verified clean (5 baseline sorry warnings unchanged, checkInitImports/lint-style/mk_all clean, lake shake exactly 12 upstream-shared files, lake lint zero matches on the 7 prevention categories -- only out-of-scope unusedArguments findings (147 errors) remain, lake test exit 0). Sorry/axiom/vacuous counts unchanged from baseline (168 naive-grep sorries / 5 declarations, 26 axioms, 1 pre-existing unrelated vacuous false positive).",
-    "lint_count_start": 125,
-    "lint_count_current": 147,
-    "lint_count_note": "lake lint error count (all unusedArguments, out of scope for this task); not directly comparable to the prior cycle's line-count-based lint_count_current -- this task is not a lint-category-fix task, see cslib-lint-fix.md activation criteria",
+    "details": "Cycle 22 (final cycle of this /orchestrate invocation's budget): processed 10 files, all committed individually after a clean scoped rebuild of the file plus every direct downstream importer. This clears the count-3 tier entirely (Soundness.lean, Saturation.lean, BXCanonical/Chronicle/ChronicleTypes.lean, SinceSeedConsistency.lean) and opportunistically starts the count-2 tier (FMCSDef.lean, BXCanonical/CanonicalChain.lean, FrameConditions/Compatibility.lean, Bundle/Construction.lean, Bundle/UntilSinceCoherence.lean, Bundle/BFMCS.lean -- chosen for being small/quick once the count-3 worklist ran dry). Also re-baselined the lint-suppression ratchet (check-lint-suppressions.sh --update), which had drifted stale across several prior cycles -- now 86 blanket suppressions across 63 files repo-wide (72 across 49 files local-only in-scope, down from 96/59 at cycle 21 close). Plan file RESUME HERE section fully rewritten with a live re-derived survey of the entire remaining count-2 (19 files) and count-1 (30 files) tiers plus per-file findings. Suppression-audit progress: 268 -> 278 sites audited cumulative (68 files fully processed). Next target: Temporal/Metalogic/Chronicle/ChronicleToCountermodel.lean (137 lines), per smaller-files-first within the count-2 tier.",
+    "lint_count_start": null,
+    "lint_count_current": null,
     "phases_completed": 7
   },
   "metadata": {
@@ -27,14 +32,16 @@
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count_naive_grep": 168,
+    "sorry_count_naive_grep": 167,
     "sorry_count_declarations_with_sorry": 5,
+    "sorry_count_note": "5 = baseline lake build --wfail --iofail sorry warnings (the authoritative count); 167 = naive repo-wide grep including warn.sorry-guarded and comment-adjacent matches, unchanged in kind from prior cycles' methodology",
     "vacuous_count": 1,
     "vacuous_count_note": "single pre-existing false positive, Computability/URM/Basic.lean:92, unrelated to this task",
     "axiom_count": 26,
     "build_passed": false,
     "build_passed_note": "lake build --wfail --iofail exits 1 due to 5 pre-existing documented baseline sorry declarations (expected, unchanged from prior cycles); zero new warnings anywhere",
-    "ci_pipeline_passed": true
+    "ci_pipeline_passed": true,
+    "lint_suppression_ratchet_passed": true
   },
   "requires_user_review": false,
   "blocked_phase": null

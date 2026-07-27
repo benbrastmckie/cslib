@@ -29,9 +29,6 @@ exactly one such satisfying model.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/BFMCS.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -125,6 +122,7 @@ theorem BFMCS.diamond_witness (B : BFMCS Atom D) (fam : FMCS Atom D) (hfam : fam
   have h_box_neg : Formula.box (Formula.neg φ) ∈ fam.mcs t :=
     B.modal_backward fam hfam (Formula.neg φ) t h_all_neg
   -- But neg (Box neg phi) is also in fam.mcs t, contradicting consistency
-  exact set_consistent_not_both (B.consistent fam hfam t) (Formula.box (Formula.neg φ)) h_box_neg h_diamond
+  exact set_consistent_not_both (B.consistent fam hfam t) (Formula.box (Formula.neg φ))
+    h_box_neg h_diamond
 
 end Cslib.Logic.Bimodal.Metalogic.Bundle

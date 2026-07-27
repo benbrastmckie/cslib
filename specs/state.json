@@ -2,38 +2,6 @@
   "next_project_number": 575,
   "active_projects": [
     {
-      "project_number": 555,
-      "project_name": "literature_search_fidelity_schema_quarantine",
-      "status": "completed",
-      "task_type": "general",
-      "description": "Repair literature search visibility for index entries written under the doc_id/chunks_dir schema. MEASURED SITUATION (all figures verified directly, not inferred): the global Literature index.json carries two entry schemas -- 273 entries with id + path=\"sources/<dir>/\", and 18 with doc_id + chunks_dir=<absolute path>. literature-search.sh's load_fidelity_map() derives its lookup key ONLY from a path prefix of \"sources/\", so no chunks_dir-schema entry ever lands in the map; get_fidelity() then fail-opens to unverified_summary, which is on QUARANTINED_FIDELITY_VALUES (literature-search.sh:53), so default search drops them and reports degraded=true with zero results. THE 18 SPLIT INTO TWO GROUPS THAT NEED DIFFERENT FIXES. GROUP A (2 docs: wijesekera_1990_constructivemodallogicsi, simpson_1994_intuitionisticmodallogic) already carry an honest, human-adjudicated stamp provenance_fidelity=ocr_rescanned_reflowed_partial_symbol_loss, which is NOT on the quarantine list. These are invisible purely because of the key-derivation bug -- their correct fidelity value exists in index.json but is unreachable. Fixing key derivation alone fully restores them. This is the tractable half and should ship first. GROUP B (16 docs, including arisakadasstrassburger_2015, marinmoralesstrassburger_2021, pacheco_2024, biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997, massacci_2000, plus 8 unrelated hyperproperty/verification docs) have provenance_fidelity=null. After the key-derivation fix, fmap.get(doc_id) still returns null and get_fidelity still fail-opens to unverified_summary, so they REMAIN quarantined. The key fix does nothing for them. CRITICAL CONSTRAINT ON GROUP B -- do not plan to solve this by extending literature-fidelity-audit.sh: that script classifies by comparing converted markdown against pdftotext output of the source PDF, and these directories contain only chunk_*.md files with NO source PDF present (verified for arisaka, wijesekera, pacheco), and zotero-library.json has no matching entries either. With no baseline available the audit's own honest verdict would be unverified_no_baseline, which is ITSELF on the quarantine list -- so an extended audit would correctly re-quarantine them and change nothing. The fail-open-to-unverified design is deliberate and correct (it prevents an unverified conversion being cited as authoritative) and MUST NOT be weakened by simply removing values from QUARANTINED_FIDELITY_VALUES. GROUP B THEREFORE NEEDS A DECISION, NOT ONLY CODE. Three honest options, to be presented to the user rather than chosen unilaterally: (a) re-acquire the source PDFs so the audit can classify them properly -- most correct, most work, requires the PDFs to be obtainable; (b) per-document adjudication stamping an honest fidelity value, which is exactly what produced Group A's two working stamps; (c) introduce a new non-quarantined fidelity value meaning second-pipeline conversion with no obtainable baseline and content spot-checked -- a policy change requiring care about what downstream consumers may then cite as authoritative. SCOPE FOR THIS TASK: (1) Fix load_fidelity_map() to derive its directory key from the chunks_dir basename when path is absent, preserving existing sources/ behaviour for the older schema. NOTE load_fidelity_map is duplicated at FOUR sites in literature-search.sh (approx lines 227, 527, 764, 908) -- fix all four or factor to a single definition. (2) Verify Group A: default (no-flag) literature-search.sh must return non-degraded results for wijesekera and simpson content. (3) Preserve fail-open semantics exactly: a missing map entry still defaults to unverified, never verified_conversion. (4) Do NOT silently resolve Group B -- write up options (a)/(b)/(c) with costs and surface them for a user decision. WORKAROUND available meanwhile and already in use: literature-search.sh --include-unverified returns correct results for all 18 today; it is the honest mechanism, being an explicit opt-in to sources that genuinely lack a verified baseline. Do not touch Cslib/ Lean source. === PDF RE-ACQUISITION COMPLETED (user-directed, 2026-07-25): 8 of 18 source files RECOVERED and preserved to $LITERATURE_DIR/.sources-recovered/ (~17MB). Provenance discovered: chunks_dir-schema entries DO carry a source_path field, and it pointed at per-session scratchpad temp dirs under /tmp/claude-*/ for 4 of them -- these were minutes-to-days from deletion and are now durable. RECOVERED (all of this repo's modal-logic working set): arisakadasstrassburger_2015 (the cut-free CS5 source), marinmoralesstrassburger_2021, pacheco_2024, wijesekera_1990, simpson_1994, biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997 (djvu). NOT RECOVERABLE (10): massacci_2000_single_step_tableaux (relevant to tableau work, source gone), plus 9 unrelated documents (6 hyperproperty/verification papers, 2 Cariani modal-future items, 1 book chapter). Group B is therefore now tractable via option (a) for the 8 recovered: literature-fidelity-audit.sh can classify them against a real baseline once the entries are reachable. The remaining 10 still need option (b) adjudication or (c) a policy value. TWO ADDITIONAL FINDINGS: (i) the real Zotero profile is ~/Documents/Zotero (NOT ~/Zotero, which also exists and is stale/different -- a query against it returns 0 for these titles while the real profile returns hits); (ii) $LITERATURE_DIR/zotero-library.json is a stale/incomplete CSL-JSON export (400 records, dated 2026-07-01, right domain -- Carnap/Kripke/Holliday/Kurucz -- but containing NONE of the 18), so the Better BibTeX 'Keep updated' export is not capturing these items. Re-exporting from the correct profile should precede any future Zotero-based discovery. ALSO: the ingestion pipeline that wrote these entries records source_path into a session-scoped temp dir, which is why the baselines vanished; that pipeline should copy sources into durable storage at ingest time, or this recurs.",
-      "dependencies": [],
-      "file_scope": [
-        ".claude/scripts/literature-search.sh",
-        ".claude/scripts/literature-fidelity-audit.sh"
-      ],
-      "created": "2026-07-25T13:50:28Z",
-      "last_updated": "2026-07-27T00:46:08Z",
-      "session_id": "sess_1785111502_bfcb60",
-      "artifacts": [
-        {
-          "path": "specs/555_literature_search_fidelity_schema_quarantine/reports/02_blocker-disposition-research.md",
-          "type": "report",
-          "summary": "Blocker disposition research: phase-6 djvu resolvable now, phase-7 premise shifted (option c de facto live), Group A regression, empty .sources-recovered correction"
-        },
-        {
-          "path": "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md",
-          "type": "plan",
-          "summary": "Revised plan v2: Phases 1-5 preserved [COMPLETED]; Phase 6 actionable close-out incl. working-tree restore; Phase 7 decision memo that stamps nothing"
-        },
-        {
-          "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md",
-          "type": "summary",
-          "summary": "Phases 6-7: working-tree regression restored, djvu gate closed as moot, arisaka honestly re-adjudicated (quarantined), Group B decision memo written without stamping"
-        }
-      ]
-    },
-    {
       "project_number": 530,
       "project_name": "consolidate_chronicle_construction_bimodal_temporal",
       "status": "planned",
@@ -213,50 +181,6 @@
         }
       ],
       "next_artifact_number": 3
-    },
-    {
-      "project_number": 463,
-      "project_name": "vet_299_455_doc_touchups",
-      "status": "completed",
-      "task_type": "markdown",
-      "title": "Docs: update ORGANISATION.md Tableau/ tree sketches + strip internal task refs from public docstrings (task 299/455 vet)",
-      "description": "Vet found low-severity documentation gaps (code placement itself is correct/idiomatic): (1) ORGANISATION.md:148 Modal/ tree sketch omits the `Tableau/` subdirectory; ORGANISATION.md:26 Foundations/Logic/ tree sketch omits `Tableau/` (Sign.lean, SignedFormula.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean, Measure.lean, PropositionalRules.lean) — add these entries to document existing placement. (2) Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:1178 and nearby: permanent public docstrings for `modalTableau_complete`/`modalTableau_decides` embed ephemeral internal notes like '(task 442 Phase 6, FINAL)', '(task 442 Phase 5a)' — replace with plain, durable mathematical descriptions.",
-      "created": "2026-07-01T15:46:37Z",
-      "last_updated": "2026-07-25T07:06:42Z",
-      "next_artifact_number": 1,
-      "artifacts": [
-        {
-          "path": "specs/463_vet_299_455_doc_touchups/reports/01_organisation-tableau-and-docstring-cleanup.md",
-          "type": "report",
-          "summary": "ORGANISATION.md:26/148 confirmed missing Tableau/; CompletenessLoop.lean already clean; LoopChecking.lean has 4 task-number citations remaining"
-        },
-        {
-          "path": "specs/463_vet_299_455_doc_touchups/plans/01_organisation-tableau-docstring-anchors.md",
-          "type": "plan",
-          "summary": "Two-phase documentation-only plan: ORGANISATION.md Tableau/ tree entries + LoopChecking.lean durable-anchor rewrites; CompletenessLoop.lean out of scope"
-        },
-        {
-          "path": "specs/463_vet_299_455_doc_touchups/summaries/01_organisation-tableau-docstring-anchors-summary.md",
-          "type": "summary",
-          "summary": "Implementation summary: ORGANISATION.md Tableau/ entries added, LoopChecking.lean task-number citations rewritten to durable anchors, build verified"
-        }
-      ],
-      "parent_task": 299,
-      "vet_origin": {
-        "session": "sess_1782919557_8a4cc2",
-        "vetted_tasks": [
-          299,
-          455
-        ]
-      },
-      "topic": "Code Hygiene",
-      "dependencies": [],
-      "session_id": "sess_1784959340_e4ceeb_463",
-      "file_scope": [
-        "ORGANISATION.md",
-        "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
-      ],
-      "completion_summary": "Added Tableau/ tree-sketch entries to ORGANISATION.md for Foundations/Logic/ (8-file block + barrel) and Logics/Modal/ (terse collapsed entry), and rewrote 4 ephemeral task-number docstring citations in LoopChecking.lean to durable S4LoopInv-structure anchors."
     },
     {
       "project_number": 456,
@@ -1220,44 +1144,6 @@
       ]
     },
     {
-      "project_number": 519,
-      "project_name": "fix_literature_ocr_chunking_and_wijesekera",
-      "status": "completed",
-      "task_type": "general",
-      "topic": "Literature",
-      "description": "Follow-up to task 518 (Simpson re-ingest). TWO PARTS.\n\n(1) RE-INGEST wijesekera_1990_constructivemodallogicsi (BibKey Wijesekera1990). Task 518's corpus audit found it has the IDENTICAL over-fragmentation signature that made Simpson unusable: 154 chunks, 468B mean, 62% under 300B. This document matters -- Wijesekera 1990 is THE source for CSLib's constructive (fallible-world) DIAMOND semantics, cited in Cslib/Logics/Modal/Metalogic/Constructive/ (CS4.lean and CS5.lean docstrings reference it for Definition 1.1.4 and Section 2), and is directly relevant to in-flight task 517. Apply task 518's proven fix (documented in specs/518_reingest_simpson1994_literature_corpus/summaries/01_reingest-summary.md): bypass the font-size heading heuristic, extract via pdftotext -layout, apply paragraph-reflow to repair OCR line-break noise, insert chapter/section-level headings only, then feed the existing unmodified literature-chunk.sh Pass-2 merge. VALIDATE that Definition 1.1.4 and the Section 2 diamond / fallible-world definitions return COMPLETE statements via literature-search.sh. Preserve the old chunk set as rollback, as 518 did.\n\n(2) HARDEN THE ROOT CAUSE (the general fix that 518 deliberately left undone). literature-convert.sh's PyMuPDF path falls back to a FONT-SIZE heading-detection heuristic when a PDF has no embedded TOC. On OCRmyPDF/Tesseract scans the per-line font metrics are noisy, so it emits spurious markdown headings mid-sentence and mid-word, and literature-chunk.sh then splits at every one -- shredding lemma statements. Fix so it does not fire on OCR'd scans: detect the OCR producer (Tesseract / OCRmyPDF metadata), require corroborating cues (line length, position, numbering, blank-line context) before accepting a font-size heading, and/or add a post-check rejecting headings that split mid-sentence. ALSO add a guard so any future ingest yielding a pathological mean chunk size (under roughly 600B) warns loudly rather than silently landing a shredded corpus. Task 518 scoped its fix to Simpson only and left the shared scripts untouched; this task does the general repair so all future --lit work benefits.\n\nNOTE the honest ceiling from 518: prose is recoverable but math symbols are frequently garbled by Tesseract. Do NOT attempt to fix OCR quality itself -- only the chunking/heading pathology. Do not touch Cslib/ Lean source. Low risk, high leverage.",
-      "dependencies": [
-        518
-      ],
-      "parent_task": 518,
-      "created": "2026-07-15T15:41:21Z",
-      "last_updated": "2026-07-25T07:50:49Z",
-      "priority": "medium",
-      "effort": "3-5 hours",
-      "artifacts": [
-        {
-          "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/reports/01_wijesekera-ocr-chunking-fix.md",
-          "type": "report",
-          "summary": "Wijesekera over-fragmentation confirmed (154 chunks, 468B mean); OCR producer is Acrobat Capture not Tesseract, so producer allowlist must broaden; pdftotext -layout surfaces clean numbered section headings"
-        },
-        {
-          "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md",
-          "type": "plan",
-          "summary": "8-phase plan: Wijesekera re-ingest via pdftotext -layout section headings + OCR heading hardening and mean-chunk-size guard; corrects the Tesseract-only premise"
-        },
-        {
-          "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/summaries/01_wijesekera-reingest-summary.md",
-          "type": "summary",
-          "summary": "Wijesekera re-ingest 154->38 chunks (468B->1669.5B mean, 62.3%->5.3% under 300B); OCR heading hardening with broadened producer family + structural cues; non-blocking mean-chunk-size guard"
-        }
-      ],
-      "session_id": "sess_1784959340_e4ceeb_519",
-      "file_scope": [
-        ".claude/scripts/literature-convert.sh",
-        ".claude/scripts/literature-ingest.sh"
-      ]
-    },
-    {
       "project_number": 537,
       "project_name": "labelled_cs5_general_soundness_biconditional",
       "status": "blocked",
@@ -1493,118 +1379,6 @@
       },
       "blockers": [
         "Blocked on the CS5 cut-free/disjunction-property research task, which was RESCOPED 2026-07-26 to report 02 section 8.2's single probe (does every IS5-consistent set have an is5FC model with total r?). NOTE A DIRECT CONSEQUENCE FOR THIS TASK: report 02 section 1 establishes that this task's own named open Prop, CS5PairSeedDisjunctionProperty, is REFUTABLE AS STATED and needs the `A not-in cl_CS5 (boxInv H)` hypothesis; the corrected statement plus its regression probe are section 8.1 land-now items on the research task. Do not attempt to discharge the uncorrected form. Standing local state, unchanged: Phases 4-6 remain blocked on the cross-inertness support lemma -- the structural DerivationTree induction the plan sketched is keyed on a necessitation-only-from-empty-context box invariant that is machine-verified FALSE for CS5PairAxiom (modus_ponens against CS5ModalAxiom.bBox, CS5.lean:216, yields a bare-box conclusion that is neither an assumption nor a necessitation witness). DELIVERED and sorry-free: phases 1, 2, 3, 7, 8; build green at 730 jobs."
-      ]
-    },
-    {
-      "project_number": 552,
-      "project_name": "tableau_calculus_conformance_rule_completeness_repair",
-      "status": "completed",
-      "task_type": "cslib",
-      "dependencies": [],
-      "file_scope": [
-        "Cslib/Logics/Temporal/Tableau/Rules.lean",
-        "Cslib/Logics/Temporal/Tableau/Saturation.lean",
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean"
-      ],
-      "description": "Shared calculus-conformance and rule-completeness repair unblocking BOTH the temporal PTL FMP/decidability front and the propositional tableau completeness front, which independently converged on the same class of defect: a rule set too weak to close valid formulas, combined with fuel machinery justified by a bound that does not hold. DELIVERABLE 1 (shared, do first): a CONFORMANCE HARNESS that executes each tableau on a corpus of known-valid and known-invalid formulas and asserts the verdict. This class of defect is invisible to type-checking and was found only by execution, so the harness is the asset that prevents recurrence. DELIVERABLE 2 (temporal, seriality): the G and H rules propagate only to ord.futureOf t and return .notApplicable when it is empty (Rules.lean approx 227-244), and the only fresh-time path from a negative until is gated on ord.timeCount greater than 0 (Rules.lean approx 312), which is false at the root. Add the missing seriality rule. DELIVERABLE 3 (temporal, time cap): the same timeCount gate hard-caps times at 4; on the valid family with iterated F the verdict flips to OPEN at exactly k=4. Remove the cap. DELIVERABLE 4 (temporal, fuel): temporalFuel equals 4n^2+12n+10 (Saturation.lean approx 78), which is quadratic, while its own docstring justifies it by a 2^n type-count bound. Measured minimal sufficient fuel on a tautology family fits 1.5*2^k-2, so the bound is FALSE at the current constant and merely restating it is not available. Either raise the constant or add the missing deduplication. DELIVERABLE 5 (temporal, trackers): Saturation.lean approx 156-158 returns the tracker unchanged on the .branching arm, so recurring untlPos and sncePos copies are never registered pending. Saturation.lean approx 303 replicates one tracker across all output branches, but untlPos's two branches have genuinely different pending sets, so the return type must become a list of EventualityTracker. DELIVERABLE 6 (propositional): the persistent T-implication rule is positive-only and never plants F-tags, leaving subformula determinacy and bivalence unprovable in the current 6-rule calculus. Add the missing branching rule. Every rule addition requires a soundness re-audit of the affected calculus. Evidence: the executed counterexamples and the measured fuel table are recorded in the temporal task's report on the island-versus-periodic strategic decision. DELIVERABLE 7 (temporal, Finding 2b/2c, promoted to first-class scope in Phase 8): temporalApplyNeg had no asAllFuture?/asAllPast? arms, so G/F duality (¬Gp -> F¬p) and the K-for-G schema were unprovable, and allFuturePosAt/allPastPosAt only checked direct-time membership, missing transitive G/H propagation across someFuture/somePast-created intermediate times (Gp -> GGp, Hp -> HHp, p -> GPp, p -> HFp). The negative arms and a transitive-closure fix for allFuturePosAt landed in Phase 6. A residual asymmetry bug was found in Phase 7: allPastPosAt reused the future-only TimeOrdering.ancestorTimes exactly as allFuturePosAt does, checking whether t is in t_anc's forward light-cone -- correct for propagating T(Gphi) forward, wrong for propagating T(Hphi) backward, which needs the reversed check (t_anc in t's forward light-cone). This left Hp -> HHp open even after Gp -> GGp correctly closed. Fixed by swapping the arguments in allPastPosAt's condition; all Finding 2b/2c rows are now CLOSED as expected.",
-      "blockers": null,
-      "last_updated": "2026-07-26T12:22:47Z",
-      "session_id": "sess_1785046950_33beb4_552",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "path": "specs/552_tableau_calculus_conformance_rule_completeness_repair/reports/01_tableau-conformance-rule-completeness.md",
-          "type": "report",
-          "summary": "Hard-mode research report: source-verification of all six deliverables against HEAD, 44 executed conformance verdicts, 3 measured fuel tables, H3 source-to-implementation mapping with 5 verified BibKeys, named soundness re-audit obligations per calculus, a 5-attack adversarial verification pass (2 claims refuted), and a prioritized P0-P4 plan with dependency reasoning."
-        },
-        {
-          "path": "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md",
-          "type": "plan",
-          "summary": "Phased implementation plan encoding decisions D1-D5: harness-as-gate, indivisible D3 wave split by verification checkpoint, transitive propagation settled as option (iii)-a (ancestorTimes), T-implication arm settled as coexisting with applyPersistenceFixpoint, fuel raised to 2^(2*subformulaCount+2) with an explicit headroom measurement step."
-        }
-      ],
-      "memory_candidates": [
-        {
-          "topic": "CSLib CslibTests conformance harness for decision procedures",
-          "content": "To execute a Cslib decision procedure in a CslibTests file, the file needs BOTH 'import X' and 'public meta import X' for the SAME module: without the plain import, defs referencing constructors fail with 'may not access declaration ... imported as meta'; without the meta import, #eval fails with 'Invalid meta definition _eval, ... is not accessible here'. decide/native_decide/rfl do NOT work on tableau drivers -- they compile to WellFounded.fix via nested 'let rec' and stall in the kernel (documented at CslibTests/ModalFrameSeparation.lean:19-35). Assertion idiom is '#guard_msgs in #eval' with a String- or Bool-valued verdict adapter, since the result types derive neither Repr nor BEq.",
-          "keywords": [
-            "cslib",
-            "CslibTests",
-            "eval",
-            "public meta import",
-            "native_decide",
-            "WellFounded.fix",
-            "conformance harness",
-            "decision procedure"
-          ]
-        },
-        {
-          "topic": "Executed conformance testing finds tableau defects type-checking cannot",
-          "content": "A tableau calculus can be fully sorry-free, green under lake build, and carry landed invariant-preservation proofs while still returning the wrong verdict on textbook-valid formulas. In one dispatch, 44 #eval probes against two sorry-free CSLib tableaux found 12 wrong verdicts, six of which no prior research report had recorded across multiple hard-mode dispatches. The defect class is rule-set incompleteness, invisible to the type checker because every landed lemma is about invariant preservation, not about which formulas close. Run the decision procedure on a known-valid/known-invalid corpus BEFORE investing in completeness proofs.",
-          "keywords": [
-            "tableau",
-            "conformance",
-            "rule completeness",
-            "executed verdicts",
-            "sorry-free but wrong",
-            "decision procedure testing"
-          ]
-        },
-        {
-          "topic": "Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion",
-          "content": "When an intuitionistic tableau's persistent T(phi->psi) rule is positive-only (only ever adds T(psi) where T(phi) is already present), the completeness truth lemma's T-imp case is blocked. The recorded remedy in such situations is often a Lindenbaum-style 'decide every subformula at every fresh world' completion rule, which branches 2^|Sub(phi0)| ways. That is over-scoped: because the truth lemma is bidirectional (proving both the T-forces and F-refutes directions simultaneously), the standard Fitting Ch.4 branching rule T(phi->psi)@w -> [F(phi)@w'] | [T(psi)@w'] supplies exactly the disjunction needed. Full subformula bivalence is never required.",
-          "keywords": [
-            "intuitionistic tableau",
-            "Fitting1983",
-            "truth lemma",
-            "sat_timp",
-            "bivalence",
-            "determinacy",
-            "Lindenbaum"
-          ]
-        }
-      ],
-      "plan_metadata": {
-        "phases": 8,
-        "total_effort_hours": 15,
-        "complexity": "complex",
-        "research_integrated": true,
-        "plan_version": 1,
-        "dependency_waves": [
-          [
-            1
-          ],
-          [
-            2,
-            5
-          ],
-          [
-            3,
-            6
-          ],
-          [
-            4,
-            7
-          ],
-          [
-            8
-          ]
-        ],
-        "reports_integrated": [
-          {
-            "path": "reports/01_tableau-conformance-rule-completeness.md",
-            "integrated_in_plan_version": 1,
-            "integrated_date": "2026-07-24"
-          }
-        ],
-        "skeleton": false,
-        "follow_up_tasks": []
-      },
-      "topic": "Modal Logic",
-      "completion_summary": "All 8 plan phases complete and committed. Delivered: (1) conformance harness gate with per-row mathematical-validity justification; (2) propositional T(->) branching arm; (3) propositional soundness re-proof; (4) per-branch eventuality tracker; (5) temporal rule arms (seriality, G/H duality, transitive propagation); (6) cap removal and fuel raise; (7) first-class scope record for the ancestorTimes/allPastPosAt findings. Fixed two real defects: Branch.lean's and SignedFormula.lean's ancestorTimes collected both directPredecessors and directSuccessors (undirected traversal), spuriously blocking isTemporallyBlocked past depth 1 -- flipped Gp -> F^k p to CLOSED for k=1..5; and Rules.lean's allPastPosAt reused the future-only TimeOrdering.ancestorTimes in the wrong direction for past-obligation propagation -- flipped Hp -> HHp. All 43 individually-executed conformance rows green (24 temporal + 19 propositional, 0 red). CslibTests/TableauConformance.lean is now a pure regression guard with no forward-looking phase scaffolding. Whole-project lake build green (3253/3253) and lake test green (9247/9247); Cslib/ bare-sorry count unchanged at 5; axiom count unchanged at 26 (0 new). Every fix re-verified against pre-fix guard_msgs, producing exactly the expected mismatches and zero others. NOT DELIVERED, closed by explicit user decision: Phase 3's IBranchSaturation sat_timp field and truthLemma's pre-existing T-imp sorry remain open -- they need a new step-lt-style fuel-sufficiency measure for applyPersistenceFixpoint's own recursion, scoped as a dedicated phase-sized effort and tracked as its own task.",
-      "roadmap_items": [
-        "Temporal tableau conformance: all 43 rows green; ancestorTimes directionality and past-obligation propagation defects fixed"
       ]
     },
     {
@@ -2005,101 +1779,6 @@
       "parent_task": null
     },
     {
-      "project_number": 559,
-      "project_name": "tableau_measured_baseline_doc_corrections",
-      "status": "completed",
-      "task_type": "cslib",
-      "title": "Land the measured Tableau baseline and correct four documentation defects",
-      "topic": "Modal Logic",
-      "dependencies": [],
-      "description": "[Task B of the modal-tableau refactor programme; P0, no dependency, runs in parallel with the Support dedup task.] Land the measured baseline table (with its exact reproduction commands) into the modal Tableau subsystem's module documentation, so the asserted-vs-actual drift that this programme's research found cannot recur. Measured figures: LoopChecking.lean 10,540 lines / 230 declarations; FrameSoundness.lean 5,317; FrameCompleteness.lean 4,307; three-file total 20,164; redirect semantic surface 4 clauses / 14 code lines at LoopChecking.lean:6557-6562; the hintikkaS4 bridge set is 8, not ten; subsystem axiom declarations 0; subsystem sorry census exactly 1. CORRECT EXACTLY FOUR ADJUDICATED DEFECTS, leaving the seven verified-TRUE claims alone: (1) LoopChecking.lean:2001-2002 -- the claim that keysOriginS4 was removed is FALSE (it has 22 code consumers); (2) LoopChecking.lean:8911-8912 -- stale references to the two _boxed reflTransGen bridge variants, removed in commit c4b33f63; (3) LoopChecking.lean:2000-2004 -- resolve the 'possibly orphaned' hedge on keysRootEmpty using the consumer audit as evidence; (4) FrameSoundness.lean:1215-1219 -- add BOTH the zero-consumer fact AND the finding that Massacci2000 Theorem 8.1 (blocking preserves satisfiability) is STATED AND NEVER PROVED there (Appendix B.2 proves only Theorem 8.4; section 10.2 defers 8.1 to Gore's model graphs), because that changes how a future reader assesses the obstruction and prevents another route from trying to reconstruct a proof its cited source does not contain. Documentation-only: no proof or definition may change.",
-      "file_scope": [
-        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
-      ],
-      "artifacts": [
-        {
-          "path": "specs/559_tableau_measured_baseline_doc_corrections/summaries/01_measured-baseline-doc-corrections-summary.md",
-          "type": "summary",
-          "summary": "Four documentation defect corrections plus the measured baseline table landed in LoopChecking.lean module docs"
-        }
-      ],
-      "blockers": [],
-      "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T00:00:00Z",
-      "next_artifact_number": 2,
-      "session_id": "sess_1785105096_50f3c7",
-      "parent_task": null,
-      "completion_summary": "Landed the measured baseline table with exact reproduction commands into LoopChecking.lean's module documentation, and corrected the four adjudicated documentation defects: (1) LoopChecking.lean:2001-2002's FALSE claim that keysOriginS4 was removed; (2) :8911-8912's stale references to the two _boxed reflTransGen bridge variants removed in c4b33f63 (bridge set is 8); (3) :2000-2004's 'possibly orphaned' hedge on keysRootEmpty, replaced with the audited fact; (4) FrameSoundness.lean:1215-1219, which now records BOTH the zero-consumer fact for branchSatisfiableIn_s4FC_ancestor_redirect AND the finding that Massacci2000 Theorem 8.1 is stated and never proved there (Appendix B.2 proves only 8.4; section 10.2 defers 8.1 to Gore's model graphs) - the latter prevents a fifth soundness route from reconstructing a proof its cited source does not contain. Documentation-only: no declaration, proof, or definition altered; the seven verified-TRUE claims left untouched. The non-reproducible '22 consumers' figure was deliberately NOT written into the source comment; the qualitative conclusion is recorded instead. Both modified modules build clean under scoped lake build, but the repo-wide gate remains red for an unrelated reason (Nested/Soundness.lean:1329, tasks 554/570), so these edits are recorded as build-unverified at the repo level. The pre-existing retained sorry moved from FrameSoundness.lean:1244 to :1270 purely by docstring insertion above it; the subsystem sorry census remains exactly 1."
-    },
-    {
-      "project_number": 560,
-      "project_name": "repair_literature_subindex_massacci_chunks",
-      "status": "completed",
-      "task_type": "meta",
-      "title": "Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)",
-      "topic": "Literature Infrastructure",
-      "dependencies": [],
-      "description": "[Task B2 of the modal-tableau refactor programme; P0, no dependency. REWRITTEN 2026-07-26: the original premise was verified INCORRECT and is retired.] RETIRED PREMISE, do not reinstate: the original description claimed specs/literature-index.json reports the massacci_2000_single_step_tableaux_for_modal_logics corpus as 1 chunk and needs repair. It does not. specs/literature-index.json is REFERENCE-ONLY (doc_id plus relevance; it stores no chunk counts at all) and validates clean at 34/34 doc_ids resolving against the global index. THE ACTUAL DEFECT: the '1 chunk' figure is GENERATED at briefing-build time by .claude/scripts/literature-briefing.sh:203-206, which derives a chunk count by counting global-index CHILD entries whose parent_doc equals the doc_id, with a chunk_count=1 fallback at :224. Massacci has 77 chunk_*.md files on disk and chunk_count:77 recorded on its PARENT entry, but ZERO child entries, so the child-entry count returns 0 and the fallback renders 1. The defect is SYSTEMIC, not Massacci-specific: 19 of 34 sub-index documents under-report identically, spanning 848 chunk files (simpson_1994:206, massacci:77, biermandepaiva_2000:53, alechina_2001:52, marin_2021:51, trufas_2024:48, post_1921:46, arisaka_2015:40, wijesekera_1990:38, from_2022:34, bentzen_2023:33, rabinovich_2014:30, henkin_1949:27, burgess_1982_i:25, burgess_1982_ii:24, johansson_1937:24, pacheco_2024:20, gabbay_1994_ch10:12, hodkinson_2006:8). CONSEQUENCE: every --lit briefing built over these documents understates available material by up to two orders of magnitude, which plausibly contributed to earlier under-use of the Massacci corpus. FIX (preferred, lowest risk): in .claude/scripts/literature-briefing.sh, prefer the parent entry's existing chunk_count field over the derived child-entry count, falling back to the child count only when the parent carries no chunk_count. This repairs all 19 documents without mutating corpus data. DO NOT fix this by rewriting ~/Projects/Literature/index.json: that is the user's SHARED global corpus, outside this repository, and mutating it affects every project on this machine. VERIFICATION: after the change, a briefing over massacci_2000_single_step_tableaux_for_modal_logics must report 77 chunks, and the sparse-coverage marker (<!-- lit-coverage ... -->) must reflect the corrected count; spot-check at least three further documents from the list above. Provenance: diagnosed during the modal-tableau refactor programme's baseline-capture phase; see specs/557_modal_tableau_refactor_abstractions_boneyard/artifacts/baseline.md.",
-      "file_scope": [
-        ".claude/scripts/literature-briefing.sh"
-      ],
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md",
-          "created": "2026-07-26"
-        },
-        {
-          "type": "plan",
-          "path": "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
-          "created": "2026-07-26"
-        },
-        {
-          "type": "summary",
-          "path": "specs/560_repair_literature_subindex_massacci_chunks/summaries/01_chunk-count-repair-summary.md",
-          "created": "2026-07-26"
-        }
-      ],
-      "blockers": [],
-      "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-27T00:00:34Z",
-      "next_artifact_number": 2,
-      "session_id": "sess_1785108997_9eb575",
-      "parent_task": null,
-      "completion_summary": "Repaired per-repo literature briefing chunk-count under-reporting in .claude/scripts/literature-briefing.sh via a four-tier precedence (child count -> parent chunk_count field -> on-disk chunk_*.md glob -> literal 1). 19 of 34 sub-index documents repaired (Massacci 1->77, simpson_1994 1->206, and 17 others); regression sentinel chagrovzakharyaschev_1997_modallogic held at 6 (not 997). Research adversarially corrected the task description on two points: true tier-2 scope is 8 documents not 19, and the description's proposed fix precedence was inverted and would have caused the 997 regression. Shared global corpus never written. Known residuals: venema_1993 pair (sec*.md naming), 17 orphaned parent_doc values. FOLLOW-UP REQUIRING USER DECISION: .claude/ is git-excluded via .git/info/exclude line 18, so the fixed script is live on disk but untracked and will be lost on a fresh clone."
-    },
-    {
-      "project_number": 561,
-      "project_name": "tableau_abstraction_decision_record",
-      "status": "completed",
-      "task_type": "cslib",
-      "title": "REVIEW GATE: decision record adopting or rejecting box-plus birth keys and RuleApplySt",
-      "topic": "Modal Logic",
-      "dependencies": [],
-      "description": "[Task C of the modal-tableau refactor programme; P1. THIS IS THE REVIEW GATE. No file may be moved or split, and no abstraction may be implemented, until this decision record is reviewed and ACCEPTED.] Produce an explicit decision record adopting or rejecting (a) Lemmon box-plus birth keys and (b) the RuleApplySt generalization, on the evidence in the refactor research report's sections 3-5. Its input already exists -- this task has no research dependency. For (a): successorBirthContent (LoopChecking.lean:384-393) records only the unwrapped (pos, psi) when T(box psi)@w is on the branch, while relevantSetFinset records both wrapped and unwrapped forms; that asymmetry IS the wrapped/unwrapped mismatch that killed one of the dead soundness routes. Box-plus is licensed for S4 BY NAME (ChagrovZakharyaschev1997 Corollary 5.32) and is FREE in the world bound (modalSubfmls (.box a) = .box a :: modalSubfmls a, FmpMeasure.lean:79, keeps the enriched key inside signedSubfmls, leaving the cardinality lemmas, modalWorldBoundS4 and the pigeonhole argument untouched). Scope the expectation down: it subsumes none of the 8 bridges outright, collapses AT MOST 2 (the box_pos_self and dia_neg_self reflexive instances), and does NOT touch the reachability defect. It is S4-scoped and MUST NOT be lifted into Foundations/. For (b): exactly ONE driver family of nine forks off modalTableauGen / modalExpandBranchesGen -- the S4 Keyed and KeyedOrdered pair -- and only because RuleApply (Saturation.lean:107-111) has no slot for per-driver state, forcing the stepper to RE-DERIVE the blockingWorldS4Keyed decision modalApplyOneS4Keyed already made internally (admitted at LoopChecking.lean:951-953). The record must also state the disposition of the two downstream consumers waiting on it: the S4 termination follow-on and the S4 keyed soundness task, whose keys and mint payload both change under (a). Blocks every implementation task in this programme.",
-      "file_scope": [
-        "specs/",
-        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-        "Cslib/Logics/Modal/Tableau/Saturation.lean"
-      ],
-      "artifacts": [
-        {
-          "path": "specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md",
-          "type": "summary",
-          "summary": "Decision record for the modal-tableau refactor programme: seven verdicts (D1-D7, no DEFERs) on report 01 sections 3-8, the Corrected Figures table verbatim, the corrected re-derivation accounting (55 sites but LARGER work), retired premises (a)-(d) as non-reinstatable, the S4-scoping constraint on box-plus, de-duplication-first sequencing, downstream dispositions for 553 and 506/511, and a Build Gate section."
-        }
-      ],
-      "blockers": [],
-      "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:13:26Z",
-      "next_artifact_number": 2,
-      "session_id": "sess_1785105096_50f3c7",
-      "parent_task": null,
-      "completion_summary": "Produced the modal-tableau abstraction decision record (the programme's review gate) at specs/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md, 645 lines. Seven explicit verdicts D1-D7, no DEFERs: box-plus birth keys ACCEPTED scoped to at-most-2-of-8-bridges with the reachability defect untouched; RuleApplySt ACCEPTED additive-first with its six-step migration order binding; Boneyard eligibility ACCEPTED subject to an execution-time audit re-run with both carve-outs (FrameSoundness.lean:1220-1244 IMMOVABLE, keysOriginS4 NOT eligible) restated verbatim; the seam table ACCEPTED only as PROVISIONAL. Rejected as non-reproducible or drift: the 77 re-derivation count (retired in favour of 55, with the work recorded as LARGER not smaller, drawing from two source files), the 'ModalTableauResult spans 11 modules' figure (original 8 restored), and the 'keysOriginS4 has 22 consumers' figure (conclusion unchanged with a large margin). Retired premises (a)-(d) recorded as binding non-reinstatable. No .lean file created, moved, or edited. NOTE: tasks 562-567 remain gated until a human signs the record's section 12 sign-off block as ACCEPTED."
-    },
-    {
       "project_number": 562,
       "project_name": "tableau_ruleapplyst_additive_introduction",
       "status": "not_started",
@@ -2308,41 +1987,6 @@
       "parent_task": null
     },
     {
-      "project_number": 570,
-      "project_name": "nested_sound_impL_lambda_chain_induction",
-      "status": "completed",
-      "task_type": "cslib",
-      "title": "Discharge nested_sound_impL via the source's induction over the Lambda chain",
-      "topic": "Constructive Modal Logic",
-      "dependencies": [],
-      "description": "[Created by the blocked-task review: this sorry was flagged in-code as needing 'a dedicated later phase (not yet numbered in the plan)' and had NO tracking task.] Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315 carries a documented strategic sorry in nested_sound_impL (soundness of the nested-sequent rule impL / imp-bullet). THE OBLIGATION: the source needs its own induction on n over the Lambda{ } chain (the L_X, L_Y, L_Z construction, page 10), mixing ctx.outputPruning.fillRhs-shaped and ctx.fillLhs-shaped premises against a ctx.fillLhs-shaped conclusion. It does NOT reduce to the already-landed congruence lemmas 4.4 / 4.5 / 4.8 alone -- that was checked and is why it was deferred rather than attempted. Build the Lambda-chain induction, then discharge the rule. Note the cut rule and NestedProof.CutFree are already landed and verified. INVARIANTS: no new axioms; the Cslib/ bare-sorry count must go DOWN by one; lake build and lake test green.",
-      "file_scope": [
-        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
-        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
-        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean",
-        "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean"
-      ],
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md",
-          "summary": "Lambda-chain induction research: source mapping (ArisakaDasStrassburger2015), three blocking defect findings (D1 missing lemma 4.7(ii), D2 outputPruning off-by-one, D3 red baseline missing cut case), six-phase decomposition"
-        },
-        {
-          "type": "plan",
-          "path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
-          "summary": "8-phase hard-mode plan owning the D1/D2/D3 scope expansion; each phase ends green with a runnable verification command"
-        }
-      ],
-      "blockers": [],
-      "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-27T02:18:45Z",
-      "next_artifact_number": 3,
-      "session_id": "sess_1785113705_bcf38a",
-      "parent_task": null,
-      "completion_summary": "Discharged nested_sound_impL via the source's page-10 Lambda-chain induction, and repaired three pre-existing defects research uncovered that the task brief had not accounted for: lemma 4.7(ii) was never landed (plus a false module-docstring claim that page 10's (i) and (ii) were the same formula); InputCtx.outputPruning was off by one nesting level at Lambda = [], which made the target theorem refutable rather than merely unproved; and nested_sound was missing its NestedProof.cut case, leaving the baseline build RED on a clean tree contrary to the brief's premise. Cslib/ bare-sorry census 41 -> 40 with no Nested/Soundness.lean entry remaining; full-library lake build green (3259/3259); lake test green (9253/9253); nested_sound_impL, nested_sound_cut and nested_sound all axiom-clean ([propext, Classical.choice, Quot.sound], no sorryAx)."
-    },
-    {
       "project_number": 571,
       "project_name": "fill_bimodal_sorries_strict_until_since",
       "status": "blocked",
@@ -2368,7 +2012,7 @@
     {
       "project_number": 572,
       "project_name": "tableau_docstring_hygiene_divergence_record",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "description": "The Intuitionistic propositional tableau calculus in Cslib/Logics/Propositional/Tableau/Intuitionistic/ carries three stale docstrings that misled twelve consecutive plan versions attempting to close remaining proof obligations (task 317's plans/01 through plans/12). This task performs ONLY documentation and references.bib edits -- no Lean definition or proof step may change. It must land BEFORE any other work in this repair programme because every downstream research/planning/implementation dispatch reads these docstrings and, absent correction, will re-derive the same refuted claims.\n\nConcrete edits required:\n\n1. Scheme.lean:3020-3041 -- the block beginning 'GAP 2 investigation ... determinacy remains BLOCKED' is STALE and directly contradicted by the current code at Scheme.lean:581, where `sat_timp` is a live `IBranchSaturation` field (also see Scheme.lean:105-108) whose reflexive form `T(phi->psi)@w in b -> F(phi)@w in b \\/ T(psi)@w in b` discharges `truthLemma`'s T-imp case without any converse (the F(phi')@w' arm contradicts IForces w' phi' via ih_phi'.2; the T(psi')@w' arm gives the goal via ih_psi'.1). Rewrite or delete this block so it reflects that GAP 2 (determinacy) is resolved and no converse is needed.\n\n2. Scheme.lean:527 -- claims `sat_timp` is NOT added as an `IBranchSaturation` field. This is false; it is a field at Scheme.lean:105-108. Correct this claim.\n\n3. Expansion.lean:125-126 -- the docstring's termination claim ('termination is unaffected since the number of distinct (implication, world) copies is bounded by intUniverse phi0') is CIRCULAR: it assumes the very world bound that the calculus's own copy-channel interaction destroys (see item 4). Replace this claim with an accurate statement that termination is NOT currently established and the expansion loop is known to diverge on some inputs (cite the module-level note added in item 4).\n\n4. Add a module-level note (in Scheme.lean or Expansion.lean, near the existing termination/measure docstrings) recording the divergence witness so no future dispatch re-attempts proving a world bound: for `phi0 = (((a->b)->c) /\\ ((d->e)->f)) -> ((u1->v1) \\/ (u2->v2))` (complexity 9, Lean-verified via `#eval`), `intExpandBranches` produces branch/world counts 4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260 -- linear growth with no saturation, and from world 3 onward each world is an exact structural duplicate of its grandparent (identical T-set/F-set, period 2). Consequently: (a) `intApplyRuleFull_outputs_subset`'s `hnw : nextWorld <= phi0.complexity + 1` hypothesis (Scheme.lean:1813) is FALSE, refuted by direct counterexample, not merely unproven; (b) `intUniverse`'s label range `List.range (phi.complexity + 2)` (Scheme.lean:1575-1577) is likewise false as an invariant of produced branches; (c) NO numeric world bound of any size exists for the current calculus. Do not schedule any further work attempting to prove `intExpandBranches_world_bound`, `hnw`, or `hUniv` as currently stated -- they are refuted, not merely hard.\n\n5. Also record, at or near the `sorry` at Scheme.lean:2578 (inside `intExpandBranches_openBranch_sat`'s fuel=0 case), that this goal is FALSE AT ITS CURRENT STATEMENT, with the Lean-verified counter-instance: `branches = [[F(p/\\q)@0]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]` -- every hypothesis of the lemma holds (`ILabelBound` holds trivially, `IExpandedConsistent`/`IAllAccessConsistent` are vacuous at `e = []`, lengths are `(1,1)`), the loop returns exactly this branch, and `IBranchSaturation.sat_fand`'s premise evaluates `true` while both disjuncts evaluate `false`. No proof can close this sorry at its current statement; it must be restated later (out of scope for this task -- this task only records the refutation).\n\n6. references.bib -- add the two dangling BibKeys currently cited in docstrings but absent from the file: `GargGenoveseNegri2012` (Garg, Genovese & Negri, 'Countermodels from Sequent Calculi in Multi-Modal Logics', LICS 2012 -- asserted 'added to references.bib in Phase 6' at Expansion.lean:210, but `grep -c GargGenoveseNegri2012 references.bib` returns 0) and a key for Dyckhoff 1992 ('Contraction-free sequent calculi for intuitionistic logic', cited in prose with no BibKey at Expansion.lean:264, `grep -c Dyckhoff references.bib` returns 0).\n\nConstraints: documentation and references.bib only. No `.lean` definition, theorem statement, or proof tactic may change. Do not attempt to close any sorry; do not change sorry locations or counts. Verify `lake build` still succeeds and `lake exe lint-style` passes on the touched files.\n\nOverlap note: task 456 (shared_tableau_containment_blocking, currently [NOT STARTED]) already lists 'add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979' in its own description. This task's edit for `GargGenoveseNegri2012` overlaps task 456's scope for that one key; `DershowitzManna1979` is unaffected and remains task 456's alone. Whichever of this task or task 456 lands `GargGenoveseNegri2012` first should leave a note in the file (or a task comment) for the other to avoid a duplicate/conflicting BibTeX entry.",
       "effort": "1-2 hours",
@@ -2381,14 +2025,15 @@
         "references.bib"
       ],
       "created": "2026-07-27T06:06:33Z",
-      "last_updated": "2026-07-27T06:06:33Z",
+      "last_updated": "2026-07-27T06:30:13Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/317_propositional_tableau_completeness/reports/14_blocker-analysis.md",
           "summary": "Spawn analysis from parent task"
         }
-      ]
+      ],
+      "session_id": "sess_1785133769_9cfe38"
     },
     {
       "project_number": 573,

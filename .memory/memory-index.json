@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-07-27T06:33:41Z",
+  "entry_count": 4,
+  "total_tokens": 865,
+  "entries": [
+    {
+      "id": "cslib-tests-conformance-harness-imports-eval",
+      "path": ".memory/10-Memories/cslib-tests-conformance-harness-imports-eval.md",
+      "title": "Executing a Cslib decision procedure in CslibTests: dual imports, #eval, no decide",
+      "created": "2026-07-26",
+      "modified": "2026-07-26",
+      "topic": "CSLib CslibTests conformance harness for decision procedures",
+      "source": "Task 552: tableau_calculus_conformance_rule_completeness_repair",
+      "tags": [
+        "CONFIG",
+        "cslib",
+        "CslibTests",
+        "conformance-harness",
+        "decision-procedure",
+        "tableau"
+      ],
+      "keywords": [
+        "CONFIG",
+        "cslib",
+        "CslibTests",
+        "conformance-harness",
+        "decision-procedure",
+        "tableau"
+      ],
+      "summary": "# Executing a Cslib decision procedure in CslibTests: dual imports, #eval, no decide To execute a Cslib decision procedu",
+      "token_count": 182,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "executed-conformance-before-completeness-proofs",
+      "path": ".memory/10-Memories/executed-conformance-before-completeness-proofs.md",
+      "title": "Run the decision procedure on a known corpus before investing in completeness proofs",
+      "created": "2026-07-26",
+      "modified": "2026-07-26",
+      "topic": "Executed conformance testing finds tableau defects type-checking cannot",
+      "source": "Task 552: tableau_calculus_conformance_rule_completeness_repair",
+      "tags": [
+        "TECHNIQUE",
+        "tableau",
+        "conformance",
+        "rule-completeness",
+        "decision-procedure",
+        "cslib"
+      ],
+      "keywords": [
+        "TECHNIQUE",
+        "tableau",
+        "conformance",
+        "rule-completeness",
+        "decision-procedure",
+        "cslib"
+      ],
+      "summary": "# Run the decision procedure on a known corpus before investing in completeness proofs A tableau calculus can be fully s",
+      "token_count": 153,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "intuitionistic-tableau-fitting-split-over-lindenbaum",
+      "path": ".memory/10-Memories/intuitionistic-tableau-fitting-split-over-lindenbaum.md",
+      "title": "Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion",
+      "created": "2026-07-26",
+      "modified": "2026-07-26",
+      "topic": "Intuitionistic tableau T-implication rule design",
+      "source": "Task 552: tableau_calculus_conformance_rule_completeness_repair",
+      "tags": [
+        "PATTERN",
+        "intuitionistic-tableau",
+        "Fitting1983",
+        "truth-lemma",
+        "bivalence",
+        "Lindenbaum"
+      ],
+      "keywords": [
+        "PATTERN",
+        "intuitionistic-tableau",
+        "Fitting1983",
+        "truth-lemma",
+        "bivalence",
+        "Lindenbaum"
+      ],
+      "summary": "# Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion When an intuitio",
+      "token_count": 150,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "temporal-tableau-426-427-file-territory",
+      "path": ".memory/10-Memories/temporal-tableau-426-427-file-territory.md",
+      "title": "Tasks 426 & 427 share Completeness.lean \u2014 serialize, do not parallelize",
+      "created": "2026-06-30",
+      "modified": "2026-06-30",
+      "topic": "Temporal tableau completeness implementation",
+      "source": "orchestrate 426,427,425,301 (session sess_1782818123_ab1047)",
+      "tags": [
+        "temporal-tableau",
+        "orchestration",
+        "territory",
+        "cslib",
+        "task-426",
+        "task-427"
+      ],
+      "keywords": [
+        "temporal-tableau",
+        "orchestration",
+        "territory",
+        "cslib",
+        "task-426",
+        "task-427"
+      ],
+      "summary": "# Tasks 426 & 427 share Completeness.lean \u2014 serialize, do not parallelize Tasks **426** (time-ordering / `ordConstraints",
+      "token_count": 380,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    }
+  ]
+}

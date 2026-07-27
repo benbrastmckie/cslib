@@ -7,21 +7,24 @@
 
 ## Recent Memories
 
-<!-- New memories will be added here automatically -->
+- 2026-07-26 — [[cslib-tests-conformance-harness-imports-eval]] — Executing a Cslib decision procedure in CslibTests: dual imports, #eval, no decide
+- 2026-07-26 — [[executed-conformance-before-completeness-proofs]] — Run the decision procedure on a known corpus before investing in completeness proofs
+- 2026-07-26 — [[intuitionistic-tableau-fitting-split-over-lindenbaum]] — Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion
+- 2026-06-30 — [[temporal-tableau-426-427-file-territory]] — Tasks 426 & 427 share Completeness.lean — serialize, do not parallelize
 
 ## By Category
 
 ### [PATTERN]
-<!-- Pattern memories -->
+- [[intuitionistic-tableau-fitting-split-over-lindenbaum]]
 
 ### [TECHNIQUE]
-<!-- Technique memories -->
+- [[executed-conformance-before-completeness-proofs]]
 
 ### [CONFIG]
-<!-- Configuration memories -->
+- [[cslib-tests-conformance-harness-imports-eval]]
 
 ### [WORKFLOW]
-<!-- Workflow memories -->
+- [[temporal-tableau-426-427-file-territory]]
 
 ### [INSIGHT]
 <!-- Insight memories -->
@@ -30,8 +33,11 @@
 
 Topics use slash-separated hierarchical paths (e.g., `python/libs/requests`, `meta/commands`).
 
-### python/
-<!-- Python-related memories -->
+### cslib/tableau/
+- [[cslib-tests-conformance-harness-imports-eval]] — CslibTests conformance harness for decision procedures
+- [[executed-conformance-before-completeness-proofs]] — Executed conformance testing finds defects type-checking cannot
+- [[intuitionistic-tableau-fitting-split-over-lindenbaum]] — Intuitionistic tableau T-implication rule design
+- [[temporal-tableau-426-427-file-territory]] — Temporal tableau completeness implementation
 
 ### meta/
 <!-- System building and .claude/ changes -->
@@ -39,9 +45,7 @@ Topics use slash-separated hierarchical paths (e.g., `python/libs/requests`, `me
 ### general/
 <!-- General programming knowledge -->
 
-<!-- Additional topic hierarchies will be added as memories are created -->
-
 ## Statistics
-- Total memories: 0
-- Topics: 0
-- Last updated: (not yet updated)
+- Total memories: 4
+- Topics: 1
+- Last updated: 2026-07-26

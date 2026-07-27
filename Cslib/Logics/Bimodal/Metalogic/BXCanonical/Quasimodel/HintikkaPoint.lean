@@ -19,13 +19,6 @@ Defines Hintikka points over a Sigma-closure.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Quasimodel/HintikkaPoint.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Quasimodel
@@ -47,6 +40,9 @@ structure HintikkaPoint (Sigma : Finset (Formula Atom)) where
   locally_consistent : ∀ f ∈ formulas, Formula.neg f ∉ formulas
   bot_free : (Formula.bot : Formula Atom) ∉ formulas
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 /-- Extensionality for Hintikka points: equality of formula sets implies equality of points. -/
 theorem HintikkaPoint.ext {Sigma : Finset (Formula Atom)} {h1 h2 : HintikkaPoint Sigma}
     (heq : h1.formulas = h2.formulas) : h1 = h2 := by
@@ -59,10 +55,14 @@ instance {Sigma : Finset (Formula Atom)} : DecidableEq (HintikkaPoint Sigma) :=
     else
       isFalse (fun h => heq (by cases h; rfl))
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem HintikkaPoint.mem_sigma {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma)
     {f : Formula Atom} (hf : f ∈ h.formulas) : f ∈ Sigma :=
   h.subset_sigma hf
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem HintikkaPoint.not_mem_of_neg_mem {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma)
     {f : Formula Atom} (hf : Formula.neg f ∈ h.formulas) : f ∉ h.formulas := by
   intro hf_in
@@ -76,16 +76,22 @@ noncomputable def sigmaSignatureFormulas (w : BXPoint Atom) (Sigma : Finset (For
     Finset (Formula Atom) :=
   Sigma.filter (fun f => f ∈ w.formulas)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 open Classical in
 theorem sigma_signature_subset (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     sigmaSignatureFormulas w Sigma ⊆ Sigma :=
   Finset.filter_subset _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 open Classical in
-theorem sigma_signature_mem_iff (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) (f : Formula Atom) :
+theorem sigma_signature_mem_iff (w : BXPoint Atom) (Sigma : Finset (Formula Atom))
+    (f : Formula Atom) :
     f ∈ sigmaSignatureFormulas w Sigma ↔ f ∈ Sigma ∧ f ∈ w.formulas := by
   simp [sigmaSignatureFormulas, Finset.mem_filter]
 
+set_option linter.unusedDecidableInType false in
 open Classical in
 theorem sigma_signature_consistent (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     ∀ f ∈ sigmaSignatureFormulas w Sigma,
@@ -94,6 +100,8 @@ theorem sigma_signature_consistent (w : BXPoint Atom) (Sigma : Finset (Formula A
   rw [sigma_signature_mem_iff] at hf hfn
   exact set_consistent_not_both w.is_mcs.1 f hf.2 hfn.2
 
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 open Classical in
 theorem sigma_signature_bot_free (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     (Formula.bot : Formula Atom) ∉ sigmaSignatureFormulas w Sigma := by
@@ -101,7 +109,8 @@ theorem sigma_signature_bot_free (w : BXPoint Atom) (Sigma : Finset (Formula Ato
   rw [sigma_signature_mem_iff] at h
   have : SetConsistent FrameClass.Base w.formulas := w.is_mcs.1
   exact this [(Formula.bot : Formula Atom)] (fun ψ hψ => by simp at hψ; rw [hψ]; exact h.2)
-    ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
+    ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom)
+      (by simp)⟩
 
 open Classical in
 /-- Constructs the Hintikka point at `w` by restricting its formulas to `Sigma`. -/
@@ -119,6 +128,7 @@ theorem sigma_signature_mem {w : BXPoint Atom} {Sigma : Finset (Formula Atom)} {
 
 /-! ## Finiteness -/
 
+set_option linter.unusedDecidableInType false in
 theorem hintikka_point_formulas_injective (Sigma : Finset (Formula Atom)) :
     Function.Injective (fun (h : HintikkaPoint Sigma) => h.formulas) :=
   fun _h1 _h2 heq => HintikkaPoint.ext heq

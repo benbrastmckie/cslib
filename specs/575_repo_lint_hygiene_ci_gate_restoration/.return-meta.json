@@ -1,7 +1,44 @@
 {
   "status": "partial",
+  "started_at": "2026-07-27T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md"
+    }
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 1,
+    "vacuous_count_note": "Same pre-existing false positive as prior cycles (Computability/URM/Basic.lean:92), unchanged by this dispatch. No new vacuous definitions introduced.",
+    "axiom_count": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "wfail_build_exact_5_baseline_sorries": true,
+    "lake_test_passed": true,
+    "note": "This dispatch touched zero .lean files (Phase 6 and Phase 7 were record-keeping/documentation-scoping only, per their reopened scope). Verified lake build --wfail --iofail still exits 1 with exactly the 5 baseline sorry warnings, lake test exits 0, lake exe checkInitImports clean, axiom count unchanged at 26. The full 7-step CI pipeline was not re-run in its entirety since no source changed; the checks that could regress from a plan-file-only + reverted-experiment dispatch were specifically re-verified instead."
+  },
+  "partial_progress": {
+    "stage": "phase-6-and-phase-7-reopen-resolution-complete",
+    "details": "Phase 6 (Sorry visibility, REOPENED): re-closed as COMPLETED. Verified the live 18-site warn.sorry count (all declaration-scoped, 0 file-scoped) exactly matches the reopen's per-file breakdown. Read all 18 sites individually; every one already carries a documented technical-blocker reason at the site (external 'WeakCanonical discrete-completeness port' / 'continuous-frame completeness' dependency) -- no new comments needed, no task-number citations found. Measured (via a scratch, uncommitted, fully-reverted experiment across all 5 files) the actual warning count if all 18 suppressions were removed: 21 additional warnings (not 18 -- 2 of ChronicleToCountermodel.lean's 7 declarations are structures with multiple independently-warning sorry'd fields), correcting the prior '23-sorry census' figure to 26 (5 existing + 21). Disposition recorded: suppression retained and justified (Propositional/Modal's unsuppressed sorries have no analogous external-port dependency), with an explicit trigger to revisit once the WeakCanonical port lands. Phase 7 (Script and documentation defects, REOPENED): re-closed as PARTIAL, 0 of 2 reopened items landed, both excluded by finding. Item 1 (NOTATION.md logic-notation-scoping section): drafted, then found NOTATION.md is byte-identical to upstream/main (git cat-file -e exits 0) -- out of scope under this dispatch's own upstream-exposure carve-out hard constraint; draft reverted before commit (git checkout --), zero net change to NOTATION.md; recommended as an upstream PR instead. Item 2 (5 stale NOTE: block deletions): located and read all 5 sites; found they are NOT stale -- each is live, accurate documentation of the still-unresolved S/Since notation collision, and deleting them would strip load-bearing explanation while the collision remains real. Left in place; disposition recorded to delete them only alongside the (already-deferred) S->Sys rename. Updated the Definition of Done bullets for both phases to reflect the corrected/final dispositions.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 5,
+    "phases_total": 8,
+    "phases_completed_note": "Phases 1, 2, 4, 6, 8 = COMPLETED. Phase 3 = IN PROGRESS (reopened by a prior cycle; out of scope for this dispatch, not touched). Phase 5 = PARTIAL (173/~427 local-only sites done, 254 remain; out of scope for this dispatch, not touched). Phase 7 = PARTIAL (0 of 2 reopened items landed, both excluded by finding this cycle -- see details)."
+  },
+  "requires_user_review": true,
+  "review_reason": "Phase 7's two reopened items were BOTH excluded by finding rather than completed as literally scoped: (1) NOTATION.md turned out to be upstream-shared (byte-identical to upstream/main), which this dispatch's own hard constraint says to skip -- the drafted section was reverted, unlanded, and needs a user decision on whether to route it as an upstream PR or override the carve-out for this specific docs-only file. (2) The 5 'stale NOTE: blocks' were found to be NOT stale and were deliberately left in place rather than deleted, contradicting the reopen's literal instruction -- flagging so a human can confirm this judgment call (deleting live documentation of an unresolved collision would have been a regression) rather than silently diverging from the explicit dispatch instruction.",
   "metadata": {
-    "cycles_used": 5,
-    "final_state": "implementing"
+    "session_id": "sess_1785173891_2df686",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
+    "compliance_check": "passed"
   }
 }

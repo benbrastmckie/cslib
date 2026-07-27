@@ -77,6 +77,15 @@ if ! lake build --wfail --iofail; then
   failed=1
 fi
 
+# Step 6 is deliberately independent of step 5. A blanket suppression makes step 5 pass by
+# hiding the warning rather than fixing it, so a green --wfail build is not evidence that
+# suppressions did not grow. This check is what distinguishes the two.
+echo "6. Blanket linter-suppression ratchet..."
+if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-lint-suppressions.sh"; then
+  echo "  FAIL: blanket linter suppressions increased"
+  failed=1
+fi
+
 echo "=== Pre-PR Verification Complete ==="
 if [ "$failed" -ne 0 ]; then
   echo "One or more checks FAILED."

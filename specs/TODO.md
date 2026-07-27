@@ -1,5 +1,5 @@
 ---
-next_project_number: 579
+next_project_number: 580
 ---
 
 # TODO
@@ -103,6 +103,15 @@ next_project_number: 579
 578 [NOT STARTED] — Untrack and gitignore the 35 ephemeral orchestrator runtime files
 
 ## Tasks
+
+### 579. Lint suppression ratchet gate
+- **Status**: [COMPLETED]
+- **Task Type**: meta
+- **Dependencies**: None
+
+**Description**: Stop the blanket-linter-suppression ratchet by gating file-scoped suppressions in CI and pre-PR, so hygiene holds as new code is written instead of accumulating into periodic cleanup tasks. ROOT CAUSE ESTABLISHED BY SURVEY: a file-scoped `set_option linter.X false` (no trailing `in`) silences every violation in the file INCLUDING every future one, so code later added to that file is unlinted by construction -- coverage accumulates rather than decaying. Ordinary tech debt gets noisier as a file grows and eventually forces attention; this gets quieter, which is why it went unnoticed. Sampling 14 files carrying blanket suppressions found 14 of 14 had the suppression in the files VERY FIRST COMMIT -- none were added later in response to a linter complaining, so this is the authoring habit (copy-paste from a neighbouring file) and not decay under feature pressure. There is no Lean file template in this repo, so there was nothing to fix at the template level; a gate is the intervention that works because it interrupts the copy at the moment it happens. Contributing factors: no active git hooks; scripts/pre-pr-check.sh carries a real --wfail gate but is a manual pre-PR script that almost nothing passes through, since this fork is ~3900 commits ahead of upstream with few PRs; and the CI --wfail gate itself has been exiting 1, and a red gate carries no information. DELIVERED: (1) scripts/check-lint-suppressions.sh -- a ratchet gate reading a per-file ceiling from scripts/lint-suppression-baseline.txt, failing when a file exceeds its allowance or a previously-clean file introduces one, reporting improvements without failing, with --update to re-baseline and --list to rank. Counts may only decrease. Declaration-scoped `... in` suppressions are always allowed and deliberately uncounted, because they die with the declaration they annotate and cannot silence future code. (2) Baseline captured at 276 blanket suppressions across 108 files. (3) Wired as step 6 of scripts/pre-pr-check.sh, deliberately independent of the step-5 --wfail gate: a blanket suppression makes step 5 pass by HIDING a warning rather than fixing it, so a green --wfail build is not evidence suppressions did not grow. (4) New .github/workflows/lint-hygiene.yml rather than a step added to lean_action_ci.yml -- every existing workflow is shared with the leanprover/cslib upstream remote, so editing one adds a conflict hunk to every future sync while a new file conflicts with nothing; the check needs no Lean or Mathlib and runs in seconds. (5) docs/lint-suppression-policy.md documenting the rule, the ratchet rationale, the re-baseline workflow, and the two elaboration traps already hit in this tree (`omit [X] in` changes a declarations elaborated type unlike the warning-only `set_option ... in`; and `set_option ... in` must precede a doc comment or the file fails to parse). CONTRIBUTING.md was deliberately NOT edited because it is shared with upstream; adding a short pointer there is a follow-up judgment call for the user, costing one line of divergence in exchange for contributor visibility. VERIFIED: gate correctly fails a newly-blanket-suppressed file, correctly fails the trailing-comment blanket form, and correctly passes the same file when the suppression is declaration-scoped; clean run at the captured baseline exits 0.
+
+---
 
 ### 578. Untrack ephemeral orchestrator runtime files
 - **Status**: [NOT STARTED]

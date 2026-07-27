@@ -1,7 +1,36 @@
 {
   "status": "partial",
+  "started_at": "2026-07-27T22:21:05Z",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md"
+    }
+  ],
+  "partial_progress": {
+    "stage": "phase5-cycle19-complete",
+    "details": "Processed 2 files: Separation/Hierarchy/HierarchyDefs.lean (4 blanket suppressions -> 0, closes the count-4 tier entirely) and Soundness/FrameClassVariants.lean (6 blanket suppressions -> 0, reduces count-6 tier from 5 to 4 files). 10 blanket suppression sites resolved. Suppression audit: 246 -> 256 sites cumulative (50 files). Ratchet: 165 -> 155 blanket lines repo-wide (141 local-only across 71 files in scope).",
+    "phases_completed": 7,
+    "lint_count_start": null,
+    "lint_count_current": null
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 28,
+    "vacuous_count": 1,
+    "axiom_count": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "wfail_build_warnings": 5,
+    "wfail_build_note": "exactly the 5 documented baseline sorry warnings, zero new, unchanged from cycle 18",
+    "lake_shake_note": "exactly 12 upstream-shared files flagged, zero local-only findings",
+    "lake_test_exit": 0
+  },
   "metadata": {
-    "cycles_used": 5,
-    "final_state": "implementing"
+    "session_id": "sess_1785189125_8d6d8d",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

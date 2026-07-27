@@ -15,35 +15,37 @@
   `.claude/rules/git-workflow.md` (commit-per-green-substep), `CONTRIBUTING.md`
 - **Type**: cslib
 - **Created**: 2026-07-27
-- **Last updated**: 2026-07-27 (cycle 17 close — Phase 5 at 222/… sites, 174 local-only blanket
-  suppressions across 78 files remaining; see "Upstream-exposure scope" for the rescope this
+- **Last updated**: 2026-07-27 (cycle 19 close — Phase 5 at 256/… sites, 141 local-only blanket
+  suppressions across 71 files remaining; see "Upstream-exposure scope" for the rescope this
   denominator is measured against)
 
 ---
 
 ## RESUME HERE
 
-Nineteenth resume (cycle 18 closure — this dispatch, processed via `/implement`). Status as of
+Twentieth resume (cycle 19 closure — this dispatch, processed via `/implement`). Status as of
 this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all COMPLETED (Phase 1's regression was re-closed in
 cycle 13; Phase 3 was re-closed in cycle 12 after its own reopen; Phase 4's post-close `lake
 shake` regression was re-closed in cycle 16). Only Phase 5 (suppression audit) remains, PARTIAL
-at 246 sites done (48 files fully processed), 151 blanket suppressions across 73 local-only files
-remaining in scope (down from 174/78-scope at cycle 17's close — see Phase 5's cycle-18 entry for
-the live re-derivation methodology, the 6-file breakdown, and a corrected upstream-split
-methodology note: filter to `fs > 0` before the upstream gate, or the file count inflates).**
+at 256 sites done (50 files fully processed), 141 blanket suppressions across 71 local-only files
+remaining in scope (down from 151/73-scope at cycle 18's close — see Phase 5's cycle-19 entry for
+the full 2-file breakdown: `HierarchyDefs.lean` closes the count-4 tier entirely; `FrameClassVariants.lean`
+reduces the count-6 tier from 5 to 4 files).**
 
-**What remains for Phase 5, stated explicitly**: 174 local-only blanket suppressions across 78
-files, split roughly as: 4 files in the count-6 tier (2 already confirmed done this cycle —
-`Eliminations.lean` closed to 1 non-`in` `openClassical` line, itself a correct permanent end
-state, not residual work), 6 files in the count-4 tier (all confirmed local-only), and a
-count-3/count-2/count-1 tail of roughly 68 more files not yet individually surveyed. At this
-cycle's observed rate (35 sites / 8 files in one dispatch, faster than the historical ~20-27
-sites/cycle average because several of this cycle's files were small and mechanical), clearing the
-remainder is estimated at **roughly 6-9 more cycles** — see Phase 5's cycle-17 entry for the full
-per-file breakdown, the live upstream/local-only split methodology
-(`git cat-file -e upstream/main:<path>` per file, not a cached repo-wide subtraction), and two new
-safety findings (the `openClassical` non-`in` permanent-suppression case, and the `unusedArguments`
-out-of-scope clarification).
+**What remains for Phase 5, stated explicitly**: 141 local-only blanket suppressions across 71
+files, split roughly as: 4 files in the count-6 tier (all confirmed local-only; `RecursiveWalks.lean`,
+1125 lines, is next per smaller-files-first), zero files in the count-4 tier (fully closed this
+cycle), and a count-3/count-2/count-1 tail of roughly 66 more files not yet individually surveyed.
+At the blended historical rate (~20-30 sites/cycle, though cycle 19's own rate was 10 sites/2
+files due to `FrameClassVariants.lean`'s unusually high 61-warning count), clearing the
+remainder is estimated at **roughly 6-9 more cycles** — see Phase 5's cycle-19 entry for the full
+per-file breakdown and this cycle's two new findings: (1) when several `unusedSimpArgs` warnings
+flag different unused arguments on the *same* simp-only line, collect every warning for that
+line before editing (each one's "Hint" only shows one argument removed at a time); (2)
+declaration-scoped `set_option linter.flexible false in` is a repo-precedented (94 pre-existing
+uses), safe narrowing for `linter.flexible` sites whose `simp` interacts with multi-step
+reductions too risky to manually reconstruct — prefer manual `simp only` reconstruction only
+when the pattern is simple and well-understood.
 
 **Cycle 16, item 1 (this dispatch) — Phase 4's `lake shake` regression re-closed.** The cycle-15
 "baseline noise, ~15 files, not fixed" finding was investigated: a live `lake shake --add-public
@@ -152,9 +154,9 @@ new sites.
 To pick Phase 5 up cold:
 
 1. Confirm the baseline (3 commands, ~5 min) — **expect exactly 5 warnings, all documented
-   sorries, and lake shake reporting only the 12 upstream-shared files, as of cycle 18**:
+   sorries, and lake shake reporting only the 12 upstream-shared files, as of cycle 19**:
    ```bash
-   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 18
+   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 19
    lake test                     # expect exit 0, 0 errors
    lake shake --add-public --keep-implied --keep-prefix Cslib   # expect exactly 12 upstream-shared files, zero local-only
    ```
@@ -162,14 +164,15 @@ To pick Phase 5 up cold:
    before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's and Phase 4's closure criteria are once
    again empirically satisfied (no further action needed on any of them).
-3. **Only Phase 5 remains.** 48 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10/11/12/14/15/16/17/18 sub-entries for the complete per-file list) — do not
+3. **Only Phase 5 remains.** 50 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11/12/14/15/16/17/18/19 sub-entries for the complete per-file list) — do not
    revisit any of them. Re-derive the live worst-offender list with the command in Phase 5's
    latest cycle entry, then **filter it through the local-only gate above** before picking a
-   target. Prioritize `Separation/Hierarchy/HierarchyDefs.lean` (1001 lines, the sole remaining
-   count-4-tier file) ahead of the count-6 tier (5 files, all 900+ lines), using the method Phase
-   5's section documents: remove all of a file's suppressions, rebuild, categorize what surfaces,
-   fix the mechanical categories, narrow the rest to declaration/usage-site scope. **Read the
+   target. **The count-4 tier is now fully closed** — go directly to the count-6 tier (4 files
+   remaining, all 900+ lines), smaller-first: `RecursiveWalks.lean` (1125 lines) next, using the
+   method Phase 5's section documents: remove all of a file's suppressions, rebuild, categorize
+   what surfaces, fix the mechanical categories, narrow the rest to declaration/usage-site scope.
+   **Read the
    `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using `omit [...] in`
    anywhere** — it changes elaboration (removes an instance from scope) and can silently break
    compilation for declarations whose *proof body* (not just stated type) needs the instance;
@@ -200,7 +203,18 @@ To pick Phase 5 up cold:
    `decide_eq_true_eq`, etc.) the warning names; (b) when re-deriving the worst-offender list,
    filter to `fs > 0` (a positive *blanket*-suppression count) before running the upstream gate —
    otherwise files that only contain declaration-scoped `... in` lines inflate the
-   upstream-carved-out file count without changing the blanket-line total.
+   upstream-carved-out file count without changing the blanket-line total. **Also read the
+   cycle-19 findings**: (a) when several `unusedSimpArgs` warnings flag *different* unused
+   arguments on the same `simp only [...]` line, each warning's "Hint" only removes the one
+   argument it names — collect every warning for that line before editing and apply the
+   fully-reduced argument list in one edit, or an intermediate edit will still carry a
+   now-also-unused argument the next warning would have flagged; (b) declaration-scoped
+   `set_option linter.flexible false in` (94 pre-existing repo-wide uses before this cycle) is a
+   safe, sanctioned narrowing for `linter.flexible` sites whose `simp` interacts with multi-step
+   reductions (`and_true` cleanup, nested case splits) too risky to manually reconstruct per the
+   cycle-18 caution — prefer manual `simp only` reconstruction only when the pattern is simple
+   and well-understood (a single Bool-and unfold, or an existing "Try this" hint elsewhere in the
+   same file that rebuild-verifies cleanly).
 4. No items require a user decision to make further Phase 5 progress. The three items formerly
    listed as blocking (see "Open decisions" below) are all genuinely out of scope for 575, not
    blockers to continuing Phase 5.
@@ -862,7 +876,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 246 sites done; 151 blanket suppressions across 73 local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 256 sites done; 141 blanket suppressions across 71 local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -1880,6 +1894,107 @@ rate, though slower per-file than cycle 17's 35-sites/8-files pace because two o
 files (`RRelation.lean` ×2) needed non-trivial `linter.flexible` narrowing rather than purely
 mechanical `show`→`change`/longLine wraps. At the current blended rate, clearing the remaining
 **151 local-only sites** is roughly **5-8 more cycles**.
+
+**Cycle 19 (this dispatch) — 2 files processed, both committed individually after a clean
+scoped rebuild plus downstream-importer rebuilds.** Per the resume instruction, worked
+`Separation/Hierarchy/HierarchyDefs.lean` first (1001 lines, the count-4 tier's final file,
+4→0, commit `ff84e0f2`), then moved into the count-6 tier smaller-first and processed
+`Soundness/FrameClassVariants.lean` (931 lines, 6→0, commit `8258d8a3`). This clears the count-4
+tier entirely and reduces the count-6 tier from 5 files to 4.
+
+`HierarchyDefs.lean` surfaced 24 `linter.flexible` warnings and 2 `style.longLine` warnings on
+removal (zero `emptyLine`/`setOption`). 6 sites (the `isUFree`/`isSFree` Bool-and pattern in
+`u_free_has_single_U_type`/`s_free_has_single_U_type`) were mechanically narrowed to
+`simp only [isUFree/isSFree, Bool.and_eq_true] at h` (imp/snce cases) or
+`simp only [isUFree/isSFree] at h` (box case, no `Bool.and` needed); the remaining 18 flexible
+sites (spanning 9 theorems: `has_single_U_type_neg/and/or`, `abstract_subst_roundtrip`,
+`abstract_untl_correct`, `abstract_untl_count_le`, `abstract_snce_subst_roundtrip`,
+`abstract_untl_preserves_separated`, `replace_untl_args_preserves_separated`) were narrowed to
+declaration-scoped `set_option linter.flexible false in` rather than manually reconstructed,
+since their goal/hypothesis-modifying `simp` calls interact with multi-step reductions
+(`and_true` cleanup, nested case splits) where a literal `simp only` reconstruction risked
+silently dropping a def-unfold lemma per the cycle-18 finding — this repo-wide pattern (94
+pre-existing uses of `set_option linter.flexible false in` before this cycle) is an established,
+sanctioned narrowing, not a new suppression. 2 longLine wraps, no semantic change.
+
+`FrameClassVariants.lean` surfaced 61 warnings across 4 categories on removal — the largest
+single-file warning count processed in this phase so far — and all 61 were resolved
+*mechanically*, needing zero declaration-scoped `set_option` fallback: **38 `unusedSimpArgs`**
+(dropped `Formula.and`/`Formula.or`/`Formula.neg` from `simp only [...]` calls per the linter's
+own reported unused-argument list; several lines had 2-3 flagged args from the same call, so
+each site's final argument set was cross-checked against *every* "unused" report for that line
+before editing, not just the first); **4 `style.show`** (`show X; exact h` sites that changed
+the goal via defeq unfold of `Order.succ/pred^[n+1]`, converted to `change` per the linter's own
+message); **4 `linter.flexible`** (`simp; exact h(n|j)` sites proving
+`Order.succ/pred^[k+1] t = s` identities, narrowed to
+`simp only [Function.iterate_succ, Function.comp_apply]` — matched the exact "Try this" pattern
+the build log itself suggested for a structurally identical site elsewhere in the same file;
+verified by rebuild per the cycle-18 caution, not pasted blind); **15 `style.longLine`**,
+mechanical wraps.
+
+Suppression-audit progress: 246 → 256 sites audited cumulative (50 files fully processed
+cumulative). Ratchet: 165 → 155 blanket suppressions repo-wide. Live per-file split: 155 total =
+**141 local-only in-scope (71 files) + 14 upstream-carved-out (unchanged)**.
+
+Full CSLib CI pipeline run once at cycle end: `lake build --wfail --iofail` (exactly 5 baseline
+sorry warnings — `FrameSoundness.lean:1252`, `Intuitionistic/Scheme.lean:570,2583`,
+`Intuitionistic/Completeness.lean:124`, `Minimal/Completeness.lean:118` — zero new anywhere),
+`lake exe checkInitImports` (clean, no output), `lake exe lint-style` (clean, no output), `lake
+shake --add-public --keep-implied --keep-prefix` (exactly the 12 upstream-shared files flagged,
+zero local-only findings), `lake exe mk_all --module` ("No update necessary"), `lake test` (exit
+0, same 5 baseline sorry warnings plus the same one pre-existing unrelated
+`backward.privateInPublic` warning in `CslibTests/FreeMonad.lean`). True sorry census
+(comment-stripped, `warn.sorry`-excluded, re-derived live per "Measurement notes"): 28,
+unchanged. Vacuous-def grep unchanged at the single pre-existing false positive
+(`Computability/URM/Basic.lean:92`); axiom count unchanged at 26. `git show` on both of this
+cycle's commits individually confirmed zero `sorry` lines touched.
+
+**Resume point (cycle 19 close)**: the 2 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10, 11, 12, 14, 15, 16, 17, 18 are done — do not revisit (50 files total). Re-verify the
+worst-offender list before starting the next cycle with the same `fs > 0`-filtered command
+above. As of cycle 19's end (155 total remaining blanket suppression lines, **141 local-only
+in-scope across 71 files**), **the count-6 tier is down to 4 files**:
+`Temporal/Metalogic/Chronicle/CounterexampleElimination/{RecursiveWalks (1125 lines),
+MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/BXCanonical/Chronicle/
+CounterexampleElimination/Interface.lean` (3048 lines — do not pick this one first),
+`Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean` (1208 lines). Pick
+`RecursiveWalks.lean` (1125 lines) next per smaller-files-first-within-tier (re-verify its line
+count and suppression count with `wc -l`/`grep` before starting, since counts only ever go
+down). The count-4 tier is now fully closed — do not look for count-4 files. Below the count-6
+tier, a count-3/count-2/count-1 tail of roughly 66 more files remains (spot-checked in earlier
+cycles, not yet individually processed).
+
+Apply the same method: remove all of a file's suppressions, rebuild, categorize what surfaces
+into vestigial / mechanically-fixable / needs-real-proof-work, fix what's mechanical, narrow the
+rest to declaration-scope, re-baseline the ratchet in the same commit — carrying forward every
+safety lesson from cycles 6-19 (see the cycle-11/12 addenda above for the full list through cycle
+12, the cycle-14 declaration-mapping-verification lesson, the cycle-15 Edit-tool
+false-duplicate-match lesson, the cycle-16 mirrored-proof-block `replace_all` lesson, the
+cycle-17 `openClassical`/`unusedArguments` findings, the cycle-18 "Try this" trace-verification
+finding, and this cycle's finding: when a file has many `unusedSimpArgs` warnings and several
+flag *multiple* unused arguments on the same `simp only [...]` line, do not fix them one at a
+time from a single warning's "Hint" — collect every warning for that line first (each reports
+only one arg removed at a time) and apply the fully-reduced argument list in one edit, or an
+intermediate edit will still carry a now-also-unused argument the next warning would have
+flagged. Also confirmed as safe and repo-precedented (94 pre-existing uses before this cycle):
+declaration-scoped `set_option linter.flexible false in`, placed immediately before the
+declaration's doc comment, is an acceptable narrowing for `linter.flexible` sites whose
+goal/hypothesis-modifying `simp` interacts with multi-step reductions where a literal
+`simp only` reconstruction risks dropping a def-unfold lemma — prefer manual `simp only`
+reconstruction when the pattern is simple and well-understood (e.g. a single Bool-and unfold, or
+a `Function.iterate_succ`/`Function.comp_apply` identity matching an existing "Try this" hint
+elsewhere in the same file), but do not force it when the risk of a silent semantic gap is high.
+
+**Effort estimate for future cycles**: this cycle cleared 10 sites (2 files) in one dispatch —
+below the ~20-30 sites/cycle blended historical average, because `FrameClassVariants.lean`'s 61
+raw warnings (across 4 categories, the largest single-file count processed in this phase) took
+disproportionate effort per suppression-count-unit relative to its own `fs=6` starting count.
+Files with many mechanically-fixable `unusedSimpArgs`/`longLine` warnings can still be
+slow in wall-clock terms even though every fix is safe and low-risk. At a blended rate accounting
+for this variance, clearing the remaining **141 local-only sites** is roughly **6-9 more
+cycles** — the count-6 tier's remaining 4 files (all 900+ lines, `Interface.lean` at 3048 lines)
+should be treated as an upper-bound-effort tier; the count-3/2/1 tail below it has historically
+gone faster per file.
 
 ### Phase 6: Sorry visibility [COMPLETED]
 

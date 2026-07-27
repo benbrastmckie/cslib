@@ -8,7 +8,6 @@
 # Format: <count> <path>
 1 Cslib/Computability/Automata/DA/Conversions.lean
 2 Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean
-3 Cslib/Foundations/Logic/Metalogic/Chronicle/CounterexampleElimination/Structures.lean
 3 Cslib/Foundations/Logic/Metalogic/Chronicle/SinceSeedConsistency.lean
 2 Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Fsub/Opening.lean

@@ -49,10 +49,6 @@ To avoid a forward dependency onto that earmarking decision,
 * Burgess 1982: "Axioms for tense logic II: Time periods", Section 2.
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Metalogic.Chronicle
@@ -242,7 +238,7 @@ theorem burgessR3Maximal_bot_not_mem (I : ChronicleInterface F) {A B C : Set F}
     (h_cons : CISetConsistent I B) :
     I.bot ∉ B := by
   intro h_bot
-  exact h_cons [I.bot] (fun φ hφ => by simp at hφ; rw [hφ]; exact h_bot)
+  exact h_cons [I.bot] (fun φ hφ => by simp only [List.mem_singleton] at hφ; rw [hφ]; exact h_bot)
     ⟨I.assumption (by simp)⟩
 
 end Cslib.Logic.Metalogic.Chronicle

@@ -92,7 +92,6 @@
 2 Cslib/Logics/Bimodal/ProofSystem/Substitution.lean
 1 Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean
 1 Cslib/Logics/Temporal/Metalogic/Chronicle/CanonicalChain.lean
-5 Cslib/Logics/Temporal/Metalogic/Chronicle/ChronicleConstruction.lean
 2 Cslib/Logics/Temporal/Metalogic/Chronicle/ChronicleToCountermodel.lean
 3 Cslib/Logics/Temporal/Metalogic/Chronicle/ChronicleTypes.lean
 6 Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean

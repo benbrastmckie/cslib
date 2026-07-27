@@ -56,12 +56,6 @@ an enumeration of `Rat x Formula x Formula x Bool`. Since both `Rat` and
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -86,6 +80,7 @@ noncomputable def singletonChronicle (A : Set (Formula Atom)) : Chronicle Atom :
     g := fun _ _ => ∅
     dom := {(0 : Rat)} }
 
+set_option linter.unusedSectionVars false in
 /--
 The singleton chronicle satisfies C0 when A is an MCS.
 -/
@@ -97,12 +92,14 @@ theorem singleton_c0 {A : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsis
   subst hx
   exact h_mcs
 
+set_option linter.unusedSectionVars false in
 /--
 The domain of the singleton chronicle is {0}.
 -/
 theorem singleton_dom (A : Set (Formula Atom)) :
     (singletonChronicle A).dom = {(0 : Rat)} := rfl
 
+set_option linter.unusedSectionVars false in
 /--
 f(0) = A in the singleton chronicle.
 -/
@@ -130,6 +127,7 @@ theorem singleton_invariant {A : Set (Formula Atom)} (h_mcs : Temporal.SetMaxima
     simp only [singletonChronicle, Finset.mem_singleton] at hx hy
     subst hx; subst hy; exact absurd hxy (lt_irrefl _)
 
+set_option linter.unusedSectionVars false in
 /--
 The singleton chronicle satisfies C2' vacuously (no adjacent pairs in {0}).
 -/
@@ -152,6 +150,7 @@ arbitrary MCS A with G(p), C with p.neg). The correct approach is
 context-specific seed construction within each elimination function.
 -/
 
+set_option linter.unusedSectionVars false in
 /--
 The singleton chronicle satisfies C4 vacuously: a singleton domain has no
 pairs x < y, so the universal quantifier is vacuously true.
@@ -164,6 +163,7 @@ theorem singleton_c4 (A : Set (Formula Atom)) :
   subst hx; subst hy
   exact absurd hxy (lt_irrefl _)
 
+set_option linter.unusedSectionVars false in
 /--
 The singleton chronicle satisfies C4' vacuously (mirror of C4).
 -/
@@ -193,7 +193,8 @@ instance : Countable (@PotentialCounterexample Atom) :=
 /-- PotentialCounterexample is infinite since Rat embeds into it. -/
 instance : Infinite (@PotentialCounterexample Atom) :=
   Infinite.of_injective
-    (fun (q : ℚ) => PotentialCounterexample.mk q 0 (Formula.bot : Formula Atom) (Formula.bot : Formula Atom) .c5_forward)
+    (fun (q : ℚ) => PotentialCounterexample.mk q 0
+      (Formula.bot : Formula Atom) (Formula.bot : Formula Atom) .c5_forward)
     (fun a b h => by injection h)
 
 /-- PotentialCounterexample is Denumerable (countable + infinite). -/
@@ -303,8 +304,10 @@ theorem omega_chain_c2' (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalCon
 /--
 The elimination result at step n (the intermediate chronicle before g-rebuild).
 -/
-noncomputable def omegaChainElimResult (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
-    (n : Nat) : EliminationResult (omegaChain A h_mcs n).val (counterexampleEnum (Nat.unpair n).2) :=
+noncomputable def omegaChainElimResult (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
+    (n : Nat) :
+    EliminationResult (omegaChain A h_mcs n).val (counterexampleEnum (Nat.unpair n).2) :=
   eliminatePotentialCounterexample
     (omegaChain A h_mcs n).val
     (omegaChain A h_mcs n).property.1
@@ -888,7 +891,8 @@ Since limitG(x,z) = limitG(x,y) inter limitF(y) inter limitG(y,z), the
 intersection is contained in limitF(y). This is the critical property for
 the guard phi to propagate to intermediate points.
 -/
-theorem limit_c3_interval_subset_point (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem limit_c3_interval_subset_point (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (x y z : Rat)
     (hx : x ∈ limitDom A h_mcs) (hy : y ∈ limitDom A h_mcs)
     (hz : z ∈ limitDom A h_mcs) (hxy : x < y) (hyz : y < z) :
@@ -901,7 +905,8 @@ theorem limit_c3_interval_subset_point (A : Set (Formula Atom)) (h_mcs : Tempora
 /--
 C3 at the limit: limitG(x,z) subset limitG(x,y) for x < y < z.
 -/
-theorem limit_c3_interval_subset_left (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem limit_c3_interval_subset_left (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (x y z : Rat)
     (hx : x ∈ limitDom A h_mcs) (hy : y ∈ limitDom A h_mcs)
     (hz : z ∈ limitDom A h_mcs) (hxy : x < y) (hyz : y < z) :
@@ -914,7 +919,8 @@ theorem limit_c3_interval_subset_left (A : Set (Formula Atom)) (h_mcs : Temporal
 /--
 C3 at the limit: limitG(x,z) subset limitG(y,z) for x < y < z.
 -/
-theorem limit_c3_interval_subset_right (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem limit_c3_interval_subset_right (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (x y z : Rat)
     (hx : x ∈ limitDom A h_mcs) (hy : y ∈ limitDom A h_mcs)
     (hz : z ∈ limitDom A h_mcs) (hxy : x < y) (hyz : y < z) :
@@ -977,7 +983,8 @@ theorem limit_forward_G (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalCon
     intro h_abs
     exact someFuture_allFuture_neg_absurd h_mcs_x φ.neg h_abs h_G_nn
   set top := Formula.bot.imp Formula.bot with htop_def
-  have h_bx10 : DerivationTree FrameClass.Base [] ((Formula.untl top φ.neg).imp (Formula.someFuture φ.neg)) :=
+  have h_bx10 : DerivationTree FrameClass.Base []
+      ((Formula.untl top φ.neg).imp (Formula.someFuture φ.neg)) :=
     DerivationTree.axiom [] _ (Axiom.until_F top φ.neg) trivial
   have h_until_not : Formula.untl top φ.neg ∉ limitF A h_mcs x := by
     intro h_in
@@ -1030,7 +1037,8 @@ theorem limit_backward_H (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalCo
     intro h_abs
     exact somePast_allPast_neg_absurd h_mcs_x φ.neg h_abs h_H_nn
   set top := Formula.bot.imp Formula.bot with htop_def
-  have h_bx10' : DerivationTree FrameClass.Base [] ((Formula.snce top φ.neg).imp (Formula.somePast φ.neg)) :=
+  have h_bx10' : DerivationTree FrameClass.Base []
+      ((Formula.snce top φ.neg).imp (Formula.somePast φ.neg)) :=
     DerivationTree.axiom [] _ (Axiom.since_P top φ.neg) trivial
   have h_since_not : Formula.snce top φ.neg ∉ limitF A h_mcs x := by
     intro h_in
@@ -1108,7 +1116,8 @@ theorem chronicle_model_exists (A : Set (Formula Atom)) (h_mcs : Temporal.SetMax
 Each elimination step inserts at most one new domain point.
 -/
 
-theorem omega_chain_dom_new_unique (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem omega_chain_dom_new_unique (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (n : Nat)
     (u v : Rat)
     (hu : u ∈ (omegaChainVal A h_mcs (n + 1)).dom)
@@ -1124,7 +1133,8 @@ theorem omega_chain_dom_new_unique (A : Set (Formula Atom)) (h_mcs : Temporal.Se
 
 /-- When the C5 forward counterexample at step n is already resolved (a witness exists
 in dom_n with proper guard), the elimination is identity: dom_{n+1} ⊆ dom_n. -/
-theorem omega_chain_c5_forward_resolved_no_new (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem omega_chain_c5_forward_resolved_no_new (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (n : Nat) (x : Rat) (ξ η : Formula Atom)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, 0, ξ, η, .c5_forward⟩)
     (hx : x ∈ (omegaChainVal A h_mcs n).dom)
@@ -1147,7 +1157,8 @@ theorem omega_chain_c5_forward_resolved_no_new (A : Set (Formula Atom)) (h_mcs :
     (by rw [hn_eq]; exact h_wit) u hu'
 
 /-- Mirror: when the C5 backward counterexample at step n is already resolved. -/
-theorem omega_chain_c5_backward_resolved_no_new (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem omega_chain_c5_backward_resolved_no_new (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (n : Nat) (x : Rat) (ξ η : Formula Atom)
     (hn_eq : counterexampleEnum (Nat.unpair n).2 = ⟨x, 0, ξ, η, .c5_backward⟩)
     (hx : x ∈ (omegaChainVal A h_mcs n).dom)
@@ -1174,7 +1185,8 @@ theorem omega_chain_c5_backward_resolved_no_new (A : Set (Formula Atom)) (h_mcs 
 Lift EliminationResult.g_sub_f_insert and g_sub_g_new to the omega chain level.
 -/
 
-theorem omega_chain_g_sub_f_insert (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem omega_chain_g_sub_f_insert (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (n : Nat)
     (a b : Rat) (h_adj : Adjacent (omegaChainVal A h_mcs n).dom a b)
     (w : Rat) (hw : w ∈ (omegaChainVal A h_mcs (n + 1)).dom)
@@ -1395,7 +1407,8 @@ theorem limit_satisfies_c5_strong (A : Set (Formula Atom)) (h_mcs : Temporal.Set
       exact adj_g_mem_limit_f A h_mcs (n + 1) a b h_adj_n1 ξ
         (h_adj_guard a b h_adj_n1 ha_ge_x hb_le_y) w hw haw hwb
 
-theorem limit_satisfies_c5'_strong (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent A)
+theorem limit_satisfies_c5'_strong (A : Set (Formula Atom))
+    (h_mcs : Temporal.SetMaximalConsistent A)
     (x : Rat) (hx : x ∈ limitDom A h_mcs)
     (ξ η : Formula Atom)
     (h_since : (ξ S η) ∈ limitF A h_mcs x) :

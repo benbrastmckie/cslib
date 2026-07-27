@@ -467,17 +467,51 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 18 of ~570 done]
+### Phase 5: Suppression audit [PARTIAL — 30 of ~570 done]
 
-**Done**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no line over
-100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced zero new
-warnings, confirming they suppressed nothing.
+**Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
+line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
+zero new warnings, confirming they suppressed nothing.
 
-**Structural finding**: 464 of the original 511 were *file-scoped blanket* suppressions; only 47
-declaration-scoped. A blanket suppression atop a 2,000-line file silences every *future* violation
-too — coverage accumulates rather than decaying. Suppression density also tracks incompleteness:
-`Separation/` and `CounterexampleElimination/` dominate the worst-offender list and are the same
-areas carrying the sorries.
+**Done (cycle 5, commit `5ac0ddda`)**: fully processed the #1 worst offender,
+`Separation/DedekindZ/Cases.lean` (12 file-scoped suppressions, 1664 lines). Removed all 12 and
+rebuilt to see exactly what each was hiding:
+- 4 categories (`emptyLine`, `maxHeartbeats`, `unusedTactic`, `setOption`) proved vestigial —
+  zero warnings surfaced, confirmed not load-bearing.
+- 4 categories fully **fixed** (not just narrowed): `unusedSimpArgs` (26 sites — removed the
+  specific flagged lemma from each `simp only [...]`), `style.longLine` (26 — rewrapped),
+  `unusedSectionVars` (16 — declaration-scoped `omit [DecidableEq Atom] in`), `style.show` (21 —
+  19 via declaration-scoped `set_option ... in`, 2 by rewriting `show` to `change`, which is
+  semantically identical and not linted).
+- 1 category (`unusedDecidableInType`, 11 sites) needed a **real correction mid-pass**: the
+  linter says the hypothesis is unused in the declaration's *type*, which does not mean the
+  *proof body* doesn't need it — `omit [DecidableEq Atom] in` (the fix that worked for
+  `unusedSectionVars`) actually **removes the instance from scope** and broke compilation for
+  several of these declarations (caught by rebuilding before committing, per this phase's own
+  "remove, rebuild" discipline). Reverted and replaced with `set_option
+  linter.unusedDecidableInType false in` — a warning-only suppression that leaves the instance in
+  scope. **Lesson for future Phase 5 batches**: these two linters look interchangeable but are
+  not; always rebuild after an `omit` before trusting it.
+- 2 categories restored as **narrow, declaration/usage-site-scoped** suppressions (real
+  refactors, not attempted this pass): `style.openClassical` (1 — the file's pervasive `open
+  Classical` would need per-declaration `open scoped Classical in` replacement) and
+  `linter.flexible` (4 — the flagged `simp [...] at h` calls need `simp?`-verified `simp only
+  [...]` replacements).
+- **Also discovered**: `set_option A in` / `set_option B in` stacking order matters — a
+  `set_option linter.style.show false in` placed *after* an `omit [...] in` on the same
+  declaration silently failed to suppress the warning; swapping the order (`set_option ... in`
+  before `omit ... in`) fixed it. Recorded here since it will recur in other files with the same
+  stacking pattern.
+
+Net for this file: 12 file-scoped suppressions → 2, both single-category and placed at their
+exact usage site. Zero blanket suppressions remain. Build clean, zero warnings, all downstream
+`Separation/**` modules rebuild clean, zero sorries touched (file has none).
+
+**Structural finding (unchanged from cycle 1)**: 464 of the original 511 were *file-scoped
+blanket* suppressions; only 47 declaration-scoped. A blanket suppression atop a 2,000-line file
+silences every *future* violation too — coverage accumulates rather than decaying. Suppression
+density also tracks incompleteness: `Separation/` and `CounterexampleElimination/` dominate the
+worst-offender list and are the same areas carrying the sorries.
 
 | Category | Count | Verdict |
 |---|---|---|
@@ -489,8 +523,14 @@ Of the 118 `@[nolint]`: `dupNamespace` 60 (Phase 2 territory), `unusedArguments`
 uniform signatures across a lemma family often carry arguments a given case ignores; no evidence
 against them found), `docBlame` 15, singletons 3.
 
-Worst offenders: `Separation/DedekindZ/Cases.lean` (12),
-`CounterexampleElimination/Elimination.lean` (8), then several at 6-7.
+**Resume point**: `Separation/DedekindZ/Cases.lean` is done — do not revisit. Next worst
+offenders (counts are pre-cycle-5, live-recheck with `lake lint` before starting since Cases.lean's
+resolution shifts nothing else): `CounterexampleElimination/Elimination.lean` (8), then several
+files at 6-7 suppressions each. Apply the same method: remove all of a file's suppressions,
+rebuild, categorize what surfaces into vestigial / mechanically-fixable / needs-real-proof-work,
+fix what's mechanical, narrow the rest to declaration-scope — and **always rebuild after using
+`omit [...] in` specifically**, since it changes elaboration (removes an instance from scope),
+unlike a `set_option linter.X false in` suppression (warning-only, always safe to add/remove).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

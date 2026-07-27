@@ -43,7 +43,6 @@ set_option linter.style.longLine false
 set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.style.openClassical false
-set_option warn.sorry false
 
 attribute [local instance] Classical.propDecidable
 
@@ -64,6 +63,7 @@ The gap elimination proof (`chronicle_gap_contradiction`) depends on
 `GoodStructuresModelSurgery.lean` from WeakCanonical (not yet ported, task 36).
 -/
 
+set_option warn.sorry false in
 /-- Core gap elimination theorem. Depends on WeakCanonical (task 36). -/
 theorem chronicle_gap_contradiction (fc : FrameClass) (A : Set (Formula Atom))
     (h_mcs : SetMaximalConsistent fc A)
@@ -136,6 +136,7 @@ theorem discrete_f_is_mcs (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : Se
     (z : Int) : SetMaximalConsistent fc (discreteF fc A h_mcs h_discrete z) :=
   limit_c0 fc A h_mcs _ (discreteEmbed fc A h_mcs h_discrete z).property
 
+set_option warn.sorry false in
 /-- FMCS on Int (discrete case). Sorry-stubbed for forward_G/backward_H (task 36). -/
 noncomputable def discreteFmcs (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
@@ -145,22 +146,26 @@ noncomputable def discreteFmcs (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs
   forward_G := by sorry  -- TODO: depends on discrete_embed_strictMono (task 36)
   backward_H := by sorry  -- TODO: depends on discrete_embed_strictMono (task 36)
 
+set_option warn.sorry false in
 /-- Succ-embedding: LimitDomSubtype → Int. Sorry-stubbed (task 36). -/
 noncomputable def succEmbed (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     LimitDomSubtype fc A h_mcs → Int := by
   sorry  -- sorry: blocked on task 36 (discrete_embed_strictMono)
 
+set_option warn.sorry false in
 /-- Rooted succ-discrete FMCS. Sorry-stubbed (task 36). -/
 noncomputable def rootedSuccDiscreteFmcs (fc : FrameClass) (N : Set (Formula Atom)) (h_N : SetMaximalConsistent fc N)
     (h_box_discrete_N : Formula.box nextTop ∈ N) (s : Int) : FMCS Atom Int fc := by
   sorry  -- sorry: blocked on task 36 (discrete FMCS construction)
 
+set_option warn.sorry false in
 theorem rooted_succ_discrete_fmcs_at_s (fc : FrameClass) (N : Set (Formula Atom)) (h_N : SetMaximalConsistent fc N)
     (h_box_discrete_N : Formula.box nextTop ∈ N) (s : Int) :
     (rootedSuccDiscreteFmcs fc N h_N h_box_discrete_N s).mcs s = N := by
   sorry  -- sorry: blocked on task 36 (rooted discrete FMCS property)
 
+set_option warn.sorry false in
 /-- BFMCS on Int (discrete case). Sorry-stubbed (task 36). -/
 noncomputable def cantorBfmcsDiscrete (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (h_box_discrete : Formula.box nextTop ∈ A) :
@@ -175,6 +180,7 @@ noncomputable def cantorBfmcsDiscrete (fc : FrameClass) (A : Set (Formula Atom))
   evalFamily := sorry  -- sorry: blocked on task 36
   eval_family_mem := sorry  -- sorry: blocked on task 36
 
+set_option warn.sorry false in
 /-- Discrete countermodel. Sorry-stubbed (task 36). -/
 theorem dd_countermodel_chronicle_discrete (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (φ : Formula Atom) (h_neg_in : φ.neg ∈ A)

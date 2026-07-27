@@ -26,11 +26,6 @@ This module proves that the Lindenbaum-Tarski algebra is a `BooleanAlgebra`.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/BooleanStructure.lean
 -/
 
-set_option linter.style.show false
-set_option linter.style.setOption false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.BooleanStructure
@@ -99,7 +94,7 @@ theorem inf_le_left_quot (a b : LindenbaumAlg Atom) : andQuot a b ≤ a := by
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives (φ.and ψ) φ
+  change Derives (φ.and ψ) φ
   exact ⟨Metalogic.Core.deductionTheorem [] (φ.and ψ) φ
     (Theorems.Propositional.lce φ ψ)⟩
 
@@ -108,7 +103,7 @@ theorem inf_le_right_quot (a b : LindenbaumAlg Atom) : andQuot a b ≤ b := by
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives (φ.and ψ) ψ
+  change Derives (φ.and ψ) ψ
   exact ⟨Metalogic.Core.deductionTheorem [] (φ.and ψ) ψ
     (Theorems.Propositional.rce φ ψ)⟩
 
@@ -118,7 +113,7 @@ theorem le_inf_quot {a b c : LindenbaumAlg Atom} (hab : a ≤ b) (hac : a ≤ c)
   induction b using Quotient.ind
   induction c using Quotient.ind
   rename_i φ ψ χ
-  show Derives φ (ψ.and χ)
+  change Derives φ (ψ.and χ)
   have h_ab : Derives φ ψ := hab
   have h_ac : Derives φ χ := hac
   obtain ⟨d_ab⟩ := h_ab
@@ -130,7 +125,7 @@ theorem le_sup_left_quot (a b : LindenbaumAlg Atom) : a ≤ orQuot a b := by
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives φ (φ.or ψ)
+  change Derives φ (φ.or ψ)
   unfold Derives
   unfold Formula.or
   exact ⟨Theorems.Propositional.raa φ ψ⟩
@@ -140,7 +135,7 @@ theorem le_sup_right_quot (a b : LindenbaumAlg Atom) : b ≤ orQuot a b := by
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives ψ (φ.or ψ)
+  change Derives ψ (φ.or ψ)
   unfold Derives
   have d_s : DerivationTree FrameClass.Base [] (ψ.imp (φ.neg.imp ψ)) :=
     DerivationTree.axiom [] _ (Axiom.imp_s ψ φ.neg) trivial
@@ -152,7 +147,7 @@ theorem sup_le_quot {a b c : LindenbaumAlg Atom} (hac : a ≤ c) (hbc : b ≤ c)
   induction b using Quotient.ind
   induction c using Quotient.ind
   rename_i φ ψ χ
-  show Derives (φ.or ψ) χ
+  change Derives (φ.or ψ) χ
   have h_ac : Derives φ χ := hac
   have h_bc : Derives ψ χ := hbc
   obtain ⟨d_ac⟩ := h_ac
@@ -160,15 +155,20 @@ theorem sup_le_quot {a b c : LindenbaumAlg Atom} (hac : a ≤ c) (hbc : b ≤ c)
   unfold Derives Formula.or
   have b1 : DerivationTree FrameClass.Base [] ((ψ.imp χ).imp ((φ.neg.imp ψ).imp (φ.neg.imp χ))) :=
     Theorems.Combinators.bCombinator
-  have neg_phi_to_chi_given_disj : DerivationTree FrameClass.Base [] ((φ.neg.imp ψ).imp (φ.neg.imp χ)) :=
+  have neg_phi_to_chi_given_disj :
+      DerivationTree FrameClass.Base [] ((φ.neg.imp ψ).imp (φ.neg.imp χ)) :=
     DerivationTree.modus_ponens [] _ _ b1 d_bc
   have cm : DerivationTree FrameClass.Base [] ((φ.imp χ).imp ((φ.neg.imp χ).imp χ)) :=
     Theorems.Propositional.classicalMerge φ χ
   have step1 : DerivationTree FrameClass.Base [] ((φ.neg.imp χ).imp χ) :=
     DerivationTree.modus_ponens [] _ _ cm d_ac
-  have b2 : DerivationTree FrameClass.Base [] (((φ.neg.imp χ).imp χ).imp (((φ.neg.imp ψ).imp (φ.neg.imp χ)).imp ((φ.neg.imp ψ).imp χ))) :=
+  have b2 :
+      DerivationTree FrameClass.Base [] (((φ.neg.imp χ).imp χ).imp
+        (((φ.neg.imp ψ).imp (φ.neg.imp χ)).imp ((φ.neg.imp ψ).imp χ))) :=
     Theorems.Combinators.bCombinator
-  have step2 : DerivationTree FrameClass.Base [] (((φ.neg.imp ψ).imp (φ.neg.imp χ)).imp ((φ.neg.imp ψ).imp χ)) :=
+  have step2 :
+      DerivationTree FrameClass.Base [] (((φ.neg.imp ψ).imp (φ.neg.imp χ)).imp
+        ((φ.neg.imp ψ).imp χ)) :=
     DerivationTree.modus_ponens [] _ _ b2 step1
   exact ⟨DerivationTree.modus_ponens [] _ _ step2 neg_phi_to_chi_given_disj⟩
 
@@ -176,17 +176,18 @@ theorem sup_le_quot {a b c : LindenbaumAlg Atom} (hac : a ≤ c) (hbc : b ≤ c)
 theorem bot_le_quot (a : LindenbaumAlg Atom) : ⊥ ≤ a := by
   induction a using Quotient.ind
   rename_i φ
-  show Derives Formula.bot φ
+  change Derives Formula.bot φ
   exact ⟨DerivationTree.axiom [] _ (Axiom.efq φ) trivial⟩
 
 /-- Everything is below top: `a ≤ ⊤`. -/
 theorem le_top_quot (a : LindenbaumAlg Atom) : a ≤ ⊤ := by
   induction a using Quotient.ind
   rename_i φ
-  show Derives φ (Formula.bot.imp Formula.bot)
+  change Derives φ (Formula.bot.imp Formula.bot)
   have d_id : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp Formula.bot) :=
     Theorems.Combinators.identity Formula.bot
-  have d_s : DerivationTree FrameClass.Base (Atom := Atom) [] (((Formula.bot).imp Formula.bot).imp (φ.imp ((Formula.bot).imp Formula.bot))) :=
+  have d_s : DerivationTree FrameClass.Base (Atom := Atom) [] (((Formula.bot).imp Formula.bot).imp
+      (φ.imp ((Formula.bot).imp Formula.bot))) :=
     DerivationTree.axiom [] _ (Axiom.imp_s ((Formula.bot : Formula Atom).imp Formula.bot) φ) trivial
   exact ⟨DerivationTree.modus_ponens [] _ _ d_s d_id⟩
 
@@ -197,37 +198,37 @@ theorem le_sup_inf_quot (a b c : LindenbaumAlg Atom) :
   induction b using Quotient.ind
   induction c using Quotient.ind
   rename_i φ ψ χ
-  show Derives ((φ.or ψ).and (φ.or χ)) (φ.or (ψ.and χ))
+  change Derives ((φ.or ψ).and (φ.or χ)) (φ.or (ψ.and χ))
   unfold Derives
   -- We inline what was P and Q in the source
   -- P = (φ.or ψ).and (φ.or χ), Q = φ.or (ψ.and χ)
   have di_left : DerivationTree FrameClass.Base [] (φ.imp (φ.or (ψ.and χ))) :=
     Metalogic.Core.deductionTheorem [] φ (φ.or (ψ.and χ)) (Theorems.Propositional.ldi φ (ψ.and χ))
-
   have di_right_conj : DerivationTree FrameClass.Base [] ((ψ.and χ).imp (φ.or (ψ.and χ))) :=
-    Metalogic.Core.deductionTheorem [] (ψ.and χ) (φ.or (ψ.and χ)) (Theorems.Propositional.rdi φ (ψ.and χ))
-
+    Metalogic.Core.deductionTheorem [] (ψ.and χ) (φ.or (ψ.and χ))
+      (Theorems.Propositional.rdi φ (ψ.and χ))
   have lce_p : DerivationTree FrameClass.Base [] (((φ.or ψ).and (φ.or χ)).imp (φ.or ψ)) :=
     Theorems.Propositional.lceImp (φ.or ψ) (φ.or χ)
   have rce_p : DerivationTree FrameClass.Base [] (((φ.or ψ).and (φ.or χ)).imp (φ.or χ)) :=
     Theorems.Propositional.rceImp (φ.or ψ) (φ.or χ)
-
   -- lce_p : P → (¬φ → ψ) and rce_p : P → (¬φ → χ) via or definition
   have p_to_neg_phi_psi := lce_p
   have p_to_neg_phi_chi := rce_p
-
   have h_ctx : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (ψ.and χ) := by
-    have h_p : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] ((φ.or ψ).and (φ.or χ)) :=
+    have h_p : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)]
+        ((φ.or ψ).and (φ.or χ)) :=
       DerivationTree.assumption _ _ (by simp)
     have h_neg_phi : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] φ.neg :=
       DerivationTree.assumption _ _ (by simp)
-    have h1 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (((φ.or ψ).and (φ.or χ)).imp (φ.neg.imp ψ)) :=
+    have h1 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)]
+        (((φ.or ψ).and (φ.or χ)).imp (φ.neg.imp ψ)) :=
       DerivationTree.weakening [] _ _ p_to_neg_phi_psi (List.nil_subset _)
     have h2 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (φ.neg.imp ψ) :=
       DerivationTree.modus_ponens _ _ _ h1 h_p
     have h_psi : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] ψ :=
       DerivationTree.modus_ponens _ _ _ h2 h_neg_phi
-    have h3 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (((φ.or ψ).and (φ.or χ)).imp (φ.neg.imp χ)) :=
+    have h3 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)]
+        (((φ.or ψ).and (φ.or χ)).imp (φ.neg.imp χ)) :=
       DerivationTree.weakening [] _ _ p_to_neg_phi_chi (List.nil_subset _)
     have h4 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (φ.neg.imp χ) :=
       DerivationTree.modus_ponens _ _ _ h3 h_p
@@ -235,38 +236,44 @@ theorem le_sup_inf_quot (a b c : LindenbaumAlg Atom) :
       DerivationTree.modus_ponens _ _ _ h4 h_neg_phi
     have pair : DerivationTree FrameClass.Base [] (ψ.imp (χ.imp (ψ.and χ))) :=
       Theorems.Combinators.pairing ψ χ
-    have pair_ctx : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (ψ.imp (χ.imp (ψ.and χ))) :=
+    have pair_ctx : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)]
+        (ψ.imp (χ.imp (ψ.and χ))) :=
       DerivationTree.weakening [] _ _ pair (List.nil_subset _)
     have step1 : DerivationTree FrameClass.Base [φ.neg, (φ.or ψ).and (φ.or χ)] (χ.imp (ψ.and χ)) :=
       DerivationTree.modus_ponens _ _ _ pair_ctx h_psi
     exact DerivationTree.modus_ponens _ _ _ step1 h_chi
-
   have h_ctx2 : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] (φ.neg.imp (ψ.and χ)) :=
     Metalogic.Core.deductionTheorem [(φ.or ψ).and (φ.or χ)] φ.neg (ψ.and χ) h_ctx
-
-  have di_right_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] ((ψ.and χ).imp (φ.or (ψ.and χ))) :=
+  have di_right_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      ((ψ.and χ).imp (φ.or (ψ.and χ))) :=
     DerivationTree.weakening [] _ _ di_right_conj (List.nil_subset _)
-  have b_inst : DerivationTree FrameClass.Base [] (((ψ.and χ).imp (φ.or (ψ.and χ))).imp ((φ.neg.imp (ψ.and χ)).imp (φ.neg.imp (φ.or (ψ.and χ))))) :=
+  have b_inst : DerivationTree FrameClass.Base [] (((ψ.and χ).imp (φ.or (ψ.and χ))).imp
+      ((φ.neg.imp (ψ.and χ)).imp (φ.neg.imp (φ.or (ψ.and χ))))) :=
     Theorems.Combinators.bCombinator
-  have b_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] (((ψ.and χ).imp (φ.or (ψ.and χ))).imp ((φ.neg.imp (ψ.and χ)).imp (φ.neg.imp (φ.or (ψ.and χ))))) :=
+  have b_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      (((ψ.and χ).imp (φ.or (ψ.and χ))).imp
+        ((φ.neg.imp (ψ.and χ)).imp (φ.neg.imp (φ.or (ψ.and χ))))) :=
     DerivationTree.weakening [] _ _ b_inst (List.nil_subset _)
-  have step2 : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] ((φ.neg.imp (ψ.and χ)).imp (φ.neg.imp (φ.or (ψ.and χ)))) :=
+  have step2 : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      ((φ.neg.imp (ψ.and χ)).imp (φ.neg.imp (φ.or (ψ.and χ)))) :=
     DerivationTree.modus_ponens _ _ _ b_ctx di_right_ctx
-  have h_neg_phi_Q : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] (φ.neg.imp (φ.or (ψ.and χ))) :=
+  have h_neg_phi_Q : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      (φ.neg.imp (φ.or (ψ.and χ))) :=
     DerivationTree.modus_ponens _ _ _ step2 h_ctx2
-
-  have di_left_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] (φ.imp (φ.or (ψ.and χ))) :=
+  have di_left_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      (φ.imp (φ.or (ψ.and χ))) :=
     DerivationTree.weakening [] _ _ di_left (List.nil_subset _)
-
-  have cm : DerivationTree FrameClass.Base [] ((φ.imp (φ.or (ψ.and χ))).imp ((φ.neg.imp (φ.or (ψ.and χ))).imp (φ.or (ψ.and χ)))) :=
+  have cm : DerivationTree FrameClass.Base [] ((φ.imp (φ.or (ψ.and χ))).imp
+      ((φ.neg.imp (φ.or (ψ.and χ))).imp (φ.or (ψ.and χ)))) :=
     Theorems.Propositional.classicalMerge φ (φ.or (ψ.and χ))
-  have cm_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] ((φ.imp (φ.or (ψ.and χ))).imp ((φ.neg.imp (φ.or (ψ.and χ))).imp (φ.or (ψ.and χ)))) :=
+  have cm_ctx : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      ((φ.imp (φ.or (ψ.and χ))).imp ((φ.neg.imp (φ.or (ψ.and χ))).imp (φ.or (ψ.and χ)))) :=
     DerivationTree.weakening [] _ _ cm (List.nil_subset _)
-  have step3 : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] ((φ.neg.imp (φ.or (ψ.and χ))).imp (φ.or (ψ.and χ))) :=
+  have step3 : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)]
+      ((φ.neg.imp (φ.or (ψ.and χ))).imp (φ.or (ψ.and χ))) :=
     DerivationTree.modus_ponens _ _ _ cm_ctx di_left_ctx
   have h_Q : DerivationTree FrameClass.Base [(φ.or ψ).and (φ.or χ)] (φ.or (ψ.and χ)) :=
     DerivationTree.modus_ponens _ _ _ step3 h_neg_phi_Q
-
   exact ⟨Metalogic.Core.deductionTheorem [] ((φ.or ψ).and (φ.or χ)) (φ.or (ψ.and χ)) h_Q⟩
 
 /-!
@@ -277,7 +284,7 @@ theorem le_sup_inf_quot (a b c : LindenbaumAlg Atom) :
 theorem inf_compl_le_bot_quot (a : LindenbaumAlg Atom) : andQuot a (negQuot a) ≤ ⊥ := by
   induction a using Quotient.ind
   rename_i φ
-  show Derives (φ.and φ.neg) Formula.bot
+  change Derives (φ.and φ.neg) Formula.bot
   unfold Derives
   have h_conj_ctx : DerivationTree FrameClass.Base [φ.and φ.neg] (φ.and φ.neg) := by
     apply DerivationTree.assumption
@@ -302,10 +309,11 @@ theorem inf_compl_le_bot_quot (a : LindenbaumAlg Atom) : andQuot a (negQuot a) �
 theorem top_le_sup_compl_quot (a : LindenbaumAlg Atom) : ⊤ ≤ orQuot a (negQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show Derives (Formula.bot.imp Formula.bot) (φ.or φ.neg)
+  change Derives (Formula.bot.imp Formula.bot) (φ.or φ.neg)
   unfold Derives
   have h_lem : DerivationTree FrameClass.Base [] (φ.or φ.neg) := Theorems.Propositional.lem φ
-  have h_s : DerivationTree FrameClass.Base [] ((φ.or φ.neg).imp ((Formula.bot.imp Formula.bot).imp (φ.or φ.neg))) :=
+  have h_s : DerivationTree FrameClass.Base [] ((φ.or φ.neg).imp
+      ((Formula.bot.imp Formula.bot).imp (φ.or φ.neg))) :=
     DerivationTree.axiom [] _ (Axiom.imp_s (φ.or φ.neg) (Formula.bot.imp Formula.bot)) trivial
   exact ⟨DerivationTree.modus_ponens [] _ _ h_s h_lem⟩
 

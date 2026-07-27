@@ -437,10 +437,10 @@ The source's proof handles nine named rules (`w, c, ∨°, □°, ◇°, ⊃°, 
 Lemma 4.5, plus a case distinction for `□•`. This module lands the seven rules whose premise and
 conclusion share a single filling operation (`InputCtx.fillLhs` throughout, or `OutputCtx.fillRhs`
 throughout): `w` (Figure `(3.1)`'s weakening, stated generically since it is not yet a landed
-`NestedProof` constructor -- Phase 19's `Admissibility.lean` territory), `c` (`contract`), `∨°`
+`NestedProof` constructor -- the dedicated `Admissibility.lean`'s territory), `c` (`contract`), `∨°`
 (`orRLeft`/`orRRight`), `□°` (`boxR`), `∧•` (`andL`), and `◇•` (`diaL`).
 
-**Deferred to Phase 12/13** (not landed here): `◇°` (`diaR`), `⊃°` (`impR`), and `□•`'s
+**Deferred** (not landed here): `◇°` (`diaR`), `⊃°` (`impR`), and `□•`'s
 case-split (`boxL`) all mix `OutputCtx.fillRhs`-shaped and `OutputCtx.fillFull`-shaped sides
 within the *same* rule (the premise uses one filling operation, the conclusion the other, or the
 rule's own components straddle the `Γ'{ }`/`Λ{ }` boundary of `Definition 2.3`). Bridging
@@ -448,10 +448,10 @@ rule's own components straddle the `Γ'{ }`/`Λ{ }` boundary of `Definition 2.3`
 own induction (mirroring the `Λ = []`-restricted pattern `Nested/Translation.lean`'s
 `InputCtx.fillEmpty_imp_outputPruning_fillRhs` already documents as a genuinely separate
 sub-project, not a corollary of Lemma 4.4/4.5 alone) -- landing a half-finished or silently
-restricted version here would misrepresent this phase's scope. Phase 12/13 build the actual
-`nested_sound` case analysis directly against the `NestedProof` constructors and are better
-positioned to close these three rules with whatever derivation their concrete instantiation
-admits, rather than needing the fully general Lemma 4.6 statement first. -/
+restricted version here would misrepresent this phase's scope. The later `nested_sound`
+case-analysis development builds its case analysis directly against the `NestedProof`
+constructors and is better positioned to close these three rules with whatever derivation their
+concrete instantiation admits, rather than needing the fully general Lemma 4.6 statement first. -/
 
 /-- **Self-and**: `⊢ P ⊃ (P ∧ P)`. -/
 private theorem cs5DerivSelfAnd (P : Proposition Atom) :
@@ -464,7 +464,8 @@ private theorem cs5DerivSelfAnd (P : Proposition Atom) :
 
 /-- **Lemma 4.6, `w`**: `fm(Γ{∅}) ⊃ fm(Γ{Δ})`, for any input context `Γ{ }` and LHS-sequent `Δ`
 (Figure `(3.1)`'s weakening rule; not yet a landed `NestedProof` constructor, see the module
-docstring's "`NestedProof.mono`" discussion in `Rules.lean` -- Phase 19's job). -/
+docstring's "`NestedProof.mono`" discussion in `Rules.lean` -- the dedicated `Admissibility.lean`'s
+job). -/
 theorem lemma4_6_w (ctx : InputCtx Atom) (Δ : NestedLhs Atom) :
     Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs .empty).fm.imp (ctx.fillLhs Δ).fm) :=
   lemma4_5 ctx (Δ := .empty) (Θ := Δ) (cs5DerivTopIntro Δ.fm)
@@ -720,15 +721,15 @@ The source's proof covers `∧°, ∨•, ⊃•, cut` uniformly via Lemma 4.8. 
 `fillRhs`'s single, uniform base case avoids the `fillFull`-style singleton-case and-uncurry step
 Lemma 4.8 needed) and its concrete `∧°` (`andR`) corollary.
 
-**Deferred to Phase 12/13/14** (not landed here): `∨•` (`orL`) needs a *branching, contravariant*
+**Deferred** (not landed here): `∨•` (`orL`) needs a *branching, contravariant*
 `InputCtx.fillLhs` lift -- a genuinely new combinator beyond `lemma4_9_fillRhs`'s covariant
 `OutputCtx.fillRhs` shape, not a corollary of it. `⊃•` (`impL`) needs the source's own
 induction-on-`n` argument over the `Λ{ }` chain (page 10's `L_X, L_Y, L_Z` construction),
 substantially more machinery than this phase's remaining scope. `cut` is not yet a landed
-`NestedProof` constructor (Phase 14's `Completeness.lean` territory) -- Lemma 4.9's `cut` case has
-no consumer to serve yet. All three are better closed by Phase 12/13 (which build `nested_sound`'s
-actual case analysis and can tailor the derivation to each rule's concrete instantiation) and
-Phase 14 (which introduces `cut` itself). -/
+`NestedProof` constructor (`Completeness.lean` territory) -- Lemma 4.9's `cut` case has
+no consumer to serve yet. All three are better closed by the later `nested_sound` case-analysis
+development (which builds its actual case analysis and can tailor the derivation to each rule's
+concrete instantiation) and `Completeness.lean` (which introduces `cut` itself). -/
 
 /-- **Branching congruence for `buildRhsChain`**: from `⊢ (Ψ₁ ∧ Ψ₂) ⊃ Θ` (at the `fm` level),
 derive `⊢ ((buildRhsChain l Ψ₁) ∧ (buildRhsChain l Ψ₂)) ⊃ (buildRhsChain l Θ)`, by induction on

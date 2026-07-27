@@ -2,7 +2,7 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~5h spent; ~6-9h remaining (Phase 3's big files and Phase 5 dominate)
+- **Effort**: ~6h spent; ~5-8h remaining (Phase 3's big files and Phase 5 dominate)
 - **Dependencies**: none blocking. Coordinate with 557/558 (Modal/Tableau refactor) before large
   edits to `Modal/Tableau/`; coordinate with 317 before edits to `Propositional/Tableau/`.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
@@ -20,7 +20,7 @@
 
 ## RESUME HERE
 
-Second resume. Status as of this pass: **Phase 1, 2, 6 COMPLETED; Phase 3 and 7 and 8 PARTIAL;
+Third resume. Status as of this pass: **Phase 1, 2, 6, 8 COMPLETED; Phase 3 and 7 PARTIAL;
 Phase 4 and 5 NOT STARTED.** To pick this up cold:
 
 1. Confirm the baseline still holds (2 commands, ~5 min):
@@ -29,33 +29,34 @@ Phase 4 and 5 NOT STARTED.** To pick this up cold:
    lake test                     # expect exit 0, 0 errors
    ```
    If either differs, something landed from another session — reconcile before proceeding.
-2. Continue **Phase 3** (task-number references). 7 small files are done (376 -> 368 sites); the
-   6 worst-offender files (Intuitionistic/Scheme 54, LoopChecking 49, Nested/Soundness 28,
-   ChronicleToCountermodel 22, Intuitionistic/Completeness, Intuitionistic/Expansion) were
-   deliberately left for a dispatch with a larger budget, since each requires reading real
-   mathematical context per site, not just mechanical substitution. Recount before starting —
-   these are pre-resume figures.
-3. Phase 8 has 7 of 10 rows done (see the phase for exactly which). The remaining 3 rows need
-   caution: the "9 zero-declaration aggregator modules" row could NOT be reproduced safely this
-   session (see the re-scoping note in Phase 8 — one candidate file the naive search flagged
-   turned out to be a genuine, documented `proof_wanted` stub, not dead code). Re-derive the
-   file list carefully, or find the original research artifact, before deleting anything there.
-   The "7 dead MCS-transfer wrappers" and "2 dead GenericMCSBridge lemmas" rows were not
-   attempted (ran out of session budget before verifying exact declaration names across the 4
-   `GenericMCSBridge.lean` files).
+2. **Phase 8 is now CLOSED** (9/10 rows, 1 excluded by finding — see the phase section for the
+   full resolution of the wrapper/lemma rows and why the aggregator-modules row is excluded, not
+   deferred). No further action needed on Phase 8.
+3. Continue **Phase 3** (task-number references). The census regex now catches both `task N` and
+   `task-N` forms with an optional letter suffix (see the phase section) — **use it, not the
+   plan's historical figures, which predate the fix**. 26 files are done across four dispatches
+   (399 -> 359 sites live count). The worst-offender files (`Intuitionistic/Scheme.lean` 94,
+   `LoopChecking.lean` 51, `Nested/Soundness.lean` 28, `ChronicleToCountermodel.lean` 22,
+   `Temporal/Tableau/Completeness.lean` 19, plus several more at 8-17) dominate the remaining 359
+   and were deliberately left for a dispatch with a larger budget — each requires reading real
+   mathematical context per site, not mechanical substitution. **Do not touch
+   `Modal/Tableau/FrameSoundness.lean`'s 9 sites without first checking whether task 553 is still
+   active** — see the explicit skip note in the phase section.
 4. Phase 7 has 2 of 3 items done (`pre-pr-check.sh`, the `LoopChecking.lean` stale census). The
-   `ORGANISATION.md` refresh and the `NOTATION.md` `S`->`Sys` rename (5 files in
-   `Foundations/Logic/`) were not attempted.
+   `ORGANISATION.md` refresh and the `NOTATION.md` `S`->`Sys` rename (24 files in
+   `Foundations/Logic/`, 231 named-argument call sites across 18 files — see the Phase 7
+   re-scoping finding) were not attempted; the rename is Tier 4/atomic and must not be started
+   unless a dispatch can finish it in one shot.
 5. Phase 4 (shake) and Phase 5 (suppression audit, 18 of ~570 done) are both still essentially
-   untouched and independent of Phase 3/7/8; any order works among all of these.
+   untouched and independent of Phase 3/7; any order works among all of these.
 6. Two items still need a **user decision before work starts** — see "Open decisions" at the
    bottom (the Chronicle namespace/structure coincidence, item 3, was addressed by an explicit
-   user decision mid-session: Phase 2 is CLOSED at 7/10 files, and the coincidence itself is
-   routed to a separate follow-up task rather than blocking this one further).
+   user decision: Phase 2 is CLOSED at 7/10 files, and the coincidence itself is routed to a
+   separate follow-up task rather than blocking this one further).
 
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes".
-**Do not** re-derive the task-tracker-reference census with a script that doesn't strip letter
-suffixes from phase numbers (`Phase 3a`) — see the caveat added to Phase 3 this session.
+**Do not** re-derive the task-tracker-reference census with the old, letter-suffix/hyphen-blind
+regex — use the fixed one in the Phase 3 section.
 
 ---
 
@@ -116,7 +117,7 @@ Each was investigated and found correct. Re-investigating wastes a cycle.
 | Linter sites | 240 | **0** |
 | `set_option linter.*` | 511 | 482 |
 | `@[nolint]` | 118 | 88 |
-| Task-tracker refs in `Cslib/**` | 376 | 368 (see Phase 3: the prior "312" figure could not be reproduced by a fresh count) |
+| Task-tracker refs in `Cslib/**` | 376 (undercounted; see Phase 3 census-regex fix) | 359 (399 by the corrected regex, minus 40 sites across 19 files fixed this session) |
 | Doubled public names | 6 cross-module leaks | **0** |
 | Bare sorries (correct method) | 28 | 28 (unchanged by design) |
 
@@ -200,46 +201,81 @@ makes the call. Files: `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
 they resolve to the un-doubled name via the enclosing-namespace walk once the declaration loses
 its doubled component. Only fully-qualified spellings break.
 
-### Phase 3: Task-number references in deliverables [IN PROGRESS — 7 files done, ~368 sites remain]
+### Phase 3: Task-number references in deliverables [IN PROGRESS — 26 files done, 359 sites remain]
 
-**The plan's original "312 sites" figure was stale as of resume — a fresh count came back 376,
-not 312 (cause not diagnosed; treat the live grep as authoritative, not the plan's number, per
-this task's own measurement-discipline lesson).** Violates
-`.claude/rules/no-task-references-in-deliverables.md`. An earlier cleanup stripped ~918; these
-are a regression.
+**The plan's original "312 sites" figure was stale — a fresh count came back 376, not 312 (cause
+not diagnosed; treat the live grep as authoritative, not the plan's number, per this task's own
+measurement-discipline lesson).** Violates `.claude/rules/no-task-references-in-deliverables.md`.
+An earlier cleanup stripped ~918; these are a regression.
 
-The narrow `task N` regex finds only 121 and **misses `Minimal/Completeness.lean` entirely**. Use:
+**Census regex fixed this session — two independent gaps closed.** The prior regex
+(`\b(task|tasks|phase|report) [0-9]+(\.[0-9]+)?\b`) missed both a letter-suffix form (`Phase 3a`)
+and a hyphenated form (`task-530`). The authoritative census is now:
 ```bash
-grep -rnoiE '\b(task|tasks|phase|report) [0-9]+(\.[0-9]+)?\b' Cslib --include='*.lean'
+grep -rnoiE '\b(task|tasks|phase|report)[ -][0-9]+[a-z]?(\.[0-9]+)?\b' Cslib --include='*.lean'
 ```
-**Caveat found this session**: this regex's trailing `\b` does not match a phase number with a
-letter suffix (`Phase 3a`, `Phase 4b`) since there is no word boundary between a digit and a
-following letter. At least 2 such sites were found and fixed incidentally while editing an
-adjacent match on the same line; if resuming, also grep
-`\b(task|tasks|phase|report) [0-9]+[a-z]?\b` to catch these directly instead of relying on
-incidental discovery.
+This finds 399 sites as of this session's start (up from the pre-session 376/368 figures, which
+used the letter-suffix-blind regex) — the increase is measurement correction, not regression: no
+new citations were introduced, the old regex simply undercounted. **Still not exhaustive**: a
+`(522's ... + 523's ...)` bare-number form (no `task`/`phase` word) was found and fixed by reading
+context, not regex; spot-check prose near any remaining hits for similar bare-number forms.
 
 Sampling confirmed the `Phase N` / `report N` hits are task-tracker history ("Phase 6", "plan v3",
 "report 08"), not mathematical algorithm phases. Spot-check before bulk-editing any file, since a
 legitimate "Phase 3" could exist in an algorithm description.
 
-**Done this session** (commit `65639464`, 7 single/near-single-site files, live count 376 -> 368):
-`Temporal/Metalogic/Chronicle/RRelation.lean`,
-`Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean`,
-`Modal/Semantics/Birelational.lean`, `Modal/Metalogic/Constructive/Labelled/Deduction.lean`,
-`LTL/Semantics/GNBA/Correctness.lean`, `Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean`,
-`Bimodal/Metalogic/BXCanonical/Frame.lean` (this last one edited only the comment beside a
-`sorry`, not the `sorry` itself). Common durable-anchor pattern used for `task 36` sites: task 36
-is `port_discrete_completeness_bimodal`, i.e. the not-yet-ported WeakCanonical
-discrete-completeness infrastructure — replace `task 36` with "the WeakCanonical
-discrete-completeness port" wherever it recurs (it recurs often; `ChronicleToCountermodel.lean`
-alone still has ~10 such mentions untouched).
+**Done this session** (399 -> 359 sites; commits `5d52f96a`, `e39211bd`, `0374e921`, `64d6b209`),
+19 files, all Tier 1 (comment/docstring-only, no code tokens touched):
+- **6 Foundations/Temporal/Bimodal Chronicle-tree files** citing `task-530`'s internal phase
+  numbering (Phase 0/1/2/3a/3b/4b): `ChronicleInterface.lean`,
+  `CounterexampleElimination/Structures.lean` (Foundations), `Temporal/.../ChronicleTypes.lean`,
+  `Bimodal/.../ChronicleTypes.lean`, `Foundations/.../RRelation.lean`, `Foundations/.../Types.lean`.
+- **10 Modal metalogic family files** citing bare task numbers (494, 480, 496, 490, 501, 522) for
+  a sibling scaffold file already named in the same docstring: `Intuitionistic/{IT,IS4,IS5,IK}`,
+  `Minimal/{MT,MS4,MS5,MK}`, `Constructive/CT`, `SchemaSoundness`. Anchor pattern: replace the
+  task number with the actual scaffold filename (`Extension.lean`, `MinExtension.lean`,
+  `CKExtension.lean`, etc.) — the file that defines the referenced construction.
+- **3 more Bimodal Chronicle-tree files** (`RRelation.lean`,
+  `CounterexampleElimination/{Structures,BurgessHelpers}.lean`) citing `task-530`/`task 113`/
+  `task 107`; the latter two describe a withdrawn lemma — replaced with *why* it was withdrawn
+  (false under strict Until semantics) rather than which task found that out.
+- **`Bimodal/Metalogic/Bundle/SuccRelation.lean`**: 7 `warn.sorry`-suppressed sorries (not part of
+  the 5-warning CI baseline) each carried a `-- sorry: blocked on task 37` trailing comment.
+  Traced task 37 in `specs/state.json`: still-blocked `port_continuous_completeness_bimodal`,
+  genuinely blocked on BimodalLogic's `FrameClass` lacking a `Continuous` constructor. Replaced
+  with that technical reason. **Only the trailing comment was edited on each `sorry` line — the
+  `sorry` tactic itself was verified untouched via `git diff` before commit**, satisfying the
+  no-sorry-relocated constraint.
 
-Worst files (recount before continuing — likely shifted slightly from the pre-resume figures):
-Intuitionistic/Scheme (54 sites at last count), LoopChecking (49), Nested/Soundness (28),
-ChronicleToCountermodel (22), Intuitionistic/Completeness, Intuitionistic/Expansion. None of
-these were started this session; they dominate the remaining ~368 and should be the next
-dispatch's primary target since the small files are now largely exhausted.
+Common durable-anchor pattern used repo-wide for `task 36` sites (not touched further this
+session — already established by the prior session): task 36 is
+`port_discrete_completeness_bimodal`, the not-yet-ported WeakCanonical discrete-completeness
+infrastructure — replace `task 36` with "the WeakCanonical discrete-completeness port"
+(`ChronicleToCountermodel.lean` alone still has ~10 such mentions untouched).
+
+**Deliberately skipped this session — do not touch without re-checking task 553's live status**:
+`Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (9 sites, "Phase 2"/"task 553"). Its citations
+sit directly inside the module comment and docstring documenting the file's own `[BLOCKED]`
+`sorry` at line 1253 (one of the 5 baseline CI-red warnings), including a direct path reference
+to `specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md`.
+Task 553 has its own live task directory with an `.orchestrator-loop-guard` file present in this
+repo as of this session (i.e. plausibly concurrently active). Editing this exact prose risks
+colliding with that task's own in-progress analysis of the same unresolved sorry. Recommend
+re-checking task 553's status in `specs/state.json` before touching this file; if it is no longer
+active, the durable-anchor fix is straightforward (the technical argument is already fully
+inline in the comment — the specs/ path citation is redundant with it and can simply be dropped).
+
+Worst files remaining (recount before continuing — these are post-session live counts, not
+pre-session estimates): `Intuitionistic/Scheme.lean` (94), `Modal/Tableau/LoopChecking.lean` (51),
+`Constructive/Nested/Soundness.lean` (28), `ChronicleToCountermodel.lean` (22),
+`Temporal/Tableau/Completeness.lean` (19), `Intuitionistic/Expansion.lean` (17),
+`Intuitionistic/Completeness.lean` (15), `Constructive/Nested/Rules.lean` (12),
+`Constructive/CS5Completeness.lean` (10), `Computability/Languages/OmegaRegularLanguage.lean` (10),
+`Modal/Tableau/FrameSoundness.lean` (9, see skip note above),
+`Minimal/Completeness.lean` (8), `Constructive/Nested/Context.lean` (8),
+`Constructive/Labelled/Soundness.lean` (8). None of these were started this session; they dominate
+the remaining 359 sites and require real per-site reading (per this phase's own caution), not
+mechanical substitution — budget the next dispatch accordingly.
 
 Replace each with a durable anchor — sibling filename, section heading, or verified fact. **Never
 delete the surrounding explanation**; the prose is usually load-bearing, only the identifier rots.

@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 import Mathlib.Logic.Function.Basic
+import Mathlib.Tactic.Attr.Core
 public import Mathlib.Data.Int.Notation
 import Mathlib.Tactic.ToDual
 

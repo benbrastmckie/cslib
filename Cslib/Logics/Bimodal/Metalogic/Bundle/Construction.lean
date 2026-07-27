@@ -23,9 +23,6 @@ Provides primitive building blocks for BFMCS construction.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/Construction.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -53,32 +50,40 @@ lemma list_consistent_to_set_consistent {Gamma : List (Formula Atom)}
 def ContextConsistent (Gamma : List (Formula Atom)) : Prop :=
   ¬Nonempty (DerivationTree FrameClass.Base Gamma (Formula.bot : Formula Atom))
 
-/-- Extends a consistent list context to a maximal consistent set via the Lindenbaum construction. -/
+/-- Extends a consistent list context to a maximal consistent set via the Lindenbaum
+construction. -/
 noncomputable def lindenbaumMCS (Gamma : List (Formula Atom)) (h_cons : ContextConsistent Gamma) :
     Set (Formula Atom) :=
-  let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) := list_consistent_to_set_consistent h_cons
+  let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) :=
+    list_consistent_to_set_consistent h_cons
   Classical.choose (set_lindenbaum_base h_set_cons)
 
 lemma lindenbaumMCS_extends (Gamma : List (Formula Atom)) (h_cons : ContextConsistent Gamma) :
     contextAsSet Gamma ⊆ lindenbaumMCS Gamma h_cons :=
-  let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) := list_consistent_to_set_consistent h_cons
+  let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) :=
+    list_consistent_to_set_consistent h_cons
   (Classical.choose_spec (set_lindenbaum_base h_set_cons)).1
 
 lemma lindenbaumMCS_is_mcs (Gamma : List (Formula Atom)) (h_cons : ContextConsistent Gamma) :
     SetMaximalConsistent (FrameClass.Base : FrameClass) (lindenbaumMCS Gamma h_cons) :=
-  let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) := list_consistent_to_set_consistent h_cons
+  let h_set_cons : SetConsistent (FrameClass.Base : FrameClass) (contextAsSet Gamma) :=
+    list_consistent_to_set_consistent h_cons
   (Classical.choose_spec (set_lindenbaum_base h_set_cons)).2
 
-/-- Extends a consistent set of formulas to a maximal consistent set via the Lindenbaum construction. -/
-noncomputable def lindenbaumMCSSet (Omega : Set (Formula Atom)) (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
+/-- Extends a consistent set of formulas to a maximal consistent set via the Lindenbaum
+construction. -/
+noncomputable def lindenbaumMCSSet (Omega : Set (Formula Atom))
+    (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
     Set (Formula Atom) :=
   Classical.choose (set_lindenbaum_base h_cons)
 
-lemma lindenbaumMCS_set_extends (Omega : Set (Formula Atom)) (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
+lemma lindenbaumMCS_set_extends (Omega : Set (Formula Atom))
+    (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
     Omega ⊆ lindenbaumMCSSet Omega h_cons :=
   (Classical.choose_spec (set_lindenbaum_base h_cons)).1
 
-lemma lindenbaumMCS_set_is_mcs (Omega : Set (Formula Atom)) (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
+lemma lindenbaumMCS_set_is_mcs (Omega : Set (Formula Atom))
+    (h_cons : SetConsistent (FrameClass.Base : FrameClass) Omega) :
     SetMaximalConsistent (FrameClass.Base : FrameClass) (lindenbaumMCSSet Omega h_cons) :=
   (Classical.choose_spec (set_lindenbaum_base h_cons)).2
 

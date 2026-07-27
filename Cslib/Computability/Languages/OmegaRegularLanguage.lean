@@ -248,9 +248,9 @@ theorem IsRegular.eq_fin_iSup_hmul_omegaPow [Inhabited Symbol] (p : ωLanguage S
     simp only [mem_iSup]
     refine ⟨?_, by grind⟩
     rintro ⟨s, h_s, t, h_t, h_mem⟩
-    use eq.symm (⟨s, h_s⟩, ⟨t, h_t⟩)
-    simp only [Equiv.apply_symm_apply]
-    exact h_mem
+    use eq.invFun (⟨s, h_s⟩, ⟨t, h_t⟩)
+    have := Equiv.apply_symm_apply eq
+    simp_all
   · rintro ⟨n, l, m, _, rfl⟩
     rw [← iSup_univ]
     apply IsRegular.iSup

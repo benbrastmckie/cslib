@@ -8,6 +8,8 @@ public import CslibTests.FreeMonad
 public import CslibTests.GrindLint
 public import CslibTests.HML
 public import CslibTests.HasFresh
+public import CslibTests.HasSubstitution
+public import CslibTests.HasWellFormed
 public import CslibTests.HilbertSearch
 public import CslibTests.ImportWithMathlib
 public import CslibTests.LTS

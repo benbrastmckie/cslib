@@ -99,19 +99,19 @@ open Set
 
 /-- Every K-valid formula is D-valid: reflexivity is not needed for seriality. -/
 theorem k_subset_d : K World Atom ⊆ D World Atom := by
-  grind only [subset_def, D, K, = setOf_true, = logic, mem_setOf_eq, = Proposition.valid]
+  grind only [subset_def, D, K, = ofPred_true, = logic, mem_ofPred_eq, = Proposition.valid]
 
 /-- Every K-valid formula is B-valid: reflexivity is not needed for symmetry. -/
 theorem k_subset_b : K World Atom ⊆ B World Atom := by
-  grind only [subset_def, B, K, = setOf_true, = logic, mem_setOf_eq, = Proposition.valid]
+  grind only [subset_def, B, K, = ofPred_true, = logic, mem_ofPred_eq, = Proposition.valid]
 
 /-- Every K-valid formula is 4-valid: reflexivity is not needed for transitivity. -/
 theorem k_subset_four : K World Atom ⊆ Four World Atom := by
-  grind only [subset_def, Four, K, = setOf_true, = logic, mem_setOf_eq, = Proposition.valid]
+  grind only [subset_def, Four, K, = ofPred_true, = logic, mem_ofPred_eq, = Proposition.valid]
 
 /-- Every K-valid formula is 5-valid: reflexivity is not needed for Euclideanness. -/
 theorem k_subset_five : K World Atom ⊆ Five World Atom := by
-  grind only [subset_def, Five, K, = setOf_true, = logic, mem_setOf_eq, = Proposition.valid]
+  grind only [subset_def, Five, K, = ofPred_true, = logic, mem_ofPred_eq, = Proposition.valid]
 
 open scoped Relation in
 /-- Every D-valid formula is T-valid: seriality implies reflexivity. -/

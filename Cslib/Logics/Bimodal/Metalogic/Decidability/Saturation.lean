@@ -38,10 +38,6 @@ Ported from BimodalLogic/Metalogic/Decidability/Saturation.lean with
 adaptations for universe-polymorphic `Formula Atom`.
 -/
 
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability
@@ -275,7 +271,8 @@ def expandBranchWithFuel (b : Branch Atom) (fuel : Nat)
           | (.saturated, _, _) => some (.inr (b, timeOrd, applied))  -- Open saturated branch
           | (.extended newBranch, newOrd, newAppliedFormulas) =>
               let applied' := newAppliedFormulas.foldl (fun s f => s.insert f) applied
-              expandBranchWithFuel newBranch fuel newOrd fc tracker applied' maxBranches (branchesUsed + 1)
+              expandBranchWithFuel newBranch fuel newOrd fc tracker applied' maxBranches
+                (branchesUsed + 1)
           | (.split branches, newOrd, newAppliedFormulas) =>
               let applied' := newAppliedFormulas.foldl (fun s f => s.insert f) applied
               -- For a split, we check if ALL branches close
@@ -292,7 +289,8 @@ def expandBranchWithFuel (b : Branch Atom) (fuel : Nat)
                 | _ =>
                     -- Cap at `fuel` to ensure termination (pair.2 is already ≤ fuel
                     -- from allocateFuelProportionally, but `min` makes it visible)
-                    match expandBranchWithFuel pair.1 (min pair.2 fuel) newOrd fc tracker applied' maxBranches branchesUsed' with
+                    match expandBranchWithFuel pair.1 (min pair.2 fuel) newOrd fc tracker
+                        applied' maxBranches branchesUsed' with
                     | none => none  -- Out of fuel
                     | some (.inl _) => acc  -- This branch closed, continue
                     | some (.inr openBr) => some (.inr openBr)  -- Found open
@@ -419,7 +417,8 @@ def buildTableau (φ : Formula Atom) (fuel : Nat := 1000)
           match saturateBlocked openBr fuel ord fc with
           | some (.inl closedBr) => some (.allClosed [closedBr])
           | some (.inr (satBr, satOrd)) =>
-              match h2 : findUnexpandedWithApplied satBr (timeOrd := satOrd) (applied := appliedSet) with
+              match h2 : findUnexpandedWithApplied satBr (timeOrd := satOrd)
+                  (applied := appliedSet) with
               | none => some (.hasOpen satBr satOrd appliedSet h2)
               | some _ => none  -- Still not saturated after post-blocking pass
           | none => none  -- Should not happen
@@ -462,7 +461,8 @@ def soundFuel (φ : Formula Atom) : Nat :=
 /--
 Build tableau with automatic fuel calculation using sound FMP-derived bound.
 -/
-def buildTableauAuto (φ : Formula Atom) (fc : FrameClass := .Base) : Option (ExpandedTableau Atom) :=
+def buildTableauAuto (φ : Formula Atom) (fc : FrameClass := .Base) :
+    Option (ExpandedTableau Atom) :=
   buildTableau φ (soundFuel φ) fc
 
 /-!
@@ -524,6 +524,7 @@ attribute [nolint unusedArguments] instReprTableauStats.repr
 ## Blocking Correctness and Termination Theorems
 -/
 
+set_option linter.flexible false in
 /--
 **Subformula property**: All formulas produced by tableau rule application
 are members of the signed subformula closure of the initial formula.
@@ -563,7 +564,8 @@ theorem tryBranch_inr
     (acc : Option (ClosedBranch Atom ⊕ (Branch Atom × TimeOrdering × AppliedSet Atom)))
     (pair : Branch Atom × Nat) (ob : Branch Atom) (ord : TimeOrdering) (ap : AppliedSet Atom)
     (ih : ∀ (fuel' : Nat), fuel' ≤ fuelBound →
-          ∀ (b' : Branch Atom) (t' : TimeOrdering) (fc' : FrameClass) (trk' : EventualityTracker Atom)
+          ∀ (b' : Branch Atom) (t' : TimeOrdering) (fc' : FrameClass)
+            (trk' : EventualityTracker Atom)
             (ap' : AppliedSet Atom) (mb : Nat) (bu : Nat)
             (ob' : Branch Atom) (o' : TimeOrdering) (a' : AppliedSet Atom),
             expandBranchWithFuel b' fuel' t' fc' trk' ap' mb bu = some (.inr (ob', o', a')) →
@@ -572,7 +574,8 @@ theorem tryBranch_inr
     (h_result : (match acc with
       | some (.inr openBr) => some (.inr openBr)
       | _ =>
-          match expandBranchWithFuel pair.1 (min pair.2 fuelBound) newOrd fc tracker applied' maxBranches branchesUsed' with
+          match expandBranchWithFuel pair.1 (min pair.2 fuelBound) newOrd fc tracker
+              applied' maxBranches branchesUsed' with
           | none => none
           | some (.inl _) => acc
           | some (.inr openBr) => some (.inr openBr)) = some (.inr (ob, ord, ap))) :
@@ -585,7 +588,8 @@ theorem tryBranch_inr
     · exact absurd h_result (by simp)
     · simp at h_result; obtain ⟨rfl, rfl, rfl⟩ := h_result
       rename_i openBr h_exp
-      exact ih (min pair.2 fuelBound) (Nat.min_le_right _ _) pair.1 newOrd fc tracker applied' maxBranches branchesUsed' ob ord ap h_exp
+      exact ih (min pair.2 fuelBound) (Nat.min_le_right _ _) pair.1 newOrd fc tracker
+        applied' maxBranches branchesUsed' ob ord ap h_exp
   | some val =>
     cases val with
     | inr p =>
@@ -598,7 +602,8 @@ theorem tryBranch_inr
       · exact absurd h_result (by simp)
       · simp at h_result; obtain ⟨rfl, rfl, rfl⟩ := h_result
         rename_i openBr h_exp
-        exact ih (min pair.2 fuelBound) (Nat.min_le_right _ _) pair.1 newOrd fc tracker applied' maxBranches branchesUsed' ob ord ap h_exp
+        exact ih (min pair.2 fuelBound) (Nat.min_le_right _ _) pair.1 newOrd fc tracker
+          applied' maxBranches branchesUsed' ob ord ap h_exp
 
 /--
 Helper: `List.foldl` with the tryBranch step preserves the findClosure invariant.
@@ -609,7 +614,8 @@ theorem foldl_preserves_findClosure
     (tracker : EventualityTracker Atom) (applied' : AppliedSet Atom)
     (maxBranches : Nat) (branchesUsed' : Nat)
     (ih : ∀ (fuel' : Nat), fuel' ≤ fuelBound →
-          ∀ (b' : Branch Atom) (t' : TimeOrdering) (fc' : FrameClass) (trk' : EventualityTracker Atom)
+          ∀ (b' : Branch Atom) (t' : TimeOrdering) (fc' : FrameClass)
+            (trk' : EventualityTracker Atom)
             (ap' : AppliedSet Atom) (mb : Nat) (bu : Nat)
             (ob' : Branch Atom) (o' : TimeOrdering) (a' : AppliedSet Atom),
             expandBranchWithFuel b' fuel' t' fc' trk' ap' mb bu = some (.inr (ob', o', a')) →
@@ -622,7 +628,8 @@ theorem foldl_preserves_findClosure
       match acc with
       | some (.inr openBr) => some (.inr openBr)
       | _ =>
-          match expandBranchWithFuel pair.1 (min pair.2 fuelBound) newOrd fc tracker applied' maxBranches branchesUsed' with
+          match expandBranchWithFuel pair.1 (min pair.2 fuelBound) newOrd fc tracker
+              applied' maxBranches branchesUsed' with
           | none => none
           | some (.inl _) => acc
           | some (.inr openBr) => some (.inr openBr)) init = some (.inr (ob, ord, ap))) :
@@ -632,7 +639,9 @@ theorem foldl_preserves_findClosure
   | cons hd tl ih_tl =>
     simp only [List.foldl] at h_result
     exact ih_tl _
-      (fun ob' ord' ap' h => tryBranch_inr fuelBound newOrd fc tracker applied' maxBranches branchesUsed' init hd ob' ord' ap' ih h_init h)
+      (fun ob' ord' ap' h =>
+        tryBranch_inr fuelBound newOrd fc tracker applied' maxBranches branchesUsed' init hd
+          ob' ord' ap' ih h_init h)
       h_result
 
 set_option linter.flexible false in
@@ -645,10 +654,12 @@ Generalized over maxBranches/branchesUsed parameters.
 -/
 theorem expandBranchWithFuel_sound
     (fuel : Nat) :
-    ∀ (b : Branch Atom) (timeOrd : TimeOrdering) (fc : FrameClass) (tracker : EventualityTracker Atom)
+    ∀ (b : Branch Atom) (timeOrd : TimeOrdering) (fc : FrameClass)
+      (tracker : EventualityTracker Atom)
       (applied : AppliedSet Atom) (maxBranches : Nat) (branchesUsed : Nat)
       (openBranch : Branch Atom) (ord : TimeOrdering) (ap : AppliedSet Atom),
-      expandBranchWithFuel b fuel timeOrd fc tracker applied maxBranches branchesUsed = some (.inr (openBranch, ord, ap)) →
+      expandBranchWithFuel b fuel timeOrd fc tracker applied maxBranches branchesUsed =
+        some (.inr (openBranch, ord, ap)) →
       findClosure openBranch fc = none := by
   induction fuel using Nat.strongRecOn with
   | _ n ih =>
@@ -677,11 +688,13 @@ theorem expandBranchWithFuel_sound
               simp [hexp] at h; obtain ⟨rfl, rfl, rfl⟩ := h; exact hfc
             | ⟨.extended newBranch, newOrd, newAppliedFormulas⟩ =>
               simp [hexp] at h
-              exact ih k (Nat.lt_succ_of_le le_rfl) newBranch newOrd fc _ _ maxBranches _ ob ord ap h
+              exact ih k (Nat.lt_succ_of_le le_rfl) newBranch newOrd fc _ _ maxBranches _
+                ob ord ap h
             | ⟨.split branches, newOrd, newAppliedFormulas⟩ =>
               simp [hexp] at h
               -- Use foldl_preserves_findClosure for zipped pairs
-              exact foldl_preserves_findClosure k newOrd fc _ _ maxBranches (branchesUsed + branches.length)
+              exact foldl_preserves_findClosure k newOrd fc _ _ maxBranches
+                (branchesUsed + branches.length)
                 (fun fuel' hle => ih fuel' (Nat.lt_succ_of_le hle))
                 (branches.zip (allocateFuelProportionally (k + 1) branches))
                 (some (.inl ⟨b, .botPos Label.initial⟩))

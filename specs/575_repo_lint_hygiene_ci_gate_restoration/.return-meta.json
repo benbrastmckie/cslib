@@ -1,6 +1,7 @@
 {
   "status": "partial",
-  "started_at": "2026-07-27T00:00:00Z",
+  "started_at": "2026-07-27T18:39:23Z",
+  "completed_at": "2026-07-27T19:25:34Z",
   "artifacts": [
     {
       "type": "plan",
@@ -11,34 +12,35 @@
     "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 1,
-    "vacuous_count_note": "Same pre-existing false positive as prior cycles (Computability/URM/Basic.lean:92), unchanged by this dispatch. No new vacuous definitions introduced.",
+    "vacuous_count_note": "Same pre-existing false positive as prior cycles (Computability/URM/Basic.lean:92), unchanged by this dispatch.",
     "axiom_count": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "wfail_build_exact_5_baseline_sorries": true,
+    "wfail_build_note": "lake build --wfail --iofail now reports 12 warnings across 7 modules, not the previously-documented 5. The 5 sorry warnings are unchanged (verified via git diff on every edited file plus per-file rebuilds). The other 7 (2 defLemma-style + 5 simp_wf-does-nothing, all in SoundnessStep.lean/Normalization/Termination.lean/CutElimination.lean) are a pre-existing regression this dispatch did not cause and did not touch -- traced to an unrelated upstream-sync merge that landed between the prior cycle's pause and this dispatch's start. Flagged in the plan's RESUME HERE and Baseline table rather than silently absorbed or silently fixed.",
     "lake_test_passed": true,
-    "note": "This dispatch touched zero .lean files (Phase 6 and Phase 7 were record-keeping/documentation-scoping only, per their reopened scope). Verified lake build --wfail --iofail still exits 1 with exactly the 5 baseline sorry warnings, lake test exits 0, lake exe checkInitImports clean, axiom count unchanged at 26. The full 7-step CI pipeline was not re-run in its entirety since no source changed; the checks that could regress from a plan-file-only + reverted-experiment dispatch were specifically re-verified instead."
+    "lake_lint_note": "lake lint reports pre-existing unusedArguments findings in ChronicleConstruction.lean and DenseSoundness.lean (Temporal), neither touched by this dispatch; zero findings in any file this dispatch edited.",
+    "lake_shake_note": "lake shake reports pre-existing import-minimization findings in 6 files unrelated to this dispatch (ListDeduction.lean, SinceSeedConsistency.lean, SignedFormula.lean, Relation/Defs.lean, Modal/Basic.lean, Forcing.lean); zero findings in any file this dispatch edited.",
+    "checkInitImports_passed": true,
+    "lint_style_passed": true,
+    "mk_all_passed": true
   },
   "partial_progress": {
-    "stage": "phase-6-and-phase-7-reopen-resolution-complete",
-    "details": "Phase 6 (Sorry visibility, REOPENED): re-closed as COMPLETED. Verified the live 18-site warn.sorry count (all declaration-scoped, 0 file-scoped) exactly matches the reopen's per-file breakdown. Read all 18 sites individually; every one already carries a documented technical-blocker reason at the site (external 'WeakCanonical discrete-completeness port' / 'continuous-frame completeness' dependency) -- no new comments needed, no task-number citations found. Measured (via a scratch, uncommitted, fully-reverted experiment across all 5 files) the actual warning count if all 18 suppressions were removed: 21 additional warnings (not 18 -- 2 of ChronicleToCountermodel.lean's 7 declarations are structures with multiple independently-warning sorry'd fields), correcting the prior '23-sorry census' figure to 26 (5 existing + 21). Disposition recorded: suppression retained and justified (Propositional/Modal's unsuppressed sorries have no analogous external-port dependency), with an explicit trigger to revisit once the WeakCanonical port lands. Phase 7 (Script and documentation defects, REOPENED): re-closed as PARTIAL, 0 of 2 reopened items landed, both excluded by finding. Item 1 (NOTATION.md logic-notation-scoping section): drafted, then found NOTATION.md is byte-identical to upstream/main (git cat-file -e exits 0) -- out of scope under this dispatch's own upstream-exposure carve-out hard constraint; draft reverted before commit (git checkout --), zero net change to NOTATION.md; recommended as an upstream PR instead. Item 2 (5 stale NOTE: block deletions): located and read all 5 sites; found they are NOT stale -- each is live, accurate documentation of the still-unresolved S/Since notation collision, and deleting them would strip load-bearing explanation while the collision remains real. Left in place; disposition recorded to delete them only alongside the (already-deferred) S->Sys rename. Updated the Definition of Done bullets for both phases to reflect the corrected/final dispositions.",
+    "stage": "phase-3-closed-phase-5-continued",
+    "details": "Phase 3 (task-number references, REOPENED by a prior cycle's exclusion audit): fully re-closed as COMPLETED this dispatch. Fixed 47 of the reopen's ~50 sites across 7 files (Minimal/Completeness.lean 2/2, Temporal/Tableau/Completeness.lean 1/1, Nested/Context.lean 2/2, Intuitionistic/Completeness.lean 5/5, Nested/Rules.lean 4/5, CS5Completeness.lean 5/5, Nested/Soundness.lean 8/10, Scheme.lean 20/25), each committed individually after a scoped rebuild plus downstream-importer rebuilds, replacing each task/phase citation with an already-present durable anchor (lemma name, filename, or descriptive title) per .claude/rules/no-task-references-in-deliverables.md. 20 repo-wide sites remain, all individually verified and accounted for: LoopChecking.lean (3, held back per the ordering constraint -- Modal/Tableau refactor coordination, not attempted), 5 sites inside direct quotations of the governing plan's own text (rewriting would misquote the source), 4 sites forming Scheme.lean's 'Recommendation for continuation' block (task-management metadata whose correct disposition is relocation to specs/, not in-place rewriting -- an unchanged finding from the prior close), and 8 sites in TemporalConservativity.lean/DiegoEmbedding.lean/Labelled-Soundness.lean confirmed as false positives or genuinely unanchorable in a prior cycle. Phase 5 (suppression audit): advanced by 2 files this dispatch -- Separation/TemporalClosure.lean (5 blanket suppressions -> 0; 3 categories vestigial, style.longLine fixed mechanically, linter.flexible narrowed to 10 declaration-scoped set_option lines) and BXCanonical/Chronicle/PointInsertion/Since.lean (5 -> 0; 3 categories vestigial, style.longLine fixed mechanically, linter.flexible narrowed to 2 declaration-scoped set_option lines). Suppression-audit progress: 173 -> 183 sites audited cumulative (27 files fully processed). Ratchet re-baselined in each file's own commit (266 -> 258 blanket suppressions repo-wide via scripts/check-lint-suppressions.sh --update). New safety finding recorded in the plan: a declaration-scoped set_option ... in line must precede the declaration's doc comment, not follow it -- the reverse order is a hard parse error ('unexpected token set_option; expected lemma'), caught by the mandatory rebuild-before-commit discipline before anything broken was staged. A repo-wide scan confirmed zero remaining instances of the broken ordering anywhere in Cslib/**. Also flagged (not fixed, out of Phase 3/5 scope): a baseline regression where lake build --wfail --iofail now reports 12 warnings instead of the documented 5 -- 7 new non-sorry warnings in 3 files this dispatch never touched, traced to an unrelated upstream-sync merge.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5,
+    "phases_completed": 6,
     "phases_total": 8,
-    "phases_completed_note": "Phases 1, 2, 4, 6, 8 = COMPLETED. Phase 3 = IN PROGRESS (reopened by a prior cycle; out of scope for this dispatch, not touched). Phase 5 = PARTIAL (173/~427 local-only sites done, 254 remain; out of scope for this dispatch, not touched). Phase 7 = PARTIAL (0 of 2 reopened items landed, both excluded by finding this cycle -- see details)."
+    "last_completed_phase": "Phase 3: Task-number references in deliverables",
+    "phases_completed_note": "Phases 1, 2, 3, 4, 6, 8 = COMPLETED (Phase 3 re-closed this dispatch). Phase 5 = PARTIAL (183/~427 local-only sites done cumulative, 244 blanket suppressions across local-only files remain in scope; this dispatch processed 2 of them). Phase 7 = PARTIAL, unchanged from the prior cycle -- explicitly NOT re-investigated this dispatch per the delegation instructions; its 2 blockers (NOTATION.md upstream-carve-out decision, and the 5 NOTE:-block-deletion judgment call) remain open and are carried forward unchanged in 'blockers' below."
   },
   "requires_user_review": true,
-  "review_reason": "Phase 7's two reopened items were BOTH excluded by finding rather than completed as literally scoped: (1) NOTATION.md turned out to be upstream-shared (byte-identical to upstream/main), which this dispatch's own hard constraint says to skip -- the drafted section was reverted, unlanded, and needs a user decision on whether to route it as an upstream PR or override the carve-out for this specific docs-only file. (2) The 5 'stale NOTE: blocks' were found to be NOT stale and were deliberately left in place rather than deleted, contradicting the reopen's literal instruction -- flagging so a human can confirm this judgment call (deleting live documentation of an unresolved collision would have been a regression) rather than silently diverging from the explicit dispatch instruction.",
+  "review_reason": "Two items need human attention: (1) NEW this dispatch -- a baseline regression: lake build --wfail --iofail now reports 12 warnings (7 new, non-sorry) instead of the documented 5, traced to an unrelated upstream-sync merge that landed while this task was paused. This dispatch did not cause it and did not fix it (out of Phase 3/5 scope) -- it needs either a dedicated follow-up cycle or an explicit decision to re-open Phase 1. (2) CARRIED FORWARD, unchanged, NOT re-investigated per explicit delegation instruction -- Phase 7's two blockers from a prior cycle: NOTATION.md's drafted 'Logic notation scoping' section could not land locally (the file is byte-identical to upstream/main, out of scope under the upstream-exposure carve-out) and needs a decision on upstream-PR-vs-local-exception; and the 5 'stale NOTE: block' deletions were found NOT stale in a prior cycle and deliberately left in place, needing sign-off on that judgment call.",
   "metadata": {
-    "session_id": "sess_1785173891_2df686",
+    "session_id": "sess_1785175989_6e99ab",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "implement",
-      "skill-cslib-implementation"
-    ],
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed"
   }
 }

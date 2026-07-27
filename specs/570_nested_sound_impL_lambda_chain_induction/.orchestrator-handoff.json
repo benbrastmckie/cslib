@@ -1,7 +1,7 @@
 {
   "status": "implemented",
-  "summary": "Phase 6 of 8 complete: landed OutputCtx.fillLhs_empty_imp_fillEmpty in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean, immediately after OutputCtx.fillLhs_fm_mono, mirroring that theorem's exact three-case recursion ([] / [Gamma] / Gamma::Gamma2::rest). This was the plan's flagged highest-residual-risk phase -- the one piece research reasoned out on paper but never compiled. It closed exactly as sketched on the first attempt, no statement adjustment needed: [] case is cs5DerivImpSelf (both sides reduce to top), [Gamma] case is the andE1 axiom instance directly (fillLhs [Gamma] empty = comma Gamma empty, fm = Gamma.fm and top; fillEmpty [Gamma] = Gamma, fm = Gamma.fm), and the cons-cons case is cs5DerivAndCongrRight over cs5DerivDiaMono applied to the IH, identical in shape to fillLhs_fm_mono's own cons-cons step. One 100-char style-lint warning was hit and fixed by rewording a docstring line (removed an explicit phase-number reference per the no-task-references convention); final build is fully clean with zero errors and zero warnings. Verified: scoped 'lake build Cslib...Nested.Translation' succeeds green with zero diagnostics. Scoped 'lake build Cslib...Nested.Soundness' still fails with exactly the single pre-existing D3 diagnostic (Soundness.lean:1536:2, Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)) -- no new fallout from this phase. bash .claude/scripts/lean-sorry-census.sh Cslib confirms sorry_count: 40, unchanged from Phase 5's baseline, with no Nested/Soundness.lean entry. Committed at 14de905a (Translation.lean + plan markers only, narrow stage).",
-  "phases_completed": 6,
+  "summary": "Phase 7 of 8 complete: landed nested_sound_cut in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean via nested_sound_impL's B := A instantiation, the always-provable A imp A weakened through InputCtx.fillLhs_fm_antitone, and a new local bridge from (ctx.fillLhs empty).fm to ctx.fillEmpty.fm. That bridge required a genuinely new piece not spelled out verbatim in the plan: NestedRhs.box's fm translation is contravariant in its LHS argument (box Phi Psi .fm = box (Phi.fm imp Psi.fm)), so lifting Phase 6's landed OutputCtx.fillLhs_empty_imp_fillEmpty (forward direction, fillLhs-empty implies fillEmpty) through cs5DerivImpCongrLeft + cs5DerivBoxMono yields the reverse box-level implication, not the forward one nested_sound_cut needs. Resolved by adding a local private reverse-direction companion, cs5DerivFillEmptyImpFillLhsEmpty (fillEmpty implies fillLhs-empty), proved by the identical three-case induction on the OutputCtx as Phase 6's lemma but with the [Gamma] case discharged via a new tiny private combinator cs5DerivAndTopIntro (P imp (P and top)) instead of andE1 -- both directions are provable since the two formulas differ only by a redundant top-conjunct. This kept the phase's sole-owner constraint on Soundness.lean intact: no edit to Translation.lean was needed. Added the .cut arm to nested_sound (after .bStruct, matching Rules.lean's constructor order) and corrected the nested_sound section docstring (removed the stale 'every constructor except impL' sentence). Verification: scoped 'lake build Cslib...Nested.Soundness' succeeds with zero errors and zero warnings; full 'lake build' succeeds for the whole Cslib target (3259/3259 jobs) -- the first fully green build in this task, flipping the baseline RED (missing-cases diagnostic on NestedProof.cut) to GREEN; 'lake exe checkInitImports' passes silently; bash .claude/scripts/lean-sorry-census.sh Cslib confirms sorry_count: 40 (unchanged from Phase 5/6's baseline) with no Nested/Soundness.lean entry; lean_verify on both nested_sound_cut and nested_sound reports only the three standard axioms (propext, Classical.choice, Quot.sound), no sorryAx, no new custom axioms. Committed at bb537ac1 (Soundness.lean + plan markers only, narrow stage).",
+  "phases_completed": 7,
   "phases_total": 8,
   "plan_markers_verified": true,
   "skeleton": false,
@@ -149,20 +149,16 @@
   ],
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
       "type": "lean_source",
-      "summary": "New theorem OutputCtx.fillLhs_empty_imp_fillEmpty landed after OutputCtx.fillLhs_fm_mono. No other declaration touched."
-    },
-    {
-      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/04_lambda-chain-phase6-summary.md",
-      "type": "summary",
-      "summary": "Phase 6 execution summary: theorem statement, proof, verification results, no deviations."
+      "summary": "Added cs5DerivAndTopIntro, cs5DerivFillEmptyImpFillLhsEmpty (local reverse companion to Translation.lean's OutputCtx.fillLhs_empty_imp_fillEmpty), nested_sound_cut, the .cut match arm on nested_sound, and corrected nested_sound's section docstring."
     }
   ],
   "blockers": [],
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
     "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md"
   ],
-  "next_action_hint": "Phase 7 (land nested_sound_cut and the .cut arm; the RED-to-green transition) is next -- both of its dependencies (Phase 5 and Phase 6) are now [COMPLETED]. Phase 6's Translation-module green checkpoint and the census-40 invariant are committed at 14de905a and must not be regressed."
+  "continuation_path": null,
+  "next_action_hint": "Phase 8 (full CI gate: lake build, checkInitImports, lake lint, lake exe lint-style, lake shake, lake exe mk_all --module, lake test; axiom check; final census re-verification) is next -- its sole dependency (Phase 7, the RED-to-green flip) is now [COMPLETED] and committed at bb537ac1. lake build already succeeds project-wide; Phase 8 should focus on the remaining CI steps not yet run in this task (lint, lint-style, shake, mk_all, test) plus the final documented axiom/census sign-off."
 }

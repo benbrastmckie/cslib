@@ -21,11 +21,6 @@ Proves the truth lemma for the D-parametric canonical model construction.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/ParametricTruthLemma.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricTruthLemma
@@ -36,10 +31,12 @@ open Cslib.Logic.Bimodal.Metalogic.Bundle
 open Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricCanonical
 open Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricHistory
 
-variable {Atom : Type} {fc : FrameClass} {D : Type*} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
+variable {Atom : Type} {fc : FrameClass} {D : Type*}
+  [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
 
 /-- The D-parametric canonical task model: valuation is MCS membership. -/
-def ParametricCanonicalTaskModel : TaskModel Atom (ParametricCanonicalTaskFrame (Atom := Atom) (fc := fc) (D := D)) where
+def ParametricCanonicalTaskModel :
+    TaskModel Atom (ParametricCanonicalTaskFrame (Atom := Atom) (fc := fc) (D := D)) where
   valuation := fun M p => Formula.atom p ∈ M.val
 
 /-- Classical tautology: neg(psi -> chi) -> psi. -/
@@ -63,9 +60,11 @@ noncomputable def negImpImpliesAntecedent (ψ χ : Formula Atom) :
     deductionTheorem [] (ψ.imp χ).neg ψ.neg.neg h_neg_neg_psi
   have h_dne : DerivationTree FrameClass.Base [] (ψ.neg.neg.imp ψ) :=
     Theorems.Propositional.doubleNegation ψ
-  have h_b : DerivationTree FrameClass.Base [] ((ψ.neg.neg.imp ψ).imp (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ))) :=
+  have h_b : DerivationTree FrameClass.Base []
+      ((ψ.neg.neg.imp ψ).imp (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ))) :=
     Theorems.Combinators.bCombinator
-  have h_step1 : DerivationTree FrameClass.Base [] (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ)) :=
+  have h_step1 : DerivationTree FrameClass.Base []
+      (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ)) :=
     DerivationTree.modus_ponens _ _ _ h_b h_dne
   have h_base : DerivationTree FrameClass.Base [] ((ψ.imp χ).neg.imp ψ) :=
     DerivationTree.modus_ponens _ _ _ h_step1 h_deduct
@@ -95,7 +94,8 @@ noncomputable def negImpImpliesNegConsequent (ψ χ : Formula Atom) :
 /-- Past analog of TF axiom: Box phi -> H(Box phi). -/
 noncomputable def pastTfDeriv (φ : Formula Atom) :
     DerivationTree fc [] ((Formula.box φ).imp (Formula.box φ).allPast) := by
-  have h_tf_swap : DerivationTree fc [] _ := Theorems.Combinators.tempFutureDerived (Formula.swapTemporal φ)
+  have h_tf_swap : DerivationTree fc [] _ :=
+    Theorems.Combinators.tempFutureDerived (Formula.swapTemporal φ)
   have h_dual := DerivationTree.temporal_duality _ h_tf_swap
   have h_eq : Formula.swapTemporal ((Formula.box (Formula.swapTemporal φ)).imp
       (Formula.box (Formula.swapTemporal φ)).allFuture) =
@@ -124,6 +124,7 @@ theorem parametric_box_persistent
   · exact h_eq ▸ h_box
   · exact fam.backward_H t s (Formula.box φ) h_gt h_H_box
 
+set_option linter.flexible false in
 /-- The parametric canonical truth lemma. -/
 theorem parametric_canonical_truth_lemma
     (B : BFMCS Atom D fc) (_h_tc : B.temporallyCoherent)
@@ -147,7 +148,8 @@ theorem parametric_canonical_truth_lemma
       have h_cons := (fam.is_mcs t).1
       exact h_cons [(Formula.bot : Formula Atom)]
         (fun psi hpsi => by simp at hpsi; rw [hpsi]; exact h_bot)
-        ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
+        ⟨DerivationTree.assumption
+          [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
     · intro h_false; exact False.elim h_false
   | imp psi chi ih_psi ih_chi =>
     simp only [truthAt]
@@ -155,7 +157,8 @@ theorem parametric_canonical_truth_lemma
     constructor
     · intro h_imp h_psi_true
       have h_psi_mcs : psi ∈ fam.mcs t := (ih_psi fam hfam t).mpr h_psi_true
-      have h_chi_mcs : chi ∈ fam.mcs t := SetMaximalConsistent.implication_property h_mcs h_imp h_psi_mcs
+      have h_chi_mcs : chi ∈ fam.mcs t :=
+        SetMaximalConsistent.implication_property h_mcs h_imp h_psi_mcs
       exact (ih_chi fam hfam t).mp h_chi_mcs
     · intro h_truth_imp
       rcases SetMaximalConsistent.negation_complete h_mcs (psi.imp chi) with h_imp | h_neg_imp
@@ -182,7 +185,8 @@ theorem parametric_canonical_truth_lemma
     · intro h_all
       have h_psi_all_mcs : ∀ fam' ∈ B.families, psi ∈ fam'.mcs t := by
         intro fam' hfam'
-        have h_in_omega : parametricToHistory fam' ∈ ParametricCanonicalOmega B := ⟨fam', hfam', rfl⟩
+        have h_in_omega : parametricToHistory fam' ∈ ParametricCanonicalOmega B :=
+          ⟨fam', hfam', rfl⟩
         exact (ih fam' hfam' t).mpr (h_all (parametricToHistory fam') h_in_omega)
       exact B.modal_backward fam hfam psi t h_psi_all_mcs
   | untl psi phi ih_psi ih_phi =>
@@ -214,6 +218,7 @@ theorem parametric_canonical_truth_lemma
         (ih_phi fam hfam s).mpr h_truth_event_s,
         fun r h_sr h_rt => (ih_psi fam hfam r).mpr (h_truth_guard r h_sr h_rt)⟩
 
+set_option linter.flexible false in
 /-- Shifted truth lemma for ShiftClosedParametricCanonicalOmega. -/
 theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     (_h_tc : B.temporallyCoherent)
@@ -235,7 +240,8 @@ theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     · intro h_mem; exfalso
       exact (fam.is_mcs t).1 [(Formula.bot : Formula Atom)]
         (fun psi hpsi => by simp at hpsi; rw [hpsi]; exact h_mem)
-        ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
+        ⟨DerivationTree.assumption
+          [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
     · intro h; exact h.elim
   | imp ψ χ ih_ψ ih_χ =>
     simp only [truthAt]
@@ -273,7 +279,8 @@ theorem parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         t (t + delta) ψ
       have h_delta : (t + delta) - t = delta := add_sub_cancel_left t delta
       rw [h_σ_eq]
-      rw [WorldHistory.time_shift_congr (parametricToHistory fam') ((t + delta) - t) delta h_delta] at h_preserve
+      rw [WorldHistory.time_shift_congr
+        (parametricToHistory fam') ((t + delta) - t) delta h_delta] at h_preserve
       exact h_preserve.mpr h_truth_canon
     · intro h_all_σ
       have h_all_fam : ∀ fam' ∈ B.families, ψ ∈ fam'.mcs t := by

@@ -161,11 +161,22 @@ Modal/
 ├── Cube.lean                  -- Modal logic cube (K, T, S4, S5)
 ├── FromPropositional.lean     -- Embedding from propositional
 ├── Metalogic/                 -- Soundness, completeness, MCS
-│   ├── Soundness.lean
-│   ├── Completeness.lean
-│   ├── MCS.lean
-│   ├── DeductionTheorem.lean
-│   └── DerivationTree.lean
+│   ├── Soundness.lean, Completeness.lean, MCS.lean
+│   ├── DeductionTheorem.lean, DerivationTree.lean
+│   ├── ConservativeExtension.lean, FrameCorrespondence.lean
+│   ├── GenericMCSBridge.lean, SchemaSoundness.lean
+│   ├── Systems/                -- Per-normal-modal-system results, one subdirectory each for
+│   │                              K, T, D, B, S4, S5, K4, K5, D4, D5, D45, DB, KB5, TB, K45
+│   │                              (15 systems x {Soundness, Completeness, ConservativeExtension})
+│   ├── Constructive/           -- Constructive (BHK-style) modal systems CK/CT/CS4/CS5:
+│   │                              soundness, completeness, plus Nested/ and Labelled/
+│   │                              tableau-style proof calculi
+│   ├── InterSystem/            -- Cross-system lemmas: axiom subsumption, conservativity,
+│   │                              lattice monotonicity/subsumption, modularity,
+│   │                              intuitionistic-to-classical embedding
+│   ├── Intuitionistic/         -- Intuitionistic modal systems IK/IT/IS4/IS5: canonical
+│   │                              model, prime theory, truth lemma, completeness
+│   └── Minimal/                -- Minimal modal systems MK/MT/MS4/MS5: completeness, extension
 └── Tableau/                   -- Tableau decision procedures (K/T/B/S4/S5 drivers, saturation, soundness/completeness)
 ```
 
@@ -186,6 +197,9 @@ Temporal/
 │   ├── Derivable.lean         -- Derivability
 │   └── Instances.lean         -- Typeclass instances
 ├── Theorems/                  -- Derived temporal theorems
+├── Tableau/                   -- Tableau decision procedure (Lukasiewicz-encoded, Pnueli
+│                                  guard/event convention): Defs, Branch, Closure, Saturation,
+│                                  TimeOrdering, Soundness, Completeness
 └── Metalogic/
     ├── Soundness.lean
     ├── Completeness.lean

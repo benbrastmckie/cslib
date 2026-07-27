@@ -53,7 +53,6 @@
 1 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean
 6 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
 5 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Burgess.lean
-5 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Seeds.lean
 5 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Since.lean
 5 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/XuGuard.lean
 4 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/RRelation.lean

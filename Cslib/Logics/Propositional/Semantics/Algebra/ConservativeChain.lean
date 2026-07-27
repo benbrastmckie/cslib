@@ -213,19 +213,6 @@ theorem HAValid_implies_GHAValid {Atom : Type u} {φ : PL.Proposition Atom}
 
 /-! ## Inter-Fragment Conservativity Corollaries -/
 
-/-- **API naming-convention alias** for `hilbertConjImpConservativeOverImp`.
-
-This definition exists solely to provide a `_direct` suffixed name that mirrors
-`hilbertConjImpConservativeOverImp_viaIpl`, giving callers a symmetric pair of names
-for the two proof routes (direct vs. via IPL). The body is literally
-`hilbertConjImpConservativeOverImp hITO h` with no independent content.
-
-See also `hilbertConjImpConservativeOverImp_viaIpl` for the alternative route through IPL. -/
-theorem hilbertConjImpConservativeOverImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
-    (hITO : φ.IsImpTopOnly = true) (h : Derivable (@ConjImpAxiom Atom) φ) :
-    Derivable (@ImpAxiom Atom) φ :=
-  hilbertConjImpConservativeOverImp hITO h
-
 /-- **MPL conservative over IPL⟨→,⊤⟩**: for imp-top-only bot-free formulas, MPL derivability
 implies ImpAxiom derivability.
 

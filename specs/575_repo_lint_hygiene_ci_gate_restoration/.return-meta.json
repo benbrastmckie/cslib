@@ -1,11 +1,15 @@
 {
   "status": "partial",
-  "started_at": "2026-07-27T19:28:24Z",
-  "completed_at": "2026-07-27T21:05:00Z",
+  "started_at": "2026-07-27T20:00:05Z",
+  "completed_at": "2026-07-27T21:45:00Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/handoffs/03_cycle-15-phase-5-progress.md"
     }
   ],
   "verification": {
@@ -15,23 +19,24 @@
     "axiom_count": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "wfail_build_note": "lake build --wfail --iofail now reports exactly 5 warnings (all documented baseline sorries), zero others. The cycle-12 regression (12 warnings across 7 modules) is fully resolved by this dispatch's item-1 work.",
+    "wfail_build_note": "lake build --wfail --iofail reports exactly 5 warnings (all documented baseline sorries), zero others -- gate intact, unchanged from cycle 14.",
     "lake_test_passed": true,
     "lint_style_passed": true,
-    "checkInitImports_passed": true
+    "checkInitImports_passed": true,
+    "lake_shake_note": "Pre-existing, out-of-scope import-minimization drift across ~15 files not touched by this or any prior Phase 5 cycle -- flagged in the plan for a future dedicated pass, not fixed (none of the affected files have any suppression-audit connection)."
   },
   "partial_progress": {
-    "stage": "item-1-complete-item-2-partial",
-    "details": "Item 1 (wfail baseline regression, PRIORITIZED FIRST per delegation scope): fully resolved. Fixed 3 local-only files: SoundnessStep.lean (Proposition.beqToEq def->theorem), Termination.lean (liftGrounded def->theorem -- note conclusionGrounded, a superficially similar def in the same file, correctly could NOT be converted since its codomain is the literal type Prop rather than an instantiated Prop term; verified this is a genuine Lean type-theory restriction via a minimal standalone repro), CutElimination.lean (5x identical vestigial simp_wf deletion in decreasing_by clauses). Each rebuilt individually plus downstream importers, each committed separately (6619c058, e47ea1cd, 6b4a5c89). Full lake build --wfail --iofail re-run confirmed exactly 5 baseline sorry warnings, zero others. Updated and committed the plan's Phase 1/RESUME HERE/Baseline-table sections to reflect the empirical re-verification (3db68d93). Item 2 (Phase 5 suppression audit, continued with remaining budget): processed 2 more local-only files to zero blanket suppressions each -- UltrafilterMCS.lean (5->0, commit fecacdde; caught and corrected a mid-pass declaration-mapping error via the mandatory rebuild-before-commit discipline) and Quasimodel/Construction.lean (5->0, commit 60eb1dca, leaf module). Suppression-audit progress: 183 -> 193 sites audited cumulative (29 files fully processed cumulative). Ratchet re-baselined in each file's own commit (258 -> 248 blanket suppressions repo-wide). Plan's Phase 5 section updated with a cycle-14 entry documenting both files, the declaration-mapping lesson, and a refreshed worst-offender list / resume point for the next dispatch (2aee338c). 234 blanket suppressions across local-only files remain in scope for future cycles.",
+    "stage": "cycle-15-phase-5-continuation",
+    "details": "Scope for this dispatch was Phase 5 (suppression audit) only, per explicit delegation instruction. Processed 4 local-only files to zero blanket suppressions each -- Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean (5->0, 765 lines, commit 8bb8f6e5), Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean (5->0, 870 lines, commit 6771ddeb), Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Burgess.lean (5->0, 987 lines, commit b54360e8), Bimodal/Metalogic/Decidability/CountermodelExtraction.lean (5->0, 1088 lines, commit 78b7b88a). Each file individually rebuilt, downstream importers rebuilt clean, lint-style clean, and the suppression ratchet re-baselined in the same commit as the file. Suppression-audit progress: 193 -> 213 sites audited cumulative (33 files fully processed cumulative). Repo-wide blanket suppression lines (ratchet-tracked): 248 -> 228 (214 local-only in-scope remaining per a live re-count against upstream/main; 14 upstream-carved-out, a live re-count that found 14 rather than the '12' some earlier cycle entries cite -- not re-investigated, the carve-out set itself is unchanged). Plan's Phase 5 section updated with a cycle-15 entry (commit c311471a) documenting all four files' category breakdowns, two new findings (an Edit-tool false-duplicate-match lesson, and a note on the two structurally-similar Burgess.lean files), and a refreshed worst-offender list / resume point. Full CSLib CI pipeline re-run at cycle end and confirmed green. Phase 7's two carried-forward blockers were NOT re-investigated per the explicit delegation instruction and are recorded below verbatim for the user. One new out-of-scope finding was flagged in the plan (not fixed): a lake shake import-minimization drift across ~15 untouched files.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1,
+    "phases_completed": 7,
     "phases_total": 8,
-    "last_completed_phase": "Phase 1: Linter sites (re-closed after cycle-13 regression fix)",
-    "phases_completed_note": "Phases 1, 2, 3, 4, 6, 7(partial-excluded-by-finding), 8 = COMPLETED/settled as of prior cycles; Phase 1 was reopened by a discovered regression and re-closed this dispatch (its own closure criterion is once again empirically satisfied by a fresh --wfail --iofail run). Phase 5 = PARTIAL, advanced by 2 files this dispatch (193/~427 local-only sites done cumulative, 234 blanket suppressions across local-only files remain in scope). Phase 7 = PARTIAL, unchanged -- explicitly NOT re-investigated this dispatch per the delegation instruction; its 2 blockers are carried forward verbatim below for the user."
+    "last_completed_phase": "Phase 5: Suppression audit (advanced from 193 to 213 sites, still PARTIAL -- 214 blanket suppressions across local-only files remain in scope)",
+    "phases_completed_note": "Phases 1, 2, 3, 4, 6, 8 = COMPLETED, unchanged from prior cycles, not touched this dispatch (out of scope per delegation instruction). Phase 5 = PARTIAL, advanced by 4 files this dispatch. Phase 7 = PARTIAL, unchanged -- explicitly NOT re-investigated this dispatch per the delegation instruction; its 2 blockers are carried forward verbatim below for the user."
   },
   "requires_user_review": true,
-  "review_reason": "Two items carried forward verbatim from prior cycles, NOT re-investigated this dispatch per explicit delegation instruction (they are settled and await a human decision, not further investigation): (1) Phase 7 item 1 -- NOTATION.md's drafted 'Logic notation scoping' section cannot land locally because the file is confirmed byte-identical to upstream/main (out of scope under the upstream-exposure carve-out); needs a human decision on whether to (a) route this as a small upstream PR (recommended), or (b) explicitly authorize editing this specific shared docs file locally as an exception to the carve-out. (2) Phase 7 item 2 -- the 5 'stale NOTE: block' deletions were found NOT stale in a prior cycle's investigation and deliberately left in place; still flagged for explicit user sign-off on that judgment call. No new blockers were introduced by this dispatch; the wfail regression that was the other open item is now fully resolved.",
+  "review_reason": "Two items carried forward verbatim from prior cycles, NOT re-investigated this dispatch per explicit delegation instruction (they are settled and await a human decision, not further investigation): (1) Phase 7 item 1 -- NOTATION.md's drafted 'Logic notation scoping' section cannot land locally because the file is confirmed byte-identical to upstream/main (out of scope under the upstream-exposure carve-out). Needs a human decision on whether to (a) route this as a small upstream PR (recommended), or (b) explicitly authorize editing this specific shared docs file locally as an exception to the carve-out. (2) Phase 7 item 2 -- the 5 'stale NOTE: block' deletions were found NOT stale in a prior cycle's investigation and deliberately left in place; still flagged for explicit user sign-off on that judgment call. A third, NEW, non-blocking item was flagged for the record: lake shake reports pre-existing import-minimization drift across ~15 files unrelated to any Phase 5 work, likely from an unrelated merge -- recommend a dedicated follow-up pass, does not block Phase 5 continuation.",
   "metadata": {
     "session_id": "sess_1785175989_6e99ab",
     "agent_type": "cslib-implementation-agent",

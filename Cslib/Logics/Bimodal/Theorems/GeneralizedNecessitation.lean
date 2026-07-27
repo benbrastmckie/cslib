@@ -21,12 +21,6 @@ Derived generalized necessitation rules for modal, temporal future, and temporal
 Ported from BimodalLogic/Theories/Bimodal/Theorems/GeneralizedNecessitation.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.unusedSimpArgs false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Theorems
@@ -37,7 +31,8 @@ open Cslib.Logic.Bimodal.Theorems.Propositional
 
 variable {Atom : Type*}
 
-/-- Local instance of the temporal K-distribution axiom `□(φ→ψ) → (□φ → □ψ)` at `FrameClass.Base`. -/
+/-- Local instance of the temporal K-distribution axiom `□(φ→ψ) → (□φ → □ψ)` at
+`FrameClass.Base`. -/
 noncomputable def tempKDistLocal (φ ψ : Formula Atom) :
     DerivationTree FrameClass.Base [] ((φ.imp ψ).allFuture.imp (φ.allFuture.imp ψ.allFuture)) :=
   let neg_contra := mp (contraposeImp φ ψ) (contraposeImp (φ.imp ψ) (ψ.neg.imp φ.neg))
@@ -50,6 +45,7 @@ noncomputable def tempKDistLocal (φ ψ : Formula Atom) :
     (contraposeImp (Formula.someFuture ψ.neg) (Formula.someFuture φ.neg))
   impTrans G_contra G_to_GK
 
+set_option linter.flexible false in
 /-- Converts a derivation of `A → B` under `Γ` into a derivation of `B` under `A :: Γ`. -/
 def reverseDeduction {fc : FrameClass} {Γ : Context Atom} {A B : Formula Atom}
     (h : DerivationTree fc Γ (A.imp B)) : DerivationTree fc (A :: Γ) B := by
@@ -67,7 +63,7 @@ noncomputable def pastNecessitation {fc : FrameClass} (φ : Formula Atom)
     DerivationTree.temporal_necessitation _ h_swap
   have final : DerivationTree fc [] φ.swapTemporal.allFuture.swapTemporal :=
     DerivationTree.temporal_duality _ g_swap
-  simp only [Formula.swapTemporal_allFuture, Formula.swapTemporal,
+  simp only [Formula.swapTemporal_allFuture,
     Formula.swapTemporal_involution] at final
   exact final
 
@@ -96,7 +92,8 @@ noncomputable def generalizedModalK {fc : FrameClass} :
   | A :: Γ', φ, h =>
     let h_deduction := Cslib.Logic.Bimodal.Metalogic.Core.deductionTheorem Γ' A φ h
     let ih_res := generalizedModalK Γ' (A.imp φ) h_deduction
-    let k_dist : DerivationTree fc [] ((Formula.box (A.imp φ)).imp ((Formula.box A).imp (Formula.box φ))) :=
+    let k_dist : DerivationTree fc []
+        ((Formula.box (A.imp φ)).imp ((Formula.box A).imp (Formula.box φ))) :=
       DerivationTree.axiom [] _ (Axiom.modal_k_dist A φ) trivial
     let k_dist_weak :=
       DerivationTree.weakening [] (Context.map Formula.box Γ') _ k_dist (List.nil_subset _)
@@ -104,7 +101,8 @@ noncomputable def generalizedModalK {fc : FrameClass} :
       DerivationTree.modus_ponens _ _ _ k_dist_weak ih_res
     reverseDeduction h_mp
 
-/-- Generalized future K: given a derivation of `φ` from `Γ`, derives `□φ` from `□Γ` for the future modality. -/
+/-- Generalized future K: given a derivation of `φ` from `Γ`, derives `□φ` from `□Γ` for the
+future modality. -/
 noncomputable def generalizedTemporalK {fc : FrameClass} :
     (Γ : Context Atom) → (φ : Formula Atom) →
     (h : DerivationTree fc Γ φ) →
@@ -116,12 +114,14 @@ noncomputable def generalizedTemporalK {fc : FrameClass} :
     let k_dist_base := tempKDistLocal A φ
     let k_dist := DerivationTree.lift (FrameClass.base_le fc) k_dist_base
     let k_dist_weak :=
-      DerivationTree.weakening [] (Context.map Formula.allFuture Γ') _ k_dist (List.nil_subset _)
+      DerivationTree.weakening [] (Context.map Formula.allFuture Γ') _ k_dist
+        (List.nil_subset _)
     let h_mp :=
       DerivationTree.modus_ponens _ _ _ k_dist_weak ih_res
     reverseDeduction h_mp
 
-/-- Generalized past K: given a derivation of `φ` from `Γ`, derives `■φ` from `■Γ` for the past modality. -/
+/-- Generalized past K: given a derivation of `φ` from `Γ`, derives `■φ` from `■Γ` for the past
+modality. -/
 noncomputable def generalizedPastK {fc : FrameClass} :
     (Γ : Context Atom) → (φ : Formula Atom) →
     (h : DerivationTree fc Γ φ) →

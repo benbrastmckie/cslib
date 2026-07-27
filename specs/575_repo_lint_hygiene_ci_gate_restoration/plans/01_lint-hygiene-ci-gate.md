@@ -21,10 +21,11 @@
 
 ## RESUME HERE
 
-Sixteenth resume (cycle 16, in progress). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8
-all COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was re-closed in cycle 12
+Seventeenth resume (cycle 16 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was re-closed in cycle 12
 after its own reopen; Phase 4's post-close `lake shake` regression was re-closed in cycle 16 —
-see below). Only Phase 5 (suppression audit) remains, PARTIAL.**
+see below). Only Phase 5 (suppression audit) remains, PARTIAL at 214 sites done, 209 blanket
+suppressions across local-only files remaining in scope.**
 
 **Cycle 16, item 1 (this dispatch) — Phase 4's `lake shake` regression re-closed.** The cycle-15
 "baseline noise, ~15 files, not fixed" finding was investigated: a live `lake shake --add-public
@@ -51,8 +52,21 @@ clean after the fix; `lake shake` repo-wide now reports exactly the 12 upstream-
 nothing else. **Phase 4's marker returns to COMPLETED, this time on a criterion that was
 empirically re-verified against a live count, not merely re-asserted.**
 
-**Cycle 16, item 2 (this dispatch, remaining budget)**: continuing Phase 5 per its own resume
-point below.
+**Cycle 16, item 2 (this dispatch, remaining budget) — Phase 5 advanced by 1 file.** Processed
+`Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/XuGuard.lean` (5→0, 1146 lines, commit
+`c0a11b8d`) — the smallest of the 3 files left in the count-5 tier at cycle 15's close.
+Suppression-audit progress: 213 → 214 sites audited cumulative (34 files fully processed
+cumulative). Repo-wide blanket suppression lines (ratchet-tracked): 228 → 223 (5 fewer). See
+Phase 5's own cycle-16 entry for the full category breakdown and the count-5 tier's final 2
+files (both `ChronicleConstruction.lean`, ~1450-1550 lines each). Full CSLib CI pipeline re-run
+at cycle end: `lake build --wfail --iofail` (exactly 5 baseline sorry warnings, zero new
+anywhere), `lake exe checkInitImports` (clean), `lake exe lint-style` (clean, no output), `lake
+shake --add-public --keep-implied --keep-prefix` (exactly the 12 upstream-shared files, zero
+local-only findings — confirms item 1's fix holds), `lake exe mk_all --module` ("No update
+necessary"), `lake test` (exit 0, same 5 baseline sorry warnings plus the same one pre-existing
+unrelated `backward.privateInPublic` warning in `CslibTests/FreeMonad.lean`). Vacuous-def grep
+unchanged at the single pre-existing false positive (`Computability/URM/Basic.lean:92`); axiom
+count unchanged at 26.
 
 **Cycle 15 (this dispatch, scope-limited to Phase 5 only)**: processed 4 more files, all
 committed individually after a clean scoped rebuild plus downstream-importer rebuilds —
@@ -119,19 +133,20 @@ new sites.
 
 To pick Phase 5 up cold:
 
-1. Confirm the baseline (2 commands, ~5 min) — **expect exactly 5 warnings, all documented
-   sorries, as of cycle 15**:
+1. Confirm the baseline (3 commands, ~5 min) — **expect exactly 5 warnings, all documented
+   sorries, and lake shake reporting only the 12 upstream-shared files, as of cycle 16**:
    ```bash
-   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 15
+   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 16
    lake test                     # expect exit 0, 0 errors
+   lake shake --add-public --keep-implied --keep-prefix Cslib   # expect exactly 12 upstream-shared files, zero local-only
    ```
    If the warning count or file set differs from the above, something else landed — reconcile
    before proceeding.
-2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's closure criterion is once again
-   empirically satisfied (no further action needed on any of them).
-3. **Only Phase 5 remains.** 33 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10/11/12/14/15 sub-entries for the complete per-file list) — do not revisit any of
-   them. Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry,
+2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's and Phase 4's closure criteria are once
+   again empirically satisfied (no further action needed on any of them).
+3. **Only Phase 5 remains.** 34 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11/12/14/15/16 sub-entries for the complete per-file list) — do not revisit any
+   of them. Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry,
    then **filter it through the local-only gate above** before picking a target. Prioritize the
    smaller count-5 files it lists ahead of the larger count-6 files, using the
    method Phase 5's section documents: remove all of a file's suppressions, rebuild, categorize
@@ -272,9 +287,9 @@ that actually caught it.
 | `lake build --wfail --iofail` | **exit 1**, 27 modules, 460 warnings | **exit 1**, 5 modules, **exactly 5 genuine sorry warnings** (a transient cycle-12 regression of 7 additional non-sorry warnings across 3 local-only files was fixed in cycle 13 — see Phase 1's cycle-13 closure note) |
 | `lake exe mk_all --check` | pass | pass |
 | `lake exe checkInitImports` | pass | pass |
-| `lake shake` | 94 files flagged (CI step disabled) | unchanged |
+| `lake shake` | 94 files flagged (CI step disabled) | CI step enabled (Phase 4); clean on the local-only tree — exactly the 12 upstream-shared files remain flagged (out of scope), zero local-only findings as of cycle 16 (a post-close regression across 11 local-only files, landed via an unrelated merge, was found and fixed in cycle 16 — see Phase 4's cycle-16 addendum) |
 | Linter sites | 240 | **0** (Phase 1 scope; the cycle-12 regression's 3 newly-affected files are fixed as of cycle 13 — see Phase 1's cycle-13 closure note) |
-| `set_option linter.*` | 511 | see Phase 5's live ratchet count (258 blanket suppressions as of cycle 12) |
+| `set_option linter.*` | 511 | see Phase 5's live ratchet count (223 blanket suppressions as of cycle 16) |
 | `@[nolint]` | 118 | 88 |
 | Task-tracker refs in `Cslib/**` | 376 (undercounted; see Phase 3 census-regex fix) | 20 (all individually accounted for as exclusions — see Phase 3's cycle-12 closure) |
 | Doubled public names | 6 cross-module leaks | **0** |
@@ -811,7 +826,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 213 sites done; 214 blanket suppressions across local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 214 sites done; 209 blanket suppressions across local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -1573,6 +1588,59 @@ fix what's mechanical, narrow the rest to declaration-scope, re-baseline the rat
 commit — carrying forward every safety lesson from cycles 6-15 (see the cycle-11/12 addenda
 above for the full list through cycle 12, the cycle-14 declaration-mapping-verification lesson,
 and this cycle's Edit-tool false-duplicate-match lesson above).
+
+**Done (cycle 16)**: processed the smallest remaining count-5 file (per the cycle-15 addendum's
+smallest-first ordering), committed after a clean scoped rebuild plus downstream-importer
+rebuilds — `Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/XuGuard.lean` (5→0, 1146
+lines, commit `c0a11b8d`): `style.emptyLine`/`style.setOption` vestigial; `unusedSimpArgs` (1
+site, `Formula.neg` unused in a `simp only` call) fixed mechanically; `style.longLine` (~59
+sites, across the file's two structurally mirrored `lemma_2_7`/`lemma_2_8` proof blocks) fixed by
+rewrapping; `flexible` (4 declarations: `l27_a_event_list_mem`, `l27_collect_guards_mem_of_B`,
+`l27_guard_snce_xi_val`, `l27_collect_guards_mem_of_snce_xi`) narrowed to declaration-scoped
+`set_option` lines — the same `l27`-family declaration names and fix pattern already seen in
+`Splitting.lean` (cycle 15), confirming this file shares that helper-family structure.
+Suppression-audit progress: 213 → 214 sites audited cumulative (34 files fully processed
+cumulative). Repo-wide blanket suppression lines (ratchet-tracked): 228 → 223 (5 fewer;
+re-baselined in the same commit). This cycle's dispatch was scope-split with item 1 (Phase 4's
+`lake shake` regression re-closure, see Phase 4's own section and the RESUME HERE cycle-16 entry)
+taking priority; only one Phase-5 file was completed as a result, not the full remaining budget.
+
+**Resume point (cycle 16 close)**: the 1 file above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10, 11, 12, 14, 15 are done — do not revisit (34 files total). Re-verify the worst-offender list
+before starting the next cycle, since resolutions only ever remove entries, and re-gate every
+candidate through `git cat-file -e upstream/main:<path>` (must FAIL) per the upstream-exposure
+rescope:
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 16's end (223 total remaining blanket suppression lines, 209 local-only in-scope —
+223 minus the 14 upstream-carved-out from the cycle-15 live re-count, unchanged this cycle), the
+count-6 tier is unchanged from cycles 8-15 (all confirmed local-only in prior cycles):
+`Temporal/Metalogic/Chronicle/CounterexampleElimination/{RecursiveWalks (1125 lines),
+MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/FrameClassVariants.lean` (931
+lines), `Bimodal/Metalogic/Separation/Eliminations.lean` (849 lines), `Bimodal/Metalogic/
+BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048 lines — do not pick this
+one first), `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean` (1208
+lines). The count-5 tier is now down to its final 2 files (XuGuard.lean, the smallest, is now
+done): `Temporal/Metalogic/Chronicle/ChronicleConstruction.lean` (1435 lines),
+`Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleConstruction.lean` (1532 lines — pick either;
+neither is meaningfully smaller). Once these 2 are done, Phase 5's next cycle must re-derive the
+worst-offender list fresh rather than relying on any cached tier framing here, since the count-4
+tier (currently ~15+ files) becomes the new frontier. Apply the same method: remove all of a
+file's suppressions, rebuild, categorize what surfaces into vestigial / mechanically-fixable /
+needs-real-proof-work, fix what's mechanical, narrow the rest to declaration-scope, re-baseline
+the ratchet in the same commit — carrying forward every safety lesson from cycles 6-16 (see the
+cycle-11/12 addenda above for the full list through cycle 12, the cycle-14
+declaration-mapping-verification lesson, the cycle-15 Edit-tool false-duplicate-match lesson, and
+this cycle's finding: when a file contains two large near-identical mirrored proof blocks
+(e.g. an `until`/`since` pair, or a `lemma_2_7`/`lemma_2_8` pair), an `Edit` whose `old_string`
+happens to be identical text in both blocks will error "found 2 matches" — use `replace_all:
+true` only when you have confirmed the intended replacement text is correct for *both* sites
+verbatim (as it was here, since the wraps were purely mechanical line-splits), otherwise widen
+`old_string` with block-distinguishing context and edit each site individually).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

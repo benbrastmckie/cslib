@@ -27,11 +27,6 @@ Defines the canonical frame for BX completeness.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Frame.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical
@@ -68,7 +63,8 @@ lemma gContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
     (h_mcs : SetMaximalConsistent FrameClass.Base Omega)
     (L : List (Formula Atom)) (h_sub : ∀ ψ ∈ L, ψ ∈ gContent Omega)
     (h_deriv : DerivationTree FrameClass.Base L φ) : Formula.allFuture φ ∈ Omega := by
-  have d_G : DerivationTree FrameClass.Base (Context.map Formula.allFuture L) (Formula.allFuture φ) :=
+  have d_G :
+      DerivationTree FrameClass.Base (Context.map Formula.allFuture L) (Formula.allFuture φ) :=
     Theorems.generalizedTemporalK L φ h_deriv
   have h_GL_in : ∀ f ∈ Context.map Formula.allFuture L, f ∈ Omega := by
     intro f hf
@@ -96,18 +92,22 @@ lemma hContentClosedDerivation {Omega : Set (Formula Atom)} {φ : Formula Atom}
 
 /-! ## gContent / hContent Set Consistent -/
 
-theorem g_content_set_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Omega) :
+theorem g_content_set_consistent {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent FrameClass.Base Omega) :
     SetConsistent FrameClass.Base (gContent Omega) := by
   intro L hL ⟨d⟩
   have h_G_bot : Formula.allFuture (Formula.bot : Formula Atom) ∈ Omega :=
     gContentClosedDerivation h_mcs L hL d
-  let neg_top : Formula Atom := ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)).imp (Formula.bot : Formula Atom)
+  let neg_top : Formula Atom :=
+    ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)).imp (Formula.bot : Formula Atom)
   have h_ef : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp neg_top) :=
     DerivationTree.axiom [] _ (Axiom.efq neg_top) trivial
-  have h_G_ef : DerivationTree FrameClass.Base [] (Formula.allFuture ((Formula.bot : Formula Atom).imp neg_top)) :=
+  have h_G_ef : DerivationTree FrameClass.Base []
+      (Formula.allFuture ((Formula.bot : Formula Atom).imp neg_top)) :=
     DerivationTree.temporal_necessitation _ h_ef
-  have h_kd : DerivationTree FrameClass.Base [] (((Formula.bot : Formula Atom).imp neg_top).allFuture.imp
-    ((Formula.bot : Formula Atom).allFuture.imp neg_top.allFuture)) :=
+  have h_kd : DerivationTree FrameClass.Base []
+      (((Formula.bot : Formula Atom).imp neg_top).allFuture.imp
+        ((Formula.bot : Formula Atom).allFuture.imp neg_top.allFuture)) :=
     Theorems.TemporalDerived.tempKDistDerived (Formula.bot : Formula Atom) neg_top
   have h1 := theoremInMcsFc h_mcs h_G_ef
   have h2 := theoremInMcsFc h_mcs h_kd
@@ -125,18 +125,22 @@ theorem g_content_set_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMaxima
     SetMaximalConsistent.implication_property h_mcs h_serial_in h_top_in
   exact someFuture_allFuture_neg_absurd h_mcs (Formula.top : Formula Atom) h_F_top h_G_neg_top
 
-theorem h_content_set_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Omega) :
+theorem h_content_set_consistent {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent FrameClass.Base Omega) :
     SetConsistent FrameClass.Base (hContent Omega) := by
   intro L hL ⟨d⟩
   have h_H_bot : Formula.allPast (Formula.bot : Formula Atom) ∈ Omega :=
     hContentClosedDerivation h_mcs L hL d
-  let neg_top : Formula Atom := ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)).imp (Formula.bot : Formula Atom)
+  let neg_top : Formula Atom :=
+    ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)).imp (Formula.bot : Formula Atom)
   have h_ef : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp neg_top) :=
     DerivationTree.axiom [] _ (Axiom.efq neg_top) trivial
-  have h_H_ef : DerivationTree FrameClass.Base [] (Formula.allPast ((Formula.bot : Formula Atom).imp neg_top)) :=
+  have h_H_ef : DerivationTree FrameClass.Base []
+      (Formula.allPast ((Formula.bot : Formula Atom).imp neg_top)) :=
     Theorems.pastNecessitation _ h_ef
-  have h_kd : DerivationTree FrameClass.Base [] (((Formula.bot : Formula Atom).imp neg_top).allPast.imp
-    ((Formula.bot : Formula Atom).allPast.imp neg_top.allPast)) :=
+  have h_kd : DerivationTree FrameClass.Base []
+      (((Formula.bot : Formula Atom).imp neg_top).allPast.imp
+        ((Formula.bot : Formula Atom).allPast.imp neg_top.allPast)) :=
     Theorems.pastKDist (Formula.bot : Formula Atom) neg_top
   have h1 := theoremInMcsFc h_mcs h_H_ef
   have h2 := theoremInMcsFc h_mcs h_kd
@@ -201,11 +205,13 @@ theorem bx_G_forward {w v : BXPoint Atom} {φ : Formula Atom}
 lemma bxGBackward (w : BXPoint Atom) (φ : Formula Atom)
     (h_not_G : Formula.allFuture φ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe w v ∧ φ ∉ v.formulas := by
-  have h_seed_cons : SetConsistent FrameClass.Base ({Formula.neg φ} ∪ gContent w.formulas : Set (Formula Atom)) := by
+  have h_seed_cons : SetConsistent FrameClass.Base
+      ({Formula.neg φ} ∪ gContent w.formulas : Set (Formula Atom)) := by
     intro L hL ⟨d⟩
     by_cases h_negφ_in : Formula.neg φ ∈ L
     · let L_filt := L.filter (fun y => decide (y ≠ Formula.neg φ))
-      have d_reord : DerivationTree FrameClass.Base (Formula.neg φ :: L_filt) (Formula.bot : Formula Atom) :=
+      have d_reord :
+          DerivationTree FrameClass.Base (Formula.neg φ :: L_filt) (Formula.bot : Formula Atom) :=
         derivationExchange d (fun x => (cons_filter_neq_perm h_negφ_in x).symm)
       have d_negneg : DerivationTree FrameClass.Base L_filt (Formula.neg (Formula.neg φ)) :=
         deductionTheorem L_filt (Formula.neg φ) (Formula.bot : Formula Atom) d_reord
@@ -220,7 +226,8 @@ lemma bxGBackward (w : BXPoint Atom) (φ : Formula Atom)
         · exact h
       have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg φ)).imp φ) :=
         Theorems.Propositional.doubleNegation φ
-      have d_dne_weak : DerivationTree FrameClass.Base L_filt ((Formula.neg (Formula.neg φ)).imp φ) :=
+      have d_dne_weak :
+          DerivationTree FrameClass.Base L_filt ((Formula.neg (Formula.neg φ)).imp φ) :=
         DerivationTree.weakening [] L_filt _ h_dne (List.nil_subset _)
       have d_phi : DerivationTree FrameClass.Base L_filt φ :=
         DerivationTree.modus_ponens L_filt _ _ d_dne_weak d_negneg
@@ -251,11 +258,13 @@ theorem bx_H_forward {w v : BXPoint Atom} {φ : Formula Atom}
 lemma bxHBackward (w : BXPoint Atom) (φ : Formula Atom)
     (h_not_H : Formula.allPast φ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe v w ∧ φ ∉ v.formulas := by
-  have h_seed_cons : SetConsistent FrameClass.Base ({Formula.neg φ} ∪ hContent w.formulas : Set (Formula Atom)) := by
+  have h_seed_cons : SetConsistent FrameClass.Base
+      ({Formula.neg φ} ∪ hContent w.formulas : Set (Formula Atom)) := by
     intro L hL ⟨d⟩
     by_cases h_negφ_in : Formula.neg φ ∈ L
     · let L_filt := L.filter (fun y => decide (y ≠ Formula.neg φ))
-      have d_reord : DerivationTree FrameClass.Base (Formula.neg φ :: L_filt) (Formula.bot : Formula Atom) :=
+      have d_reord :
+          DerivationTree FrameClass.Base (Formula.neg φ :: L_filt) (Formula.bot : Formula Atom) :=
         derivationExchange d (fun x => (cons_filter_neq_perm h_negφ_in x).symm)
       have d_negneg : DerivationTree FrameClass.Base L_filt (Formula.neg (Formula.neg φ)) :=
         deductionTheorem L_filt (Formula.neg φ) (Formula.bot : Formula Atom) d_reord
@@ -270,7 +279,8 @@ lemma bxHBackward (w : BXPoint Atom) (φ : Formula Atom)
         · exact h
       have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg φ)).imp φ) :=
         Theorems.Propositional.doubleNegation φ
-      have d_dne_weak : DerivationTree FrameClass.Base L_filt ((Formula.neg (Formula.neg φ)).imp φ) :=
+      have d_dne_weak :
+          DerivationTree FrameClass.Base L_filt ((Formula.neg (Formula.neg φ)).imp φ) :=
         DerivationTree.weakening [] L_filt _ h_dne (List.nil_subset _)
       have d_phi : DerivationTree FrameClass.Base L_filt φ :=
         DerivationTree.modus_ponens L_filt _ _ d_dne_weak d_negneg
@@ -329,7 +339,8 @@ lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
         rcases h_mem with rfl | h
         · exact absurd rfl h_ne
         · exact h
-      have d_box_neg : DerivationTree FrameClass.Base (Context.map Formula.box L_filt) (Formula.box (Formula.neg ψ)) :=
+      have d_box_neg : DerivationTree FrameClass.Base
+          (Context.map Formula.box L_filt) (Formula.box (Formula.neg ψ)) :=
         Theorems.generalizedModalK L_filt (Formula.neg ψ) d_neg
       have h_box_L_in : ∀ f ∈ Context.map Formula.box L_filt, f ∈ w.formulas := by
         intro f hf
@@ -349,7 +360,8 @@ lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
         rcases h_mem with rfl | h
         · exact absurd hχ h_ψ_in
         · exact h
-      have d_box_bot : DerivationTree FrameClass.Base (Context.map Formula.box L) (Formula.box (Formula.bot : Formula Atom)) :=
+      have d_box_bot : DerivationTree FrameClass.Base
+          (Context.map Formula.box L) (Formula.box (Formula.bot : Formula Atom)) :=
         Theorems.generalizedModalK L (Formula.bot : Formula Atom) d
       have h_box_L_in : ∀ f ∈ Context.map Formula.box L, f ∈ w.formulas := by
         intro f hf
@@ -359,12 +371,16 @@ lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
         exact h_L_in_bc χ hχ_in
       have h_box_bot_in := SetMaximalConsistent.closed_under_derivation w.is_mcs
         (Context.map Formula.box L) h_box_L_in d_box_bot
-      have h_ax : DerivationTree FrameClass.Base [] (Formula.box (Formula.bot : Formula Atom) |>.imp (Formula.bot : Formula Atom)) :=
+      have h_ax :
+          DerivationTree FrameClass.Base [] (Formula.box (Formula.bot : Formula Atom) |>.imp
+            (Formula.bot : Formula Atom)) :=
         DerivationTree.axiom [] _ (Axiom.modal_t (Formula.bot : Formula Atom)) trivial
       have h_bot := SetMaximalConsistent.implication_property w.is_mcs
         (theoremInMcsFc w.is_mcs h_ax) h_box_bot_in
-      exact w.is_mcs.1 [(Formula.bot : Formula Atom)] (fun χ hχ => by simp at hχ; rw [hχ]; exact h_bot)
-        ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
+      exact w.is_mcs.1 [(Formula.bot : Formula Atom)]
+        (fun χ hχ => by simp only [List.mem_singleton] at hχ; rw [hχ]; exact h_bot)
+        ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)]
+          (Formula.bot : Formula Atom) (by simp)⟩
   obtain ⟨M, hM_sup, hM_mcs⟩ := set_lindenbaum_base h_seed_cons
   have h_ψ_in : ψ ∈ M := hM_sup (Set.mem_union_left _ (Set.mem_singleton ψ))
   have h_bc_sub : bc ⊆ M := fun χ hχ => hM_sup (Set.mem_union_right _ hχ)
@@ -372,7 +388,8 @@ lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
     intro χ
     constructor
     · intro h_box
-      have h_m4 : DerivationTree FrameClass.Base [] ((Formula.box χ).imp (Formula.box (Formula.box χ))) :=
+      have h_m4 :
+          DerivationTree FrameClass.Base [] ((Formula.box χ).imp (Formula.box (Formula.box χ))) :=
         DerivationTree.axiom [] _ (Axiom.modal_4 χ) trivial
       have h_box_box := SetMaximalConsistent.implication_property w.is_mcs
         (theoremInMcsFc w.is_mcs h_m4) h_box
@@ -384,13 +401,17 @@ lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
         cases SetMaximalConsistent.negation_complete w.is_mcs (Formula.box χ) with
         | inl h => exact absurd h h_not_box
         | inr h => exact h
-      have h_m5 : DerivationTree FrameClass.Base [] ((Formula.box χ).neg.box.neg.imp (Formula.box χ)) :=
+      have h_m5 :
+          DerivationTree FrameClass.Base [] ((Formula.box χ).neg.box.neg.imp (Formula.box χ)) :=
         DerivationTree.axiom [] _ (Axiom.modal_5_collapse χ) trivial
-      have h_contra : DerivationTree FrameClass.Base [] ((Formula.box χ).neg.imp (Formula.box χ).neg.box.neg.neg) :=
+      have h_contra : DerivationTree FrameClass.Base []
+          ((Formula.box χ).neg.imp (Formula.box χ).neg.box.neg.neg) :=
         Theorems.Propositional.contraposition h_m5
-      have h_dne : DerivationTree FrameClass.Base [] ((Formula.box χ).neg.box.neg.neg.imp (Formula.box χ).neg.box) :=
+      have h_dne : DerivationTree FrameClass.Base []
+          ((Formula.box χ).neg.box.neg.neg.imp (Formula.box χ).neg.box) :=
         Theorems.Propositional.doubleNegation ((Formula.box χ).neg.box)
-      have h_neg_intro : DerivationTree FrameClass.Base [] ((Formula.box χ).neg.imp (Formula.box χ).neg.box) :=
+      have h_neg_intro :
+          DerivationTree FrameClass.Base [] ((Formula.box χ).neg.imp (Formula.box χ).neg.box) :=
         Theorems.Combinators.impTrans h_contra h_dne
       have h_box_neg_box := SetMaximalConsistent.implication_property w.is_mcs
         (theoremInMcsFc w.is_mcs h_neg_intro) h_neg_box
@@ -402,13 +423,16 @@ lemma bxModalWitness (w : BXPoint Atom) (ψ : Formula Atom)
 /-! ## Box Preservation Along bxLe -/
 
 /-- Derives the schema `¬□φ → □¬□φ` from the modal-5-collapse axiom. -/
-noncomputable def negBoxToBoxNegBox' (φ : Formula Atom) :
-    DerivationTree FrameClass.Base [] ((Formula.box φ).neg.imp (Formula.box (Formula.box φ).neg)) := by
-  have h_m5 : DerivationTree FrameClass.Base [] ((Formula.box φ).neg.box.neg.imp (Formula.box φ)) :=
+noncomputable def negBoxToBoxNegBox' (φ : Formula Atom) : DerivationTree FrameClass.Base []
+    ((Formula.box φ).neg.imp (Formula.box (Formula.box φ).neg)) := by
+  have h_m5 :
+      DerivationTree FrameClass.Base [] ((Formula.box φ).neg.box.neg.imp (Formula.box φ)) :=
     DerivationTree.axiom [] _ (Axiom.modal_5_collapse φ) trivial
-  have h_contra : DerivationTree FrameClass.Base [] ((Formula.box φ).neg.imp (Formula.box φ).neg.box.neg.neg) :=
+  have h_contra :
+      DerivationTree FrameClass.Base [] ((Formula.box φ).neg.imp (Formula.box φ).neg.box.neg.neg) :=
     Theorems.Propositional.contraposition h_m5
-  have h_dne : DerivationTree FrameClass.Base [] ((Formula.box φ).neg.box.neg.neg.imp (Formula.box φ).neg.box) :=
+  have h_dne : DerivationTree FrameClass.Base []
+      ((Formula.box φ).neg.box.neg.neg.imp (Formula.box φ).neg.box) :=
     Theorems.Propositional.doubleNegation ((Formula.box φ).neg.box)
   exact Theorems.Combinators.impTrans h_contra h_dne
 
@@ -416,7 +440,8 @@ theorem box_preserved_along_bx_le {w v : BXPoint Atom} (h_le : bxLe w v) (φ : F
     Formula.box φ ∈ w.formulas ↔ Formula.box φ ∈ v.formulas := by
   constructor
   · intro h_box
-    have h_tf : DerivationTree FrameClass.Base [] ((Formula.box φ).imp (Formula.allFuture (Formula.box φ))) :=
+    have h_tf : DerivationTree FrameClass.Base []
+        ((Formula.box φ).imp (Formula.allFuture (Formula.box φ))) :=
       Theorems.Combinators.tempFutureDerived φ
     have h_G_box := SetMaximalConsistent.implication_property w.is_mcs
       (theoremInMcsFc w.is_mcs h_tf) h_box
@@ -435,7 +460,8 @@ theorem box_preserved_along_bx_le {w v : BXPoint Atom} (h_le : bxLe w v) (φ : F
     have h_G_box_neg := SetMaximalConsistent.implication_property w.is_mcs
       (theoremInMcsFc w.is_mcs h_tf2) h_box_neg
     have h_box_neg_v := bx_G_forward h_le h_G_box_neg
-    have h_mt : DerivationTree FrameClass.Base [] ((Formula.box (Formula.box φ).neg).imp (Formula.box φ).neg) :=
+    have h_mt : DerivationTree FrameClass.Base []
+        ((Formula.box (Formula.box φ).neg).imp (Formula.box φ).neg) :=
       DerivationTree.axiom [] _ (Axiom.modal_t (Formula.box φ).neg) trivial
     have h_neg_v := SetMaximalConsistent.implication_property v.is_mcs
       (theoremInMcsFc v.is_mcs h_mt) h_box_neg_v
@@ -453,7 +479,8 @@ lemma bxUntilEventualityResolution
     (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe w v ∧ ψ ∈ v.formulas := by
   have h_F_psi : Formula.someFuture ψ ∈ w.formulas := by
-    have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
+    have h_ax : DerivationTree FrameClass.Base [] _ :=
+      DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
     exact SetMaximalConsistent.implication_property w.is_mcs
       (theoremInMcsFc w.is_mcs h_ax) h_until
   exact bxForwardWitness w ψ h_F_psi
@@ -464,7 +491,8 @@ lemma bxSinceEventualityResolution
     (_h_not_psi : ψ ∉ w.formulas) :
     ∃ v : BXPoint Atom, bxLe v w ∧ ψ ∈ v.formulas := by
   have h_P_psi : Formula.somePast ψ ∈ w.formulas := by
-    have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
+    have h_ax : DerivationTree FrameClass.Base [] _ :=
+      DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
     exact SetMaximalConsistent.implication_property w.is_mcs
       (theoremInMcsFc w.is_mcs h_ax) h_since
   exact bxBackwardWitness w ψ h_P_psi

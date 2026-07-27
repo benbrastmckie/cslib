@@ -35,13 +35,6 @@ step can be preserved without modification.
 - Goldblatt 1992, Logics of Time and Computation
 -/
 
-set_option linter.style.setOption false
-set_option linter.unusedSimpArgs false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.ConservativeExtension
@@ -90,15 +83,15 @@ theorem embed_unembed_qfree (φ : ExtFormula Atom) (h : freshAtom ∉ φ.atoms) 
   | bot => rfl
   | imp a b iha ihb =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [unembedFormula, embedFormula, iha h.1, ihb h.2]
+    simp [unembedFormula, iha h.1, ihb h.2]
   | box a ih =>
-    simp [ExtFormula.atoms] at h; simp [unembedFormula, embedFormula, ih h]
+    simp [ExtFormula.atoms] at h; simp [unembedFormula, ih h]
   | untl b a ihb iha =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [unembedFormula, embedFormula, iha h.1, ihb h.2]
+    simp [unembedFormula, iha h.1, ihb h.2]
   | snce b a ihb iha =>
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
-    simp [unembedFormula, embedFormula, iha h.1, ihb h.2]
+    simp [unembedFormula, iha h.1, ihb h.2]
 
 end DecEq
 
@@ -117,6 +110,7 @@ section DecEq
 
 variable [DecidableEq Atom]
 
+set_option linter.flexible false in
 /-- Sum.inl atoms are preserved by substitution. -/
 theorem inl_not_in_substFormula_atoms {a : Atom} {phi : ExtFormula Atom}
     (h : Sum.inl a ∉ phi.atoms) : Sum.inl a ∉ (substFormula phi).atoms := by
@@ -232,6 +226,7 @@ theorem substFreshWith_preserves_qfree (a : Atom) (φ : ExtFormula Atom)
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp [substFreshWith, iha h.1, ihb h.2]
 
+set_option linter.unusedDecidableInType false in
 theorem substFreshWith_of_embedded (a : Atom) (φ : Formula Atom) :
     substFreshWith a (embedFormula φ) = embedFormula φ :=
   substFreshWith_preserves_qfree a _ (fresh_not_in_embedFormula_atoms φ)
@@ -505,6 +500,8 @@ theorem collectDerivInl_sub_weak {fc : FrameClass}
       collectDerivInl (ExtDerivationTree.weakening Γ Δ φ d h) := by
   intro x hx; simp only [collectDerivInl, Finset.mem_union]; tauto
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- For any Finset of atoms, there exists an atom not in it.
 Requires `[Infinite Atom]`. -/
 theorem exists_fresh_atom [Infinite Atom]
@@ -518,6 +515,7 @@ Key lemma: if `t ≠ a` and `Sum.inl t ∉ phi.atoms`,
 then `Sum.inl t ∉ (substFreshWith a phi).atoms`.
 -/
 
+set_option linter.flexible false in
 theorem substFreshWith_preserves_irr_fresh {a t : Atom}
     {phi : ExtFormula Atom}
     (h : Sum.inl t ∉ phi.atoms) (h_ne : t ≠ a) :
@@ -543,6 +541,8 @@ theorem substFreshWith_preserves_irr_fresh {a t : Atom}
     simp only [substFreshWith, ExtFormula.atoms, Finset.mem_union, not_or]
     exact ⟨iha h.1, ihb h.2⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Subset preserved under substFreshWith map. -/
 theorem map_substFreshWith_subset (a : Atom) {Gamma Delta : ExtContext Atom}
     (h : Gamma ⊆ Delta) :
@@ -562,16 +562,21 @@ fresh for the entire derivation tree (not appearing in collectDerivInl).
 def liftFormula (a : Atom) (φ : ExtFormula Atom) : Formula Atom :=
   unembedFormula (substFreshWith a φ)
 
+set_option linter.unusedDecidableInType false in
 /-- liftFormula preserves embedFormula (embedded formulas are q-free). -/
 theorem liftFormula_embed (a : Atom) (φ : Formula Atom) :
     liftFormula a (embedFormula φ) = φ := by
   simp [liftFormula, substFreshWith_of_embedded, unembed_embed]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- liftFormula distributes over imp. -/
 theorem liftFormula_imp (a : Atom) (x y : ExtFormula Atom) :
     liftFormula a (x.imp y) = (liftFormula a x).imp (liftFormula a y) := by
   simp [liftFormula, substFreshWith, unembedFormula]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- liftFormula distributes over swapTemporal. -/
 theorem liftFormula_swapTemporal (a : Atom) (φ : ExtFormula Atom) :
     liftFormula a φ.swapTemporal = (liftFormula a φ).swapTemporal := by
@@ -624,6 +629,8 @@ def liftAxiom (a : Atom) {φ : ExtFormula Atom} (h : ExtAxiom φ) :
   | density x => exact .density _
   | dense_indicator => exact .dense_indicator
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- liftAxiom preserves minFrameClass. -/
 theorem liftAxiom_preserves_minFrameClass (a : Atom) {φ : ExtFormula Atom}
     (h : ExtAxiom φ) : (liftAxiom a h).minFrameClass = h.minFrameClass := by
@@ -680,6 +687,7 @@ noncomputable def liftDerivationWith {fc : FrameClass} (a : Atom) :
 Projects F+ derivations of embedded formulas back to F derivations.
 -/
 
+set_option linter.unusedDecidableInType false in
 /-- F+ is a conservative extension of F: if F+ derives `embedFormula phi` from
 `L.map embedFormula`, then F derives `phi` from `L`.
 

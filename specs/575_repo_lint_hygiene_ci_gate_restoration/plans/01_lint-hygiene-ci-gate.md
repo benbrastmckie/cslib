@@ -1140,9 +1140,10 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
   internal section headings). The original literal wording is permanently unachievable, not
   merely unmet this cycle — see Phase 3's closure notes for why.
 - `lake shake` clean and its CI step uncommented. **[MET]**
-- Suppression audit outcome recorded per site. **[PARTIAL]** — 30 of ~570 done; see Phase 5's
-  resume point. This is the one criterion expected to remain open across multiple cycles (Phase 5
-  is explicitly unbounded — see the task description and "Testing & Validation").
+- Suppression audit outcome recorded per site. **[PARTIAL]** — 163 of ~570 done (23 files fully
+  processed cumulative); see Phase 5's resume point. This is the one criterion expected to
+  remain open across multiple cycles (Phase 5 is explicitly unbounded — see the task description
+  and "Testing & Validation").
 - `pre-pr-check.sh` can actually fail. **[MET]**
 
 ## Rollback/Contingency

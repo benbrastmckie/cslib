@@ -1169,9 +1169,9 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
 
-/-! ### Ancestor-Redirect Decision Gate (Phase 2, plan v3, ancestor-only blocking)
+/-! ### Ancestor-Redirect Decision Gate (ancestor-only blocking)
 
-**The obligation.** The ancestor-only-blocking route (task 553 plan v3) redirects a would-be
+**The obligation.** The ancestor-only-blocking route redirects a would-be
 mint at `src` onto an EXISTING ancestor `a` (reached by an already-recorded chain of `acc`
 edges) whenever `a`'s recorded key equals the prospective successor's birth content. The
 single load-bearing risk the whole route rests on is whether *adding the back-edge `src → a`
@@ -1197,8 +1197,8 @@ hypothesis available to a *standalone* (no-driver, no-Hintikka-completeness) lem
 this for an unbounded family of such `x`. This is not a new discovery: it is exactly what this
 file's own `branchPropAdequateIn` module comment (two sections below) already documents for
 Route P's identical redirect-to-an-existing-world shape ("breaks `branchSatisfiableIn`'s edge
-conjunct ... outright for such an edge"). The sorry below marks precisely this point; see
-`#### Phase 2 Verdict` in the plan for the recorded [BLOCKED] disposition. -/
+conjunct ... outright for such an edge"). The sorry below marks precisely this point; it is
+recorded as [BLOCKED] (see the lemma's own docstring below for the exact obstruction). -/
 
 /-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases`
 (unavailable across files) -- same proof, same pattern as `hasEdge_mem_successorsOf_origin`
@@ -1212,18 +1212,17 @@ private lemma hasEdge_addEdge_cases_anc {acc : Accessibility} {w w' u u' : World
   · exact Or.inl ⟨hw.symm, hw'.symm⟩
   · exact Or.inr h
 
-/-- **Phase 2 decision-gate lemma (task 553 plan v3).** `a` an already-recorded ancestor of
+/-- **Ancestor-redirect decision-gate lemma.** `a` an already-recorded ancestor of
 `src` (`acc.hasEdge a src`), with `a`'s current content already containing, UNWRAPPED, every
 box-positive/diamond-negative fact recorded at `src` (`hboxback`/`hdianeg` -- the semantic
 payoff of `S4LoopInv.keyLowerBd` composed with the guard's key-equality check, stated here with
 no reference to `keys`/`successorBirthContent`/`spine`). **Attempted; BLOCKED** -- see the
-module comment above and `#### Phase 2 Verdict` in
-`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md`
-for the exact obstruction. The `sorry` marks the one case genuinely not dischargeable from
-these hypotheses: an arbitrary `branchSatisfiableIn` witness need not have `m.r (f src) (f a)`,
-and extending `m.r` to add it (forced to close transitively, since `IsTrans` binds the concrete
-relation) requires box/diamond content transfer for *every* ambient predecessor of `f src`, not
-just `src` itself -- a fact no standalone, driver-independent hypothesis set can supply.
+module comment above for the exact obstruction. The `sorry` marks the one case genuinely not
+dischargeable from these hypotheses: an arbitrary `branchSatisfiableIn` witness need not have
+`m.r (f src) (f a)`, and extending `m.r` to add it (forced to close transitively, since
+`IsTrans` binds the concrete relation) requires box/diamond content transfer for *every*
+ambient predecessor of `f src`, not just `src` itself -- a fact no standalone,
+driver-independent hypothesis set can supply.
 
 **Consumer audit: zero consumers.** This lemma is referenced exactly once anywhere in the
 repository, by its own declaration:
@@ -1273,7 +1272,7 @@ lemma branchSatisfiableIn_s4FC_ancestor_redirect
     -- comment above) requires controlling box/diamond content at every ambient predecessor of
     -- `f src` -- not just at `src` itself. `hboxback`/`hdianeg` only speak about `src`, so this
     -- case is not dischargeable from the stated (standalone, driver-independent) hypotheses.
-    -- See `#### Phase 2 Verdict` in the plan: this is the recorded [BLOCKED] obstruction.
+    -- This is the recorded [BLOCKED] obstruction (see the lemma's docstring above).
     sorry
 
 /-! ### Propagation-Adequacy Invariant (S4-Keyed)
@@ -1342,7 +1341,7 @@ branch-independent, so untouched by adding a new element), `branchPropAdequateIn
 is driven by branch membership, so adding `T(□φ)@w'` reopens the conjunct's obligation at every
 edge already recorded *out of* `w'` -- without `hready` the bare analogue is false in general.
 `hready` is exactly what the S4-keyed ordered driver's mint-readiness discipline
-(`LoopChecking.lean`, Phase 4's `_mintReady`) is designed to supply at every real call site: a
+(`LoopChecking.lean`'s `_mintReady`) is designed to supply at every real call site: a
 world only ever acquires an outgoing (redirect) edge once it is mint-ready, i.e. once its own
 box-content has already stabilized. The redirect-edge instance of this discharge obligation was
 to have been established by `blockedRedirect_boxctx_mem`, but that lemma was false as stated and
@@ -1564,7 +1563,7 @@ lemma modalClosed_unsat_propAdequateIn [DecidableEq Atom]
         | pos => exact absurd hsf hpos
         | neg => simp [hsf, Sign.isPos] at hsfcond
 
-/-! **`blockedRedirect_propAdequate` (Phase 12 assembly) -- REMOVED.** It composed
+/-! **`blockedRedirect_propAdequate` -- REMOVED.** It composed
 `blockedRedirect_boxctx_mem`/`blockedRedirect_diaNeg_mem` (`LoopChecking.lean`, since removed --
 both were **false as stated**, see that file's "Redirect-Inertness Assembly" comment and
 `reports/02_redirect-inertness-divergence-audit.md` §2.2) with the ambient model's branch-formula

@@ -1,0 +1,3 @@
+  m   k  cplx  bound  creations  maxNW  reuse   steps    |b|  labels      result  VIOLATES?  secs
+--------------------------------------------------------------------------------------------------------------
+  1   3     8      9          8      9      4      22     39       9  openBranch         no     0.0

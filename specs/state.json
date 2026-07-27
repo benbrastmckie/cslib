@@ -326,13 +326,13 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "blocked",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-27T01:13:07Z",
-      "next_artifact_number": 13,
+      "last_updated": "2026-07-27T02:15:27Z",
+      "next_artifact_number": 14,
       "artifacts": [
         {
           "type": "plan",
@@ -448,13 +448,29 @@
           "path": "specs/317_propositional_tableau_completeness/handoffs/12_world-bound-decision.md",
           "type": "handoff",
           "summary": "Full derivation and evidence for the Phase 3 blocker: a reproducible counterexample (via lean_run_code against the real, unmodified intuitionisticTableau/intApplyRuleFull functions) showing the plan's world-creation-to-distinct-position injection claim is false, plus three candidate re-plan directions."
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/13_blocker-root-cause-and-correct-approach.md",
+          "type": "report",
+          "summary": "Root-cause audit of the twelve-plan-version blocker. Lean-verified findings: (1) intExpandBranches does NOT terminate on the complexity-9 formula ((a->b)->c & (d->e)->f) -> ((u1->v1) v (u2->v2)) -- world count grows linearly in fuel with exact period-2 structural repetition from world 3 on; (2) consequently the linear world bound nextWorld <= complexity+1 (intApplyRuleFull_outputs_subset's hnw, Scheme.lean:1813) and the intUniverse label range are FALSE, and no bound of any size exists; (3) the sorry at Scheme.lean:2578 is a FALSE goal at the lemma's current statement, with a Lean-verified counter-instance. Root cause named: the 'Deliverable 6' T-implication copy channel (Expansion.lean:136-143, added to make sat_timp provable) is in direct conflict with propagatePersistence -- each copy beta-resolves to a fresh F(antecedent) at a fresh world which mints another world. The Sfor loop-check intFImpReuseWitness? cannot cut it because it searches descendants while the blocking world is always an ancestor. Recommends re-scoping (Option B: correct three stale docstrings, record the refutation, mark [BLOCKED] behind a scoped calculus-repair task) over a thirteenth incremental plan; notes that intuitionistic/minimal decidability is ALREADY sorry-free in CSLib via the FMP route (lean_verify axiom profile confirmed).",
+          "reference_grounding_tier": 1
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/probes/int_tableau.py",
+          "type": "probe",
+          "summary": "Line-by-line Python port of Rules.lean + Expansion.lean + Branch/ClosureCondition helpers, validated to reproduce the Lean-computed v12 data point exactly (branch length 77, 9 labels, identical 12-row diagnostic). Used as a search accelerator; every conclusion drawn from it was independently re-confirmed by Lean #eval."
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/probes/check_atom_persist.py",
+          "type": "probe",
+          "summary": "Audits IAtomPersist / full T-persistence / T-implication copy completeness / edge-endpoint containment on the branches the real algorithm produces. All four hold across five formulas and both closure predicates -- a positive finding preserving the phase-0 spike's premise-narrowing route for the two Completeness bridges."
         }
       ],
       "dependencies": [
         552
       ],
       "parent_task": 298,
-      "session_id": "sess_1785112067_941950",
+      "session_id": "sess_1785116976_ff4040",
       "blockers": [],
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
@@ -472,6 +488,35 @@
             "intuitionistic-logic",
             "persistence",
             "counterexample"
+          ]
+        },
+        {
+          "content": "Before proving anything about a COMPUTABLE Lean definition, #eval it against the property you are about to assume. In CSLib's intuitionistic tableau, twelve plan versions tried to prove a world bound `nextWorld <= complexity + 1` for an expansion loop that provably does not terminate at all -- a single #eval at four fuel values would have refuted it at the outset. Executable definitions make their own invariants testable; treat an untested assumed invariant over computable code as unverified.",
+          "tags": [
+            "lean4",
+            "cslib",
+            "verification",
+            "anti-pattern",
+            "formalization-design"
+          ]
+        },
+        {
+          "content": "When two proof obligations in a formalization are each 'resolved' by a different design change, check that the two changes are mutually compatible before planning further. CSLib's intuitionistic tableau added an accessible-world copy channel for T(phi->psi) to make sat_timp provable; that channel is exactly what makes world creation unbounded, destroying the world bound the other obligation needs. Each dispatch inherited the other's docstring as fact and never tested the conjunction. Symptom to watch for: many plan versions alternating between two lemmas without either converging.",
+          "tags": [
+            "formalization-design",
+            "orchestration",
+            "churn",
+            "cslib",
+            "root-cause"
+          ]
+        },
+        {
+          "content": "A validated re-implementation in a fast language is a legitimate research instrument for Lean formalizations whose definitions are computable but too slow to #eval at scale. The discipline that makes it trustworthy: (1) port line-by-line from the source files, (2) validate against a known Lean-computed data point BEFORE using it, (3) use it only to SEARCH, and (4) re-confirm every conclusion with Lean #eval on the unmodified library. This turned a pair of #eval timeouts into a decisive Lean-verified counterexample.",
+          "tags": [
+            "lean4",
+            "research-method",
+            "verification",
+            "tooling"
           ]
         }
       ],
@@ -2263,7 +2308,7 @@
     {
       "project_number": 570,
       "project_name": "nested_sound_impL_lambda_chain_induction",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Discharge nested_sound_impL via the source's induction over the Lambda chain",
       "topic": "Constructive Modal Logic",
@@ -2289,7 +2334,7 @@
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-27T01:23:03Z",
+      "last_updated": "2026-07-27T01:23:13Z",
       "next_artifact_number": 3,
       "session_id": "sess_1785113705_bcf38a",
       "parent_task": null

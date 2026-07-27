@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Foundations.Logic.Theorems.Propositional.Core
+public import Mathlib.Tactic.Attr.Core
 
 /-! # Big Conjunction over Lists of Formulas
 

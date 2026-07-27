@@ -161,6 +161,32 @@ DerivationTree (2), Bimodal/Metalogic/Core/DerivationTree (2), MetricSoundness (
 Strip the prefix; delete all 78 suppressions. Compiler-verified — a wrong rename fails the build.
 Sequenced before any upstream PR, since renaming public API post-release is far more expensive.
 
+**Outcome: PARTIAL — 7 of 10 files done (30 declarations), 3 files aborted (27 declarations).**
+
+Done: MetricSoundness (1), Bimodal Core/DerivationTree (2), Temporal Metalogic/DerivationTree
+(2), MCS (2), DenseMCS (4), Temporal ProofSystem/Derivable (9), Bimodal ProofSystem/Derivable
+(10). Plus 2 vestigial suppressions in the two `ProofSystem/Axioms.lean`. 42 of 78 suppressions
+deleted.
+
+Only **6** reference sites needed editing, not the ~484 estimated. The estimate counted every
+occurrence of the short form (`Temporal.SetMaximalConsistent`, 289 of them). Those need no edit:
+consumers sit inside `namespace Cslib.Logic.Temporal` or `open Cslib.Logic`, so after the
+declaration loses its doubled component the same source text resolves to the un-doubled name via
+the enclosing-namespace walk. Only fully-qualified spellings actually break — and there were
+exactly 6, the cross-module leaks this workstream was written to eliminate.
+
+**Aborted: the three Chronicle modules are misdiagnosed above.** Their `Chronicle.` prefix is not
+a repeated namespace component — it is the *structure* name. `namespace ...Metalogic.Chronicle`
+contains `structure Chronicle`, so `def Chronicle.c0` correctly declares
+`...Metalogic.Chronicle.Chronicle.c0`, the projection-namespace member that 172 dot-notation call
+sites (`chi.c0`, `chi.c3`, …) across 12 files depend on. Stripping the prefix was tried and
+reverted; it fails with `Invalid field 'c0': the environment does not contain
+...Chronicle.Chronicle.c0` for all nine predicates. The real `dupNamespace` violation is the
+`namespace Chronicle` / `structure Chronicle` name coincidence, and clearing it means moving the
+structure to the parent namespace or renaming the namespace across the whole `Chronicle/`
+subtree — a design decision, not a mechanical rename. 36 suppressions (33 `@[nolint]`,
+3 `set_option`) remain there and are load-bearing until that call is made.
+
 ### W7 — Script and documentation defects
 
 - `scripts/pre-pr-check.sh:5-26` — steps 1-3 wrap their greps in `if` conditions, so `set -e`

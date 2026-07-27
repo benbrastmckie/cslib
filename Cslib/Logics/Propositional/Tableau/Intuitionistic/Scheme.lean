@@ -448,12 +448,13 @@ def IFimpAccess (edges : IEdges) (b : IBranch Atom) : Prop :=
 
 /-! ### `intExtractValuation` monotonicity — STOP-gate finding
 
-**Blocker (documented, not a `sorry`; no lemma is stated below).** The remaining Phase 2 task —
+**Blocker (documented, not a `sorry`; no lemma is stated below).** The remaining monotonicity
+task —
 "prove `intExtractValuation` monotone along `intAccessPreorder edges`" (needed both for a
 genuine `KripkeModel.v_upward_closed` field AND for instantiating `IValid`'s
 `∀{w w'} p, w≤w' → val w p → val w' p` hypothesis, `Kripke.lean:145-148`, which is exactly the
 `sorry` at `Completeness.lean:113`/`Minimal/Completeness.lean:110`) is **entangled with the B2
-fuel-sufficiency argument (Phase 6-10), not completable from completeness-side machinery alone**.
+fuel-sufficiency argument, not completable from completeness-side machinery alone**.
 
 Evidence (verified against source, not assumed):
 - `intApplyRuleFull` (`Rules.lean:245-268`) maps EVERY `.pos, .imp` signed formula (i.e. every
@@ -471,7 +472,7 @@ Evidence (verified against source, not assumed):
   co-inductive dependency on formula complexity resolved only by REPEATED
   `applyPersistenceFixpoint` passes, i.e. by fuel. This is not a completeness-side gap fixable
   by a `Soundness.lean` edit (Postmortem 4 does not apply); it is a genuine WAVE-ORDERING
-  inversion: Phase 2 (Wave 2) becomes logically dependent on Phase 10's
+  inversion: the monotonicity task (Wave 2) becomes logically dependent on the
   `intExpMeasure`/fuel-sufficiency machinery (Wave 6), which does not exist yet.
 
 **What IS complete and unconditionally true** (committed above, `lake build` green,
@@ -480,7 +481,8 @@ zero new sorries): `intAccessPreorder` (a genuine `Preorder Nat` from edge-reach
 `isAccessible` itself transitive) and `intAccessPreorder_le_of_isAccessible` (lifting any raw
 `sat_fimp`/future-`sat_timp` witness into that order). `sat_fimp`'s numeric `w ≤ w'` clause
 (R8) is UNCHANGED here per the plan's own allowance ("or note it will be restated over the edge
-relation in Phase 4") — deferred to Phase 4, not a Phase 2 blocker.
+relation in Phase 4") — deferred to the edge-relation restatement, not a monotonicity-task
+blocker.
 
 **Recommendation for continuation**: either (a) reorder so Phase 2's monotonicity discharge is
 FOLDED INTO Phase 10 (mirroring R3's own anticipated fold for `sat_timp`'s succ-case, generalized
@@ -1487,7 +1489,7 @@ This section defines the fixed finite `(sign, subformula, world)` cell universe
 `intUniverse φ` and the per-branch counting measure `intWork`, mirroring the proven
 Modal-K `FmpMeasure` pattern (`Cslib/Logics/Modal/Tableau/FmpMeasure.lean`: `modalSubfmls`,
 `modalUniverse`, `modalWork`). These are the building blocks for the base-3 damped worklist
-measure `intExpMeasure` (task 317 phase 7, not yet defined) that will certify `intFuel φ`
+measure `intExpMeasure` (not yet defined) that will certify `intFuel φ`
 is sufficient for the expansion loop to reach a Hintikka set before fuel is exhausted.
 
 The intuitionistic/minimal calculus differs from Modal K in its connective set (`imp`/
@@ -1912,7 +1914,7 @@ omit [Hashable Atom] in
 /-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
 `FmpMeasure.lean:190-193`): the number of universe elements not yet on the branch, plus
 the number not yet expanded. Strictly decreases per expansion step despite persistence
-(task 317 phase 7, `intExpMeasure_step_lt`, not yet proved). -/
+(`intExpMeasure_step_lt`, not yet proved). -/
 def intWork (U b e : List (ISF Atom)) : Nat :=
   U.countP (fun sf => !(b.any (· == sf))) + U.countP (fun sf => !(e.any (· == sf)))
 
@@ -2316,14 +2318,14 @@ lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
         Nat.pow_le_pow_right (by norm_num) hfinal
     _ = intFuel φ := rfl
 
-/-! ## Persistence-loop fuel-sufficiency (task 317 phase 10, `sat_timp` STOP-gate gap 1
-continuation, `Scheme.lean:485-533`)
+/-! ## Persistence-loop fuel-sufficiency (`sat_timp` STOP-gate gap 1 continuation,
+`Scheme.lean:485-533`)
 
 Closes GAP 1 of the `sat_timp` STOP-gate above: a genuine termination bound for
 `applyPersistenceFixpoint`'s OWN recursion, distinct from `intExpMeasure_step_lt` (which bounds
 the OUTER alpha/beta/world-creation loop only). The key fact: each non-fixpoint round of
 `applyAllTImpRules` strictly drops the count of `intUniverse φ0`-cells not yet on the branch
-(mirrors the `intWork`/`intCount_notMem_append_drop` engine from phase 7, restricted to the
+(mirrors the `intWork`/`intCount_notMem_append_drop` engine above, restricted to the
 branch-membership term alone, since persistence has no separate `e` "expanded" set). Since this
 count is bounded above by `|intUniverse φ0|` (a fixed polynomial in `φ0.complexity`), fuel at
 least this count suffices for a genuine fixpoint. GAP 2 (determinacy) is NOT addressed here — see
@@ -2384,7 +2386,7 @@ private lemma intTImpRule_output_notMem {φ ψ : Proposition Atom} {w : Nat} {ed
 
 omit [Hashable Atom] in
 /-- One non-fixpoint round of `applyAllTImpRules` strictly drops the count of `intUniverse φ0`
-cells not yet on the branch, given branch-containment `hb` (task 317 phase 10, gap 1
+cells not yet on the branch, given branch-containment `hb` (the fuel-sufficiency gap 1
 continuation; mirrors `intWork_drop`'s combinatorial core, restricted to the branch-membership
 term since persistence tracks no separate expanded set). -/
 private lemma applyAllTImpRules_count_drop
@@ -2463,7 +2465,7 @@ private lemma applyAllTImpRules_count_drop
   omega
 
 omit [Hashable Atom] in
-/-- **Genuine-fixpoint sufficiency** (task 317 phase 10, closes `sat_timp` STOP-gate GAP 1):
+/-- **Genuine-fixpoint sufficiency** (closes `sat_timp` STOP-gate GAP 1):
 `applyPersistenceFixpoint b edges fuel` is a genuine fixpoint of `applyAllTImpRules` — applying
 one more round changes nothing — whenever the fuel is at least the count of `intUniverse φ0`
 cells not yet claimed by `b`. Combined with `intUniverse_length_le` (a fixed polynomial bound in
@@ -3036,13 +3038,13 @@ accept it as an argument):
 - For `intScheme` (where `modelBot b = fun _ => False`): `hvalid edges b` follows from
   `IValid φ` applied at World `= ℕ` with the `intAccessPreorder edges` instance,
   `val = intExtractValuation b`, with the upward-closure of `intExtractValuation b` along that
-  frame (task 317 phase 4/9 deferred-monotonicity bridge).
+  frame (the deferred-monotonicity bridge).
 - For `minScheme` (where `modelBot b = minBranchBotForces b`): `hvalid edges b` follows from
   `MValid φ` applied analogously, with upward-closure of both `intExtractValuation b` and
   `minBranchBotForces b` along `intAccessPreorder edges`.
 
 This theorem is sorry-free given `openBranch_countermodel S`; the deferred-monotonicity
-obligation lives entirely in `hvalid`'s callers (Phase 4/9/10).
+obligation lives entirely in `hvalid`'s callers.
 
 ## References
 

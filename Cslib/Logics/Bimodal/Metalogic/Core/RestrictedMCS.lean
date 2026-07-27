@@ -42,10 +42,6 @@ the target formula.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Core/RestrictedMCS/Basic.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Core
@@ -171,7 +167,7 @@ theorem restricted_mcs_negation_complete {Omega : Set (Formula Atom)}
       have hχL := hχ'.1
       have hχne : χ ≠ psi := by simpa using hχ'.2
       specialize h_L_sub χ hχL
-      simp [Set.mem_insert_iff] at h_L_sub
+      simp only [Set.mem_insert_iff] at h_L_sub
       rcases h_L_sub with rfl | h_in
       · exact absurd rfl hχne
       · exact h_in
@@ -209,7 +205,7 @@ theorem restricted_mcs_negation_complete {Omega : Set (Formula Atom)}
       have hχL' := hχ'.1
       have hχne : χ ≠ psi.neg := by simpa using hχ'.2
       specialize h_L'_sub χ hχL'
-      simp [Set.mem_insert_iff] at h_L'_sub
+      simp only [Set.mem_insert_iff] at h_L'_sub
       rcases h_L'_sub with rfl | h_in
       · exact absurd rfl hχne
       · exact h_in

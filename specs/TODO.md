@@ -1,5 +1,5 @@
 ---
-next_project_number: 572
+next_project_number: 575
 ---
 
 # TODO
@@ -11,11 +11,13 @@ next_project_number: 572
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,557,558,562,563,569 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,400,430,450,456,497,511,537,551,553,564,568,571 | 36,37,181,317,425,465,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,506,548,565,566 | 39,40,375,511,564 | foundations, modal logic, code hygiene |
-| 4 | 300,567 | 506,558,565,566 | modal logic |
-| 5 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,572 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,573 | 36,37,181,425,465,530,554,562,563,572 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,506,548,565,566,574 | 39,40,511,564,573 | foundations, propositional logic, modal logic |
+| 4 | 300,456,567 | 506,558,565,566,574 | modal logic, tableau infrastructure |
+| 5 | 317,414 | 181,215,300,301,456 | propositional logic, code hygiene |
+| 6 | 375,430 | 317 | propositional logic |
+| 7 | 413 | 375 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -26,10 +28,13 @@ next_project_number: 572
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
+409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+572 [RESEARCHED] — The Intuitionistic propositional tableau calculus in Cslib/Logics
+  └─ 573 [RESEARCHED] — SMALL, time-boxed research/prototyping spike. Produces a decision
+    └─ 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
+317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
-409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
@@ -94,6 +99,92 @@ next_project_number: 572
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
 
 ## Tasks
+
+### 574. Tableau calculus repair ancestor blocking
+- **Effort**: 2500-4000 lines; multi-dispatch, recommend --hard with phase-sized dispatches
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 573
+- **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+
+**Description**: LARGE task (~2500-4000 lines estimated, comparable in scope to the modal-K analogue Cslib/Logics/Modal/Tableau/FmpMeasure.lean at 3388 lines). Depends on the predecessor spike task's decision record (its `handoffs/01_quotient-soundness-spike-decision.md`) -- READ IT FIRST; if it reports the quotient approach is NOT compatible with `intExpandBranches_closed_unsat`, STOP and re-scope this task via `/revise` before proceeding, per that spike's explicit instruction.
+
+Background (self-contained): the intuitionistic propositional tableau in Cslib/Logics/Propositional/Tableau/Intuitionistic/ has a Lean-verified divergence: `intExpandBranches` does not terminate on `phi0 = (((a->b)->c) /\ ((d->e)->f)) -> ((u1->v1) \/ (u2->v2))` (complexity 9) -- world count grows unboundedly with fuel (4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260), with exact period-2 structural repetition from world 3 on. Root cause: `applyAllTImpRules` (Expansion.lean:136-143) copies `T(phi->psi)` itself into every accessible world lacking a copy (added to make `sat_timp` provable), which conflicts with `intFImpRule`'s `propagatePersistence` (Rules.lean:154-159, copies ALL T-formulas parent->child): each fresh copy BETA-resolves to a fresh `F(antecedent)` at the fresh world, minting another world, which receives another copy, forever. `intFImpReuseWitness?` (Expansion.lean:283-311) cannot cut this because it searches descendants (`isAccessible edges w x`) while the blocking world in a Fitting-style loop-check is always an ancestor.
+
+Implement, in dependency order, built ADDITIVELY FIRST per repo convention (add new declarations alongside the old, bridge, then migrate -- so already-landed green theorems never go red mid-flight):
+
+STEP 1 -- Remove or bound the Deliverable-6 self-copy channel. Either drop the `T(phi->psi)` self-copy from `applyAllTImpRules` (Expansion.lean:136-143) and instead recover `sat_timp`-at-accessible-worlds by making the `.pos, .imp` rule (Rules.lean:274-275) range over EXISTING accessible labels (Fitting's actual rule shape per `Fitting1983` Ch. 4), rather than firing only reflexively at the label of the specific copy it is handed; or gate the copy so it structurally cannot re-trigger world creation. Either way, this removes the mechanism that makes world creation unbounded.
+
+STEP 2 -- Replace `intFImpReuseWitness?` (Expansion.lean:283-311) with an ancestor-directed `Sfor`-containment blocking check: search ANCESTORS of the creation site (not descendants) for one whose forced-set `Sfor` already contains what the new world would force, and DROP the current `F(psi)@x` conjunct (Expansion.lean:308) -- the conjunct that made the old check alternately fail on the F1 divergence witness.
+
+STEP 3 -- Restate `IBranchSaturation.sat_fimp` over the resulting BLOCKING QUOTIENT frame (the blocked world is identified with its blocking ancestor) and rewrite `truthLemma`'s F-imp case (Scheme.lean:600-607) to read its witness off the quotient rather than off `w <= w'` directly. Re-verify that `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) still holds under the restated frame -- this is the exact obligation the predecessor spike task was dispatched to de-risk; follow its documented approach if it reported GO, but DO re-verify the full proof (the spike was a bounded prototype, not a completed proof).
+
+Explicit acceptance gate: `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) re-verified sorry-free under the new calculus.
+
+REQUIRED explicit statement for whoever picks up this task: the 43-row regression guard `CslibTests/TableauConformance.lean` WILL CHANGE as a direct consequence of this work, because the algorithm's OUTPUTS change (fewer/different worlds, different branch shapes) once the self-copy channel and loop-check are altered. Task 317's previously-standing constraint that this guard 'must stay green' unchanged is WRONG under this repair and must not be inherited or treated as a constraint here -- the guard's expected values must be regenerated against the repaired algorithm's actual output, and its row count/shapes may differ from 43 rows in their current form.
+
+Out of scope for this task (left for task 317 itself, downstream, blocked on task 456's exponential world bound landing after this task): re-deriving the numeric world bound (task 456, `shared_tableau_containment_blocking`, already scopes the correct EXPONENTIAL replacement `Tableau.distinctTypes_le_pow`, `(b.labels.map b.typeAt).eraseDups.length <= 2^U.length` for a subformula-closed universe U) and closing the four remaining assembly sorries in task 317 (Scheme.lean:599 truthLemma T-imp case, the fuel=0 base case of `intExpandBranches_openBranch_sat`, and the two Completeness.lean bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125) -- those depend on this task's calculus landing plus task 456's bound.
+
+Constraints: additive-first (new declarations alongside old, migrate only once bridged and re-verified); no new axioms; no `sorry` left as a permanent artifact at task completion (temporary sorries during in-progress phases are acceptable per the repo's phase-based workflow but must be closed before this task completes); `lake build`, `lake exe checkInitImports`, `lake exe lint-style`, and `lake shake` must be green at completion; `CslibTests/TableauConformance.lean` must be UPDATED (not merely left accidentally green) to reflect the repaired algorithm's actual output, with row count and shapes re-derived from real `#eval`/proof output, not guessed.
+
+---
+
+### 573. Tableau quotient soundness spike
+- **Effort**: 3-5 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 572
+- **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+
+**Description**: SMALL, time-boxed research/prototyping spike. Produces a decision record; does NOT modify any file under Cslib/. Gates the large calculus-repair task that follows it in this programme.
+
+Background (self-contained): CSLib's intuitionistic propositional tableau (Cslib/Logics/Propositional/Tableau/Intuitionistic/) implements the world-creating F(phi->psi) rule with T-formula persistence propagation. Two design decisions are in direct mutual conflict: (A) `applyAllTImpRules` (Expansion.lean:136-143) copies every `T(phi->psi)` on the branch to every accessible world lacking a copy, added to make `sat_timp`/`truthLemma`'s T-imp case provable; (B) `intFImpRule`'s `propagatePersistence` (Rules.lean:154-159) copies ALL T-formulas from a world into each freshly-created child world. Under A+B, a world-creating step at w produces a child w' carrying a fresh copy of every `T(phi->psi)` from w; each fresh copy independently BETA-resolves to a fresh `F(phi)@w'`, which (if phi is itself .imp-shaped) mints another world, ad infinitum. Lean-verified to diverge: for `phi0 = (((a->b)->c) /\ ((d->e)->f)) -> ((u1->v1) \/ (u2->v2))` (complexity 9), `intExpandBranches` produces unboundedly many worlds with exact period-2 structural repetition from world 3 on (world counts 4/7/10/14/20/27/40/54/67/87 at fuel 10/20/30/40/60/80/120/160/200/260).
+
+The loop-check meant to prevent this, `intFImpReuseWitness?` (Expansion.lean:283-311), cannot: it searches only worlds reachable FROM the creation site (`isAccessible edges w x`, i.e. descendants), but the blocking world in a standard Fitting-style loop-check (`Fitting1983` Ch. 4, BibKey verified present at references.bib:211) is always an ANCESTOR -- the forced-set `Sfor` at the blocking world already contains everything the new world would force, and `Sfor` grows monotonically ALONG accessibility, so the ancestor is where containment is realized, never a descendant. The standard resolution (`Fitting1983` Ch. 4; the labelled-sequent analogue in `NegriVonPlato2001`, BibKey verified present at references.bib:913) is not to reuse the ancestor as a `sat_fimp` witness directly but to BLOCK the branch and build the countermodel over the finite QUOTIENT frame in which the blocked world is identified with its blocking ancestor -- at which point the needed `w <= x` relation holds in the quotient. This requires restating `IBranchSaturation.sat_fimp` relative to the quotient frame and rewriting `truthLemma`'s F-imp case (Scheme.lean:600-607) to read its witness off the quotient.
+
+This quotient construction was never prototyped in Lean, and an earlier attempt at a related fix (an 'Option B' appending `F(psi)@x` directly) was found unsound specifically against `intExpandBranches_closed_unsat` (Minimal/Soundness.lean). This soundness interaction is the single largest unretired risk in the repair programme.
+
+Task: determine, against LIVE Lean goal state (not by hand-argument), whether `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) SURVIVES when: (a) `IBranchSaturation.sat_fimp` is restated over the blocking quotient frame (world w identified with its blocking ancestor x when w is blocked), and (b) `intFImpReuseWitness?` is replaced by an ancestor-directed `Sfor`-containment check (search ancestors of the creation site for one whose forced-set already contains what the new world would force), dropping the current `F(psi)@x` conjunct (Expansion.lean:308) -- the conjunct that makes the existing check fail on the F1 divergence witness (at even worlds F(b) is present but not F(e); vice versa at odd worlds, so even the reflexive candidate x=w alternately fails).
+
+Method: prototype the restated `sat_fimp` and the ancestor-directed containment check as throwaway Lean snippets (via `lean_run_code`/scratch definitions, or an uncommitted scratch file), and attempt the `intExpandBranches_closed_unsat` proof against them, inspecting goal state via `lean_goal` at each step. Do not attempt a full proof if it grows large; the deliverable is a GO/NO-GO determination with the specific goal-state evidence for the call, not a completed proof.
+
+Output: write a decision record to this task's `handoffs/` directory (e.g. `handoffs/01_quotient-soundness-spike-decision.md`) stating: (1) whether the quotient-restated `sat_fimp` + ancestor-directed containment check appears compatible with `intExpandBranches_closed_unsat`, with the specific goal state or obstruction found; (2) if the answer is NEGATIVE or uncertain, say explicitly that the repair task's shape changes and that it must be RE-SCOPED (via `/revise` or `/spawn`) before it is dispatched -- do not let the repair task proceed against a falsified premise; (3) if POSITIVE, confirm the repair task's quotient/rewrite step is a safe green light.
+
+Constraints: NO library changes -- no file under Cslib/ may be edited/committed by this task. Prototyping happens via `lean_run_code`/scratch snippets or an uncommitted scratch file. Read-only against the existing library plus a decision-record write under this task's own directory.
+
+---
+
+### 572. Tableau docstring hygiene divergence record
+- **Effort**: 1-2 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+- **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+
+**Description**: The Intuitionistic propositional tableau calculus in Cslib/Logics/Propositional/Tableau/Intuitionistic/ carries three stale docstrings that misled twelve consecutive plan versions attempting to close remaining proof obligations (task 317's plans/01 through plans/12). This task performs ONLY documentation and references.bib edits -- no Lean definition or proof step may change. It must land BEFORE any other work in this repair programme because every downstream research/planning/implementation dispatch reads these docstrings and, absent correction, will re-derive the same refuted claims.
+
+Concrete edits required:
+
+1. Scheme.lean:3020-3041 -- the block beginning 'GAP 2 investigation ... determinacy remains BLOCKED' is STALE and directly contradicted by the current code at Scheme.lean:581, where `sat_timp` is a live `IBranchSaturation` field (also see Scheme.lean:105-108) whose reflexive form `T(phi->psi)@w in b -> F(phi)@w in b \/ T(psi)@w in b` discharges `truthLemma`'s T-imp case without any converse (the F(phi')@w' arm contradicts IForces w' phi' via ih_phi'.2; the T(psi')@w' arm gives the goal via ih_psi'.1). Rewrite or delete this block so it reflects that GAP 2 (determinacy) is resolved and no converse is needed.
+
+2. Scheme.lean:527 -- claims `sat_timp` is NOT added as an `IBranchSaturation` field. This is false; it is a field at Scheme.lean:105-108. Correct this claim.
+
+3. Expansion.lean:125-126 -- the docstring's termination claim ('termination is unaffected since the number of distinct (implication, world) copies is bounded by intUniverse phi0') is CIRCULAR: it assumes the very world bound that the calculus's own copy-channel interaction destroys (see item 4). Replace this claim with an accurate statement that termination is NOT currently established and the expansion loop is known to diverge on some inputs (cite the module-level note added in item 4).
+
+4. Add a module-level note (in Scheme.lean or Expansion.lean, near the existing termination/measure docstrings) recording the divergence witness so no future dispatch re-attempts proving a world bound: for `phi0 = (((a->b)->c) /\ ((d->e)->f)) -> ((u1->v1) \/ (u2->v2))` (complexity 9, Lean-verified via `#eval`), `intExpandBranches` produces branch/world counts 4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260 -- linear growth with no saturation, and from world 3 onward each world is an exact structural duplicate of its grandparent (identical T-set/F-set, period 2). Consequently: (a) `intApplyRuleFull_outputs_subset`'s `hnw : nextWorld <= phi0.complexity + 1` hypothesis (Scheme.lean:1813) is FALSE, refuted by direct counterexample, not merely unproven; (b) `intUniverse`'s label range `List.range (phi.complexity + 2)` (Scheme.lean:1575-1577) is likewise false as an invariant of produced branches; (c) NO numeric world bound of any size exists for the current calculus. Do not schedule any further work attempting to prove `intExpandBranches_world_bound`, `hnw`, or `hUniv` as currently stated -- they are refuted, not merely hard.
+
+5. Also record, at or near the `sorry` at Scheme.lean:2578 (inside `intExpandBranches_openBranch_sat`'s fuel=0 case), that this goal is FALSE AT ITS CURRENT STATEMENT, with the Lean-verified counter-instance: `branches = [[F(p/\q)@0]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]` -- every hypothesis of the lemma holds (`ILabelBound` holds trivially, `IExpandedConsistent`/`IAllAccessConsistent` are vacuous at `e = []`, lengths are `(1,1)`), the loop returns exactly this branch, and `IBranchSaturation.sat_fand`'s premise evaluates `true` while both disjuncts evaluate `false`. No proof can close this sorry at its current statement; it must be restated later (out of scope for this task -- this task only records the refutation).
+
+6. references.bib -- add the two dangling BibKeys currently cited in docstrings but absent from the file: `GargGenoveseNegri2012` (Garg, Genovese & Negri, 'Countermodels from Sequent Calculi in Multi-Modal Logics', LICS 2012 -- asserted 'added to references.bib in Phase 6' at Expansion.lean:210, but `grep -c GargGenoveseNegri2012 references.bib` returns 0) and a key for Dyckhoff 1992 ('Contraction-free sequent calculi for intuitionistic logic', cited in prose with no BibKey at Expansion.lean:264, `grep -c Dyckhoff references.bib` returns 0).
+
+Constraints: documentation and references.bib only. No `.lean` definition, theorem statement, or proof tactic may change. Do not attempt to close any sorry; do not change sorry locations or counts. Verify `lake build` still succeeds and `lake exe lint-style` passes on the touched files.
+
+Overlap note: task 456 (shared_tableau_containment_blocking, currently [NOT STARTED]) already lists 'add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979' in its own description. This task's edit for `GargGenoveseNegri2012` overlaps task 456's scope for that one key; `DershowitzManna1979` is unaffected and remains task 456's alone. Whichever of this task or task 456 lands `GargGenoveseNegri2012` first should leave a note in the file (or a task comment) for the other to avoid a duplicate/conflicting BibTeX entry.
+
+---
 
 ### 571. Fill the strict-Until/Since-gated Bimodal sorries (SuccRelation, UntilSinceCoherence)
 - **Status**: [BLOCKED]
@@ -501,7 +592,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
-- **Dependencies**: Task 317
+- **Dependencies**: Task 574
 
 **Description**: Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
 
@@ -698,10 +789,10 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 552
+- **Dependencies**: Task 456, Task 552
 - **Plan**:
   - [plans/03_b2-fuel-sufficiency.md]
   - [317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md]

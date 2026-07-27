@@ -16,8 +16,8 @@ public import Mathlib.Data.Finset.Basic
 Generic version of the ~95%-shared `ChronicleTypes` layer (DCS infrastructure,
 r-relations, r-maximality, Burgess content relations, the `Chronicle` structure,
 conditions c0-c5', `ValidChronicle`, C3 consequences, `ChronicleInvariant`, and basic
-subset/intersection theorems), parameterized by a `ChronicleInterface F` value
-(task-530 Phase 1). Both `Logics/Bimodal/.../Chronicle/ChronicleTypes.lean` and
+subset/intersection theorems), parameterized by a `ChronicleInterface F` value.
+Both `Logics/Bimodal/.../Chronicle/ChronicleTypes.lean` and
 `Logics/Temporal/.../Chronicle/ChronicleTypes.lean` instantiate this module and
 re-export its declarations under their existing names.
 

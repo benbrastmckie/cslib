@@ -35,7 +35,7 @@ broader `ChronicleInterface F`.
   `PointInsertion/Burgess.lean`), confirmed for `untlLeftMonoDeriv` in both trees and for
   `combineImpConj` in Temporal specifically (Bimodal's own `combineImpConj` is available
   via `Theorems/Combinators.lean` with no cycle, but the field must serve both trees
-  uniformly). Both are deferred to Phase 2 (`RRelation.lean`), which sits at the correct
+  uniformly). Both are deferred to `RRelation.lean`, which sits at the correct
   layer to supply them;
 - the MCS/Burgess apparatus lemmas the `ChronicleTypes` layer invokes
   (`mcsClosedUnderDerivation`, `theoremInMcs`, `negationComplete`, `negExcludes`,
@@ -61,25 +61,23 @@ resolution across several live `fc`.
 ## Relationship to `SinceSeedInterface`
 
 `ChronicleInterface` is a deliberately **separate** structure from `SinceSeedInterface`,
-not an `extends` of it, so that this task's phased rollout does not disturb the already
-green `SinceSeedConsistency.lean` / `PointInsertion/Since.lean` path. The two interfaces'
-field sets overlap substantially (both bundle the same formula operators and a similar
-derivation-combinator/MCS-apparatus core) — this overlap is intentional and is noted here
-for the optional Phase 5 reconciliation (`SinceSeedInterface` reusing the broader
-`ChronicleInterface`), which this task treats as low-priority and does not require.
+not an `extends` of it, so that this consolidation's phased rollout does not disturb the
+already green `SinceSeedConsistency.lean` / `PointInsertion/Since.lean` path. The two
+interfaces' field sets overlap substantially (both bundle the same formula operators and a
+similar derivation-combinator/MCS-apparatus core) — this overlap is intentional and is noted
+here for the optional future reconciliation (`SinceSeedInterface` reusing the broader
+`ChronicleInterface`), which is treated as low-priority and not required.
 
 ## Status
 
-Phase 0 (signature/defeq skeleton) of the task-530 plan
-(`specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/`). The field set
-here covers exactly what the Phase 1 `ChronicleTypes` lift needs (DCS infrastructure:
-`mcs_is_dcs`, `cud_contains_theorems`, `cud_modus_ponens`, `cud_conj_closed`,
-`cud_not_mem_is_sdc`). The larger Burgess/Zorn/Xu apparatus needed by the `RRelation`
-shared core (Phase 2) and the enrichment/walk machinery needed by
-`CounterexampleElimination`/`ChronicleConstruction` (Phases 3–4) are deliberately **not**
-included yet — per the task-530 plan's risk mitigation, fields are expanded conservatively
-as each later phase needs them, mirroring how `SinceSeedInterface` itself was built up
-incrementally across the task-454 phases.
+This module implements the signature/defeq skeleton stage of the Bimodal/Temporal
+chronicle-construction consolidation. The field set here covers exactly what the
+`ChronicleTypes` lift needs (DCS infrastructure: `mcs_is_dcs`, `cud_contains_theorems`,
+`cud_modus_ponens`, `cud_conj_closed`, `cud_not_mem_is_sdc`). The larger Burgess/Zorn/Xu
+apparatus needed by the `RRelation` shared core and the enrichment/walk machinery needed by
+`CounterexampleElimination`/`ChronicleConstruction` are deliberately **not** included yet —
+per this consolidation's risk mitigation, fields are expanded conservatively as each later
+stage needs them, mirroring how `SinceSeedInterface` itself was built up incrementally.
 
 ## References
 

@@ -21,7 +21,7 @@ public import Cslib.Foundations.Logic.Metalogic.Chronicle.Types
 
 Defines the chronicle data structure from Burgess 1982, Section 2.
 
-## Status (task 530, Phase 1)
+## Status
 
 The DCS infrastructure (`ClosedUnderDerivation`, `SetDeductivelyClosed`, `mcs_is_dcs`,
 `cud_*`/`dcs_*`), r-relations (`rRelation`/`rRelationSince`/`r3Relation`/
@@ -89,13 +89,13 @@ theorem mcs_to_base {fc : FrameClass} {A : Set (Formula Atom)}
     intro h_cons
     exact set_consistent_not_both h_cons phi (Set.mem_insert phi A) (Set.mem_insert_of_mem phi h_neg)
 
-/-! ## `ChronicleInterface` Instance Family (task 530, Phase 1)
+/-! ## `ChronicleInterface` Instance Family
 
 Populates every field of the shared Foundations interface with Bimodal's own
 `fc`-threaded apparatus, indexed by `fc` (Bimodal needs one interface value per live
 `fc`, as with `bimodalSinceInterface` in `PointInsertion/Since.lean`). -/
 
-/-- The `ChronicleInterface` instance family for Bimodal (task 530), indexed by `fc`. Not
+/-- The `ChronicleInterface` instance family for Bimodal, indexed by `fc`. Not
 marked `private`: the public re-export `abbrev`s below (`ClosedUnderDerivation`,
 `SetDeductivelyClosed`, `rRelation`, ...) unfold to expressions mentioning it directly, and
 Lean's module-privacy system disallows a `public section` declaration from referencing a
@@ -381,7 +381,7 @@ abbrev BurgessR3Maximal (fc : FrameClass) (A B C : Set (Formula Atom)) : Prop :=
 
 /-! ## Chronicle Structure
 
-**Deviation from full genericity (task 530, Phase 1)**: `Chronicle` and its conditions
+**Deviation from full genericity**: `Chronicle` and its conditions
 c0-c5', `ValidChronicle`, `ChronicleInvariant`, and the C3 consequences are kept
 logic-local (verbatim, unchanged), NOT routed through the generic
 `Cslib.Foundations.Logic.Metalogic.Chronicle.Types.Chronicle`/`.c0`-`.c5'` machinery.

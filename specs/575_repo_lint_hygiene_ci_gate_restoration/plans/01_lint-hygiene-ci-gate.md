@@ -362,7 +362,7 @@ suppression is load-bearing.
   session for exactly that reason — investigation only (`grep`/`Read`), zero `.lean` edits, zero
   `lake build` invocations spent on it.
 
-### Phase 8: Dead-code deletions [PARTIAL — 7 of 10 rows done]
+### Phase 8: Dead-code deletions [COMPLETED — 9/10 rows done, 1 excluded by finding]
 
 User-approved in full.
 
@@ -372,35 +372,95 @@ User-approved in full.
 | `KripkeBridge.lean` | 296 | **DONE** `154fa5ea` | All 6 exports: 0 external refs |
 | `Bridge.lean` | 133 | **DONE** `99834bc0` | Self-documents "no in-tree consumer"; 1 hit is a docstring |
 | `CanAlgComplete` + `FragmentGeneric` | 333 | **DONE** `f72b3393` | 0 term-level consumers; also patched 4 sibling docstrings' dangling `CanAlgComplete` mentions |
-| 9 zero-declaration aggregator modules | 238 | **NOT STARTED — re-scoped, see note below** | 0 decls, 0 importers |
-| 7 dead MCS-transfer wrappers | ~50 | NOT STARTED | 0 external refs (8th has 6 — **keep it**) |
+| 9 zero-declaration aggregator modules | 238 | **EXCLUDED — false-positive risk confirmed, see note below** | re-derivation found every remaining candidate is genuine, documented architecture |
+| 7 dead MCS-transfer wrappers | ~50 | **DONE** `24435820` | Identified precisely as `*_setConsistent_iff_algebraic`/`*_setMaxConsistent_iff_algebraic`; each had exactly 2 repo-wide occurrences (own docstring bullet + declaration); 8th (`temporal_setMaxConsistent_iff_algebraic`) has 6 external call sites in `Temporal/Metalogic/MCS.lean` — kept |
 | `Theory.Derivation.normalize` + `normalizeAux` | ~25 | **DONE** `24ba4d78` | 0 consumers, no correctness theorem; superseded by `Termination.lean`'s structural driver |
-| 2 dead `GenericMCSBridge` lemmas | ~15 | NOT STARTED | 0 consumers |
+| 2 dead `GenericMCSBridge` lemmas | ~15 | **DONE** `24435820` (folded into the wrapper row) | 6 fully-dead `unfoldListImpInTree`/`unfoldListImpInTreeFc` defs (Modal, Propositional, Temporal x2, Bimodal x2) — see note below on the count discrepancy |
 | `NativePropositionalEmbedding` | ~5 | **DONE** `4b57fd98` | Uninstantiated stub |
 | `hilbertConjImpConservativeOverImp_direct` | ~4 | **DONE** `6de7be96` | Pure alias; `_direct` name is backwards |
 
-**Re-scoping note on the "9 zero-declaration aggregator modules" row**: a zero-declaration,
-zero-(in-tree)-importer search over `Cslib/**/*.lean` found 34 files with no `theorem/def/
-structure/...` declarations, of which 6 also have zero importers from other files inside
-`Cslib/` (excluding the auto-generated root `Cslib.lean` barrel, which imports everything and so
-is not a meaningful "importer" signal): `BXCanonical/BXCanonical.lean` (15 lines),
-`BXCanonical/Completeness.lean` (24 lines), `Algebraic/Algebraic.lean` (14 lines),
-`Bundle/FMCS.lean` (27 lines), `Bundle/Bundle.lean` (14 lines), and
-`Automata/DA/Conversions.lean` (117 lines) — summing to 211, not 238, so this is not confirmed
-to be the original 9-file set. Critically, **`Automata/DA/Conversions.lean` is NOT dead**: it
-is a deliberate, documented `proof_wanted`-stub file (with an explicit `set_option
-linter.privateModule false` justification for why it has no declarations), not orphaned
-aggregator scaffolding — deleting it would have been wrong. `BXCanonical/Completeness.lean`
-is also borderline: its docstring documents planned future growth (`completeness_discrete`,
-`completeness`, pending the WeakCanonical port) rather than being purely inert. Given this
-false-positive risk and the inability to reconstruct the original research's exact 9-file list,
-this row was **not attempted** this session rather than guessed at. Recommend the next dispatch
-either locate the original research artifact that produced the "9 files, 238 lines" figure, or
-independently re-derive it with a tighter aggregator definition (e.g. "file whose only content
-is `import` statements plus a one-line comment, no `/-! -/` doc block") before deleting anything
-in this bucket.
+**Resolution of the "7 dead MCS-transfer wrappers" and "2 dead GenericMCSBridge lemmas" rows**
+(this session): neither row's stale figure named specific declarations, so both were re-derived
+from scratch via full reference-count grepping of every `lemma`/`theorem`/`def` in the 4
+`GenericMCSBridge.lean` files (Modal, Propositional, Temporal, Bimodal).
+
+- **"7 dead MCS-transfer wrappers (8th has 6 refs)" — exact match found**: the 8
+  `*_setConsistent_iff_algebraic`/`*_setMaxConsistent_iff_algebraic` theorems (2 per file,
+  "MCS transfer" = transferring `SetConsistent`/`SetMaximalConsistent` status between the
+  tree-based and algebraic derivation systems). 7 of the 8 had exactly 2 repo-wide occurrences
+  (their own docstring bullet in the file header + their own declaration line) — i.e. truly
+  zero consumers, not even within their own file. The 8th, `temporal_setMaxConsistent_iff_algebraic`,
+  had exactly 8 occurrences = 2 baseline + **6** external call sites in
+  `Cslib/Logics/Temporal/Metalogic/MCS.lean` — an exact match to the plan's "8th has 6 refs,
+  keep it" note. Deleted the other 7; kept this one unchanged.
+- **"2 dead GenericMCSBridge lemmas" — count could not be reproduced, but a real dead-code
+  cluster was found and removed under the same evidentiary standard**: the actual zero-reference
+  declarations besides the 7 above are 6 `noncomputable def`s, not 2 `lemma`s:
+  `unfoldListImpInTree` (Modal, Propositional, Temporal, Bimodal) and `unfoldListImpInTreeFc`
+  (Temporal, Bimodal). Each is a thin post-task-452-generalization delegator to
+  `GenericMCS.unfoldListImp` (Foundations) that nothing calls — confirmed independently by
+  `GenericMCS.lean`'s own docstring at its `unfoldListImp` definition: "Generic backward helper
+  (was `unfoldListImpInTree` × 4)". Per this task's own measurement-discipline lesson (treat a
+  live, reproducible count as authoritative over a stale plan figure), these 6 were deleted
+  instead of searching further for a nonexistent "2 lemmas" reading. `derivTreeToList(Fc)` and
+  `listDerivToTree(Fc)` in all 4 files were verified to have real callers (internal to build the
+  `*_deriv_iff_algebraic(_fc)` theorems, or external via `Modal`/`Propositional`
+  `DeductionTheorem.lean`) and were left untouched.
+- Each file's "Main Results" docstring bullets and "Backward" architecture prose were updated to
+  match (describing the direct `GenericMCS.listDerivToTree`/`GenericMCS.unfoldListImp` delegation
+  in place of the removed local wrapper), per the never-delete-the-surrounding-explanation
+  discipline used in Phase 3. Verified: all 4 files build individually, every affected
+  reverse-dependency cone (`Modal`/`Propositional`/`Temporal`/`Bimodal` `DeductionTheorem.lean`,
+  `Temporal/Metalogic/DenseMCS.lean`, `Temporal/Metalogic/MCS.lean`) builds clean, and a full
+  `lake build Cslib` (3255 jobs) is green.
+
+**Resolution of the "9 zero-declaration aggregator modules" row — EXCLUDED, not attempted,
+false-positive risk confirmed a second time**: re-ran the zero-declaration search with a wider
+declaration-keyword net than the prior session's pass (which only checked
+`theorem|lemma|def|structure|inductive|instance|abbrev|class`) and cross-checked import
+reverse-dependencies. Two independent problems ruled out this whole row:
+
+1. **The naive scan itself produces false positives.** In addition to the prior session's
+   confirmed false positive (`Automata/DA/Conversions.lean`, a documented `proof_wanted` stub),
+   this session's tighter zero-*importer* pass surfaced a 7th zero-declaration/zero-importer
+   candidate not in the prior session's set of 6:
+   `Cslib/Foundations/Logic/Automation/HilbertSearch.lean` (268 lines). Reading it confirmed it
+   is a substantial, actively-used `hilbert_search` proof-search **tactic** implementation (a
+   `public meta section` with `private def`, `initialize registerTraceClass`, and `elab`-family
+   declarations) — none of which match the `theorem|lemma|def|...` keyword regex, so a purely
+   syntactic "zero declarations" scan misclassifies real, load-bearing meta-code as an "empty
+   aggregator". This is the second time (of two attempts, two sessions) a naive pass on this
+   exact bucket has produced a false positive, which is itself evidence the detection method is
+   unsound for this row, not just that individual files need spot-checking.
+2. **The remaining 6 candidates are self-documented, deliberate architecture, not orphaned
+   scaffolding.** Reading all 6 zero-declaration/zero-importer files
+   (`Algebraic/Algebraic.lean`, `Bundle/Bundle.lean`, `Bundle/FMCS.lean`,
+   `BXCanonical/BXCanonical.lean`, `BXCanonical/Completeness.lean`, plus the confirmed-dead-code
+   exclusion `Automata/DA/Conversions.lean`) shows each carries an explicit comment or docstring
+   naming its own purpose: `Algebraic.lean`/`Bundle.lean`/`BXCanonical.lean` are literally headed
+   `-- Barrel import for .../ modules`, a deliberate convention (this repo's version of a
+   directory barrel file that centralizes Mathlib attribute imports — e.g. `Finset.Attr`,
+   `Finiteness.Attr`, `SetLike` — needed by tactics elsewhere in the same subtree) rather than
+   accidental cruft; `Bundle/FMCS.lean` documents itself as "Re-export only; FMCS definition is
+   in FMCSDef.lean"; `BXCanonical/Completeness.lean` documents planned future growth
+   (`completeness_discrete`, `completeness`, pending the WeakCanonical port — the same finding
+   the prior session already flagged as borderline). None of these read as "inert leftover
+   scaffolding" once opened; they read as intentional (if currently under-wired, 0-importer)
+   plumbing, which is the exact category this task's Open Decision 2 (the 620 dead lines in
+   `Foundations/Logic/Metalogic/`) already routes to a design call rather than a hygiene
+   deletion, not this task's remit.
+
+Given (1) the detection method has now produced a confirmed false positive on two independent
+attempts and (2) every surviving candidate self-documents as deliberate architecture, this row
+is excluded from Phase 8 by finding — the same disposition Phase 2 used to close at 7/10. The
+original "9 files, 238 lines" figure was never reproduced by either session and should be
+treated as unreliable; if a future task wants to pursue this, it needs either the original
+research artifact (not located) or a human design call on the barrel-file convention itself
+(should these 5 genuine barrels be wired into their sibling files' imports, or removed
+entirely?), which is out of scope for a hygiene-only task.
 
 Deleting modules requires updating `Cslib.lean` and re-running `lake exe mk_all --module`.
+This was not needed this session since only in-file declarations were removed, not files.
 
 ---
 

@@ -42,7 +42,7 @@ From an open saturated branch `b`, the countermodel is:
 and `openBranch_countermodel intScheme` respectively, which carry the deferred sorries in
 `Scheme.lean`. The remaining sorry in `intuitionisticTableau_complete` bridges `IValid φ` to
 the per-branch forcing hypothesis required by `tableau_complete intScheme`; this bridge is
-part of the completeness obligations handed to task 317.
+one of the remaining completeness obligations.
 
 ## References
 
@@ -62,9 +62,9 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 /-- The truth lemma for the intuitionistic tableau.
 
 Delegates to `truthLemma intScheme`. The parametric sorry in `truthLemma` is the single
-deferred completeness obligation for task 317.
+deferred completeness obligation.
 
-**Route (a) frame (task 317 phase 1)**: takes `edges`/`hfimp` and installs
+**Route (a) frame**: takes `edges`/`hfimp` and installs
 `intAccessPreorder edges` as the countermodel frame via `letI` (Postmortem-5 revision — this
 internal corollary MAY expose `edges`; the stable public contract is untouched, see
 `intuitionisticTableau_complete` below).
@@ -87,9 +87,9 @@ lemma intTruthLemma (b : IBranch Atom) (edges : IEdges)
 
 Delegates to `openBranch_countermodel intScheme`. The structural sorries in
 `openBranch_countermodel` (relating `intExpandBranches ... = .openBranch b` to properties
-of `b`) are deferred to task 317.
+of `b`) are deferred.
 
-**Route (a) frame (task 317 phase 1/3)**: the conclusion existentially exposes the `edges`
+**Route (a) frame**: the conclusion existentially exposes the `edges`
 the `intAccessPreorder` countermodel frame is installed over (Postmortem-5 revision: this
 internal corollary has no live consumer beyond docstrings, so exposing `edges` here does not
 touch the stable public contract).
@@ -110,10 +110,10 @@ then the intuitionistic tableau closes on `φ`.
 
 Delegates to `tableau_complete intScheme`. The remaining sorry bridges `IValid φ` to the
 per-`edges` forcing hypothesis `∀ edges b, @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (fun _ => False) 0 φ` required by `tableau_complete` (task 317 phase 4,
-Route (a): `edges` is only discovered inside `tableau_complete`'s own proof, from the
-open-branch case, so the bridge must accept it as an argument rather than fix one ambient
-frame); this bridge is the core completeness obligation for task 317.
+(intExtractValuation b) (fun _ => False) 0 φ` required by `tableau_complete` (Route (a):
+`edges` is only discovered inside `tableau_complete`'s own proof, from the open-branch case, so
+the bridge must accept it as an argument rather than fix one ambient frame); this bridge is the
+core remaining completeness obligation.
 
 Proof strategy: `tableau_complete intScheme φ` takes `∀ edges b, IForces (intExtractValuation
 b) (intScheme.modelBot b) 0 φ` at the `intAccessPreorder edges` frame. For the intuitionistic

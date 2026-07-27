@@ -2,7 +2,8 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~9h spent; Phase 5 is the sole remaining workstream (unbounded by design)
+- **Effort**: ~9h spent; Phase 5 is the sole remaining workstream (bounded by the
+  upstream-exposure rescope below — no longer unbounded)
 - **Dependencies**: none blocking. Phases 3, 4, 7, 8's live-task coordination concerns are
   resolved (see Phase 3's closure notes) — no further coordination needed with 317/425/553.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
@@ -14,15 +15,25 @@
   `.claude/rules/git-workflow.md` (commit-per-green-substep), `CONTRIBUTING.md`
 - **Type**: cslib
 - **Created**: 2026-07-27
-- **Last updated**: 2026-07-27
+- **Last updated**: 2026-07-27 (rescoped to the local-only tree — see "Upstream-exposure scope")
 
 ---
 
 ## RESUME HERE
 
-Eighth resume (cycle 8 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
-COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 123 of ~570.** To pick this up
-cold:
+Tenth resume (cycle 10 closure), **rescoped**. Status as of this pass: **Phases 1, 2, 3, 4, 6, 7,
+8 all COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 163 sites done.**
+
+**READ FIRST — the scope changed.** Phase 5 is no longer "repo-wide, unbounded". It now covers
+**local-only files only**: **264 blanket suppressions across 96 files**, a finite worklist
+(~10 more cycles at the observed ~27 sites/cycle). The 12 blanket suppressions in files shared
+with the `upstream` remote are **carved out** — route them to an upstream PR instead of editing
+them here. Gate every candidate file with `git cat-file -e upstream/main:<path>`, which must
+**FAIL** for the file to be in scope. Full rationale and the measured split: "Upstream-exposure
+scope" under Constraints. Everything Phase 5 has already touched is local-only, so no prior work
+needs revisiting on account of this change.
+
+To pick this up cold:
 
 1. Confirm the baseline still holds (2 commands, ~5 min):
    ```bash
@@ -31,9 +42,10 @@ cold:
    ```
    If either differs, something landed from another session — reconcile before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them.
-3. **Only Phase 5 remains.** 15 files are fully processed cumulative (see Phase 5's cycle 1/5/6/
-   7/8 sub-entries for the complete per-file list) — do not revisit any of them. Continue with
-   the live worst-offender list at the end of Phase 5's cycle-8 entry, prioritizing the smaller
+3. **Only Phase 5 remains.** 23 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10 sub-entries for the complete per-file list) — do not revisit any of them.
+   Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry, then
+   **filter it through the local-only gate above** before picking a target. Prioritize the smaller
    count-5 files it lists (several under 300 lines) ahead of the larger count-6 files, using the
    method Phase 5's section documents: remove all of a file's suppressions, rebuild, categorize
    what surfaces, fix the mechanical categories, narrow the rest to declaration/usage-site scope.
@@ -75,6 +87,8 @@ re-enabled; suppression debt audited and reduced; scripts that can actually fail
   end. That is the correct end state; clearing them is mathematical work owned by tasks 317 and
   553/557.
 - Any structural consolidation requiring mathematics — see "Routed elsewhere".
+- **Hygiene edits to files shared with `upstream`** — carved out by the upstream-exposure
+  rescope below; route those to an upstream PR instead.
 
 ## Constraints
 
@@ -83,11 +97,48 @@ re-enabled; suppression debt audited and reduced; scripts that can actually fail
   (`simp [X] at h` -> `simp only [...] at h`).
 - **No new `set_option linter.* false`.** Suppressing instead of fixing is the pattern Phase 5
   exists to reverse. If a warning cannot be fixed without changing mathematics, report it.
+- **Before editing any file, confirm it is local-only**: `git cat-file -e upstream/main:<path>`
+  must FAIL (non-zero) for the file to be in scope. If it succeeds, the file is shared with
+  upstream — skip it and record it for an upstream PR. See "Upstream-exposure scope".
 - Verification protocol (user decision, revised): **risk-tiered batch verification** — see
   "Testing & Validation". Nothing is ever committed unverified; what changed is the *granularity*
   of verification, not its strictness. The superseded rule was "rebuild after each file, commit
   only when green", which ran all four gates (including the 9,253-test `lake test`) against 672
   modules to validate edits that frequently could not affect elaboration at all.
+
+### Upstream-exposure scope (rescope — supersedes "repo-wide" framing)
+
+This repository is a fork of `leanprover/cslib` (remote `upstream`) that is **3,899 commits ahead
+and 541 behind**, with an active sync branch. Hygiene edits therefore split into two populations
+with very different costs, and this task is scoped to the first:
+
+| Population | Files | Blanket suppressions left | Sync cost |
+|---|---|---|---|
+| **Local-only** (added here; absent upstream) | 521 added | **264** across 96 files | None — upstream never touches these paths |
+| **Shared with upstream** (modified here) | 70 modified, 21 deleted | **12** across 12 files | Every edit is another conflict hunk on a file upstream also edits |
+
+Measured against `upstream/main` (tip `f36649cf`): `Logics/Bimodal` is 0-of-139 upstream,
+`Logics/Temporal` 0-of-53, `Logics/Modal` 0-of-142, `Logics/Propositional` 1-of-110. **Every file
+processed by Phase 5 so far is local-only**, as is every remaining target on its worst-offender
+list — the work done to date carries zero conflict debt, and continuing on the local tree keeps
+it that way.
+
+**IN SCOPE**: the 264 blanket suppressions across 96 local-only files, plus the 77 local-only
+`@[nolint]` attributes.
+
+**OUT OF SCOPE (carved out by this rescope)**: the 12 blanket suppressions across 12 shared files
+and their 11 `@[nolint]` attributes — chiefly under `Computability/Automata/**`,
+`Foundations/**`, and `Languages/LambdaCalculus/LocallyNameless/**`. Fixing lint in a file
+upstream also maintains is better done **as an upstream PR, then synced down**: same end state,
+no conflict debt, and lint fixes are the class of change upstream merges readily. Do not edit
+these files under this task; record any found issue for a follow-up upstream PR instead.
+
+**Rationale, stated plainly**: the sync concern never argued against the bulk of this task —
+it argues for this carve-out and nothing more. The separate, non-sync question of *timing*
+(hardening ~443 files that are not upstream yet, in a tree where `Modal/Tableau` is under active
+refactor) is a prioritization call for the user, not a correctness constraint on the plan. Lint
+cleanliness is a **precondition** for upstream acceptance, since upstream CI runs `--wfail`; this
+work is aligned with eventual upstreaming, not opposed to it.
 
 ### Explicit non-targets — do NOT "clean" these
 
@@ -473,7 +524,19 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 163 of ~570 done]
+### Phase 5: Suppression audit [PARTIAL — 163 sites done; 264 blanket suppressions across 96 local-only files remain in scope]
+
+**Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
+only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
+local-only files**, plus 77 local-only `@[nolint]` attributes. The 12 blanket suppressions across
+12 files shared with `upstream` are **out of scope** — route them to an upstream PR (see
+"Upstream-exposure scope"). Gate every candidate with
+`git cat-file -e upstream/main:<path>`; it must FAIL for the file to be in scope.
+
+This replaces the former "~570 repo-wide, unbounded" framing. The phase is now **bounded**: 264
+blanket suppressions is a finite worklist, and at the observed ~27 sites/cycle it is roughly 10
+more cycles rather than open-ended. The historical progress figures below (counted against the
+old ~570 denominator) are left unrewritten as an accurate record of what each cycle did.
 
 **Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
 line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
@@ -1140,11 +1203,17 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
   internal section headings). The original literal wording is permanently unachievable, not
   merely unmet this cycle — see Phase 3's closure notes for why.
 - `lake shake` clean and its CI step uncommented. **[MET]**
-- Suppression audit outcome recorded per site. **[PARTIAL]** — 163 of ~570 done (23 files fully
-  processed cumulative); see Phase 5's resume point. This is the one criterion expected to
-  remain open across multiple cycles (Phase 5 is explicitly unbounded — see the task description
-  and "Testing & Validation").
+- ~~Suppression audit outcome recorded per site (repo-wide, ~570).~~ **Restated (upstream-exposure
+  rescope)**: suppression audit outcome recorded per site **for local-only files**; blanket
+  suppressions in files shared with `upstream` are recorded for a follow-up upstream PR rather
+  than edited here. **[PARTIAL]** — 163 sites done (23 files fully processed cumulative); **264
+  blanket suppressions across 96 local-only files remain in scope**, and 12 across 12 shared
+  files are carved out. See Phase 5's resume point. This criterion is now **bounded** — roughly
+  10 more cycles at the observed rate — where the original repo-wide wording was open-ended.
 - `pre-pr-check.sh` can actually fail. **[MET]**
+- **No hygiene edit lands in a file shared with `upstream`.** **[MET]** — verified at rescope
+  time: all 23 files processed to date are local-only (`Logics/{Bimodal,Temporal,Modal}` are
+  0-of-139, 0-of-53, 0-of-142 upstream respectively).
 
 ## Rollback/Contingency
 
@@ -1157,6 +1226,14 @@ gap — worst case it reintroduces a warning.
 If a Phase 5 suppression removal surfaces warnings that cannot be fixed without changing a proof:
 restore the suppression, but convert it from file-scoped to declaration-scoped (`... in`) and
 record why. Do not leave a blanket suppression in place as the resolution.
+
+**Reversing the upstream-exposure rescope**: the carve-out is a scope decision, not a code
+change, so reversing it requires no revert — restore the "repo-wide" wording in "Upstream-exposure
+scope", Phase 5's scope paragraph, and the Definition of Done, and the 12 shared-file
+suppressions come back into scope. Reverse it only if the decision is made to stop tracking
+`upstream`, since the carve-out's whole justification is conflict cost on files upstream also
+maintains. If instead the fork stops syncing, the sync branch and the `upstream` remote should be
+removed in the same change so the rationale and the configuration do not drift apart.
 
 ---
 
@@ -1180,6 +1257,25 @@ record why. Do not leave a blanket suppression in place as the resolution.
    parent namespace, or rename the namespace across the subtree? Out of scope for this
    hygiene-only task; carried by task 576, which depends on task 568. Until decided, 36
    suppressions stay.
+4. **`lean_action_ci.yml` diverges from upstream in TWO directions, and only one is this task's
+   doing.** Discovered during the upstream-exposure rescope. `git diff upstream/main..HEAD --
+   .github/workflows/lean_action_ci.yml`:
+
+   | Setting | upstream | local | Origin |
+   |---|---|---|---|
+   | `lake shake` step | commented out | **enabled** | This task, Phase 4 — intended |
+   | `test-args` | `--wfail --iofail` | `""` | **Not this task** — predates it |
+   | `TEST_ARGS` | `--wfail --iofail` | `''` | **Not this task** — predates it |
+
+   The local test gate is therefore **weaker than upstream's**. This matters because this task's
+   Definition of Done is framed as restoring the CI gate, and the first DoD line
+   (`lake build --wfail --iofail` clean) is currently being measured against a build gate that is
+   strict while the *test* gate is relaxed. Nothing in the task description authorizes relaxing
+   tests, so this is pre-existing divergence surfaced here, not something Phase 4 introduced —
+   but it is a **shared** file, so it will need reconciling on every upstream sync. **Decision
+   needed**: restore `--wfail --iofail` on the test args (and fix whatever then fails), or record
+   an explicit, documented reason for the local relaxation. Out of scope to change unilaterally
+   under a hygiene-only task.
 
 ---
 

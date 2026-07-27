@@ -201,7 +201,7 @@ makes the call. Files: `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
 they resolve to the un-doubled name via the enclosing-namespace walk once the declaration loses
 its doubled component. Only fully-qualified spellings break.
 
-### Phase 3: Task-number references in deliverables [IN PROGRESS — 26 files done, 359 sites remain]
+### Phase 3: Task-number references in deliverables [IN PROGRESS — 38 files done, 293 sites remain]
 
 **The plan's original "312 sites" figure was stale — a fresh count came back 376, not 312 (cause
 not diagnosed; treat the live grep as authoritative, not the plan's number, per this task's own
@@ -253,32 +253,92 @@ session — already established by the prior session): task 36 is
 infrastructure — replace `task 36` with "the WeakCanonical discrete-completeness port"
 (`ChronicleToCountermodel.lean` alone still has ~10 such mentions untouched).
 
-**Deliberately skipped this session — do not touch without re-checking task 553's live status**:
-`Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (9 sites, "Phase 2"/"task 553"). Its citations
-sit directly inside the module comment and docstring documenting the file's own `[BLOCKED]`
-`sorry` at line 1253 (one of the 5 baseline CI-red warnings), including a direct path reference
-to `specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md`.
-Task 553 has its own live task directory with an `.orchestrator-loop-guard` file present in this
-repo as of this session (i.e. plausibly concurrently active). Editing this exact prose risks
-colliding with that task's own in-progress analysis of the same unresolved sorry. Recommend
-re-checking task 553's status in `specs/state.json` before touching this file; if it is no longer
-active, the durable-anchor fix is straightforward (the technical argument is already fully
-inline in the comment — the specs/ path citation is redundant with it and can simply be dropped).
+**This session (cycle 4): 359 -> 293 sites, 12 files fixed, 6 commits (`f54993e3`, `85e874c1`,
+`7e7941b6`, `12e935e2`, `f967c7f3` plus the FrameSoundness commit), all verified building green
+with `sorry`-line integrity checked via `git diff` where sorries were adjacent.**
 
-Worst files remaining (recount before continuing — these are post-session live counts, not
-pre-session estimates): `Intuitionistic/Scheme.lean` (94), `Modal/Tableau/LoopChecking.lean` (51),
-`Constructive/Nested/Soundness.lean` (28), `ChronicleToCountermodel.lean` (22),
-`Temporal/Tableau/Completeness.lean` (19), `Intuitionistic/Expansion.lean` (17),
-`Intuitionistic/Completeness.lean` (15), `Constructive/Nested/Rules.lean` (12),
-`Constructive/CS5Completeness.lean` (10), `Computability/Languages/OmegaRegularLanguage.lean` (10),
-`Modal/Tableau/FrameSoundness.lean` (9, see skip note above),
-`Minimal/Completeness.lean` (8), `Constructive/Nested/Context.lean` (8),
-`Constructive/Labelled/Soundness.lean` (8). None of these were started this session; they dominate
-the remaining 359 sites and require real per-site reading (per this phase's own caution), not
-mechanical substitution — budget the next dispatch accordingly.
+- **Checked task 553's live status first** (per the prior session's skip note): `specs/state.json`
+  shows `status: "planned"`; `specs/553_.../​.lock/holder.json` has a heartbeat over a day stale;
+  `.orchestrator-loop-guard` records `"terminated_reason": "MAX_CYCLES reached"`. Concluded NOT
+  actively concurrent. Fixed `Modal/Tableau/FrameSoundness.lean` (9 sites) accordingly: the
+  technical argument was already fully inline (module comment, lemma docstring, and a Massacci-
+  citation finding below it), so the `specs/` path and bare `Phase N` tags were pure redundant
+  decoration — dropped them, kept 100% of the prose, rewrapped two lines that hit the 100-char
+  style limit as a side effect.
+- **`ChronicleToCountermodel.lean`** (22 sites, all `task 36`): applied the durable anchor already
+  established in a prior cycle for this exact task number ("the WeakCanonical
+  discrete-completeness port"). 12 of the 22 sites are trailing comments on `warn.sorry`-suppressed
+  `sorry` lines; verified via `git diff` that every `sorry` tactic itself is byte-identical,
+  only the comment text changed.
+- **10 more `task 36` / `task 241` / `task 252` / `task 366` / `task 552` / `task 340` sites**
+  across 10 small files (`BXCanonical/Completeness.lean`, `UntilSinceCoherence.lean`,
+  `MullerClosure.lean`, `Formula.lean` (LTL), `TimeOrdering.lean`, `Choueka.lean`, `Concat.lean`,
+  `BuchiChar.lean`, `GenericMCS.lean`, `IntToClassical.lean`): each task number was checked against
+  `specs/state.json` / `specs/archive/` first — all six are archived/completed (241 McNaughton,
+  252 acceptance-conditions-zoo, 340 derived-connective-defaults, 366 deduction-theorem-threading,
+  552 tableau-conformance, plus the already-established 36/37 WeakCanonical anchor) — before
+  replacing with durable technical anchors (the theorem name, the convention name, or a
+  cross-file reference to the sibling module that carries the real explanation).
+- **`OmegaRegularLanguage.lean`** (10 sites, `task 241`): same archived-task pattern; the
+  surrounding prose already names every lemma used at each step, making the bare `Phase N` tags
+  purely decorative — dropped the tags, kept "McNaughton's Theorem"/"Choueka route" as the
+  anchor.
+- **`TimeOrdering.lean`**: only 1 of its 4 sites was `task 552` (fixed); the other 3 ("`Phase 8
+  (Completeness)`" x2, `Phase 7`) are left untouched — see task-425 finding below.
 
-Replace each with a durable anchor — sibling filename, section heading, or verified fact. **Never
-delete the surrounding explanation**; the prose is usually load-bearing, only the identifier rots.
+**New finding this session: two more live/in-progress task families identified, spanning most of
+the remaining 293 sites.**
+
+1. **Task 317** (`propositional_tableau_completeness`, status `blocked`, no active `.lock` but
+   `reports/` activity dated within the last day) accounts for `Intuitionistic/Scheme.lean` (94),
+   `Intuitionistic/Expansion.lean` (17), `Intuitionistic/Completeness.lean` (15),
+   `Minimal/Completeness.lean` (8) — 134 sites, all under `Propositional/Tableau/`, exactly the
+   subtree this plan's own dependency line already flags ("coordinate with 317 before large edits
+   to `Propositional/Tableau/`"). Reading `Scheme.lean`'s citations confirmed they are not
+   historical: they are STOP-gate findings and `(task 317, pending)` markers describing
+   currently-unproved lemmas (`intExpandBranches_openBranch_sat`) and cross-references to task
+   317's own multi-version plan (v1 through v12+, phase numbering has changed across versions).
+   **Not touched.** Recommend deferring this entire subtree to whenever task 317 next resolves
+   or is explicitly coordinated with.
+2. **Task 425** (`temporal_tableau_ptl_fmp_decidability`, status `not_started` but with 4 reports
+   and 3 plans dated within the last 3 days — clearly active research/planning despite the status
+   field) accounts for `Temporal/Tableau/Completeness.lean` (19), `Rules.lean` (4), `Saturation.lean`
+   (3), `Soundness.lean` (2), `TimeOrdering.lean`'s remaining 3 sites, and
+   `Temporal/Semantics/Validity.lean` (2, citing `report 02` = task 425's own
+   `02_validity-notion-fmp-grounding.md`) — 33 sites. **Not touched.**
+3. **An unidentified but clearly live, multi-phase development** spans
+   `Constructive/Nested/{Soundness,Rules,Context,Translation}.lean` (28+12+8+2=50),
+   `Constructive/CS5Completeness.lean` (10), and `Constructive/Labelled/Soundness.lean` (8) — 68
+   sites. No `task N` number is cited anywhere in these files (searched
+   `specs/**/*.md` for `IntoClassical`-adjacent filenames and found only archived tasks 484/523,
+   neither of which matches this family), but the prose repeatedly says "per this phase's own
+   task list", "the governing plan's Phase N", and — most tellingly — forward-references content
+   that does not yet exist in the repo ("Phase 19's `Admissibility.lean` territory"). This reads
+   as an actively-evolving, phase-numbered proof-development plan that is either tracked outside
+   `specs/` or under a task this session could not identify. **Not touched**; recommend a
+   dedicated investigation (or a direct question to the user) before any cleanup pass on this
+   subtree, since forward-referenced, not-yet-landed phases are exactly the kind of content a
+   blind hygiene pass could irreversibly corrupt.
+4. **`LoopChecking.lean`** (51 sites, task 553's plan-phase numbering, v3/v5 mixed) was
+   **not attempted despite task 553 being confirmed non-concurrent** (see point above): at
+   9800+ lines with 51 disparate `Phase N` citations each requiring individual mathematical
+   grounding (not a single repeated pattern like `task 36`), this is a scale problem independent
+   of the concurrency question — it needs its own dedicated dispatch budget, not a
+   fit-it-in-alongside-everything-else pass.
+5. **`TemporalConservativity.lean` (4) and `DiegoEmbedding.lean` (4) are false positives, not
+   violations**: their `Phase N` occurrences are section headings organizing the file's *own*
+   self-contained mathematical construction (e.g. `## Phase 1: HilbertFilter Structure and
+   Prerequisites`), not task-tracker citations — exactly the ambiguity this phase's own
+   measurement notes warned about ("a legitimate Phase 3 could exist in an algorithm
+   description"). No fix needed; these should be excluded from future census totals for this
+   phase.
+
+Replace each genuine site with a durable anchor — sibling filename, section heading, or verified
+fact. **Never delete the surrounding explanation**; the prose is usually load-bearing, only the
+identifier rots. **Always check the cited task's live status in `specs/state.json` /
+`specs/archive/` before touching a file** — this session's own experience shows roughly a third
+of the remaining sites belong to genuinely live, in-progress work (317, 425, and the unidentified
+Nested-family plan) where a "fix" would corrupt active provenance, not clean up stale debt.
 
 ### Phase 4: Import gate (`lake shake`) [COMPLETED]
 

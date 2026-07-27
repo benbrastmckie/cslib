@@ -52,6 +52,12 @@ The **same-state-space** conversions that require complex constructions:
 * [W. Thomas, *Infinite Words*, Chapter 3][Thomas2003]
 -/
 
+-- This module consists exclusively of `proof_wanted` statements, which are elaborated and
+-- discarded rather than added to the environment. It therefore declares nothing public (the
+-- `@[expose] public section` below has nothing to expose) and the `privateModule` linter cannot
+-- be satisfied without adding a declaration, which would change the file's mathematical content.
+set_option linter.privateModule false
+
 @[expose] public section
 
 namespace Cslib.Automata.DA

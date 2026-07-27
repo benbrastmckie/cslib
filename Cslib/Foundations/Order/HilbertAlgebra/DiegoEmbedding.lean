@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+import Mathlib.Tactic.Attr.Core
 
 public import Mathlib.Data.SetLike.Basic
 public import Mathlib.Data.Set.Lattice

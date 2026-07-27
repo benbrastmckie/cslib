@@ -18,10 +18,6 @@ Main soundness theorems for bimodal logic TM:
 - Full derivation soundness (`soundness`, `soundness_dense`, `soundness_discrete`)
 -/
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic
@@ -93,14 +89,16 @@ theorem modal_k_dist_valid (φ ψ : Formula Atom) :
   exact h_box_imp σ h_σ_mem (h_box_phi σ h_σ_mem)
 
 theorem serial_future_axiom_valid :
-    ⊨ ((Formula.bot.imp (Formula.bot : Formula Atom)).imp (Formula.someFuture (Formula.bot.imp Formula.bot))) := by
+    ⊨ ((Formula.bot.imp (Formula.bot : Formula Atom)).imp
+      (Formula.someFuture (Formula.bot.imp Formula.bot))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
   simp only [truthAt]
   intro _; obtain ⟨s, hts⟩ := exists_gt t
   exact ⟨s, hts, fun h => h, fun _ _ _ hf => absurd hf not_false⟩
 
 theorem serial_past_axiom_valid :
-    ⊨ ((Formula.bot.imp (Formula.bot : Formula Atom)).imp (Formula.somePast (Formula.bot.imp Formula.bot))) := by
+    ⊨ ((Formula.bot.imp (Formula.bot : Formula Atom)).imp
+      (Formula.somePast (Formula.bot.imp Formula.bot))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
   simp only [truthAt]
   intro _; obtain ⟨s, hst⟩ := exists_lt t
@@ -142,9 +140,13 @@ theorem temp_l_valid (φ : Formula Atom) :
   -- h_now : truthAt ... t φ
   -- h_future : ¬∃ s > t, ¬φ(s) ∧ guard (i.e., Gφ)
   rcases lt_trichotomy r t with h_lt | h_eq | h_gt
-  · exact h_neg_φr (by by_contra h_neg; apply h_past; exact ⟨r, h_lt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
+  · exact h_neg_φr (by
+      by_contra h_neg; apply h_past
+      exact ⟨r, h_lt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
   · exact h_neg_φr (h_eq ▸ h_now)
-  · exact h_neg_φr (by by_contra h_neg; apply h_future; exact ⟨r, h_gt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
+  · exact h_neg_φr (by
+      by_contra h_neg; apply h_future
+      exact ⟨r, h_gt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
 
 theorem modal_future_valid (φ : Formula Atom) : ⊨ ((φ.box).imp ((φ.allFuture).box)) := by
   intro D _ _ _ _ ℱ M Omega h_sc τ _h_mem t
@@ -211,7 +213,7 @@ theorem enrichment_until_valid (φ ψ p : Formula Atom) :
     ⊨ (Formula.and p (Formula.untl φ ψ) |>.imp
       (Formula.untl φ (Formula.and ψ (Formula.snce φ p)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.neg, truthAt]
+  simp only [truthAt]
   intro h_conj
   have h_pt : truthAt M Omega τ t p := by
     by_contra h_neg; exact h_conj (fun h_p _ => h_neg h_p)
@@ -226,7 +228,7 @@ theorem enrichment_since_valid (φ ψ p : Formula Atom) :
     ⊨ (Formula.and p (Formula.snce φ ψ) |>.imp
       (Formula.snce φ (Formula.and ψ (Formula.untl φ p)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.neg, truthAt]
+  simp only [truthAt]
   intro h_conj
   have h_pt : truthAt M Omega τ t p := by
     by_contra h_neg; exact h_conj (fun h_p _ => h_neg h_p)
@@ -240,7 +242,7 @@ theorem enrichment_since_valid (φ ψ p : Formula Atom) :
 theorem self_accum_until_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.untl φ ψ).imp (Formula.untl (Formula.and φ (Formula.untl φ ψ)) ψ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.neg, truthAt]
+  simp only [truthAt]
   intro ⟨s, hts, h_ψs, h_guard⟩
   refine ⟨s, hts, h_ψs, fun r htr hrs h_imp => ?_⟩
   exact h_imp (h_guard r htr hrs) ⟨s, hrs, h_ψs, fun q hqr hqs => h_guard q (lt_trans htr hqr) hqs⟩
@@ -248,7 +250,7 @@ theorem self_accum_until_valid (φ ψ : Formula Atom) :
 theorem self_accum_since_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.snce φ ψ).imp (Formula.snce (Formula.and φ (Formula.snce φ ψ)) ψ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.neg, truthAt]
+  simp only [truthAt]
   intro ⟨s, hst, h_ψs, h_guard⟩
   refine ⟨s, hst, h_ψs, fun r hsr hrt h_imp => ?_⟩
   exact h_imp (h_guard r hsr hrt) ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr hrt)⟩
@@ -256,7 +258,7 @@ theorem self_accum_since_valid (φ ψ : Formula Atom) :
 theorem absorb_until_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.untl φ (Formula.and φ (Formula.untl φ ψ))).imp (Formula.untl φ ψ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.neg, truthAt]
+  simp only [truthAt]
   intro ⟨s₁, hts₁, h_conj, h_guard₁⟩
   have ⟨h_φs₁, s₂, hs₁s₂, h_ψs₂, h_guard₂⟩ :
       truthAt M Omega τ s₁ φ ∧ (∃ s₂, s₁ < s₂ ∧ truthAt M Omega τ s₂ ψ ∧
@@ -272,7 +274,7 @@ theorem absorb_until_valid (φ ψ : Formula Atom) :
 theorem absorb_since_valid (φ ψ : Formula Atom) :
     ⊨ ((Formula.snce φ (Formula.and φ (Formula.snce φ ψ))).imp (Formula.snce φ ψ)) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.neg, truthAt]
+  simp only [truthAt]
   intro ⟨s₁, hs₁t, h_conj, h_guard₁⟩
   have ⟨h_φs₁, s₂, hs₂s₁, h_ψs₂, h_guard₂⟩ :
       truthAt M Omega τ s₁ φ ∧ (∃ s₂, s₂ < s₁ ∧ truthAt M Omega τ s₂ ψ ∧
@@ -291,7 +293,7 @@ theorem linear_until_valid (φ ψ χ θ : Formula Atom) :
           (Formula.untl (Formula.and φ χ) (Formula.and ψ χ)))
         (Formula.untl (Formula.and φ χ) (Formula.and φ θ)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  simp only [truthAt]
   intro h_conj
   have h_both : (∃ s, t < s ∧ truthAt M Omega τ s ψ ∧
       ∀ r, t < r → r < s → truthAt M Omega τ r φ) ∧
@@ -321,7 +323,7 @@ theorem linear_since_valid (φ ψ χ θ : Formula Atom) :
           (Formula.snce (Formula.and φ χ) (Formula.and ψ χ)))
         (Formula.snce (Formula.and φ χ) (Formula.and φ θ)))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  simp only [truthAt]
   intro h_conj
   have h_both : (∃ s, s < t ∧ truthAt M Omega τ s ψ ∧
       ∀ r, s < r → r < t → truthAt M Omega τ r φ) ∧
@@ -365,7 +367,7 @@ theorem temp_linearity_valid (φ ψ : Formula Atom) :
         (Formula.or (Formula.someFuture (Formula.and φ (Formula.someFuture ψ)))
           (Formula.someFuture (Formula.and (Formula.someFuture φ) ψ))))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  simp only [truthAt]
   intro h_conj
   have h_F_phi : ∃ s, t < s ∧ truthAt M Omega τ s φ ∧ ∀ r, t < r → r < s → False → False := by
     by_contra h; exact h_conj (fun h1 _ => h h1)
@@ -392,7 +394,7 @@ theorem temp_linearity_past_valid (φ ψ : Formula Atom) :
         (Formula.or (Formula.somePast (Formula.and φ (Formula.somePast ψ)))
           (Formula.somePast (Formula.and (Formula.somePast φ) ψ))))) := by
   intro D _ _ _ _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.and, Formula.or, Formula.neg, truthAt]
+  simp only [truthAt]
   intro h_conj
   have h_P_phi : ∃ s, s < t ∧ truthAt M Omega τ s φ ∧ ∀ r, s < r → r < t → False → False := by
     by_contra h; exact h_conj (fun h1 _ => h h1)
@@ -430,7 +432,7 @@ theorem P_since_equiv_valid (φ : Formula Atom) :
 theorem dense_indicator_valid :
     validDense (Formula.untl Formula.bot (Formula.bot.imp (Formula.bot : Formula Atom))).neg := by
   intro D _ _ _ h_dense _ ℱ M Omega _h_sc τ _h_mem t
-  simp only [Formula.neg, truthAt]
+  simp only [Formula.neg]
   intro ⟨s, hts, _h_top, h_guard⟩
   obtain ⟨r, htr, hrs⟩ := @DenselyOrdered.dense D _ h_dense t s hts
   exact h_guard r htr hrs
@@ -518,11 +520,13 @@ theorem discrete_box_necessity_valid :
   intro ⟨s, hts, _h_top, h_guard⟩ σ _h_σ_mem
   exact ⟨s, hts, fun h => h, h_guard⟩
 
-theorem prior_UZ_valid (φ : Formula Atom) : validDiscrete (φ.someFuture.imp (Formula.untl φ.neg φ)) := by
+theorem prior_UZ_valid (φ : Formula Atom) :
+    validDiscrete (φ.someFuture.imp (Formula.untl φ.neg φ)) := by
   intro D _ _ _ _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
   exact SoundnessLemmas.prior_UZ_is_valid φ ℱ M Omega h_sc τ h_mem t
 
-theorem prior_SZ_valid (φ : Formula Atom) : validDiscrete (φ.somePast.imp (Formula.snce φ.neg φ)) := by
+theorem prior_SZ_valid (φ : Formula Atom) :
+    validDiscrete (φ.somePast.imp (Formula.snce φ.neg φ)) := by
   intro D _ _ _ _ _ _ _ _ ℱ M Omega h_sc τ h_mem t
   exact SoundnessLemmas.prior_SZ_is_valid φ ℱ M Omega h_sc τ h_mem t
 
@@ -534,7 +538,8 @@ theorem z1_valid (φ : Formula Atom) : validDiscrete
 /-! ## Combined Axiom Validators -/
 
 /-- All base TM axioms are universally valid. -/
-theorem axiom_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameClass ≤ FrameClass.Base) : ⊨ φ := by
+theorem axiom_valid {φ : Formula Atom} (h : Axiom φ)
+    (h_fc : h.minFrameClass ≤ FrameClass.Base) : ⊨ φ := by
   cases h with
   | imp_k φ ψ χ => exact prop_k_valid φ ψ χ
   | imp_s φ ψ => exact prop_s_valid φ ψ
@@ -580,7 +585,8 @@ theorem axiom_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameClass �
   | z1 _ => exact absurd h_fc (by simp [Axiom.minFrameClass, LE.le])
 
 /-- All dense-compatible axioms are valid on dense frames. -/
-theorem axiom_dense_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameClass ≤ FrameClass.Dense) : validDense φ := by
+theorem axiom_dense_valid {φ : Formula Atom} (h : Axiom φ)
+    (h_fc : h.minFrameClass ≤ FrameClass.Dense) : validDense φ := by
   cases h with
   | imp_k φ ψ χ => exact Validity.valid_implies_valid_dense (prop_k_valid φ ψ χ)
   | imp_s φ ψ => exact Validity.valid_implies_valid_dense (prop_s_valid φ ψ)
@@ -593,14 +599,20 @@ theorem axiom_dense_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameC
   | modal_k_dist φ ψ => exact Validity.valid_implies_valid_dense (modal_k_dist_valid φ ψ)
   | serial_future => exact Validity.valid_implies_valid_dense serial_future_axiom_valid
   | serial_past => exact Validity.valid_implies_valid_dense serial_past_axiom_valid
-  | left_mono_until_G φ χ ψ => exact Validity.valid_implies_valid_dense (left_mono_until_G_valid φ χ ψ)
-  | left_mono_since_H φ χ ψ => exact Validity.valid_implies_valid_dense (left_mono_since_H_valid φ χ ψ)
-  | right_mono_until φ ψ χ => exact Validity.valid_implies_valid_dense (right_mono_until_valid φ ψ χ)
-  | right_mono_since φ ψ χ => exact Validity.valid_implies_valid_dense (right_mono_since_valid φ ψ χ)
+  | left_mono_until_G φ χ ψ =>
+      exact Validity.valid_implies_valid_dense (left_mono_until_G_valid φ χ ψ)
+  | left_mono_since_H φ χ ψ =>
+      exact Validity.valid_implies_valid_dense (left_mono_since_H_valid φ χ ψ)
+  | right_mono_until φ ψ χ =>
+      exact Validity.valid_implies_valid_dense (right_mono_until_valid φ ψ χ)
+  | right_mono_since φ ψ χ =>
+      exact Validity.valid_implies_valid_dense (right_mono_since_valid φ ψ χ)
   | connect_future _ => exact Validity.valid_implies_valid_dense (connect_future_valid _)
   | connect_past _ => exact Validity.valid_implies_valid_dense (connect_past_valid _)
-  | enrichment_until φ ψ p => exact Validity.valid_implies_valid_dense (enrichment_until_valid φ ψ p)
-  | enrichment_since φ ψ p => exact Validity.valid_implies_valid_dense (enrichment_since_valid φ ψ p)
+  | enrichment_until φ ψ p =>
+      exact Validity.valid_implies_valid_dense (enrichment_until_valid φ ψ p)
+  | enrichment_since φ ψ p =>
+      exact Validity.valid_implies_valid_dense (enrichment_since_valid φ ψ p)
   | self_accum_until φ ψ => exact Validity.valid_implies_valid_dense (self_accum_until_valid φ ψ)
   | self_accum_since φ ψ => exact Validity.valid_implies_valid_dense (self_accum_since_valid φ ψ)
   | absorb_until φ ψ => exact Validity.valid_implies_valid_dense (absorb_until_valid φ ψ)
@@ -610,7 +622,8 @@ theorem axiom_dense_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameC
   | until_F φ ψ => exact Validity.valid_implies_valid_dense (until_F_valid φ ψ)
   | since_P φ ψ => exact Validity.valid_implies_valid_dense (since_P_valid φ ψ)
   | temp_linearity φ ψ => exact Validity.valid_implies_valid_dense (temp_linearity_valid φ ψ)
-  | temp_linearity_past φ ψ => exact Validity.valid_implies_valid_dense (temp_linearity_past_valid φ ψ)
+  | temp_linearity_past φ ψ =>
+      exact Validity.valid_implies_valid_dense (temp_linearity_past_valid φ ψ)
   | F_until_equiv φ => exact Validity.valid_implies_valid_dense (F_until_equiv_valid φ)
   | P_since_equiv φ => exact Validity.valid_implies_valid_dense (P_since_equiv_valid φ)
   | modal_future ψ => exact Validity.valid_implies_valid_dense (modal_future_valid ψ)
@@ -626,7 +639,8 @@ theorem axiom_dense_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameC
   | z1 _ => exact absurd h_fc (by simp [Axiom.minFrameClass, LE.le])
 
 /-- All discrete-compatible axioms are valid on discrete frames. -/
-theorem axiom_discrete_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFrameClass ≤ FrameClass.Discrete) :
+theorem axiom_discrete_valid {φ : Formula Atom} (h : Axiom φ)
+    (h_fc : h.minFrameClass ≤ FrameClass.Discrete) :
     validDiscrete φ := by
   cases h with
   | imp_k φ ψ χ => exact Validity.valid_implies_valid_discrete (prop_k_valid φ ψ χ)
@@ -640,14 +654,20 @@ theorem axiom_discrete_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFra
   | modal_k_dist φ ψ => exact Validity.valid_implies_valid_discrete (modal_k_dist_valid φ ψ)
   | serial_future => exact Validity.valid_implies_valid_discrete serial_future_axiom_valid
   | serial_past => exact Validity.valid_implies_valid_discrete serial_past_axiom_valid
-  | left_mono_until_G φ χ ψ => exact Validity.valid_implies_valid_discrete (left_mono_until_G_valid φ χ ψ)
-  | left_mono_since_H φ χ ψ => exact Validity.valid_implies_valid_discrete (left_mono_since_H_valid φ χ ψ)
-  | right_mono_until φ ψ χ => exact Validity.valid_implies_valid_discrete (right_mono_until_valid φ ψ χ)
-  | right_mono_since φ ψ χ => exact Validity.valid_implies_valid_discrete (right_mono_since_valid φ ψ χ)
+  | left_mono_until_G φ χ ψ =>
+      exact Validity.valid_implies_valid_discrete (left_mono_until_G_valid φ χ ψ)
+  | left_mono_since_H φ χ ψ =>
+      exact Validity.valid_implies_valid_discrete (left_mono_since_H_valid φ χ ψ)
+  | right_mono_until φ ψ χ =>
+      exact Validity.valid_implies_valid_discrete (right_mono_until_valid φ ψ χ)
+  | right_mono_since φ ψ χ =>
+      exact Validity.valid_implies_valid_discrete (right_mono_since_valid φ ψ χ)
   | connect_future _ => exact Validity.valid_implies_valid_discrete (connect_future_valid _)
   | connect_past _ => exact Validity.valid_implies_valid_discrete (connect_past_valid _)
-  | enrichment_until φ ψ p => exact Validity.valid_implies_valid_discrete (enrichment_until_valid φ ψ p)
-  | enrichment_since φ ψ p => exact Validity.valid_implies_valid_discrete (enrichment_since_valid φ ψ p)
+  | enrichment_until φ ψ p =>
+      exact Validity.valid_implies_valid_discrete (enrichment_until_valid φ ψ p)
+  | enrichment_since φ ψ p =>
+      exact Validity.valid_implies_valid_discrete (enrichment_since_valid φ ψ p)
   | self_accum_until φ ψ => exact Validity.valid_implies_valid_discrete (self_accum_until_valid φ ψ)
   | self_accum_since φ ψ => exact Validity.valid_implies_valid_discrete (self_accum_since_valid φ ψ)
   | absorb_until φ ψ => exact Validity.valid_implies_valid_discrete (absorb_until_valid φ ψ)
@@ -657,15 +677,19 @@ theorem axiom_discrete_valid {φ : Formula Atom} (h : Axiom φ) (h_fc : h.minFra
   | until_F φ ψ => exact Validity.valid_implies_valid_discrete (until_F_valid φ ψ)
   | since_P φ ψ => exact Validity.valid_implies_valid_discrete (since_P_valid φ ψ)
   | temp_linearity φ ψ => exact Validity.valid_implies_valid_discrete (temp_linearity_valid φ ψ)
-  | temp_linearity_past φ ψ => exact Validity.valid_implies_valid_discrete (temp_linearity_past_valid φ ψ)
+  | temp_linearity_past φ ψ =>
+      exact Validity.valid_implies_valid_discrete (temp_linearity_past_valid φ ψ)
   | F_until_equiv φ => exact Validity.valid_implies_valid_discrete (F_until_equiv_valid φ)
   | P_since_equiv φ => exact Validity.valid_implies_valid_discrete (P_since_equiv_valid φ)
   | modal_future ψ => exact Validity.valid_implies_valid_discrete (modal_future_valid ψ)
   | discrete_symm_fwd => exact Validity.valid_implies_valid_discrete discrete_symm_fwd_valid
   | discrete_symm_bwd => exact Validity.valid_implies_valid_discrete discrete_symm_bwd_valid
-  | discrete_propagate_fwd => exact Validity.valid_implies_valid_discrete discrete_propagate_fwd_valid
-  | discrete_propagate_bwd => exact Validity.valid_implies_valid_discrete discrete_propagate_bwd_valid
-  | discrete_box_necessity => exact Validity.valid_implies_valid_discrete discrete_box_necessity_valid
+  | discrete_propagate_fwd =>
+      exact Validity.valid_implies_valid_discrete discrete_propagate_fwd_valid
+  | discrete_propagate_bwd =>
+      exact Validity.valid_implies_valid_discrete discrete_propagate_bwd_valid
+  | discrete_box_necessity =>
+      exact Validity.valid_implies_valid_discrete discrete_box_necessity_valid
   | density _ => exact absurd h_fc (by simp [Axiom.minFrameClass, LE.le])
   | dense_indicator => exact absurd h_fc (by simp [Axiom.minFrameClass, LE.le])
   | prior_UZ φ => exact prior_UZ_valid φ

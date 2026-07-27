@@ -17,23 +17,18 @@ Replace-U infrastructure, congruence lemmas, and Cases 5-8 separability proofs
 for Dedekind-complete integer orders (GHR94 Lemma 10.3.11 items 5-8 on Z).
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.maxHeartbeats false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedSectionVars false
-set_option linter.style.openClassical false
-set_option linter.unusedTactic false
 
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
 
 open Cslib.Logic.Bimodal
+
+-- `open Classical` here is pervasive across ~1600 lines of this file; replacing it with
+-- `open scoped Classical in` per-declaration is a real refactor deliberately not undertaken in
+-- this pass. Narrowed from this file's original 12-category blanket suppression block down to
+-- this single, still-necessary one.
+set_option linter.style.openClassical false in
 open Classical
 
 variable {Atom : Type*} [DecidableEq Atom]
@@ -52,6 +47,7 @@ Mathematical justification: GHR94 Lemma 10.3.11 items 5-8 specialized to Z. -/
 
 /-! ## Helper lemmas for Cases 5-8 -/
 
+omit [DecidableEq Atom] in
 /-- case3Alpha(a∧U, q, A, B) implies U(A,B): the alpha event always makes U true.
     alpha = (a∧U) ∨ ((¬q ∧ S(a∧U, q)) ∧ (q∨U))
     First disjunct has U. Second disjunct: ¬q ∧ (q∨U) → ¬q ∧ U → U. -/
@@ -73,6 +69,7 @@ theorem case3_alpha_aU_implies_U (a q A B : Formula Atom) (M : IntStructure Atom
     · exact absurd h_q h_nq
     · exact h_u
 
+omit [DecidableEq Atom] in
 /-- alpha(a∧U, q, A, B) is intEquiv to (a ∨ (¬q ∧ S(a∧U, q))) ∧ U(A,B).
     This factoring allows us to extract a U-free event for Case 1 application. -/
 theorem case3_alpha_aU_factor (a q A B : Formula Atom) :
@@ -96,7 +93,8 @@ theorem case3_alpha_aU_factor (a q A B : Formula Atom) :
     simp only [case3Alpha]
     rcases (int_truth_or M t _ _).mp h_or with h_a | h_nq_s
     · exact (int_truth_or M t _ _).mpr (Or.inl ((int_truth_and M t _ _).mpr ⟨h_a, hU⟩))
-    · exact (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨h_nq_s, (int_truth_or M t _ _).mpr (Or.inr hU)⟩))
+    · exact (int_truth_or M t _ _).mpr (Or.inr
+        ((int_truth_and M t _ _).mpr ⟨h_nq_s, (int_truth_or M t _ _).mpr (Or.inr hU)⟩))
 
 /-! ## Replace U(A,B) with True Infrastructure
 
@@ -136,6 +134,8 @@ def untlUnderBoolOnly : Formula Atom → Formula Atom → Formula Atom → Prop
   | .untl q p, A, B => (p = A ∧ q = B) ∨ (isUFree (.untl q p) = true)
   | .snce q p, _, _ => isUFree p = true ∧ isUFree q = true
 
+set_option linter.flexible false in
+omit [DecidableEq Atom] in
 /-- U-free formulas satisfy untlUnderBoolOnly trivially. -/
 theorem u_free_untl_under_bool (phi A B : Formula Atom) (h : isUFree phi = true) :
     untlUnderBoolOnly phi A B := by
@@ -146,6 +146,7 @@ theorem u_free_untl_under_bool (phi A B : Formula Atom) (h : isUFree phi = true)
   | untl _ _ => simp [isUFree] at h
   | snce q p _ _ => simp [isUFree] at h; exact h
 
+set_option linter.style.show false in
 /-- replaceUntlWithTop produces U-free result when untlUnderBoolOnly holds. -/
 theorem replace_U_free_of_bool (phi A B : Formula Atom)
     (h_bool : untlUnderBoolOnly phi A B) :
@@ -168,6 +169,7 @@ theorem replace_U_free_of_bool (phi A B : Formula Atom)
     show isUFree (.snce (replaceUntlWithTop q A B) (replaceUntlWithTop p A B)) = true
     simp [isUFree, replace_id_of_U_free p A B hp, replace_id_of_U_free q A B hq, hp, hq]
 
+set_option linter.flexible false in
 /-- For formulas where U(A,B) is only under boolean connectives,
     at a time where U(A,B) holds, truth is preserved by replacement. -/
 theorem replace_correct_bool (phi A B : Formula Atom) (M : IntStructure Atom) (t : ℤ)
@@ -192,6 +194,7 @@ theorem replace_correct_bool (phi A B : Formula Atom) (M : IntStructure Atom) (t
     simp only [replaceUntlWithTop, intTruth, replace_id_of_U_free p A B hp,
                replace_id_of_U_free q A B hq]
 
+omit [DecidableEq Atom] in
 set_option linter.unusedTactic false in
 /-- case1Psi satisfies untlUnderBoolOnly: its only .untl .untl is A B,
     and all .snce are args U-free. -/
@@ -201,11 +204,11 @@ theorem case1_psi_bool_only (a q A B : Formula Atom)
     untlUnderBoolOnly (case1Psi a q A B) A B := by
   have h_and : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.and p q) A B := by
-    intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p (.imp q .bot)) .bot) A B
+    intro p q hp hq; change untlUnderBoolOnly (.imp (.imp p (.imp q .bot)) .bot) A B
     exact ⟨⟨hp, hq, trivial⟩, trivial⟩
   have h_or : ∀ p q, untlUnderBoolOnly p A B → untlUnderBoolOnly q A B →
       untlUnderBoolOnly (Formula.or p q) A B := by
-    intro p q hp hq; show untlUnderBoolOnly (.imp (.imp p .bot) q) A B
+    intro p q hp hq; change untlUnderBoolOnly (.imp (.imp p .bot) q) A B
     exact ⟨⟨hp, trivial⟩, hq⟩
   unfold case1Psi
   apply h_or
@@ -222,12 +225,14 @@ theorem case1_psi_bool_only (a q A B : Formula Atom)
         · exact u_free_untl_under_bool A A B hA
         · exact (⟨ha, hB⟩ : untlUnderBoolOnly (.snce B a) A B)
       · exact (⟨ha, hq⟩ : untlUnderBoolOnly (.snce q a) A B)
-  · have hev_uf : isUFree (Formula.and (Formula.and (Formula.and A q) (.snce B a)) (.snce q a)) = true := by
-      simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hA, hq, ha, hB]
+  · have hev_uf :
+        isUFree (Formula.and (Formula.and (Formula.and A q) (.snce B a)) (.snce q a)) = true := by
+      simp [isUFree, hA, hq, ha, hB]
     exact (⟨hev_uf, hq⟩ : untlUnderBoolOnly (.snce q _) A B)
 
 /-! ## Congruence Lemmas -/
 
+omit [DecidableEq Atom] in
 /-- If at every time where U(A,B) holds, C₁ ↔ C₂, then
     S(C₁ ∧ U, guard) ↔ S(C₂ ∧ U, guard). -/
 theorem snce_event_congr_with_U (C₁ C₂ guard A B : Formula Atom)
@@ -243,6 +248,7 @@ theorem snce_event_congr_with_U (C₁ C₂ guard A B : Formula Atom)
     have ⟨hC₂, hU⟩ := (int_truth_and M s _ _).mp h_event
     exact ⟨s, hst, (int_truth_and M s _ _).mpr ⟨(h_eq M s hU).mpr hC₂, hU⟩, h_guard⟩
 
+omit [DecidableEq Atom] in
 /-- snce congrence on event. -/
 theorem snce_event_congr {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ₂) :
     intEquiv (.snce ψ φ₁) (.snce ψ φ₂) := by
@@ -250,6 +256,7 @@ theorem snce_event_congr {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ�
   · rintro ⟨s, hst, hφ, hψ⟩; exact ⟨s, hst, (h M s).mp hφ, hψ⟩
   · rintro ⟨s, hst, hφ, hψ⟩; exact ⟨s, hst, (h M s).mpr hφ, hψ⟩
 
+omit [DecidableEq Atom] in
 /-- and congrence on left. -/
 theorem and_left_congr {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ₂) :
     intEquiv (Formula.and φ₁ ψ) (Formula.and φ₂ ψ) := by
@@ -259,6 +266,7 @@ theorem and_left_congr {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ₂
   · intro h'; have ⟨hφ, hψ⟩ := (int_truth_and M t _ _).mp h'
     exact (int_truth_and M t _ _).mpr ⟨(h M t).mpr hφ, hψ⟩
 
+omit [DecidableEq Atom] in
 /-- Boolean distribution: (a ∨ b) ∧ c ↔ (a ∧ c) ∨ (b ∧ c). -/
 theorem and_or_distrib (a b c : Formula Atom) :
     intEquiv (Formula.and (Formula.or a b) c)
@@ -276,11 +284,13 @@ theorem and_or_distrib (a b c : Formula Atom) :
     · have ⟨hb, hc⟩ := (int_truth_and M t _ _).mp h2
       exact (int_truth_and M t _ _).mpr ⟨(int_truth_or M t _ _).mpr (Or.inr hb), hc⟩
 
+omit [DecidableEq Atom] in
 /-- qZ with negated q argument is U-free. -/
 theorem Q_Z_neg_q_U_free (A B q : Formula Atom)
     (hA : isUFree A = true) (hB : isUFree B = true) (hq : isUFree q = true) :
     isUFree (qZ A B (Formula.neg q)) = true :=
-  Q_Z_U_free A B (Formula.neg q) hA hB (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq])
+  Q_Z_U_free A B (Formula.neg q) hA hB
+    (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq])
 
 /-! ## Replace U(A,B) with False (bot) Infrastructure
 
@@ -309,6 +319,7 @@ theorem replace_bot_id_of_U_free (phi A B : Formula Atom) (h : isUFree phi = tru
   | untl _ _ => simp [isUFree] at h
   | snce q p ihq ihp => simp [isUFree] at h; simp [replaceUntlWithBot, ihp h.1, ihq h.2]
 
+set_option linter.style.show false in
 /-- replaceUntlWithBot produces U-free result when untlUnderBoolOnly holds. -/
 theorem replace_bot_U_free_of_bool (phi A B : Formula Atom)
     (h_bool : untlUnderBoolOnly phi A B) :
@@ -358,6 +369,7 @@ theorem replace_correct_bot (phi A B : Formula Atom) (M : IntStructure Atom) (t 
 
 /-! ## Congruence for ¬U branch -/
 
+omit [DecidableEq Atom] in
 /-- If at every time where ¬U(A,B) holds, C₁ ↔ C₂, then
     S(C₁ ∧ ¬U, guard) ↔ S(C₂ ∧ ¬U, guard). -/
 theorem snce_event_congr_with_notU (C₁ C₂ guard A B : Formula Atom)
@@ -375,6 +387,7 @@ theorem snce_event_congr_with_notU (C₁ C₂ guard A B : Formula Atom)
 
 /-! ## Core Helper: S(COMBINED ∧ ¬U, guard) Separable -/
 
+set_option linter.unusedDecidableInType false in
 /-- S(COMBINED ∧ ¬U(A,B), guard) is separable when COMBINED satisfies
     untlUnderBoolOnly and guard is U-free with S-free A, B.
     Works by replacing U with bot in the event and applying Case 2. -/
@@ -409,6 +422,7 @@ def d21Sep (a q A B : Formula Atom) : Formula Atom :=
     (case1Psi a Q_Z_nq A B)
     (case1Psi (replaceUntlWithTop (Formula.and (Formula.neg q) σ) A B) Q_Z_nq A B)
 
+set_option linter.style.show false in
 /-- d21Sep satisfies untlUnderBoolOnly. -/
 theorem d21_sep_bool_only (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -426,13 +440,15 @@ theorem d21_sep_bool_only (a q A B : Formula Atom)
       show untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp (case1Psi a q A B) .bot)) .bot) A B
       refine ⟨⟨?_, case1_psi_bool_only a q A B ha hq hA hB, trivial⟩, trivial⟩
       exact ⟨u_free_untl_under_bool q A B hq, trivial⟩
-    have h_replaced_uf : isUFree (replaceUntlWithTop (Formula.and (Formula.neg q) (case1Psi a q A B)) A B) = true :=
+    have h_replaced_uf :
+        isUFree (replaceUntlWithTop (Formula.and (Formula.neg q) (case1Psi a q A B)) A B) = true :=
       replace_U_free_of_bool _ A B h_nqσ_bool
     exact case1_psi_bool_only
       (replaceUntlWithTop (Formula.and (Formula.neg q) (case1Psi a q A B)) A B)
       (qZ A B (Formula.neg q)) A B h_replaced_uf
       (Q_Z_neg_q_U_free A B q hA hB hq) hA hB
 
+set_option linter.style.show false in
 /-- d21Sep is intEquiv to S(alpha, qZ) where alpha = case3Alpha(a∧U, q, A, B).
     This non-existential form allows using d21Sep in D3's event. -/
 theorem d21_sep_equiv (a q A B : Formula Atom)
@@ -444,13 +460,18 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
   -- Step 1: alpha ↔ (a ∨ (¬q ∧ S(a∧U,q))) ∧ U
   have step1 : intEquiv
     (.snce (qZ A B (Formula.neg q)) (case3Alpha (Formula.and a (.untl B A)) q A B))
-    (.snce (qZ A B (Formula.neg q)) (Formula.and (Formula.or a (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl B A))))) (.untl B A))) :=
+    (.snce (qZ A B (Formula.neg q))
+      (Formula.and (Formula.or a (Formula.and (Formula.neg q)
+        (.snce q (Formula.and a (.untl B A))))) (.untl B A))) :=
     snce_event_congr (case3_alpha_aU_factor a q A B)
   -- Step 2: Distribute → S(a∧U, qZ) ∨ S((¬q∧S(a∧U,q))∧U, qZ)
   have step2 : intEquiv
-    (.snce (qZ A B (Formula.neg q)) (Formula.and (Formula.or a (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl B A))))) (.untl B A)))
+    (.snce (qZ A B (Formula.neg q))
+      (Formula.and (Formula.or a (Formula.and (Formula.neg q)
+        (.snce q (Formula.and a (.untl B A))))) (.untl B A)))
     (Formula.or (.snce (qZ A B (Formula.neg q)) (Formula.and a (.untl B A)))
-                (.snce (qZ A B (Formula.neg q)) (Formula.and (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl B A)))) (.untl B A)))) :=
+                (.snce (qZ A B (Formula.neg q)) (Formula.and (Formula.and (Formula.neg q)
+                  (.snce q (Formula.and a (.untl B A)))) (.untl B A)))) :=
     int_equiv_trans
       (snce_event_congr (and_or_distrib a
         (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl B A))))
@@ -472,7 +493,8 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
       exact (int_truth_and M t _ _).mpr ⟨hnq, (hσ_equiv M t).mpr hσ'⟩
   have step3 : intEquiv
     (.snce (qZ A B (Formula.neg q))
-           (Formula.and (Formula.and (Formula.neg q) (.snce q (Formula.and a (.untl B A)))) (.untl B A)))
+           (Formula.and (Formula.and (Formula.neg q)
+             (.snce q (Formula.and a (.untl B A)))) (.untl B A)))
     (.snce (qZ A B (Formula.neg q))
            (Formula.and (Formula.and (Formula.neg q) σ) (.untl B A))) :=
     snce_event_congr (and_left_congr hY_congr)
@@ -525,6 +547,7 @@ theorem d21_sep_equiv (a q A B : Formula Atom)
 
 /-! ## Core Helper: S(COMBINED ∧ U, guard) Separable -/
 
+set_option linter.unusedDecidableInType false in
 /-- S(COMBINED ∧ U(A,B), guard) is separable when COMBINED satisfies
     untlUnderBoolOnly and guard is U-free with S-free A, B.
     Works by replacing U with True in the event and applying Case 1. -/
@@ -545,6 +568,8 @@ theorem snce_combined_U_separable
 
 /-! ## Cases 5-8 Separability -/
 
+set_option linter.style.show false in
+set_option linter.unusedDecidableInType false in
 /-- Generalized Case 5: S(a ^ U(A,B), q v U(A,B)) is separable.
     Drops S-free requirements on a and q (only A, B need S-freeness).
     The proof only uses S-freeness of A and B. -/
@@ -633,6 +658,7 @@ theorem case5_separable_Z_gen (a q A B : Formula Atom)
         (Formula.and (Formula.and A (Formula.or q (.untl B A))) (d21Sep a q A B))
         q A B hA hB hA' hB' hq h_event_bool
 
+set_option linter.unusedDecidableInType false in
 theorem case5_separable_Z (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -654,6 +680,7 @@ Key lemma: U(A,B) and U(¬A∧¬B, ¬A) cannot both hold at the same time.
 When U(A,B) holds at an event point, the U'-containing parts of any separated
 equivalent of S(a∧U', q) vanish, leaving only U-free components. -/
 
+omit [DecidableEq Atom] in
 /-- U(A,B) and U(¬A∧¬B, ¬A) are contradictory: they cannot both hold at the same time.
     Proof: if U(A,B)(t) gives witness s₁ > t with A(s₁)∧B on (t,s₁), and
     U(¬A∧¬B, ¬A)(t) gives witness s₂ > t with (¬A∧¬B)(s₂)∧(¬A) on (t,s₂), then
@@ -676,6 +703,7 @@ theorem untl_neguntl_contradictory (A B : Formula Atom) (M : IntStructure Atom) 
   · -- s₁ > s₂: s₂ ∈ (t, s₁), guard gives B(s₂), but ¬B(s₂)
     exact hnotB₂ (hB₁ s₂ hts₂ h)
 
+omit [DecidableEq Atom] in
 /-- Negation equivalence specialized: ¬U → G(¬A) ∨ U', as an intEquiv on the event. -/
 theorem neg_untl_event_equiv (a A B : Formula Atom) :
     intEquiv (Formula.and a (Formula.neg (.untl B A)))
@@ -696,6 +724,8 @@ theorem neg_untl_event_equiv (a A B : Formula Atom) :
       exact (int_truth_and M t _ _).mpr ⟨ha,
         (neg_until_equiv A B M t).mpr ((int_truth_or M t _ _).mpr (Or.inr hU'))⟩
 
+set_option linter.style.show false in
+set_option linter.unusedDecidableInType false in
 /-- S(ev, q∨U) is separable when ev is U-free.
     This is the core of Branch A and is like case5_separable_Z_gen but with
     the event already U-free (no U in the event), making it simpler. -/
@@ -714,7 +744,7 @@ theorem snce_Ufree_event_qU_guard_separable (ev q A B : Formula Atom)
   -- alpha = ev ∨ ((¬q ∧ S(ev,q)) ∧ (q∨U))
   -- Since ev is U-free: alpha has U only in (q∨U) → untlUnderBoolOnly
   have h_nqSev_uf : isUFree (Formula.and (Formula.neg q) (.snce q ev)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hq, hev_uf]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq, hev_uf]
   -- alpha = ev ∨ (nqSev ∧ (q∨U)) where nqSev = ¬q∧S(ev,q) is U-free
   -- S(alpha, qZ): distribute via since_distrib_or_left
   -- then event-split the second disjunct on U
@@ -892,6 +922,7 @@ a(s) and ¬U(A,B)(s) hold, with q∨U on (s,t). The formula is equivalent to:
 D1 is separated: S(a,q∧¬A) is U-free, ¬A is U-free, ¬(B∧U) is boolean of atoms/U.
 D2 uses eliminations (3) and (5): factor (q∨U) in event, apply since_distrib. -/
 
+omit [DecidableEq Atom] in
 /-- GHR94 10.2.3 item 6: S(a∧¬U, q∨U) ↔ [S(a,q∧¬A)∧¬A∧¬(B∧U)] ∨ S(¬B∧¬A∧(q∨U)∧S(a,q∧¬A), q∨U).
     The decomposition considers when the first ¬B after the witness s occurs. -/
 theorem case6_equiv_Z (a q A B : Formula Atom) :
@@ -1016,7 +1047,8 @@ theorem case6_equiv_Z (a q A B : Formula Atom) :
           ⟨w, hwt, hAw, fun z htz hzw => hBsw z (lt_trans hst htz) hzw⟩
         exact hrest ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩)
       refine ⟨s, hst, (int_truth_and M s _ _).mpr ⟨ha_s, hnotU_s⟩, fun r hsr hrt => ?_⟩
-      exact (int_truth_or M r _ _).mpr (Or.inl (((int_truth_and M r _ _).mp (hqnA_guard r hsr hrt)).1))
+      exact (int_truth_or M r _ _).mpr
+        (Or.inl (((int_truth_and M r _ _).mp (hqnA_guard r hsr hrt)).1))
     · -- D2: S(¬B∧¬A∧(q∨U)∧S(a,q∧¬A), q∨U)(t)
       obtain ⟨r, hrt, hevent_r, hguard_r⟩ := hD2
       have ⟨h_left, hSa_r⟩ := (int_truth_and M r _ _).mp hevent_r
@@ -1032,11 +1064,13 @@ theorem case6_equiv_Z (a q A B : Formula Atom) :
         exact hnotBr (hBsw r hsr hwr)
       refine ⟨s, lt_trans hsr hrt, (int_truth_and M s _ _).mpr ⟨ha_s, hnotU_s⟩, fun z hsz hzt => ?_⟩
       rcases lt_or_ge z r with hzr | hrz
-      · exact (int_truth_or M z _ _).mpr (Or.inl (((int_truth_and M z _ _).mp (hqnA_sr z hsz hzr)).1))
+      · exact (int_truth_or M z _ _).mpr
+          (Or.inl (((int_truth_and M z _ _).mp (hqnA_sr z hsz hzr)).1))
       · rcases eq_or_lt_of_le hrz with rfl | hrz'
         · exact hqU_r
         · exact hguard_r z hrz' hzt
 
+set_option linter.unusedDecidableInType false in
 /-- Case 6 separability for Z: S(a ^ ~U(A,B), q v U(A,B)) is separable.
     Uses GHR94 10.2.3 item 6 direct formula, then separates each disjunct
     using eliminations (3) and (5) per GHR94. -/
@@ -1055,7 +1089,7 @@ theorem case6_separable_Z (a q A B : Formula Atom)
     · apply and_separable
       · -- S(a, q∧¬A): a, q, A all U-free → syntactically separated
         have hg : isUFree (Formula.and q (Formula.neg A)) = true := by
-          simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hq, hA]
+          simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq, hA]
         exact ⟨.snce (Formula.and q (Formula.neg A)) a,
           by simp [isSyntacticallySeparated, ha, hg], int_equiv_refl _⟩
       · -- ¬A: U-free and S-free
@@ -1113,16 +1147,17 @@ theorem case6_separable_Z (a q A B : Formula Atom)
     apply is_separable_of_equiv (since_distrib_or_left _ _ (Formula.or q (.untl B A)))
     have hSTUFF_uf : isUFree (Formula.and (Formula.and (Formula.neg B) (Formula.neg A))
         (.snce (Formula.and q (Formula.neg A)) a)) = true := by
-      simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
     apply or_separable
     · -- S(STUFF∧q, q∨U): STUFF∧q is U-free → snce_Ufree_event_qU_guard_separable
       have hev_uf : isUFree (Formula.and (Formula.and (Formula.and (Formula.neg B)
           (Formula.neg A)) (.snce (Formula.and q (Formula.neg A)) a)) q) = true := by
-        simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
+        simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
       exact snce_Ufree_event_qU_guard_separable _ q A B hev_uf hq hA hB hA' hB'
     · -- S(STUFF∧U, q∨U): STUFF is U-free → case5_separable_Z_gen
       exact case5_separable_Z_gen _ q A B hSTUFF_uf hq hA hB hA' hB'
 
+set_option linter.unusedDecidableInType false in
 /-- Case 6 generalized: drops S-free requirements on a, q (they were unused
     in the original proof). Only needs S-free A, B. -/
 theorem case6_separable_Z_gen (a q A B : Formula Atom)
@@ -1136,7 +1171,7 @@ theorem case6_separable_Z_gen (a q A B : Formula Atom)
   · apply and_separable
     · apply and_separable
       · have hg : isUFree (Formula.and q (Formula.neg A)) = true := by
-          simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hq, hA]
+          simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq, hA]
         exact ⟨.snce (Formula.and q (Formula.neg A)) a,
           by simp [isSyntacticallySeparated, ha, hg], int_equiv_refl _⟩
       · exact u_free_s_free_is_separable (Formula.neg A)
@@ -1187,11 +1222,11 @@ theorem case6_separable_Z_gen (a q A B : Formula Atom)
     apply is_separable_of_equiv (since_distrib_or_left _ _ (Formula.or q (.untl B A)))
     have hSTUFF_uf : isUFree (Formula.and (Formula.and (Formula.neg B) (Formula.neg A))
         (.snce (Formula.and q (Formula.neg A)) a)) = true := by
-      simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
     apply or_separable
     · have hev_uf : isUFree (Formula.and (Formula.and (Formula.and (Formula.neg B)
           (Formula.neg A)) (.snce (Formula.and q (Formula.neg A)) a)) q) = true := by
-        simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
+        simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq, hA, hB]
       exact snce_Ufree_event_qU_guard_separable _ q A B hev_uf hq hA hB hA' hB'
     · exact case5_separable_Z_gen _ q A B hSTUFF_uf hq hA hB hA' hB'
 
@@ -1210,6 +1245,7 @@ D1: further eliminated by distributing (q∨¬U) in event, then
 
 The first disjunct can be further eliminated by eliminations (8) and (4). -/
 
+omit [DecidableEq Atom] in
 /-- GHR94 10.2.3 item 7: S(a∧U, q∨¬U) ↔ D1 ∨ D2 ∨ D3.
     The decomposition considers when the A from U(A,B) first occurs. -/
 theorem case7_equiv_Z (a q A B : Formula Atom) :
@@ -1296,7 +1332,8 @@ theorem case7_equiv_Z (a q A B : Formula Atom) :
         -- On (r,t): hguard_r gives q∨¬U.
         refine ⟨s, lt_trans hsr hrt, (int_truth_and M s _ _).mpr ⟨ha_s, hU_s⟩, fun z hsz hzt => ?_⟩
         rcases lt_or_ge z r with hzr | hrz
-        · exact (int_truth_or M z _ _).mpr (Or.inl (((int_truth_and M z _ _).mp (hBq_sr z hsz hzr)).2))
+        · exact (int_truth_or M z _ _).mpr
+            (Or.inl (((int_truth_and M z _ _).mp (hBq_sr z hsz hzr)).2))
         · rcases eq_or_lt_of_le hrz with rfl | hrz'
           · exact ((int_truth_and M r _ _).mp hAqnotU).2 -- (q∨¬U)(r) from event
           · exact hguard_r z hrz' hzt
@@ -1307,7 +1344,8 @@ theorem case7_equiv_Z (a q A B : Formula Atom) :
         have hU_s : intTruth M s (.untl B A) :=
           ⟨t, hst, hAt, fun z hsz hzt => ((int_truth_and M z _ _).mp (hBq_st z hsz hzt)).1⟩
         refine ⟨s, hst, (int_truth_and M s _ _).mpr ⟨ha_s, hU_s⟩, fun z hsz hzt => ?_⟩
-        exact (int_truth_or M z _ _).mpr (Or.inl (((int_truth_and M z _ _).mp (hBq_st z hsz hzt)).2))
+        exact (int_truth_or M z _ _).mpr
+          (Or.inl (((int_truth_and M z _ _).mp (hBq_st z hsz hzt)).2))
     · -- D3: S(a,B∧q) ∧ B ∧ U at t
       have ⟨hSaBq_B, hUt⟩ := (int_truth_and M t _ _).mp hD3
       have ⟨hSaBq, hBt⟩ := (int_truth_and M t _ _).mp hSaBq_B
@@ -1333,6 +1371,7 @@ This avoids the multi-U-type problem because:
   - S(¬q∧U, ¬a∨U) is Case 5 (event has U, guard has U)
 -/
 
+omit [DecidableEq Atom] in
 /-- GHR94 10.3.11.8 on Z: S(a∧¬U, q∨¬U) ↔ S(a∧¬U, ⊤) ∧ ¬S(¬q∧U, ¬a∨U). -/
 theorem case8_equiv_Z (a q A B : Formula Atom) :
     intEquiv (.snce (Formula.or q (Formula.neg (.untl B A)))
@@ -1400,6 +1439,7 @@ theorem case8_equiv_Z (a q A B : Formula Atom) :
     · -- ¬U(r) holds. q(r) ∨ ¬U(r) via ¬U(r).
       exact Or.inr hU_r
 
+set_option linter.unusedDecidableInType false in
 /-- Case 8 generalized: drops S-free requirements on a, q. Only needs S-free A, B.
     Uses case5_separable_Z_gen and elim_case_2_gen. -/
 theorem case8_separable_Z_gen (a q A B : Formula Atom)
@@ -1411,15 +1451,20 @@ theorem case8_separable_Z_gen (a q A B : Formula Atom)
   apply is_separable_of_equiv (case8_equiv_Z a q A B)
   apply and_separable
   · -- S(a∧¬U, ⊤): Case 2 with guard = ⊤ = neg bot (U-free)
-    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree]
-    obtain ⟨psi, hequiv, hsep⟩ := elim_case_2_gen a (Formula.neg (Formula.bot : Formula Atom)) A B ha hg hA hB hA' hB'
+    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree]
+    obtain ⟨psi, hequiv, hsep⟩ :=
+      elim_case_2_gen a (Formula.neg (Formula.bot : Formula Atom)) A B ha hg hA hB hA' hB'
     exact ⟨psi, hsep, hequiv⟩
   · -- ¬S(¬q∧U, ¬a∨U): neg_separable of Case 5 (generalized)
     apply neg_separable
-    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
-    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+    have hnq_uf : isUFree (Formula.neg q) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+    have hna_uf : isUFree (Formula.neg a) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
     exact case5_separable_Z_gen (Formula.neg q) (Formula.neg a) A B hnq_uf hna_uf hA hB hA' hB'
 
+omit [DecidableEq Atom] in
 /-- S(ev, q∨¬U) is separable when ev is U-free.
     Dual of snce_Ufree_event_qU_guard_separable.
     Uses Case 4 pattern: S(a, q∨¬U) ↔ ¬H(¬a) ∧ ¬psi1 via elim_case_1_gen. -/
@@ -1429,16 +1474,18 @@ theorem snce_Ufree_event_qNotU_guard_separable (ev q A B : Formula Atom)
     (hA' : isSFree A = true) (hB' : isSFree B = true) :
     isSeparable (.snce (Formula.or q (Formula.neg (.untl B A))) ev) := by
   -- Case 4 pattern: S(a, q∨¬U) ↔ ¬H(¬a) ∧ ¬S((¬a∧¬q)∧U, ¬a)
-  have hna_uf : isUFree (Formula.neg ev) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
-  have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+  have hna_uf : isUFree (Formula.neg ev) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
+  have hnq_uf : isUFree (Formula.neg q) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
   have hanq_uf : isUFree (Formula.and (Formula.neg ev) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf, hq]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf, hq]
   obtain ⟨psi1, hequiv1, hsep1⟩ := elim_case_1_gen
     (Formula.and (Formula.neg ev) (Formula.neg q)) (Formula.neg ev) A B
     hanq_uf hna_uf hA hB hA' hB'
   -- S(ev, q∨¬U) ↔ ¬H(¬ev) ∧ ¬psi1
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg ev)) = true := by
-    simp [isSyntacticallySeparated, Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
   refine is_separable_of_equiv ?_ (and_separable
     (neg_separable ⟨.allPast (Formula.neg ev), hsep_H, int_equiv_refl _⟩)
     (neg_separable ⟨psi1, hsep1, hequiv1⟩))
@@ -1469,8 +1516,8 @@ theorem snce_Ufree_event_qNotU_guard_separable (ev q A B : Formula Atom)
         exact (hguard1 s hss1 hst) hev_s
   · intro hand
     have ⟨hnotH, hnotPsi1⟩ := (int_truth_and M t _ _).mp hand
-    have hnotS1 : ¬ intTruth M t (.snce (Formula.neg ev) (Formula.and (Formula.and (Formula.neg ev) (Formula.neg q))
-        (.untl B A))) :=
+    have hnotS1 : ¬ intTruth M t (.snce (Formula.neg ev)
+        (Formula.and (Formula.and (Formula.neg ev) (Formula.neg q)) (.untl B A))) :=
       fun hS1 => hnotPsi1 hS1
     by_contra hnotS
     rcases (int_truth_or M t _ _).mp ((neg_since_equiv ev
@@ -1487,6 +1534,7 @@ theorem snce_Ufree_event_qNotU_guard_separable (ev q A B : Formula Atom)
       exact hnotS1 ⟨s, hst, (int_truth_and M s _ _).mpr
         ⟨(int_truth_and M s _ _).mpr ⟨hna_s, hnotQ_s⟩, hU_s⟩, hguard⟩
 
+set_option linter.unusedDecidableInType false in
 /-- Case 7 separability for Z: S(a ^ U(A,B), q v ~U(A,B)) is separable.
     Uses GHR94 10.2.3 item 7 direct formula. -/
 theorem case7_separable_Z (a q A B : Formula Atom)
@@ -1498,7 +1546,7 @@ theorem case7_separable_Z (a q A B : Formula Atom)
       (Formula.and a (.untl B A))) := by
   apply is_separable_of_equiv (case7_equiv_Z a q A B)
   have hBq_uf : isUFree (Formula.and B q) = true := by
-    simp only [Formula.and, Formula.neg, isUFree, hB, hq, Bool.true_and, Bool.and_self]
+    simp only [isUFree, hB, hq, Bool.and_self]
   apply or_separable
   · apply or_separable
     · -- D1: S(A∧(q∨¬U)∧S(a,B∧q), q∨¬U)
@@ -1542,12 +1590,12 @@ theorem case7_separable_Z (a q A B : Formula Atom)
       apply is_separable_of_equiv (since_distrib_or_left _ _
         (Formula.or q (Formula.neg (.untl B A))))
       have hSTUFF_uf : isUFree (Formula.and A (.snce (Formula.and B q) a)) = true := by
-        simp only [Formula.and, Formula.neg, isUFree, hA, ha, hB, hq, Bool.and_self]
+        simp only [isUFree, hA, ha, hB, hq, Bool.and_self]
       apply or_separable
       · -- S(STUFF∧q, q∨¬U): STUFF∧q is U-free → Case 4 pattern
         have hev_uf : isUFree (Formula.and (Formula.and A
             (.snce (Formula.and B q) a)) q) = true := by
-          simp only [Formula.and, Formula.neg, isUFree, hA, ha, hB, hq, Bool.and_self]
+          simp only [isUFree, hA, ha, hB, hq, Bool.and_self]
         exact snce_Ufree_event_qNotU_guard_separable _ q A B hev_uf hq hA hB hA' hB'
       · -- S(STUFF∧¬U, q∨¬U): Case 8 generalized
         exact case8_separable_Z_gen
@@ -1566,6 +1614,7 @@ theorem case7_separable_Z (a q A B : Formula Atom)
         (u_free_s_free_is_separable B hB hB')
     · exact ⟨.untl B A, by simp [isSyntacticallySeparated, hA', hB'], int_equiv_refl _⟩
 
+set_option linter.unusedDecidableInType false in
 /-- Case 7 generalized: drops S-free requirements on a, q (they were unused
     in the original proof). Only needs S-free A, B. -/
 theorem case7_separable_Z_gen (a q A B : Formula Atom)
@@ -1576,7 +1625,7 @@ theorem case7_separable_Z_gen (a q A B : Formula Atom)
       (Formula.and a (.untl B A))) := by
   apply is_separable_of_equiv (case7_equiv_Z a q A B)
   have hBq_uf : isUFree (Formula.and B q) = true := by
-    simp only [Formula.and, Formula.neg, isUFree, hB, hq, Bool.true_and, Bool.and_self]
+    simp only [isUFree, hB, hq, Bool.and_self]
   apply or_separable
   · apply or_separable
     · have h_rearrange : intEquiv
@@ -1617,11 +1666,11 @@ theorem case7_separable_Z_gen (a q A B : Formula Atom)
       apply is_separable_of_equiv (since_distrib_or_left _ _
         (Formula.or q (Formula.neg (.untl B A))))
       have hSTUFF_uf : isUFree (Formula.and A (.snce (Formula.and B q) a)) = true := by
-        simp only [Formula.and, Formula.neg, isUFree, hA, ha, hB, hq, Bool.and_self]
+        simp only [isUFree, hA, ha, hB, hq, Bool.and_self]
       apply or_separable
       · have hev_uf : isUFree (Formula.and (Formula.and A
             (.snce (Formula.and B q) a)) q) = true := by
-          simp only [Formula.and, Formula.neg, isUFree, hA, ha, hB, hq, Bool.and_self]
+          simp only [isUFree, hA, ha, hB, hq, Bool.and_self]
         exact snce_Ufree_event_qNotU_guard_separable _ q A B hev_uf hq hA hB hA' hB'
       · exact case8_separable_Z_gen
           (Formula.and A (.snce (Formula.and B q) a))
@@ -1637,6 +1686,7 @@ theorem case7_separable_Z_gen (a q A B : Formula Atom)
         (u_free_s_free_is_separable B hB hB')
     · exact ⟨.untl B A, by simp [isSyntacticallySeparated, hA', hB'], int_equiv_refl _⟩
 
+set_option linter.unusedDecidableInType false in
 /-- Case 8 separability for Z: S(a ^ ~U(A,B), q v ~U(A,B)) is separable. -/
 theorem case8_separable_Z (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -1649,16 +1699,23 @@ theorem case8_separable_Z (a q A B : Formula Atom)
   apply is_separable_of_equiv (case8_equiv_Z a q A B)
   apply and_separable
   · -- S(a∧¬U, ⊤): Case 2 with guard = ⊤ = neg bot (U-free)
-    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree]
-    obtain ⟨psi, hequiv, hsep⟩ := elim_case_2_gen a (Formula.neg (Formula.bot : Formula Atom)) A B ha hg hA hB hA' hB'
+    have hg : isUFree (Formula.neg (Formula.bot : Formula Atom)) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree]
+    obtain ⟨psi, hequiv, hsep⟩ :=
+      elim_case_2_gen a (Formula.neg (Formula.bot : Formula Atom)) A B ha hg hA hB hA' hB'
     exact ⟨psi, hsep, hequiv⟩
   · -- ¬S(¬q∧U, ¬a∨U): neg_separable of Case 5
     apply neg_separable
-    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
-    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
-    have hnq_sf : isSFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, hq']
-    have hna_sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
-    exact case5_separable_Z (Formula.neg q) (Formula.neg a) A B hnq_uf hna_uf hA hB hnq_sf hna_sf hA' hB'
+    have hnq_uf : isUFree (Formula.neg q) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+    have hna_uf : isUFree (Formula.neg a) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+    have hnq_sf : isSFree (Formula.neg q) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isSFree, hq']
+    have hna_sf : isSFree (Formula.neg a) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
+    exact case5_separable_Z (Formula.neg q) (Formula.neg a) A B hnq_uf hna_uf hA hB
+      hnq_sf hna_sf hA' hB'
 
 
 end Cslib.Logic.Bimodal.Metalogic.Separation

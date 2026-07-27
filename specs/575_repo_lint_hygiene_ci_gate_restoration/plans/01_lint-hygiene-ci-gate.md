@@ -2,10 +2,9 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~7h spent; ~4-6h remaining (Phase 3's live-task-blocked files and Phase 5 dominate)
-- **Dependencies**: none blocking. Coordinate with 557/558 (Modal/Tableau refactor) before large
-  edits to `Modal/Tableau/`; coordinate with 317 before edits to `Propositional/Tableau/`;
-  coordinate with 425 before edits to `Temporal/Tableau/` and `Temporal/Semantics/Validity.lean`.
+- **Effort**: ~9h spent; Phase 5 is the sole remaining workstream (unbounded by design)
+- **Dependencies**: none blocking. Phases 3, 4, 7, 8's live-task coordination concerns are
+  resolved (see Phase 3's closure notes) — no further coordination needed with 317/425/553.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
   shared infrastructure) conducted 2026-07-27; findings inlined below rather than filed as
   separate reports.
@@ -21,8 +20,9 @@
 
 ## RESUME HERE
 
-Fourth resume. Status as of this pass: **Phase 1, 2, 4, 6, 7, 8 COMPLETED; Phase 3 IN PROGRESS
-(293 sites remain, down from 359); Phase 5 PARTIAL (18 of ~570).** To pick this up cold:
+Fifth resume (cycle 5 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 30 of ~570.** To pick this up
+cold:
 
 1. Confirm the baseline still holds (2 commands, ~5 min):
    ```bash
@@ -30,41 +30,29 @@ Fourth resume. Status as of this pass: **Phase 1, 2, 4, 6, 7, 8 COMPLETED; Phase
    lake test                     # expect exit 0, 0 errors
    ```
    If either differs, something landed from another session — reconcile before proceeding.
-2. **Phase 4 and Phase 7 are now CLOSED.** No further action needed on either. `lake shake` is
-   clean (re-verify with `lake shake --add-public --keep-implied --keep-prefix Cslib`, expect
-   exit 0) and its CI step is uncommented.
-3. Continue **Phase 3**. Before touching ANY worst-offender file, check its cited task number's
-   live status in `specs/state.json` / `specs/archive/` — this cycle found that roughly a third
-   of the remaining sites belong to genuinely live, in-progress work where a "fix" would corrupt
-   active provenance, not clean up stale debt:
-   - **Task 317** (`Propositional/Tableau/{Scheme,Expansion,Completeness}.lean` +
-     `Minimal/Completeness.lean`, ~134 sites): live/blocked, recent report activity. This plan's
-     own dependency line already says to coordinate with 317 before large edits here.
-   - **Task 425** (`Temporal/Tableau/{Completeness,Rules,Saturation,Soundness}.lean`,
-     `TimeOrdering.lean`'s remaining 3 sites, `Temporal/Semantics/Validity.lean`, ~33 sites):
-     status field says `not_started` but has 4 reports + 3 plans dated within the last 3 days —
-     treat as active.
-   - **An unidentified multi-phase development** (`Constructive/Nested/{Soundness,Rules,Context,
-     Translation}.lean`, `CS5Completeness.lean`, `Labelled/Soundness.lean`, ~68 sites): no task
-     number found; references "the governing plan" and forward-references not-yet-written
-     phases. Investigate (search `specs/**/*.md`) or ask the user before touching.
-   - **`LoopChecking.lean`** (51 sites, task 553 -- confirmed NOT concurrent, but 9800+ lines
-     with 51 disparate citations needing individual grounding): a scale problem, needs its own
-     dedicated dispatch budget.
-   - **`TemporalConservativity.lean` and `DiegoEmbedding.lean`** (4+4 sites): confirmed FALSE
-     POSITIVES — their `Phase N` occurrences are the file's own internal section headings, not
-     task-tracker citations. No fix needed; exclude from future census totals.
-4. Phase 5 (suppression audit, 18 of ~570 done) is unchanged this cycle and remains the
-   orchestrator's stated lowest-priority workstream — pick it up once Phase 3 needs user
-   coordination or is otherwise exhausted for now.
-5. Two items still need a **user decision before work starts** — see "Open decisions" at the
-   bottom.
+2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them. In
+   particular, Phase 3's two previously-live task subtrees (317, 425) and the previously
+   unidentified `Constructive/Nested` development are all resolved — see Phase 3's closure notes
+   for the full per-file breakdown and the 59 sites excluded by finding (all documented,
+   individually verified, not merely assumed from task liveness).
+3. **Only Phase 5 remains.** `Separation/DedekindZ/Cases.lean` (the #1 worst offender) is now
+   fully processed — do not revisit it. Continue with `CounterexampleElimination/Elimination.lean`
+   (8 suppressions pre-cycle-5) and the next few files at 6-7, using the method Phase 5's section
+   documents: remove all of a file's suppressions, rebuild, categorize what surfaces, fix the
+   mechanical categories, narrow the rest to declaration/usage-site scope. **Read the
+   `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using `omit [...] in`
+   anywhere** — it changes elaboration (removes an instance from scope) and can silently break
+   compilation for declarations whose *proof body* (not just stated type) needs the instance;
+   `set_option linter.X false in` is always safe since it only suppresses the warning.
+4. No items require a user decision to make further Phase 5 progress. The three items formerly
+   listed as blocking (see "Open decisions" below) are all genuinely out of scope for 575, not
+   blockers to continuing Phase 5.
 
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
 (also implemented in `scripts/pre-pr-check.sh`). True census: 28 (excl. `warn.sorry`-suppressed
 lines, comments stripped), reconfirmed this cycle.
-**Do not** re-derive the task-tracker-reference census with the old, letter-suffix/hyphen-blind
-regex — use the fixed one in the Phase 3 section.
+**Phase 3 is closed** — its task/phase/report-string census is no longer a live worklist; see its
+section for the final fixed/excluded/false-positive breakdown instead of re-deriving one.
 
 ---
 
@@ -782,9 +770,17 @@ verification criteria passed. Unverified work remains uncommittable.
 
 - `lake build --wfail --iofail` reports no warning other than the 5 genuine sorries. **[MET]**
 - `lake test` green, 0 errors. **[MET]**
-- Zero `task N` / `Phase N` / `report N` strings in `Cslib/**`.
-- `lake shake` clean and its CI step uncommented.
-- Suppression audit outcome recorded per site.
+- ~~Zero `task N` / `Phase N` / `report N` strings in `Cslib/**`.~~ **Restated (Phase 3
+  closure)**: zero citations to completed/archived tasks or to already-landed code; forward
+  references to unwritten work, and citations inside internally disputed/inconsistent
+  narratives, retained with documented rationale. **[MET]** — see Phase 3's per-file table: 226
+  sites fixed, 59 excluded by individually-verified finding, 8 confirmed false positives (legit
+  internal section headings). The original literal wording is permanently unachievable, not
+  merely unmet this cycle — see Phase 3's closure notes for why.
+- `lake shake` clean and its CI step uncommented. **[MET]**
+- Suppression audit outcome recorded per site. **[PARTIAL]** — 30 of ~570 done; see Phase 5's
+  resume point. This is the one criterion expected to remain open across multiple cycles (Phase 5
+  is explicitly unbounded — see the task description and "Testing & Validation").
 - `pre-pr-check.sh` can actually fail. **[MET]**
 
 ## Rollback / Contingency

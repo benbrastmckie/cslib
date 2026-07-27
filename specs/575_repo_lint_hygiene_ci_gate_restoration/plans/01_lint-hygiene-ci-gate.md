@@ -23,14 +23,14 @@
 
 ## RESUME HERE
 
-Eighteenth resume (cycle 17 closure — final cycle of the prior `/orchestrate` invocation; this
-task is now paused pending a fresh `/orchestrate` or `/implement` dispatch). Status as of this
-pass: **Phases 1, 2, 3, 4, 6, 7, 8 all COMPLETED (Phase 1's regression was re-closed in cycle 13;
-Phase 3 was re-closed in cycle 12 after its own reopen; Phase 4's post-close `lake shake`
-regression was re-closed in cycle 16). Only Phase 5 (suppression audit) remains, PARTIAL at 222
-sites done (42 files fully processed), 174 blanket suppressions across 78 local-only files
-remaining in scope (down from 209/209-scope at cycle 16's close — see Phase 5's cycle-17 entry for
-the live re-derivation methodology and the full 8-file breakdown).**
+Nineteenth resume (cycle 18 closure — this dispatch, processed via `/implement`). Status as of
+this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all COMPLETED (Phase 1's regression was re-closed in
+cycle 13; Phase 3 was re-closed in cycle 12 after its own reopen; Phase 4's post-close `lake
+shake` regression was re-closed in cycle 16). Only Phase 5 (suppression audit) remains, PARTIAL
+at 246 sites done (48 files fully processed), 151 blanket suppressions across 73 local-only files
+remaining in scope (down from 174/78-scope at cycle 17's close — see Phase 5's cycle-18 entry for
+the live re-derivation methodology, the 6-file breakdown, and a corrected upstream-split
+methodology note: filter to `fs > 0` before the upstream gate, or the file count inflates).**
 
 **What remains for Phase 5, stated explicitly**: 174 local-only blanket suppressions across 78
 files, split roughly as: 4 files in the count-6 tier (2 already confirmed done this cycle —
@@ -152,9 +152,9 @@ new sites.
 To pick Phase 5 up cold:
 
 1. Confirm the baseline (3 commands, ~5 min) — **expect exactly 5 warnings, all documented
-   sorries, and lake shake reporting only the 12 upstream-shared files, as of cycle 17**:
+   sorries, and lake shake reporting only the 12 upstream-shared files, as of cycle 18**:
    ```bash
-   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 17
+   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 18
    lake test                     # expect exit 0, 0 errors
    lake shake --add-public --keep-implied --keep-prefix Cslib   # expect exactly 12 upstream-shared files, zero local-only
    ```
@@ -162,33 +162,45 @@ To pick Phase 5 up cold:
    before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's and Phase 4's closure criteria are once
    again empirically satisfied (no further action needed on any of them).
-3. **Only Phase 5 remains.** 42 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10/11/12/14/15/16/17 sub-entries for the complete per-file list) — do not revisit
-   any of them. Re-derive the live worst-offender list with the command in Phase 5's latest cycle
-   entry, then **filter it through the local-only gate above** before picking a target. Prioritize
-   the smaller count-4 files it lists ahead of the larger count-6 files (the count-5 tier is now
-   empty), using the method Phase 5's section documents: remove all of a file's suppressions,
-   rebuild, categorize what surfaces, fix the mechanical categories, narrow the rest to
-   declaration/usage-site scope. **Read the `unusedDecidableInType` vs `unusedSectionVars` lesson
-   in Phase 5 before using `omit [...] in` anywhere** — it changes elaboration (removes an
-   instance from scope) and can silently break compilation for declarations whose *proof body*
-   (not just stated type) needs the instance; `set_option linter.X false in` is always safe since
-   it only suppresses the warning. **Also read the cycle-8 finding**: a small file's line count
-   is not a reliable effort proxy on its own — after the initial suppression removal, further
-   declaration-scoped fixes can surface additional previously-hidden warnings on other
-   declarations; rebuild after each round, not just once. **Also read the cycle-12 finding**: a
-   `set_option ... in` line placed next to a doc comment must come *before* the doc comment, not
-   after — the reverse order is a hard parse error, caught only by rebuilding before commit.
-   **Also read the cycle-14 finding**: after adding a declaration-scoped `set_option
-   linter.flexible false in`, rebuild and confirm it actually silenced the warning it was meant
-   for (not a neighboring declaration) — line-number-to-declaration mapping errors are easy to
-   make in files with many short, similarly-structured back-to-back theorems, and only a rebuild
-   catches a wrong placement. **Also read the cycle-17 findings**: (a) a file whose
-   `style.openClassical` suppression targets a persistent, non-`in` `open Classical` will
-   correctly bottom out at 1 remaining blanket line, not 0 — this is the permanent, correct end
-   state for that category, not incomplete work (see `Eliminations.lean`); (b) `lake lint`'s
+3. **Only Phase 5 remains.** 48 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11/12/14/15/16/17/18 sub-entries for the complete per-file list) — do not
+   revisit any of them. Re-derive the live worst-offender list with the command in Phase 5's
+   latest cycle entry, then **filter it through the local-only gate above** before picking a
+   target. Prioritize `Separation/Hierarchy/HierarchyDefs.lean` (1001 lines, the sole remaining
+   count-4-tier file) ahead of the count-6 tier (5 files, all 900+ lines), using the method Phase
+   5's section documents: remove all of a file's suppressions, rebuild, categorize what surfaces,
+   fix the mechanical categories, narrow the rest to declaration/usage-site scope. **Read the
+   `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using `omit [...] in`
+   anywhere** — it changes elaboration (removes an instance from scope) and can silently break
+   compilation for declarations whose *proof body* (not just stated type) needs the instance;
+   `set_option linter.X false in` is always safe since it only suppresses the warning. **Also
+   read the cycle-8 finding**: a small file's line count is not a reliable effort proxy on its
+   own — after the initial suppression removal, further declaration-scoped fixes can surface
+   additional previously-hidden warnings on other declarations; rebuild after each round, not
+   just once. **Also read the cycle-12 finding**: a `set_option ... in` line placed next to a doc
+   comment must come *before* the doc comment, not after — the reverse order is a hard parse
+   error, caught only by rebuilding before commit. **Also read the cycle-14 finding**: after
+   adding a declaration-scoped `set_option linter.flexible false in`, rebuild and confirm it
+   actually silenced the warning it was meant for (not a neighboring declaration) —
+   line-number-to-declaration mapping errors are easy to make in files with many short,
+   similarly-structured back-to-back theorems, and only a rebuild catches a wrong placement.
+   **Also read the cycle-17 findings**: (a) a file whose `style.openClassical` suppression
+   targets a persistent, non-`in` `open Classical` will correctly bottom out at 1 remaining
+   blanket line, not 0 — this is the permanent, correct end state for that category, not
+   incomplete work (see `Eliminations.lean`, and this cycle's `QLemma.lean`); (b) `lake lint`'s
    `unusedArguments` findings are a distinct, out-of-scope linter from this phase's
-   `unusedSectionVars`/`unusedDecidableInType` targets — do not attempt to fix them opportunistically.
+   `unusedSectionVars`/`unusedDecidableInType` targets — do not attempt to fix them
+   opportunistically. **Also read the cycle-18 findings**: (a) the `linter.flexible` "Try this:
+   simp only [...]" suggestion in the build log is a hint, not a ground truth — it can omit
+   def-unfold lemmas (e.g. `embedFormula`, `ExtFormula.atoms`) the original blanket `simp`
+   implicitly relied on via Lean's automatic iota/delta reduction; verify every suggested
+   replacement by rebuild before trusting it, and if it fails with "simp made no progress" or a
+   goal-shape mismatch, reconstruct the simp-only set yourself from the def names the blanket
+   call used plus the specific structural lemma (`injEq`, `Finset.mem_union`,
+   `decide_eq_true_eq`, etc.) the warning names; (b) when re-deriving the worst-offender list,
+   filter to `fs > 0` (a positive *blanket*-suppression count) before running the upstream gate —
+   otherwise files that only contain declaration-scoped `... in` lines inflate the
+   upstream-carved-out file count without changing the blanket-line total.
 4. No items require a user decision to make further Phase 5 progress. The three items formerly
    listed as blocking (see "Open decisions" below) are all genuinely out of scope for 575, not
    blockers to continuing Phase 5.
@@ -850,7 +862,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 222 sites done; 174 blanket suppressions across 78 local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 246 sites done; 151 blanket suppressions across 73 local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -1771,6 +1783,103 @@ files should continue to go faster than the remaining count-6-tier files (`Recur
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.
+
+**Cycle 18 (this dispatch) — 6 files processed, all committed individually after a clean scoped
+rebuild plus downstream-importer rebuilds.** Worked the count-4 tier smaller-first per the
+delegation instruction, then continued into it entirely: `Bimodal/Metalogic/Algebraic/
+BooleanStructure.lean` (342 lines, 4→0, commit `638f6e70`), `Bimodal/Metalogic/
+ConservativeExtension/ExtFormula.lean` (374 lines, 4→0, commit `dd479966`),
+`Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean` (436 lines, 4→1, commit `b69a2f27` — the 1
+remaining line is a permanent, correct non-`in` `style.openClassical` suppression for the file's
+persistent `open Classical`, matching the cycle-17 `Eliminations.lean` precedent, not residual
+work), `Bimodal/Metalogic/BXCanonical/Frame.lean` (472 lines, 4→0, commit `449d0d63`),
+`Foundations/Logic/Metalogic/Chronicle/RRelation.lean` (614 lines, 4→0, commit `043e4947`),
+`Bimodal/Metalogic/BXCanonical/Chronicle/RRelation.lean` (780 lines, 4→0, commit `d666dbce`).
+This clears the count-4 tier down to its single largest file (`HierarchyDefs.lean`, 1001 lines).
+Suppression-audit progress: 222 → 246 sites audited cumulative (48 files fully processed
+cumulative). Ratchet: 188 → 165 blanket suppressions repo-wide. Live per-file upstream/local-only
+split (`git cat-file -e upstream/main:<path>` for every file currently carrying a blanket
+suppression, filtered to `fs > 0` — an early pass over this cycle's re-derivation double-counted
+41 files that contain some `set_option linter.*` line but zero *blanket* ones, which would have
+under-reported the upstream-carved-out total; corrected by filtering to blanket-count > 0 before
+the upstream gate) found 165 total = **151 local-only in-scope (73 files) + 14
+upstream-carved-out (14 files, unchanged)**.
+
+New category encountered this cycle: `linter.flexible` warnings where the "Try this:
+simp only [...]" suggestion in the build log is **not directly usable as a literal
+copy-paste replacement** — verified by rebuild failure (`simp made no progress` /
+`Invalid ⟨...⟩ notation`) when applied verbatim in `ExtFormula.lean` and
+`RRelation.lean` (both files). Root cause: the linter's info trace does not always include the
+`embedFormula`/`ExtFormula.atoms`-style def-unfold lemmas that the original blanket `simp
+[embedFormula, ...]` implicitly relied on (Lean's automatic iota/delta reduction during full
+`simp` masks this dependency; `simp only [<the one suggested lemma>]` alone does not always
+carry it). **Fix method going forward**: derive the simp-only set by reasoning about what the
+flagged tactic's hypothesis/goal actually needs (the same def-unfold names used in the original
+blanket call, plus the specific structural lemma — `injEq`, `Finset.mem_union`,
+`decide_eq_true_eq`, etc. — that the linter names), then verify by rebuild; treat the "Try this"
+line as a *hint*, not a ground truth, since it can quietly omit lemmas needed for the
+tactic-after-`simp` to still type-check. This is now the 5th documented `linter.flexible`
+sub-lesson (after the cycle-6 `simp?`-via-`lean_multi_attempt` guidance, cycle-9/17
+`openClassical`, and cycle-14/15/16 declaration-mapping/duplicate-match/mirrored-block lessons).
+
+Full CSLib CI pipeline run once at cycle end: `lake build --wfail --iofail` (exactly 5 baseline
+sorry warnings — `FrameSoundness.lean:1252`, `Intuitionistic/Scheme.lean:570,2583`,
+`Intuitionistic/Completeness.lean:124`, `Minimal/Completeness.lean:118` — zero new anywhere),
+`lake exe checkInitImports` (clean, no output), `lake exe lint-style` (clean, no output), `lake
+shake --add-public --keep-implied --keep-prefix` (exactly the 12 upstream-shared files flagged,
+zero local-only findings), `lake exe mk_all --module` ("No update necessary"), `lake test` (exit
+0, same 5 baseline sorry warnings plus the same one pre-existing unrelated
+`backward.privateInPublic` warning in `CslibTests/FreeMonad.lean`). True sorry census
+(comment-stripped, `warn.sorry`-excluded, per "Measurement notes", re-derived live rather than
+trusted from the prior cycle's figure): 28, unchanged. Vacuous-def grep unchanged at the single
+pre-existing false positive (`Computability/URM/Basic.lean:92`); axiom count unchanged at 26.
+`git show` on each of this cycle's 6 commits individually confirmed zero `sorry` lines touched
+(each diff checked, not just grepped in aggregate).
+
+**Resume point (cycle 18 close)**: the 6 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10, 11, 12, 14, 15, 16, 17 are done — do not revisit (48 files total). Re-verify the worst-offender
+list before starting the next cycle, since resolutions only ever remove entries, and re-gate every
+candidate through `git cat-file -e upstream/main:<path>` (must FAIL) per the upstream-exposure
+rescope, **filtering to files with a positive blanket count before the upstream gate** (the
+cycle-18 correction above):
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | awk '$1 > 0' | head -20
+```
+As of cycle 18's end (165 total remaining blanket suppression lines, **151 local-only in-scope
+across 73 files**), the count-6 tier is still 5 files, unchanged from cycle 17 (none touched this
+cycle): `Temporal/Metalogic/Chronicle/CounterexampleElimination/{RecursiveWalks (1125 lines),
+MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/FrameClassVariants.lean` (931
+lines), `Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048
+lines — do not pick this one first), `Bimodal/Metalogic/BXCanonical/Chronicle/
+ChronicleToCountermodelBasic.lean` (1208 lines). **The count-4 tier is down to its final file**:
+`Separation/Hierarchy/HierarchyDefs.lean` (1001 lines, confirmed local-only) — pick this next
+per the established smaller-files-first-within-tier method (it is smaller than every count-6
+file, so still ahead of that tier despite its own four-figure line count). Below it, a
+count-3/count-2/count-1 tail of roughly 68 more files remains (spot-checked in earlier cycles,
+not yet individually processed this cycle).
+
+Apply the same method: remove all of a file's suppressions, rebuild, categorize what surfaces
+into vestigial / mechanically-fixable / needs-real-proof-work, fix what's mechanical, narrow the
+rest to declaration-scope, re-baseline the ratchet in the same commit — carrying forward every
+safety lesson from cycles 6-18 (see the cycle-11/12 addenda above for the full list through cycle
+12, the cycle-14 declaration-mapping-verification lesson, the cycle-15 Edit-tool
+false-duplicate-match lesson, the cycle-16 mirrored-proof-block `replace_all` lesson, the
+cycle-17 `openClassical`/`unusedArguments` findings, and this cycle's two findings: (1) the
+`linter.flexible` "Try this" trace can omit def-unfold lemmas the original blanket `simp`
+implicitly relied on — verify every suggested `simp only` replacement by rebuild, do not paste
+it blind; (2) when re-deriving the worst-offender list, filter to `fs > 0` (files actually
+carrying a *blanket* suppression) before running the upstream gate, or the upstream-carved-out
+file count will be inflated by files that only contain declaration-scoped `... in` lines).
+
+**Effort estimate for future cycles**: this cycle cleared 24 sites (6 files, 23 fully resolved +
+1 permanent-end-state) in one dispatch — in line with the ~20-30 sites/cycle blended historical
+rate, though slower per-file than cycle 17's 35-sites/8-files pace because two of this cycle's
+files (`RRelation.lean` ×2) needed non-trivial `linter.flexible` narrowing rather than purely
+mechanical `show`→`change`/longLine wraps. At the current blended rate, clearing the remaining
+**151 local-only sites** is roughly **5-8 more cycles**.
 
 ### Phase 6: Sorry visibility [COMPLETED]
 

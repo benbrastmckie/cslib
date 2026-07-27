@@ -16,6 +16,7 @@
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Fsub/Reduction.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Stlc/Basic.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Stlc/StrongNorm.lean
+1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/CallByName.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/FullBetaConfluence.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/FullBetaEtaConfluence.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/FullBetaEta.lean
@@ -23,6 +24,7 @@
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/FullEtaConfluence.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/FullEta.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/MultiApp.lean
+1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/StandardReduction.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/StrongNorm.lean
 2 Cslib/Logics/Bimodal/FrameConditions/Compatibility.lean
 1 Cslib/Logics/Bimodal/FrameConditions/Soundness.lean

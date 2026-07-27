@@ -176,7 +176,7 @@ preservation of an *external* side predicate under `cl` is needed (contrast the 
 never fixed externally: it is read off the very same set `Z`, via `cs5PairTauR`/`cs5PairTauL`, so
 the fact holds uniformly for *every* deductively-closed `Z`, including every set reached during a
 Zorn/Lindenbaum extension (`QuasiPrime CS5PairAxiom` reuses the fully generic `QuasiPrime`
-machinery from `Segment.lean`, so Phase 4's `prime_set_exclusion` application inherits this for
+machinery from `Segment.lean`, so this module's `prime_set_exclusion` application inherits this for
 free). -/
 
 /-- **Cross-condition 1 is `cl`-stable.** For any `CS5PairAxiom`-deductively-closed `Z`,
@@ -664,14 +664,16 @@ theorem cs5Pair_leftExclusion_of_rightExclusion {H : Set (Proposition Atom)}
 
 /-- **The corrected entry point.** Collapses the module's three open obligations (`hL`, `hR`,
 `CS5PairSeedDisjunctionProperty`) plus the blocked cross-inertness lemma to the single corrected
-obligation `CS5PairSeedRightExclusion`: given `hA : A ∉ cl_CS5(boxInv H)` (Phase 3 discharges
-this from the caller's actual hypothesis `□A ∉ H`) and `hExcl : CS5PairSeedRightExclusion H A`,
+obligation `CS5PairSeedRightExclusion`: given `hA : A ∉ cl_CS5(boxInv H)`
+(`cs5_box_mem_of_mem_boxInv_closure` below discharges this from the caller's actual hypothesis
+`□A ∉ H`) and `hExcl : CS5PairSeedRightExclusion H A`,
 `hExcl hA` is the bare right exclusion `hR`, from which `hL` and the disjunction form both follow
 (`cs5Pair_leftExclusion_of_rightExclusion`/`cs5Pair_disjunctionProperty_of_rightExclusion`),
 composing into the landed `cs5Pair_derivExcludes_of_disjunctionProperty`. Note that this entry
 point carries the extra hypothesis `hA` the old `cs5Pair_derivExcludes_of_disjunctionProperty`
 did not have -- flagged in the plan's Goals & Non-Goals as the one place this repair is not a
-strict strengthening in isolation; Phase 3 shows it is not a net weakening in practice, since
+strict strengthening in isolation; the caller-side discharge lemma below shows it is not a net
+weakening in practice, since
 `hA` is discharged for free whenever `H` is `CS5`-deductively closed and `□A ∉ H`, which every
 caller of this module already has. -/
 theorem cs5Pair_derivExcludes_of_rightExclusion {H : Set (Proposition Atom)}
@@ -696,7 +698,7 @@ general (its counterexample is `□(B → A), □B ∈ H` with `□A ∉ H` -- a
 deductively closed `H` can never witness `□A ∉ H` together with `□(B → A), □B ∈ H`. Consequently
 `hA` is free for every caller with a deductively closed `H` and `□A ∉ H` -- exactly the
 hypotheses every real caller of this module already carries, per the plan's Goals & Non-Goals
-discussion of why Phase 2's added `hA` hypothesis is not a net weakening in practice. -/
+discussion of why the added `hA` hypothesis is not a net weakening in practice. -/
 
 /-- **Box-over-finite-conjunction.** If every element of `L` has its box in a `CS5`-deductively
 closed `H`, so does the box of their conjunction `bigAnd L` (`SegmentLindenbaum.lean`'s dual of
@@ -795,7 +797,7 @@ theorem cs5_box_mem_of_mem_boxInv_closure {H : Set (Proposition Atom)}
 
 /-- **The named caller-side discharge.** Contrapositive of `cs5_box_mem_of_mem_boxInv_closure`:
 whenever `H` is `CS5`-deductively closed and `□A ∉ H`, the side condition
-`cs5Pair_derivExcludes_of_rightExclusion` needs is free. This is what makes Phase 2's added `hA`
+`cs5Pair_derivExcludes_of_rightExclusion` needs is free. This is what makes the added `hA`
 hypothesis not a net weakening in practice -- round 2 §1.1's counterexample shape
 (`□(B → A), □B ∈ H` with `□A ∉ H`) cannot arise once `H` is deductively closed, since `k` applied
 to `□(B → A)` and `□B` already forces `□A ∈ H`. -/

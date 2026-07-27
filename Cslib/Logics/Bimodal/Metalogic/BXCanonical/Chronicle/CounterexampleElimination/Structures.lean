@@ -34,12 +34,6 @@ proofs). See the generic module's docstring for the full rationale.
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}

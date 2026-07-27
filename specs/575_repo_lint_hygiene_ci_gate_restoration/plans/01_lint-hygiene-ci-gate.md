@@ -369,7 +369,7 @@ suppression is load-bearing.
   while `Bundle.UntilSinceCoherence` (2 suppressed sorries) exits 0. (Measurement note only, no
   action item.)
 
-### Phase 7: Script and documentation defects [PARTIAL — 2 of 3 items done]
+### Phase 7: Script and documentation defects [COMPLETED — 2/3 items done, 1 excluded by finding]
 
 - **`scripts/pre-pr-check.sh:5-26` cannot fail.** **DONE** (commit `7be1fd61`): accumulated a
   `failed` flag across all 5 steps (added a step 5 running `lake build --wfail --iofail`) and
@@ -382,49 +382,53 @@ suppression is load-bearing.
   `NOTE:`/`TODO:`, so they were always among whatever count was correct). **DONE** (commit
   `2fc441a0`): deleted the two-line assertion rather than correcting the numbers, per the plan's
   own guidance that a hardcoded repo-wide census on a comment line will go stale again.
-- **`ORGANISATION.md` stale by ~100 files.** NOT STARTED. Every claimed path exists (no
-  phantoms); the failure is omission. Modal lists `Metalogic/` as 5 files; reality is 94
-  undocumented across `Systems/` (45), `Constructive/` (24), `InterSystem/` (10),
-  `Intuitionistic/` (9), `Minimal/` (6). Temporal's `Tableau/` (8 files) absent entirely. The
-  `Foundations/Logic/Tableau/` entries ARE current and correct. Consider a CI check diffing
-  sketch against filesystem — at this drift rate a hand-maintained census will go stale again.
-- **`NOTATION.md` has no logic section**, for a tree that is ~450 of 676 files. NOT STARTED.
-  Concrete cost: `Foundations` names its proof-system type parameter `S`, colliding with
-  Temporal/Bimodal scoped notation `S` for *Since*, forcing `@`-positional application in 5
-  files. Documented five times in `NOTE:` blocks, fixed zero times. Fix: rename `S` -> `Sys` in
-  `Foundations/Logic/`, delete the 5 NOTE blocks, add a scoped-notation rule to NOTATION.md.
-  (`ORGANISATION.md` and the `S`->`Sys` rename are grouped as one remaining item since neither
-  was started this session; treat them as two independent sub-steps when resumed.)
+- **`ORGANISATION.md` stale by ~100 files.** **DONE** (commit `5456ba96`): documented the 5
+  previously-undocumented `Modal/Metalogic/` subdirectories (`Systems/` 45 files across 15
+  per-system subdirs, `Constructive/` 24, `InterSystem/` 10, `Intuitionistic/` 9, `Minimal/` 6)
+  plus 4 top-level files that were also missing, and added the entirely-absent
+  `Temporal/Tableau/` entry (8 files). Every path was verified against the filesystem via `find`
+  before writing — no phantoms. `Foundations/Logic/Tableau/` entries were already correct and
+  left untouched, per the prior session's finding.
+- **`NOTATION.md` has no logic section / `S`->`Sys` rename — EXCLUDED by finding, elevated risk
+  confirmed beyond the prior session's re-scoping.** `Foundations` names its proof-system type
+  parameter `S`, colliding with Temporal/Bimodal scoped notation `S` for *Since*. The prior
+  session's re-scoping already found this touches 24 files under `Foundations/Logic/**` and 231
+  named-argument call sites across 18 files (5 outside `Foundations/Logic/`), with one confirmed
+  false positive to avoid (`LinearLogic/CLL/PhaseSemantics/Basic.lean`, an unrelated
+  `S : Set (Fact P)` local variable).
 
-  **Re-scoping finding (this session, investigation only, zero files edited)**: the "5 files"
-  framing understates the true footprint. `S` is the bound `Type*` parameter on `InferenceSystem`
-  (`Foundations/Logic/InferenceSystem.lean`) and is threaded through **24 files** under
-  `Foundations/Logic/**` (`ProofSystem.lean` alone has 177 bare-`S` tokens; `Theorems/
-  DerivationCombinators.lean` 96; `Theorems/Modal/S5.lean` 84; `Metalogic/PrimeExclusion.lean` 66;
-  `Theorems/Temporal/TemporalDerived.lean` 64; `Metalogic/Consistency.lean` 61;
-  `Theorems/Combinators.lean` 60 — the rest smaller). Named-argument call sites `(S := ...)` that
-  would need to become `(Sys := ...)` for the rename to typecheck number **231 across 18 files**
-  (13 inside `Foundations/Logic/`, plus the 5 real downstream consumers: the two Bimodal
-  `Theorems/Propositional/*` files, the two Temporal `Metalogic/*` files named in the NOTE blocks,
-  and `Modal/Metalogic/InterSystem/IntToClassical.lean`, which has 62 more occurrences on its own
-  despite carrying no NOTE — it uses named args for the same tag with no collision to explain).
-  One superficially-matching file, `LinearLogic/CLL/PhaseSemantics/Basic.lean`, is a **false
-  positive**: its `(S := ...)` binds an unrelated `S : Set (Fact P)` local variable, not this
-  tag — confirmed by reading `sInf_isFact`/`carriersInf` — and must NOT be touched.
+  **This session's finding (investigation only, zero `.lean` edits, zero `lake build` calls
+  spent on it): a live `\bS\b` census disagrees sharply with the prior session's per-file
+  figures, and the cause is a second class of false positive the prior session's numbers did not
+  account for.** A live `grep -roE '\bS\b'` over the 24 files returns **1229** raw matches
+  (e.g. `ProofSystem.lean` 189 vs. the prior session's reported 177; `Theorems/
+  DerivationCombinators.lean` 142 vs. 96; `Theorems/Modal/S5.lean` 109 vs. 84 — every file's live
+  count is higher, not just noisier). Reading a sample explains why:
+  `Foundations/Logic/ProofSystem.lean:33,341,348,354` document Hilbert systems as
+  `MinimalHilbert (K, S, MP)` — here `S` is the **combinatory-logic S-axiom name** (the classic
+  K/S/I combinator naming convention for Hilbert-style axiom schemas), a completely unrelated
+  sense of the token `S` from the `InferenceSystem` type parameter, sitting in the same
+  docstrings that also use the real parameter dozens of lines later. A blind rename would
+  silently corrupt this prose to the nonsensical `MinimalHilbert (K, Sys, MP)` — a
+  compiler-invisible error, since it lives in a docstring, not code the type-checker touches.
+  This is the same false-positive *category* as the already-known `PhaseSemantics/Basic.lean`
+  exclusion (a coincidentally-reused single-letter token meaning something else), but occurring
+  **inside** the target file set rather than only in an adjacent file, which means per-file
+  blanket substitution is unsafe even restricted to the already-scoped 24 files — every match
+  needs individual disambiguation, not just every *file*.
 
-  Because `InferenceSystem.lean`/`ProofSystem.lean` sit at the root of the logic dependency graph,
-  this is not choppable into independently-green single-file commits the way the rest of this
-  task has been: a binder rename only typechecks once every one of the ~18 named-argument-using
-  files is updated in the same atomic change, and verifying it means a near-full-project rebuild
-  (this module tree feeds nearly everything under `Cslib/Logics/`), not the fast scoped builds
-  every other Phase 7/8 item used. That cost profile is disproportionate to a "rename an
-  identifier" item inside a hygiene task that otherwise verifies per-file in seconds. Recommend
-  either: (a) a dedicated follow-up task sized for one atomic ~18-file commit with a single
-  full-project rebuild budgeted in, or (b) if attempted inside this task, doing it as the very
-  last action before Definition-of-Done sign-off, in one shot, specifically so a failed attempt
-  doesn't cost repeated full rebuilds against an otherwise-finished plan. Not attempted this
-  session for exactly that reason — investigation only (`grep`/`Read`), zero `.lean` edits, zero
-  `lake build` invocations spent on it.
+  Given (1) the true occurrence count is materially larger than previously estimated (1229 raw,
+  of unknown-but-nontrivial genuine fraction), (2) genuine semantic false positives exist inside
+  the target files themselves and are invisible to the compiler if mishandled, and (3) the prior
+  session's own atomicity finding already holds (one commit, one near-full-project rebuild, no
+  incremental verification possible) — the combined risk profile exceeds what a single dispatch
+  should absorb inside an otherwise-finished hygiene task, per this phase's own explicit
+  instruction that a half-applied attempt is worse than not starting. Excluded from this task by
+  finding, the same disposition Phase 2 and Phase 8 used to close at less than 100%. Recommend a
+  dedicated follow-up task that budgets: a per-occurrence disambiguation pass (not a blind regex
+  substitution) across the 24 files, the 231 named-argument sites in the 18 consumer files, the 5
+  stale `NOTE:` block deletions, the `NOTATION.md` scoped-notation-rule addition, and one
+  full-project rebuild. Not attempted this session for exactly that reason.
 
 ### Phase 8: Dead-code deletions [COMPLETED — 9/10 rows done, 1 excluded by finding]
 

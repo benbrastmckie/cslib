@@ -562,12 +562,12 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 7: Land `nested_sound_cut` and the missing `.cut` arm — build RED to GREEN [NOT STARTED]
+### Phase 7: Land `nested_sound_cut` and the missing `.cut` arm — build RED to GREEN [COMPLETED]
 
 - **Goal:** Close the last `NestedProof` constructor and take the library from RED to green.
 - **Files:** `Cslib/.../Nested/Soundness.lean` (sole owner)
 - **Tasks:**
-  - [ ] Land `nested_sound_cut (ctx : InputCtx Atom) (A : Proposition Atom) (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm) (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom A)).fm) : Derivable (@CS5ModalAxiom Atom) ctx.fillEmpty.fm`,
+  - [x] Land `nested_sound_cut (ctx : InputCtx Atom) (A : Proposition Atom) (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm) (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom A)).fm) : Derivable (@CS5ModalAxiom Atom) ctx.fillEmpty.fm`,
         matching `NestedProof.cut`'s premise/conclusion types at `Rules.lean:299-301`. Proof route
         (the source's own one-liner, "For the cut-rule we additionally observe that `A ⊃ A` is
         always provable"):
@@ -582,11 +582,11 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
            bridge sits at the `ctx.Λ` level and lifts through `□` (`cs5DerivBoxMono`, contravariant
            in the antecedent — use `cs5DerivImpCongrLeft` as `fillLhs_fm_antitone` does) and then
            through `ctx.Γ'` (`OutputCtx.fillRhs_fm_mono`).
-  - [ ] Docstring citing Lemma 4.9's `cut` sentence, p. 10, with the BibKey; state explicitly that
+  - [x] Docstring citing Lemma 4.9's `cut` sentence, p. 10, with the BibKey; state explicitly that
         this is soundness of `cut` as a primitive, **not** cut admissibility (§6, out of scope).
-  - [ ] Add the arm `| _, .cut ctx A p q => nested_sound_cut ctx A (nested_sound p) (nested_sound q)`
+  - [x] Add the arm `| _, .cut ctx A p q => nested_sound_cut ctx A (nested_sound p) (nested_sound q)`
         to `nested_sound`, placed to match `Rules.lean`'s constructor order (after `.bStruct`).
-  - [ ] Correct the `nested_sound` section docstring: all 19 constructors are now discharged; remove
+  - [x] Correct the `nested_sound` section docstring: all 19 constructors are now discharged; remove
         the stale "Every constructor except `impL`" sentence and any residual forward-pointing note
         left by Phase 5.
 - **Estimated output:** ~70 lines.

@@ -175,6 +175,26 @@ private theorem cs5DerivTopIntro (X : Proposition Atom) :
     Derivable (@CS5ModalAxiom Atom) (X.imp Proposition.top) :=
   cs5DerivImpOfDerivable X (cs5DerivImpSelf Proposition.bot)
 
+/-- **`⊤`-conjunct introduction**: `⊢ P ⊃ (P ∧ ⊤)`, for any `P`. Discharges the single hypothesis
+`P` (`deductionTheorem`), then combines the assumed `P` with the closed theorem `⊢ ⊤` via the
+`andI` schema. Used by `cs5DerivFillEmptyImpFillLhsEmpty`'s `[Γ]` case below. -/
+private theorem cs5DerivAndTopIntro (P : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) (P.imp (P.and Proposition.top)) := by
+  obtain ⟨dtop⟩ := cs5DerivImpSelf (Atom := Atom) Proposition.bot
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] P (P.and Proposition.top) ?_⟩
+  have h1 : DerivationTree (@CS5ModalAxiom Atom) [P]
+      (P.imp (Proposition.top.imp (P.and Proposition.top))) :=
+    .weakening [] [P] _ (.ax [] _ (.andI P Proposition.top)) (fun _ h => nomatch h)
+  have h2 : DerivationTree (@CS5ModalAxiom Atom) [P] P :=
+    .assumption [P] _ (List.mem_singleton.mpr rfl)
+  have h3 : DerivationTree (@CS5ModalAxiom Atom) [P]
+      (Proposition.top.imp (P.and Proposition.top)) :=
+    .modus_ponens _ _ _ h1 h2
+  have h4 : DerivationTree (@CS5ModalAxiom Atom) [P] Proposition.top :=
+    .weakening [] [P] _ dtop (fun _ h => nomatch h)
+  exact .modus_ponens _ _ _ h3 h4
+
 /-- **Uncurry**: from `⊢ P ⊃ (Q ⊃ R)`, derive `⊢ (P ∧ Q) ⊃ R`. Built via nested `deductionTheorem`
 discharge of the single hypothesis `P ∧ Q`, projecting `P`/`Q` via `andE1`/`andE2` before
 re-applying the (weakened) curried fact. -/
@@ -1520,14 +1540,91 @@ theorem nested_sound_impL (ctx : InputCtx Atom) (A B : Proposition Atom)
   -- (4) combine: `⊢ (fm(Γ'{ΨX}) ∧ fm(Γ'{ΨY})) ⊃ fm(Γ'{ΨZ})`, `⊢ fm(Γ'{ΨX})`, `⊢ fm(Γ'{ΨY})`.
   exact andMP h5 hAX hB
 
+/-! ## `cut` (Lemma 4.9, page 10): The Last Constructor
+
+`NestedRhs.box Φ Ψ`'s translation `fm = □(Φ.fm ⊃ Ψ.fm)` (`Syntax.lean`) is *contravariant* in
+`Φ`, so lifting Phase 6's `OutputCtx.fillLhs_empty_imp_fillEmpty` (`(Λ.fillLhs ∅).fm ⊃
+Λ.fillEmpty.fm`) through a `box`/`ctx.Γ'` congruence chain (`cs5DerivImpCongrLeft` then
+`cs5DerivBoxMono`, exactly as `InputCtx.fillLhs_fm_antitone` does) yields the *reverse* implication
+at the lifted level. Reaching `(ctx.fillLhs ∅).fm ⊃ ctx.fillEmpty.fm` -- the direction
+`nested_sound_cut` needs -- therefore requires the *reverse*-direction companion to Phase 6's
+lemma, `Λ.fillEmpty.fm ⊃ (Λ.fillLhs ∅).fm`, as the congruence's input. Since this phase's file list
+names `Soundness.lean` sole owner (no `Translation.lean` edits), that companion is landed here as a
+private local lemma, mirroring Phase 6's exact three-case induction on `Λ` verbatim except for the
+`[Γ]` base case's direction: `Γ.fm ⊃ (Γ.fm ∧ ⊤)` (`cs5DerivAndTopIntro`) in place of the `andE1`
+elimination Phase 6 used, since `⊤` is unconditionally provable in either direction. -/
+
+/-- **Reverse companion to `OutputCtx.fillLhs_empty_imp_fillEmpty`**: `⊢ Λ.fillEmpty.fm ⊃
+(Λ.fillLhs ∅).fm`, for every output context `Λ`. Local to this file (see the section docstring
+above for why): needed as `cs5DerivImpCongrLeft`'s input to lift, contravariantly through `box`,
+into the direction `nested_sound_cut` actually needs. Proved by induction on `Λ`, mirroring
+`OutputCtx.fillLhs_empty_imp_fillEmpty`'s own three-case recursion:
+- `[]`: `fillEmpty [] = ∅ = fillLhs [] ∅`, the identical term -- `cs5DerivImpSelf`.
+- `[Γ]`: `fillEmpty [Γ] = Γ` (`fm = Γ.fm`) versus `fillLhs [Γ] ∅ = comma Γ ∅` (`fm = Γ.fm ∧ ⊤`) --
+  `cs5DerivAndTopIntro` discharges the `⊤` conjunct directly.
+- `Γ :: Γ₂ :: rest`: both sides reduce to `Γ.fm ∧ ◇(…).fm`, congruent in the right conjunct
+  (`cs5DerivAndCongrRight`) over `◇`-monotonicity (`cs5DerivDiaMono`) applied to the induction
+  hypothesis on `Γ₂ :: rest` -- the identical shape as the forward lemma's own cons-cons step. -/
+private theorem cs5DerivFillEmptyImpFillLhsEmpty :
+    ∀ (Λ : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom) (Λ.fillEmpty.fm.imp (Λ.fillLhs NestedLhs.empty).fm)
+  | [] => cs5DerivImpSelf _
+  | [Γ] => cs5DerivAndTopIntro Γ.fm
+  | Γ :: Γ₂ :: rest =>
+      cs5DerivAndCongrRight Γ.fm
+        (cs5DerivDiaMono (cs5DerivFillEmptyImpFillLhsEmpty (Γ₂ :: rest)))
+
+/-- **Soundness of `cut`** (eq. (3.1), page 7; Lemma 4.9's own one-liner, page 10): "For the
+cut-rule we additionally observe that `A ⊃ A` is always provable." Route:
+1. `nested_sound_impL ctx A A hA hB` (the `B := A` instantiation) gives
+   `⊢ (ctx.fillLhs (A ⊃ A)•).fm`.
+2. `⊢ A ⊃ A` (`cs5DerivImpSelf`) weakens to `⊢ ⊤ ⊃ fm((A ⊃ A)•)`, fed through
+   `InputCtx.fillLhs_fm_antitone` to get `⊢ (ctx.fillLhs (A ⊃ A)•).fm ⊃ (ctx.fillLhs ∅).fm`; `modus
+   ponens` with step 1 gives `⊢ (ctx.fillLhs ∅).fm`.
+3. `cs5DerivFillEmptyImpFillLhsEmpty ctx.Λ` lifted contravariantly through `box`
+   (`cs5DerivImpCongrLeft` + `cs5DerivBoxMono`) and then through `ctx.Γ'`
+   (`OutputCtx.fillRhs_fm_mono`) bridges `⊢ (ctx.fillLhs ∅).fm ⊃ ctx.fillEmpty.fm`; `modus ponens`
+   with step 2's result gives the goal `⊢ ctx.fillEmpty.fm`. -/
+theorem nested_sound_cut (ctx : InputCtx Atom) (A : Proposition Atom)
+    (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm)
+    (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom A)).fm) :
+    Derivable (@CS5ModalAxiom Atom) ctx.fillEmpty.fm := by
+  -- (1) `nested_sound_impL` with `B := A`.
+  have h1 : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.imp A))).fm :=
+    nested_sound_impL ctx A A hA hB
+  -- (2) `A ⊃ A` always provable; contravariant `fillLhs` bridge to `(ctx.fillLhs ∅).fm`.
+  have hself : Derivable (@CS5ModalAxiom Atom)
+      (NestedLhs.empty.fm.imp (NestedLhs.atom (A.imp A)).fm) :=
+    cs5DerivImpOfDerivable Proposition.top (cs5DerivImpSelf A)
+  have h2 : Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillLhs (NestedLhs.atom (A.imp A))).fm.imp (ctx.fillLhs NestedLhs.empty).fm) :=
+    InputCtx.fillLhs_fm_antitone ctx hself
+  have h3 : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs NestedLhs.empty).fm := by
+    obtain ⟨d1⟩ := h1
+    obtain ⟨d2⟩ := h2
+    exact ⟨.modus_ponens [] _ _ d2 d1⟩
+  -- (3) bridge `(ctx.fillLhs ∅).fm ⊃ ctx.fillEmpty.fm` via the reverse companion above.
+  have hΛrev : Derivable (@CS5ModalAxiom Atom)
+      (ctx.Λ.fillEmpty.fm.imp (ctx.Λ.fillLhs NestedLhs.empty).fm) :=
+    cs5DerivFillEmptyImpFillLhsEmpty ctx.Λ
+  have hboxed : Derivable (@CS5ModalAxiom Atom)
+      ((NestedRhs.box (ctx.Λ.fillLhs NestedLhs.empty) ctx.π).fm.imp
+        (NestedRhs.box ctx.Λ.fillEmpty ctx.π).fm) :=
+    cs5DerivBoxMono (cs5DerivImpCongrLeft hΛrev)
+  have hbridge : Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillLhs NestedLhs.empty).fm.imp ctx.fillEmpty.fm) :=
+    OutputCtx.fillRhs_fm_mono hboxed ctx.Γ'
+  obtain ⟨d3⟩ := h3
+  obtain ⟨d4⟩ := hbridge
+  exact ⟨.modus_ponens [] _ _ d4 d3⟩
+
 /-! ## Theorem 4.1, Assembled: `nested_sound`
 
 The top-level soundness theorem, structurally recursive on the `NestedProof` term itself
 (mirroring `NestedProof.height`'s own recursion shape), dispatching to each constructor's case
-lemma above and threading the recursive soundness facts of its premises through. `impL` is now
-fully discharged via `nested_sound_impL` above (no `sorry`); the `.cut` constructor still has no
-arm here (`NestedProof.cut` is landed in `Rules.lean` but `nested_sound` has not yet been
-extended to match it) -- a follow-up phase lands `nested_sound_cut` and its arm. -/
+lemma above and threading the recursive soundness facts of its premises through. Every constructor,
+including `impL` (`nested_sound_impL`) and `cut` (`nested_sound_cut`), is now fully discharged
+(no `sorry`). -/
 
 /-- **Theorem 4.1** (page 9): every `NestedProof` derivation is sound with respect to `CS5`'s
 Hilbert system -- `NestedProof Γ → Derivable (@CS5ModalAxiom Atom) (fm Γ)`. -/
@@ -1552,6 +1649,7 @@ theorem nested_sound :
   | _, .fourR ctx A Δ p => nested_sound_fourR ctx A Δ (nested_sound p)
   | _, .fourL ctx A Δ p => nested_sound_fourL ctx A Δ (nested_sound p)
   | _, .bStruct ctx σ Δ p => nested_sound_bStruct ctx σ Δ (nested_sound p)
+  | _, .cut ctx A p q => nested_sound_cut ctx A (nested_sound p) (nested_sound q)
 
 /-- **Corollary to Theorem 4.1**: a cut-free `NestedProof` of `(∅, A°)` -- the source's own
 convention for "a proof of the formula `A`" (see `Rules.lean`'s `NestedProof` docstring) -- gives

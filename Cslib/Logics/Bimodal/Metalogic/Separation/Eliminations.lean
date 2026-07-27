@@ -22,24 +22,19 @@ formula where U(A,B) appears only at top level (not under S).
 - GHR94, Lemma 10.2.3, pp. 572-580
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSimpArgs false
-set_option linter.style.openClassical false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
 
 open Cslib.Logic.Bimodal
+set_option linter.style.openClassical false
 open Classical
 
 variable {Atom : Type*}
 
 /-! ## Helper Lemmas -/
 
+set_option linter.flexible false in
 theorem u_free_s_free_imp_separated (φ : Formula Atom)
     (hu : isUFree φ = true) (hs : isSFree φ = true) :
     isSyntacticallySeparated φ = true := by
@@ -66,7 +61,7 @@ theorem neg_separated {φ : Formula Atom} (h : isSyntacticallySeparated φ = tru
 theorem and_separated {φ ψ : Formula Atom}
     (h1 : isSyntacticallySeparated φ = true) (h2 : isSyntacticallySeparated ψ = true) :
     isSyntacticallySeparated (Formula.and φ ψ) = true := by
-  simp [Formula.and, Formula.neg, isSyntacticallySeparated, h1, h2]
+  simp [isSyntacticallySeparated, h1, h2]
 
 /-! ## Case 1 -/
 
@@ -78,6 +73,7 @@ def case1Psi (a q A B : Formula Atom) : Formula Atom :=
     (Formula.and (Formula.and A (.snce B a)) (.snce q a)))
     (.snce q (Formula.and (Formula.and (Formula.and A q) (.snce B a)) (.snce q a)))
 
+set_option linter.flexible false in
 theorem elim_case_1 (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -156,7 +152,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
           · exact hq₂ r (lt_trans hle hrs) hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-  · simp [case1Psi, Formula.and, Formula.or, Formula.neg,
+  · simp [case1Psi, Formula.and, Formula.or,
           isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB']
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
@@ -174,6 +170,7 @@ theorem elim_case_1 (a q A B : Formula Atom)
     terms where `u_free_s_free_imp_separated` is applied)
 -/
 
+set_option linter.flexible false in
 theorem elim_case_1_gen (a q A B : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
     (hA : isUFree A = true) (hB : isUFree B = true)
@@ -251,11 +248,12 @@ theorem elim_case_1_gen (a q A B : Formula Atom)
           · exact hq₂ r (lt_trans hle hrs) hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-  · simp [case1Psi, Formula.and, Formula.or, Formula.neg,
+  · simp [case1Psi, Formula.and, Formula.or,
           isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB']
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
 
+set_option linter.flexible false in
 /-- case1Psi is intEquiv to S(a∧U, q) and syntactically separated.
     This is the non-existential form of elim_case_1_gen for direct formula access. -/
 theorem case1_psi_properties (a q A B : Formula Atom)
@@ -334,7 +332,7 @@ theorem case1_psi_properties (a q A B : Formula Atom)
           · exact hq₂ r (lt_trans hle hrs) hrw
           · exact hrw ▸ hqw
           · exact hq_rest r hrw hrt
-  · simp [case1Psi, Formula.and, Formula.or, Formula.neg,
+  · simp [case1Psi, Formula.and, Formula.or,
           isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB']
     exact ⟨u_free_s_free_imp_separated B hB hB',
            u_free_s_free_imp_separated A hA hA'⟩
@@ -398,7 +396,8 @@ theorem case2_psi_properties (a q A B : Formula Atom)
         have hGA_unf := (int_truth_allFuture M s (Formula.neg A)).mp hGA
         have hA_t : ¬ intTruth M t A := (int_truth_neg M t A).mp (hGA_unf t hst)
         have hnotU_t : ¬ intTruth M t (.untl B A) := by
-          intro ⟨u, htu, hAu, _⟩; exact ((int_truth_neg M u A).mp (hGA_unf u (lt_trans hst htu))) hAu
+          intro ⟨u, htu, hAu, _⟩
+          exact ((int_truth_neg M u A).mp (hGA_unf u (lt_trans hst htu))) hAu
         have hS_qnA : intTruth M t (.snce (Formula.and q (Formula.neg A)) a) :=
           ⟨s, hst, ha_s, fun r hr1 hr2 =>
             (int_truth_and M r q (Formula.neg A)).mpr ⟨hqg r hr1 hr2, hGA_unf r hr1⟩⟩
@@ -425,7 +424,8 @@ theorem case2_psi_properties (a q A B : Formula Atom)
             ⟨s, hst, ha_s, fun r hr1 hr2 =>
               (int_truth_and M r _ _).mpr ⟨hnA_guard r hr1 (hut ▸ hr2), hqg r hr1 hr2⟩⟩
           apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; right
-          exact (int_truth_and M t _ _).mpr ⟨(int_truth_and M t _ _).mpr ⟨hut ▸ hnotA_u, hut ▸ hnotB_u⟩, hS_nAq⟩
+          exact (int_truth_and M t _ _).mpr
+            ⟨(int_truth_and M t _ _).mpr ⟨hut ▸ hnotA_u, hut ▸ hnotB_u⟩, hS_nAq⟩
         · -- u > t: d1 — ¬U(A,B) at t follows from ¬A on (s,u) and ¬A∧¬B at u
           have hnotA_t : ¬ intTruth M t A := (int_truth_neg M t A).mp (hnA_guard t hst hut)
           have hnotU_t : ¬ intTruth M t (.untl B A) := by
@@ -449,7 +449,8 @@ theorem case2_psi_properties (a q A B : Formula Atom)
           have hnotU_s : ¬ intTruth M s (.untl B A) := by
             intro ⟨u, hsu, hAu, hBguard⟩
             have hnA_on : ∀ r, s < r → r < t → ¬ intTruth M r A :=
-              fun r hr1 hr2 => (int_truth_neg M r A).mp ((int_truth_and M r q (Formula.neg A)).mp (hguard r hr1 hr2)).2
+              fun r hr1 hr2 => (int_truth_neg M r A).mp
+                ((int_truth_and M r q (Formula.neg A)).mp (hguard r hr1 hr2)).2
             rcases lt_trichotomy u t with hut | hut | hut
             · exact hnA_on u hsu hut hAu
             · exact hA_t (hut ▸ hAu)
@@ -462,7 +463,8 @@ theorem case2_psi_properties (a q A B : Formula Atom)
           have hnotU_s : ¬ intTruth M s (.untl B A) := by
             intro ⟨u, hsu, hAu, hBguard⟩
             have hnA_on : ∀ r, s < r → r < t → ¬ intTruth M r A :=
-              fun r hr1 hr2 => (int_truth_neg M r A).mp ((int_truth_and M r _ _).mp (hguard r hr1 hr2)).1
+              fun r hr1 hr2 => (int_truth_neg M r A).mp
+                ((int_truth_and M r _ _).mp (hguard r hr1 hr2)).1
             rcases lt_trichotomy u t with hut | hut | hut
             · exact hnA_on u hsu hut hAu
             · exact ((int_truth_neg M t A).mp hnotA_t) (hut ▸ hAu)
@@ -476,7 +478,8 @@ theorem case2_psi_properties (a q A B : Formula Atom)
         have hnotU_s : ¬ intTruth M s (.untl B A) := by
           intro ⟨u, hsu, hAu, hBguard⟩
           have hnA_on : ∀ r, s < r → r < w → ¬ intTruth M r A :=
-            fun r hr1 hr2 => (int_truth_neg M r A).mp ((int_truth_and M r _ _).mp (hguard_inner r hr1 hr2)).1
+            fun r hr1 hr2 => (int_truth_neg M r A).mp
+              ((int_truth_and M r _ _).mp (hguard_inner r hr1 hr2)).1
           rcases lt_trichotomy u w with huw | huw | huw
           · exact hnA_on u hsu huw hAu
           · exact ((int_truth_neg M w A).mp hnotA_w) (huw ▸ hAu)
@@ -490,9 +493,9 @@ theorem case2_psi_properties (a q A B : Formula Atom)
   · -- Separation check
     have hsep_A : isSyntacticallySeparated A = true := u_free_s_free_imp_separated A hA hA'
     have hsep_B : isSyntacticallySeparated B = true := u_free_s_free_imp_separated B hB hB'
-    simp only [d1, d2, d3, Formula.or, Formula.and, Formula.neg, PropositionalConnectives.neg,
-      isSyntacticallySeparated, isUFree, isSFree, ha, hq, hA, hB, hA', hB',
-      Bool.true_and, Bool.and_true, hsep_A, hsep_B]
+    simp only [Formula.neg, PropositionalConnectives.neg,
+      isSyntacticallySeparated, isUFree, ha, hq, hA, hB, hA', hB',
+      Bool.and_true, hsep_A, hsep_B]
 
 /-- Case 2 generalized: S(a ∧ ¬U(A,B), q) → separated equivalent.
     Delegates to `case2_psi_properties` (non-existential form). -/
@@ -529,16 +532,19 @@ theorem elim_case_3 (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (.untl B A)) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
   have haq_Sf : isSFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isSFree, ha', hq']
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
-  have ha_neg_Sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
+    simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha', hq']
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+  have ha_neg_Sf : isSFree (Formula.neg a) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
   obtain ⟨psi2, hequiv2, hsep2⟩ := elim_case_2
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB haq_Sf ha_neg_Sf hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg,
+      isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi2), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -560,10 +566,12 @@ theorem elim_case_3 (a q A B : Formula Atom)
       have ⟨hnotH, hnotPsi2⟩ := (int_truth_and M t _ _).mp hand
       have hnotH' := (int_truth_neg M t _).mp hnotH
       have hnotPsi2' := (int_truth_neg M t _).mp hnotPsi2
-      have hnotS2 : ¬ intTruth M t (.snce (Formula.neg a) (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg (.untl B A)))) :=
+      have hnotS2 : ¬ intTruth M t (.snce (Formula.neg a)
+          (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg (.untl B A)))) :=
         fun hS2 => hnotPsi2' ((hequiv2 M t).mp hS2)
       by_contra hnotS
-      rcases (int_truth_or M t _ _).mp ((neg_since_equiv a (Formula.or q (.untl B A)) M t).mp hnotS) with hH | hS_neg
+      rcases (int_truth_or M t _ _).mp
+        ((neg_since_equiv a (Formula.or q (.untl B A)) M t).mp hnotS) with hH | hS_neg
       · exact hnotH' hH
       · obtain ⟨s, hst, hevent, hguard⟩ := hS_neg
         have ⟨hna_s, hnotQU_s⟩ := (int_truth_and M s _ _).mp hevent
@@ -586,16 +594,19 @@ theorem elim_case_4 (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (Formula.neg (.untl B A))) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
   have haq_Sf : isSFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isSFree, ha', hq']
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
-  have ha_neg_Sf : isSFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
+    simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha', hq']
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+  have ha_neg_Sf : isSFree (Formula.neg a) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isSFree, ha']
   obtain ⟨psi1, hequiv1, hsep1⟩ := elim_case_1
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB haq_Sf ha_neg_Sf hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg,
+      isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi1), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -617,10 +628,12 @@ theorem elim_case_4 (a q A B : Formula Atom)
       have ⟨hnotH, hnotPsi1⟩ := (int_truth_and M t _ _).mp hand
       have hnotH' := (int_truth_neg M t _).mp hnotH
       have hnotPsi1' := (int_truth_neg M t _).mp hnotPsi1
-      have hnotS1 : ¬ intTruth M t (.snce (Formula.neg a) (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (.untl B A))) :=
+      have hnotS1 : ¬ intTruth M t (.snce (Formula.neg a)
+          (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (.untl B A))) :=
         fun hS1 => hnotPsi1' ((hequiv1 M t).mp hS1)
       by_contra hnotS
-      rcases (int_truth_or M t _ _).mp ((neg_since_equiv a (Formula.or q (Formula.neg (.untl B A))) M t).mp hnotS) with hH | hS_neg
+      rcases (int_truth_or M t _ _).mp
+        ((neg_since_equiv a (Formula.or q (Formula.neg (.untl B A))) M t).mp hnotS) with hH | hS_neg
       · exact hnotH' hH
       · obtain ⟨s, hst, hevent, hguard⟩ := hS_neg
         have ⟨hna_s, hnotG⟩ := (int_truth_and M s _ _).mp hevent
@@ -644,13 +657,15 @@ theorem elim_case_3_gen (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (.untl B A)) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
   obtain ⟨psi2, hequiv2, hsep2⟩ := elim_case_2_gen
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg,
+      isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi2), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -672,10 +687,12 @@ theorem elim_case_3_gen (a q A B : Formula Atom)
       have ⟨hnotH, hnotPsi2⟩ := (int_truth_and M t _ _).mp hand
       have hnotH' := (int_truth_neg M t _).mp hnotH
       have hnotPsi2' := (int_truth_neg M t _).mp hnotPsi2
-      have hnotS2 : ¬ intTruth M t (.snce (Formula.neg a) (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg (.untl B A)))) :=
+      have hnotS2 : ¬ intTruth M t (.snce (Formula.neg a)
+          (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg (.untl B A)))) :=
         fun hS2 => hnotPsi2' ((hequiv2 M t).mp hS2)
       by_contra hnotS
-      rcases (int_truth_or M t _ _).mp ((neg_since_equiv a (Formula.or q (.untl B A)) M t).mp hnotS) with hH | hS_neg
+      rcases (int_truth_or M t _ _).mp
+        ((neg_since_equiv a (Formula.or q (.untl B A)) M t).mp hnotS) with hH | hS_neg
       · exact hnotH' hH
       · obtain ⟨s, hst, hevent, hguard⟩ := hS_neg
         have ⟨hna_s, hnotQU_s⟩ := (int_truth_and M s _ _).mp hevent
@@ -697,13 +714,15 @@ theorem elim_case_4_gen (a q A B : Formula Atom)
       intEquiv (.snce (Formula.or q (Formula.neg (.untl B A))) a) psi ∧
       isSyntacticallySeparated psi = true := by
   have haq_Uf : isUFree (Formula.and (Formula.neg a) (Formula.neg q)) = true := by
-    simp [Formula.and, Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
-  have ha_neg_Uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha, hq]
+  have ha_neg_Uf : isUFree (Formula.neg a) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
   obtain ⟨psi1, hequiv1, hsep1⟩ := elim_case_1_gen
     (Formula.and (Formula.neg a) (Formula.neg q)) (Formula.neg a) A B
     haq_Uf ha_neg_Uf hA hB hA' hB'
   have hsep_H : isSyntacticallySeparated (.allPast (Formula.neg a)) = true := by
-    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg, isUFree, ha, Bool.and_true]
+    simp only [is_syntactically_separated_allPast, Formula.neg, PropositionalConnectives.neg,
+      isUFree, ha, Bool.and_true]
   refine ⟨Formula.and (Formula.neg (.allPast (Formula.neg a))) (Formula.neg psi1), ?_, ?_⟩
   · intro M t; constructor
     · intro hS
@@ -725,10 +744,12 @@ theorem elim_case_4_gen (a q A B : Formula Atom)
       have ⟨hnotH, hnotPsi1⟩ := (int_truth_and M t _ _).mp hand
       have hnotH' := (int_truth_neg M t _).mp hnotH
       have hnotPsi1' := (int_truth_neg M t _).mp hnotPsi1
-      have hnotS1 : ¬ intTruth M t (.snce (Formula.neg a) (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (.untl B A))) :=
+      have hnotS1 : ¬ intTruth M t (.snce (Formula.neg a)
+          (Formula.and (Formula.and (Formula.neg a) (Formula.neg q)) (.untl B A))) :=
         fun hS1 => hnotPsi1' ((hequiv1 M t).mp hS1)
       by_contra hnotS
-      rcases (int_truth_or M t _ _).mp ((neg_since_equiv a (Formula.or q (Formula.neg (.untl B A))) M t).mp hnotS) with hH | hS_neg
+      rcases (int_truth_or M t _ _).mp
+        ((neg_since_equiv a (Formula.or q (Formula.neg (.untl B A))) M t).mp hnotS) with hH | hS_neg
       · exact hnotH' hH
       · obtain ⟨s, hst, hevent, hguard⟩ := hS_neg
         have ⟨hna_s, hnotG⟩ := (int_truth_and M s _ _).mp hevent
@@ -757,7 +778,8 @@ theorem elim_case_4_gen (a q A B : Formula Atom)
   every formula is separable via junction-depth induction (oracle-free).
 -/
 
--- Note: Cases 5-8 are now proved in NormalForm.lean using `all_formulas_separable` from Hierarchy.lean.
+-- Note: Cases 5-8 are now proved in NormalForm.lean using `all_formulas_separable`
+-- from Hierarchy.lean.
 
 /-! ## Separability Helpers -/
 

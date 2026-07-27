@@ -78,7 +78,7 @@
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Distributivity.lean
 3 Cslib/Logics/Bimodal/Metalogic/Separation/DualEliminations.lean
 3 Cslib/Logics/Bimodal/Metalogic/Separation/Duality.lean
-6 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean
+1 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/FormulaOps.lean
 4 Cslib/Logics/Bimodal/Metalogic/Separation/Hierarchy/HierarchyDefs.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/IntHelpers.lean

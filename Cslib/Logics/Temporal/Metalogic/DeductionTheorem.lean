@@ -45,7 +45,6 @@ without changing the public signature.
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean
 -/
 
-set_option linter.style.setOption false
 
 @[expose] public section
 

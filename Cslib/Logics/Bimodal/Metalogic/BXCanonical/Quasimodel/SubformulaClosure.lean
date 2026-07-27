@@ -20,7 +20,6 @@ Defines the finite subformula closure for the Hintikka-set quasimodel constructi
 -/
 
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 
 @[expose] public section
 

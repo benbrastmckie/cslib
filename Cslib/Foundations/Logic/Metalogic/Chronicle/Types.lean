@@ -30,7 +30,6 @@ re-export its declarations under their existing names.
 -/
 
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 set_option linter.dupNamespace false
 
 @[expose] public section

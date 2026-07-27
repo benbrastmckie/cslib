@@ -51,7 +51,6 @@ Proof extraction functions (`tryAxiomProof`, `buildCompositionalProof`,
 `extractProof`, `ProofExtractionResult`) are imported from ProofExtraction.lean.
 -/
 
-set_option linter.style.longLine false
 
 @[expose] public section
 

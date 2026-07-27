@@ -15,7 +15,6 @@ Soundness theorems for the TM proof system using typeclass constraints.
 -/
 
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 
 @[expose] public section
 

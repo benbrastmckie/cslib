@@ -43,7 +43,6 @@ the modal T-axiom `□φ → φ` is still valid (modal accessibility is reflexiv
 
 set_option linter.style.show false
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 
 @[expose] public section
 

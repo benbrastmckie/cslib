@@ -53,7 +53,6 @@ adaptations for universe-polymorphic `Formula Atom`.
 -/
 
 set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
 
 @[expose] public section
 

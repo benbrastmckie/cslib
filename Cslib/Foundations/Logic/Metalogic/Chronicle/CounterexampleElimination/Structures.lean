@@ -52,7 +52,6 @@ trees (it is `private` in both, so no cross-tree naming-conflict risk either way
 set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 
 @[expose] public section
 

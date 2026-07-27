@@ -48,7 +48,6 @@ Ported from BimodalLogic/Metalogic/Decidability/Correctness.lean with
 adaptations for universe-polymorphic `Formula Atom`.
 -/
 
-set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.unusedDecidableInType false
 

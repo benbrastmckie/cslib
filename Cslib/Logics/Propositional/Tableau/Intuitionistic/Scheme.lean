@@ -802,7 +802,7 @@ private lemma sfSatisfied_mono {b b' : IBranch Atom} {sf : ISF Atom}
     (hmono : ∀ x ∈ b, x ∈ b') (h : sfSatisfied b sf) : sfSatisfied b' sf := by
   simp only [sfSatisfied] at *
   rcases sf with ⟨s, f, l⟩
-  cases s <;> cases f <;> simp only [sfSatisfied] at * <;>
+  cases s <;> cases f <;> simp only [] at * <;>
     first
     | exact h
     | exact ⟨any_mono_sub hmono h.1, any_mono_sub hmono h.2⟩
@@ -854,11 +854,11 @@ omit [Hashable Atom] in
 private lemma sfAccessSat_mono {edges : IEdges} {b b' : IBranch Atom} {sf : ISF Atom}
     (hmono : ∀ x ∈ b, x ∈ b') (h : sfAccessSat edges b sf) : sfAccessSat edges b' sf := by
   rcases sf with ⟨s, f, l⟩
-  cases s <;> cases f <;> simp only [sfAccessSat] at * <;>
-    first
-    | exact h
-    | (obtain ⟨w', hacc, h1, h2⟩ := h
-       exact ⟨w', hacc, any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
+  cases s <;> cases f <;> simp only [sfAccessSat] at *
+  first
+  | exact h
+  | (obtain ⟨w', hacc, h1, h2⟩ := h
+     exact ⟨w', hacc, any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
 
 omit [Hashable Atom] in
 /-- `sfAccessSat` is monotone under appending a new edge to `edges` (the accessibility
@@ -866,11 +866,11 @@ witness survives, per `isAccessible_append_mono`). -/
 private lemma sfAccessSat_edges_mono {edges : IEdges} (newEdge : Nat × Nat) {b : IBranch Atom}
     {sf : ISF Atom} (h : sfAccessSat edges b sf) : sfAccessSat (edges ++ [newEdge]) b sf := by
   rcases sf with ⟨s, f, l⟩
-  cases s <;> cases f <;> simp only [sfAccessSat] at * <;>
-    first
-    | exact h
-    | (obtain ⟨w', hacc, h1, h2⟩ := h
-       exact ⟨w', isAccessible_append_mono newEdge hacc, h1, h2⟩)
+  cases s <;> cases f <;> simp only [sfAccessSat] at *
+  first
+  | exact h
+  | (obtain ⟨w', hacc, h1, h2⟩ := h
+     exact ⟨w', isAccessible_append_mono newEdge hacc, h1, h2⟩)
 
 omit [Hashable Atom] in
 /-- `IExpandedAccessConsistent` is monotone under branch inclusion. -/
@@ -903,7 +903,7 @@ private lemma intStepBranch_none_compound_mem
     obtain ⟨x, hxe, rfl⟩ := hany
     exact hxe
   · rw [Bool.not_eq_true] at hany
-    simp only [hany, ite_false] at hbody
+    simp only [hany] at hbody
     cases hca : intApplyRuleFull sf nw b with
     | linearResult fs nw' edge => simp only [hca] at hbody; exact absurd hbody (by simp)
     | branchingResult brs nw' => simp only [hca] at hbody; exact absurd hbody (by simp)
@@ -1096,7 +1096,7 @@ private lemma intStepBranch_linear_preserves
         rw [List.mem_append, List.mem_singleton] at hsf'
         rcases hsf' with hsf' | rfl
         · exact sfAccessSat_mono hmemOld (hACC sf' hsf')
-        · show sfAccessSat edges (Branch.extendMany b newForms) ⟨.pos, .and φ ψ, l⟩
+        · change sfAccessSat edges (Branch.extendMany b newForms) ⟨.pos, .and φ ψ, l⟩
           simp [sfAccessSat]
   | neg =>
     cases ff with
@@ -1125,7 +1125,7 @@ private lemma intStepBranch_linear_preserves
         rw [List.mem_append, List.mem_singleton] at hsf'
         rcases hsf' with hsf' | rfl
         · exact sfAccessSat_mono hmemOld (hACC sf' hsf')
-        · show sfAccessSat edges (Branch.extendMany b newForms) ⟨.neg, .or φ ψ, l⟩
+        · change sfAccessSat edges (Branch.extendMany b newForms) ⟨.neg, .or φ ψ, l⟩
           simp [sfAccessSat]
     | imp φ ψ =>
       simp only [intApplyRuleFull, intFImpRule, IntRuleResult.linearResult.injEq] at hint
@@ -1153,9 +1153,9 @@ private lemma intStepBranch_linear_preserves
       · intro sf' hsf'
         rw [List.mem_append, List.mem_singleton] at hsf'
         rcases hsf' with hsf' | rfl
-        · show sfAccessSat (edges ++ [(nw, l)]) (Branch.extendMany b newForms) sf'
+        · change sfAccessSat (edges ++ [(nw, l)]) (Branch.extendMany b newForms) sf'
           exact sfAccessSat_edges_mono (nw, l) (sfAccessSat_mono hmemOld (hACC sf' hsf'))
-        · show sfAccessSat (edges ++ [(nw, l)]) (Branch.extendMany b newForms) ⟨.neg, .imp φ ψ, l⟩
+        · change sfAccessSat (edges ++ [(nw, l)]) (Branch.extendMany b newForms) ⟨.neg, .imp φ ψ, l⟩
           simp only [sfAccessSat]
           refine ⟨nw, isAccessible_one_step (by simp),
                   List.any_eq_true.mpr ⟨⟨.pos, φ, nw⟩, hmemNew _ ?_, by simp⟩,

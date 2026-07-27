@@ -40,10 +40,6 @@ Diamond-box duality:
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Completeness.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic

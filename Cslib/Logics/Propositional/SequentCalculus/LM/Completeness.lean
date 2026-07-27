@@ -320,8 +320,7 @@ theorem lm_iff_mvalid {φ : Proposition Atom} :
     rw [← hilbert_iff_lm]
     simp only [Finset.toList_empty]
     exact ⟨dtree⟩
-  · intro ⟨d⟩
-    intro World _ val bot_forces v_uc bf_uc w
+  · intro ⟨d⟩ World _ val bot_forces v_uc bf_uc w
     exact d.sound val bot_forces v_uc bf_uc w (fun _ h => by simp at h)
 
 end Cslib.Logic.PL

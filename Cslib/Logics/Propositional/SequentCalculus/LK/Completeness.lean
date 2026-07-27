@@ -379,8 +379,7 @@ theorem lk_iff_tautology {φ : Proposition Atom} :
     Tautology φ ↔ Nonempty (LKProof (∅ ⊢ₛ ({φ} : Finset _))) := by
   constructor
   · exact lk_completeness
-  · intro ⟨d⟩
-    intro v
+  · intro ⟨d⟩ v
     have h_valid := d.sound
     obtain ⟨C, hC, hCval⟩ := h_valid v (fun _ h => by simp at h)
     simp only [Finset.mem_singleton] at hC

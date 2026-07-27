@@ -305,8 +305,7 @@ theorem lj_iff_ivalid {φ : Proposition Atom} :
     rw [← hilbert_iff_lj]
     simp only [Finset.toList_empty]
     exact ⟨dtree⟩
-  · intro ⟨d⟩
-    intro World _ val v_uc w
+  · intro ⟨d⟩ World _ val v_uc w
     exact d.sound val v_uc w (fun _ h => by simp at h)
 
 end Cslib.Logic.PL

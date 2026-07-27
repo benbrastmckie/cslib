@@ -98,7 +98,7 @@ lemma geomCap_le_pow {Sf k : Nat} (hSf : 1 ≤ Sf) (hdeg : Sf = 1 → k = 0) :
     subst hSf1
     have hk0 : k = 0 := hdeg rfl
     subst hk0
-    simpa using geomCap_zero_le_pow (Sf := 1) (le_refl 1)
+    exact geomCap_zero_le_pow (Sf := 1) (le_refl 1)
   · have := geomCap_add_one_le_pow hge k
     omega
 

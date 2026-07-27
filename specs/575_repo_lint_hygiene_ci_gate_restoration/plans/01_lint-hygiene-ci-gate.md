@@ -20,8 +20,8 @@
 
 ## RESUME HERE
 
-Fifth resume (cycle 5 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
-COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 30 of ~570.** To pick this up
+Eighth resume (cycle 8 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+COMPLETED. Only Phase 5 (suppression audit) remains, PARTIAL at 123 of ~570.** To pick this up
 cold:
 
 1. Confirm the baseline still holds (2 commands, ~5 min):
@@ -30,27 +30,29 @@ cold:
    lake test                     # expect exit 0, 0 errors
    ```
    If either differs, something landed from another session — reconcile before proceeding.
-2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them. In
-   particular, Phase 3's two previously-live task subtrees (317, 425) and the previously
-   unidentified `Constructive/Nested` development are all resolved — see Phase 3's closure notes
-   for the full per-file breakdown and the 59 sites excluded by finding (all documented,
-   individually verified, not merely assumed from task liveness).
-3. **Only Phase 5 remains.** `Separation/DedekindZ/Cases.lean` (the #1 worst offender) is now
-   fully processed — do not revisit it. Continue with `CounterexampleElimination/Elimination.lean`
-   (8 suppressions pre-cycle-5) and the next few files at 6-7, using the method Phase 5's section
-   documents: remove all of a file's suppressions, rebuild, categorize what surfaces, fix the
-   mechanical categories, narrow the rest to declaration/usage-site scope. **Read the
-   `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using `omit [...] in`
-   anywhere** — it changes elaboration (removes an instance from scope) and can silently break
-   compilation for declarations whose *proof body* (not just stated type) needs the instance;
-   `set_option linter.X false in` is always safe since it only suppresses the warning.
+2. **Phases 1-4 and 6-8 are all CLOSED.** No further action needed on any of them.
+3. **Only Phase 5 remains.** 15 files are fully processed cumulative (see Phase 5's cycle 1/5/6/
+   7/8 sub-entries for the complete per-file list) — do not revisit any of them. Continue with
+   the live worst-offender list at the end of Phase 5's cycle-8 entry, prioritizing the smaller
+   count-5 files it lists (several under 300 lines) ahead of the larger count-6 files, using the
+   method Phase 5's section documents: remove all of a file's suppressions, rebuild, categorize
+   what surfaces, fix the mechanical categories, narrow the rest to declaration/usage-site scope.
+   **Read the `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using
+   `omit [...] in` anywhere** — it changes elaboration (removes an instance from scope) and can
+   silently break compilation for declarations whose *proof body* (not just stated type) needs
+   the instance; `set_option linter.X false in` is always safe since it only suppresses the
+   warning. **Also read the cycle-8 finding**: a small file's line count is not a reliable
+   effort proxy on its own — after the initial suppression removal, further declaration-scoped
+   fixes can surface additional previously-hidden warnings on other declarations; rebuild after
+   each round, not just once.
 4. No items require a user decision to make further Phase 5 progress. The three items formerly
    listed as blocking (see "Open decisions" below) are all genuinely out of scope for 575, not
    blockers to continuing Phase 5.
 
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
 (also implemented in `scripts/pre-pr-check.sh`). True census: 28 (excl. `warn.sorry`-suppressed
-lines, comments stripped), reconfirmed this cycle.
+lines, comments stripped); the `--wfail --iofail` build reconfirmed exactly 5 baseline sorry
+warnings at cycle 8's end.
 **Phase 3 is closed** — its task/phase/report-string census is no longer a live worklist; see its
 section for the final fixed/excluded/false-positive breakdown instead of re-deriving one.
 
@@ -471,7 +473,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 90 of ~570 done]
+### Phase 5: Suppression audit [PARTIAL — 123 of ~570 done]
 
 **Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
 line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
@@ -633,6 +635,78 @@ declaration's doc comment (and before any preceding `open X in` modifier, if pre
 between the doc comment and the declaration** (see cycle 6 parse-hazard finding above) — **and
 never retype existing proof-body lines inside an Edit's new_string; edit only boundary lines
 and re-read the region before building** (see cycle 7 finding above).
+
+**Done (cycle 8)**: processed 6 more files, all committed individually after a clean scoped
+rebuild — `Bimodal/Metalogic/BXCanonical/Quasimodel/HintikkaPoint.lean` (6→15
+declaration-scoped, only 126 lines — much smaller than the worst-offender list's line-count
+estimates suggested, since a file-scoped blanket suppression can hide warnings on declarations
+beyond the originally-suppressed categories; removal surfaced warnings on 3 additional
+declarations — `HintikkaPoint.ext`, `HintikkaPoint.mem_sigma`,
+`HintikkaPoint.not_mem_of_neg_mem` — that the blanket had also been silently covering),
+`Bimodal/Metalogic/ConservativeExtension/Lifting.lean` (6→15 declaration-scoped, 708 lines,
+zero downstream importers — a leaf module), `Bimodal/Metalogic/BXCanonical/CanonicalModel.lean`
+(6→9 declaration-scoped, 787 lines, ~50 `style.longLine` sites — the heaviest single-file
+rewrap-count this cycle, two `show`→`change` rewrites per the cycle-5-established
+semantically-identical fix), `Bimodal/Theorems/GeneralizedNecessitation.lean` (5→1
+declaration-scoped, 140 lines), `Bimodal/Syntax/SubformulaClosure/NestingDepth.lean` (5→34
+declaration-scoped, 147 lines — 17 of 19 theorems needed both `unusedSectionVars` and
+`unusedDecidableInType`, narrowed individually per the "never leave blanket" mandate even at
+near-100% density), `Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean` (5→10
+declaration-scoped, 346 lines). Suppression-audit progress: 90 → 123 of ~570 total sites now
+individually audited (15 files fully processed cumulative). Full CSLib CI pipeline run once at
+cycle end: `lake build --wfail --iofail` (exactly 5 baseline sorry warnings, zero new), `lake
+exe checkInitImports` (clean), `lake lint` (0 warnings library-wide), `lake exe lint-style`
+(clean), `lake shake --add-public --keep-implied --keep-prefix` (clean), `lake exe mk_all
+--module` ("No update necessary"), `lake test` (exit 0). Naive repo-wide sorry grep at 168
+(documented as an unreliable measure — see "Measurement notes" above; the authoritative
+`--wfail --iofail` build count is what was checked); vacuous-def grep still flags the same
+single pre-existing false positive (`Computability/URM/Basic.lean:92`, unrelated to this task);
+axiom count unchanged at 26.
+
+**New finding (cycle 8)**: line-count is not a reliable proxy for effort on its own — a small
+file (like 126-line HintikkaPoint.lean) can still require several additional per-declaration
+suppressions beyond the file's original suppression-category count, because a blanket
+file-scoped suppression silently covers *every* declaration in the file, not just the ones an
+earlier pass explicitly reasoned about. Always re-run the build after the initial suppression
+removal AND after each round of declaration-scoped fixes, since new warnings on
+previously-unlisted declarations can surface only once the closest-covering suppression is gone.
+
+**Resume point**: the 6 files above (cycle 8) plus all files from cycles 1, 5, 6, 7 are done —
+do not revisit. Live worst-offender list after cycle 8 (re-verify with the file-scoped-
+suppression-count one-liner below before starting, since file resolutions can shift what's
+"worst" only by removing entries, never by changing another file's count):
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 8's end, the count-6 tier is: `Temporal/Metalogic/Chronicle/
+CounterexampleElimination/{RecursiveWalks (1125 lines), MainElimination (1685 lines)}.lean`,
+`Bimodal/Metalogic/Soundness/FrameClassVariants.lean` (931 lines), `Bimodal/Metalogic/
+Separation/Eliminations.lean` (849 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+CounterexampleElimination/Interface.lean` (3048 lines — do not pick this one first),
+`Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean` (1208 lines). The
+count-5 tier has several much smaller files worth prioritizing ahead of the count-6 tier, per
+the cycle-7/8 finding that per-declaration narrowing effort scales with file size more than
+suppression count: `Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean` (105 lines),
+`Bimodal/Metalogic/BXCanonical/Completeness/Dense.lean` (141 lines), `Temporal/Metalogic/
+Chronicle/Frame.lean` (254 lines), `Temporal/Metalogic/WitnessSeed.lean` (259 lines),
+`Temporal/Metalogic/Chronicle/RRelation.lean` (303 lines) — check line counts with `wc -l`
+before picking, and re-verify the suppression count is still accurate (the grep one-liner
+above), since counts only ever go down as files get processed. Apply the same method: remove
+all of a file's suppressions, rebuild, categorize what surfaces into vestigial /
+mechanically-fixable / needs-real-proof-work, fix what's mechanical, narrow the rest to
+declaration-scope — **always rebuild after using `omit [...] in` specifically** (elaboration-
+changing, unlike `set_option linter.X false in` which is warning-only and always safe to
+add/remove) — **and prefer `set_option ... in` over `omit ... in` for unusedSectionVars
+whenever the task's constraints forbid theorem-statement changes** — **and always place
+`set_option .../omit ... in` before a declaration's doc comment (and before any preceding
+`open X in` modifier, if present), never between the doc comment and the declaration** — **and
+never retype existing proof-body lines inside an Edit's new_string; edit only boundary lines
+and re-read the region before building** — **and after the initial suppression removal, expect
+possible follow-up rounds of newly-surfaced per-declaration warnings once earlier fixes narrow
+the covering suppression (see cycle 8 finding above); rebuild after each round, not just once.**
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

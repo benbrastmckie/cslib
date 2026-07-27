@@ -11,7 +11,7 @@ public import Cslib.Logics.Modal.Metalogic.Minimal.MinExtension
 
 /-! # MS4: Minimal Modal Logic S4 (Soundness + Completeness)
 
-This module instantiates the task-496 frame-condition-parametrized, `Axioms`-generic scaffold
+This module instantiates the frame-condition-parametrized, `Axioms`-generic scaffold
 (`MinExtension.lean`) at `MS4`, the minimal-base analogue of Simpson's `IS4` ([Simpson1994]
 Ch. 3): `MS4` = `MT` (`MT.lean`) + the `4` axiom schemata. As with `T`, `4` needs **both** a
 box-form and a diamond-form schema, `fourBox : □A → □□A` and `fourDia : ◇◇A → ◇A`, since `◇` is
@@ -35,8 +35,9 @@ closure proof (`min_canonical_transitive_ms4`), both fully positive.
   over reflexive-and-transitive frames (`MValidFC ms4FC`).
 - `min_canonical_reflexive_ms4`/`min_canonical_transitive_ms4`/`min_canonical_ms4FC`: the
   canonical relation `MinExt.minCanonicalR` (over `MS4ModalAxiom`) is reflexive and transitive.
-- `ms4_completeness`/`ms4_consistent`/`ms4_soundness_completeness`: instantiation of the task-496
-  parametric `mkvalidFC_completeness` at `Axioms := MS4ModalAxiom`, `FC := ms4FC`.
+- `ms4_completeness`/`ms4_consistent`/`ms4_soundness_completeness`: instantiation of
+  `MinExtension.lean`'s parametric `mkvalidFC_completeness` at `Axioms := MS4ModalAxiom`,
+  `FC := ms4FC`.
 
 ## References
 
@@ -280,8 +281,8 @@ theorem min_canonical_ms4FC : ms4FC (@MinExt.minCanonicalR Atom MS4ModalAxiom) :
 
 /-- **Completeness for `MS4`**: any formula that is `MValidFC ms4FC` (forced at every world of
 every reflexive-and-transitive birelational model) is derivable from `MS4ModalAxiom`.
-Instantiation of the task-496 parametric `mkvalidFC_completeness` at `Axioms := MS4ModalAxiom`,
-`FC := ms4FC`, `h_canonFC := min_canonical_ms4FC`. -/
+Instantiation of `MinExtension.lean`'s parametric `mkvalidFC_completeness` at
+`Axioms := MS4ModalAxiom`, `FC := ms4FC`, `h_canonFC := min_canonical_ms4FC`. -/
 theorem ms4_completeness {φ : Proposition Atom} (h_valid : MValidFC.{u, u} ms4FC φ) :
     Derivable MS4ModalAxiom φ :=
   mkvalidFC_completeness ms4FC

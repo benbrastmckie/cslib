@@ -11,7 +11,7 @@ public import Cslib.Logics.Modal.Metalogic.Minimal.MinExtension
 
 /-! # MS5: Minimal Modal Logic S5 (Soundness + Completeness)
 
-This module instantiates the task-496 frame-condition-parametrized, `Axioms`-generic scaffold
+This module instantiates the frame-condition-parametrized, `Axioms`-generic scaffold
 (`MinExtension.lean`) at `MS5`, the minimal-base analogue of Simpson's `IS5` ([Simpson1994]
 Ch. 3): `MS5` = `MS4` (`MS4.lean`) + the `B` axiom schemata. As with `T`/`4`, `B` needs **both** a
 box-form and a diamond-form schema, `bBox : A → □◇A` and `bDia : ◇□A → A`, since `◇` is primitive
@@ -43,8 +43,9 @@ proof (`min_canonical_symmetric_ms5`), both fully positive -- a verbatim port of
   over reflexive-transitive-symmetric frames (`MValidFC ms5FC`).
 - `min_canonical_symmetric_ms5`/`min_canonical_ms5FC`: the canonical relation
   `MinExt.minCanonicalR` (over `MS5ModalAxiom`) is symmetric (bundled with refl/trans).
-- `ms5_completeness`/`ms5_consistent`/`ms5_soundness_completeness`: instantiation of the task-496
-  parametric `mkvalidFC_completeness` at `Axioms := MS5ModalAxiom`, `FC := ms5FC`.
+- `ms5_completeness`/`ms5_consistent`/`ms5_soundness_completeness`: instantiation of
+  `MinExtension.lean`'s parametric `mkvalidFC_completeness` at `Axioms := MS5ModalAxiom`,
+  `FC := ms5FC`.
 
 ## References
 
@@ -331,8 +332,8 @@ theorem min_canonical_ms5FC : ms5FC (@MinExt.minCanonicalR Atom MS5ModalAxiom) :
 
 /-- **Completeness for `MS5`**: any formula that is `MValidFC ms5FC` (forced at every world of
 every reflexive-transitive-symmetric birelational model) is derivable from `MS5ModalAxiom`.
-Instantiation of the task-496 parametric `mkvalidFC_completeness` at `Axioms := MS5ModalAxiom`,
-`FC := ms5FC`, `h_canonFC := min_canonical_ms5FC`. -/
+Instantiation of `MinExtension.lean`'s parametric `mkvalidFC_completeness` at
+`Axioms := MS5ModalAxiom`, `FC := ms5FC`, `h_canonFC := min_canonical_ms5FC`. -/
 theorem ms5_completeness {φ : Proposition Atom} (h_valid : MValidFC.{u, u} ms5FC φ) :
     Derivable MS5ModalAxiom φ :=
   mkvalidFC_completeness ms5FC

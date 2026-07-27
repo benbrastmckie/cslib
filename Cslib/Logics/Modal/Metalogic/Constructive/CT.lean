@@ -11,7 +11,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 
 /-! # CT: Constructive Modal Logic T (Soundness + Completeness)
 
-This module instantiates the task-501 frame-condition-parametrized segment scaffold
+This module instantiates the frame-condition-parametrized segment scaffold
 (`CKExtension.lean`) at the constructive analogue of `T`: `CT` = bare `CK` (`CK.lean`) plus the
 two `T` schemata `tBox : □A → A` and `tDia : A → ◇A`. As in the birelational `IT`/`IS4`/`IS5`
 family (`Intuitionistic/IT.lean`), **both** a box-form and a diamond-form schema are required
@@ -389,9 +389,10 @@ theorem ctBot_mreach_wit {w : CTSegment Atom} (hb : ctBot w) :
   exact ⟨CTSegment.ofHead (w.seg.tail_qprime t ht_mem), ht_mem, ht_bot⟩
 
 /-- **Completeness for `CT`**: any formula that is `CKValidFC ctFC` (forced at every world of
-every reflexive fallible-world model) is derivable from `CTModalAxiom`. Instantiation of the
-task-501 parametric `ckvalidFC_completeness` over the `CTSegment` canonical model, with `realize`
-built from `quasi_head_realization` (segment analogue of `segment_realization`, exposing the
+every reflexive fallible-world model) is derivable from `CTModalAxiom`. Instantiation of
+`CKExtension.lean`'s parametric `ckvalidFC_completeness` over the `CTSegment` canonical
+model, with `realize` built from `quasi_head_realization` (segment analogue of
+`segment_realization`, exposing the
 witnessing quasi-prime theory directly so it can be wrapped via `CTSegment.ofHead`) and
 `ct_truth_lemma`. -/
 theorem ct_completeness {φ : Proposition Atom} (h_valid : CKValidFC.{u, u} ctFC φ) :

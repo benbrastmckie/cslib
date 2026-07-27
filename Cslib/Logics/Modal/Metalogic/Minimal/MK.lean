@@ -13,8 +13,9 @@ public import Cslib.Logics.Modal.Semantics.Birelational
 /-! # MK: Minimal Modal Logic K (Axioms + Soundness)
 
 This module defines `MK`, the modal logic over the **minimal** propositional base (no `efq` /
-explosion): `IK` minus `efq` minus `dbot`/Nd, over the task-490 birelational semantics with the
-minimal `⊥` treatment (`⊥` an ordinary proposition, not forced-false). `MK` targets `MValid`
+explosion): `IK` minus `efq` minus `dbot`/Nd, over the `Semantics/Birelational.lean` birelational
+semantics with the minimal `⊥` treatment (`⊥` an ordinary proposition, not forced-false). `MK`
+targets `MValid`
 (birelational, ∃-diamond, F1/F2 confluence), the *same* semantics `IK` targets, but with an
 *arbitrary* upward-closed `botForces` predicate rather than `fun _ => False`.
 
@@ -63,8 +64,8 @@ variable {Atom : Type u}
 /-- Axiom schemata for minimal modal logic `MK`: `IK` (`IKModalAxiom`) minus `efq` minus
 `dbot`/Nd. The 8 propositional constructors mirror `MinPropAxiom`/`IntPropAxiom` without `efq`;
 the 4 modal constructors are `k1`/Kb, `k2`/Kd, `k3`/Cd (Fischer-Servi, ◇ over ∨), `k4`/Idb
-(Fischer-Servi box) — exactly the four hypotheses `{h_K, h_Kdia, h_Cd, h_Idb}` of the task-480
-birelational framework, omitting `h_dbot`. -/
+(Fischer-Servi box) — exactly the four hypotheses `{h_K, h_Kdia, h_Cd, h_Idb}` of the
+`Intuitionistic/Extension.lean` birelational framework, omitting `h_dbot`. -/
 inductive MKModalAxiom : Proposition Atom → Prop where
   /-- Weakening: `φ → (ψ → φ)`. -/
   | implyK (φ ψ : Proposition Atom) :

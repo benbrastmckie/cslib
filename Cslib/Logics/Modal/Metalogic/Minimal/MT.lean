@@ -11,7 +11,7 @@ public import Cslib.Logics.Modal.Metalogic.Minimal.MinExtension
 
 /-! # MT: Minimal Modal Logic T (Soundness + Completeness)
 
-This module instantiates the task-496 frame-condition-parametrized, `Axioms`-generic scaffold
+This module instantiates the frame-condition-parametrized, `Axioms`-generic scaffold
 (`MinExtension.lean`) at `MT`, the minimal-base analogue of Simpson's `IT` ([Simpson1994] Ch. 3):
 `MT` = `MK` (`MK.lean`) + reflexivity (`T` axiom). `MTModalAxiom` extends `MKModalAxiom` with
 **both** a box-form and a diamond-form `T` axiom, `tBox : □A → A` and `tDia : A → ◇A`; both are
@@ -38,8 +38,9 @@ are reused unchanged, instantiated at `Axioms := MTModalAxiom`; the only new wor
   reflexive frames (`MValidFC mtFC`).
 - `min_canonical_reflexive_mt`: the canonical relation `MinExt.minCanonicalR` (over `MTModalAxiom`)
   is reflexive -- proved positively via `min_axiom_mem`/`min_imp_property`, no negation.
-- `mt_completeness`/`mt_consistent`/`mt_soundness_completeness`: instantiation of the task-496
-  parametric `mkvalidFC_completeness` at `Axioms := MTModalAxiom`, `FC := mtFC`.
+- `mt_completeness`/`mt_consistent`/`mt_soundness_completeness`: instantiation of
+  `MinExtension.lean`'s parametric `mkvalidFC_completeness` at `Axioms := MTModalAxiom`,
+  `FC := mtFC`.
 
 ## References
 
@@ -241,8 +242,8 @@ theorem min_canonical_reflexive_mt :
 
 /-- **Completeness for `MT`**: any formula that is `MValidFC mtFC` (forced at every world of
 every reflexive birelational model, arbitrary `botForces`) is derivable from `MTModalAxiom`.
-Instantiation of the task-496 parametric `mkvalidFC_completeness` at `Axioms := MTModalAxiom`,
-`FC := mtFC`, `h_canonFC := min_canonical_reflexive_mt`. -/
+Instantiation of `MinExtension.lean`'s parametric `mkvalidFC_completeness` at
+`Axioms := MTModalAxiom`, `FC := mtFC`, `h_canonFC := min_canonical_reflexive_mt`. -/
 theorem mt_completeness {φ : Proposition Atom} (h_valid : MValidFC.{u, u} mtFC φ) :
     Derivable MTModalAxiom φ :=
   mkvalidFC_completeness mtFC

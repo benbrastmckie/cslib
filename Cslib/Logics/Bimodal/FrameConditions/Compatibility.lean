@@ -14,9 +14,6 @@ public import Cslib.Logics.Bimodal.ProofSystem.Axioms
 Typeclasses expressing which axioms are valid on which frame classes.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.FrameConditions
@@ -41,7 +38,8 @@ class AxiomDenseCompatible {φ : Formula Atom} (ax : Axiom φ) : Prop where
 /-- An axiom is discrete-compatible if it is valid on all discrete temporal frames. -/
 class AxiomDiscreteCompatible {φ : Formula Atom} (ax : Axiom φ) : Prop where
   valid : ∀ (D : Type) [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
-            [Nontrivial D] [NoMaxOrder D] [NoMinOrder D] [SuccOrder D] [PredOrder D] [IsSuccArchimedean D]
+            [Nontrivial D] [NoMaxOrder D] [NoMinOrder D] [SuccOrder D] [PredOrder D]
+            [IsSuccArchimedean D]
             [DiscreteTemporalFrame D], validOver D φ
 
 /-! ## Monotonicity: Linear -> Dense/Discrete -/

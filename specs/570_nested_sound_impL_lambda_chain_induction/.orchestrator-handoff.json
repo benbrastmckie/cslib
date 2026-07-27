@@ -1,32 +1,157 @@
 {
   "status": "implemented",
-  "summary": "Phase 4 of 8 complete: landed lambdaChain_XZ_imp_Y (the page-10 Lambda-chain induction the task is named for -- a three-case structural recursion over the OutputCtx list, matching OutputCtx.fillLhs's own [] / [L0] / L0::L1::rest split, discharged via topBase/lemma4_7_ii+mpAnd/lemma4_7_ii+lemma4_7_iv respectively) plus the two Lambda=[] normalisation shape lemmas psiX_fm and primeRhs_fm (both closed by 'cases ctx.Lambda <;> rfl'), in a new '## The Lambda-Chain Induction (Lemma 4.9, ImpL)' section in Soundness.lean, placed after the Lambda-Chain Toolkit section and before the impL-deferred section. All three transcribed verbatim (statement and proof) from the research report's compiled, sorry-free proofs at specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md. Module's remaining diagnostics after this phase are still exactly the two pre-existing ones: the impL sorry warning (now at line 1488) and the NestedProof.cut Missing-cases error (now at line 1502) -- no third diagnostic introduced, confirmed via scoped lake build. Sorry census unchanged at 41 (bash .claude/scripts/lean-sorry-census.sh Cslib), as planned (Phase 4 adds no sorry and removes none; the impL sorry it feeds into is removed in Phase 5).",
-  "phases_completed": 4,
+  "summary": "Phase 5 of 8 complete: discharged nested_sound_impL by transcribing the research-compiled impL_repaired assembly (specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md, section L5) -- the Lambda-chain induction (lambdaChain_XZ_imp_Y, Phase 4) composed through lambdaChain_step2 (Phase 3) and box-lifted by lemma4_7_iii (already landed), aligned via psiX_fm (Phase 4), lifted through ctx.Gamma' via the already-landed lemma4_9_fillRhs, with premise hA transported onto (ctx.Gamma'.fillRhs PsiX).fm via a two-case match on ctx.Gamma': the G::r' branch uses the already-landed OutputCtx.fillRhs_append definitionally, the [] branch necessitates hA (a closed derivation) via cs5DerivImpOfDerivable + .necessitation, mirroring the existing lemma4_2_id/lemma4_2_bot idiom in the same file. Closed by andMP h5 hAX hB. Rewrote the section docstring (retitled from 'Deferred, Strategic Sorry' to describe the landed construction, the source's L_X/L_Y/L_Z page-10 text, the flagged fillRhs-vs-fillFull Lean-encoding divergence, and the Gamma'=[] necessitation-soundness argument), nested_sound_impL's own docstring, and the nested_sound section docstring (removed the stale 'every constructor except impL' sentence, left a forward-pointing note to the still-missing .cut arm for Phase 7). Verified: scoped 'lake build Cslib...Nested.Soundness' now fails with exactly one diagnostic, the pre-existing NestedProof.cut Missing-cases non-exhaustiveness error -- the declaration-uses-sorry warning is gone and no other diagnostic was introduced. bash .claude/scripts/lean-sorry-census.sh Cslib confirms sorry_count: 40 (was 41) with no Nested/Soundness.lean entry anywhere in the inventory. #print axioms nested_sound_impL was NOT run -- per the plan's own note, the module does not yet produce a .olean (still red on the unrelated .cut case), so the axiom check is correctly deferred to Phase 8 once Phase 7 makes the module compile. Committed at 702c4c6b (Soundness.lean + plan markers only, narrow stage).",
+  "phases_completed": 5,
   "phases_total": 8,
   "plan_markers_verified": true,
   "skeleton": false,
   "sorry_inventory": [
     {
-      "file": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
-      "line": 1488,
-      "note": "Pre-existing strategic sorry for nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 4; census unchanged at 41 before and after this dispatch. Line number shifted from 1424 (Phase 3's report) to 1488 due to the new Phase 4 section inserted above it."
+      "file": "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean",
+      "line": 269,
+      "note": "pre-existing, out of scope for task 570"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 75,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 145,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 146,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 152,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 157,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 162,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 172,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 173,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 174,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 175,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 176,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "line": 187,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean",
+      "line": 161,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean",
+      "line": 38,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean",
+      "line": 43,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 257,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 263,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 270,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 277,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 284,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 289,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+      "line": 294,
+      "note": "pre-existing, blocked on unrelated task; out of scope"
+    },
+    {
+      "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "line": 1270,
+      "note": "pre-existing, out of scope for task 570"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 599,
+      "note": "pre-existing, out of scope for task 570"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 2578,
+      "note": "pre-existing, out of scope for task 570"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 133,
+      "note": "pre-existing, out of scope for task 570"
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 125,
+      "note": "pre-existing, out of scope for task 570"
     }
   ],
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
       "type": "lean_source",
-      "summary": "Added the Lambda-Chain Induction section: lambdaChain_XZ_imp_Y, psiX_fm, primeRhs_fm. All sorry-free."
-    },
-    {
-      "path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
-      "type": "plan",
-      "summary": "Phase 4 heading marked [COMPLETED]; all five Phase 4 task checkboxes checked, with one documented call-syntax deviation on primeRhs_fm."
-    },
-    {
-      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/02_lambda-chain-phase4-summary.md",
-      "type": "summary",
-      "summary": "Phase 4 implementation summary."
+      "summary": "nested_sound_impL body replaced with the impL_repaired assembly; section docstring, theorem docstring, and nested_sound section docstring updated accordingly. No other declaration touched."
     }
   ],
   "blockers": [],
@@ -34,5 +159,5 @@
     "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
     "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md"
   ],
-  "next_action_hint": "Phase 5 (discharge nested_sound_impL's sorry at Soundness.lean:1488, using lambdaChain_XZ_imp_Y, psiX_fm, primeRhs_fm from this phase plus lambdaChain_step2/mpAnd/topBase/andMP from Phase 3 and lemma4_9_fillRhs already landed) is now unblocked: it depends on Phases 2 and 4, both [COMPLETED]. Phase 6 (OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean, depends on Phase 2) remains independently available if not already dispatched. Expected post-Phase-5 build: only the pre-existing NestedProof.cut Missing-cases error remains; the sorry warning must be gone; census drops 41 to 40. Do NOT dispatch Phase 7 before both Phase 5 and Phase 6 are [COMPLETED]."
+  "next_action_hint": "Dispatch Phase 6 (land OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean, the cut bridging induction) -- depends only on Phase 2, which is already [COMPLETED], so it is independently available and does not need to wait on Phase 5. Do NOT start Phase 7 until BOTH Phase 5 (now done) and Phase 6 are [COMPLETED]; Phase 7 depends on both."
 }

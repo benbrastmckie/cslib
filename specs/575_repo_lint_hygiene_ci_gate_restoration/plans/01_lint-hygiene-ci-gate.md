@@ -147,9 +147,27 @@ call, not a deletion.
 
 ### W6 — Doubled-namespace public API (user-approved)
 
-The `dupNamespace` linter was overridden 78 times (63 `@[nolint]` + 15 `set_option`) and was
-correct every time. 57 declarations across 10 files carry a namespace prefix they are already
-inside, producing doubled public names. Verified leaking across module boundaries:
+**CORRECTION — the framing below was wrong for 3 of the 10 files.** The claim "the linter was
+correct every time" does not hold. It is correct for the 7 Temporal/Bimodal files (30
+declarations, all fixed). It is **not** correct for the three Chronicle modules: there,
+`namespace ...Metalogic.Chronicle` contains `structure Chronicle`, so `def Chronicle.c0`
+legitimately declares a projection-namespace member of the *structure*, not a repeated namespace
+component. 81 dot-notation call sites (`chi.c0`, `chi.c3`, …) depend on it. Stripping the prefix
+was attempted and reverted — it fails with `Invalid field 'c0'`. The genuine defect there is the
+`namespace Chronicle` / `structure Chronicle` name coincidence, whose fix (move the structure to
+the parent namespace, or rename the namespace across the whole `Chronicle/` subtree) is a design
+decision, not a mechanical rename. Its 36 suppressions are load-bearing until that call is made.
+
+**A second estimate in this section was also wrong**: the "~484 reference sites" figure counted
+every occurrence of the short form (`Temporal.SetMaximalConsistent` alone accounts for 289).
+Those need no edit — consumers sit inside `namespace Cslib.Logic.Temporal` or use `open`, so the
+same source text resolves to the un-doubled name via the enclosing-namespace walk once the
+declaration loses its doubled component. Only fully-qualified spellings break, and there were
+exactly **6** — precisely the cross-module leaks this workstream targeted.
+
+The `dupNamespace` linter was overridden 78 times (63 `@[nolint]` + 15 `set_option`). For the 7
+Temporal/Bimodal files it was correct: 30 declarations carried a namespace prefix they were
+already inside, producing doubled public names. Verified leaking across module boundaries:
 
 - `Cslib.Logic.Bimodal.Bimodal.ThDerivable` — 5 uses
 - `Cslib.Logic.Temporal.Temporal.ThDerivable` — 1 use

@@ -133,7 +133,7 @@ theorem ltlModelChecking [Finite State] [Finite Atom]
     have h_negsat : SatisfiesExec labeling ss_lts (Formula.neg phi) :=
       satisfiesExec_iff_mem_omegaLanguage.mpr h_mem
     -- phi and ¬phi both satisfied — contradiction
-    simp only [SatisfiesExec, Satisfies] at h_negsat
+    simp only [SatisfiesExec] at h_negsat
     exact h_negsat h_sat
   · -- Backward: no accepting cycle → all executions satisfy phi
     intro hno_cycle s₀ hs₀ ss mus h_exec h_ss0
@@ -141,7 +141,7 @@ theorem ltlModelChecking [Finite State] [Finite Atom]
     -- h_not_sat : ¬ SatisfiesExec labeling ss phi
     -- The labeling sequence violates phi, so satisfies neg phi
     have h_neg : SatisfiesExec labeling ss (Formula.neg phi) := by
-      simp only [SatisfiesExec, Satisfies]; exact h_not_sat
+      simp only [SatisfiesExec]; exact h_not_sat
     -- The labeling sequence is in (neg phi).omegaLanguage = language(gnbaNBA(neg phi))
     have h_neg_lang : ss.map (fun s => {p | labeling s p}) ∈
         (ωAcceptor.language (Formula.gnbaNBA (Formula.neg phi))).toSet := by

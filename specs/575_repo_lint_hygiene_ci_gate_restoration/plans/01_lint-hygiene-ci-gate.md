@@ -21,9 +21,10 @@
 
 ## RESUME HERE
 
-Thirteenth resume (cycle 13 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
-COMPLETED (Phase 1's regression re-closed this cycle; Phase 3 was re-closed in cycle 12 after its
-own reopen). Only Phase 5 (suppression audit) remains, PARTIAL at 183 sites done.**
+Fourteenth resume (cycle 14 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was re-closed in cycle 12
+after its own reopen). Only Phase 5 (suppression audit) remains, PARTIAL at 193 sites done, 234
+blanket suppressions across local-only files remaining in scope.**
 
 **RESOLVED this cycle — the baseline regression flagged (not fixed) at cycle 12's close is now
 fixed.** `lake build --wfail --iofail` had regressed to **12 warnings across 7 modules**; it is
@@ -61,20 +62,20 @@ new sites.
 To pick Phase 5 up cold:
 
 1. Confirm the baseline (2 commands, ~5 min) — **expect exactly 5 warnings, all documented
-   sorries, as of cycle 13** (the cycle-12 regression is fixed):
+   sorries, as of cycle 14**:
    ```bash
-   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 13
+   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 14
    lake test                     # expect exit 0, 0 errors
    ```
    If the warning count or file set differs from the above, something else landed — reconcile
    before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's closure criterion is once again
    empirically satisfied (no further action needed on any of them).
-3. **Only Phase 5 remains.** 27 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10/11/12 sub-entries for the complete per-file list) — do not revisit any of them.
-   Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry, then
-   **filter it through the local-only gate above** before picking a target. Prioritize the smaller
-   count-5 files it lists ahead of the larger count-6 files, using the
+3. **Only Phase 5 remains.** 29 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11/12/14 sub-entries for the complete per-file list) — do not revisit any of
+   them. Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry,
+   then **filter it through the local-only gate above** before picking a target. Prioritize the
+   smaller count-5 files it lists ahead of the larger count-6 files, using the
    method Phase 5's section documents: remove all of a file's suppressions, rebuild, categorize
    what surfaces, fix the mechanical categories, narrow the rest to declaration/usage-site scope.
    **Read the `unusedDecidableInType` vs `unusedSectionVars` lesson in Phase 5 before using
@@ -86,7 +87,11 @@ To pick Phase 5 up cold:
    fixes can surface additional previously-hidden warnings on other declarations; rebuild after
    each round, not just once. **Also read the cycle-12 finding**: a `set_option ... in` line
    placed next to a doc comment must come *before* the doc comment, not after — the reverse order
-   is a hard parse error, caught only by rebuilding before commit.
+   is a hard parse error, caught only by rebuilding before commit. **Also read the cycle-14
+   finding**: after adding a declaration-scoped `set_option linter.flexible false in`, rebuild
+   and confirm it actually silenced the warning it was meant for (not a neighboring declaration)
+   — line-number-to-declaration mapping errors are easy to make in files with many short,
+   similarly-structured back-to-back theorems, and only a rebuild catches a wrong placement.
 4. No items require a user decision to make further Phase 5 progress. The three items formerly
    listed as blocking (see "Open decisions" below) are all genuinely out of scope for 575, not
    blockers to continuing Phase 5.
@@ -94,8 +99,8 @@ To pick Phase 5 up cold:
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
 (also implemented in `scripts/pre-pr-check.sh`). True census: 28 (excl. `warn.sorry`-suppressed
 lines, comments stripped); the `--wfail --iofail` build reconfirmed exactly 5 baseline
-*sorry* warnings at cycle 8's end, again at cycle 12's end, and again at cycle 13's end (after
-the regression fix above).
+*sorry* warnings at cycle 8's end, cycle 12's end, cycle 13's end (after the regression fix), and
+cycle 14's end.
 **Phase 3 is closed** — its task/phase/report-string census is no longer a live worklist; see its
 section for the final fixed/excluded/false-positive breakdown instead of re-deriving one.
 
@@ -710,7 +715,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 183 sites done; 244 blanket suppressions across local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 193 sites done; 234 blanket suppressions across local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -1327,6 +1332,70 @@ ordering lesson).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.
+
+**Done (cycle 14)**: processed the 2 smallest remaining count-5 files, each committed
+individually after a clean scoped rebuild (both are leaf/near-leaf modules) —
+`Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean` (5→0, 662 lines: `style.setOption`/
+`style.emptyLine` vestigial; `style.longLine` (~25 sites) fixed mechanically by rewrapping;
+`style.show` (3 sites, all `show` that changed the goal) rewritten to `change`; `linter.flexible`
+— 2 bare-goal `simp` sites had the linter's own "Try this" suggestion (`simp only
+[List.mem_cons]`, `simp only [List.foldl_nil]`) applied verbatim, fully discharging both with no
+suppression needed; the remaining 12 sites (repeated `simp [...] at h` calls) narrowed to 6
+declaration-scoped `set_option linter.flexible false in` lines — one placement was corrected
+mid-pass after a rebuild showed the suppression had been attributed to the wrong declaration
+(`ultrafilterToSet_mcs` instead of the true site, `SetMaximalConsistent.
+ultrafilter_correspondence`); commit `fecacdde`), `Bimodal/Metalogic/BXCanonical/Quasimodel/
+Construction.lean` (5→0, 670 lines, leaf module — no downstream importers: `style.setOption`/
+`style.emptyLine` vestigial; `style.longLine` (20 sites) fixed mechanically; `style.show` (2
+sites) rewritten to `change`; `linter.flexible` narrowed to 4 declaration-scoped
+`set_option ... in` lines; commit `60eb1dca`). Suppression-audit progress: 188 → 193 sites
+audited cumulative (29 files fully processed). Repo-wide blanket suppression lines
+(ratchet-tracked): 258 → 248 (10 fewer; re-baselined in each file's own commit).
+
+**New finding (cycle 14) — a declaration-mapping error caught by the rebuild-before-commit
+discipline.** When narrowing `linter.flexible` sites to declaration scope in a file with many
+similarly-named theorems back-to-back, it is easy to miscount which declaration a warning's line
+number actually falls inside (especially when line numbers shift after earlier edits in the same
+file). On `UltrafilterMCS.lean`, a `set_option linter.flexible false in` was first placed on
+`ultrafilterToSet_mcs`, but a rebuild showed that declaration had zero flexible warnings of its
+own — the true site was the *next* declaration, `SetMaximalConsistent.
+ultrafilter_correspondence`. **Lesson for future Phase 5 cycles**: after adding a
+declaration-scoped suppression, rebuild and confirm the specific warning it was meant to silence
+is actually gone *and* that the declaration you suppressed is not now over-broad (silencing
+nothing) — do not assume a line-number-to-declaration mapping is correct without this check,
+especially in files with many short back-to-back theorems using the same proof idiom.
+
+**Resume point (cycle 14 close)**: the 2 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10, 11, 12 are done — do not revisit (29 files total). Re-verify the worst-offender list before
+starting the next cycle, since resolutions only ever remove entries, and re-gate every candidate
+through `git cat-file -e upstream/main:<path>` (must FAIL) per the upstream-exposure rescope:
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 14's end (248 total remaining blanket suppression lines), the count-6 tier is
+unchanged from cycles 8-13 (all confirmed local-only in prior cycles): `Temporal/Metalogic/
+Chronicle/CounterexampleElimination/{RecursiveWalks (1125 lines), MainElimination (1685
+lines)}.lean`, `Bimodal/Metalogic/Soundness/FrameClassVariants.lean` (931 lines), `Bimodal/
+Metalogic/Separation/Eliminations.lean` (849 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+CounterexampleElimination/Interface.lean` (3048 lines — do not pick this one first), `Bimodal/
+Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean` (1208 lines). The count-5
+tier's smallest-first remainder (UltrafilterMCS.lean and Quasimodel/Construction.lean, the two
+smallest, are now done): `Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean` (765
+lines), `Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean` (870 lines), `Bimodal/
+Metalogic/BXCanonical/Chronicle/PointInsertion/Burgess.lean` (987 lines), `Bimodal/Metalogic/
+Decidability/CountermodelExtraction.lean` (1088 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+PointInsertion/XuGuard.lean` (1146 lines), `Temporal/Metalogic/Chronicle/
+ChronicleConstruction.lean` (1435 lines), `Bimodal/Metalogic/BXCanonical/Chronicle/
+ChronicleConstruction.lean` (1532 lines) — re-verify exact line counts with `wc -l` before
+picking, since counts only ever go down. Apply the same method: remove all of a file's
+suppressions, rebuild, categorize what surfaces into vestigial / mechanically-fixable /
+needs-real-proof-work, fix what's mechanical, narrow the rest to declaration-scope, re-baseline
+the ratchet in the same commit — carrying forward every safety lesson from cycles 6-14 (see the
+cycle-11/12 addenda above for the full list through cycle 12, plus this cycle's
+declaration-mapping-verification lesson).
 
 ### Phase 6: Sorry visibility [COMPLETED]
 

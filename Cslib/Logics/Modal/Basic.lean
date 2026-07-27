@@ -174,25 +174,25 @@ theorem Proposition.map_injective_aux {f : Atom → Atom'} (hf : Function.Inject
     (φ ψ : Proposition Atom) (h : φ.map f = ψ.map f) : φ = ψ := by
   induction φ generalizing ψ with
   | atom p =>
-    cases ψ <;> simp [Proposition.map] at h
+    cases ψ <;> simp only [Proposition.map, Proposition.atom.injEq, reduceCtorEq] at h
     exact congrArg Proposition.atom (hf h)
   | bot =>
     cases ψ <;> simp [Proposition.map] at h
     rfl
   | imp φ₁ φ₂ ih₁ ih₂ =>
-    cases ψ <;> simp [Proposition.map] at h
+    cases ψ <;> simp only [Proposition.map, Proposition.imp.injEq, reduceCtorEq] at h
     exact congrArg₂ Proposition.imp (ih₁ _ h.1) (ih₂ _ h.2)
   | and φ₁ φ₂ ih₁ ih₂ =>
-    cases ψ <;> simp [Proposition.map] at h
+    cases ψ <;> simp only [Proposition.map, Proposition.and.injEq, reduceCtorEq] at h
     exact congrArg₂ Proposition.and (ih₁ _ h.1) (ih₂ _ h.2)
   | or φ₁ φ₂ ih₁ ih₂ =>
-    cases ψ <;> simp [Proposition.map] at h
+    cases ψ <;> simp only [Proposition.map, Proposition.or.injEq, reduceCtorEq] at h
     exact congrArg₂ Proposition.or (ih₁ _ h.1) (ih₂ _ h.2)
   | box φ ih =>
-    cases ψ <;> simp [Proposition.map] at h
+    cases ψ <;> simp only [Proposition.map, Proposition.box.injEq, reduceCtorEq] at h
     exact congrArg Proposition.box (ih _ h)
   | diamond φ ih =>
-    cases ψ <;> simp [Proposition.map] at h
+    cases ψ <;> simp only [Proposition.map, Proposition.diamond.injEq, reduceCtorEq] at h
     exact congrArg Proposition.diamond (ih _ h)
 
 /-- `Proposition.map` is injective whenever the underlying atom relabeling is injective. -/

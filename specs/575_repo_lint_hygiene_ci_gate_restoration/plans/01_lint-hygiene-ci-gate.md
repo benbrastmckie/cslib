@@ -84,7 +84,11 @@ re-enabled; suppression debt audited and reduced; scripts that can actually fail
   (`simp [X] at h` -> `simp only [...] at h`).
 - **No new `set_option linter.* false`.** Suppressing instead of fixing is the pattern Phase 5
   exists to reverse. If a warning cannot be fixed without changing mathematics, report it.
-- Verification protocol (user decision): rebuild after **each file**, commit only when green.
+- Verification protocol (user decision, revised): **risk-tiered batch verification** — see
+  "Testing & Validation". Nothing is ever committed unverified; what changed is the *granularity*
+  of verification, not its strictness. The superseded rule was "rebuild after each file, commit
+  only when green", which ran all four gates (including the 9,253-test `lake test`) against 672
+  modules to validate edits that frequently could not affect elaboration at all.
 
 ### Explicit non-targets — do NOT "clean" these
 
@@ -184,9 +188,9 @@ everything that was actually in its remit.
 The genuine residual defect is the `namespace Chronicle` / `structure Chronicle` name
 coincidence. Fixing it means moving the structure to the parent namespace, or renaming the
 namespace across the whole `Chronicle/` subtree — a design decision, out of scope for this
-hygiene-only task. It is being carried by a separate follow-up task (number assigned at
-creation), which the orchestrator will create once this task finishes. The remaining 36
-suppressions (33 `@[nolint]`, 3 `set_option`) are **load-bearing** until that follow-up task
+hygiene-only task. It is being carried by task 576, which depends on task 568 (the Chronicle
+architecture question) so the naming decision is not made twice. The remaining 36
+suppressions (33 `@[nolint]`, 3 `set_option`) are **load-bearing** until task 576
 makes the call. Files: `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
 `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean`,
 `Foundations/Logic/Metalogic/Chronicle/Types.lean` (9 declarations each).
@@ -328,6 +332,36 @@ suppression is load-bearing.
   (`ORGANISATION.md` and the `S`->`Sys` rename are grouped as one remaining item since neither
   was started this session; treat them as two independent sub-steps when resumed.)
 
+  **Re-scoping finding (this session, investigation only, zero files edited)**: the "5 files"
+  framing understates the true footprint. `S` is the bound `Type*` parameter on `InferenceSystem`
+  (`Foundations/Logic/InferenceSystem.lean`) and is threaded through **24 files** under
+  `Foundations/Logic/**` (`ProofSystem.lean` alone has 177 bare-`S` tokens; `Theorems/
+  DerivationCombinators.lean` 96; `Theorems/Modal/S5.lean` 84; `Metalogic/PrimeExclusion.lean` 66;
+  `Theorems/Temporal/TemporalDerived.lean` 64; `Metalogic/Consistency.lean` 61;
+  `Theorems/Combinators.lean` 60 — the rest smaller). Named-argument call sites `(S := ...)` that
+  would need to become `(Sys := ...)` for the rename to typecheck number **231 across 18 files**
+  (13 inside `Foundations/Logic/`, plus the 5 real downstream consumers: the two Bimodal
+  `Theorems/Propositional/*` files, the two Temporal `Metalogic/*` files named in the NOTE blocks,
+  and `Modal/Metalogic/InterSystem/IntToClassical.lean`, which has 62 more occurrences on its own
+  despite carrying no NOTE — it uses named args for the same tag with no collision to explain).
+  One superficially-matching file, `LinearLogic/CLL/PhaseSemantics/Basic.lean`, is a **false
+  positive**: its `(S := ...)` binds an unrelated `S : Set (Fact P)` local variable, not this
+  tag — confirmed by reading `sInf_isFact`/`carriersInf` — and must NOT be touched.
+
+  Because `InferenceSystem.lean`/`ProofSystem.lean` sit at the root of the logic dependency graph,
+  this is not choppable into independently-green single-file commits the way the rest of this
+  task has been: a binder rename only typechecks once every one of the ~18 named-argument-using
+  files is updated in the same atomic change, and verifying it means a near-full-project rebuild
+  (this module tree feeds nearly everything under `Cslib/Logics/`), not the fast scoped builds
+  every other Phase 7/8 item used. That cost profile is disproportionate to a "rename an
+  identifier" item inside a hygiene task that otherwise verifies per-file in seconds. Recommend
+  either: (a) a dedicated follow-up task sized for one atomic ~18-file commit with a single
+  full-project rebuild budgeted in, or (b) if attempted inside this task, doing it as the very
+  last action before Definition-of-Done sign-off, in one shot, specifically so a failed attempt
+  doesn't cost repeated full rebuilds against an otherwise-finished plan. Not attempted this
+  session for exactly that reason — investigation only (`grep`/`Read`), zero `.lean` edits, zero
+  `lake build` invocations spent on it.
+
 ### Phase 8: Dead-code deletions [PARTIAL — 7 of 10 rows done]
 
 User-approved in full.
@@ -372,7 +406,50 @@ Deleting modules requires updating `Cslib.lean` and re-running `lake exe mk_all 
 
 ## Testing & Validation
 
-Run after every file, and all four before declaring done:
+**Principle**: verification granularity is matched to what an edit can actually break. The
+strictness of the final gate is unchanged — every gate below still runs before the task is
+declared done, and no commit ever contains unverified work. What changes is that a full-repo
+build + 9,253-test suite no longer runs against 672 modules to validate an edit that cannot
+affect elaboration.
+
+### Two build commands, deliberately distinguished
+
+| Command | Cost | When |
+|---|---|---|
+| `lake build Cslib.Path.To.Module` | rebuilds that module's cone only | **during** a phase, per batch |
+| `lake build --wfail --iofail` | full repo, 672 modules | **phase boundary only** |
+
+Most files touched by the remaining phases are near-leaves (Phase 3's six worst-offender files
+have 0–2 reverse dependents each), so the targeted form is dramatically cheaper and is the
+correct in-phase instrument.
+
+### Risk tiers — assign every edit before making it
+
+**When in doubt, use the higher tier.** Mis-assigning downward is the only way this protocol
+can lose accuracy, so the tie-break is always upward.
+
+| Tier | Edit class | Can it change elaboration? | Verification |
+|---|---|---|---|
+| 0 | Non-compiling files: `.md`, `.yml`, `.sh`, `.github/**` | No — Lean never reads them | No Lean build. `bash -n` for shell scripts; nothing for prose |
+| 1 | Comment / docstring text only, no code tokens (Phase 3 citations) | No | Batch freely; **one targeted build per batch** |
+| 2 | Deletion of dead code (Phase 8) | Only via dangling reference, which the compiler names exactly | `grep` for references first, then batch-delete + one targeted build over affected reverse-deps |
+| 3 | Import edits (Phase 4 shake) | Only via missing/unused import, precisely reported | Batch per directory + targeted build; re-run `lake shake` once at phase end |
+| 4 | Tactic-surface rewrites, suppression removal (Phase 5) | **Yes — genuinely proof-affecting** | Small batches of *mutually independent* modules; targeted build per batch |
+
+Tier 1's only realistic failure mode is a malformed comment delimiter or an accidental edit
+inside a string literal. Both are syntactic, both are caught by any build of that module, and
+both are localized by the error message — so per-file granularity buys nothing a per-batch build
+does not already give.
+
+### On failure
+
+The compiler names the file and line; fix it directly. Only if a failure is genuinely ambiguous
+across a batch, bisect the batch. Expected cost is one build per batch, with a `log(batch)`
+penalty on the rare failure — versus one build per file unconditionally.
+
+### Phase-boundary gate (unchanged in strictness)
+
+All four, at every phase boundary and before declaring the task done:
 
 ```bash
 lake build --wfail --iofail   # must show ONLY the 5 sorry warnings listed above
@@ -380,6 +457,14 @@ lake test                     # exit 0, 0 errors
 lake exe mk_all --check
 lake exe checkInitImports
 ```
+
+### Commit granularity
+
+Commit per verified-green **batch**, not per file. This still satisfies
+`.claude/rules/git-workflow.md`'s commit-per-green-substep mandate: a sub-step is a
+progress-file objective reaching `done`, and `files_touched` explicitly accumulates across
+multiple files, so a batch is a legitimate sub-step. "Green" still means the batch's own
+verification criteria passed. Unverified work remains uncommittable.
 
 ## Definition of Done
 
@@ -392,8 +477,10 @@ lake exe checkInitImports
 
 ## Rollback / Contingency
 
-Every change is an isolated commit verified green before landing, so `git revert <sha>` is safe
-per-file. No commit in this task alters mathematics, so a revert can never reintroduce a proof
+Every commit is verified green before landing, so `git revert <sha>` is safe. Under the
+risk-tiered protocol a commit covers a verified batch rather than a single file, so a revert
+restores that batch — keep batches to one tier and one phase so a revert stays semantically
+clean. No commit in this task alters mathematics, so a revert can never reintroduce a proof
 gap — worst case it reintroduces a warning.
 
 If a Phase 5 suppression removal surfaces warnings that cannot be fixed without changing a proof:
@@ -420,8 +507,8 @@ record why. Do not leave a blanket suppression in place as the resolution.
    locally. Needs a design call: wire up or delete.
 3. **The `Chronicle` namespace/structure name coincidence** (Phase 2) — move the structure to the
    parent namespace, or rename the namespace across the subtree? Out of scope for this
-   hygiene-only task; carried by a separate follow-up task (number assigned at creation), created
-   by the orchestrator once this task finishes. Until decided, 36 suppressions stay.
+   hygiene-only task; carried by task 576, which depends on task 568. Until decided, 36
+   suppressions stay.
 
 ---
 

@@ -30,7 +30,7 @@ This matches the bimodal `TimeOrdering` design and is semantically sound
 because the branch truth lemma ensures that the model built from the branch
 satisfies the ordering constraints directly.
 
-If Phase 8 (Completeness) requires transitive closure, the hook function
+If Completeness requires transitive closure, the hook function
 `ancestorTimes` provides a fuelled version. This decision is documented
 here and revisited in the completeness module.
 
@@ -118,7 +118,7 @@ def timeCount (ord : TimeOrdering) : Nat :=
 
 /-- Fuelled transitive closure of future: times reachable from `t` in at most `fuel` steps.
 
-This is the hook for Phase 8 (Completeness) if transitive closure is needed.
+This is the hook for Completeness if transitive closure is needed.
 The default rules use `futureOf` (direct successors). -/
 def ancestorTimes (ord : TimeOrdering) (t : Nat) : Nat → List Nat
   | 0 => []

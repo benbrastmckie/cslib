@@ -49,9 +49,9 @@ currently be proved without additional theory:
 4. `temporalTableau_sound`: The main soundness theorem.
    Blocked by (1), (2), and (3).
 
-## Phase Status
+## Status
 
-Phase 7 is [BLOCKED] pending resolution of the eventuality-defect soundness
+This module is [BLOCKED] pending resolution of the eventuality-defect soundness
 gap and the F(U) propagation soundness argument.
 
 ## References
@@ -86,8 +86,8 @@ assignment `f : TimeIndex → D`, such that:
 - Every T(φ)@t on the branch satisfies `Satisfies M (f t) φ`.
 - Every F(φ)@t on the branch satisfies `¬Satisfies M (f t) φ`.
 
-The existential domain is restricted to the discrete-serial frame class (report 02 Finding
-2.2) rather than the bare `[LinearOrder D] [Nontrivial D]` used in the earlier draft: the
+The existential domain is restricted to the discrete-serial frame class rather than the bare
+`[LinearOrder D] [Nontrivial D]` used in the earlier draft: the
 tableau's `untlPos` rule (`Rules.lean`) places its Until witness at the immediate
 integer successor of the current time, which is sound only under discreteness (the
 discreteness axiom `G'⊥ ∧ H'⊥` separates `validDiscrete` from `valid`, `[Burgess1982I]`

@@ -91,7 +91,9 @@ against the working tree when this section landed.
 wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean
 wc -l Cslib/Logics/Modal/Tableau/FrameSoundness.lean
 wc -l Cslib/Logics/Modal/Tableau/FrameCompleteness.lean
-grep -cE '^(private )?(protected )?(noncomputable )?(theorem|lemma|def|abbrev|instance|structure|inductive) ' Cslib/Logics/Modal/Tableau/LoopChecking.lean
+PAT='^(private )?(protected )?(noncomputable )?'
+PAT="$PAT(theorem|lemma|def|abbrev|instance|structure|inductive) "
+grep -cE "$PAT" Cslib/Logics/Modal/Tableau/LoopChecking.lean
 ```
 
 At `7eb51f69`: `LoopChecking.lean` 10,540 lines, `FrameSoundness.lean` 5,317,
@@ -140,7 +142,8 @@ discrepancy was a scope confusion of exactly this kind, not a drift.
 grep -rho 'Local re-derivation' Cslib/ | wc -l                                    # 55
 grep -rl 'ModalTableauResult' --include='*.lean' Cslib/Logics/Modal/Tableau/ | wc -l   # 8
 grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake | wc -l    # 9
-grep -nE '^(private )?(theorem|lemma) hintikkaS4_' Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l   # 8
+grep -nE '^(private )?(theorem|lemma) hintikkaS4_' \
+  Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l   # 8
 grep -n 'structure S4LoopInv' Cslib/Logics/Modal/Tableau/LoopChecking.lean
 wc -l CslibTests/S4LoopGuardRegression.lean                                       # 197
 ```
@@ -348,6 +351,7 @@ def modalUniverseS4 (φ₀ : Proposition Atom) :
   (List.range (modalWorldBoundS4 φ₀ + 1)).flatMap (fun w =>
     (modalSubfmls φ₀).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The S4 universe has length at most
 `2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)`. Mirrors
 `modalUniverse_length_le` (`FmpMeasure.lean`; that lemma carries the identical
@@ -949,18 +953,21 @@ def modalMintShape (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
   | .pos, .diamond _ => true
   | _, _ => false
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalMintShape` characterisation, box-negative shape (`F(□φ)@w`). -/
 @[simp]
 lemma modalMintShape_boxNeg (φ : Proposition Atom) (w : WorldIndex) :
     modalMintShape (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) = true :=
   rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalMintShape` characterisation, diamond-positive shape (`T(◇φ)@w`). -/
 @[simp]
 lemma modalMintShape_diaPos (φ : Proposition Atom) (w : WorldIndex) :
     modalMintShape (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) = true :=
   rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalMintShape` is `false` at every signed-formula shape other than the two minting
 shapes: the complement of the two characterisation lemmas above. -/
 lemma modalMintShape_eq_false_of_not_boxNeg_diaPos
@@ -1399,6 +1406,7 @@ def keysOriginS4
          (s', φ') = ((Sign.neg, ψ) : Sign × Proposition Atom) ∨
          (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Entry establishment**: `keysOriginS4` holds at the ordered driver's seed state. The sole
 recorded key is `(0, ∅)` (`modalTableauS4KeyedOrdered`'s seed), so the only membership case is
 `w = 0`, the invariant's root disjunct, discharged immediately. -/
@@ -1411,6 +1419,7 @@ lemma keysOriginS4_entry (φ : Proposition Atom) :
   simp only [List.mem_singleton, Prod.mk.injEq] at hmem
   exact Or.inl hmem.1
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Survives branch growth**: `keysOriginS4` transports across `b ⊆ b'` at fixed `acc`/`keys`.
 Every disjunct in the invariant is either branch-independent (the edge conjunct, the root case)
 or an `∈ b` membership fact, which persists under `hsub`. -/
@@ -1432,6 +1441,7 @@ lemma keysOriginS4_mono_branch
       · exact Or.inl heq
       · exact Or.inr (hsub _ hdia)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Survives edge addition**: `keysOriginS4` transports across accessibility growth (every
 edge of `acc` also an edge of `acc'`) at fixed `b`/`keys`. `keysOriginS4` is existential over
 edges, so this is immediate. -/
@@ -1898,6 +1908,7 @@ private lemma mem_boxPositivesOf_S4 {b : List (SignedFormula (Proposition Atom) 
     · simp at hsfeq
   · simp at hsfeq
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the `boxProps` group propagated by both fresh-world rules. S4-local
 restatement of `FmpMeasure.lean`'s file-private `boxProps_outputs_subset`. -/
 private lemma boxProps_outputs_subset_S4 (φ₀ : Proposition Atom)
@@ -1927,6 +1938,7 @@ private lemma boxProps_outputs_subset_S4 (φ₀ : Proposition Atom)
       exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans_S4 hψmem hψsub)
   · simp at heq
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the `diaNegProps` group propagated by both fresh-world rules.
 S4-local restatement of `FmpMeasure.lean`'s file-private `diaNegProps_outputs_subset`. -/
 private lemma diaNegProps_outputs_subset_S4 (φ₀ : Proposition Atom)
@@ -1961,6 +1973,7 @@ private lemma diaNegProps_outputs_subset_S4 (φ₀ : Proposition Atom)
     · simp at heq
   · simp at heq
 
+omit [Hashable Atom] in
 /-- `diamondPos`: `T(◇φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
 groups at `w'`: the witness, propagated box-positives, and propagated diamond-negatives. All
 three groups stay inside `U_{S4}(φ₀)` given the branch invariant `hb`, the source membership
@@ -2003,6 +2016,7 @@ lemma modalApplyOne_diamondPos_outputs_subset_S4
   · exact boxProps_outputs_subset_S4 φ₀ b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset_S4 φ₀ b w hb hwbound x hdia
 
+omit [Hashable Atom] in
 /-- `boxNeg`: `F(□φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three groups at
 `w'`: the witness, propagated box-positives, and propagated diamond-negatives. Identical
 structure to `modalApplyOne_diamondPos_outputs_subset_S4` except the witness is directly `φ`
@@ -2121,7 +2135,8 @@ stated -- see the "Redirect-Inertness Assembly" section below).
 
 ```
 grep -rn 'keysOriginS4' --include='*.lean' Cslib/ | wc -l
-grep -rn 'keysOriginS4' --include='*.lean' Cslib/ | grep -vE ':[[:space:]]*(--|[/][-]|[-][|]|[*])' | wc -l
+grep -rn 'keysOriginS4' --include='*.lean' Cslib/ \
+  | grep -vE ':[[:space:]]*(--|[/][-]|[-][|]|[*])' | wc -l
 ```
 
 61 textual references, 55 of them on lines that do not begin with a comment marker, all inside
@@ -2172,6 +2187,7 @@ bound). The report's recommended repair (recording box-context keys in *boxed* f
 this argument outright with a three-line consequence of the already-landed
 `S4LoopInv.keyLowerBd`. -/
 
+omit [Hashable Atom] in
 /-- **`keyLowerBd`'s minting case, box-negative shape**: the prospective birth content computed
 PRE-step (`successorBirthContent`) is a subset of the freshly-minted world's relevant set
 computed POST-step (`relevantSetFinset` over `newForms ++ b`). Consumes `modalApplyOne`'s
@@ -2247,6 +2263,7 @@ private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
         exact ⟨⟨.neg, .diamond p.2, w⟩, hbmem, by simp [hdedup]⟩
       exact List.mem_append_left _ (List.mem_append_right _ htarget)
 
+omit [Hashable Atom] in
 /-- **`keyLowerBd`'s minting case, diamond-positive shape** (dual of the box-negative case):
 the prospective birth content computed PRE-step is a subset of the freshly-minted world's
 relevant set computed POST-step. -/
@@ -2996,6 +3013,7 @@ private lemma mintGroup_label_eq_freshWorld_S4
       · simp at heq
     · simp at heq
 
+omit [Hashable Atom] in
 /-- The T-augmented rule `modalApplyOneT` never mints at its own two relevant shapes
 (`T(□φ)@w`, `F(◇φ)@w`): `acc` is unchanged and every emitted formula's label is a known world
 of `b` -- either the source's own world `w` (self-propagation, known since `sf ∈ b`) or one of
@@ -3100,6 +3118,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_known_S4
         · exact hself x hx
       · simp at hfalse
 
+omit [Hashable Atom] in
 /-- The S4-augmented rule `modalApplyOneS4Rules` never mints at its two T/4-relevant shapes
 (`T(□φ)@w`, `F(◇φ)@w`): composes `modalApplyOneT_boxPos_diaNeg_known_S4` (K+T layer) with the
 4-rule propagation (`modalFourBoxProp`/`modalFourDiaNegProp`), whose targets are recorded
@@ -3192,6 +3211,7 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_known_S4
       · trivial
       · exact hfour
 
+omit [Hashable Atom] in
 /-- Outside the two K-minting shapes, and with `sf.formula` non-modal (neither `box` nor
 `diamond`), `modalApplyOne` never touches `acc` and every emitted formula's label is `sf.label`
 (the propositional decomposition rules never leave the source world): the goal reduces to K's
@@ -3374,6 +3394,7 @@ private lemma modalApplyOne_diamondNeg_snd_S4
   rw [if_neg (by simp [htry])]
   split_ifs <;> rfl
 
+omit [Hashable Atom] in
 /-- **T-augmented universe-membership composite**: at the two T-relevant shapes (`T(□φ)@w`,
 `F(◇φ)@w`), `modalApplyOneT` never touches `acc`, and every emitted formula lands in
 `modalUniverseS4 φ₀` given the branch invariant `hb` -- combining K's own output-subset facts
@@ -3510,6 +3531,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
       · exact hKmem x hx
       · exact hself x hx
 
+omit [Hashable Atom] in
 /-- **S4-augmented universe-membership composite**: composes
 `modalApplyOneT_boxPos_diaNeg_universe_S4` (K+T layer) with the 4-rule propagation
 (`modalFourBoxProp`/`modalFourDiaNegProp`), whose targets are recorded successors of `w` (known
@@ -3619,10 +3641,12 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_universe_S4
       · trivial
       · exact hfour
 
+omit [Hashable Atom] in
 /-- Outside the two K-minting shapes, and with `sf.formula` non-modal, every emitted formula
 lands in `modalUniverseS4 φ₀`: `modalApplyOne_prop_outputs_subset` gives formula ∈
 `modalSubfmls sf.formula` at the unchanged label `sf.label`, composed with `hb`'s own bound on
-`sf` via `modalSubfmls_trans_S4`. Universe-membership analog of `modalApplyOne_nonModal_known_S4`. -/
+`sf` via `modalSubfmls_trans_S4`. Universe-membership analog of
+`modalApplyOne_nonModal_known_S4`. -/
 private lemma modalApplyOne_nonModal_universe_S4
     (φ₀ : Proposition Atom)
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -3736,7 +3760,7 @@ private lemma modalStepBranchS4Keyed_keys_subset
   rw [hkeq]
   intro p hp
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
-    simp only [hs, hf]
+    simp only []
   all_goals first
     | exact hp
     | skip
@@ -3779,7 +3803,7 @@ private lemma modalStepBranchS4KeyedOrdered_keys_subset
   rw [hkeq]
   intro p hp
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
-    simp only [hs, hf]
+    simp only []
   all_goals first
     | exact hp
     | skip
@@ -5132,11 +5156,11 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
     · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
           SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
       have hmshape : isMintingShaped sf = true := by rw [hsfeq]; rfl
@@ -5198,11 +5222,11 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
   · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
       ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
@@ -5223,14 +5247,14 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
       simp only [List.mem_singleton] at he'
       subst he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
       intro e' he' w
       obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
@@ -5333,11 +5357,11 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
     · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
           SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
       have hmshape : isMintingShaped sf = true := by rw [hsfeq]; rfl
@@ -5399,11 +5423,11 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
   · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
       ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
@@ -5424,14 +5448,14 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
       simp only [List.mem_singleton] at he'
       subst he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
       intro e' he' w
       obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
@@ -8637,6 +8661,7 @@ private lemma modalApplyOneS4Keyed_outputsSubsetUniverse_S4
 argument) is shown sufficient here, mirroring `modalExpMeasure_entry_le_fuel`
 (`FmpMeasure.lean:208-251`). -/
 
+omit [Hashable Atom] in
 /-- **Entry-measure sufficiency for `modalFuelS4`**: at the S4 keyed tableau's entry point, the
 worklist measure over `modalUniverseS4 φ₀` is bounded by `modalFuelS4 φ₀`. Direct transcription
 of `modalExpMeasure_entry_le_fuel` (`FmpMeasure.lean:208-251`), substituting `modalUniverseS4`/
@@ -9059,7 +9084,8 @@ declarations, not the ten that existed when this paragraph was first written (th
 was correct then; `c4b33f63` removed two of them).
 
 ```
-grep -nE '^(private )?(theorem|lemma) hintikkaS4_' Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l
+grep -nE '^(private )?(theorem|lemma) hintikkaS4_' \
+  Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l
 ```
 
 Beware a near-miss measurement: counting *distinct identifiers* over the same file returns 11,

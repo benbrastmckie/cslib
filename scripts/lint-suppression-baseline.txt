@@ -31,7 +31,6 @@
 1 Cslib/Logics/Bimodal/FrameConditions/Validity.lean
 4 Cslib/Logics/Bimodal/Metalogic/Algebraic/BooleanStructure.lean
 2 Cslib/Logics/Bimodal/Metalogic/Algebraic/InteriorOperators.lean
-4 Cslib/Logics/Bimodal/Metalogic/Algebraic/LindenbaumQuotient.lean
 2 Cslib/Logics/Bimodal/Metalogic/Algebraic/ParametricCanonical.lean
 2 Cslib/Logics/Bimodal/Metalogic/Algebraic/ParametricCompleteness.lean
 3 Cslib/Logics/Bimodal/Metalogic/Algebraic/ParametricHistory.lean

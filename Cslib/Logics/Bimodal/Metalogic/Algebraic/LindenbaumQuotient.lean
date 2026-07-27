@@ -21,11 +21,6 @@ Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/LindenbaumQuotient
 (2 sorries: temp_k_dist in provEquiv_allFuture_congr -- now resolved using derived theorem)
 -/
 
-set_option linter.style.show false
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.LindenbaumQuotient
@@ -88,7 +83,8 @@ def toQuot (φ : Formula Atom) : LindenbaumAlg Atom := Quotient.mk provEquivSeto
 /-- Notation for the quotient map sending a formula to its equivalence class. -/
 scoped notation "⟦" φ "⟧" => toQuot φ
 
-/-- Negation is antitone with respect to derivability: if `ψ` derives `φ`, then `¬φ` derives `¬ψ`. -/
+/-- Negation is antitone with respect to derivability: if `ψ` derives `φ`, then `¬φ` derives
+`¬ψ`. -/
 theorem derives_neg_antitone {φ ψ : Formula Atom} (h : Derives ψ φ) : Derives φ.neg ψ.neg := by
   unfold Derives at *
   obtain ⟨d⟩ := h
@@ -143,7 +139,8 @@ theorem provEquiv_imp_congr {φ₁ φ₂ ψ₁ ψ₂ : Formula Atom}
   · have b1 : DerivationTree FrameClass.Base [] ((ψ₁.imp ψ₂).imp ((φ₂.imp ψ₁).imp (φ₂.imp ψ₂))) :=
       Theorems.Combinators.bCombinator
     have h1 := DerivationTree.modus_ponens [] _ _ b1 d_ψ_fwd
-    have b2_pre : DerivationTree FrameClass.Base [] ((φ₁.imp ψ₁).imp ((φ₂.imp φ₁).imp (φ₂.imp ψ₁))) :=
+    have b2_pre : DerivationTree FrameClass.Base []
+        ((φ₁.imp ψ₁).imp ((φ₂.imp φ₁).imp (φ₂.imp ψ₁))) :=
       Theorems.Combinators.bCombinator
     have flip2 : DerivationTree FrameClass.Base []
         (((φ₁.imp ψ₁).imp ((φ₂.imp φ₁).imp (φ₂.imp ψ₁))).imp
@@ -155,7 +152,8 @@ theorem provEquiv_imp_congr {φ₁ φ₂ ψ₁ ψ₂ : Formula Atom}
   · have b1 : DerivationTree FrameClass.Base [] ((ψ₂.imp ψ₁).imp ((φ₁.imp ψ₂).imp (φ₁.imp ψ₁))) :=
       Theorems.Combinators.bCombinator
     have h1 := DerivationTree.modus_ponens [] _ _ b1 d_ψ_bwd
-    have b2_pre : DerivationTree FrameClass.Base [] ((φ₂.imp ψ₂).imp ((φ₁.imp φ₂).imp (φ₁.imp ψ₂))) :=
+    have b2_pre : DerivationTree FrameClass.Base []
+        ((φ₂.imp ψ₂).imp ((φ₁.imp φ₂).imp (φ₁.imp ψ₂))) :=
       Theorems.Combinators.bCombinator
     have flip2 : DerivationTree FrameClass.Base []
         (((φ₂.imp ψ₂).imp ((φ₁.imp φ₂).imp (φ₁.imp ψ₂))).imp
@@ -241,7 +239,7 @@ noncomputable def sigmaQuot : LindenbaumAlg Atom → LindenbaumAlg Atom :=
 theorem sigma_quot_involution (a : LindenbaumAlg Atom) : sigmaQuot (sigmaQuot a) = a := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.swapTemporal.swapTemporal) = toQuot φ
+  change toQuot (φ.swapTemporal.swapTemporal) = toQuot φ
   rw [Formula.swapTemporal_involution]
 
 /-- Sigma commutes with negation on the Lindenbaum algebra. -/
@@ -249,8 +247,8 @@ theorem sigma_quot_neg (a : LindenbaumAlg Atom) :
     sigmaQuot (negQuot a) = negQuot (sigmaQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.neg.swapTemporal) = negQuot (toQuot (φ.swapTemporal))
-  simp only [Formula.neg, Formula.swapTemporal]
+  change toQuot (φ.neg.swapTemporal) = negQuot (toQuot (φ.swapTemporal))
+  simp only [Formula.neg]
   rfl
 
 /-- Sigma distributes over disjunction (supremum) on the Lindenbaum algebra. -/
@@ -259,8 +257,8 @@ theorem sigma_quot_sup (a b : LindenbaumAlg Atom) :
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show toQuot ((φ.or ψ).swapTemporal) = orQuot (toQuot φ.swapTemporal) (toQuot ψ.swapTemporal)
-  simp only [Formula.or, Formula.neg, Formula.swapTemporal]
+  change toQuot ((φ.or ψ).swapTemporal) = orQuot (toQuot φ.swapTemporal) (toQuot ψ.swapTemporal)
+  simp only [Formula.swapTemporal]
   rfl
 
 /-- Sigma maps G to H: `σ(G a) = H(σ a)`. -/
@@ -268,7 +266,7 @@ theorem sigma_quot_G_H (a : LindenbaumAlg Atom) :
     sigmaQuot (gQuot a) = hQuot (sigmaQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.allFuture.swapTemporal) = hQuot (toQuot φ.swapTemporal)
+  change toQuot (φ.allFuture.swapTemporal) = hQuot (toQuot φ.swapTemporal)
   simp only [Formula.swapTemporal_allFuture]
   rfl
 
@@ -277,7 +275,7 @@ theorem sigma_quot_H_G (a : LindenbaumAlg Atom) :
     sigmaQuot (hQuot a) = gQuot (sigmaQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.allPast.swapTemporal) = gQuot (toQuot φ.swapTemporal)
+  change toQuot (φ.allPast.swapTemporal) = gQuot (toQuot φ.swapTemporal)
   simp only [Formula.swapTemporal_allPast]
   rfl
 
@@ -286,7 +284,7 @@ theorem sigma_quot_box (a : LindenbaumAlg Atom) :
     sigmaQuot (boxQuot a) = boxQuot (sigmaQuot a) := by
   induction a using Quotient.ind
   rename_i φ
-  show toQuot (φ.box.swapTemporal) = boxQuot (toQuot φ.swapTemporal)
+  change toQuot (φ.box.swapTemporal) = boxQuot (toQuot φ.swapTemporal)
   simp only [Formula.swapTemporal]
   rfl
 

@@ -290,7 +290,7 @@ theorem bimodal_conservative_over_temporal
     [Infinite Atom] [DecidableEq Atom] [Denumerable (Temporal.Formula Atom)]
     {φ : Temporal.Formula Atom}
     (h : Cslib.Logic.Bimodal.ThDerivable φ.toBimodal) :
-    Cslib.Logic.Temporal.Temporal.ThDerivable φ := by
+    Cslib.Logic.Temporal.ThDerivable φ := by
   apply Cslib.Logic.Temporal.completeness
   intro D _lo _nt _nm _nm2 M t
   exact temporal_valid_of_bimodal_derivable h D M t

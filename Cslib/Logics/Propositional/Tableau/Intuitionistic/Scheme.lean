@@ -33,7 +33,7 @@ avoided to prevent typeclass resolution ambiguity on `Bool`-valued data.
 
 `modelBot_uc` (upward-closure of `modelBot b`) is omitted from this interface because
 it requires a saturation hypothesis for the minimal scheme; it is proved inline inside
-the parametric truth lemma in `Scheme.lean` Phase 3.
+the parametric truth lemma in `Scheme.lean`.
 
 ## Main Definitions
 
@@ -64,8 +64,8 @@ also on `b`: alpha-rule formulas have BOTH outputs, beta-rule formulas have AT L
 output (corresponding to the sub-branch taken), and the world-creating F(φ→ψ) rule has
 T(φ) and F(ψ) at a fresh world.
 
-These conditions are established structurally by `intExpandBranches_openBranch_sat` (task 317,
-pending) via induction on the expansion loop. The key step: `intStepBranch b e nw = none`
+These conditions are established structurally by `intExpandBranches_openBranch_sat`
+(pending) via induction on the expansion loop. The key step: `intStepBranch b e nw = none`
 implies every compound formula in `b` is in `e`, and formulas in `e` had their rule outputs
 added to an ancestor branch; branch monotonicity carries them forward to `b`.
 
@@ -296,7 +296,7 @@ theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
       · simp [isAccessible.go] at hacc
   · exact hsat
 
-/-! ## Edge-Accessibility Preorder (task 317 plan v5 Phase 2)
+/-! ## Edge-Accessibility Preorder
 
 `isAccessible edges` (`Rules.lean:87-102`) already computes multi-hop reachability over the
 parent-child `edges` list (a fuel-bounded DFS). Rather than re-proving `isAccessible` itself is
@@ -306,7 +306,7 @@ Mathlib's reflexive-transitive closure of `isAccessible edges` treated as a base
 This is sound regardless of whether `isAccessible edges` is "already" transitive (it gives AT
 LEAST as much accessibility as needed, and `Relation.ReflTransGen.single` lifts any ONE
 `isAccessible edges w w' = true` fact — which is all `sat_fimp`/`sat_timp` witnesses ever
-supply — directly into the closure). This replaces the ambient numeric `≤` (report 08's finding:
+supply — directly into the closure). This replaces the ambient numeric `≤` (a known finding:
 the ambient `(ℕ,≤)` frame admits "phantom" worlds not on the branch, falsifying the T(→)
 truth-lemma case; edge-reachability restricts `≤` to worlds the expansion actually
 constructed). -/
@@ -332,7 +332,7 @@ lemma intAccessPreorder_le_of_isAccessible {edges : IEdges} {w w' : Nat}
     @LE.le Nat (intAccessPreorder edges).toLE w w' :=
   Relation.ReflTransGen.single h
 
-/-! ### Edge-list monotonicity (task 317 phase 1)
+/-! ### Edge-list monotonicity
 
 The expansion loop only ever APPENDS to `edges` (world-creation adds one parent-child pair;
 persistence/alpha/beta steps leave it unchanged), so any accessibility fact established at an
@@ -343,7 +343,7 @@ a direct edge its one-hop accessibility; `isAccessible_append_mono` shows append
 never loses an existing accessibility witness (the DFS's candidate-children list and fuel
 bound can only grow). Together with `Relation.ReflTransGen.mono`, these let
 `intAccessPreorder`-accessibility survive edge-list growth without needing to touch
-`Soundness.lean`'s (task 316, read-only) internal machinery. -/
+`Soundness.lean`'s (read-only) internal machinery. -/
 
 /-- A direct parent-child edge `(w', w) ∈ edges` gives one-hop accessibility `w ⤳ w'`. -/
 private lemma isAccessible_one_step {edges : IEdges} {w w' : Nat}
@@ -433,7 +433,7 @@ lemma intAccessPreorder_mono_append {edges : IEdges} (newEdge : Nat × Nat) {w w
     @LE.le Nat (intAccessPreorder (edges ++ [newEdge])).toLE w w' :=
   Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) h
 
-/-- The final edge-accessibility payoff (task 317 phase 1): every `F(φ→ψ)@w` on the
+/-- The final edge-accessibility payoff: every `F(φ→ψ)@w` on the
 saturated branch `b` has a genuinely edge-accessible witness under `edges`, upgrading
 `sat_fimp`'s numeric proxy to the real `intAccessPreorder` frame. Declared early (ahead of
 the invariant-threading machinery below) since `truthLemma` consumes it directly. NOT
@@ -446,7 +446,7 @@ def IFimpAccess (edges : IEdges) (b : IBranch Atom) : Prop :=
       b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
       b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
 
-/-! ### `intExtractValuation` monotonicity — STOP-gate finding (task 317 plan v5 Phase 2, R1)
+/-! ### `intExtractValuation` monotonicity — STOP-gate finding
 
 **Blocker (documented, not a `sorry`; no lemma is stated below).** The remaining Phase 2 task —
 "prove `intExtractValuation` monotone along `intAccessPreorder edges`" (needed both for a
@@ -489,11 +489,11 @@ alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or 
 orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
 dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
 
-/-! ### `sat_timp` discharge — STOP-gate finding (task 317 phase 9), UPDATED (Deliverable 6
+/-! ### `sat_timp` discharge — STOP-gate finding, UPDATED (Deliverable 6
 branching-rule redesign)
 
 **Gap 2 (determinacy) is RESOLVED as of the `.pos, .imp` branching arm added to
-`intApplyRuleFull` (`Rules.lean:245-268`).** The STOP-gate below (task 317 phase 9) was written
+`intApplyRuleFull` (`Rules.lean:245-268`).** The STOP-gate below was written
 against the OLD design, where `intTImpRule` was the ONLY `T(φ→ψ)` rule and only ever ADDED
 `T(ψ)@w'` under `T(φ)@w' ∈ b` — never planting `F(φ)@w'`, so the needed disjunction
 `F(φ)@w' ∈ b ∨ T(ψ)@w' ∈ b` was unreachable without an independent determinacy/bivalence fact
@@ -546,10 +546,10 @@ force either `sorry` via a weakened/vacuous statement. -/
 
 /-! ## Parametric Truth Lemma -/
 
-/-- Parametric truth lemma (the single deferred completeness obligation, task 317).
+/-- Parametric truth lemma (the single deferred completeness obligation).
 Generalizes `intTruthLemma` over an `IntMinScheme`'s `closurePred`/`modelBot`.
 
-**Infrastructure cross-reference** (task 422): The FMP routes in `Metalogic/IntDecidability.lean`
+**Infrastructure cross-reference**: The FMP routes in `Metalogic/IntDecidability.lean`
 and `Metalogic/MinDecidability.lean` prove analogous "forcing ↔ membership" statements
 (`int_fin_truth_lemma`, `min_fin_truth_lemma`) over finite `Σ`-bounded worlds. Those lemmas
 rest on the `IntLindenbaum.lean`/minimal Lindenbaum substrate and are sorry-free. This
@@ -558,11 +558,11 @@ Factoring a common abstraction across the two carrier systems is explicitly defe
 the module headers in `Metalogic/IntDecidability.lean` and `Metalogic/MinDecidability.lean`
 for the full rationale.
 
-**Route (a) frame (task 317 phase 1)**: the completeness countermodel's `[Preorder Nat]`
+**Route (a) frame**: the completeness countermodel's `[Preorder Nat]`
 instance is `intAccessPreorder edges` (edge-reachability over the branch's accumulated
 parent-child edges), installed locally via `letI` (per `intAccessPreorder`'s own docstring),
 NOT the ambient global `Nat` order — the latter admits "phantom" worlds not on the branch,
-falsifying the T(→) case (report 08). `hfimp : IFimpAccess edges b` upgrades `sat_fimp`'s
+falsifying the T(→) case. `hfimp : IFimpAccess edges b` upgrades `sat_fimp`'s
 witness from the numeric `w ≤ w'` proxy to a genuine `isAccessible edges w w'` fact, which
 the F-imp case below needs to instantiate `IForces_imp`'s `∀ w', w ≤ w' → …` over this frame. -/
 lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
@@ -604,7 +604,7 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
-      -- hfimp (task 317 phase 1, Route (a)) witnesses a genuinely edge-accessible w' with
+      -- hfimp (Route (a)) witnesses a genuinely edge-accessible w' with
       -- T(φ')@w', F(ψ')@w'; lift to the `intAccessPreorder` order, IH closes each
       -- membership-to-forcing step.
       intro h hcontra
@@ -818,11 +818,11 @@ private lemma IExpandedConsistent_mono {b b' : IBranch Atom} {e : List (ISF Atom
     (hmono : ∀ x ∈ b, x ∈ b') (h : IExpandedConsistent b e) : IExpandedConsistent b' e :=
   fun sf hsfin => sfSatisfied_mono hmono (h sf hsfin)
 
-/-! ### Edge-accessibility companion invariant (task 317 phase 1, Route (a))
+/-! ### Edge-accessibility companion invariant (Route (a))
 
 `sfSatisfied`'s `.neg, .imp` clause only records the numeric proxy `sf.label ≤ w'` (the
 literal `sat_fimp` field, kept as-is — no reformulation, per the Preserved Assets table). That
-proxy is exactly the "phantom worlds" gap report 08 identifies: it is NOT strong enough to
+proxy is exactly the previously-noted "phantom worlds" gap: it is NOT strong enough to
 instantiate `truthLemma`'s F-imp case over `intAccessPreorder edges` (which needs genuine
 edge-reachability of the witness, not merely a numeric bound). `sfAccessSat`/
 `IExpandedAccessConsistent` is a companion invariant threaded ALONGSIDE `sfSatisfied`/
@@ -1043,7 +1043,7 @@ private lemma intStepBranch_some_exists
 
 omit [Hashable Atom] in
 /-- A `linearResult` step preserves `IExpandedConsistent`, `ILabelBound`, and the
-edge-accessibility companion `IExpandedAccessConsistent` (task 317 phase 1): the processed
+edge-accessibility companion `IExpandedAccessConsistent`: the processed
 formula's rule outputs are exactly the new formulas added to the branch, so `sfSatisfied`
 (and, for the world-creating `.neg, .imp` case, `sfAccessSat` over the freshly-appended edge)
 holds for it, and old formulas persist their satisfaction/bound/access facts since
@@ -1409,7 +1409,7 @@ private lemma IAllConsistent_map {branches' : List (IBranch Atom)} (f : IBranch 
     exact ⟨(h bh (List.mem_cons_self ..)).1, (h bh (List.mem_cons_self ..)).2,
       ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
 
-/-- The edge-accessibility companion of `IAllConsistent` (task 317 phase 1): threaded
+/-- The edge-accessibility companion of `IAllConsistent`: threaded
 ALONGSIDE it (not merged into it, to avoid touching `IAllConsistent`'s already-green call
 sites) through the same `branches`/`expandedSets`/`edgeSets` triple. -/
 private def IAllAccessConsistent (bs : List (IBranch Atom)) (es : List (List (ISF Atom)))
@@ -1481,7 +1481,7 @@ private lemma IExpandedAccessConsistent_sat
   rw [hsfeq] at hsat; simp only [sfAccessSat] at hsat
   exact hsat
 
-/-! ## Fixed Finite Universe and Counting Work (task 317 phase 6, report 07 §Q4)
+/-! ## Fixed Finite Universe and Counting Work
 
 This section defines the fixed finite `(sign, subformula, world)` cell universe
 `intUniverse φ` and the per-branch counting measure `intWork`, mirroring the proven
@@ -1496,7 +1496,7 @@ definitions (mirroring `modalSubfmls`/`modalUniverse`'s *shape*, not literal reu
 than reusing `Proposition.subformulas` (`Subformula.lean`), which is `Finset`-valued and
 the wrong shape for the counting-measure machinery below. `intUniverse`'s size bound
 (`intUniverse_length_le`) is exactly the quantity `intFuel φ := 3 ^ (2 * (2 * φ.complexity
-+ 1) * (φ.complexity + 2))` (task 317 phase 5, `Expansion.lean:462-463`) was pre-sized
++ 1) * (φ.complexity + 2))` (`Expansion.lean:462-463`) was pre-sized
 against.
 
 ## References
@@ -1547,9 +1547,10 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- The number of `.imp`-node positions in `φ`'s subformula list is at most `φ.complexity`
 (mirrors `intSubfmls_length_le`'s induction shape, tracking a per-connective `imp`-count
 instead of total length). This is the key combinatorial fact underlying the linear world
-bound `intExpandBranches_world_bound` (report 07 §Q4 F5, continuation): world-creation
+bound `intExpandBranches_world_bound`: world-creation
 fires *only* on a `.neg`-signed `.imp` formula (`Rules.lean:262-264`), and (per the
-occurrence-tracking argument recorded in the Phase 6.2 continuation) each world created
+occurrence-tracking argument recorded in the Branch-Universe Containment section below) each
+world created
 during expansion can be injected into a DISTINCT `.imp`-node position of `φ0`'s own parse
 tree -- since F-signed formulas never propagate via persistence (`posFormulasAt`/
 `propagatePersistence`/`intTImpRule` are `.pos`-only, `Rules.lean:126,139-141,174-186`), a
@@ -1594,7 +1595,7 @@ def intUniverse (φ : Proposition Atom) : List (ISF Atom) :=
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The universe has length at most `2 * (2 * φ.complexity + 1) * (φ.complexity + 2)` --
 exactly the exponent `intFuel φ := 3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))`
-(task 317 phase 5, `Expansion.lean:462-463`) was pre-sized against (mirrors
+(`Expansion.lean:462-463`) was pre-sized against (mirrors
 `modalUniverse_length_le`, `FmpMeasure.lean:154-186`). -/
 lemma intUniverse_length_le (φ : Proposition Atom) :
     (intUniverse φ).length ≤
@@ -1628,7 +1629,7 @@ lemma intUniverse_length_le (φ : Proposition Atom) :
       ≤ (φ.complexity + 2) * (2 * (2 * φ.complexity + 1)) := houter
     _ = 2 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by ring
 
-/-! ## Branch-Universe Containment (task 317 phase 6.2, report 07 §Q4 / line 143)
+/-! ## Branch-Universe Containment
 
 This section proves that every signed formula added to a branch by any intuitionistic
 tableau rule (ALPHA, BETA, world-creating F(φ→ψ), or the persistent T(φ→ψ) rule) stays
@@ -1922,7 +1923,7 @@ def intExpMeasure (U : List (ISF Atom))
     (branches expandedSets : List (List (ISF Atom))) : Nat :=
   ((branches.zip expandedSets).map (fun p => 3 ^ intWork U p.1 p.2)).sum
 
-/-! ## Strict-Decrease Engine (task 317 phase 7) -/
+/-! ## Strict-Decrease Engine -/
 
 omit [Hashable Atom] in
 /-- **Combinatorial core** (mirrors `modalCount_notMem_append_drop`, `FmpMeasure.lean:2440`):
@@ -2066,7 +2067,7 @@ private lemma intExpMeasure_append
   simp only [intExpMeasure, List.zip_append h, List.map_append, List.sum_append]
 
 omit [Hashable Atom] in
-/-- **The strict-decrease engine** (task 317 phase 7, mirrors `modalExpMeasure_step_lt`'s linear
+/-- **The strict-decrease engine** (mirrors `modalExpMeasure_step_lt`'s linear
 case, `FmpMeasure.lean:2873`): one `intExpandBranches`'s `go` step that replaces the single
 active branch `bh` by a single successor `b'` -- covering the ALPHA arm (`newEdge = none`,
 `b' = Branch.extendMany bh newForms`), the world-creating arm with no `Sfor`-reuse
@@ -2134,7 +2135,7 @@ private lemma intExpMeasure_const_exp
   simp only [intExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
 
 omit [Hashable Atom] in
-/-- **The BETA-arm strict-decrease lemma** (task 317 phase 7.2, mirrors
+/-- **The BETA-arm strict-decrease lemma** (mirrors
 `modalExpMeasure_step_lt`'s branching case, `FmpMeasure.lean:2921-2937`): completes
 `intExpMeasure_step_lt`'s coverage of `intStepBranch`'s `.branchingResult` arm -- the two
 branching rules, `.pos, .or` (F-or) and `.neg, .and` (T-and), both producing a literal
@@ -2269,14 +2270,14 @@ lemma intExpMeasure_step_lt_branch
 
 omit [Hashable Atom] in
 /-- At the tableau entry point, the worklist measure over the universe `intUniverse φ` is
-bounded by `intFuel φ` (task 317 phase 8; mirrors `modalExpMeasure_entry_le_fuel`,
+bounded by `intFuel φ` (mirrors `modalExpMeasure_entry_le_fuel`,
 `FmpMeasure.lean:208-251`). The initial singleton branch `[⟨.neg, φ, 0⟩]` with empty
 expanded-set `[]` gives `intWork (intUniverse φ) [⟨.neg, φ, 0⟩] [] ≤ 2 * |intUniverse φ|`
 (the branch-exclusion term is bounded by `List.countP_le_length`, the expanded-set term is
 exactly the full length since `e = []` excludes nothing); `intUniverse_length_le` then bounds
 `|intUniverse φ|` by `2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, so `2 * |intUniverse φ|`
 is bounded by `4 * (2 * φ.complexity + 1) * (φ.complexity + 2)` -- exactly the doubled exponent
-`intFuel φ` was raised to in phase 8.0 (`Expansion.lean`), closing with equality (no slack
+`intFuel φ` was raised to (`Expansion.lean`), closing with equality (no slack
 needed, unlike the modal analogue's messier world-bound formula). -/
 lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
     intExpMeasure (intUniverse φ) [[(⟨.neg, φ, 0⟩ : ISF Atom)]] [[]] ≤ intFuel φ := by
@@ -2559,15 +2560,15 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
 Additionally exposes the accumulated `IEdges` active for `b` at the point of saturation
-(task 317 phase 1 plumbing), so the completeness side can install edge-accessibility as the
-countermodel frame (task 317 phase 2) instead of the ambient numeric `≤`. The conclusion also
+(plumbing), so the completeness side can install edge-accessibility as the
+countermodel frame instead of the ambient numeric `≤`. The conclusion also
 carries `IFimpAccess edges b`: every `F(φ→ψ)@w ∈ b` has a genuinely edge-accessible witness
 (not merely the numeric `sat_fimp` proxy), the fact `truthLemma`'s F-imp case needs to
-instantiate over `intAccessPreorder edges` (task 317 phase 1, Route (a)).
+instantiate over `intAccessPreorder edges` (Route (a)).
 
 The proof mirrors `intExpandBranches_openBranch_closed`: induction on `fuel`, with inner
 induction on the `pending` list in the `go` helper, threading the combined `IAllConsistent`
-invariant AND its edge-accessibility companion `IAllAccessConsistent` (task 317 phase 1). In
+invariant AND its edge-accessibility companion `IAllAccessConsistent`. In
 the recursive cases (`linearResult`, `branchingResult`), the fuel IH closes the goal once both
 invariants are re-established for the extended/branched state via
 `intStepBranch_linear_preserves`/`intStepBranch_branch_preserves` (the exposed `edges` witness
@@ -2695,7 +2696,7 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                 -- b = bPers; intStepBranch returned none, so every compound formula in
                 -- bPers is already recorded in eH (`intStepBranch_none_compound_mem`), and
                 -- `hIC_bPers`/`hACC_bPers` give its rule-outputs / edge-access witnesses on
-                -- bPers -- exactly `IBranchSaturation` + `IFimpAccess` (task 317 phase 1).
+                -- bPers -- exactly `IBranchSaturation` + `IFimpAccess`.
                 exact ⟨edgesH, IExpandedConsistent_sat hstep hIC_bPers,
                   IExpandedAccessConsistent_sat hstep hACC_bPers⟩
               | some step =>
@@ -2972,15 +2973,15 @@ If the expansion with `S.closurePred` returns `.openBranch b`, then the extracte
 valuation `intExtractValuation b` with `botForces = S.modelBot b` falsifies `φ` at
 world 0.
 
-- At `intScheme`: specializes to `intuitionisticOpenBranch_countermodel` (Phase 3b).
-- At `minScheme`: specializes to `minOpenBranch_countermodel` (Phase 3b).
+- At `intScheme`: specializes to `intuitionisticOpenBranch_countermodel`.
+- At `minScheme`: specializes to `minOpenBranch_countermodel`.
 
 ## Proof structure
 
 From `h : intExpandBranches ... S.closurePred = .openBranch b` we extract structural facts:
 1. `hopen`: the returned branch is open (`S.closurePred b = false`).
 2. `hsat`/`hfimp`: the returned branch is saturated, together with the edge-accessibility
-   upgrade of its F(φ→ψ) witnesses (task 317 phase 1, Route (a)).
+   upgrade of its F(φ→ψ) witnesses (Route (a)).
 3. `hFmem`: F(φ)@0 is on b (branch monotonicity: formulas are only added).
 Then `(truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem` closes the goal, existentially
 packaging the `edges` the countermodel frame (`intAccessPreorder edges`) is installed over
@@ -3009,7 +3010,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
               exact List.mem_cons_self)
           b h
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
-  -- Obtain the saturation witness and its accumulated edges (task 317 phase 1), together
+  -- Obtain the saturation witness and its accumulated edges, together
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
   obtain ⟨edges, hsat, hfimp⟩ :=
     intExpandBranches_openBranch_sat _ _ _ _ _ _ _
@@ -3025,7 +3026,7 @@ branch-derived Kripke model, then the parametric expansion closes on `φ`.
 
 Proof: by contrapositive. If the expansion returns `.openBranch b`, then
 `openBranch_countermodel S` gives `∃ edges, ¬ @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (S.modelBot b) 0 φ` (task 317 phase 1/2, Route (a)), contradicting
+(intExtractValuation b) (S.modelBot b) 0 φ` (Route (a)), contradicting
 `hvalid edges b`.
 
 The hypothesis `hvalid` encodes the per-scheme validity notion, now quantified over the

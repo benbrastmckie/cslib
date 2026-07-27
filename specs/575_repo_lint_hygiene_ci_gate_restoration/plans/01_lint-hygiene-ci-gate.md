@@ -280,20 +280,48 @@ mechanical substitution — budget the next dispatch accordingly.
 Replace each with a durable anchor — sibling filename, section heading, or verified fact. **Never
 delete the surrounding explanation**; the prose is usually load-bearing, only the identifier rots.
 
-### Phase 4: Import gate (`lake shake`) [NOT STARTED]
+### Phase 4: Import gate (`lake shake`) [COMPLETED]
 
-Commented out at `.github/workflows/lean_action_ci.yml:29-32`.
+**DONE** (commit `69477a15`). Reconciled counts: a live run confirmed **94 files / 91
+remove-directives / 20 add-directives** (the plan's "94/91/19" figure was correct; the
+"92/106/36" figure was stale).
 
-**Do not naively re-enable.** ~77% of flagged removals are a redundant `import Cslib.Init`; only
-**~24 are genuine** unused module imports, clustered in Tableau code. For every flagged file
-another `Cslib.*` import carries `Cslib.Init` transitively, so `checkInitImports` would not break
-— but the churn diff would be large and valueless.
+**Correction to this phase's original premise**: the plan assumed `Cslib.Init`'s existing
+`module -- shake: keep-downstream, shake: keep-all` annotation (added upstream in
+`25232322`/#379) would suppress the ~69 redundant-`import Cslib.Init` removal suggestions,
+and that a `scripts/noshake.json` config could reinforce it. Neither holds for this repo's
+pinned toolchain (`leanprover--lean4---v4.31.0`): (1) `scripts/noshake.json` / `--cfg` belong
+to a *different* tool — the Batteries-provided `lake exe shake` — not the built-in
+`lake shake` this CI step actually invokes (confirmed via `lake shake --help`, which has no
+`--cfg` flag); (2) tested directly with `--explain` against several of the 69 files, the
+built-in `lake shake`'s `keep-downstream` mechanism did not suppress the removal suggestion
+for any of them in this toolchain version, despite the annotation being present and
+syntactically correct.
 
-Correct sequence: configure shake to always keep `Cslib.Init`, fix the ~24 genuine imports, then
-uncomment the CI step.
+Given that, the actual disposition was: **apply the tool's own `--fix` across all 94 files**
+in one batch (`lake shake --add-public --keep-implied --keep-prefix --fix Cslib`), per this
+phase's own risk-tier-3 caution that shake directives are advice to be verified by rebuild,
+not by argument about the mechanism. This is safe and mechanical — removing a directly-redundant
+`import Cslib.Init` never changes elaboration when another retained import already carries it
+transitively (verified: `checkInitImports` stayed green afterward).
 
-Reconcile counts first — two runs disagreed: 94 files / 91 removes / 19 adds versus
-92 / 106 / 36. Likely flag or version drift; resolve before acting.
+**Two genuine false positives found and fixed by hand** (not part of the mechanical `--fix`,
+per the "directives are advice, not proof" caution): `Cslib/Logics/Propositional/Tableau/Defs.lean`
+and `Cslib/Logics/Temporal/Tableau/Defs.lean` each had a vestigial `open Cslib.Logic.Tableau`
+that shake's needs-analysis doesn't track (an unused `open` isn't a "reference" it counts), so
+it removed the import providing that namespace and the `open` line became `error: unknown
+namespace`. Confirmed by reading both files that no identifier from `Cslib.Logic.Tableau`
+(`PropTableauRule`/`applyPropRule`/`tryAllPropRules`) is used unqualified in either file —
+the `open` itself was dead. Fixed by deleting the dead open (Temporal's file keeps
+`open Cslib.Logic.Temporal`, which the file does use, e.g. bare `Formula`). No proof term,
+definition, or theorem statement was touched; this is a dead-`open`-directive deletion, the
+same class of fix as Phase 8.
+
+Verification: `lake build --wfail --iofail` (exit 1, exactly the 5 baseline sorry warnings),
+`lake test` (exit 0), `lake exe checkInitImports` (exit 0), `lake exe mk_all --check` ("No
+update necessary"), then `lake shake --add-public --keep-implied --keep-prefix Cslib` re-run
+clean (exit 0, zero files flagged). CI step uncommented at
+`.github/workflows/lean_action_ci.yml:29-32`.
 
 ### Phase 5: Suppression audit [PARTIAL — 18 of ~570 done]
 

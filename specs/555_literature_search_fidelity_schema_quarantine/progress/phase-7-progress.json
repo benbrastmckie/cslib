@@ -1,0 +1,53 @@
+{
+  "phase": 7,
+  "phase_name": "Decision memo — write up and surface, decide nothing",
+  "started_at": "2026-07-26T18:50:00Z",
+  "last_updated": "2026-07-26T19:10:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "7.1 - state reversed premise, blast radius, histogram, massacci status",
+      "status": "done",
+      "files_touched": [
+        "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md"
+      ]
+    },
+    {
+      "id": 2,
+      "description": "7.2 - restate options (b)/(c)/(d) with concrete costs, neutral presentation",
+      "status": "done",
+      "files_touched": [
+        "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md"
+      ]
+    },
+    {
+      "id": 3,
+      "description": "7.3 - write up Group A regression as separate decision item",
+      "status": "done",
+      "files_touched": [
+        "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md"
+      ]
+    },
+    {
+      "id": 4,
+      "description": "7.4 - record residual findings (djvu gate, arisaka, gabbay_1994, sources-recovered, phase 1-5 no-op)",
+      "status": "done",
+      "files_touched": [
+        "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md"
+      ]
+    },
+    {
+      "id": 5,
+      "description": "7.5 - write round-2 summary, commit Stage C part 2",
+      "status": "done",
+      "files_touched": [
+        "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md",
+        "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md"
+      ]
+    }
+  ],
+  "current_objective": 5,
+  "approaches_tried": [],
+  "deviations": [],
+  "handoff_count": 0
+}

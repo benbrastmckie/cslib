@@ -1,8 +1,11 @@
 # Implementation Plan: Task #555 (v2)
 
 - **Task**: 555 - literature_search_fidelity_schema_quarantine
-- **Status**: [PARTIAL] (Phases 1-5 COMPLETED and committed; Phases 6-7 revised from BLOCKED gates
-  into actionable work — Phase 6 closes out the former DJVU gate, Phase 7 produces a decision memo)
+- **Status**: [COMPLETED] (All 7 phases COMPLETED and committed. Phase 6 closed out the former DJVU
+  gate, restored the working tree, repointed `.sources-recovered/` references, and re-adjudicated
+  `arisakadasstrassburger_2015` (honest quarantined outcome). Phase 7 produced the decision memo
+  surfacing the Group B disposition, Group A regression, and residual findings — no value stamped,
+  no policy changed, no `index.json` write in Phase 7 itself.)
 - **Effort**: 8 hours total (5 hours spent on Phases 1-5; ~3 hours remaining across Phases 6-7)
 - **Dependencies**: None
 - **Research Inputs**:
@@ -572,7 +575,7 @@ writes none. Commit at the end of each.
 
 ---
 
-### Phase 7: Decision memo — write up and surface, decide nothing [NOT STARTED]
+### Phase 7: Decision memo — write up and surface, decide nothing [COMPLETED]
 
 - **Goal:** Produce a single decision memo that gives the user everything needed to decide the
   Group B disposition, the Group A regression, and the residual findings.
@@ -587,88 +590,101 @@ writes none. Commit at the end of each.
 - **Tasks:**
 
   **7.1 — State the reversed premise up front.**
-  - [ ] Open the memo with the single most consequential fact: `no_source_pdf` is **not** on
+  - [x] Open the memo with the single most consequential fact: `no_source_pdf` is **not** on
         `QUARANTINED_FIDELITY_VALUES`, so **every document stamped with it is currently returned by
         default no-flag search, non-degraded, with no signal to the caller that no source exists.**
-        State this plainly and early — it is currently live and unannounced.
-  - [ ] Give the measured blast radius from Phase 6.5, not the research report's figure: **66**
+        State this plainly and early — it is currently live and unannounced. *(completed: memo
+        section 1)*
+  - [x] Give the measured blast radius from Phase 6.5, not the research report's figure: **66**
         documents stamped `no_source_pdf`, all verified genuinely sourceless (0 of 66 have a
         `source.*` file on disk). Note that the report's "9" was the subset traceable to this task's
         original Group B, and that the index-wide population is roughly seven times larger.
-  - [ ] Record the full current fidelity histogram and note that **127** entries carry no
+        *(completed: memo section 1)*
+  - [x] Record the full current fidelity histogram and note that **127** entries carry no
         `provenance_fidelity` at all and therefore fail open to `unverified_summary`, which *is*
-        quarantined.
-  - [ ] Record that `massacci_2000_single_step_tableaux_for_modal_logics` has **left** the set — it
+        quarantined. *(completed: memo section 1 table)*
+  - [x] Record that `massacci_2000_single_step_tableaux_for_modal_logics` has **left** the set — it
         has a `source.pdf` and is stamped `verified_conversion` — so the remaining set contains
-        nothing referenced by this repository's `specs/literature-index.json`.
+        nothing referenced by this repository's `specs/literature-index.json`. *(completed: memo
+        section 1)*
 
   **7.2 — Restate options (b), (c), (d) against the current state, with concrete costs.**
-  - [ ] **Option (b) — stamp `unverified_no_baseline` on the sourceless set.** Files changed:
+  - [x] **Option (b) — stamp `unverified_no_baseline` on the sourceless set.** Files changed:
         `$LITERATURE_DIR/index.json` only (data, not repo source; a few `jq` edits). Effect: this is
         now a **rollback of live behavior**, not a no-op — it removes these documents from default
         search, since `unverified_no_baseline` is quarantined. Downstream: reachable only via
         `--include-unverified`. Citation risk: minimal; most conservative option. State the scope
         decision the user must also make: apply to the 9 originally in scope, or to all 66.
-  - [ ] **Option (c) — a non-quarantined value meaning "converted, no obtainable baseline."** Files
+        *(completed: memo section 2)*
+  - [x] **Option (c) — a non-quarantined value meaning "converted, no obtainable baseline."** Files
         changed: **none required — this is already the operative state** via `no_source_pdf`.
         Formalizing it means documenting `no_source_pdf` as a deliberate non-quarantined value in
         `literature-search.sh` and the audit script header. Downstream: `literature-search.sh`
         default search, `literature-briefing.sh` corpus selection, and every `--lit` briefing treat
         all 66 as citable. Citation risk: **high** — an agent citing one of these has no source
         against which any claim can be checked, which is precisely the failure mode the quarantine
-        mechanism exists to prevent.
-  - [ ] **Option (d) — leave as-is.** Files changed: none. State explicitly that **(d) has changed
+        mechanism exists to prevent. *(completed: memo section 2)*
+  - [x] **Option (d) — leave as-is.** Files changed: none. State explicitly that **(d) has changed
         meaning since it was first written**: "as-is" now means *citable in default search*, not
         *quarantined*. Substantively identical to accepting (c). Flag this plainly — a user who
-        picks (d) believing it is the status-quo-conservative choice would be mistaken.
-  - [ ] Be explicit that no code in this repository caused the current state: `no_source_pdf` was
+        picks (d) believing it is the status-quo-conservative choice would be mistaken. *(completed:
+        memo section 2)*
+  - [x] Be explicit that no code in this repository caused the current state: `no_source_pdf` was
         always in the audit script's six-value enum, `QUARANTINED_FIDELITY_VALUES` was never edited,
-        and the stamping was done by the Literature repo's `bb3bf18`.
-  - [ ] Present the options neutrally. Do **not** recommend one, and do **not** mark one as the
-        default.
+        and the stamping was done by the Literature repo's `bb3bf18`. *(completed: memo section 2
+        opening paragraph)*
+  - [x] Present the options neutrally. Do **not** recommend one, and do **not** mark one as the
+        default. *(completed: memo explicitly states no option is recommended or defaulted)*
 
   **7.3 — Write up the Group A regression as a separate decision item.**
-  - [ ] Report that Literature commit `bb3bf18` overwrote `wijesekera_1990_constructivemodallogicsi`
+  - [x] Report that Literature commit `bb3bf18` overwrote `wijesekera_1990_constructivemodallogicsi`
         and `simpson_1994_intuitionisticmodallogic` from `ocr_rescanned_reflowed_partial_symbol_loss`
         to `verified_conversion` (current `word_ratio` 0.9922 and 0.9828 respectively), losing the
-        partial-symbol-loss warning that a citing agent previously received.
-  - [ ] State the fix cost honestly: 2 `jq` edits to `$LITERATURE_DIR/index.json` (data, not repo
-        source), and nothing else.
-  - [ ] State the reason it is surfaced rather than actioned: it **reverses another repository's
+        partial-symbol-loss warning that a citing agent previously received. *(completed: memo
+        section 3 table)*
+  - [x] State the fix cost honestly: 2 `jq` edits to `$LITERATURE_DIR/index.json` (data, not repo
+        source), and nothing else. *(completed: memo section 3)*
+  - [x] State the reason it is surfaced rather than actioned: it **reverses another repository's
         deliberate commit**. Both documents now have real source PDFs, so `verified_conversion` is
-        arguably computable; what was lost is the explicit warning, not the ratio.
-  - [ ] Note that this task's Phase 4 `SIX_VALUE_ENUM` guard works but only constrains
+        arguably computable; what was lost is the explicit warning, not the ratio. *(completed:
+        memo section 3)*
+  - [x] Note that this task's Phase 4 `SIX_VALUE_ENUM` guard works but only constrains
         `literature-fidelity-audit.sh`; `bb3bf18` wrote by another route and bypassed it. If the
         user wants durable protection, that is a separate piece of work in the Literature repo, not
-        here.
+        here. *(completed: memo section 3, "Durability gap" paragraph)*
 
   **7.4 — Record the residual findings that need no decision but must not be lost.**
-  - [ ] The former Phase 6 DJVU gate is **closed, not waived**: `source.pdf` made it moot, no
+  - [x] The former Phase 6 DJVU gate is **closed, not waived**: `source.pdf` made it moot, no
         install and no authorization were needed, and the old `command -v djvutxt` check was a false
-        negative.
-  - [ ] `arisakadasstrassburger_2015` — report the Phase 6.4 outcome and the measured ratios
+        negative. *(completed: memo section 4)*
+  - [x] `arisakadasstrassburger_2015` — report the Phase 6.4 outcome and the measured ratios
         (0.5148 whole-document, 0.5128 chunk-sum, against a 0.75 threshold). If it remained
         quarantined, say so plainly and state that this is the honest verdict: the markdown really
         does contain about half the source's words. Note it is the only modal-logic document still
         quarantined and the one the task description called out as central, so the user may want to
-        re-convert the source rather than re-adjudicate it — but do not do so here.
-  - [ ] `gabbay_1994` is a second `unadjudicated` document (`word_ratio` 0.11, no source on disk),
-        not previously reported.
-  - [ ] `$LITERATURE_DIR/.sources-recovered/` is empty; sources live at
-        `sources/<doc_id>/source.{pdf,djvu}`. Record what Phase 6.3 repointed.
-  - [ ] **The Phase 1-5 code is now a functional no-op.** The `doc_id` fallback adds 0 keys against
+        re-convert the source rather than re-adjudicate it — but do not do so here. *(completed:
+        memo section 4 reports the Phase 6.4 re-measured figures — md_words 10,012 / pdf_words
+        18,575 / ratio 0.539, essentially unchanged from the plan's earlier hand-computed figures —
+        and states the quarantined outcome plainly)*
+  - [x] `gabbay_1994` is a second `unadjudicated` document (`word_ratio` 0.11, no source on disk),
+        not previously reported. *(completed: memo section 4)*
+  - [x] `$LITERATURE_DIR/.sources-recovered/` is empty; sources live at
+        `sources/<doc_id>/source.{pdf,djvu}`. Record what Phase 6.3 repointed. *(completed: memo
+        section 4)*
+  - [x] **The Phase 1-5 code is now a functional no-op.** The `doc_id` fallback adds 0 keys against
         the current index (`old 127 / new 127`, `added: []`) and the legacy gate matches 0 of 321
         entries, because the migration gave every former legacy entry a `sources/`-prefixed `path`.
         Report the uncommitted working-tree revert that Phase 6.1 restored, and put the question to
         the user: **keep the code as defensive coverage for any future legacy-schema ingest, or
-        retire it deliberately as dead code?** Do not answer it.
+        retire it deliberately as dead code?** Do not answer it. *(completed: memo section 4;
+        question posed, not answered)*
 
   **7.5 — Close out.**
-  - [ ] Write the round-2 implementation summary to
+  - [x] Write the round-2 implementation summary to
         `specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md`,
-        covering Phase 6's actions and pointing at the memo for the open decisions.
-  - [ ] Commit Stage C part 2. Scope: the task directory only. Message:
-        `task 555 phase 7: write Group B decision memo and round-2 summary`.
+        covering Phase 6's actions and pointing at the memo for the open decisions. *(completed)*
+  - [x] Commit Stage C part 2. Scope: the task directory only. Message:
+        `task 555 phase 7: write Group B decision memo and round-2 summary`. *(completed)*
 
 - **Timing:** 1.5 hours
 - **Depends on:** 6
@@ -734,9 +750,11 @@ writes none. Commit at the end of each.
       burgess_1984 sub-entries showed incidental word_ratio drift 1.0041->1.0033 with no
       provenance_fidelity class change — see Phase 6.4 annotation and Phase 7 memo)*
 - [x] `RATIO_THRESHOLD` (0.75) and `PROOF_ADEQUACY_THRESHOLD` (0.6) unchanged at task end.
-- [ ] The decision memo exists, covers options (b)/(c)/(d), the Group A regression, and the explicit
-      statement that `no_source_pdf` is citable by default (Phase 7).
-- [ ] Phase 7 modified no script and caused no `index.json` write.
+- [x] The decision memo exists, covers options (b)/(c)/(d), the Group A regression, and the explicit
+      statement that `no_source_pdf` is citable by default (Phase 7). *(verified: 198 lines, all
+      required needles present)*
+- [x] Phase 7 modified no script and caused no `index.json` write. *(verified: git status clean on
+      .claude/scripts/, index.json byte-identical to post-Phase-6 snapshot)*
 - [x] `QUARANTINED_FIDELITY_VALUES` unchanged — asserted at every phase, including 6 and 7.
 - [x] No file under `Cslib/` and no `.lean` file modified at any point (Phase 6 confirmed; Phase 7
       re-confirms below).

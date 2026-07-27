@@ -79,7 +79,7 @@ next_project_number: 580
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-575 [PARTIAL] — Repo-wide linter and hygiene cleanup, restoring the CI build gate
+575 [IMPLEMENTING] — Repo-wide linter and hygiene cleanup, restoring the CI build gate
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
@@ -142,7 +142,7 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 ---
 
 ### 575. Repo lint hygiene ci gate restoration
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None

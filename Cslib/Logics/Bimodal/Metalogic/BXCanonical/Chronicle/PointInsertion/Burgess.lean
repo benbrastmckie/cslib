@@ -25,12 +25,6 @@ associated seed-consistency results.
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -57,11 +51,13 @@ of B by delta violates burgessR3, which is the key to the splitting construction
 Helper: If L is a subset of {delta} union B with B a DCS, and L derives phi, then either
 phi is in B, or there exists beta in B with a theorem (beta AND delta) implies phi.
 -/
-theorem dc_delta_B_controlled (fc : FrameClass) {B : Set (Formula Atom)} (h_dcs : ClosedUnderDerivation fc B)
+theorem dc_delta_B_controlled (fc : FrameClass) {B : Set (Formula Atom)}
+    (h_dcs : ClosedUnderDerivation fc B)
     {delta phi : Formula Atom} {L : List (Formula Atom)}
     (hL_sub : ∀ psi ∈ L, psi ∈ ({delta} : Set (Formula Atom)) ∪ B)
     (hL_deriv : DerivationTree fc L phi) :
-    (phi ∈ B) ∨ (∃ beta ∈ B, Nonempty (DerivationTree fc [] ((Formula.and beta delta).imp phi))) := by
+    (phi ∈ B) ∨
+      (∃ beta ∈ B, Nonempty (DerivationTree fc [] ((Formula.and beta delta).imp phi))) := by
   haveI : ∀ x : Formula Atom, Decidable (x ∈ B) := fun x => Classical.propDecidable _
   by_cases h_delta_L : delta ∈ L
   · let L_B := L.filter (· ∈ B)
@@ -80,9 +76,12 @@ theorem dc_delta_B_controlled (fc : FrameClass) {B : Set (Formula Atom)} (h_dcs 
     by_cases hLB_empty : L_B = []
     · rw [hLB_empty] at d_imp
       have h_top_B : (Formula.bot.imp Formula.bot) ∈ B :=
-        cud_contains_theorems h_dcs (Cslib.Logic.Bimodal.Theorems.Combinators.identity (Formula.bot : Formula Atom))
-      exact Or.inr ⟨Formula.bot.imp Formula.bot, h_top_B, ⟨Cslib.Logic.Bimodal.Theorems.Combinators.impTrans
-        (Cslib.Logic.Bimodal.Theorems.Propositional.rceImp (Formula.bot.imp Formula.bot) delta) d_imp⟩⟩
+        cud_contains_theorems h_dcs
+          (Cslib.Logic.Bimodal.Theorems.Combinators.identity (Formula.bot : Formula Atom))
+      exact Or.inr ⟨Formula.bot.imp Formula.bot, h_top_B,
+        ⟨Cslib.Logic.Bimodal.Theorems.Combinators.impTrans
+          (Cslib.Logic.Bimodal.Theorems.Propositional.rceImp (Formula.bot.imp Formula.bot) delta)
+          d_imp⟩⟩
     · have h_imp_B : delta.imp phi ∈ B := h_dcs L_B _ hLB_sub d_imp
       right
       refine ⟨delta.imp phi, h_imp_B, ⟨?_⟩⟩
@@ -90,13 +89,15 @@ theorem dc_delta_B_controlled (fc : FrameClass) {B : Set (Formula Atom)} (h_dcs 
         DerivationTree.modus_ponens [(Formula.and (delta.imp phi) delta)]
           (Formula.and (delta.imp phi) delta) (delta.imp phi)
           (DerivationTree.weakening [] [(Formula.and (delta.imp phi) delta)] _
-            (Cslib.Logic.Bimodal.Theorems.Propositional.lceImp (delta.imp phi) delta) (List.nil_subset _))
+            (Cslib.Logic.Bimodal.Theorems.Propositional.lceImp (delta.imp phi) delta)
+            (List.nil_subset _))
           (DerivationTree.assumption _ _ (by simp))
       have h_r : DerivationTree fc [(Formula.and (delta.imp phi) delta)] delta :=
         DerivationTree.modus_ponens [(Formula.and (delta.imp phi) delta)]
           (Formula.and (delta.imp phi) delta) delta
           (DerivationTree.weakening [] [(Formula.and (delta.imp phi) delta)] _
-            (Cslib.Logic.Bimodal.Theorems.Propositional.rceImp (delta.imp phi) delta) (List.nil_subset _))
+            (Cslib.Logic.Bimodal.Theorems.Propositional.rceImp (delta.imp phi) delta)
+            (List.nil_subset _))
           (DerivationTree.assumption _ _ (by simp))
       have h_mp : DerivationTree fc [(Formula.and (delta.imp phi) delta)] phi :=
         DerivationTree.modus_ponens [(Formula.and (delta.imp phi) delta)] delta phi h_l h_r
@@ -199,7 +200,8 @@ theorem xu_lemma_2_3_since_top (fc : FrameClass) {A B C : Set (Formula Atom)}
     theoremInMcsFc h_mcs_A (DerivationTree.temporal_necessitation _ h_bx12')
   -- G(P(alpha)) → G(snce(alpha, top)) via temporal K distribution
   have h_temp_k :=
-    liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived alpha.somePast (Formula.snce top alpha))
+    liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived alpha.somePast
+      (Formula.snce top alpha))
   have h_G_snce : (Formula.snce top alpha).allFuture ∈ A :=
     SetMaximalConsistent.implication_property h_mcs_A
       (SetMaximalConsistent.implication_property h_mcs_A
@@ -221,7 +223,8 @@ theorem xu_lemma_2_3_since_top (fc : FrameClass) {A B C : Set (Formula Atom)}
     have h_G_flip := theoremInMcsFc h_mcs_A (DerivationTree.temporal_necessitation _ h_flip)
     -- G(snce) → G(beta → beta ∧ snce) via temporal K distribution
     have h_temp_k2 :=
-      liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived (Formula.snce top alpha) (beta.imp (Formula.and beta (Formula.snce top alpha))))
+      liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived
+        (Formula.snce top alpha) (beta.imp (Formula.and beta (Formula.snce top alpha))))
     have h_G_guard_str : (beta.imp (Formula.and beta (Formula.snce top alpha))).allFuture ∈ A :=
       SetMaximalConsistent.implication_property h_mcs_A
         (SetMaximalConsistent.implication_property h_mcs_A
@@ -269,7 +272,8 @@ theorem xu_lemma_2_3_until_top (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_H_impl : (gamma.someFuture.imp (Formula.untl top gamma)).allPast ∈ C :=
     theoremInMcsFc h_mcs_C (Cslib.Logic.Bimodal.Theorems.pastNecessitation _ h_bx12)
   -- H(F(gamma)) → H(untl(gamma, top)) via past K distribution
-  have h_past_k : DerivationTree fc [] _ := Cslib.Logic.Bimodal.Theorems.pastKDist gamma.someFuture (Formula.untl top gamma)
+  have h_past_k : DerivationTree fc [] _ :=
+    Cslib.Logic.Bimodal.Theorems.pastKDist gamma.someFuture (Formula.untl top gamma)
   have h_H_untl : (Formula.untl top gamma).allPast ∈ C :=
     SetMaximalConsistent.implication_property h_mcs_C
       (SetMaximalConsistent.implication_property h_mcs_C
@@ -285,7 +289,8 @@ theorem xu_lemma_2_3_until_top (fc : FrameClass) {A B C : Set (Formula Atom)}
         ((Formula.untl top gamma).imp (beta.imp (Formula.and beta (Formula.untl top gamma)))) :=
       mp (pairing beta (Formula.untl top gamma)) flip
     -- H(untl(gamma,top) → (beta → beta ∧ untl(gamma,top))) via past necessitation
-    have h_H_flip := theoremInMcsFc h_mcs_C (Cslib.Logic.Bimodal.Theorems.pastNecessitation _ h_flip)
+    have h_H_flip :=
+      theoremInMcsFc h_mcs_C (Cslib.Logic.Bimodal.Theorems.pastNecessitation _ h_flip)
     -- H(untl(gamma,top)) → H(beta → beta ∧ untl(gamma,top)) via past K
     have h_past_k2 : DerivationTree fc [] _ := Cslib.Logic.Bimodal.Theorems.pastKDist
       (Formula.untl top gamma) (beta.imp (Formula.and beta (Formula.untl top gamma)))
@@ -310,7 +315,8 @@ theorem xu_lemma_2_3_until_top (fc : FrameClass) {A B C : Set (Formula Atom)}
 /-! ## Set.univ is ClosedUnderDerivation -/
 
 /-- `Set.univ` is `ClosedUnderDerivation` -- every formula is in `Set.univ`. -/
-theorem set_univ_closed_under_derivation (fc : FrameClass) : ClosedUnderDerivation fc (Set.univ : Set (Formula Atom)) :=
+theorem set_univ_closed_under_derivation (fc : FrameClass) :
+    ClosedUnderDerivation fc (Set.univ : Set (Formula Atom)) :=
   fun _ _ _ _ => Set.mem_univ _
 
 /-! ## Inconsistent case helpers for gContent/hContent ⊆ B
@@ -346,11 +352,14 @@ theorem G_ex_falso_strengthen (fc : FrameClass) {A : Set (Formula Atom)}
   have d_ef := exFalsoFromAssumption fc φ ψ
   exact SetMaximalConsistent.implication_property h_mcs_A
     (SetMaximalConsistent.implication_property h_mcs_A
-      (theoremInMcsFc h_mcs_A (liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived φ (φ.neg.imp ψ))))
+      (theoremInMcsFc h_mcs_A
+        (liftBase fc
+          (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived φ (φ.neg.imp ψ))))
       (theoremInMcsFc h_mcs_A (DerivationTree.temporal_necessitation _ d_ef)))
     h_Gφ
 
-/-- Helper: H(ψ.neg → χ) ∈ C from H(ψ) ∈ C, using exFalsoFromAssumption + pastNecessitation + pastKDist. -/
+/-- Helper: H(ψ.neg → χ) ∈ C from H(ψ) ∈ C, using exFalsoFromAssumption + pastNecessitation +
+pastKDist. -/
 theorem H_ex_falso_strengthen (fc : FrameClass) {C : Set (Formula Atom)}
     (h_mcs_C : SetMaximalConsistent fc C) (ψ χ : Formula Atom)
     (h_Hψ : Formula.allPast ψ ∈ C) :
@@ -362,6 +371,7 @@ theorem H_ex_falso_strengthen (fc : FrameClass) {C : Set (Formula Atom)}
       (theoremInMcsFc h_mcs_C (Cslib.Logic.Bimodal.Theorems.pastNecessitation _ d_ef)))
     h_Hψ
 
+set_option linter.flexible false in
 /-- When {φ} ∪ B is inconsistent with DCS B, we have φ.neg ∈ B.
 Proof: ¬SetConsistent means ∃ derivation of ⊥ from {φ} ∪ B.
 By deduction theorem: derivation of φ.neg from B. By closure: φ.neg ∈ B. -/
@@ -741,12 +751,13 @@ noncomputable def listConj (fc : FrameClass) : List (Formula Atom) → Formula A
   | [φ] => φ
   | (φ :: rest) => Formula.and φ (listConj fc rest)
 
+set_option linter.flexible false in
 /-- ⊢ listConj L → φ for each φ ∈ L. -/
 noncomputable def listConjImpliesElem (fc : FrameClass) :
     (L : List (Formula Atom)) → (φ : Formula Atom) → (h : φ ∈ L) →
     DerivationTree fc [] ((listConj fc L).imp φ)
   | [ψ], φ, h => by
-    simp [List.mem_singleton] at h
+    simp at h
     subst h; simp [listConj]; exact identity φ
   | (ψ₁ :: ψ₂ :: rest), φ, h => by
     simp [listConj]
@@ -763,8 +774,10 @@ noncomputable def listConjImpliesElem (fc : FrameClass) :
       have h_rec := listConjImpliesElem fc (ψ₂ :: rest) φ h'
       exact impTrans h_right h_rec
 
+set_option linter.flexible false in
 /-- If B is DCS and all elements of L are in B, then listConj L ∈ B. -/
-theorem list_conj_mem_dcs (fc : FrameClass) {B : Set (Formula Atom)} (h_dcs : ClosedUnderDerivation fc B) :
+theorem list_conj_mem_dcs (fc : FrameClass) {B : Set (Formula Atom)}
+    (h_dcs : ClosedUnderDerivation fc B) :
     (L : List (Formula Atom)) → (h : ∀ φ ∈ L, φ ∈ B) → listConj fc L ∈ B
   | [], _ => cud_contains_theorems h_dcs (identity (Formula.bot : Formula Atom))
   | [φ], h => by simp [listConj]; exact h φ (List.mem_singleton.mpr rfl)
@@ -776,8 +789,10 @@ theorem list_conj_mem_dcs (fc : FrameClass) {B : Set (Formula Atom)} (h_dcs : Cl
         h ψ (List.mem_cons.mpr (Or.inr hψ)))
     exact cud_conj_closed h_dcs h1 h2
 
+set_option linter.flexible false in
 /-- If A is MCS and all elements of L are in A, then listConj L ∈ A. -/
-theorem list_conj_mem_mcs (fc : FrameClass) {A : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc A) :
+theorem list_conj_mem_mcs (fc : FrameClass) {A : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent fc A) :
     (L : List (Formula Atom)) → (h : ∀ φ ∈ L, φ ∈ A) → listConj fc L ∈ A
   | [], _ => theoremInMcsFc h_mcs (identity (Formula.bot : Formula Atom))
   | [φ], h => by simp [listConj]; exact h φ (List.mem_singleton.mpr rfl)
@@ -798,11 +813,12 @@ theorem consistent_of_F_mem (fc : FrameClass) {A : Set (Formula Atom)}
   have h_seed := forward_temporal_witness_seed_consistent A h_mcs φ h_F
   exact SetConsistent_of_subset (Set.subset_union_left) h_seed
 
+set_option linter.flexible false in
 /-- If {φ} is consistent and [φ] ⊢ ⊥, then False. -/
 theorem inconsistent_singleton_false (fc : FrameClass) {φ : Formula Atom}
     (h_cons : SetConsistent fc ({φ} : Set (Formula Atom)))
     (d : DerivationTree fc [φ] Formula.bot) : False :=
-  h_cons [φ] (fun ψ hψ => by simp [List.mem_singleton] at hψ; subst hψ; exact Set.mem_singleton _) ⟨d⟩
+  h_cons [φ] (fun ψ hψ => by simp at hψ; subst hψ; exact Set.mem_singleton _) ⟨d⟩
 
 
 /-- Derivation-level left_mono for Until: if ⊢ φ→χ then ⊢ untl(φ,ψ) → untl(χ,ψ).
@@ -900,7 +916,8 @@ theorem P_mono_mcs (fc : FrameClass) {C : Set (Formula Atom)}
   exact somePast_allPast_neg_absurd h_mcs phi h_P h_H_neg_phi
 
 /-- Structure to hold the result of iterated BX13 enrichment. -/
-structure EnrichedEvent (fc : FrameClass) (A : Set (Formula Atom)) (guard event : Formula Atom) (alphas : List (Formula Atom)) where
+structure EnrichedEvent (fc : FrameClass) (A : Set (Formula Atom)) (guard event : Formula Atom)
+    (alphas : List (Formula Atom)) where
   /-- The enriched event formula produced by BX13 enrichment. -/
   event' : Formula Atom
   /-- Proof that `untl(event', guard)` belongs to the MCS `A`. -/
@@ -942,7 +959,8 @@ noncomputable def iteratedEnrichment (fc : FrameClass) {A : Set (Formula Atom)}
           exact evt.hSnce α' h)
 
 /-- Structure for iterated BX13' (Since-direction) enrichment. -/
-structure EnrichedEventSince (fc : FrameClass) (C : Set (Formula Atom)) (guard event : Formula Atom) (gammas : List (Formula Atom)) where
+structure EnrichedEventSince (fc : FrameClass) (C : Set (Formula Atom)) (guard event : Formula Atom)
+    (gammas : List (Formula Atom)) where
   /-- The enriched event formula produced by BX13' enrichment. -/
   event' : Formula Atom
   /-- Proof that `snce(event', guard)` belongs to the MCS `C`. -/
@@ -962,7 +980,8 @@ noncomputable def iteratedEnrichmentSince (fc : FrameClass) {C : Set (Formula At
     (event : Formula Atom) →
     Formula.snce guard event ∈ C →
     EnrichedEventSince fc C guard event gammas
-  | [], _, event, hSnce => EnrichedEventSince.mk event hSnce (identity event) (fun _ h => by simp at h)
+  | [], _, event, hSnce =>
+    EnrichedEventSince.mk event hSnce (identity event) (fun _ h => by simp at h)
   | γ :: rest, h_gammas, event, hSnce => by
     have h_γ : γ ∈ C := h_gammas γ (List.mem_cons.mpr (Or.inl rfl))
     have h_enriched := enrichment_since_mcs fc h_mcs h_γ hSnce

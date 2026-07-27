@@ -50,11 +50,6 @@ interval. Key consequences:
 - Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Chronicle/RRelation.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
@@ -83,30 +78,35 @@ theorem until_implies_F_in_mcs (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) {γ δ : Formula Atom}
     (h_until : Formula.untl γ δ ∈ A) :
     Formula.someFuture δ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.until_implies_F_in_mcs (bimodalChronicleInterface fc) h_mcs h_until
+  Cslib.Logic.Metalogic.Chronicle.until_implies_F_in_mcs (bimodalChronicleInterface fc)
+    h_mcs h_until
 
 theorem until_self_accum_in_mcs (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) {γ δ : Formula Atom}
     (h_until : Formula.untl γ δ ∈ A) :
     Formula.untl (Formula.and γ (Formula.untl γ δ)) δ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.until_self_accum_in_mcs (bimodalChronicleInterface fc) h_mcs h_until
+  Cslib.Logic.Metalogic.Chronicle.until_self_accum_in_mcs (bimodalChronicleInterface fc)
+    h_mcs h_until
 
 theorem since_implies_P_in_mcs (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A) {γ δ : Formula Atom}
     (h_since : Formula.snce γ δ ∈ A) :
     Formula.somePast δ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.since_implies_P_in_mcs (bimodalChronicleInterface fc) h_mcs h_since
+  Cslib.Logic.Metalogic.Chronicle.since_implies_P_in_mcs (bimodalChronicleInterface fc)
+    h_mcs h_since
 
 theorem rRelation_guard_continues' {A B : Set (Formula Atom)}
     (h_r : rRelation A B) {γ δ : Formula Atom}
     (h_until : Formula.untl γ δ ∈ A) (h_not_delta : δ ∉ B) :
     γ ∈ B ∧ Formula.untl γ δ ∈ B :=
-  Cslib.Logic.Metalogic.Chronicle.rRelation_guard_continues' (bimodalChronicleInterface FrameClass.Base) h_r h_until h_not_delta
+  Cslib.Logic.Metalogic.Chronicle.rRelation_guard_continues'
+    (bimodalChronicleInterface FrameClass.Base) h_r h_until h_not_delta
 
 /-! ## Deductive Closure -/
 
 /-- Deductive closure of a set: the set of all formulas derivable from finite subsets of S. -/
-noncomputable def deductiveClosure (fc : FrameClass) (Sig : Set (Formula Atom)) : Set (Formula Atom) :=
+noncomputable def deductiveClosure (fc : FrameClass) (Sig : Set (Formula Atom)) :
+    Set (Formula Atom) :=
   Cslib.Logic.Metalogic.Chronicle.ciDeductiveClosure (bimodalChronicleInterface fc) Sig
 
 theorem subset_deductiveClosure (fc : FrameClass) (Sig : Set (Formula Atom)) :
@@ -115,20 +115,24 @@ theorem subset_deductiveClosure (fc : FrameClass) (Sig : Set (Formula Atom)) :
 
 theorem deductiveClosure_closed (fc : FrameClass) (Sig : Set (Formula Atom)) :
     ∀ (L : List (Formula Atom)) (φ : Formula Atom),
-      (∀ ψ ∈ L, ψ ∈ deductiveClosure fc Sig) → DerivationTree fc L φ → φ ∈ deductiveClosure fc Sig :=
+      (∀ ψ ∈ L, ψ ∈ deductiveClosure fc Sig) → DerivationTree fc L φ →
+        φ ∈ deductiveClosure fc Sig :=
   Cslib.Logic.Metalogic.Chronicle.deductiveClosure_closed (bimodalChronicleInterface fc) Sig
 
-theorem deductiveClosure_consistent (fc : FrameClass) {Sig : Set (Formula Atom)} (h : SetConsistent fc Sig) :
+theorem deductiveClosure_consistent (fc : FrameClass) {Sig : Set (Formula Atom)}
+    (h : SetConsistent fc Sig) :
     SetConsistent fc (deductiveClosure fc Sig) :=
   Cslib.Logic.Metalogic.Chronicle.deductiveClosure_consistent (bimodalChronicleInterface fc) h
 
-theorem deductiveClosure_is_dcs (fc : FrameClass) {Sig : Set (Formula Atom)} (h : SetConsistent fc Sig) :
+theorem deductiveClosure_is_dcs (fc : FrameClass) {Sig : Set (Formula Atom)}
+    (h : SetConsistent fc Sig) :
     SetDeductivelyClosed fc (deductiveClosure fc Sig) :=
   Cslib.Logic.Metalogic.Chronicle.deductiveClosure_is_dcs (bimodalChronicleInterface fc) h
 
 theorem deductiveClosure_closed_under_derivation (fc : FrameClass) (Sig : Set (Formula Atom)) :
     ClosedUnderDerivation fc (deductiveClosure fc Sig) :=
-  Cslib.Logic.Metalogic.Chronicle.deductiveClosure_closed_under_derivation (bimodalChronicleInterface fc) Sig
+  Cslib.Logic.Metalogic.Chronicle.deductiveClosure_closed_under_derivation
+    (bimodalChronicleInterface fc) Sig
 
 /-! ## R-Maximal Extension Existence -/
 
@@ -143,7 +147,8 @@ theorem rMaximal_extension_exists (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A)
     {Sig : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed fc Sig) (h_r : rRelation A Sig) :
     ∃ B : Set (Formula Atom), Sig ⊆ B ∧ rMaximal fc A B :=
-  Cslib.Logic.Metalogic.Chronicle.rMaximal_extension_exists (bimodalChronicleInterface fc) h_mcs h_dcs h_r
+  Cslib.Logic.Metalogic.Chronicle.rMaximal_extension_exists (bimodalChronicleInterface fc)
+    h_mcs h_dcs h_r
 
 /--
 Similarly for Since: R-maximal Since extensions exist. (Bimodal-only: no Temporal
@@ -156,19 +161,23 @@ theorem rMaximalSince_extension_exists (fc : FrameClass) {A : Set (Formula Atom)
     ∃ B : Set (Formula Atom), Sig ⊆ B ∧ rMaximalSince fc A B := by
   have h_S_in : Sig ∈ {B | Sig ⊆ B ∧ SetDeductivelyClosed fc B ∧ rRelationSince A B} :=
     ⟨Set.Subset.refl _, h_dcs, h_r⟩
-  obtain ⟨B, hB_in, hB_max⟩ := zorn_subset {B | Sig ⊆ B ∧ SetDeductivelyClosed fc B ∧ rRelationSince A B} (by
+  obtain ⟨B, hB_in, hB_max⟩ :=
+    zorn_subset {B | Sig ⊆ B ∧ SetDeductivelyClosed fc B ∧ rRelationSince A B} (by
     intro c hc_sub hc_chain
     by_cases hc_empty : c = ∅
-    · exact ⟨Sig, h_S_in, by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
+    · exact ⟨Sig, h_S_in,
+        by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
     · obtain ⟨T₀, hT₀⟩ := Set.nonempty_iff_ne_empty.mpr hc_empty
       refine ⟨⋃₀ c, ?_, fun t ht => Set.subset_sUnion_of_mem ht⟩
       refine ⟨Set.subset_sUnion_of_subset c T₀ (hc_sub hT₀).1 hT₀, ?_, ?_⟩
       · constructor
         · intro L hL ⟨d⟩
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
           exact (hc_sub hTc).2.1.1 L hLT ⟨d⟩
         · intro L φ hL d
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
           exact Set.mem_sUnion.mpr ⟨T, hTc, (hc_sub hTc).2.1.2 L φ hLT d⟩
       · intro γ δ h_since
         rcases (hc_sub hT₀).2.2 γ δ h_since with h_d | ⟨h_g, h_s⟩
@@ -188,30 +197,36 @@ theorem r3Maximal_extension_exists (fc : FrameClass) {A C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_C : SetMaximalConsistent fc C)
     {Sig : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed fc Sig) (h_r3 : r3Relation A Sig C) :
     ∃ B : Set (Formula Atom), Sig ⊆ B ∧ R3Maximal fc A B C :=
-  Cslib.Logic.Metalogic.Chronicle.r3Maximal_extension_exists (bimodalChronicleInterface fc) h_mcs_A h_mcs_C h_dcs h_r3
+  Cslib.Logic.Metalogic.Chronicle.r3Maximal_extension_exists (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_C h_dcs h_r3
 
 /--
 Mirror: R3-maximal Since extensions exist. (Bimodal-only.)
 -/
 theorem r3MaximalSince_extension_exists (fc : FrameClass) {A C : Set (Formula Atom)}
     (_h_mcs_A : SetMaximalConsistent fc A) (_h_mcs_C : SetMaximalConsistent fc C)
-    {Sig : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed fc Sig) (h_r3 : r3RelationSince A Sig C) :
+    {Sig : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed fc Sig)
+    (h_r3 : r3RelationSince A Sig C) :
     ∃ B : Set (Formula Atom), Sig ⊆ B ∧ R3MaximalSince fc A B C := by
   have h_S_in : Sig ∈ {B | Sig ⊆ B ∧ SetDeductivelyClosed fc B ∧ r3RelationSince A B C} :=
     ⟨Set.Subset.refl _, h_dcs, h_r3⟩
-  obtain ⟨B, hB_in, hB_max⟩ := zorn_subset {B | Sig ⊆ B ∧ SetDeductivelyClosed fc B ∧ r3RelationSince A B C} (by
+  obtain ⟨B, hB_in, hB_max⟩ :=
+    zorn_subset {B | Sig ⊆ B ∧ SetDeductivelyClosed fc B ∧ r3RelationSince A B C} (by
     intro c hc_sub hc_chain
     by_cases hc_empty : c = ∅
-    · exact ⟨Sig, h_S_in, by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
+    · exact ⟨Sig, h_S_in,
+        by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
     · obtain ⟨T₀, hT₀⟩ := Set.nonempty_iff_ne_empty.mpr hc_empty
       refine ⟨⋃₀ c, ?_, fun t ht => Set.subset_sUnion_of_mem ht⟩
       refine ⟨Set.subset_sUnion_of_subset c T₀ (hc_sub hT₀).1 hT₀, ?_, ?_⟩
       · constructor
         · intro L hL ⟨d⟩
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
           exact (hc_sub hTc).2.1.1 L hLT ⟨d⟩
         · intro L φ hL d
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
           exact Set.mem_sUnion.mpr ⟨T, hTc, (hc_sub hTc).2.1.2 L φ hLT d⟩
       · constructor
         · intro γ δ h_since
@@ -246,29 +261,37 @@ theorem burgessR_absorption (fc : FrameClass) {A D C : Set (Formula Atom)}
     (β : Formula Atom) (h_β_D : β ∈ D)
     (h_rAD : burgessR A β D) (h_rDC : burgessR D β C) :
     burgessR A β C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessR_absorption (bimodalChronicleInterface fc) h_mcs_A h_mcs_D β h_β_D h_rAD h_rDC
+  Cslib.Logic.Metalogic.Chronicle.burgessR_absorption (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_D β h_β_D h_rAD h_rDC
 
-theorem burgessRSet_absorption (fc : FrameClass) {A D C : Set (Formula Atom)} {B : Set (Formula Atom)}
+theorem burgessRSet_absorption (fc : FrameClass) {A D C : Set (Formula Atom)}
+    {B : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_D : SetMaximalConsistent fc D)
     (h_sub_D : B ⊆ D) (h_rAD : burgessRSet A B D) (h_rDC : burgessRSet D B C) :
     burgessRSet A B C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessRSet_absorption (bimodalChronicleInterface fc) h_mcs_A h_mcs_D h_sub_D h_rAD h_rDC
+  Cslib.Logic.Metalogic.Chronicle.burgessRSet_absorption (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_D h_sub_D h_rAD h_rDC
 
 theorem burgessRSince_absorption (fc : FrameClass) {A D C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_D : SetMaximalConsistent fc D)
     (β : Formula Atom) (h_β_D : β ∈ D)
     (h_rAD : burgessRSince A β D) (h_rDC : burgessRSince D β C) :
     burgessRSince A β C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessRSince_absorption (bimodalChronicleInterface fc) h_mcs_A h_mcs_D β h_β_D h_rAD h_rDC
+  Cslib.Logic.Metalogic.Chronicle.burgessRSince_absorption (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_D β h_β_D h_rAD h_rDC
 
-theorem burgessRSetSince_absorption (fc : FrameClass) {A D C : Set (Formula Atom)} {B : Set (Formula Atom)}
+theorem burgessRSetSince_absorption (fc : FrameClass) {A D C : Set (Formula Atom)}
+    {B : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_D : SetMaximalConsistent fc D)
     (h_sub_D : B ⊆ D) (h_rAD : burgessRSetSince A B D) (h_rDC : burgessRSetSince D B C) :
     burgessRSetSince A B C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessRSetSince_absorption (bimodalChronicleInterface fc) h_mcs_A h_mcs_D h_sub_D h_rAD h_rDC
+  Cslib.Logic.Metalogic.Chronicle.burgessRSetSince_absorption (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_D h_sub_D h_rAD h_rDC
 
-theorem burgessR3_absorption (fc : FrameClass) {A D C : Set (Formula Atom)} {B₁ B₂ B₁₂ : Set (Formula Atom)}
-    (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_D : SetMaximalConsistent fc D) (h_mcs_C : SetMaximalConsistent fc C)
+theorem burgessR3_absorption (fc : FrameClass) {A D C : Set (Formula Atom)}
+    {B₁ B₂ B₁₂ : Set (Formula Atom)}
+    (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_D : SetMaximalConsistent fc D)
+    (h_mcs_C : SetMaximalConsistent fc C)
     (h_sub_B₁ : B₁₂ ⊆ B₁) (h_sub_D : B₁₂ ⊆ D) (h_sub_B₂ : B₁₂ ⊆ B₂)
     (h_r3_AD : burgessR3 A B₁ D) (h_r3_DC : burgessR3 D B₂ C) :
     burgessR3 A B₁₂ C := by
@@ -282,9 +305,11 @@ theorem burgessR3_absorption (fc : FrameClass) {A D C : Set (Formula Atom)} {B�
 
 /-! ## MCS Contrapositive Helper -/
 
-theorem mcs_contrapositive_mem (fc : FrameClass) {Sig : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc Sig)
+theorem mcs_contrapositive_mem (fc : FrameClass) {Sig : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent fc Sig)
     {A B : Formula Atom} (hImpl : A.imp B ∈ Sig) (h_negB : B.neg ∈ Sig) : A.neg ∈ Sig :=
-  Cslib.Logic.Metalogic.Chronicle.mcs_contrapositive_mem (bimodalChronicleInterface fc) h_mcs hImpl h_negB
+  Cslib.Logic.Metalogic.Chronicle.mcs_contrapositive_mem (bimodalChronicleInterface fc)
+    h_mcs hImpl h_negB
 
 /-! ## C4 Hard Case Derivations (Bimodal-only) -/
 
@@ -302,9 +327,12 @@ theorem c4_hard_case_G_neg_delta (fc : FrameClass) {A : Set (Formula Atom)}
   set top := Formula.bot.imp (Formula.bot : Formula Atom) with htop_def
   have h_G_top_gamma : Formula.allFuture (top.imp γ) ∈ A := by
     have h_G_ps := theoremInMcsFc h_mcs
-      (DerivationTree.temporal_necessitation _ (DerivationTree.axiom [] _ (Axiom.imp_s γ top) trivial))
+      (DerivationTree.temporal_necessitation _
+        (DerivationTree.axiom [] _ (Axiom.imp_s γ top) trivial))
     have h_dist := theoremInMcsFc h_mcs
-      (liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived (Atom := Atom) γ (top.imp γ)))
+      (liftBase fc
+        (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived
+          (Atom := Atom) γ (top.imp γ)))
     exact SetMaximalConsistent.implication_property h_mcs
       (SetMaximalConsistent.implication_property h_mcs h_dist h_G_ps) h_Gγ
   have h_ax := theoremInMcsFc h_mcs
@@ -353,12 +381,15 @@ theorem deductiveClosure_singleton_imp (fc : FrameClass) {B : Set (Formula Atom)
     (h_cud : ClosedUnderDerivation fc B) {δ φ : Formula Atom}
     (h_delta : δ ∈ B) (h_imp : (δ.imp φ) ∈ deductiveClosure fc B) :
     φ ∈ B :=
-  Cslib.Logic.Metalogic.Chronicle.deductiveClosure_singleton_imp (bimodalChronicleInterface fc) h_cud h_delta h_imp
+  Cslib.Logic.Metalogic.Chronicle.deductiveClosure_singleton_imp (bimodalChronicleInterface fc)
+    h_cud h_delta h_imp
 
-theorem dcs_neg_insert_consistent (fc : FrameClass) {B : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed fc B)
+theorem dcs_neg_insert_consistent (fc : FrameClass) {B : Set (Formula Atom)}
+    (h_dcs : SetDeductivelyClosed fc B)
     {φ : Formula Atom} (h_not_in : φ ∉ B) :
     SetConsistent fc (insert φ.neg B) :=
-  Cslib.Logic.Metalogic.Chronicle.dcs_neg_insert_consistent (bimodalChronicleInterface fc) h_dcs.2 h_not_in
+  Cslib.Logic.Metalogic.Chronicle.dcs_neg_insert_consistent (bimodalChronicleInterface fc)
+    h_dcs.2 h_not_in
 
 /-! ## BurgessR3 Guard Algebra (Bimodal-only) -/
 
@@ -482,50 +513,59 @@ theorem untl_left_mono_G (fc : FrameClass) {A : Set (Formula Atom)}
     {β₁ β₂ γ : Formula Atom}
     (h_G_impl : (β₁.imp β₂).allFuture ∈ A) (hUntl : Formula.untl β₁ γ ∈ A) :
     Formula.untl β₂ γ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.untl_left_mono_G (bimodalChronicleInterface fc) h_mcs h_G_impl hUntl
+  Cslib.Logic.Metalogic.Chronicle.untl_left_mono_G (bimodalChronicleInterface fc)
+    h_mcs h_G_impl hUntl
 
 theorem snce_left_mono_H (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A)
     {β₁ β₂ γ : Formula Atom}
     (h_H_impl : (β₁.imp β₂).allPast ∈ A) (hSnce : Formula.snce β₁ γ ∈ A) :
     Formula.snce β₂ γ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.snce_left_mono_H (bimodalChronicleInterface fc) h_mcs h_H_impl hSnce
+  Cslib.Logic.Metalogic.Chronicle.snce_left_mono_H (bimodalChronicleInterface fc)
+    h_mcs h_H_impl hSnce
 
 theorem untl_left_mono_thm (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A)
     {β₁ β₂ γ : Formula Atom}
     (hImpl : DerivationTree fc [] (β₁.imp β₂)) (hUntl : Formula.untl β₁ γ ∈ A) :
     Formula.untl β₂ γ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.untl_left_mono_thm (bimodalChronicleInterface fc) h_mcs hImpl hUntl
+  Cslib.Logic.Metalogic.Chronicle.untl_left_mono_thm (bimodalChronicleInterface fc)
+    h_mcs hImpl hUntl
 
 theorem snce_left_mono_thm (fc : FrameClass) {A : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc A)
     {β₁ β₂ γ : Formula Atom}
     (hImpl : DerivationTree fc [] (β₁.imp β₂)) (hSnce : Formula.snce β₁ γ ∈ A) :
     Formula.snce β₂ γ ∈ A :=
-  Cslib.Logic.Metalogic.Chronicle.snce_left_mono_thm (bimodalChronicleInterface fc) h_mcs hImpl hSnce
+  Cslib.Logic.Metalogic.Chronicle.snce_left_mono_thm (bimodalChronicleInterface fc)
+    h_mcs hImpl hSnce
 
 /-! ## Helper: Derivation from Singleton Set Implies Implication Theorem -/
 
 /-- If `L` consists entirely of copies of `η` and `L ⊢ φ`, then `[η] ⊢ φ`. -/
-noncomputable def derivationFromSingletonList (fc : FrameClass) {η φ : Formula Atom} {L : List (Formula Atom)}
+noncomputable def derivationFromSingletonList (fc : FrameClass) {η φ : Formula Atom}
+    {L : List (Formula Atom)}
     (hL : ∀ ψ ∈ L, ψ = η) (d : DerivationTree fc L φ) :
     DerivationTree fc [η] φ :=
   Cslib.Logic.Metalogic.Chronicle.derivationFromSingletonList (bimodalChronicleInterface fc) hL d
 
-theorem burgessR_of_deductiveClosure_singleton (fc : FrameClass) {A C : Set (Formula Atom)} {η : Formula Atom}
+theorem burgessR_of_deductiveClosure_singleton (fc : FrameClass) {A C : Set (Formula Atom)}
+    {η : Formula Atom}
     (h_mcs_A : SetMaximalConsistent fc A)
     (h_burgessR : burgessR A η C) (φ : Formula Atom)
     (hφ : φ ∈ deductiveClosure fc ({η} : Set (Formula Atom))) :
     burgessR A φ C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessR_of_deductiveClosure_singleton (bimodalChronicleInterface fc) h_mcs_A h_burgessR φ hφ
+  Cslib.Logic.Metalogic.Chronicle.burgessR_of_deductiveClosure_singleton
+    (bimodalChronicleInterface fc) h_mcs_A h_burgessR φ hφ
 
-theorem burgessRSince_of_deductiveClosure_singleton (fc : FrameClass) {A C : Set (Formula Atom)} {η : Formula Atom}
+theorem burgessRSince_of_deductiveClosure_singleton (fc : FrameClass) {A C : Set (Formula Atom)}
+    {η : Formula Atom}
     (h_mcs_C : SetMaximalConsistent fc C)
     (h_burgessRSince : burgessRSince C η A) (φ : Formula Atom)
     (hφ : φ ∈ deductiveClosure fc ({η} : Set (Formula Atom))) :
     burgessRSince C φ A :=
-  Cslib.Logic.Metalogic.Chronicle.burgessRSince_of_deductiveClosure_singleton (bimodalChronicleInterface fc) h_mcs_C h_burgessRSince φ hφ
+  Cslib.Logic.Metalogic.Chronicle.burgessRSince_of_deductiveClosure_singleton
+    (bimodalChronicleInterface fc) h_mcs_C h_burgessRSince φ hφ
 
 /-! ## BurgessR3Maximal Existence from Seed -/
 
@@ -534,29 +574,36 @@ theorem burgessR3Maximal_extension_exists (fc : FrameClass) {A C : Set (Formula 
     {Sig : Set (Formula Atom)} (h_cud : ClosedUnderDerivation fc Sig) (h_r3 : burgessR3 A Sig C) :
     ∃ B : Set (Formula Atom), Sig ⊆ B ∧ ClosedUnderDerivation fc B ∧ BurgessR3Maximal fc A B C := by
   obtain ⟨B, hSB, hB_cud, hB_r3⟩ :=
-    Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_extension_exists (bimodalChronicleInterface fc) h_mcs_A h_mcs_C h_cud h_r3
+    Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_extension_exists
+      (bimodalChronicleInterface fc) h_mcs_A h_mcs_C h_cud h_r3
   exact ⟨B, hSB, hB_cud, hB_cud, hB_r3⟩
 
-theorem burgessR3Maximal_exists_from_seed (fc : FrameClass) (A C : Set (Formula Atom)) (η : Formula Atom)
+theorem burgessR3Maximal_exists_from_seed (fc : FrameClass) (A C : Set (Formula Atom))
+    (η : Formula Atom)
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_C : SetMaximalConsistent fc C)
     (h_burgessR : burgessR A η C)
     (h_burgessRSince : burgessRSince C η A)
     (h_η_A : η ∈ A) :
     ∃ B : Set (Formula Atom), BurgessR3Maximal fc A B C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_exists_from_seed (bimodalChronicleInterface fc) A C η h_mcs_A h_mcs_C h_burgessR h_burgessRSince h_η_A
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_exists_from_seed (bimodalChronicleInterface fc)
+    A C η h_mcs_A h_mcs_C h_burgessR h_burgessRSince h_η_A
 
 /-! ## BurgessR3Maximal Accessor Lemmas (Bimodal-only) -/
 
-theorem BurgessR3Maximal_cud (fc : FrameClass) {A B C : Set (Formula Atom)} (h : BurgessR3Maximal fc A B C) :
+theorem BurgessR3Maximal_cud (fc : FrameClass) {A B C : Set (Formula Atom)}
+    (h : BurgessR3Maximal fc A B C) :
     ClosedUnderDerivation fc B := h.1
 
-theorem BurgessR3Maximal_burgessR3 (fc : FrameClass) {A B C : Set (Formula Atom)} (h : BurgessR3Maximal fc A B C) :
+theorem BurgessR3Maximal_burgessR3 (fc : FrameClass) {A B C : Set (Formula Atom)}
+    (h : BurgessR3Maximal fc A B C) :
     burgessR3 A B C := h.2.1
 
-theorem BurgessR3Maximal_burgessRSet (fc : FrameClass) {A B C : Set (Formula Atom)} (h : BurgessR3Maximal fc A B C) :
+theorem BurgessR3Maximal_burgessRSet (fc : FrameClass) {A B C : Set (Formula Atom)}
+    (h : BurgessR3Maximal fc A B C) :
     burgessRSet A B C := h.2.1.1
 
-theorem BurgessR3Maximal_burgessRSetSince (fc : FrameClass) {A B C : Set (Formula Atom)} (h : BurgessR3Maximal fc A B C) :
+theorem BurgessR3Maximal_burgessRSetSince (fc : FrameClass) {A B C : Set (Formula Atom)}
+    (h : BurgessR3Maximal fc A B C) :
     burgessRSetSince C B A := h.2.1.2
 
 /-! ## BurgessR3 Bridging Lemmas for C4 (Bimodal-only) -/
@@ -599,37 +646,43 @@ theorem neg_allPast_neg_to_somePast (fc : FrameClass) {M : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc M) (α : Formula Atom)
     (h : Formula.neg (Formula.allPast (Formula.neg α)) ∈ M) :
     Formula.somePast α ∈ M :=
-  Cslib.Logic.Metalogic.Chronicle.neg_allPast_neg_to_somePast (bimodalChronicleInterface fc) h_mcs α h
+  Cslib.Logic.Metalogic.Chronicle.neg_allPast_neg_to_somePast (bimodalChronicleInterface fc)
+    h_mcs α h
 
 theorem neg_allFuture_neg_to_someFuture (fc : FrameClass) {M : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc M) (γ : Formula Atom)
     (h : Formula.neg (Formula.allFuture (Formula.neg γ)) ∈ M) :
     Formula.someFuture γ ∈ M :=
-  Cslib.Logic.Metalogic.Chronicle.neg_allFuture_neg_to_someFuture (bimodalChronicleInterface fc) h_mcs γ h
+  Cslib.Logic.Metalogic.Chronicle.neg_allFuture_neg_to_someFuture (bimodalChronicleInterface fc)
+    h_mcs γ h
 
 theorem someFuture_H_neg_G_P_absurd (fc : FrameClass) {M : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc M) (α : Formula Atom)
     (h_F : Formula.someFuture (Formula.allPast (Formula.neg α)) ∈ M)
     (h_GP : Formula.allFuture (Formula.somePast α) ∈ M) : False :=
-  Cslib.Logic.Metalogic.Chronicle.someFuture_H_neg_G_P_absurd (bimodalChronicleInterface fc) h_mcs α h_F h_GP
+  Cslib.Logic.Metalogic.Chronicle.someFuture_H_neg_G_P_absurd (bimodalChronicleInterface fc)
+    h_mcs α h_F h_GP
 
 theorem somePast_G_neg_H_F_absurd (fc : FrameClass) {M : Set (Formula Atom)}
     (h_mcs : SetMaximalConsistent fc M) (γ : Formula Atom)
     (h_P : Formula.somePast (Formula.allFuture (Formula.neg γ)) ∈ M)
     (h_HF : Formula.allPast (Formula.someFuture γ) ∈ M) : False :=
-  Cslib.Logic.Metalogic.Chronicle.somePast_G_neg_H_F_absurd (bimodalChronicleInterface fc) h_mcs γ h_P h_HF
+  Cslib.Logic.Metalogic.Chronicle.somePast_G_neg_H_F_absurd (bimodalChronicleInterface fc)
+    h_mcs γ h_P h_HF
 
 theorem burgessR_implies_burgessRSince (fc : FrameClass) {A C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_C : SetMaximalConsistent fc C)
     {β : Formula Atom} (h_burgessR : burgessR A β C) :
     burgessRSince C β A :=
-  Cslib.Logic.Metalogic.Chronicle.burgessR_implies_burgessRSince (bimodalChronicleInterface fc) h_mcs_A h_mcs_C h_burgessR
+  Cslib.Logic.Metalogic.Chronicle.burgessR_implies_burgessRSince (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_C h_burgessR
 
 theorem burgessRSince_implies_burgessR (fc : FrameClass) {A C : Set (Formula Atom)}
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_C : SetMaximalConsistent fc C)
     {β : Formula Atom} (h_burgessRSince : burgessRSince C β A) :
     burgessR A β C :=
-  Cslib.Logic.Metalogic.Chronicle.burgessRSince_implies_burgessR (bimodalChronicleInterface fc) h_mcs_A h_mcs_C h_burgessRSince
+  Cslib.Logic.Metalogic.Chronicle.burgessRSince_implies_burgessR (bimodalChronicleInterface fc)
+    h_mcs_A h_mcs_C h_burgessRSince
 
 /--
 **Corollary**: burgessRSet and burgessRSetSince are equivalent. (Bimodal-only.)
@@ -665,14 +718,18 @@ theorem burgessR3_untl_conj_in_A (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_event_weak1 : DerivationTree fc [] ((Formula.and γ δ).imp γ) :=
     Cslib.Logic.Bimodal.Theorems.Propositional.lceImp γ δ
   have h_G_event_weak1 := DerivationTree.temporal_necessitation _ h_event_weak1
-  have h_bx3 := DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_until (Formula.and γ δ) γ β) trivial
+  have h_bx3 :=
+    DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_until (Formula.and γ δ) γ β) trivial
   have h_untl_beta_gamma := SetMaximalConsistent.implication_property h_mcs_A
     (theoremInMcsFc h_mcs_A (DerivationTree.modus_ponens [] _ _ h_bx3 h_G_event_weak1))
     h_untl_step1
-  have h_untl_inner_weak : DerivationTree fc [] (((Formula.and β β').untl (γ.and δ)).imp (β.untl γ)) := by
+  have h_untl_inner_weak :
+      DerivationTree fc [] (((Formula.and β β').untl (γ.and δ)).imp (β.untl γ)) := by
     have h_G_gw1 := DerivationTree.temporal_necessitation _ h_guard_weak1
-    have h_bx2g := DerivationTree.axiom (fc := fc) [] _ (Axiom.left_mono_until_G (Formula.and β β') β (Formula.and γ δ)) trivial
-    have h_step1 : DerivationTree fc [] (((Formula.and β β').untl (γ.and δ)).imp (β.untl (γ.and δ))) :=
+    have h_bx2g := DerivationTree.axiom (fc := fc) [] _
+      (Axiom.left_mono_until_G (Formula.and β β') β (Formula.and γ δ)) trivial
+    have h_step1 :
+        DerivationTree fc [] (((Formula.and β β').untl (γ.and δ)).imp (β.untl (γ.and δ))) :=
       DerivationTree.modus_ponens [] _ _ h_bx2g h_G_gw1
     have h_step2 : DerivationTree fc [] ((β.untl (γ.and δ)).imp (β.untl γ)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_event_weak1
@@ -682,19 +739,24 @@ theorem burgessR3_untl_conj_in_A (fc : FrameClass) {A B C : Set (Formula Atom)}
     (β'.and (β.untl γ))) := by
     have h_comp1 : DerivationTree fc [] (
       ((Formula.and β β').and ((Formula.and β β').untl (γ.and δ))).imp β') := by
-      have h1 : DerivationTree fc [] _ := Cslib.Logic.Bimodal.Theorems.Propositional.lceImp (Formula.and β β') ((Formula.and β β').untl (γ.and δ))
+      have h1 : DerivationTree fc [] _ :=
+        Cslib.Logic.Bimodal.Theorems.Propositional.lceImp
+          (Formula.and β β') ((Formula.and β β').untl (γ.and δ))
       have h2 : DerivationTree fc [] _ := Cslib.Logic.Bimodal.Theorems.Propositional.rceImp β β'
       exact impTrans h1 h2
     have h_comp2 : DerivationTree fc [] (
       ((Formula.and β β').and ((Formula.and β β').untl (γ.and δ))).imp (β.untl γ)) := by
-      have h1 : DerivationTree fc [] _ := Cslib.Logic.Bimodal.Theorems.Propositional.rceImp (Formula.and β β') ((Formula.and β β').untl (γ.and δ))
+      have h1 : DerivationTree fc [] _ :=
+        Cslib.Logic.Bimodal.Theorems.Propositional.rceImp
+          (Formula.and β β') ((Formula.and β β').untl (γ.and δ))
       exact impTrans h1 h_untl_inner_weak
     exact combineImpConj h_comp1 h_comp2
   have h_weak_guard := untl_left_mono_thm fc h_mcs_A h_full_guard_weak h_accum
   have h_event_weak2 : DerivationTree fc [] ((Formula.and γ δ).imp δ) :=
     Cslib.Logic.Bimodal.Theorems.Propositional.rceImp γ δ
   have h_G_event_weak2 := DerivationTree.temporal_necessitation _ h_event_weak2
-  have h_bx3' := DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_until (Formula.and γ δ) δ (β'.and (β.untl γ))) trivial
+  have h_bx3' := DerivationTree.axiom (fc := fc) [] _
+    (Axiom.right_mono_until (Formula.and γ δ) δ (β'.and (β.untl γ))) trivial
   exact SetMaximalConsistent.implication_property h_mcs_A
     (theoremInMcsFc h_mcs_A (DerivationTree.modus_ponens [] _ _ h_bx3' h_G_event_weak2))
     h_weak_guard
@@ -773,8 +835,10 @@ theorem burgessR3Maximal_with_guard (fc : FrameClass) (A C : Set (Formula Atom))
       exact burgessR_of_deductiveClosure_singleton fc h_mcs_A h_burgessR φ hφ
     · intro φ hφ
       exact burgessRSince_of_deductiveClosure_singleton fc h_mcs_C h_burgessRSince φ hφ
-  obtain ⟨B, hSB, _, h_B3M⟩ := burgessR3Maximal_extension_exists fc h_mcs_A h_mcs_C h_dc_cud h_dc_r3
-  have h_η_B : η ∈ B := hSB (subset_deductiveClosure fc ({η} : Set (Formula Atom)) (Set.mem_singleton η))
+  obtain ⟨B, hSB, _, h_B3M⟩ :=
+    burgessR3Maximal_extension_exists fc h_mcs_A h_mcs_C h_dc_cud h_dc_r3
+  have h_η_B : η ∈ B :=
+    hSB (subset_deductiveClosure fc ({η} : Set (Formula Atom)) (Set.mem_singleton η))
   exact ⟨B, h_η_B, h_B3M⟩
 
 end Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle

@@ -193,7 +193,7 @@ lemma intStepBranch_result_ne_notApplicable
   by_cases hexp : (expanded.any (· == sf)) = true
   · simp [hexp] at hsf
   · simp only [Bool.not_eq_true] at hexp
-    simp [hexp] at hsf
+    simp only [hexp, Bool.false_eq_true, ↓reduceIte] at hsf
     cases hint : intApplyRuleFull sf nextWorld b with
     | notApplicable => simp [hint] at hsf
     | linearResult fs nw' e =>

@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Foundations.Logic.Metalogic.ListImplication
+public import Mathlib.Tactic.Attr.Core
 
 /-! # Algebraic List-Level Deduction
 

@@ -57,7 +57,6 @@
 4 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean
 2 Cslib/Logics/Bimodal/Metalogic/BXCanonical/OrderedSeedConsistency.lean
 1 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Quasimodel/SubformulaClosure.lean
-4 Cslib/Logics/Bimodal/Metalogic/BXCanonical/TruthLemma.lean
 3 Cslib/Logics/Bimodal/Metalogic/Completeness.lean
 1 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean
 4 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtFormula.lean

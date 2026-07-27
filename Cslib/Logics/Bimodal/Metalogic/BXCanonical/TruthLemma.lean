@@ -42,11 +42,6 @@ The Until/Since forward direction (eventuality resolution) is proved via
 * Burgess 1984, Goldblatt 1992 (canonical model truth lemma)
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical
@@ -64,15 +59,20 @@ any particular TaskModel embedding. They show that MCS membership correctly
 reflects the semantic meaning of each connective.
 -/
 
+set_option linter.flexible false in
 /-- Bot is not in any MCS. -/
-theorem bot_not_in_mcs {fc : FrameClass} {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (fc := fc) Omega) :
+theorem bot_not_in_mcs {fc : FrameClass} {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (fc := fc) Omega) :
     (Formula.bot : Formula Atom) ∉ Omega := by
   intro h_bot
   exact h_mcs.1 [(Formula.bot : Formula Atom)] (fun ψ hψ => by simp at hψ; rw [hψ]; exact h_bot)
-    ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
+    ⟨DerivationTree.assumption
+      [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩
 
+set_option linter.flexible false in
 /-- Implication property: (phi -> psi) in Omega iff (phi in Omega -> psi in Omega) for MCS Omega. -/
-theorem imp_iff_mcs {fc : FrameClass} {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (fc := fc) Omega) (φ ψ : Formula Atom) :
+theorem imp_iff_mcs {fc : FrameClass} {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (fc := fc) Omega) (φ ψ : Formula Atom) :
     φ.imp ψ ∈ Omega ↔ (φ ∈ Omega → ψ ∈ Omega) := by
   constructor
   · exact SetMaximalConsistent.implication_property h_mcs

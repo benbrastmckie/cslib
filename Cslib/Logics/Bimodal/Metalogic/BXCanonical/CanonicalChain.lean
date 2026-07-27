@@ -19,9 +19,6 @@ MCS-level lemmas for BX axioms and delegation bridges.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/CanonicalChain.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical
@@ -37,7 +34,8 @@ variable {Atom : Type*}
 
 theorem F_imp_top_until_mcs {w : BXPoint Atom} {ψ : Formula Atom}
     (h : Formula.someFuture ψ ∈ w.formulas) :
-    Formula.untl ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)) ψ ∈ w.formulas := by
+    Formula.untl ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)) ψ ∈
+      w.formulas := by
   have h_ax : DerivationTree FrameClass.Base [] ((Formula.someFuture ψ).imp
     (Formula.untl ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)) ψ)) :=
     DerivationTree.axiom [] _ (Axiom.F_until_equiv ψ) trivial
@@ -46,7 +44,8 @@ theorem F_imp_top_until_mcs {w : BXPoint Atom} {ψ : Formula Atom}
 
 theorem P_imp_top_since_mcs {w : BXPoint Atom} {ψ : Formula Atom}
     (h : Formula.somePast ψ ∈ w.formulas) :
-    Formula.snce ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)) ψ ∈ w.formulas := by
+    Formula.snce ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)) ψ ∈
+      w.formulas := by
   have h_ax : DerivationTree FrameClass.Base [] ((Formula.somePast ψ).imp
     (Formula.snce ((Formula.bot : Formula Atom).imp (Formula.bot : Formula Atom)) ψ)) :=
     DerivationTree.axiom [] _ (Axiom.P_since_equiv ψ) trivial
@@ -58,8 +57,9 @@ theorem P_imp_top_since_mcs {w : BXPoint Atom} {ψ : Formula Atom}
 theorem absorb_until_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h : Formula.untl φ (Formula.and φ (Formula.untl φ ψ)) ∈ w.formulas) :
     Formula.untl φ ψ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] ((Formula.untl φ (Formula.and φ (Formula.untl φ ψ))).imp
-    (Formula.untl φ ψ)) :=
+  have h_ax :
+      DerivationTree FrameClass.Base []
+        ((Formula.untl φ (Formula.and φ (Formula.untl φ ψ))).imp (Formula.untl φ ψ)) :=
     DerivationTree.axiom [] _ (Axiom.absorb_until φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
@@ -67,8 +67,9 @@ theorem absorb_until_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
 theorem absorb_since_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h : Formula.snce φ (Formula.and φ (Formula.snce φ ψ)) ∈ w.formulas) :
     Formula.snce φ ψ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] ((Formula.snce φ (Formula.and φ (Formula.snce φ ψ))).imp
-    (Formula.snce φ ψ)) :=
+  have h_ax :
+      DerivationTree FrameClass.Base []
+        ((Formula.snce φ (Formula.and φ (Formula.snce φ ψ))).imp (Formula.snce φ ψ)) :=
     DerivationTree.axiom [] _ (Axiom.absorb_since φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h

@@ -4,7 +4,7 @@
     {
       "project_number": 555,
       "project_name": "literature_search_fidelity_schema_quarantine",
-      "status": "partial",
+      "status": "completed",
       "task_type": "general",
       "description": "Repair literature search visibility for index entries written under the doc_id/chunks_dir schema. MEASURED SITUATION (all figures verified directly, not inferred): the global Literature index.json carries two entry schemas -- 273 entries with id + path=\"sources/<dir>/\", and 18 with doc_id + chunks_dir=<absolute path>. literature-search.sh's load_fidelity_map() derives its lookup key ONLY from a path prefix of \"sources/\", so no chunks_dir-schema entry ever lands in the map; get_fidelity() then fail-opens to unverified_summary, which is on QUARANTINED_FIDELITY_VALUES (literature-search.sh:53), so default search drops them and reports degraded=true with zero results. THE 18 SPLIT INTO TWO GROUPS THAT NEED DIFFERENT FIXES. GROUP A (2 docs: wijesekera_1990_constructivemodallogicsi, simpson_1994_intuitionisticmodallogic) already carry an honest, human-adjudicated stamp provenance_fidelity=ocr_rescanned_reflowed_partial_symbol_loss, which is NOT on the quarantine list. These are invisible purely because of the key-derivation bug -- their correct fidelity value exists in index.json but is unreachable. Fixing key derivation alone fully restores them. This is the tractable half and should ship first. GROUP B (16 docs, including arisakadasstrassburger_2015, marinmoralesstrassburger_2021, pacheco_2024, biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997, massacci_2000, plus 8 unrelated hyperproperty/verification docs) have provenance_fidelity=null. After the key-derivation fix, fmap.get(doc_id) still returns null and get_fidelity still fail-opens to unverified_summary, so they REMAIN quarantined. The key fix does nothing for them. CRITICAL CONSTRAINT ON GROUP B -- do not plan to solve this by extending literature-fidelity-audit.sh: that script classifies by comparing converted markdown against pdftotext output of the source PDF, and these directories contain only chunk_*.md files with NO source PDF present (verified for arisaka, wijesekera, pacheco), and zotero-library.json has no matching entries either. With no baseline available the audit's own honest verdict would be unverified_no_baseline, which is ITSELF on the quarantine list -- so an extended audit would correctly re-quarantine them and change nothing. The fail-open-to-unverified design is deliberate and correct (it prevents an unverified conversion being cited as authoritative) and MUST NOT be weakened by simply removing values from QUARANTINED_FIDELITY_VALUES. GROUP B THEREFORE NEEDS A DECISION, NOT ONLY CODE. Three honest options, to be presented to the user rather than chosen unilaterally: (a) re-acquire the source PDFs so the audit can classify them properly -- most correct, most work, requires the PDFs to be obtainable; (b) per-document adjudication stamping an honest fidelity value, which is exactly what produced Group A's two working stamps; (c) introduce a new non-quarantined fidelity value meaning second-pipeline conversion with no obtainable baseline and content spot-checked -- a policy change requiring care about what downstream consumers may then cite as authoritative. SCOPE FOR THIS TASK: (1) Fix load_fidelity_map() to derive its directory key from the chunks_dir basename when path is absent, preserving existing sources/ behaviour for the older schema. NOTE load_fidelity_map is duplicated at FOUR sites in literature-search.sh (approx lines 227, 527, 764, 908) -- fix all four or factor to a single definition. (2) Verify Group A: default (no-flag) literature-search.sh must return non-degraded results for wijesekera and simpson content. (3) Preserve fail-open semantics exactly: a missing map entry still defaults to unverified, never verified_conversion. (4) Do NOT silently resolve Group B -- write up options (a)/(b)/(c) with costs and surface them for a user decision. WORKAROUND available meanwhile and already in use: literature-search.sh --include-unverified returns correct results for all 18 today; it is the honest mechanism, being an explicit opt-in to sources that genuinely lack a verified baseline. Do not touch Cslib/ Lean source. === PDF RE-ACQUISITION COMPLETED (user-directed, 2026-07-25): 8 of 18 source files RECOVERED and preserved to $LITERATURE_DIR/.sources-recovered/ (~17MB). Provenance discovered: chunks_dir-schema entries DO carry a source_path field, and it pointed at per-session scratchpad temp dirs under /tmp/claude-*/ for 4 of them -- these were minutes-to-days from deletion and are now durable. RECOVERED (all of this repo's modal-logic working set): arisakadasstrassburger_2015 (the cut-free CS5 source), marinmoralesstrassburger_2021, pacheco_2024, wijesekera_1990, simpson_1994, biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997 (djvu). NOT RECOVERABLE (10): massacci_2000_single_step_tableaux (relevant to tableau work, source gone), plus 9 unrelated documents (6 hyperproperty/verification papers, 2 Cariani modal-future items, 1 book chapter). Group B is therefore now tractable via option (a) for the 8 recovered: literature-fidelity-audit.sh can classify them against a real baseline once the entries are reachable. The remaining 10 still need option (b) adjudication or (c) a policy value. TWO ADDITIONAL FINDINGS: (i) the real Zotero profile is ~/Documents/Zotero (NOT ~/Zotero, which also exists and is stale/different -- a query against it returns 0 for these titles while the real profile returns hits); (ii) $LITERATURE_DIR/zotero-library.json is a stale/incomplete CSL-JSON export (400 records, dated 2026-07-01, right domain -- Carnap/Kripke/Holliday/Kurucz -- but containing NONE of the 18), so the Better BibTeX 'Keep updated' export is not capturing these items. Re-exporting from the correct profile should precede any future Zotero-based discovery. ALSO: the ingestion pipeline that wrote these entries records source_path into a session-scoped temp dir, which is why the baselines vanished; that pipeline should copy sources into durable storage at ingest time, or this recurs.",
       "dependencies": [],
@@ -13,23 +13,23 @@
         ".claude/scripts/literature-fidelity-audit.sh"
       ],
       "created": "2026-07-25T13:50:28Z",
-      "last_updated": "2026-07-25T20:08:09Z",
-      "session_id": "sess_1785007897_038307_555",
+      "last_updated": "2026-07-27T00:46:08Z",
+      "session_id": "sess_1785111502_bfcb60",
       "artifacts": [
         {
-          "path": "specs/555_literature_search_fidelity_schema_quarantine/reports/01_fidelity-schema-key-derivation.md",
+          "path": "specs/555_literature_search_fidelity_schema_quarantine/reports/02_blocker-disposition-research.md",
           "type": "report",
-          "summary": "Fidelity-map key derivation fix, Group A/B disposition, and audit-script legacy-schema path"
+          "summary": "Blocker disposition research: phase-6 djvu resolvable now, phase-7 premise shifted (option c de facto live), Group A regression, empty .sources-recovered correction"
         },
         {
-          "path": "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md",
+          "path": "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md",
           "type": "plan",
-          "summary": "7-phase plan: four-site key-derivation fix and Group A verification first, legacy-schema audit mode after, djvu and 10-doc disposition as gates"
+          "summary": "Revised plan v2: Phases 1-5 preserved [COMPLETED]; Phase 6 actionable close-out incl. working-tree restore; Phase 7 decision memo that stamps nothing"
         },
         {
-          "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md",
+          "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md",
           "type": "summary",
-          "summary": "5/7 phases: four-site key-derivation fix, Group A restored, legacy-schema audit mode added; Phases 6-7 blocked gates"
+          "summary": "Phases 6-7: working-tree regression restored, djvu gate closed as moot, arisaka honestly re-adjudicated (quarantined), Group B decision memo written without stamping"
         }
       ]
     },
@@ -326,12 +326,12 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-27T00:24:36Z",
+      "last_updated": "2026-07-27T00:28:07Z",
       "next_artifact_number": 13,
       "artifacts": [
         {
@@ -504,7 +504,7 @@
         552
       ],
       "parent_task": 298,
-      "session_id": "sess_1785111299_a45a66",
+      "session_id": "sess_1785112067_941950",
       "blockers": [],
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",

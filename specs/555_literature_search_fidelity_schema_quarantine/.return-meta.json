@@ -1,54 +1,7 @@
 {
-  "status": "implemented",
-  "session_id": "sess_1785200000_impl555",
-  "artifacts": [
-    {
-      "type": "summary",
-      "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md",
-      "summary": "Decision memo: restates options (b)/(c)/(d) for the 66-document Group B no_source_pdf disposition with concrete costs, reports the Group A regression (Literature commit bb3bf18), and records residual findings. Stamps no value, edits no constant, writes no index.json."
-    },
-    {
-      "type": "summary",
-      "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md",
-      "summary": "Round-2 implementation summary covering Phase 6 (working-tree restore, djvu gate close-out, .sources-recovered/ repointing, arisaka re-adjudication) and Phase 7 (decision memo)."
-    }
-  ],
-  "completion_data": {
-    "completion_summary": "Executed Phases 6-7 of plan v2: restored literature-search.sh and literature-fidelity-audit.sh from HEAD (undoing an uncommitted revert), closed the former DJVU gate for chagrovzakharyaschev_1997_modallogic (already classified via source.pdf), repointed .sources-recovered/ references to the migrated sources/<doc_id>/ layout, re-adjudicated arisakadasstrassburger_2015 (stays honestly quarantined, word_ratio 0.539), and produced a decision memo surfacing the Group B disposition (66 no_source_pdf documents, not 9), the Group A regression, and residual findings for the user to decide."
-  },
+  "status": "completed",
   "metadata": {
-    "agent_type": "general-implementation-agent",
-    "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
-    "plan_path": "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md",
-    "phases_in_scope": [6, 7],
-    "phases_completed": 2,
-    "phases_total": 2
-  },
-  "memory_candidates": [
-    {
-      "content": "When a fidelity/provenance audit script's --write mode operates over an entire corpus rather than a single targeted document (no per-document CLI selector), re-running it to re-adjudicate one document can incidentally recompute ratios for unrelated entries due to extractor non-determinism (e.g. pdftotext whitespace/ordering variance across runs). This is not a bug in the audit logic itself but a side effect of full-corpus recomputation. When diffing before/after snapshots to verify a targeted re-adjudication, expect and explicitly account for this class of incidental drift rather than treating any non-target change as a scope violation.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md",
-      "confidence": 0.7,
-      "suggested_keywords": ["fidelity-audit", "index.json", "pdftotext", "non-determinism", "diff-verification"]
-    },
-    {
-      "content": "A quarantine-list-based fail-open design (values NOT in QUARANTINED_FIDELITY_VALUES are citable by default) can silently reverse polarity when an external, unversioned data repository (here, a separate ~/Projects/Literature git repo tracking index.json) introduces a new stamped value that was always in the code's enum but never previously populated at scale. The code itself did not change and no one edited the quarantine constant, yet the population of documents treated as citable-by-default grew ~7x. When auditing fidelity/quarantine systems, always re-measure the live population size against a stamped value rather than trusting an earlier report's count, since population drift can happen entirely outside the audited repository's own commits.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md",
-      "confidence": 0.75,
-      "suggested_keywords": ["quarantine", "fail-open", "provenance-fidelity", "external-data-drift", "no_source_pdf"]
-    }
-  ],
-  "modified_files": [
-    ".claude/scripts/literature-search.sh",
-    ".claude/scripts/literature-fidelity-audit.sh",
-    "specs/literature/SOURCES.md",
-    "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md",
-    "specs/555_literature_search_fidelity_schema_quarantine/progress/phase-6-progress.json",
-    "specs/555_literature_search_fidelity_schema_quarantine/progress/phase-7-progress.json",
-    "specs/555_literature_search_fidelity_schema_quarantine/reports/02_blocker-disposition-research.md",
-    "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_group-b-decision-memo.md",
-    "specs/555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md"
-  ]
+    "cycles_used": 2,
+    "final_state": "completed"
+  }
 }

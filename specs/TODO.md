@@ -11,7 +11,7 @@ next_project_number: 572
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,555,557,558,562,563,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,557,558,562,563,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,400,430,450,456,497,511,537,551,553,564,568,571 | 36,37,181,317,425,465,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,506,548,565,566 | 39,40,375,511,564 | foundations, modal logic, code hygiene |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
@@ -26,7 +26,7 @@ next_project_number: 572
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [PLANNED] — Fill the remaining propositional/intuitionistic tableau completen
+317 [IMPLEMENTING] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
@@ -96,10 +96,6 @@ next_project_number: 572
 ### Constructive Modal Logic
 
 570 [NOT STARTED] — [Created by the blocked-task review: this sorry was flagged in-co
-
-### Uncategorized
-
-555 [PARTIAL] — Repair literature search visibility for index entries written und
 
 ## Tasks
 
@@ -265,12 +261,12 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 555. Literature search fidelity schema quarantine
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Dependencies**: None
-- **Research**: [555_literature_search_fidelity_schema_quarantine/reports/01_fidelity-schema-key-derivation.md]
-- **Plan**: [555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md]
-- **Summary**: [555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md]
+- **Research**: [555_literature_search_fidelity_schema_quarantine/reports/02_blocker-disposition-research.md]
+- **Plan**: [555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md]
+- **Summary**: [555_literature_search_fidelity_schema_quarantine/summaries/02_blocker-resolution-summary.md]
 
 **Description**: Repair literature search visibility for index entries written under the doc_id/chunks_dir schema. MEASURED SITUATION (all figures verified directly, not inferred): the global Literature index.json carries two entry schemas -- 273 entries with id + path="sources/<dir>/", and 18 with doc_id + chunks_dir=<absolute path>. literature-search.sh's load_fidelity_map() derives its lookup key ONLY from a path prefix of "sources/", so no chunks_dir-schema entry ever lands in the map; get_fidelity() then fail-opens to unverified_summary, which is on QUARANTINED_FIDELITY_VALUES (literature-search.sh:53), so default search drops them and reports degraded=true with zero results. THE 18 SPLIT INTO TWO GROUPS THAT NEED DIFFERENT FIXES. GROUP A (2 docs: wijesekera_1990_constructivemodallogicsi, simpson_1994_intuitionisticmodallogic) already carry an honest, human-adjudicated stamp provenance_fidelity=ocr_rescanned_reflowed_partial_symbol_loss, which is NOT on the quarantine list. These are invisible purely because of the key-derivation bug -- their correct fidelity value exists in index.json but is unreachable. Fixing key derivation alone fully restores them. This is the tractable half and should ship first. GROUP B (16 docs, including arisakadasstrassburger_2015, marinmoralesstrassburger_2021, pacheco_2024, biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997, massacci_2000, plus 8 unrelated hyperproperty/verification docs) have provenance_fidelity=null. After the key-derivation fix, fmap.get(doc_id) still returns null and get_fidelity still fail-opens to unverified_summary, so they REMAIN quarantined. The key fix does nothing for them. CRITICAL CONSTRAINT ON GROUP B -- do not plan to solve this by extending literature-fidelity-audit.sh: that script classifies by comparing converted markdown against pdftotext output of the source PDF, and these directories contain only chunk_*.md files with NO source PDF present (verified for arisaka, wijesekera, pacheco), and zotero-library.json has no matching entries either. With no baseline available the audit's own honest verdict would be unverified_no_baseline, which is ITSELF on the quarantine list -- so an extended audit would correctly re-quarantine them and change nothing. The fail-open-to-unverified design is deliberate and correct (it prevents an unverified conversion being cited as authoritative) and MUST NOT be weakened by simply removing values from QUARANTINED_FIDELITY_VALUES. GROUP B THEREFORE NEEDS A DECISION, NOT ONLY CODE. Three honest options, to be presented to the user rather than chosen unilaterally: (a) re-acquire the source PDFs so the audit can classify them properly -- most correct, most work, requires the PDFs to be obtainable; (b) per-document adjudication stamping an honest fidelity value, which is exactly what produced Group A's two working stamps; (c) introduce a new non-quarantined fidelity value meaning second-pipeline conversion with no obtainable baseline and content spot-checked -- a policy change requiring care about what downstream consumers may then cite as authoritative. SCOPE FOR THIS TASK: (1) Fix load_fidelity_map() to derive its directory key from the chunks_dir basename when path is absent, preserving existing sources/ behaviour for the older schema. NOTE load_fidelity_map is duplicated at FOUR sites in literature-search.sh (approx lines 227, 527, 764, 908) -- fix all four or factor to a single definition. (2) Verify Group A: default (no-flag) literature-search.sh must return non-degraded results for wijesekera and simpson content. (3) Preserve fail-open semantics exactly: a missing map entry still defaults to unverified, never verified_conversion. (4) Do NOT silently resolve Group B -- write up options (a)/(b)/(c) with costs and surface them for a user decision. WORKAROUND available meanwhile and already in use: literature-search.sh --include-unverified returns correct results for all 18 today; it is the honest mechanism, being an explicit opt-in to sources that genuinely lack a verified baseline. Do not touch Cslib/ Lean source. === PDF RE-ACQUISITION COMPLETED (user-directed, 2026-07-25): 8 of 18 source files RECOVERED and preserved to $LITERATURE_DIR/.sources-recovered/ (~17MB). Provenance discovered: chunks_dir-schema entries DO carry a source_path field, and it pointed at per-session scratchpad temp dirs under /tmp/claude-*/ for 4 of them -- these were minutes-to-days from deletion and are now durable. RECOVERED (all of this repo's modal-logic working set): arisakadasstrassburger_2015 (the cut-free CS5 source), marinmoralesstrassburger_2021, pacheco_2024, wijesekera_1990, simpson_1994, biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997 (djvu). NOT RECOVERABLE (10): massacci_2000_single_step_tableaux (relevant to tableau work, source gone), plus 9 unrelated documents (6 hyperproperty/verification papers, 2 Cariani modal-future items, 1 book chapter). Group B is therefore now tractable via option (a) for the 8 recovered: literature-fidelity-audit.sh can classify them against a real baseline once the entries are reachable. The remaining 10 still need option (b) adjudication or (c) a policy value. TWO ADDITIONAL FINDINGS: (i) the real Zotero profile is ~/Documents/Zotero (NOT ~/Zotero, which also exists and is stale/different -- a query against it returns 0 for these titles while the real profile returns hits); (ii) $LITERATURE_DIR/zotero-library.json is a stale/incomplete CSL-JSON export (400 records, dated 2026-07-01, right domain -- Carnap/Kripke/Holliday/Kurucz -- but containing NONE of the 18), so the Better BibTeX 'Keep updated' export is not capturing these items. Re-exporting from the correct profile should precede any future Zotero-based discovery. ALSO: the ingestion pipeline that wrote these entries records source_path into a session-scoped temp dir, which is why the baselines vanished; that pipeline should copy sources into durable storage at ingest time, or this recurs.
 
@@ -704,7 +700,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 552

@@ -28,12 +28,6 @@ Also includes Lemma 2.8' and the enriched Lemma 2.4 variants (with/without guard
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -298,6 +292,7 @@ The enriched seed `{β} ∪ gContent(A) ∪ {snce(γ, α) : α ∈ A}` ensures t
 Lindenbaum extension C satisfies burgessRSince(C, γ, A), enabling
 `burgessR3Maximal_with_guard` to produce B with γ ∈ B. -/
 
+set_option linter.flexible false in
 /-- **Enriched Until witness seed consistency**: {β} ∪ gContent(A) ∪ {snce(γ, α) : α ∈ A}
 is consistent when untl(γ,β) ∈ MCS A.
 
@@ -399,7 +394,8 @@ private theorem until_witness_enriched_seed_consistent (fc : FrameClass) {A : Se
       rw [hφ_eq]
       have h_proj := listConjImpliesElem fc alpha_list α hα_list
       have h_H_proj := Cslib.Logic.Bimodal.Theorems.pastNecessitation _ h_proj
-      have h_bx3' := DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_since α_star α γ) trivial
+      have h_bx3' :=
+        DerivationTree.axiom (fc := fc) [] _ (Axiom.right_mono_since α_star α γ) trivial
       have h_snce_mono : DerivationTree fc [] ((Formula.snce γ α_star).imp (Formula.snce γ α)) :=
         mp h_H_proj h_bx3'
       exact Or.inr ⟨impTrans (rceImp β (Formula.snce γ α_star)) h_snce_mono⟩
@@ -454,6 +450,7 @@ The enriched seed `{β} ∪ hContent(A) ∪ {untl(γ, α) : α ∈ A}` ensures
 burgessR(C, γ, A), then `burgessR_implies_burgessRSince` gives
 burgessRSince(A, γ, C), enabling `burgessR3Maximal_with_guard C A γ`. -/
 
+set_option linter.flexible false in
 /-- **Enriched Since witness seed consistency**: `{β} ∪ hContent(A) ∪ {untl(γ, α) : α ∈ A}`
 is consistent when `snce(γ,β) ∈ MCS A`.
 

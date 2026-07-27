@@ -1,18 +1,28 @@
 {
-  "status": "planned",
-  "summary": "Three-phase plan repairs literature-briefing.sh per-repo chunk-count under-reporting via a corrected four-tier precedence (child count -> parent chunk_count field -> on-disk chunk_*.md glob -> literal 1), fixing 21 of 34 documents including Massacci at 77, with a chagrovzakharyaschev==6 regression sentinel in every phase.",
+  "status": "implemented",
+  "summary": "Phase 3 complete: documented the four-tier chunk-count precedence in literature-briefing.sh, cleaned two pre-existing task-number references from Phase 1-2 comments, and recorded the definitive full-34 verification sweep (19 repaired: 8 Tier-2 + 11 Tier-3, 13 unchanged-correct, 2 residuals) in specs/560_repair_literature_subindex_massacci_chunks/summaries/01_chunk-count-repair-summary.md. All sentinels confirmed: massacci=77, chagrovzakharyaschev=6, lit-coverage marker unchanged (seg_count=34 sparse=false), --global mode unaffected. Documented the .claude/ git-tracking gap (script is live on disk but untracked via .git/info/exclude line 18) as a follow-up requiring a user git-configuration decision -- not modified here per hard constraints.",
+  "phases_completed": 3,
+  "phases_total": 3,
+  "skeleton": false,
+  "blockers": [],
   "artifacts": [
+    {
+      "path": "specs/560_repair_literature_subindex_massacci_chunks/summaries/01_chunk-count-repair-summary.md",
+      "type": "summary",
+      "summary": "Full-34 before/after verification sweep, known residuals (venema_1993 pair, 17 orphaned parent_doc values), and the .claude/ git-tracking gap follow-up"
+    },
     {
       "path": "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
       "type": "plan",
-      "summary": "Phase 1 Tier-2 chunk_count-field fallback (8 docs), Phase 2 Tier-3 on-disk chunk_*.md glob (11 docs), Phase 3 precedence documentation plus a full-34 self-checking verification sweep; global Literature corpus is read-only throughout."
+      "summary": "Phase 3 heading marked [COMPLETED]"
     }
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
-  "phases_total": 3,
+  "next_action_hint": "complete",
   "modified_files": [
+    ".claude/scripts/literature-briefing.sh",
     "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
-    "specs/560_repair_literature_subindex_massacci_chunks/.return-meta.json"
-  ]
+    "specs/560_repair_literature_subindex_massacci_chunks/summaries/01_chunk-count-repair-summary.md"
+  ],
+  "sorry_inventory": [],
+  "notes": "literature-briefing.sh was edited on disk (four-tier precedence comment block added; two pre-existing inline task-number references removed) but could not be git-committed in this repository: .claude/ is excluded from git tracking via .git/info/exclude line 18 (/.claude), a machine-local exclusion that contradicts .gitignore line 18's comment stating .claude tracked files are allowed. This means the fix is live and verified on disk right now but will be lost on a fresh clone or a .claude/ restore. Recorded explicitly in the summary's Impacts and Follow-ups sections; .git/info/exclude, .gitignore, and git config were NOT modified, per the hard constraint. Only the plan file and the new summary were git-committed."
 }

@@ -426,7 +426,7 @@ All 8 verification checks PASS.
 
 ---
 
-### Phase 3: Document the three-tier precedence and known residuals in the script header, and record the full-34 verification sweep [NOT STARTED]
+### Phase 3: Document the three-tier precedence and known residuals in the script header, and record the full-34 verification sweep [COMPLETED]
 
 **Goal**: Make the precedence decision and its two residuals legible to the next maintainer, so
 the inverted-precedence trap is not re-introduced, and record the final verified state of all 34

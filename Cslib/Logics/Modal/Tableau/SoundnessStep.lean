@@ -120,7 +120,7 @@ lemma modalClosed_unsat
     -- T(φ)/F(φ) contradiction
     simp only [hfind, ClosureCondition.findClosure] at hcr
     cases hcontra : Branch.findContradiction b with
-    | none => simp [hfind, hcontra, ClosureCondition.findClosure] at hclosed
+    | none => simp only [hfind, hcontra, Option.isSome_none, Bool.false_eq_true] at hclosed
     | some pair =>
       obtain ⟨phi, l⟩ := pair
       simp only [Branch.findContradiction] at hcontra
@@ -436,6 +436,7 @@ lemma negImp_alpha_preserved
   · exact ⟨fun h => by simp at h, fun _ => hnc⟩
   · exact hb sf' hmem_old
 
+omit [Hashable Atom] in
 /-- Box-positive arm semantic soundness, extracted from
 `modalStepBranch_preserves_sat`'s K monolith (below, the `| box φ =>` arm) as a standalone
 `RuleResultSat`-valued lemma about `modalApplyOne` directly (not `modalStepBranch`). Given
@@ -484,6 +485,7 @@ lemma modalApplyOne_boxPos_sound
           simp only [Satisfies] at hpos
           exact hpos (f tgt) (hacc lbl tgt hedge))
 
+omit [Hashable Atom] in
 /-- Diamond-negative arm semantic soundness, extracted from
 `modalStepBranch_preserves_sat`'s K monolith (below, the `| diamond φ =>` arm in the `neg`
 case) as a standalone `RuleResultSat`-valued lemma. Dual of `modalApplyOne_boxPos_sound`. -/
@@ -530,6 +532,7 @@ lemma modalApplyOne_diaNeg_sound
         subst hsf'
         exact sfSat_neg m f φ tgt' (hneg (f tgt') (hacc lbl tgt' hedge))
 
+omit [Hashable Atom] in
 /-- If `modalStepBranch b e acc = some (newBs, newExps, newAcc)` and `b` is satisfiable
 (with the freshness invariant `hInv`), then some branch in `newBs` is satisfiable.
 
@@ -574,9 +577,9 @@ theorem modalStepBranch_preserves_sat
         simp only [Satisfies] at hpos
       | and φ ψ =>
         -- andPos: T(φ ∧ ψ) → linear [T(φ), T(ψ)] (single branch, both added)
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-          Option.some.injEq, Prod.mk.injEq] at hsf
+        simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+          modalOrOf?, modalImpOf?, modalNegOf?, List.find?_cons_of_pos, Option.getD_some,
+          ↓reduceIte, List.cons_append, List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         simp only [Satisfies] at hpos
@@ -590,9 +593,10 @@ theorem modalStepBranch_preserves_sat
         · exact hb sf' hmem_old
       | or φ ψ =>
         -- orPos: T(φ ∨ ψ) → branching [T(φ)] | [T(ψ)]
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-          Option.some.injEq, Prod.mk.injEq] at hsf
+        simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+          modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+          List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+          List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         simp only [Satisfies] at hpos
@@ -616,9 +620,10 @@ theorem modalStepBranch_preserves_sat
         -- Rule depends only on whether the consequent is ⊥ (negation) or not (implication)
         rcases eq_or_ne ψ Proposition.bot with rfl | hne
         · -- negPos: T(φ → ⊥) = T(¬φ) → linear [F(φ)]
-          simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-            modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-            Option.some.injEq, Prod.mk.injEq] at hsf
+          simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+            modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+            List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+            List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           refine ⟨[⟨.neg, φ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hacc, ?_⟩
@@ -630,9 +635,10 @@ theorem modalStepBranch_preserves_sat
             exact fun ha => hpos ha
           · exact hb sf' hmem_old
         · -- impPos: T(φ → ψ) (ψ ≠ ⊥) → branching [F(φ)] | [T(ψ)]
-          simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-            modalImpOf?_imp hne, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-            Option.some.injEq, Prod.mk.injEq] at hsf
+          simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+            modalOrOf?, modalImpOf?_imp hne, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+            List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+            List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           simp only [Satisfies] at hpos
@@ -652,8 +658,9 @@ theorem modalStepBranch_preserves_sat
             · exact hb sf' hmem_old
       | box φ =>
         -- T(□φ): tryAllPropRules returns notApplicable, then boxPos fires
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+        simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+          modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+          List.find?_cons_of_neg, List.find?, Option.getD_none, ↓reduceIte, List.isEmpty_iff] at hsf
         -- boxPos: result = .persistent (boxPropagation b acc φ lbl)
         -- if boxPropagation is empty → notApplicable (simp eliminates)
         -- otherwise → persistent newForms
@@ -698,7 +705,7 @@ theorem modalStepBranch_preserves_sat
         -- T(◇φ): tryAllPropRules returns notApplicable, then diamondPos fires
         simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
           modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-          Option.getD_some, Option.getD_none, Bool.false_eq_true, if_false,
+          Option.getD_none, Bool.false_eq_true, if_false,
           Option.some.injEq, Prod.mk.injEq] at hsf
         -- diamondPos: T(◇φ)@lbl gives an existential semantic witness ww with
         -- m.r (f lbl) ww ∧ Satisfies m ww φ (native diamond semantics)
@@ -837,9 +844,10 @@ theorem modalStepBranch_preserves_sat
           modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
       | and φ ψ =>
         -- andNeg: F(φ ∧ ψ) → branching [F(φ)] | [F(ψ)]
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-          Option.some.injEq, Prod.mk.injEq] at hsf
+        simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+          modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+          List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+          List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         simp only [Satisfies] at hneg
@@ -860,9 +868,10 @@ theorem modalStepBranch_preserves_sat
           · exact hb sf' hmem_old
       | or φ ψ =>
         -- orNeg: F(φ ∨ ψ) → linear [F(φ), F(ψ)] (single branch, both added)
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-          Option.some.injEq, Prod.mk.injEq] at hsf
+        simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+          modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+          List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+          List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
         simp only [Satisfies] at hneg
@@ -878,9 +887,10 @@ theorem modalStepBranch_preserves_sat
       | imp φ ψ =>
         rcases eq_or_ne ψ Proposition.bot with rfl | hne
         · -- negNeg: F(φ → ⊥) = F(¬φ) → linear [T(φ)]
-          simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-            modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-            Option.some.injEq, Prod.mk.injEq] at hsf
+          simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+            modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+            List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+            List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           simp only [Satisfies] at hneg
@@ -892,9 +902,10 @@ theorem modalStepBranch_preserves_sat
           · exact ⟨fun _ => hneg.1, fun h => by simp at h⟩
           · exact hb sf' hmem_old
         · -- impNeg: F(φ → ψ) (ψ ≠ ⊥) → linear [T(φ), F(ψ)]
-          simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-            modalImpOf?_imp hne, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-            Option.some.injEq, Prod.mk.injEq] at hsf
+          simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+            modalOrOf?, modalImpOf?_imp hne, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+            List.find?_cons_of_neg, List.find?, Option.getD_some, ↓reduceIte, List.cons_append,
+            List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
           obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
           subst hnewBs hnewAcc
           exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
@@ -903,7 +914,7 @@ theorem modalStepBranch_preserves_sat
         -- w' = modalNextWorld b
         simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
           modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
-          Option.getD_some, Option.getD_none, Bool.false_eq_true, if_false,
+          Option.getD_none, Bool.false_eq_true, if_false,
           Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
         subst hnewBs hnewAcc
@@ -1045,8 +1056,11 @@ theorem modalStepBranch_preserves_sat
               exact (hb sf' hmem_old).2 hsign
       | diamond φ =>
         -- F(◇φ): diamondNeg fires universally on all recorded successors of lbl
-        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
-          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+        simp only [RuleResult.isApplicable, tryAllPropRules, List.map, applyPropRule, modalAndOf?,
+          modalOrOf?, modalImpOf?, modalNegOf?, Bool.false_eq_true, not_false_eq_true,
+          List.find?_cons_of_neg, List.find?, Option.getD_none, ↓reduceIte, List.any_eq_true,
+          beq_iff_eq, exists_eq_right, List.isEmpty_iff, List.filterMap_eq_nil_iff, ite_eq_left_iff,
+          reduceCtorEq, imp_false, Decidable.not_not] at hsf
         simp only [Satisfies] at hneg
         push Not at hneg
         split_ifs at hsf with hemp

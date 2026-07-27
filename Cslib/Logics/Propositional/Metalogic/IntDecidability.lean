@@ -105,17 +105,17 @@ Two worlds with the same carrier are equal by propext; this makes the carrier ma
 and enables the `Fintype` instance via `Fintype.ofInjective`. -/
 structure IntFinWorld (φ : PL.Proposition Atom) where
   /-- The world's carrier: a finset of Σ-subformulas. -/
-  carrier   : Finset (PL.Proposition Atom)
+  carrier : Finset (PL.Proposition Atom)
   /-- The carrier is a subset of the subformulas of φ. -/
-  sub       : carrier ⊆ φ.subformulas
+  sub : carrier ⊆ φ.subformulas
   /-- Deductive closure within Σ: if ψ is Int-derivable from the carrier and ψ ∈ Σ,
   then ψ ∈ carrier. -/
-  closed    : ∀ ψ ∈ φ.subformulas,
+  closed : ∀ ψ ∈ φ.subformulas,
       SetDerivable IntPropAxiom (↑carrier : Set (PL.Proposition Atom)) ψ → ψ ∈ carrier
   /-- Consistency: ⊥ is not in the carrier. -/
   consistent : (⊥ : PL.Proposition Atom) ∉ carrier
   /-- Primality: the disjunction property. -/
-  prime     : ∀ a b : PL.Proposition Atom, (.or a b) ∈ carrier → a ∈ carrier ∨ b ∈ carrier
+  prime : ∀ a b : PL.Proposition Atom, (.or a b) ∈ carrier → a ∈ carrier ∨ b ∈ carrier
 
 /-! ## Extensionality -/
 
@@ -143,7 +143,7 @@ theorem intFinWorld_carrier_injective (φ : PL.Proposition Atom) :
       (fun w : IntFinWorld φ =>
         (⟨w.carrier, Finset.mem_powerset.mpr w.sub⟩ :
           ↑(φ.subformulas.powerset))) :=
-  fun w₁ w₂ h => IntFinWorld.ext (congrArg Subtype.val h)
+  fun _w₁ _w₂ h => IntFinWorld.ext (congrArg Subtype.val h)
 
 /-- `IntFinWorld φ` is a `Fintype`: worlds embed injectively into the finite powerset `2^Σ`.
 

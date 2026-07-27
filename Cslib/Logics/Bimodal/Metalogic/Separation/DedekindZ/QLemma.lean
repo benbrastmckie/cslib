@@ -16,16 +16,12 @@ K+/K- definitions, Q-lemma (forward and backward), qZ syntactic properties,
 and Case 3 equivalence for Z.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSimpArgs false
-set_option linter.style.openClassical false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
 
 open Cslib.Logic.Bimodal
+set_option linter.style.openClassical false
 open Classical
 
 variable {Atom : Type*}
@@ -364,7 +360,8 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
           ⟨w, htw, hAw, fun r htr hrw => hBguard_w r (lt_trans hf₀t htr) hrw⟩
         simp only [case3Rhs]
         apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; right
-        exact (int_truth_and M t _ _).mpr ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
+        exact (int_truth_and M t _ _).mpr
+          ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
     · push Not at hq_right
       obtain ⟨f₁, hf₀f₁, hf₁t, hnqf₁⟩ := hq_right
       haveI : DecidablePred (fun r => ¬intTruth M r q) := Classical.decPred _
@@ -390,7 +387,8 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
         apply (int_truth_or M f₀ _ _).mpr; right
         exact (int_truth_and M f₀ _ _).mpr
           ⟨(int_truth_and M f₀ _ _).mpr ⟨hnqf₀, hSaq_f₀⟩, hqU_f₀⟩
-      have hguard_full : ∀ z, f₀ < z → z < t → (intTruth M z (Formula.neg q) → intTruth M z (.untl B A)) := by
+      have hguard_full : ∀ z, f₀ < z → z < t →
+          (intTruth M z (Formula.neg q) → intTruth M z (.untl B A)) := by
         intro z hf₀z hzt hnqz
         have hsz : s < z := lt_trans hsf₀ hf₀z
         rcases (int_truth_or M z _ _).mp (hguard z hsz hzt) with hq | hU
@@ -426,7 +424,8 @@ theorem case3_equiv_Z_fwd (a q A B : Formula Atom) (M : IntStructure Atom) (t : 
           ⟨w, htw, hAw, fun r htr hrw => hBguard_w r (lt_trans hgt htr) hrw⟩
         simp only [case3Rhs]
         apply (int_truth_or M t _ _).mpr; left; apply (int_truth_or M t _ _).mpr; right
-        exact (int_truth_and M t _ _).mpr ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
+        exact (int_truth_and M t _ _).mpr
+          ⟨hSalpha_t, (int_truth_or M t _ _).mpr (Or.inr ((int_truth_and M t _ _).mpr ⟨hBt, hUt⟩))⟩
 
 /-- Case 3 general equivalence for Z. -/
 theorem case3_equiv_Z_general (a q A B : Formula Atom) :

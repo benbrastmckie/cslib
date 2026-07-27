@@ -21,12 +21,6 @@ Also contains the gContent/hContent duality theorems.
 * Ported from Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 -/
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic
@@ -68,6 +62,7 @@ lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}
 
 /-! ## Shared helper for G(¬X) extraction from seed inconsistency -/
 
+set_option linter.flexible false in
 /-- From L ⊢ ⊥ where L ⊆ {X} ∪ gContent(M), extract G(¬X) ∈ M. -/
 theorem extract_g_neg_from_seed {M : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent M)
@@ -82,7 +77,7 @@ theorem extract_g_neg_from_seed {M : Set (Formula Atom)}
       intro x hx
       by_cases hxX : x = X
       · exact List.mem_cons.mpr (Or.inl hxX)
-      · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter, decide_eq_true_eq]; exact ⟨hx, hxX⟩))
+      · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter]; exact ⟨hx, hxX⟩))
     have d_reord := DerivationTree.weakening L _ Formula.bot d h_sub_reord
     have d_neg := deductionTheorem _ X Formula.bot d_reord
     have h_G_filt : ∀ chi ∈ L.filter (fun y => decide (y ≠ X)), (𝐆chi) ∈ M := by
@@ -95,7 +90,8 @@ theorem extract_g_neg_from_seed {M : Set (Formula Atom)}
       · exact absurd rfl h_ne
       · exact h_gc
     have d_G_neg := generalizedTemporalK _ (Formula.neg X) d_neg
-    have h_ctx : ∀ f ∈ Context.map Formula.allFuture (L.filter (fun y => decide (y ≠ X))), f ∈ M := by
+    have h_ctx :
+        ∀ f ∈ Context.map Formula.allFuture (L.filter (fun y => decide (y ≠ X))), f ∈ M := by
       intro f hf; rw [Context.mem_map_iff] at hf
       obtain ⟨chi, hc, he⟩ := hf; rw [← he]; exact h_G_filt chi hc
     exact temporal_closed_under_derivation h_mcs h_ctx ⟨d_G_neg⟩
@@ -112,12 +108,14 @@ theorem extract_g_neg_from_seed {M : Set (Formula Atom)}
       intro f hf; rw [Context.mem_map_iff] at hf
       obtain ⟨chi, hc, he⟩ := hf; rw [← he]; exact h_G_all chi hc
     have h_G_bot := temporal_closed_under_derivation h_mcs h_G_L ⟨d_G_bot⟩
-    have h_ef := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.imp_s (Formula.bot : Formula Atom) X) trivial
+    have h_ef := DerivationTree.axiom (fc := FrameClass.Base) [] _
+      (Axiom.imp_s (Formula.bot : Formula Atom) X) trivial
     have h_G_ef := DerivationTree.temporal_necessitation _ h_ef
     have h_K := tempKDistDerived (Formula.bot : Formula Atom) (Formula.neg X)
     have h_G_imp := DerivationTree.modus_ponens [] _ _ h_K h_G_ef
     exact temporal_implication_property h_mcs (theoremInMcs h_mcs h_G_imp) h_G_bot
 
+set_option linter.flexible false in
 /-- From L ⊢ ⊥ where L ⊆ {X} ∪ hContent(M), extract H(¬X) ∈ M. -/
 theorem extract_h_neg_from_seed {M : Set (Formula Atom)}
     (h_mcs : Temporal.SetMaximalConsistent M)
@@ -131,7 +129,7 @@ theorem extract_h_neg_from_seed {M : Set (Formula Atom)}
       intro x hx
       by_cases hxX : x = X
       · exact List.mem_cons.mpr (Or.inl hxX)
-      · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter, decide_eq_true_eq]; exact ⟨hx, hxX⟩))
+      · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter]; exact ⟨hx, hxX⟩))
     have d_reord := DerivationTree.weakening L _ Formula.bot d h_sub_reord
     have d_neg := deductionTheorem _ X Formula.bot d_reord
     have h_H_filt : ∀ chi ∈ L.filter (fun y => decide (y ≠ X)), (𝐇chi) ∈ M := by
@@ -160,7 +158,8 @@ theorem extract_h_neg_from_seed {M : Set (Formula Atom)}
       intro f hf; rw [Context.mem_map_iff] at hf
       obtain ⟨chi, hc, he⟩ := hf; rw [← he]; exact h_H_all chi hc
     have h_H_bot := temporal_closed_under_derivation h_mcs h_H_L ⟨d_H_bot⟩
-    have h_ef := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.imp_s (Formula.bot : Formula Atom) X) trivial
+    have h_ef := DerivationTree.axiom (fc := FrameClass.Base) [] _
+      (Axiom.imp_s (Formula.bot : Formula Atom) X) trivial
     have h_H_ef := pastNecessitation _ h_ef
     have h_K := pastKDist (Formula.bot : Formula Atom) (Formula.neg X)
     have h_H_imp := DerivationTree.modus_ponens [] _ _ h_K h_H_ef
@@ -228,7 +227,8 @@ theorem g_content_subset_implies_h_content_reverse
   intro phi h_H_phi_in_M'
   by_contra h_not_phi
   have h_neg_phi := mcs_neg_of_not_mem h_mcs h_not_phi
-  have h_ta : DerivationTree FrameClass.Base [] ((Formula.neg phi).imp (Formula.allFuture (Formula.neg phi).somePast)) :=
+  have h_ta : DerivationTree FrameClass.Base []
+      ((Formula.neg phi).imp (Formula.allFuture (Formula.neg phi).somePast)) :=
     DerivationTree.axiom [] _ (Axiom.connect_future (Formula.neg phi)) trivial
   have h_G_P_neg := temporal_implication_property h_mcs (theoremInMcs h_mcs h_ta) h_neg_phi
   have h_P_neg_M' : (𝐏(¬phi)) ∈ M' := h_GC h_G_P_neg
@@ -246,7 +246,8 @@ theorem h_content_subset_implies_g_content_reverse
   intro phi h_G_phi_in_M'
   by_contra h_not_phi
   have h_neg_phi := mcs_neg_of_not_mem h_mcs h_not_phi
-  have h_pta : DerivationTree FrameClass.Base [] ((Formula.neg phi).imp (Formula.neg phi).someFuture.allPast) :=
+  have h_pta : DerivationTree FrameClass.Base []
+      ((Formula.neg phi).imp (Formula.neg phi).someFuture.allPast) :=
     DerivationTree.axiom [] _ (Axiom.connect_past (Formula.neg phi)) trivial
   have h_H_F_neg := temporal_implication_property h_mcs (theoremInMcs h_mcs h_pta) h_neg_phi
   have h_F_neg_M' : (𝐅(¬phi)) ∈ M' := h_HC h_H_F_neg

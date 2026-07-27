@@ -1,30 +1,37 @@
 {
-  "status": "planned",
-  "agent_type": "planner-hard-agent",
-  "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate-hard", "planner-hard-agent"],
+  "status": "partial",
+  "agent_type": "cslib-implementation-hard-agent",
+  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
   "task_number": 570,
   "task_name": "nested_sound_impL_lambda_chain_induction",
   "session_id": "sess_1785113705_bcf38a",
-  "artifact_path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
-  "phase_count": 8,
-  "estimated_hours": 6,
-  "postmortem_rules_count": 8,
-  "plan_metadata": {
-    "phases": 8,
-    "total_effort_hours": 6,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1, 2], [3, 6], [4], [5], [7], [8]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_lambda-chain-induction.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-07-26"
-      }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+      "type": "lean_source",
+      "summary": "Added lemma4_7_ii; corrected module/section/lemma4_7_i_ii docstrings."
+    },
+    {
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/01_lambda-chain-induction-summary.md",
+      "type": "summary",
+      "summary": "Phase 1 implementation summary."
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 8,
+  "memory_candidates": [],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 41,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": false,
+    "ci_pipeline_passed": false,
+    "notes": "Scoped build (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness) fails with exactly the two named pre-existing diagnostics (cut non-exhaustiveness, impL sorry), both explicitly out of scope for Phase 1 and scheduled for Phases 7 and 5 respectively. No third diagnostic. Full CI pipeline not run (single-phase dispatch; build is expected RED until Phase 7)."
+  },
+  "partial_progress": {
+    "stage": "phase_1_complete",
+    "details": "lemma4_7_ii landed and docstrings corrected. Phases 2-8 not started."
   },
   "completed_at": "2026-07-26"
 }

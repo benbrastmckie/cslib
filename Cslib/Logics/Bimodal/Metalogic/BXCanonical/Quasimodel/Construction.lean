@@ -36,12 +36,6 @@ with the defect-discharge property for Until/Since formulas.
 * Reynolds 1996: Formal treatment of quasimodel chains
 -/
 
-set_option linter.style.setOption false
-set_option linter.style.show false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Quasimodel
@@ -74,11 +68,13 @@ def hintikkaStep {Sigma : Finset (Formula Atom)} (h1 h2 : HintikkaPoint Sigma) :
 
 /-- An Until-defect at a Hintikka point: φ U ψ is in the point but ψ is not.
     This means the Until formula has not been discharged at this point. -/
-def UntilDefect {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma) (φ ψ : Formula Atom) : Prop :=
+def UntilDefect {Sigma : Finset (Formula Atom)}
+    (h : HintikkaPoint Sigma) (φ ψ : Formula Atom) : Prop :=
   Formula.untl ψ φ ∈ h.formulas ∧ ψ ∉ h.formulas
 
 /-- Since-defect: mirror of Until-defect for Since formulas. -/
-def SinceDefect {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma) (φ ψ : Formula Atom) : Prop :=
+def SinceDefect {Sigma : Finset (Formula Atom)}
+    (h : HintikkaPoint Sigma) (φ ψ : Formula Atom) : Prop :=
   Formula.snce ψ φ ∈ h.formulas ∧ ψ ∉ h.formulas
 
 /-! ## Defect Count
@@ -109,7 +105,8 @@ recursion in Lean), we prove the existence theorem using the BXPoint infrastruct
 we construct the chain at the MCS level and project down to Hintikka points. -/
 
 /-- A finite chain of Hintikka points witnessing satisfaction of an Until-formula. -/
-structure QuasimodelChain (Sigma : Finset (Formula Atom)) (target_lhs target_rhs : Formula Atom) where
+structure QuasimodelChain
+    (Sigma : Finset (Formula Atom)) (target_lhs target_rhs : Formula Atom) where
   /-- The list of Hintikka points forming the chain (always nonempty). -/
   points : List (HintikkaPoint Sigma)
   /-- The chain is nonempty. -/
@@ -161,7 +158,8 @@ noncomputable def QuasimodelChain.singleton {Sigma : Finset (Formula Atom)} {φ 
 theorem self_accum_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h : Formula.untl ψ φ ∈ w.formulas) :
     Formula.untl (Formula.and ψ (Formula.untl ψ φ)) φ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.self_accum_until ψ φ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.self_accum_until ψ φ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
 
@@ -170,7 +168,8 @@ theorem self_accum_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
 theorem until_F_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h : Formula.untl ψ φ ∈ w.formulas) :
     Formula.someFuture φ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.until_F ψ φ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.until_F ψ φ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
 
@@ -179,7 +178,8 @@ theorem until_F_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
 theorem connect_future_mcs {w : BXPoint Atom} {φ : Formula Atom}
     (h : φ ∈ w.formulas) :
     Formula.allFuture (Formula.somePast φ) ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_future φ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.connect_future φ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
 
@@ -189,7 +189,8 @@ theorem connect_future_mcs {w : BXPoint Atom} {φ : Formula Atom}
 theorem self_accum_since_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h : Formula.snce ψ φ ∈ w.formulas) :
     Formula.snce (Formula.and ψ (Formula.snce ψ φ)) φ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.self_accum_since ψ φ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.self_accum_since ψ φ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
 
@@ -197,7 +198,8 @@ theorem self_accum_since_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
 theorem since_P_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h : Formula.snce ψ φ ∈ w.formulas) :
     Formula.somePast φ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.since_P ψ φ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.since_P ψ φ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
 
@@ -205,7 +207,8 @@ theorem since_P_mcs {w : BXPoint Atom} {φ ψ : Formula Atom}
 theorem connect_past_mcs {w : BXPoint Atom} {φ : Formula Atom}
     (h : φ ∈ w.formulas) :
     Formula.allPast (Formula.someFuture φ) ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_past φ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.connect_past φ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h
 
@@ -281,7 +284,8 @@ noncomputable def sinceDefectSet {Sigma : Finset (Formula Atom)} (h : HintikkaPo
 
 open Classical in
 /-- The number of Since-defects at a Hintikka point. -/
-noncomputable def sinceDefectCount {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma) : Nat :=
+noncomputable def sinceDefectCount
+    {Sigma : Finset (Formula Atom)} (h : HintikkaPoint Sigma) : Nat :=
   (sinceDefectSet h).card
 
 open Classical in
@@ -353,7 +357,8 @@ def HintikkaStepOracle {Sigma : Finset (Formula Atom)} (φ ψ : Formula Atom) : 
         (Formula.untl ψ φ ∈ wh'.point.formulas ∧
           defectCount wh'.point < defectCount h))
 
-/-- A raw Hintikka chain: a nonempty list of Hintikka points with each consecutive pair related by `hintikkaStep`. -/
+/-- A raw Hintikka chain: a nonempty list of Hintikka points with each consecutive pair
+    related by `hintikkaStep`. -/
 structure HintikkaRawChain (Sigma : Finset (Formula Atom)) where
   /-- The list of Hintikka points forming the chain. -/
   points : List (HintikkaPoint Sigma)
@@ -393,6 +398,7 @@ noncomputable def HintikkaRawChain.singleton {Sigma : Finset (Formula Atom)}
   unfold HintikkaRawChain.head
   simp [HintikkaRawChain.singleton_points]
 
+set_option linter.flexible false in
 /-- Prepend a Hintikka point to a raw chain, provided the new head
     steps to the old head. -/
 noncomputable def HintikkaRawChain.cons {Sigma : Finset (Formula Atom)}
@@ -408,7 +414,7 @@ noncomputable def HintikkaRawChain.cons {Sigma : Finset (Formula Atom)}
       List.head?_eq_some_head c.nonempty
     rw [h_eq] at hy
     simp at hy
-    show hintikkaStep h0 y
+    change hintikkaStep h0 y
     have : c.head = y := by
       unfold HintikkaRawChain.head
       exact hy
@@ -440,6 +446,7 @@ def ChainWitnessed {Sigma : Finset (Formula Atom)}
     (c : HintikkaRawChain Sigma) : Prop :=
   ∀ h ∈ c.points, ∃ w : BXPoint Atom, ∀ f ∈ h.formulas, f ∈ w.formulas
 
+set_option linter.flexible false in
 /-- **Main theorem**: `hintikka_chain_exists`.
 
     Given a step oracle and a starting Hintikka point `h0` carrying the
@@ -535,6 +542,7 @@ def HintikkaStepOracleSince {Sigma : Finset (Formula Atom)} (φ ψ : Formula Ato
         (Formula.snce ψ φ ∈ wh'.point.formulas ∧
           sinceDefectCount wh'.point < sinceDefectCount h))
 
+set_option linter.flexible false in
 /-- Append a single Hintikka point to a raw chain, provided the old
     last point steps to the new point. -/
 noncomputable def HintikkaRawChain.snoc {Sigma : Finset (Formula Atom)}
@@ -555,7 +563,7 @@ noncomputable def HintikkaRawChain.snoc {Sigma : Finset (Formula Atom)}
     have h_head : ([h0] : List (HintikkaPoint Sigma)).head? = some h0 := by simp
     rw [h_head] at hy
     simp at hy
-    show hintikkaStep x y
+    change hintikkaStep x y
     rw [← hx, ← hy]
     exact h_step
 
@@ -578,6 +586,7 @@ theorem HintikkaRawChain.snoc_head {Sigma : Finset (Formula Atom)}
   unfold HintikkaRawChain.head
   simp [c.nonempty]
 
+set_option linter.flexible false in
 /-- `hintikka_chain_exists_since`: Since dual of `hintikka_chain_exists`. -/
 theorem hintikka_chain_exists_since
     {Sigma : Finset (Formula Atom)} {φ ψ : Formula Atom}

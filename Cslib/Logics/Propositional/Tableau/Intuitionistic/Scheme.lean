@@ -512,31 +512,37 @@ branch. `applyAllTImpRules` (`Expansion.lean:118-…`) now ALSO copies `T(φ→�
 world accessible from its source that lacks a copy — but this copying, like the original
 `T(ψ)`-consequence propagation, runs inside `applyPersistenceFixpoint`'s fuel-bounded fixpoint
 loop (`Expansion.lean:133-139`), reusing the OUTER expansion loop's remaining step-count
-(`fuel'+1` at the `intExpandBranches_openBranch_sat` call site, `:1438` era). If that fuel is
-exhausted before a GENUINE fixpoint of `applyAllTImpRules` is reached, some accessible world may
-never receive its copy, and the `sat_timp` disjunction is then genuinely FALSE for that world on
-that specific (low-fuel) branch — not merely unproved, but false as a fact about the branch.
+(`fuel'+1` at the `intExpandBranches_openBranch_sat` call site). If that fuel is exhausted
+before a GENUINE fixpoint of `applyAllTImpRules` is reached, some accessible world may never
+receive its copy, and the `sat_timp` disjunction is then genuinely FALSE for that world on that
+specific (low-fuel) branch — not merely unproved, but false as a fact about the branch.
 Establishing "fuel is always sufficient for persistence's OWN recursion to reach a genuine
 fixpoint" needs a NEW step-lt-style measure lemma for `applyPersistenceFixpoint`'s recursion
 (distinct from `intExpMeasure_step_lt`, which bounds the OUTER alpha/beta/world-creation loop and
 says nothing about inner persistence rounds) threaded through `intExpandBranches_openBranch_sat`'s
-own `:1388`-era `sorry` (the SAME gap, one level up) — out of proportion for this phase, and
-comparable in size to a full additional phase on its own, exactly as task 317 phase 10 already
-scoped it.
+own fuel-0 `sorry` (the SAME gap, one level up — see that lemma's docstring and in-proof note for
+the current status of that obligation). This measure has not been built. Note also that the
+world bound any such fuel-sufficiency measure would ultimately be sized against is itself
+refuted: see the *Divergence witness* note in `Expansion.lean` (this does NOT by itself refute
+Gap 1 — the witness bears on world-boundedness, not on persistence fuel-sufficiency directly —
+but any future attempt at this measure must not lean on `intUniverse`'s linear world range as a
+genuine invariant of produced branches).
 
-**Consequence for this task's Phase 3.** `sat_timp` is NOT added as an `IBranchSaturation` field
-and `truthLemma`'s T-imp `sorry` (below) is NOT closed: doing either would require discharging
-`sat_timp` at `IExpandedConsistent_sat`, the sole construction site, which needs Gap 1's
-fuel-sufficiency invariant — a genuine, substantial, pre-existing gap this phase's 2-hour budget
-cannot responsibly absorb without forcing a `sorry`, an axiom, or a weakened/vacuous restatement,
-all of which are prohibited. `intRule_preserves_sat`'s new `.pos, .imp` case (Soundness.lean) IS
-landed and sorry-free — that lemma reasons about a REAL Kripke model's forcing relation directly
-(classical excluded middle on `IForces`), not about branch-syntactic saturation, so it does not
-depend on Gap 1 at all. Recommendation for continuation: build the persistence fuel-sufficiency
-measure (Gap 1) as its own phase, then revisit `sat_timp`/`truthLemma`'s T-imp case together with
-`intExpandBranches_openBranch_sat`'s own `sorry` in one pass, since both bottom out in the same
-missing invariant. Do NOT attempt to force `sat_timp` via a weakened/vacuous statement or a
-`sorry`. -/
+**`sat_timp` IS an `IBranchSaturation` field** (`:105-108`), realized by `intApplyRuleFull`'s
+`.pos, .imp` branching arm (`Rules.lean:245-268`, `:274-275`), which fires reflexively at the
+label of the specific signed-formula copy it is given. No converse of the induction hypothesis
+is needed to use it: in `truthLemma`'s T-imp case, the `F(φ')@w'` arm of the disjunction
+contradicts `IForces val w' φ'` via `ih_φ'.2`, and the `T(ψ')@w'` arm yields the goal directly
+via `ih_ψ'.1`. The case nonetheless stays `sorry`, not because `sat_timp` is missing or because
+a converse is needed, but because the disjunction is only available at `w'` once `w'` carries
+its own `T(φ'→ψ')` copy — Gap 1 above, which is not yet established. `intRule_preserves_sat`'s
+`.pos, .imp` case (`Soundness.lean`) is already landed and sorry-free — that lemma reasons about
+a real Kripke model's forcing relation directly (classical excluded middle on `IForces`), not
+about branch-syntactic saturation, so it does not depend on Gap 1 at all. Recommendation for
+continuation: build the persistence fuel-sufficiency measure (Gap 1) as its own effort, then
+revisit `truthLemma`'s T-imp case together with `intExpandBranches_openBranch_sat`'s fuel-0
+`sorry` in one pass, since both bottom out in the same missing invariant. Do NOT attempt to
+force either `sorry` via a weakened/vacuous statement. -/
 
 /-! ## Parametric Truth Lemma -/
 
@@ -584,17 +590,17 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
     simp only [IForces_imp]
     constructor
     · -- T(φ'→ψ')@w ∈ b → ∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
-      -- Needs `sat_timp : ∀ w' accessible from w, F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b`. The
-      -- determinacy obstruction that used to block this (task 317 phase 9 Gap 2) is RESOLVED
-      -- by the `.pos, .imp` branching arm added to `intApplyRuleFull` -- see the updated
+      -- `sat_timp` (a live `IBranchSaturation` field, `:105-108`) supplies exactly
+      -- `∀ w' accessible from w, F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b` at any world `w'` carrying its
+      -- own `T(φ'→ψ')` copy: the `F(φ')@w'` arm contradicts `IForces val w' φ'` via `ih_φ'.2`,
+      -- and the `T(ψ')@w'` arm yields the goal via `ih_ψ'.1` -- see the updated
       -- "`sat_timp` discharge" STOP-gate note above this lemma. What remains, UNCHANGED, is
-      -- Gap 1: the disjunction only holds at worlds that actually carry their own
+      -- Gap 1: the disjunction is only available at `w'` once `w'` actually carries its own
       -- `T(φ'→ψ')` copy, which `applyAllTImpRules`'s copy-propagation only guarantees at a
       -- GENUINE fixpoint of the fuel-bounded persistence loop -- an invariant not yet built
-      -- (comparable in size to a full phase; see the STOP-gate note for the exact call-site
-      -- analysis). `sat_timp` is therefore deliberately NOT added as an `IBranchSaturation`
-      -- field and this case stays `sorry` rather than being forced via a weakened or vacuous
-      -- statement.
+      -- (see the STOP-gate note for the exact call-site analysis). This case stays `sorry`
+      -- because that copy-propagation invariant is not established, not because `sat_timp` is
+      -- missing or because a converse of the induction hypothesis is needed.
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
@@ -1568,10 +1574,19 @@ lemma intSubfmls_impCount_le (φ : Proposition Atom) :
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The fixed finite universe of `(sign, subformula, world)` cells for `φ`: both signs,
-every subformula of `φ`, at every world label `0 .. φ.complexity + 1` (mirrors
-`modalUniverse`, `FmpMeasure.lean:149-152`, using the linear intuitionistic world bound
-`φ.complexity + 1` -- report 07 §Q4 F5, `intExpandBranches_world_bound` (continuation,
-see handoff) -- in place of the Modal-K `modalWorldBound`). -/
+every subformula of `φ`, at every world label `0 .. φ.complexity + 1` (mirrors `modalUniverse`,
+`FmpMeasure.lean:149-152`, using the linear world range `φ.complexity + 1` in place of the
+Modal-K `modalWorldBound`).
+
+**This linear world bound is REFUTED as an invariant of branches actually produced by
+`intExpandBranches`** -- see the *Divergence witness* note in `Expansion.lean` (immediately
+before its `## Decision Procedures` section) for the counterexample: on a complexity-9 witness
+formula, world labels grow linearly and unboundedly in fuel, with no saturation. `intUniverse`
+is retained here only as the *measure domain* `intExpMeasure` is built over (a finite-cell
+bookkeeping convenience for the fuel-sufficiency argument), NOT as a containment guarantee that
+every world an actual expansion run visits lies within `0 .. φ.complexity + 1`. Do not read
+`∀ x ∈ b, x ∈ intUniverse φ` as an established invariant of `intExpandBranches`; the *Divergence
+witness* note shows a direct counterexample. -/
 def intUniverse (φ : Proposition Atom) : List (ISF Atom) :=
   (List.range (φ.complexity + 2)).flatMap (fun w =>
     (intSubfmls φ).flatMap (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩]))
@@ -1795,18 +1810,23 @@ private lemma applyPersistenceFixpoint_subset {φ0 : Proposition Atom} (b : IBra
     · exact ih _ (applyAllTImpRules_subset hb)
 
 omit [Hashable Atom] [DecidableEq Atom] in
-/-- **Step-level containment dispatch** (task 317 phase 6.2, the load-bearing containment
-fact, report 07 line 143): every signed formula emitted by `intApplyRuleFull sf nextWorld b`
-stays inside `U(φ0)`, given the branch invariant `hb`, the source membership `hsf`, and the
-world-bound hypothesis `hnw` (consumed only by the world-creating `F(φ → ψ)` case, to show
-the freshly minted world label `nextWorld` stays inside `U(φ0)`'s label range). This is
-EXACTLY the `hb` hypothesis `intExpMeasure_step_lt`/`_branch` (above) take as an assumption:
-composed with `applyPersistenceFixpoint_subset` (persistence containment) via an outer
-induction over `intExpandBranches`'s `go` recursion (task 317 phase 10), this lemma lets
-`hb` be inductively re-established at every step, discharging the obligation those two
-lemmas currently assume. Mirrors `modalApplyOne_outputs_subset`, `FmpMeasure.lean:669-754`,
+/-- **Step-level containment dispatch**: every signed formula emitted by
+`intApplyRuleFull sf nextWorld b` stays inside `U(φ0)`, given the branch invariant `hb`, the
+source membership `hsf`, and the world-bound hypothesis `hnw` (consumed only by the
+world-creating `F(φ → ψ)` case, to show the freshly minted world label `nextWorld` stays inside
+`U(φ0)`'s label range). Mirrors `modalApplyOne_outputs_subset`, `FmpMeasure.lean:669-754`,
 simplified for the propositional connective set (2 ALPHA + 2 BETA rules, one world-creating
-rule) versus Modal-K's box/diamond rule set (2 persistent + 2 fresh-world-minting rules). -/
+rule) versus Modal-K's box/diamond rule set (2 persistent + 2 fresh-world-minting rules).
+
+**`hnw` is FALSE for branches `intExpandBranches` actually produces** -- refuted by direct
+counterexample, not merely unproven. See the *Divergence witness* note in `Expansion.lean`
+(immediately before its `## Decision Procedures` section): on the witness formula there, the
+expansion loop mints worlds with unboundedly growing labels, so `nextWorld ≤ φ0.complexity + 1`
+fails at the actual call sites reached during expansion. The lemma below remains
+conditionally TRUE (its conclusion follows validly from its hypotheses), but `hnw` is not
+dischargeable at those call sites -- so this lemma cannot, by itself, establish the
+step-invariant an outer induction over `intExpandBranches` would need. The hypothesis is left
+in place deliberately: removing it would be a statement change, out of scope here. -/
 lemma intApplyRuleFull_outputs_subset {φ0 : Proposition Atom} {sf : ISF Atom}
     {nextWorld : Nat} {b : IBranch Atom}
     (hb : ∀ x ∈ b, x ∈ intUniverse φ0) (hsf : sf ∈ b)
@@ -2554,9 +2574,9 @@ invariants are re-established for the extended/branched state via
 passes through the IH, growing by one edge exactly at world-creation). In the `none` leaf
 case, the returned branch equals `bPers` directly, `edgesH` (the edge list active at that
 point) is the exposed witness, and `IExpandedConsistent_sat`/`IExpandedAccessConsistent_sat`
-discharge both conjuncts directly from the threaded invariants. The fuel-0 base case still has
-a gap (task 317 phase 10, `sorry`, entangled with the fuel-sufficiency argument, not this
-phase's scope). -/
+discharge both conjuncts directly from the threaded invariants. The fuel-0 base case's goal is
+REFUTED at its current statement, not merely gapped: see the in-proof note at the `sorry`
+below for the Lean-verified counter-instance and why no proof can close it as written. -/
 private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
@@ -2572,9 +2592,31 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
   induction fuel generalizing branches expandedSets nextWorlds edgeSets hAC hLen0 hACC with
   | zero =>
-    -- fuel=0 base case: intExpandBranches returns the first open branch from the initial
-    -- list without saturating it. Proving IBranchSaturation here requires the
-    -- fuel-sufficiency argument (task 317 phase 10 blocker; out of scope for phase 1).
+    -- fuel=0 base case: THE GOAL IS FALSE AT ITS CURRENT STATEMENT, refuted by a
+    -- Lean-verified counter-instance, not merely unproven.
+    --
+    -- Counter-instance: `branches = [[⟨.neg, p ∧ q, 0⟩]]`, `expandedSets = [[]]`,
+    -- `nextWorlds = [1]`, `edgeSets = [[]]`.
+    --
+    -- Every hypothesis of this lemma holds at that instance: `ILabelBound` holds trivially
+    -- (the single branch's one formula sits at label `0 < 1`); `IExpandedConsistent` and
+    -- `IAllAccessConsistent` are vacuous, since `expandedSets = [[]]` supplies the empty
+    -- expanded-set `e = []` and `edgeSets = [[]]` supplies the empty edge list; the length
+    -- hypotheses `hLen0` (`branches.length = edgeSets.length`) and the analogous
+    -- `expandedSets`/`nextWorlds` lengths are all `(1, 1)`.
+    --
+    -- With `fuel = 0`, `intExpandBranches` returns `.openBranch b` for `b` = the branch
+    -- itself, `[⟨.neg, p ∧ q, 0⟩]`, unmodified -- it is never saturated. But
+    -- `IBranchSaturation.sat_fand`'s premise (`F(p ∧ q)@0` present) evaluates `true` while
+    -- BOTH disjuncts it requires (`F(p)@0` or `F(q)@0` present) evaluate `false`: neither is
+    -- on the branch. So `IBranchSaturation Atom b` is false at this `b`, and the existential
+    -- goal (`∃ edges, IBranchSaturation Atom b ∧ IFimpAccess edges b`) is unsatisfiable at
+    -- this instance despite every hypothesis holding.
+    --
+    -- Consequence: no proof can close this `sorry` at the lemma's current statement. Closing
+    -- it requires RESTATING the lemma (e.g. with a saturation-establishing precondition on
+    -- the initial worklist, ruling out the counter-instance above) -- out of scope here. This
+    -- note only records the refutation so no future attempt re-derives it from scratch.
     sorry
   | succ fuel' ih =>
     simp only [intExpandBranches] at h
@@ -3016,29 +3058,6 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
   | openBranch b =>
     obtain ⟨edges, hcm⟩ := openBranch_countermodel S φ b hresult
     exact absurd (hvalid edges b) hcm
-
-/-! ### GAP 2 investigation (task 317 phase 10 continuation, this dispatch): determinacy remains
-BLOCKED, confirmed by source-level investigation, not merely re-asserted. `truthLemma`'s T-imp
-case needs, for `w'` accessible from `w` with `T(φ'→ψ')@w ∈ b` and `IForces val w' φ'` (a
-SEMANTIC fact), to conclude `IForces val w' ψ'`. The only route into `b`'s syntax is via
-`ih_φ'`, whose sole usable direction is `T(φ')@w' ∈ b → IForces val w' φ'` — its CONVERSE
-(`IForces val w' φ' → T(φ')@w' ∈ b`, needed to invoke the genuine-fixpoint fact above) is not
-given by the induction and is not established by any Hintikka field: `sat_tand`/`sat_fand`/…
-only decompose compounds ALREADY on the branch, and the persistent T(→) rule (`Rules.lean:174`)
-is `.pos`-only (never plants `F`-tags across worlds), so a world `w'` created as the witness for
-one `F(A→B)` obligation has no mechanism forcing an UNRELATED subformula `φ'` of `φ0` to be
-either `T`- or `F`-tagged there. Bivalence over `Sub(φ0)` at every reachable world is not a
-byproduct of the EXISTING rule set (`Rules.lean`'s five decomposition rules + the one
-world-creating rule) — it would need a NEW tableau rule (a Lindenbaum-style "decide `ξ` at `w'`"
-branching step for every `ξ ∈ Sub(φ0)` not yet tagged at a freshly created world), which is a
-calculus-level change to `Rules.lean`/`Expansion.lean`, not a completeness-side (`Scheme.lean`)
-fix. This is OUT OF SCOPE for task 317's Phase 10 as planned (an internal, `Scheme.lean`-only
-discharge) and is recommended as a NEW task (calculus redesign: add a determinacy/completion
-rule), to be researched and planned separately before `sat_timp`/truthLemma's T-imp case can
-close. No field/lemma is stated for `sat_timp` here — adding it now, even in the strictly
-fixpoint-provable weak form, would sit unused (truthLemma's T-imp case needs the full
-disjunction, not just the weak implication), so it is deferred until gap 2 has a resolution
-strategy, per the zero-debt "no unused scaffolding masquerading as progress" standard. -/
 
 end Cslib.Logic.PL
 

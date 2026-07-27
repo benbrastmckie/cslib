@@ -11,13 +11,12 @@ next_project_number: 575
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,572 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,573 | 36,37,181,425,465,530,554,562,563,572 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,506,548,565,566,574 | 39,40,511,564,573 | foundations, propositional logic, modal logic |
-| 4 | 300,456,567 | 506,558,565,566,574 | modal logic, tableau infrastructure |
-| 5 | 317,414 | 181,215,300,301,456 | propositional logic, code hygiene |
-| 6 | 375,430 | 317 | propositional logic |
-| 7 | 413 | 375 | code hygiene |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574 | 36,37,181,425,465,530,554,562,563,573 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,456,506,548,565,566 | 39,40,511,564,574 | foundations, modal logic, tableau infrastructure |
+| 4 | 300,317,567 | 456,506,558,565,566 | propositional logic, modal logic |
+| 5 | 375,414,430 | 181,215,300,301,317 | propositional logic, code hygiene |
+| 6 | 413 | 375 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -29,9 +28,8 @@ next_project_number: 575
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-572 [PLANNING] — The Intuitionistic propositional tableau calculus in Cslib/Logics
-  └─ 573 [RESEARCHED] — SMALL, time-boxed research/prototyping spike. Produces a decision
-    └─ 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
+573 [RESEARCHED] — SMALL, time-boxed research/prototyping spike. Produces a decision
+  └─ 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -158,11 +156,13 @@ Constraints: NO library changes -- no file under Cslib/ may be edited/committed 
 
 ### 572. Tableau docstring hygiene divergence record
 - **Effort**: 1-2 hours
-- **Status**: [PLANNING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+- **Plan**: [572_tableau_docstring_hygiene_divergence_record/plans/01_docstring-hygiene-divergence-record.md]
+- **Summary**: [572_tableau_docstring_hygiene_divergence_record/summaries/01_docstring-hygiene-divergence-record-summary.md]
 
 **Description**: The Intuitionistic propositional tableau calculus in Cslib/Logics/Propositional/Tableau/Intuitionistic/ carries three stale docstrings that misled twelve consecutive plan versions attempting to close remaining proof obligations (task 317's plans/01 through plans/12). This task performs ONLY documentation and references.bib edits -- no Lean definition or proof step may change. It must land BEFORE any other work in this repair programme because every downstream research/planning/implementation dispatch reads these docstrings and, absent correction, will re-derive the same refuted claims.
 

@@ -2012,7 +2012,7 @@
     {
       "project_number": 572,
       "project_name": "tableau_docstring_hygiene_divergence_record",
-      "status": "planning",
+      "status": "completed",
       "task_type": "cslib",
       "description": "The Intuitionistic propositional tableau calculus in Cslib/Logics/Propositional/Tableau/Intuitionistic/ carries three stale docstrings that misled twelve consecutive plan versions attempting to close remaining proof obligations (task 317's plans/01 through plans/12). This task performs ONLY documentation and references.bib edits -- no Lean definition or proof step may change. It must land BEFORE any other work in this repair programme because every downstream research/planning/implementation dispatch reads these docstrings and, absent correction, will re-derive the same refuted claims.\n\nConcrete edits required:\n\n1. Scheme.lean:3020-3041 -- the block beginning 'GAP 2 investigation ... determinacy remains BLOCKED' is STALE and directly contradicted by the current code at Scheme.lean:581, where `sat_timp` is a live `IBranchSaturation` field (also see Scheme.lean:105-108) whose reflexive form `T(phi->psi)@w in b -> F(phi)@w in b \\/ T(psi)@w in b` discharges `truthLemma`'s T-imp case without any converse (the F(phi')@w' arm contradicts IForces w' phi' via ih_phi'.2; the T(psi')@w' arm gives the goal via ih_psi'.1). Rewrite or delete this block so it reflects that GAP 2 (determinacy) is resolved and no converse is needed.\n\n2. Scheme.lean:527 -- claims `sat_timp` is NOT added as an `IBranchSaturation` field. This is false; it is a field at Scheme.lean:105-108. Correct this claim.\n\n3. Expansion.lean:125-126 -- the docstring's termination claim ('termination is unaffected since the number of distinct (implication, world) copies is bounded by intUniverse phi0') is CIRCULAR: it assumes the very world bound that the calculus's own copy-channel interaction destroys (see item 4). Replace this claim with an accurate statement that termination is NOT currently established and the expansion loop is known to diverge on some inputs (cite the module-level note added in item 4).\n\n4. Add a module-level note (in Scheme.lean or Expansion.lean, near the existing termination/measure docstrings) recording the divergence witness so no future dispatch re-attempts proving a world bound: for `phi0 = (((a->b)->c) /\\ ((d->e)->f)) -> ((u1->v1) \\/ (u2->v2))` (complexity 9, Lean-verified via `#eval`), `intExpandBranches` produces branch/world counts 4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260 -- linear growth with no saturation, and from world 3 onward each world is an exact structural duplicate of its grandparent (identical T-set/F-set, period 2). Consequently: (a) `intApplyRuleFull_outputs_subset`'s `hnw : nextWorld <= phi0.complexity + 1` hypothesis (Scheme.lean:1813) is FALSE, refuted by direct counterexample, not merely unproven; (b) `intUniverse`'s label range `List.range (phi.complexity + 2)` (Scheme.lean:1575-1577) is likewise false as an invariant of produced branches; (c) NO numeric world bound of any size exists for the current calculus. Do not schedule any further work attempting to prove `intExpandBranches_world_bound`, `hnw`, or `hUniv` as currently stated -- they are refuted, not merely hard.\n\n5. Also record, at or near the `sorry` at Scheme.lean:2578 (inside `intExpandBranches_openBranch_sat`'s fuel=0 case), that this goal is FALSE AT ITS CURRENT STATEMENT, with the Lean-verified counter-instance: `branches = [[F(p/\\q)@0]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]` -- every hypothesis of the lemma holds (`ILabelBound` holds trivially, `IExpandedConsistent`/`IAllAccessConsistent` are vacuous at `e = []`, lengths are `(1,1)`), the loop returns exactly this branch, and `IBranchSaturation.sat_fand`'s premise evaluates `true` while both disjuncts evaluate `false`. No proof can close this sorry at its current statement; it must be restated later (out of scope for this task -- this task only records the refutation).\n\n6. references.bib -- add the two dangling BibKeys currently cited in docstrings but absent from the file: `GargGenoveseNegri2012` (Garg, Genovese & Negri, 'Countermodels from Sequent Calculi in Multi-Modal Logics', LICS 2012 -- asserted 'added to references.bib in Phase 6' at Expansion.lean:210, but `grep -c GargGenoveseNegri2012 references.bib` returns 0) and a key for Dyckhoff 1992 ('Contraction-free sequent calculi for intuitionistic logic', cited in prose with no BibKey at Expansion.lean:264, `grep -c Dyckhoff references.bib` returns 0).\n\nConstraints: documentation and references.bib only. No `.lean` definition, theorem statement, or proof tactic may change. Do not attempt to close any sorry; do not change sorry locations or counts. Verify `lake build` still succeeds and `lake exe lint-style` passes on the touched files.\n\nOverlap note: task 456 (shared_tableau_containment_blocking, currently [NOT STARTED]) already lists 'add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979' in its own description. This task's edit for `GargGenoveseNegri2012` overlaps task 456's scope for that one key; `DershowitzManna1979` is unaffected and remains task 456's alone. Whichever of this task or task 456 lands `GargGenoveseNegri2012` first should leave a note in the file (or a task comment) for the other to avoid a duplicate/conflicting BibTeX entry.",
       "effort": "1-2 hours",
@@ -2025,15 +2025,26 @@
         "references.bib"
       ],
       "created": "2026-07-27T06:06:33Z",
-      "last_updated": "2026-07-27T06:30:13Z",
+      "last_updated": "2026-07-27T06:51:56Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/317_propositional_tableau_completeness/reports/14_blocker-analysis.md",
           "summary": "Spawn analysis from parent task"
+        },
+        {
+          "path": "specs/572_tableau_docstring_hygiene_divergence_record/plans/01_docstring-hygiene-divergence-record.md",
+          "type": "plan",
+          "summary": "Six-phase plan with per-phase lake build / sorry-inventory / no-semantics-changed verification; all description line numbers re-verified against the working tree."
+        },
+        {
+          "path": "specs/572_tableau_docstring_hygiene_divergence_record/summaries/01_docstring-hygiene-divergence-record-summary.md",
+          "type": "summary",
+          "summary": "Phase-by-phase account, verification results, sorry-count table, coordination note."
         }
       ],
-      "session_id": "sess_1785133769_9cfe38"
+      "session_id": "sess_1785133769_9cfe38",
+      "completion_summary": "Corrected three stale docstring claims in the intuitionistic tableau calculus (sat_timp field existence, resolved GAP-2 determinacy, circular termination claim), recorded the expansion-loop divergence witness and the fuel-0 refutation as permanent in-source notes, and added the two missing references.bib entries. Documentation and references.bib only: no Lean definition, statement, or tactic changed; sorry inventory byte-identical; lake build and lint-style green."
     },
     {
       "project_number": 573,

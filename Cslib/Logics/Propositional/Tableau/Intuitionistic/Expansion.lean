@@ -121,9 +121,13 @@ signed-formula copy it is given, so realizing the source's "for every w' accessi
 w, either F(φ)@w' or T(ψ)@w'" obligation requires each accessible w' to eventually carry
 its own `⟨.pos, φ → ψ, w'⟩` copy, which `intStepBranch`/`intApplyRuleFull` can then resolve
 independently (and which `expanded` then tracks per-`(implication, world)` pair, since each
-copy is a distinct `ISF`). This mirrors `intTImpRule`'s own accessibility scan; termination
-is unaffected since the number of distinct `(implication, world)` copies is bounded by
-`intUniverse φ0`.
+copy is a distinct `ISF`). This mirrors `intTImpRule`'s own accessibility scan.
+
+Termination of the overall expansion loop (`intExpandBranches`, below) is NOT currently
+established, and the loop is known to diverge on some inputs: the `intUniverse φ0` bound this
+docstring previously appealed to is itself refuted, not merely unproven. See the
+*Divergence witness* note below in this file (`## Decision Procedures`, immediately preceding
+`intFuel`) for the counterexample and its consequences.
 
 Returns the updated branch with all pending persistence applications. -/
 def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
@@ -207,7 +211,7 @@ newEdge), newExp)` branch (see `intExpandBranches` below).
 
 Following the `Sfor`-containment termination technique of Garg, Genovese & Negri,
 *Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
-[`GargGenoveseNegri2012`; BibKey added to `references.bib` in Phase 6], this helper will decide
+[`GargGenoveseNegri2012`], this helper will decide
 whether the `F(φ → ψ)`-triggered world-creation in `go`'s
 `some (.linearResult newForms nw' (some newEdge), newExp)` branch — the *only* world-creating
 case, produced solely by `intApplyRuleFull`'s `F(φ → ψ)` clause via `intFImpRule` — can be
@@ -261,7 +265,8 @@ When Phase 2 wires this in: `some x` means do NOT create `w'` — mark `F(φ →
 with `bPers` (not `Branch.extendMany bPers newForms`) and unmodified `edges` (not
 `edges ++ [newEdge]`). `none` means proceed exactly as today (create `w'` as normal).
 
-**Why not the worlds-free G4ip weight** (Dyckhoff 1992 / Negri–von Plato 2001 §5.5): that
+**Why not the worlds-free G4ip weight** (Dyckhoff 1992 [`Dyckhoff1992`] / Negri–von Plato 2001
+[`NegriVonPlato2001`] §5.5): that
 measure requires every rule's active formula to be strictly lighter than its principal
 formula, which `propagatePersistence` breaks by unconditionally copying ALL `T`-signed
 formulas at `w` — including compounds not yet expanded there — onto `w'` regardless of
@@ -470,6 +475,52 @@ predicate and countermodel `botForces`) into a single parameterized interface. -
     (closurePred : IBranch Atom → Bool) :
     IntTableauResult Atom :=
   intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
+
+/-! ### Divergence witness: no world bound exists for this calculus -/
+
+/-!
+`intExpandBranches` does not terminate on every input: it diverges on a complexity-9 witness
+formula, and no numeric world bound (of any size) can be substituted for the one
+`intUniverse`/`intApplyRuleFull_outputs_subset` assume. This note is the durable, greppable
+record of that fact, obtained by evaluating `intExpandBranches` on the witness formula below at
+increasing fuel and observing the branch/world counts.
+
+**Witness formula** (complexity 9):
+`φ0 = (((a→b)→c) ∧ ((d→e)→f)) → ((u₁→v₁) ∨ (u₂→v₂))`
+
+**Measured growth.** Evaluating `intExpandBranches [[⟨.neg, φ0, 0⟩]] [[]] [1] [[]] fuel
+isIntuitionisticallyClosed` at increasing `fuel`, the maximum world label reached is:
+
+| fuel         | 10 | 20 | 30 | 40 | 60 | 80 | 120 | 160 | 200 | 260 |
+|--------------|----|----|----|----|----|----|-----|-----|-----|-----|
+| max label    | 4  | 7  | 10 | 14 | 21 | 27 | 40  | 54  | 67  | 87  |
+
+Growth is linear in fuel with no saturation: `intStepBranch` never returns `none` on this
+input, so the loop consumes its entire fuel budget every time.
+
+**Structural duplication.** From world 3 onward, every world is an exact structural duplicate
+of its grandparent — identical T-set and F-set, period 2. The two T-implication rules
+(`applyAllTImpRules`'s copy channel above and `intFImpRule` in `Rules.lean`) ping-pong forever
+on identical content; only the label increments.
+
+**Three consequences:**
+(a) `intApplyRuleFull_outputs_subset`'s hypothesis `hnw : nextWorld ≤ φ0.complexity + 1`
+(`Scheme.lean`) is FALSE, refuted by this direct counterexample.
+(b) `intUniverse`'s label range `List.range (φ.complexity + 2)` (`Scheme.lean`) is false as an
+invariant of branches actually produced by `intExpandBranches`.
+(c) NO numeric world bound of any size exists for the current calculus: the world count is
+unbounded in fuel on this input, so no `f(φ0)` satisfies `nextWorld ≤ f(φ0)`.
+
+**Directive.** Do not attempt to prove `intExpandBranches_world_bound`, the `hnw` hypothesis, or
+the `intUniverse` containment invariant (`hUniv`) as currently stated — they are refuted, not
+merely hard. Any future progress on world-boundedness requires a calculus-level change (an
+ancestor-directed loop-check/blocking rule that actually cuts the ping-pong above), not a proof
+effort against the present statements.
+
+**Method.** Obtained by evaluating `intExpandBranches` on `φ0` at increasing fuel and comparing
+branch contents across worlds; re-verified directly in Lean on the unmodified library, not only
+by an external harness.
+-/
 
 /-! ## Decision Procedures -/
 

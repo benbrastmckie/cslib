@@ -14,8 +14,9 @@ public import Mathlib.Data.Set.Card
 
 This file establishes closure of deterministic Muller automata (DMAs) under finite union
 (`DA.Muller.union`), mirroring the DBA union construction in `DA.BuchiClosure` over the
-product automaton `DA.prod`. This closure lemma is used by task 241 (McNaughton's theorem,
-Choueka route) to fold a finite family of DMAs into a single DMA.
+product automaton `DA.prod`. This closure lemma is used by McNaughton's theorem
+(Choueka route, see `Cslib.Computability.Languages.OmegaRegularLanguage`) to fold a finite
+family of DMAs into a single DMA.
 
 ## References
 
@@ -118,8 +119,8 @@ theorem Muller.empty_language_eq : language (Muller.empty : Muller Unit Symbol) 
 /-- Existential DMA-recognizability is closed under finite (bounded) union: if each `p i`
 (for `i` ranging over a finite subset `s` of an index type `I`) is recognized by a
 finite-state DMA, so is `⨆ i ∈ s, p i`. This is the finite lift of `Muller.union` used by
-task 241 (Choueka forward assembly, Phase 5) to fold the finite Choueka decomposition family
-into a single DMA. Mirrors the induction pattern of `IsRegular.iSup`
+McNaughton's theorem (Choueka forward assembly) to fold the finite Choueka decomposition
+family into a single DMA. Mirrors the induction pattern of `IsRegular.iSup`
 (`Cslib.Computability.Languages.OmegaRegularLanguage`). -/
 theorem Muller.exists_iSup {I : Type*} [Finite I] {Symbol : Type*} {s : Set I}
     {p : I → Cslib.ωLanguage Symbol}

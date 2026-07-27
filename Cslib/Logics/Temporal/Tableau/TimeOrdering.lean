@@ -107,7 +107,7 @@ def allTimes (ord : TimeOrdering) : List Nat :=
 
 /-- The total number of distinct time points recorded in the ordering.
 
-**Historical note** (task 552 continuation, Phase 7): this was previously read directly by
+**Historical note**: this was previously read directly by
 `Rules.lean`'s `untlNeg`/`snceNeg` Reynolds co-decomposition arms as a raw numeric cap
 (`0 < timeCount < 4`) bounding fresh future/past point creation. That cap has been replaced by
 the `isTemporallyBlocked` dedup-based termination gate (`Branch.lean`), the same device already

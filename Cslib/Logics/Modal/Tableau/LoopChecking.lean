@@ -103,8 +103,8 @@ them); the declaration count does not. Re-run `wc -l` rather than citing the sto
 ### Sorry census
 
 ```
-{ grep -rnE '^[[:space:]]*sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/ ; \
-  grep -rnE '(:=|\bby)[[:space:]]+sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/ ; } \
+{ grep -rnE '^[[:space:]]*sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/; \
+  grep -rnE '(:=|\bby)[[:space:]]+sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/; } \
   | sort -u | grep 'Modal/Tableau/'
 ```
 
@@ -8984,6 +8984,7 @@ witnessFormula)`. Threaded alongside `keys`, read only by the completeness direc
 the probe's working type
 (`specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean:43`).
 -/
+@[nolint unusedArguments]
 abbrev Reds (Atom : Type*) [DecidableEq Atom] [Hashable Atom] :=
   List (WorldIndex × WorldIndex × Sign × Proposition Atom)
 

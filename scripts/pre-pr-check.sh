@@ -27,6 +27,10 @@ echo "4. Building PR-scope modules..."
 lake build Cslib.Foundations.Logic.Metalogic.Consistency
 lake build Cslib.Logics.Modal.Metalogic
 lake build Cslib.Logics.Temporal.Metalogic
-lake build Cslib.Logics.Bimodal.Metalogic
+# Bimodal has no Metalogic barrel module; build its sub-barrels directly.
+lake build Cslib.Logics.Bimodal.Metalogic.Core
+lake build Cslib.Logics.Bimodal.Metalogic.Completeness
+lake build Cslib.Logics.Bimodal.Metalogic.Decidability
+lake build Cslib.Logics.Bimodal.Metalogic.Separation
 
 echo "=== Pre-PR Verification Complete ==="

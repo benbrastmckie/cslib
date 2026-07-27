@@ -581,6 +581,7 @@ bookkeeping artifact but corresponds to a real `T(φ)@t` member of the branch, s
 least-witness/pigeonhole argument over the branch's own signed-formula content is sound. The
 `ord` parameter is threaded for uniformity with the run-level worklist invariants below (and
 for Phase 3's later use); it is not needed by this invariant's own statement. -/
+@[nolint unusedArguments]
 def TrackerBranchFaithful (b : TBranch Atom) (_ord : TimeOrdering)
     (tracker : EventualityTracker Atom) : Prop :=
   ∀ e ∈ tracker.pending, (⟨.pos, e.formula, e.label⟩ : TSF Atom) ∈ b

@@ -405,13 +405,13 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 4: Land `lambdaChain_XZ_imp_Y` (the Λ-chain induction) and the two shape lemmas [NOT STARTED]
+### Phase 4: Land `lambdaChain_XZ_imp_Y` (the Λ-chain induction) and the two shape lemmas [COMPLETED]
 
 - **Goal:** Land the induction this task is named for, plus the two `Λ = []` normalisation shape
   lemmas the assembly needs.
 - **Files:** `Cslib/.../Nested/Soundness.lean` (sole owner)
 - **Tasks:**
-  - [ ] Land, in the Λ-Chain Toolkit section, the three-case structural recursion (from research,
+  - [x] Land, in the Λ-Chain Toolkit section, the three-case structural recursion (from research,
         compiled sorry-free):
         ```lean
         theorem lambdaChain_XZ_imp_Y (A B : Proposition Atom) :
@@ -424,7 +424,7 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
           | Λ₀ :: Λ₁ :: rest =>
               lemma4_7_ii Λ₀.fm (lemma4_7_iv (lambdaChain_XZ_imp_Y A B (Λ₁ :: rest)))
         ```
-  - [ ] Docstring must record: the motive
+  - [x] Docstring must record: the motive
         `P(Λ) := ⊢ ((Λ.fillRhs A°).fm ∧ (Λ.fillLhs (A⊃B)•).fm) ⊃ (Λ.fillLhs B•).fm` with `A`, `B`
         fixed outside the recursion as parameters; the three-way `[]` / `[Λ₀]` / `Λ₀ :: Λ₁ :: rest`
         split matching `OutputCtx.fillLhs`'s own recursion (and `OutputCtx.fillLhs_fm_mono`'s and
@@ -432,13 +432,19 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
         (`[]` is the degenerate `Λ{ } = { }` where `fillRhs` supplies the `⊤` antecedent, `[Λ₀]` is
         `n = 0`, `Λ₀ :: Λ₁ :: rest` is `n ≥ 1`); and the verbatim source sentence "using an
         induction on n together with Lemma 4.7.(ii) and (iv)" with the BibKey.
-  - [ ] Note in the docstring the definitional identity the cons-cons step relies on, which holds
+  - [x] Note in the docstring the definitional identity the cons-cons step relies on, which holds
         by `rfl`: `(buildRhsChain (Λ₁::rest) Ψ).fm = □ ((OutputCtx.fillRhs (Λ₁::rest) Ψ).fm)` —
         this is what lets `lemma4_7_iv`'s `□A ∧ ◇B ⊃ ◇C` shape line up with no rewriting.
-  - [ ] Land `psiX_fm (ctx : InputCtx Atom) (A : Proposition Atom) : (buildRhsChain (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A)).fm = Proposition.box ((ctx.Λ.fillRhs (.atom A)).fm)`
+  - [x] Land `psiX_fm (ctx : InputCtx Atom) (A : Proposition Atom) : (buildRhsChain (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A)).fm = Proposition.box ((ctx.Λ.fillRhs (.atom A)).fm)`
         — `cases ctx.Λ <;> rfl`.
-  - [ ] Land `primeRhs_fm (ctx : InputCtx Atom) (A : Proposition Atom) : ((ctx.Λ.headD .empty :: ctx.Λ.tail).fillRhs (NestedRhs.atom A)).fm = (ctx.Λ.fillRhs (.atom A)).fm`
-        — `cases ctx.Λ <;> rfl`.
+  - [x] Land `primeRhs_fm (ctx : InputCtx Atom) (A : Proposition Atom) : ((ctx.Λ.headD .empty :: ctx.Λ.tail).fillRhs (NestedRhs.atom A)).fm = (ctx.Λ.fillRhs (.atom A)).fm`
+        — `cases ctx.Λ <;> rfl`. **Deviation**: landed as
+        `OutputCtx.fillRhs (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A)` (explicit
+        application) rather than dot-notation `(...).fillRhs (...)` — dot notation on a raw list
+        literal of type `List (NestedLhs Atom)` cannot resolve to `OutputCtx.fillRhs` (an `abbrev`
+        alias, not a distinct head symbol for namespace lookup), producing
+        `Invalid field 'fillRhs': environment does not contain 'List.fillRhs'`. Same statement,
+        same proof (`cases ctx.Λ <;> rfl`), purely a call-syntax fix.
 - **Estimated output:** ~70 lines (25 proof, 45 docstring).
 - **Timing:** ~45 minutes.
 - **Depends on:** 1, 3

@@ -1400,6 +1400,70 @@ theorem lambdaChain_step2 {X Y Z P : Proposition Atom}
   have hY : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] Y := .modus_ponens _ _ _ hd hXZ
   exact .modus_ponens _ _ _ hYimpP hY
 
+/-! ## The Λ-Chain Induction (Lemma 4.9, `⊃•`)
+
+**The `Λ{ }`-chain induction** the task is named for. Page 10: "let `Λ{ } = Λ0, [Λ1, [. . . ,
+[Λn, { }] . . .]]`. Now let `P = fm(Π◦)` and `Li = fm(Λi)` for `i = 0 . . . n`, and let
+`LX = fm(Λ{A◦})`, `LY = fm(Λ{B•})`, `LZ = fm(Λ{A ⊃ B•})` ... `(LX ∧ LZ) ⊃ LY`, which can be
+shown provable in `HCK + X` using an induction on `n` together with Lemma 4.7.(ii) and (iv)."
+See [ArisakaDasStrassburger2015], §4, page 10.
+
+**Induction motive, spelled out.** The recursion is structural on the `OutputCtx` list `Λ`,
+using the file's established **three-way** split (`[]` / `[Λ₀]` / `Λ₀ :: Λ₁ :: rest`) — the same
+split `OutputCtx.fillLhs` itself recurses on, and the same one `OutputCtx.fillLhs_fm_mono` and
+`lemma4_8` already use. The motive is
+
+`P(Λ) := ⊢ ((Λ.fillRhs A°).fm ∧ (Λ.fillLhs (A⊃B)•).fm) ⊃ (Λ.fillLhs B•).fm`
+
+with `A`, `B` **fixed outside** the recursion (they are parameters, not part of the motive), and
+the recursive call taken at the structurally smaller `Λ₁ :: rest`. Reading the three cases against
+the source's `Λ{ } = Λ0, [Λ1, [. . . , [Λn, { }] . . .]]`: `[]` is the degenerate `Λ{ } = { }` (the
+source's `n = 0` with no `Λ0` layer, where `fillRhs` supplies the `⊤` antecedent), `[Λ₀]` is
+`n = 0`, and `Λ₀ :: Λ₁ :: rest` is `n ≥ 1`.
+
+The cons-cons step relies on one definitional identity, which holds by `rfl`:
+`(buildRhsChain (Λ₁::rest) Ψ).fm = □ ((OutputCtx.fillRhs (Λ₁::rest) Ψ).fm)` — both sides reduce to
+`Proposition.box (Λ₁.fm.imp (buildRhsChain rest Ψ).fm)`. That is what lets `lemma4_7_iv`'s
+`□A ∧ ◇B ⊃ ◇C` shape line up with the goal with no rewriting at all. -/
+
+/-- **The `Λ{ }`-chain induction** (page 10): `⊢ (L_X ∧ L_Z) ⊃ L_Y`. The source's "induction on
+`n` … together with Lemma 4.7.(ii) and (iv)", transcribed literally.
+
+| Case | Goal | Discharged by |
+|---|---|---|
+| `[]` | `((⊤ ⊃ A) ∧ (A ⊃ B)) ⊃ B` | `topBase` (propositional; `⊤ = ⊥ ⊃ ⊥` via `efq`) |
+| `[Λ₀]` | `((L₀ ⊃ A) ∧ (L₀ ∧ (A ⊃ B))) ⊃ (L₀ ∧ B)` | `lemma4_7_ii (D := L₀)` via `mpAnd` |
+| `Λ₀::Λ₁::rest` | `((L₀⊃□X′) ∧ (L₀∧◇Z′)) ⊃ (L₀∧◇Y′)` | `lemma4_7_ii (D := L₀)` via `lemma4_7_iv` |
+
+See [ArisakaDasStrassburger2015], §4, page 10. -/
+theorem lambdaChain_XZ_imp_Y (A B : Proposition Atom) :
+    ∀ (Λ : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom)
+        (((Λ.fillRhs (.atom A)).fm.and (Λ.fillLhs (.atom (A.imp B))).fm).imp
+          (Λ.fillLhs (.atom B)).fm)
+  | []               => topBase A B
+  | [Λ₀]             => lemma4_7_ii Λ₀.fm (mpAnd A B)
+  | Λ₀ :: Λ₁ :: rest =>
+      lemma4_7_ii Λ₀.fm (lemma4_7_iv (lambdaChain_XZ_imp_Y A B (Λ₁ :: rest)))
+
+/-- Shape lemma for the `ctx.Λ = []` normalisation used by the `impL` assembly:
+`InputCtx.outputPruning`'s `ctx.Λ.headD .empty :: ctx.Λ.tail` layer, run through `buildRhsChain`,
+computes the same formula as `□` applied to `ctx.Λ.fillRhs (.atom A)`. Closed by `cases ctx.Λ <;>
+rfl` — both branches (`Λ = []` giving the repaired `[∅]` layer, and `Λ = Γ :: rest` where
+`headD .empty :: tail` is the identity) reduce definitionally. -/
+theorem psiX_fm (ctx : InputCtx Atom) (A : Proposition Atom) :
+    (buildRhsChain (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A)).fm
+      = Proposition.box ((ctx.Λ.fillRhs (.atom A)).fm) := by
+  cases ctx.Λ <;> rfl
+
+/-- Companion shape lemma to `psiX_fm`: the repaired `ctx.Λ.headD .empty :: ctx.Λ.tail` output
+context, filled via `fillRhs`, computes the same full-sequent formula as `ctx.Λ.fillRhs (.atom
+A)` itself. Closed by `cases ctx.Λ <;> rfl`. -/
+theorem primeRhs_fm (ctx : InputCtx Atom) (A : Proposition Atom) :
+    (OutputCtx.fillRhs (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A)).fm
+      = (ctx.Λ.fillRhs (.atom A)).fm := by
+  cases ctx.Λ <;> rfl
+
 /-! ## `⊃•` (`impL`): Deferred, Strategic Sorry
 
 Per Phase 11's deviation note (restated in this module's docstring): `impL` needs the source's own

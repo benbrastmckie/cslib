@@ -7,10 +7,11 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+public import Mathlib.Tactic.Attr.Core
 public import Cslib.Foundations.Logic.Connectives
 -- `⊆` in the public `Deriv.weak` constructor elaborates via this module's `SubsetElabAux`,
 -- which must be publicly imported for the constructor's type to be usable downstream.
-public import Mathlib.Tactic.SetNotationForOrder
+public import Mathlib.Tactic.SetNotationForOrder -- shake: keep
 
 /-! # Morphisms of Proof Systems
 

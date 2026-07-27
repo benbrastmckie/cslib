@@ -471,7 +471,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 30 of ~570 done]
+### Phase 5: Suppression audit [PARTIAL — 59 of ~570 done]
 
 **Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
 line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
@@ -527,14 +527,76 @@ Of the 118 `@[nolint]`: `dupNamespace` 60 (Phase 2 territory), `unusedArguments`
 uniform signatures across a lemma family often carry arguments a given case ignores; no evidence
 against them found), `docBlame` 15, singletons 3.
 
-**Resume point**: `Separation/DedekindZ/Cases.lean` is done — do not revisit. Next worst
-offenders (counts are pre-cycle-5, live-recheck with `lake lint` before starting since Cases.lean's
-resolution shifts nothing else): `CounterexampleElimination/Elimination.lean` (8), then several
-files at 6-7 suppressions each. Apply the same method: remove all of a file's suppressions,
-rebuild, categorize what surfaces into vestigial / mechanically-fixable / needs-real-proof-work,
-fix what's mechanical, narrow the rest to declaration-scope — and **always rebuild after using
-`omit [...] in` specifically**, since it changes elaboration (removes an instance from scope),
-unlike a `set_option linter.X false in` suppression (warning-only, always safe to add/remove).
+**Done (cycle 6)**: processed 4 more files, all committed individually after a clean scoped
+rebuild — `BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean` (8→1),
+`Separation/NormalForm.lean` (7→30 declaration-scoped), `Separation/Hierarchy/
+HierarchyInduction.lean` (7→58 declaration-scoped, 1449 lines, 63 declarations — the largest
+file processed to date), `BXCanonical/Chronicle/ChronicleToCountermodel.lean` (7→2). Verified
+first that the 12 `set_option warn.sorry false in` sites this cycle's continuation context
+flagged as highest-priority were already correctly declaration-scoped (all end in `in`, none
+file-scoped) — no action needed, prior cycles had already fixed this.
+
+- **New parse-hazard discovered**: `set_option ... in` (and `omit [...] in`) MUST precede a
+  declaration's doc comment, never sit between the doc comment and the declaration —
+  `/-- doc -/\nset_option ... in\ntheorem foo ...` fails to parse (`unexpected token
+  'set_option'; expected 'lemma'`), while `set_option ... in\n/-- doc -/\ntheorem foo ...`
+  parses fine. This bit twice this cycle: once as a straightforward ordering bug, and once via
+  a bad automated fix — a lazy-regex reorder pass (`/--.*?-/` with DOTALL) mis-paired doc
+  comments across unrelated declarations whenever the immediately-following content didn't
+  match its expected middle group, because backtracking silently grew the "doc" match across
+  intervening code to the next `-/` it could find. The doc-comment-start search was rewritten
+  as a plain backward line scan from the declaration line (stopping at the matching `/--`, not
+  at a blank line, since multi-line doc comments can have internal blank paragraph breaks) and
+  re-verified against a small repro before reapplying at file scale.
+- **Hard-constraint interaction discovered**: `omit [X] in` is the established Phase 5 fix for
+  `unusedSectionVars` (safe, unlike `unusedDecidableInType`, per the cycle-5 lesson above) but
+  it does remove the instance-implicit from the declaration's *elaborated type* — which this
+  dispatch's explicit hard constraint against altering theorem statements rules out. Used
+  `set_option linter.unusedSectionVars false in` instead everywhere this cycle (statement-
+  preserving, still declaration-scoped, still zero-blanket-suppression-compliant), even at the
+  cost of not literally "fixing" the category the way cycle 5's Cases.lean did. Future cycles
+  should default to `set_option ... in` over `omit ... in` for this reason unless a task's
+  constraints explicitly permit implicit-argument-shape changes.
+- `NormalForm.lean` and `HierarchyInduction.lean`: virtually every theorem in both files
+  doesn't actually need the section's `[DecidableEq Atom]` (unusedSectionVars/
+  unusedDecidableInType fired on ~all declarations) — each got both suppressions
+  declaration-scoped rather than restoring a blanket file-scope version, per the "never leave
+  blanket" mandate even where the count is close to 100%.
+- `ChronicleToCountermodel.lean`: one genuine mechanical fix (2 unused `simp only` lemmas,
+  `Function.iterate_zero`/`id_eq`, removed).
+- Full four-gate-plus phase-boundary suite run once at cycle end (not per-file, to conserve
+  budget after 4 clean per-file scoped rebuilds): `lake build` (full, 5 baseline sorry warnings
+  only), `lake exe checkInitImports` (clean), `lake lint` (0 warnings library-wide), `lake exe
+  lint-style` (clean), `lake shake --add-public --keep-implied --keep-prefix` (clean), `lake
+  exe mk_all --module` ("No update necessary"), `lake test` (exit 0). Naive repo-wide sorry
+  grep unchanged at 165; vacuous-def grep still flags the same single pre-existing false
+  positive (`Computability/URM/Basic.lean:92`, unrelated to this task); axiom count unchanged
+  at 26.
+
+**Resume point**: the 4 files above are done — do not revisit. Live worst-offender list
+after cycle 6 (re-verify with the file-scoped-suppression-count one-liner below before
+starting, since file resolutions can shift what's "worst" only by removing entries, never by
+changing another file's count):
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+Next targets as of cycle 6 end: `Separation/Hierarchy/HierarchyCompletion.lean` (7, 1000
+lines — expect a HierarchyInduction.lean-sized effort), then a cluster of 6-suppression files
+(`Temporal/Metalogic/Chronicle/CounterexampleElimination/{Structures,RecursiveWalks,
+MainElimination,Elimination}.lean`, `Bimodal/Metalogic/Soundness/FrameClassVariants.lean`,
+`Bimodal/Metalogic/Separation/{SeparationThm,Hierarchy/HierarchyCaseSep,Eliminations}.lean`).
+Apply the same method: remove all of a file's suppressions, rebuild, categorize what surfaces
+into vestigial / mechanically-fixable / needs-real-proof-work, fix what's mechanical, narrow
+the rest to declaration-scope — **always rebuild after using `omit [...] in` specifically**
+(elaboration-changing, unlike `set_option linter.X false in` which is warning-only and always
+safe to add/remove) — **and prefer `set_option ... in` over `omit ... in` for
+unusedSectionVars whenever the task's constraints forbid theorem-statement changes** (see
+cycle 6 finding above) — **and always place `set_option .../omit ... in` before a
+declaration's doc comment, never between the doc comment and the declaration** (see cycle 6
+parse-hazard finding above).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

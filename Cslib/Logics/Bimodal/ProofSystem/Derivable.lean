@@ -21,8 +21,6 @@ This module provides a Prop-valued wrapper `Derivable` around the Type-valued
 - `Derivable.lift`: Frame class monotonicity for Prop-valued derivability
 -/
 
-set_option linter.dupNamespace false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal
@@ -34,16 +32,14 @@ variable {Atom : Type u}
 /-- Prop-valued derivability: `Bimodal.Derivable fc Gamma p` holds iff
     there exists a derivation tree for `p` from context `Gamma` at
     frame class `fc`. -/
-@[nolint dupNamespace]
-def Bimodal.Derivable (fc : FrameClass) (Gamma : Context Atom)
+def Derivable (fc : FrameClass) (Gamma : Context Atom)
     (p : Formula Atom) : Prop :=
   Nonempty (DerivationTree fc Gamma p)
 
 /-! ## Coercion from DerivationTree -/
 
 /-- Any derivation tree witnesses Prop-valued derivability. -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.ofTree {fc : FrameClass}
+theorem Derivable.ofTree {fc : FrameClass}
     {Gamma : Context Atom} {p : Formula Atom}
     (d : DerivationTree fc Gamma p) :
     Bimodal.Derivable fc Gamma p :=
@@ -53,8 +49,7 @@ theorem Bimodal.Derivable.ofTree {fc : FrameClass}
 
 /-- Lift Prop-valued derivability from `fc1` to `fc2`
     when `fc1 <= fc2`. -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.lift {fc₁ fc₂ : FrameClass}
+theorem Derivable.lift {fc₁ fc₂ : FrameClass}
     (h_le : fc₁ ≤ fc₂)
     {Gamma : Context Atom} {p : Formula Atom}
     (h : Bimodal.Derivable fc₁ Gamma p) :
@@ -66,8 +61,7 @@ theorem Bimodal.Derivable.lift {fc₁ fc₂ : FrameClass}
 
 /-- Axiom rule: Any axiom schema instance is derivable
     (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.ax {fc : FrameClass}
+theorem Derivable.ax {fc : FrameClass}
     (Gamma : Context Atom) (p : Formula Atom)
     (h : Axiom p) (h_fc : h.minFrameClass ≤ fc) :
     Bimodal.Derivable fc Gamma p :=
@@ -75,15 +69,13 @@ theorem Bimodal.Derivable.ax {fc : FrameClass}
 
 /-- Assumption rule: Formulas in context are derivable
     (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.assume {fc : FrameClass}
+theorem Derivable.assume {fc : FrameClass}
     (Gamma : Context Atom) (p : Formula Atom)
     (h : p ∈ Gamma) : Bimodal.Derivable fc Gamma p :=
   Nonempty.intro (DerivationTree.assumption Gamma p h)
 
 /-- Modus ponens (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.mp {fc : FrameClass}
+theorem Derivable.mp {fc : FrameClass}
     {Gamma : Context Atom} {p q : Formula Atom}
     (h1 : Bimodal.Derivable fc Gamma (p.imp q))
     (h2 : Bimodal.Derivable fc Gamma p) :
@@ -94,8 +86,7 @@ theorem Bimodal.Derivable.mp {fc : FrameClass}
 
 /-- Modal necessitation: If `|-! p` then `|-! box p`
     (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.nec {fc : FrameClass}
+theorem Derivable.nec {fc : FrameClass}
     {p : Formula Atom}
     (h : Bimodal.Derivable fc [] p) :
     Bimodal.Derivable fc [] (Formula.box p) := by
@@ -104,8 +95,7 @@ theorem Bimodal.Derivable.nec {fc : FrameClass}
 
 /-- Temporal necessitation: If `|-! p` then `|-! G p`
     (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.temp_nec {fc : FrameClass}
+theorem Derivable.temp_nec {fc : FrameClass}
     {p : Formula Atom}
     (h : Bimodal.Derivable fc [] p) :
     Bimodal.Derivable fc [] p.allFuture := by
@@ -115,8 +105,7 @@ theorem Bimodal.Derivable.temp_nec {fc : FrameClass}
 
 /-- Temporal duality: If `|-! p` then `|-! swapTemporal p`
     (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.temp_dual {fc : FrameClass}
+theorem Derivable.temp_dual {fc : FrameClass}
     {p : Formula Atom}
     (h : Bimodal.Derivable fc [] p) :
     Bimodal.Derivable fc [] p.swapTemporal := by
@@ -126,8 +115,7 @@ theorem Bimodal.Derivable.temp_dual {fc : FrameClass}
 
 /-- Weakening: If `Gamma |-! p` and `Gamma <= Delta` then
     `Delta |-! p` (Prop-valued). -/
-@[nolint dupNamespace]
-theorem Bimodal.Derivable.weaken {fc : FrameClass}
+theorem Derivable.weaken {fc : FrameClass}
     {Gamma Delta : Context Atom} {p : Formula Atom}
     (h : Bimodal.Derivable fc Gamma p)
     (hsub : Gamma ⊆ Delta) :

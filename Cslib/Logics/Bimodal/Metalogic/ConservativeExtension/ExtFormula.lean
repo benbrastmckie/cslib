@@ -31,11 +31,6 @@ formula from the original language, enabling the standard Goldblatt/BdRV naming 
 - Goldblatt 1992, Logics of Time and Computation
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.ConservativeExtension
@@ -222,12 +217,15 @@ theorem embedFormula_swapTemporal (φ : Formula Atom) :
 theorem embedAtom_injective : Function.Injective (embedAtom : Atom → ExtAtom Atom) :=
   Sum.inl_injective
 
-theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom → ExtFormula Atom) := by
+theorem embedFormula_injective :
+    Function.Injective (embedFormula : Formula Atom → ExtFormula Atom) := by
   intro φ ψ h
   induction φ generalizing ψ with
   | atom s =>
     cases ψ with
-    | atom t => simp [embedFormula, embedAtom] at h; exact congrArg Formula.atom h
+    | atom t =>
+      simp only [embedFormula, embedAtom, ExtFormula.atom.injEq, Sum.inl.injEq] at h
+      exact congrArg Formula.atom h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
     | box _ => simp [embedFormula] at h
@@ -244,7 +242,7 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
   | imp a b iha ihb =>
     cases ψ with
     | imp c d =>
-      simp [embedFormula] at h
+      simp only [embedFormula, ExtFormula.imp.injEq] at h
       exact congrArg₂ Formula.imp (iha h.1) (ihb h.2)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
@@ -253,7 +251,9 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
     | snce _ _ => simp [embedFormula] at h
   | box a ih =>
     cases ψ with
-    | box c => simp [embedFormula] at h; exact congrArg Formula.box (ih h)
+    | box c =>
+      simp only [embedFormula, ExtFormula.box.injEq] at h
+      exact congrArg Formula.box (ih h)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
     | imp _ _ => simp [embedFormula] at h
@@ -262,7 +262,7 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
   | untl b a ihb iha =>
     cases ψ with
     | untl d c =>
-      simp [embedFormula] at h
+      simp only [embedFormula, ExtFormula.untl.injEq] at h
       exact congrArg₂ Formula.untl (ihb h.1) (iha h.2)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
@@ -272,7 +272,7 @@ theorem embedFormula_injective : Function.Injective (embedFormula : Formula Atom
   | snce b a ihb iha =>
     cases ψ with
     | snce d c =>
-      simp [embedFormula] at h
+      simp only [embedFormula, ExtFormula.snce.injEq] at h
       exact congrArg₂ Formula.snce (ihb h.1) (iha h.2)
     | atom _ => simp [embedFormula] at h
     | bot => simp [embedFormula] at h
@@ -299,16 +299,16 @@ theorem fresh_not_in_embedFormula_atoms (φ : Formula Atom) :
   | bot =>
     simp [embedFormula, ExtFormula.atoms]
   | imp a b iha ihb =>
-    simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
+    simp only [embedFormula_imp, ExtFormula.atoms, Finset.mem_union, not_or]
     exact ⟨iha, ihb⟩
   | box a ih =>
-    simp [embedFormula, ExtFormula.atoms]
+    simp only [embedFormula_box, ExtFormula.atoms]
     exact ih
   | untl b a ihb iha =>
-    simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
+    simp only [embedFormula_untl, ExtFormula.atoms, Finset.mem_union, not_or]
     exact ⟨iha, ihb⟩
   | snce b a ihb iha =>
-    simp [embedFormula, ExtFormula.atoms, Finset.mem_union]
+    simp only [embedFormula_snce, ExtFormula.atoms, Finset.mem_union, not_or]
     exact ⟨iha, ihb⟩
 
 /-- Variant: all atoms in an embedded formula are of the form Sum.inl. -/
@@ -317,30 +317,30 @@ theorem embedFormula_atoms_subset_inl (φ : Formula Atom) :
   induction φ with
   | atom s =>
     intro a ha
-    simp [embedFormula, ExtFormula.atoms, embedAtom] at ha
+    simp only [embedFormula, embedAtom, ExtFormula.atoms, Finset.mem_singleton] at ha
     exact ⟨s, ha⟩
   | bot =>
     intro a ha
     simp [embedFormula, ExtFormula.atoms] at ha
   | imp a b iha ihb =>
     intro x hx
-    simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
+    simp only [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
     cases hx with
     | inl h => exact iha x h
     | inr h => exact ihb x h
   | box a ih =>
     intro x hx
-    simp [embedFormula, ExtFormula.atoms] at hx
+    simp only [embedFormula_box, ExtFormula.atoms] at hx
     exact ih x hx
   | untl b a ihb iha =>
     intro x hx
-    simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
+    simp only [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
     cases hx with
     | inl h => exact iha x h
     | inr h => exact ihb x h
   | snce b a ihb iha =>
     intro x hx
-    simp [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
+    simp only [embedFormula, ExtFormula.atoms, Finset.mem_union] at hx
     cases hx with
     | inl h => exact iha x h
     | inr h => exact ihb x h

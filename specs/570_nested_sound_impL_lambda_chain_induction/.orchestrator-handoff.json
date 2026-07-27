@@ -1,45 +1,33 @@
 {
   "status": "implemented",
-  "summary": "Phase 2 of 8 complete: repaired InputCtx.outputPruning (Context.lean) to retain the box layer it dropped at ctx.Lambda = [] (D2's off-by-one nesting bug), giving nested_sound_impL a true-as-stated premise type. New definition: ctx.Gamma' ++ (ctx.Lambda.headD NestedLhs.empty :: ctx.Lambda.tail) -- identity on nonempty Lambda, Gamma' ++ [empty] on Lambda = []. Restructured InputCtx.fillEmpty_imp_outputPruning_fillRhs (Translation.lean) into a two-case split on ctx.Gamma': the G :: r' case reduces both sides to the literal same term via OutputCtx.fillRhs_append + buildRhsChain_append (an outright identity, no tBox needed); the Gamma' = [] case retains the original tBox + cs5DerivTopImpElim argument unchanged. Updated all affected docstrings in Context.lean (module-level Output Pruning section plus the local outputPruning docstring), Translation.lean (module-level Pruning Relation section plus the theorem docstring), and Rules.lean (the outputPruning bullet in the module docstring; Rules.lean:223 did not describe plain-append semantics so needed no change). Fixed one style-lint warning (show -> change) introduced by the new proof. Context, Rules, and Translation all build green with zero errors and zero warnings. Soundness.lean's diagnostics are unchanged from Phase 1's baseline: exactly the two expected pre-existing diagnostics (sorry warning at nested_sound_impL, Missing cases error for NestedProof.cut) and nothing else -- confirming no fallout from the repair. Sorry census unchanged at 41. outputPruning grep confined to Nested/Context.lean, Nested/Rules.lean, Nested/Translation.lean, Nested/Soundness.lean as predicted.",
-  "phases_completed": 2,
+  "summary": "Phase 3 of 8 complete: landed the four propositional combinators of the Lambda-chain toolkit in Soundness.lean, in a new '## Lambda-Chain Toolkit (Lemma 4.9, ImpL)' section placed after Lemma 4.9 and before the impL-deferred section. mpAnd (A B) : (A and (A imp B)) imp B is built via cs5DerivUncurrySwap fed cs5DerivImpSelf (A.imp B) -- the Q imp (P imp R) shape cs5DerivUncurrySwap expects collapses to the identity exactly when Q = P.imp R. topBase (A B) : ((top imp A) and (A imp B)) imp B is built by currying mpAnd into A imp ((A imp B) imp B), composing with cs5DerivTopImpElim via transitivity, then uncurrying back. andMP is a 3-step andI+modus_ponens combinator over closed derivations. lambdaChain_step2 is built via two nested deductionTheorem discharges (of the conjunction X and (Y imp P), then of Z), mirroring the file's existing lemma4_7_i_ii/cs5DerivKdiaUncurrySwapSchema proof pattern exactly (context [Z, Hyp], andE1/andE2 projections, andI recombination, MP against the weakened hypothesis). mpAnd/topBase/andMP marked private; lambdaChain_step2 public per plan. All four proved sorry-free, zero new diagnostics. Module's remaining diagnostics unchanged from Phase 1's baseline: the impL sorry warning (now at line 1424, shifted by the new section) and the cut non-exhaustiveness error (now at line 1438) -- both expected and unowned by this phase. Sorry census unchanged at 41 (bash .claude/scripts/lean-sorry-census.sh Cslib). Deviation from plan's proof-shape hint: mpAnd and topBase were built by composing existing private cs5Deriv* combinators (cs5DerivUncurrySwap, cs5DerivCurry, cs5DerivImpTrans, cs5DerivTopImpElim) already present earlier in Soundness.lean, rather than raw DerivationTree terms via deductionTheorem+andE1/andE2+MP as the plan's proof-shape note suggested. The stated type signatures and public API are unchanged from the plan; only the internal proof term differs (shorter, reuses existing file-local toolkit, same idiom the file already uses elsewhere e.g. lemma4_2_bot's singleton case). This is not a settled-design reopening -- no Postmortem Constraint governs mpAnd/topBase's internal proof technique -- and does not affect Phase 4's call sites (mpAnd A B, topBase A B are consumed by signature only).",
+  "phases_completed": 3,
   "phases_total": 8,
   "plan_markers_verified": true,
   "skeleton": false,
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
-      "line": 1354,
-      "note": "Pre-existing strategic sorry for nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 2; census unchanged at 41 before and after this dispatch."
+      "line": 1424,
+      "note": "Pre-existing strategic sorry for nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 3; census unchanged at 41 before and after this dispatch. Line number shifted from 1354 (Phase 2's report) to 1424 due to the new Phase 3 section inserted above it."
     }
   ],
   "artifacts": [
     {
-      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean",
+      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
       "type": "lean_source",
-      "summary": "Repaired InputCtx.outputPruning definition and its local + module-level docstrings."
-    },
-    {
-      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
-      "type": "lean_source",
-      "summary": "Restructured InputCtx.fillEmpty_imp_outputPruning_fillRhs's proof into a two-case split on ctx.Gamma'; updated its docstring and the module-level Pruning Relation section."
-    },
-    {
-      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
-      "type": "lean_source",
-      "summary": "Updated the outputPruning bullet in the module docstring to describe the repaired definition instead of plain append."
+      "summary": "Added the Lambda-Chain Toolkit section: mpAnd, topBase, andMP (private), lambdaChain_step2 (public). All sorry-free."
     },
     {
       "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
       "type": "plan",
-      "summary": "Phase 2 heading marked [COMPLETED]; all seven Phase 2 task checkboxes checked."
+      "summary": "Phase 3 heading marked [COMPLETED]; all five Phase 3 task checkboxes checked."
     }
   ],
   "blockers": [],
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
     "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md"
   ],
-  "next_action_hint": "Wave 2 is now unblocked: Phase 3 (land mpAnd, topBase, andMP, lambdaChain_step2 in Soundness.lean's new Lambda-Chain Toolkit section; depends on Phase 1, already done) and Phase 6 (land OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean; depends on Phase 2, now done) have disjoint file territory (Soundness.lean vs Translation.lean) and can be dispatched in either order or in parallel. Do NOT dispatch Phase 4 or Phase 5 before Phase 3 (and, for Phase 5, Phase 4) is [COMPLETED]."
+  "next_action_hint": "Phase 4 (land lambdaChain_XZ_imp_Y, the Lambda-chain induction, plus psiX_fm/primeRhs_fm shape lemmas in Soundness.lean) is now unblocked: it depends on Phases 1 and 3, both [COMPLETED]. Phase 6 (OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean, depends on Phase 2) remains independently available if not already dispatched. Do NOT dispatch Phase 5 before Phase 4 is [COMPLETED]."
 }

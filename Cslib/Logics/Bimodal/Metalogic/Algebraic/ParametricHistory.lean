@@ -21,10 +21,6 @@ Converts FMCS (Family of MCS) to WorldHistory for the D-parametric canonical Tas
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/ParametricHistory.lean
 -/
 
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricHistory
@@ -34,15 +30,17 @@ open Cslib.Logic.Bimodal.Metalogic.Core
 open Cslib.Logic.Bimodal.Metalogic.Bundle
 open Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricCanonical
 
-variable {Atom : Type} {fc : FrameClass} {D : Type*} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
+variable {Atom : Type} {fc : FrameClass} {D : Type*} [AddCommGroup D] [LinearOrder D]
+  [IsOrderedAddMonoid D]
 
 /-- Convert an FMCS to a WorldHistory in the parametric canonical TaskFrame. -/
-def parametricToHistory (fam : FMCS Atom D fc) : WorldHistory (ParametricCanonicalTaskFrame (Atom := Atom) (fc := fc) (D := D)) where
+def parametricToHistory (fam : FMCS Atom D fc) :
+    WorldHistory (ParametricCanonicalTaskFrame (Atom := Atom) (fc := fc) (D := D)) where
   domain := fun _ => True
   convex := fun _ _ _ _ _ _ _ => True.intro
   states := fun t _ => ⟨fam.mcs t, fam.is_mcs t⟩
   respects_task := fun s t _ _ hst => by
-    show parametricCanonicalTaskRel _ _ _
+    change parametricCanonicalTaskRel _ _ _
     unfold parametricCanonicalTaskRel
     by_cases h_pos : t - s > 0
     · rw [if_pos h_pos]
@@ -62,7 +60,8 @@ theorem parametric_to_history_states (fam : FMCS Atom D fc) (t : D) (ht : True) 
     (parametricToHistory fam).states t ht = ⟨fam.mcs t, fam.is_mcs t⟩ := rfl
 
 /-- The parametric canonical Omega: the set of world-histories from bundle families. -/
-def ParametricCanonicalOmega (B : BFMCS Atom D fc) : Set (WorldHistory (ParametricCanonicalTaskFrame (Atom := Atom) (fc := fc) (D := D))) :=
+def ParametricCanonicalOmega (B : BFMCS Atom D fc) :
+    Set (WorldHistory (ParametricCanonicalTaskFrame (Atom := Atom) (fc := fc) (D := D))) :=
   { tau | ∃ fam ∈ B.families, tau = parametricToHistory fam }
 
 /-- The shift-closed parametric canonical Omega. -/

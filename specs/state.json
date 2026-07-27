@@ -2308,7 +2308,7 @@
     {
       "project_number": 570,
       "project_name": "nested_sound_impL_lambda_chain_induction",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Discharge nested_sound_impL via the source's induction over the Lambda chain",
       "topic": "Constructive Modal Logic",
@@ -2334,10 +2334,11 @@
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-27T01:23:13Z",
+      "last_updated": "2026-07-27T02:18:45Z",
       "next_artifact_number": 3,
       "session_id": "sess_1785113705_bcf38a",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Discharged nested_sound_impL via the source's page-10 Lambda-chain induction, and repaired three pre-existing defects research uncovered that the task brief had not accounted for: lemma 4.7(ii) was never landed (plus a false module-docstring claim that page 10's (i) and (ii) were the same formula); InputCtx.outputPruning was off by one nesting level at Lambda = [], which made the target theorem refutable rather than merely unproved; and nested_sound was missing its NestedProof.cut case, leaving the baseline build RED on a clean tree contrary to the brief's premise. Cslib/ bare-sorry census 41 -> 40 with no Nested/Soundness.lean entry remaining; full-library lake build green (3259/3259); lake test green (9253/9253); nested_sound_impL, nested_sound_cut and nested_sound all axiom-clean ([propext, Classical.choice, Quot.sound], no sorryAx)."
     },
     {
       "project_number": 571,

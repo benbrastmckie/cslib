@@ -11,7 +11,7 @@ next_project_number: 572
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,557,558,562,563,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,557,558,562,563,569 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,400,430,450,456,497,511,537,551,553,564,568,571 | 36,37,181,317,425,465,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,506,548,565,566 | 39,40,375,511,564 | foundations, modal logic, code hygiene |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
@@ -93,10 +93,6 @@ next_project_number: 572
 
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
 
-### Constructive Modal Logic
-
-570 [IMPLEMENTING] — [Created by the blocked-task review: this sorry was flagged in-co
-
 ## Tasks
 
 ### 571. Fill the strict-Until/Since-gated Bimodal sorries (SuccRelation, UntilSinceCoherence)
@@ -114,7 +110,7 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 570. Discharge nested_sound_impL via the source's induction over the Lambda chain
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Constructive Modal Logic
 - **Dependencies**: None

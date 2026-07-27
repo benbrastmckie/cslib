@@ -51,7 +51,7 @@ variable {State Symbol : Type*}
 states `s s' ∈ S`, there exists a nonempty word `w` such that `da.mtr s w = s'`.
 
 Defined on the base `DA` type (not `DA.Muller`) so the predicate is reusable for future
-Rabin characterizations (task 252). -/
+Rabin characterizations. -/
 def IsLoop (da : DA State Symbol) (S : Set State) : Prop :=
   S.Nonempty ∧ ∀ s ∈ S, ∀ s' ∈ S, ∃ w : List Symbol, w ≠ [] ∧ da.mtr s w = s'
 

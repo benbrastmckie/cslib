@@ -478,8 +478,8 @@ theorem k_derivable_of_ik_idb {φ ψ : Proposition Atom} :
 /-! ## Assembly: The `IK → K` Bridge -/
 
 /-- Every `IKModalAxiom` instance is `Derivable` in classical `K`. Assembles the 14
-per-axiom derivations above (the 12 from `IntToClassical.lean`'s Phase-6 section plus
-`cd`/`idb` from this phase) into the total axiom→derivation map required by
+per-axiom derivations above (the 12 from the Direct/Derived Schemata sections above plus
+`cd`/`idb`) into the total axiom→derivation map required by
 `Derivable_of_axiom_derivable`. -/
 theorem ikAxiom_derivable_in_K {φ : Proposition Atom} (h : IKModalAxiom φ) :
     Derivable (@KAxiom Atom) φ :=

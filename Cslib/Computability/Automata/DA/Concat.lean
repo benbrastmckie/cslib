@@ -716,7 +716,7 @@ private lemma concat_slot_isSome_of_infOcc [Finite State1] [Finite State2]
 `concat da1 acc1 da2`, accepted under `mullerAccConcat`, recognizes exactly the concatenation
 of `da1`'s finite-string language with `da2`'s Muller ω-language. This is the key correctness
 theorem enabling the forward (ω-regular ⊆ DMA) direction of McNaughton's theorem via the
-Choueka decomposition route (task 241). -/
+Choueka decomposition route. -/
 theorem concat_language_eq [Finite State1] [Finite State2]
     (da1 : DA State1 Symbol) (acc1 : Set State1) (da2 : DA State2 Symbol)
     (accSet2 : Set (Set State2)) :

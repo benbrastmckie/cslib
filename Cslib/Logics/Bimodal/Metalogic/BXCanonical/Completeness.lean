@@ -15,7 +15,7 @@ Barrel file for completeness theorems. Currently contains:
 
 - `completeness_dense`: Dense completeness (via Burgess chronicle on Rat)
 
-Pending (task 36, WeakCanonical):
+Pending (the WeakCanonical discrete-completeness port):
 - `completeness_discrete`: Discrete completeness (via succ-embedding on Int)
 - `completeness`: General completeness (three-way case split)
 -/

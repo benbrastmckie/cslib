@@ -62,7 +62,9 @@ forced by the *type* of what fills the hole, not a free stylistic choice:
   operation specifically, not `fillRhs` alone: `⊃•`'s first premise is `Γ⇓{A°}` (`ctx.outputPruning
   .fillRhs`, Definition 2.3 -- "the output pruning is defined differently from [Str13]: there
   only the unique output formula is removed, whereas here the whole subtree containing the output
-  formula is removed", matching Phase 7's `Γ' ++ Λ`); `◇°`'s conclusion `Γ{◇A°,[Δ]}` mixes an
+  formula is removed", matching `Nested/Context.lean`'s `outputPruning`, `Γ' ++ (Λ.headD ∅ ::
+  Λ.tail)` -- the identity on nonempty `Λ` and `Γ' ++ [∅]` when `Λ = []`, retaining the box layer
+  `fillLhs` always inserts); `◇°`'s conclusion `Γ{◇A°,[Δ]}` mixes an
   RHS leaf (`◇A°`) with an LHS bracket (`[Δ]`) at the same level, which cannot be a single
   `NestedRhs` filler (`NestedRhs` has no comma constructor), so it is `ctx.fillFull (.dia Δ, ...)`
   -- a genuine full-sequent pair, not a bare RHS sequent.

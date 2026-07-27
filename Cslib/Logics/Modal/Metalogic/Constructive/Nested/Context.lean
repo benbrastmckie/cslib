@@ -73,10 +73,20 @@ file), which is strong corroborating evidence the decomposition is right.
 "For every input context `Γ{ } = Γ'{Λ{ }, Π◦}`, we define its *output pruning* `Γ⇓{ }` to be the
 context `Γ'{Λ{ }}`... Thus, `Γ⇓{ }` is an output context." Since both `Γ'{ }` and `Λ{ }` are
 output contexts (`List`s of `NestedLhs` layers) and `Γ'{Λ{ }}` substitutes `Λ{ }`'s own
-(still-open) template directly into `Γ'{ }`'s hole, this is exactly `Γ' ++ Λ` (list append): the
-combined chain `Γ'₁, […, [Γ'ₘ, [Λ₁, […, [Λₖ, { }] …]]] …]` is literally the eq. (2.2) template for
-the concatenated list. Verified against Example 2.1's `Γ2{ }` (`Γ' = [C]`, `Λ = []`, so
-`Γ2⇓{ } = [C] ++ [] = [C]`, matching the expected "same context with the `Π`-branch removed").
+(still-open) template directly into `Γ'{ }`'s hole, the naive reading is list append, `Γ' ++ Λ`.
+**This naive reading is off by one nesting level when `Λ = []`**: `InputCtx.fillLhs` (below)
+unconditionally wraps its hole-filling in one `.box` regardless of `Λ`'s length
+(`.box (ctx.Λ.fillLhs Δ) ctx.π`), but plain `Γ' ++ []` contributes zero layers at that position —
+concretely, `impL`'s premise 1 (`Nested/Rules.lean`) and its conclusion (via `fillLhs`) then
+disagree about how many `□`s separate `Γ'` from the hole, making `nested_sound_impL` false as
+stated (counterexample: `ctx = ⟨[C•], [], P°⟩`, `C := A`, `B := ⊥`; both premises derivable, the
+conclusion `A ⊃ □((A ⊃ ⊥) ⊃ P)` fails in a 2-world classical S5 model). The correct definition is
+`Γ' ++ (Λ.headD ∅ :: Λ.tail)`: the identity on non-empty `Λ` (retaining `Λ`'s own first layer
+unchanged), and `Γ' ++ [∅]` on `Λ = []` — inserting exactly the one retained box layer `fillLhs`
+always supplies, keeping the hole where `Γ{ }` had it (Observation 2.2's `Γ'{Λ{ }}`) rather than
+collapsing it away. Verified against Example 2.1's `Γ2{ }` (`Γ' = [C]`, `Λ = []`, so
+`Γ2⇓{ } = [C] ++ [∅] = [C, ∅]`), reproducing the source's own two-layer `[C•, ∅]` decomposition —
+"same context with the `Π`-branch removed", *not* collapsed to a single layer.
 
 ## Basic Equational Lemmas
 
@@ -182,10 +192,17 @@ def InputCtx.fillEmpty (ctx : InputCtx Atom) : NestedFull Atom :=
 
 /-- The output pruning `Γ⇓{ }` of an input context: "the same context with the subtree containing
 the unique output formula and sharing the same root as `{ }` removed", i.e. `Γ'{Λ{ }}` with `Π`
-dropped. Since `Γ'` and `Λ` are both eq. (2.2)-shaped lists sharing the same hole (nested inside
-`Λ`), substituting `Λ{ }`'s own (still-open) template into `Γ'{ }`'s hole is exactly list
-append. -/
-def InputCtx.outputPruning (ctx : InputCtx Atom) : OutputCtx Atom := ctx.Γ' ++ ctx.Λ
+dropped, keeping the hole exactly where `Γ{ }` had it. `headD ∅ :: tail` is the identity on
+non-empty `Λ` (both are the eq. (2.2)-shaped list `Λ` itself), so this reduces to the naive
+`Γ' ++ Λ` append whenever `Λ ≠ []`. On `Λ = []` it instead yields `Γ' ++ [∅]`: a single retained
+`∅`-layer standing in for the vanished `Λ{ }`, which is exactly the one `.box` layer
+`InputCtx.fillLhs` unconditionally supplies at this position (`.box (ctx.Λ.fillLhs Δ) ctx.π`)
+regardless of `Λ`'s length. Dropping that layer (the naive `Γ' ++ []= Γ'` reading) makes
+`nested_sound_impL`'s premise 1 one `□` shallower than its conclusion demands — see the module
+docstring's counterexample. This reproduces the source's own `[C•, ∅]` two-layer decomposition of
+Example 2.1's `Γ₂⇓{ }`. -/
+def InputCtx.outputPruning (ctx : InputCtx Atom) : OutputCtx Atom :=
+  ctx.Γ' ++ (ctx.Λ.headD NestedLhs.empty :: ctx.Λ.tail)
 
 /-! ## Basic Equational Lemmas -/
 

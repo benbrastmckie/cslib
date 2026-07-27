@@ -1,7 +1,7 @@
 {
-  "status": "partial",
-  "summary": "Phase 1 of 8 complete: landed lemma4_7_ii (single deductionTheorem discharge of the conjunctive hypothesis (D imp A) and (D and B), andE1/andE2 projections, andI recombination, MP against the weakened (A and B) imp C hypothesis, final andI to rebuild D and C) immediately after lemma4_7_i_ii in Soundness.lean. Corrected the module docstring's 'Lemma 4.7(i)/(ii): A Documented Source Duplication' section (now 'Lemma 4.7(i) and (ii): Distinct Statements'), the Lemma 4.7 section-header docstring, and lemma4_7_i_ii's own docstring, all of which previously claimed parts (i) and (ii) display the same formula. lemma4_7_i_ii was not renamed. Only Phase 1 was dispatched; phases 2-8 not started.",
-  "phases_completed": 1,
+  "status": "implemented",
+  "summary": "Phase 2 of 8 complete: repaired InputCtx.outputPruning (Context.lean) to retain the box layer it dropped at ctx.Lambda = [] (D2's off-by-one nesting bug), giving nested_sound_impL a true-as-stated premise type. New definition: ctx.Gamma' ++ (ctx.Lambda.headD NestedLhs.empty :: ctx.Lambda.tail) -- identity on nonempty Lambda, Gamma' ++ [empty] on Lambda = []. Restructured InputCtx.fillEmpty_imp_outputPruning_fillRhs (Translation.lean) into a two-case split on ctx.Gamma': the G :: r' case reduces both sides to the literal same term via OutputCtx.fillRhs_append + buildRhsChain_append (an outright identity, no tBox needed); the Gamma' = [] case retains the original tBox + cs5DerivTopImpElim argument unchanged. Updated all affected docstrings in Context.lean (module-level Output Pruning section plus the local outputPruning docstring), Translation.lean (module-level Pruning Relation section plus the theorem docstring), and Rules.lean (the outputPruning bullet in the module docstring; Rules.lean:223 did not describe plain-append semantics so needed no change). Fixed one style-lint warning (show -> change) introduced by the new proof. Context, Rules, and Translation all build green with zero errors and zero warnings. Soundness.lean's diagnostics are unchanged from Phase 1's baseline: exactly the two expected pre-existing diagnostics (sorry warning at nested_sound_impL, Missing cases error for NestedProof.cut) and nothing else -- confirming no fallout from the repair. Sorry census unchanged at 41. outputPruning grep confined to Nested/Context.lean, Nested/Rules.lean, Nested/Translation.lean, Nested/Soundness.lean as predicted.",
+  "phases_completed": 2,
   "phases_total": 8,
   "plan_markers_verified": true,
   "skeleton": false,
@@ -9,25 +9,37 @@
     {
       "file": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
       "line": 1354,
-      "note": "Pre-existing sorry in nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 1; census unchanged at 41 (project-wide) before and after this dispatch."
+      "note": "Pre-existing strategic sorry for nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 2; census unchanged at 41 before and after this dispatch."
     }
   ],
   "artifacts": [
     {
-      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean",
       "type": "lean_source",
-      "summary": "Added lemma4_7_ii (Lemma 4.7(ii), page 10) after lemma4_7_i_ii; corrected module docstring, section docstring, and lemma4_7_i_ii docstring to state (i) and (ii) are distinct formulas."
+      "summary": "Repaired InputCtx.outputPruning definition and its local + module-level docstrings."
+    },
+    {
+      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
+      "type": "lean_source",
+      "summary": "Restructured InputCtx.fillEmpty_imp_outputPruning_fillRhs's proof into a two-case split on ctx.Gamma'; updated its docstring and the module-level Pruning Relation section."
+    },
+    {
+      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
+      "type": "lean_source",
+      "summary": "Updated the outputPruning bullet in the module docstring to describe the repaired definition instead of plain append."
     },
     {
       "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
       "type": "plan",
-      "summary": "Phase 1 heading updated to [COMPLETED]; all four Phase 1 task checkboxes checked off."
+      "summary": "Phase 2 heading marked [COMPLETED]; all seven Phase 2 task checkboxes checked."
     }
   ],
   "blockers": [],
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
     "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md"
   ],
-  "next_action_hint": "Dispatch Phase 2 next (repair InputCtx.outputPruning and restructure the Lambda = [] pruning bridge in Context.lean/Translation.lean/Rules.lean). Phase 2 has disjoint file territory from Phase 1 (Soundness.lean vs Context/Translation/Rules) and was already unblocked (depends on: none). Do NOT dispatch Phase 5 before Phase 2 is [COMPLETED]."
+  "next_action_hint": "Wave 2 is now unblocked: Phase 3 (land mpAnd, topBase, andMP, lambdaChain_step2 in Soundness.lean's new Lambda-Chain Toolkit section; depends on Phase 1, already done) and Phase 6 (land OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean; depends on Phase 2, now done) have disjoint file territory (Soundness.lean vs Translation.lean) and can be dispatched in either order or in parallel. Do NOT dispatch Phase 4 or Phase 5 before Phase 3 (and, for Phase 5, Phase 4) is [COMPLETED]."
 }

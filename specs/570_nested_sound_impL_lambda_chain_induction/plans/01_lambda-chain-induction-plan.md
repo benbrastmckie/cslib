@@ -312,36 +312,36 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 2: Repair `InputCtx.outputPruning` and restructure the `Λ = []` pruning bridge [NOT STARTED]
+### Phase 2: Repair `InputCtx.outputPruning` and restructure the `Λ = []` pruning bridge [COMPLETED]
 
 - **Goal:** Make `nested_sound_impL` true as stated by giving `outputPruning` the box layer it
   drops at `ctx.Λ = []`, and repair the one downstream proof that unfolds it.
 - **Files:** `Cslib/.../Nested/Context.lean`, `Cslib/.../Nested/Translation.lean`,
   `Cslib/.../Nested/Rules.lean` (docstrings only, if needed). Sole owner of all three.
 - **Tasks:**
-  - [ ] Replace `Context.lean:188` with
+  - [x] Replace `Context.lean:188` with
         `def InputCtx.outputPruning (ctx : InputCtx Atom) : OutputCtx Atom := ctx.Γ' ++ (ctx.Λ.headD NestedLhs.empty :: ctx.Λ.tail)`.
-  - [ ] Update its docstring: explain that `headD .empty :: tail` is the identity on non-empty `Λ`
+  - [x] Update its docstring: explain that `headD .empty :: tail` is the identity on non-empty `Λ`
         and yields `[∅]` on `Λ = []`, retaining the box layer the hole sits under; cite
         Observation 2.2 / Definition 2.3 (`Γ⇓{ } = Γ'{Λ{ }}` keeps the hole where `Γ{ }` had it,
         only the `Π` subtree is removed); note this reproduces the source's own `[C•, ∅]`
         two-layer decomposition of Example 2.1's `Γ₂{ }`.
-  - [ ] Update the `Context.lean:87` "Output Pruning" docstring paragraph if it still describes the
+  - [x] Update the `Context.lean:87` "Output Pruning" docstring paragraph if it still describes the
         old plain-append semantics.
-  - [ ] Restructure `InputCtx.fillEmpty_imp_outputPruning_fillRhs` (`Translation.lean:300`).
+  - [x] Restructure `InputCtx.fillEmpty_imp_outputPruning_fillRhs` (`Translation.lean:300`).
         **Keep the statement and the `hΛ : ctx.Λ = []` hypothesis unchanged.** Restructure the
         proof as a two-case split on `ctx.Γ'` per the plan-time refinement table above:
         `Γ' = G :: r'` is an identity implication (both sides reduce to
         `(G, buildRhsChain r' (box ∅ π))` via `buildRhsChain_append`); `Γ' = []` retains the
         existing `tBox` + `cs5DerivTopImpElim` argument (`(∅, box ∅ π)` versus `(∅, π)`).
         **Do not delete the `tBox` machinery.**
-  - [ ] Update `Translation.lean:68` and `Translation.lean:293` docstrings to describe the new
+  - [x] Update `Translation.lean:68` and `Translation.lean:293` docstrings to describe the new
         two-case structure and to note that the `Λ = []` restriction is retained deliberately
         (the general-`Λ` version needs a `◇`/`□` polarity argument, out of scope).
-  - [ ] Update `Rules.lean:62` and `Rules.lean:223` docstrings if they describe `outputPruning` as
+  - [x] Update `Rules.lean:62` and `Rules.lean:223` docstrings if they describe `outputPruning` as
         plain append. **No source change to `impL`/`cut` premise types** — they are stated via
         `outputPruning` and pick the repair up automatically.
-  - [ ] Fix any additional build fallout the repair surfaces in `Context.lean`/`Rules.lean`/
+  - [x] Fix any additional build fallout the repair surfaces in `Context.lean`/`Rules.lean`/
         `Translation.lean`. If fallout appears in a file outside the declared scope, STOP and
         report it rather than widening scope silently.
 - **Estimated output:** ~90 lines (30 proof restructuring, 60 docstrings).

@@ -69,9 +69,12 @@ bare structural equalities" and that "the correct form is probably an `fm`-level
 `ctx.Λ = []` (i.e. the hole sits directly at the outer box's LHS slot — the shape of every
 `InputCtx` example this development has actually built, e.g. Phase 7's `γ₂Ctx`), that
 `Derivable (ctx.fillEmpty.fm.imp (ctx.outputPruning.fillRhs ctx.π).fm)`: filling with `∅`
-derivably *implies* the output-pruned filling with `π`. The proof is short — `tBox` (`□A → A`)
-unboxes the single extra `□` that `Γ{∅}` carries and `Γ⇓{π}` does not, using `⊢⊤` to discharge the
-"filled-with-nothing" `⊤ ⊃ ·` wrapper.
+derivably *implies* the output-pruned filling with `π`. Under the repaired `InputCtx.outputPruning`
+(`Nested/Context.lean`, which retains a `∅`-layer at `Λ = []` rather than collapsing it), the proof
+splits on `ctx.Γ'`: for `ctx.Γ' = G :: r'` both sides reduce to the literal same term via
+`buildRhsChain_append`, an outright identity implication; only for `ctx.Γ' = []` do the two sides
+still differ by one retained `□`, and there `tBox` (`□A → A`) unboxes it, using `⊢⊤` to discharge
+the "filled-with-nothing" `⊤ ⊃ ·` wrapper.
 
 **The unrestricted version (arbitrary `ctx.Λ`) is *not* `CS5`-Hilbert-derivable**, and this module
 does not attempt it as a bare `Derivable` schema (landing an unprovable claim, or a claim proved
@@ -291,33 +294,55 @@ theorem InputCtx.fillLhs_fm_antitone (ctx : InputCtx Atom) {Δ Δ' : NestedLhs A
 /-- **`Γ{∅}` derivably implies `Γ⇓{π}`, when `ctx.Λ = []`.** For `ctx : InputCtx Atom` whose hole
 sits directly at the outer box's LHS slot (`ctx.Λ = []`, matching Phase 7's `γ₂Ctx` and every
 `InputCtx` example this development has built), `Derivable (ctx.fillEmpty.fm ⊃ (ctx.outputPruning
-.fillRhs ctx.π).fm)`. Both sides reduce (after rewriting `ctx.Λ = []`) to `ctx.Γ'`-filled full
-sequents differing only in whether the innermost `NestedRhs` is `box ∅ ctx.π` (`fillEmpty`'s
-`∅`-substitution) or `ctx.π` directly (the pruned filling); `tBox` (`□A ⊃ A`) together with `⊢ ⊤`
-(`cs5DerivTopImpElim`) discharges exactly that extra `□(⊤ ⊃ ·)` wrapper, lifted through `ctx.Γ'`
-by `OutputCtx.fillRhs_fm_mono`. See the module docstring for why the unrestricted (`ctx.Λ`
-arbitrary) version is *not* `CS5`-Hilbert-derivable, and is therefore not attempted here. -/
+.fillRhs ctx.π).fm)`. Under the repaired `outputPruning` (`Nested/Context.lean`), `ctx.Λ = []`
+gives `ctx.outputPruning = ctx.Γ' ++ [∅]`, and the proof splits on `ctx.Γ'` exactly per the plan's
+refinement of this lemma:
+- `ctx.Γ' = G :: r'`: `ctx.fillEmpty` and `ctx.outputPruning.fillRhs ctx.π` both reduce
+  (`OutputCtx.fillRhs_append` + `buildRhsChain_append`) to the *literal same term*
+  `(G, buildRhsChain r' (.box ∅ ctx.π))` — an identity implication, `cs5DerivImpSelf`. No `tBox`
+  step is needed here; the repair closes exactly the gap `tBox` used to be patching over in this
+  branch.
+- `ctx.Γ' = []`: both sides degenerate to the un-repaired lemma's own `(∅, box ∅ π)` versus
+  `(∅, π)` pair — the two sides still differ by one retained `□`, so the original `tBox` (`□A ⊃ A`)
+  together with `⊢ ⊤` (`cs5DerivTopImpElim`) argument is retained unchanged in this branch, lifted
+  through the (now trivial, `ctx.Γ' = []`) outer context by `OutputCtx.fillRhs_fm_mono`.
+
+See the module docstring for why the unrestricted (`ctx.Λ` arbitrary) version is *not*
+`CS5`-Hilbert-derivable, and is therefore not attempted here. -/
 theorem InputCtx.fillEmpty_imp_outputPruning_fillRhs (ctx : InputCtx Atom) (hΛ : ctx.Λ = []) :
     Derivable (@CS5ModalAxiom Atom)
       (ctx.fillEmpty.fm.imp (ctx.outputPruning.fillRhs ctx.π).fm) := by
-  have htb : Derivable (@CS5ModalAxiom Atom)
-      ((Proposition.box (Proposition.top.imp ctx.π.fm)).imp (Proposition.top.imp ctx.π.fm)) :=
-    ⟨.ax [] _ (.tBox (Proposition.top.imp ctx.π.fm))⟩
-  have hcore : Derivable (@CS5ModalAxiom Atom)
-      ((NestedRhs.box NestedLhs.empty ctx.π).fm.imp ctx.π.fm) :=
-    cs5DerivImpTrans htb cs5DerivTopImpElim
-  have hres : Derivable (@CS5ModalAxiom Atom)
-      ((ctx.Γ'.fillRhs (NestedRhs.box NestedLhs.empty ctx.π)).fm.imp
-        (ctx.Γ'.fillRhs ctx.π).fm) :=
-    OutputCtx.fillRhs_fm_mono hcore ctx.Γ'
+  have hΛfe : ctx.Λ.fillEmpty = NestedLhs.empty := by rw [hΛ]; rfl
   have hlhs : ctx.fillEmpty = ctx.Γ'.fillRhs (NestedRhs.box NestedLhs.empty ctx.π) := by
     unfold InputCtx.fillEmpty
-    rw [hΛ]
-    rfl
-  have hrhs : ctx.outputPruning.fillRhs ctx.π = ctx.Γ'.fillRhs ctx.π := by
-    unfold InputCtx.outputPruning
-    rw [hΛ, List.append_nil]
-  rw [hlhs, hrhs]
-  exact hres
+    rw [hΛfe]
+  match hΓ' : ctx.Γ' with
+  | G :: r' =>
+    have hrhs : ctx.outputPruning.fillRhs ctx.π =
+        OutputCtx.fillRhs (G :: r') (NestedRhs.box NestedLhs.empty ctx.π) := by
+      unfold InputCtx.outputPruning
+      rw [hΓ', hΛ]
+      change OutputCtx.fillRhs ((G :: r') ++ [NestedLhs.empty]) ctx.π = _
+      rw [OutputCtx.fillRhs_append]
+      rfl
+    rw [hlhs, hrhs, hΓ']
+    exact cs5DerivImpSelf _
+  | [] =>
+    have htb : Derivable (@CS5ModalAxiom Atom)
+        ((Proposition.box (Proposition.top.imp ctx.π.fm)).imp (Proposition.top.imp ctx.π.fm)) :=
+      ⟨.ax [] _ (.tBox (Proposition.top.imp ctx.π.fm))⟩
+    have hcore : Derivable (@CS5ModalAxiom Atom)
+        ((NestedRhs.box NestedLhs.empty ctx.π).fm.imp ctx.π.fm) :=
+      cs5DerivImpTrans htb cs5DerivTopImpElim
+    have hres : Derivable (@CS5ModalAxiom Atom)
+        ((OutputCtx.fillRhs [] (NestedRhs.box NestedLhs.empty ctx.π)).fm.imp
+          (OutputCtx.fillRhs [] ctx.π : NestedFull Atom).fm) :=
+      OutputCtx.fillRhs_fm_mono hcore []
+    have hrhs : ctx.outputPruning.fillRhs ctx.π = OutputCtx.fillRhs [] ctx.π := by
+      unfold InputCtx.outputPruning
+      rw [hΓ', hΛ]
+      rfl
+    rw [hlhs, hrhs, hΓ']
+    exact hres
 
 end Cslib.Logic.Modal

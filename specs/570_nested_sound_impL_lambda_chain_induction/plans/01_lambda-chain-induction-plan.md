@@ -517,13 +517,13 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 6: Land `OutputCtx.fillLhs_empty_imp_fillEmpty` (the `cut` bridging induction) [NOT STARTED]
+### Phase 6: Land `OutputCtx.fillLhs_empty_imp_fillEmpty` (the `cut` bridging induction) [COMPLETED]
 
 - **Goal:** Land the one piece the research dispatch did not compile: the bridge between
   `fillLhs ∅` and `fillEmpty`.
 - **Files:** `Cslib/.../Nested/Translation.lean` (sole owner)
 - **Tasks:**
-  - [ ] Land
+  - [x] Land
         `theorem OutputCtx.fillLhs_empty_imp_fillEmpty : ∀ (ctx : OutputCtx Atom), Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs NestedLhs.empty).fm.imp ctx.fillEmpty.fm)`
         immediately after `OutputCtx.fillLhs_fm_mono` (`Translation.lean:255`), **mirroring that
         theorem's existing three-case recursion exactly**:
@@ -534,12 +534,15 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
         - `Γ :: Γ₂ :: rest` — `and`-congruence in the right conjunct
           (`cs5DerivAndCongrRight`) over `◇`-monotonicity (`cs5DerivDiaMono`) applied to the IH,
           exactly as `fillLhs_fm_mono`'s own cons-cons step does.
-  - [ ] Docstring: state the `⊤`-conjunct-only difference, cite Observation 2.2's `Γ{∅}` collapse
+        **No deviation from the sketch**: all three cases closed exactly as planned, on the first
+        attempt, with no goal-state surprises — the highest-residual-risk phase turned out to be a
+        direct structural clone of `fillLhs_fm_mono` as anticipated by the mitigation.
+  - [x] Docstring: state the `⊤`-conjunct-only difference, cite Observation 2.2's `Γ{∅}` collapse
         semantics (`OutputCtx.fillEmpty` collapses the innermost level rather than substituting),
         and name `OutputCtx.fillLhs_fm_mono` as the structural template.
-  - [ ] If the `[Γ]` or cons-cons case does not close as sketched, use `lean_goal` /
+  - [x] If the `[Γ]` or cons-cons case does not close as sketched, use `lean_goal` /
         `lean_multi_attempt` to inspect the actual `fm` shapes before adjusting — **do not** change
-        the statement to something weaker without recording why.
+        the statement to something weaker without recording why. (Not needed — closed as sketched.)
 - **Estimated output:** ~40 lines.
 - **Timing:** ~1 hour (highest-uncertainty phase; budget generously).
 - **Depends on:** 2

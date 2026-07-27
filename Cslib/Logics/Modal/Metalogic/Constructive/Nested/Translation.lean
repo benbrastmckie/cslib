@@ -264,6 +264,33 @@ theorem OutputCtx.fillLhs_fm_mono {Δ Δ' : NestedLhs Atom}
   | Γ :: Γ₂ :: rest =>
       cs5DerivAndCongrRight Γ.fm (cs5DerivDiaMono (OutputCtx.fillLhs_fm_mono h (Γ₂ :: rest)))
 
+/-- **`Γ{∅}` derivably implies `Γ{∅}` filled directly, at the `OutputCtx` level** — the bridge
+between `OutputCtx.fillLhs · NestedLhs.empty` and `OutputCtx.fillEmpty`: given the module
+docstring's remark that these are *not* the same `NestedLhs` term (`fillEmpty` collapses the
+innermost level, `fillLhs · ∅` instead substitutes `∅` and leaves that level's `comma`/`dia`
+structure in place — Observation 2.2's "`Γ{∅}`... we simply remove the occurrence of `{ }`" versus
+ordinary hole substitution), the two differ only by a redundant `⊤`-conjunct at the innermost
+level, discharged by `andE1`. Proved by induction on `ctx`, mirroring `OutputCtx.fillLhs_fm_mono`'s
+exact three-case recursion (the structural template named by this phase's task list):
+- `[]`: `fillLhs [] ∅ = ∅ = fillEmpty []`, literally the same term — `cs5DerivImpSelf`.
+- `[Γ]`: `fillLhs [Γ] ∅ = comma Γ ∅` (`fm = Γ.fm ∧ ⊤`) versus `fillEmpty [Γ] = Γ` (`fm = Γ.fm`);
+  `andE1` discharges the `⊤` conjunct directly, no further lemma needed.
+- `Γ :: Γ₂ :: rest`: both sides reduce to `Γ.fm ∧ ◇(…).fm`, congruent in the right conjunct
+  (`cs5DerivAndCongrRight`) over `◇`-monotonicity (`cs5DerivDiaMono`) applied to the induction
+  hypothesis on `Γ₂ :: rest` — the identical shape as `fillLhs_fm_mono`'s own cons-cons step.
+
+This is the `OutputCtx`-level piece `nested_sound_cut`'s `cut` case composes with
+`InputCtx.fillLhs_fm_antitone` to bridge `InputCtx.fillLhs ∅` and `InputCtx.fillEmpty` at the
+`ctx.Λ` level, then lifts through `□` and the outer `ctx.Γ'`. -/
+theorem OutputCtx.fillLhs_empty_imp_fillEmpty :
+    ∀ (ctx : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs NestedLhs.empty).fm.imp ctx.fillEmpty.fm)
+  | [] => cs5DerivImpSelf _
+  | [Γ] => ⟨.ax [] _ (.andE1 Γ.fm Proposition.top)⟩
+  | Γ :: Γ₂ :: rest =>
+      cs5DerivAndCongrRight Γ.fm
+        (cs5DerivDiaMono (OutputCtx.fillLhs_empty_imp_fillEmpty (Γ₂ :: rest)))
+
 /-! ## Input Contexts: Contravariant Compositionality -/
 
 /-- **`InputCtx.fillLhs` is `fm`-contravariant in its LHS filler**: given `⊢ Δ.fm ⊃ Δ'.fm`, derive

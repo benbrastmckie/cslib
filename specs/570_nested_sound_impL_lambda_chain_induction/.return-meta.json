@@ -1,76 +1,30 @@
 {
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
+  "status": "planned",
+  "agent_type": "planner-hard-agent",
+  "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate-hard", "planner-hard-agent"],
   "task_number": 570,
   "task_name": "nested_sound_impL_lambda_chain_induction",
   "session_id": "sess_1785113705_bcf38a",
-  "delegation_depth": 2,
-  "artifacts": [
-    "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md"
-  ],
-  "findings_count": 3,
-  "adversarial_verification_triggered": true,
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "verified",
-  "bibkey": "ArisakaDasStrassburger2015",
-  "bibkey_location": "references.bib:939",
-  "baseline": {
-    "sorry_census_command": "bash .claude/scripts/lean-sorry-census.sh Cslib",
-    "sorry_count": 41,
-    "target_sorry": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315",
-    "lake_build_status": "RED",
-    "lake_build_error": "Soundness.lean:1329:2: Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)",
-    "lake_test_status": "not_run (library does not build)",
-    "working_tree_clean_for_Cslib": true
+  "artifact_path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
+  "phase_count": 8,
+  "estimated_hours": 6,
+  "postmortem_rules_count": 8,
+  "plan_metadata": {
+    "phases": 8,
+    "total_effort_hours": 6,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1, 2], [3, 6], [4], [5], [7], [8]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_lambda-chain-induction.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-07-26"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
   },
-  "defects_found": [
-    {
-      "id": "D1",
-      "title": "Lemma 4.7(ii) never landed; module docstring's (i)==(ii) duplication claim is false",
-      "isolation": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:35-45 (docstring), :503 (lemma4_7_i_ii)",
-      "blocking": true
-    },
-    {
-      "id": "D2",
-      "title": "InputCtx.outputPruning is off by one nesting level when ctx.Lambda = []; nested_sound_impL is FALSE as stated",
-      "isolation": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean:188",
-      "blocking": true
-    },
-    {
-      "id": "D3",
-      "title": "nested_sound is non-exhaustive (missing NestedProof.cut case) - lake build currently FAILS",
-      "isolation": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1327",
-      "blocking": true
-    }
-  ],
-  "verified_in_research": [
-    "lemma4_7_ii (sorry-free, compiled)",
-    "mpAnd (sorry-free, compiled)",
-    "topBase (sorry-free, compiled)",
-    "lambdaChain_XZ_imp_Y (sorry-free, compiled) - THE Lambda-chain induction",
-    "lambdaChain_step2 (sorry-free, compiled)",
-    "psiX_fm / primeRhs_fm (sorry-free, compiled)",
-    "andMP (sorry-free, compiled)",
-    "impL_repaired - end-to-end discharge of the rule under the repaired pruning (sorry-free, compiled)",
-    "hA_derivable / hB_derivable - counterexample premises (sorry-free, compiled)"
-  ],
-  "memory_candidates": [
-    {
-      "topic": "literature-fidelity",
-      "claim": "PDF text-extraction glyph loss is selective, not uniform. In the Arisaka-Das-Strassburger 2015 PDF, pdftotext drops the box glyph but renders the and/imp glyphs cleanly. A prior dispatch concluded 'Lemma 4.7(i) and (ii) are literally the same formula' from a corrupted read and landed one Lean lemma for both citations; a direct pdftotext -layout render shows they differ. Rule: when a render looks like it duplicates a numbered statement, re-render before concluding duplication, and cross-check the recovered glyphs against the already-formalized definitions via rfl.",
-      "keywords": ["pdftotext", "glyph-loss", "literature-fidelity", "source-corruption", "lean4"]
-    },
-    {
-      "topic": "formalization-defects",
-      "claim": "When a formalization defines a context-with-hole and a separate 'pruned' variant of it, verify hole DEPTH agreement at every arity, especially the empty/degenerate case. In Cslib's nested-sequent encoding, InputCtx.fillLhs wraps the hole in an extra .box while outputPruning (= Gamma' ++ Lambda) does not, so the two agree for |Lambda| >= 1 and disagree by one nesting level at |Lambda| = 0 - making the soundness theorem for the rule refutable rather than merely unproved. Symptom to look for: a pre-existing bridging lemma that is restricted to the degenerate case and uses tBox (box A -> A) to strip a level.",
-      "keywords": ["context-with-hole", "off-by-one", "nested-sequents", "soundness", "outputPruning"]
-    },
-    {
-      "topic": "baseline-verification",
-      "claim": "Establish the build baseline BEFORE planning work against a 'must stay green' invariant. Task 570's brief asserted lake build was green; a scoped lake build showed the target module fails to compile on a clean tree (non-exhaustive match missing a constructor added in a later phase). A strategic-sorry dispatch can leave a module RED if a sibling constructor was landed without updating its consumer's match.",
-      "keywords": ["baseline", "lake-build", "non-exhaustive-match", "strategic-sorry", "invariant"]
-    }
-  ],
-  "next_steps": "Run /plan 570 to create implementation plan",
-  "plan_scope_warning": "The task as scoped (build the Lambda-chain induction, then discharge the rule) is necessary but NOT sufficient. The plan MUST also (a) land lemma4_7_ii, (b) repair InputCtx.outputPruning, and (c) discharge NestedProof.cut in nested_sound - otherwise the 'lake build green' invariant is unreachable and the discharged theorem would be unsound."
+  "completed_at": "2026-07-26"
 }

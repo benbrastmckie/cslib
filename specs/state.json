@@ -2263,7 +2263,7 @@
     {
       "project_number": 570,
       "project_name": "nested_sound_impL_lambda_chain_induction",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Discharge nested_sound_impL via the source's induction over the Lambda chain",
       "topic": "Constructive Modal Logic",
@@ -2280,12 +2280,17 @@
           "type": "report",
           "path": "specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md",
           "summary": "Lambda-chain induction research: source mapping (ArisakaDasStrassburger2015), three blocking defect findings (D1 missing lemma 4.7(ii), D2 outputPruning off-by-one, D3 red baseline missing cut case), six-phase decomposition"
+        },
+        {
+          "type": "plan",
+          "path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
+          "summary": "8-phase hard-mode plan owning the D1/D2/D3 scope expansion; each phase ends green with a runnable verification command"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-27T01:14:10Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-07-27T01:23:03Z",
+      "next_artifact_number": 3,
       "session_id": "sess_1785113705_bcf38a",
       "parent_task": null
     },

@@ -1,71 +1,54 @@
 {
-  "status": "researched",
-  "phase": "research",
+  "status": "planned",
+  "phase": "plan",
   "task_number": 570,
   "session_id": "sess_1785113705_bcf38a",
-  "agent_type": "cslib-research-hard-agent",
+  "agent_type": "planner-hard-agent",
   "orchestrator_mode": true,
-  "summary": "The Lambda-chain induction the task asks for is real, small, and now PROVED sorry-free (three cases, via the source's own Lemma 4.7(ii)+(iv) recipe; compiled with zero diagnostics). But discharging Soundness.lean:1315 is blocked by three pre-existing defects, each established with Lean-verified evidence: (D1) Lemma 4.7(ii) was never landed - the module docstring's claim that page 10 displays 4.7(i) and (ii) with 'literally the same visible formula' is refuted by a direct pdftotext -layout render, and 4.7(ii) is the exact ingredient the source names for this induction; (D2) InputCtx.outputPruning (= Gamma' ++ Lambda) is off by one nesting level when ctx.Lambda = [], which makes nested_sound_impL FALSE as stated, not merely unproved (counterexample: ctx = <[C], [], P>, C := A, B := bot - both premises Lean-proved derivable, conclusion A -> box((A -> bot) -> P) fails in a 2-world classical S5 model and every CS5 theorem is classically S5-valid); (D3) nested_sound is non-exhaustive (missing the NestedProof.cut case), so lake build of the target module currently FAILS on a clean tree - the baseline is RED, contradicting the task brief's 'lake build green' premise. With D1 and D2 repaired, the complete sorry-free discharge of the rule was assembled and compiled end-to-end during research. Eight existing declarations are reused; exactly one new definition-level change is needed (a one-line repair to outputPruning). No new axioms, no sorry deferral.",
+  "summary": "Wrote an 8-phase hard-mode plan that explicitly owns the mandatory scope expansion beyond the task title. The plan covers all three research-verified defects: D1 (land lemma4_7_ii, correct the module docstring's false '(i) and (ii) are the same formula' claim), D2 (repair InputCtx.outputPruning to ctx.Gamma' ++ (ctx.Lambda.headD NestedLhs.empty :: ctx.Lambda.tail), which is what makes nested_sound_impL true rather than refutable), and D3 (land nested_sound_cut plus the missing .cut arm, which is what takes lake build from RED to green). Every phase is one bounded agent run (~40-90 lines) with a concrete runnable verification command and a stated expected result. Because the baseline is RED, each phase that touches Soundness.lean verifies against a NAMED expected residual error ('Missing cases: _, (NestedProof.cut ...)' and, until Phase 5, the sorry warning) rather than a clean build, and states that any additional diagnostic is that phase's own fallout. Genuine intermediate green checkpoints land at Phase 2 (Context/Rules/Translation all build green - this is also the D2 blast-radius test) and Phase 6 (Translation green). The build flips to green at Phase 7, which is as early as is honest since cut's proof consumes the repaired impL. All 11 research-compiled declarations are assigned explicit landing sites in a Preserved Assets table with a MUST-NOT-re-derive rule. PLAN-TIME REFINEMENT to the research report, verified by reading Context.lean:100-190: the report's claim that Translation.lean:300 'collapses to reflexivity' under the D2 repair holds only for non-empty ctx.Gamma'. At Gamma' = [] the two sides are (empty, box empty pi) versus (empty, pi) - still one box apart - so the tBox/cs5DerivTopImpElim machinery must be RETAINED and the proof restructured as a two-case split on Gamma'. This is recorded as a binding Do-NOT so the implementer does not delete live machinery.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md",
-      "description": "Tier-1 research report: source-to-implementation mapping (BibKey ArisakaDasStrassburger2015, verified at references.bib:939), verbatim page-10 source text, exact fm shapes at the sorry (all rfl-verified in Lean), three defect findings with counterexamples, proposed Lean statements with the induction motive spelled out, six-phase decomposition, and the H4 Claim Verification Table."
+      "type": "plan",
+      "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
+      "description": "8-phase hard-mode implementation plan with Postmortem Constraints (8 binding Do-NOTs, 4 settled decisions), Preserved Assets accounting for all 11 research-compiled declarations, H3 source-to-implementation mapping with verbatim page-10 source text, explicit dependency wave map with H7 territory contracts, and per-phase runnable verification commands with stated expected results."
     },
     {
       "type": "metadata",
       "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/.return-meta.json",
-      "description": "Return metadata with baseline metrics, defect inventory, and three memory candidates."
+      "description": "Return metadata: status planned, phase_count 8, estimated_hours 6, plan_metadata with dependency_waves and skeleton=false."
     }
   ],
-  "blockers": [
+  "blockers": [],
+  "phases_total": 8,
+  "dependency_waves": [[1, 2], [3, 6], [4], [5], [7], [8]],
+  "green_checkpoints": [
     {
-      "id": "D1",
-      "severity": "blocking",
-      "title": "Lemma 4.7(ii) is missing from Soundness.lean",
-      "detail": "page 10: (i) is ((D imp A) and (D imp B)) imp (D imp C); (ii) is ((D imp A) and (D and B)) imp (D and C). These differ. lemma4_7_i_ii (Soundness.lean:503) covers (i) only. The docstring paragraph at Soundness.lean:35-45 asserting duplication must be corrected. Resolution: land lemma4_7_ii (proved sorry-free during research, ~20 lines, structural clone of lemma4_7_i_ii).",
-      "resolvable_in_task": true
+      "phase": 2,
+      "gate": "lake build ...Nested.Context && ...Nested.Rules && ...Nested.Translation all zero-error",
+      "note": "First real green. Doubles as the D2 blast-radius test (grep-checked but never build-checked before this point)."
     },
     {
-      "id": "D2",
-      "severity": "blocking",
-      "title": "InputCtx.outputPruning is defective at ctx.Lambda = [] - the theorem is refutable as stated",
-      "detail": "Context.lean:188. InputCtx.fillLhs places the hole inside an extra .box; Gamma' ++ Lambda does not account for it when Lambda = []. Hole-depth table verified by rfl at |Lambda| = 0,1,2. Fix: outputPruning ctx := ctx.Gamma' ++ (ctx.Lambda.headD NestedLhs.empty :: ctx.Lambda.tail) - identity on non-empty Lambda, and on Lambda = [] it reproduces the source's own Example 2.1 decomposition. Corroborating evidence: Translation.lean:300's Lambda = []-restricted tBox bridge collapses to reflexivity under the fix, i.e. the tBox was papering over exactly this gap. This is a scope EXPANSION beyond the task brief and the plan must own it.",
-      "resolvable_in_task": true
+      "phase": 6,
+      "gate": "lake build ...Nested.Translation zero-error",
+      "note": "Highest-uncertainty phase - OutputCtx.fillLhs_empty_imp_fillEmpty is the ONE piece research did not compile. Deliberately placed off the impL critical path so its failure cannot block Phases 3-5 or the census 41->40 invariant."
     },
     {
-      "id": "D3",
-      "severity": "blocking",
-      "title": "Baseline lake build is RED - nested_sound is missing the NestedProof.cut case",
-      "detail": "lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness fails: '1329:2: Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)'. Committed state at 88b198bf; Cslib/ working tree clean. The task's 'lake build green' invariant is therefore unreachable by discharging impL alone. Resolution path sized in the report: reuse the repaired impL argument with B := A plus 'A imp A is always provable' (the source's own one-liner), routed through the already-landed InputCtx.fillLhs_fm_antitone, plus one small bridging induction OutputCtx.fillLhs_empty_imp_fillEmpty. This is the one piece not yet compiled.",
-      "resolvable_in_task": true
+      "phase": 7,
+      "gate": "lake build green for the whole Cslib target",
+      "note": "The RED -> green flip. The milestone the plan exists to reach."
     }
   ],
-  "verified_artifacts_compiled": [
-    "lemma4_7_ii",
-    "mpAnd",
-    "topBase",
-    "lambdaChain_XZ_imp_Y",
-    "lambdaChain_step2",
-    "psiX_fm",
-    "primeRhs_fm",
-    "andMP",
-    "impL_repaired (end-to-end)",
-    "hA_derivable",
-    "hB_derivable"
+  "residual_risks": [
+    "Phase 6's bridging induction is uncompiled; it mirrors OutputCtx.fillLhs_fm_mono's three-case recursion in the same file, but it is the plan's single largest unknown. If it does not close, Phases 1-5 still land the census 41->40 invariant and the build stays RED on the pre-existing cut error - the plan forbids inserting a sorry into nested_sound_cut to force a cosmetic green.",
+    "D2's blast radius was grep-checked (confined to Nested/) but not build-checked; Completeness.lean / CS5Completeness.lean were never read. Phase 2's three-module build gate is the real test, and the plan instructs the implementer to STOP and report rather than widen scope if fallout appears outside the declared file scope.",
+    "lake exe lint-style is named in the task's exit invariants but is NOT a defined target in this repository's lakefile.toml (which declares only lean_exe checkInitImports, testDriver CslibTests, lintDriver batteries/runLinter). Phase 8 attempts it, records the outcome truthfully, and substitutes lake exe mk_all --check plus lake build's weak.linter.style.* options. The plan forbids reporting the invariant as met by a command that did not run.",
+    "lake test cannot be assessed until the library builds, so Phase 8 is the first moment any test signal exists."
   ],
-  "baseline": {
-    "sorry_count": 41,
-    "sorry_census_command": "bash .claude/scripts/lean-sorry-census.sh Cslib",
-    "target_sorry": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1315",
-    "lake_build": "RED",
-    "lake_test": "not_run"
-  },
-  "exit_criteria_for_implementation": [
-    "sorry census 41 -> 40, with the Soundness.lean:1315 entry gone from the inventory",
-    "lake build RED -> green (requires the cut case, D3)",
-    "no new axioms; #print axioms nested_sound_impL free of sorryAx",
-    "lake exe checkInitImports, lake lint, lake exe lint-style, lake test all green"
+  "exit_criteria": [
+    "Cslib bare-sorry census 41 -> 40, Soundness.lean:1315 gone from the inventory",
+    "lake build RED -> green",
+    "#print axioms nested_sound_impL free of sorryAx; no new axiom declarations in the diff",
+    "lake exe checkInitImports, lake lint, lake exe mk_all --check, lake test all green; lake exe lint-style attempted and its outcome recorded"
   ],
-  "next_action_hint": "Run /plan 570 --hard. The plan MUST expand scope beyond the task brief to cover D1 (land lemma4_7_ii), D2 (repair InputCtx.outputPruning), and D3 (discharge NestedProof.cut and add its arm to nested_sound) - the brief's stated scope alone is necessary but not sufficient, and would land an unsound theorem against a still-red build. Recommended six-phase decomposition is in the report's 'Recommended Phase Decomposition' section; each phase is one agent run and ends green. Highest residual risk: D3's fillLhs-empty/fillEmpty bridging induction is the only piece not compiled during research, and the blast radius of the D2 definition change was grep-checked (confined to Nested/) but not build-checked."
+  "next_action_hint": "Run /implement 570 --hard. Dispatch Phase 1 first; it is self-contained in Soundness.lean and verifies against the named pre-existing errors. Phase 2 is the highest-value early checkpoint (it is what makes nested_sound_impL true rather than refutable) and has disjoint file territory from Phase 1, so the two may be dispatched in either order or in parallel. Do NOT dispatch Phase 5 before Phase 2 is [COMPLETED] - against the un-repaired outputPruning the theorem is refutable and any proof effort is spent on a false statement. Commit on every green gate (task 570 phase {P}: {name}), especially Phases 2, 6, and 7."
 }

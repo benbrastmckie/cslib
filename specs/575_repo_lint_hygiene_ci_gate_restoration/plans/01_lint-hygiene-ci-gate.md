@@ -473,7 +473,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 123 of ~570 done]
+### Phase 5: Suppression audit [PARTIAL — 148 of ~570 done]
 
 **Done (cycle 1)**: 18 provably-vestigial deletions (`37046110`) — 14 `longLine` in files with no
 line over 100 chars, 4 `setOption` whose only effect was silencing themselves. Rebuild produced
@@ -707,6 +707,92 @@ never retype existing proof-body lines inside an Edit's new_string; edit only bo
 and re-read the region before building** — **and after the initial suppression removal, expect
 possible follow-up rounds of newly-surfaced per-declaration warnings once earlier fixes narrow
 the covering suppression (see cycle 8 finding above); rebuild after each round, not just once.**
+
+**Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
+suppression is load-bearing.
+
+**Done (cycle 9)**: processed the 5 count-5 files the cycle-8 addendum flagged as smaller
+priorities, all committed individually after a clean scoped rebuild plus downstream-importer
+rebuilds — `Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean` (5→7 usage-scoped, 105
+lines: `style.emptyLine` vestigial; `style.longLine` (5) fixed mechanically; `unusedSectionVars`
++ `unusedDecidableInType` narrowed across 6 theorems; `style.openClassical` narrowed to a
+*persistent* (non-`in`) `set_option` immediately before the file-wide `open Classical` —
+**new safety finding**: `set_option linter.style.openClassical false in open Classical` scopes
+the open to that single command only and silently breaks the `Classical.propDecidable` instance
+propagation needed by `Finset.filter` in the file's two `noncomputable def`s, causing
+`DecidablePred` synthesis failures; the non-`in` form must be used whenever a persistent `open`
+is itself the suppression target), `Bimodal/Metalogic/BXCanonical/Completeness/Dense.lean`
+(5→2 usage-scoped, 141 lines: `style.emptyLine`/`style.setOption`/`flexible` all vestigial;
+`style.longLine` (1) and `unusedSectionVars` (1) fixed/narrowed), `Temporal/Metalogic/
+Chronicle/Frame.lean` (5→2 declaration-scoped, 254 lines: `style.setOption`/`style.emptyLine`
+vestigial; `unusedSimpArgs` (2, both `simp [List.mem_filter, decide_eq_true_eq]` calls) fixed
+mechanically by dropping the linter-confirmed-unused `decide_eq_true_eq` argument;
+`style.longLine` (12) fixed mechanically; `flexible` (2, same simp calls) narrowed to
+declaration-scoped `set_option` on `tGBackward`/`tHBackward` rather than rewriting the simp call
+per the linter's own `simp?`/`simp only` suggestion, which would exceed the sanctioned mechanical
+edit set), `Temporal/Metalogic/WitnessSeed.lean` (5→2 declaration-scoped, 259 lines: same
+pattern as Frame.lean — `unusedSimpArgs` (2) fixed mechanically, `style.longLine` (7) fixed
+mechanically, `flexible` (2) narrowed on `extract_g_neg_from_seed`/`extract_h_neg_from_seed`),
+`Temporal/Metalogic/Chronicle/RRelation.lean` (5→0, 303 lines: `unusedSimpArgs`/
+`style.setOption`/`flexible`/`style.emptyLine` all vestigial; `style.longLine` (22) fixed
+mechanically — this file is a thin one-line re-export layer over `Cslib.Foundations.Logic.
+Metalogic.Chronicle.RRelation`, so every site was rewrapped by breaking the forwarding call
+after the function name onto an indented continuation line; file is now fully clean of linter
+overrides). Suppression-audit progress: 123 → 148 of ~570 total sites now individually audited
+(20 files fully processed cumulative). Full CSLib CI pipeline run once at cycle end: `lake build
+--wfail --iofail` (exactly 5 baseline sorry warnings, zero new), `lake exe checkInitImports`
+(clean), `lake lint` (0 warnings library-wide), `lake exe lint-style` (clean), `lake shake
+--add-public --keep-implied --keep-prefix` (clean), `lake exe mk_all --module` ("No update
+necessary"), `lake test` (exit 0). Vacuous-def grep unchanged at the single pre-existing false
+positive (`Computability/URM/Basic.lean:92`); axiom count unchanged at 26.
+
+**New finding (cycle 9)**: `set_option linter.X false in open Y` is unsafe when `open Y`'s
+*persistent* effect (not just its own elaboration) is what the rest of the file depends on —
+`in` scopes the option (and, empirically, the open's downstream visibility) to that single
+command, so a later `Finset.filter`/`Decidable` use that relied on the scoped instance from
+`open Classical` fails with a stuck `DecidablePred` metavariable. Always rebuild immediately
+after scoping `style.openClassical` with `in`; if the build regresses, drop `in` and use a plain
+non-scoped `set_option` line before the `open` statement instead (this is itself a pattern
+already used elsewhere in the codebase, e.g. `ChronicleToCountermodelBasic.lean`,
+`Separation/Eliminations.lean`, `Separation/DedekindZ/QLemma.lean`).
+
+**Resume point**: the 5 files above (cycle 9) plus all files from cycles 1, 5, 6, 7, 8 are done —
+do not revisit (20 files total). Re-verify the worst-offender list before starting the next
+cycle, since resolutions only ever remove entries:
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 9's end (291 total remaining file-scoped suppression lines across the repo), the
+count-6 tier is unchanged from cycle 8: `Temporal/Metalogic/Chronicle/CounterexampleElimination/
+{RecursiveWalks (1125 lines), MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/
+FrameClassVariants.lean` (931 lines), `Bimodal/Metalogic/Separation/Eliminations.lean` (849
+lines), `Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048
+lines — do not pick this one first), `Bimodal/Metalogic/BXCanonical/Chronicle/
+ChronicleToCountermodelBasic.lean` (1208 lines). The count-5 tier (next priority, smaller files
+first per the cycle-7/8/9 finding that per-declaration narrowing effort scales with file size
+more than suppression count) now includes: `Temporal/Metalogic/Chronicle/PointInsertion/
+{Splitting, Since, Seeds, Burgess}.lean`, `Temporal/Metalogic/Chronicle/ChronicleConstruction.
+lean`, `Bimodal/Metalogic/Separation/TemporalClosure.lean`, `Bimodal/Metalogic/Decidability/
+CountermodelExtraction.lean`, `Bimodal/Metalogic/BXCanonical/Quasimodel/Construction.lean`,
+`Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/{XuGuard, Since, Seeds, Burgess}.lean`,
+`Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/{Structures,
+BurgessHelpers}.lean`, `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleConstruction.lean`,
+`Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean` — check line counts with `wc -l` before
+picking, and re-verify the suppression count is still accurate (the grep one-liner above), since
+counts only ever go down as files get processed. Apply the same method: remove all of a file's
+suppressions, rebuild, categorize what surfaces into vestigial / mechanically-fixable /
+needs-real-proof-work, fix what's mechanical, narrow the rest to declaration-scope — carrying
+forward every safety lesson from cycles 6-9 (elaboration-changing `omit`/`open` constructs need
+an immediate rebuild before trusting them; prefer `set_option ... in` over `omit ... in` for
+`unusedSectionVars`; `set_option .../omit ... in` goes before a declaration's doc comment, never
+between; never retype existing proof-body content inside an Edit's `new_string` — edit only
+boundary lines and re-read before building; expect possible follow-up rounds of newly-surfaced
+warnings after the first round of fixes narrows a covering suppression; and, new this cycle, a
+persistent-`open`-dependent linter site needs a non-`in` `set_option` line, not a `set_option ...
+in` wrapper).
 
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.

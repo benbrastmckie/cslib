@@ -34,7 +34,6 @@
 2 Cslib/Logics/Bimodal/Metalogic/Algebraic/ParametricCanonical.lean
 2 Cslib/Logics/Bimodal/Metalogic/Algebraic/ParametricCompleteness.lean
 3 Cslib/Logics/Bimodal/Metalogic/Algebraic/ParametricHistory.lean
-4 Cslib/Logics/Bimodal/Metalogic/Algebraic/RestrictedParametricTruthLemma.lean
 2 Cslib/Logics/Bimodal/Metalogic/Bundle/BFMCS.lean
 2 Cslib/Logics/Bimodal/Metalogic/Bundle/CanonicalFrame.lean
 2 Cslib/Logics/Bimodal/Metalogic/Bundle/Construction.lean

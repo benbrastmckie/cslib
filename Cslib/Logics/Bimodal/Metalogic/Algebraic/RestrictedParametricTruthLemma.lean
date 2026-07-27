@@ -21,11 +21,6 @@ Restricted version of the parametric shifted truth lemma that only requires
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/RestrictedParametricTruthLemma.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.RestrictedParametricTruthLemma
@@ -38,7 +33,8 @@ open Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricHistory
 open Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricTruthLemma
 open Cslib.Logic.Bimodal
 
-variable {Atom : Type} [DecidableEq Atom] {fc : FrameClass} {D : Type*} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
+variable {Atom : Type} [DecidableEq Atom] {fc : FrameClass} {D : Type*}
+  [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
 
 /-- Proves that the negation of an implication implies its antecedent. -/
 noncomputable def negImpImpliesAntecedent (ψ χ : Formula Atom) :
@@ -61,9 +57,11 @@ noncomputable def negImpImpliesAntecedent (ψ χ : Formula Atom) :
     deductionTheorem [] (ψ.imp χ).neg ψ.neg.neg h_neg_neg_psi
   have h_dne : DerivationTree FrameClass.Base [] (ψ.neg.neg.imp ψ) :=
     Theorems.Propositional.doubleNegation ψ
-  have h_b : DerivationTree FrameClass.Base [] ((ψ.neg.neg.imp ψ).imp (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ))) :=
+  have h_b : DerivationTree FrameClass.Base []
+      ((ψ.neg.neg.imp ψ).imp (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ))) :=
     Theorems.Combinators.bCombinator
-  have h_step1 : DerivationTree FrameClass.Base [] (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ)) :=
+  have h_step1 : DerivationTree FrameClass.Base []
+      (((ψ.imp χ).neg.imp ψ.neg.neg).imp ((ψ.imp χ).neg.imp ψ)) :=
     DerivationTree.modus_ponens _ _ _ h_b h_dne
   have h_base : DerivationTree FrameClass.Base [] ((ψ.imp χ).neg.imp ψ) :=
     DerivationTree.modus_ponens _ _ _ h_step1 h_deduct
@@ -90,6 +88,7 @@ noncomputable def negImpImpliesNegConsequent (ψ χ : Formula Atom) :
     deductionTheorem [] (ψ.imp χ).neg χ.neg h_neg_chi
   exact h_base.lift (FrameClass.base_le fc)
 
+set_option linter.flexible false in
 /-- Restricted parametric shifted truth lemma. -/
 theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     (root : Formula Atom)
@@ -109,7 +108,8 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     simp only [truthAt]
     exact ⟨fun h => absurd h (fun h_bot => (fam.is_mcs t).1 [(Formula.bot : Formula Atom)]
       (fun psi hpsi => by simp at hpsi; rw [hpsi]; exact h_bot)
-      ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩),
+      ⟨DerivationTree.assumption
+        [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩),
       fun h => h.elim⟩
   | imp ψ χ ih_ψ ih_χ =>
     have h_ψ_sub := closure_imp_left root ψ χ h_sub
@@ -119,7 +119,8 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     constructor
     · intro h_imp h_ψ_true
       exact (ih_χ h_χ_sub fam hfam t).mp
-        (SetMaximalConsistent.implication_property h_mcs h_imp ((ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true))
+        (SetMaximalConsistent.implication_property h_mcs h_imp
+          ((ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true))
     · intro h_truth_imp
       rcases SetMaximalConsistent.negation_complete h_mcs (ψ.imp χ) with h_imp | h_neg_imp
       · exact h_imp
@@ -147,12 +148,14 @@ theorem restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         t (t + delta) ψ
       have h_delta : (t + delta) - t = delta := add_sub_cancel_left t delta
       rw [h_σ_eq]
-      rw [WorldHistory.time_shift_congr (parametricToHistory fam') ((t + delta) - t) delta h_delta] at h_preserve
+      rw [WorldHistory.time_shift_congr
+        (parametricToHistory fam') ((t + delta) - t) delta h_delta] at h_preserve
       exact h_preserve.mpr h_truth_canon
     · intro h_all_σ
       exact B.modal_backward fam hfam ψ t (fun fam' hfam' =>
         (ih h_ψ_sub fam' hfam' t).mpr
-          (h_all_σ (parametricToHistory fam') (parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩)))
+          (h_all_σ (parametricToHistory fam')
+            (parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩)))
   | untl psi phi ih_psi ih_phi =>
     have h_phi_sub := closure_untl_left root phi psi h_sub
     have h_psi_sub := closure_untl_right root phi psi h_sub
@@ -197,7 +200,8 @@ theorem restricted_parametric_completeness_from_neg_membership
       (parametricToHistory fam) t φ := by
   intro h_phi_true
   exact set_consistent_not_both (fam.is_mcs t).1 φ
-    ((restricted_parametric_shifted_truth_lemma B root h_rtc h_buc h_fuc φ h_sub fam hfam t).mpr h_phi_true)
+    ((restricted_parametric_shifted_truth_lemma B root h_rtc h_buc h_fuc φ h_sub fam hfam t).mpr
+      h_phi_true)
     h_neg_in
 
 /-!
@@ -212,6 +216,7 @@ The truth lemma induction only uses these coherence properties for subformulas o
 so the restricted versions suffice.
 -/
 
+set_option linter.flexible false in
 /-- Fully restricted parametric shifted truth lemma: all three coherence hypotheses
 are restricted to subformulaClosure/deferralClosure of root. -/
 theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
@@ -232,7 +237,8 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     simp only [truthAt]
     exact ⟨fun h => absurd h (fun h_bot => (fam.is_mcs t).1 [(Formula.bot : Formula Atom)]
       (fun psi hpsi => by simp at hpsi; rw [hpsi]; exact h_bot)
-      ⟨DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩),
+      ⟨DerivationTree.assumption
+        [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)⟩),
       fun h => h.elim⟩
   | imp ψ χ ih_ψ ih_χ =>
     have h_ψ_sub := closure_imp_left root ψ χ h_sub
@@ -242,7 +248,8 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
     constructor
     · intro h_imp h_ψ_true
       exact (ih_χ h_χ_sub fam hfam t).mp
-        (SetMaximalConsistent.implication_property h_mcs h_imp ((ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true))
+        (SetMaximalConsistent.implication_property h_mcs h_imp
+          ((ih_ψ h_ψ_sub fam hfam t).mpr h_ψ_true))
     · intro h_truth_imp
       rcases SetMaximalConsistent.negation_complete h_mcs (ψ.imp χ) with h_imp | h_neg_imp
       · exact h_imp
@@ -270,12 +277,14 @@ theorem fully_restricted_parametric_shifted_truth_lemma (B : BFMCS Atom D fc)
         t (t + delta) ψ
       have h_delta : (t + delta) - t = delta := add_sub_cancel_left t delta
       rw [h_σ_eq]
-      rw [WorldHistory.time_shift_congr (parametricToHistory fam') ((t + delta) - t) delta h_delta] at h_preserve
+      rw [WorldHistory.time_shift_congr
+        (parametricToHistory fam') ((t + delta) - t) delta h_delta] at h_preserve
       exact h_preserve.mpr h_truth_canon
     · intro h_all_σ
       exact B.modal_backward fam hfam ψ t (fun fam' hfam' =>
         (ih h_ψ_sub fam' hfam' t).mpr
-          (h_all_σ (parametricToHistory fam') (parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩)))
+          (h_all_σ (parametricToHistory fam')
+            (parametricCanonicalOmega_subset_shiftClosed B ⟨fam', hfam', rfl⟩)))
   | untl psi phi ih_psi ih_phi =>
     have h_phi_sub := closure_untl_left root phi psi h_sub
     have h_psi_sub := closure_untl_right root phi psi h_sub
@@ -320,7 +329,8 @@ theorem fully_restricted_parametric_completeness_from_neg_membership
       (parametricToHistory fam) t φ := by
   intro h_phi_true
   exact set_consistent_not_both (fam.is_mcs t).1 φ
-    ((fully_restricted_parametric_shifted_truth_lemma B root h_rtc h_buc h_fuc φ h_sub fam hfam t).mpr h_phi_true)
+    ((fully_restricted_parametric_shifted_truth_lemma B root h_rtc h_buc h_fuc φ h_sub fam hfam
+      t).mpr h_phi_true)
     h_neg_in
 
 end Cslib.Logic.Bimodal.Metalogic.Algebraic.RestrictedParametricTruthLemma

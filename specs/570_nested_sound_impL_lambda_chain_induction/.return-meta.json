@@ -1,31 +1,40 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-27T01:45:06Z",
-  "completed_at": "2026-07-27T01:59:00Z",
-  "phases_completed": 5,
+  "started_at": "2026-07-27T01:53:47Z",
+  "phases_completed": 6,
   "phases_total": 8,
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Translation.lean",
       "type": "lean_source",
-      "summary": "nested_sound_impL discharged sorry-free via the Lambda-chain induction assembly."
+      "summary": "New theorem OutputCtx.fillLhs_empty_imp_fillEmpty landed after OutputCtx.fillLhs_fm_mono."
+    },
+    {
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/04_lambda-chain-phase6-summary.md",
+      "type": "summary",
+      "summary": "Phase 6 execution summary."
+    },
+    {
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Orchestrator handoff for phase 6 completion."
     }
-  ],
-  "memory_candidates": [
-    "The lemma4_2_id/lemma4_2_bot necessitation idiom (cs5DerivImpOfDerivable P <| .necessitation _ d, applied to a closed Derivable fact d) is the reusable pattern in this file for the ctx.Gamma' = [] base case whenever a premise needs lifting behind a fresh box layer with a top/constant antecedent."
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Phase 5 discharged and verified green; handoff written."
+    "details": "Phase 6 landed, verified, committed at 14de905a"
   },
+  "memory_candidates": [
+    "The plan's flagged highest-residual-risk phase (Phase 6, OutputCtx.fillLhs_empty_imp_fillEmpty) closed on the first attempt with zero deviation from the sketch, because it was correctly identified as a direct structural clone of an already-landed theorem (OutputCtx.fillLhs_fm_mono) -- naming an existing proof as the template for an unproved one is a strong risk-reduction move when the shapes genuinely match."
+  ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 40,
     "vacuous_count": 0,
-    "axiom_count_note": "deferred to Phase 8 per plan -- module still red on unrelated NestedProof.cut case, no .olean produced yet",
-    "build_passed_scoped": true,
-    "build_error_remaining": "Soundness.lean: Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _) -- pre-existing, Phase 7's target",
-    "ci_pipeline_passed": "not run (single-phase dispatch; full CI deferred to Phase 8)"
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": null,
+    "notes": "Phase-scoped verification only (single-phase dispatch): lake build on Nested.Translation succeeds green with zero diagnostics; lake build on Nested.Soundness fails with exactly the single pre-existing D3 cut-non-exhaustiveness diagnostic (expected, fixed in Phase 7). Full CI pipeline deferred to Phase 8 per plan."
   },
   "metadata": {
     "session_id": "sess_1785113705_bcf38a",

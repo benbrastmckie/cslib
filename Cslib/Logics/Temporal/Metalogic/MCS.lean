@@ -31,10 +31,6 @@ proves temporal-specific MCS properties needed for the completeness theorem.
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean — generic MCS framework
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.unusedSimpArgs false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal
@@ -305,9 +301,7 @@ theorem mcs_h_mp
     have d_h_swap2 := DerivationTree.temporal_duality _ d_g_swap
     have h_eq : (Formula.allFuture X.swapTemporal).swapTemporal =
         Formula.allPast (X.swapTemporal.swapTemporal) := by
-      simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-        Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-        Formula.swapTemporal]
+      simp only [Formula.swapTemporal]
     rw [Formula.swapTemporal_involution] at h_eq
     exact ⟨h_eq ▸ d_h_swap2⟩
   -- BX3' (right_mono_since): H(α→β) → P(α) → P(β)
@@ -445,18 +439,14 @@ theorem derive_h_contradiction
     have d_g := DerivationTree.temporal_necessitation _ d
     have d_swap := DerivationTree.temporal_duality _ d_g
     have h_eq : (Formula.allFuture φ).swapTemporal = Formula.allPast φ.swapTemporal := by
-      simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-        Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-        Formula.swapTemporal]
+      simp only [Formula.swapTemporal]
     -- Double-swap: duality(d) gives ⊢ swap(φ); necessitation; duality gives H(φ) by involution.
     have d_swap_phi := DerivationTree.temporal_duality φ d
     have d_g_swap := DerivationTree.temporal_necessitation _ d_swap_phi
     have d_h := DerivationTree.temporal_duality _ d_g_swap
     have h_eq2 : (Formula.allFuture φ.swapTemporal).swapTemporal =
         Formula.allPast (φ.swapTemporal.swapTemporal) := by
-      simp only [Formula.allFuture, Formula.allPast, Formula.someFuture, Formula.somePast,
-        Formula.neg, PropositionalConnectives.neg, Formula.top, PropositionalConnectives.top,
-        Formula.swapTemporal]
+      simp only [Formula.swapTemporal]
     rw [Formula.swapTemporal_involution] at h_eq2
     exact ⟨h_eq2 ▸ d_h⟩
   | cons a L' ih =>

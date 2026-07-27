@@ -66,8 +66,6 @@ open Cslib.Logic.Modal
 universe u
 variable {Atom : Type u} {𝒯 : Set GeomAxiom}
 
-open Classical
-
 /-! ## A small `Deriv`-level toolkit -/
 
 /-- Any member of `Γ` is trivially `Deriv`-derivable from it (via the singleton witness list). -/

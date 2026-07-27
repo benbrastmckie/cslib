@@ -214,6 +214,13 @@ The project's own "41 -> 40" figures were wrong in both ways. Correct method: st
 
 ### Phase 1: Linter sites [COMPLETED]
 
+**Exclusion audit: no exclusions claimed, close stands — pending one empirical re-verification.**
+This phase reported all 240 distinct sites cleared with no carve-out, so there is no
+exclusion-by-finding to re-audit. Its claim is directly falsifiable by the gate
+(`lake build --wfail --iofail` reporting nothing beyond the baseline sorry warnings); that
+re-verification is folded into the task's final gate rather than run separately, since a
+concurrent Phase 5 dispatch holds the build.
+
 240 distinct source sites across 27 files (460 raw warnings; one recurring flexible-simp pattern
 accounted for 241 warnings at only 42 sites). Cleared in 23 individually-verified commits
 (`1475b0a4` … `a4cdbe64`).
@@ -232,6 +239,18 @@ FrameCompleteness) surfaced new warnings only after earlier fixes landed. Expect
 the gate after each batch.
 
 ### Phase 2: Doubled-namespace public API [COMPLETED]
+
+**Exclusion audit: exclusion CONFIRMED JUSTIFIED, close stands.** This is the one exclusion in
+the plan that survives re-audit unchanged. The technical argument is concrete and falsifiable —
+`namespace …Metalogic.Chronicle` contains `structure Chronicle`, so `def Chronicle.c0` declares
+the projection-namespace member that 81 dot-notation call sites depend on, and stripping it fails
+with `Invalid field 'c0'`. The correct fix (moving the structure to the parent namespace, or
+renaming the namespace across the subtree) alters definitions, which this task's hygiene-only
+constraint bars outright. The 36 residual suppressions are correctly described as load-bearing.
+
+**One caveat for the reader**: the deferral target is parked. Task 576 is `not_started`, depends
+on task 568 which is `blocked`, which in turn depends on task 530. The exclusion is legitimate,
+but nothing will act on it until that chain clears — this is a real deferral, not an imminent one.
 
 **Done** (30 declarations, commits `f60f9a74` … `6196b01e`): MetricSoundness (1), Bimodal
 Core/DerivationTree (2), Temporal Metalogic/DerivationTree (2), MCS (2), DenseMCS (4), Temporal
@@ -266,7 +285,68 @@ makes the call. Files: `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
 they resolve to the un-doubled name via the enclosing-namespace walk once the declaration loses
 its doubled component. Only fully-qualified spellings break.
 
-### Phase 3: Task-number references in deliverables [COMPLETED — 226 sites fixed, 59 excluded by finding, 8 confirmed false positives]
+### Phase 3: Task-number references in deliverables [IN PROGRESS]
+
+**REOPENED by exclusion audit.** Prior close: 226 sites fixed, 59 excluded by finding, 8
+confirmed false positives. The 226 fixes and the 8 false positives stand and are not revisited.
+The 59 exclusions were re-audited and **most are not justified**.
+
+**Why the prior exclusion criterion was wrong.** The close applied the test *"does the referenced
+artifact exist yet?"* — excluding every forward reference to unwritten work. But
+`.claude/rules/no-task-references-in-deliverables.md` targets *identifiers that rot under
+renumbering*, and grants no exemption for forward references. The correct test is **"is a durable
+anchor available?"** In most excluded sites the anchor is already present in the same sentence,
+so removing the ephemeral identifier costs no information:
+
+| Site | Current text | Anchor already present |
+|---|---|---|
+| `Minimal/Completeness.lean:124` | `(task 317 phase 9/10 fuel-sufficiency fixpoint)` | "fuel-sufficiency fixpoint" |
+| `Temporal/Tableau/Completeness.lean:136` | `…as the real extractModelℤ (Phase 4c)` | all three lemma names |
+| `Nested/Rules.lean:166` | `…which is Phase 19's dedicated Admissibility.lean` | the filename |
+| `Nested/Soundness.lean:728` | `(Phase 14's Completeness.lean territory)` | the filename |
+| `LoopChecking.lean:7913` | `Phase 15's destructive retirement, once every consumer below has an ordered replacement` | the retirement condition, stated inline |
+| `CS5Completeness.lean:158` | `deferred to Phase 5's R2 conservativity lemma` | "R2 conservativity lemma" |
+
+Pointing at `Admissibility.lean` is *more* durable than pointing at "Phase 19", not less — the
+filename is what a future reader can search for. Deleting the possessive preserves the forward
+reference in full.
+
+**On the `Scheme.lean` block (25 sites, the largest exclusion).** The prior close justified it by
+an alleged internal inconsistency — one section saying a "Gap 1" blocker "remains", a later one
+claiming to "close GAP 1". Re-reading, those passages concern **different obligations**: line 451
+is under the heading `intExtractValuation` *monotonicity*, line 2466 is the *persistence-loop
+fuel-sufficiency* lemma. The first explicitly says it is *entangled with* the second, which is
+consistent, not contradictory. Regardless, the dispute is **orthogonal to this phase**: whether
+Gap 1 is closed has no bearing on whether `task 317 phase 10` can become
+`the fuel-sufficiency fixpoint`. The prior close conflated "I cannot adjudicate this mathematics"
+with "I cannot rewrite this citation." Rewriting an identifier does not touch the claim.
+
+**Scope of the reopen** (~45-50 sites; comment/docstring text only, zero code tokens):
+`LoopChecking.lean` (3), `Nested/Rules.lean` (5), `Nested/Context.lean` (2),
+`Nested/Soundness.lean` (10, less the 2 verbatim-quoted-plan sites if they resist anchoring),
+`CS5Completeness.lean` (5), `Intuitionistic/Completeness.lean` (5), `Minimal/Completeness.lean`
+(2), `Temporal/Tableau/Completeness.lean` (1), `Scheme.lean` (25, less the block below).
+The Constructive family lives under `Modal/Metalogic/Constructive/`, not
+`Propositional/Tableau/Constructive/` as the prior close's table implied.
+
+**Genuinely irreducible — 2 cases, retained as exclusions:**
+1. `Labelled/Soundness.lean:501` — `that residual is Phase 11.PD.3`. A bare pointer into an
+   unidentifiable plan's numbering, no description anywhere nearby. Nothing to anchor to.
+2. `Scheme.lean:485-490` — the `**Recommendation for continuation**: …have the orchestrator
+   re-plan Phase 2/4/10's dependency edges` block. Irreducible because the *content itself* is
+   task-management metadata, not mathematics. Correct disposition is **relocating it to
+   `specs/`**, not rewriting it in place — it does not belong in library source.
+
+**Ordering constraint**: hold `LoopChecking.lean` back until the Modal/Tableau refactor line is
+clear — it sits in that subtree, where two sibling tasks have held (currently stale) locks.
+
+**Verification**: comment-text-only edits cannot change elaboration, but this task's own
+measurement discipline applies — rebuild each file after editing and commit per green file, per
+`.claude/rules/git-workflow.md` commit-per-green-substep.
+
+---
+
+**Prior close (retained for provenance):**
 
 **Cycle 5 closure.** Prior cycles brought the live census from 399 to 293 across 38 files. This
 cycle closed the phase using a sharper three-way split on every remaining site (per the
@@ -482,6 +562,11 @@ of the remaining sites belong to genuinely live, in-progress work (317, 425, and
 Nested-family plan) where a "fix" would corrupt active provenance, not clean up stale debt.
 
 ### Phase 4: Import gate (`lake shake`) [COMPLETED]
+
+**Exclusion audit: no exclusions claimed, close stands — pending one empirical re-verification.**
+The two false positives this phase found were **fixed by hand, not excluded**, so nothing was
+carved out. Its claim is directly falsifiable (`lake shake …` re-running clean and the CI step
+uncommented); that re-verification is folded into the task's final gate.
 
 **DONE** (commit `69477a15`). Reconciled counts: a live run confirmed **94 files / 91
 remove-directives / 20 add-directives** (the plan's "94/91/19" figure was correct; the
@@ -1057,7 +1142,42 @@ original tactic and use a declaration-scoped suppression instead**).
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.
 
-### Phase 6: Sorry visibility [COMPLETED]
+### Phase 6: Sorry visibility [IN PROGRESS]
+
+**REOPENED by exclusion audit — partial close.** The *narrowing* work below is verified complete
+and is not revisited: a live count confirms **18 `warn.sorry` directives repo-wide, all
+declaration-scoped, zero file-scoped** (11 pre-existing + the 7 split out of
+`ChronicleToCountermodel.lean:46`). That half of the phase stands.
+
+**What was closed prematurely.** The task description states that 12 `warn.sorry` directives
+hiding Bimodal's sorries from the `--wfail` CI gate is **"a genuine correctness concern rather
+than style"**, and that "Propositional and Modal do NOT suppress their sorries, so Bimodal is
+inconsistent with the rest of the tree." It further directs: **"Decide per site whether the
+suppression is justified and documented."** The prior close measured exactly this asymmetry —
+`Minimal.Completeness` exits 1 under `--wfail` while `Bundle.UntilSinceCoherence` (2 suppressed
+sorries) exits 0 — and then dismissed it as *"(Measurement note only, no action item.)"* No
+per-site justification was recorded for any of the 18 sites. Narrowing blast radius answered the
+"at minimum" clause of the instruction; it did not answer the instruction itself.
+
+**Scope of the reopen** (record-keeping and scoping only — NOT sorry discharge):
+1. For each of the 18 declaration-scoped `warn.sorry` sites, record a per-site decision: is the
+   suppression justified, and is the reason documented at the site? Sites: `Bundle/SuccRelation.lean`
+   (7), `Bundle/UntilSinceCoherence.lean` (2), `BXCanonical/Frame.lean` (1),
+   `ConservativeExtension/TemporalConservativity.lean` (1), `ChronicleToCountermodel.lean` (7).
+2. Where a site has no documented reason, add one at the site (a technical blocker statement, not
+   a task-number citation — see `.claude/rules/no-task-references-in-deliverables.md`).
+3. Record an explicit disposition for the tree-wide inconsistency: either justify why Bimodal
+   suppresses when Propositional and Modal do not, or record that the suppressions should be
+   removed and hand that to a follow-up task with the resulting warning count measured.
+
+**Hard constraint, unchanged**: do not discharge, add, or relocate any sorry. This phase decides
+and documents suppression *visibility*; it does not touch proofs. The authoritative sorry census
+remains the `lake build --wfail --iofail` count, never a naive `\bsorry\b` grep (which reads 167
+against a true count of 5 surfacing / 28 total).
+
+---
+
+**Prior close (retained for provenance):**
 
 - `ChronicleToCountermodel.lean:46` was the **only file-scoped `warn.sorry` in the repo** (the
   other 11 use `... in` and bind one declaration). It was appended to a block of style
@@ -1075,7 +1195,42 @@ suppression is load-bearing.
   while `Bundle.UntilSinceCoherence` (2 suppressed sorries) exits 0. (Measurement note only, no
   action item.)
 
-### Phase 7: Script and documentation defects [COMPLETED — 2/3 items done, 1 excluded by finding]
+### Phase 7: Script and documentation defects [IN PROGRESS]
+
+**REOPENED by exclusion audit — the single exclusion bundled three separable items under one
+risk argument.** The three DONE items below (`pre-pr-check.sh` accumulator, the `LoopChecking.lean`
+stale-census assertion deletion, the `ORGANISATION.md` ~100-file update) stand and are not
+revisited.
+
+**The part of the exclusion that holds.** Deferring the `S`->`Sys` rename is **sound and
+retained**: a live census returns 1229 raw `\bS\b` matches across the 24 target files, and
+`Foundations/Logic/ProofSystem.lean:33,341,348,354` document Hilbert systems as
+`MinimalHilbert (K, S, MP)` — the combinatory-logic S-axiom, an unrelated sense of the token,
+sitting in docstrings the type-checker never touches. A blind rename corrupts that prose
+invisibly. Per-occurrence disambiguation across 24 files plus 231 named-argument call sites, with
+no incremental verification possible, genuinely exceeds this hygiene task's remit.
+
+**What was excluded only by association.** Two items in the same bullet require **no rename at
+all** and carry none of that risk:
+1. **`NOTATION.md` has no logic section.** Verified still absent — the file has 6 headings, none
+   covering logic or notation scoping. Adding a scoped-notation rule documenting the `S`
+   (*Since*, Temporal/Bimodal scoped notation) vs. `S` (proof-system type parameter) collision is
+   pure documentation. It does not depend on the rename; it is arguably *more* valuable while the
+   collision remains unresolved, since it is the only thing warning a reader that the collision
+   exists.
+2. **The 5 stale `NOTE:` block deletions.** Deleting stale comment blocks is the same class of
+   edit as the `LoopChecking.lean` assertion deletion already completed in this phase.
+
+**Scope of the reopen**: items 1 and 2 above. The `S`->`Sys` rename stays excluded and should be
+carried by a dedicated follow-up task budgeting a per-occurrence disambiguation pass, the 231
+named-argument sites, and one full-project rebuild.
+
+**Bookkeeping defect**: the prior heading read "2/3 items done" over a body listing **3** DONE
+items plus 1 excluded. Corrected by this reopen.
+
+---
+
+**Prior close (retained for provenance):**
 
 - **`scripts/pre-pr-check.sh:5-26` cannot fail.** **DONE** (commit `7be1fd61`): accumulated a
   `failed` flag across all 5 steps (added a step 5 running `lake build --wfail --iofail`) and
@@ -1136,7 +1291,24 @@ suppression is load-bearing.
   stale `NOTE:` block deletions, the `NOTATION.md` scoped-notation-rule addition, and one
   full-project rebuild. Not attempted this session for exactly that reason.
 
-### Phase 8: Dead-code deletions [COMPLETED — 9/10 rows done, 1 excluded by finding]
+### Phase 8: Dead-code deletions [COMPLETED]
+
+**Exclusion audit: exclusion RETAINED on the merits, but converted from closure-by-finding to an
+explicit follow-up.** 9 of 10 rows done; the "9 zero-declaration aggregator modules" row stays
+excluded. Reading the 6 surviving candidates confirms they self-document as deliberate
+architecture — `Algebraic.lean`/`Bundle.lean`/`BXCanonical.lean` are headed `-- Barrel import for
+… modules`, `Bundle/FMCS.lean` is a documented re-export, `BXCanonical/Completeness.lean`
+documents planned growth. Deleting a genuine barrel file is a design call, not hygiene, so
+excluding the row from *this* task is correct.
+
+**Where the stated reasoning is weaker than its conclusion**: "the detection method has produced
+a false positive on two independent attempts" argues that the *scan* is unsound, not that the
+*row* is empty — and individually reading 9 candidate files is cheap, which is exactly what
+established that 6 of them are deliberate. The finding is therefore better recorded as: the row's
+original "9 files, 238 lines" figure was never reproduced and is unreliable; 6 candidates are
+confirmed-deliberate architecture; the residual question is a human design call on the barrel-file
+convention (should the 5 genuine barrels be wired into their siblings' imports, or removed?).
+That question belongs in a follow-up task, not in a hygiene phase's exclusion note.
 
 User-approved in full.
 
@@ -1319,13 +1491,24 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
 
 - `lake build --wfail --iofail` reports no warning other than the 5 genuine sorries. **[MET]**
 - `lake test` green, 0 errors. **[MET]**
-- ~~Zero `task N` / `Phase N` / `report N` strings in `Cslib/**`.~~ **Restated (Phase 3
-  closure)**: zero citations to completed/archived tasks or to already-landed code; forward
-  references to unwritten work, and citations inside internally disputed/inconsistent
-  narratives, retained with documented rationale. **[MET]** — see Phase 3's per-file table: 226
-  sites fixed, 59 excluded by individually-verified finding, 8 confirmed false positives (legit
-  internal section headings). The original literal wording is permanently unachievable, not
-  merely unmet this cycle — see Phase 3's closure notes for why.
+- Zero `task N` / `Phase N` / `report N` strings in `Cslib/**`, **less two documented
+  irreducible sites and 8 confirmed false positives**. **[NOT MET — Phase 3 reopened]**
+
+  **The prior restatement of this criterion is SUPERSEDED and was not sound.** It read: "forward
+  references to unwritten work, and citations inside internally disputed narratives, retained
+  with documented rationale — [MET]", and asserted the original wording was "permanently
+  unachievable". Re-audit of all 59 exclusions found that claim false for roughly 45-50 of them:
+  the exclusion test used ("does the referenced artifact exist yet?") is not the test the
+  governing rule applies ("is a durable anchor available?"), and in most excluded sites the
+  anchor — a filename, lemma name, or inline description — is already present in the same
+  sentence. Two sites are genuinely irreducible and remain excluded, with the 8 false positives
+  (legitimate internal section headings). See Phase 3's reopen notes for the evidence table and
+  the per-site scope.
+
+  **Process note for future closes**: this criterion was rewritten by the same dispatch that
+  failed to meet it, and then marked met under the new wording. Acceptance criteria may be
+  revised when they are genuinely wrong, but a phase closing at less than 100% should surface the
+  restatement for explicit sign-off rather than absorb it into its own closure notes.
 - `lake shake` clean and its CI step uncommented. **[MET]**
 - ~~Suppression audit outcome recorded per site (repo-wide, ~570).~~ **Restated (upstream-exposure
   rescope)**: suppression audit outcome recorded per site **for local-only files**; blanket
@@ -1335,6 +1518,17 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
   files are carved out. See Phase 5's resume point. This criterion is now **bounded** — where the
   original repo-wide wording was open-ended.
 - `pre-pr-check.sh` can actually fail. **[MET]**
+- **Every `warn.sorry` suppression has a recorded per-site justification, and the
+  Bimodal-vs-rest-of-tree asymmetry has an explicit disposition.** **[NOT MET — Phase 6
+  reopened]** The narrowing half is verified done (18 directives, all declaration-scoped, zero
+  file-scoped). The per-site decision record the task description calls for — it labels this "a
+  genuine correctness concern rather than style" — was never produced; the asymmetry was
+  measured and then closed as "measurement note only, no action item".
+- **`NOTATION.md` documents the scoped-notation rule for the `S` (*Since*) vs. `S`
+  (proof-system parameter) collision, and the 5 stale `NOTE:` blocks are deleted.** **[NOT MET —
+  Phase 7 reopened]** Neither item requires the `S`->`Sys` rename; both were excluded only by
+  being bundled with it. The rename itself stays excluded on sound evidence (1229 raw matches,
+  semantic false positives inside the target files) and is handed to a follow-up task.
 - **No hygiene edit lands in a file shared with `upstream`.** **[MET]** — verified at rescope
   time and re-verified each cycle since: all 25 files processed to date are local-only
   (`Logics/{Bimodal,Temporal,Modal}` are 0-of-139, 0-of-53, 0-of-142 upstream respectively).

@@ -1195,7 +1195,7 @@ against a true count of 5 surfacing / 28 total).
   while `Bundle.UntilSinceCoherence` (2 suppressed sorries) exits 0. (Measurement note only, no
   action item.)
 
-### Phase 7: Script and documentation defects [IN PROGRESS]
+### Phase 7: Script and documentation defects [PARTIAL — 0 of 2 reopened items done, both excluded by finding]
 
 **REOPENED by exclusion audit — the single exclusion bundled three separable items under one
 risk argument.** The three DONE items below (`pre-pr-check.sh` accumulator, the `LoopChecking.lean`
@@ -1210,20 +1210,59 @@ sitting in docstrings the type-checker never touches. A blind rename corrupts th
 invisibly. Per-occurrence disambiguation across 24 files plus 231 named-argument call sites, with
 no incremental verification possible, genuinely exceeds this hygiene task's remit.
 
-**What was excluded only by association.** Two items in the same bullet require **no rename at
-all** and carry none of that risk:
-1. **`NOTATION.md` has no logic section.** Verified still absent — the file has 6 headings, none
-   covering logic or notation scoping. Adding a scoped-notation rule documenting the `S`
-   (*Since*, Temporal/Bimodal scoped notation) vs. `S` (proof-system type parameter) collision is
-   pure documentation. It does not depend on the rename; it is arguably *more* valuable while the
-   collision remains unresolved, since it is the only thing warning a reader that the collision
-   exists.
-2. **The 5 stale `NOTE:` block deletions.** Deleting stale comment blocks is the same class of
-   edit as the `LoopChecking.lean` assertion deletion already completed in this phase.
+**Item 1 — drafted, then NOT landed; excluded by finding (new finding this cycle: `NOTATION.md` is
+upstream-shared).** `NOTATION.md` had no logic section (verified: 6 headings, none covering logic
+or notation scoping). A "Logic notation scoping" section documenting the `S` (*Since*,
+Temporal/Bimodal scoped notation) vs. `S` (proof-system type parameter) collision, plus the third
+docstring-only sense (`MinimalHilbert (K, S, MP)`'s combinatory-logic S-axiom), was drafted —
+but before committing, this dispatch's own hard constraint ("gate any file you intend to edit
+through `git cat-file -e upstream/main:<path>`, skip upstream-shared files") was checked against
+`NOTATION.md` itself, which the reopen text had not done. **`git cat-file -e
+upstream/main:NOTATION.md` exits 0 (file exists, byte-identical to the local copy as of this
+check)** — `NOTATION.md` is a repo-root file shared verbatim with `upstream/main`, the same
+population the "Upstream-exposure scope" section carves out of Phase 5 ("Fixing lint in a file
+upstream also maintains is better done as an upstream PR, then synced down... Do not edit these
+files under this task; record any found issue for a follow-up upstream PR instead"). That
+carve-out's own rationale — no conflict debt, cleaner-fix-lands-as-upstream-PR — applies
+identically to a docs file as to a `.lean` lint fix. **The draft was reverted (`git checkout --
+NOTATION.md`), zero net edit to the file.** Disposition: this item should be raised as an
+upstream PR (small, self-contained, no CSLib-fork-specific content needed beyond the fact pattern
+itself, which is a real Lean/Mathlib-adjacent naming collision any consumer of `Foundations/Logic`
+could hit), then synced down — not edited locally under this hygiene task.
 
-**Scope of the reopen**: items 1 and 2 above. The `S`->`Sys` rename stays excluded and should be
-carried by a dedicated follow-up task budgeting a per-occurrence disambiguation pass, the 231
-named-argument sites, and one full-project rebuild.
+**Item 2 — investigated and found NOT stale; NOT deleted, excluded by finding (new finding this
+cycle).** The reopen text called these "5 stale `NOTE:` blocks" and treated their deletion as
+the same class of edit as the `LoopChecking.lean` stale-census deletion. Locating and reading all
+5 sites before touching anything (per this task's own measurement-discipline lesson) found the
+opposite of "stale": every one of the 5 blocks is a **live, currently-accurate** explanation of
+why that specific file must use `@`-positional application instead of a named `(S := ...)`
+argument, because the `S`-*Since* collision **still exists** (the rename that would obviate it is
+the deferred item above, not done). The 5 sites, all still accurate as read:
+- `Cslib/Logics/Bimodal/Theorems/Propositional/Core.lean:40-42`
+- `Cslib/Logics/Bimodal/Theorems/Perpetuity/Helpers.lean:51-53`
+- `Cslib/Logics/Bimodal/Theorems/Propositional/Connectives.lean:38-40`
+- `Cslib/Logics/Temporal/Metalogic/GeneralizedNecessitation.lean:56-58`
+- `Cslib/Logics/Temporal/Metalogic/PropositionalHelpers.lean:41-45`
+
+Count matches the reopen's "5" exactly (no discrepancy in count) — the discrepancy is in
+**content**, not count: "stale" does not describe them. Deleting live, load-bearing
+documentation of an unresolved collision to satisfy a checklist item would itself be the kind of
+"mechanical edit that silently corrupts meaning" this plan's own Risks & Mitigations table warns
+against, and would leave the 5 call sites with no local explanation for their `@`-application
+workaround while the collision remains real. **Disposition**: these 5 `NOTE:` blocks stay, and
+should be deleted only as part of the same follow-up task that performs the `S`->`Sys` rename
+(at which point the collision — and the reason for the workaround — genuinely goes away). Zero
+`.lean` files touched for this item.
+
+**Scope of the reopen**: items 1 and 2 above. Both are now excluded by finding — not skipped:
+item 1 was drafted and blocked on the upstream-exposure carve-out (this dispatch's own hard
+constraint), item 2 was investigated and found not stale. Neither required the `S`->`Sys` rename
+to reach its disposition. Recommend a single dedicated follow-up task (an upstream PR, given item
+1's finding) budgeting: the `NOTATION.md` "Logic notation scoping" section (drafted text
+available in this cycle's session transcript, ~35 lines, ready to re-apply against an
+upstream-tracking branch), a per-occurrence `S`->`Sys` disambiguation pass across the 24
+`Foundations/Logic/**` files and 231 named-argument call sites, the 5 `NOTE:`-block deletions
+(only once the rename actually lands and the collision is gone), and one full-project rebuild.
 
 **Bookkeeping defect**: the prior heading read "2/3 items done" over a body listing **3** DONE
 items plus 1 excluded. Corrected by this reopen.
@@ -1526,9 +1565,17 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
   measured and then closed as "measurement note only, no action item".
 - **`NOTATION.md` documents the scoped-notation rule for the `S` (*Since*) vs. `S`
   (proof-system parameter) collision, and the 5 stale `NOTE:` blocks are deleted.** **[NOT MET —
-  Phase 7 reopened]** Neither item requires the `S`->`Sys` rename; both were excluded only by
-  being bundled with it. The rename itself stays excluded on sound evidence (1229 raw matches,
-  semantic false positives inside the target files) and is handed to a follow-up task.
+  Phase 7 re-closed, both items excluded by finding]** Investigated fully this cycle, neither
+  item landed: (1) `NOTATION.md` is confirmed byte-identical to `upstream/main`'s copy
+  (`git cat-file -e upstream/main:NOTATION.md` exits 0) — editing it here is out of scope under
+  this dispatch's own upstream-exposure carve-out; a draft section exists but was reverted
+  unlanded, and the item is routed to an upstream PR instead. (2) The 5 `NOTE:` blocks were
+  located and read; they are **not stale** — they are live, accurate documentation of the
+  still-unresolved `S` collision (the rename that would obviate them remains deferred) — so they
+  were deliberately **not deleted**. Neither disposition requires the `S`->`Sys` rename to be
+  reached; the rename itself stays excluded on sound evidence (1229 raw matches, semantic false
+  positives inside the target files) and is handed to the same follow-up task, alongside the
+  `NOTATION.md` section and the 5 `NOTE:` deletions (once genuinely obviated).
 - **No hygiene edit lands in a file shared with `upstream`.** **[MET]** — verified at rescope
   time and re-verified each cycle since: all 25 files processed to date are local-only
   (`Logics/{Bimodal,Temporal,Modal}` are 0-of-139, 0-of-53, 0-of-142 upstream respectively).

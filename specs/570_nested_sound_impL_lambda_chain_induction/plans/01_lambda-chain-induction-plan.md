@@ -464,12 +464,12 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 5: Discharge `nested_sound_impL` — remove the sorry at `Soundness.lean:1315` [NOT STARTED]
+### Phase 5: Discharge `nested_sound_impL` — remove the sorry at `Soundness.lean:1315` [COMPLETED]
 
 - **Goal:** Replace the strategic `sorry` with the assembled proof, taking the census 41 to 40.
 - **Files:** `Cslib/.../Nested/Soundness.lean` (sole owner)
 - **Tasks:**
-  - [ ] Replace the body of `nested_sound_impL` (currently `Soundness.lean:1306-1315`) with the
+  - [x] Replace the body of `nested_sound_impL` (currently `Soundness.lean:1306-1315`) with the
         research-compiled assembly:
         1. `set ΨX := buildRhsChain (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A)`,
            `set ΨY := NestedRhs.box (ctx.Λ.fillLhs (.atom B)) ctx.π`,
@@ -482,18 +482,18 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
            `implyK` on `hA` (which is a theorem, hence necessitable); `G :: r'` uses
            `OutputCtx.fillRhs_append` to transport `hA` definitionally.
         5. `exact andMP h5 hAX hB`.
-  - [ ] Rewrite the section docstring at `Soundness.lean:1294-1303` (`/-! ## ⊃• (impL): Deferred,
+  - [x] Rewrite the section docstring at `Soundness.lean:1294-1303` (`/-! ## ⊃• (impL): Deferred,
         Strategic Sorry -/`). Retitle to describe the landed proof. Record: the source's page-10
         `L_X, L_Y, L_Z` construction; the flagged Lean-encoding divergence (routing through
         `lemma4_9_fillRhs` instead of `lemma4_8`/`fillFull`, with the `⊤`-conjunct reason); and why
         the two-case split on `ctx.Γ'` is needed and sound (a derivable premise can be necessitated,
         a hypothesis inside a box cannot).
-  - [ ] Rewrite `nested_sound_impL`'s own docstring from "deferred, see the section docstring above"
+  - [x] Rewrite `nested_sound_impL`'s own docstring from "deferred, see the section docstring above"
         to a statement of what it proves, citing Theorem 4.1's `⊃•` case, pp. 9-10.
-  - [ ] Update the `nested_sound` section docstring (`Soundness.lean:1320-1326`) — remove "Every
+  - [x] Update the `nested_sound` section docstring (`Soundness.lean:1320-1326`) — remove "Every
         constructor except `impL` is fully discharged", which is doubly inaccurate (`cut` is absent
         entirely). Phase 7 finishes this sentence; Phase 5 may leave a forward-pointing note.
-  - [ ] Remove the `-- sorry: …` deferral comment block entirely.
+  - [x] Remove the `-- sorry: …` deferral comment block entirely.
 - **Estimated output:** ~90 lines (55 proof, 35 docstring).
 - **Timing:** ~1 hour 15 minutes.
 - **Depends on:** 2, 4

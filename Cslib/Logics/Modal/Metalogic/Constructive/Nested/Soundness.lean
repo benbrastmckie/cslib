@@ -1464,36 +1464,70 @@ theorem primeRhs_fm (ctx : InputCtx Atom) (A : Proposition Atom) :
       = (ctx.Λ.fillRhs (.atom A)).fm := by
   cases ctx.Λ <;> rfl
 
-/-! ## `⊃•` (`impL`): Deferred, Strategic Sorry
+/-! ## `⊃•` (`impL`): the Λ-Chain Induction, Assembled (Lemma 4.9, Theorem 4.1)
 
-Per Phase 11's deviation note (restated in this module's docstring): `impL` needs the source's own
-induction-on-`n` argument over the `Λ{ }` chain (page 10's `L_X, L_Y, L_Z` construction), which
-mixes `ctx.outputPruning.fillRhs`-shaped and `ctx.fillLhs`-shaped premises against a `ctx.fillLhs`-
-shaped conclusion in a way that does not reduce to Lemma 4.4/4.5/4.8's already-landed congruence
-lemmas alone -- genuinely more machinery than this phase's remaining scope (not in Phase 13's own
-task list, which names only `□•, □◦, ♦•, ♦◦, t•, t◦, 4•, 4◦, b[]`). Landed as a single,
-tightly-scoped, documented `sorry` (the anti-analysis contract's strategic-sorry policy), tracked
-in this dispatch's `sorry_inventory` with a follow-up to a later, not-yet-numbered phase. -/
+Landed via the source's own page-10 construction: with `L_i = fm(Λᵢ)`, `L_X = fm(Λ{A◦})`,
+`L_Y = fm(Λ{B•})`, `L_Z = fm(Λ{(A⊃B)•})`, the source shows `(L_X ∧ (L_Y ⊃ P)) ⊃ (L_Z ⊃ P)`
+provable "using an induction on `n` together with Lemma 4.7.(ii) and (iv)" plus the observation
+that this follows from `(L_X ∧ L_Z) ⊃ L_Y` (the `Λ`-chain induction, `lambdaChain_XZ_imp_Y`,
+landed in the "The Λ-Chain Induction" section above).
 
-/-- **Soundness of `⊃•`** (`impL`): deferred, see the section docstring above. -/
+**Flagged Lean-encoding divergence from the source's stated route**: the source says "To be able
+to apply Lemma 4.8", i.e. lift through `Γ'` via `OutputCtx.fillFull`. This proof instead lifts via
+`lemma4_9_fillRhs` (`OutputCtx.fillRhs`). Considered and rejected: `fillFull`'s singleton-case
+`comma Φ Γ` merge makes `fm(Γ'.fillFull (Λ.fillRhs Ψ))` differ from `fm((Γ' ++ Λ).fillRhs Ψ)` by
+`⊤`-conjuncts, requiring a bridging *implication* rather than an equality; `fillRhs`'s uniform base
+case has no such singleton merge and its shape matches exactly. This is a Lean-encoding artefact
+(`fillFull` vs `fillRhs`), not a mathematical disagreement -- the proof below still uses exactly
+the source's Lemma 4.7(ii)/(iv) induction.
+
+**Why the two-case split on `ctx.Γ'` is needed, and why it is sound**: with `Γ' = G :: r'`, the
+already-landed `OutputCtx.fillRhs_append` transports premise `hA` onto `ctx.Γ'.fillRhs ΨX`
+definitionally. With `Γ' = []`, `hA` reduces to an outright theorem (`⊢ L_X`, no free assumptions),
+so it can be *necessitated* (`⊢ □L_X`) and then weakened behind `⊤ ⊃`; a hypothesis merely
+*derivable inside a box* could not be necessitated this way, but `hA` being a closed derivation
+makes the step sound. This mirrors the existing `lemma4_2_id`/`lemma4_2_bot` necessitation idiom
+above (`Soundness.lean`, Lemma 4.2 section). -/
+
+/-- **Soundness of `⊃•`** (`impL`), Theorem 4.1 (pp. 9-10), assembled from the Λ-chain induction
+(Lemma 4.9, page 10). See the section docstring above for the construction and the one flagged
+Lean-encoding divergence from the source's stated `lemma4_8`/`fillFull` route. -/
 theorem nested_sound_impL (ctx : InputCtx Atom) (A B : Proposition Atom)
     (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm)
     (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom B)).fm) :
     Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.imp B))).fm := by
-  -- sorry: assumes the `⊃•`/`impL` soundness fact holds for an arbitrary `InputCtx`; deferred
-  -- because it needs the source's page-10 induction-on-`n` over the `Λ{ }` chain (the
-  -- `L_X, L_Y, L_Z` construction), not yet formalized as of this dispatch; follow-up: a
-  -- dedicated later phase building that induction (not yet numbered in the plan; flagged
-  -- forward alongside Phase 13's `cut` non-target in the handoff)
-  sorry
+  set ΨX := buildRhsChain (ctx.Λ.headD .empty :: ctx.Λ.tail) (NestedRhs.atom A) with hΨX
+  set ΨY := NestedRhs.box (ctx.Λ.fillLhs (.atom B)) ctx.π with hΨY
+  set ΨZ := NestedRhs.box (ctx.Λ.fillLhs (.atom (A.imp B))) ctx.π with hΨZ
+  -- (1) Λ-chain induction (Lemma 4.9), then the source's step 2, then box-lift by Lemma 4.7(iii).
+  have h4 : Derivable (@CS5ModalAxiom Atom) ((ΨX.fm.and ΨY.fm).imp ΨZ.fm) := by
+    rw [hΨX, hΨY, hΨZ]
+    rw [psiX_fm ctx A]
+    exact lemma4_7_iii (lambdaChain_step2 (P := ctx.π.fm) (lambdaChain_XZ_imp_Y A B ctx.Λ))
+  -- (2) lift through `Γ'` via the already-landed Lemma 4.9 `fillRhs` branching lemma.
+  have h5 := lemma4_9_fillRhs h4 ctx.Γ'
+  -- (3) transport premise `hA` onto `ctx.Γ'.fillRhs ΨX`.
+  have hAX : Derivable (@CS5ModalAxiom Atom) (ctx.Γ'.fillRhs ΨX).fm := by
+    rw [InputCtx.outputPruning] at hA
+    match hΓ : ctx.Γ' with
+    | [] =>
+        rw [hΓ] at hA
+        obtain ⟨d⟩ := hA
+        exact cs5DerivImpOfDerivable Proposition.top ⟨.necessitation _ d⟩
+    | G :: r' =>
+        rw [hΓ, OutputCtx.fillRhs_append] at hA
+        exact hA
+  -- (4) combine: `⊢ (fm(Γ'{ΨX}) ∧ fm(Γ'{ΨY})) ⊃ fm(Γ'{ΨZ})`, `⊢ fm(Γ'{ΨX})`, `⊢ fm(Γ'{ΨY})`.
+  exact andMP h5 hAX hB
 
 /-! ## Theorem 4.1, Assembled: `nested_sound`
 
 The top-level soundness theorem, structurally recursive on the `NestedProof` term itself
 (mirroring `NestedProof.height`'s own recursion shape), dispatching to each constructor's case
-lemma above and threading the recursive soundness facts of its premises through. Every
-constructor except `impL` is fully discharged; `impL` routes through the strategic `sorry` in
-`nested_sound_impL` above (see that theorem's docstring). -/
+lemma above and threading the recursive soundness facts of its premises through. `impL` is now
+fully discharged via `nested_sound_impL` above (no `sorry`); the `.cut` constructor still has no
+arm here (`NestedProof.cut` is landed in `Rules.lean` but `nested_sound` has not yet been
+extended to match it) -- a follow-up phase lands `nested_sound_cut` and its arm. -/
 
 /-- **Theorem 4.1** (page 9): every `NestedProof` derivation is sound with respect to `CS5`'s
 Hilbert system -- `NestedProof Γ → Derivable (@CS5ModalAxiom Atom) (fm Γ)`. -/

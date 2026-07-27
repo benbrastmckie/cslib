@@ -32,7 +32,6 @@ proves temporal-specific MCS properties needed for the completeness theorem.
 -/
 
 set_option linter.style.setOption false
-set_option linter.dupNamespace false
 set_option linter.flexible false
 set_option linter.unusedSimpArgs false
 
@@ -53,13 +52,11 @@ attribute [local instance] Classical.propDecidable
 /-! ## Abbreviations -/
 
 /-- Set consistency for the temporal derivation system. -/
-@[nolint dupNamespace]
-abbrev Temporal.SetConsistent (Ω : Set (Formula Atom)) : Prop :=
+abbrev SetConsistent (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetConsistent temporalDerivationSystem Ω
 
 /-- Set maximal consistency for the temporal derivation system. -/
-@[nolint dupNamespace]
-abbrev Temporal.SetMaximalConsistent (Ω : Set (Formula Atom)) : Prop :=
+abbrev SetMaximalConsistent (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetMaximalConsistent temporalDerivationSystem Ω
 
 /-! ## Generic MCS Properties -/

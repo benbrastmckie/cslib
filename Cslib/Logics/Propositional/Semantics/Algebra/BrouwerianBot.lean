@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+public import Mathlib.Tactic.Attr.Core
 
 public import Cslib.Logics.Propositional.Semantics.Algebra.BotProperties
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion

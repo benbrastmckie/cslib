@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+import Mathlib.Tactic.Attr.Core
 
 public import Cslib.Foundations.Order.BrouwerianSemilattice
 public import Cslib.Logics.Propositional.Semantics.Algebra

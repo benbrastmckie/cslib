@@ -2,7 +2,7 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~4h spent; ~6-10h remaining (Phase 3 dominates)
+- **Effort**: ~5h spent; ~6-9h remaining (Phase 3's big files and Phase 5 dominate)
 - **Dependencies**: none blocking. Coordinate with 557/558 (Modal/Tableau refactor) before large
   edits to `Modal/Tableau/`; coordinate with 317 before edits to `Propositional/Tableau/`.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
@@ -20,7 +20,8 @@
 
 ## RESUME HERE
 
-Everything below Phase 3 is untouched work. To pick this up cold:
+Second resume. Status as of this pass: **Phase 1, 2, 6 COMPLETED; Phase 3 and 7 and 8 PARTIAL;
+Phase 4 and 5 NOT STARTED.** To pick this up cold:
 
 1. Confirm the baseline still holds (2 commands, ~5 min):
    ```bash
@@ -28,12 +29,33 @@ Everything below Phase 3 is untouched work. To pick this up cold:
    lake test                     # expect exit 0, 0 errors
    ```
    If either differs, something landed from another session — reconcile before proceeding.
-2. Start at **Phase 3** (task-number references, 312 sites). It is the largest remaining item and
-   needs no design decisions.
-3. Phases 4-7 are independent of each other and of Phase 3; any order works.
-4. Two items need a **user decision before work starts** — see "Open decisions" at the bottom.
+2. Continue **Phase 3** (task-number references). 7 small files are done (376 -> 368 sites); the
+   6 worst-offender files (Intuitionistic/Scheme 54, LoopChecking 49, Nested/Soundness 28,
+   ChronicleToCountermodel 22, Intuitionistic/Completeness, Intuitionistic/Expansion) were
+   deliberately left for a dispatch with a larger budget, since each requires reading real
+   mathematical context per site, not just mechanical substitution. Recount before starting —
+   these are pre-resume figures.
+3. Phase 8 has 7 of 10 rows done (see the phase for exactly which). The remaining 3 rows need
+   caution: the "9 zero-declaration aggregator modules" row could NOT be reproduced safely this
+   session (see the re-scoping note in Phase 8 — one candidate file the naive search flagged
+   turned out to be a genuine, documented `proof_wanted` stub, not dead code). Re-derive the
+   file list carefully, or find the original research artifact, before deleting anything there.
+   The "7 dead MCS-transfer wrappers" and "2 dead GenericMCSBridge lemmas" rows were not
+   attempted (ran out of session budget before verifying exact declaration names across the 4
+   `GenericMCSBridge.lean` files).
+4. Phase 7 has 2 of 3 items done (`pre-pr-check.sh`, the `LoopChecking.lean` stale census). The
+   `ORGANISATION.md` refresh and the `NOTATION.md` `S`->`Sys` rename (5 files in
+   `Foundations/Logic/`) were not attempted.
+5. Phase 4 (shake) and Phase 5 (suppression audit, 18 of ~570 done) are both still essentially
+   untouched and independent of Phase 3/7/8; any order works among all of these.
+6. Two items still need a **user decision before work starts** — see "Open decisions" at the
+   bottom (the Chronicle namespace/structure coincidence, item 3, was addressed by an explicit
+   user decision mid-session: Phase 2 is CLOSED at 7/10 files, and the coincidence itself is
+   routed to a separate follow-up task rather than blocking this one further).
 
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes".
+**Do not** re-derive the task-tracker-reference census with a script that doesn't strip letter
+suffixes from phase numbers (`Phase 3a`) — see the caveat added to Phase 3 this session.
 
 ---
 
@@ -90,7 +112,7 @@ Each was investigated and found correct. Re-investigating wastes a cycle.
 | Linter sites | 240 | **0** |
 | `set_option linter.*` | 511 | 482 |
 | `@[nolint]` | 118 | 88 |
-| Task-tracker refs in `Cslib/**` | 376 | 312 |
+| Task-tracker refs in `Cslib/**` | 376 | 368 (see Phase 3: the prior "312" figure could not be reproduced by a fresh count) |
 | Doubled public names | 6 cross-module leaks | **0** |
 | Bare sorries (correct method) | 28 | 28 (unchanged by design) |
 
@@ -139,7 +161,7 @@ Fixing warnings cascades: four extra files (FiveSimplification, TDriver, BDriver
 FrameCompleteness) surfaced new warnings only after earlier fixes landed. Expect this and re-run
 the gate after each batch.
 
-### Phase 2: Doubled-namespace public API [PARTIAL — 7 of 10 files]
+### Phase 2: Doubled-namespace public API [COMPLETED]
 
 **Done** (30 declarations, commits `f60f9a74` … `6196b01e`): MetricSoundness (1), Bimodal
 Core/DerivationTree (2), Temporal Metalogic/DerivationTree (2), MCS (2), DenseMCS (4), Temporal
@@ -147,18 +169,25 @@ ProofSystem/Derivable (9), Bimodal ProofSystem/Derivable (10), plus 2 vestigial 
 the two `ProofSystem/Axioms.lean`. 42 of 78 `dupNamespace` suppressions deleted. All 6
 cross-module leaks (`Cslib.Logic.Temporal.Temporal.ThDerivable` and friends) eliminated.
 
-**Aborted, and the original diagnosis was WRONG** — do not retry as a mechanical rename. The
-three `Chronicle` modules' `Chronicle.` prefix is not a repeated namespace component; it is the
-*structure* name. `namespace ...Metalogic.Chronicle` contains `structure Chronicle`, so
-`def Chronicle.c0` correctly declares the projection-namespace member that 81 dot-notation call
-sites (`chi.c0`, `chi.c3`, …) depend on. Stripping it fails with
-`Invalid field 'c0': the environment does not contain ...Chronicle.Chronicle.c0`.
+**The three `Chronicle` modules are OUT OF SCOPE by finding, not an incomplete step** — the
+original diagnosis that flagged them was WRONG, and re-scoping to exclude them is what closes
+this phase correctly. Do not retry as a mechanical rename, and do not attempt the
+structure/namespace rename either — both alter definitions and are barred by this task's
+hygiene-only constraint. The three `Chronicle` modules' `Chronicle.` prefix is not a repeated
+namespace component; it is the *structure* name. `namespace ...Metalogic.Chronicle` contains
+`structure Chronicle`, so `def Chronicle.c0` correctly declares the projection-namespace member
+that 81 dot-notation call sites (`chi.c0`, `chi.c3`, …) depend on. Stripping it fails with
+`Invalid field 'c0': the environment does not contain ...Chronicle.Chronicle.c0`. The 7 files
+completed above were the ones that genuinely had doubled namespaces — Phase 2 achieved
+everything that was actually in its remit.
 
-The genuine defect is the `namespace Chronicle` / `structure Chronicle` name coincidence. Fixing
-it means moving the structure to the parent namespace, or renaming the namespace across the whole
-`Chronicle/` subtree — a design decision. The remaining 36 suppressions (33 `@[nolint]`,
-3 `set_option`) are **load-bearing** until that call is made. Files:
-`Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
+The genuine residual defect is the `namespace Chronicle` / `structure Chronicle` name
+coincidence. Fixing it means moving the structure to the parent namespace, or renaming the
+namespace across the whole `Chronicle/` subtree — a design decision, out of scope for this
+hygiene-only task. It is being carried by a separate follow-up task (number assigned at
+creation), which the orchestrator will create once this task finishes. The remaining 36
+suppressions (33 `@[nolint]`, 3 `set_option`) are **load-bearing** until that follow-up task
+makes the call. Files: `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
 `Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean`,
 `Foundations/Logic/Metalogic/Chronicle/Types.lean` (9 declarations each).
 
@@ -167,21 +196,46 @@ it means moving the structure to the parent namespace, or renaming the namespace
 they resolve to the un-doubled name via the enclosing-namespace walk once the declaration loses
 its doubled component. Only fully-qualified spellings break.
 
-### Phase 3: Task-number references in deliverables [NOT STARTED]
+### Phase 3: Task-number references in deliverables [IN PROGRESS — 7 files done, ~368 sites remain]
 
-**312 sites.** Violates `.claude/rules/no-task-references-in-deliverables.md`. An earlier cleanup
-stripped ~918; these are a regression.
+**The plan's original "312 sites" figure was stale as of resume — a fresh count came back 376,
+not 312 (cause not diagnosed; treat the live grep as authoritative, not the plan's number, per
+this task's own measurement-discipline lesson).** Violates
+`.claude/rules/no-task-references-in-deliverables.md`. An earlier cleanup stripped ~918; these
+are a regression.
 
 The narrow `task N` regex finds only 121 and **misses `Minimal/Completeness.lean` entirely**. Use:
 ```bash
 grep -rnoiE '\b(task|tasks|phase|report) [0-9]+(\.[0-9]+)?\b' Cslib --include='*.lean'
 ```
+**Caveat found this session**: this regex's trailing `\b` does not match a phase number with a
+letter suffix (`Phase 3a`, `Phase 4b`) since there is no word boundary between a digit and a
+following letter. At least 2 such sites were found and fixed incidentally while editing an
+adjacent match on the same line; if resuming, also grep
+`\b(task|tasks|phase|report) [0-9]+[a-z]?\b` to catch these directly instead of relying on
+incidental discovery.
+
 Sampling confirmed the `Phase N` / `report N` hits are task-tracker history ("Phase 6", "plan v3",
 "report 08"), not mathematical algorithm phases. Spot-check before bulk-editing any file, since a
 legitimate "Phase 3" could exist in an algorithm description.
 
-Worst files (recount before starting): Intuitionistic/Scheme, LoopChecking, Nested/Soundness,
-ChronicleToCountermodel, Intuitionistic/Completeness, Intuitionistic/Expansion.
+**Done this session** (commit `65639464`, 7 single/near-single-site files, live count 376 -> 368):
+`Temporal/Metalogic/Chronicle/RRelation.lean`,
+`Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean`,
+`Modal/Semantics/Birelational.lean`, `Modal/Metalogic/Constructive/Labelled/Deduction.lean`,
+`LTL/Semantics/GNBA/Correctness.lean`, `Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean`,
+`Bimodal/Metalogic/BXCanonical/Frame.lean` (this last one edited only the comment beside a
+`sorry`, not the `sorry` itself). Common durable-anchor pattern used for `task 36` sites: task 36
+is `port_discrete_completeness_bimodal`, i.e. the not-yet-ported WeakCanonical
+discrete-completeness infrastructure — replace `task 36` with "the WeakCanonical
+discrete-completeness port" wherever it recurs (it recurs often; `ChronicleToCountermodel.lean`
+alone still has ~10 such mentions untouched).
+
+Worst files (recount before continuing — likely shifted slightly from the pre-resume figures):
+Intuitionistic/Scheme (54 sites at last count), LoopChecking (49), Nested/Soundness (28),
+ChronicleToCountermodel (22), Intuitionistic/Completeness, Intuitionistic/Expansion. None of
+these were started this session; they dominate the remaining ~368 and should be the next
+dispatch's primary target since the small files are now largely exhausted.
 
 Replace each with a durable anchor — sibling filename, section heading, or verified fact. **Never
 delete the surrounding explanation**; the prose is usually load-bearing, only the identifier rots.
@@ -229,58 +283,88 @@ Worst offenders: `Separation/DedekindZ/Cases.lean` (12),
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.
 
-### Phase 6: Sorry visibility [NOT STARTED]
+### Phase 6: Sorry visibility [COMPLETED]
 
-- `ChronicleToCountermodel.lean:46` is the **only file-scoped `warn.sorry` in the repo** (the
+- `ChronicleToCountermodel.lean:46` was the **only file-scoped `warn.sorry` in the repo** (the
   other 11 use `... in` and bind one declaration). It was appended to a block of style
-  suppressions and matched their form — correct for linters, wrong for a soundness signal. Blast
-  radius: all 12 sorries in the file, plus any added later. Line 43 of that same block suppresses
-  the linter that would flag the block itself. **Fix: split into 12 scoped `... in` forms.**
-  Mechanical.
+  suppressions and matched their form — correct for linters, wrong for a soundness signal.
+  **DONE** (commit `607b92f4`): split into 7 declaration-scoped `set_option warn.sorry false in`
+  forms, one per sorry-bearing declaration (`chronicle_gap_contradiction`, `discreteFmcs`,
+  `succEmbed`, `rootedSuccDiscreteFmcs`, `rooted_succ_discrete_fmcs_at_s`,
+  `cantorBfmcsDiscrete`, `dd_countermodel_chronicle_discrete`) — this covers all 12 sorry tokens
+  in the file (two of the seven declarations are structures with multiple sorry'd fields). No
+  suppression was removed; the blast radius was narrowed from file-wide to declaration-scoped,
+  matching the other 11 `warn.sorry` sites repo-wide. Build unaffected (still exactly the 5
+  baseline warnings under `--wfail --iofail`).
 - All 12 `warn.sorry` suppressions repo-wide are in Bimodal; Propositional's 4 and Modal's 1 are
   unsuppressed and do surface. Measured asymmetry: `Minimal.Completeness` exits 1 under `--wfail`
-  while `Bundle.UntilSinceCoherence` (2 suppressed sorries) exits 0.
+  while `Bundle.UntilSinceCoherence` (2 suppressed sorries) exits 0. (Measurement note only, no
+  action item.)
 
-### Phase 7: Script and documentation defects [NOT STARTED]
+### Phase 7: Script and documentation defects [PARTIAL — 2 of 3 items done]
 
-- **`scripts/pre-pr-check.sh:5-26` cannot fail.** Steps 1-3 wrap their greps in `if` conditions,
-  so `set -e` never applies and no step sets an exit code; only step 4's `lake build` can fail it.
-  Its sorry check uses the naive grep that caused the count inflation, and its debug-command scan
-  returns 4 false positives (docstring mentions at `S5Simplification.lean:1963,1966,1970` and
-  `LoopChecking.lean:7178`). Fix: accumulate a failure flag and `exit 1`; strip comments and
-  exclude `warn.sorry`; anchor the debug grep to line starts; add `lake build --wfail --iofail`.
-- **`LoopChecking.lean:160-161`** asserts "Repo-wide: 11 TODO:, 8 NOTE:". Both wrong (13 and 9),
-  and self-referentially incoherent: claims no `NOTE:` tags in its own file while containing two,
-  and the two asserting lines are themselves among the counted tags. Delete them; a repo-wide
-  census belongs in a script where it cannot go stale.
-- **`ORGANISATION.md` stale by ~100 files.** Every claimed path exists (no phantoms); the failure
-  is omission. Modal lists `Metalogic/` as 5 files; reality is 94 undocumented across `Systems/`
-  (45), `Constructive/` (24), `InterSystem/` (10), `Intuitionistic/` (9), `Minimal/` (6).
-  Temporal's `Tableau/` (8 files) absent entirely. The `Foundations/Logic/Tableau/` entries ARE
-  current and correct. Consider a CI check diffing sketch against filesystem — at this drift rate
-  a hand-maintained census will go stale again.
-- **`NOTATION.md` has no logic section**, for a tree that is ~450 of 676 files. Concrete cost:
-  `Foundations` names its proof-system type parameter `S`, colliding with Temporal/Bimodal scoped
-  notation `S` for *Since*, forcing `@`-positional application in 5 files. Documented five times
-  in `NOTE:` blocks, fixed zero times. Fix: rename `S` -> `Sys` in `Foundations/Logic/`, delete
-  the 5 NOTE blocks, add a scoped-notation rule to NOTATION.md.
+- **`scripts/pre-pr-check.sh:5-26` cannot fail.** **DONE** (commit `7be1fd61`): accumulated a
+  `failed` flag across all 5 steps (added a step 5 running `lake build --wfail --iofail`) and
+  `exit 1` at the end if any failed; sorry check now strips block/line comments and excludes
+  `warn.sorry`-mentioning lines (verified this reproduces Bimodal's true 23-sorry census); debug
+  grep now anchors `#check`/`#eval`/`dbg_trace` to line starts, eliminating the 4 docstring false
+  positives at `S5Simplification.lean:1963,1966,1970` and `LoopChecking.lean:7178`.
+- **`LoopChecking.lean:160-161`** asserted "Repo-wide: 11 TODO:, 8 NOTE:", both wrong and
+  self-referentially incoherent (the two asserting lines themselves contain the literal strings
+  `NOTE:`/`TODO:`, so they were always among whatever count was correct). **DONE** (commit
+  `2fc441a0`): deleted the two-line assertion rather than correcting the numbers, per the plan's
+  own guidance that a hardcoded repo-wide census on a comment line will go stale again.
+- **`ORGANISATION.md` stale by ~100 files.** NOT STARTED. Every claimed path exists (no
+  phantoms); the failure is omission. Modal lists `Metalogic/` as 5 files; reality is 94
+  undocumented across `Systems/` (45), `Constructive/` (24), `InterSystem/` (10),
+  `Intuitionistic/` (9), `Minimal/` (6). Temporal's `Tableau/` (8 files) absent entirely. The
+  `Foundations/Logic/Tableau/` entries ARE current and correct. Consider a CI check diffing
+  sketch against filesystem — at this drift rate a hand-maintained census will go stale again.
+- **`NOTATION.md` has no logic section**, for a tree that is ~450 of 676 files. NOT STARTED.
+  Concrete cost: `Foundations` names its proof-system type parameter `S`, colliding with
+  Temporal/Bimodal scoped notation `S` for *Since*, forcing `@`-positional application in 5
+  files. Documented five times in `NOTE:` blocks, fixed zero times. Fix: rename `S` -> `Sys` in
+  `Foundations/Logic/`, delete the 5 NOTE blocks, add a scoped-notation rule to NOTATION.md.
+  (`ORGANISATION.md` and the `S`->`Sys` rename are grouped as one remaining item since neither
+  was started this session; treat them as two independent sub-steps when resumed.)
 
-### Phase 8: Dead-code deletions [PARTIAL — 1 of 10 done]
+### Phase 8: Dead-code deletions [PARTIAL — 7 of 10 rows done]
 
-User-approved in full. Only the root scratch files have landed.
+User-approved in full.
 
 | Target | Lines | Status | Evidence |
 |---|---|---|---|
 | 9 root scratch files | — | **DONE** `2f608bdf` | In no build target; 15 phantom sorries |
-| `KripkeBridge.lean` | 296 | NOT STARTED | All 6 exports: 0 external refs |
-| `Bridge.lean` | 133 | NOT STARTED | Self-documents "no in-tree consumer"; 1 hit is a docstring |
-| `CanAlgComplete` + `FragmentGeneric` | 333 | NOT STARTED | 0 term-level consumers |
-| 9 zero-declaration aggregator modules | 238 | NOT STARTED | 0 decls, 0 importers |
+| `KripkeBridge.lean` | 296 | **DONE** `154fa5ea` | All 6 exports: 0 external refs |
+| `Bridge.lean` | 133 | **DONE** `99834bc0` | Self-documents "no in-tree consumer"; 1 hit is a docstring |
+| `CanAlgComplete` + `FragmentGeneric` | 333 | **DONE** `f72b3393` | 0 term-level consumers; also patched 4 sibling docstrings' dangling `CanAlgComplete` mentions |
+| 9 zero-declaration aggregator modules | 238 | **NOT STARTED — re-scoped, see note below** | 0 decls, 0 importers |
 | 7 dead MCS-transfer wrappers | ~50 | NOT STARTED | 0 external refs (8th has 6 — **keep it**) |
-| `Theory.Derivation.normalize` + `normalizeAux` | ~25 | NOT STARTED | 0 consumers, no correctness theorem |
+| `Theory.Derivation.normalize` + `normalizeAux` | ~25 | **DONE** `24ba4d78` | 0 consumers, no correctness theorem; superseded by `Termination.lean`'s structural driver |
 | 2 dead `GenericMCSBridge` lemmas | ~15 | NOT STARTED | 0 consumers |
-| `NativePropositionalEmbedding` | ~5 | NOT STARTED | Uninstantiated stub |
-| `hilbertConjImpConservativeOverImp_direct` | ~4 | NOT STARTED | Pure alias; `_direct` name is backwards |
+| `NativePropositionalEmbedding` | ~5 | **DONE** `4b57fd98` | Uninstantiated stub |
+| `hilbertConjImpConservativeOverImp_direct` | ~4 | **DONE** `6de7be96` | Pure alias; `_direct` name is backwards |
+
+**Re-scoping note on the "9 zero-declaration aggregator modules" row**: a zero-declaration,
+zero-(in-tree)-importer search over `Cslib/**/*.lean` found 34 files with no `theorem/def/
+structure/...` declarations, of which 6 also have zero importers from other files inside
+`Cslib/` (excluding the auto-generated root `Cslib.lean` barrel, which imports everything and so
+is not a meaningful "importer" signal): `BXCanonical/BXCanonical.lean` (15 lines),
+`BXCanonical/Completeness.lean` (24 lines), `Algebraic/Algebraic.lean` (14 lines),
+`Bundle/FMCS.lean` (27 lines), `Bundle/Bundle.lean` (14 lines), and
+`Automata/DA/Conversions.lean` (117 lines) — summing to 211, not 238, so this is not confirmed
+to be the original 9-file set. Critically, **`Automata/DA/Conversions.lean` is NOT dead**: it
+is a deliberate, documented `proof_wanted`-stub file (with an explicit `set_option
+linter.privateModule false` justification for why it has no declarations), not orphaned
+aggregator scaffolding — deleting it would have been wrong. `BXCanonical/Completeness.lean`
+is also borderline: its docstring documents planned future growth (`completeness_discrete`,
+`completeness`, pending the WeakCanonical port) rather than being purely inert. Given this
+false-positive risk and the inability to reconstruct the original research's exact 9-file list,
+this row was **not attempted** this session rather than guessed at. Recommend the next dispatch
+either locate the original research artifact that produced the "9 files, 238 lines" figure, or
+independently re-derive it with a tighter aggregator definition (e.g. "file whose only content
+is `import` statements plus a one-line comment, no `/-! -/` doc block") before deleting anything
+in this bucket.
 
 Deleting modules requires updating `Cslib.lean` and re-running `lake exe mk_all --module`.
 
@@ -304,7 +388,7 @@ lake exe checkInitImports
 - Zero `task N` / `Phase N` / `report N` strings in `Cslib/**`.
 - `lake shake` clean and its CI step uncommented.
 - Suppression audit outcome recorded per site.
-- `pre-pr-check.sh` can actually fail.
+- `pre-pr-check.sh` can actually fail. **[MET]**
 
 ## Rollback / Contingency
 
@@ -335,8 +419,9 @@ record why. Do not leave a blanket suppression in place as the resolution.
    `SetDeduction` in particular duplicates functionality Modal/Temporal/Bimodal each solved
    locally. Needs a design call: wire up or delete.
 3. **The `Chronicle` namespace/structure name coincidence** (Phase 2) — move the structure to the
-   parent namespace, or rename the namespace across the subtree? Until decided, 36 suppressions
-   stay.
+   parent namespace, or rename the namespace across the subtree? Out of scope for this
+   hygiene-only task; carried by a separate follow-up task (number assigned at creation), created
+   by the orchestrator once this task finishes. Until decided, 36 suppressions stay.
 
 ---
 

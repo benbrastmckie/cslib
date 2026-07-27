@@ -54,11 +54,6 @@ it from their own axiom schemas / duality unfoldings, whichever differs, exactly
 * Burgess 1982: "Axioms for tense logic II: Time periods", Lemmas 2.2-2.5.
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Metalogic.Chronicle
@@ -105,7 +100,8 @@ theorem rRelation_guard_continues' (I : ChronicleInterface F) {A B : Set F}
 theorem subset_deductiveClosure (I : ChronicleInterface F) (Sig : Set F) :
     Sig ⊆ ciDeductiveClosure I Sig := by
   intro φ hφ
-  exact ⟨[φ], fun ψ hψ => by simp at hψ; exact hψ ▸ hφ, ⟨I.assumption (by simp)⟩⟩
+  exact ⟨[φ], fun ψ hψ => by
+    simp only [List.mem_singleton] at hψ; exact hψ ▸ hφ, ⟨I.assumption (by simp)⟩⟩
 
 theorem deductiveClosure_closed (I : ChronicleInterface F) (Sig : Set F) :
     ∀ (L : List F) (φ : F),
@@ -128,7 +124,8 @@ theorem deductiveClosure_closed (I : ChronicleInterface F) (Sig : Set F) :
     · rcases List.mem_append.mp hχ with h | h
       · exact hM1_sub χ h
       · exact hM2_sub χ h
-    · exact ⟨I.modusPonens (I.weakening M1 (M1 ++ M2) (I.imp ψ φ) d1 (List.subset_append_left M1 M2))
+    · exact ⟨I.modusPonens
+        (I.weakening M1 (M1 ++ M2) (I.imp ψ φ) d1 (List.subset_append_left M1 M2))
         (I.weakening M2 (M1 ++ M2) ψ d2 (List.subset_append_right M1 M2))⟩
 
 theorem deductiveClosure_consistent (I : ChronicleInterface F) {Sig : Set F}
@@ -184,16 +181,19 @@ theorem rMaximal_extension_exists (I : ChronicleInterface F) {A : Set F}
   obtain ⟨B, hB_in, hB_max⟩ := zorn_subset (rDCSExtensions I A Sig) (by
     intro c hc_sub hc_chain
     by_cases hc_empty : c = ∅
-    · exact ⟨Sig, h_S_in, by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
+    · exact ⟨Sig, h_S_in,
+        by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
     · obtain ⟨T₀, hT₀⟩ := Set.nonempty_iff_ne_empty.mpr hc_empty
       refine ⟨⋃₀ c, ?_, fun t ht => Set.subset_sUnion_of_mem ht⟩
       refine ⟨Set.subset_sUnion_of_subset c T₀ (hc_sub hT₀).1 hT₀, ?_, ?_⟩
       · constructor
         · intro L hL ⟨d⟩
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
           exact (hc_sub hTc).2.1.1 L hLT ⟨d⟩
         · intro L φ hL d
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
           exact Set.mem_sUnion.mpr ⟨T, hTc, (hc_sub hTc).2.1.2 L φ hLT d⟩
       · intro γ δ h_until
         rcases (hc_sub hT₀).2.2 γ δ h_until with h_d | ⟨h_g, h_u⟩
@@ -219,16 +219,19 @@ theorem r3Maximal_extension_exists (I : ChronicleInterface F) {A C : Set F}
   obtain ⟨B, hB_in, hB_max⟩ := zorn_subset (r3DCSExtensions I A Sig C) (by
     intro c hc_sub hc_chain
     by_cases hc_empty : c = ∅
-    · exact ⟨Sig, h_S_in, by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
+    · exact ⟨Sig, h_S_in,
+        by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
     · obtain ⟨T₀, hT₀⟩ := Set.nonempty_iff_ne_empty.mpr hc_empty
       refine ⟨⋃₀ c, ?_, fun t ht => Set.subset_sUnion_of_mem ht⟩
       refine ⟨Set.subset_sUnion_of_subset c T₀ (hc_sub hT₀).1 hT₀, ?_, ?_⟩
       · constructor
         · intro L hL ⟨d⟩
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun φ hφ => hL φ hφ)
           exact (hc_sub hTc).2.1.1 L hLT ⟨d⟩
         · intro L φ hL d
-          obtain ⟨T, hTc, hLT⟩ := chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
+          obtain ⟨T, hTc, hLT⟩ :=
+            chain_finite_subset_in_element hc_chain hT₀ L (fun ψ hψ => hL ψ hψ)
           exact Set.mem_sUnion.mpr ⟨T, hTc, (hc_sub hTc).2.1.2 L φ hLT d⟩
       · constructor
         · intro γ δ h_until
@@ -321,7 +324,8 @@ theorem mcs_contrapositive_mem (I : ChronicleInterface F) {M : Set F}
     (h_imp : I.imp φ ψ ∈ M) (h_neg_psi : I.imp ψ I.bot ∈ M) :
     I.imp φ I.bot ∈ M := by
   rcases I.negationComplete h_mcs φ with h_phi | h_negphi
-  · exact absurd (cud_modus_ponens I (mcs_is_dcs I h_mcs).2 h_imp h_phi) (I.negExcludes h_mcs h_neg_psi)
+  · exact absurd (cud_modus_ponens I (mcs_is_dcs I h_mcs).2 h_imp h_phi)
+      (I.negExcludes h_mcs h_neg_psi)
   · exact h_negphi
 
 /-! ## BurgessR3Maximal Existence -/
@@ -353,7 +357,8 @@ theorem dcs_neg_insert_consistent (I : ChronicleInterface F) {B : Set F}
       intro x hx
       by_cases hxn : x = I.imp φ I.bot
       · exact List.mem_cons.mpr (Or.inl hxn)
-      · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter]; exact ⟨hx, hxn⟩))
+      · exact List.mem_cons.mpr (Or.inr (by
+          simp only [List.mem_filter, decide_eq_true_eq]; exact ⟨hx, hxn⟩))
     have d_reord := I.weakening L _ I.bot d h_sub_reord
     have d_negneg := I.deductionTheorem _ (I.imp φ I.bot) I.bot d_reord
     have h_filt_in_B : ∀ ψ ∈ L.filter (fun y => decide (y ≠ I.imp φ I.bot)), ψ ∈ B := by
@@ -388,10 +393,12 @@ theorem burgessR3Maximal_extension_exists (I : ChronicleInterface F) {A C : Set 
     ∃ B, Sig ⊆ B ∧ CIBurgessR3Maximal I A B C := by
   have h_S_in : Sig ∈ {B | Sig ⊆ B ∧ CIClosedUnderDerivation I B ∧ ciBurgessR3 I A B C} :=
     ⟨Set.Subset.refl _, h_cud, h_br3⟩
-  obtain ⟨B, hB_in, hB_max⟩ := zorn_subset {B | Sig ⊆ B ∧ CIClosedUnderDerivation I B ∧ ciBurgessR3 I A B C} (by
+  obtain ⟨B, hB_in, hB_max⟩ :=
+    zorn_subset {B | Sig ⊆ B ∧ CIClosedUnderDerivation I B ∧ ciBurgessR3 I A B C} (by
     intro c hc_sub hc_chain
     by_cases hc_empty : c = ∅
-    · exact ⟨Sig, h_S_in, by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
+    · exact ⟨Sig, h_S_in,
+        by intro t ht; exact absurd ht (by rw [hc_empty]; exact Set.notMem_empty _)⟩
     · obtain ⟨T₀, hT₀⟩ := Set.nonempty_iff_ne_empty.mpr hc_empty
       refine ⟨⋃₀ c, ?_, fun t ht => Set.subset_sUnion_of_mem ht⟩
       refine ⟨Set.subset_sUnion_of_subset c T₀ (hc_sub hT₀).1 hT₀, ?_, ?_⟩
@@ -489,7 +496,8 @@ noncomputable def ciNegAndSelfNeg (I : ChronicleInterface F) (ψ : F) :
   have d1 : I.Deriv [X] ψ :=
     I.modusPonens (I.weakening [] [X] (I.imp X ψ) h2 (by simp)) (I.assumption (by simp))
   have d2 : I.Deriv [X] (I.imp ψ I.bot) :=
-    I.modusPonens (I.weakening [] [X] (I.imp X (I.imp ψ I.bot)) h1 (by simp)) (I.assumption (by simp))
+    I.modusPonens (I.weakening [] [X] (I.imp X (I.imp ψ I.bot)) h1 (by simp))
+      (I.assumption (by simp))
   exact I.deductionTheorem [] X I.bot (I.modusPonens d2 d1)
 
 theorem burgessR_implies_burgessRSince (I : ChronicleInterface F) {A C : Set F}
@@ -502,7 +510,8 @@ theorem burgessR_implies_burgessRSince (I : ChronicleInterface F) {A C : Set F}
     · have hUntl : I.untl β (I.allPast (I.imp α I.bot)) ∈ A := h_burgessR _ h_H
       have h_F : I.someFuture (I.allPast (I.imp α I.bot)) ∈ A :=
         cud_modus_ponens I (mcs_is_dcs I h_mcs_A).2
-          (cud_contains_theorems I (mcs_is_dcs I h_mcs_A).2 (I.untilF β (I.allPast (I.imp α I.bot)))) hUntl
+          (cud_contains_theorems I (mcs_is_dcs I h_mcs_A).2
+            (I.untilF β (I.allPast (I.imp α I.bot)))) hUntl
       have h_GP : I.allFuture (I.somePast α) ∈ A :=
         cud_modus_ponens I (mcs_is_dcs I h_mcs_A).2
           (cud_contains_theorems I (mcs_is_dcs I h_mcs_A).2 (I.connectFuture α)) hα
@@ -522,7 +531,8 @@ theorem burgessR_implies_burgessRSince (I : ChronicleInterface F) {A C : Set F}
         (I.enrichmentUntil β (I.imp (I.snce β α) I.bot) α)) h_conj
   have h_F := until_implies_F_in_mcs I h_mcs_A h_enriched
   have h_neg_event := ciNegAndSelfNeg I (I.snce β α)
-  have h_G_neg := cud_contains_theorems I (mcs_is_dcs I h_mcs_A).2 (I.futureNecessitation _ h_neg_event)
+  have h_G_neg :=
+    cud_contains_theorems I (mcs_is_dcs I h_mcs_A).2 (I.futureNecessitation _ h_neg_event)
   exact I.someFutureAllFutureNegAbsurd h_mcs_A _ h_F h_G_neg
 
 theorem burgessRSince_implies_burgessR (I : ChronicleInterface F) {A C : Set F}
@@ -535,7 +545,8 @@ theorem burgessRSince_implies_burgessR (I : ChronicleInterface F) {A C : Set F}
     · have hSnce : I.snce β (I.allFuture (I.imp γ I.bot)) ∈ C := h_burgessRSince _ h_G
       have h_P : I.somePast (I.allFuture (I.imp γ I.bot)) ∈ C :=
         cud_modus_ponens I (mcs_is_dcs I h_mcs_C).2
-          (cud_contains_theorems I (mcs_is_dcs I h_mcs_C).2 (I.sinceP β (I.allFuture (I.imp γ I.bot)))) hSnce
+          (cud_contains_theorems I (mcs_is_dcs I h_mcs_C).2
+            (I.sinceP β (I.allFuture (I.imp γ I.bot)))) hSnce
       have h_HF : I.allPast (I.someFuture γ) ∈ C :=
         cud_modus_ponens I (mcs_is_dcs I h_mcs_C).2
           (cud_contains_theorems I (mcs_is_dcs I h_mcs_C).2 (I.connectPast γ)) hγ
@@ -555,7 +566,8 @@ theorem burgessRSince_implies_burgessR (I : ChronicleInterface F) {A C : Set F}
         (I.enrichmentSince β (I.imp (I.untl β γ) I.bot) γ)) h_conj
   have h_P' := since_implies_P_in_mcs I h_mcs_C h_enriched
   have h_neg_event := ciNegAndSelfNeg I (I.untl β γ)
-  have h_H_neg := cud_contains_theorems I (mcs_is_dcs I h_mcs_C).2 (I.pastNecessitation _ h_neg_event)
+  have h_H_neg :=
+    cud_contains_theorems I (mcs_is_dcs I h_mcs_C).2 (I.pastNecessitation _ h_neg_event)
   exact I.somePastAllPastNegAbsurd h_mcs_C _ h_P' h_H_neg
 
 /-! ## Deductive Closure Singleton Propagation -/

@@ -368,23 +368,23 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 3: Land the four propositional combinators of the Λ-chain toolkit [NOT STARTED]
+### Phase 3: Land the four propositional combinators of the Λ-chain toolkit [COMPLETED]
 
 - **Goal:** Land `mpAnd`, `topBase`, `andMP`, and `lambdaChain_step2` — the propositional
   ingredients the induction and the assembly consume.
 - **Files:** `Cslib/.../Nested/Soundness.lean` (sole owner)
 - **Tasks:**
-  - [ ] Open a new section `/-! ## Λ-Chain Toolkit (Lemma 4.9, `⊃•`) -/` in `Soundness.lean`,
+  - [x] Open a new section `/-! ## Λ-Chain Toolkit (Lemma 4.9, `⊃•`) -/` in `Soundness.lean`,
         placed after the Lemma 4.9 section and before the `⊃•` section at line ~1294.
-  - [ ] Land `mpAnd (A B : Proposition Atom) : Derivable _ ((A.and (A.imp B)).imp B)` —
+  - [x] Land `mpAnd (A B : Proposition Atom) : Derivable _ ((A.and (A.imp B)).imp B)` —
         `deductionTheorem` + `andE1`/`andE2` + MP, ~10 lines.
-  - [ ] Land `topBase (A B : Proposition Atom) : Derivable _ (((Proposition.top.imp A).and (A.imp B)).imp B)`
+  - [x] Land `topBase (A B : Proposition Atom) : Derivable _ (((Proposition.top.imp A).and (A.imp B)).imp B)`
         — same shape; `⊤ = ⊥ ⊃ ⊥` discharged via `efq`, ~10 lines.
-  - [ ] Land `andMP : ⊢ (U ∧ V) ⊃ W → ⊢ U → ⊢ V → ⊢ W` — 3-line `andI` + MP combinator.
-  - [ ] Land `lambdaChain_step2 {X Y Z P : Proposition Atom} (h : Derivable _ ((X.and Z).imp Y)) : Derivable _ ((X.and (Y.imp P)).imp (Z.imp P))`
+  - [x] Land `andMP : ⊢ (U ∧ V) ⊃ W → ⊢ U → ⊢ V → ⊢ W` — 3-line `andI` + MP combinator.
+  - [x] Land `lambdaChain_step2 {X Y Z P : Proposition Atom} (h : Derivable _ ((X.and Z).imp Y)) : Derivable _ ((X.and (Y.imp P)).imp (Z.imp P))`
         — two nested `deductionTheorem` discharges (of the conjunction, then of `Z`), ~15 lines.
         Docstring cites the source's "But this follows from `(L_X ∧ L_Z) ⊃ L_Y`" sentence.
-  - [ ] Mark `mpAnd`, `topBase`, `andMP` `private` if they are not intended as public API, matching
+  - [x] Mark `mpAnd`, `topBase`, `andMP` `private` if they are not intended as public API, matching
         the file's existing convention for `cs5Deriv*` helpers. `lambdaChain_step2` is public
         (it is a named source step).
 - **Estimated output:** ~70 lines.

@@ -1330,6 +1330,76 @@ theorem nested_sound_fourR (ctx : OutputCtx Atom) (A : Proposition Atom) (Δ : N
   obtain ⟨dimp⟩ := fillRhs_imp_fillFull_four ctx Δ A
   exact ⟨.modus_ponens _ _ _ dimp d⟩
 
+/-! ## Λ-Chain Toolkit (Lemma 4.9, `⊃•`)
+
+Four small propositional combinators consumed by the `⊃•` (`impL`) induction and its assembly
+(next section): `mpAnd`/`topBase` are the base-case ingredients `lambdaChain_XZ_imp_Y` composes
+with `lemma4_7_ii` at `Λ = []`/`Λ = [Λ₀]`; `andMP` is the closed-derivation `andI`+MP combinator
+the final `impL` assembly applies; `lambdaChain_step2` is the source's own second step, "But this
+follows from `(L_X ∧ L_Z) ⊃ L_Y`" (page 10). See [ArisakaDasStrassburger2015], §4, page 10. -/
+
+/-- `⊢ (A ∧ (A ⊃ B)) ⊃ B`: modus ponens uncurried into a single conjunction. Built via
+`cs5DerivUncurrySwap` fed the identity `⊢ (A ⊃ B) ⊃ (A ⊃ B)` -- the `Q ⊃ (P ⊃ R)` shape
+`cs5DerivUncurrySwap` expects collapses to `cs5DerivImpSelf` exactly when `Q = P.imp R`. -/
+private theorem mpAnd (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) ((A.and (A.imp B)).imp B) :=
+  cs5DerivUncurrySwap (cs5DerivImpSelf (A.imp B))
+
+/-- `⊢ ((⊤ ⊃ A) ∧ (A ⊃ B)) ⊃ B`: `mpAnd`'s `Λ = []` variant, with the left conjunct's `A`
+replaced by `⊤ ⊃ A` (the `fillRhs []`/degenerate-chain antecedent). Built by curry-ing `mpAnd`
+into `⊢ A ⊃ ((A ⊃ B) ⊃ B)`, composing with `cs5DerivTopImpElim : ⊢ (⊤ ⊃ A) ⊃ A` via transitivity,
+then uncurry-ing back into the conjunctive shape. -/
+private theorem topBase (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) (((Proposition.top.imp A).and (A.imp B)).imp B) :=
+  cs5DerivUncurry (cs5DerivImpTrans cs5DerivTopImpElim (cs5DerivCurry (mpAnd A B)))
+
+/-- **Closed `andI` + modus ponens combinator**: from `⊢ (U ∧ V) ⊃ W`, `⊢ U`, and `⊢ V`, derive
+`⊢ W`. Used by the `impL` assembly to combine the branching-lift fact against its two premises. -/
+private theorem andMP {U V W : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((U.and V).imp W))
+    (hU : Derivable (@CS5ModalAxiom Atom) U) (hV : Derivable (@CS5ModalAxiom Atom) V) :
+    Derivable (@CS5ModalAxiom Atom) W := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dU⟩ := hU
+  obtain ⟨dV⟩ := hV
+  exact ⟨.modus_ponens _ _ _ d
+    (.modus_ponens _ _ _ (.modus_ponens _ _ _ (.ax [] _ (.andI U V)) dU) dV)⟩
+
+/-- **The source's step 2** (page 10): "To be able to apply Lemma 4.8, we need to show that
+`(L_X ∧ (L_Y ⊃ P)) ⊃ (L_Z ⊃ P)` is provable in `HCK + X`. But this follows from
+`(L_X ∧ L_Z) ⊃ L_Y`". From `⊢ (X ∧ Z) ⊃ Y`, derive `⊢ (X ∧ (Y ⊃ P)) ⊃ (Z ⊃ P)`. Built via two
+nested `deductionTheorem` discharges (of the conjunction `X ∧ (Y ⊃ P)`, then of `Z`): `X`/`Y ⊃ P`
+are projected from the conjunction via `andE1`/`andE2`, recombined with `Z` via `andI` into
+`X ∧ Z`, fed to the (weakened) hypothesis to obtain `Y`, then discharged against `Y ⊃ P` to
+reach `P`. See [ArisakaDasStrassburger2015], §4, page 10. -/
+theorem lambdaChain_step2 {X Y Z P : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((X.and Z).imp Y)) :
+    Derivable (@CS5ModalAxiom Atom) ((X.and (Y.imp P)).imp (Z.imp P)) := by
+  obtain ⟨d⟩ := h
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] (X.and (Y.imp P)) (Z.imp P) ?_⟩
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [X.and (Y.imp P)] Z P ?_
+  -- context: [Z, X.and (Y.imp P)]
+  set Hyp := X.and (Y.imp P)
+  have hHyp : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] Hyp :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_singleton.mpr rfl)))
+  have hZ : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] Z :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hX : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] X :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 X (Y.imp P))) (fun _ h => nomatch h))
+      hHyp
+  have hYimpP : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] (Y.imp P) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 X (Y.imp P))) (fun _ h => nomatch h))
+      hHyp
+  have hXZ : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] (X.and Z) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andI X Z)) (fun _ h => nomatch h)) hX) hZ
+  have hd : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] ((X.and Z).imp Y) :=
+    .weakening [] _ _ d (fun _ h => nomatch h)
+  have hY : DerivationTree (@CS5ModalAxiom Atom) [Z, Hyp] Y := .modus_ponens _ _ _ hd hXZ
+  exact .modus_ponens _ _ _ hYimpP hY
+
 /-! ## `⊃•` (`impL`): Deferred, Strategic Sorry
 
 Per Phase 11's deviation note (restated in this module's docstring): `impL` needs the source's own

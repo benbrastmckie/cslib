@@ -29,10 +29,6 @@ cases.
 - GHR94 Chapter 10.2: duality halves the proof burden
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -164,6 +160,7 @@ theorem dual_S_free_iff_U_free (phi : Formula Atom) :
     simp [Formula.swapTemporal, isUFree,
       isSFree, ih1, ih2]
 
+set_option linter.flexible false in
 /-- Syntactic separation is preserved by swapTemporal. -/
 theorem dual_separated (phi : Formula Atom) :
     isSyntacticallySeparated phi.swapTemporal =
@@ -241,6 +238,7 @@ theorem dual_past_only_iff_future_only
     simp [Formula.swapTemporal, isFutureOnly,
       isPastOnly]
 
+set_option linter.flexible false in
 /-- Proper separation is preserved by swapTemporal. -/
 theorem dual_properly_separated (phi : Formula Atom) :
     isProperlySeparated phi.swapTemporal =

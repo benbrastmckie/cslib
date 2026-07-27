@@ -214,7 +214,7 @@ noncomputable def ndToLM {Γ : Ctx Atom} {A : Proposition Atom} :
     (AxiomTheory (@MinPropAxiom Atom) : Theory Atom).Derivation Γ A →
     LMProof (Γ ⊢ A)
   | .ax h_mem => by
-    simp only [AxiomTheory, Set.mem_setOf_eq] at h_mem
+    simp only [AxiomTheory, Set.mem_ofPred_eq] at h_mem
     exact Classical.choice (lmOfMinAxiom h_mem)
   | .ass h_mem =>
     SeqProof.ax A Γ h_mem

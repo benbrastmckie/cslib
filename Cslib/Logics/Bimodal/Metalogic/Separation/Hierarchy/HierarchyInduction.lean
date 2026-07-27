@@ -338,7 +338,7 @@ theorem extract_innermost_U_type_S_free (φ : Formula Atom) (h : isUFree φ = fa
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact ih2 hd hns.2
-  | box c ih => simp only [isUFree] at h; unfold extractInnermostUType; exact ih h hns
+  | box c ih => simp only [isUFree] at h; exact ih h hns
   | untl b a ih2 ih1 =>
     unfold extractInnermostUType
     by_cases ha : isUFree a = false
@@ -375,7 +375,7 @@ theorem extract_innermost_U_type_U_free (φ : Formula Atom) (h : isUFree φ = fa
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact ih2 hd hns.2
-  | box c ih => simp only [isUFree] at h; unfold extractInnermostUType; exact ih h hns
+  | box c ih => simp only [isUFree] at h; exact ih h hns
   | untl b a ih2 ih1 =>
     unfold extractInnermostUType
     by_cases ha : isUFree a = false
@@ -421,7 +421,7 @@ theorem extract_innermost_U_type_contains_deep (φ : Formula Atom) (h : isUFree 
       exact Or.inr (ih2 hd hns.2)
   | box c ih =>
     simp only [isUFree] at h
-    unfold extractInnermostUType; simp only [containsUntlDeep]; exact ih h hns
+    simp only [containsUntlDeep]; exact ih h hns
   | untl b a ih2 ih1 =>
     unfold extractInnermostUType
     by_cases ha : isUFree a = false
@@ -553,7 +553,7 @@ theorem extract_U_type_S_free (φ : Formula Atom) (h : isUFree φ = false)
       have hd : isUFree d = false := by
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact ih2 hd hns.2
-  | box c ih => simp only [isUFree] at h; unfold extractUType; exact ih h hns
+  | box c ih => simp only [isUFree] at h; exact ih h hns
   | untl b a => exact hns
   | snce d c ih2 ih1 =>
     unfold extractUType
@@ -585,7 +585,7 @@ theorem extract_U_type_contains_surface (φ : Formula Atom) (h : isUFree φ = fa
       exact Or.inr (ih2 hd hns.2)
   | box c ih =>
     simp only [isUFree] at h
-    unfold extractUType; simp only [containsUntlSurface]; exact ih h hns
+    simp only [containsUntlSurface]; exact ih h hns
   | untl b a =>
     unfold extractUType; exact ⟨rfl, rfl⟩
   | snce d c ih2 ih1 =>

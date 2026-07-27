@@ -119,7 +119,7 @@ theorem kripkeAdapterOmega_eq_of_accessible {World Atom : Type}
     (h_rw : m.r w w') :
     kripkeAdapterOmega m w = kripkeAdapterOmega m w' := by
   ext σ
-  simp only [kripkeAdapterOmega, Set.mem_setOf_eq]
+  simp only [kripkeAdapterOmega, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨u, hu, rfl⟩; exact ⟨u, h_eucl w w' u h_rw hu, rfl⟩
   · rintro ⟨u, hu, rfl⟩; exact ⟨u, h_trans w w' u h_rw hu, rfl⟩

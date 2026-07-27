@@ -320,7 +320,7 @@ theorem min_compactness {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition At
   -- L witnesses the finite subset; by strong soundness, L-derivability gives L-entailment
   refine ⟨L, hL_sub, ?_⟩
   apply min_strong_soundness
-  exact ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩
+  exact ⟨L, fun x hx => Set.mem_ofPred_eq.mpr hx, hL_deriv⟩
 
 /-! ## Weak Completeness Corollary -/
 

@@ -92,13 +92,11 @@ end DerivationTree
 /-- `Temporal.Deriv Γ φ` holds iff there exists a derivation tree deriving `φ`
 from `Γ` at `FrameClass.Base`. This is the `Prop`-level wrapper used by the
 generic `DerivationSystem`. -/
-@[nolint dupNamespace]
 def Temporal.Deriv (Γ : List (Formula Atom)) (φ : Formula Atom) : Prop :=
   Nonempty (DerivationTree FrameClass.Base Γ φ)
 
 /-- `Temporal.ThDerivable φ` means `φ` is derivable from the empty context
 at `FrameClass.Base`. -/
-@[nolint dupNamespace]
 def Temporal.ThDerivable (φ : Formula Atom) : Prop :=
   Temporal.Deriv (Atom := Atom) [] φ
 

@@ -625,6 +625,8 @@ private def Theory.Derivation.snAndE1Form {G : Ctx Atom} {A B : Proposition Atom
   | impE D' E', he => ⟨andE1 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
   | @Derivation.efq _ _ _ _ _ i D', he =>
       ⟨@Derivation.efq _ _ _ _ _ i D', by simpa [isStronglyNormal] using he⟩
+termination_by e.nodeCount
+decreasing_by all_goals (simp only [Theory.Derivation.nodeCount]; omega)
 
 /-- Given a strongly-normal derivation `e : G ⊢ A ∧ B`, produce a strongly-normal `G ⊢ B`.
 Symmetric to `snAndE1Form`: at an `andI` leaf project the second component. -/
@@ -648,6 +650,8 @@ private def Theory.Derivation.snAndE2Form {G : Ctx Atom} {A B : Proposition Atom
   | impE D' E', he => ⟨andE2 _ (impE D' E'), by simpa [isStronglyNormal] using he⟩
   | @Derivation.efq _ _ _ _ _ i D', he =>
       ⟨@Derivation.efq _ _ _ _ _ i D', by simpa [isStronglyNormal] using he⟩
+termination_by e.nodeCount
+decreasing_by all_goals (simp only [Theory.Derivation.nodeCount]; omega)
 
 /-- Head-behaviour lemma for `snAndE1Form`: if the output is intro-or-`orE`-headed, then the
 input `e` was already intro-or-`orE`-headed. The only way `snAndE1Form` produces a non-neutral
@@ -705,11 +709,11 @@ where `phase = 0` for the two eliminators and `phase = 1` for `snSubst`, and the
 `snSubst`. Every recursive edge is discharged by `decreasing_by` as follows:
 
   * eliminator → eliminator (push/commuting, structural on the principal premise): same
-    complexity, same phase, strictly smaller `sizeOf` — closed by `decreasing_tactic`.
+    complexity, same phase, strictly smaller `nodeCount` — closed by `decreasing_tactic`.
   * eliminator → snSubst (β-redex, substitute at a PROPER subformula of the cut): first
     component strictly drops (`A.complexity < (A → B).complexity`, etc.) — closed by
     `left; simp [Proposition.complexity]; omega`.
-  * snSubst → snSubst (structural on `body`): same complexity, same phase, smaller `sizeOf` —
+  * snSubst → snSubst (structural on `body`): same complexity, same phase, smaller `nodeCount` —
     closed by `decreasing_tactic`.
   * snSubst → eliminator (re-eliminate a substituted child at an `impE` node): the **HEAD-BOUND**.
     `snSubst`'s `impE` case head-matches `(snSubst D' arg).1`: in the intro-or-orE-headed
@@ -724,7 +728,7 @@ Head-bound termination support:
     proven for the `ax/ass/andI/andE1/andE2/impE/orI1/orI2` cases (the head-bound's entire
     dependency cone — neutral implications `ax/ass/andE1/andE2/impE` — is sorry-free).
   - Standalone head-behaviour lemmas `snAndE1Form_head`/`snAndE2Form_head`, complexity
-    subformula lemmas `cx_and_left/right`, `sizeOf_impE_left/right`, and the lex lemma
+    subformula lemmas `cx_and_left/right`, `nodeCount_impE_left/right`, and the lex lemma
     `lex3_of_le_of_lt`.
 
 Mutual-block case structure:
@@ -732,8 +736,8 @@ Mutual-block case structure:
     re-eliminating via `snOrEForm`).
   - `snSubst`'s `impI` and `orE` cases via the context-reindex cast
     `insert A (insert P G) = insert P (insert A G)` (`Finset.insert_comm`), with cast invariance
-    lemmas `isStronglyNormal_cast`/`sizeOf_cast` threading the `sizeOf` equality into
-    `decreasing_by` (`rw [sizeOf_cast]; omega`).
+    lemmas `isStronglyNormal_cast`/`nodeCount_cast` threading the `nodeCount` equality into
+    `decreasing_by` (`rw [nodeCount_cast]; omega`).
   - The carried head invariant was refined with a `body.isOrERoot = false` antecedent (the `orE`
     case's conclusion need not be a subformula of the eliminated disjunction); all consumers
     supply it since an elimination's major premise is never `orE`-headed in a SN derivation.
@@ -742,17 +746,19 @@ The `snSubst` head-bound termination obligation is discharged via the carried
 head-behaviour invariant (see `snSubst` below). The structural driver `snForm` (L6) and
 `exists_stronglyNormal_form` follow the block. -/
 
-/-- `sizeOf` of an `impE`'s function premise is smaller than the whole derivation. Proven
+/-- The `nodeCount` of an `impE`'s function premise is smaller than the whole derivation. Proven
 outside the mutual block so the termination proof can close the `impE` structural edge by a
 cheap `exact` instead of an expensive in-context `simp`/`omega`. -/
-private lemma sizeOf_impE_left {Γ : Ctx Atom} {A B : Proposition Atom}
-    (D : T.Derivation Γ (A → B)) (E : T.Derivation Γ A) : sizeOf D < sizeOf (D.impE E) := by
-  simp only [Cslib.Logic.PL.Theory.Derivation.impE.sizeOf_spec]; omega
+private lemma nodeCount_impE_left {Γ : Ctx Atom} {A B : Proposition Atom}
+    (D : T.Derivation Γ (A → B)) (E : T.Derivation Γ A) :
+    D.nodeCount < (D.impE E).nodeCount := by
+  simp only [Theory.Derivation.nodeCount]; omega
 
-/-- `sizeOf` of an `impE`'s argument premise is smaller than the whole derivation. -/
-private lemma sizeOf_impE_right {Γ : Ctx Atom} {A B : Proposition Atom}
-    (D : T.Derivation Γ (A → B)) (E : T.Derivation Γ A) : sizeOf E < sizeOf (D.impE E) := by
-  simp only [Cslib.Logic.PL.Theory.Derivation.impE.sizeOf_spec]; omega
+/-- The `nodeCount` of an `impE`'s argument premise is smaller than the whole derivation. -/
+private lemma nodeCount_impE_right {Γ : Ctx Atom} {A B : Proposition Atom}
+    (D : T.Derivation Γ (A → B)) (E : T.Derivation Γ A) :
+    E.nodeCount < (D.impE E).nodeCount := by
+  simp only [Theory.Derivation.nodeCount]; omega
 
 /-- Lexicographic decrease of the 3-component measure when the first component is `≤` and the
 second is `<` (the head-bound edge: cut complexity `≤ P` and phase `0 < 1`). Proven standalone
@@ -771,11 +777,11 @@ substituted hypothesis `P` sits at the front for the `snSubst` recursive call. -
 private lemma isStronglyNormal_cast {Γ Γ₂ : Ctx Atom} {A : Proposition Atom} (h : Γ = Γ₂)
     (D : T.Derivation Γ A) : (h ▸ D).isStronglyNormal = D.isStronglyNormal := by subst h; rfl
 
-/-- Casting a derivation along a context equality preserves `sizeOf` (the cast is a no-op on the
+/-- Casting a derivation along a context equality preserves `nodeCount` (the cast is a no-op on the
 tree). Lets the `snSubst` termination proof close the `impI`/`orE` binder edges by rewriting the
-cast away before the structural `sizeOf` comparison. -/
-private lemma sizeOf_cast {Γ Γ₂ : Ctx Atom} {A : Proposition Atom} (h : Γ = Γ₂)
-    (D : T.Derivation Γ A) : sizeOf (h ▸ D) = sizeOf D := by subst h; rfl
+cast away before the structural `nodeCount` comparison. -/
+private lemma nodeCount_cast {Γ Γ₂ : Ctx Atom} {A : Proposition Atom} (h : Γ = Γ₂)
+    (D : T.Derivation Γ A) : (h ▸ D).nodeCount = D.nodeCount := by subst h; rfl
 
 set_option maxHeartbeats 2000000 in
 -- The mutual well-founded recursion `snImpEForm`/`snOrEForm`/`snSubst` with the carried
@@ -783,7 +789,7 @@ set_option maxHeartbeats 2000000 in
 -- limit so the (sorry-free) termination proof elaborates within budget.
 mutual
 
-/-- L3: smart implication eliminator. Measure: ((A→B).complexity, 0, sizeOf f). -/
+/-- L3: smart implication eliminator. Measure: ((A→B).complexity, 0, f.nodeCount). -/
 private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
     (f : T.Derivation G (A → B)) (hf : f.isStronglyNormal = true)
     (a : T.Derivation G A) (ha : a.isStronglyNormal = true) :
@@ -814,11 +820,12 @@ private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
       simp only [isStronglyNormal, Bool.and_eq_true]; exact ⟨hf, ha⟩⟩
   | @Derivation.efq _ _ _ _ _ i D', hf =>
       ⟨@Derivation.efq _ _ _ _ _ i D', by simpa only [isStronglyNormal] using hf⟩
-  termination_by ((A → B).complexity, 0, sizeOf f)
+  termination_by ((A → B).complexity, 0, f.nodeCount)
   decreasing_by
-    all_goals (simp_wf; first | (left; omega) | (right; omega))
+    all_goals (simp_wf; try simp only [Theory.Derivation.nodeCount]
+               first | (left; omega) | (right; omega))
 
-/-- L4: smart disjunction eliminator. Measure: ((A∨B).complexity, 0, sizeOf D). -/
+/-- L4: smart disjunction eliminator. Measure: ((A∨B).complexity, 0, D.nodeCount). -/
 private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom}
     (D : T.Derivation G (A ∨ B)) (hD : D.isStronglyNormal = true)
     (DA : T.Derivation (insert A G) C) (hDA : DA.isStronglyNormal = true)
@@ -863,11 +870,12 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
       simp only [isStronglyNormal, Bool.and_eq_true] at hD ⊢; exact ⟨⟨hD, hDA⟩, hDB⟩⟩
   | @Derivation.efq _ _ _ _ _ i D', hD =>
       ⟨@Derivation.efq _ _ _ _ _ i D', by simpa only [isStronglyNormal] using hD⟩
-  termination_by ((A ∨ B).complexity, 0, sizeOf D)
+  termination_by ((A ∨ B).complexity, 0, D.nodeCount)
   decreasing_by
-    all_goals (simp_wf; first | (left; omega) | (right; omega))
+    all_goals (simp_wf; try simp only [Theory.Derivation.nodeCount]
+               first | (left; omega) | (right; omega))
 
-/-- L5: substitution-normalization. Measure: `(P.complexity, 1, sizeOf body)`.
+/-- L5: substitution-normalization. Measure: `(P.complexity, 1, body.nodeCount)`.
 
 The return subtype carries, beyond strong normality, the **head-behaviour invariant**
 
@@ -1042,14 +1050,16 @@ private def Theory.Derivation.snSubst {P B : Proposition Atom} {G : Ctx Atom}
           refine ⟨?_, ?_⟩
           · cases hx : sd'.1 <;> simp_all [isStronglyNormal, isIntroRoot, isOrERoot]
           · intro _ hno _; simp [isOrERoot] at hno⟩
-  termination_by (P.complexity, 1, sizeOf body)
+  termination_by (P.complexity, 1, body.nodeCount)
   decreasing_by
     all_goals first
       | (simp_wf; right; right; first
           | omega
-          | exact sizeOf_impE_left _ _
-          | exact sizeOf_impE_right _ _
-          | (rw [sizeOf_cast]; omega))
+          | exact nodeCount_impE_left _ _
+          | exact nodeCount_impE_right _ _
+          | (rw [nodeCount_cast]; omega)
+          | (simp only [Theory.Derivation.nodeCount]; omega)
+          | (rw [nodeCount_cast]; simp only [Theory.Derivation.nodeCount]; omega))
       | (simp_wf; exact lex3_of_le_of_lt hle (by omega))
 
 end

@@ -666,7 +666,7 @@ private lemma concat_slot_infOcc_eq [Finite State1] [Finite State2]
     {s2 | ∃ s ∈ ((concat da1 acc1 da2).run xs).infOcc, s.2 i = some s2} =
       (da2.run (xs.drop n)).infOcc := by
   ext s2
-  simp only [Set.mem_setOf_eq, mem_infOcc]
+  simp only [Set.mem_ofPred_eq, mem_infOcc]
   constructor
   · rintro ⟨s, hs_inf, hs_i⟩
     apply frequently_atTop.mpr
@@ -687,7 +687,7 @@ private lemma concat_slot_infOcc_eq [Finite State1] [Finite State2]
       obtain ⟨j, hj, hjeq⟩ := frequently_atTop.mp hfreq (max l (m0 + 1))
       obtain ⟨j', rfl⟩ : ∃ j', j = j' + 1 := ⟨j - 1, by omega⟩
       refine ⟨n + 1 + j', by omega, ?_⟩
-      simp only [Set.mem_setOf_eq]
+      simp only [Set.mem_ofPred_eq]
       rw [hpersist j' (by omega), hjeq]
     rw [ωSequence.frequently_in_finite_type] at hfreq'
     obtain ⟨s, hs_mem, hs_freq⟩ := hfreq'

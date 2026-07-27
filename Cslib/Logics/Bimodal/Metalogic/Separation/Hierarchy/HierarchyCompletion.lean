@@ -401,7 +401,6 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
       exact ih2 hd hns.2 hle
   | box c ih =>
     simp only [isUFree] at h
-    unfold extractUType
     have hle : uNestingDepth c ≤ 1 := by
       simp only [uNestingDepth] at hdepth; exact hdepth
     exact ih h hns hle

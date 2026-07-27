@@ -654,7 +654,7 @@ theorem lemma_2_7_since_seed_consistent {A B C : Set F}
               (I.weakening [] _ _ h_chain (List.nil_subset _))
               (I.assumption (by exact List.mem_singleton.mpr rfl))
           · exfalso
-            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
+            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_ofPred_eq,
               Set.mem_singleton_iff] at h_φ_seed
             rcases h_φ_seed with ((h1 | h2) | h5)
             · exact h_B_case h1
@@ -764,7 +764,7 @@ theorem lemma_2_7_since {A B C : Set F}
   have h_untl_conj_xi_D : ∀ β ∈ B, ∀ γ ∈ C, I.untl (I.and β xi) γ ∈ D := by
     intro β hβ γ hγ; apply h_sup
     show I.untl (I.and β xi) γ ∈ lemma27SinceSeed I A B C xi eta
-    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
+    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_ofPred_eq]
     right; exact ⟨β, hβ, γ, hγ, rfl⟩
   have h_B_nonempty : ∃ β₀ : F, β₀ ∈ B := by
     exact ⟨I.imp I.bot I.bot, I.cudContainsTheorems h_r3m.1 (I.identity' I.bot)⟩
@@ -911,7 +911,7 @@ theorem lemma_2_8_since_seed_consistent {A B C : Set F}
               (I.weakening [] _ _ h_chain (List.nil_subset _))
               (I.assumption (by exact List.mem_singleton.mpr rfl))
           · exfalso
-            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq,
+            simp only [lemma27SinceSeed, Set.mem_union, Set.mem_ofPred_eq,
               Set.mem_singleton_iff] at h_φ_seed
             rcases h_φ_seed with ((h1 | h2) | h5)
             · exact h_B_case h1
@@ -1037,7 +1037,7 @@ theorem lemma_2_8_since {A B C : Set F}
   have h_untl_conj_xi_D : ∀ β ∈ B, ∀ γ ∈ C, I.untl (I.and β xi) γ ∈ D := by
     intro β hβ γ hγ; apply h_sup
     show I.untl (I.and β xi) γ ∈ lemma27SinceSeed I A B C xi eta
-    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_setOf_eq]
+    simp only [lemma27SinceSeed, Set.mem_union, Set.mem_ofPred_eq]
     right; exact ⟨β, hβ, γ, hγ, rfl⟩
   have h_B_nonempty : ∃ β₀ : F, β₀ ∈ B := by
     exact ⟨I.imp I.bot I.bot, I.cudContainsTheorems h_r3m.1 (I.identity' I.bot)⟩

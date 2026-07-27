@@ -55,7 +55,7 @@ theorem IntStructure.reverse_reverse
   cases M with | mk val =>
   simp only [IntStructure.reverse]
   congr 1; funext a; ext t
-  simp [Set.mem_setOf_eq, neg_neg]
+  simp [Set.mem_ofPred_eq, neg_neg]
 
 /-! ## Duality Theorem -/
 
@@ -69,7 +69,7 @@ theorem swapTemporal_int_truth
   induction phi generalizing t with
   | atom a =>
     simp [Formula.swapTemporal, intTruth,
-      IntStructure.reverse, Set.mem_setOf_eq, neg_neg]
+      IntStructure.reverse, Set.mem_ofPred_eq, neg_neg]
   | bot => simp [Formula.swapTemporal, intTruth]
   | imp phi psi ih1 ih2 =>
     simp only [Formula.swapTemporal, intTruth]

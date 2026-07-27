@@ -105,8 +105,7 @@ def mkUpset (P : World → Prop)
 /-- Membership in `mkUpset P hP` at `toDual w` is equivalent to `P w`. -/
 @[simp]
 lemma memMkUpset (P : World → Prop) (hP : ∀ {w w' : World}, w ≤ w' → P w → P w') (w : World) :
-    toDual w ∈ mkUpset P hP ↔ P w := by
-  simp [mkUpset]
+    toDual w ∈ mkUpset P hP ↔ P w := Iff.rfl
 
 /-- `mkUpset (fun _ => False)` equals the bottom element of `UpsetAlgebra World`. -/
 lemma mkUpsetFalse :

@@ -67,11 +67,11 @@ theorem characteristicSet_eq_iff_equiv (phi : Formula Atom)
     have h1 : (⟨ψ, hψ⟩ : subformulaClosure phi) ∈ characteristicSet phi Omega ↔
               (⟨ψ, hψ⟩ : subformulaClosure phi) ∈ characteristicSet phi Theta := by
       rw [h_eq]
-    simp only [characteristicSet, Set.mem_setOf_eq] at h1
+    simp only [characteristicSet, Set.mem_ofPred_eq] at h1
     exact h1
   · intro h_equiv
     ext ⟨ψ, hψ⟩
-    simp only [characteristicSet, Set.mem_setOf_eq]
+    simp only [characteristicSet, Set.mem_ofPred_eq]
     exact h_equiv ψ hψ
 
 /--

@@ -418,7 +418,7 @@ private noncomputable def intFinWorldOfPrimeDCCS {φ : PL.Proposition Atom}
     refine ⟨hψ'mem, ?_⟩
     have h_sub_set : (↑(φ.subformulas.filter (fun ξ => ξ ∈ T)) : Set _) ⊆ T := by
       intro ξ hξ
-      simp only [Finset.coe_filter, Set.mem_setOf_eq] at hξ
+      simp only [Finset.coe_filter, Set.mem_ofPred_eq] at hξ
       exact hξ.2
     obtain ⟨L, hLsub, hLderiv⟩ := SetDerivable_weakening h_sub_set h_sd'
     exact hT.1.2 L ψ' hLsub hLderiv

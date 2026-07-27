@@ -443,7 +443,7 @@ theorem ultrafilterToSet_mcs (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) :
     exact uf.bot_not_mem h_bot_in_uf
   · intro φ hφ
     unfold ultrafilterToSet at hφ
-    simp only [Set.mem_setOf_eq] at hφ
+    simp only [Set.mem_ofPred_eq] at hφ
     have h_compl : (toQuot φ)ᶜ ∈ uf.carrier := by
       cases uf.compl_or (toQuot φ) with
       | inl h => exact absurd h hφ
@@ -479,7 +479,7 @@ theorem SetMaximalConsistent.ultrafilter_correspondence :
   · intro Γ
     apply Subtype.ext
     ext φ
-    simp only [ultrafilterToSet, Set.mem_setOf_eq]
+    simp only [ultrafilterToSet, Set.mem_ofPred_eq]
     constructor
     · intro h_mem
       obtain ⟨ψ, h_psi_in, h_eq⟩ := h_mem

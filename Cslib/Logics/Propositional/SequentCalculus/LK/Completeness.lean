@@ -241,7 +241,7 @@ noncomputable def ndToLK {Γ : Finset (Proposition Atom)} {A : Proposition Atom}
     (AxiomTheory (@PropositionalAxiom Atom) : Theory Atom).Derivation Γ A →
     LKProof (Γ ⊢ₛ ({A} : Finset _))
   | .ax h_mem => by
-    simp only [AxiomTheory, Set.mem_setOf_eq] at h_mem
+    simp only [AxiomTheory, Set.mem_ofPred_eq] at h_mem
     exact Classical.choice (lkOfPropAxiom h_mem)
   | .ass h_mem =>
     -- A ∈ Γ; ax with singleton succedent

@@ -869,7 +869,7 @@ theorem limit_c3 (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalConsistent
     (_hz : z ∈ limitDom A h_mcs) (hxy : x < y) (hyz : y < z) :
     limitG A h_mcs x z = limitG A h_mcs x y ∩ limitF A h_mcs y ∩ limitG A h_mcs y z := by
   ext φ
-  simp only [Set.mem_inter_iff, limitG, Set.mem_setOf_eq]
+  simp only [Set.mem_inter_iff, limitG, Set.mem_ofPred_eq]
   constructor
   · intro h
     exact ⟨⟨fun w hw hxw hwy => h w hw hxw (lt_trans hwy hyz),

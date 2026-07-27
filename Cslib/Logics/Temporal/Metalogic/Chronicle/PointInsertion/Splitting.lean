@@ -476,7 +476,7 @@ theorem lemma_2_7 {A B C : Set (Formula Atom)}
   have h_snce_conj_xi_D : ∀ β ∈ B, ∀ α ∈ A, Formula.snce (Formula.and β xi) α ∈ D := by
     intro β hβ α hα; apply h_sup
     show Formula.snce (Formula.and β xi) α ∈ lemma27Seed A B C xi eta
-    simp only [lemma27Seed, Set.mem_union, Set.mem_setOf_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
+    simp only [lemma27Seed, Set.mem_union, Set.mem_ofPred_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
   have h_B_nonempty : ∃ β₀ : Formula Atom, β₀ ∈ B := by
     exact ⟨Formula.bot.imp Formula.bot, cud_contains_theorems h_r3m.1
       (identity' (Formula.bot : Formula Atom))⟩
@@ -728,7 +728,7 @@ theorem lemma_2_8 {A B C : Set (Formula Atom)}
   have h_snce_conj_xi_D : ∀ β ∈ B, ∀ α ∈ A, Formula.snce (Formula.and β xi) α ∈ D := by
     intro β hβ α hα; apply h_sup
     show Formula.snce (Formula.and β xi) α ∈ lemma27Seed A B C xi eta
-    simp only [lemma27Seed, Set.mem_union, Set.mem_setOf_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
+    simp only [lemma27Seed, Set.mem_union, Set.mem_ofPred_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
   have h_B_nonempty : ∃ β₀ : Formula Atom, β₀ ∈ B := by
     exact ⟨Formula.bot.imp Formula.bot, cud_contains_theorems h_r3m.1
       (identity' (Formula.bot : Formula Atom))⟩

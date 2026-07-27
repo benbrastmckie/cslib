@@ -237,7 +237,7 @@ theorem abstract_untl_correct (phi x y : Formula Atom) (p : Atom)
     split
     · next h =>
       obtain ⟨hc, hd⟩ := h; subst hc; subst hd
-      simp [intTruth, IntStructure.withAtom, Set.mem_setOf_eq]
+      simp [intTruth, IntStructure.withAtom, Set.mem_ofPred_eq]
     · next _ =>
       simp only [intTruth]
       constructor
@@ -411,7 +411,7 @@ theorem abstract_snce_correct (phi x y : Formula Atom) (p : Atom)
     split
     · next h =>
       obtain ⟨hc, hd⟩ := h; subst hc; subst hd
-      simp [intTruth, Set.mem_setOf_eq, h_eq]
+      simp [intTruth, Set.mem_ofPred_eq, h_eq]
     · next hne =>
       simp only [intTruth]
       constructor

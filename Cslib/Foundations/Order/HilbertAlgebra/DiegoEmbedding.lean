@@ -119,14 +119,14 @@ theorem le_iff {F G : HilbertFilter H} : F ≤ G ↔ ∀ a, a ∈ F → a ∈ G 
 above `a`. This is the smallest deductive filter containing `a`. -/
 def principal (a : H) : HilbertFilter H where
   carrier := {x | a ≤ x}
-  top_mem := Set.mem_setOf.mpr le_top
-  upper ha hab := Set.mem_setOf.mpr (le_trans (Set.mem_setOf.mp ha) hab)
-  mp {x y} ha hab := Set.mem_setOf.mpr
-    (himp_mp (himp_mp (himp_S a x y) (Set.mem_setOf.mp hab)) (Set.mem_setOf.mp ha))
+  top_mem := Set.mem_ofPred.mpr le_top
+  upper ha hab := Set.mem_ofPred.mpr (le_trans (Set.mem_ofPred.mp ha) hab)
+  mp {x y} ha hab := Set.mem_ofPred.mpr
+    (himp_mp (himp_mp (himp_S a x y) (Set.mem_ofPred.mp hab)) (Set.mem_ofPred.mp ha))
 
 @[simp]
 theorem mem_principal {a x : H} : x ∈ principal a ↔ a ≤ x :=
-  Set.mem_setOf
+  Set.mem_ofPred
 
 
 /-- `principal a ≤ principal b ↔ b ≤ a` (the map is order-reversing). -/
@@ -309,7 +309,7 @@ def himpFilter (F G : HilbertFilter H) : HilbertFilter H where
 @[simp]
 theorem mem_himpFilter {F G : HilbertFilter H} {a : H} :
     a ∈ himpFilter F G ↔ ∀ x : H, a ≤ x → x ∈ F → x ∈ G :=
-  Set.mem_setOf
+  Set.mem_ofPred
 
 /-- The filter lattice of a Hilbert algebra is a `GeneralizedHeytingAlgebra`.
 

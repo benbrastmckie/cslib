@@ -622,7 +622,7 @@ private lemma fulfillFold_pending_subset (b : TBranch Atom) (ord : TimeOrdering)
   | cons hd tl ih =>
     intro tr0
     simp only [List.foldl_cons]
-    refine (ih _).trans ?_
+    refine List.Subset.trans (ih _) ?_
     split
     · split
       · split

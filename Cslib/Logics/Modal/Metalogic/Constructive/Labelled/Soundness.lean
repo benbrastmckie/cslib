@@ -999,11 +999,11 @@ theorem raise_subtree {Atom : Type u} {World : Type v} [Preorder World]
         have hsub : {q | q ∈ G.X ∧ ht q ≥ ht c} ⊂ {q | q ∈ G.X ∧ ht q ≥ ht p} := by
           constructor
           · intro q hq
-            simp only [Set.mem_setOf_eq] at hq ⊢
+            simp only [Set.mem_ofPred_eq] at hq ⊢
             exact ⟨hq.1, by omega⟩
           · intro hcontra
             have hp' := hcontra (show p ∈ {q | q ∈ G.X ∧ ht q ≥ ht p} from ⟨hpX, le_refl (ht p)⟩)
-            simp only [Set.mem_setOf_eq] at hp'
+            simp only [Set.mem_ofPred_eq] at hp'
             omega
         have hn' : {q | q ∈ G.X ∧ ht q ≥ ht c}.ncard < n :=
           lt_of_lt_of_le (Set.ncard_lt_ncard hsub hpXset) hcard

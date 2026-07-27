@@ -136,7 +136,7 @@ theorem Parity.toRabin_language_eq [Finite State] (a : Parity State Symbol) :
   apply mem_ext
   intro xs
   rw [ωAcceptor.mem_language, ωAcceptor.mem_language]
-  simp only [ωAcceptor.Accepts, Parity.toRabin, Set.mem_setOf_eq]
+  simp only [ωAcceptor.Accepts, Parity.toRabin, Set.mem_ofPred_eq]
   -- Abbreviations
   set R := (a.run xs).infOcc with h_R_def
   set C := a.color '' R with h_C_def
@@ -155,7 +155,7 @@ theorem Parity.toRabin_language_eq [Finite State] (a : Parity State Symbol) :
       intro m hm ⟨s, hs_R, hs_color⟩
       -- s ∈ R ∩ color⁻¹{k | k < 2n}
       have hs_in_avoid : s ∈ R ∩ a.color ⁻¹' {k | k < 2 * n} := by
-        simp only [mem_inter_iff, mem_preimage, mem_setOf_eq]
+        simp only [mem_inter_iff, mem_preimage, mem_ofPred_eq]
         exact ⟨hs_R, hs_color ▸ hm⟩
       rw [h_avoid] at hs_in_avoid
       exact hs_in_avoid
@@ -182,7 +182,7 @@ theorem Parity.toRabin_language_eq [Finite State] (a : Parity State Symbol) :
     · -- Avoidance: R ∩ color⁻¹{m | m < k+k} = ∅
       apply Set.Subset.antisymm _ (Set.empty_subset _)
       intro s ⟨hs_R, hs_lt⟩
-      simp only [mem_preimage, mem_setOf_eq] at hs_lt
+      simp only [mem_preimage, mem_ofPred_eq] at hs_lt
       have h_le : sInf C ≤ a.color s := h_sInf_min (a.color s) ⟨s, hs_R, rfl⟩
       rw [hk] at h_le
       exact absurd hs_lt (Nat.not_lt.mpr h_le)

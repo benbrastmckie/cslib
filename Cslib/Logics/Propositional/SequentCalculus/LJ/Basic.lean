@@ -178,37 +178,37 @@ Unlike LK's two-sided `mono`, this single-conclusion calculus weakens only the a
 This follows by structural induction on the proof, inserting additional weakening steps at
 axiom and `botL` leaves and propagating context extensions upward through the rules. The gated
 `botL` arm rebinds its stored `[IsIntuitionistic T]` instance via `letI` before reconstruction. -/
-def SeqProof.mono {T : Theory Atom} {Γ Γ' : Ctx Atom} {C : Proposition Atom}
-    (hL : Γ ⊆ Γ') : SeqProof T (Γ ⊢ C) → SeqProof T (Γ' ⊢ C)
-  | .ax A _ hA =>
+def SeqProof.mono {T : Theory Atom} : ∀ {seq : @Sequent Atom}, SeqProof T seq →
+    ∀ {Γ' : Ctx Atom}, seq.1 ⊆ Γ' → SeqProof T (Γ' ⊢ seq.2)
+  | _, .ax A _ hA, Γ', hL =>
       ax A Γ' (hL hA)
-  | @SeqProof.botL _ _ _ _ _ inst hbot =>
+  | _, @SeqProof.botL _ _ _ _ _ inst hbot, Γ', hL =>
       letI := inst
       botL Γ' _ (hL hbot)
-  | .andL A B hAB d =>
+  | _, .andL A B hAB d, _, hL =>
       andL A B (hL hAB)
         (d.mono (Finset.insert_subset_insert _ (Finset.insert_subset_insert _ hL)))
-  | .andR A B d₁ d₂ =>
+  | _, .andR A B d₁ d₂, _, hL =>
       andR A B
         (d₁.mono hL)
         (d₂.mono hL)
-  | .orL A B hAB d₁ d₂ =>
+  | _, .orL A B hAB d₁ d₂, _, hL =>
       orL A B (hL hAB)
         (d₁.mono (Finset.insert_subset_insert _ hL))
         (d₂.mono (Finset.insert_subset_insert _ hL))
-  | .orR1 A B d =>
+  | _, .orR1 A B d, _, hL =>
       orR1 A B (d.mono hL)
-  | .orR2 A B d =>
+  | _, .orR2 A B d, _, hL =>
       orR2 A B (d.mono hL)
-  | .impL A B hAB d₁ d₂ =>
+  | _, .impL A B hAB d₁ d₂, _, hL =>
       impL A B (hL hAB)
         (d₁.mono hL)
         (d₂.mono (Finset.insert_subset_insert _ hL))
-  | .impR A B d =>
+  | _, .impR A B d, _, hL =>
       impR A B (d.mono (Finset.insert_subset_insert _ hL))
-  | .weakL A d =>
+  | _, .weakL A d, _, hL =>
       d.mono ((Finset.subset_insert A _).trans hL)
-  | .cut A d₁ d₂ =>
+  | _, .cut A d₁ d₂, _, hL =>
       cut A
         (d₁.mono hL)
         (d₂.mono (Finset.insert_subset_insert _ hL))
@@ -216,7 +216,7 @@ def SeqProof.mono {T : Theory Atom} {Γ Γ' : Ctx Atom} {C : Proposition Atom}
 /-- Left-side monotonicity for LJ proofs. Re-export of `SeqProof.mono` at `IPL`. -/
 @[reducible] def LJProof.mono {Γ Γ' : Ctx Atom} {C : Proposition Atom}
     (hL : Γ ⊆ Γ') (d : LJProof (Γ ⊢ C)) : LJProof (Γ' ⊢ C) :=
-  SeqProof.mono hL d
+  SeqProof.mono d hL
 
 /-- A predicate asserting that a proof is cut-free (contains no `cut` steps). Generic over `T`. -/
 def SeqProof.CutFree {T : Theory Atom} : SeqProof T seq → Prop

@@ -124,7 +124,7 @@ theorem ltlModelChecking [Finite State] [Finite Atom]
     -- So the labeling sequence is in language(gnbaNBA (neg phi)) = (neg phi).gnbaOmegaLanguage
     have h_mem : ss_lts.map (fun s => {p | labeling s p}) ∈
         (ωAcceptor.language (Formula.gnbaNBA (Formula.neg phi))).toSet := by
-      simp only [ωAcceptor.language, Set.mem_setOf_eq]
+      simp only [ωAcceptor.language, Set.mem_ofPred_eq]
       exact ⟨ss_nba, h_nba_run, h_acc⟩
     -- By gnba_language_eq, the language = gnbaOmegaLanguage = omegaLanguage definitionally
     rw [Formula.gnba_language_eq] at h_mem
@@ -148,7 +148,7 @@ theorem ltlModelChecking [Finite State] [Finite Atom]
       rw [Formula.gnba_language_eq]
       exact satisfiesExec_iff_mem_omegaLanguage.mp h_neg
     rw [ωAcceptor.language] at h_neg_lang
-    simp only [Set.mem_setOf_eq] at h_neg_lang
+    simp only [Set.mem_ofPred_eq] at h_neg_lang
     obtain ⟨ss_nba, h_nba_run, h_nba_acc⟩ := h_neg_lang
     -- Build: there is a violating product run
     have h_prod_ne : (ωAcceptor.language (naProd lts (fun s => {p | labeling s p}) init

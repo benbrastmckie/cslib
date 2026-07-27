@@ -431,7 +431,7 @@ established relative to `edges` remains true relative to `edges ++ [newEdge]`. L
 lemma intAccessPreorder_mono_append {edges : IEdges} (newEdge : Nat × Nat) {w w' : Nat}
     (h : @LE.le Nat (intAccessPreorder edges).toLE w w') :
     @LE.le Nat (intAccessPreorder (edges ++ [newEdge])).toLE w w' :=
-  Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) h
+  Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) _ _ h
 
 /-- The final edge-accessibility payoff (task 317 phase 1): every `F(φ→ψ)@w` on the
 saturated branch `b` has a genuinely edge-accessible witness under `edges`, upgrading
@@ -1563,7 +1563,7 @@ lemma intSubfmls_impCount_le (φ : Proposition Atom) :
   | atom p => simp [intSubfmls, isImpShaped]
   | bot => simp [intSubfmls, isImpShaped]
   | imp a b iha ihb =>
-    simp [intSubfmls, List.countP_append, isImpShaped, complexity_imp]
+    simp [intSubfmls, List.countP_cons, List.countP_append, isImpShaped, complexity_imp]
     omega
   | and a b iha ihb =>
     simp [intSubfmls, List.countP_append, isImpShaped, complexity_and]

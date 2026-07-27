@@ -256,7 +256,6 @@ theorem soundness_thderivable_metric {D : Type*} [AddCommGroup D] [LinearOrder D
 set_option linter.dupNamespace false in
 /-- `BX⁺` derivability: derivability at the metric frame class `FrameClass.Metric`.
 `BX⁺` is the metric tense logic, sound over ordered-abelian-group time. -/
-@[nolint dupNamespace]
 def Temporal.BXPlusDerivable (φ : Formula Atom) : Prop :=
   Temporal.ThDerivableFc FrameClass.Metric φ
 

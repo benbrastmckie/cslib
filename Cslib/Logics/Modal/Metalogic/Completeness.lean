@@ -955,7 +955,7 @@ theorem compactness
   obtain ⟨L, hL_sub, hL_deriv⟩ :=
     strong_completeness h_implyK h_implyS h_efq h_peirce truthLemma canonical_FC h
   exact ⟨L, hL_sub,
-    strong_soundness sound ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩⟩
+    strong_soundness sound ⟨L, fun x hx => Set.mem_ofPred_eq.mpr hx, hL_deriv⟩⟩
 
 /-- **Parametric Weak Completeness**: If `phi` is valid over all `FC`-frames
 (satisfies at every world of every model satisfying `FC`), then `phi` is derivable

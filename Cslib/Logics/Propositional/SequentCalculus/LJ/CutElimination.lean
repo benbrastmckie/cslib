@@ -220,7 +220,8 @@ noncomputable def ljCutAdmPrincipalAndR
     ljCutAdmPrincipalAndR P Q Γ₀ d₁p d₁q ih d' hcf'
       (fun x hx => hant (Finset.mem_insert_of_mem hx))
   | .cut _ _ _, hcf' => absurd hcf' id
-termination_by sizeOf d₂
+termination_by d₂.height
+decreasing_by all_goals (simp_wf; simp [SeqProof.height, LJProof.height]; try omega)
 
 /-- Principal `orR`/`orL` case: structural recursion on `d₂` given a sub-proof
 `d₁sub : CutFreeLJProof (Γ₀ ⊢ X)` where `X` is the chosen disjunct. The parameter
@@ -345,7 +346,8 @@ noncomputable def ljCutAdmPrincipalOrR
     ljCutAdmPrincipalOrR P Q Γ₀ d₁sub hXsz hXeq rebuild ih d' hcf'
       (fun x hx => hant (Finset.mem_insert_of_mem hx))
   | .cut _ _ _, hcf' => absurd hcf' id
-termination_by sizeOf d₂
+termination_by d₂.height
+decreasing_by all_goals (simp_wf; simp [SeqProof.height, LJProof.height]; try omega)
 
 /-- Principal `impR`/`impL` case: structural recursion on `d₂` given
 `d₁' : CutFreeLJProof (insert P Γ₀ ⊢ Q)` from the `impR` side. When `d₂` decomposes
@@ -455,7 +457,8 @@ noncomputable def ljCutAdmPrincipalImpR
     ljCutAdmPrincipalImpR P Q Γ₀ d₁' ih d' hcf'
       (fun x hx => hant (Finset.mem_insert_of_mem hx))
   | .cut _ _ _, hcf' => absurd hcf' id
-termination_by sizeOf d₂
+termination_by d₂.height
+decreasing_by all_goals (simp_wf; simp [SeqProof.height, LJProof.height]; try omega)
 
 /-! ### ljCutAdmLeft: structural recursion on d₁ -/
 
@@ -534,7 +537,8 @@ noncomputable def ljCutAdmLeft
   | .weakL A' d', hcf' =>
     ljCutAdmLeft A Γ₀ C₀ d₂ ih d' hcf' ((Finset.subset_insert A' _).trans hant)
   | .cut _ _ _, hcf' => absurd hcf' id
-termination_by sizeOf d₁
+termination_by d₁.height
+decreasing_by all_goals (simp_wf; simp [SeqProof.height, LJProof.height]; try omega)
 
 /-! ### ljCutAdmRight: structural recursion on d₂ -/
 
@@ -642,7 +646,8 @@ noncomputable def ljCutAdmRight
     ljCutAdmRight A Γ₀ d₁ ih d' hcf'
       (fun x hx => hant (Finset.mem_insert_of_mem hx))
   | .cut _ _ _, hcf' => absurd hcf' id
-termination_by sizeOf d₂
+termination_by d₂.height
+decreasing_by all_goals (simp_wf; simp [SeqProof.height, LJProof.height]; try omega)
 
 /-! ## Top-Level Cut Admissibility and Cut Elimination -/
 

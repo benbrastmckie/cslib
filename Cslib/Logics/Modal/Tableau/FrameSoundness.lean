@@ -1680,7 +1680,7 @@ Instantiates `frameValid`/`branchSatisfiableIn` for the modal logic S5 (`Cube.S5
 `K ∪ T ∪ Four ∪ Five`, `Cube.lean:85`): a reflexive right-Euclidean relation is an equivalence
 relation (`Relation.symm_rightEuclidean_iff_trans` gives transitivity from Euclideanness once
 symmetry is available, and reflexivity + Euclideanness together give symmetry via
-`Relation.RightEuclidean.refl_cod`-style projections), matching S5's single-cluster model
+`Relation.RightEuclidean.reflOn_cod`-style projections), matching S5's single-cluster model
 property. -/
 def s5FC : FrameCondition := fun {_} r => Std.Refl r ∧ Relation.RightEuclidean r
 
@@ -1926,7 +1926,7 @@ lemma reachable_imp_cod_related_five
     by_cases hw00 : w0 = (0 : WorldIndex)
     · subst hw00
       refine ⟨w, hedge, ?_⟩
-      exact Relation.RightEuclidean.refl_cod (hacc 0 w hedge)
+      exact Relation.RightEuclidean.reflOn_cod.of_cod (hacc 0 w hedge)
     · obtain ⟨s, hs0, hsw0⟩ := ih hw00
       have hs_cod : f s ∈ Relation.cod m.r := ⟨f 0, hacc 0 s hs0⟩
       have hw0_cod : f w0 ∈ Relation.cod m.r := ⟨f s, hsw0⟩
@@ -2202,7 +2202,7 @@ lemma modalStepBranchFive_preserves_accReachableInv
       simp only [List.mem_singleton] at hx
       subst hx
       exact hsf'known
-    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
       (hInv w (modalKnownWorlds_append_subset_of_labels_known hknown' w hw))
   rw [heq] at hsf
   rcases modalApplyOneFiveProp_knownWorlds_step sf b acc hsfmem hknown with
@@ -2248,9 +2248,9 @@ lemma modalStepBranchFive_preserves_accReachableInv
       rcases List.mem_append.mp hsf' with hnew | hold
       · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
         rw [hlabels sf' hnew]
-        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) (hInv sf.label
+        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _ (hInv sf.label
           hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
-      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
           (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim
@@ -2353,7 +2353,7 @@ lemma modalStepBranchS5Gen_preserves_accReachableInv
       simp only [List.mem_singleton] at hx
       subst hx
       exact hsf'known
-    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
       (hInv w (modalKnownWorlds_append_subset_of_labels_known hknown' w hw))
   rw [heq] at hsf
   rcases modalApplyOneS5_knownWorlds_step sf b acc hsfmem hknown with
@@ -2399,9 +2399,9 @@ lemma modalStepBranchS5Gen_preserves_accReachableInv
       rcases List.mem_append.mp hsf' with hnew | hold
       · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
         rw [hlabels sf' hnew]
-        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) (hInv sf.label
+        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _ (hInv sf.label
           hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
-      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
           (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim
@@ -3738,7 +3738,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       simp only [List.mem_singleton] at hx
       subst hx
       exact hsf'known
-    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
       (hInv w (modalKnownWorlds_append_subset_of_labels_known hknown' w hw))
   rw [heq] at hsf
   rcases modalApplyOneKb5''Prop_knownWorlds_step sf b acc hsfmem hknown h0 with
@@ -3788,9 +3788,9 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       rcases List.mem_append.mp hsf' with hnew | hold
       · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
         rw [hlabels sf' hnew]
-        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) (hInv sf.label
+        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _ (hInv sf.label
           hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
-      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
           (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim

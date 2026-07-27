@@ -56,14 +56,12 @@ attribute [local instance] Classical.propDecidable
 
 set_option linter.dupNamespace false in
 /-- Prop-valued derivability at frame class `fc`. -/
-@[nolint dupNamespace]
 def Temporal.DerivFc (fc : FrameClass) (Gamma : List (Formula Atom))
     (phi : Formula Atom) : Prop :=
   Nonempty (DerivationTree fc Gamma phi)
 
 set_option linter.dupNamespace false in
 /-- Theorem derivability at frame class `fc` (from empty context). -/
-@[nolint dupNamespace]
 def Temporal.ThDerivableFc (fc : FrameClass) (phi : Formula Atom) : Prop :=
   Temporal.DerivFc fc [] phi
 
@@ -106,14 +104,12 @@ def temporalDerivationSystemFc (fc : FrameClass) :
 
 set_option linter.dupNamespace false in
 /-- Set consistency at frame class `fc`. -/
-@[nolint dupNamespace]
 abbrev Temporal.SetConsistentFc (fc : FrameClass)
     (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetConsistent (temporalDerivationSystemFc fc) Ω
 
 set_option linter.dupNamespace false in
 /-- Set maximal consistency at frame class `fc`. -/
-@[nolint dupNamespace]
 abbrev Temporal.SetMaximalConsistentFc (fc : FrameClass)
     (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetMaximalConsistent (temporalDerivationSystemFc fc) Ω

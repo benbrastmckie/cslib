@@ -102,7 +102,7 @@ theorem MPL.hilbert_alg_completeness {Atom : Type u} {φ : PL.Proposition Atom} 
   · intro hd H _ v bot_val
     exact (hilbert_alg_complete_theory (@MinPropAxiom Atom)).mp hd H v bot_val
       (fun ψ hψ => by
-        simp only [AxiomTheory, Set.mem_setOf_eq] at hψ
+        simp only [AxiomTheory, Set.mem_ofPred_eq] at hψ
         exact min_alg_axiom_sound hψ H v bot_val)
   · intro h
     -- Instantiate GHAValid at the Hilbert Lindenbaum algebra for MinPropAxiom.
@@ -131,7 +131,7 @@ theorem IPL.hilbert_alg_completeness {Atom : Type u} {φ : PL.Proposition Atom} 
   · intro hd H _ v
     exact (hilbert_alg_complete_theory (@IntPropAxiom Atom)).mp hd H v ⊥
       (fun ψ hψ => by
-        simp only [AxiomTheory, Set.mem_setOf_eq] at hψ
+        simp only [AxiomTheory, Set.mem_ofPred_eq] at hψ
         exact int_alg_axiom_sound hψ H v)
   · intro h
     -- Instantiate HAValid at the Hilbert Lindenbaum algebra for IntPropAxiom.
@@ -164,7 +164,7 @@ theorem CPL.hilbert_alg_completeness {Atom : Type u} {φ : PL.Proposition Atom} 
   · intro hd H _ v
     exact (hilbert_alg_complete_theory (@PropositionalAxiom Atom)).mp hd H v ⊥
       (fun ψ hψ => by
-        simp only [AxiomTheory, Set.mem_setOf_eq] at hψ
+        simp only [AxiomTheory, Set.mem_ofPred_eq] at hψ
         exact prop_alg_axiom_sound hψ H v)
   · intro h
     -- Instantiate BAValid at the Hilbert Lindenbaum algebra for PropositionalAxiom.

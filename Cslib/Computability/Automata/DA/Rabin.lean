@@ -165,7 +165,7 @@ theorem Rabin.toMuller_language_eq (a : Rabin State Symbol) :
   apply mem_ext
   intro xs
   rw [ωAcceptor.mem_language, ωAcceptor.mem_language]
-  simp only [ωAcceptor.Accepts, Rabin.toMuller, Set.mem_setOf_eq]
+  simp only [ωAcceptor.Accepts, Rabin.toMuller, Set.mem_ofPred_eq]
 
 /-! ## Rabin–Streett duality -/
 

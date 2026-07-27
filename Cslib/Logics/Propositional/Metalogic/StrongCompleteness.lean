@@ -534,7 +534,7 @@ theorem prop_compactness {Γ : Set (PL.Proposition Atom)} {φ : PL.Proposition A
       (∀ x ∈ L, x ∈ Γ) ∧
       SemanticEntails {ψ | ψ ∈ L} φ := by
   obtain ⟨L, hL_sub, hL_deriv⟩ := prop_strong_completeness h
-  exact ⟨L, hL_sub, prop_strong_soundness ⟨L, fun x hx => Set.mem_setOf_eq.mpr hx, hL_deriv⟩⟩
+  exact ⟨L, hL_sub, prop_strong_soundness ⟨L, fun x hx => Set.mem_ofPred_eq.mpr hx, hL_deriv⟩⟩
 
 /-! ## Weak Completeness Corollary -/
 

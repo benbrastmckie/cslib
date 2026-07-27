@@ -194,7 +194,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       Formula.gnbaOmegaLanguage φ := by
   apply Cslib.ωLanguage.mem_ext
   intro v
-  simp only [Formula.gnbaOmegaLanguage, Cslib.ωLanguage.mem_def, Set.mem_setOf_eq]
+  simp only [Formula.gnbaOmegaLanguage, Cslib.ωLanguage.mem_def, Set.mem_ofPred_eq]
   constructor
   · -- Soundness: NBA accepting run → satisfaction
     -- Use Classical for Decidability of B ∈ gnbaAcceptSet throughout
@@ -214,7 +214,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       rw [Filter.frequently_atTop] at hacc ⊢
       intro n
       obtain ⟨k, hk, hk_acc⟩ := hacc n
-      simp only [Formula.gnbaNBA, Set.mem_setOf_eq] at hk_acc
+      simp only [Formula.gnbaNBA, Set.mem_ofPred_eq] at hk_acc
       exact ⟨k, hk, hk_acc⟩
     -- Counter transition lemma: extract the counter condition from the NBA transition
     have hctr_trans : ∀ i,
@@ -446,7 +446,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
           have hgnbaAcc_untl := hgnbaAcc (Formula.untl ψ₁ ψ₂) huntl_sub
           rw [Filter.frequently_atTop] at hgnbaAcc_untl
           obtain ⟨j₀, hj₀i, hj₀acc⟩ := hgnbaAcc_untl i
-          simp only [Formula.gnbaAcceptSet, Set.mem_setOf_eq] at hj₀acc
+          simp only [Formula.gnbaAcceptSet, Set.mem_ofPred_eq] at hj₀acc
           -- Simplify hj₀acc: the existential in the inr case collapses to ψ₂ ∈ B j₀
           have hj₀acc' : Formula.untl ψ₁ ψ₂ ∉ (B j₀).val ∨ ψ₂ ∈ (B j₀).val := by
             rcases hj₀acc with h | ⟨ψ₁', ψ₂', heq, hmem⟩
@@ -534,7 +534,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
             exact ((hgnbaTr start).2.2 ψ₁ ψ₂ hψcl).mpr (Or.inr ⟨hψ₁mem, huntl_succ⟩)
     -- Conclude: φ ∈ B_0 (from start condition) → Satisfies val v φ
     have hstart_gnba : (ss 0).1 ∈ Formula.gnbaStart φ := hstart.1
-    simp only [Formula.gnbaStart, Set.mem_setOf_eq] at hstart_gnba
+    simp only [Formula.gnbaStart, Set.mem_ofPred_eq] at hstart_gnba
     have hphi_sat := (hkey φ (Formula.self_mem_closure φ) 0).mp hstart_gnba
     simpa using hphi_sat
   · -- Completeness: satisfaction → NBA accepting run
@@ -561,7 +561,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
       intro N
       by_contra hall
       push Not at hall
-      simp only [Formula.gnbaAcceptSet, Set.mem_setOf_eq, not_or, not_not,
+      simp only [Formula.gnbaAcceptSet, Set.mem_ofPred_eq, not_or, not_not,
         not_exists, not_and] at hall
       -- hall : ∀ b ≥ N, (ψ₁ U ψ₂) ∈ B_b ∧ ∀ x x', (ψ₁ U ψ₂) = (x U x') → x' ∉ B_b
       -- From hall N: (ψ₁ U ψ₂) ∈ B_N
@@ -589,7 +589,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
     let ctr : ℕ → Fin K.succ := Formula.gnbaCtrSeq φ B
     let ss : ℕ → Formula.GNBANBAState φ := fun k => (B k, ctr k)
     have hss_start : ss 0 ∈ (Formula.gnbaNBA φ).start := by
-      simp only [Formula.gnbaNBA, ss, Set.mem_setOf_eq]
+      simp only [Formula.gnbaNBA, ss]
       exact ⟨hstart, rfl⟩
     have hss_trans : (Formula.gnbaNBA φ).OmegaExecution ss v := by
       intro n
@@ -606,7 +606,7 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
     -- The counter is monotone between resets: from ctr = m < K, it stays at m until
     -- B visits acc(untl[m]), then advances to m+1. After K such advances, ctr = K.
     have hss_acc : ∃ᶠ k in Filter.atTop, ss k ∈ (Formula.gnbaNBA φ).accept := by
-      simp only [Formula.gnbaNBA, Set.mem_setOf_eq, ss]
+      simp only [Formula.gnbaNBA, ss]
       -- Goal: ∃ᶠ k in Filter.atTop, (ctr k).val = K
       -- First handle the trivial K = 0 case
       by_cases hK : K = 0
@@ -614,8 +614,10 @@ theorem Formula.gnba_language_eq (φ : Formula Atom) :
         simp only [Filter.frequently_atTop]
         intro N
         refine ⟨N, le_refl _, ?_⟩
-        have : (ctr N).val < K.succ := (ctr N).isLt
-        omega
+        have hlt : (ctr N).val < K.succ := (ctr N).isLt
+        -- membership in `gnbaNBA.accept` is `rfl`-equal to the counter equation
+        have hval : (ctr N).val = K := by omega
+        exact hval
       · -- K > 0: the key cycling argument
         have hK_pos : 0 < K := Nat.pos_of_ne_zero hK
         -- Counter step lemma: ctr (n+1) is obtained by advancing ctr n (or staying)

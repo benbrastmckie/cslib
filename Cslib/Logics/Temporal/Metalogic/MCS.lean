@@ -53,12 +53,10 @@ attribute [local instance] Classical.propDecidable
 /-! ## Abbreviations -/
 
 /-- Set consistency for the temporal derivation system. -/
-@[nolint dupNamespace]
 abbrev Temporal.SetConsistent (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetConsistent temporalDerivationSystem Ω
 
 /-- Set maximal consistency for the temporal derivation system. -/
-@[nolint dupNamespace]
 abbrev Temporal.SetMaximalConsistent (Ω : Set (Formula Atom)) : Prop :=
   Metalogic.SetMaximalConsistent temporalDerivationSystem Ω
 

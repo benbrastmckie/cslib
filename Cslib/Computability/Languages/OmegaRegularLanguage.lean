@@ -358,7 +358,7 @@ theorem IsRegular.of_da_muller {State : Type} [Finite State]
       ⨆ F ∈ {F : Finset State | (F : Set State) ∈ da.accept}, langF F := by
     apply mem_ext
     intro xs
-    simp only [mem_language, Accepts, mem_iSup, Set.mem_setOf_eq]
+    simp only [mem_language, Accepts, mem_iSup, Set.mem_ofPred_eq]
     constructor
     · intro h_acc
       -- infOcc is finite (since State is finite)

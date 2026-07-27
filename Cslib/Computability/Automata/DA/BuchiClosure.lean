@@ -62,12 +62,12 @@ theorem Buchi.union_language_eq (a1 : Buchi State1 Symbol) (a2 : Buchi State2 Sy
   · intro h
     apply Frequently.mono h
     intro k hk
-    simp only [mem_union, mem_setOf_eq, prod_run_eq] at hk
+    simp only [mem_union, mem_ofPred_eq, prod_run_eq] at hk
     exact hk
   · intro h
     apply Frequently.mono h
     intro k hk
-    simp only [mem_union, mem_setOf_eq, prod_run_eq]
+    simp only [mem_union, mem_ofPred_eq, prod_run_eq]
     exact hk
 
 /-! ## DBA Complement Non-Closure -/
@@ -146,7 +146,7 @@ theorem Buchi.not_closed_complement :
     intro xs
     rw [Cslib.ωLanguage.mem_compl, mem_infOftenOne_language,
       Cslib.ωLanguage.mem_def]
-    simp only [Cslib.ωLanguage.Example.eventuallyZero, Set.mem_setOf_eq]
+    simp only [Cslib.ωLanguage.Example.eventuallyZero, Set.mem_ofPred_eq]
     rw [not_frequently]
     constructor
     · intro h

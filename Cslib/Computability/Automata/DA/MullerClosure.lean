@@ -93,7 +93,7 @@ theorem Muller.union_language_eq [Finite State1] [Finite State2]
   apply mem_ext
   intro xs
   rw [Cslib.ωLanguage.mem_sup, mem_language, mem_language, mem_language]
-  simp only [ωAcceptor.Accepts, Muller.union, Set.mem_setOf_eq]
+  simp only [ωAcceptor.Accepts, Muller.union, Set.mem_ofPred_eq]
   rw [prod_run_infOcc_fst, prod_run_infOcc_snd]
 
 /-! ## The empty DMA and the finite-union lift -/

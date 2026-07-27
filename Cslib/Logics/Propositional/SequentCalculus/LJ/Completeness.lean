@@ -194,7 +194,7 @@ noncomputable def ndToLJ {Γ : Ctx Atom} {A : Proposition Atom} :
     (AxiomTheory (@IntPropAxiom Atom) : Theory Atom).Derivation Γ A →
     LJProof (Γ ⊢ A)
   | .ax h_mem => by
-    simp only [AxiomTheory, Set.mem_setOf_eq] at h_mem
+    simp only [AxiomTheory, Set.mem_ofPred_eq] at h_mem
     exact Classical.choice (ljOfIntAxiom h_mem)
   | .ass h_mem =>
     SeqProof.ax A Γ h_mem

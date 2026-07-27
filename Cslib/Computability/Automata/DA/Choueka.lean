@@ -242,13 +242,13 @@ private lemma greater_subseq (φ φ' : ℕ → ℕ) (hi : Function.Injective φ'
     have h_inf : {m : ℕ | n < m}.Infinite := by
       apply Set.infinite_of_injective_forall_mem (f := fun k : ℕ => n + 1 + k)
       · intro a b h; dsimp only at h; omega
-      · intro k; simp only [Set.mem_setOf_eq]; omega
+      · intro k; simp only [Set.mem_ofPred_eq]; omega
     have h_fin : {m : ℕ | φ' m ≤ φ n}.Finite := by
       have heq : {m : ℕ | φ' m ≤ φ n} = φ' ⁻¹' {x | x ≤ φ n} := rfl
       rw [heq]
       exact Set.Finite.preimage hi.injOn (Set.finite_le_nat (φ n))
     obtain ⟨m, hm⟩ := (h_inf.sdiff h_fin).nonempty
-    simp only [Set.mem_sdiff, Set.mem_setOf_eq, not_le] at hm
+    simp only [Set.mem_sdiff, Set.mem_ofPred_eq, not_le] at hm
     exact ⟨m, hm.1, hm.2⟩
   choose f h_f h_φ using h_step
   refine ⟨fun k => f^[k] 0, ?_, ?_⟩

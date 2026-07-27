@@ -58,10 +58,10 @@ theorem satisfies_mem_denotation {m : Model World Atom} {φ : Proposition Atom} 
     simp only [Proposition.denotation, Set.mem_union, derivation_def, Satisfies]
     exact ⟨fun h => h.imp ih₁.mp ih₂.mp, fun h => h.imp ih₁.mpr ih₂.mpr⟩
   | box φ ih =>
-    simp only [Proposition.denotation, Set.mem_setOf_eq, derivation_def, Satisfies]
+    simp only [Proposition.denotation, Set.mem_ofPred_eq, derivation_def, Satisfies]
     exact ⟨fun h w' hr => ih.mp (h w' hr), fun h w' hr => ih.mpr (h w' hr)⟩
   | diamond φ ih =>
-    simp only [Proposition.denotation, Set.mem_setOf_eq, derivation_def, Satisfies]
+    simp only [Proposition.denotation, Set.mem_ofPred_eq, derivation_def, Satisfies]
     exact ⟨fun ⟨w', hr, hs⟩ => ⟨w', hr, ih.mp hs⟩, fun ⟨w', hr, hs⟩ => ⟨w', hr, ih.mpr hs⟩⟩
 
 /-- A world is in the denotation of a proposition iff it is not in the denotation of the negation

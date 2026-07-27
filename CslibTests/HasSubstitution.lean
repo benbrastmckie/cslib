@@ -1,3 +1,5 @@
+module
+
 import Cslib.Foundations.Syntax.HasSubstitution
 
 namespace CslibTests

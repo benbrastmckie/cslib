@@ -34,7 +34,6 @@ variable {Atom : Type u}
 /-- Prop-valued derivability: `Bimodal.Derivable fc Gamma p` holds iff
     there exists a derivation tree for `p` from context `Gamma` at
     frame class `fc`. -/
-@[nolint dupNamespace]
 def Bimodal.Derivable (fc : FrameClass) (Gamma : Context Atom)
     (p : Formula Atom) : Prop :=
   Nonempty (DerivationTree fc Gamma p)
@@ -42,7 +41,6 @@ def Bimodal.Derivable (fc : FrameClass) (Gamma : Context Atom)
 /-! ## Coercion from DerivationTree -/
 
 /-- Any derivation tree witnesses Prop-valued derivability. -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.ofTree {fc : FrameClass}
     {Gamma : Context Atom} {p : Formula Atom}
     (d : DerivationTree fc Gamma p) :
@@ -53,7 +51,6 @@ theorem Bimodal.Derivable.ofTree {fc : FrameClass}
 
 /-- Lift Prop-valued derivability from `fc1` to `fc2`
     when `fc1 <= fc2`. -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.lift {fc₁ fc₂ : FrameClass}
     (h_le : fc₁ ≤ fc₂)
     {Gamma : Context Atom} {p : Formula Atom}
@@ -66,7 +63,6 @@ theorem Bimodal.Derivable.lift {fc₁ fc₂ : FrameClass}
 
 /-- Axiom rule: Any axiom schema instance is derivable
     (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.ax {fc : FrameClass}
     (Gamma : Context Atom) (p : Formula Atom)
     (h : Axiom p) (h_fc : h.minFrameClass ≤ fc) :
@@ -75,14 +71,12 @@ theorem Bimodal.Derivable.ax {fc : FrameClass}
 
 /-- Assumption rule: Formulas in context are derivable
     (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.assume {fc : FrameClass}
     (Gamma : Context Atom) (p : Formula Atom)
     (h : p ∈ Gamma) : Bimodal.Derivable fc Gamma p :=
   Nonempty.intro (DerivationTree.assumption Gamma p h)
 
 /-- Modus ponens (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.mp {fc : FrameClass}
     {Gamma : Context Atom} {p q : Formula Atom}
     (h1 : Bimodal.Derivable fc Gamma (p.imp q))
@@ -94,7 +88,6 @@ theorem Bimodal.Derivable.mp {fc : FrameClass}
 
 /-- Modal necessitation: If `|-! p` then `|-! box p`
     (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.nec {fc : FrameClass}
     {p : Formula Atom}
     (h : Bimodal.Derivable fc [] p) :
@@ -104,7 +97,6 @@ theorem Bimodal.Derivable.nec {fc : FrameClass}
 
 /-- Temporal necessitation: If `|-! p` then `|-! G p`
     (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.temp_nec {fc : FrameClass}
     {p : Formula Atom}
     (h : Bimodal.Derivable fc [] p) :
@@ -115,7 +107,6 @@ theorem Bimodal.Derivable.temp_nec {fc : FrameClass}
 
 /-- Temporal duality: If `|-! p` then `|-! swapTemporal p`
     (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.temp_dual {fc : FrameClass}
     {p : Formula Atom}
     (h : Bimodal.Derivable fc [] p) :
@@ -126,7 +117,6 @@ theorem Bimodal.Derivable.temp_dual {fc : FrameClass}
 
 /-- Weakening: If `Gamma |-! p` and `Gamma <= Delta` then
     `Delta |-! p` (Prop-valued). -/
-@[nolint dupNamespace]
 theorem Bimodal.Derivable.weaken {fc : FrameClass}
     {Gamma Delta : Context Atom} {p : Formula Atom}
     (h : Bimodal.Derivable fc Gamma p)

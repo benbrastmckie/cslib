@@ -173,7 +173,7 @@ private theorem nextNBA_language_eq {State : Type*} (na : NA.Buchi State (Set At
     language (nextNBA na) = ⟨{ xs | xs.tail ∈ language na }⟩ := by
   apply ωLanguage.mem_ext
   intro xs
-  simp only [ωLanguage.mem_def, Set.mem_setOf]
+  simp only [ωLanguage.mem_def, Set.mem_ofPred]
   constructor
   · rintro ⟨ss, ⟨h_start, h_trans⟩, h_acc⟩
     simp only [nextNBA, Set.mem_singleton_iff] at h_start
@@ -258,7 +258,7 @@ private theorem omegaLanguage_next {Atom : Type*} (φ : Formula Atom) :
     (Formula.next φ).omegaLanguage = ⟨{ xs | xs.tail ∈ φ.omegaLanguage }⟩ := by
   apply ωLanguage.mem_ext
   intro xs
-  simp only [Formula.omegaLanguage, ωLanguage.mem_def, Set.mem_setOf_eq, Satisfies]
+  simp only [Formula.omegaLanguage, ωLanguage.mem_def, Set.mem_ofPred_eq, Satisfies]
 
 /-- The ω-language of `next φ` is ω-regular, given IH for `φ`. -/
 theorem Formula.isRegular_next {Atom : Type*} {φ : Formula Atom}
@@ -288,7 +288,7 @@ private theorem omegaLanguage_untl {Atom : Type*} (φ ψ : Formula Atom) :
       ⟨{ v | ∃ j, v.drop j ∈ ψ.omegaLanguage ∧ ∀ k < j, v.drop k ∈ φ.omegaLanguage }⟩ := by
   apply ωLanguage.mem_ext
   intro v
-  simp only [Formula.omegaLanguage, ωLanguage.mem_def, Set.mem_setOf_eq, Satisfies]
+  simp only [Formula.omegaLanguage, ωLanguage.mem_def, Set.mem_ofPred_eq, Satisfies]
 
 /-- The ω-language of any LTL formula over a finite atom set is ω-regular.
 

@@ -378,7 +378,6 @@ abbrev Adjacent (dom : Finset Rat) (x y : Rat) : Prop :=
 Kept logic-local (unchanged); see the module docstring "Status" section. -/
 
 /-- A chronicle: a finite sequence of MCS-labelled rational points with interval sets. -/
-@[nolint dupNamespace]
 structure Chronicle (Atom : Type*) where
   /-- Point labelling: assigns an MCS to each rational time point. -/
   f : Rat → Set (Formula Atom)
@@ -387,41 +386,32 @@ structure Chronicle (Atom : Type*) where
   /-- The finite domain of rational time points. -/
   dom : Finset Rat
 
--- Suppress dupNamespace for auto-generated Chronicle declarations
-attribute [nolint dupNamespace] Chronicle.mk Chronicle.rec
-  Chronicle.f Chronicle.g Chronicle.dom
 
 /-! ## Chronicle Conditions -/
 
 /-- Condition c0: every point in the domain is labelled by an MCS. -/
-@[nolint dupNamespace]
 def Chronicle.c0 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom, Temporal.SetMaximalConsistent (chi.f x)
 
 /-- Condition c1: every interval label is closed under derivation. -/
-@[nolint dupNamespace]
 def Chronicle.c1 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → ClosedUnderDerivation (chi.g x y)
 
 /-- Condition c2: every adjacent interval satisfies the r3-relation. -/
-@[nolint dupNamespace]
 def Chronicle.c2 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → r3Relation (chi.f x) (chi.g x y) (chi.f y)
 
 /-- Condition c2': adjacent intervals satisfy Burgess R3-maximality. -/
-@[nolint dupNamespace]
 def Chronicle.c2' (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, Adjacent chi.dom x y →
     BurgessR3Maximal (chi.f x) (chi.g x y) (chi.f y)
 
 /-- Condition c3: the interval label for [x,z] decomposes as g(x,y) ∩ f(y) ∩ g(y,z). -/
-@[nolint dupNamespace]
 def Chronicle.c3 (chi : Chronicle Atom) : Prop :=
   ∀ x y z : Rat, x ∈ chi.dom → y ∈ chi.dom → z ∈ chi.dom →
     x < y → y < z → chi.g x z = chi.g x y ∩ chi.f y ∩ chi.g y z
 
 /-- Condition c4: for ¬(δ U γ) at x and δ at y, there is a witness z between x and y with ¬γ. -/
-@[nolint dupNamespace]
 def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y →
     ∀ (gamma delta : Formula Atom),
@@ -430,7 +420,6 @@ def Chronicle.c4 (chi : Chronicle Atom) : Prop :=
       ∃ z ∈ chi.dom, x < z ∧ z < y ∧ gamma.neg ∈ chi.f z
 
 /-- Condition c4': the Since-dual of c4: witness for ¬(δ S γ) at x going backwards. -/
-@[nolint dupNamespace]
 def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → y < x →
     ∀ (gamma delta : Formula Atom),
@@ -440,7 +429,6 @@ def Chronicle.c4' (chi : Chronicle Atom) : Prop :=
 
 /-- Condition c5: if δ U γ holds at x, there is a future witness y
 where δ holds and γ U δ holds between. -/
-@[nolint dupNamespace]
 def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),
@@ -450,7 +438,6 @@ def Chronicle.c5 (chi : Chronicle Atom) : Prop :=
           gamma ∈ chi.f z ∧ (gamma U delta) ∈ chi.f z
 
 /-- Condition c5': the Since-dual of c5: past witness for δ S γ at x. -/
-@[nolint dupNamespace]
 def Chronicle.c5' (chi : Chronicle Atom) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : Formula Atom),

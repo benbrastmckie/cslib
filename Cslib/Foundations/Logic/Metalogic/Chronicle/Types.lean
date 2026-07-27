@@ -173,7 +173,6 @@ def R3MaximalSince (I : ChronicleInterface F) (A B C : Set F) : Prop :=
 
 /-- A chronicle: a finite rational domain with point-sets `f` and interval-sets `g`
 (Burgess 1982, Section 2). -/
-@[nolint dupNamespace]
 structure Chronicle (F : Type*) where
   /-- Point-set function assigning a formula set to each rational point. -/
   f : Rat → Set F
@@ -182,45 +181,36 @@ structure Chronicle (F : Type*) where
   /-- Finite set of rational time-points forming the chronicle domain. -/
   dom : Finset Rat
 
--- Suppress dupNamespace for auto-generated Chronicle declarations
-attribute [nolint dupNamespace] Chronicle.mk Chronicle.rec
-  Chronicle.f Chronicle.g Chronicle.dom
 
 /-! ## Chronicle Conditions -/
 
 /-- Condition c0: every point in the domain carries a maximal consistent set. -/
-@[nolint dupNamespace]
 def Chronicle.c0 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x ∈ chi.dom, CISetMaximalConsistent I (chi.f x)
 
 /-- Condition c1: every interval-set `g x y` is closed under derivation. -/
-@[nolint dupNamespace]
 def Chronicle.c1 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → CIClosedUnderDerivation I (chi.g x y)
 
 /-- Condition c2: the interval-set `g x y` r3-relates the point-sets at each pair of
 domain points. -/
-@[nolint dupNamespace]
 def Chronicle.c2 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → r3Relation I (chi.f x) (chi.g x y) (chi.f y)
 
 /-- Condition c2': the interval-set is Burgess-R3-maximal at each adjacent pair of domain
 points. -/
-@[nolint dupNamespace]
 def Chronicle.c2' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, Adjacent chi.dom x y →
     CIBurgessR3Maximal I (chi.f x) (chi.g x y) (chi.f y)
 
 /-- Condition c3: the interval-set over `[x,z]` decomposes as `g x y ∩ f y ∩ g y z` for
 intermediate `y`. -/
-@[nolint dupNamespace]
 def Chronicle.c3 (chi : Chronicle F) : Prop :=
   ∀ x y z : Rat, x ∈ chi.dom → y ∈ chi.dom → z ∈ chi.dom →
     x < y → y < z → chi.g x z = chi.g x y ∩ chi.f y ∩ chi.g y z
 
 /-- Condition c4: if `¬(delta U gamma) ∈ f x` and `delta ∈ f y` then some intermediate
 point witnesses `¬gamma`. -/
-@[nolint dupNamespace]
 def Chronicle.c4 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y →
     ∀ (gamma delta : F),
@@ -230,7 +220,6 @@ def Chronicle.c4 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
 
 /-- Condition c4': the since-variant of c4, witnessing `¬gamma` between `y` and `x` in the
 past direction. -/
-@[nolint dupNamespace]
 def Chronicle.c4' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → y < x →
     ∀ (gamma delta : F),
@@ -240,7 +229,6 @@ def Chronicle.c4' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
 
 /-- Condition c5: if `delta U gamma ∈ f x` then some future `y` witnesses `delta` with
 `gamma` holding at all intermediate points. -/
-@[nolint dupNamespace]
 def Chronicle.c5 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : F),
@@ -251,7 +239,6 @@ def Chronicle.c5 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
 
 /-- Condition c5': the since-variant of c5, witnessing `delta` in the past with `gamma` at
 all intermediate points. -/
-@[nolint dupNamespace]
 def Chronicle.c5' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x ∈ chi.dom,
     ∀ (gamma delta : F),

@@ -94,13 +94,13 @@ theorem Buchi.toMuller_language_eq [Finite State] (a : Buchi State Symbol) :
   constructor
   · -- Muller accepts (infOcc ∩ accept nonempty) → DBA accepts (∃ᶠ k, run xs k ∈ accept)
     intro hM
-    simp only [Set.mem_setOf_eq] at hM
+    simp only [Set.mem_ofPred_eq] at hM
     obtain ⟨q, hq_infOcc, hq_acc⟩ := hM
     rw [mem_infOcc] at hq_infOcc
     exact Frequently.mono hq_infOcc (fun k hk => hk ▸ hq_acc)
   · -- DBA accepts (∃ᶠ k, run xs k ∈ accept) → Muller accepts (infOcc ∩ accept nonempty)
     intro hB
-    simp only [Set.mem_setOf_eq]
+    simp only [Set.mem_ofPred_eq]
     rw [frequently_in_finite_type] at hB
     obtain ⟨q, hq_acc, hq_freq⟩ := hB
     exact ⟨q, hq_freq, hq_acc⟩

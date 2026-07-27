@@ -817,7 +817,7 @@ theorem lemma_2_7 (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_snce_conj_xi_D : ∀ β ∈ B, ∀ α ∈ A, Formula.snce (Formula.and β xi) α ∈ D := by
     intro β hβ α hα; apply h_sup
     show Formula.snce (Formula.and β xi) α ∈ lemma27Seed fc A B C xi eta
-    simp only [lemma27Seed, Set.mem_union, Set.mem_setOf_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
+    simp only [lemma27Seed, Set.mem_union, Set.mem_ofPred_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
   -- Step 5c: Derive snce(xi, α) ∈ D for all α ∈ A (via left_mono_since_H)
   -- From snce(β∧xi, α) ∈ D and ⊢ (β∧xi) → xi: snce(xi, α) ∈ D
   have h_B_nonempty : ∃ β₀ : Formula Atom, β₀ ∈ B := by
@@ -1100,7 +1100,7 @@ theorem lemma_2_8 (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_snce_conj_xi_D : ∀ β ∈ B, ∀ α ∈ A, Formula.snce (Formula.and β xi) α ∈ D := by
     intro β hβ α hα; apply h_sup
     show Formula.snce (Formula.and β xi) α ∈ lemma27Seed fc A B C xi eta
-    simp only [lemma27Seed, Set.mem_union, Set.mem_setOf_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
+    simp only [lemma27Seed, Set.mem_union, Set.mem_ofPred_eq]; right; exact ⟨β, hβ, α, hα, rfl⟩
   -- Step 5c: Derive snce(xi, α) ∈ D for all α ∈ A
   have h_B_nonempty : ∃ β₀ : Formula Atom, β₀ ∈ B := by
     exact ⟨Formula.bot.imp Formula.bot, cud_contains_theorems h_r3m.1

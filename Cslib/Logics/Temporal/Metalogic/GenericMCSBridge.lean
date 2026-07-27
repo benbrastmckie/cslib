@@ -20,12 +20,9 @@ at `S := Temporal.HilbertBX`.
 
 - `derivTreeToList`: `DerivationTree .Base Γ φ → (algDS).Deriv Γ φ`
   (forward, structural induction on the tree).
-- `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
-  (backward helper).
 - `listDerivToTree`: `(algDS).Deriv Γ φ → DerivationTree .Base Γ φ`
   (backward direction).
 - `temporal_deriv_iff_algebraic`: bidirectional equivalence on derivability.
-- `temporal_setConsistent_iff_algebraic`: consistency equivalence.
 - `temporal_setMaxConsistent_iff_algebraic`: MCS equivalence.
 
 ## Architecture
@@ -40,8 +37,9 @@ at `S := Temporal.HilbertBX`.
 **Forward** (tree → algebraic): structural induction on the `DerivationTree`. Each
 constructor maps to a corresponding algebraic derivation operation.
 
-**Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
-`Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
+**Backward** (algebraic → tree): `listDerivToTree` delegates directly to the generic
+`GenericMCS.listDerivToTree` (Foundations), which extracts `d₀ : [] ⊢ listImp Γ φ`, weakens to
+`Γ ⊢ listImp Γ φ`, then applies the generic `GenericMCS.unfoldListImp` to eliminate each layer.
 
 The base (`fc := .Base`) bridge is defined below as a thin delegation to the
 `fc`-parameterized bridge (`*Fc` names): `temporalAlgDS.Deriv Γ φ` and
@@ -183,20 +181,6 @@ lemma derivTreeToListFc {fc : FrameClass}
     simp only [temporalAlgDSFc, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
-/-! ## FC-Parameterized Backward Helper -/
-
-/-- Backward helper (fc-generalized): given `Γ ⊢[fc] listImp Ψ φ` and `Ψ ⊆ Γ`,
-produce `Γ ⊢[fc] φ` by iterating modus ponens with assumption trees. Delegates to the
-generic `unfoldListImp` (Foundations), instantiated at `D := DerivationTree fc` via the
-`HilbertTree` instance above. -/
-noncomputable def unfoldListImpInTreeFc {fc : FrameClass}
-    {Γ : Context Atom} {φ : Formula Atom}
-    (Ψ : Context Atom)
-    (d : DerivationTree fc Γ (listImp Ψ φ))
-    (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
-    DerivationTree fc Γ φ :=
-  GenericMCS.unfoldListImp Ψ d h_sub
-
 /-! ## FC-Parameterized Backward Bridge -/
 
 /-- Backward bridge: `(temporalAlgDSFc fc).Deriv Γ φ → DerivationTree fc Γ φ`.
@@ -245,16 +229,6 @@ lemma derivTreeToList
     (temporalAlgDS (Atom := Atom)).Deriv Γ φ :=
   derivTreeToListFc d
 
-/-- Backward helper: given `Γ ⊢ listImp Ψ φ` (tree) and `Ψ ⊆ Γ`,
-produce `Γ ⊢ φ`. Delegates to `unfoldListImpInTreeFc` at `fc := .Base`. -/
-noncomputable def unfoldListImpInTree
-    {Γ : Context Atom} {φ : Formula Atom}
-    (Ψ : Context Atom)
-    (d : DerivationTree FrameClass.Base Γ (listImp Ψ φ))
-    (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
-    DerivationTree FrameClass.Base Γ φ :=
-  unfoldListImpInTreeFc (fc := .Base) Ψ d h_sub
-
 /-- Backward bridge: `temporalAlgDS.Deriv Γ φ → DerivationTree .Base Γ φ`.
 Delegates to `listDerivToTreeFc` at `fc := .Base` (definitionally equal source, §3.2). -/
 noncomputable def listDerivToTree
@@ -286,14 +260,6 @@ theorem temporal_deriv_iff_algebraic
     exact ⟨listDerivToTree h⟩
 
 /-! ## MCS Equivalences -/
-
-/-- `SetConsistent` under `temporalDerivationSystem` iff under `temporalAlgDS`.
-Delegates to the generic `setConsistent_iff_congr` (Foundations). -/
-theorem temporal_setConsistent_iff_algebraic
-    {Ω : Set (Formula Atom)} :
-    SetConsistent temporalDerivationSystem Ω ↔
-    SetConsistent (temporalAlgDS (Atom := Atom)) Ω :=
-  GenericMCS.setConsistent_iff_congr (fun _ _ => temporal_deriv_iff_algebraic)
 
 /-- `SetMaximalConsistent` under `temporalDerivationSystem` iff under `temporalAlgDS`.
 Delegates to the generic `setMaxConsistent_iff_congr` (Foundations). -/

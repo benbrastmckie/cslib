@@ -22,13 +22,9 @@ at `S := ClosedHilbert (PL.DerivationTree Axioms)`, for any axiom predicate sati
   tag (Foundations) and the generic backward combinators.
 - `derivTreeToList`: `DerivationTree Axioms Γ φ → (propAlgDS Axioms).Deriv Γ φ`
   (forward, structural induction on the tree; 4 arms, no necessitation).
-- `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
-  (backward helper).
 - `listDerivToTree`: `(propAlgDS Axioms).Deriv Γ φ → DerivationTree Axioms Γ φ`
   (backward direction).
 - `pl_deriv_iff_algebraic`: bidirectional equivalence on derivability.
-- `pl_setConsistent_iff_algebraic`: consistency equivalence.
-- `pl_setMaxConsistent_iff_algebraic`: MCS equivalence.
 
 ## Architecture
 
@@ -44,8 +40,9 @@ at `S := ClosedHilbert (PL.DerivationTree Axioms)`, for any axiom predicate sati
 logic has 4 constructors (ax, assumption, modusPonens, weakening); there is no
 `necessitation` arm.
 
-**Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
-`Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
+**Backward** (algebraic → tree): `listDerivToTree` delegates directly to the generic
+`GenericMCS.listDerivToTree` (Foundations), which extracts `d₀ : [] ⊢ listImp Γ φ`, weakens to
+`Γ ⊢ listImp Γ φ`, then applies the generic `GenericMCS.unfoldListImp` to eliminate each layer.
 
 ## Design Note
 
@@ -135,20 +132,6 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
     simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
-/-! ## Backward Helper: Unfold listImp Using Assumptions -/
-
-/-- Backward helper: given `Γ ⊢ listImp Ψ φ` (tree) and `Ψ ⊆ Γ`,
-produce `Γ ⊢ φ` by iterating modus ponens with assumption trees. Delegates to the
-generic `unfoldListImp` (Foundations), instantiated at `D := PL.DerivationTree Axioms`
-via the `HilbertTree` instance above. -/
-noncomputable def unfoldListImpInTree [HasMinimalAxioms Axioms]
-    {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
-    (Ψ : List (PL.Proposition Atom))
-    (d : PL.DerivationTree Axioms Γ (listImp Ψ φ))
-    (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
-    PL.DerivationTree Axioms Γ φ :=
-  GenericMCS.unfoldListImp Ψ d h_sub
-
 /-! ## Backward Direction: Algebraic Deriv → DerivationTree -/
 
 /-- Backward bridge: `(propAlgDS Axioms).Deriv Γ φ → DerivationTree Axioms Γ φ`.
@@ -173,23 +156,5 @@ theorem pl_deriv_iff_algebraic [HasMinimalAxioms Axioms]
     (propDerivationSystem Axioms).Deriv Γ φ ↔
     (propAlgDS Axioms (Atom := Atom)).Deriv Γ φ :=
   GenericMCS.deriv_iff_algebraic_of_forward Iff.rfl derivTreeToList
-
-/-! ## MCS Equivalences -/
-
-/-- `SetConsistent` under `propDerivationSystem Axioms` iff under `propAlgDS Axioms`.
-Delegates to the generic `setConsistent_iff_congr` (Foundations). -/
-theorem pl_setConsistent_iff_algebraic [HasMinimalAxioms Axioms]
-    {Ω : Set (PL.Proposition Atom)} :
-    SetConsistent (propDerivationSystem Axioms) Ω ↔
-    SetConsistent (propAlgDS Axioms (Atom := Atom)) Ω :=
-  GenericMCS.setConsistent_iff_congr (fun _ _ => pl_deriv_iff_algebraic)
-
-/-- `SetMaximalConsistent` under `propDerivationSystem Axioms` iff under `propAlgDS Axioms`.
-Delegates to the generic `setMaxConsistent_iff_congr` (Foundations). -/
-theorem pl_setMaxConsistent_iff_algebraic [HasMinimalAxioms Axioms]
-    {Ω : Set (PL.Proposition Atom)} :
-    SetMaximalConsistent (propDerivationSystem Axioms) Ω ↔
-    SetMaximalConsistent (propAlgDS Axioms (Atom := Atom)) Ω :=
-  GenericMCS.setMaxConsistent_iff_congr (fun _ _ => pl_deriv_iff_algebraic)
 
 end Cslib.Logic.PL

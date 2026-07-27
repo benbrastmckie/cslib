@@ -17,13 +17,6 @@ Extracted from HierarchyCompletion.lean to break a circular dependency
 These theorems do NOT depend on HierarchyInduction.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.unusedDecidableInType false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -32,6 +25,8 @@ open Cslib.Logic.Bimodal
 
 variable {Atom : Type*} [DecidableEq Atom]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- hasSingleUType for case1Psi when a, q, A, B are U-free. -/
 theorem case1_psi_has_single_U_type (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -42,6 +37,8 @@ theorem case1_psi_has_single_U_type (a q x y : Formula Atom)
   all_goals simp_all [u_free_has_single_U_type ha, u_free_has_single_U_type hq,
     u_free_has_single_U_type hx, u_free_has_single_U_type hy]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- hasSingleUType for case2Psi when a, q, A, B are U-free. -/
 theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -55,6 +52,7 @@ theorem case2_psi_has_single_U_type (a q x y : Formula Atom)
 
 /-! ### Case-specific isSeparableWithUType -/
 
+set_option linter.unusedDecidableInType false in
 /-- Case 1 with U-type preservation: S(a∧U(A,B), q) is separable_with_U_type. -/
 theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -65,6 +63,7 @@ theorem case1_sep_with_U_type_gen (a q x y : Formula Atom)
   exact ⟨case1Psi a q x y, hsep, hequiv,
     case1_psi_has_single_U_type a q x y ha hq hx hy⟩
 
+set_option linter.unusedDecidableInType false in
 /-- Case 2 with U-type preservation: S(a∧¬U(A,B), q) is separable_with_U_type. -/
 theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -77,6 +76,7 @@ theorem case2_sep_with_U_type_gen (a q x y : Formula Atom)
 
 /-! ### Combined Helpers with U-type Preservation -/
 
+set_option linter.unusedDecidableInType false in
 /-- S(COMBINED ∧ U(A,B), guard) is separable_with_U_type A B when COMBINED
     satisfies untlUnderBoolOnly and guard is U-free. -/
 theorem snce_combined_U_sep_with_U_type
@@ -95,6 +95,7 @@ theorem snce_combined_U_sep_with_U_type
   exact ⟨case1Psi combined' guard x y, hsep, hequiv,
     case1_psi_has_single_U_type combined' guard x y h_uf hg_uf hx hy⟩
 
+set_option linter.unusedDecidableInType false in
 /-- S(COMBINED ∧ ¬U(A,B), guard) is separable_with_U_type A B when COMBINED
     satisfies untlUnderBoolOnly and guard is U-free. -/
 theorem snce_combined_notU_sep_with_U_type
@@ -115,6 +116,8 @@ theorem snce_combined_notU_sep_with_U_type
 
 /-! ### Private helpers for Cases 5-8 -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Helper: and_left_congr for intEquiv. -/
 theorem and_left_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ₂) :
     intEquiv (Formula.and φ₁ ψ) (Formula.and φ₂ ψ) := by
@@ -124,6 +127,8 @@ theorem and_left_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ 
   · intro h'; have ⟨hφ, hψ⟩ := int_truth_and_iff.mp h'
     exact int_truth_and_iff.mpr ⟨(h m t).mpr hφ, hψ⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- snce preserves intEquiv (local copy). -/
 theorem snce_congr_local {φ₁ ψ₁ φ₂ ψ₂ : Formula Atom}
     (h1 : intEquiv φ₁ φ₂) (h2 : intEquiv ψ₁ ψ₂) :
@@ -134,6 +139,7 @@ theorem snce_congr_local {φ₁ ψ₁ φ₂ ψ₂ : Formula Atom}
   · rintro ⟨s, hst, hφ, hψ⟩
     exact ⟨s, hst, (h1 m s).mpr hφ, fun r hr1 hr2 => (h2 m r).mpr (hψ r hr1 hr2)⟩
 
+set_option linter.unusedDecidableInType false in
 /-- Helper: snce_event_congr for intEquiv (event only). -/
 theorem snce_event_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ₁ φ₂) :
     intEquiv (.snce ψ φ₁) (.snce ψ φ₂) :=
@@ -141,6 +147,7 @@ theorem snce_event_congr_hier {φ₁ φ₂ ψ : Formula Atom} (h : intEquiv φ�
 
 /-! ### Cases 5-8 with U-type Preservation -/
 
+set_option linter.unusedDecidableInType false in
 -- Deep recursive separability proof with multiple equivalence and distribution steps.
 /-- Case 5 with U-type: S(a∧U(A,B), q∨U(A,B)) is separable_with_U_type A B. -/
 theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
@@ -176,7 +183,8 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
               exact int_truth_and_iff.mpr ⟨hnq, (hσ_equiv m t).mp hS⟩
             · intro h; have ⟨hnq, hσ'⟩ := int_truth_and_iff.mp h
               exact int_truth_and_iff.mpr ⟨hnq, (hσ_equiv m t).mpr hσ'⟩
-          apply is_separable_with_U_type_of_equiv (snce_event_congr_hier (and_left_congr_hier hY_congr))
+          apply is_separable_with_U_type_of_equiv
+            (snce_event_congr_hier (and_left_congr_hier hY_congr))
           have h_nqσ_bool : untlUnderBoolOnly (Formula.and (Formula.neg q) σ) x y := by
             change untlUnderBoolOnly (.imp (.imp (Formula.neg q) (.imp σ .bot)) .bot) x y
             refine ⟨⟨?_, case1_psi_bool_only a q x y ha hq hx hy, trivial⟩, trivial⟩
@@ -227,6 +235,7 @@ theorem case5_sep_with_U_type_Z_gen (a q x y : Formula Atom)
         (Formula.and (Formula.and x (Formula.or q (.untl y x))) (d21Sep a q x y))
         q x y hx hy hx' hy' hq h_event_bool
 
+set_option linter.unusedDecidableInType false in
 /-- Case 8 with U-type: S(a∧¬U, q∨¬U) is separable_with_U_type A B. -/
 theorem case8_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -236,13 +245,18 @@ theorem case8_sep_with_U_type_Z_gen (a q x y : Formula Atom)
       (Formula.and a (Formula.neg (.untl y x)))) x y := by
   apply is_separable_with_U_type_of_equiv (case8_equiv_Z a q x y)
   apply and_separable_with_U_type
-  · have hg : isUFree (Formula.neg (.bot : Formula Atom)) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree]
+  · have hg : isUFree (Formula.neg (.bot : Formula Atom)) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree]
     exact case2_sep_with_U_type_gen a (Formula.neg .bot) x y ha hg hx hy hx' hy'
   · apply neg_separable_with_U_type
-    have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
-    have hna_uf : isUFree (Formula.neg a) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
-    exact case5_sep_with_U_type_Z_gen (Formula.neg q) (Formula.neg a) x y hnq_uf hna_uf hx hy hx' hy'
+    have hnq_uf : isUFree (Formula.neg q) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+    have hna_uf : isUFree (Formula.neg a) = true := by
+      simp [Formula.neg, PropositionalConnectives.neg, isUFree, ha]
+    exact case5_sep_with_U_type_Z_gen (Formula.neg q) (Formula.neg a) x y hnq_uf hna_uf
+      hx hy hx' hy'
 
+set_option linter.unusedDecidableInType false in
 -- Deep recursive separability proof with distribution, case splitting, and vacuous elimination.
 /-- S(ev, q∨U(A,B)) is separable_with_U_type A B when ev is U-free. -/
 theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
@@ -306,7 +320,8 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
       apply h_or_bool
       · exact ⟨hev_uf, hQ_uf_D3⟩
       · exact case1_psi_bool_only _ _ x y h_nqSev_uf_D3 hQ_uf_D3 hx hy
-    have h_d21_equiv : intEquiv (.snce (qZ x y (Formula.neg q)) (case3Alpha ev q x y)) d21_local := by
+    have h_d21_equiv :
+        intEquiv (.snce (qZ x y (Formula.neg q)) (case3Alpha ev q x y)) d21_local := by
       have h_step1 := since_distrib_or_left ev
         (Formula.and (Formula.and (Formula.neg q) (.snce q ev)) (Formula.or q (.untl y x)))
         (qZ x y (Formula.neg q))
@@ -379,6 +394,7 @@ theorem snce_Ufree_event_qU_guard_sep_with_U_type (ev q x y : Formula Atom)
         (Formula.and (Formula.and x (Formula.or q (.untl y x))) d21_local)
         q x y hx hy hx' hy' hq h_event_bool
 
+set_option linter.unusedDecidableInType false in
 /-- Case 6 with U-type: S(a∧¬U, q∨U) is separable_with_U_type A B. -/
 theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
     (ha : isUFree a = true) (hq : isUFree q = true)
@@ -395,7 +411,8 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
         exact ⟨.snce (Formula.and q (Formula.neg x)) a,
           by simp [isSyntacticallySeparated, ha, hg_uf], int_equiv_refl _,
           ⟨u_free_has_single_U_type ha, u_free_has_single_U_type hg_uf⟩⟩
-      · exact u_free_separable_with_type (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hx])
+      · exact u_free_separable_with_type
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hx])
     · apply neg_separable_with_U_type
       exact and_separable_with_U_type
         (u_free_separable_with_type hy)
@@ -449,14 +466,17 @@ theorem case6_sep_with_U_type_Z_gen (a q x y : Formula Atom)
       exact snce_Ufree_event_qU_guard_sep_with_U_type _ q x y hev_uf hq hx hy hx' hy'
     · exact case5_sep_with_U_type_Z_gen _ q x y hSTUFF_uf hq hx hy hx' hy'
 
+set_option linter.unusedDecidableInType false in
 /-- S(ev, q∨¬U) is separable_with_U_type when ev is U-free. -/
 theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
     (hev_uf : isUFree ev = true) (hq : isUFree q = true)
     (hx : isUFree x = true) (hy : isUFree y = true)
     (hx' : isSFree x = true) (hy' : isSFree y = true) :
     isSeparableWithUType (.snce (Formula.or q (Formula.neg (.untl y x))) ev) x y := by
-  have hna_uf : isUFree (Formula.neg ev) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
-  have hnq_uf : isUFree (Formula.neg q) = true := by simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
+  have hna_uf : isUFree (Formula.neg ev) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf]
+  have hnq_uf : isUFree (Formula.neg q) = true := by
+    simp [Formula.neg, PropositionalConnectives.neg, isUFree, hq]
   have hanq_uf : isUFree (Formula.and (Formula.neg ev) (Formula.neg q)) = true := by
     simp [Formula.neg, PropositionalConnectives.neg, isUFree, hev_uf, hq]
   have ⟨hequiv1, hsep1⟩ := case1_psi_properties
@@ -496,11 +516,12 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
       · exact (hguard1 s hss1 hst) hev_s
   · intro hand
     have ⟨hnotH, hnotPsi1⟩ := int_truth_and_iff.mp hand
-    have hnotS1 : ¬ intTruth m t (.snce (Formula.neg ev) (Formula.and (Formula.and (Formula.neg ev) (Formula.neg q))
-        (.untl y x))) :=
+    have hnotS1 : ¬ intTruth m t (.snce (Formula.neg ev)
+        (Formula.and (Formula.and (Formula.neg ev) (Formula.neg q)) (.untl y x))) :=
       fun hS1 => hnotPsi1 hS1
     by_contra hnotS
-    rcases int_truth_or_iff.mp ((neg_since_equiv ev (Formula.or q (Formula.neg (.untl y x))) m t).mp hnotS) with hH | hS_neg
+    rcases int_truth_or_iff.mp
+      ((neg_since_equiv ev (Formula.or q (Formula.neg (.untl y x))) m t).mp hnotS) with hH | hS_neg
     · exact hnotH hH
     · obtain ⟨s, hst, hevent, hguard⟩ := hS_neg
       have ⟨hna_s, hnotQnU_s⟩ := int_truth_and_iff.mp hevent
@@ -512,6 +533,7 @@ theorem snce_Ufree_event_qNotU_guard_sep_with_U_type (ev q x y : Formula Atom)
       exact hnotS1 ⟨s, hst, int_truth_and_iff.mpr
         ⟨int_truth_and_iff.mpr ⟨hna_s, hnotQ_s⟩, hnotNotU_s⟩, hguard⟩
 
+set_option linter.unusedDecidableInType false in
 -- Deep recursive separability proof with rearrangement, distribution, and case 8 subcase.
 /-- Case 7 with U-type: S(a∧U, q∨¬U) is separable_with_U_type A B. -/
 theorem case7_sep_with_U_type_Z_gen (a q x y : Formula Atom)

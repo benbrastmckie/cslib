@@ -72,10 +72,6 @@ generic `lemma_2_7_since_seed_consistent`/`lemma_2_7_since`/`lemma_2_8_since_see
 
 namespace Cslib.Logic.Metalogic.Chronicle
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.unusedSimpArgs false
-
 variable {F : Type*}
 
 /-! ## Purely Definitional Notions (parameterized directly by primitives)
@@ -416,6 +412,7 @@ noncomputable def l27sC5EventList (B C : Set F) (xi : F) (L : List F) : List F :
       some (Classical.choose (Classical.choose_spec h).2)
     else none)
 
+set_option linter.flexible false in
 /-- Elements of `l27sC5EventList` are in `C`. -/
 theorem l27s_c5_event_list_mem {B C : Set F} {xi : F}
     {L : List F} {γ : F} (hγ : γ ∈ l27sC5EventList I B C xi L) : γ ∈ C := by
@@ -435,6 +432,7 @@ noncomputable def l27sB5GuardList (B C : Set F) (xi : F) (L : List F) : List F :
       some (Classical.choose h)
     else none)
 
+set_option linter.flexible false in
 /-- Elements of `l27sB5GuardList` are in `B`. -/
 theorem l27s_b5_guard_list_mem {B C : Set F} {xi : F}
     {L : List F} {β : F} (hβ : β ∈ l27sB5GuardList I B C xi L) : β ∈ B := by
@@ -486,6 +484,7 @@ Both logics prove `Sig ⊆ deductiveClosure Sig` and
 `ClosedUnderDerivation (deductiveClosure Sig)` by the same argument purely in terms of the
 abstract `Deriv` family, so these factor generically with no new interface fields. -/
 
+set_option linter.flexible false in
 /-- Every element of `Sig` is in its own deductive closure (singleton witness list). -/
 theorem subsetDeductiveClosure (Sig : Set F) : Sig ⊆ deductiveClosure I Sig := by
   intro φ hφ
@@ -528,6 +527,7 @@ theorem deductiveClosureClosedUnderDerivation (Sig : Set F) :
 Ported from Temporal's `fc := .Base` reading (the two logics' bodies diverge 100%
 mechanically modulo `fc`-threading and notation). -/
 
+set_option linter.flexible false in
 /-- Since-direction seed consistency. Uses the BX5'+BX7'+BX13' chain (via `I`'s
 apparatus fields) to show the `lemma27SinceSeed` is consistent whenever `xi ∉ B`. -/
 theorem lemma_2_7_since_seed_consistent {A B C : Set F}
@@ -806,6 +806,7 @@ Ported from Temporal's `fc := .Base` reading, mirroring the `lemma_2_7_since` po
 Uses the same BX5'+BX7'+BX13' chain but eliminates the D1/D2 cases via `α'` (the negated
 disjunction `¬(eta ∨ (xi ∧ snce(xi, eta)))`) instead of `xi ∉ B`. -/
 
+set_option linter.flexible false in
 /-- Since-direction seed consistency for Lemma 2.8: same seed as `lemma_2_7_since_seed_consistent`
 but proved via `¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A` instead of `xi ∉ B`. -/
 theorem lemma_2_8_since_seed_consistent {A B C : Set F}

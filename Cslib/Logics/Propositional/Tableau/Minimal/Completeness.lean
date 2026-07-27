@@ -68,7 +68,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 Delegates to `truthLemma minScheme`. The parametric sorry in `truthLemma` is the single
 deferred completeness obligation.
 
-**Route (a) frame (task 317 phase 1)**: takes `edges`/`hfimp` and installs
+**Route (a) frame**: takes `edges`/`hfimp` and installs
 `intAccessPreorder edges` as the countermodel frame via `letI` (mirrors
 `Intuitionistic.Completeness.intTruthLemma`).
 
@@ -94,7 +94,7 @@ lemma minTruthLemma (b : IBranch Atom) (edges : IEdges)
 Delegates to `openBranch_countermodel minScheme`. The structural sorries in
 `openBranch_countermodel` remain deferred.
 
-**Route (a) frame (task 317 phase 1/3)**: mirrors
+**Route (a) frame**: mirrors
 `Intuitionistic.Completeness.intuitionisticOpenBranch_countermodel`'s existential exposure of
 `edges`.
 
@@ -112,9 +112,9 @@ tableau closes on `φ`.
 
 Delegates to `tableau_complete minScheme`. The remaining sorry bridges `MValid φ` to the
 per-`edges` forcing hypothesis `∀ edges b, @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (minBranchBotForces b) 0 φ` required by `tableau_complete` (task 317
-phase 4, Route (a), mirrors `intuitionisticTableau_complete`); this is the core deferred
-completeness obligation. -/
+(intExtractValuation b) (minBranchBotForces b) 0 φ` required by `tableau_complete`
+(Route (a), mirrors `intuitionisticTableau_complete`); this is the core deferred completeness
+obligation. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme

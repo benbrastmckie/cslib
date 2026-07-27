@@ -63,7 +63,7 @@ Proof by structural induction on `d`:
   conclusion is a subformula of the major premise's conclusion, transitivity completes the proof. -/
 -- Helper: lift grounded conclusion through a subformula step.
 -- If d has conclusion P and P.IsSubformula Q, and Q is grounded in G/T, then so is P.
-private def liftGrounded {G : Ctx Atom} {P Q : Proposition Atom}
+private theorem liftGrounded {G : Ctx Atom} {P Q : Proposition Atom}
     (hPQ : P.IsSubformula Q)
     (hg : (∃ C ∈ G, Q.IsSubformula C) ∨ (∃ C ∈ T, Q.IsSubformula C)) :
     (∃ C ∈ G, P.IsSubformula C) ∨ (∃ C ∈ T, P.IsSubformula C) := by

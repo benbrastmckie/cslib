@@ -150,7 +150,7 @@ below, not the `pdftotext` extraction.
   "To address this problem, we introduce the structural rules in Figure 4 ... The first ... is
   sound in the constructive setting").
 
-## `NestedProof.mono`: Index-Transport Precursor to Phase 19's Weakening
+## `NestedProof.mono`: Index-Transport Precursor to the Content-Weakening Admissibility
 
 The plan's task list asks to "land weakening/`.mono` transport," mirroring the
 `SeqProof.mono`/`LJProof.mono`/`CutFreeLJProof.mono` weakening-transport family in
@@ -159,11 +159,12 @@ as the **index-equality transport** (`Γ = Γ' → NestedProof Γ → NestedProo
 (hence height-non-increasing, matching this phase's own verification criterion literally) --
 **not yet** the genuine content-weakening admissible rule (Figure `(3.1)`'s `w`: `Γ{∅} / Γ{Δ•}`
 for arbitrary `Δ`, which the source itself states is proved admissible only much later, alongside
-`nec`/`cut`). The plan's own Phase 19 ("Height-preserving admissibility of the structural rules")
-explicitly names its first task "extend Phase 10's `.mono` to the height-preserving statement" --
-confirming this phase's `.mono` is deliberately the narrower precursor, not a premature (and
-unbudgeted, within this phase's 2.5-hour scope) attempt at the full admissibility induction over
-all eighteen constructors, which is Phase 19's dedicated `Admissibility.lean`. Separately, and for
+`nec`/`cut`). The governing plan's own "Height-preserving admissibility of the structural rules"
+task explicitly names its first item "extend Phase 10's `.mono` to the height-preserving
+statement" -- confirming this phase's `.mono` is deliberately the narrower precursor, not a
+premature (and unbudgeted, within this phase's 2.5-hour scope) attempt at the full admissibility
+induction over all eighteen constructors, which is the dedicated `Admissibility.lean`. Separately,
+and for
 free: since `NCS5` is realised as five *additional* constructors on the same `NestedProof`
 inductive rather than a new type, every `NCK′` proof is automatically an `NCS5` proof
 of unchanged height with no transport lemma needed for that inclusion direction.
@@ -330,7 +331,7 @@ def NestedProof.height : ∀ {Γ : NestedFull Atom}, NestedProof Γ → Nat
   | _, .bStruct _ _ _ p => p.height + 1
   | _, .cut _ _ p q => max p.height q.height + 1
 
-/-! ## `NestedProof.mono`: Index-Transport Precursor to Phase 19's Weakening
+/-! ## `NestedProof.mono`: Index-Transport Precursor to the Content-Weakening Admissibility
 
 See the module docstring's "`NestedProof.mono`" section for why this is the index-equality
 transport precursor to the later content-weakening admissibility theorem, not that theorem

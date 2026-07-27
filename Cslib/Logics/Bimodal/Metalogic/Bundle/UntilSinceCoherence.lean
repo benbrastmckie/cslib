@@ -18,9 +18,6 @@ Backward Until and backward Since lemmas for FMCS families over Int.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -33,12 +30,14 @@ variable {Atom : Type*}
 /-! ## Reflexive Base Case -/
 
 set_option warn.sorry false in
-theorem backward_until_reflexive {M : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem backward_until_reflexive {M : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_psi : ψ ∈ M) : Formula.untl φ ψ ∈ M := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
-theorem backward_since_reflexive {M : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem backward_since_reflexive {M : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_psi : ψ ∈ M) : Formula.snce φ ψ ∈ M := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 

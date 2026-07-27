@@ -26,12 +26,6 @@ and maximal consistent sets.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/UltrafilterMCS.lean
 -/
 
-set_option linter.style.show false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.UltrafilterMCS
@@ -96,7 +90,8 @@ theorem mcsToSet_top {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent Fra
   exact ⟨(Formula.bot : Formula Atom).imp Formula.bot, h, rfl⟩
 
 /-- The bottom element of the Lindenbaum algebra is not in any MCS image. -/
-theorem mcsToSet_bot_not_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Γ) :
+theorem mcsToSet_bot_not_mem
+    {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Γ) :
     ⊥ ∉ mcsToSet Γ := by
   intro ⟨φ, h_mem, h_eq⟩
   have h_le : toQuot φ ≤ (⊥ : LindenbaumAlg Atom) := by rw [← h_eq]
@@ -104,13 +99,16 @@ theorem mcsToSet_bot_not_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsis
   obtain ⟨d_neg⟩ := h_derives
   have h_phi_incons : ¬Consistent (fc := FrameClass.Base) [φ] := by
     intro h_cons
-    have d_phi : DerivationTree FrameClass.Base [φ] φ := DerivationTree.assumption [φ] φ (by simp)
-    have d_bot : DerivationTree FrameClass.Base [φ] Formula.bot := DerivationTree.modus_ponens [φ] φ Formula.bot
-      (DerivationTree.weakening [] [φ] (Formula.neg φ) d_neg (by simp)) d_phi
+    have d_phi : DerivationTree FrameClass.Base [φ] φ :=
+      DerivationTree.assumption [φ] φ (by simp)
+    have d_bot : DerivationTree FrameClass.Base [φ] Formula.bot :=
+      DerivationTree.modus_ponens [φ] φ Formula.bot
+        (DerivationTree.weakening [] [φ] (Formula.neg φ) d_neg (by simp)) d_phi
     exact h_cons ⟨d_bot⟩
   have h_cons : Consistent (fc := FrameClass.Base) [φ] := h_mcs.1 [φ] (by simp [h_mem])
   exact h_phi_incons h_cons
 
+set_option linter.flexible false in
 /-- The MCS image is upward closed: if `a ∈ mcsToSet Γ` and `a ≤ b`, then `b ∈ mcsToSet Γ`. -/
 theorem mcsToSet_mem_of_le {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Γ)
     {a b : LindenbaumAlg Atom} (ha : a ∈ mcsToSet Γ) (h_le : a ≤ b) :
@@ -149,9 +147,12 @@ theorem mcsToSet_mem_of_le {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsiste
       have d_neg_ψ' := DerivationTree.weakening Γ' (φ :: Γ') ψ.neg d_neg_ψ
         (fun x hx => List.mem_cons_of_mem φ hx)
       have d_imp' := DerivationTree.weakening [] (φ :: Γ') (φ.imp ψ) d_imp (by simp)
-      have d_φ : DerivationTree FrameClass.Base (φ :: Γ') φ := DerivationTree.assumption (φ :: Γ') φ (by simp)
-      have d_ψ : DerivationTree FrameClass.Base (φ :: Γ') ψ := DerivationTree.modus_ponens (φ :: Γ') φ ψ d_imp' d_φ
-      have d_bot'' : DerivationTree FrameClass.Base (φ :: Γ') Formula.bot := DerivationTree.modus_ponens (φ :: Γ') ψ Formula.bot d_neg_ψ' d_ψ
+      have d_φ : DerivationTree FrameClass.Base (φ :: Γ') φ :=
+        DerivationTree.assumption (φ :: Γ') φ (by simp)
+      have d_ψ : DerivationTree FrameClass.Base (φ :: Γ') ψ :=
+        DerivationTree.modus_ponens (φ :: Γ') φ ψ d_imp' d_φ
+      have d_bot'' : DerivationTree FrameClass.Base (φ :: Γ') Formula.bot :=
+        DerivationTree.modus_ponens (φ :: Γ') ψ Formula.bot d_neg_ψ' d_ψ
       have h_cons_list : Consistent (fc := FrameClass.Base) (φ :: Γ') := by
         apply h_mcs.1 (φ :: Γ')
         intro χ hχ
@@ -162,6 +163,7 @@ theorem mcsToSet_mem_of_le {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsiste
       exact h_cons_list ⟨d_bot''⟩
     exact ⟨ψ, h_psi_in, rfl⟩
 
+set_option linter.flexible false in
 /-- The MCS image is closed under infimum (conjunction). -/
 theorem mcsToSet_inf_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Γ)
     {a b : LindenbaumAlg Atom} (ha : a ∈ mcsToSet Γ) (hb : b ∈ mcsToSet Γ) :
@@ -194,7 +196,7 @@ theorem mcsToSet_inf_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent
     have d_bot' := DerivationTree.weakening L ((φ.and ψ) :: Γ') Formula.bot d_bot h_L_sub
     have d_neg := deductionTheorem Γ' (φ.and ψ) Formula.bot d_bot'
     have d_neg' := DerivationTree.weakening Γ' (ψ :: φ :: Γ') (φ.and ψ).neg d_neg
-      (fun x hx => by simp; right; right; exact hx)
+      (fun x hx => by simp only [List.mem_cons]; right; right; exact hx)
     have d_φ : (ψ :: φ :: Γ') ⊢ᴮ φ := DerivationTree.assumption (ψ :: φ :: Γ') φ (by simp)
     have d_ψ : (ψ :: φ :: Γ') ⊢ᴮ ψ := DerivationTree.assumption (ψ :: φ :: Γ') ψ (by simp)
     have d_and : (ψ :: φ :: Γ') ⊢ᴮ φ.and ψ := by
@@ -205,7 +207,8 @@ theorem mcsToSet_inf_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent
       have d_ψ' : (φ.imp ψ.neg :: ψ :: φ :: Γ') ⊢ᴮ ψ :=
         DerivationTree.assumption _ _ (by simp)
       have d_neg_ψ' := DerivationTree.modus_ponens (φ.imp ψ.neg :: ψ :: φ :: Γ') φ ψ.neg d_hyp d_φ'
-      have d_bot' := DerivationTree.modus_ponens (φ.imp ψ.neg :: ψ :: φ :: Γ') ψ Formula.bot d_neg_ψ' d_ψ'
+      have d_bot' :=
+        DerivationTree.modus_ponens (φ.imp ψ.neg :: ψ :: φ :: Γ') ψ Formula.bot d_neg_ψ' d_ψ'
       exact deductionTheorem (ψ :: φ :: Γ') (φ.imp ψ.neg) Formula.bot d_bot'
     have d_bot'' := DerivationTree.modus_ponens (ψ :: φ :: Γ') (φ.and ψ) Formula.bot d_neg' d_and
     have h_cons : Consistent (fc := FrameClass.Base) (ψ :: φ :: Γ') := by
@@ -221,6 +224,7 @@ theorem mcsToSet_inf_mem {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent
   rw [h_a_eq, h_b_eq]
   rfl
 
+set_option linter.flexible false in
 /-- For every element `a`, either `a` or `aᶜ` belongs to the MCS image (ultrafilter dichotomy). -/
 theorem mcsToSet_compl_or {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Γ)
     (a : LindenbaumAlg Atom) : a ∈ mcsToSet Γ ∨ aᶜ ∈ mcsToSet Γ := by
@@ -283,7 +287,8 @@ theorem mcsToSet_compl_or {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsisten
         have d_φ := DerivationTree.modus_ponens Γ'' φ.neg.neg φ d_dne' d_neg_neg
         have d_neg_combined := DerivationTree.weakening Γ' (Γ'' ++ Γ') φ.neg d_neg (by simp)
         have d_φ_combined := DerivationTree.weakening Γ'' (Γ'' ++ Γ') φ d_φ (by simp)
-        have d_bot_combined := DerivationTree.modus_ponens (Γ'' ++ Γ') φ Formula.bot d_neg_combined d_φ_combined
+        have d_bot_combined :=
+          DerivationTree.modus_ponens (Γ'' ++ Γ') φ Formula.bot d_neg_combined d_φ_combined
         have h_combined_cons : Consistent (fc := FrameClass.Base) (Γ'' ++ Γ') := by
           apply h_mcs.1 (Γ'' ++ Γ')
           intro χ hχ
@@ -295,6 +300,7 @@ theorem mcsToSet_compl_or {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsisten
       use φ.neg, h_neg_in
       rfl
 
+set_option linter.flexible false in
 /-- An element and its complement cannot both belong to the MCS image. -/
 theorem mcsToSet_compl_not {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsistent FrameClass.Base Γ)
     {a : LindenbaumAlg Atom} (ha : a ∈ mcsToSet Γ) : aᶜ ∉ mcsToSet Γ := by
@@ -306,7 +312,8 @@ theorem mcsToSet_compl_not {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsiste
   obtain ⟨d_imp⟩ := (h_le1 : Derives ψ φ.neg)
   have d_φ : [φ, ψ] ⊢ᴮ φ := DerivationTree.assumption [φ, ψ] φ (by simp)
   have d_ψ : [φ, ψ] ⊢ᴮ ψ := DerivationTree.assumption [φ, ψ] ψ (by simp)
-  have d_imp' : [φ, ψ] ⊢ᴮ ψ.imp φ.neg := DerivationTree.weakening [] [φ, ψ] (ψ.imp φ.neg) d_imp (by simp)
+  have d_imp' : [φ, ψ] ⊢ᴮ ψ.imp φ.neg :=
+    DerivationTree.weakening [] [φ, ψ] (ψ.imp φ.neg) d_imp (by simp)
   have d_neg : [φ, ψ] ⊢ᴮ φ.neg := DerivationTree.modus_ponens [φ, ψ] ψ φ.neg d_imp' d_ψ
   have d_bot : [φ, ψ] ⊢ᴮ Formula.bot := DerivationTree.modus_ponens [φ, ψ] φ Formula.bot d_neg d_φ
   have h_cons : Consistent (fc := FrameClass.Base) [φ, ψ] := by
@@ -323,7 +330,8 @@ theorem mcsToSet_compl_not {Γ : Set (Formula Atom)} (h_mcs : SetMaximalConsiste
 -/
 
 /-- Construct a Boolean algebra ultrafilter from an MCS. -/
-def mcsToUltrafilter (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Omega}) :
+def mcsToUltrafilter
+    (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Omega}) :
     BoolAlgUltrafilter (LindenbaumAlg Atom) where
   carrier := mcsToSet Γ.val
   top_mem := mcsToSet_top Γ.property
@@ -334,7 +342,8 @@ def mcsToUltrafilter (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent F
   compl_not := fun _ ha => mcsToSet_compl_not Γ.property ha
 
 @[simp]
-theorem mcsToUltrafilter_carrier (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Omega}) :
+theorem mcsToUltrafilter_carrier
+    (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Omega}) :
     (mcsToUltrafilter Γ).carrier = mcsToSet Γ.val := rfl
 
 /-!
@@ -348,12 +357,14 @@ theorem fold_le_of_derives (L : List (Formula Atom)) (ψ : Formula Atom)
   induction L generalizing ψ with
   | nil =>
     simp only [List.foldl_nil]
-    show topQuot ≤ toQuot ψ
+    change topQuot ≤ toQuot ψ
     unfold topQuot
-    show Derives ((Formula.bot : Formula Atom).imp Formula.bot) ψ
+    change Derives ((Formula.bot : Formula Atom).imp Formula.bot) ψ
     unfold Derives
-    have d_s : DerivationTree FrameClass.Base (Atom := Atom) [] (ψ.imp (((Formula.bot : Formula Atom).imp Formula.bot).imp ψ)) :=
-      DerivationTree.axiom [] _ (Axiom.imp_s ψ ((Formula.bot : Formula Atom).imp Formula.bot)) trivial
+    have d_s : DerivationTree FrameClass.Base (Atom := Atom) []
+        (ψ.imp (((Formula.bot : Formula Atom).imp Formula.bot).imp ψ)) :=
+      DerivationTree.axiom [] _
+        (Axiom.imp_s ψ ((Formula.bot : Formula Atom).imp Formula.bot)) trivial
     exact ⟨DerivationTree.modus_ponens [] _ _ d_s h⟩
   | cons φ L' ih =>
     simp only [List.foldl_cons]
@@ -374,7 +385,7 @@ theorem fold_le_of_derives (L : List (Formula Atom)) (ψ : Formula Atom)
     rw [fold_from_x L' (⊤ ⊓ toQuot φ)]
     simp only [top_inf_eq]
     have mp_le : toQuot φ ⊓ toQuot (φ.imp ψ) ≤ toQuot ψ := by
-      show andQuot (toQuot φ) (toQuot (φ.imp ψ)) ≤ toQuot ψ
+      change andQuot (toQuot φ) (toQuot (φ.imp ψ)) ≤ toQuot ψ
       change Derives (φ.and (φ.imp ψ)) ψ
       unfold Derives
       have h_ctx : DerivationTree FrameClass.Base [φ.and (φ.imp ψ)] ψ := by
@@ -402,7 +413,8 @@ theorem fold_le_of_derives (L : List (Formula Atom)) (ψ : Formula Atom)
 ## Ultrafilter to MCS Direction
 -/
 
-/-- Preimage of an ultrafilter under the quotient map: the set of formulas whose class is in `uf`. -/
+/-- Preimage of an ultrafilter under the quotient map: the set of formulas whose class is in
+`uf`. -/
 def ultrafilterToSet (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) : Set (Formula Atom) :=
   { φ | toQuot φ ∈ uf.carrier }
 
@@ -426,7 +438,7 @@ theorem ultrafilterToSet_mcs (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) :
             List.foldl (fun acc φ => acc ⊓ toQuot φ) x N ∈ uf.carrier := by
           intro N
           induction N with
-          | nil => intro _ x hx; simp; exact hx
+          | nil => intro _ x hx; simp only [List.foldl_nil]; exact hx
           | cons m N ih_N =>
             intro hN x hx
             simp only [List.foldl_cons]
@@ -451,8 +463,10 @@ theorem ultrafilterToSet_mcs (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) :
     have h_neg_phi : toQuot φ.neg ∈ uf.carrier := h_compl
     have h_neg_in : φ.neg ∈ ultrafilterToSet uf := h_neg_phi
     intro h_cons
-    have h_neg_in_insert : φ.neg ∈ insert φ (ultrafilterToSet uf) := Set.mem_insert_of_mem φ h_neg_in
-    have h_phi_in_insert : φ ∈ insert φ (ultrafilterToSet uf) := Set.mem_insert φ (ultrafilterToSet uf)
+    have h_neg_in_insert : φ.neg ∈ insert φ (ultrafilterToSet uf) :=
+      Set.mem_insert_of_mem φ h_neg_in
+    have h_phi_in_insert : φ ∈ insert φ (ultrafilterToSet uf) :=
+      Set.mem_insert φ (ultrafilterToSet uf)
     have h_L_cons : Consistent (fc := FrameClass.Base) [φ, φ.neg] := by
       apply h_cons [φ, φ.neg]
       intro ψ hψ
@@ -469,9 +483,12 @@ theorem ultrafilterToSet_mcs (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) :
 ## Bijection
 -/
 
+set_option linter.flexible false in
 theorem SetMaximalConsistent.ultrafilter_correspondence :
-    ∃ (f : {Γ : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Γ} → BoolAlgUltrafilter (LindenbaumAlg Atom))
-      (g : BoolAlgUltrafilter (LindenbaumAlg Atom) → {Γ : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Γ}),
+    ∃ (f : {Γ : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Γ} →
+        BoolAlgUltrafilter (LindenbaumAlg Atom))
+      (g : BoolAlgUltrafilter (LindenbaumAlg Atom) →
+        {Γ : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Γ}),
       Function.LeftInverse g f ∧ Function.RightInverse g f := by
   use mcsToUltrafilter
   use fun uf => ⟨ultrafilterToSet uf, ultrafilterToSet_mcs uf⟩
@@ -509,11 +526,14 @@ theorem SetMaximalConsistent.ultrafilter_correspondence :
           exact List.mem_filter.mpr ⟨hχ, by simpa⟩
       have d_bot' := DerivationTree.weakening L (φ :: Γ') Formula.bot d_bot h_L_sub
       have d_neg := deductionTheorem Γ' φ Formula.bot d_bot'
-      have d_neg' := DerivationTree.weakening Γ' (ψ :: Γ') φ.neg d_neg (fun x hx => List.mem_cons_of_mem ψ hx)
+      have d_neg' :=
+        DerivationTree.weakening Γ' (ψ :: Γ') φ.neg d_neg (fun x hx => List.mem_cons_of_mem ψ hx)
       have d_ψ : (ψ :: Γ') ⊢ᴮ ψ := DerivationTree.assumption (ψ :: Γ') ψ (by simp)
-      have d_imp' : (ψ :: Γ') ⊢ᴮ ψ.imp φ := DerivationTree.weakening [] (ψ :: Γ') (ψ.imp φ) d_imp (by simp)
+      have d_imp' : (ψ :: Γ') ⊢ᴮ ψ.imp φ :=
+        DerivationTree.weakening [] (ψ :: Γ') (ψ.imp φ) d_imp (by simp)
       have d_φ : (ψ :: Γ') ⊢ᴮ φ := DerivationTree.modus_ponens (ψ :: Γ') ψ φ d_imp' d_ψ
-      have d_bot'' : (ψ :: Γ') ⊢ᴮ Formula.bot := DerivationTree.modus_ponens (ψ :: Γ') φ Formula.bot d_neg' d_φ
+      have d_bot'' : (ψ :: Γ') ⊢ᴮ Formula.bot :=
+        DerivationTree.modus_ponens (ψ :: Γ') φ Formula.bot d_neg' d_φ
       have h_cons : Consistent (fc := FrameClass.Base) (ψ :: Γ') := by
         apply Γ.property.1 (ψ :: Γ')
         intro χ hχ
@@ -542,7 +562,8 @@ theorem SetMaximalConsistent.ultrafilter_correspondence :
 ## Helper Lemmas for Ultrafilter Properties
 -/
 
-theorem BoolAlgUltrafilter.compl_xor {α : Type*} [BooleanAlgebra α] (uf : BoolAlgUltrafilter α) (a : α) :
+theorem BoolAlgUltrafilter.compl_xor
+    {α : Type*} [BooleanAlgebra α] (uf : BoolAlgUltrafilter α) (a : α) :
     (a ∈ uf.carrier ∧ aᶜ ∉ uf.carrier) ∨ (a ∉ uf.carrier ∧ aᶜ ∈ uf.carrier) := by
   cases uf.compl_or a with
   | inl h => exact Or.inl ⟨h, uf.compl_not a h⟩
@@ -592,8 +613,10 @@ noncomputable def ultrafilterToMcs (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)
 theorem ultrafilter_to_mcs_val (uf : BoolAlgUltrafilter (LindenbaumAlg Atom)) :
     (ultrafilterToMcs uf).val = ultrafilterToSet uf := rfl
 
+set_option linter.flexible false in
 /-- Round-trip: converting an MCS to an ultrafilter and back recovers the original MCS. -/
-theorem ultrafilter_mcs_round_trip (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Omega}) :
+theorem ultrafilter_mcs_round_trip
+    (Γ : {Omega : Set (Formula Atom) // SetMaximalConsistent FrameClass.Base Omega}) :
     ultrafilterToMcs (mcsToUltrafilter Γ) = Γ := by
   apply Subtype.ext
   simp only [ultrafilterToMcs, ultrafilterToSet, mcsToUltrafilter]
@@ -627,11 +650,14 @@ theorem ultrafilter_mcs_round_trip (Γ : {Omega : Set (Formula Atom) // SetMaxim
         exact List.mem_filter.mpr ⟨hχ, by simpa⟩
     have d_bot' := DerivationTree.weakening L (φ :: Γ') Formula.bot d_bot h_L_sub
     have d_neg := deductionTheorem Γ' φ Formula.bot d_bot'
-    have d_neg' := DerivationTree.weakening Γ' (ψ :: Γ') φ.neg d_neg (fun x hx => List.mem_cons_of_mem ψ hx)
+    have d_neg' :=
+      DerivationTree.weakening Γ' (ψ :: Γ') φ.neg d_neg (fun x hx => List.mem_cons_of_mem ψ hx)
     have d_ψ : (ψ :: Γ') ⊢ᴮ ψ := DerivationTree.assumption (ψ :: Γ') ψ (by simp)
-    have d_imp' : (ψ :: Γ') ⊢ᴮ ψ.imp φ := DerivationTree.weakening [] (ψ :: Γ') (ψ.imp φ) d_imp (by simp)
+    have d_imp' : (ψ :: Γ') ⊢ᴮ ψ.imp φ :=
+      DerivationTree.weakening [] (ψ :: Γ') (ψ.imp φ) d_imp (by simp)
     have d_φ : (ψ :: Γ') ⊢ᴮ φ := DerivationTree.modus_ponens (ψ :: Γ') ψ φ d_imp' d_ψ
-    have d_bot'' : (ψ :: Γ') ⊢ᴮ Formula.bot := DerivationTree.modus_ponens (ψ :: Γ') φ Formula.bot d_neg' d_φ
+    have d_bot'' : (ψ :: Γ') ⊢ᴮ Formula.bot :=
+      DerivationTree.modus_ponens (ψ :: Γ') φ Formula.bot d_neg' d_φ
     have h_cons : Consistent (fc := FrameClass.Base) (ψ :: Γ') := by
       apply Γ.property.1 (ψ :: Γ')
       intro χ hχ

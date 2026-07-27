@@ -59,7 +59,6 @@
 3 Cslib/Logics/Bimodal/Metalogic/Completeness.lean
 1 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean
 4 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtFormula.lean
-4 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/Substitution.lean
 3 Cslib/Logics/Bimodal/Metalogic/Core/MaximalConsistent.lean
 3 Cslib/Logics/Bimodal/Metalogic/Core/RestrictedMCS.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/Closure.lean

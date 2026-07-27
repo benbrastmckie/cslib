@@ -25,11 +25,6 @@ These are the foundation for proving axiom closure and the lifting theorem.
 - Goldblatt 1992, Logics of Time and Computation
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.unusedDecidableInType false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.ConservativeExtension
@@ -178,6 +173,7 @@ theorem substFormula_preserves_qfree (φ : ExtFormula Atom) (h : freshAtom ∉ �
     simp only [ExtFormula.atoms, Finset.mem_union, not_or] at h
     simp [substFormula, iha h.1, ihb h.2]
 
+set_option linter.unusedDecidableInType false in
 /-- Embedded formulas are unchanged by substitution. -/
 theorem substFormula_of_embedded (φ : Formula Atom) :
     substFormula (embedFormula φ) = embedFormula φ :=
@@ -187,6 +183,7 @@ theorem substFormula_of_embedded (φ : Formula Atom) :
 ## Idempotence
 -/
 
+set_option linter.flexible false in
 /-- After substitution, the fresh atom does not appear. -/
 theorem freshAtom_not_in_substFormula_atoms (φ : ExtFormula Atom) :
     freshAtom ∉ (substFormula φ).atoms := by
@@ -207,6 +204,7 @@ theorem freshAtom_not_in_substFormula_atoms (φ : ExtFormula Atom) :
     simp [substFormula, ExtFormula.atoms, Finset.mem_union]
     exact ⟨iha, ihb⟩
 
+set_option linter.unusedDecidableInType false in
 /-- Substitution is idempotent: applying it twice gives the same result. -/
 theorem substFormula_idempotent (φ : ExtFormula Atom) :
     substFormula (substFormula φ) = substFormula φ :=
@@ -288,6 +286,7 @@ theorem substAxiom_preserves_minFrameClass {φ : ExtFormula Atom} (h : ExtAxiom 
 ## List Substitution
 -/
 
+set_option linter.unusedDecidableInType false in
 /-- Substitution distributes over list map. -/
 theorem substFormula_map_embedded [DecidableEq Atom] (L : List (Formula Atom)) :
     (L.map embedFormula).map substFormula = L.map embedFormula := by

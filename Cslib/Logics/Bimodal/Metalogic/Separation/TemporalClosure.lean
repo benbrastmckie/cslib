@@ -26,12 +26,6 @@ operators preserve separability) without axioms.
 - `swap_no_U_nested_gives_no_S_nested`: Duality converts between the two predicates
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -51,6 +45,7 @@ def replaceBoxWithTop : Formula Atom -> Formula Atom
   | .untl psi phi => .untl (replaceBoxWithTop psi) (replaceBoxWithTop phi)
   | .snce psi phi => .snce (replaceBoxWithTop psi) (replaceBoxWithTop phi)
 
+set_option linter.flexible false in
 /-- Box-normalization preserves semantic equivalence over integer time. -/
 theorem replace_box_equiv (phi : Formula Atom) : intEquiv phi (replaceBoxWithTop phi) := by
   intro M t
@@ -121,6 +116,7 @@ theorem replace_box_preserves_separated (phi : Formula Atom)
 
 /-! ## noSNestedInU for Box-Free Separated Formulas -/
 
+set_option linter.flexible false in
 /-- U-free formulas satisfy noSNestedInU (vacuously: no untl nodes). -/
 theorem u_free_no_S_nested (phi : Formula Atom) (h : isUFree phi = true) :
     noSNestedInU phi := by
@@ -132,6 +128,7 @@ theorem u_free_no_S_nested (phi : Formula Atom) (h : isUFree phi = true) :
   | untl _ _ => simp [isUFree] at h
   | snce b a ih2 ih1 => simp [isUFree] at h; exact ⟨ih1 h.1, ih2 h.2⟩
 
+set_option linter.flexible false in
 /-- S-free formulas satisfy noSNestedInU (untl args inherit S-freeness). -/
 theorem s_free_no_S_nested (phi : Formula Atom) (h : isSFree phi = true) :
     noSNestedInU phi := by
@@ -143,6 +140,7 @@ theorem s_free_no_S_nested (phi : Formula Atom) (h : isSFree phi = true) :
   | untl b a _ih2 _ih1 => simp [isSFree] at h; exact h
   | snce _ _ => simp [isSFree] at h
 
+set_option linter.flexible false in
 /-- A box-normalized separated formula satisfies noSNestedInU. -/
 theorem replace_box_separated_no_S_nested (phi : Formula Atom)
     (h : isSyntacticallySeparated phi = true) :
@@ -209,6 +207,7 @@ theorem swap_no_S_nested_gives_no_U_nested (phi : Formula Atom)
   | snce b a ih2 ih1 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
 
+set_option linter.flexible false in
 /-- A box-normalized separated formula also satisfies noUNestedInS. -/
 theorem replace_box_separated_no_U_nested (phi : Formula Atom)
     (h : isSyntacticallySeparated phi = true) :
@@ -251,6 +250,7 @@ where
 
 /-! ## Key Structural Properties for Temporal Closure -/
 
+set_option linter.flexible false in
 /-- snce of box-normalized separated formulas satisfies noSNestedInU. -/
 theorem snce_of_boxfree_sep_no_S_nested (phi psi : Formula Atom)
     (h1 : isSyntacticallySeparated phi = true)
@@ -267,6 +267,7 @@ theorem allPast_of_boxfree_sep_no_S_nested (phi : Formula Atom)
   simp only [no_S_nested_in_U_allPast]
   exact replace_box_separated_no_S_nested phi h
 
+set_option linter.flexible false in
 /-- untl of box-normalized separated formulas satisfies noUNestedInS. -/
 theorem untl_of_boxfree_sep_no_U_nested (phi psi : Formula Atom)
     (h1 : isSyntacticallySeparated phi = true)
@@ -352,6 +353,7 @@ theorem junction_depth_U_zero_imp_S_free (phi : Formula Atom) (h : junctionDepth
     simp [junctionDepthU] at h; simp [isSFree, ih1 (by omega), ih2 (by omega)]
   | snce _ _ => simp [junctionDepthU] at h
 
+set_option linter.flexible false in
 /-- S-free formulas have junctionDepth = 0. -/
 theorem s_free_junction_depth_zero (phi : Formula Atom) (h : isSFree phi = true) :
     junctionDepth phi = 0 := by
@@ -381,6 +383,7 @@ where
       simp [isSFree] at h; simp [junctionDepthU, ih1 h.1, ih2 h.2]
     | snce _ _ => simp [isSFree] at h
 
+set_option linter.flexible false in
 /-- U-free formulas have junctionDepth = 0. -/
 theorem u_free_junction_depth_zero (phi : Formula Atom) (h : isUFree phi = true) :
     junctionDepth phi = 0 := by
@@ -410,6 +413,7 @@ where
     | snce b a ih2 ih1 =>
       simp [isUFree] at h; simp [junctionDepthS, ih1 h.1, ih2 h.2]
 
+set_option linter.flexible false in
 /-- The snce of two box-normalized separated formulas has junctionDepth ≤ 1. -/
 theorem snce_of_boxfree_sep_jd_le_one (phi psi : Formula Atom)
     (h1 : isSyntacticallySeparated phi = true)
@@ -434,8 +438,10 @@ where
     | untl b a _ih2 _ih1 =>
       simp [isSyntacticallySeparated] at h
       simp [replaceBoxWithTop, junctionDepthS]
-      have ha := s_free_junction_depth_zero (replaceBoxWithTop a) (replace_box_preserves_S_free a h.1)
-      have hb := s_free_junction_depth_zero (replaceBoxWithTop b) (replace_box_preserves_S_free b h.2)
+      have ha := s_free_junction_depth_zero
+        (replaceBoxWithTop a) (replace_box_preserves_S_free a h.1)
+      have hb := s_free_junction_depth_zero
+        (replaceBoxWithTop b) (replace_box_preserves_S_free b h.2)
       omega
     | snce b a _ih2 _ih1 =>
       simp [isSyntacticallySeparated] at h

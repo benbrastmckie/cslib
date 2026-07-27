@@ -90,7 +90,6 @@
 4 Cslib/Logics/Bimodal/Metalogic/Separation/Hierarchy/HierarchyDefs.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/IntHelpers.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/NegationEquiv.lean
-5 Cslib/Logics/Bimodal/Metalogic/Separation/TemporalClosure.lean
 2 Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean
 6 Cslib/Logics/Bimodal/Metalogic/Soundness/FrameClassVariants.lean
 3 Cslib/Logics/Bimodal/Metalogic/Soundness/Soundness.lean

@@ -285,7 +285,51 @@ makes the call. Files: `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`,
 they resolve to the un-doubled name via the enclosing-namespace walk once the declaration loses
 its doubled component. Only fully-qualified spellings break.
 
-### Phase 3: Task-number references in deliverables [IN PROGRESS]
+### Phase 3: Task-number references in deliverables [COMPLETED]
+
+**Cycle 12 closure.** Worked the reopen's full "~45-50 site" scope (excluding `LoopChecking.lean`,
+held back per the ordering constraint) across 7 files, all committed individually after a clean
+scoped rebuild plus downstream-importer rebuilds: `Minimal/Completeness.lean` (2/2),
+`Temporal/Tableau/Completeness.lean` (1/1), `Nested/Context.lean` (2/2),
+`Intuitionistic/Completeness.lean` (5/5), `Nested/Rules.lean` (4/5, 1 verbatim-quote exclusion),
+`CS5Completeness.lean` (5/5), `Nested/Soundness.lean` (8/10, 2 verbatim-quote exclusions),
+`Scheme.lean` (20/25, 5 exclusions -- 1 verbatim quote + the 4-site "Recommendation for
+continuation" relocate-to-specs block). 47 of the reopen's sites fixed this cycle.
+
+**Repo-wide census after this cycle: 20 sites remain, all accounted-for exclusions or
+deliberate holds** (verified via `grep -rnoiE '\b(task|tasks|phase|report)[ -][0-9]+[a-z]?(\.[0-9]+)?\b'
+Cslib --include='*.lean'`):
+- `LoopChecking.lean` (3) -- held back per the ordering constraint (Modal/Tableau refactor
+  coordination); not attempted this cycle.
+- `Scheme.lean` (5) -- 1 site (line 484) is inside a direct quotation of the governing plan's
+  own allowance text ("...restated over the edge relation in Phase 4"); the other 4 are the
+  "Recommendation for continuation" block, task-management metadata whose correct disposition is
+  relocation to `specs/`, not in-place rewriting (unchanged from the prior close's finding).
+- `Nested/Soundness.lean` (2) and `Nested/Rules.lean` (1) -- verbatim quotations of the governing
+  plan's own task-list text ("using Phase 8's compositionality lemmas" / "extend Phase 10's
+  `.mono`..."); rewriting inside a direct quote would misquote the source.
+- `TemporalConservativity.lean` (4) and `DiegoEmbedding.lean` (4) -- confirmed false positives
+  from a prior cycle: `## Phase N:` is each file's own internal section-organizing convention for
+  a self-contained mathematical construction, not a task-tracker citation. Unchanged.
+- `Labelled/Soundness.lean` (1) -- `that residual is Phase 11.PD.3`, a bare pointer into an
+  unidentifiable plan's numbering with nothing nearby to anchor to; retained as an exclusion from
+  the prior cycle.
+
+**Verification**: every edited file was rebuilt individually (`lake build <Module>`) plus its
+downstream importers where applicable; `git diff` was checked for every file to confirm zero
+`sorry`/proof-term lines were touched (comment/docstring text only); no line exceeds the 100-char
+style limit after rewrapping. The full phase-boundary gate is run once at the task's final close
+(see "Phase-boundary gate").
+
+**Definition of Done, restated**: this closes the reopen's own "is a durable anchor available?"
+test for every site that was not itself either (a) inside a verbatim quotation of external plan
+text, (b) task-management metadata whose home is `specs/` rather than library source, or (c) a
+file deliberately held back for a concurrent-refactor coordination reason. All three exclusion
+classes are individually documented above rather than assumed.
+
+---
+
+**Prior status marker (retained for provenance): [IN PROGRESS], reopened by exclusion audit.**
 
 **REOPENED by exclusion audit.** Prior close: 226 sites fixed, 59 excluded by finding, 8
 confirmed false positives. The 226 fixes and the 8 false positives stand and are not revisited.

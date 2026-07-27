@@ -15,40 +15,83 @@
   `.claude/rules/git-workflow.md` (commit-per-green-substep), `CONTRIBUTING.md`
 - **Type**: cslib
 - **Created**: 2026-07-27
-- **Last updated**: 2026-07-27 (cycle 20 close — Phase 5 at 263/… sites, 111 local-only blanket
-  suppressions across 64 files remaining; see "Upstream-exposure scope" for the rescope this
+- **Last updated**: 2026-07-27 (cycle 21 close — Phase 5 at 268/… sites, 96 local-only blanket
+  suppressions across 59 files remaining; see "Upstream-exposure scope" for the rescope this
   denominator is measured against)
 
 ---
 
 ## RESUME HERE
 
-Twenty-first resume (cycle 20 closure — this dispatch, processed via `/implement`). Status as of
-this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all COMPLETED (Phase 1's regression was re-closed in
+Twenty-second resume (cycle 21 closure — this dispatch, processed via `/implement`). Status as
+of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all COMPLETED (Phase 1's regression was re-closed in
 cycle 13; Phase 3 was re-closed in cycle 12 after its own reopen; Phase 4's post-close `lake
 shake` regression was re-closed in cycle 16). Only Phase 5 (suppression audit) remains, PARTIAL
-at 263 sites done (57 files fully processed), 111 blanket suppressions across 64 local-only files
-remaining in scope (down from 141/71-scope at cycle 19's close — see Phase 5's cycle-20 entry for
-the full 7-file breakdown: `RecursiveWalks.lean` and `MainElimination.lean` close 2 of the 3
-largest remaining count-6-tier files; `ChronicleToCountermodelBasic.lean` closes the 3rd down to
-1 (the correct openClassical end state); `DualEliminations.lean`, `ParametricHistory.lean`,
-`MaximalConsistent.lean`, and `Structures.lean` clear 4 files out of the count-3 tier).**
+at 268 sites done (62 files fully processed), 96 blanket suppressions across 59 local-only files
+remaining in scope (down from 111/64-scope at cycle 20's close). This cycle processed 5 files,
+all in the count-3 tier, all 3→0 clean, all verified by scoped rebuild of the file plus every
+direct downstream importer before commit: `Bimodal/Metalogic/Separation/Duality.lean` (420
+lines; 2 flexible sites narrowed to declaration-scoped suppressions), `Bimodal/Metalogic/Core/
+RestrictedMCS.lean` (437 lines; 2 flexible sites manually reconstructed as `simp only
+[Set.mem_insert_iff]`), `Bimodal/Metalogic/Completeness.lean` (483 lines; all 3 suppressions
+were unnecessary, zero warnings on removal), `Temporal/Metalogic/Chronicle/ChronicleTypes.lean`
+(522 lines; 24 longLine wraps + 13 dupNamespace sites narrowed to 10 declaration-scoped
+suppressions on the `Chronicle` structure and its `c0`-`c5'` conditions, which are deliberately
+named to match the enclosing namespace, mirroring the Bimodal tree's identical pattern —
+renaming would alter the public API and is out of hygiene-only scope), `Temporal/Metalogic/
+MCS.lean` (538 lines; 3 identical unusedSimpArgs sites reduced from an 8-lemma `simp only` to
+`simp only [Formula.swapTemporal]`).**
 
-**What remains for Phase 5, stated explicitly**: 111 local-only blanket suppressions across 64
+**What remains for Phase 5, stated explicitly**: 96 local-only blanket suppressions across 59
 files, split roughly as: 1 file in the count-6 tier (`Interface.lean`, 3048 lines, confirmed
-local-only, deliberately deferred — by far the largest file remaining in this phase), 8 files in
-the count-3 tier (`Duality.lean` at 420 lines is next per smaller-files-first — see the cycle-20
-entry for the full list), and a count-2/count-1 tail below that, not yet individually surveyed
-this cycle. At this cycle's rate (30 sites/7 files, well above the blended historical average
-since two of the three large files processed were mostly mechanical), clearing the remainder is
-estimated at **roughly 4-6 more cycles**, treated cautiously since large-file variance has swung
-both directions in past cycles — see Phase 5's cycle-20 entry for the full per-file breakdown and
-two new findings: (1) a bare `simp [X]` (not `simp only [X]`) pulling in the full default simp
-set is a strong signal to prefer declaration-scoped `set_option linter.flexible false in` over
-manual reconstruction, since the full set's closure isn't visible without interactive `simp?`
-output; (2) when scripting multi-site `set_option ... in` insertion (as opposed to manual `Edit`
-calls), insert above the preceding doc comment, not between it and the declaration — the cycle-6
-parse hazard recurs with scripted insertion and was caught by rebuild-before-commit this cycle.
+local-only, deliberately deferred — by far the largest file remaining in this phase), 5 files in
+the count-3 tier (`Soundness/Soundness.lean` 845 lines, `Decidability/Saturation.lean` 708
+lines, `BXCanonical/Chronicle/ChronicleTypes.lean` 578 lines — note this is the Bimodal
+counterpart of the Temporal `ChronicleTypes.lean` just closed this cycle and almost certainly
+needs the identical structure/c0-c5' dupNamespace-narrowing treatment plus its own longLine
+pass, so re-use this cycle's pattern rather than re-deriving it — `Foundations/Logic/Metalogic/
+Chronicle/SinceSeedConsistency.lean` 1072 lines; re-verify line counts and suppression counts
+live before starting, since counts only ever go down), and a count-2/count-1 tail below that
+(re-derive with the fs>0-filtered, upstream-gated command below before assuming its size or
+composition). At this cycle's rate (15 sites/5 files, all mechanical or narrow-scope, no large
+files attempted), clearing the remainder is estimated at **roughly 4-6 more cycles**, unchanged
+from cycle 20's estimate — treated cautiously since large-file variance (`Interface.lean`,
+`SinceSeedConsistency.lean`) has swung both directions in past cycles. New findings this cycle:
+(1) when a `structure`/namespace name intentionally collides with its enclosing namespace (the
+`Chronicle` pattern, confirmed identical in both the Temporal and Bimodal BXCanonical trees per
+each file's own module docstring), the resulting `dupNamespace` warnings are a correct, permanent
+narrowing target, not a fixable warning — renaming would alter the definition and is out of
+hygiene-only scope, so apply `set_option linter.dupNamespace false in` per declaration (structure
++ each condition def) rather than attempting a rename; (2) `longLine` warnings on `have h :
+DerivationTree ... := ...` are always mechanically fixable by wrapping the type annotation onto
+its own indented continuation line with zero term-content change — rebuild after wrapping to
+confirm no elaboration change; (3) when a `simp only [...]` blanket-replacement candidate for
+`unusedSimpArgs` recurs verbatim at multiple call sites in one file, a single `replace_all`
+`Edit` handles every site in one pass — but only after confirming (via the collected warning
+list, not assumption) that every site has the exact same fully-reduced argument list.
+
+**Cycle 20 findings, still relevant**: (1) a bare `simp [X]` (not `simp only [X]`) pulling in
+the full default simp set is a strong signal to prefer declaration-scoped `set_option
+linter.flexible false in` over manual reconstruction, since the full set's closure isn't visible
+without interactive `simp?` output — reserve manual `simp only` reconstruction for simple,
+single-lemma, well-understood cases (confirmed again this cycle on `RestrictedMCS.lean`'s
+`simp [Set.mem_insert_iff] at h`); (2) when scripting multi-site `set_option ... in` insertion
+(as opposed to manual `Edit` calls), insert above the preceding doc comment, not between it and
+the declaration — the cycle-6 parse hazard recurs with scripted insertion and was caught by
+rebuild-before-commit this cycle.
+
+Re-derive the live worst-offender list with (filter to `fs > 0`, then gate each candidate through
+the upstream check before treating it as in-scope):
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  if [ "$fs" -gt 0 ]; then echo "$fs $f"; fi
+done | sort -rn | while read fs f; do
+  git cat-file -e upstream/main:"$f" 2>/dev/null || echo "$fs $f"
+done
+```
+Next target as of cycle 21's close: `Bimodal/Metalogic/Soundness/Soundness.lean` (845 lines),
+per smaller-files-first within the count-3 tier.
 
 **Cycle 16, item 1 (this dispatch) — Phase 4's `lake shake` regression re-closed.** The cycle-15
 "baseline noise, ~15 files, not fixed" finding was investigated: a live `lake shake --add-public
@@ -880,7 +923,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 263 sites done; 111 blanket suppressions across 64 local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 268 sites done; 96 blanket suppressions across 59 local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96

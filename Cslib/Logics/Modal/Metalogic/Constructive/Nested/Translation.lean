@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Context
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
 

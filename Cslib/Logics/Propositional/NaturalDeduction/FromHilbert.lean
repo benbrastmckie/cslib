@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Metalogic.DeductionTheorem
+public import Cslib.Logics.Propositional.ProofSystem.Axioms
 
 /-! # Natural Deduction Rules as Hilbert Wrappers
 

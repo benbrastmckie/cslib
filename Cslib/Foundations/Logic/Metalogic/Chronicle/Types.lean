@@ -8,8 +8,8 @@ module
 
 import Cslib.Init
 public import Cslib.Foundations.Logic.Metalogic.Chronicle.ChronicleInterface
-public import Mathlib.Data.Rat.Defs
-public import Mathlib.Data.Finset.Basic
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Data.Finset.Defs
 
 /-! # Chronicle Types — Shared Bimodal/Temporal Chronicle Data Structures
 

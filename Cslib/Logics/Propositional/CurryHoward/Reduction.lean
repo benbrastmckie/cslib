@@ -6,9 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism
 public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Termination
+public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Reduction
 
 /-! # Curry-Howard Reduction Correspondence
 

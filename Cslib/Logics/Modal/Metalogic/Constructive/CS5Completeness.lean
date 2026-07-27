@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
 
 /-! # `CS5` Native Hilbert Completeness via the Atom-Sum Pair Lindenbaum Construction

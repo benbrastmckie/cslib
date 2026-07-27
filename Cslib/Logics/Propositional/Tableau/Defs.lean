@@ -7,9 +7,11 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Propositional.Subformula
-public import Cslib.Foundations.Logic.Tableau.ClosureCondition
-public import Cslib.Foundations.Logic.Tableau.PropositionalRules
+public import Cslib.Logics.Propositional.Defs
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Tactic.Attr.Core
+public import Mathlib.Tactic.SetLike
+public import Mathlib.Tactic.ToAdditive
 
 /-! # Shared Definitions for Propositional Tableau Systems
 
@@ -39,8 +41,6 @@ on `imp _ bot`. Nested `imp` matching is order-sensitive with `propImpOf?`.
 @[expose] public section
 
 namespace Cslib.Logic.PL
-
-open Cslib.Logic.Tableau
 
 variable {Atom : Type*}
 

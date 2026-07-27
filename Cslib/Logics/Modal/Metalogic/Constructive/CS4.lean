@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 
 /-! # CS4: Constructive Modal Logic S4 (Soundness and Completeness)

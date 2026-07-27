@@ -6,10 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.GenericDriver
 public import Cslib.Logics.Modal.Tableau.FrameRules
-import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 
 /-! # B-System Tableau Driver

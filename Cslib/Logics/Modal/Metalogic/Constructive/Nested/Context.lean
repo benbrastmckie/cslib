@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Syntax
 
 /-! # Nested Sequent Contexts: Hole Filling and Output Pruning

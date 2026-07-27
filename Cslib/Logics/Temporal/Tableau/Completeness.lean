@@ -6,9 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Temporal.Tableau.Soundness
 public import Mathlib.Algebra.Order.ToIntervalMod
+public import Cslib.Logics.Temporal.Semantics.Satisfies
+public import Cslib.Logics.Temporal.Tableau.Saturation
 
 /-! # Temporal Tableau Completeness
 

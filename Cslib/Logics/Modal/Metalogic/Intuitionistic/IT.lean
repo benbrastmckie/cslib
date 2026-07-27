@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 
 /-! # IT: Intuitionistic Modal Logic T (Soundness + Completeness)

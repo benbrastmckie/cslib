@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerian
 public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms

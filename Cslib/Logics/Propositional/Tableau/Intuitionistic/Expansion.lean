@@ -8,6 +8,8 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
+public import Cslib.Foundations.Logic.Tableau.ClosureCondition
+public import Cslib.Logics.Propositional.Subformula
 
 /-! # Intuitionistic Propositional Tableau Expansion
 

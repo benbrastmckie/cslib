@@ -7,7 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 public import Cslib.Logics.Modal.Basic
 public import Cslib.Foundations.Logic.Axioms
-public import Mathlib.Data.Finset.Basic
+public import Mathlib.Data.Finset.Insert
+public import Mathlib.Data.Finset.Lattice.Basic
 
 /-! # Schema-Union Axiom Combinator for Modal Proof Systems
 

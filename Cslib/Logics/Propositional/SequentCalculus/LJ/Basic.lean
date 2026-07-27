@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.NaturalDeduction.Basic
 public import Cslib.Foundations.Logic.InferenceSystem
 

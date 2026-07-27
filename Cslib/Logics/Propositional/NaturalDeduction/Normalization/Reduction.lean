@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Basic
+public import Cslib.Logics.Propositional.NaturalDeduction.Basic
 
 /-! # Reduction and Normalization for Propositional Natural Deduction
 

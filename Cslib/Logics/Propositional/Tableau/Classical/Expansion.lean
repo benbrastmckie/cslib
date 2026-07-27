@@ -8,6 +8,9 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Defs
+public import Cslib.Foundations.Logic.Tableau.ClosureCondition
+public import Cslib.Foundations.Logic.Tableau.PropositionalRules
+public import Cslib.Logics.Propositional.Subformula
 
 /-! # Classical Propositional Tableau Expansion
 

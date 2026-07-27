@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Minimal.MinExtension
 
 /-! # MS4: Minimal Modal Logic S4 (Soundness + Completeness)

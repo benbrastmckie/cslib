@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Decidability
 public import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure

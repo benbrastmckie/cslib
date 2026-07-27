@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Completeness
 
 /-! # IK: Intuitionistic Modal Logic K (Soundness + Completeness)

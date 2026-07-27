@@ -8,7 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
-public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
 
 /-! # Minimal Tableau Completeness
 

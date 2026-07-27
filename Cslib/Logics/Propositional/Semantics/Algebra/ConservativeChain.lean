@@ -6,13 +6,11 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativityInstances
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 -- Classical conservativity column (Kalmár / truth-assignment method):
 -- CL-A CPL⟨→,⊤⟩ ⊂ CPL, CL-B CPL⟨∧,→,⊤⟩ ⊂ CPL, CL-C CPL⟨∧,→,⊥,⊤⟩ ⊂ CPL
-public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 
 /-! # Conservative Extension Chain for Propositional Logic
 

@@ -8,7 +8,8 @@ module
 
 import Cslib.Init
 import Mathlib.Logic.Function.Basic
-import Mathlib.Data.Int.Order.Basic
+public import Mathlib.Data.Int.Notation
+import Mathlib.Tactic.ToDual
 
 /-! # Time Ordering Constraint Store
 

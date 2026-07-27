@@ -6,8 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 
 /-! # IS4: Intuitionistic Modal Logic S4 (Soundness + Completeness)
 

@@ -18,13 +18,6 @@ C5/C5' counterexamples by inserting new witness points.
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -34,7 +27,8 @@ open Cslib.Logic.Temporal.Metalogic
 
 /-! ## Recursive Walks -/
 
-/-- Recursive walk that eliminates a C5 forward (Until) counterexample by inserting a new witness point. -/
+/-- Recursive walk that eliminates a C5 forward (Until) counterexample by inserting a new
+witness point. -/
 noncomputable def c5ForwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
@@ -82,7 +76,7 @@ noncomputable def c5ForwardWalk
           have ha_lt : a < max_old := lt_of_le_of_ne ha_le ha_ne
           exact h_no_between max_old (Finset.mem_insert_of_mem h_max_mem) ⟨ha_lt, h_max_lt_y⟩
         subst ha_eq
-        show BurgessR3Maximal
+        change BurgessR3Maximal
           (if max_old = y then C else χ.f max_old)
           (g' max_old y)
           (if y = y then C else χ.f y)
@@ -92,12 +86,12 @@ noncomputable def c5ForwardWalk
         rw [← h_eq_max]; exact h_r3m
       · have ha_ne : a ≠ y := fun h => hy_notin (h ▸ ha)
         have hb_ne : b ≠ y := fun h => hy_notin (h ▸ hb)
-        show BurgessR3Maximal
+        change BurgessR3Maximal
           (if a = y then C else χ.f a)
           (g' a b)
           (if b = y then C else χ.f b)
-        simp only [ha_ne, hb_ne, ite_false, ite_true]
-        show BurgessR3Maximal (χ.f a)
+        simp only [ha_ne, hb_ne, ite_false]
+        change BurgessR3Maximal (χ.f a)
           (if a = max_old ∧ b = y then B else χ.g a b) (χ.f b)
         rw [if_neg (fun ⟨_, hby⟩ => hb_ne hby)]
         have h_adj_old : Adjacent χ.dom a b := by
@@ -109,7 +103,7 @@ noncomputable def c5ForwardWalk
             dom_sub := Finset.subset_insert y χ.dom
             c0 := by
               intro q hq
-              show Temporal.SetMaximalConsistent (if q = y then C else χ.f q)
+              change Temporal.SetMaximalConsistent (if q = y then C else χ.f q)
               change q ∈ insert y χ.dom at hq
               simp only [Finset.mem_insert] at hq
               rcases hq with rfl | hq
@@ -123,7 +117,7 @@ noncomputable def c5ForwardWalk
               exact if_neg h_ne
             g_agrees := by
               intro a b ha hb
-              show g' a b = χ.g a b
+              change g' a b = χ.g a b
               simp only [g']
               have hb_ne : b ≠ y := fun h => hy_notin (h ▸ hb)
               simp only [hb_ne, and_false, ite_false]
@@ -155,7 +149,7 @@ noncomputable def c5ForwardWalk
                     (Finset.mem_insert_of_mem h_max_mem) ⟨hlt, h_max_lt_y⟩
                 exact le_antisymm ha_le_max hmax_le_a
               subst ha_eq
-              show ξ ∈ g' max_old y
+              change ξ ∈ g' max_old y
               simp only [g', and_self, ite_true]
               exact h_ξ_B
             g_sub_f_insert := by
@@ -265,7 +259,8 @@ noncomputable def c5ForwardWalk
               rw [← hwx']
               exact conj_left_mcs h_mcs_x' ξ (Formula.untl ξ η) h_cond_i.1⟩⟩
       -- Termination: (dom.filter (· > x')).card < (dom.filter (· > pt)).card
-      have h_term : (χ.dom.filter (fun v => v > x')).card < (χ.dom.filter (fun v => v > pt)).card := by
+      have h_term : (χ.dom.filter (fun v => v > x')).card <
+          (χ.dom.filter (fun v => v > pt)).card := by
         apply Finset.card_lt_card
         constructor
         · intro v hv
@@ -299,8 +294,10 @@ noncomputable def c5ForwardWalk
                     have ha_gt : pt < a := lt_of_le_of_ne h_le_a (Ne.symm ha_ne)
                     by_cases ha_old : a ∈ χ.dom
                     · exact h_adj_sx'.2.2.2 a ha_old ⟨ha_gt, h_a_ge_x'⟩
-                    · -- a is new from recursion at x', so x' < a by new_point_after. Contradicts a < x'.
-                      exact absurd (r.new_point_after a h_adj_ab.1 ha_old) (not_lt.mpr (le_of_lt h_a_ge_x'))
+                    · -- a is new from recursion at x', so x' < a by new_point_after.
+                      -- Contradicts a < x'.
+                      exact absurd (r.new_point_after a h_adj_ab.1 ha_old)
+                        (not_lt.mpr (le_of_lt h_a_ge_x'))
                   subst ha_eq
                   -- b must be x': x' in val.dom, pt < x', no new point between
                   have hb_eq : b = x' := by
@@ -309,7 +306,8 @@ noncomputable def c5ForwardWalk
                     rcases lt_or_gt_of_ne hb_ne with hb_lt | hb_gt
                     · by_cases hb_old : b ∈ χ.dom
                       · exact h_adj_sx'.2.2.2 b hb_old ⟨h_adj_ab.2.2.1, hb_lt⟩
-                      · exact absurd (r.new_point_after b h_adj_ab.2.1 hb_old) (not_lt.mpr (le_of_lt hb_lt))
+                      · exact absurd (r.new_point_after b h_adj_ab.2.1 hb_old)
+                          (not_lt.mpr (le_of_lt hb_lt))
                     · exact h_adj_ab.2.2.2 x' hx'_val ⟨hstart_lt_x', hb_gt⟩
                   subst hb_eq
                   rw [r.g_agrees _ x' h_start_mem hx'_dom]
@@ -349,7 +347,8 @@ noncomputable def c5ForwardWalk
             -- Derive h_neg_disj: ¬(η ∨ (ξ ∧ U(ξ,η))) ∈ f(x')
             have h_conj_not_f : Formula.and ξ (Formula.untl ξ η) ∉ χ.f x' :=
               fun h => h_cond_i ⟨h, h_xi_g⟩
-            have h_neg_disj : (Formula.or η (Formula.and ξ (Formula.untl ξ η))).neg ∈ χ.f x' := by
+            have h_neg_disj :
+                (Formula.or η (Formula.and ξ (Formula.untl ξ η))).neg ∈ χ.f x' := by
               have h1 : (¬η) ∈ χ.f x' := by
                 rcases temporal_negation_complete h_mcs_x' η with h | h
                 · exact absurd h (h_guard_implies_no_event h_xi_g)
@@ -365,10 +364,12 @@ noncomputable def c5ForwardWalk
                     (Formula.and ξ (Formula.untl ξ η))))
                 (conj_mcs h_mcs_x' η.neg (Formula.and ξ (Formula.untl ξ η)).neg h1 h2)
             obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', _⟩ :=
-              lemma_2_8 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_until_start h_neg_disj
+              lemma_2_8 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                h_until_start h_neg_disj
             exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', hBB' h_xi_g⟩
           · obtain ⟨B', D, B'', hB', hB'', hD, hη, hBB', h_B_sub_D, hBB'', h_xi_B'⟩ :=
-              lemma_2_7 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_until_start h_xi_g
+              lemma_2_7 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                h_until_start h_xi_g
             exact ⟨B', D, B'', hB', hB'', hD, hη, h_B_sub_D, hBB', hBB'', h_xi_B'⟩
         · by_cases h_eta_neg_g : (¬η) ∈ χ.g pt x'
           · by_cases h_xi_g : ξ ∈ χ.g pt x'
@@ -376,7 +377,8 @@ noncomputable def c5ForwardWalk
               · -- conj in g but not-condition(i): conj not in f(x')
                 have h_conj_not_f : Formula.and ξ (Formula.untl ξ η) ∉ χ.f x' :=
                   fun h => h_cond_i ⟨h, h_xi_g⟩
-                have h_neg_disj : (Formula.or η (Formula.and ξ (Formula.untl ξ η))).neg ∈ χ.f x' := by
+                have h_neg_disj :
+                    (Formula.or η (Formula.and ξ (Formula.untl ξ η))).neg ∈ χ.f x' := by
                   have h1 : (¬η) ∈ χ.f x' := by
                     rcases temporal_negation_complete h_mcs_x' η with h | h
                     · exact absurd h (h_guard_implies_no_event h_xi_g)
@@ -392,7 +394,8 @@ noncomputable def c5ForwardWalk
                         (Formula.and ξ (Formula.untl ξ η))))
                     (conj_mcs h_mcs_x' η.neg (Formula.and ξ (Formula.untl ξ η)).neg h1 h2)
                 obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', _⟩ :=
-                  lemma_2_8 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_until_start h_neg_disj
+                  lemma_2_8 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                    h_until_start h_neg_disj
                 exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', hBB' h_xi_g⟩
               · have h_bx5 := self_accum_until_mcs h_mcs_start ξ η h_until_start
                 obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, hBB', h_B_sub_D, hBB'', _⟩ :=
@@ -400,7 +403,8 @@ noncomputable def c5ForwardWalk
                     (Formula.and ξ (Formula.untl ξ η)) η h_bx5 h_conj_g
                 exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', hBB' h_xi_g⟩
             · obtain ⟨B', D, B'', hB', hB'', hD, hη, hBB', h_B_sub_D, hBB'', h_xi_B'⟩ :=
-                lemma_2_7 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_until_start h_xi_g
+                lemma_2_7 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                  h_until_start h_xi_g
               exact ⟨B', D, B'', hB', hB'', hD, hη, h_B_sub_D, hBB', hBB'', h_xi_B'⟩
           · by_cases h_xi_g2 : ξ ∈ χ.g pt x'
             · have h_sp := lemma_2_6_splitting h_mcs_start h_mcs_x' h_r3m_adj
@@ -411,7 +415,8 @@ noncomputable def c5ForwardWalk
                   (theoremInMcs hD_mcs (doubleNegation η)) h_dne_D,
                 h_B_sub_D, hBB', hBB'', hBB' h_xi_g2⟩
             · obtain ⟨B', D, B'', hB', hB'', hD, hη, hBB', h_B_sub_D, hBB'', h_xi_B'⟩ :=
-                lemma_2_7 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_until_start h_xi_g2
+                lemma_2_7 h_mcs_start h_mcs_x' h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                  h_until_start h_xi_g2
               exact ⟨B', D, B'', hB', hB'', hD, hη, h_B_sub_D, hBB', hBB'', h_xi_B'⟩
       let B' := h_split_result.choose
       let D := h_split_result.choose_spec.choose
@@ -446,11 +451,12 @@ noncomputable def c5ForwardWalk
             have hb_ge : x' ≤ b := by
               by_contra hlt; push Not at hlt
               exact h_adj_sx'.2.2.2 b hb ⟨lt_trans hstart_lt_z hab, hlt⟩
-            exact h_no_between x' (Finset.mem_insert_of_mem hx'_dom) ⟨hz_lt_x', lt_of_le_of_ne hb_ge (Ne.symm hb_ne)⟩
+            exact h_no_between x' (Finset.mem_insert_of_mem hx'_dom)
+              ⟨hz_lt_x', lt_of_le_of_ne hb_ge (Ne.symm hb_ne)⟩
           subst hb_eq
           have hz_ne_pt : z ≠ pt := ne_of_gt hstart_lt_z
           have hx'_ne_z : x' ≠ z := ne_of_gt hz_lt_x'
-          simp only [val, g', if_true, hx'_ne_z, if_false, hz_ne_pt, and_true, and_self, if_true]
+          simp only [val, g', if_true, hx'_ne_z, if_false, hz_ne_pt, and_self, if_true]
           exact h_B''_max
         · -- a is in old domain, a < z. Show a = pt.
           have ha_le_start : a ≤ pt := by
@@ -458,20 +464,22 @@ noncomputable def c5ForwardWalk
             exact h_adj_sx'.2.2.2 a ha ⟨hgt, lt_trans hab hz_lt_x'⟩
           have ha_eq_start : a = pt := by
             by_contra ha_ne
-            exact h_no_between pt (Finset.mem_insert_of_mem h_start_mem) ⟨lt_of_le_of_ne ha_le_start ha_ne, hstart_lt_z⟩
+            exact h_no_between pt (Finset.mem_insert_of_mem h_start_mem)
+              ⟨lt_of_le_of_ne ha_le_start ha_ne, hstart_lt_z⟩
           subst ha_eq_start
           dsimp only [val, g']
-          simp only [ne_of_lt hstart_lt_z, if_false, if_true, and_self, if_true, ne_of_gt hstart_lt_z]
+          simp only [ne_of_lt hstart_lt_z, if_false, if_true, and_self, if_true]
           exact h_B'_max
         · have ha_ne : a ≠ z := fun h => hz_notin (h ▸ ha)
           have hb_ne : b ≠ z := fun h => hz_notin (h ▸ hb)
-          show BurgessR3Maximal (if a = z then D else χ.f a) (g' a b) (if b = z then D else χ.f b)
+          change BurgessR3Maximal (if a = z then D else χ.f a) (g' a b) (if b = z then D else χ.f b)
           simp only [ha_ne, hb_ne, ite_false, g', and_false, false_and]
-          exact h_c2' a b ⟨ha, hb, hab, fun u hu huab => h_no_between u (Finset.mem_insert_of_mem hu) huab⟩
+          exact h_c2' a b
+            ⟨ha, hb, hab, fun u hu huab => h_no_between u (Finset.mem_insert_of_mem hu) huab⟩
       exact { val := val
               dom_sub := Finset.subset_insert z χ.dom
               c0 := by
-                intro q hq; show Temporal.SetMaximalConsistent (if q = z then D else χ.f q)
+                intro q hq; change Temporal.SetMaximalConsistent (if q = z then D else χ.f q)
                 simp only [val, Finset.mem_insert] at hq
                 rcases hq with rfl | hq
                 · simp only [ite_true]; exact h_D_mcs
@@ -482,13 +490,14 @@ noncomputable def c5ForwardWalk
                 have hx_ne_z : x ≠ z := by intro h; exact hz_notin (h ▸ hx)
                 simp only [hx_ne_z, if_false]
               g_agrees := by
-                intro a b ha hb; show g' a b = χ.g a b; simp only [g']
+                intro a b ha hb; change g' a b = χ.g a b; simp only [g']
                 simp only [show a ≠ z from fun h => hz_notin (h ▸ ha),
                   show b ≠ z from fun h => hz_notin (h ▸ hb), false_and, and_false, ite_false]
               witness := z
               witness_mem := Finset.mem_insert_self z χ.dom
               witness_gt := hstart_lt_z
-              witness_event := by show η ∈ (if z = z then D else χ.f z); simp only [ite_true]; exact h_eta_D
+              witness_event := by
+                change η ∈ (if z = z then D else χ.f z); simp only [ite_true]; exact h_eta_D
               witness_guard := by
                 intro a b h_adj_ab h_le_a h_le_b
                 obtain ⟨ha_dom, hb_dom, hab_lt, h_no_btw⟩ := h_adj_ab
@@ -498,7 +507,8 @@ noncomputable def c5ForwardWalk
                   have ha_gt := lt_of_le_of_ne h_le_a (Ne.symm ha_ne)
                   rcases ha_dom with rfl | ha_mem
                   · exact absurd h_le_b (not_le.mpr hab_lt)
-                  · exact h_adj_sx'.2.2.2 a ha_mem ⟨ha_gt, lt_trans (lt_of_lt_of_le hab_lt h_le_b) hz_lt_x'⟩
+                  · exact h_adj_sx'.2.2.2 a ha_mem
+                      ⟨ha_gt, lt_trans (lt_of_lt_of_le hab_lt h_le_b) hz_lt_x'⟩
                 subst ha_eq
                 have hb_eq : b = z := by
                   by_contra hb_ne
@@ -513,7 +523,7 @@ noncomputable def c5ForwardWalk
                 intro a b h_adj w hw hw_not haw hwb
                 simp only [val, Finset.mem_insert] at hw
                 rcases hw with rfl | hw
-                · show χ.g a b ⊆ (if z = z then D else χ.f z); simp only [ite_true]
+                · change χ.g a b ⊆ (if z = z then D else χ.f z); simp only [ite_true]
                   have hab : a = pt ∧ b = x' := by
                     constructor
                     · by_contra ha_ne
@@ -574,7 +584,8 @@ decreasing_by
      This yields a single WF goal closed by simp_all + exact h_term. -/
   all_goals simp_all only [gt_iff_lt]
   all_goals exact h_term
-/-- Recursive walk that eliminates a C5 backward (Since) counterexample by inserting a new witness point. -/
+/-- Recursive walk that eliminates a C5 backward (Since) counterexample by inserting a new
+witness point. -/
 noncomputable def c5BackwardWalk
     (χ : Chronicle Atom) (h_c0 : χ.c0) (h_c2' : χ.c2')
     (ξ η : Formula Atom) (pt : Rat)
@@ -623,7 +634,7 @@ noncomputable def c5BackwardWalk
           have hb_gt : min_old < b := lt_of_le_of_ne hb_ge (Ne.symm hb_ne)
           exact h_no_between min_old (Finset.mem_insert_of_mem h_min_mem) ⟨h_min_lt_y, hb_gt⟩
         subst hb_eq
-        show BurgessR3Maximal
+        change BurgessR3Maximal
           (if y = y then C else χ.f y)
           (g' y min_old)
           (if min_old = y then C else χ.f min_old)
@@ -633,17 +644,18 @@ noncomputable def c5BackwardWalk
       · exact absurd hab (not_lt.mpr (le_of_lt (hy_lt a ha)))
       · have ha_ne : a ≠ y := fun h => hy_notin (h ▸ ha)
         have hb_ne : b ≠ y := fun h => hy_notin (h ▸ hb)
-        show BurgessR3Maximal
+        change BurgessR3Maximal
           (if a = y then C else χ.f a)
           (g' a b)
           (if b = y then C else χ.f b)
         simp only [ha_ne, hb_ne, ite_false, g', false_and, ite_false]
-        exact h_c2' a b ⟨ha, hb, hab, fun u hu huab => h_no_between u (Finset.mem_insert_of_mem hu) huab⟩
+        exact h_c2' a b
+          ⟨ha, hb, hab, fun u hu huab => h_no_between u (Finset.mem_insert_of_mem hu) huab⟩
     exact { val := χ'
             dom_sub := Finset.subset_insert y χ.dom
             c0 := by
               intro q hq
-              show Temporal.SetMaximalConsistent (if q = y then C else χ.f q)
+              change Temporal.SetMaximalConsistent (if q = y then C else χ.f q)
               change q ∈ insert y χ.dom at hq
               simp only [Finset.mem_insert] at hq
               rcases hq with rfl | hq
@@ -657,7 +669,7 @@ noncomputable def c5BackwardWalk
               exact if_neg h_ne
             g_agrees := by
               intro a b ha hb
-              show g' a b = χ.g a b
+              change g' a b = χ.g a b
               simp only [g']
               have ha_ne : a ≠ y := fun h => hy_notin (h ▸ ha)
               simp only [ha_ne, false_and, ite_false]
@@ -690,7 +702,7 @@ noncomputable def c5BackwardWalk
                 have hmin_le_b : min_old ≤ b := h_min_le b hb_old
                 exact le_antisymm hb_le_min hmin_le_b
               subst hb_eq
-              show ξ ∈ g' y min_old
+              change ξ ∈ g' y min_old
               simp only [g', and_self, ite_true]
               exact h_ξ_B
             g_sub_f_insert := by
@@ -726,7 +738,8 @@ noncomputable def c5BackwardWalk
               exact absurd (h_min_le w hw) (not_le.mpr (h_eq_min ▸ hws))
             witness_not_old := hy_notin }
   · -- **RECURSIVE CASE**: pt > min_old. Find predecessor x''.
-    have h_start_gt_min : min_old < pt := lt_of_le_of_ne (h_min_le pt h_start_mem) (Ne.symm h_eq_min)
+    have h_start_gt_min : min_old < pt :=
+      lt_of_le_of_ne (h_min_le pt h_start_mem) (Ne.symm h_eq_min)
     let T_pred := χ.dom.filter (fun v => v < pt)
     have hT_ne : T_pred.Nonempty :=
       ⟨min_old, Finset.mem_filter.mpr ⟨h_min_mem, h_start_gt_min⟩⟩
@@ -800,7 +813,8 @@ noncomputable def c5BackwardWalk
               rw [hwx'']
               exact conj_left_mcs h_mcs_x'' ξ (Formula.snce ξ η) h_cond_i.1⟩⟩
       -- Termination: (dom.filter (· < x'')).card < (dom.filter (· < pt)).card
-      have h_term : (χ.dom.filter (fun v => v < x'')).card < (χ.dom.filter (fun v => v < pt)).card := by
+      have h_term : (χ.dom.filter (fun v => v < x'')).card <
+          (χ.dom.filter (fun v => v < pt)).card := by
         apply Finset.card_lt_card
         constructor
         · intro v hv
@@ -834,8 +848,10 @@ noncomputable def c5BackwardWalk
                     have hb_lt : b < pt := lt_of_le_of_ne h_le_b hb_ne
                     by_cases hb_old : b ∈ χ.dom
                     · exact h_adj_x''s.2.2.2 b hb_old ⟨h_b_le_x'', hb_lt⟩
-                    · -- b is new from recursion at x'', so b < x'' by new_point_before. Contradicts b > x''.
-                      exact absurd (r.new_point_before b h_adj_ab.2.1 hb_old) (not_lt.mpr (le_of_lt h_b_le_x''))
+                    · -- b is new from recursion at x'', so b < x'' by new_point_before.
+                      -- Contradicts b > x''.
+                      exact absurd (r.new_point_before b h_adj_ab.2.1 hb_old)
+                        (not_lt.mpr (le_of_lt h_b_le_x''))
                   subst hb_eq
                   -- a must be x'': x'' in val.dom, a < pt, nothing between a and pt
                   have ha_eq : a = x'' := by
@@ -848,7 +864,8 @@ noncomputable def c5BackwardWalk
                       -- If new, new_point_before gives a < x'', contradiction.
                       by_cases ha_old : a ∈ χ.dom
                       · exact h_adj_x''s.2.2.2 a ha_old ⟨ha_gt, h_adj_ab.2.2.1⟩
-                      · exact absurd (r.new_point_before a h_adj_ab.1 ha_old) (not_lt.mpr (le_of_lt ha_gt))
+                      · exact absurd (r.new_point_before a h_adj_ab.1 ha_old)
+                          (not_lt.mpr (le_of_lt ha_gt))
                   rw [ha_eq, r.g_agrees x'' _ hx''_dom h_start_mem]
                   exact h_cond_i.2
               g_sub_f_insert := r.g_sub_f_insert
@@ -885,7 +902,8 @@ noncomputable def c5BackwardWalk
           · -- η ∈ g, ξ ∈ g: use lemma_2_8_since (avoids needing SetConsistent g)
             have h_conj_not_f : Formula.and ξ (Formula.snce ξ η) ∉ χ.f x'' :=
               fun h => h_cond_i ⟨h, h_xi_g⟩
-            have h_neg_disj : (Formula.or η (Formula.and ξ (Formula.snce ξ η))).neg ∈ χ.f x'' := by
+            have h_neg_disj :
+                (Formula.or η (Formula.and ξ (Formula.snce ξ η))).neg ∈ χ.f x'' := by
               have h1 : (¬η) ∈ χ.f x'' := by
                 rcases temporal_negation_complete h_mcs_x'' η with h | h
                 · exact absurd h (h_guard_implies_no_event h_xi_g)
@@ -901,10 +919,12 @@ noncomputable def c5BackwardWalk
                     (Formula.and ξ (Formula.snce ξ η))))
                 (conj_mcs h_mcs_x'' η.neg (Formula.and ξ (Formula.snce ξ η)).neg h1 h2)
             obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', _⟩ :=
-              lemma_2_8_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_since_start h_neg_disj
+              lemma_2_8_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                h_since_start h_neg_disj
             exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', hBB'' h_xi_g⟩
           · obtain ⟨B', D, B'', hB', hB'', hD, hη, hBB', h_B_sub_D, hBB'', h_xi_B''⟩ :=
-              lemma_2_7_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_since_start h_xi_g
+              lemma_2_7_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                h_since_start h_xi_g
             exact ⟨B', D, B'', hB', hB'', hD, hη, h_B_sub_D, hBB', hBB'', h_xi_B''⟩
         · by_cases h_eta_neg_g : (¬η) ∈ χ.g x'' pt
           · by_cases h_xi_g : ξ ∈ χ.g x'' pt
@@ -912,7 +932,8 @@ noncomputable def c5BackwardWalk
               · -- conj in g but not-condition(i): conj not in f(x'')
                 have h_conj_not_f : Formula.and ξ (Formula.snce ξ η) ∉ χ.f x'' :=
                   fun h => h_cond_i ⟨h, h_xi_g⟩
-                have h_neg_disj : (Formula.or η (Formula.and ξ (Formula.snce ξ η))).neg ∈ χ.f x'' := by
+                have h_neg_disj :
+                    (Formula.or η (Formula.and ξ (Formula.snce ξ η))).neg ∈ χ.f x'' := by
                   have h1 : (¬η) ∈ χ.f x'' := by
                     rcases temporal_negation_complete h_mcs_x'' η with h | h
                     · exact absurd h (h_guard_implies_no_event h_xi_g)
@@ -928,7 +949,8 @@ noncomputable def c5BackwardWalk
                         (Formula.and ξ (Formula.snce ξ η))))
                     (conj_mcs h_mcs_x'' η.neg (Formula.and ξ (Formula.snce ξ η)).neg h1 h2)
                 obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', _⟩ :=
-                  lemma_2_8_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_since_start h_neg_disj
+                  lemma_2_8_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                    h_since_start h_neg_disj
                 exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', hBB'' h_xi_g⟩
               · have h_bx5 := self_accum_since_mcs h_mcs_start ξ η h_since_start
                 obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, hBB', h_B_sub_D, hBB'', _⟩ :=
@@ -936,7 +958,8 @@ noncomputable def c5BackwardWalk
                     (Formula.and ξ (Formula.snce ξ η)) η h_bx5 h_conj_g
                 exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', hBB'' h_xi_g⟩
             · obtain ⟨B', D, B'', hB', hB'', hD, hη, hBB', h_B_sub_D, hBB'', h_xi_B''⟩ :=
-                lemma_2_7_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_since_start h_xi_g
+                lemma_2_7_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                  h_since_start h_xi_g
               exact ⟨B', D, B'', hB', hB'', hD, hη, h_B_sub_D, hBB', hBB'', h_xi_B''⟩
           · by_cases h_xi_g2 : ξ ∈ χ.g x'' pt
             · have h_sp := lemma_2_6_splitting h_mcs_x'' h_mcs_start h_r3m_adj
@@ -947,7 +970,8 @@ noncomputable def c5BackwardWalk
                   (theoremInMcs hD_mcs (doubleNegation η)) h_dne_D,
                 h_B_sub_D, hBB', hBB'', hBB'' h_xi_g2⟩
             · obtain ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, hBB', h_B_sub_D, hBB'', h_xi_B''⟩ :=
-                lemma_2_7_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η h_since_start h_xi_g2
+                lemma_2_7_since h_mcs_x'' h_mcs_start h_r3m_adj h_r3m_adj.1 h_gc_adj ξ η
+                  h_since_start h_xi_g2
               exact ⟨B', D, B'', hB', hB'', hD_mcs, hη_D, h_B_sub_D, hBB', hBB'', h_xi_B''⟩
       let B' := h_split_result.choose
       let D := h_split_result.choose_spec.choose
@@ -982,12 +1006,13 @@ noncomputable def c5BackwardWalk
             have hb_ge : pt ≤ b := by
               by_contra hlt; push Not at hlt
               exact h_adj_x''s.2.2.2 b hb ⟨lt_trans hx''_lt_z hab, hlt⟩
-            exact h_no_between pt (Finset.mem_insert_of_mem h_start_mem) ⟨hz_lt_pt, lt_of_le_of_ne hb_ge (Ne.symm hb_ne)⟩
+            exact h_no_between pt (Finset.mem_insert_of_mem h_start_mem)
+              ⟨hz_lt_pt, lt_of_le_of_ne hb_ge (Ne.symm hb_ne)⟩
           subst hb_eq
-          show BurgessR3Maximal (if z = z then D else χ.f z) (g' z b) (if b = z then D else χ.f b)
+          change BurgessR3Maximal (if z = z then D else χ.f z) (g' z b) (if b = z then D else χ.f b)
           have hz_ne_x'' : z ≠ x'' := ne_of_gt hx''_lt_z
           have hb_ne_z : b ≠ z := ne_of_gt hz_lt_pt
-          simp only [ite_true, hb_ne_z, ite_false, g', hz_ne_x'', false_and, ite_false, and_self, ite_true]
+          simp only [ite_true, hb_ne_z, ite_false, g', hz_ne_x'', ite_false, and_self, ite_true]
           exact h_B''_max
         · -- a is in old domain, a < z. Show a = x''.
           have ha_le_x'' : a ≤ x'' := by
@@ -995,20 +1020,22 @@ noncomputable def c5BackwardWalk
             exact h_adj_x''s.2.2.2 a ha ⟨hgt, lt_trans hab hz_lt_pt⟩
           have ha_eq_x'' : a = x'' := by
             by_contra ha_ne
-            exact h_no_between x'' (Finset.mem_insert_of_mem hx''_dom) ⟨lt_of_le_of_ne ha_le_x'' ha_ne, hx''_lt_z⟩
+            exact h_no_between x'' (Finset.mem_insert_of_mem hx''_dom)
+              ⟨lt_of_le_of_ne ha_le_x'' ha_ne, hx''_lt_z⟩
           subst ha_eq_x''
           dsimp only [val, g']
-          simp only [ne_of_lt hx''_lt_z, if_false, if_true, and_self, if_true, ne_of_gt hx''_lt_z]
+          simp only [ne_of_lt hx''_lt_z, if_false, if_true, and_self, if_true]
           exact h_B'_max
         · have ha_ne : a ≠ z := fun h => hz_notin (h ▸ ha)
           have hb_ne : b ≠ z := fun h => hz_notin (h ▸ hb)
-          show BurgessR3Maximal (if a = z then D else χ.f a) (g' a b) (if b = z then D else χ.f b)
+          change BurgessR3Maximal (if a = z then D else χ.f a) (g' a b) (if b = z then D else χ.f b)
           simp only [ha_ne, hb_ne, ite_false, g', and_false, false_and]
-          exact h_c2' a b ⟨ha, hb, hab, fun u hu huab => h_no_between u (Finset.mem_insert_of_mem hu) huab⟩
+          exact h_c2' a b
+            ⟨ha, hb, hab, fun u hu huab => h_no_between u (Finset.mem_insert_of_mem hu) huab⟩
       exact { val := val
               dom_sub := Finset.subset_insert z χ.dom
               c0 := by
-                intro q hq; show Temporal.SetMaximalConsistent (if q = z then D else χ.f q)
+                intro q hq; change Temporal.SetMaximalConsistent (if q = z then D else χ.f q)
                 simp only [val, Finset.mem_insert] at hq
                 rcases hq with rfl | hq
                 · simp only [ite_true]; exact h_D_mcs
@@ -1019,13 +1046,14 @@ noncomputable def c5BackwardWalk
                 have hx_ne_z : x ≠ z := by intro h; exact hz_notin (h ▸ hx)
                 simp only [hx_ne_z, if_false]
               g_agrees := by
-                intro a b ha hb; show g' a b = χ.g a b; simp only [g']
+                intro a b ha hb; change g' a b = χ.g a b; simp only [g']
                 simp only [show a ≠ z from fun h => hz_notin (h ▸ ha),
                   show b ≠ z from fun h => hz_notin (h ▸ hb), false_and, and_false, ite_false]
               witness := z
               witness_mem := Finset.mem_insert_self z χ.dom
               witness_lt := hz_lt_pt
-              witness_event := by show η ∈ (if z = z then D else χ.f z); simp only [ite_true]; exact h_eta_D
+              witness_event := by
+                change η ∈ (if z = z then D else χ.f z); simp only [ite_true]; exact h_eta_D
               witness_guard := by
                 intro a b h_adj_ab h_le_a h_le_b
                 obtain ⟨ha_dom, hb_dom, hab_lt, h_no_btw⟩ := h_adj_ab
@@ -1046,19 +1074,21 @@ noncomputable def c5BackwardWalk
                   have ha_gt : z < a := lt_of_le_of_ne h_le_a (Ne.symm ha_ne)
                   rcases ha_dom with rfl | ha_mem
                   · exact absurd (le_refl z) (not_le.mpr ha_gt)
-                  · -- a ∈ χ.dom, z < a, and a < b = pt. So x'' < z < a < pt, contradicts h_adj_x''s.
+                  · -- a ∈ χ.dom, z < a, and a < b = pt. So x'' < z < a < pt,
+                    -- contradicts h_adj_x''s.
                     exact h_adj_x''s.2.2.2 a ha_mem ⟨lt_trans hx''_lt_z ha_gt, hab_lt⟩
                 subst ha_eq
                 -- Need: ξ ∈ g'(z, b) where b = pt (after subst). g' checks:
                 -- z = x'' ∧ b = z? No (z ≠ x''). Then z = z ∧ b = pt? Yes. Result: B''.
-                show ξ ∈ g' z b
-                simp only [g', show z ≠ x'' from ne_of_gt hx''_lt_z, false_and, ite_false, and_self, ite_true]
+                change ξ ∈ g' z b
+                simp only [g', show z ≠ x'' from ne_of_gt hx''_lt_z, false_and, ite_false,
+                  and_self, ite_true]
                 exact h_xi_B''
               g_sub_f_insert := by
                 intro a b h_adj w hw hw_not haw hwb
                 simp only [val, Finset.mem_insert] at hw
                 rcases hw with rfl | hw
-                · show χ.g a b ⊆ (if z = z then D else χ.f z); simp only [ite_true]
+                · change χ.g a b ⊆ (if z = z then D else χ.f z); simp only [ite_true]
                   have hab : a = x'' ∧ b = pt := by
                     constructor
                     · by_contra ha_ne
@@ -1114,7 +1144,7 @@ noncomputable def c5BackwardWalk
               witness_not_old := hz_notin }
 termination_by (χ.dom.filter (fun v => v < pt)).card
 decreasing_by
-  all_goals simp_all only [gt_iff_lt]
+  all_goals simp_all only []
   all_goals exact h_term
 
 

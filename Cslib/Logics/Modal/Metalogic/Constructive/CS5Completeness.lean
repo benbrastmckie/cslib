@@ -46,7 +46,7 @@ negation-completeness step anywhere.
 - `cs5PairAxiom_left_derivable`/`cs5PairAxiom_right_derivable`: the easy transport direction,
   `Derivable CS5ModalAxiom φ → Derivable CS5PairAxiom (τ_L φ)` (and the `τ_R` analogue), via
   `Derivable.map` (`DerivationTree.lean`). The converse (needed to show the eventual projected
-  pair's components are themselves `CS5ModalAxiom`-quasi-prime) is Phase 5's R2 conservativity
+  pair's components are themselves `CS5ModalAxiom`-quasi-prime) is the R2 conservativity
   lemma, not this phase's concern.
 - `crossCond_left_stable`/`crossCond_right_stable`: `cl`-stability of the cross-conditions for
   any `CS5PairAxiom`-deductively-closed set -- library port of the probe's prototype (ii).
@@ -155,7 +155,7 @@ inductive CS5PairAxiom : Proposition (Atom ⊕ Atom) → Prop where
 `Derivable CS5ModalAxiom φ → Derivable CS5PairAxiom (τ_L φ)` (and the `τ_R` analogue), via
 `Derivable.map` (`DerivationTree.lean`) instantiated at `f := Sum.inl`/`Sum.inr` and the
 schema-compatibility witness `CS5PairAxiom.left`/`.right`. The converse direction (needed for
-Phase 5's projection to be faithful) is deferred to Phase 5's R2 conservativity lemma. -/
+the projection to be faithful) is deferred to the R2 conservativity lemma. -/
 
 /-- `CS5`-derivability transports to the left-tagged copy of `CS5PairAxiom`. -/
 theorem cs5PairAxiom_left_derivable {φ : Proposition Atom} (h : Derivable (@CS5ModalAxiom Atom) φ) :
@@ -372,7 +372,7 @@ equivalent to the pair's own *joint satisfiability* -- exactly what a truth lemm
 box-backward pair this module is building towards would need to presuppose. The genuinely
 distinct candidate is a **product model** over two copies of `IS5`'s semantics (not a common
 valuation): this is a real, independently-motivated route, and it is closed on its own terms
-(not dismissed as circular) by the governing plan's Phase 5, which shows its residual side
+(not dismissed as circular) by the R2 conservativity lemma, which shows its residual side
 condition is equivalent to the `CS5 = IS5` collapse the mandate has not adopted.
 
 **Status.** Open here. A correct proof is expected to require a cut-free/nested-sequent argument
@@ -427,10 +427,10 @@ theorem cs5Pair_orBot_imp_self (x : Proposition (Atom ⊕ Atom)) :
   exact mp_deriv (mp_deriv horE hidx) hbotx
 
 /-- **The conditional `DerivExcludes` reduction.** Consumes the two individual exclusions
-`hL`/`hR` and the named open obligation `hOpen` as **explicit hypotheses** -- since Phase 4
-(cross-inertness) is blocked, `hL`/`hR` are not available as theorems here either; both remain
-open pending a future cross-inertness argument or the spawned disjunction-property subtask. The
-theorem itself is proved by case analysis on the `List` argument of `DerivExcludes`
+`hL`/`hR` and the named open obligation `hOpen` as **explicit hypotheses** -- since the
+cross-inertness argument is blocked, `hL`/`hR` are not available as theorems here either; both
+remain open pending a future cross-inertness argument or the spawned disjunction-property
+subtask. The theorem itself is proved by case analysis on the `List` argument of `DerivExcludes`
 (`Metalogic.PrimeExclusion.lean:332`): the `[]` case is consistency of `T` via `hL` + `EFQ`; the
 singleton cases are `hL`/`hR` directly (via `cs5Pair_orBot_imp_self`); the two-element-and-longer
 case reduces to `hOpen` (via `cs5Pair_bigOr_imp_or`). Sorry-free regardless of which hypotheses a

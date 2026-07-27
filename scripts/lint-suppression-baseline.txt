@@ -68,7 +68,6 @@
 3 Cslib/Logics/Bimodal/Metalogic/Core/RestrictedMCS.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/Closure.lean
 2 Cslib/Logics/Bimodal/Metalogic/Decidability/Correctness.lean
-5 Cslib/Logics/Bimodal/Metalogic/Decidability/CountermodelExtraction.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/ClosureMCS.lean
 2 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/Filtration.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/FMP.lean

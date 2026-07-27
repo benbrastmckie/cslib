@@ -21,10 +21,38 @@
 
 ## RESUME HERE
 
-Fifteenth resume (cycle 15 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
-COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was re-closed in cycle 12
-after its own reopen). Only Phase 5 (suppression audit) remains, PARTIAL at 213 sites done, 214
-blanket suppressions across local-only files remaining in scope.**
+Sixteenth resume (cycle 16, in progress). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8
+all COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was re-closed in cycle 12
+after its own reopen; Phase 4's post-close `lake shake` regression was re-closed in cycle 16 —
+see below). Only Phase 5 (suppression audit) remains, PARTIAL.**
+
+**Cycle 16, item 1 (this dispatch) — Phase 4's `lake shake` regression re-closed.** The cycle-15
+"baseline noise, ~15 files, not fixed" finding was investigated: a live `lake shake --add-public
+--keep-implied --keep-prefix Cslib` found **23 files** flagged (not ~15), gated individually
+through `git cat-file -e upstream/main:<path>`. **12 were upstream-shared, confirmed out of
+scope** (unchanged, routed to a future upstream PR): `Algorithms/Lean/TimeM.lean`,
+`Computability/Machines/Turing/{MultiTape/Deterministic,SingleTape/NonDeterministic}.lean`,
+`Foundations/{Data/StackTape,Relation/Defs,Relation/Confluence,Control/Monad/Free,
+Data/HasFresh}.lean`, `Languages/{CCS/Basic,CombinatoryLogic/Defs,
+LambdaCalculus/LocallyNameless/Untyped/LcAt}.lean`, `Logics/Modal/Basic.lean`. **11 were
+local-only, in scope, and fixed** (11 individual commits, each rebuilt file-plus-downstream-
+importers before commit): `Foundations/Logic/Metalogic/
+{Chronicle/SinceSeedConsistency,ListDeduction,ProofSystemMorphism}.lean`,
+`Foundations/Logic/Tableau/SignedFormula.lean`, `Foundations/Logic/Theorems/BigConj.lean`,
+`Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean`,
+`Logics/Modal/Metalogic/Constructive/Forcing.lean`, `Logics/Propositional/Semantics/Algebra/
+{PointedBrouwerian,BrouwerianBot,NonemptyLowerSet}.lean`,
+`Logics/Temporal/Tableau/TimeOrdering.lean`. See Phase 4's own section for the full breakdown,
+including the one non-mechanical case (`ProofSystemMorphism.lean`'s suggested import removal was
+rejected and `-- shake: keep`-annotated instead, since the file's own comment documents that
+import as required for a public constructor's notation elaboration). Full CI pipeline (`lake
+build --wfail --iofail`, `checkInitImports`, `lint-style`, `mk_all --module`, `lake test`) re-run
+clean after the fix; `lake shake` repo-wide now reports exactly the 12 upstream-shared files and
+nothing else. **Phase 4's marker returns to COMPLETED, this time on a criterion that was
+empirically re-verified against a live count, not merely re-asserted.**
+
+**Cycle 16, item 2 (this dispatch, remaining budget)**: continuing Phase 5 per its own resume
+point below.
 
 **Cycle 15 (this dispatch, scope-limited to Phase 5 only)**: processed 4 more files, all
 committed individually after a clean scoped rebuild plus downstream-importer rebuilds —
@@ -50,19 +78,11 @@ same one pre-existing unrelated `backward.privateInPublic` warning in
 `CslibTests/FreeMonad.lean`). Vacuous-def grep unchanged at the single pre-existing false
 positive (`Computability/URM/Basic.lean:92`); axiom count unchanged at 26.
 
-**Baseline noise found, NOT part of this phase's scope, flagged for the record (unlike the
-cycle-12/13 `--wfail` regression, this one does not affect the wfail gate and was not fixed)**:
-`lake shake --add-public --keep-implied --keep-prefix` reports import-minimization findings
-(mostly `add Mathlib.Tactic.Attr.Core`) across roughly 15 files, none of which this dispatch (or
-any prior Phase 5 cycle) touched — e.g. `Foundations/Logic/Metalogic/ListDeduction.lean`,
-`Foundations/Logic/Theorems/BigConj.lean`, `Languages/CCS/Basic.lean`,
-`Logics/Modal/Basic.lean`, `Logics/Temporal/Tableau/TimeOrdering.lean`. This looks like the same
-class of "landed via an unrelated merge, not a Phase 3/5 edit" drift the cycle-12/13 `--wfail`
-regression was, but for the `lake shake` gate rather than the `--wfail` build gate. It is
-explicitly out of scope for a Phase-5-only dispatch (fixing it would mean editing files with no
-suppression-audit connection) and does not gate CI the way `--wfail` does, so it is recorded here
-rather than fixed or silently ignored. A future cycle (or a dedicated task) should re-run `lake
-shake --fix` on these files if the drift is confirmed unrelated to any in-flight work.
+**Baseline noise found at cycle 15, NOT part of that dispatch's scope — RESOLVED cycle 16.**
+`lake shake --add-public --keep-implied --keep-prefix` reported import-minimization findings
+across (a live cycle-16 recount found) 23 files, 11 of which were local-only and in scope. Fixed
+in cycle 16 — see the RESUME HERE cycle-16 entry above and Phase 4's own section for the full
+per-file breakdown. The remaining 12 are confirmed upstream-shared and correctly out of scope.
 
 **RESOLVED this cycle — the baseline regression flagged (not fixed) at cycle 12's close is now
 fixed.** `lake build --wfail --iofail` had regressed to **12 warnings across 7 modules**; it is
@@ -706,6 +726,44 @@ of the remaining sites belong to genuinely live, in-progress work (317, 425, and
 Nested-family plan) where a "fix" would corrupt active provenance, not clean up stale debt.
 
 ### Phase 4: Import gate (`lake shake`) [COMPLETED]
+
+**Post-close regression found and fixed.** A later Phase 5 cycle's continuation context flagged
+that `lake shake --add-public --keep-implied --keep-prefix` had drifted to report
+import-minimization findings across ~15 files, landed via an unrelated merge after this phase's
+original close — the same class of "unrelated merge regression" as the cycle-12/13 `--wfail`
+regression documented in Phase 1, but for the shake gate instead of the build gate. A dedicated
+dispatch investigated: a live run found **23 files** flagged (not ~15 — the ~15 estimate was a
+sample, not an exhaustive count), gated each individually through
+`git cat-file -e upstream/main:<path>` per the upstream-exposure carve-out. **12 were
+upstream-shared (out of scope, unchanged)** — `Algorithms/Lean/TimeM.lean`,
+`Computability/Machines/Turing/{MultiTape/Deterministic,SingleTape/NonDeterministic}.lean`,
+`Foundations/{Data/StackTape,Relation/Defs,Relation/Confluence,Control/Monad/Free,
+Data/HasFresh}.lean`, `Languages/{CCS/Basic,CombinatoryLogic/Defs,
+LambdaCalculus/LocallyNameless/Untyped/LcAt}.lean`, `Logics/Modal/Basic.lean` — routed to a
+future upstream PR, not fixed here, consistent with every other upstream-shared exclusion in this
+task. **11 were local-only (in scope)**, all fixed this dispatch, each individually rebuilt (file
+plus downstream importers) and committed: `Foundations/Logic/Metalogic/
+{Chronicle/SinceSeedConsistency,ListDeduction,ProofSystemMorphism}.lean`,
+`Foundations/Logic/Tableau/SignedFormula.lean`, `Foundations/Logic/Theorems/BigConj.lean`,
+`Foundations/Order/HilbertAlgebra/DiegoEmbedding.lean`,
+`Logics/Modal/Metalogic/Constructive/Forcing.lean`, `Logics/Propositional/Semantics/Algebra/
+{PointedBrouwerian,BrouwerianBot,NonemptyLowerSet}.lean`,
+`Logics/Temporal/Tableau/TimeOrdering.lean`. All 11 fixes were the tool's suggested `add` import
+directive applied by hand (never a bare `--fix` batch, since that command's reachable-module
+closure would also have touched the upstream-shared dependency files this rescope must not
+edit). **One exception, not a mechanical add**: `ProofSystemMorphism.lean`'s shake suggestion
+was `remove public import Mathlib.Tactic.SetNotationForOrder` — rejected, because the file's own
+inline comment documents that import as required for the public `Deriv.weak` constructor's `⊆`
+elaboration to remain usable by any future downstream importer (the file is currently a leaf with
+none yet); annotated `-- shake: keep` instead of deleting it, per `lake shake --help`'s own
+"preserve this specific import" mechanism, and added the tool's separate `Mathlib.Tactic.Attr.Core`
+suggestion alongside it. A full `lake build --wfail --iofail` (exactly 5 baseline sorry warnings),
+`lake exe checkInitImports`, `lake exe lint-style`, `lake exe mk_all --module` ("No update
+necessary"), and `lake test` (exit 0, same pre-existing `backward.privateInPublic` warning in
+`CslibTests/FreeMonad.lean`) were all re-run clean after the fix. `lake shake` re-run
+repo-wide now reports exactly the 12 upstream-shared files and nothing else — **the phase's
+"clean" criterion is empirically re-verified as true for the local-only tree**, which is this
+task's actual scope per the upstream-exposure rescope.
 
 **Exclusion audit: no exclusions claimed, close stands — pending one empirical re-verification.**
 The two false positives this phase found were **fixed by hand, not excluded**, so nothing was

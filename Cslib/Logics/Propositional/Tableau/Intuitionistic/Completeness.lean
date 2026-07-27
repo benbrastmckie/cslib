@@ -120,14 +120,14 @@ b) (intScheme.modelBot b) 0 φ` at the `intAccessPreorder edges` frame. For the 
 scheme, `modelBot b = fun _ => False`. This follows from `IValid φ` by instantiating at
 `World = Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val = intExtractValuation b`, with
 the upward-closure of `intExtractValuation b` ALONG THAT FRAME — the deferred-monotonicity
-obligation folded into fuel-sufficiency (task 317 phase 9/10), not yet available. -/
+obligation folded into the fuel-sufficiency fixpoint, not yet available. -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
   intro edges _b
-  -- Task 317 phase 4 (deferred-monotonicity bridge): `h` instantiated at
-  -- `intAccessPreorder edges` needs `intExtractValuation _b`'s upward-closure along that
-  -- frame, which is not available until the fuel-sufficiency fixpoint (phase 9/10).
+  -- Deferred-monotonicity bridge: `h` instantiated at `intAccessPreorder edges` needs
+  -- `intExtractValuation _b`'s upward-closure along that frame, which is not available
+  -- until the fuel-sufficiency fixpoint.
   -- The bridge SHAPE (accepting `edges`) is now Route (a)-correct; only this monotonicity
   -- premise remains deferred.
   sorry

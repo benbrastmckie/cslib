@@ -1,7 +1,7 @@
 # Implementation Plan: Repair per-document chunk-count under-reporting in literature-briefing.sh
 
 - **Task**: 560 - Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md`

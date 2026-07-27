@@ -2026,7 +2026,7 @@
     {
       "project_number": 560,
       "project_name": "repair_literature_subindex_massacci_chunks",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "meta",
       "title": "Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)",
       "topic": "Literature Infrastructure",
@@ -2045,14 +2045,20 @@
           "type": "plan",
           "path": "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
           "created": "2026-07-26"
+        },
+        {
+          "type": "summary",
+          "path": "specs/560_repair_literature_subindex_massacci_chunks/summaries/01_chunk-count-repair-summary.md",
+          "created": "2026-07-26"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:50:52Z",
+      "last_updated": "2026-07-27T00:00:34Z",
       "next_artifact_number": 2,
       "session_id": "sess_1785108997_9eb575",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Repaired per-repo literature briefing chunk-count under-reporting in .claude/scripts/literature-briefing.sh via a four-tier precedence (child count -> parent chunk_count field -> on-disk chunk_*.md glob -> literal 1). 19 of 34 sub-index documents repaired (Massacci 1->77, simpson_1994 1->206, and 17 others); regression sentinel chagrovzakharyaschev_1997_modallogic held at 6 (not 997). Research adversarially corrected the task description on two points: true tier-2 scope is 8 documents not 19, and the description's proposed fix precedence was inverted and would have caused the 997 regression. Shared global corpus never written. Known residuals: venema_1993 pair (sec*.md naming), 17 orphaned parent_doc values. FOLLOW-UP REQUIRING USER DECISION: .claude/ is git-excluded via .git/info/exclude line 18, so the fixed script is live on disk but untracked and will be lost on a fresh clone."
     },
     {
       "project_number": 561,

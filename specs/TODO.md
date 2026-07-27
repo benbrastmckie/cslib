@@ -1,5 +1,5 @@
 ---
-next_project_number: 576
+next_project_number: 578
 ---
 
 # TODO
@@ -13,7 +13,7 @@ next_project_number: 576
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573,575 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574 | 36,37,181,425,465,530,554,562,563,573 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,456,506,548,565,566 | 39,40,511,564,574 | foundations, modal logic, tableau infrastructure |
+| 3 | 41,456,506,548,565,566,576 | 39,40,511,564,568,574 | foundations, modal logic, bimodal and temporal logic, ... |
 | 4 | 300,317,567 | 456,506,558,565,566 | propositional logic, modal logic |
 | 5 | 375,414,430 | 181,215,300,301,317 | propositional logic, code hygiene |
 | 6 | 413 | 375 | code hygiene |
@@ -96,8 +96,29 @@ next_project_number: 576
 ### Bimodal And Temporal Logic
 
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
+  └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
 ## Tasks
+
+### 576. Resolve the Chronicle namespace/structure name coincidence and its 36 load-bearing suppressions
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Bimodal and Temporal Logic
+- **Dependencies**: Task 568
+
+**Description**: Resolve the `namespace Chronicle` / `structure Chronicle` NAME COINCIDENCE, and delete the 36 suppressions it forces (33 @[nolint], 3 set_option) across the three ChronicleTypes/Types files, 9 declarations each.
+
+ORIGIN: identified during the repo-wide lint-hygiene work as the genuine residual defect behind a group of dupNamespace suppressions. That work closed its doubled-namespace phase at 7 of 10 files and deliberately EXCLUDED the three Chronicle modules, because the original doubled-namespace diagnosis was WRONG there: `namespace ...Metalogic.Chronicle` contains `structure Chronicle`, so `def Chronicle.c0` correctly declares a structure-projection member that 81 dot-notation call sites (chi.c0, chi.c3, ...) depend on. A mechanical prefix strip fails with "Invalid field 'c0': the environment does not contain ...Chronicle.Chronicle.c0". The 36 suppressions are LOAD-BEARING until the coincidence itself is resolved -- do NOT delete them before the restructure lands.
+
+THE DECISION: either (a) move `structure Chronicle` to the parent namespace, or (b) rename the namespace across the whole Chronicle/ subtree, or (c) a better option surfaced by the dependency below. This alters definitions, which is why it was barred from the hygiene-only lint task.
+
+DEPENDENCY RATIONALE (task 568): 568 asks what the RIGHT Chronicle architecture is for Bimodal/Temporal dedup, evaluating type-alias, label-type parameterization, and typeclass-mediated indexing. Its file_scope is the three Chronicle DIRECTORIES and strictly contains this task's three files. If 568 recommends parameterizing the structure away, the naming question resolves differently -- or evaporates entirely. Renaming first would risk doing the work twice. Sequence after 568 reports.
+
+DEFINITION OF DONE: the namespace/structure coincidence is resolved by an explicit, recorded decision; all 36 suppressions are deleted; dupNamespace is clean across the three files; the 81 dot-notation call sites still resolve; `lake build --wfail --iofail` shows no new warnings and `lake test` is unchanged.
+
+CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or relocate any sorry.
+
+---
 
 ### 575. Repo lint hygiene ci gate restoration
 - **Status**: [PARTIAL]

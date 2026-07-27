@@ -100,6 +100,22 @@ Each was investigated and found correct. Re-investigating wastes a cycle.
 
 ---
 
+## Risks & Mitigations
+
+Every risk below was *realized* during execution, not hypothesized. Each mitigation is the one
+that actually caught it.
+
+| Risk | Realized as | Mitigation |
+|---|---|---|
+| A "mechanical" cleanup list contains items whose edit breaks the build | The three `Chronicle` modules: `Chronicle.` is a structure-projection namespace, not a doubled one; stripping it fails on 81 dot-notation call sites | Per-item verification before editing. Phase 2 closed at 7/10 with the trio excluded by finding |
+| A mechanical edit compiles green but silently corrupts meaning | The `S`->`Sys` rename: `ProofSystem.lean`'s docstrings use "K, S, MP" as *combinatory-logic* naming, unrelated to the `InferenceSystem` parameter | Semantic (not just syntactic) census before a rename. Phase 7 excluded it by finding |
+| A dead-code list flags live code | `HilbertSearch.lean` (a real tactic implementation, invisible to a declaration-keyword scan) and a documented `proof_wanted` stub | Full reference-count grep per candidate. Phase 8 closed at 9/10 rows |
+| Planning-time counts are wrong by orders of magnitude | "~484 reference sites" was truly 6 (~80x); "5 files" for the rename was 24 files + 231 call sites; the 376 reference baseline was truly 399 | Treat every asserted count as a hypothesis; re-derive with a corrected regex before relying on it |
+| A census regex silently undercounts | The reference census missed hyphenated `task-N` and letter-suffixed `Phase 3a`; a naive `\bsorry\b` scan counted `warn.sorry` option lines as proof holes | Documented census method in "Measurement notes"; regex fixed and recorded in Phase 3 |
+| Uniform per-file verification makes atomic refactors inexpressible | A rename that must land across 24 files at once cannot be decomposed into independently-green single-file commits | Risk-tiered batch verification (see "Testing & Validation"); Tier 4 permits one atomic batch |
+| Editing files owned by a concurrent task corrupts its provenance | Tasks 553/557 held stale locks overlapping this `file_scope`; `FrameSoundness.lean` citations document 553's live sorry analysis | Check task liveness before editing; retain forward references to unwritten work with recorded rationale |
+| A suppression-removal idiom that is safe in one case breaks another | `omit [...] in` is safe for `unusedSectionVars` but broke compilation for `unusedDecidableInType` | Rebuild before committing every Phase 5 batch; restore-and-narrow rather than leave blanket |
+
 ## Baseline and current state
 
 | Gate | At task start | Now |
@@ -765,6 +781,21 @@ Commit per verified-green **batch**, not per file. This still satisfies
 progress-file objective reaching `done`, and `files_touched` explicitly accumulates across
 multiple files, so a batch is a legitimate sub-step. "Green" still means the batch's own
 verification criteria passed. Unverified work remains uncommittable.
+
+## Artifacts & Outputs
+
+| Artifact | Kind | Notes |
+|---|---|---|
+| `plans/01_lint-hygiene-ci-gate.md` | plan | This file; carries the phase state, closure findings, and resume point |
+| `.github/workflows/lean_action_ci.yml` | deliverable | `lake shake` step uncommented and live (Phase 4) |
+| `scripts/pre-pr-check.sh` | deliverable | Now able to actually fail; correct sorry-census method (Phase 7) |
+| `ORGANISATION.md` | deliverable | Refreshed for 5 undocumented Modal/Metalogic subdirs + `Temporal/Tableau/` (Phase 7) |
+| `Cslib/**` | deliverable | 240 linter sites cleared; 226 task-citations replaced with durable anchors; 13 dead declarations and 5 dead modules deleted; import graph shaken; 12 file-scoped suppressions narrowed to 2 |
+| `remaining-warnings.txt`, `warning-sites.txt` | working | Historical worklists, exhausted |
+| `handoffs/02_phase-6-7-8-3-progress.md` | handoff | Continuation context between dispatches |
+
+No report artifact was filed: research findings were inlined into this plan (see **Research
+Inputs** in the metadata block) rather than written as separate `reports/` files.
 
 ## Definition of Done
 

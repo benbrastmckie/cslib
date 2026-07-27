@@ -1,5 +1,5 @@
 {
-  "next_project_number": 576,
+  "next_project_number": 578,
   "active_projects": [
     {
       "project_number": 530,
@@ -2118,8 +2118,8 @@
         ".github/workflows/lean_action_ci.yml"
       ],
       "created": "2026-07-27T06:54:27Z",
-      "last_updated": "2026-07-27T08:12:18Z",
-      "session_id": "sess_1785135293_c62e37",
+      "last_updated": "2026-07-27T11:26:46Z",
+      "session_id": "sess_1785140072_91c8ab",
       "artifacts": [
         {
           "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md",
@@ -2137,6 +2137,29 @@
         "skeleton": false
       },
       "progress_note": "CI gate restored modulo the 5 genuine sorries (expected end state; those are owned by tasks 317 and 553/557). 36 commits. Remaining: Phase 3 task-refs (312 sites, largest), Phase 4 shake, Phase 5 suppressions (288 pure-style are the best target), Phase 6 warn.sorry rescoping, Phase 7 scripts/docs, Phase 8 dead-code deletions (9 of 10 approved-but-unstarted)."
+    },
+    {
+      "project_number": 576,
+      "project_name": "chronicle_namespace_structure_coincidence",
+      "title": "Resolve the Chronicle namespace/structure name coincidence and its 36 load-bearing suppressions",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Bimodal and Temporal Logic",
+      "created": "2026-07-27T08:56:55Z",
+      "last_updated": "2026-07-27T08:56:55Z",
+      "session_id": "sess_1785140072_91c8ab",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "blockers": [],
+      "dependencies": [
+        568
+      ],
+      "file_scope": [
+        "Cslib/Logics/Temporal/Metalogic/Chronicle/ChronicleTypes.lean",
+        "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean",
+        "Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean"
+      ],
+      "description": "Resolve the `namespace Chronicle` / `structure Chronicle` NAME COINCIDENCE, and delete the 36 suppressions it forces (33 @[nolint], 3 set_option) across the three ChronicleTypes/Types files, 9 declarations each.\n\nORIGIN: identified during the repo-wide lint-hygiene work as the genuine residual defect behind a group of dupNamespace suppressions. That work closed its doubled-namespace phase at 7 of 10 files and deliberately EXCLUDED the three Chronicle modules, because the original doubled-namespace diagnosis was WRONG there: `namespace ...Metalogic.Chronicle` contains `structure Chronicle`, so `def Chronicle.c0` correctly declares a structure-projection member that 81 dot-notation call sites (chi.c0, chi.c3, ...) depend on. A mechanical prefix strip fails with \"Invalid field 'c0': the environment does not contain ...Chronicle.Chronicle.c0\". The 36 suppressions are LOAD-BEARING until the coincidence itself is resolved -- do NOT delete them before the restructure lands.\n\nTHE DECISION: either (a) move `structure Chronicle` to the parent namespace, or (b) rename the namespace across the whole Chronicle/ subtree, or (c) a better option surfaced by the dependency below. This alters definitions, which is why it was barred from the hygiene-only lint task.\n\nDEPENDENCY RATIONALE (task 568): 568 asks what the RIGHT Chronicle architecture is for Bimodal/Temporal dedup, evaluating type-alias, label-type parameterization, and typeclass-mediated indexing. Its file_scope is the three Chronicle DIRECTORIES and strictly contains this task's three files. If 568 recommends parameterizing the structure away, the naming question resolves differently -- or evaporates entirely. Renaming first would risk doing the work twice. Sequence after 568 reports.\n\nDEFINITION OF DONE: the namespace/structure coincidence is resolved by an explicit, recorded decision; all 36 suppressions are deleted; dupNamespace is clean across the three files; the 81 dot-notation call sites still resolve; `lake build --wfail --iofail` shows no new warnings and `lake test` is unchanged.\n\nCONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or relocate any sorry.\n"
     }
   ],
   "repository_health": {

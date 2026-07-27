@@ -80,7 +80,7 @@ provides a `LawfulBEq (Proposition Atom)` instance (`instance [DecidableEq α] :
 in `Init.Core`), so `eq_of_beq` is available directly -- no structural induction on
 `Proposition` is needed (and the naive structural arms do not typecheck, since `==` on
 `Proposition Atom` does not definitionally reduce constructor-by-constructor). -/
-private def Proposition.beqToEq {Atom : Type*} [DecidableEq Atom] :
+private theorem Proposition.beqToEq {Atom : Type*} [DecidableEq Atom] :
     ∀ (a b : Proposition Atom), (a == b) = true → a = b :=
   fun _ _ h => LawfulBEq.eq_of_beq h
 

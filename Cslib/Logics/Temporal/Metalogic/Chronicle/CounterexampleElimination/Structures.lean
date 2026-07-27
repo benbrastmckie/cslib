@@ -20,7 +20,7 @@ public import Mathlib.Tactic.Linarith
 C5/C5' counterexample structures, the fresh-rational helper lemmas,
 and BurgessR3Maximal helper lemmas used by the Temporal chronicle construction.
 
-## Status (task 530, Phase 3a)
+## Status (Chronicle Consolidation)
 
 The fresh-rational Finset helpers and the `BurgessR3Maximal_g_content_sub`/`_sdc`/
 `_bot_not_mem` MCS-level lemmas are now thin re-exports of
@@ -28,8 +28,9 @@ The fresh-rational Finset helpers and the `BurgessR3Maximal_g_content_sub`/`_sdc
 
 `C5Counterexample`/`C5'Counterexample` stay logic-local, verbatim (see the generic
 module's docstring for the `Chronicle`-locality rationale), as does
-`burgessR3Maximal_from_h_content_sub` (forward dependency on the Phase 4b duality-theorem
-decision) and `c2'_preserved_on_old_adjacent`.
+`burgessR3Maximal_from_h_content_sub` (forward dependency on a not-yet-made
+duality-theorem consolidation decision for the shared Chronicle construction) and
+`c2'_preserved_on_old_adjacent`.
 -/
 
 @[expose] public section

@@ -46,10 +46,11 @@ set. See `NIK.weaken` below.
 
 ### The geometric extension `(R_χ)`: 𝒯-closure of the graph relation, flagged
 
-Report 01 cites the geometric rules `{(R_χ) | χ ∈ 𝒯}` only by source location (`:4940`) without
-transcribing Figure 4-3's exact rule shape (the report explicitly does not reproduce it, since its
-own scope was the completeness spine, not Chapter 4's syntax in full). **This is a genuine gap in
-the available source material, flagged rather than guessed silently.** This module resolves it
+The literature basis for this module ([Simpson1994]) is available here only by source location
+(`:4940`) in the converted text, without transcribing Figure 4-3's exact rule shape (the
+completeness-spine research for this file did not reproduce it, since Chapter 4's syntax in full
+was out of scope for that pass). **This is a genuine gap in the available source material,
+flagged rather than guessed silently.** This module resolves it
 via the standard treatment of geometric theories in labelled deduction (as in labelled sequent
 calculi for modal logics, e.g. Negri's `G3`-systems): `(□E)` and `(◇I)` -- the two rules with a
 relational premise, confirmed by inspection to be the only two (see `NIK.smoke_boxE` below and

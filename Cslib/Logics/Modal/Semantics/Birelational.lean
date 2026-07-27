@@ -72,7 +72,9 @@ structure BFrame (World : Type*) [Preorder World] where
   `r w' v'`. This is what makes the standard `◇` clause monotone. -/
   f1 : ∀ {w w' v : World}, w ≤ w' → r w v → ∃ v', r w' v' ∧ v ≤ v'
   /-- (F2) down-confluence (`r; ≤ ⊆ ≤; r`): if `r w v` and `v ≤ v'`, then some `w' ≥ w` has
-  `r w' v'`. Needed to validate the IK interaction axioms and for completeness (tasks 492-495). -/
+  `r w' v'`. Needed to validate the IK interaction axioms and for completeness of the
+  intuitionistic/constructive modal calculi built on this frame (IK, CK, and their
+  extensions). -/
   f2 : ∀ {w v v' : World}, r w v → v ≤ v' → ∃ w', w ≤ w' ∧ r w' v'
 
 /-- A birelational model adds a heredity (upward-closed) valuation and a `botForces` predicate

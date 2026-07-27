@@ -32,8 +32,8 @@ open Cslib.Automata NA
 `φ` at position 0.
 
 This is defined here to state `gnba_language_eq` within `GNBA.Correctness` without importing
-`OmegaRegular.lean` (which would create a circular dependency in Phase 5 when
-`OmegaRegular.lean` imports `GNBA.lean`). The definition is equivalent to
+`OmegaRegular.lean` (which would create a circular dependency, since `OmegaRegular.lean`
+imports `GNBA.lean`). The definition is equivalent to
 `Formula.omegaLanguage` in `OmegaRegular.lean`. -/
 def Formula.gnbaOmegaLanguage (φ : Formula Atom) : ωLanguage (Set Atom) :=
   ⟨{ v | Satisfies (fun p s => p ∈ s) v φ }⟩

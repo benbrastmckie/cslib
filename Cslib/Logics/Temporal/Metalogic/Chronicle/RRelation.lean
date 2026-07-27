@@ -16,7 +16,7 @@ public import Mathlib.Order.Zorn
 
 Core r-relation infrastructure for the temporal chronicle construction.
 
-## Status (task 530, Phase 2)
+## Status (Chronicle Consolidation)
 
 The ~38-lemma shared core (deductive-closure infrastructure, r-relation/r3
 maximal-extension existence via Zorn, `burgess*_absorption`, `untl/snce_left_mono*`,

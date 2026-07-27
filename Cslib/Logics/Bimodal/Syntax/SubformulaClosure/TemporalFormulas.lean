@@ -328,9 +328,9 @@ theorem p_nesting_depth_P_deferral (chi : Formula Atom) :
 
 -- The remaining structural lemmas (max depth, allFuture/allPast cases, box cases)
 -- are deferred to a follow-up continuation due to volume. The definitions and
--- core membership lemmas above are sufficient for Phase 2+ dependencies.
+-- core membership lemmas above are sufficient for the deferral-closure dependencies below.
 
--- Placeholder for forward references from later phases:
+-- Placeholder for forward references from later development:
 theorem F_top_deferral_mem_deferralClosure (phi : Formula Atom) :
     (fTopDeferral : Formula Atom) ∈ deferralClosure phi := by
   apply serialityFormulas_subset_deferralClosure

@@ -82,6 +82,7 @@ lemma extractModel_atom_sat_iff
     b.any (fun sf => sf.sign == .pos && sf.formula == .atom p && sf.label == w) = true := by
   simp only [Satisfies, extractModel]
 
+omit [Hashable Atom] in
 /-- `T(atom p)@w ∈ b` implies atom `p` is satisfied at `w` in `extractModel b acc`. -/
 lemma extractModel_atomPos_sat
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -113,7 +114,7 @@ lemma openBranch_noTBot
   | some _ => simp [hfind] at hopen
   | none =>
     have hno := List.find?_eq_none.mp hfind ⟨.pos, .bot, w⟩ hmem
-    simp [SignedFormula.isPos, Sign.isPos] at hno
+    simp only [SignedFormula.isPos, Sign.isPos, Bool.true_and, beq_iff_eq] at hno
     exact hno rfl
 
 omit [Hashable Atom] in
@@ -166,7 +167,7 @@ lemma hintikka_box_pos
   simp only [modalApplyOne, tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
     modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hcond
   -- Reduce outer if: none.getD notApplicable = notApplicable → match gives false → if false
-  simp [Option.getD_none] at hcond
+  simp only [Option.getD_none, Bool.false_eq_true, ↓reduceIte, List.isEmpty_iff] at hcond
   -- w' is a successor of w
   have hw'_succ : w' ∈ acc.successorsOf w := by
     simp only [Accessibility.successorsOf, List.mem_filterMap]
@@ -185,7 +186,8 @@ lemma hintikka_box_pos
       simp only [List.any_eq_true, beq_iff_eq] at hinb
       obtain ⟨sf', hsf'mem, rfl⟩ := hinb
       exact hsf'mem
-    · simp [if_neg hinb] at hnil
+    · simp only [List.any_eq_true, beq_iff_eq, exists_eq_right, ite_eq_left_iff, reduceCtorEq,
+        imp_false, Decidable.not_not] at hnil
       exact hnil
   · -- hemp : boxPropagation ≠ [] → hcond : ∀ sf' ∈ boxPropagation, sf' ∈ b
     by_cases hinb :
@@ -246,7 +248,9 @@ lemma hintikka_diamond_neg
   have hcond := hrule ⟨.neg, .diamond ψ, w⟩ hmem
   simp only [modalApplyOne, tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
     modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hcond
-  simp [Option.getD_none] at hcond
+  simp only [Option.getD_none, Bool.false_eq_true, ↓reduceIte, List.any_eq_true, beq_iff_eq,
+    exists_eq_right, List.isEmpty_iff, List.filterMap_eq_nil_iff, ite_eq_left_iff, reduceCtorEq,
+    imp_false, Decidable.not_not] at hcond
   have hw'_succ : w' ∈ acc.successorsOf w := by
     simp only [Accessibility.successorsOf, List.mem_filterMap]
     simp only [Accessibility.hasEdge, List.any_eq_true] at hr
@@ -314,6 +318,7 @@ lemma modalApplyOne_eq_prop_of_applicable
   simp only [modalApplyOne]
   rw [if_pos h]
 
+omit [Hashable Atom] in
 /-- Reduction of `modalApplyOne` on a positive implication to a decomposer case split.
 
 `and`/`or` are native constructors disjoint from `.imp`, so `modalAndOf?`/
@@ -336,13 +341,14 @@ lemma modalApplyOne_imp_pos (a c : Proposition Atom) (w : WorldIndex)
     · rcases hN : modalNegOf? (.imp a c) with _ | x
       · exfalso
         rcases c with _|_|_|_|_|_|_ <;> simp_all [modalImpOf?, modalNegOf?]
-      · simp [hI, hN, RuleResult.isApplicable]
-    · simp [hI, RuleResult.isApplicable]
+      · simp [RuleResult.isApplicable]
+    · simp [RuleResult.isApplicable]
   rw [modalApplyOne_eq_prop_of_applicable ⟨.pos, .imp a c, w⟩ b acc happ, tryAllPropRules_pos]
   simp only [modalAndOf?, modalOrOf?]
   rcases modalImpOf? (.imp a c) with _ | ⟨x, y⟩ <;>
     rcases modalNegOf? (.imp a c) with _ | x <;> rfl
 
+omit [Hashable Atom] in
 /-- Reduction of `modalApplyOne` on a negative implication to a decomposer case split.
 
 See `modalApplyOne_imp_pos` for why `modalAndOf?`/`modalOrOf?` are always `none`
@@ -364,13 +370,14 @@ lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
     · rcases hN : modalNegOf? (.imp a c) with _ | x
       · exfalso
         rcases c with _|_|_|_|_|_|_ <;> simp_all [modalImpOf?, modalNegOf?]
-      · simp [hI, hN, RuleResult.isApplicable]
-    · simp [hI, RuleResult.isApplicable]
+      · simp [RuleResult.isApplicable]
+    · simp [RuleResult.isApplicable]
   rw [modalApplyOne_eq_prop_of_applicable ⟨.neg, .imp a c, w⟩ b acc happ, tryAllPropRules_neg]
   simp only [modalAndOf?, modalOrOf?]
   rcases modalImpOf? (.imp a c) with _ | ⟨x, y⟩ <;>
     rcases modalNegOf? (.imp a c) with _ | x <;> rfl
 
+omit [Hashable Atom] in
 /-- Reduction of `modalApplyOne` on a positive conjunction: `andPos` fires directly since
 `modalAndOf?` matches the native `.and` constructor first in `tryAllPropRules`'s priority
 order (no encoding disambiguation needed). -/
@@ -383,6 +390,7 @@ lemma modalApplyOne_and_pos (φ ψ : Proposition Atom) (w : WorldIndex)
   rw [modalApplyOne_eq_prop_of_applicable ⟨.pos, .and φ ψ, w⟩ b acc happ, tryAllPropRules_pos]
   simp [modalAndOf?]
 
+omit [Hashable Atom] in
 /-- Reduction of `modalApplyOne` on a negative conjunction (`andNeg`, branching). -/
 lemma modalApplyOne_and_neg (φ ψ : Proposition Atom) (w : WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -394,6 +402,7 @@ lemma modalApplyOne_and_neg (φ ψ : Proposition Atom) (w : WorldIndex)
   rw [modalApplyOne_eq_prop_of_applicable ⟨.neg, .and φ ψ, w⟩ b acc happ, tryAllPropRules_neg]
   simp [modalAndOf?]
 
+omit [Hashable Atom] in
 /-- Reduction of `modalApplyOne` on a positive disjunction (`orPos`, branching). -/
 lemma modalApplyOne_or_pos (φ ψ : Proposition Atom) (w : WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -405,6 +414,7 @@ lemma modalApplyOne_or_pos (φ ψ : Proposition Atom) (w : WorldIndex)
   rw [modalApplyOne_eq_prop_of_applicable ⟨.pos, .or φ ψ, w⟩ b acc happ, tryAllPropRules_pos]
   simp [modalAndOf?, modalOrOf?]
 
+omit [Hashable Atom] in
 /-- Reduction of `modalApplyOne` on a negative disjunction (`orNeg`, linear). -/
 lemma modalApplyOne_or_neg (φ ψ : Proposition Atom) (w : WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -418,6 +428,7 @@ lemma modalApplyOne_or_neg (φ ψ : Proposition Atom) (w : WorldIndex)
 
 /-! ## Modal Truth Lemma -/
 
+omit [Hashable Atom] in
 /-- Modal Truth Lemma: membership in a Hintikka branch tracks satisfaction in the
 extracted Kripke model `extractModel b acc`.
 
@@ -503,7 +514,7 @@ lemma modalTruthLemma
           simp only [modalApplyOne_imp_pos, modalImpOf?_imp hne] at hcond
           intro hsa
           obtain ⟨br, hbr_mem, hbr⟩ := hcond
-          simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hbr_mem
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
           rcases hbr_mem with rfl | rfl
           · exact absurd hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2
               (hbr ⟨.neg, a, w⟩ (by simp)))
@@ -534,7 +545,7 @@ lemma modalTruthLemma
         have hcond := hH.2.1 ⟨.neg, .and φ' ψ', w⟩ hmem
         simp only [modalApplyOne_and_neg] at hcond
         obtain ⟨br, hbr_mem, hbr⟩ := hcond
-        simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hbr_mem
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
         rintro ⟨hsφ, hsψ⟩
         rcases hbr_mem with rfl | rfl
         · exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
@@ -548,7 +559,7 @@ lemma modalTruthLemma
         have hcond := hH.2.1 ⟨.pos, .or φ' ψ', w⟩ hmem
         simp only [modalApplyOne_or_pos] at hcond
         obtain ⟨br, hbr_mem, hbr⟩ := hcond
-        simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hbr_mem
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
         rcases hbr_mem with rfl | rfl
         · exact Or.inl ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
             (hbr ⟨.pos, φ', w⟩ (by simp)))
@@ -586,6 +597,7 @@ lemma modalTruthLemma
 
 /-! ## Open-Branch Countermodel -/
 
+omit [Hashable Atom] in
 /-- An open Hintikka branch with `F(φ)@0 ∈ b` yields a Kripke countermodel to `φ`.
 
 The extracted model `extractModel b acc` falsifies `φ` at world `0`. -/
@@ -668,6 +680,7 @@ theorem modalHintikkaClause_eq (s : Sign) (φ : Proposition Atom) (w : WorldInde
     (X : List (SignedFormula (Proposition Atom) WorldIndex)) (Y : Accessibility) :
     modalHintikkaClause s φ w X Y = modalHintikkaClauseGen modalApplyOne s φ w X Y := rfl
 
+omit [Hashable Atom] in
 /-- For a non-`box`/`diamond`-shaped signed formula, `modalApplyOne`'s rule result does not
 depend on the branch or accessibility relation. Propositional rules are formula-structural
 (`modalApplyOne_imp_pos`/`_neg`, `modalApplyOne_and_pos`/`_neg`, `modalApplyOne_or_pos`/`_neg`,

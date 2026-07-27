@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Basic
+public import Mathlib.Order.Defs.PartialOrder
 
 /-! # Constructive (Wijesekera-Style) Modal Forcing
 

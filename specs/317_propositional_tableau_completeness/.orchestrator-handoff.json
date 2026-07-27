@@ -2,50 +2,49 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Plan v11, Phases 0-1 completed and committed (verification spike; sat_timp field added to IBranchSaturation and mechanically discharged at IExpandedConsistent_sat, the sole construction site). Phase 2 (universe/measure invariant threading) blocked on two compounding, verified obstacles: (1) intUniverse/intExpMeasure are declared ~450-950 lines after intExpandBranches_openBranch_sat in Scheme.lean, a genuine forward-reference confirmed by a real build error -- this independently corroborates a prior v6-plan handoff's own decision note about the same forward-declaration constraint; (2) maintaining universe-membership across the F-imp world-creating recursive step needs an intExpandBranches_world_bound lemma (nextWorld <= phi0.complexity + 1) that Scheme.lean documents in three places as an unbuilt 'continuation, see handoff' item, not a mechanical assembly step. No sorry/axiom/vacuous statement was introduced; a broken in-progress edit was reverted (git checkout --) back to the Phase-1-committed green state. Phases 3-7 not attempted (transitively blocked). A positive finding: Phase 3's zero case is easy given the invariant (intExpMeasure <= 0 forces branches = [], contradicting the openBranch result) -- simpler than the plan's own description.",
+  "summary": "Plan v12, Phases 0-1 (verification spike; sat_timp field) were already [COMPLETED] before this dispatch. This dispatch: (1) executed Phase 2 -- relocated the ~1,060-line universe/measure/persistence block (intUniverse, intExpMeasure, applyPersistenceFixpoint_genuine_of_count_le_fuel, etc.) from after tableau_complete to before intExpandBranches_openBranch_sat's docstring, pure code motion verified by an exact sorted-multiset-of-lines identity between pre- and post-move file content; scoped builds green; committed. (2) Began Phase 3 (the world-budget accounting invariant) via its own mandated 30-minute timeboxed alternative check, which escalated into a decisive negative result: direct computation against the real, unmodified intuitionisticTableau/intApplyRuleFull functions produced a concrete, reproducible counterexample showing the plan's stated injection strategy (each world-creating firing maps to a distinct .imp-node position of phi0) is false -- a single static position can fire the world-creating rule multiple times via T-signed persistence copying into sibling worlds. Phase 3 is marked BLOCKED, not PARTIAL, because there is no green Lean artifact to commit for it: the investigation was conducted entirely via throwaway #eval snippets (per the plan's own prohibition on writing speculative Lean against a strategy already known unsound), and no Cslib/ file was edited beyond Phase 2's relocation. Phases 4-9 are transitively blocked. Task-tree sorry count unchanged at 4 (Phase 2 closes no sorry by design; Phase 3 landed no proof).",
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md"
+      "path": "specs/317_propositional_tableau_completeness/plans/12_world-bound-prereq-threading.md"
     },
     {
       "type": "handoff",
-      "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md"
+      "path": "specs/317_propositional_tableau_completeness/handoffs/12_world-bound-decision.md"
     },
     {
       "type": "summary",
-      "path": "specs/317_propositional_tableau_completeness/summaries/11_tableau-completeness-assembly-summary.md"
+      "path": "specs/317_propositional_tableau_completeness/summaries/12_world-bound-prereq-threading-summary.md"
     }
   ],
   "blockers": [
     {
-      "description": "Phase 2's universe/measure invariant threading is blocked by (a) a forward-reference: intUniverse/intExpMeasure are declared after intExpandBranches_openBranch_sat, requiring relocation of ~950 lines of already-landed code; and (b) a missing intExpandBranches_world_bound lemma (nextWorld <= phi0.complexity + 1) needed to maintain universe-membership across the F-imp world-creating step, explicitly documented in-file (Scheme.lean:2025-2038, :2052-2055, :2536-2538) as an unbuilt continuation requiring a new injective worlds-to-imp-positions argument. See handoffs/11_phase2-blocker-findings.md for full evidence and a re-plan recommendation.",
-      "phase": "phase-2",
+      "description": "Phase 3's mandated timeboxed alternative check found that the plan's stated world-bound proof strategy -- an injective map from world-creation events into distinct static .imp-node positions of phi0 (backed by intSubfmls_impCount_le) -- is false, verified by a concrete, reproducible counterexample computed directly against the real intuitionisticTableau/intApplyRuleFull functions (not a hand-proof stall). For phi0 = ((p->q)->r /\\ (s->t)) -> ((u1->v1) \\/ (u2->v2) \\/ (u3->v3)) (complexity 10), the single static position 'p->q' fires the world-creating rule at 8 distinct labels, not 1, because the T-signed antecedent-of-antecedent gets copied (via propagatePersistence and applyAllTImpRules's broader accessible-world copy channel) into every sibling world created from its source, and each copy independently BETA-resolves and re-fires world-creation. Whether the target numeric bound (nextWorld <= phi0.complexity + 1) itself holds is unresolved either way -- only the specific proof route is refuted. Two follow-on stress tests intended to compound the effect timed out in the #eval sandbox before returning a conclusive result. See handoffs/12_world-bound-decision.md for full derivation, evidence, and three candidate re-plan directions (amortized/multiset argument, potential-function argument tied to the existing intExpMeasure machinery, or independent reverification of the bound via a faster instrumented harness).",
+      "phase": "phase-3",
       "severity": "hard"
     }
   ],
   "next_action_hint": "plan",
   "files_modified": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md"
+    "specs/317_propositional_tableau_completeness/plans/12_world-bound-prereq-threading.md",
+    "specs/317_propositional_tableau_completeness/handoffs/12_world-bound-decision.md"
   ],
   "decisions_made": [
-    "Reverted the broken in-progress Phase 2 edit via git checkout -- rather than leaving a non-building state or forcing a sorry/workaround.",
-    "Did not attempt the ~950-line intUniverse/intExpMeasure relocation or invent intExpandBranches_world_bound within this dispatch: both are separately-sized units of work, not slack inside Phase 2/3's stated budget.",
-    "Recorded that Phase 3's zero case is easy given the invariant (a short contradiction from intExpMeasure <= 0), simpler than the plan's own described argument, so a future dispatch does not re-derive this."
+    "Executed Phase 2's block relocation via a verified pure-Python line-slice splice rather than manual Edit tool operations, given the plan's own guidance to avoid whole-file reads and manual edits at this scale; verified purity via an exact sorted-multiset-of-lines identity check between pre- and post-move content.",
+    "Escalated Phase 3's mandated 30-minute timeboxed alternative check into a full computational falsification of the stated injection strategy, using lean_run_code against the real production functions, rather than attempting to hand-prove an argument already suspected (during hand-tracing) to have a gap.",
+    "Did not write any speculative Lean for the accounting invariant once the injection strategy was confirmed false, per the plan's prohibition on writing proof code against a route already known unsound; recorded the finding in a handoff instead, matching the plan's own Rollback/Contingency guidance for this exact phase.",
+    "Marked Phase 3 BLOCKED rather than PARTIAL: PARTIAL implies a green sub-step exists to resume from, but this investigation produced no Lean artifact -- only a decisive negative finding about the plan's own stated strategy."
   ],
   "dead_ends": [
-    "Do not add phi0-dependent hypotheses (hUniv/hMeasure) to intExpandBranches_openBranch_sat's signature without first relocating intUniverse/intExpMeasure earlier in the file -- confirmed via a real build error (Function expected at intUniverse/intExpMeasure), not a hypothesis.",
-    "Do not assume Phase 2 and Phase 3 are separable at the Lean level: Lean's `induction ... generalizing` automatically sweeps any new hypothesis depending on the generalized variables into the reverted set, so adding hUniv/hMeasure to the signature immediately forces every existing ih/ih_inner call site to supply them -- there is no way to add the hypotheses in Phase 2 and defer their use to Phase 3."
+    "The injection 'world-creation event -> distinct .imp-node position of phi0' (as literally stated in three pre-existing in-file docstrings and the plan's Phase 3/4 tasks) is refuted by direct counterexample -- do not attempt to formalize it as stated in a future dispatch.",
+    "Do not trust the in-file docstring's premise 'F-signed formulas never propagate via persistence' as sufficient justification for injectivity -- it is true but irrelevant: the T-signed antecedent-of-antecedent propagates, and each copy's own resolution mints a fresh F-signed instance independently.",
+    "Attempting to stress-test the numeric bound itself via nested implication chains (to amplify the counterexample and determine whether the bound is outright false, not just the proof route) hit #eval sandbox timeouts for chain depth >= 2; this needs a faster computational harness (native-compiled test or hand-instrumented tracing) before it can be resolved, not a bigger #eval budget in the same style."
   ],
   "continuation_context": {
     "handoff_path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-    "phases_completed": 2,
-    "phases_total": 8
+    "phases_completed": 3,
+    "phases_total": 10
   },
   "plan_markers_verified": true
 }

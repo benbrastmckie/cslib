@@ -92,12 +92,13 @@ collapsing it away. Verified against Example 2.1's `Γ2{ }` (`Γ' = [C]`, `Λ = 
 `buildRhsChain_append` (chain-building distributes over list append) and the derived
 `OutputCtx.fillRhs_append` are landed, since they are both simple to state/prove now and are
 exactly the "nesting/associativity of filling" facts the plan calls for. The further relationship
-between `(Γ⇓){∆}` and `Γ{∆}` in general is **deferred to Phase 8** ("`fm` compositionality over
-contexts"): the natural candidate equations (e.g. relating `ctx.outputPruning.fillRhs ctx.π` to
+between `(Γ⇓){∆}` and `Γ{∆}` in general is **deferred to the `fm`-compositionality-over-contexts
+development**: the natural candidate equations (e.g. relating `ctx.outputPruning.fillRhs ctx.π` to
 `ctx.fillEmpty`) do not hold as bare structural equalities — they differ by exactly the
-`box ∅ ·`-vs-direct-substitution distinction documented above for `fillEmpty` — and Phase 8 is
-where the `fm`-level (rather than raw-term) compositionality apparatus needed to state the correct
-relationship is built. Landing a mis-stated placeholder lemma now would be worse than deferring.
+`box ∅ ·`-vs-direct-substitution distinction documented above for `fillEmpty` — and that
+development is where the `fm`-level (rather than raw-term) compositionality apparatus needed to
+state the correct relationship is built. Landing a mis-stated placeholder lemma now would be worse
+than deferring.
 -/
 
 @[expose] public section

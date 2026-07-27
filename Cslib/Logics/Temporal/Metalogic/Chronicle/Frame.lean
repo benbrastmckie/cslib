@@ -20,12 +20,6 @@ witnesses, and eventuality resolution for the temporal chronicle construction.
 * Ported from Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean
 -/
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
@@ -141,20 +135,24 @@ theorem t_G_forward {w v : TPoint Atom} {φ : Formula Atom}
     φ ∈ v.formulas :=
   h_le h_G
 
+set_option linter.flexible false in
 lemma tGBackward (w : TPoint Atom) (φ : Formula Atom)
     (h_not_G : (𝐆φ) ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe w v ∧ φ ∉ v.formulas := by
-  have h_seed_cons : Temporal.SetConsistent ({Formula.neg φ} ∪ gContent w.formulas : Set (Formula Atom)) := by
+  have h_seed_cons :
+      Temporal.SetConsistent ({Formula.neg φ} ∪ gContent w.formulas : Set (Formula Atom)) := by
     intro L hL ⟨d⟩
     by_cases h_negφ_in : (¬φ) ∈ L
-    · have h_sub_reord : ∀ x, x ∈ L → x ∈ Formula.neg φ :: L.filter (fun y => decide (y ≠ Formula.neg φ)) := by
+    · have h_sub_reord :
+          ∀ x, x ∈ L → x ∈ Formula.neg φ :: L.filter (fun y => decide (y ≠ Formula.neg φ)) := by
         intro x hx
         by_cases hxn : x = Formula.neg φ
         · exact List.mem_cons.mpr (Or.inl hxn)
-        · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter, decide_eq_true_eq]; exact ⟨hx, hxn⟩))
+        · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter]; exact ⟨hx, hxn⟩))
       have d_reord := DerivationTree.weakening L _ Formula.bot d h_sub_reord
       have d_negneg := deductionTheorem _ (Formula.neg φ) Formula.bot d_reord
-      have h_filt_in_g : ∀ ψ ∈ L.filter (fun y => decide (y ≠ Formula.neg φ)), ψ ∈ gContent w.formulas := by
+      have h_filt_in_g :
+          ∀ ψ ∈ L.filter (fun y => decide (y ≠ Formula.neg φ)), ψ ∈ gContent w.formulas := by
         intro ψ hψ
         have h_and := List.mem_filter.mp hψ
         have h_ne : ψ ≠ Formula.neg φ := by simpa using h_and.2
@@ -164,8 +162,12 @@ lemma tGBackward (w : TPoint Atom) (φ : Formula Atom)
         · exact absurd rfl h_ne
         · exact h
       have h_dne := doubleNegation φ
-      have d_dne_weak := DerivationTree.weakening [] (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ h_dne (fun _ h => nomatch h)
-      have d_phi := DerivationTree.modus_ponens (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ _ d_dne_weak d_negneg
+      have d_dne_weak :=
+        DerivationTree.weakening [] (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ h_dne
+          (fun _ h => nomatch h)
+      have d_phi :=
+        DerivationTree.modus_ponens (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ _
+          d_dne_weak d_negneg
       exact h_not_G (gContentClosedDerivation w.is_mcs _ h_filt_in_g d_phi)
     · have h_L_in_g : ∀ ψ ∈ L, ψ ∈ gContent w.formulas := by
         intro ψ hψ
@@ -188,20 +190,24 @@ theorem t_H_forward {w v : TPoint Atom} {φ : Formula Atom}
   g_content_subset_implies_h_content_reverse v.formulas w.formulas
     v.is_mcs w.is_mcs h_le h_H
 
+set_option linter.flexible false in
 lemma tHBackward (w : TPoint Atom) (φ : Formula Atom)
     (h_not_H : (𝐇φ) ∉ w.formulas) :
     ∃ v : TPoint Atom, tLe v w ∧ φ ∉ v.formulas := by
-  have h_seed_cons : Temporal.SetConsistent ({Formula.neg φ} ∪ hContent w.formulas : Set (Formula Atom)) := by
+  have h_seed_cons :
+      Temporal.SetConsistent ({Formula.neg φ} ∪ hContent w.formulas : Set (Formula Atom)) := by
     intro L hL ⟨d⟩
     by_cases h_negφ_in : (¬φ) ∈ L
-    · have h_sub_reord : ∀ x, x ∈ L → x ∈ Formula.neg φ :: L.filter (fun y => decide (y ≠ Formula.neg φ)) := by
+    · have h_sub_reord :
+          ∀ x, x ∈ L → x ∈ Formula.neg φ :: L.filter (fun y => decide (y ≠ Formula.neg φ)) := by
         intro x hx
         by_cases hxn : x = Formula.neg φ
         · exact List.mem_cons.mpr (Or.inl hxn)
-        · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter, decide_eq_true_eq]; exact ⟨hx, hxn⟩))
+        · exact List.mem_cons.mpr (Or.inr (by simp [List.mem_filter]; exact ⟨hx, hxn⟩))
       have d_reord := DerivationTree.weakening L _ Formula.bot d h_sub_reord
       have d_negneg := deductionTheorem _ (Formula.neg φ) Formula.bot d_reord
-      have h_filt_in_h : ∀ ψ ∈ L.filter (fun y => decide (y ≠ Formula.neg φ)), ψ ∈ hContent w.formulas := by
+      have h_filt_in_h :
+          ∀ ψ ∈ L.filter (fun y => decide (y ≠ Formula.neg φ)), ψ ∈ hContent w.formulas := by
         intro ψ hψ
         have h_and := List.mem_filter.mp hψ
         have h_ne : ψ ≠ Formula.neg φ := by simpa using h_and.2
@@ -211,8 +217,12 @@ lemma tHBackward (w : TPoint Atom) (φ : Formula Atom)
         · exact absurd rfl h_ne
         · exact h
       have h_dne := doubleNegation φ
-      have d_dne_weak := DerivationTree.weakening [] (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ h_dne (fun _ h => nomatch h)
-      have d_phi := DerivationTree.modus_ponens (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ _ d_dne_weak d_negneg
+      have d_dne_weak :=
+        DerivationTree.weakening [] (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ h_dne
+          (fun _ h => nomatch h)
+      have d_phi :=
+        DerivationTree.modus_ponens (L.filter (fun y => decide (y ≠ Formula.neg φ))) _ _
+          d_dne_weak d_negneg
       exact h_not_H (hContentClosedDerivation w.is_mcs _ h_filt_in_h d_phi)
     · have h_L_in_h : ∀ ψ ∈ L, ψ ∈ hContent w.formulas := by
         intro ψ hψ

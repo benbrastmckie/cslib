@@ -32,17 +32,19 @@ pair, Phase 10), matching this development's `NCS5` instance rather than the sou
   (would need the very soundness fact being proved); a signature-collapse via sum-elimination
   retraction is not schema-compatible with the `NestedProof` inductive's per-rule indexing.
 
-## Lemma 4.7(i)/(ii): A Documented Source Duplication
+## Lemma 4.7(i) and (ii): Distinct Statements
 
-Page 10 displays Lemma 4.7 parts (i) and (ii) with **literally the same visible formula**:
-"If `(A ∧ B) ⊃ C` is provable in `HCK+X`, then so is `((D ⊃ A) ∧ (D ⊃ B)) ⊃ (D ⊃ C)`" — verified
-against a direct render of page 10 (not just `pdftotext`, which independently corrupts this
-region by dropping/misreading operator glyphs at exactly this position, consistent with this
-development's already-documented `pdftotext` unreliability for this PDF's font encoding). Since
-both parts cite the identical conclusion and Lemma 4.9's proof separately invokes "Lemma 4.7.(i)"
-(for Lemma 4.8's congruence, alongside part (iii)) and "Lemma 4.7.(ii)" (for the `cut`-rule's
-chain argument, alongside part (iv)), landing **one** Lean fact discharges both citations; this is
-recorded here as an observed source duplication, not a silent invention of a different statement.
+Page 10's Lemma 4.7 parts (i) and (ii) are **different formulas**, verified against a direct
+render of page 10 (not just `pdftotext`, which independently corrupts this region by
+dropping/misreading operator glyphs at exactly this position, consistent with this development's
+already-documented `pdftotext` unreliability for this PDF's font encoding): (i) is "If `(A ∧ B) ⊃
+C` is provable in `HCK+X`, then so is `((D ⊃ A) ∧ (D ⊃ B)) ⊃ (D ⊃ C)`"; (ii) is "If `(A ∧ B) ⊃ C`
+is provable in `HCK+X`, then so is `((D ⊃ A) ∧ (D ∧ B)) ⊃ (D ∧ C)`" — `∧`/`⊃` glyphs render
+cleanly in this PDF at this position, only `□` drops elsewhere. Both are landed as separate Lean
+facts: `lemma4_7_i_ii` (which retains its identifier for call-site stability but covers part (i)
+only) and `lemma4_7_ii` (part (ii)), matching Lemma 4.9's proof, which separately invokes "Lemma
+4.7.(i)" (for Lemma 4.8's congruence, alongside part (iii)) and "Lemma 4.7.(ii)" (for the
+`cut`-rule's chain argument, alongside part (iv)).
 
 ## References
 
@@ -492,14 +494,15 @@ theorem lemma4_6_diaL (ctx : InputCtx Atom) (A : Proposition Atom) :
 
 /-! ## Lemma 4.7 (page 10): Branching-Rule Congruence Facts
 
-See the module docstring's "Lemma 4.7(i)/(ii): A Documented Source Duplication" section: both
-parts share the same conclusion here. -/
+See the module docstring's "Lemma 4.7(i) and (ii): Distinct Statements" section: parts (i) and
+(ii) are different formulas, each landed as its own Lean fact below. -/
 
 /-- **`(D ⊃ ·)`-congruence under a shared hypothesis**: from `⊢ (A ∧ B) ⊃ C`, derive
 `⊢ ((D ⊃ A) ∧ (D ⊃ B)) ⊃ (D ⊃ C)`, for any fixed `D`. Built directly via three nested
 `deductionTheorem` discharges: the outer two project `D ⊃ A`/`D ⊃ B` from the assumed conjunction
 and `D` from the innermost assumption, combine `A`/`B` via `andI`, then apply the (weakened)
-hypothesis. This is Lemma 4.7(i) *and* (ii) (see the module docstring). -/
+hypothesis. This is Lemma 4.7(i) only; see `lemma4_7_ii` below for part (ii). The `_i_ii` suffix
+is retained for call-site stability. -/
 theorem lemma4_7_i_ii (D : Proposition Atom) {A B C : Proposition Atom}
     (h : Derivable (@CS5ModalAxiom Atom) ((A.and B).imp C)) :
     Derivable (@CS5ModalAxiom Atom) (((D.imp A).and (D.imp B)).imp (D.imp C)) := by
@@ -528,6 +531,42 @@ theorem lemma4_7_i_ii (D : Proposition Atom) {A B C : Proposition Atom}
   have hd : DerivationTree (@CS5ModalAxiom Atom) [D, Hyp] ((A.and B).imp C) :=
     .weakening [] _ _ d (fun _ h => nomatch h)
   exact .modus_ponens _ _ _ hd hAB
+
+/-- **Lemma 4.7(ii)** (page 10): from `⊢ (A ∧ B) ⊃ C`, derive
+`⊢ ((D ⊃ A) ∧ (D ∧ B)) ⊃ (D ∧ C)`, for any fixed `D`. Built via a single `deductionTheorem`
+discharge of the conjunctive hypothesis `(D ⊃ A) ∧ (D ∧ B)`: `D` and `B` are extracted from its
+second conjunct via `andE1`/`andE2`, `A` follows by `modus_ponens` against the first conjunct,
+`A ∧ B` is recombined via `andI` and fed to the (weakened) hypothesis to obtain `C`, and `D ∧ C`
+is rebuilt via a final `andI`. See [ArisakaDasStrassburger2015], §4, page 10. -/
+theorem lemma4_7_ii (D : Proposition Atom) {A B C : Proposition Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((A.and B).imp C)) :
+    Derivable (@CS5ModalAxiom Atom) (((D.imp A).and (D.and B)).imp (D.and C)) := by
+  obtain ⟨d⟩ := h
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] ((D.imp A).and (D.and B)) (D.and C) ?_⟩
+  -- context: [(D.imp A).and (D.and B)]
+  set Hyp := (D.imp A).and (D.and B)
+  have hHyp : DerivationTree (@CS5ModalAxiom Atom) [Hyp] Hyp :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hDA : DerivationTree (@CS5ModalAxiom Atom) [Hyp] (D.imp A) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 (D.imp A) (D.and B)))
+      (fun _ h => nomatch h)) hHyp
+  have hDandB : DerivationTree (@CS5ModalAxiom Atom) [Hyp] (D.and B) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 (D.imp A) (D.and B)))
+      (fun _ h => nomatch h)) hHyp
+  have hD : DerivationTree (@CS5ModalAxiom Atom) [Hyp] D :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 D B)) (fun _ h => nomatch h)) hDandB
+  have hB : DerivationTree (@CS5ModalAxiom Atom) [Hyp] B :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 D B)) (fun _ h => nomatch h)) hDandB
+  have hA : DerivationTree (@CS5ModalAxiom Atom) [Hyp] A := .modus_ponens _ _ _ hDA hD
+  have hAB : DerivationTree (@CS5ModalAxiom Atom) [Hyp] (A.and B) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andI A B)) (fun _ h => nomatch h)) hA) hB
+  have hd : DerivationTree (@CS5ModalAxiom Atom) [Hyp] ((A.and B).imp C) :=
+    .weakening [] _ _ d (fun _ h => nomatch h)
+  have hC : DerivationTree (@CS5ModalAxiom Atom) [Hyp] C := .modus_ponens _ _ _ hd hAB
+  exact .modus_ponens _ _ _
+    (.modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andI D C)) (fun _ h => nomatch h)) hD) hC
 
 /-- **`□`-distributivity over `∧`**: `⊢ (□A ∧ □B) ⊃ □(A ∧ B)`, via necessitated `andI` composed
 with the `k`-axiom, then uncurried. -/

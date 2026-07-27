@@ -1,7 +1,7 @@
 # Implementation Plan: Discharge `nested_sound_impL` via the Source's Λ-Chain Induction
 
 - **Task**: 570 - nested_sound_impL_lambda_chain_induction
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 6 hours (8 phases)
 - **Dependencies**: None
 - **Research Inputs**: `specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md`
@@ -266,29 +266,29 @@ cannot precede it. Phases 2 and 6 deliver genuine intermediate green checkpoints
 
 ---
 
-### Phase 1: Land `lemma4_7_ii` and correct the module docstring's (i)/(ii) duplication claim [NOT STARTED]
+### Phase 1: Land `lemma4_7_ii` and correct the module docstring's (i)/(ii) duplication claim [COMPLETED]
 
 - **Goal:** Land the missing Lemma 4.7(ii) and remove the false claim that Lemma 4.7 parts (i)
   and (ii) display the same formula.
 - **Files:** `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean` (sole owner)
 - **Tasks:**
-  - [ ] Add `lemma4_7_ii` immediately after `lemma4_7_i_ii` (currently `Soundness.lean:503`),
+  - [x] Add `lemma4_7_ii` immediately after `lemma4_7_i_ii` (currently `Soundness.lean:503`),
         with signature
         `theorem lemma4_7_ii (D : Proposition Atom) {A B C : Proposition Atom} (h : Derivable (@CS5ModalAxiom Atom) ((A.and B).imp C)) : Derivable (@CS5ModalAxiom Atom) (((D.imp A).and (D.and B)).imp (D.and C))`.
         Proof shape (from research, compiled): one `deductionTheorem` discharge of the conjunctive
         hypothesis, `andE1`/`andE2` projections, `andI` recombination, MP against the weakened
         hypothesis, `andI` to rebuild `D ∧ C`. Structurally a near-clone of `lemma4_7_i_ii`.
-  - [ ] Give it a docstring citing "**Lemma 4.7(ii)** (page 10)" and the `ArisakaDasStrassburger2015`
+  - [x] Give it a docstring citing "**Lemma 4.7(ii)** (page 10)" and the `ArisakaDasStrassburger2015`
         BibKey, matching the citation style of `lemma4_7_iii`/`lemma4_7_iv`.
-  - [ ] Rewrite the module-docstring paragraph at `Soundness.lean:35-45` ("Lemma 4.7(i)/(ii): A
+  - [x] Rewrite the module-docstring paragraph at `Soundness.lean:35-45` ("Lemma 4.7(i)/(ii): A
         Documented Source Duplication"). Replace the duplication claim with the corrected fact:
         (i) is `((D ⊃ A) ∧ (D ⊃ B)) ⊃ (D ⊃ C)`, (ii) is `((D ⊃ A) ∧ (D ∧ B)) ⊃ (D ∧ C)`; they are
         different statements; `∧`/`⊃` glyphs render cleanly in this PDF, only `□` drops. Note that
         `lemma4_7_i_ii` retains its identifier for call-site stability but covers part (i) only.
-  - [ ] Correct `lemma4_7_i_ii`'s own docstring (the "This is Lemma 4.7(i) *and* (ii)" sentence
+  - [x] Correct `lemma4_7_i_ii`'s own docstring (the "This is Lemma 4.7(i) *and* (ii)" sentence
         and the pointer at `Soundness.lean:494-496`) to say part (i) only, pointing at the new
         `lemma4_7_ii` for part (ii).
-  - [ ] Do NOT rename `lemma4_7_i_ii`.
+  - [x] Do NOT rename `lemma4_7_i_ii`.
 - **Estimated output:** ~50 lines (20 proof, 30 docstring).
 - **Timing:** ~45 minutes.
 - **Depends on:** none

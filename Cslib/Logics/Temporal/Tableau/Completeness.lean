@@ -32,15 +32,15 @@ procedure: an open saturated branch yields a countermodel.
 - `extractModelℤ_atomPos_sat`, `extractModelℤ_bot_false`: Basic properties of the ℤ model.
 - `extractModelℤ_atom_neg_notSat`: Negative atom property (requires injectivity hypothesis).
 - `periodicReduce` / `periodicReduce_mem_Ico_of_gt`, `extractModelℤPeriodic` + its three
-  property lemmas: the forward (future-tail) half of the bi-lasso periodic countermodel spike
-  (plan round 04, Phase 4), parameterized by an explicit loop witness `(instAnc, instNew)`.
+  property lemmas: the forward (future-tail) half of the bi-lasso periodic countermodel spike,
+  parameterized by an explicit loop witness `(instAnc, instNew)`.
 - `periodicReducePast` / `periodicReducePast_mem_Ico_of_lt`, `extractModelℤPeriodicPast` + its
-  three property lemmas (Phase 4b): the symmetric backward (past-tail) half, completing the
+  three property lemmas: the symmetric backward (past-tail) half, completing the
   bi-lasso reduction machinery in both directions.
-- `instantStrict_constraint_lt` (Phase 4a, partial): converts a recorded ordering-constraint
+- `instantStrict_constraint_lt` (partial): converts a recorded ordering-constraint
   edge `(t_anc, t_new) ∈ ord.constraints` plus `InstantStrict ord` into the `hL : ord.instant
   t_anc < ord.instant t_new` fact the periodic reductions need. This is the *conversion* half of
-  Phase 4a; the *existence* half (deriving such an edge from a genuine `isSubsetBlocked`
+  this fact; the *existence* half (deriving such an edge from a genuine `isSubsetBlocked`
   witness, for an arbitrary branch returned by `temporalTableau`) is the open gap documented
   below.
 
@@ -62,10 +62,10 @@ remaining blocker is the FMP construction for the Until/Since cases (below).
 
 ### Blocked (FMP Existence Argument — Genuine Structural Gap, Not Merely Proof Complexity)
 
-Plan round 04 (Phase 4c/4d) called for deriving the loop witness `(t_anc, t_new)` generically
+The original design called for deriving the loop witness `(t_anc, t_new)` generically
 from "a genuine `isSubsetBlocked` witness" produced by an arbitrary `temporalTableau φ =
 .openBranch b ord` result, then wiring `extractModelℤPeriodic` in as the real `extractModelℤ`
-and re-proving the FMP truth lemma (Phases 5-6) and completeness assembly (Phase 7) against it.
+and re-proving the FMP truth lemma and completeness assembly against it.
 Careful tracing of `temporalStepBranch`/`processNext`/`isTemporalClosed`/`findEventualityDefect`
 (`Saturation.lean`, `Closure.lean`, `Branch.lean`) found this premise does not hold generically,
 for two compounding reasons:
@@ -94,10 +94,9 @@ for two compounding reasons:
    `2^(subformulaCount φ)` distinct time-types) is large enough that `isSubsetBlocked` *must*
    already hold among the branch's created labels whenever fuel exhausts with pending
    eventualities still open. This theorem is not yet formalized anywhere in the codebase; it is
-   the actual mathematical content of the tableau's termination argument (report
-   01 §3/§8.3's informal "the number of distinct time types is bounded by `2^n`" claim), and is
-   independent from (and a prerequisite to) the periodic-model *definition* work landed in Phase
-   4a/4b above.
+   the actual mathematical content of the tableau's termination argument (the informal
+   "the number of distinct time types is bounded by `2^n`" claim), and is
+   independent from (and a prerequisite to) the periodic-model *definition* work landed above.
 
    A secondary, narrower observation on the same theme, **now resolved**: `temporalStepBranch`'s
    `.branching` case (which `untlPos`/`sncePos`/`untlNeg`/`snceNeg`/all propositional branching
@@ -136,9 +135,7 @@ for two compounding reasons:
    branch's own labels whenever pending eventualities remain. This is the prerequisite for
    wiring `extractModelℤPeriodic`/`periodicReducePast` in as the real `extractModelℤ` (Phase 4c)
    and completing Phases 5-7 (`temporalTruthLemma_untl`/`_snce`, `openBranch_branchSat`,
-   `temporalTableau_complete`). Recommend a dedicated research pass before further planning; see
-   `specs/425_temporal_tableau_ptl_fmp_decidability/` Phase 4 `[PARTIAL]` writeup for the
-   complete trace.
+   `temporalTableau_complete`). Recommend a dedicated research pass before further planning.
 
 ## References
 
@@ -245,12 +242,12 @@ lemma extractModelℤ_bot_false (b : TBranch Atom) (ord : TimeOrdering) (z : ℤ
     ¬ Satisfies (extractModelℤ b ord) z .bot :=
   Satisfies.bot_false (extractModelℤ b ord) z
 
-/-! ## Bi-Lasso Periodic Countermodel (Phase 4 Spike)
+/-! ## Bi-Lasso Periodic Countermodel (Spike)
 
 `extractModelℤ` above is the "island" model: every instant not populated by an actual branch
 label reads uniformly `false`. This is insufficient for the Until/Since truth lemma, which
-needs a witness that may fall *beyond* the branch's last populated instant. The fix (report 01
-§4, grounded by report 02 Finding 4) is a bidirectional ultimately-periodic (bi-lasso) ℤ-model:
+needs a witness that may fall *beyond* the branch's last populated instant. The fix is a
+bidirectional ultimately-periodic (bi-lasso) ℤ-model:
 fold every instant beyond the branch's populated range back into a finite "loop window" using
 the time-subset-blocked ancestor pair the tableau's own termination argument already produces.
 
@@ -295,7 +292,7 @@ omit [Hashable Atom] in
 /-- Spike property lemma: for instants already at or before the loop witness `instNew`, the
 periodic model's atom satisfaction agrees exactly with `extractModelℤ`'s (the reduction is the
 identity there). This confirms the periodic reduction is tractable and conservative over the
-populated range before committing to the full Phase 4 redesign. -/
+populated range before committing to the full redesign. -/
 lemma extractModelℤPeriodic_atom_sat_iff_of_le (b : TBranch Atom) (ord : TimeOrdering)
     (instAnc instNew : ℤ) (hL : instAnc < instNew) (z : ℤ) (hz : z ≤ instNew) (p : Atom) :
     Satisfies (extractModelℤPeriodic b ord instAnc instNew hL) z (.atom p) ↔
@@ -321,7 +318,7 @@ lemma extractModelℤPeriodic_bot_false (b : TBranch Atom) (ord : TimeOrdering)
     ¬ Satisfies (extractModelℤPeriodic b ord instAnc instNew hL) z .bot :=
   Satisfies.bot_false (extractModelℤPeriodic b ord instAnc instNew hL) z
 
-/-! ## Backward (Past-Tail) Periodic Reduction (Phase 4b)
+/-! ## Backward (Past-Tail) Periodic Reduction
 
 `periodicReduce` above only extends the model *beyond* a future loop witness `instNew`. A
 genuine bi-lasso countermodel needs a symmetric backward extension beyond a *past* loop
@@ -386,26 +383,26 @@ lemma extractModelℤPeriodicPast_bot_false (b : TBranch Atom) (ord : TimeOrderi
     ¬ Satisfies (extractModelℤPeriodicPast b ord pAnc pNew hL) z .bot :=
   Satisfies.bot_false (extractModelℤPeriodicPast b ord pAnc pNew hL) z
 
-/-! ## Loop-Witness Conversion Helper (Phase 4a, Partial)
+/-! ## Loop-Witness Conversion Helper (Partial)
 
 `periodicReduce`/`periodicReducePast` above take the loop witness `(instAnc, instNew)` (resp.
-`(pAnc, pNew)`) as free parameters with a bare `hL : instAnc < instNew` hypothesis. Phase 4a's
-goal is to derive this `hL` from a genuine tableau-produced constraint fact rather than assume
+`(pAnc, pNew)`) as free parameters with a bare `hL : instAnc < instNew` hypothesis. The goal
+here is to derive this `hL` from a genuine tableau-produced constraint fact rather than assume
 it abstractly. The conversion itself is immediate given `InstantStrict` and a direct ordering
-edge; that part is proved below (`instantStrict_constraint_lt`). What Phase 4a does **not**
+edge; that part is proved below (`instantStrict_constraint_lt`). What this section does **not**
 close — documented precisely in the "Blocked (FMP Existence Argument)" section following
 `extractModelℤPeriodic_bot_false` above and the module docstring's "Remaining Blocked
 Obligations" — is the existence of such a witnessing edge (or, more precisely, of a genuine
 `isSubsetBlocked`-satisfying ancestor pair reachable among an *arbitrary* open branch's labels)
-for the general case Phase 4c/4d need; see that write-up for the full analysis. -/
+for the general case; see that write-up for the full analysis. -/
 
 omit [Hashable Atom] in
-/-- Direct conversion step for Phase 4a: given `InstantStrict ord` (already established
+/-- Direct conversion step: given `InstantStrict ord` (already established
 run-level, sorry-free, by `temporalTableau_instantStrict`) and a recorded ordering-constraint
 edge `(t_anc, t_new) ∈ ord.constraints`, produces exactly the `hL : ord.instant t_anc <
 ord.instant t_new` fact `periodicReduce`/`extractModelℤPeriodic` need, replacing the spike's
 free `hL` parameter with a value derived from the tableau's own constraint bookkeeping. This is
-the conversion half of Phase 4a; see the module docstring for what remains open (the existence,
+the conversion half; see the module docstring for what remains open (the existence,
 for an arbitrary open branch, of such an edge tied to a genuine `isSubsetBlocked` witness). -/
 lemma instantStrict_constraint_lt (ord : TimeOrdering) (t_anc t_new : TimeIndex)
     (hIS : TimeOrdering.InstantStrict ord) (hedge : (t_anc, t_new) ∈ ord.constraints) :

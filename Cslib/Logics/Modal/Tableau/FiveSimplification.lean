@@ -584,7 +584,7 @@ lemma modalApplyOneFiveProp_snd_eq
     (modalApplyOneFiveProp sf b acc).snd = (modalApplyOne sf b acc).snd := by
   unfold modalApplyOneFiveProp
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
+    simp_all only [List.isEmpty_iff] <;>
     rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
 
 omit [Hashable Atom] in
@@ -2063,7 +2063,7 @@ lemma modalApplyOneKb5''Prop_snd_eq
     (modalApplyOneKb5''Prop sf b acc).snd = (modalApplyOne sf b acc).snd := by
   unfold modalApplyOneKb5''Prop
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
+    simp_all only [List.isEmpty_iff] <;>
     rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
 
 omit [Hashable Atom] in

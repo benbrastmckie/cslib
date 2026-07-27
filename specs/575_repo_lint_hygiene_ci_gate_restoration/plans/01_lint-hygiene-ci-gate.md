@@ -1142,7 +1142,7 @@ original tactic and use a declaration-scoped suppression instead**).
 **Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
 suppression is load-bearing.
 
-### Phase 6: Sorry visibility [IN PROGRESS]
+### Phase 6: Sorry visibility [COMPLETED]
 
 **REOPENED by exclusion audit — partial close.** The *narrowing* work below is verified complete
 and is not revisited: a live count confirms **18 `warn.sorry` directives repo-wide, all
@@ -1174,6 +1174,90 @@ per-site justification was recorded for any of the 18 sites. Narrowing blast rad
 and documents suppression *visibility*; it does not touch proofs. The authoritative sorry census
 remains the `lake build --wfail --iofail` count, never a naive `\bsorry\b` grep (which reads 167
 against a true count of 5 surfacing / 28 total).
+
+**Reopen resolution (this cycle) — all 3 scope items done, zero `.lean` proof edits.**
+
+*Step 0 — re-verify the live count before trusting it (per this task's own measurement-discipline
+lesson).* `grep -rn "set_option warn.sorry" Cslib/` returns exactly **18** matches, all ending in
+`in` (declaration-scoped, zero file-scoped), split exactly as the reopen text states: 7 in
+`Bundle/SuccRelation.lean`, 2 in `Bundle/UntilSinceCoherence.lean`, 1 in `BXCanonical/Frame.lean`,
+1 in `ConservativeExtension/TemporalConservativity.lean`, 7 in `BXCanonical/Chronicle/
+ChronicleToCountermodel.lean` (the file the reopen text lists bare as `ChronicleToCountermodel.lean`
+— there are two files of that basename in the tree; the sorry-suppressing one is under
+`Bimodal/Metalogic/BXCanonical/Chronicle/`, not `Temporal/Metalogic/Chronicle/`, which has zero
+`warn.sorry` sites). Baseline reconfirmed: `lake build --wfail --iofail` exits 1 with exactly 5
+warnings (Modal `FrameSoundness` ×1, Propositional `Intuitionistic/Scheme` ×2,
+`Intuitionistic/Completeness` ×1, `Minimal/Completeness` ×1). Count matches; no discrepancy to
+record for item 1's premise.
+
+*Item 1 — per-site decision, all 18 sites read.* Every one of the 18 sites already carries an
+inline technical-blocker comment on (or immediately after) its `sorry`/`by sorry` token — none
+were bare/undocumented:
+- **`Bundle/SuccRelation.lean` (7: `until_unfold_in_mcs`, `since_unfold_in_mcs`,
+  `until_persists_through_succ`, `or_until_in_mcs`, `or_since_in_mcs`, `g_content_subset_mcs`,
+  `h_content_subset_mcs`, lines 256/262/268/275/282/289/294)** — a block comment at line 251
+  ("Sorries ported from the original source; blocked on upstream continuous-frame completeness")
+  plus a per-line `-- blocked on upstream continuous-frame completeness
+  (port_continuous_completeness_bimodal)` on every `sorry`. **Justified, documented.**
+- **`Bundle/UntilSinceCoherence.lean` (2: `backward_until_reflexive`, `backward_since_reflexive`,
+  lines 35/40)** — same per-line comment as above. **Justified, documented.**
+- **`BXCanonical/Frame.lean` (1: `bx_le_refl`, line 159)** — section header `/-! ## Reflexivity
+  (sorry'd under irreflexive semantics) -/` plus inline `-- sorry: blocked on the WeakCanonical
+  discrete-completeness port (requires irreflexive semantics resolution)`. **Justified,
+  documented.**
+- **`ConservativeExtension/TemporalConservativity.lean` (1:
+  `temporal_valid_of_bimodal_derivable`, line 248)** — a multi-line docstring/comment block
+  (module-level "Domain Mismatch Resolution" discussion, ~10 lines) explaining the domain
+  mismatch between bimodal soundness (`AddCommGroup D`) and temporal completeness (arbitrary
+  serial linear order `D`), ending "The sorry ... marks this gap." **Justified, documented.**
+- **`BXCanonical/Chronicle/ChronicleToCountermodel.lean` (7: `chronicle_gap_contradiction`,
+  `discreteFmcs`, `succEmbed`, `rootedSuccDiscreteFmcs`, `rooted_succ_discrete_fmcs_at_s`,
+  `cantorBfmcsDiscrete`, `dd_countermodel_chronicle_discrete`, lines
+  69/151/165/175/182/192/209)** — 6 of 7 carry a `/-- ... -/` docstring naming the blocker
+  ("pending the WeakCanonical discrete-completeness port"); the 7th
+  (`rooted_succ_discrete_fmcs_at_s`, line 182) has no docstring but its `sorry` carries the same
+  inline blocker comment at the site. **Justified, documented at the site in all 7 cases**
+  (docstring-level for 6, inline-comment-level for the 7th — "at the site" is satisfied either
+  way per this reopen's own wording).
+
+**Net result for item 2: no new comments needed.** All 18 sites already had a technical-blocker
+reason recorded at the site before this cycle; none used a task-number citation (the
+`port_continuous_completeness_bimodal` / `GoodStructuresModelSurgery` / `discrete_embed_strictMono`
+tokens are source-file/lemma names from the upstream `BimodalLogic` project this material was
+ported from, durable anchors, not ephemeral task numbers).
+
+**Item 3 — tree-wide asymmetry disposition, with a corrected measurement.** Verified live (via a
+scratch, uncommitted experiment: all 18 `set_option warn.sorry false in` lines temporarily
+replaced with a no-op comment across all 5 files, `lake build --wfail --iofail` run once, then
+every file restored via the pre-experiment backup and re-diffed to confirm zero net change before
+continuing — no commit ever touched a `.lean` file for this measurement):
+removing all 18 suppressions surfaces **21** additional warnings, not 18 — `SuccRelation.lean` 7,
+`UntilSinceCoherence.lean` 2, `ChronicleToCountermodel.lean` **10** (not 7: `discreteFmcs` and
+`cantorBfmcsDiscrete` are structures with multiple independently-elaborated sorry'd fields, each
+producing its own warning), `BXCanonical/Frame.lean` 1, `TemporalConservativity.lean` 1. Total
+repo-wide if fully unsuppressed today: **26** (5 existing + 21), not the **23** figure Phase 7's
+prior-close notes state (that count assumed 1 warning per suppressed declaration, which
+undercounts the two multi-field structures by 3).
+
+**Disposition: suppression retained, asymmetry justified — not removed.** Reasoning:
+1. Every one of the 18 sites is blocked on the same identified external dependency: a
+   not-yet-ported "WeakCanonical discrete-completeness" / "continuous-frame completeness"
+   component from the upstream `BimodalLogic` source project. This is a structurally different
+   situation from Propositional's 4 and Modal's 1 unsuppressed sorries, which are isolated,
+   in-tree proof gaps with no external-port dependency — there is nothing analogous to suppress
+   *for*.
+2. Removing the suppression today would turn `lake build --wfail --iofail` from 5 warnings back
+   to 26, reverting the exact criterion this task exists to restore (Definition of Done's first
+   bullet). That is a regression, not a hygiene fix, and squarely out of this phase's "do not
+   discharge, add, or relocate any sorry" constraint in spirit (it would functionally re-expose
+   18 declarations' worth of known, externally-blocked debt to a gate that cannot act on it).
+3. This is a documented, bounded, externally-triggered debt, not an open-ended one: **the
+   suppression should be revisited (and very likely removed) once the WeakCanonical
+   discrete-completeness port lands upstream in `BimodalLogic` and is pulled into this tree** —
+   at that point the sorries themselves should be discharged (a follow-up formalization task, not
+   hygiene), and the suppressions would come off naturally as part of that work. Recorded here as
+   the explicit trigger condition, per this reopen's demand for a real disposition rather than a
+   measurement-only note.
 
 ---
 
@@ -1558,11 +1642,15 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
   original repo-wide wording was open-ended.
 - `pre-pr-check.sh` can actually fail. **[MET]**
 - **Every `warn.sorry` suppression has a recorded per-site justification, and the
-  Bimodal-vs-rest-of-tree asymmetry has an explicit disposition.** **[NOT MET — Phase 6
-  reopened]** The narrowing half is verified done (18 directives, all declaration-scoped, zero
-  file-scoped). The per-site decision record the task description calls for — it labels this "a
-  genuine correctness concern rather than style" — was never produced; the asymmetry was
-  measured and then closed as "measurement note only, no action item".
+  Bimodal-vs-rest-of-tree asymmetry has an explicit disposition.** **[MET — Phase 6 re-closed]**
+  All 18 declaration-scoped sites (0 file-scoped) verified to already carry a documented
+  technical-blocker reason at the site (external "WeakCanonical discrete-completeness port"
+  dependency — see Phase 6's per-site table). Asymmetry disposition: suppression retained and
+  justified — Propositional/Modal's unsuppressed sorries have no analogous external-port
+  dependency to suppress for, and removing the suppression today would revert the CI gate from 5
+  to a corrected **26** warnings (not the previously-stated 23 — measured this cycle via a
+  reverted, uncommitted experiment). Explicit trigger recorded: revisit once the WeakCanonical
+  port lands and the sorries can actually be discharged.
 - **`NOTATION.md` documents the scoped-notation rule for the `S` (*Since*) vs. `S`
   (proof-system parameter) collision, and the 5 stale `NOTE:` blocks are deleted.** **[NOT MET —
   Phase 7 re-closed, both items excluded by finding]** Investigated fully this cycle, neither

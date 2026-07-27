@@ -537,7 +537,6 @@ public import Cslib.Logics.Propositional.ProofSystem.IntMinInstances
 public import Cslib.Logics.Propositional.ProofSystemEquivalence
 public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.Semantics.Algebra.BotProperties
-public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness

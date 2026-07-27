@@ -32,12 +32,6 @@ plus the proper separation theorem and atom-preserving separation.
 - Research report Sections 4.4-4.9
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.unusedDecidableInType false
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -48,12 +42,16 @@ open Cslib.Logic.Bimodal
 
 /-! ## Congruence and Separability Helpers -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem allPast_congr {φ ψ : Formula Atom} (h : intEquiv φ ψ) :
     intEquiv (.allPast φ) (.allPast ψ) := by
   intro M t; simp only [int_truth_allPast]; constructor
   · intro hall s hst; exact (h M s).mp (hall s hst)
   · intro hall s hst; exact (h M s).mpr (hall s hst)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem allFuture_congr {φ ψ : Formula Atom} (h : intEquiv φ ψ) :
     intEquiv (.allFuture φ) (.allFuture ψ) := by
   intro M t; simp only [int_truth_allFuture]; constructor
@@ -71,6 +69,7 @@ The temporal closure theorems state that temporal operators preserve separabilit
 These are corollaries of `all_formulas_separable` (proved in Hierarchy.lean via
 the full GHR94 junction-depth induction). -/
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure: allPast of a separable formula is separable.
     When the separated equivalent φ' is U-free, allPast φ' is directly
     separated. When φ' has U-subterms, the GHR94 substitution bridge
@@ -80,16 +79,19 @@ theorem allPast_separable (φ : Formula Atom) (_h : isSeparable φ) :
     isSeparable (.allPast φ) :=
   all_formulas_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure: allFuture of a separable formula is separable. -/
 theorem allFuture_separable (φ : Formula Atom) (_h : isSeparable φ) :
     isSeparable (.allFuture φ) :=
   all_formulas_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure: untl of separable formulas is separable. -/
 theorem untl_separable (φ ψ : Formula Atom) (_h1 : isSeparable φ) (_h2 : isSeparable ψ) :
     isSeparable (.untl ψ φ) :=
   all_formulas_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure: snce of separable formulas is separable. -/
 theorem snce_separable (φ ψ : Formula Atom) (_h1 : isSeparable φ) (_h2 : isSeparable ψ) :
     isSeparable (.snce ψ φ) :=
@@ -101,6 +103,7 @@ Every formula is separable, proved via `all_formulas_separable` in Hierarchy.lea
 The full proof uses junction-depth induction with the GHR94 Lemmas 10.2.4-10.2.8
 substitution bridge. -/
 
+set_option linter.unusedDecidableInType false in
 /-- Every {U,S}-formula over integer time is separable (equivalent to a
     syntactically separated formula). GHR94 Theorem 10.2.9. -/
 theorem all_separable (phi : Formula Atom) : isSeparable phi :=
@@ -108,6 +111,7 @@ theorem all_separable (phi : Formula Atom) : isSeparable phi :=
 
 /-! ## Lemma 10.2.4: Single S with Top-Level U(A,B) -/
 
+set_option linter.unusedDecidableInType false in
 /-- Lemma 10.2.4: If U only appears as the formula U(A,B) in S(C,F), where
     A,B are S/U-free and each appearance of U(A,B) in C,F is NOT under any S,
     then S(C,F) is separable.
@@ -121,6 +125,7 @@ theorem single_S_with_U (C w A B : Formula Atom)
 
 /-! ## Lemma 10.2.5: Single U Formula -/
 
+set_option linter.unusedDecidableInType false in
 /-- Lemma 10.2.5: If A, B are S/U-free and the only U in D is U(A,B),
     then D is separable.
 
@@ -133,6 +138,7 @@ theorem single_U_separable (A B D : Formula Atom)
 
 /-! ## Lemma 10.2.6: Multiple U Formulas -/
 
+set_option linter.unusedDecidableInType false in
 /-- Lemma 10.2.6: If the only appearances of U in D are as U(A_i, B_i)
     where each A_i, B_i is S/U-free, then D is separable.
 
@@ -143,6 +149,7 @@ theorem multi_U_separable (D : Formula Atom) :
 
 /-! ## Lemma 10.2.7: No S within U -/
 
+set_option linter.unusedDecidableInType false in
 /-- Lemma 10.2.7: If D contains no S nested within a U, then D is separable.
 
     This follows directly from `all_separable`. -/
@@ -153,6 +160,7 @@ theorem no_S_within_U_separable (D : Formula Atom)
 
 /-! ## Lemma 10.2.8: General Case (Junction Depth) -/
 
+set_option linter.unusedDecidableInType false in
 /-- Lemma 10.2.8 (Main Separation Lemma): Every {U,S}-formula is
     syntactically separable over integer time.
 
@@ -163,6 +171,7 @@ theorem junction_depth_separable (D : Formula Atom) :
 
 /-! ## Theorem 10.2.9: Separation Theorem -/
 
+set_option linter.unusedDecidableInType false in
 /-- Theorem 10.2.9 (Separation Theorem): Each wff in the language with
     {U, S} is equivalent, over the integer flow of time, to a separated wff.
 
@@ -184,23 +193,27 @@ Since `isSyntacticallySeparated = isProperlySeparated` for all formulas
 directly from `all_formulas_separable`. The temporal closure lemmas below are
 corollaries, not axioms. -/
 
+set_option linter.unusedDecidableInType false in
 /-- Every formula is properly separable, via predicate equivalence with
     syntactic separation (`syn_sep_eq_proper_sep`). -/
 theorem all_formulas_properly_separable (φ : Formula Atom) : isProperlySeparable φ :=
   (separable_iff_properly_separable φ).mp (all_formulas_separable φ)
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure for proper separability: allPast of a properly separable
     formula is properly separable. -/
 theorem allPast_properly_separable (φ : Formula Atom) (_h : isProperlySeparable φ) :
     isProperlySeparable (.allPast φ) :=
   all_formulas_properly_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure for proper separability: allFuture of a properly separable
     formula is properly separable. -/
 theorem allFuture_properly_separable (φ : Formula Atom) (_h : isProperlySeparable φ) :
     isProperlySeparable (.allFuture φ) :=
   all_formulas_properly_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure for proper separability: untl of properly separable
     formulas is properly separable. -/
 theorem untl_properly_separable (φ ψ : Formula Atom)
@@ -208,6 +221,7 @@ theorem untl_properly_separable (φ ψ : Formula Atom)
     isProperlySeparable (.untl ψ φ) :=
   all_formulas_properly_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Temporal closure for proper separability: snce of properly separable
     formulas is properly separable. -/
 theorem snce_properly_separable (φ ψ : Formula Atom)
@@ -215,12 +229,14 @@ theorem snce_properly_separable (φ ψ : Formula Atom)
     isProperlySeparable (.snce ψ φ) :=
   all_formulas_properly_separable _
 
+set_option linter.unusedDecidableInType false in
 /-- Every {U,S}-formula over integer time is properly separable (equivalent to a
     properly separated formula). This is the strong version of Theorem 10.2.9
     required by Theorem 9.3.1. -/
 theorem all_properly_separable (phi : Formula Atom) : isProperlySeparable phi :=
   all_formulas_properly_separable phi
 
+set_option linter.unusedDecidableInType false in
 /-- Theorem 10.2.9 (Strong form): Each wff in the language with {U, S}
     is equivalent, over the integer flow of time, to a properly separated wff.
     This is the version needed by Theorem 9.3.1. -/
@@ -250,6 +266,8 @@ noncomputable def restrictAtoms (φ : Formula Atom) (allowed : Set Atom) : Formu
   | .untl ψ₂ ψ₁ => .untl (restrictAtoms ψ₂ allowed) (restrictAtoms ψ₁ allowed)
   | .snce ψ₂ ψ₁ => .snce (restrictAtoms ψ₂ allowed) (restrictAtoms ψ₁ allowed)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 open Classical in
 /-- Atoms of `restrictAtoms` are contained in the allowed set. -/
 theorem formula_atoms_restrict_subset (φ : Formula Atom) (allowed : Set Atom) :
@@ -261,11 +279,16 @@ theorem formula_atoms_restrict_subset (φ : Formula Atom) (allowed : Set Atom) :
     · next h => intro x hx; simp only [formulaAtoms, Set.mem_singleton_iff] at hx; subst hx; exact h
     · simp only [formulaAtoms]; exact Set.union_subset (Set.empty_subset _) (Set.empty_subset _)
   | bot => exact Set.empty_subset _
-  | imp ψ₁ ψ₂ ih1 ih2 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
+  | imp ψ₁ ψ₂ ih1 ih2 =>
+    unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
   | box ψ ih => exact ih
-  | untl ψ₂ ψ₁ ih2 ih1 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
-  | snce ψ₂ ψ₁ ih2 ih1 => unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
+  | untl ψ₂ ψ₁ ih2 ih1 =>
+    unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
+  | snce ψ₂ ψ₁ ih2 ih1 =>
+    unfold restrictAtoms; simp only [formulaAtoms]; exact Set.union_subset ih1 ih2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 open Classical in
 theorem restrict_atoms_S_free (φ : Formula Atom) (allowed : Set Atom)
     (h : isSFree φ = true) : isSFree (restrictAtoms φ allowed) = true := by
@@ -281,6 +304,8 @@ theorem restrict_atoms_S_free (φ : Formula Atom) (allowed : Set Atom)
     simp [isSFree] at h; unfold restrictAtoms; simp [isSFree, ih1 h.1, ih2 h.2]
   | snce _ _ => simp [isSFree] at h
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 open Classical in
 theorem restrict_atoms_U_free (φ : Formula Atom) (allowed : Set Atom)
     (h : isUFree φ = true) : isUFree (restrictAtoms φ allowed) = true := by
@@ -296,6 +321,8 @@ theorem restrict_atoms_U_free (φ : Formula Atom) (allowed : Set Atom)
   | snce ψ₂ ψ₁ ih2 ih1 =>
     simp [isUFree] at h; unfold restrictAtoms; simp [isUFree, ih1 h.1, ih2 h.2]
 
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 open Classical in
 /-- `restrictAtoms` preserves `isProperlySeparated`. -/
 theorem restrict_atoms_preserves_properly_separated (φ : Formula Atom) (allowed : Set Atom)
@@ -322,6 +349,8 @@ theorem restrict_atoms_preserves_properly_separated (φ : Formula Atom) (allowed
     rw [← u_free_eq_past_only, ← u_free_eq_past_only] at h
     exact ⟨restrict_atoms_U_free ψ₁ allowed h.1, restrict_atoms_U_free ψ₂ allowed h.2⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 open Classical in
 /-- In a model where all non-allowed atoms are universally true,
     `restrictAtoms` agrees semantically with the original formula. -/
@@ -350,6 +379,7 @@ theorem restrict_atoms_truth (ψ : Formula Atom) (allowed : Set Atom)
     · rintro ⟨s, hst, hc, hd⟩
       exact ⟨s, hst, (ih1 s).mpr hc, fun r hr1 hr2 => (ih2 r).mpr (hd r hr1 hr2)⟩
 
+set_option linter.unusedDecidableInType false in
 open Classical in
 /-- Restricting atoms of ψ to the allowed set preserves `intEquiv` with φ,
     provided φ's atoms are contained in the allowed set.
@@ -375,6 +405,7 @@ theorem int_equiv_restrict_atoms {φ ψ : Formula Atom} (hequiv : intEquiv φ ψ
     restrict_atoms_truth ψ allowed M' t h_true
   exact h_phi.trans ((hequiv M' t).trans (h_restrict.symm.trans h_restrict_models.symm))
 
+set_option linter.unusedDecidableInType false in
 open Classical in
 /-- Atom-preserving proper separation: the separated equivalent uses only atoms
     from the original formula. This is a strengthening of `isProperlySeparable`

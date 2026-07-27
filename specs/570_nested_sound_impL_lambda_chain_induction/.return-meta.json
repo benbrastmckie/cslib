@@ -1,7 +1,7 @@
 {
-  "status": "partial",
+  "status": "implemented",
   "agent_type": "cslib-implementation-hard-agent",
-  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+  "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation-hard", "cslib-implementation-hard-agent"],
   "task_number": 570,
   "task_name": "nested_sound_impL_lambda_chain_induction",
   "session_id": "sess_1785113705_bcf38a",
@@ -9,17 +9,24 @@
     {
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
       "type": "lean_source",
-      "summary": "Added lemma4_7_ii; corrected module/section/lemma4_7_i_ii docstrings."
+      "summary": "Added lambdaChain_XZ_imp_Y, psiX_fm, primeRhs_fm in a new Lambda-Chain Induction section."
     },
     {
-      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/01_lambda-chain-induction-summary.md",
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
+      "type": "plan",
+      "summary": "Phase 4 marked [COMPLETED], task checkboxes checked."
+    },
+    {
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/02_lambda-chain-phase4-summary.md",
       "type": "summary",
-      "summary": "Phase 1 implementation summary."
+      "summary": "Phase 4 implementation summary."
     }
   ],
-  "phases_completed": 1,
+  "phases_completed": 4,
   "phases_total": 8,
-  "memory_candidates": [],
+  "memory_candidates": [
+    "Dot notation on a raw List.cons literal cannot resolve to an abbrev-defined type's namespace (e.g. OutputCtx := List (NestedLhs Atom)): `(x :: xs).fillRhs a` fails with 'environment does not contain List.fillRhs' even when `xs.fillRhs` (a projection with declared type OutputCtx) works fine. Fix: use explicit application `OutputCtx.fillRhs (x :: xs) a`."
+  ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 41,
@@ -27,11 +34,11 @@
     "axiom_count": 0,
     "build_passed": false,
     "ci_pipeline_passed": false,
-    "notes": "Scoped build (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness) fails with exactly the two named pre-existing diagnostics (cut non-exhaustiveness, impL sorry), both explicitly out of scope for Phase 1 and scheduled for Phases 7 and 5 respectively. No third diagnostic. Full CI pipeline not run (single-phase dispatch; build is expected RED until Phase 7)."
+    "notes": "Scoped build (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness) fails with exactly the two named pre-existing diagnostics (NestedProof.cut Missing-cases at line 1502, impL sorry at line 1479), both explicitly out of scope for Phase 4 and scheduled for Phases 7 and 5 respectively. No third diagnostic introduced. Full CI pipeline not run (single-phase dispatch; build is expected RED until Phase 7). Sorry census unchanged at 41 (bash .claude/scripts/lean-sorry-census.sh Cslib), as planned for this phase."
   },
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "lemma4_7_ii landed and docstrings corrected. Phases 2-8 not started."
+    "stage": "phase_4_complete",
+    "details": "lambdaChain_XZ_imp_Y, psiX_fm, primeRhs_fm landed sorry-free. Phases 5, 6, 7, 8 not started."
   },
   "completed_at": "2026-07-26"
 }

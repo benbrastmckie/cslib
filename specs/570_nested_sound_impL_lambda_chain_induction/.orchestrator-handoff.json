@@ -1,27 +1,32 @@
 {
   "status": "implemented",
-  "summary": "Phase 3 of 8 complete: landed the four propositional combinators of the Lambda-chain toolkit in Soundness.lean, in a new '## Lambda-Chain Toolkit (Lemma 4.9, ImpL)' section placed after Lemma 4.9 and before the impL-deferred section. mpAnd (A B) : (A and (A imp B)) imp B is built via cs5DerivUncurrySwap fed cs5DerivImpSelf (A.imp B) -- the Q imp (P imp R) shape cs5DerivUncurrySwap expects collapses to the identity exactly when Q = P.imp R. topBase (A B) : ((top imp A) and (A imp B)) imp B is built by currying mpAnd into A imp ((A imp B) imp B), composing with cs5DerivTopImpElim via transitivity, then uncurrying back. andMP is a 3-step andI+modus_ponens combinator over closed derivations. lambdaChain_step2 is built via two nested deductionTheorem discharges (of the conjunction X and (Y imp P), then of Z), mirroring the file's existing lemma4_7_i_ii/cs5DerivKdiaUncurrySwapSchema proof pattern exactly (context [Z, Hyp], andE1/andE2 projections, andI recombination, MP against the weakened hypothesis). mpAnd/topBase/andMP marked private; lambdaChain_step2 public per plan. All four proved sorry-free, zero new diagnostics. Module's remaining diagnostics unchanged from Phase 1's baseline: the impL sorry warning (now at line 1424, shifted by the new section) and the cut non-exhaustiveness error (now at line 1438) -- both expected and unowned by this phase. Sorry census unchanged at 41 (bash .claude/scripts/lean-sorry-census.sh Cslib). Deviation from plan's proof-shape hint: mpAnd and topBase were built by composing existing private cs5Deriv* combinators (cs5DerivUncurrySwap, cs5DerivCurry, cs5DerivImpTrans, cs5DerivTopImpElim) already present earlier in Soundness.lean, rather than raw DerivationTree terms via deductionTheorem+andE1/andE2+MP as the plan's proof-shape note suggested. The stated type signatures and public API are unchanged from the plan; only the internal proof term differs (shorter, reuses existing file-local toolkit, same idiom the file already uses elsewhere e.g. lemma4_2_bot's singleton case). This is not a settled-design reopening -- no Postmortem Constraint governs mpAnd/topBase's internal proof technique -- and does not affect Phase 4's call sites (mpAnd A B, topBase A B are consumed by signature only).",
-  "phases_completed": 3,
+  "summary": "Phase 4 of 8 complete: landed lambdaChain_XZ_imp_Y (the page-10 Lambda-chain induction the task is named for -- a three-case structural recursion over the OutputCtx list, matching OutputCtx.fillLhs's own [] / [L0] / L0::L1::rest split, discharged via topBase/lemma4_7_ii+mpAnd/lemma4_7_ii+lemma4_7_iv respectively) plus the two Lambda=[] normalisation shape lemmas psiX_fm and primeRhs_fm (both closed by 'cases ctx.Lambda <;> rfl'), in a new '## The Lambda-Chain Induction (Lemma 4.9, ImpL)' section in Soundness.lean, placed after the Lambda-Chain Toolkit section and before the impL-deferred section. All three transcribed verbatim (statement and proof) from the research report's compiled, sorry-free proofs at specs/570_nested_sound_impL_lambda_chain_induction/reports/01_lambda-chain-induction.md. Module's remaining diagnostics after this phase are still exactly the two pre-existing ones: the impL sorry warning (now at line 1488) and the NestedProof.cut Missing-cases error (now at line 1502) -- no third diagnostic introduced, confirmed via scoped lake build. Sorry census unchanged at 41 (bash .claude/scripts/lean-sorry-census.sh Cslib), as planned (Phase 4 adds no sorry and removes none; the impL sorry it feeds into is removed in Phase 5).",
+  "phases_completed": 4,
   "phases_total": 8,
   "plan_markers_verified": true,
   "skeleton": false,
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
-      "line": 1424,
-      "note": "Pre-existing strategic sorry for nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 3; census unchanged at 41 before and after this dispatch. Line number shifted from 1354 (Phase 2's report) to 1424 due to the new Phase 3 section inserted above it."
+      "line": 1488,
+      "note": "Pre-existing strategic sorry for nested_sound_impL, scheduled for removal in Phase 5. Not touched by Phase 4; census unchanged at 41 before and after this dispatch. Line number shifted from 1424 (Phase 3's report) to 1488 due to the new Phase 4 section inserted above it."
     }
   ],
   "artifacts": [
     {
-      "path": "/home/benjamin/Projects/cslib/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
       "type": "lean_source",
-      "summary": "Added the Lambda-Chain Toolkit section: mpAnd, topBase, andMP (private), lambdaChain_step2 (public). All sorry-free."
+      "summary": "Added the Lambda-Chain Induction section: lambdaChain_XZ_imp_Y, psiX_fm, primeRhs_fm. All sorry-free."
     },
     {
-      "path": "/home/benjamin/Projects/cslib/specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md",
       "type": "plan",
-      "summary": "Phase 3 heading marked [COMPLETED]; all five Phase 3 task checkboxes checked."
+      "summary": "Phase 4 heading marked [COMPLETED]; all five Phase 4 task checkboxes checked, with one documented call-syntax deviation on primeRhs_fm."
+    },
+    {
+      "path": "specs/570_nested_sound_impL_lambda_chain_induction/summaries/02_lambda-chain-phase4-summary.md",
+      "type": "summary",
+      "summary": "Phase 4 implementation summary."
     }
   ],
   "blockers": [],
@@ -29,5 +34,5 @@
     "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
     "specs/570_nested_sound_impL_lambda_chain_induction/plans/01_lambda-chain-induction-plan.md"
   ],
-  "next_action_hint": "Phase 4 (land lambdaChain_XZ_imp_Y, the Lambda-chain induction, plus psiX_fm/primeRhs_fm shape lemmas in Soundness.lean) is now unblocked: it depends on Phases 1 and 3, both [COMPLETED]. Phase 6 (OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean, depends on Phase 2) remains independently available if not already dispatched. Do NOT dispatch Phase 5 before Phase 4 is [COMPLETED]."
+  "next_action_hint": "Phase 5 (discharge nested_sound_impL's sorry at Soundness.lean:1488, using lambdaChain_XZ_imp_Y, psiX_fm, primeRhs_fm from this phase plus lambdaChain_step2/mpAnd/topBase/andMP from Phase 3 and lemma4_9_fillRhs already landed) is now unblocked: it depends on Phases 2 and 4, both [COMPLETED]. Phase 6 (OutputCtx.fillLhs_empty_imp_fillEmpty in Translation.lean, depends on Phase 2) remains independently available if not already dispatched. Expected post-Phase-5 build: only the pre-existing NestedProof.cut Missing-cases error remains; the sorry warning must be gone; census drops 41 to 40. Do NOT dispatch Phase 7 before both Phase 5 and Phase 6 are [COMPLETED]."
 }

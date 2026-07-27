@@ -8,6 +8,8 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
+public import Cslib.Foundations.Logic.Tableau.ClosureCondition
+public import Cslib.Logics.Propositional.Subformula
 
 /-! # Intuitionistic Propositional Tableau Expansion
 
@@ -23,11 +25,11 @@ T(φ)/F(φ) pairs at the same label).
   `closurePred`** — the generic workhorse. `intuitionisticTableau` instantiates it with
   `isIntuitionisticallyClosed`; `minimalTableau` instantiates it with `isMinimallyClosed`.
   `propExpandBranches` is an alias that emphasizes this generic, closure-predicate-parameterized
-  design (Phase 8, task 407 S3 follow-up).
+  design.
 - `intuitionisticTableau`: Starting from `F(φ)` at world 0, closes iff `IValid φ`.
 - `minimalTableau`: Same as above but uses `isMinimallyClosed`; closes iff `MValid φ`.
 
-## Tableau Unification (Phase 8)
+## Tableau Unification
 
 The two divergence points between intuitionistic and minimal tableau are:
 1. **Closure predicate**: `isIntuitionisticallyClosed` vs `isMinimallyClosed`.
@@ -203,11 +205,11 @@ lemma intStepBranch_result_ne_notApplicable
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
       exact hsf.1.symm ▸ (by simp)
 
-/-! ## Sfor-Containment Loop-Check (task 317, plan 04) -/
+/-! ## Sfor-Containment Loop-Check -/
 
-/-- The `Sfor`-containment loop-check (Phase 2 of `04_sfor-dedup-fuel-sufficiency.md`; design
-settled in Phase 1, GO verdict). Wired into `go`'s `some (.linearResult newForms nw' (some
-newEdge), newExp)` branch (see `intExpandBranches` below).
+/-- The `Sfor`-containment loop-check (design settled, GO verdict). Wired into `go`'s
+`some (.linearResult newForms nw' (some newEdge), newExp)` branch (see `intExpandBranches`
+below).
 
 Following the `Sfor`-containment termination technique of Garg, Genovese & Negri,
 *Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
@@ -245,11 +247,12 @@ the rule layer at all.
   world already holds at `x`, AND
 - `ψ ∉ posFormulasAt bPers x` — the obligation is still open at `x` (no `T(ψ)@x`, so reusing
   `x` does not vacuously close the branch), AND
-- **`F(ψ)@x` is already an explicit entry on `bPers`** (Option A, task 317 plan 04 post-Phase-3
-  fix). This is the load-bearing conjunct for soundness: `IBranchSaturation.sat_fimp`/
+- **`F(ψ)@x` is already an explicit entry on `bPers`** (Option A fix). This is the load-bearing
+  conjunct for soundness: `IBranchSaturation.sat_fimp`/
   `sfSatisfied`'s `.neg, .imp` case demands an *explicit* `F(ψ)@x` entry, not merely
-  `ψ ∉ posFormulasAt bPers x` — Phase 3 found a concrete counterexample where the latter alone
-  holds but no `F(ψ)@x` entry exists, breaking the Hintikka condition at the reused witness.
+  `ψ ∉ posFormulasAt bPers x` — an earlier investigation found a concrete counterexample where
+  the latter alone holds but no `F(ψ)@x` entry exists, breaking the Hintikka condition at the
+  reused witness.
   Requiring `F(ψ)@x` to already be *literally present* on `bPers` closes that gap for free,
   with NO branch modification on reuse (the alternative, Option B — appending a fresh `F(ψ)@x`
   entry unconditionally — was tried and found UNSOUND: `intExpandBranches_closed_unsat`
@@ -260,7 +263,7 @@ the rule layer at all.
   to pre-exist sidesteps this entirely: nothing new is asserted, so the already-established
   `intBranchSatisfied` witness for `bPers` continues to apply unchanged).
 
-When Phase 2 wires this in: `some x` means do NOT create `w'` — mark `F(φ → ψ)@w` expanded
+`some x` means do NOT create `w'` — mark `F(φ → ψ)@w` expanded
 (already achieved via `newExp`) and continue on the SAME branch, calling `intExpandBranches`
 with `bPers` (not `Branch.extendMany bPers newForms`) and unmodified `edges` (not
 `edges ++ [newEdge]`). `none` means proceed exactly as today (create `w'` as normal).
@@ -316,7 +319,7 @@ def intFImpReuseWitness? (bPers : IBranch Atom) (edges : IEdges)
         none
 
 omit [Hashable Atom] in
-/-- Specification lemma for `intFImpReuseWitness?` (task 317 plan 04, post-Phase-3 fix):
+/-- Specification lemma for `intFImpReuseWitness?`:
 when it returns `some x` for the `.neg`-signed obligation `ψ` read off `newForms`, `x`
 satisfies all five search conditions, including the load-bearing Option-A conjunct
 `F(ψ)@x ∈ bPers` (an explicit branch entry, not merely "not forced"). This is the fact
@@ -416,7 +419,7 @@ def intExpandBranches
                 closurePred
             | some e =>
               -- World-creating F(φ → ψ) rule: run the Sfor-containment loop-check
-              -- (task 317 plan 04) before committing to a fresh world w' = e.1.
+              -- before committing to a fresh world w' = e.1.
               match intFImpReuseWitness? bPers edges newForms e with
               | some _x =>
                 -- Reuse: an accessible ancestor already contains Sfor(w') and lacks ψ, so
@@ -525,11 +528,11 @@ by an external harness.
 /-! ## Decision Procedures -/
 
 /-- Fuel bound for the intuitionistic/minimal tableau expansion loop, as a function of
-formula complexity. Set to `3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (task 317
-phase 8.0, doubling the phase-5 exponent to mirror the Modal-K `modalFuel`'s built-in
-factor-of-2, `FmpMeasure.lean:232-233`), replacing the earlier
+formula complexity. Set to `3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (doubling
+the earlier exponent to mirror the Modal-K `modalFuel`'s built-in factor-of-2,
+`FmpMeasure.lean:232-233`), replacing the earlier
 `2 ^ (2 * φ.complexity + 2)` bound which was insufficient to guarantee saturation. The
-phase-5 exponent (`2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, un-doubled) was verified
+earlier exponent (`2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, un-doubled) was verified
 insufficient for `intExpMeasure_init_le_fuel`: the initial worklist measure scales as
 `3 ^ (2 * |intUniverse φ| - 1)`, i.e. ~twice `intUniverse_length_le`'s bound, not once (see
 `Scheme.lean`'s `intExpMeasure_init_le_fuel`). Shared by `intuitionisticTableau`,

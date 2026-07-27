@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Basic
 public import Cslib.Logics.Propositional.Semantics.Kripke
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence

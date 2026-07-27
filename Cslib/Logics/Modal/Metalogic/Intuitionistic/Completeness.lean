@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma
 
 /-! # Completeness for Intuitionistic Modal Logic (Birelational Canonical Model)

@@ -122,7 +122,7 @@ lemma branchNextTime_gt (b : TBranch Atom) (sf : TSF Atom)
 
 /-- Fuel bound for `TimeOrdering.ancestorTimes` lookups inside `allFuturePosAt`/`allPastPosAt`.
 Generous relative to the tiny time counts the tableau ever reaches (bounded by `temporalFuel`);
-not itself a termination-critical bound (see `Rules.lean`'s cap-removal history, Phase 7). -/
+not itself a termination-critical bound (see this file's cap-removal history). -/
 def ancestorLookupFuel : Nat := 50
 
 /-- Collect T(Gφ) formulas from the branch relevant to propagating into the future of `t`:
@@ -332,7 +332,7 @@ Reynolds co-decomposition for Until/Since.
 
 `blocked` is `isTemporallyBlocked b sf.label ord tracker`, precomputed by the caller -- see
 `temporalApplyPos`'s docstring for why it is threaded in as a `Bool`. Used by the `untlNeg`/
-`snceNeg` fresh-time-creation arms (Deliverable 3/4, Phase 7) as the dedup-based termination
+`snceNeg` fresh-time-creation arms (Deliverable 3/4) as the dedup-based termination
 gate, replacing the old raw `timeCount < 4` numeric cap. -/
 def temporalApplyNeg
     (sf : TSF Atom)
@@ -372,7 +372,7 @@ def temporalApplyNeg
       (.branching [branch1, branch2], ord)
     | [] =>
       -- No unprocessed future times: create fresh one unless `t` is already dedup-blocked
-      -- (Deliverable 3/4, Phase 7): the old raw `0 < timeCount < 4` cap is replaced by the same
+      -- (Deliverable 3/4): the old raw `0 < timeCount < 4` cap is replaced by the same
       -- `isTemporallyBlocked` subset-blocking device the seriality arm already uses
       -- (`temporalApplyPos`), now wired here as a fresh-time *suppressor* per the research
       -- report's Finding 4 (dedup device existed but was previously consulted only at closure
@@ -403,7 +403,7 @@ def temporalApplyNeg
         [⟨.neg, guard, t'⟩, ⟨.neg, φ, t'⟩, sf]
       (.branching [branch1, branch2], ord)
     | [] =>
-      -- Symmetric to the `untlNeg` case above (Deliverable 3/4, Phase 7).
+      -- Symmetric to the `untlNeg` case above (Deliverable 3/4).
       if pastTimes.isEmpty && !blocked then
         let t' := branchNextTime b
         let newOrd := ord.addPast t t'

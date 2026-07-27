@@ -158,7 +158,8 @@ theorem h_content_set_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMaxima
 
 set_option warn.sorry false in
 theorem bx_le_refl (w : BXPoint Atom) : bxLe w w := by
-  sorry  -- sorry: blocked on task 36 (requires irreflexive semantics resolution)
+  sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port (requires
+         -- irreflexive semantics resolution)
 
 /-! ## Transitivity -/
 

@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKTruthLemma
 public import Cslib.Logics.Modal.Semantics.Birelational
 

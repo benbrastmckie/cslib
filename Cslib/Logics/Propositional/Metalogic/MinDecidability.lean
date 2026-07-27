@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.Metalogic.MinStrongCompleteness
 public import Cslib.Logics.Propositional.Subformula
 public import Mathlib.Data.Finset.Powerset

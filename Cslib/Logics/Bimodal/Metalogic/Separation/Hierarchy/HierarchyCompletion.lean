@@ -17,13 +17,6 @@ preservation, single-U-type separability (axiom-free), GHR94 Lemma 10.2.6/10.2.7
 oracle threading, and all_formulas_separable.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.unusedDecidableInType false
-set_option linter.style.maxHeartbeats false
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -32,6 +25,8 @@ variable {Atom : Type*} [DecidableEq Atom] [Infinite Atom]
 
 open Cslib.Logic.Bimodal
 
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 /-- GHR94 Lemma 10.2.6 (parameterized): A formula with `noSNestedInU` and
     `hasNoAllpastAllfuture` is separable, given a callback for handling
     the `.snceconstituents `/`.allPast` produced by substitution.
@@ -90,6 +85,8 @@ Uses strong induction on snceDepthOfU. The key `.sncecase ` at depth >= 2
 recurses on children (strict depth decrease), producing separated witnesses
 WITH single-U-type preservation. Box-normalization + leaf case finishes it. -/
 
+set_option linter.unusedDecidableInType false in
+set_option linter.unusedSectionVars false in
 /-- hasSingleUType with S-free A, B implies noSNestedInU.
     This follows because noSNestedInU checks that .untl are args S-free,
     and hasSingleUType forces every .untl be to .untl B A where A, B are S-free. -/
@@ -107,6 +104,8 @@ theorem has_single_U_type_gives_no_S_nested (phi A B : Formula Atom)
     exact ⟨hA_sf, hB_sf⟩
   | snce b a ih2 ih1 => exact ⟨ih1 h_single.1, ih2 h_single.2⟩
 
+set_option linter.unusedDecidableInType false in
+set_option linter.unusedSectionVars false in
 /-- Box-normalization preserves hasSingleUType with box-normalized args:
     if hasSingleUType phi A B, then
     hasSingleUType (replaceBoxWithTop phi) (replaceBoxWithTop A) (replaceBoxWithTop B). -/
@@ -126,6 +125,7 @@ theorem replace_box_preserves_single_U_type (phi A B : Formula Atom)
   | snce b a ih2 ih1 =>
     exact ⟨ih1 h.1, ih2 h.2⟩
 
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.5 (oracle-parameterized):
     A formula with single U-type U(A,B) (where A, B are S-free and U-free)
     is separable, given an oracle for `noSNestedInU` formulas with JD ≤ 1.
@@ -233,6 +233,7 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
           exact is_separable_of_equiv hequiv (oracle (.snce w'' C'') hns hjd)
   exact this (snceDepthOfU phi) phi (Nat.le_refl _) h_single
 
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.5 (oracle-free, returning isSeparableWithUType):
     A formula with single U-type U(A,B) (where A, B are S-free and U-free)
     is `isSeparableWithUType _ A B`.
@@ -355,6 +356,7 @@ theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)
             (replace_box_equiv A) (replace_box_equiv B) hA_sf hB_sf
   exact this (snceDepthOfU phi) phi (Nat.le_refl _) h_single
 
+set_option linter.unusedDecidableInType false in
 /-- Oracle-free corollary: isSeparable for single-U-type formulas. -/
 theorem single_U_formula_separable_no_oracle (phi A B : Formula Atom)
     (hA_sf : isSFree A = true) (hB_sf : isSFree B = true)
@@ -364,6 +366,7 @@ theorem single_U_formula_separable_no_oracle (phi A B : Formula Atom)
   separable_with_type_imp_separable
     (single_U_formula_sep_with_U_type_no_oracle phi A B hA_sf hB_sf hA_uf hB_uf h_single)
 
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.5 (backward-compatible wrapper):
     Now delegates to the oracle-free version. -/
 theorem single_U_formula_separable_noax (phi A B : Formula Atom)
@@ -378,6 +381,8 @@ theorem single_U_formula_separable_noax (phi A B : Formula Atom)
 Lemma 10.2.6: `noSNestedInU phi` and `uNestingDepth phi <= 1` implies separable.
 Lemma 10.2.7: `noSNestedInU phi` implies separable (by uNestingDepth induction). -/
 
+set_option linter.unusedDecidableInType false in
+set_option linter.unusedSectionVars false in
 /-- Helper: `extractUType` returns U-free arguments when `uNestingDepth phi <= 1`.
     At depth <= 1, every `.untl b` a has `uNestingDepth (.untl b a) <= 1`,
     so `uNestingDepth a = 0` and `uNestingDepth b = 0`, meaning a and b are U-free. -/
@@ -419,6 +424,8 @@ theorem extract_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
       have hle : uNestingDepth d ≤ 1 := Nat.le_trans (U_nesting_depth_le_snce_right c d) hdepth
       exact ih2 hd hns.2 hle
 
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 /-- GHR94 Lemma 10.2.6 (oracle-parameterized):
     A formula with `noSNestedInU` and `uNestingDepth <= 1` is separable,
     given an oracle for `noSNestedInU` formulas with JD ≤ 1.
@@ -468,6 +475,8 @@ theorem lemma_10_2_6_self_contained_param (phi : Formula Atom)
             hAB_sf.1 hAB_sf.2 hAB_uf.1 hAB_uf.2 hsingle_χ oracle)
     exact is_separable_of_equiv hphi_equiv h_subst_sep
 
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 /-- GHR94 Lemma 10.2.6 (oracle-free):
     Uses `single_U_formula_separable_no_oracle` directly instead of an oracle. -/
 theorem lemma_10_2_6_no_oracle (phi : Formula Atom)
@@ -510,6 +519,7 @@ theorem lemma_10_2_6_no_oracle (phi : Formula Atom)
             hAB_sf.1 hAB_sf.2 hAB_uf.1 hAB_uf.2 hsingle_χ)
     exact is_separable_of_equiv hphi_equiv h_subst_sep
 
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.6 (backward-compatible wrapper):
     Now delegates to the oracle-free version. -/
 theorem lemma_10_2_6_self_contained (phi : Formula Atom)
@@ -518,6 +528,7 @@ theorem lemma_10_2_6_self_contained (phi : Formula Atom)
     isSeparable phi :=
   lemma_10_2_6_no_oracle phi hns hd
 
+set_option linter.unusedSectionVars false in
 /-- Substituting `.untl B` A (with U-free A, B) into a U-free formula gives
     `uNestingDepth <= 1`. Since the base formula has no `.untlnodes `, the only
     `.untlin ` the result comes from substituting `.untl B` A for atoms. Each such
@@ -550,8 +561,8 @@ theorem subst_U_free_U_nesting_depth_le_one (ψ : Formula Atom) (p : Atom) (A B 
     have := ih1 hψ_uf.1; have := ih2 hψ_uf.2; omega
 
 /-- Callback formulas from `subst_in_separated_separable_typed` have `uNestingDepth ≤ 1`
-    when A, B are U-free. The callback formula is `.snce (subst d p (.untl B A)) (subst c p (.untl B A))`
-    where c, d are U-free. -/
+    when A, B are U-free. The callback formula is
+    `.snce (subst d p (.untl B A)) (subst c p (.untl B A))` where c, d are U-free. -/
 theorem callback_U_nesting_depth_le_one (c d : Formula Atom) (p : Atom) (A B : Formula Atom)
     (hc_uf : isUFree c = true) (hd_uf : isUFree d = true)
     (hA_uf : isUFree A = true) (hB_uf : isUFree B = true) :
@@ -562,6 +573,7 @@ theorem callback_U_nesting_depth_le_one (c d : Formula Atom) (p : Atom) (A B : F
   have h2 := subst_U_free_U_nesting_depth_le_one d p A B hd_uf hA_uf hB_uf
   omega
 
+set_option linter.flexible false in
 /-- Version of `subst_in_separated_separable` where the callback also receives
     `uNestingDepth χ ≤ 1`. Used by `no_S_nested_sep` to thread the
     `uNestingDepth` IH through back-substitution at depth >= 2.
@@ -608,12 +620,15 @@ theorem subst_in_separated_separable_depth (ψ : Formula Atom) (p : Atom) (A B :
 These helpers establish that callback formulas produced during separation have
 junctionDepth ≤ 1, enabling the JD-bounded oracle pattern. -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Junction depth 0 with expanded gives separated (re-export for convenience). -/
 theorem jd_zero_sep (φ : Formula Atom)
     (hexp : hasNoAllpastAllfuture φ = true) (hjd : junctionDepth φ = 0) :
     isSeparable φ :=
   separated_imp_separable φ (expanded_jd_zero_imp_separated φ hexp hjd)
 
+set_option linter.unusedSectionVars false in
 /-- Callback formulas from `subst_in_separated_separable` have junctionDepth ≤ 1.
     This follows because: (1) the `.snce d` c branches c, d of a separated formula
     are U-free, hence have junctionDepthS = 0; (2) substituting `.untl B` A (with
@@ -654,12 +669,14 @@ where
       simp [isUFree] at huf
       simp [substFormula, junctionDepthS, ih1 huf.1, ih2 huf.2]
 
+set_option linter.unusedSectionVars false in
 /-- Callback formulas from substitution into separated formulas have hasNoAllpastAllfuture. -/
 theorem callback_has_no_allpast_allfuture (c d : Formula Atom) (p : Atom) (A B : Formula Atom) :
     hasNoAllpastAllfuture
       (.snce (substFormula d p (.untl B A)) (substFormula c p (.untl B A))) = true := by
   exact has_no_allpast_allfuture_true _
 
+set_option linter.flexible false in
 /-- Version of `subst_in_separated_separable` where the callback also receives a
     junctionDepth bound. The callback formulas have JD ≤ 1. -/
 theorem subst_in_separated_separable_jd (ψ : Formula Atom) (p : Atom) (A B : Formula Atom)
@@ -697,6 +714,7 @@ theorem subst_in_separated_separable_jd (ψ : Formula Atom) (p : Atom) (A B : Fo
       callback_jd_le_one c d p A B hsep.1 hsep.2 hA_sf hB_sf
     exact ih_snce _ hns hjd_bound
 
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.7 (oracle-parameterized):
     A formula with `noSNestedInU` is separable, given an oracle for
     `noSNestedInU` formulas with JD ≤ 1.
@@ -761,6 +779,7 @@ theorem no_S_nested_in_U_separable_direct_param (phi : Formula Atom)
         exact is_separable_of_equiv hphi_equiv h_subst_sep
   exact outer (uNestingDepth phi) phi (Nat.le_refl _) hns
 
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemmas 10.2.6 + 10.2.7 (oracle-free):
     A formula with noSNestedInU is separable.
     No oracle parameter, no axiom-backed functions.
@@ -817,6 +836,8 @@ theorem no_S_nested_sep (phi : Formula Atom) (hns : noSNestedInU phi) :
         exact lemma_10_2_6_no_oracle ψ hns_ψ (by omega)
   exact proof (uNestingDepth phi) (countUTotal phi) phi (le_refl _) (le_refl _) hns
 
+set_option linter.unusedDecidableInType false in
+set_option linter.flexible false in
 /-- Version of `no_S_nested_in_U_separable_param` with JD-bounded callback. -/
 theorem no_S_nested_in_U_separable_param_jd (phi : Formula Atom)
     (hns : noSNestedInU phi)
@@ -862,6 +883,7 @@ theorem no_S_nested_in_U_separable_param_jd (phi : Formula Atom)
         hAB_sf.1 hAB_sf.2 hpsi_sep callback
     exact is_separable_of_equiv hphi_equiv h_subst_sep
 
+set_option linter.unusedDecidableInType false in
 /-- Main hierarchy theorem: every expanded formula is separable.
     Proved by strong induction on junctionDepth. The `.sncecase ` reduces to separated
     forms of sub-formulas, which satisfy `noSNestedInU` and have JD ≤ 1.
@@ -989,11 +1011,13 @@ theorem all_formulas_separable_aux (φ : Formula Atom)
         exact is_separable_of_equiv hequiv h_untl_sep
   exact this (junctionDepth φ) φ (Nat.le_refl _) hexp
 
+set_option linter.unusedDecidableInType false in
 /-- Every formula is separable (GHR94 Theorem 10.2.9 for integer time).
     Proved by expanding temporal operators and applying the hierarchy theorem. -/
 theorem all_formulas_separable (φ : Formula Atom) : isSeparable φ :=
   is_separable_of_equiv (expand_temporal_equiv φ)
-    (all_formulas_separable_aux (expandTemporal φ) (by simp [expand_temporal_id, has_no_allpast_allfuture_true]))
+    (all_formulas_separable_aux (expandTemporal φ)
+      (by simp [expand_temporal_id, has_no_allpast_allfuture_true]))
 
 
 end Cslib.Logic.Bimodal.Metalogic.Separation

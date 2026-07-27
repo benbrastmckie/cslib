@@ -8,7 +8,8 @@ module
 
 import Cslib.Init
 import Mathlib.Logic.Function.Basic
-import Mathlib.Data.Int.Order.Basic
+public import Mathlib.Data.Int.Notation
+import Mathlib.Tactic.ToDual
 
 /-! # Time Ordering Constraint Store
 
@@ -29,7 +30,7 @@ This matches the bimodal `TimeOrdering` design and is semantically sound
 because the branch truth lemma ensures that the model built from the branch
 satisfies the ordering constraints directly.
 
-If Phase 8 (Completeness) requires transitive closure, the hook function
+If Completeness requires transitive closure, the hook function
 `ancestorTimes` provides a fuelled version. This decision is documented
 here and revisited in the completeness module.
 
@@ -106,7 +107,7 @@ def allTimes (ord : TimeOrdering) : List Nat :=
 
 /-- The total number of distinct time points recorded in the ordering.
 
-**Historical note** (task 552 continuation, Phase 7): this was previously read directly by
+**Historical note**: this was previously read directly by
 `Rules.lean`'s `untlNeg`/`snceNeg` Reynolds co-decomposition arms as a raw numeric cap
 (`0 < timeCount < 4`) bounding fresh future/past point creation. That cap has been replaced by
 the `isTemporallyBlocked` dedup-based termination gate (`Branch.lean`), the same device already
@@ -117,7 +118,7 @@ def timeCount (ord : TimeOrdering) : Nat :=
 
 /-- Fuelled transitive closure of future: times reachable from `t` in at most `fuel` steps.
 
-This is the hook for Phase 8 (Completeness) if transitive closure is needed.
+This is the hook for Completeness if transitive closure is needed.
 The default rules use `futureOf` (direct successors). -/
 def ancestorTimes (ord : TimeOrdering) (t : Nat) : Nat → List Nat
   | 0 => []

@@ -7,7 +7,6 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Propositional.Metalogic.GenericMCSBridge
-public import Cslib.Logics.Propositional.ProofSystem.Axioms
 public import Cslib.Foundations.Logic.Metalogic.GenericMCS
 public import Cslib.Foundations.Data.ListHelpers
 

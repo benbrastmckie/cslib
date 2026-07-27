@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Basic
 
 /-! # Cut Elimination for LJ (Hauptsatz)

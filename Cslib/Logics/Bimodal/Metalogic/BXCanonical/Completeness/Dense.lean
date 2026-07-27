@@ -36,12 +36,6 @@ infrastructure, where `TaskFrame.WorldState : Type`.
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical
 
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -55,6 +49,7 @@ open Cslib.Logic.Bimodal.Theorems.Propositional
 
 /-! ## Consistency of {¬φ} When φ Is Not Derivable -/
 
+set_option linter.unusedSectionVars false in
 /--
 If φ is not derivable from the empty context, then {¬φ} is set-consistent.
 -/
@@ -134,7 +129,8 @@ theorem completeness_dense (φ : Formula Atom) :
     have h_box : DerivationTree FrameClass.Dense [] (Chronicle.nextTop (Atom := Atom)).neg.box :=
       DerivationTree.necessitation _ h_ax
     have h_in : (Chronicle.nextTop (Atom := Atom)).neg.box ∈ M := theoremInMcsFc hM_mcs h_box
-    exact set_consistent_not_both hM_mcs.1 (Chronicle.nextTop (Atom := Atom)).neg.box h_in h_not_box_dense
+    exact set_consistent_not_both hM_mcs.1
+      (Chronicle.nextTop (Atom := Atom)).neg.box h_in h_not_box_dense
 
 end DenseCompleteness
 

@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Completeness
 
 /-! # IK: Intuitionistic Modal Logic K (Soundness + Completeness)
@@ -229,8 +228,8 @@ theorem ik_soundness_derivable {φ : Proposition Atom}
 /-! ## Completeness and Consistency -/
 
 /-- **Completeness for `IK`**: any `IValid` formula is derivable from `IKModalAxiom`. Pure
-instantiation of the task-480 parametric `ivalid_completeness` at `Axioms := IKModalAxiom`,
-each discharger the matching `IKModalAxiom` constructor. -/
+instantiation of `Completeness.lean`'s parametric `ivalid_completeness` at
+`Axioms := IKModalAxiom`, each discharger the matching `IKModalAxiom` constructor. -/
 theorem ik_completeness {φ : Proposition Atom} (h_valid : IValid.{u, u} φ) :
     Derivable IKModalAxiom φ :=
   ivalid_completeness

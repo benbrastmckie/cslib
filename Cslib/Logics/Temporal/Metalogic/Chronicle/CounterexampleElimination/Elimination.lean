@@ -19,13 +19,6 @@ and walk result structures.
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -89,7 +82,8 @@ private lemma eliminateC5'Counterexample {χ : Chronicle Atom}
   obtain ⟨y, hy_lt, hy_notin⟩ := exists_rat_lt_finset χ.dom
   have h_mcs_x := h_c0 ce.x ce.x_mem
   have h_P_η : Formula.somePast ce.η ∈ χ.f ce.x := by
-    have h_ax : DerivationTree FrameClass.Base [] ((Formula.snce ce.ξ ce.η).imp (Formula.somePast ce.η)) :=
+    have h_ax :
+        DerivationTree FrameClass.Base [] ((Formula.snce ce.ξ ce.η).imp (Formula.somePast ce.η)) :=
       DerivationTree.axiom [] _ (Axiom.since_P ce.ξ ce.η) trivial
     exact temporal_implication_property h_mcs_x
       (theoremInMcs h_mcs_x h_ax) ce.since_mem

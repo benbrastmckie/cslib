@@ -356,6 +356,7 @@ lemma modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
+omit [Hashable Atom] in
 /-- At the two propagation shapes, `modalApplyOneFiveProp` never mints (its accessibility output
 is exactly K's, unchanged) and only appends formulas at existing known worlds. Mirrors
 `modalApplyOneS5_boxPos_diaNeg_eq`. -/
@@ -584,7 +585,7 @@ lemma modalApplyOneFiveProp_snd_eq
     (modalApplyOneFiveProp sf b acc).snd = (modalApplyOne sf b acc).snd := by
   unfold modalApplyOneFiveProp
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
+    simp_all only [List.isEmpty_iff] <;>
     rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
 
 omit [Hashable Atom] in
@@ -1249,6 +1250,7 @@ two structural facts about `modalApplyOneFive`/`modalApplyOneFiveProp`, mirrorin
 staging), both are stated directly, without the `RuleApply`/`S5SoundSpec` abstraction layer S5
 needed to cover two distinct rules. -/
 
+omit [Hashable Atom] in
 /-- The Five analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
 `modalApplyOneFiveProp` (the non-reuse propagation rule, exact structural analogue of
 `modalApplyOneS5`): either `modalApplyOneFiveProp` leaves `acc` unchanged with every emitted
@@ -2063,7 +2065,7 @@ lemma modalApplyOneKb5''Prop_snd_eq
     (modalApplyOneKb5''Prop sf b acc).snd = (modalApplyOne sf b acc).snd := by
   unfold modalApplyOneKb5''Prop
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
+    simp_all only [List.isEmpty_iff] <;>
     rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
 
 omit [Hashable Atom] in
@@ -2169,6 +2171,7 @@ invariant every branch in this tableau satisfies (it starts from the singleton `
 formulas are never removed), threaded the same way completeness proofs elsewhere in this
 development already thread `F(φ)@0 ∈ b` explicitly. -/
 
+omit [Hashable Atom] in
 /-- At the two propagation shapes, `modalApplyOneKb5''Prop` never mints (its accessibility output
 is exactly K's, unchanged) and only appends formulas at existing known worlds -- given the root is
 already known. Mirrors the retired frozen rule's analogous lemma, with the extra `h0` hypothesis
@@ -2268,6 +2271,7 @@ lemma modalApplyOneKb5''Prop_boxPos_diaNeg_eq
         · exact hkn
         · rw [hxeq]; dsimp only; exact h0
 
+omit [Hashable Atom] in
 /-- The Kb5'' analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
 `modalApplyOneKb5''Prop`, given the root is already known. Mirrors the retired frozen rule's
 analogous lemma, with the extra `h0` hypothesis. -/

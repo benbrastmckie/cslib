@@ -6,12 +6,11 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 
 /-! # IT: Intuitionistic Modal Logic T (Soundness + Completeness)
 
-This module instantiates the task-494 frame-condition-parametrized scaffold (`Extension.lean`)
+This module instantiates the frame-condition-parametrized scaffold (`Extension.lean`)
 at Simpson's `IT` ([Simpson1994] Ch. 3), the intuitionistic analogue of classical `T`: `IT` = `IK`
 + reflexivity. `ITModalAxiom` extends `IKModalAxiom` (`IK.lean`) with **both** a box-form and a
 diamond-form `T` axiom, `tBox : □A → A` and `tDia : A → ◇A`; both are needed because `◇` is
@@ -27,7 +26,7 @@ Mathlib version pinned by this project's `lake-manifest.json` -- using it would 
 deprecation warning on every use site, violating the zero-warnings build gate) -- same semantic
 content (`∀ w, r w w`), different (undeprecated, local) name.
 
-All task-480/492/Extension assets (`canonicalR`, `canonical_f1`/`canonical_f2`,
+All `Extension.lean` assets (`canonicalR`, `canonical_f1`/`canonical_f2`,
 `canonical_imp_property`, `axiom_mem`, `IValidFC`, `ivalidFC_completeness`) are reused unchanged;
 the only new work is the two `tBox`/`tDia` soundness cases and the canonical-reflexivity closure
 proof (`it_canonical_reflexive`), both fully positive (no `by_contra`, no negation).
@@ -40,8 +39,9 @@ proof (`it_canonical_reflexive`), both fully positive (no `by_contra`, no negati
   reflexive frames (`IValidFC itFC`).
 - `it_canonical_reflexive`: the canonical relation `canonicalR` (over `ITModalAxiom`) is
   reflexive -- proved positively via `axiom_mem`/`canonical_imp_property`, no negation.
-- `it_completeness`/`it_consistent`/`it_soundness_completeness`: instantiations of the task-494
-  parametric `ivalidFC_completeness` at `Axioms := ITModalAxiom`, `FC := itFC`.
+- `it_completeness`/`it_consistent`/`it_soundness_completeness`: instantiations of
+  `Extension.lean`'s parametric `ivalidFC_completeness` at `Axioms := ITModalAxiom`,
+  `FC := itFC`.
 
 ## References
 
@@ -258,9 +258,9 @@ theorem it_canonical_reflexive : itFC (@canonicalR Atom ITModalAxiom) := by
     exact canonical_imp_property (axiom_mem (ITModalAxiom.tDia φ)) hφ
 
 /-- **Completeness for `IT`**: any formula that is `IValidFC itFC` (forced at every world of
-every reflexive birelational model) is derivable from `ITModalAxiom`. Instantiation of the
-task-494 parametric `ivalidFC_completeness` at `Axioms := ITModalAxiom`, `FC := itFC`,
-`h_canonFC := it_canonical_reflexive`. -/
+every reflexive birelational model) is derivable from `ITModalAxiom`. Instantiation of
+`Extension.lean`'s parametric `ivalidFC_completeness` at `Axioms := ITModalAxiom`,
+`FC := itFC`, `h_canonFC := it_canonical_reflexive`. -/
 theorem it_completeness {φ : Proposition Atom} (h_valid : IValidFC.{u, u} itFC φ) :
     Derivable ITModalAxiom φ :=
   ivalidFC_completeness itFC

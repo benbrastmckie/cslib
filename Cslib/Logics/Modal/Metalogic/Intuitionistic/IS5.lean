@@ -6,12 +6,11 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 
 /-! # IS5: Intuitionistic Modal Logic S5 (Soundness + Completeness)
 
-This module instantiates the task-494 frame-condition-parametrized scaffold (`Extension.lean`) at
+This module instantiates the frame-condition-parametrized scaffold (`Extension.lean`) at
 Simpson's `IS5` ([Simpson1994] Ch. 3), the intuitionistic analogue of classical `S5`: `IS5` = `IS4`
 (`IS4.lean`) + the `B` axiom schemata. As with `T`/`4`, `B` needs **both** a box-form and a
 diamond-form schema, `bBox : A → □◇A` and `bDia : ◇□A → A`, since `◇` is primitive and not
@@ -37,7 +36,7 @@ require). `is5FC` mirrors `IS4`'s `is4FC` (`IS4.lean:136`) and the classical fil
 `Reflexive`/`Transitive`/`Symmetric` (deprecated in the pinned Mathlib -- see `IT.lean`'s module
 docstring) -- same semantic content, different (undeprecated, local) name.
 
-All task-480/492/Extension/IT/IS4 assets (`canonicalR`, `canonical_f1`/`canonical_f2`,
+All `Extension.lean`/`IT.lean`/`IS4.lean` assets (`canonicalR`, `canonical_f1`/`canonical_f2`,
 `canonical_imp_property`, `axiom_mem`, `IValidFC`, `ivalidFC_completeness`) are reused unchanged;
 the only new work is the two `bBox`/`bDia` soundness cases and the canonical-symmetry closure
 proof (`is5_canonical_symmetric`), both fully positive (no `by_contra`, no negation).
@@ -51,8 +50,8 @@ proof (`is5_canonical_symmetric`), both fully positive (no `by_contra`, no negat
 - `is5_canonical_reflexive`/`is5_canonical_transitive`/`is5_canonical_symmetric`: the canonical
   relation `canonicalR` (over `IS5ModalAxiom`) is reflexive, transitive, and symmetric -- all
   proved positively via `axiom_mem`/`canonical_imp_property`, no negation.
-- `is5_completeness`/`is5_consistent`/`is5_soundness_completeness`: instantiations of the task-494
-  parametric `ivalidFC_completeness` at `Axioms := IS5ModalAxiom`, `FC := is5FC`.
+- `is5_completeness`/`is5_consistent`/`is5_soundness_completeness`: instantiations of
+  `Extension.lean`'s parametric `ivalidFC_completeness` at `Axioms := IS5ModalAxiom`, `FC := is5FC`.
 
 ## References
 
@@ -359,8 +358,8 @@ theorem is5_canonical_fc : is5FC (@canonicalR Atom IS5ModalAxiom) :=
 
 /-- **Completeness for `IS5`**: any formula that is `IValidFC is5FC` (forced at every world of
 every reflexive-transitive-symmetric birelational model) is derivable from `IS5ModalAxiom`.
-Instantiation of the task-494 parametric `ivalidFC_completeness` at `Axioms := IS5ModalAxiom`,
-`FC := is5FC`, `h_canonFC := is5_canonical_fc`. -/
+Instantiation of `Extension.lean`'s parametric `ivalidFC_completeness` at
+`Axioms := IS5ModalAxiom`, `FC := is5FC`, `h_canonFC := is5_canonical_fc`. -/
 theorem is5_completeness {φ : Proposition Atom} (h_valid : IValidFC.{u, u} is5FC φ) :
     Derivable IS5ModalAxiom φ :=
   ivalidFC_completeness is5FC

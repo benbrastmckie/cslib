@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Basic
 
 /-! # Nested Sequent Syntax and the `fm` Translation

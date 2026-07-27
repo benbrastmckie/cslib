@@ -28,12 +28,6 @@ DCS neg insert, and R3Maximal/BurgessR3Maximal properties.
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -95,10 +89,12 @@ private theorem F_mem_of_g_content_sub {A C : Set (Formula Atom)}
         ((Formula.untl Formula.top γ.neg.neg).imp (Formula.untl Formula.top γ))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until γ.neg.neg γ Formula.top) trivial
     -- ⊢ F(¬¬γ) → F(γ)
-    have h_F_mono : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).imp (Formula.someFuture γ)) :=
+    have h_F_mono : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).imp
+        (Formula.someFuture γ)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dne
     -- Contrapositive: ⊢ ¬F(γ) → ¬F(¬¬γ)
-    have h_contra : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).neg.imp (Formula.someFuture γ.neg.neg).neg) :=
+    have h_contra : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).neg.imp
+        (Formula.someFuture γ.neg.neg).neg) :=
       contraposition h_F_mono
     -- ¬F(¬¬γ) → G(¬γ) is not defeq (G is primitive); bridge via
     -- the classic_to_allFuture axiom, then compose with the contrapositive above.
@@ -106,7 +102,8 @@ private theorem F_mem_of_g_content_sub {A C : Set (Formula Atom)}
         (Formula.allFuture γ.neg)) :=
       DerivationTree.axiom [] _ (Axiom.classic_to_allFuture γ.neg) trivial
     -- ¬F(γ) ∈ A → G(¬γ) ∈ A
-    exact temporal_implication_property h_mcs_A (theoremInMcs h_mcs_A (impTrans h_contra h_bridge)) h_neg_F
+    exact temporal_implication_property h_mcs_A
+      (theoremInMcs h_mcs_A (impTrans h_contra h_bridge)) h_neg_F
   have h_neg_C : (¬γ) ∈ C := h_gc h_G_neg
   exact mcs_not_mem_of_neg h_mcs_C h_neg_C h_γ
 
@@ -116,7 +113,8 @@ private theorem P_mem_of_g_content_sub {A C : Set (Formula Atom)}
     (h_gc : gContent A ⊆ C) (α : Formula Atom) (h_α : α ∈ A) :
     (𝐏α) ∈ C := by
   have h_GP : Formula.allFuture (Formula.somePast α) ∈ A := by
-    have h_ax : DerivationTree FrameClass.Base [] (α.imp (Formula.allFuture (Formula.somePast α))) :=
+    have h_ax : DerivationTree FrameClass.Base []
+        (α.imp (Formula.allFuture (Formula.somePast α))) :=
       DerivationTree.axiom [] _ (Axiom.connect_future α) trivial
     exact temporal_implication_property h_mcs_A (theoremInMcs h_mcs_A h_ax) h_α
   exact h_gc h_GP
@@ -132,13 +130,15 @@ theorem burgessR3Maximal_from_g_content_sub' {A C : Set (Formula Atom)}
   have h_bR : burgessR A top C := by
     intro γ hγ
     have h_F := F_mem_of_g_content_sub h_mcs_A h_mcs_C h_gc γ hγ
-    have h_bx12 : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).imp (Formula.untl top γ)) :=
+    have h_bx12 : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).imp
+        (Formula.untl top γ)) :=
       DerivationTree.axiom [] _ (Axiom.F_until_equiv γ) trivial
     exact temporal_implication_property h_mcs_A (theoremInMcs h_mcs_A h_bx12) h_F
   have h_bRS : burgessRSince C top A := by
     intro α hα
     have h_P := P_mem_of_g_content_sub h_mcs_A h_gc α hα
-    have h_bx12' : DerivationTree FrameClass.Base [] ((Formula.somePast α).imp (Formula.snce top α)) :=
+    have h_bx12' : DerivationTree FrameClass.Base [] ((Formula.somePast α).imp
+        (Formula.snce top α)) :=
       DerivationTree.axiom [] _ (Axiom.P_since_equiv α) trivial
     exact temporal_implication_property h_mcs_C (theoremInMcs h_mcs_C h_bx12') h_P
   exact burgessR3Maximal_exists_from_seed A C top h_mcs_A h_mcs_C h_bR h_bRS h_top_A
@@ -226,7 +226,8 @@ theorem linear_until_mcs {A : Set (Formula Atom)}
     Formula.untl (Formula.and φ χ) (Formula.and ψ χ) ∈ A ∨
     Formula.untl (Formula.and φ χ) (Formula.and φ θ) ∈ A := by
   have h_conj := conj_mcs h_mcs _ _ h_u1 h_u2
-  have h_bx7 := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.linear_until φ ψ χ θ) trivial
+  have h_bx7 :=
+    DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.linear_until φ ψ χ θ) trivial
   have h_disj := temporal_implication_property h_mcs (theoremInMcs h_mcs h_bx7) h_conj
   rcases or_elim_mcs h_mcs h_disj with h12 | h3
   · rcases or_elim_mcs h_mcs h12 with h1 | h2
@@ -243,7 +244,8 @@ theorem linear_since_mcs {A : Set (Formula Atom)}
     Formula.snce (Formula.and φ χ) (Formula.and ψ χ) ∈ A ∨
     Formula.snce (Formula.and φ χ) (Formula.and φ θ) ∈ A := by
   have h_conj := conj_mcs h_mcs _ _ h_s1 h_s2
-  have h_bx7 := DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.linear_since φ ψ χ θ) trivial
+  have h_bx7 :=
+    DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.linear_since φ ψ χ θ) trivial
   have h_disj := temporal_implication_property h_mcs (theoremInMcs h_mcs h_bx7) h_conj
   rcases or_elim_mcs h_mcs h_disj with h12 | h3
   · rcases or_elim_mcs h_mcs h12 with h1 | h2
@@ -373,8 +375,8 @@ private theorem H_implies_P_mcs {A : Set (Formula Atom)}
 /-! ## DCS Neg Insert Consistent -/
 
 /-- If B is CUD and φ ∉ B, then {¬φ} ∪ B is consistent. -/
-private theorem dcs_neg_union_consistent' {Sig : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed Sig)
-    {φ : Formula Atom} (h_not : φ ∉ Sig) :
+private theorem dcs_neg_union_consistent' {Sig : Set (Formula Atom)}
+    (h_dcs : SetDeductivelyClosed Sig) {φ : Formula Atom} (h_not : φ ∉ Sig) :
     Temporal.SetConsistent ({φ.neg} ∪ Sig) :=
   dcs_neg_insert_consistent h_dcs.2 h_not
 
@@ -429,7 +431,9 @@ theorem dc_delta_B_controlled {B : Set (Formula Atom)} (h_dcs : ClosedUnderDeriv
     {delta phi : Formula Atom} {L : List (Formula Atom)}
     (hL_sub : ∀ psi ∈ L, psi ∈ ({delta} : Set (Formula Atom)) ∪ B)
     (hL_deriv : DerivationTree FrameClass.Base L phi) :
-    (phi ∈ B) ∨ (∃ beta ∈ B, Nonempty (DerivationTree FrameClass.Base [] ((Formula.and beta delta).imp phi))) := by
+    (phi ∈ B) ∨
+      (∃ beta ∈ B, Nonempty (DerivationTree FrameClass.Base []
+        ((Formula.and beta delta).imp phi))) := by
   haveI : ∀ x : Formula Atom, Decidable (x ∈ B) := fun x => Classical.propDecidable _
   by_cases h_delta_L : delta ∈ L
   · let L_B := L.filter (· ∈ B)
@@ -450,12 +454,15 @@ theorem dc_delta_B_controlled {B : Set (Formula Atom)} (h_dcs : ClosedUnderDeriv
       -- When L_B is empty, ⊢ delta → phi. Need ⊢ (top ∧ delta) → phi.
       have h_top_B : ((Formula.bot : Formula Atom).imp Formula.bot) ∈ B :=
         cud_contains_theorems h_dcs
-          (DerivationTree.axiom (fc := FrameClass.Base) [] _ (Axiom.efq (Formula.bot : Formula Atom)) trivial)
-      exact Or.inr ⟨Formula.bot.imp Formula.bot, h_top_B, ⟨impTrans (rceImp (Formula.bot.imp Formula.bot) delta) d_imp⟩⟩
+          (DerivationTree.axiom (fc := FrameClass.Base) [] _
+            (Axiom.efq (Formula.bot : Formula Atom)) trivial)
+      exact Or.inr ⟨Formula.bot.imp Formula.bot, h_top_B,
+        ⟨impTrans (rceImp (Formula.bot.imp Formula.bot) delta) d_imp⟩⟩
     · have h_imp_B : (delta → phi) ∈ B := h_dcs L_B _ hLB_sub d_imp
       right
       refine ⟨delta.imp phi, h_imp_B, ⟨?_⟩⟩
-      have h_l : DerivationTree FrameClass.Base [(Formula.and (delta.imp phi) delta)] (delta.imp phi) :=
+      have h_l : DerivationTree FrameClass.Base [(Formula.and (delta.imp phi) delta)]
+          (delta.imp phi) :=
         DerivationTree.modus_ponens [(Formula.and (delta.imp phi) delta)]
           (Formula.and (delta.imp phi) delta) (delta.imp phi)
           (DerivationTree.weakening [] [(Formula.and (delta.imp phi) delta)] _

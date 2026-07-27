@@ -299,7 +299,6 @@ inductive Axiom : Formula Atom -> Type u where
   | dense_indicator :
       Axiom (Formula.untl Formula.bot (Formula.top)).neg
 
-set_option linter.dupNamespace false in
 /-- Minimum frame class for each axiom constructor.
     Base (37 axioms), Dense (2: density, dense_indicator), Discrete (3: prior_UZ, prior_SZ, z1). -/
 def Axiom.minFrameClass {phi : Formula Atom} :

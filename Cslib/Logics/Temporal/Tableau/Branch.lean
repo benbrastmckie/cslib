@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Temporal.Tableau.Rules
 
 /-! # Temporal Tableau Branch Utilities

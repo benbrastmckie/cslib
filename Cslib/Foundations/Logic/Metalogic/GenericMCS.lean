@@ -41,7 +41,7 @@ The deduction theorem for each structural logic then reduces to:
 ## Frame-class parameterization (Option A outcome)
 
 The seam was originally built only for single-frame-class systems (`FrameClass.Base`).
-Task-366 extended the bridges to arbitrary `fc : FrameClass`:
+The bridges were later extended to arbitrary `fc : FrameClass`:
 
 - **Bimodal** (`Core/GenericMCSBridge.lean`): `HilbertTMFc fc` tag type with
   `MinimalHilbert (HilbertTMFc fc)` instance for any `fc`, yielding

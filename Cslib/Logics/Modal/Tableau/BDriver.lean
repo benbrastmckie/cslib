@@ -6,10 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.GenericDriver
 public import Cslib.Logics.Modal.Tableau.FrameRules
-import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 
 /-! # B-System Tableau Driver
@@ -321,6 +319,7 @@ private lemma modalApplyOneB_freshLocal
   · rw [modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or_B hshape)]
     exact modalApplyOne_fresh_local sf b acc
 
+omit [Hashable Atom] in
 /-- **Field 2 (`outputsSubsetUniverse`)**. -/
 private lemma modalApplyOneB_outputsSubsetUniverse
     (φ0 : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -457,6 +456,7 @@ private lemma modalApplyOneB_persistentFresh
   · rw [modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or_B hshape)] at hpers
     exact modalApplyOne_persistent_props sf b acc nf hpers
 
+omit [Hashable Atom] in
 /-- **Field 4 (`rankStep`)**: reuses K's own `rank'` witness (valid since `modalApplyOneB` never
 touches `acc` at the two B-relevant shapes) and separately bounds the backward-propagated
 formulas using `accFreshInv` + `hedge` directly: for a predecessor `v` of `w`
@@ -600,6 +600,7 @@ private lemma modalApplyOneB_outDegStep
   · rw [modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or_B hshape)]
     exact modalApplyOne_outDeg_step sf b e acc houtdeg w
 
+omit [Hashable Atom] in
 /-- **Field 6 (`knownWorldsStep`)**: the known-worlds membership for backward-propagated
 formulas comes directly from `modalBBoxBack`/`modalBDiaNegBack`'s own known-worlds filter
 (`FrameRules.lean`) -- no extra invariant is needed, unlike field 4's numeric bound. This is
@@ -715,6 +716,7 @@ private lemma modalApplyOneB_branchingLength
 
 /-! ## Discharging F8-F12 (the Hintikka/saturation chain fields) -/
 
+omit [Hashable Atom] in
 /-- **F8 (`localShapeInvariance`)**. -/
 private lemma modalApplyOneB_localShapeInvariance
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex)

@@ -16,7 +16,7 @@ Generic version of the ~38-lemma shared core of `RRelation.lean` (deductive-clos
 infrastructure, r-relation/r3 maximal-extension existence via Zorn, `burgess*_absorption`,
 `untl/snce_left_mono*`, seed→`BurgessR3Maximal`, the `someFuture`/`somePast` absurdity
 lemmas, and the `burgessR_implies_burgessRSince` pair), parameterized by a
-`ChronicleInterface F` value (task-530 Phase 2). Both
+`ChronicleInterface F` value. Both
 `Logics/Bimodal/.../Chronicle/RRelation.lean` and
 `Logics/Temporal/.../Chronicle/RRelation.lean` instantiate this module and re-export its
 declarations under their existing names.
@@ -36,10 +36,11 @@ declarations under their existing names.
 - Temporal's primed `deductiveClosure_singleton_imp'`/`derivationFromSingletonList`
   variant (Bimodal has no primed counterpart).
 
-## Interface Fields Added for This Phase
+## Interface Fields Added for This Module
 
-Phase 0/1 supplied the formula operators, derivation combinators, and MCS/Burgess
-apparatus needed by `ChronicleTypes.lean`. This phase adds the axiom-level Deriv facts
+`ChronicleInterface.lean`/`ChronicleTypes.lean` supplied the formula operators, derivation
+combinators, and MCS/Burgess apparatus needed by `ChronicleTypes.lean`. This module adds
+the axiom-level Deriv facts
 (BX2-BX6, BX10, connect_future/past, enrichment) and the MCS-level duality-bridge facts
 (`someFutureAllFutureNegAbsurd`, `negAllPastNegToSomePast`, etc.) that the RRelation layer
 needs but `ChronicleTypes` does not. Each new field is *statement-only*: both logics prove

@@ -8,7 +8,8 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleToCountermodelBasic
 public import Mathlib.Data.Int.ConditionallyCompleteOrder
--- WeakCanonical.IntegerModel.GoodStructuresModelSurgery not yet ported (task 36)
+-- WeakCanonical.IntegerModel.GoodStructuresModelSurgery not yet ported
+-- (pending the WeakCanonical discrete-completeness port)
 
 /-!
 # Chronicle-to-Countermodel Integration (Gap Elimination and Discrete Pipeline)
@@ -20,7 +21,8 @@ for the BX completeness theorem.
 ## Port Status
 
 The discrete pipeline and gap elimination depend on `WeakCanonical.IntegerModel.
-GoodStructuresModelSurgery` which is not yet ported (task 36). All declarations
+GoodStructuresModelSurgery` which is not yet ported (pending the WeakCanonical
+discrete-completeness port). All declarations
 from the source are preserved with sorry-stubs where WeakCanonical is needed.
 
 The `mcs_mixed_case_absurd` theorem is fully ported (no sorry) since it depends
@@ -36,15 +38,6 @@ only on S5 axioms and K-distribution.
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.openClassical false
-set_option warn.sorry false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -56,15 +49,23 @@ open Cslib.Logic.Bimodal.Metalogic.Bundle
 open Cslib.Logic.Bimodal.Metalogic.BXCanonical
 open Cslib.Logic.Bimodal.Metalogic.BXCanonical.CanonicalModel
 open Cslib.Logic.Bimodal.Theorems.Propositional
+-- File-wide `open Classical` (not per-declaration) is used throughout for the
+-- `local instance Classical.propDecidable` interaction; replacing it with per-declaration
+-- `open scoped Classical in` is a real refactor across every theorem/def below, deferred
+-- (not this pass's scope -- see the mandate against altering proof terms/statements).
+set_option linter.style.openClassical false in
 open Classical
 
 /-! ## Gap Elimination and IsSuccArchimedean
 
 The gap elimination proof (`chronicle_gap_contradiction`) depends on
-`GoodStructuresModelSurgery.lean` from WeakCanonical (not yet ported, task 36).
+`GoodStructuresModelSurgery.lean` from WeakCanonical (not yet ported, pending the
+WeakCanonical discrete-completeness port).
 -/
 
-/-- Core gap elimination theorem. Depends on WeakCanonical (task 36). -/
+set_option warn.sorry false in
+/-- Core gap elimination theorem. Depends on WeakCanonical (the discrete-completeness
+port, not yet landed). -/
 theorem chronicle_gap_contradiction (fc : FrameClass) (A : Set (Formula Atom))
     (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x)
@@ -72,7 +73,8 @@ theorem chronicle_gap_contradiction (fc : FrameClass) (A : Set (Formula Atom))
     (h_lt : a < b)
     (h_gap : ∀ k : Nat, (limitDomSubtypeSucc fc A h_mcs h_discrete)^[k] a ≠ b) :
     False := by
-  sorry  -- depends on gap_contradicts_prior from GoodStructuresModelSurgery (task 36)
+  sorry  -- depends on gap_contradicts_prior from GoodStructuresModelSurgery
+         -- (the WeakCanonical discrete-completeness port)
 
 /-- Succ-cofinality from gap elimination. -/
 theorem succ_cofinal (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
@@ -96,22 +98,26 @@ lemma limitDomSubtypeIsSuccArchimedean (fc : FrameClass)
     exact ⟨k, hk⟩
   · exact ⟨0, by simp⟩
 
-/-! ## Discrete Pipeline (sorry-stubbed, task 36) -/
+/-! ## Discrete Pipeline (sorry-stubbed, pending the WeakCanonical discrete-completeness
+port) -/
 
 /-- Forward embedding into LimitDomSubtype. -/
-noncomputable def embedForward (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+noncomputable def embedForward (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     Nat → LimitDomSubtype fc A h_mcs :=
   fun n => (limitDomSubtypeSucc fc A h_mcs h_discrete)^[n] ⟨0, zero_mem_limit_dom fc A h_mcs⟩
 
 /-- Backward embedding into LimitDomSubtype. -/
-noncomputable def embedBackward (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+noncomputable def embedBackward (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     Nat → LimitDomSubtype fc A h_mcs :=
   fun n => (limitDomSubtypePred fc A h_mcs h_discrete)^[n] ⟨0, zero_mem_limit_dom fc A h_mcs⟩
 
 /-- Discrete embedding: Int → LimitDomSubtype. -/
-noncomputable def discreteEmbed (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+noncomputable def discreteEmbed (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     Int → LimitDomSubtype fc A h_mcs :=
   fun z =>
@@ -120,63 +126,88 @@ noncomputable def discreteEmbed (fc : FrameClass) (A : Set (Formula Atom)) (h_mc
     else embedBackward fc A h_mcs h_discrete (-z).toNat
 
 /-- Discrete f: MCS assignment via discrete embedding. -/
-noncomputable def discreteF (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+noncomputable def discreteF (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     Int → Set (Formula Atom) :=
   fun z => limitF fc A h_mcs (discreteEmbed fc A h_mcs h_discrete z).val
 
-theorem discrete_f_at_zero (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+theorem discrete_f_at_zero (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     discreteF fc A h_mcs h_discrete 0 = A := by
-  simp only [discreteF, discreteEmbed, embedForward, Function.iterate_zero, id_eq]
+  simp only [discreteF, discreteEmbed, embedForward]
   exact limit_f_zero fc A h_mcs
 
-theorem discrete_f_is_mcs (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+theorem discrete_f_is_mcs (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x)
     (z : Int) : SetMaximalConsistent fc (discreteF fc A h_mcs h_discrete z) :=
   limit_c0 fc A h_mcs _ (discreteEmbed fc A h_mcs h_discrete z).property
 
-/-- FMCS on Int (discrete case). Sorry-stubbed for forward_G/backward_H (task 36). -/
-noncomputable def discreteFmcs (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+set_option warn.sorry false in
+/-- FMCS on Int (discrete case). Sorry-stubbed for forward_G/backward_H
+(pending the WeakCanonical discrete-completeness port). -/
+noncomputable def discreteFmcs (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     FMCS Atom Int fc where
   mcs := discreteF fc A h_mcs h_discrete
   is_mcs := discrete_f_is_mcs fc A h_mcs h_discrete
-  forward_G := by sorry  -- TODO: depends on discrete_embed_strictMono (task 36)
-  backward_H := by sorry  -- TODO: depends on discrete_embed_strictMono (task 36)
+  forward_G := by sorry  -- TODO: depends on discrete_embed_strictMono
+                         -- (the WeakCanonical discrete-completeness port)
+  backward_H := by sorry  -- TODO: depends on discrete_embed_strictMono
+                          -- (the WeakCanonical discrete-completeness port)
 
-/-- Succ-embedding: LimitDomSubtype → Int. Sorry-stubbed (task 36). -/
-noncomputable def succEmbed (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+set_option warn.sorry false in
+/-- Succ-embedding: LimitDomSubtype → Int. Sorry-stubbed (pending the WeakCanonical
+discrete-completeness port). -/
+noncomputable def succEmbed (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_discrete : ∀ x ∈ limitDom fc A h_mcs, nextTop ∈ limitF fc A h_mcs x) :
     LimitDomSubtype fc A h_mcs → Int := by
-  sorry  -- sorry: blocked on task 36 (discrete_embed_strictMono)
+  sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+         -- (discrete_embed_strictMono)
 
-/-- Rooted succ-discrete FMCS. Sorry-stubbed (task 36). -/
-noncomputable def rootedSuccDiscreteFmcs (fc : FrameClass) (N : Set (Formula Atom)) (h_N : SetMaximalConsistent fc N)
+set_option warn.sorry false in
+/-- Rooted succ-discrete FMCS. Sorry-stubbed (pending the WeakCanonical
+discrete-completeness port). -/
+noncomputable def rootedSuccDiscreteFmcs (fc : FrameClass) (N : Set (Formula Atom))
+    (h_N : SetMaximalConsistent fc N)
     (h_box_discrete_N : Formula.box nextTop ∈ N) (s : Int) : FMCS Atom Int fc := by
-  sorry  -- sorry: blocked on task 36 (discrete FMCS construction)
+  sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+         -- (discrete FMCS construction)
 
-theorem rooted_succ_discrete_fmcs_at_s (fc : FrameClass) (N : Set (Formula Atom)) (h_N : SetMaximalConsistent fc N)
+set_option warn.sorry false in
+theorem rooted_succ_discrete_fmcs_at_s (fc : FrameClass) (N : Set (Formula Atom))
+    (h_N : SetMaximalConsistent fc N)
     (h_box_discrete_N : Formula.box nextTop ∈ N) (s : Int) :
     (rootedSuccDiscreteFmcs fc N h_N h_box_discrete_N s).mcs s = N := by
-  sorry  -- sorry: blocked on task 36 (rooted discrete FMCS property)
+  sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+         -- (rooted discrete FMCS property)
 
-/-- BFMCS on Int (discrete case). Sorry-stubbed (task 36). -/
-noncomputable def cantorBfmcsDiscrete (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+set_option warn.sorry false in
+/-- BFMCS on Int (discrete case). Sorry-stubbed (pending the WeakCanonical
+discrete-completeness port). -/
+noncomputable def cantorBfmcsDiscrete (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_box_discrete : Formula.box nextTop ∈ A) :
     BFMCS Atom Int fc where
   families := { fam | ∃ (N : Set (Formula Atom)) (h_N : SetMaximalConsistent fc N)
     (h_box_N : Formula.box nextTop ∈ N) (s : Int),
     (∀ ψ, Formula.box ψ ∈ A ↔ Formula.box ψ ∈ N) ∧
     fam = rootedSuccDiscreteFmcs fc N h_N h_box_N s }
-  nonempty := sorry  -- sorry: blocked on task 36
-  modal_forward := by sorry  -- sorry: blocked on task 36
-  modal_backward := by sorry  -- sorry: blocked on task 36
-  evalFamily := sorry  -- sorry: blocked on task 36
-  eval_family_mem := sorry  -- sorry: blocked on task 36
+  nonempty := sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+  modal_forward := by sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+  modal_backward := by sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+  evalFamily := sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
+  eval_family_mem := sorry  -- sorry: blocked on the WeakCanonical discrete-completeness port
 
-/-- Discrete countermodel. Sorry-stubbed (task 36). -/
-theorem dd_countermodel_chronicle_discrete (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+set_option warn.sorry false in
+/-- Discrete countermodel. Sorry-stubbed (pending the WeakCanonical
+discrete-completeness port). -/
+theorem dd_countermodel_chronicle_discrete (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (φ : Formula Atom) (h_neg_in : φ.neg ∈ A)
     (h_box_discrete : Formula.box nextTop ∈ A) :
     ∃ (D : Type _) (_ : AddCommGroup D) (_ : LinearOrder D) (_ : IsOrderedAddMonoid D)
@@ -184,7 +215,7 @@ theorem dd_countermodel_chronicle_discrete (fc : FrameClass) (A : Set (Formula A
       (Omega : Set (WorldHistory TF)) (_ : ShiftClosed Omega)
       (τ : WorldHistory TF) (_ : τ ∈ Omega) (t : D),
       ¬truthAt TM Omega τ t φ := by
-  sorry  -- TODO: discrete pipeline (task 36)
+  sorry  -- TODO: discrete pipeline (pending the WeakCanonical discrete-completeness port)
 
 /-! ## Mixed Case: Impossible by S5
 
@@ -192,24 +223,37 @@ The mixed case (neither □(F'T) nor □(U(T,bot)) in A) is impossible.
 This proof is complete (no sorry) since it uses only S5 axioms.
 -/
 
+set_option linter.unusedSectionVars false in
 /--
 Mixed case is absurd: if ¬□(F'T) ∈ A and ¬□(U(T,bot)) ∈ A, then False.
 -/
-theorem mcs_mixed_case_absurd (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+theorem mcs_mixed_case_absurd (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (h_not_box_dense : (Formula.box nextTop.neg).neg ∈ A)
     (h_not_box_discrete : (Formula.box (nextTop (Atom := Atom))).neg ∈ A) : False := by
-  have h_axiom_base : DerivationTree FrameClass.Base [] ((nextTop (Atom := Atom)).imp (Formula.box nextTop)) :=
+  have h_axiom_base :
+      DerivationTree FrameClass.Base [] ((nextTop (Atom := Atom)).imp (Formula.box nextTop)) :=
     DerivationTree.axiom [] _ Axiom.discrete_box_necessity trivial
-  have h_contra_base : DerivationTree FrameClass.Base [] ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg) :=
+  have h_contra_base :
+      DerivationTree FrameClass.Base []
+        ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg) :=
     contraposition h_axiom_base
-  have h_contra : DerivationTree fc [] ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg) :=
+  have h_contra :
+      DerivationTree fc [] ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg) :=
     liftBase fc h_contra_base
-  have h_nec : DerivationTree fc [] (Formula.box ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg)) :=
+  have h_nec :
+      DerivationTree fc []
+        (Formula.box ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg)) :=
     DerivationTree.necessitation _ h_contra
-  have h_k_dist : DerivationTree fc [] ((Formula.box ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg)).imp
-      ((Formula.box (Formula.box nextTop).neg).imp (Formula.box nextTop.neg))) :=
-    DerivationTree.axiom [] _ (Axiom.modal_k_dist (Formula.box (nextTop (Atom := Atom))).neg nextTop.neg) trivial
-  have h_box_chain : DerivationTree fc [] ((Formula.box (Formula.box (nextTop (Atom := Atom))).neg).imp (Formula.box nextTop.neg)) :=
+  have h_k_dist :
+      DerivationTree fc []
+        ((Formula.box ((Formula.box (nextTop (Atom := Atom))).neg.imp nextTop.neg)).imp
+          ((Formula.box (Formula.box nextTop).neg).imp (Formula.box nextTop.neg))) :=
+    DerivationTree.axiom [] _
+      (Axiom.modal_k_dist (Formula.box (nextTop (Atom := Atom))).neg nextTop.neg) trivial
+  have h_box_chain :
+      DerivationTree fc []
+        ((Formula.box (Formula.box (nextTop (Atom := Atom))).neg).imp (Formula.box nextTop.neg)) :=
     DerivationTree.modus_ponens [] _ _ h_k_dist h_nec
   have h_box_neg_box : Formula.box (Formula.box (nextTop (Atom := Atom))).neg ∈ A :=
     SetMaximalConsistent.neg_box_implies_box_neg_box h_mcs nextTop h_not_box_discrete
@@ -218,8 +262,10 @@ theorem mcs_mixed_case_absurd (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs 
       (theoremInMcsFc h_mcs h_box_chain) h_box_neg_box
   exact set_consistent_not_both h_mcs.1 (Formula.box nextTop.neg) h_box_dense h_not_box_dense
 
+set_option linter.unusedSectionVars false in
 /-- Mixed-case countermodel: vacuously true since the mixed case is impossible. -/
-theorem dd_countermodel_chronicle_mixed_sorry (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
+theorem dd_countermodel_chronicle_mixed_sorry (fc : FrameClass) (A : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent fc A)
     (φ : Formula Atom) (_h_neg_in : φ.neg ∈ A)
     (h_not_box_dense : (Formula.box nextTop.neg).neg ∈ A)
     (h_not_box_discrete : (Formula.box (nextTop (Atom := Atom))).neg ∈ A) :

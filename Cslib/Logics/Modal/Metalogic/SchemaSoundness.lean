@@ -38,11 +38,11 @@ case-split.
 
 The 13 frame-unconditional entries reuse the existing atoms in `Metalogic/Soundness.lean`
 (`Satisfies.implyK_axiom`, …, `Satisfies.diaDualityBack_axiom`) verbatim (read-only reuse). The
-5 frame-conditioned entries delegate to the task-522 library lemmas in
+5 frame-conditioned entries delegate to the library lemmas in
 `Metalogic/FrameCorrespondence.lean` (`Satisfies.modalT_axiom`, `modalFour_axiom`, `modalB_axiom`,
 `modalD_axiom`, `modalFive_axiom`) rather than re-proving the frame arguments inline — this
-composition (522's semantic side + 523's syntactic side) is a design invariant of the
-schema-union rollout.
+composition (`FrameCorrespondence.lean`'s semantic side + `SchemaUnion.lean`'s syntactic side)
+is a design invariant of the schema-union rollout.
 
 ## References
 

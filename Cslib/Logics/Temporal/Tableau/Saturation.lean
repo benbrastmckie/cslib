@@ -573,14 +573,14 @@ theorem temporalTableau_instantStrict (φ : Formula Atom) (b : TBranch Atom) (or
 
 /-! ## Run-Level Tracker-Branch Faithfulness -/
 
-/-- The tracker-branch faithfulness invariant (report 02 Finding 3a): every pending
+/-- The tracker-branch faithfulness invariant: every pending
 eventuality obligation in `tracker` is backed by an actual positive occurrence of its
 generating formula on the branch `b`. This is the genuine new prerequisite plan 01 lacked:
-`eventualityDefect_unsat` (Phase 3) needs to know that a "pending" eventuality is not merely a
+`eventualityDefect_unsat` needs to know that a "pending" eventuality is not merely a
 bookkeeping artifact but corresponds to a real `T(φ)@t` member of the branch, so that the
 least-witness/pigeonhole argument over the branch's own signed-formula content is sound. The
 `ord` parameter is threaded for uniformity with the run-level worklist invariants below (and
-for Phase 3's later use); it is not needed by this invariant's own statement. -/
+for that lemma's later use); it is not needed by this invariant's own statement. -/
 @[nolint unusedArguments]
 def TrackerBranchFaithful (b : TBranch Atom) (_ord : TimeOrdering)
     (tracker : EventualityTracker Atom) : Prop :=

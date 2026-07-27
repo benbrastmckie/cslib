@@ -201,7 +201,7 @@ then `φ` is temporally satisfied in every temporal model on any domain `D` that
 3. Apply the semantic bridge lemma to convert bimodal truth to temporal satisfaction. -/
 theorem temporal_valid_on_addcommgroup
     {Atom : Type*} {φ : Temporal.Formula Atom}
-    (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal)
+    (h : Cslib.Logic.Bimodal.ThDerivable φ.toBimodal)
     {D : Type} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D] [Nontrivial D]
     (M : Temporal.TemporalModel D Atom) (t : D) :
     Temporal.Satisfies M t φ := by
@@ -261,7 +261,7 @@ AddCommGroup domains (`temporal_valid_on_addcommgroup`) are fully proven. -/
 theorem temporal_valid_of_bimodal_derivable
     [Infinite Atom] [DecidableEq Atom]
     {φ : Temporal.Formula Atom}
-    (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal)
+    (h : Cslib.Logic.Bimodal.ThDerivable φ.toBimodal)
     (D : Type) [LinearOrder D] [Nontrivial D]
     [NoMaxOrder D] [NoMinOrder D]
     (M : Temporal.TemporalModel D Atom) (t : D) :
@@ -289,8 +289,8 @@ validity on AddCommGroup domains (Phase 2 partial) are both fully proven. -/
 theorem bimodal_conservative_over_temporal
     [Infinite Atom] [DecidableEq Atom] [Denumerable (Temporal.Formula Atom)]
     {φ : Temporal.Formula Atom}
-    (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal) :
-    Cslib.Logic.Temporal.Temporal.ThDerivable φ := by
+    (h : Cslib.Logic.Bimodal.ThDerivable φ.toBimodal) :
+    Cslib.Logic.Temporal.ThDerivable φ := by
   apply Cslib.Logic.Temporal.completeness
   intro D _lo _nt _nm _nm2 M t
   exact temporal_valid_of_bimodal_derivable h D M t

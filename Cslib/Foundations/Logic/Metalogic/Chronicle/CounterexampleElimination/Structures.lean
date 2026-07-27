@@ -17,30 +17,30 @@ public import Mathlib.Tactic.Linarith
 Generic version of the fresh-rational Finset helpers and the MCS-level `BurgessR3Maximal`
 helper lemmas shared verbatim (modulo `fc`) between
 `Logics/Bimodal/.../Chronicle/CounterexampleElimination/{Structures,BurgessHelpers}.lean`
-and `Logics/Temporal/.../Chronicle/CounterexampleElimination/Structures.lean`
-(task-530 Phase 3a). Both trees instantiate this module and re-export its declarations
-under their existing names.
+and `Logics/Temporal/.../Chronicle/CounterexampleElimination/Structures.lean`.
+Both trees instantiate this module and re-export its declarations under their existing
+names.
 
 ## Kept logic-local (NOT lifted here)
 
 `C5Counterexample`/`C5'Counterexample` are `structure`s indexed by `Chronicle F`, whose
-fields (`.f`/`.dom`) Phase 1 deliberately kept logic-local (a `toGeneric` bridge broke
-downstream `rcases`/`simp` proofs — see `ChronicleTypes.lean`'s "Chronicle Structure"
-section). Genericizing these two ~15-line structures would require either reintroducing
-that bridge (same regression risk, since these structures are pattern-matched constantly
-by the Phase 3b/3c walk/elimination proofs) or a new second bridge layer for near-zero
-duplication savings; both trees keep them verbatim instead, per this task's sanctioned
-"keep logic-local rather than risk the abstraction" contingency.
+fields (`.f`/`.dom`) this generalization effort deliberately kept logic-local (a
+`toGeneric` bridge broke downstream `rcases`/`simp` proofs — see `ChronicleTypes.lean`'s
+"Chronicle Structure" section). Genericizing these two ~15-line structures would require
+either reintroducing that bridge (same regression risk, since these structures are
+pattern-matched constantly by the walk/elimination proofs) or a new second bridge layer
+for near-zero duplication savings; both trees keep them verbatim instead, per the
+sanctioned "keep logic-local rather than risk the abstraction" contingency.
 
 `c2'_preserved_on_old_adjacent` has the same `Chronicle`-locality issue (it pattern-matches
 `χ.f`/`χ.g` values against `Adjacent`) and stays logic-local in both trees.
 
 `burgessR3Maximal_from_h_content_sub` depends on the duality theorem
-`g_content_sub_imp_h_content_sub'`/`h_content_sub_imp_g_content_sub'`, which the task-530
-plan's Phase 4b text already earmarks as logic-local ("add to temporal only if the same
-axioms are available there"). To avoid a forward dependency from this phase onto that
-Phase 4b decision, `burgessR3Maximal_from_h_content_sub` also stays logic-local in both
-trees (it is `private` in both, so no cross-tree naming-conflict risk either way).
+`g_content_sub_imp_h_content_sub'`/`h_content_sub_imp_g_content_sub'`, which is already
+earmarked as logic-local ("add to temporal only if the same axioms are available there").
+To avoid a forward dependency onto that earmarking decision,
+`burgessR3Maximal_from_h_content_sub` also stays logic-local in both trees (it is
+`private` in both, so no cross-tree naming-conflict risk either way).
 
 ## References
 
@@ -52,7 +52,6 @@ trees (it is `private` in both, so no cross-tree naming-conflict risk either way
 set_option linter.style.setOption false
 set_option linter.flexible false
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 
 @[expose] public section
 

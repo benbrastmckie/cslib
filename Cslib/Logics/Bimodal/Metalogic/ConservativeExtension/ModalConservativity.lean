@@ -244,7 +244,7 @@ Proof:
 
 Note: `Atom : Type` (universe 0) is required because `TaskFrame.WorldState : Type`. -/
 theorem bimodal_conservative_over_s5 {Atom : Type} {φ : Modal.Proposition Atom}
-    (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal) :
+    (h : Cslib.Logic.Bimodal.ThDerivable φ.toBimodal) :
     Modal.Derivable (@Modal.S5Axiom Atom) φ := by
   -- Apply S5 completeness: reduce to showing φ is valid over all S5 frames
   apply s5_completeness

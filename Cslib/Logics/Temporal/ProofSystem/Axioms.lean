@@ -281,7 +281,6 @@ inductive Axiom : Formula Atom → Type u where
   | classic_to_allPast (φ : Formula Atom) :
       Axiom ((Formula.neg (Formula.somePast (Formula.neg φ))).imp φ.allPast)
 
-set_option linter.dupNamespace false in
 /-- Minimum frame class for each axiom constructor. Base BX axioms
     are valid on all linear temporal orders. Density axioms require
     densely ordered frames. -/

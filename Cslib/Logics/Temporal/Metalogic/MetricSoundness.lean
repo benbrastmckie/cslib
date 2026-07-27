@@ -31,7 +31,7 @@ and `NoMinOrder`, so Base-axiom delegation to `axiom_sound` requires no extra hy
 - `axiom_sound_metric`: all axioms are valid over ordered-abelian-group serial linear orders.
 - `swap_valid_of_valid_metric`: metric validity transfers to `swapTemporal` via `OrderDual`.
 - `soundness_metric`, `soundness_thderivable_metric`: derivation soundness at `FrameClass.Metric`.
-- `Temporal.BXPlusDerivable`: `BX⁺` derivability abbreviation.
+- `BXPlusDerivable`: `BX⁺` derivability abbreviation.
 
 ## References
 
@@ -253,10 +253,9 @@ theorem soundness_thderivable_metric {D : Type*} [AddCommGroup D] [LinearOrder D
 
 /-! ## BX⁺ Derivability -/
 
-set_option linter.dupNamespace false in
 /-- `BX⁺` derivability: derivability at the metric frame class `FrameClass.Metric`.
 `BX⁺` is the metric tense logic, sound over ordered-abelian-group time. -/
-def Temporal.BXPlusDerivable (φ : Formula Atom) : Prop :=
+def BXPlusDerivable (φ : Formula Atom) : Prop :=
   Temporal.ThDerivableFc FrameClass.Metric φ
 
 end Cslib.Logic.Temporal

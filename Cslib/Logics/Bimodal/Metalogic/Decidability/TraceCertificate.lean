@@ -38,7 +38,6 @@ Ported from BimodalLogic with universe-polymorphic `Formula Atom`
 replacing monomorphic `Formula`.
 -/
 
-set_option linter.style.longLine false
 
 @[expose] public section
 

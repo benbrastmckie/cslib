@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms

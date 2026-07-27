@@ -1,0 +1,27 @@
+# Local-only workflow. Deliberately a SEPARATE file rather than a step added to
+# lean_action_ci.yml: every workflow under .github/workflows/ is shared with the
+# leanprover/cslib upstream remote, so editing one adds a conflict hunk to every future
+# sync. A new file is a pure local addition and conflicts with nothing.
+#
+# This gate does NOT need Lean or Mathlib and must stay that way -- it is a text check, so it
+# runs in seconds and gives feedback long before the build job finishes.
+
+name: Lint Hygiene
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+jobs:
+  suppression-ratchet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Blanket linter-suppression ratchet"
+        run: |
+          set -e
+          bash scripts/check-lint-suppressions.sh

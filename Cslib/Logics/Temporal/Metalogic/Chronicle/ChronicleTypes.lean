@@ -18,7 +18,7 @@ public import Cslib.Foundations.Logic.Metalogic.Chronicle.Types
 DCS infrastructure, r-relation definitions, r-maximality, and Burgess relation
 definitions for the temporal chronicle construction.
 
-## Status (task 530, Phase 1)
+## Status
 
 The DCS infrastructure (`ClosedUnderDerivation`, `SetDeductivelyClosed`, `mcs_is_dcs`,
 `cud_*`/`dcs_*`), r-relations, r-maximality, and Burgess content relations are now thin
@@ -57,14 +57,14 @@ attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
 
-/-! ## `ChronicleInterface` Instance (task 530, Phase 1)
+/-! ## `ChronicleInterface` Instance
 
 Populates every field of the shared Foundations interface with Temporal's own apparatus
 at `FrameClass.Base`. Not marked `private`: the public re-export `abbrev`s below unfold to
 expressions mentioning it directly, and Lean's module-privacy system disallows a `public
 section` declaration from referencing a `private` one. -/
 
-/-- The `ChronicleInterface` instance for Temporal (task 530). -/
+/-- The `ChronicleInterface` instance for Temporal. -/
 noncomputable def temporalChronicleInterface : ChronicleInterface (Formula Atom) where
   bot := Formula.bot
   imp := Formula.imp

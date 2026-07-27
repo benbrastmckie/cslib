@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Translation
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Rules
 
@@ -16,16 +15,16 @@ This module lands Arisaka–Das–Straßburger's soundness auxiliary lemmas
 (`doc_id: arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics`, §4, page 9-10,
 Lemmas 4.2–4.9), opening Stage D (`Theorem 4.1`, soundness of `NCS5` with respect to `HCS5`). Every
 lemma is stated against `Derivable (@CS5ModalAxiom Atom)`, fixing `X = {t,4,b}` (`CS5`'s safe
-pair, Phase 10), matching this development's `NCS5` instance rather than the source's generic
+pair), matching this development's `NCS5` instance rather than the source's generic
 `X ⊆ {d,t,b,4,5}` parameterisation.
 
 ## Settled Design (binding this phase and successors)
 
 * **Route**: nested-sequent soundness via Hilbert-derivability facts about `fm`, not a semantic
   argument (the source's own Theorem 4.1 proof route).
-* **`InputCtx`-vs-`OutputCtx` convention** (Phase 9): LHS-typed hole content uses
+* **`InputCtx`-vs-`OutputCtx` convention**: LHS-typed hole content uses
   `InputCtx.fillLhs`; RHS-typed content uses `OutputCtx.fillRhs`/`.fillFull`.
-* **Reused, not re-proved**: Phase 8's `OutputCtx.fillRhs_fm_mono`, `OutputCtx.fillLhs_fm_mono`,
+* **Reused, not re-proved**: `OutputCtx.fillRhs_fm_mono`, `OutputCtx.fillLhs_fm_mono`,
   and `InputCtx.fillLhs_fm_antitone` are the compositionality engines Lemma 4.4/4.5 below cite
   directly, per this phase's own task list ("using Phase 8's compositionality lemmas").
 * **Dead ends** (do not re-attempt): the semantic route via pair-axiom soundness is circular
@@ -419,7 +418,7 @@ theorem lemma4_4 {Δ Θ : NestedFull Atom}
 /-! ## Lemma 4.5 (page 9): `InputCtx.fillLhs` Contravariant Congruence -/
 
 /-- **Lemma 4.5** (page 9): let `Γ{ }` be an input context and `Δ, Σ` be LHS-sequents. If
-`fm(Σ) ⊃ fm(Δ)` is provable, so is `fm(Γ{Δ}) ⊃ fm(Γ{Σ})`. This is *exactly* Phase 8's
+`fm(Σ) ⊃ fm(Δ)` is provable, so is `fm(Γ{Δ}) ⊃ fm(Γ{Σ})`. This is *exactly*
 `InputCtx.fillLhs_fm_antitone`: the source's own proof ("`Γ{ } = Γ'{Λ{ },Π}`... induction on
 `Λ{ }`, using Lemma 4.3(iii) and (v) ... [then] Lemma 4.3(ii) ... [then] Lemma 4.4") is precisely
 what `fillLhs_fm_antitone` already carries out, composed from `OutputCtx.fillLhs_fm_mono`
@@ -778,7 +777,7 @@ soundness fact -- exactly the shape `nested_sound`'s eventual structural recursi
 constructor. Landed here: `botL`, `andL`, `andR`, `orRLeft`, `orRRight`, `impR`, `contract` (seven
 of this phase's ten target constructors).
 
-**`impR` resolved, not deferred**: Phase 11 flagged `impR` as needing "a genuinely separate
+**`impR` resolved, not deferred**: an earlier pass flagged `impR` as needing "a genuinely separate
 `fillRhs`-vs-`fillFull` empty-layer bridging induction." That induction is landed below
 (`buildFullChain_imp_buildRhsChain`/`fillFull_imp_fillRhs`), using only `tBox`, curry/uncurry, and
 `cs5DerivImpCongrRight`/`cs5DerivBoxMono` -- no new axiom needed, since `OutputCtx.fillFull` and
@@ -788,7 +787,7 @@ the tool that reconciles the "extra box" `fillFull`'s base case carries.
 **`id` and `orL`: repaired, not a genuine gap.** A follow-up defect-repair dispatch verified this
 phase's diagnosis against the recovered source PDF directly (Figure 2, page 6; Lemma 4.2, page 9;
 Lemma 4.8/4.9 and their proofs, page 10) and found the diagnosis **confirmed but the conclusion
-sharpened**: the obstruction was not real mathematics but a Phase 9 over-generalization, for
+sharpened**: the obstruction was not real mathematics but an over-generalization, for
 *both* `id` and `orL`, with the identical root cause.
 
 Figure 2 writes `id`'s and `⊥•`'s rules with the companion output formula *inside the same
@@ -798,7 +797,8 @@ braces* as the principal formula (`Γ{a•,a°}`, `Γ{⊥•,Π°}`), and Lemma 
 `InputCtx` with a separately-nested `Λ`. `∨•`'s rule (`Γ{A•,Π°}`/`Γ{B•,Π°}`/`Γ{A∨B•,Π°}`) uses the
 *identical* braces-together notation, and Lemma 4.9's proof confirms the same reading: *"For the
 `∧°`- and `∨•`-rules, this follows immediately from Lemma 4.8"* -- Lemma 4.8 is likewise stated
-for `Γ{ }` an output context. Phase 9 instead encoded both `id` and `orL` via `InputCtx.fillLhs`
+for `Γ{ }` an output context. An earlier pass instead encoded both `id` and `orL` via
+`InputCtx.fillLhs`
 (the family that genuinely needs a separately-tracked, arbitrarily-nested `Λ`, correct for rules
 like `∧•`/`⊃•`/`□•` whose Figure-2 notation shows *only* the principal formula, companion
 elsewhere) -- a strictly more general reading than the paper's own rule, and the extra generality
@@ -819,7 +819,7 @@ generality it carries stays *true* (not merely provable-by-accident): `⊥` impl
 `efq` regardless of how many `◇`s wrap it, so `nested_sound_botL`'s existing proof (via
 `lemma_botL_lambda_core`'s `◇`-bridging induction, closing with `cs5DerivDiaBotElim`) is a
 strictly *stronger*, still-sound theorem -- a generalization that happens to remain true is not a
-defect, so it is left exactly as Phase 12 landed it. -/
+defect, so it is left exactly as originally landed. -/
 
 /-- **Disjunction elimination combinator**: from `⊢ A ⊃ C` and `⊢ B ⊃ C`, derive `⊢ (A ∨ B) ⊃ C`
 (`orE`'s curried schema, applied via two `modus_ponens` steps). -/
@@ -954,7 +954,7 @@ theorem nested_sound_contract (ctx : InputCtx Atom) (Δ : NestedLhs Atom)
 
 /-! ## `⊃°` (`impR`): the `fillFull`-vs-`fillRhs` Bridge
 
-See the module docstring: this closes Phase 11's deferred `impR` case, using only `tBox` and
+See the module docstring: this closes the deferred `impR` case, using only `tBox` and
 curry/uncurry combinators (no new axiom). -/
 
 /-- **Curry, swapped order**: from `⊢ (P ∧ Q) ⊃ R`, derive `⊢ Q ⊃ (P ⊃ R)` (curry with the
@@ -1016,7 +1016,7 @@ private theorem fillFull_imp_fillRhs (ctx : OutputCtx Atom) (A B : Proposition A
       cs5DerivImpCongrRight Γ.fm (buildFullChain_imp_buildRhsChain A B (Γ₂ :: rest))
 
 /-- **Soundness of `⊃°`** (`impR`): from the premise's soundness fact, `modus_ponens` against
-`fillFull_imp_fillRhs`. Closes Phase 11's deferred `impR` case (see the module docstring). -/
+`fillFull_imp_fillRhs`. Closes the deferred `impR` case (see the module docstring). -/
 theorem nested_sound_impR (ctx : OutputCtx Atom) (A B : Proposition Atom)
     (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillFull (.atom A, .atom B)).fm) :
     Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (A.imp B))).fm := by
@@ -1087,7 +1087,7 @@ theorem nested_sound_orL (ctx : OutputCtx Atom) (A B : Proposition Atom) (π : N
 premise and conclusion fill the *same* `InputCtx` via `.fillLhs`, differing only in the LHS
 filler, so each closes via Lemma 4.5 (`InputCtx.fillLhs_fm_antitone`) composed with a single
 closed propositional/modal fact. Despite the plan's anticipation of a `boxL` "case-split" (the
-same kind of obstruction Phase 12 hit for `id`/`orL`), no case-split or new axiom is actually
+same kind of obstruction hit earlier for `id`/`orL`), no case-split or new axiom is actually
 needed: `boxL`'s premise-to-conclusion step is exactly Lemma 4.7(iv)'s `(□A ∧ ◇B) ⊃ ◇(A ∧ B)`
 (`cs5DerivBoxDiaDistrib`, already landed for Lemma 4.7(iv)/Lemma 4.8), evaluated with `B :=
 Δ.fm`. `fourL`/`bStruct` need the same fact with an extra `fourBox`/`bBox` step first (to turn
@@ -1166,9 +1166,9 @@ theorem nested_sound_bStruct (ctx : InputCtx Atom) (σ Δ : NestedLhs Atom)
     (cs5DerivBStructDistrib σ.fm Δ.fm)
   exact ⟨.modus_ponens _ _ _ dimp d⟩
 
-/-! ## `□°`, `♦•`: Closing Phase 11's Landed Lemma 4.6 Cases
+/-! ## `□°`, `♦•`: Closing the Landed Lemma 4.6 Cases
 
-`lemma4_6_boxR`/`lemma4_6_diaL` were already landed in Phase 11; this section supplies their
+`lemma4_6_boxR`/`lemma4_6_diaL` were already landed earlier; this section supplies their
 `nested_sound` wrappers. -/
 
 /-- **Soundness of `□°`** (`boxR`): from the premise's soundness fact, `modus_ponens` against
@@ -1220,8 +1220,9 @@ theorem nested_sound_tL (ctx : InputCtx Atom) (A : Proposition Atom)
 /-! ## `◇°` (`diaR`) and `4°` (`fourR`): the `fillRhs`-vs-`fillFull` Bridge, `kdia`-Flavoured
 
 Both rules mix an `OutputCtx.fillRhs`-shaped premise (`Γ{[Δ,A°]}` / `Γ{[Δ,◇A°]}`) against a
-`OutputCtx.fillFull`-shaped conclusion (`Γ{◇A°,[Δ]}`), the same family of obstruction Phase 11
-deferred `impR` for (closed in this file's earlier section via `tBox` + curry/uncurry). Here the
+`OutputCtx.fillFull`-shaped conclusion (`Γ{◇A°,[Δ]}`), the same family of obstruction that an
+earlier pass deferred `impR` for (closed in this file's earlier section via `tBox` +
+curry/uncurry). Here the
 modal content is `kdia` (`□(φ⊃ψ) ⊃ (◇φ⊃◇ψ)`) rather than `tBox`, since the leaf is genuinely
 being *lifted* through a `◇` (not merely unwrapped): `Γ{[Δ,A°]}` (bare `A` reachable behind the
 bracket) implies `Γ{◇A°,[Δ]}` (`◇A` reachable directly), matching `kdia`'s own shape exactly.
@@ -1543,16 +1544,17 @@ theorem nested_sound_impL (ctx : InputCtx Atom) (A B : Proposition Atom)
 /-! ## `cut` (Lemma 4.9, page 10): The Last Constructor
 
 `NestedRhs.box Φ Ψ`'s translation `fm = □(Φ.fm ⊃ Ψ.fm)` (`Syntax.lean`) is *contravariant* in
-`Φ`, so lifting Phase 6's `OutputCtx.fillLhs_empty_imp_fillEmpty` (`(Λ.fillLhs ∅).fm ⊃
+`Φ`, so lifting `OutputCtx.fillLhs_empty_imp_fillEmpty` (`(Λ.fillLhs ∅).fm ⊃
 Λ.fillEmpty.fm`) through a `box`/`ctx.Γ'` congruence chain (`cs5DerivImpCongrLeft` then
 `cs5DerivBoxMono`, exactly as `InputCtx.fillLhs_fm_antitone` does) yields the *reverse* implication
 at the lifted level. Reaching `(ctx.fillLhs ∅).fm ⊃ ctx.fillEmpty.fm` -- the direction
-`nested_sound_cut` needs -- therefore requires the *reverse*-direction companion to Phase 6's
-lemma, `Λ.fillEmpty.fm ⊃ (Λ.fillLhs ∅).fm`, as the congruence's input. Since this phase's file list
-names `Soundness.lean` sole owner (no `Translation.lean` edits), that companion is landed here as a
-private local lemma, mirroring Phase 6's exact three-case induction on `Λ` verbatim except for the
+`nested_sound_cut` needs -- therefore requires the *reverse*-direction companion to that
+lemma, `Λ.fillEmpty.fm ⊃ (Λ.fillLhs ∅).fm`, as the congruence's input. Since this section's
+editing scope names `Soundness.lean` sole owner (no `Translation.lean` edits), that companion is
+landed here as a private local lemma, mirroring that lemma's exact three-case induction on `Λ`
+verbatim except for the
 `[Γ]` base case's direction: `Γ.fm ⊃ (Γ.fm ∧ ⊤)` (`cs5DerivAndTopIntro`) in place of the `andE1`
-elimination Phase 6 used, since `⊤` is unconditionally provable in either direction. -/
+elimination that lemma used, since `⊤` is unconditionally provable in either direction. -/
 
 /-- **Reverse companion to `OutputCtx.fillLhs_empty_imp_fillEmpty`**: `⊢ Λ.fillEmpty.fm ⊃
 (Λ.fillLhs ∅).fm`, for every output context `Λ`. Local to this file (see the section docstring

@@ -1,0 +1,60 @@
+{
+  "phase": 2,
+  "phase_name": "Untrack the tracked ephemeral files and verify all three checks",
+  "started_at": "2026-07-27T00:05:00Z",
+  "last_updated": "2026-07-27T00:20:00Z",
+  "objectives": [
+    {"id": 1, "description": "Re-run check script and capture live Check B output as authoritative list", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Execute git rm --cached / git rm -r --cached for every printed remediation command", "status": "done", "files_touched": [
+      "specs/317_propositional_tableau_completeness/.orchestrator-loop-guard",
+      "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-loop-guard",
+      "specs/557_modal_tableau_refactor_abstractions_boneyard/.orchestrator-loop-guard",
+      "specs/archive/038_temporal_dense_completeness/.orchestrator-loop-guard",
+      "specs/archive/073_propositional_shared_sublogic/.orchestrator-loop-guard",
+      "specs/archive/091_pr_1_5_propositional_hilbert_submission/.orchestrator-loop-guard",
+      "specs/archive/169_recreate_modal_primitives_pr_upstream/.orchestrator-loop-guard",
+      "specs/archive/170_submit_subpr_3_1_3_2_temporal_syntax/.orchestrator-loop-guard",
+      "specs/archive/199_review_pr_citations/.orchestrator-loop-guard",
+      "specs/archive/200_fix_literature_directory_quality/.orchestrator-loop-guard",
+      "specs/archive/232_rebase_pr649_onto_pr648/.orchestrator-loop-guard",
+      "specs/archive/266_research_propositional_and_foundations_improvements/.orchestrator-loop-guard",
+      "specs/archive/322_mpl_conservative_extension_chain/.orchestrator-loop-guard",
+      "specs/archive/385_complete_parked_tableau_interpolation_fmp/.orchestrator-loop-guard",
+      "specs/archive/404_forall2_mathlib_cleanup_soundness/.orchestrator-loop-guard",
+      "specs/archive/477_refactor_pr_662_stack_on_607/.orchestrator-loop-guard",
+      "specs/archive/515_s5_universal_rule_termination_unblock_504/.orchestrator-loop-guard",
+      "specs/317_propositional_tableau_completeness/.orchestrator-churn-state.json",
+      "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-churn-state.json",
+      "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-churn-state.json",
+      "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/.orchestrator-churn-state.json",
+      "specs/557_modal_tableau_refactor_abstractions_boneyard/.orchestrator-churn-state.json",
+      "specs/archive/515_s5_universal_rule_termination_unblock_504/.orchestrator-churn-state.json",
+      "specs/archive/517_labelled_bounded_context_cs5_completeness/.orchestrator-churn-state.json",
+      "specs/archive/515_s5_universal_rule_termination_unblock_504/.drift-inspection.json",
+      "specs/archive/552_tableau_calculus_conformance_rule_completeness_repair/.drift-inspection.json",
+      "specs/557_modal_tableau_refactor_abstractions_boneyard/.lock",
+      "specs/.orchestrator-multi-state.json",
+      "specs/.return-meta-multi.json",
+      "specs/.return-meta-multi.sess_1782893182_f5e27d.json",
+      "specs/317_propositional_tableau_completeness/.return-meta-lit-05.json",
+      "specs/archive/332_normalization_termination_proof/.return-meta-research.json",
+      "specs/archive/345_reconcile_logic_encodings_isminimal/reports/.return-meta-teammate-a.json",
+      "specs/.events.lock",
+      ".gitignore"
+    ]},
+    {"id": 3, "description": "Confirm no command touched .orchestrator-handoff.json or bare .return-meta.json", "status": "done", "files_touched": []},
+    {"id": 4, "description": "Review git status/diff --staged and stage only .gitignore + the 34 index deletions", "status": "done", "files_touched": []}
+  ],
+  "current_objective": 4,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "2.verification",
+      "description": "Plan's Testing & Validation grep 'git ls-files specs | grep -E ...' (loose substring pattern) additionally matches 3 pre-existing tracked files not in the 34-path remediation list.",
+      "type": "deferred",
+      "reason": "specs/.orchestrator-multi-state.sess_1782893182_f5e27d.json, specs/archive/056_plan_pr_submission_strategy/.orchestrator-loop-guard.tmp, and specs/archive/517_labelled_bounded_context_cs5_completeness/.orchestrator-churn-state.plan08-stale.json are naming variants (session-suffixed / .tmp / stale-suffixed) that do not exactly match any of the standard's 9 canonical glob patterns or check-runtime-file-tracking.sh's own anchored Check B regexes ($-anchored). They were correctly absent from the live Check B output re-run at the start of Phase 2, so the plan's own instruction to 'drive off its live Check B output rather than any hardcoded list' excludes them. check-runtime-file-tracking.sh exits 0 (all three checks pass), which is the task's stated definition of done. Deferred as out of scope for this task; a future task could extend the standard's pattern set to cover these variant suffixes if desired.",
+      "annotation": "n/a (verification-only observation about a looser plan grep vs. the authoritative check script; no plan task item required action here)"
+    }
+  ]
+}

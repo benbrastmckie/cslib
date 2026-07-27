@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Reduction
+public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Basic
 
 /-! # Normalization Termination for Propositional Natural Deduction
 

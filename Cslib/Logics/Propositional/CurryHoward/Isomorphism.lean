@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 
 /-! # Curry-Howard Isomorphism: Forward and Backward Maps

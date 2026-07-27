@@ -550,19 +550,16 @@ public import Cslib.Logics.Propositional.ProofSystem.IntMinInstances
 public import Cslib.Logics.Propositional.ProofSystemEquivalence
 public import Cslib.Logics.Propositional.Semantics.Algebra
 public import Cslib.Logics.Propositional.Semantics.Algebra.BotProperties
-public import Cslib.Logics.Propositional.Semantics.Algebra.Bridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.Brouwerian
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompletenessGeneric
-public import Cslib.Logics.Propositional.Semantics.Algebra.CanAlgComplete
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpBotConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativityInstances
-public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentGeneric
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentPredicates
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.Glivenko
@@ -574,7 +571,6 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaumRel
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertStrongCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
-public import Cslib.Logics.Propositional.Semantics.Algebra.KripkeBridge
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplConservativeChain
 public import Cslib.Logics.Propositional.Semantics.Algebra.MplPointedConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet

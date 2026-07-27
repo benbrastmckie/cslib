@@ -89,11 +89,11 @@ theorem IsRegular.omegaLim_da_muller {l : Language Symbol} (h : l.IsRegular) :
     by grind [DA.Buchi.toMuller_language_eq, DA.buchi_eq_finAcc_omegaLim]⟩
 
 /-- The ω-power of a regular language is recognized by a finite-state deterministic Muller
-automaton, via the Choueka route (task 241, McNaughton's theorem, Phase 3): decompose `l∗` as
+automaton, via the Choueka route (McNaughton's theorem): decompose `l∗` as
 a DFA language, take its Choueka language `U` (regular, via `DA.chouekaLang_regular`), obtain a
 DMA for `U↗ω` (the base case, `omegaLim_da_muller` above), and combine the two via the Choueka
 identity `DA.chouekaLang_omega_power_eq_omega_limit` and the concat-automaton correctness
-`DA.concat_language_eq` (Phase 2). -/
+`DA.concat_language_eq`. -/
 theorem IsRegular.omegaPow_da_muller [Inhabited Symbol] {l : Language Symbol}
     (h : l.IsRegular) :
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol),
@@ -398,14 +398,14 @@ private lemma buchiFamily_component_isRegular {Symbol : Type} [Inhabited Symbol]
   grind [buchiFamily, IsRegular.hmul, IsRegular.omegaPow]
 
 /-- Every ω-regular language is recognized by a finite-state deterministic Muller automaton
-(the forward direction `(⇒)` of McNaughton's theorem, task 241, Phase 5, Choueka route).
+(the forward direction `(⇒)` of McNaughton's theorem, Choueka route).
 
 **Proof**: decompose `p = ⨆ i, (l i) * (m i)^ω` via `eq_fin_iSup_hmul_omegaPow`; for each
 component `i`, obtain a DFA for the regular prefix `l i` (`Language.IsRegular.iff_dfa`) and a
-DMA for the ω-power `(m i)^ω` (`omegaPow_da_muller`, Phase 3); combine them into a single DMA
-for `(l i) * (m i)^ω` via the concat-automaton correctness lemma (`DA.concat_language_eq`,
-Phase 2); fold the finite family (indexed by `Fin n`) into one DMA via the finite-union lift
-`DA.Muller.exists_iSup_univ` (Phase 4). -/
+DMA for the ω-power `(m i)^ω` (`omegaPow_da_muller`); combine them into a single DMA
+for `(l i) * (m i)^ω` via the concat-automaton correctness lemma (`DA.concat_language_eq`);
+fold the finite family (indexed by `Fin n`) into one DMA via the finite-union lift
+`DA.Muller.exists_iSup_univ`. -/
 theorem IsRegular.to_da_muller [Inhabited Symbol] {p : ωLanguage Symbol}
     (hp : p.IsRegular) :
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p := by
@@ -424,7 +424,7 @@ theorem IsRegular.to_da_muller [Inhabited Symbol] {p : ωLanguage Symbol}
   rw [show DA.FinAcc.mk dfa1.toDA dfa1.accept = dfa1 from rfl, hdfa1,
     show DA.Muller.mk da2.toDA da2.accept = da2 from rfl, hda2]
 
-/-- **McNaughton's Theorem** (task 241): an ω-language is ω-regular (recognized by a
+/-- **McNaughton's Theorem**: an ω-language is ω-regular (recognized by a
 finite-state nondeterministic Büchi automaton) if and only if it is recognized by a
 finite-state deterministic Muller automaton.
 
@@ -442,7 +442,7 @@ theorem IsRegular.iff_da_muller {Symbol : Type} [Inhabited Symbol] {p : ωLangua
     ∃ (State : Type) (_ : Finite State) (da : DA.Muller State Symbol), language da = p :=
   ⟨fun hp => IsRegular.to_da_muller hp, fun ⟨_, _, da, h⟩ => h ▸ IsRegular.of_da_muller da⟩
 
--- Now that McNaughton's theorem is proved (task 241), the following corollaries follow from the
+-- Now that McNaughton's theorem is proved, the following corollaries follow from the
 -- conversion chain in `Cslib.Computability.Automata.DA.Conversions`:
 --
 --   `IsRegular.iff_da_rabin`: ω-regularity ↔ recognizable by a finite-state DRA.

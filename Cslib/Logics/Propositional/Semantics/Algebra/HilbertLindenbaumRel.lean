@@ -6,10 +6,10 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum
 public import Cslib.Logics.Propositional.Semantics.SemanticConsequence
+public import Cslib.Foundations.Order.BrouwerianSemilattice
+public import Cslib.Logics.Propositional.Semantics.Algebra
 
 /-! # Γ-Relativized Hilbert Lindenbaum Quotient Algebra
 

@@ -20,8 +20,6 @@ PL-to-target embeddings (`toModal`, `toTemporal`, `toBimodal`).
   an atom-injection map `atomEmbed`.
 - `PL.Proposition.embed`: Generic structural embedding using any `PropositionalEmbedding`
   instance. Structural on `atom`/`bot`/`imp`; Łukasiewicz on `and`/`or`.
-- `NativePropositionalEmbedding`: Uninstantiated extension point for future
-  intuitionistic-faithful embeddings with native `and`/`or`.
 
 ## Encoding Rationale and Classical Scope
 
@@ -37,11 +35,6 @@ constructors and `HasAnd`/`HasOr` instances (`Modal/Basic.lean`), matching `PL.P
 but `Temporal.Formula` and `Bimodal.Formula` do not yet. Pushing `and`/`or` into
 `PropositionalConnectives` would require updating all four concrete formula types
 simultaneously and falls outside the scope of this consolidation.
-
-**Intuitionistic lift.** An intuitionistic embedding faithful to native `∧`/`∨` can be provided
-in the future by instantiating `NativePropositionalEmbedding` for each target. That extension
-point is deliberately uninstantiated here; it is provided as a typed stub so the module
-boundary is clear.
 
 ## References
 
@@ -118,20 +111,5 @@ theorem PL.Proposition.embed_or [HasBot F] [HasImp F] [PropositionalEmbedding At
     (a b : PL.Proposition Atom) :
     (PL.Proposition.or a b).embed (F := F) =
     HasImp.imp (HasImp.imp a.embed HasBot.bot) b.embed := rfl
-
-/-! ## Extension Point -/
-
-/-- Uninstantiated extension point for a future intuitionistic-faithful embedding.
-
-A type `F` with native `∧`/`∨` constructors (`HasAnd F`, `HasOr F`) could provide a
-faithful embedding of `PL.Proposition` that preserves the native `and`/`or` without
-Łukasiewicz encoding. This class is deliberately **not instantiated here**: it is provided
-as a typed stub to make the extension boundary explicit. Instantiation requires each target
-formula type to have primitive `∧`/`∨` constructors: `Modal.Proposition` already does
-(`Modal/Basic.lean`), but `Temporal.Formula` and `Bimodal.Formula` do not yet. -/
-class NativePropositionalEmbedding (Atom : Type*) (F : Type*) [HasBot F] [HasImp F]
-    [HasAnd F] [HasOr F] where
-  /-- Native injection of propositional atoms into the target formula type. -/
-  nativeAtomEmbed : Atom → F
 
 end Cslib.Logic

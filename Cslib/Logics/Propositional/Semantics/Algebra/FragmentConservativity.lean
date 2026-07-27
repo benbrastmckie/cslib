@@ -6,15 +6,15 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 
 /-! # Generic Fragment-Conservativity Core
 
 This module factors the shared four-theorem skeleton realized independently by
 `ImpConservative.lean`, `ConjImpConservative.lean`, `ConjImpBotConservative.lean`, and
-`OrImpConservative.lean` into a single generic `structure FragmentConservativity P`, mirroring
-the existing `CanAlgComplete` structure-by-reuse idiom (`CanAlgComplete.lean`).
+`OrImpConservative.lean` into a single generic `structure FragmentConservativity P`, using the
+same structure-by-reuse idiom as the analogous fragment-completeness developments elsewhere in
+this directory.
 
 Each of the four fragment files proves the same four-theorem shape for its own fragment
 predicate `P`, target axiom system `Ax`, and hard-direction proof route:
@@ -40,7 +40,7 @@ instances (see `FragmentConservativityInstances.lean`).
 - `sub`: the axiom-level subsumption `Ax ψ → IntPropAxiom ψ`, feeding `derivable_mono`.
 
 A `structure` (not a `class`) is used because `Ax` is *output* data that varies per fragment and
-is not inferable by instance search — identical rationale to `CanAlgComplete`.
+is not inferable by instance search.
 
 ## Main Results
 
@@ -114,7 +114,7 @@ the fragment-specific hard direction, kept verbatim per instance), and (2) every
 is an `IntPropAxiom` (`sub`, feeding the generic subsumption direction via `derivable_mono`).
 
 A `structure` (not a `class`) is used because `Ax` is *output* data that varies per fragment and
-is not inferable by instance search — identical rationale to `CanAlgComplete`. -/
+is not inferable by instance search. -/
 structure FragmentConservativity {Atom : Type u} (P : PL.Proposition Atom → Bool) where
   /-- The target sub-logic axiom predicate whose derivability characterizes the fragment. -/
   Ax : PL.Proposition Atom → Prop

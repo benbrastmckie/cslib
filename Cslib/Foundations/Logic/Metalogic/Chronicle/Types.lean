@@ -8,16 +8,16 @@ module
 
 import Cslib.Init
 public import Cslib.Foundations.Logic.Metalogic.Chronicle.ChronicleInterface
-public import Mathlib.Data.Rat.Defs
-public import Mathlib.Data.Finset.Basic
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Data.Finset.Defs
 
 /-! # Chronicle Types — Shared Bimodal/Temporal Chronicle Data Structures
 
 Generic version of the ~95%-shared `ChronicleTypes` layer (DCS infrastructure,
 r-relations, r-maximality, Burgess content relations, the `Chronicle` structure,
 conditions c0-c5', `ValidChronicle`, C3 consequences, `ChronicleInvariant`, and basic
-subset/intersection theorems), parameterized by a `ChronicleInterface F` value
-(task-530 Phase 1). Both `Logics/Bimodal/.../Chronicle/ChronicleTypes.lean` and
+subset/intersection theorems), parameterized by a `ChronicleInterface F` value.
+Both `Logics/Bimodal/.../Chronicle/ChronicleTypes.lean` and
 `Logics/Temporal/.../Chronicle/ChronicleTypes.lean` instantiate this module and
 re-export its declarations under their existing names.
 
@@ -30,7 +30,6 @@ re-export its declarations under their existing names.
 -/
 
 set_option linter.style.emptyLine false
-set_option linter.style.longLine false
 set_option linter.dupNamespace false
 
 @[expose] public section

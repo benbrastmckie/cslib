@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.NaturalDeduction.Equivalence
 public import Cslib.Logics.Propositional.NaturalDeduction.DerivedRules
 

@@ -31,8 +31,6 @@ framework. Height lemmas are already in `Derivation.lean`.
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean — generic MCS API
 -/
 
-set_option linter.dupNamespace false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal
@@ -46,12 +44,12 @@ variable {Atom : Type*}
 /-- `Bimodal.Deriv Γ φ` holds iff there exists a derivation tree deriving `φ`
 from `Γ` at `FrameClass.Base`. This is the `Prop`-level wrapper used by the
 generic `DerivationSystem`. -/
-def Bimodal.Deriv (Γ : List (Formula Atom)) (φ : Formula Atom) : Prop :=
+def Deriv (Γ : List (Formula Atom)) (φ : Formula Atom) : Prop :=
   Nonempty (DerivationTree FrameClass.Base Γ φ)
 
 /-- `Bimodal.ThDerivable φ` means `φ` is derivable from the empty context
 at `FrameClass.Base`. -/
-def Bimodal.ThDerivable (φ : Formula Atom) : Prop :=
+def ThDerivable (φ : Formula Atom) : Prop :=
   Bimodal.Deriv (Atom := Atom) [] φ
 
 /-! ## Basic Combinators -/

@@ -91,7 +91,9 @@ against the working tree when this section landed.
 wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean
 wc -l Cslib/Logics/Modal/Tableau/FrameSoundness.lean
 wc -l Cslib/Logics/Modal/Tableau/FrameCompleteness.lean
-grep -cE '^(private )?(protected )?(noncomputable )?(theorem|lemma|def|abbrev|instance|structure|inductive) ' Cslib/Logics/Modal/Tableau/LoopChecking.lean
+PAT='^(private )?(protected )?(noncomputable )?'
+PAT="$PAT(theorem|lemma|def|abbrev|instance|structure|inductive) "
+grep -cE "$PAT" Cslib/Logics/Modal/Tableau/LoopChecking.lean
 ```
 
 At `7eb51f69`: `LoopChecking.lean` 10,540 lines, `FrameSoundness.lean` 5,317,
@@ -140,7 +142,8 @@ discrepancy was a scope confusion of exactly this kind, not a drift.
 grep -rho 'Local re-derivation' Cslib/ | wc -l                                    # 55
 grep -rl 'ModalTableauResult' --include='*.lean' Cslib/Logics/Modal/Tableau/ | wc -l   # 8
 grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake | wc -l    # 9
-grep -nE '^(private )?(theorem|lemma) hintikkaS4_' Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l   # 8
+grep -nE '^(private )?(theorem|lemma) hintikkaS4_' \
+  Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l   # 8
 grep -n 'structure S4LoopInv' Cslib/Logics/Modal/Tableau/LoopChecking.lean
 wc -l CslibTests/S4LoopGuardRegression.lean                                       # 197
 ```
@@ -157,8 +160,6 @@ wc -l CslibTests/S4LoopGuardRegression.lean                                     
 * **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns
   11, because three further names occur only in call positions or prose. See the
   "Redirect Forward-Cone Free Transfer" section for what was removed and when.
-* No `FIX:`/`NOTE:`/`TODO:`/`QUESTION:` tags in `LoopChecking.lean`, `FrameSoundness.lean`, or
-  `FrameCompleteness.lean` (0 each). Repo-wide: 11 `TODO:`, 8 `NOTE:`.
 * There is no `Boneyard/` directory (`find . -type d -name 'Boneyard' -not -path './.lake/*'`
   returns nothing).
 
@@ -348,6 +349,7 @@ def modalUniverseS4 (φ₀ : Proposition Atom) :
   (List.range (modalWorldBoundS4 φ₀ + 1)).flatMap (fun w =>
     (modalSubfmls φ₀).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The S4 universe has length at most
 `2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)`. Mirrors
 `modalUniverse_length_le` (`FmpMeasure.lean`; that lemma carries the identical
@@ -949,18 +951,21 @@ def modalMintShape (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
   | .pos, .diamond _ => true
   | _, _ => false
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalMintShape` characterisation, box-negative shape (`F(□φ)@w`). -/
 @[simp]
 lemma modalMintShape_boxNeg (φ : Proposition Atom) (w : WorldIndex) :
     modalMintShape (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) = true :=
   rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalMintShape` characterisation, diamond-positive shape (`T(◇φ)@w`). -/
 @[simp]
 lemma modalMintShape_diaPos (φ : Proposition Atom) (w : WorldIndex) :
     modalMintShape (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) = true :=
   rfl
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalMintShape` is `false` at every signed-formula shape other than the two minting
 shapes: the complement of the two characterisation lemmas above. -/
 lemma modalMintShape_eq_false_of_not_boxNeg_diaPos
@@ -1257,7 +1262,7 @@ lemma modalStepBranchS4KeyedOrdered_cases (φ₀ : Proposition Atom)
     exact ⟨sf, hsf_mem, hsf_body.trans hstep⟩
 
 /-- `modalStepBranchS4KeyedOrdered ... = none ↔ modalStepBranchS4Keyed ... = none`. The linchpin
-that lets later phases (Phase 13's saturation step in particular) transfer facts about the old
+that lets later phases (the saturation step in particular) transfer facts about the old
 stepper's termination condition to the new one without re-deriving anything: if the ordered
 stepper reaches the fallback, both sides are the literal same expression; if it does not, both
 sides are provably `some _ ≠ none` (a primary-scan hit forces the old traversal to also find
@@ -1360,8 +1365,8 @@ unwrapped `T(ψ)@wBlock ∈ b` (the recorded key stores unwrapped box-context, p
 non-root key was recorded at a mint, and that mint recorded an edge. `keysOriginS4` records this
 origin edge as a standalone auxiliary, letting mint-readiness act on an edge that already exists.
 
-**Design decision -- auxiliary, not an `S4LoopInv` field** (flagged deviation from the blocked
-Phase-10 handoff's `keysOrigin` sketch): adding a field to `S4LoopInv` would reopen the
+**Design decision -- auxiliary, not an `S4LoopInv` field** (flagged deviation from an earlier,
+rejected `keysOrigin` sketch): adding a field to `S4LoopInv` would reopen the
 already-finalized struct design and force re-proof of the unordered line
 (`modalStepBranchS4_preserves_S4LoopInv`), which this plan is committed to leaving byte-for-byte
 unchanged until this driver's retirement. The codebase already sets this precedent twice:
@@ -1399,6 +1404,7 @@ def keysOriginS4
          (s', φ') = ((Sign.neg, ψ) : Sign × Proposition Atom) ∨
          (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Entry establishment**: `keysOriginS4` holds at the ordered driver's seed state. The sole
 recorded key is `(0, ∅)` (`modalTableauS4KeyedOrdered`'s seed), so the only membership case is
 `w = 0`, the invariant's root disjunct, discharged immediately. -/
@@ -1411,6 +1417,7 @@ lemma keysOriginS4_entry (φ : Proposition Atom) :
   simp only [List.mem_singleton, Prod.mk.injEq] at hmem
   exact Or.inl hmem.1
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Survives branch growth**: `keysOriginS4` transports across `b ⊆ b'` at fixed `acc`/`keys`.
 Every disjunct in the invariant is either branch-independent (the edge conjunct, the root case)
 or an `∈ b` membership fact, which persists under `hsub`. -/
@@ -1432,6 +1439,7 @@ lemma keysOriginS4_mono_branch
       · exact Or.inl heq
       · exact Or.inr (hsub _ hdia)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Survives edge addition**: `keysOriginS4` transports across accessibility growth (every
 edge of `acc` also an edge of `acc'`) at fixed `b`/`keys`. `keysOriginS4` is existential over
 edges, so this is immediate. -/
@@ -1448,7 +1456,7 @@ lemma keysOriginS4_mono_acc
 
 /-! ### Case-(b) Conditional Derivation
 
-The load-bearing half of the redirect-inertness argument (Phase 12), proved standalone here so
+The load-bearing half of the redirect-inertness argument, proved standalone here so
 it lands regardless of how the witness gate below resolves: given an ALREADY-EXISTING edge
 `u → wBlock` and `T(□ψ)@u ∈ b`, mint-readiness forces `T(□ψ)@wBlock ∈ b` -- otherwise
 `modalFourBoxProp` at `(u, wBlock)` would still be an unsettled non-mint candidate, contradicting
@@ -1898,6 +1906,7 @@ private lemma mem_boxPositivesOf_S4 {b : List (SignedFormula (Proposition Atom) 
     · simp at hsfeq
   · simp at hsfeq
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the `boxProps` group propagated by both fresh-world rules. S4-local
 restatement of `FmpMeasure.lean`'s file-private `boxProps_outputs_subset`. -/
 private lemma boxProps_outputs_subset_S4 (φ₀ : Proposition Atom)
@@ -1927,6 +1936,7 @@ private lemma boxProps_outputs_subset_S4 (φ₀ : Proposition Atom)
       exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans_S4 hψmem hψsub)
   · simp at heq
 
+omit [Hashable Atom] in
 /-- Shared closure fact for the `diaNegProps` group propagated by both fresh-world rules.
 S4-local restatement of `FmpMeasure.lean`'s file-private `diaNegProps_outputs_subset`. -/
 private lemma diaNegProps_outputs_subset_S4 (φ₀ : Proposition Atom)
@@ -1961,6 +1971,7 @@ private lemma diaNegProps_outputs_subset_S4 (φ₀ : Proposition Atom)
     · simp at heq
   · simp at heq
 
+omit [Hashable Atom] in
 /-- `diamondPos`: `T(◇φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
 groups at `w'`: the witness, propagated box-positives, and propagated diamond-negatives. All
 three groups stay inside `U_{S4}(φ₀)` given the branch invariant `hb`, the source membership
@@ -2003,6 +2014,7 @@ lemma modalApplyOne_diamondPos_outputs_subset_S4
   · exact boxProps_outputs_subset_S4 φ₀ b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset_S4 φ₀ b w hb hwbound x hdia
 
+omit [Hashable Atom] in
 /-- `boxNeg`: `F(□φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three groups at
 `w'`: the witness, propagated box-positives, and propagated diamond-negatives. Identical
 structure to `modalApplyOne_diamondPos_outputs_subset_S4` except the witness is directly `φ`
@@ -2121,7 +2133,8 @@ stated -- see the "Redirect-Inertness Assembly" section below).
 
 ```
 grep -rn 'keysOriginS4' --include='*.lean' Cslib/ | wc -l
-grep -rn 'keysOriginS4' --include='*.lean' Cslib/ | grep -vE ':[[:space:]]*(--|[/][-]|[-][|]|[*])' | wc -l
+grep -rn 'keysOriginS4' --include='*.lean' Cslib/ \
+  | grep -vE ':[[:space:]]*(--|[/][-]|[-][|]|[*])' | wc -l
 ```
 
 61 textual references, 55 of them on lines that do not begin with a comment marker, all inside
@@ -2153,7 +2166,7 @@ lemma keysRootEmpty_entry :
   simp only [List.mem_singleton, Prod.mk.injEq] at hk
   exact hk.2
 
-/-! ### Redirect-Inertness Assembly (Phase 12) -- REMOVED
+/-! ### Redirect-Inertness Assembly -- REMOVED
 
 `blockedRedirect_boxctx_mem` and `blockedRedirect_diaNeg_mem` were removed here: both were
 **FALSE as stated**, not merely unproven, so their `sorry`s were an unsound foundation rather
@@ -2172,6 +2185,7 @@ bound). The report's recommended repair (recording box-context keys in *boxed* f
 this argument outright with a three-line consequence of the already-landed
 `S4LoopInv.keyLowerBd`. -/
 
+omit [Hashable Atom] in
 /-- **`keyLowerBd`'s minting case, box-negative shape**: the prospective birth content computed
 PRE-step (`successorBirthContent`) is a subset of the freshly-minted world's relevant set
 computed POST-step (`relevantSetFinset` over `newForms ++ b`). Consumes `modalApplyOne`'s
@@ -2247,6 +2261,7 @@ private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
         exact ⟨⟨.neg, .diamond p.2, w⟩, hbmem, by simp [hdedup]⟩
       exact List.mem_append_left _ (List.mem_append_right _ htarget)
 
+omit [Hashable Atom] in
 /-- **`keyLowerBd`'s minting case, diamond-positive shape** (dual of the box-negative case):
 the prospective birth content computed PRE-step is a subset of the freshly-minted world's
 relevant set computed POST-step. -/
@@ -2446,7 +2461,7 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Reusable result-shape-agnostic accessibility extraction**, dual of
 `modalStepBranchS4Keyed_result_keys_eq`: whatever `result` turns out to be, the 3rd tuple
 component of the inner `match result with ...` is always the same `newAcc0`. Needed by
-`keysOriginS4`'s preservation (Phase 11) at the 12 non-minting shapes, where `result` may be any
+`keysOriginS4`'s preservation at the 12 non-minting shapes, where `result` may be any
 of `.linear`/`.branching`/`.persistent` but the accessibility component is uniformly `newAcc0`
 regardless. -/
 private lemma modalStepBranchS4Keyed_result_acc_eq
@@ -2996,6 +3011,7 @@ private lemma mintGroup_label_eq_freshWorld_S4
       · simp at heq
     · simp at heq
 
+omit [Hashable Atom] in
 /-- The T-augmented rule `modalApplyOneT` never mints at its own two relevant shapes
 (`T(□φ)@w`, `F(◇φ)@w`): `acc` is unchanged and every emitted formula's label is a known world
 of `b` -- either the source's own world `w` (self-propagation, known since `sf ∈ b`) or one of
@@ -3100,6 +3116,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_known_S4
         · exact hself x hx
       · simp at hfalse
 
+omit [Hashable Atom] in
 /-- The S4-augmented rule `modalApplyOneS4Rules` never mints at its two T/4-relevant shapes
 (`T(□φ)@w`, `F(◇φ)@w`): composes `modalApplyOneT_boxPos_diaNeg_known_S4` (K+T layer) with the
 4-rule propagation (`modalFourBoxProp`/`modalFourDiaNegProp`), whose targets are recorded
@@ -3192,6 +3209,7 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_known_S4
       · trivial
       · exact hfour
 
+omit [Hashable Atom] in
 /-- Outside the two K-minting shapes, and with `sf.formula` non-modal (neither `box` nor
 `diamond`), `modalApplyOne` never touches `acc` and every emitted formula's label is `sf.label`
 (the propositional decomposition rules never leave the source world): the goal reduces to K's
@@ -3374,6 +3392,7 @@ private lemma modalApplyOne_diamondNeg_snd_S4
   rw [if_neg (by simp [htry])]
   split_ifs <;> rfl
 
+omit [Hashable Atom] in
 /-- **T-augmented universe-membership composite**: at the two T-relevant shapes (`T(□φ)@w`,
 `F(◇φ)@w`), `modalApplyOneT` never touches `acc`, and every emitted formula lands in
 `modalUniverseS4 φ₀` given the branch invariant `hb` -- combining K's own output-subset facts
@@ -3510,6 +3529,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
       · exact hKmem x hx
       · exact hself x hx
 
+omit [Hashable Atom] in
 /-- **S4-augmented universe-membership composite**: composes
 `modalApplyOneT_boxPos_diaNeg_universe_S4` (K+T layer) with the 4-rule propagation
 (`modalFourBoxProp`/`modalFourDiaNegProp`), whose targets are recorded successors of `w` (known
@@ -3619,10 +3639,12 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_universe_S4
       · trivial
       · exact hfour
 
+omit [Hashable Atom] in
 /-- Outside the two K-minting shapes, and with `sf.formula` non-modal, every emitted formula
 lands in `modalUniverseS4 φ₀`: `modalApplyOne_prop_outputs_subset` gives formula ∈
 `modalSubfmls sf.formula` at the unchanged label `sf.label`, composed with `hb`'s own bound on
-`sf` via `modalSubfmls_trans_S4`. Universe-membership analog of `modalApplyOne_nonModal_known_S4`. -/
+`sf` via `modalSubfmls_trans_S4`. Universe-membership analog of
+`modalApplyOne_nonModal_known_S4`. -/
 private lemma modalApplyOne_nonModal_universe_S4
     (φ₀ : Proposition Atom)
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -3736,7 +3758,7 @@ private lemma modalStepBranchS4Keyed_keys_subset
   rw [hkeq]
   intro p hp
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
-    simp only [hs, hf]
+    simp only []
   all_goals first
     | exact hp
     | skip
@@ -3779,7 +3801,7 @@ private lemma modalStepBranchS4KeyedOrdered_keys_subset
   rw [hkeq]
   intro p hp
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
-    simp only [hs, hf]
+    simp only []
   all_goals first
     | exact hp
     | skip
@@ -4176,7 +4198,7 @@ lemma modalStepBranchS4_preserves_keysDistinct (φ₀ : Proposition Atom)
   case neg.pos.diamond =>
     exact keysUpdate_preserves_keysDistinct φ₀ b keys .pos ψ sf.label hKD w1 w2 k1 k2 h1 h2 hne
 
-/-- **`keysDistinct`'s ordered-driver preservation (Phase 6, escalation-trigger sub-lemma).**
+/-- **`keysDistinct`'s ordered-driver preservation (escalation-trigger sub-lemma).**
 Identical statement and proof shape to `modalStepBranchS4_preserves_keysDistinct`, transcribed
 against the ordered stepper via `modalStepBranchS4KeyedOrdered_selected_mem` in place of the
 direct `findSome?` extraction from `modalStepBranchS4Keyed`. The plan flags this sub-lemma as the
@@ -4585,7 +4607,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysWorldsKnown (φ₀ : Propositi
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
 
-/-! ### Origin-Edge Invariant — Step Preservation (Phase 11)
+/-! ### Origin-Edge Invariant — Step Preservation
 
 `keysOriginS4` (defined above, alongside its entry and monotonicity lemmas) survives a single
 `modalStepBranchS4Keyed`/`modalStepBranchS4KeyedOrdered` step, over every branch produced.
@@ -5132,11 +5154,11 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
     · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
           SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
       have hmshape : isMintingShaped sf = true := by rw [hsfeq]; rfl
@@ -5198,11 +5220,11 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
   · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
       ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
@@ -5223,14 +5245,14 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
       simp only [List.mem_singleton] at he'
       subst he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
       intro e' he' w
       obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
@@ -5333,11 +5355,11 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
     · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
           SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
       have hmshape : isMintingShaped sf = true := by rw [hsfeq]; rfl
@@ -5399,11 +5421,11 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
         rcases eq_or_ne w sf.label with hw | hw
         · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
             List.length_append]
-          simp [List.filter_cons, hmshape]
+          simp [hmshape]
         · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
-          simp [List.filter_cons, hne]
+          simp [hne]
   · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
       ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
@@ -5424,14 +5446,14 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
       simp only [List.mem_singleton] at he'
       subst he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
       intro e' he' w
       obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
       rw [houtdeg w, List.filter_append, List.length_append]
-      simp [List.filter_cons, hnm]
+      simp [hnm]
     · rw [hres] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨-, rfl, rfl, -⟩ := hsf
@@ -6710,7 +6732,7 @@ theorem modalHintikkaSetS4_eq (φ₀ : Proposition Atom)
 /-- **The bare saturation conjunct** (conjunct 2 of `modalHintikkaSetS4`): every non-minting-
 shaped formula's `modalApplyOneS4 φ₀` output is already present on `b`. Named so the six S4
 Hintikka bridges below (`hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen}`) can be stated
-against this alone rather than the full four-conjunct predicate -- report 04's plan-time
+against this alone rather than the full four-conjunct predicate -- the plan-time
 verification (`plans/04_subtractive-blocking-red-channel.md`, "Design Decision Derived at Plan
 Time") reads each bridge's proof as consuming only this conjunct (`obtain ⟨_, hrule, _⟩ := hH`).
 This is a strictly weaker hypothesis than `modalHintikkaSetS4`, so it is derivable from it:
@@ -7714,8 +7736,9 @@ theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
       keysInUniverse := modalStepBranchS4_preserves_keysInUniverse φ₀ b e acc keys newBs newExps
         newAcc keys' hbC hkI hstep }
 
-/-- **`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`** (Phase 6's deliverable, extended in
-Phase 11 with the origin-edge invariant's fourth conjunct): every `modalStepBranchS4KeyedOrdered`
+/-- **`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`** (originally established for the
+ordered driver, later extended with the origin-edge invariant's fourth conjunct): every
+`modalStepBranchS4KeyedOrdered`
 step preserves `S4LoopInv`, mirroring `modalStepBranchS4_preserves_S4LoopInv` exactly -- a
 `refine`+`exact` assembly with no independent proof content of its own, just twelve calls to this
 section's ordered per-field sub-lemmas (`modalStepBranchS4KeyedOrdered_preserves_{bClosure,
@@ -7729,7 +7752,7 @@ reach this point -- the plan's escalation trigger (`keysDistinct`, attempted fir
 confirming settled-context scheduling changes only *timing*, never producing a duplicate key or
 otherwise degrading any invariant.
 
-**Phase 11 note**: `keysOriginS4` (like `keysWorldsKnown`/`worldsContiguousS4` before it) is
+**Note**: `keysOriginS4` (like `keysWorldsKnown`/`worldsContiguousS4` before it) is
 threaded as an extra hypothesis/conclusion, NOT an `S4LoopInv` field -- the struct itself is
 untouched, and the unordered wrapper `modalStepBranchS4_preserves_S4LoopInv` is byte-for-byte
 unchanged (this extension applies to the ordered driver only). -/
@@ -7789,7 +7812,7 @@ proofs. `modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` below mirror
 `keys` (the stable per-world birth-key list `modalStepBranchS4Keyed` already threads) carried as
 a fourth parallel worklist column alongside `(branch, expanded, acc)`. The live `modalTableauS4`
 is left untouched as the reference artifact the `heq1`-style bridges and `modalHintikkaSetS4_eq`
-consume; `instDecidableS4Valid` (Phase 5) points at `modalTableauS4Keyed` instead. -/
+consume; `instDecidableS4Valid` points at `modalTableauS4Keyed` instead. -/
 
 /-- The keyed S4 fuel-based expansion of a list of branches: `modalExpandBranchesGen`
 (`Saturation.lean:201-243`), copy-and-threaded with a fourth `keyss` worklist column carrying
@@ -7858,14 +7881,15 @@ def modalExpandBranchesS4Keyed
 /-- The keyed S4 modal tableau decision procedure: the entry point for the bespoke keyed driver,
 mirroring `modalTableauGen`/`modalTableauS4`'s entry-branch shape (`F(φ)@0`), with
 `keys := [(0, ∅)]` at the start: the root world `0` is pre-existing (not minted), so it is seeded
-with the trivial (empty) birth key rather than left absent from `keys`. **Correction (Phase 11):**
+with the trivial (empty) birth key rather than left absent from `keys`. **Correction:**
 an earlier version of this entry used `keys := []`; that violates `S4LoopInv.keysTotal` (every
 known world has a recorded key) since `0 ∈ modalKnownWorlds [F(φ)@0]` from the very first
 formula's label, and no step ever mints world `0` again to backfill a key for it. Seeding `(0, ∅)`
 satisfies `keysTotal` trivially (`∅ ⊆ relevantSetFinset φ₀ b 0` and `∅ ⊆ signedSubfmls φ₀` both
-hold unconditionally) and is invisible to every Phase 1-10 lemma, all of which are stated for an
-arbitrary `keys` list. Fuel is `modalFuelS4 φ`, the S4-specific fuel bound (sufficiency:
-`modalExpMeasure_entry_le_fuelS4`) -- K's `modalFuel φ` is confirmed NOT provably sufficient for
+hold unconditionally) and is invisible to every lemma established earlier in this file, all of
+which are stated for an arbitrary `keys` list. Fuel is `modalFuelS4 φ`, the S4-specific fuel
+bound (sufficiency: `modalExpMeasure_entry_le_fuelS4`) -- K's `modalFuel φ` is confirmed NOT
+provably sufficient for
 the S4 keyed loop's pigeonhole world bound `modalWorldBoundS4`. The live `modalTableauS4` is NOT
 redefined; `instDecidableS4Valid` (deferred) would point at this declaration instead. -/
 def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
@@ -7880,7 +7904,7 @@ Structural copies of `modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` above, w
 stepper `modalStepBranchS4KeyedOrdered` (settled-context scheduling: non-minting candidates
 first, minting fallback only once the branch has settled) substituted for
 `modalStepBranchS4Keyed` at the single per-branch step call. Termination of the copied `fuel'`
-recursion is not a new obligation here: Phase 5's own measure lemma
+recursion is not a new obligation here: the existing measure lemma
 (`modalExpMeasure_step_lt_S4KeyedOrdered`) already establishes strict decrease for the ordered
 stepper's `some` case, and the `processNext` recursion shape (structural recursion on the outer
 `fuel`, exactly as in `modalExpandBranchesS4Keyed`) is unchanged from the original, so Lean's
@@ -7950,11 +7974,11 @@ def modalExpandBranchesS4KeyedOrdered
 
 /-- The ordered-stepper analogue of `modalTableauS4Keyed`: the entry point for the settled-context
 scheduling driver, mirroring its predecessor's entry-branch shape (`F(φ)@0`) and seeding exactly
-`keys := [(0, ∅)]` -- **not** `keys := []`, per the Phase 11 correction at `modalTableauS4Keyed`
+`keys := [(0, ∅)]` -- **not** `keys := []`, per the correction at `modalTableauS4Keyed`
 above (an empty `keys` list violates `S4LoopInv.keysTotal`, since `0 ∈ modalKnownWorlds [F(φ)@0]`
 from the first formula's label and no step re-mints world `0` to backfill a key for it). Fuel is
 the same S4-specific bound `modalFuelS4 φ` used by `modalTableauS4Keyed`
-(`modalExpMeasure_entry_le_fuelS4` was confirmed in Phase 6 to apply verbatim to the ordered
+(`modalExpMeasure_entry_le_fuelS4` was confirmed to apply verbatim to the ordered
 driver, independent of traversal order). Successor to `modalTableauS4Keyed`, which Phase 15
 retires once this entry point has a proved soundness/completeness pair of its own. -/
 def modalTableauS4KeyedOrdered (φ : Proposition Atom) : ModalTableauResult Atom :=
@@ -8637,6 +8661,7 @@ private lemma modalApplyOneS4Keyed_outputsSubsetUniverse_S4
 argument) is shown sufficient here, mirroring `modalExpMeasure_entry_le_fuel`
 (`FmpMeasure.lean:208-251`). -/
 
+omit [Hashable Atom] in
 /-- **Entry-measure sufficiency for `modalFuelS4`**: at the S4 keyed tableau's entry point, the
 worklist measure over `modalUniverseS4 φ₀` is bounded by `modalFuelS4 φ₀`. Direct transcription
 of `modalExpMeasure_entry_le_fuel` (`FmpMeasure.lean:208-251`), substituting `modalUniverseS4`/
@@ -8682,7 +8707,7 @@ lemma modalExpMeasure_entry_le_fuelS4 (φ₀ : Proposition Atom) :
         Nat.pow_le_pow_right (by norm_num) hfinal
     _ = modalFuelS4 φ₀ := rfl
 
-/-! ## Phase 6 (handoff 3d-i): Keys-Threaded Hintikka-Tracking Invariant Bundle
+/-! ## Keys-Threaded Hintikka-Tracking Invariant Bundle
 
 The bespoke keys-threaded analogue of the `ModalLoopInvHintikka` bundle
 (`CompletenessLoop.lean:293-325`), for `modalApplyOneS4Keyed φ₀ keys`. The frozen `S4LoopInv`
@@ -8735,7 +8760,8 @@ lemma modalApplyOneS4Keyed_fst_eq_of_not_box (φ₀ : Proposition Atom)
   exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
 
 /-- **Territory-local re-derivation of `modalHintikkaClauseGen_lift`** (`private` to
-`Completeness.lean`, hence unavailable here, per Phase 3's re-derivation precedent): if
+`Completeness.lean`, hence unavailable here, following the same re-derivation approach used
+elsewhere in this file): if
 `modalHintikkaClauseGen apply s φ w b acc` holds and `b ⊆ b'`, it holds at `(b', acc')` too,
 given `apply`'s F8 local-shape-invariance. Verbatim transcription of the generic proof, kept
 generic in `apply` (rather than specialized to `modalApplyOneS4Keyed`) for direct auditability
@@ -8926,13 +8952,13 @@ structure S4KeyedHintikkaInv (φ₀ : Proposition Atom)
       (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
 
 /-- **`S4KeyedHintikkaInv` weakens across branch/accessibility growth** at a FIXED expanded set
-`e`: this discharges Phase 6's monotonicity obligations directly --
+`e`: this discharges the Hintikka-tracking invariant's monotonicity obligations directly --
 `hintikkaInv` transports via the branch/`acc`-independence of non-box/diamond shapes
 (`modalHintikkaClauseGen_lift_S4` fed `modalApplyOneS4Keyed_fst_eq_of_not_box`; box/diamond
 shapes are vacuously `True` on both sides), and the two witness-existence fields are permanent
 once recorded since `acc`/`b` only grow (`hbsub`/`haccsub`). `eBoxOnlyNeg`/`eDiamondOnlyPos`
-mention no `b`/`acc` at all and transport unchanged. This is the building block Phase 7's
-single-step preservation composes against the OLD `e`'s facts lifted to the post-step
+mention no `b`/`acc` at all and transport unchanged. This is the building block the
+single-step-preservation lemma below composes against the OLD `e`'s facts lifted to the post-step
 `(b', acc')`. -/
 lemma S4KeyedHintikkaInv_weaken (φ₀ : Proposition Atom)
     (b b' e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc acc' : Accessibility)
@@ -8962,7 +8988,7 @@ would otherwise justify OUT of `acc` (the soundness-tracked structure) and into 
 completeness-only channel `red`, with a bifurcated Hintikka predicate (`modalHintikkaSetS4Sub`)
 substituting `accWithReds acc red` for `acc` in the witness/forward-cone conjuncts only.
 
-**Route (3) is dead** (`#### Phase 3 Verdict`, `plans/04_subtractive-blocking-red-channel.md`):
+**Route (3) is dead** (see `plans/04_subtractive-blocking-red-channel.md`):
 Decision Gate B refuted the cone-extension lemma the bifurcated predicate's forward-cone
 conjuncts require, because the free transfer below (`blockedRedirect_unwrapped_boxPos_mem`/
 `blockedRedirect_unwrapped_diaNeg_mem`) yields only an *unwrapped* branch fact at the redirect
@@ -9007,7 +9033,7 @@ theorem hasEdge_accWithReds_iff (acc : Accessibility) (red : Reds Atom) (x y : W
 
 Retained per the post-Gate-B triage as a general fact about the `Reds`/`accWithReds` packaging
 above; independent of the now-dead bifurcated Hintikka predicate that originally motivated it
-(`plans/04_subtractive-blocking-red-channel.md`, former Phase 2 task (b)). -/
+(`plans/04_subtractive-blocking-red-channel.md`). -/
 
 /-- **Path decomposition** for `ReflTransGen (accWithReds acc red)`: a path `w ⤳ u` either stays
 entirely inside `acc.hasEdge`, or its first `red`-hop can be isolated -- it decomposes as an
@@ -9044,8 +9070,8 @@ lemma reflTransGen_accWithReds_first_red (acc : Accessibility) (red : Reds Atom)
 
 /-! ## Redirect Forward-Cone Free Transfer (Route-Independent Remnant)
 
-Route (3)'s Decision Gate B (`plans/04_subtractive-blocking-red-channel.md`, `#### Phase 3
-Verdict`) refuted the cone-extension lemma that would have let the two free transfers below
+Route (3)'s Decision Gate B (`plans/04_subtractive-blocking-red-channel.md`)
+refuted the cone-extension lemma that would have let the two free transfers below
 propagate beyond the redirect target `wBlock` itself. The two boxed bridge variants
 `hintikkaS4_box_pos_reflTransGen_boxed`/`hintikkaS4_dia_neg_reflTransGen_boxed`, and the
 forward-cone conjuncts they fed (`S4KeyedSubHintikkaInv.redBoxForwardCone`/`redDiaForwardCone`),
@@ -9059,7 +9085,8 @@ declarations, not the ten that existed when this paragraph was first written (th
 was correct then; `c4b33f63` removed two of them).
 
 ```
-grep -nE '^(private )?(theorem|lemma) hintikkaS4_' Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l
+grep -nE '^(private )?(theorem|lemma) hintikkaS4_' \
+  Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l
 ```
 
 Beware a near-miss measurement: counting *distinct identifiers* over the same file returns 11,
@@ -9136,7 +9163,7 @@ lemma blockedRedirect_unwrapped_diaNeg_mem (φ₀ : Proposition Atom)
   rw [heq] at hsf'mem
   exact hsf'mem
 
-/-! ## Phase 7: Single-Step Invariant Preservation -/
+/-! ## Single-Step Invariant Preservation -/
 
 omit [Hashable Atom] in
 /-- **Blocked-redirect witness membership**: when the keys-aware minting guard blocks
@@ -9254,7 +9281,7 @@ private lemma modalApplyOneS4Keyed_keys_indep_of_not_box (φ₀ : Proposition At
 /-- `modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys)` does not depend on `keys` at all:
 vacuously `True` on both sides for box/diamond-shaped `φ` (by `modalHintikkaClauseGen`'s own
 carve-out), and reduces to the SAME `keys`-independent `modalApplyOne` call for every other
-shape (`modalApplyOneS4Keyed_keys_indep_of_not_box`). This is exactly what lets Phase 7's single-
+shape (`modalApplyOneS4Keyed_keys_indep_of_not_box`). This is exactly what lets the single-
 step preservation lift the OLD `e`'s `hintikkaInv` facts (stated over `keys`) to the post-step
 `keys'` without re-deriving anything about the individual formulas of `e`. -/
 private lemma modalHintikkaClauseGen_S4Keyed_keys_indep (φ₀ : Proposition Atom)
@@ -9336,16 +9363,16 @@ private lemma S4KeyedHintikkaInv_append (φ₀ : Proposition Atom)
       subst hnewmem
       exact hnew_diaPosWitness ψ w hsfeq
 
-/-- **Phase 7 — single-step preservation of `S4KeyedHintikkaInv`**: every
+/-- **Single-step preservation of `S4KeyedHintikkaInv`**: every
 `modalStepBranchS4Keyed` step preserves the keys-threaded Hintikka-tracking invariant bundle,
 given the ambient frozen `S4LoopInv` structure (defined above in this file, consumed for
 `keyLowerBd`'s blocked-witness argument).
 Mirrors `modalStepBranchS4_preserves_bClosure`'s case-split shape (mint-unblocked / mint-blocked
-/ non-mint), composing `S4KeyedHintikkaInv_weaken` (Phase 6, old `e`'s facts lifted across
+/ non-mint), composing `S4KeyedHintikkaInv_weaken` (old `e`'s facts lifted across
 branch/`acc` growth) with `S4KeyedHintikkaInv_append`'s per-field assembly for the just-selected
 formula: an unblocked mint discharges its witness via K's own `modalApplyOne_boxNeg_witness`/
 `_diamondPos_witness`; a blocked redirect discharges it via
-`modalStepBranchS4Keyed_blocked_witness_mem` (this file, Phase 7). -/
+`modalStepBranchS4Keyed_blocked_witness_mem` (this file, above). -/
 theorem modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
@@ -9682,7 +9709,7 @@ theorem modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv (φ₀ : Proposition
       · -- notApplicable: impossible, `findSome?` only returns `some` when applicable.
         rw [hres] at hsf; simp at hsf
 
-/-! ## Phase 8: 4-Tuple Stepper Projection Bridge + Local Measure-Split Helpers
+/-! ## 4-Tuple Stepper Projection Bridge + Local Measure-Split Helpers
 
 The measure-decrease engine (`modalExpMeasure_step_lt_gen`, `FmpMeasure.lean:3227`) is phrased
 against the generic 3-tuple driver `modalStepBranchGen` (`Saturation.lean:122`), whereas the
@@ -9725,7 +9752,7 @@ private lemma stepBranch_findSome?_proj4to3
       have hg1' : g1 x = some (a, bb, c, k) := by rw [hg1, h]
       rw [hpt x a bb c k hg1']
 
-/-- **The projection lemma (Phase 8)**: a keyed step at `modalStepBranchS4Keyed φ₀ b e acc keys`
+/-- **The projection lemma**: a keyed step at `modalStepBranchS4Keyed φ₀ b e acc keys`
 implies the corresponding step of the generic driver at `apply := modalApplyOneS4Keyed φ₀ keys`,
 dropping the `keys'` component. Both sides select the SAME formula `sf` from `b` (same
 "already expanded" guard `e.any (· == sf)`) and dispatch on the SAME `RuleResult` value
@@ -9775,7 +9802,7 @@ lemma modalStepBranchS4Keyed_proj_stepBranchGen (φ₀ : Proposition Atom)
 
 omit [Hashable Atom] in
 /-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_split`
-(`:3174`), territory-local per Phase 3's own convention (`_S4` suffix) since the upstream
+(`:3174`), territory-local per this file's own convention (`_S4` suffix) since the upstream
 lemma is `private` and out of territory. Identical proof, universe-generic in `U`. -/
 private lemma modalExpMeasure_split_S4
     (U : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -9794,7 +9821,7 @@ private lemma modalExpMeasure_split_S4
 
 omit [Hashable Atom] in
 /-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_append`
-(`:3191`), territory-local per Phase 3's own convention. Identical proof, universe-generic
+(`:3191`), territory-local per this file's own convention. Identical proof, universe-generic
 in `U`. -/
 private lemma modalExpMeasure_append_S4
     (U : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -9807,14 +9834,14 @@ private lemma modalExpMeasure_append_S4
 
 omit [Hashable Atom] in
 /-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_const_exp`
-(`:3204`), territory-local per Phase 3/8's own convention (`_S4` suffix) since the upstream
+(`:3204`), territory-local per this file's own convention (`_S4` suffix) since the upstream
 lemma is `private` and out of territory. Identical proof, universe-generic in `U`.
 
-**Plan deviation note**: the v3 plan's Phase 8 task list named only `modalExpMeasure_split`/
+**Plan deviation note**: the original task list for this section named only `modalExpMeasure_split`/
 `modalExpMeasure_append` as the private helpers needing re-derivation; `modalExpMeasure_const_exp`
 is a third private helper the generic engine (`modalExpMeasure_step_lt_gen`) also relies on
 (`FmpMeasure.lean:3276`), overlooked in that enumeration. Re-derived here, by the same mechanical
-pattern, since Phase 9 (below) needs it. -/
+pattern, since the section below needs it. -/
 private lemma modalExpMeasure_const_exp_S4
     (U : List (SignedFormula (Proposition Atom) WorldIndex))
     (newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -9823,21 +9850,22 @@ private lemma modalExpMeasure_const_exp_S4
       = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
   simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
 
-/-! ## Phase 9: Keyed Per-Step Measure Decrease over `modalUniverseS4`
+/-! ## Keyed Per-Step Measure Decrease over `modalUniverseS4`
 
 Transcription of `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean:3227`, public but hardwired to
 K's `modalUniverse φ0`/`modalWorldBound φ0`) over `modalUniverseS4 φ₀`/`modalWorldBoundS4 φ₀`.
 Direct instantiation does not typecheck (see the plan's "Measure-Decrease Lead"), so the proof
-below is a line-by-line transcription consuming: Phase 3's four universe-generic combinatorial
-primitives (`_S4`-suffixed above), Phase 4's three landed per-call obligations
+below is a line-by-line transcription consuming: four universe-generic combinatorial
+primitives (`_S4`-suffixed above), three landed per-call obligations
 (`modalApplyOneS4Keyed_branchingLength_S4`/`_persistentFresh_S4`/`_outputsSubsetUniverse_S4`),
-and Phase 8's projection bridge (`modalStepBranchS4Keyed_proj_stepBranchGen`) plus its local
+and the projection bridge (`modalStepBranchS4Keyed_proj_stepBranchGen`) plus its local
 `modalExpMeasure_split_S4`/`_append_S4` helpers (and the `_const_exp_S4` helper just above).
 `hstep` is phrased directly against the keyed 4-tuple stepper `modalStepBranchS4Keyed` (dropping
-`keys'` via the Phase 8 bridge inside the proof), matching what Phase 10's top-loop induction
+`keys'` via the projection bridge inside the proof), matching what the top-loop induction below
 will have in hand at each call site. The `hOutputsSubsetUniverse` obligation's extra hypotheses
 (`hknown`/`hWC`/`hKT`/`hKD`/`hKI`, in place of the generic template's `accFreshInv`/strict-world-
-bound pair) are threaded as raw hypotheses here rather than derived; Phase 10 supplies them from
+bound pair) are threaded as raw hypotheses here rather than derived; the top-loop induction
+below supplies them from
 the ambient `S4LoopInv`. -/
 
 /-- **The keyed engine**: one `modalStepBranchS4Keyed` step strictly decreases the base-3 damped
@@ -10087,13 +10115,13 @@ lemma modalExpMeasure_step_lt_S4KeyedOrdered
     exact pow3_add_one_le hC h0
   · rw [hres] at hfound; simp at hfound
 
-/-! ## Phase 10: Top-Loop Induction — `modalExpandBranchesS4Keyed_hintikka`
+/-! ## Top-Loop Induction — `modalExpandBranchesS4Keyed_hintikka`
 
 Assembles the termination top-loop: an open branch produced by the keyed driver is a Hintikka
 set for the live S4 rule. Structural port of `modalExpandBranchesHintikka`
 (`CompletenessLoop.lean:1430-1740`) with the per-index invariant taken as the CONJUNCTION
 `S4LoopInv ∧ S4KeyedHintikkaInv ∧ keysWorldsKnown ∧ worldsContiguousS4` (there is no single
-bundled structure playing `ModalLoopInvHintikka`'s role for the keyed driver, per Phase 6's
+bundled structure playing `ModalLoopInvHintikka`'s role for the keyed driver, per this file's
 deliberate non-bundling), and threading the extra `keys` worklist column throughout. -/
 
 /-- **Local re-derivation** of `CompletenessLoop.lean`'s `private modalStepBranchGen_newExps_const`
@@ -10129,7 +10157,7 @@ private lemma modalStepBranchS4Keyed_newExps_const (φ₀ : Proposition Atom)
 /-- **Local re-derivation** of the saturated-leaf characterisation
 (`modalStepBranchGen_none_saturated`, `Completeness.lean:809`, public but phrased against the
 generic 3-tuple driver, hence not directly applicable to the keyed 4-tuple stepper), mirroring
-Phase 7's own `findSome?_eq_none_iff` + case-split idiom rather than routing through a
+this file's own `findSome?_eq_none_iff` + case-split idiom rather than routing through a
 generic-driver projection for the `none` direction. -/
 private lemma modalStepBranchS4Keyed_none_saturated (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -10196,7 +10224,7 @@ private lemma modalApplyOneS4Keyed_diaPos_ne_notApplicable (φ₀ : Proposition 
 (bridged from the keyed rule via `hintikka_congr_S4`/`modalHintikkaSetS4_eq` at the very end).
 Per-index hypothesis is the conjunction `S4LoopInv ∧ S4KeyedHintikkaInv ∧ keysWorldsKnown ∧
 worldsContiguousS4` (no single bundled structure plays `ModalLoopInvHintikka`'s role here, per
-Phase 6's deliberate non-bundling); an extra `keyss` worklist column is threaded alongside
+the same deliberate non-bundling); an extra `keyss` worklist column is threaded alongside
 `branches`/`expandedSets`/`accs` throughout, mirroring `modalExpandBranchesS4Keyed`'s own
 `keyss`/`pendingKeys`/`doneKeys` bookkeeping. Structural port of `modalExpandBranchesHintikka`
 (`CompletenessLoop.lean:1430-1740`). -/
@@ -10551,7 +10579,7 @@ theorem modalExpandBranchesS4Keyed_hintikka (φ₀ : Proposition Atom) (fuel : N
                         rw [List.getElem?_cons_succ]; exact hki_restKs
                 · exact hinner
 
-/-! ## Phase 11 Groundwork: Keyed-Driver Initial-Branch Membership Persistence -/
+/-! ## Groundwork: Keyed-Driver Initial-Branch Membership Persistence -/
 
 /-- **Keyed-driver initial-branch membership persistence**: mirrors
 `modalExpandBranchesGen_openBranch_initial_mem` (`CompletenessLoop.lean`) for the bespoke

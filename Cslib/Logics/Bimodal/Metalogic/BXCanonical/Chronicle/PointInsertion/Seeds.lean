@@ -29,12 +29,6 @@ These form the foundational building blocks for the Burgess chronicle point-inse
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -348,11 +342,13 @@ theorem G_implies_F_mcs (fc : FrameClass) {A : Set (Formula Atom)}
   have h_G_top_α : Formula.allFuture (Formula.imp top α) ∈ A := by
     have h1 := theoremInMcsFc h_mcs (DerivationTree.temporal_necessitation _ h_weak)
     have h2 := theoremInMcsFc h_mcs
-      (liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived α (Formula.imp top α)))
+      (liftBase fc
+        (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived α (Formula.imp top α)))
     exact SetMaximalConsistent.implication_property h_mcs
       (SetMaximalConsistent.implication_property h_mcs h2 h1) h_G
   have h_top_in : top ∈ A :=
-    theoremInMcsFc h_mcs (Cslib.Logic.Bimodal.Theorems.Combinators.identity (Formula.bot : Formula Atom))
+    theoremInMcsFc h_mcs
+      (Cslib.Logic.Bimodal.Theorems.Combinators.identity (Formula.bot : Formula Atom))
   have h_F_top : Formula.someFuture top ∈ A :=
     SetMaximalConsistent.implication_property h_mcs
       (theoremInMcsFc h_mcs (DerivationTree.axiom [] _ Axiom.serial_future trivial)) h_top_in
@@ -381,7 +377,8 @@ theorem H_implies_P_mcs (fc : FrameClass) {A : Set (Formula Atom)}
     exact SetMaximalConsistent.implication_property h_mcs
       (SetMaximalConsistent.implication_property h_mcs h2 h1) h_H
   have h_top_in : top ∈ A :=
-    theoremInMcsFc h_mcs (Cslib.Logic.Bimodal.Theorems.Combinators.identity (Formula.bot : Formula Atom))
+    theoremInMcsFc h_mcs
+      (Cslib.Logic.Bimodal.Theorems.Combinators.identity (Formula.bot : Formula Atom))
   have h_P_top : Formula.somePast top ∈ A :=
     SetMaximalConsistent.implication_property h_mcs
       (theoremInMcsFc h_mcs (DerivationTree.axiom [] _ Axiom.serial_past trivial)) h_top_in
@@ -416,15 +413,17 @@ lemma gPropagationWitness (fc : FrameClass) {A : Set (Formula Atom)}
 
 /-! ## Seed Consistency for DCS Extension -/
 
+set_option linter.flexible false in
 /-- If S is a DCS and φ ∉ S, then {φ.neg} ∪ S is consistent. -/
-theorem dcs_neg_union_consistent (fc : FrameClass) {Sig : Set (Formula Atom)} (h_dcs : SetDeductivelyClosed fc Sig)
-    {φ : Formula Atom} (h_not : φ ∉ Sig) :
+theorem dcs_neg_union_consistent (fc : FrameClass) {Sig : Set (Formula Atom)}
+    (h_dcs : SetDeductivelyClosed fc Sig) {φ : Formula Atom} (h_not : φ ∉ Sig) :
     SetConsistent fc ({φ.neg} ∪ Sig) := by
   intro L hL ⟨d⟩
   apply h_not
   by_cases h_neg_in_L : φ.neg ∈ L
   · have d_ext : DerivationTree fc (φ.neg :: L) Formula.bot :=
-      DerivationTree.weakening L (φ.neg :: L) Formula.bot d (List.subset_cons_of_subset _ (List.Subset.refl L))
+      DerivationTree.weakening L (φ.neg :: L) Formula.bot d
+        (List.subset_cons_of_subset _ (List.Subset.refl L))
     have d_imp : DerivationTree fc L φ.neg.neg :=
       deductionTheorem L φ.neg Formula.bot d_ext
     have h_dne : DerivationTree fc [] (φ.neg.neg.imp φ) :=

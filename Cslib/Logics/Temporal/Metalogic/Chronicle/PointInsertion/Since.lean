@@ -26,12 +26,6 @@ and the final Lemma 2.4 Since-direction with guard.
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
@@ -69,7 +63,8 @@ shared Foundations interface with Temporal's own apparatus at `FrameClass.Base`.
 delegate to the generic `lemma27SinceSeed`/`l27s*` helpers
 (`Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency`) instead of duplicating
 them locally. -/
-private noncomputable def temporalSinceInterface : Cslib.Logic.Metalogic.Chronicle.SinceSeedInterface (Formula Atom) where
+private noncomputable def temporalSinceInterface :
+    Cslib.Logic.Metalogic.Chronicle.SinceSeedInterface (Formula Atom) where
   bot := Formula.bot
   imp := Formula.imp
   and := Formula.and

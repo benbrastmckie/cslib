@@ -16,12 +16,6 @@ Deferral closure, seriality formulas, temporal blocking set, and structural lemm
 Ported from BimodalLogic/Theories/Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean
 -/
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal
@@ -72,12 +66,14 @@ instance : DecidablePred (IsSinceFormula (Atom := Atom)) :=
   | .atom _ | .bot | .imp _ _ | .box _ | .untl _ _ =>
     isFalse (by simp [IsSinceFormula])
 
-/-- Maps `φ U ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ U ψ))`; returns `⊥` on non-until-formulas. -/
+/-- Maps `φ U ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ U ψ))`; returns `⊥` on
+non-until-formulas. -/
 def toUntilDeferral : Formula Atom → Formula Atom
   | .untl psi phi => Formula.or psi (Formula.and phi (.untl psi phi))
   | _ => Formula.bot
 
-/-- Maps `φ S ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ S ψ))`; returns `⊥` on non-since-formulas. -/
+/-- Maps `φ S ψ` to its deferral expansion `ψ ∨ (φ ∧ (φ S ψ))`; returns `⊥` on
+non-since-formulas. -/
 def toSinceDeferral : Formula Atom → Formula Atom
   | .snce psi phi => Formula.or psi (Formula.and phi (.snce psi phi))
   | _ => Formula.bot
@@ -131,10 +127,12 @@ def temporalBlockingSet (phi : Formula Atom) : Finset (Formula Atom) :=
   ((closureWithNeg phi).filter IsFutureFormula).image toFutureBlocking ∪
   ((closureWithNeg phi).filter IsPastFormula).image toPastBlocking
 
+set_option linter.unusedDecidableInType false in
 theorem toFutureBlocking_someFuture (chi : Formula Atom) :
     toFutureBlocking (Formula.someFuture chi) = Formula.allFuture chi.neg := by
   simp only [toFutureBlocking, extractFutureInner_someFuture]
 
+set_option linter.unusedDecidableInType false in
 theorem toPastBlocking_somePast (chi : Formula Atom) :
     toPastBlocking (Formula.somePast chi) = Formula.allPast chi.neg := by
   simp only [toPastBlocking, extractPastInner_somePast]
@@ -159,7 +157,8 @@ theorem allPast_neg_mem_temporalBlockingSet_of_somePast {phi chi : Formula Atom}
   rw [Finset.mem_filter]
   exact ⟨h, by simp [IsPastFormula, extractPastInner_somePast]⟩
 
-/-- The base deferral closure of `phi`: subformulas, deferrals, blocking formulas, and seriality witnesses. -/
+/-- The base deferral closure of `phi`: subformulas, deferrals, blocking formulas, and
+seriality witnesses. -/
 def baseDeferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
   closureWithNeg phi ∪ deferralDisjunctionSet phi ∪ backwardDeferralSet phi
   ∪ serialityFormulas ∪ temporalBlockingSet phi
@@ -168,7 +167,8 @@ def baseDeferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
 def deferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
   baseDeferralClosure phi
 
-/-- The extended deferral closure of `phi`, additionally including until- and since-deferral expansions. -/
+/-- The extended deferral closure of `phi`, additionally including until- and since-deferral
+expansions. -/
 def extendedDeferralClosure (phi : Formula Atom) : Finset (Formula Atom) :=
   baseDeferralClosure phi ∪ untilDeferralSet phi ∪ sinceDeferralSet phi
 
@@ -189,7 +189,8 @@ theorem closureWithNeg_subset_deferralClosure (phi : Formula Atom) :
     closureWithNeg phi ⊆ deferralClosure phi := by
   intro psi h
   unfold deferralClosure baseDeferralClosure
-  exact Finset.mem_union_left _ (Finset.mem_union_left _ (Finset.mem_union_left _ (Finset.mem_union_left _ h)))
+  exact Finset.mem_union_left _
+    (Finset.mem_union_left _ (Finset.mem_union_left _ (Finset.mem_union_left _ h)))
 
 theorem self_mem_deferralClosure (phi : Formula Atom) : phi ∈ deferralClosure phi :=
   closureWithNeg_subset_deferralClosure phi (self_mem_closureWithNeg phi)
@@ -273,10 +274,12 @@ theorem allPast_neg_mem_deferralClosure_of_somePast {phi chi : Formula Atom}
   temporalBlockingSet_subset_deferralClosure phi
     (allPast_neg_mem_temporalBlockingSet_of_somePast h)
 
+set_option linter.unusedDecidableInType false in
 theorem toFutureDeferral_someFuture (chi : Formula Atom) :
     toFutureDeferral (Formula.someFuture chi) = Formula.or chi (Formula.someFuture chi) := by
   simp only [toFutureDeferral, extractFutureInner_someFuture]
 
+set_option linter.unusedDecidableInType false in
 theorem toPastDeferral_somePast (chi : Formula Atom) :
     toPastDeferral (Formula.somePast chi) = Formula.or chi (Formula.somePast chi) := by
   simp only [toPastDeferral, extractPastInner_somePast]
@@ -310,27 +313,33 @@ theorem deferral_of_P_in_closure (phi chi : Formula Atom)
   · exact h
   · simp only [IsPastFormula, extractPastInner_somePast, Option.isSome_some]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem f_nesting_depth_or (chi psi : Formula Atom) :
     fNestingDepth (Formula.or chi psi) = 0 := by
-  simp only [Formula.or, Formula.neg, fNestingDepth]
+  simp only [fNestingDepth]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem p_nesting_depth_or (chi psi : Formula Atom) :
     pNestingDepth (Formula.or chi psi) = 0 := by
-  simp only [Formula.or, Formula.neg, pNestingDepth]
+  simp only [pNestingDepth]
 
+set_option linter.unusedDecidableInType false in
 theorem f_nesting_depth_F_deferral (chi : Formula Atom) :
     fNestingDepth (Formula.or chi (Formula.someFuture chi)) = 0 :=
   f_nesting_depth_or chi (Formula.someFuture chi)
 
+set_option linter.unusedDecidableInType false in
 theorem p_nesting_depth_P_deferral (chi : Formula Atom) :
     pNestingDepth (Formula.or chi (Formula.somePast chi)) = 0 :=
   p_nesting_depth_or chi (Formula.somePast chi)
 
 -- The remaining structural lemmas (max depth, allFuture/allPast cases, box cases)
 -- are deferred to a follow-up continuation due to volume. The definitions and
--- core membership lemmas above are sufficient for Phase 2+ dependencies.
+-- core membership lemmas above are sufficient for the deferral-closure dependencies below.
 
--- Placeholder for forward references from later phases:
+-- Placeholder for forward references from later development:
 theorem F_top_deferral_mem_deferralClosure (phi : Formula Atom) :
     (fTopDeferral : Formula Atom) ∈ deferralClosure phi := by
   apply serialityFormulas_subset_deferralClosure

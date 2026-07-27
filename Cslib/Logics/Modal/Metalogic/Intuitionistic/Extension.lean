@@ -6,8 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma
 
 /-! # Frame-Condition-Parametrized Extensions of the Birelational Canonical Model
 

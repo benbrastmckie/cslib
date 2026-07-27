@@ -6,11 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
-public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness
 public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompletenessGeneric
 

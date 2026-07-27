@@ -22,13 +22,9 @@ at `S := ClosedHilbert (DerivationTree Axioms)`, for any axiom predicate satisfy
   tag (Foundations) and the generic backward combinators.
 - `derivTreeToList`: `DerivationTree Axioms Γ φ → (modalAlgDS).Deriv Γ φ`
   (forward, structural induction on the tree; 5 arms including `necessitation`).
-- `unfoldListImpInTree`: `Γ ⊢ listImp Ψ φ → Ψ ⊆ Γ → Γ ⊢ φ`
-  (backward helper).
 - `listDerivToTree`: `(modalAlgDS).Deriv Γ φ → DerivationTree Axioms Γ φ`
   (backward direction).
 - `modal_deriv_iff_algebraic`: bidirectional equivalence on derivability.
-- `modal_setConsistent_iff_algebraic`: consistency equivalence.
-- `modal_setMaxConsistent_iff_algebraic`: MCS equivalence.
 
 ## Architecture
 
@@ -45,8 +41,9 @@ at `S := ClosedHilbert (DerivationTree Axioms)`, for any axiom predicate satisfy
 context and constructs `⊢ □ψ` via the `InferenceSystem` instance for
 `ClosedHilbert (DerivationTree Axioms)`.
 
-**Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
-`Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
+**Backward** (algebraic → tree): `listDerivToTree` delegates directly to the generic
+`GenericMCS.listDerivToTree` (Foundations), which extracts `d₀ : [] ⊢ listImp Γ φ`, weakens to
+`Γ ⊢ listImp Γ φ`, then applies the generic `GenericMCS.unfoldListImp` to eliminate each layer.
 
 ## Design Note
 
@@ -148,20 +145,6 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
     simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
-/-! ## Backward Helper: Unfold listImp Using Assumptions -/
-
-/-- Backward helper: given `Γ ⊢ listImp Ψ φ` (tree) and `Ψ ⊆ Γ`,
-produce `Γ ⊢ φ` by iterating modus ponens with assumption trees. Delegates to the
-generic `unfoldListImp` (Foundations), instantiated at `D := DerivationTree Axioms`
-via the `HilbertTree` instance above. -/
-noncomputable def unfoldListImpInTree [HasMinimalAxioms Axioms]
-    {Γ : List (Proposition Atom)} {φ : Proposition Atom}
-    (Ψ : List (Proposition Atom))
-    (d : DerivationTree Axioms Γ (listImp Ψ φ))
-    (h_sub : ∀ a ∈ Ψ, a ∈ Γ) :
-    DerivationTree Axioms Γ φ :=
-  GenericMCS.unfoldListImp Ψ d h_sub
-
 /-! ## Backward Direction: Algebraic Deriv → DerivationTree -/
 
 /-- Backward bridge: `(modalAlgDS Axioms).Deriv Γ φ → DerivationTree Axioms Γ φ`.
@@ -185,23 +168,5 @@ theorem modal_deriv_iff_algebraic [HasMinimalAxioms Axioms]
     (modalDerivationSystem Axioms).Deriv Γ φ ↔
     (modalAlgDS Axioms (Atom := Atom)).Deriv Γ φ :=
   GenericMCS.deriv_iff_algebraic_of_forward Iff.rfl derivTreeToList
-
-/-! ## MCS Equivalences -/
-
-/-- `SetConsistent` under `modalDerivationSystem Axioms` iff under `modalAlgDS Axioms`.
-Delegates to the generic `setConsistent_iff_congr` (Foundations). -/
-theorem modal_setConsistent_iff_algebraic [HasMinimalAxioms Axioms]
-    {Ω : Set (Proposition Atom)} :
-    SetConsistent (modalDerivationSystem Axioms) Ω ↔
-    SetConsistent (modalAlgDS Axioms (Atom := Atom)) Ω :=
-  GenericMCS.setConsistent_iff_congr (fun _ _ => modal_deriv_iff_algebraic)
-
-/-- `SetMaximalConsistent` under `modalDerivationSystem Axioms` iff under `modalAlgDS Axioms`.
-Delegates to the generic `setMaxConsistent_iff_congr` (Foundations). -/
-theorem modal_setMaxConsistent_iff_algebraic [HasMinimalAxioms Axioms]
-    {Ω : Set (Proposition Atom)} :
-    SetMaximalConsistent (modalDerivationSystem Axioms) Ω ↔
-    SetMaximalConsistent (modalAlgDS Axioms (Atom := Atom)) Ω :=
-  GenericMCS.setMaxConsistent_iff_congr (fun _ _ => modal_deriv_iff_algebraic)
 
 end Cslib.Logic.Modal

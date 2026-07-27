@@ -17,13 +17,6 @@ countUTotal lemmas, substitution into separated formulas, S/U-nesting depth
 measures, and callback infrastructure.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.unusedDecidableInType false
-set_option linter.style.maxHeartbeats false
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation
@@ -56,6 +49,8 @@ we substitute back into the separated formula. The crucial insight:
 
 /-! ### Step 1: Substitution Preservation Lemmas -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Substituting an S-free formula into an S-free formula preserves S-freeness.
     This is needed when substituting `.untl B` A (with S-free A, B) for an atom
     in the S-free arguments of `.untlnodes ` in a separated formula. -/
@@ -80,6 +75,8 @@ theorem subst_S_free_preserves_S_free (ψ : Formula Atom) (p : Atom) (r : Formul
     simp [substFormula, isSFree, ih1 hψ.1, ih2 hψ.2]
   | snce _ _ => simp [isSFree] at hψ
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Substituting a U-free formula into a U-free formula preserves U-freeness.
     Dual of `subst_S_free_preserves_S_free`. -/
 theorem subst_U_free_preserves_U_free (ψ : Formula Atom) (p : Atom) (r : Formula Atom)
@@ -103,6 +100,12 @@ theorem subst_U_free_preserves_U_free (ψ : Formula Atom) (p : Atom) (r : Formul
     simp [isUFree] at hψ
     simp [substFormula, isUFree, ih1 hψ.1, ih2 hψ.2]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- 3 `simp [isUFree] at hψ` sites destructure a Bool-conjunction hypothesis across
+-- induction cases; a `simp only [...]` replacement needs a `simp?`-verified lemma
+-- set per case, deferred as real refactoring work (not this pass's scope).
+set_option linter.flexible false in
 /-- Substituting `.untl B` A (with S-free args) into a U-free formula gives
     `noSNestedInU`. The only new `.untlnodes ` are the substituted copies
     of `.untl B` A, which have S-free arguments by hypothesis. -/
@@ -129,6 +132,8 @@ theorem subst_U_free_gives_no_S_nested (ψ : Formula Atom) (p : Atom) (A B : For
     simp [isUFree] at hψ
     exact ⟨ih1 hψ.1, ih2 hψ.2⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Substituting hasNoAllpastAllfuture preservation: if ψ has no allPast/allFuture
     and the replacement has none either, the result has none. -/
 theorem subst_preserves_no_allpast_allfuture (ψ : Formula Atom) (p : Atom) (r : Formula Atom)
@@ -163,6 +168,8 @@ def containsUntlSurface : Formula Atom → Formula Atom → Formula Atom → Pro
   | .untl d c, A, B => c = A ∧ d = B
   | .snce d c, A, B => containsUntlSurface c A B ∨ containsUntlSurface d A B
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Abstracting a formula that contains `.untl B` A at the surface level strictly
     decreases countUSubformulas. This is the corrected version of the count
     decrease lemma: the hypothesis `containsUntlSurface` ensures the non-matching
@@ -200,6 +207,12 @@ theorem abstract_untl_count_lt_of_contains_surface (phi A B : Formula Atom) (p :
 
 /-! ### countUTotal lemmas for oracle-free separation -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- `simp [...]; exact ...` sites combine unfolding with closing the goal; a
+-- `simp only [...]` replacement needs `simp?`-verified lemma sets, deferred as real
+-- refactoring work (not this pass's scope).
+set_option linter.flexible false in
 /-- `abstractUntl` never increases `countUTotal`. -/
 theorem abstract_untl_count_total_le (phi A B : Formula Atom) (p : Atom) :
     countUTotal (abstractUntl phi A B p) ≤ countUTotal phi := by
@@ -228,6 +241,8 @@ def containsUntlDeep : Formula Atom → Formula Atom → Formula Atom → Prop
       containsUntlDeep c A B ∨ containsUntlDeep d A B
   | .snce d c, A, B => containsUntlDeep c A B ∨ containsUntlDeep d A B
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Surface containment implies deep containment. -/
 theorem contains_untl_surface_implies_deep (phi A B : Formula Atom) :
     containsUntlSurface phi A B → containsUntlDeep phi A B := by
@@ -250,6 +265,8 @@ theorem contains_untl_surface_implies_deep (phi A B : Formula Atom) :
     · exact Or.inl (ih1 hc)
     · exact Or.inr (ih2 hd)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Abstracting a formula that contains `.untl B` A at any depth strictly
     decreases `countUTotal`. -/
 theorem abstract_untl_count_total_lt_of_contains_deep (phi A B : Formula Atom) (p : Atom)
@@ -285,6 +302,8 @@ theorem abstract_untl_count_total_lt_of_contains_deep (phi A B : Formula Atom) (
     · have := ih1 hc; have := abstract_untl_count_total_le d A B p; omega
     · have := ih2 hd; have := abstract_untl_count_total_le c A B p; omega
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- S-free formulas have noSNestedInU (vacuously: no `.sncenodes ` at all). -/
 theorem s_free_implies_no_S_nested (phi : Formula Atom) (h : isSFree phi = true) :
     noSNestedInU phi := by
@@ -300,6 +319,10 @@ theorem s_free_implies_no_S_nested (phi : Formula Atom) (h : isSFree phi = true)
     exact h
   | snce _ _ => simp [isSFree] at h
 
+-- the `by simp only [...] at h; simp [hc] at h; exact h` term-mode proof chains two
+-- flexible `simp` calls; a `simp only [...]` replacement needs `simp?`-verified lemma
+-- sets, deferred as real refactoring work (not this pass's scope).
+set_option linter.flexible false in
 /-- Extract innermost U-type: recurses INTO `.untlchildren ` to find a `.untlwith
     ` U-free arguments. Unlike `extractUType` which takes the first `.untlit
     ` finds, this descends into `.untlchildren ` when they're not U-free. -/
@@ -322,6 +345,8 @@ noncomputable def extractInnermostUType :
     if hc : isUFree c = false then extractInnermostUType c hc hns.1
     else extractInnermostUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- `extractInnermostUType` returns S-free arguments. -/
 theorem extract_innermost_U_type_S_free (φ : Formula Atom) (h : isUFree φ = false)
     (hns : noSNestedInU φ) :
@@ -358,6 +383,8 @@ theorem extract_innermost_U_type_S_free (φ : Formula Atom) (h : isUFree φ = fa
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact ih2 hd hns.2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- `extractInnermostUType` returns U-free arguments (KEY property).
     At the innermost level, both arguments are U-free by construction. -/
 theorem extract_innermost_U_type_U_free (φ : Formula Atom) (h : isUFree φ = false)
@@ -401,6 +428,8 @@ theorem extract_innermost_U_type_U_free (φ : Formula Atom) (h : isUFree φ = fa
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact ih2 hd hns.2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- `extractInnermostUType` returns a pair `(A, B)` such that
     `containsUntlDeep φ A B`. -/
 theorem extract_innermost_U_type_contains_deep (φ : Formula Atom) (h : isUFree φ = false)
@@ -443,6 +472,8 @@ theorem extract_innermost_U_type_contains_deep (φ : Formula Atom) (h : isUFree 
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact Or.inr (ih2 hd hns.2)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- abstractUntl preserves hasNoAllpastAllfuture. -/
 theorem abstract_untl_preserves_no_allpast_allfuture (phi A B : Formula Atom) (p : Atom)
     (h : hasNoAllpastAllfuture phi = true) :
@@ -468,6 +499,12 @@ Given a separated formula ψ, substituting `.untl B` A (with S-free A, B)
 for atom p yields a separable formula, provided we have a callback
 for handling the `.snceand ` `.allPast` constituents. -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- 3 `simp [isSyntacticallySeparated] at hsep` sites destructure the separated-formula
+-- hypothesis across induction cases; a `simp only [...]` replacement needs a
+-- `simp?`-verified lemma set per case, deferred as real refactoring work.
+set_option linter.flexible false in
 /-- Substituting `.untl B` A (S-free args) for atom p in a separated formula
     produces a separable formula, using `ih_snce` for constituents where
     substitution breaks separation (`.snceand ` `.allPast` positions). -/
@@ -505,24 +542,34 @@ theorem subst_in_separated_separable (ψ : Formula Atom) (p : Atom) (A B : Formu
 
 Substitution congruence and helper lemmas for the hierarchy theorem. -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Substitution preserves intEquiv: if φ ≡ ψ then subst(φ, p, r) ≡ subst(ψ, p, r). -/
 theorem subst_formula_congr {φ ψ : Formula Atom} (h : intEquiv φ ψ)
     (p : Atom) (r : Formula Atom) :
     intEquiv (substFormula φ p r) (substFormula ψ p r) := by
   intro M t; rw [subst_correctness, subst_correctness]; exact h _ t
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Helper: `.untlwith ` S-free args is already separated. -/
 theorem untl_sf_exp_separated (a b : Formula Atom)
     (ha_sf : isSFree a = true) (hb_sf : isSFree b = true) :
     isSeparable (.untl b a) :=
   ⟨.untl b a, by simp [isSyntacticallySeparated, ha_sf, hb_sf], int_equiv_refl _⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Helper: `.sncewith ` U-free args is already separated. -/
 theorem snce_uf_separated (a b : Formula Atom)
     (ha_uf : isUFree a = true) (hb_uf : isUFree b = true) :
     isSeparable (.snce b a) :=
   ⟨.snce b a, by simp [isSyntacticallySeparated, ha_uf, hb_uf], int_equiv_refl _⟩
 
+-- the `by simp only [...] at h; simp [hc] at h; exact h` term-mode proof chains two
+-- flexible `simp` calls; a `simp only [...]` replacement needs `simp?`-verified lemma
+-- sets, deferred as real refactoring work (not this pass's scope).
+set_option linter.flexible false in
 /-- Extract a U-type (A, B) with S-free args from a non-U-free formula
     that has `noSNestedInU`. -/
 noncomputable def extractUType : (φ : Formula Atom) → (isUFree φ = false) →
@@ -538,6 +585,8 @@ noncomputable def extractUType : (φ : Formula Atom) → (isUFree φ = false) �
     if hc : isUFree c = false then extractUType c hc hns.1
     else extractUType d (by simp only [isUFree] at h; simp [hc] at h; exact h) hns.2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem extract_U_type_S_free (φ : Formula Atom) (h : isUFree φ = false)
     (hns : noSNestedInU φ) :
     isSFree (extractUType φ h hns).1 = true ∧
@@ -564,6 +613,8 @@ theorem extract_U_type_S_free (φ : Formula Atom) (h : isUFree φ = false)
         simp only [isUFree] at h; cases huf : isUFree c <;> simp_all
       exact ih2 hd hns.2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- `extractUType` returns a pair `(A, B)` such that `containsUntlSurface φ A B`.
     This is the bridge between `extractUType` (which finds the first `.untlby `
     descending through `imp`, `box`, `snce`) and the count decrease lemma
@@ -618,6 +669,8 @@ def snceDepthOfU : Formula Atom → Nat
     if isUFree a = true ∧ isUFree b = true then 0
     else 1 + max (snceDepthOfU a) (snceDepthOfU b)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- U-free formulas have snceDepthOfU = 0. -/
 theorem snce_depth_of_U_zero_of_U_free (phi : Formula Atom)
     (h : isUFree phi = true) : snceDepthOfU phi = 0 := by
@@ -633,6 +686,8 @@ theorem snce_depth_of_U_zero_of_U_free (phi : Formula Atom)
     simp [isUFree] at h
     simp [snceDepthOfU, h.1, h.2]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Key property: for `.snce F` C where C or F is not U-free,
     `snceDepthOfU C < snceDepthOfU (.snce F C)` and similarly for F. -/
 theorem snce_depth_of_U_lt_snce (C w : Formula Atom)
@@ -642,26 +697,36 @@ theorem snce_depth_of_U_lt_snce (C w : Formula Atom)
   simp [snceDepthOfU, h]
   constructor <;> omega
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- snceDepthOfU is monotone for imp subterms. -/
 theorem snce_depth_of_U_le_imp_left (a b : Formula Atom) :
     snceDepthOfU a ≤ snceDepthOfU (.imp a b) :=
   Nat.le_max_left _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem snce_depth_of_U_le_imp_right (a b : Formula Atom) :
     snceDepthOfU b ≤ snceDepthOfU (.imp a b) :=
   Nat.le_max_right _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- snceDepthOfU passes through box unchanged. -/
 theorem snce_depth_of_U_le_box (a : Formula Atom) :
     snceDepthOfU a ≤ snceDepthOfU (.box a) :=
   Nat.le_refl _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- For `.snce b` a where not both U-free, left arg has strictly smaller depth. -/
 theorem snce_depth_of_U_le_snce_left (a b : Formula Atom)
     (h : ¬(isUFree a = true ∧ isUFree b = true)) :
     snceDepthOfU a ≤ snceDepthOfU (.snce b a) := by
   simp [snceDepthOfU, h]; omega
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- For `.snce b` a where not both U-free, right arg has strictly smaller depth. -/
 theorem snce_depth_of_U_le_snce_right (a b : Formula Atom)
     (h : ¬(isUFree a = true ∧ isUFree b = true)) :
@@ -681,6 +746,8 @@ The argument:
 - `noSNestedInU`: every `.untl b` a has `isSFree a ∧ isSFree b`
 - Together these imply `isSyntacticallySeparated phi = true`. -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Base case for GHR94 10.2.7: snceDepthOfU = 0 with noSNestedInU
     implies syntactically separated, hence separable. -/
 theorem snce_depth_zero_no_S_nested_separated (phi : Formula Atom)
@@ -714,6 +781,12 @@ This means: every `.sncein ` phi has U-free args, and every `.untlis ` U(A,B)
 with S-free args. So `.untlpositions ` have S-free args and `.sncepositions `
 have U-free args. -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- `simp [snceDepthOfU] at hdepth` destructures the depth-zero hypothesis; a
+-- `simp only [...]` replacement needs a `simp?`-verified lemma set, deferred as real
+-- refactoring work (not this pass's scope).
+set_option linter.flexible false in
 /-- When snceDepthOfU = 0 and hasSingleUType, every `.sncesubformula `
     has U-free args, so the formula is syntactically separated
     (given hasNoAllpastAllfuture). -/
@@ -760,6 +833,8 @@ def uNestingDepth : Formula Atom → Nat
   | .untl b a => 1 + max (uNestingDepth a) (uNestingDepth b)
   | .snce b a => max (uNestingDepth a) (uNestingDepth b)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- uNestingDepth = 0 iff the formula is U-free. -/
 theorem U_nesting_depth_zero_iff_U_free (phi : Formula Atom) :
     uNestingDepth phi = 0 ↔ isUFree phi = true := by
@@ -777,11 +852,15 @@ theorem U_nesting_depth_zero_iff_U_free (phi : Formula Atom) :
   | snce b a ih2 ih1 =>
     simp only [uNestingDepth, isUFree, Nat.max_eq_zero_iff, Bool.and_eq_true, ih1, ih2]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- U-free formulas have uNestingDepth = 0. -/
 theorem U_nesting_depth_zero_of_U_free (phi : Formula Atom)
     (h : isUFree phi = true) : uNestingDepth phi = 0 :=
   (U_nesting_depth_zero_iff_U_free phi).mpr h
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- When uNestingDepth <= 1 and noSNestedInU, all U-args are U-free.
     This is the key property: at depth <= 1, U-args are boolean (U-free AND S-free). -/
 theorem U_nesting_depth_le_one_untl_args_U_free (a b : Formula Atom)
@@ -795,40 +874,56 @@ theorem U_nesting_depth_le_one_untl_args_U_free (a b : Formula Atom)
 
 -- Monotonicity lemmas
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_le_imp_left (a b : Formula Atom) :
     uNestingDepth a ≤ uNestingDepth (.imp a b) := by
   simp only [uNestingDepth]
   exact Nat.le_max_left _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_le_imp_right (a b : Formula Atom) :
     uNestingDepth b ≤ uNestingDepth (.imp a b) := by
   simp only [uNestingDepth]
   exact Nat.le_max_right _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_le_box (a : Formula Atom) :
     uNestingDepth a ≤ uNestingDepth (.box a) := by
   simp only [uNestingDepth, le_refl]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_le_snce_left (a b : Formula Atom) :
     uNestingDepth a ≤ uNestingDepth (.snce b a) := by
   simp only [uNestingDepth]
   exact Nat.le_max_left _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_le_snce_right (a b : Formula Atom) :
     uNestingDepth b ≤ uNestingDepth (.snce b a) := by
   simp only [uNestingDepth]
   exact Nat.le_max_right _ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_lt_untl_left (a b : Formula Atom) :
     uNestingDepth a < uNestingDepth (.untl b a) := by
   simp only [uNestingDepth]
   omega
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem U_nesting_depth_lt_untl_right (a b : Formula Atom) :
     uNestingDepth b < uNestingDepth (.untl b a) := by
   simp only [uNestingDepth]
   omega
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- abstractUntl does not increase uNestingDepth.
     Replacing `.untl B` A with `.atom p` can only decrease or maintain the depth. -/
 theorem abstract_untl_U_nesting_depth_le (phi A B : Formula Atom) (p : Atom) :
@@ -848,6 +943,8 @@ theorem abstract_untl_U_nesting_depth_le (phi A B : Formula Atom) (p : Atom) :
   | snce d c ih2 ih1 =>
     simp only [abstractUntl, uNestingDepth]; omega
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Corollary: abstractUntl preserves the uNestingDepth <= k bound. -/
 theorem abstract_untl_U_nesting_depth_le_of_le (phi A B : Formula Atom) (p : Atom) (k : Nat)
     (h : uNestingDepth phi ≤ k) :
@@ -860,6 +957,8 @@ Substituting U(A,B) (with U-free A, B) for an atom in a U-free formula yields
 a formula with single U-type U(A,B). This is the key property enabling the
 self-contained depth-1 case in Lemma 10.2.5 (axiom-free). -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Substituting U(A,B) (with U-free A, B) for an atom in a U-free formula
     yields a formula with single U-type U(A,B). -/
 theorem subst_U_free_gives_single_U_type (c : Formula Atom) (p : Atom)
@@ -891,6 +990,8 @@ theorem subst_U_free_gives_single_U_type (c : Formula Atom) (p : Atom)
     simp only [substFormula, hasSingleUType]
     exact ⟨ih1 hc_U_free.1, ih2 hc_U_free.2⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Callback formulas from subst_in_separated_separable have single U-type
     when the separated formula's snce-args are U-free (which they are by
     definition of isSyntacticallySeparated). -/
@@ -902,6 +1003,12 @@ theorem callback_has_single_U_type (c d : Formula Atom) (p : Atom) (A B : Formul
   ⟨subst_U_free_gives_single_U_type c p A B hc_U_free hA_U_free hB_U_free,
    subst_U_free_gives_single_U_type d p A B hd_U_free hA_U_free hB_U_free⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- 3 `simp [isSyntacticallySeparated] at hsep` sites destructure the separated-formula
+-- hypothesis across induction cases; a `simp only [...]` replacement needs a
+-- `simp?`-verified lemma set per case, deferred as real refactoring work.
+set_option linter.flexible false in
 /-- Version of `subst_in_separated_separable` where the callback also receives
     `hasSingleUType chi A B`. This enables the callback to use
     `single_U_formula_separable_noax` which requires single-U-type.
@@ -950,6 +1057,8 @@ bridge lemma for single_U_formula_separable_noax: when the IH produces
 separated C' and F', this lemma gives snceDepthOfU C' = 0 and
 snceDepthOfU F' = 0, so .snce F' C' has depth exactly 1. -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- After box-normalization, a syntactically separated formula has snceDepthOfU = 0.
     The raw theorem without box-normalization fails because isSyntacticallySeparated
     treats .box as atomic while snceDepthOfU passes through it. But after
@@ -999,6 +1108,8 @@ def replaceUntl (C A B r : Formula Atom) : Formula Atom :=
   | .untl d c => if c = A ∧ d = B then r else .untl (replaceUntl d A B r) (replaceUntl c A B r)
   | .snce d c => .snce (replaceUntl d A B r) (replaceUntl c A B r)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- replaceUntl with single U-type produces a U-free formula when r is U-free. -/
 theorem replace_untl_U_free (C A B r : Formula Atom)
     (hsingle : hasSingleUType C A B) (hr : isUFree r = true) :
@@ -1016,6 +1127,8 @@ theorem replace_untl_U_free (C A B r : Formula Atom)
   | snce d c ih2 ih1 =>
     simp [replaceUntl, isUFree, ih1 hsingle.1, ih2 hsingle.2]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- replaceUntl is identity on U-free formulas. -/
 theorem replace_untl_identity_U_free (C A B r : Formula Atom) (h : isUFree C = true) :
     replaceUntl C A B r = C := by
@@ -1027,6 +1140,11 @@ theorem replace_untl_identity_U_free (C A B r : Formula Atom) (h : isUFree C = t
   | untl _ _ => simp [isUFree] at h
   | snce d c ih2 ih1 => simp [isUFree] at h; simp [replaceUntl, ih1 h.1, ih2 h.2]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- `simp [...]` sites unfold semantics/depth definitions inline; a `simp only [...]`
+-- replacement needs `simp?`-verified lemma sets, deferred as real refactoring work.
+set_option linter.flexible false in
 /-- When U(A,B) holds at a point and C has single U-type with snceDepthOfU = 0
     and hasNoAllpastAllfuture, C evaluates identically to replaceUntl C A B (¬⊥).
     This is because every .untl B A in C is evaluated at the SAME point t
@@ -1059,6 +1177,12 @@ theorem single_U_eval_when_U_true (C A B : Formula Atom)
       replace_untl_identity_U_free c A B _ hc_uf,
       replace_untl_identity_U_free d A B _ hd_uf]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
+-- `simp [snceDepthOfU] at hdepth` destructures the depth-zero hypothesis; a
+-- `simp only [...]` replacement needs a `simp?`-verified lemma set, deferred as real
+-- refactoring work (not this pass's scope).
+set_option linter.flexible false in
 /-- Dual: when ¬U(A,B) holds at a point, C evaluates identically to replaceUntl C A B ⊥. -/
 theorem single_U_eval_when_U_false (C A B : Formula Atom)
     (hsingle : hasSingleUType C A B)
@@ -1088,6 +1212,8 @@ theorem single_U_eval_when_U_false (C A B : Formula Atom)
       replace_untl_identity_U_free c A B _ hc_uf,
       replace_untl_identity_U_free d A B _ hd_uf]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Semantic equivalence: C ∧ U(A,B) ≡ C[U:=⊤] ∧ U(A,B) for single-U-type C. -/
 theorem single_U_and_conj_simplify (C A B : Formula Atom)
     (hsingle : hasSingleUType C A B)
@@ -1098,11 +1224,15 @@ theorem single_U_and_conj_simplify (C A B : Formula Atom)
   intro M t; constructor
   · intro h
     have ⟨hC, hU⟩ := int_truth_and_iff.mp h
-    exact int_truth_and_iff.mpr ⟨(single_U_eval_when_U_true C A B hsingle hexp hdepth M t hU).mp hC, hU⟩
+    exact int_truth_and_iff.mpr
+      ⟨(single_U_eval_when_U_true C A B hsingle hexp hdepth M t hU).mp hC, hU⟩
   · intro h
     have ⟨hCt, hU⟩ := int_truth_and_iff.mp h
-    exact int_truth_and_iff.mpr ⟨(single_U_eval_when_U_true C A B hsingle hexp hdepth M t hU).mpr hCt, hU⟩
+    exact int_truth_and_iff.mpr
+      ⟨(single_U_eval_when_U_true C A B hsingle hexp hdepth M t hU).mpr hCt, hU⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Dual of `single_U_and_conj_simplify`: C ∧ ¬U(A,B) ≡ C[U:=⊥] ∧ ¬U(A,B). -/
 theorem single_U_and_conj_simplify_neg (C A B : Formula Atom)
     (hsingle : hasSingleUType C A B)
@@ -1122,6 +1252,8 @@ theorem single_U_and_conj_simplify_neg (C A B : Formula Atom)
     exact int_truth_and_iff.mpr
       ⟨(single_U_eval_when_U_false C A B hsingle hexp hdepth M t hnotU').mpr hCb, hnotU⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Guard 2-clause CNF decomposition for single-U-type formulas:
     F ≡ (replaceUntl(F,A,B,⊤) ∨ ¬U(A,B)) ∧ (U(A,B) ∨ replaceUntl(F,A,B,⊥))
     where ⊤ = Formula.neg .bot.
@@ -1167,6 +1299,8 @@ theorem single_U_guard_cnf (w A B : Formula Atom)
       · exact absurd hU' hU
       · exact (single_U_eval_when_U_false w A B hsingle hexp hdepth M t hU).mpr hqn
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Guard conjunction distribution for Since (Lemma 10.2.1(ii)):
     S(ev, G₁ ∧ G₂) ↔ S(ev, G₁) ∧ S(ev, G₂).
     Re-export of `since_distrib_and_right` with the naming convention
@@ -1176,6 +1310,8 @@ theorem snce_conj_guard_distribute (ev G1 G2 : Formula Atom) :
               (Formula.and (.snce G1 ev) (.snce G2 ev)) :=
   since_distrib_and_right ev G1 G2
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Congruence for untl: if a ≡ a' and b ≡ b' then untl a b ≡ untl a' b'. -/
 theorem untl_congr {a a' b b' : Formula Atom}
     (ha : intEquiv a a') (hb : intEquiv b b') :
@@ -1186,6 +1322,8 @@ theorem untl_congr {a a' b b' : Formula Atom}
   · rintro ⟨s, hts, hφ, hψ⟩
     exact ⟨s, hts, (ha M s).mpr hφ, fun r hr1 hr2 => (hb M r).mpr (hψ r hr1 hr2)⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- Congruence for snce: if a ≡ a' and b ≡ b' then snce a b ≡ snce a' b'. -/
 theorem snce_congr {a a' b b' : Formula Atom}
     (ha : intEquiv a a') (hb : intEquiv b b') :
@@ -1196,6 +1334,8 @@ theorem snce_congr {a a' b b' : Formula Atom}
   · rintro ⟨s, hst, hφ, hψ⟩
     exact ⟨s, hst, (ha M s).mpr hφ, fun r hr1 hr2 => (hb M r).mpr (hψ r hr1 hr2)⟩
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.4 (general form -- the leaf case):
     `.snce F` C where C, F have `snceDepthOfU = 0` and `hasSingleUType`
     is separable. Non-recursive -- uses event-guard decomposition + Cases 1-8.
@@ -1226,7 +1366,8 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
     -- a = replaceUntl C A B (neg bot) is U-free
     let a_pos := replaceUntl C A B (Formula.neg .bot)
     have ha_uf : isUFree a_pos = true :=
-      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
+      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C
+        (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
     -- S(C^U, w) is equiv to S(a^U, w)
     have h_equiv_pos : intEquiv (.snce w (Formula.and C (.untl B A)))
         (.snce w (Formula.and a_pos (.untl B A))) :=
@@ -1243,7 +1384,8 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_w (by simp [isUFree])
       -- S(a^U, w) equiv S(a^U, (q_pos v -U) ^ (U v q_neg))
@@ -1300,7 +1442,8 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_w
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_w (by simp [isUFree])
       -- S(a'^-U, w) equiv S(a'^-U, (q_pos v -U) ^ (U v q_neg))
@@ -1335,6 +1478,8 @@ theorem snce_single_U_depth_one_separable (C w A B : Formula Atom)
         apply is_separable_of_equiv h_snce_comm
         exact case6_separable_gen' a_neg q_neg A B ha_neg_uf hqn_uf hA_uf hB_uf hA_sf hB_sf
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 /-- GHR94 Lemma 10.2.4 with U-type preservation:
     `.snce w` C where C, w have `snceDepthOfU = 0` and `hasSingleUType`
     is `isSeparableWithUType`. Same structure as `snce_single_U_depth_one_separable`
@@ -1356,7 +1501,8 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
   · have h_simp_pos := single_U_and_conj_simplify C A B hsingle_C hexp_C hdC
     let a_pos := replaceUntl C A B (Formula.neg .bot)
     have ha_uf : isUFree a_pos = true :=
-      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
+      replace_untl_U_free C A B (Formula.neg .bot) hsingle_C
+        (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
     have h_equiv_pos : intEquiv (.snce w (Formula.and C (.untl B A)))
         (.snce w (Formula.and a_pos (.untl B A))) :=
       snce_congr h_simp_pos (int_equiv_refl w)
@@ -1368,7 +1514,8 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_F (by simp [isUFree])
       have h_guard_equiv : intEquiv (.snce w (Formula.and a_pos (.untl B A)))
@@ -1414,7 +1561,8 @@ theorem snce_single_U_depth_one_sep_with_U_type (C w A B : Formula Atom)
       let q_pos := replaceUntl w A B (Formula.neg .bot)
       let q_neg := replaceUntl w A B .bot
       have hqp_uf : isUFree q_pos = true :=
-        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
+        replace_untl_U_free w A B (Formula.neg .bot) hsingle_F
+          (by simp [Formula.neg, PropositionalConnectives.neg, isUFree])
       have hqn_uf : isUFree q_neg = true :=
         replace_untl_U_free w A B .bot hsingle_F (by simp [isUFree])
       have h_guard_equiv : intEquiv (.snce w (Formula.and a_neg (Formula.neg (.untl B A))))

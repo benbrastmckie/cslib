@@ -192,6 +192,7 @@ holds directly from a Φ-bound witness (an exact copy of `modalStepBranch_worldB
 calc chain, generalized over an arbitrary potential term `Φ` so it applies to the pre-step branch
 `b` itself, not just a step's output). -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The a-priori world bound holds for any branch `bb` whose Φ-sum (`modalMaxWorld bb + Φ`) is
 bounded by `geomCap Sf (modalDepth φ0)`, for an arbitrary potential term `Φ`. Generalizes the
 closing calc chain of `modalStepBranch_worldBound` (`FmpMeasure.lean:2451`) so it applies
@@ -340,6 +341,7 @@ def ModalLoopAuxK (φ0 : Proposition Atom)
     modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
       geomCap (modalSubfmls φ0).length (modalDepth φ0)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- **`ModalLoopAuxK` entails the world bound**: the pointwise `AuxBounds` obligation for K's
 instantiation, discharged directly by the already-landed
 `modalMaxWorld_lt_worldBound_of_phiBound`. -/
@@ -2190,7 +2192,7 @@ lemma modalLoopInvGen_initial (apply : RuleApply Atom) (φ0 : Proposition Atom) 
       unfold modalPotentialTerm
       simp only []
       rcases hd : modalDepth φ0 with _ | k
-      · simp [hd]
+      · simp
       · rw [if_neg (by omega), houtdeg0 0]
         simp only [Nat.sub_zero, Nat.add_sub_cancel]
         rw [geomCap_succ]

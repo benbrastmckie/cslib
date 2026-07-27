@@ -20,7 +20,7 @@ public import Mathlib.Tactic.Linarith
 C5/C5' counterexample structures, the fresh-rational helper lemmas,
 and BurgessR3Maximal helper lemmas used by the Temporal chronicle construction.
 
-## Status (task 530, Phase 3a)
+## Status (Chronicle Consolidation)
 
 The fresh-rational Finset helpers and the `BurgessR3Maximal_g_content_sub`/`_sdc`/
 `_bot_not_mem` MCS-level lemmas are now thin re-exports of
@@ -28,20 +28,14 @@ The fresh-rational Finset helpers and the `BurgessR3Maximal_g_content_sub`/`_sdc
 
 `C5Counterexample`/`C5'Counterexample` stay logic-local, verbatim (see the generic
 module's docstring for the `Chronicle`-locality rationale), as does
-`burgessR3Maximal_from_h_content_sub` (forward dependency on the Phase 4b duality-theorem
-decision) and `c2'_preserved_on_old_adjacent`.
+`burgessR3Maximal_from_h_content_sub` (forward dependency on a not-yet-made
+duality-theorem consolidation decision for the shared Chronicle construction) and
+`c2'_preserved_on_old_adjacent`.
 -/
 
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
-
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
 
 attribute [local instance] Classical.propDecidable
 
@@ -177,13 +171,15 @@ private theorem burgessR3Maximal_from_h_content_sub {A C : Set (Formula Atom)}
   have h_bR : burgessR A top C := by
     intro γ hγ
     -- gContent(A) ⊆ C gives F(γ) ∈ A via connect_past + connect_future
-    have h_ax_cp : DerivationTree FrameClass.Base [] (γ.imp (Formula.allPast (Formula.someFuture γ))) :=
+    have h_ax_cp :
+        DerivationTree FrameClass.Base [] (γ.imp (Formula.allPast (Formula.someFuture γ))) :=
       DerivationTree.axiom [] _ (Axiom.connect_past γ) trivial
     have h_HF : Formula.allPast (Formula.someFuture γ) ∈ C :=
       temporal_implication_property h_mcs_C
         (theoremInMcs h_mcs_C h_ax_cp) hγ
     have h_F : (𝐅γ) ∈ A := h_hc h_HF
-    have h_bx12 : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).imp (Formula.untl top γ)) :=
+    have h_bx12 :
+        DerivationTree FrameClass.Base [] ((Formula.someFuture γ).imp (Formula.untl top γ)) :=
       DerivationTree.axiom [] _ (Axiom.F_until_equiv γ) trivial
     exact temporal_implication_property h_mcs_A
       (theoremInMcs h_mcs_A h_bx12) h_F
@@ -194,13 +190,15 @@ private theorem burgessR3Maximal_from_h_content_sub {A C : Set (Formula Atom)}
       have h_neg_P : (Formula.somePast α).neg ∈ C :=
         (temporal_negation_complete h_mcs_C _).resolve_left h_not_P
       -- Use connect_future: α → G(P(α)), so α ∈ A → P(α) ∈ gContent(A) ⊆ C.
-      have h_ax_cf : DerivationTree FrameClass.Base [] (α.imp (Formula.allFuture (Formula.somePast α))) :=
+      have h_ax_cf :
+          DerivationTree FrameClass.Base [] (α.imp (Formula.allFuture (Formula.somePast α))) :=
         DerivationTree.axiom [] _ (Axiom.connect_future α) trivial
       have h_GP : Formula.allFuture (Formula.somePast α) ∈ A :=
         temporal_implication_property h_mcs_A (theoremInMcs h_mcs_A h_ax_cf) hα
       have h_P_in_C : (𝐏α) ∈ C := h_gc h_GP
       exact h_not_P h_P_in_C
-    have h_bx12' : DerivationTree FrameClass.Base [] ((Formula.somePast α).imp (Formula.snce top α)) :=
+    have h_bx12' :
+        DerivationTree FrameClass.Base [] ((Formula.somePast α).imp (Formula.snce top α)) :=
       DerivationTree.axiom [] _ (Axiom.P_since_equiv α) trivial
     exact temporal_implication_property h_mcs_C
       (theoremInMcs h_mcs_C h_bx12') h_P

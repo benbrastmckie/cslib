@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
 public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative

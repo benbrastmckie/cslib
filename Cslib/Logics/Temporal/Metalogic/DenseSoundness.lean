@@ -28,7 +28,6 @@ base soundness theorem to `FrameClass.Dense`.
 * [J. Burgess, *Axioms for Tense Logic I: Since and Until*][Burgess1982I] — BX axioms (dense case)
 -/
 
-set_option linter.style.setOption false
 
 @[expose] public section
 

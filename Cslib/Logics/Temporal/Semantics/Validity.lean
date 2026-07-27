@@ -158,10 +158,9 @@ abbrev formulaSatisfiable (φ : Formula Atom) : Prop := satisfiable φ
 /-- A formula is satisfiable over a discrete-serial linear order: there exists a model on
 a discrete-serial domain (`NoMaxOrder`, `NoMinOrder`, `SuccOrder`, `PredOrder`,
 `IsSuccArchimedean`) and a time where it holds. Mirrors `satisfiable` with the frame class
-matched to `validDiscrete`, so that the two notions are properly dual (report 02 Finding
-2.1: this is the discrete-time satisfiability predicate needed to state
-`temporalTableau_sound`/`temporalTableau_complete` against `validDiscrete` rather than
-`valid`). -/
+matched to `validDiscrete`, so that the two notions are properly dual (this is the
+discrete-time satisfiability predicate needed to state `temporalTableau_sound`/
+`temporalTableau_complete` against `validDiscrete` rather than `valid`). -/
 def satisfiableDiscrete (φ : Formula Atom) : Prop :=
   ∃ (D : Type) (_ : LinearOrder D) (_ : Nontrivial D)
     (_ : NoMaxOrder D) (_ : NoMinOrder D)
@@ -248,7 +247,7 @@ theorem satisfiable_not_valid_neg {φ : Formula Atom}
 /-- Discrete validity is the dual of discrete satisfiability of the negation: `φ` is valid
 over all discrete-serial linear orders iff `¬φ` is not satisfiable over any discrete-serial
 linear order. Mirrors `satisfiable_not_valid_neg`, strengthened to a biconditional over the
-discrete-serial frame class (report 02 Finding 2.1); this is the bridge consumed by
+discrete-serial frame class; this is the bridge consumed by
 `instDecidableValid`'s `validDiscrete φ ↔ temporalTableau (¬φ) = .closed` construction. -/
 theorem validDiscrete_iff_not_satisfiableDiscrete_neg {φ : Formula Atom} :
     validDiscrete φ ↔ ¬ satisfiableDiscrete (¬φ) := by

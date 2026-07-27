@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianBot
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertLindenbaum

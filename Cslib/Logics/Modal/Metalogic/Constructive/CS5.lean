@@ -6,9 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
-public import Mathlib.Data.Fintype.Pi
+public import Mathlib.Data.Fintype.Defs
 
 /-! # CS5: Constructive Modal Logic S5 (Soundness, and the Symmetric-Tail Completeness Route)
 

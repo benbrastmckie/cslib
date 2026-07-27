@@ -6,12 +6,11 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 
 /-! # IS4: Intuitionistic Modal Logic S4 (Soundness + Completeness)
 
-This module instantiates the task-494 frame-condition-parametrized scaffold (`Extension.lean`) at
+This module instantiates the frame-condition-parametrized scaffold (`Extension.lean`) at
 Simpson's `IS4` ([Simpson1994] Ch. 3), the intuitionistic analogue of classical `S4`: `IS4` = `IT`
 (`IT.lean`) + the `4` axiom schemata. As with `T`, `4` needs **both** a box-form and a
 diamond-form schema, `fourBox : □A → □□A` and `fourDia : ◇◇A → ◇A`, since `◇` is primitive and not
@@ -27,7 +26,7 @@ bundled `Model`); it is **not** Mathlib's `Reflexive`/`Transitive` (deprecated i
 Mathlib -- see `IT.lean`'s module docstring) -- same semantic content
 (`(∀ w, r w w) ∧ (∀ w x y, r w x → r x y → r w y)`), different (undeprecated, local) name.
 
-All task-480/492/Extension/IT assets (`canonicalR`, `canonical_f1`/`canonical_f2`,
+All `Extension.lean`/`IT.lean` assets (`canonicalR`, `canonical_f1`/`canonical_f2`,
 `canonical_imp_property`, `axiom_mem`, `IValidFC`, `ivalidFC_completeness`) are reused unchanged;
 the only new work is the two `fourBox`/`fourDia` soundness cases and the canonical-transitivity
 closure proof (`is4_canonical_transitive`), both fully positive (no `by_contra`, no negation).
@@ -41,8 +40,8 @@ closure proof (`is4_canonical_transitive`), both fully positive (no `by_contra`,
 - `is4_canonical_reflexive`/`is4_canonical_transitive`: the canonical relation `canonicalR` (over
   `IS4ModalAxiom`) is reflexive and transitive -- both proved positively via
   `axiom_mem`/`canonical_imp_property`, no negation.
-- `is4_completeness`/`is4_consistent`/`is4_soundness_completeness`: instantiations of the
-  task-494 parametric `ivalidFC_completeness` at `Axioms := IS4ModalAxiom`, `FC := is4FC`.
+- `is4_completeness`/`is4_consistent`/`is4_soundness_completeness`: instantiations of
+  `Extension.lean`'s parametric `ivalidFC_completeness` at `Axioms := IS4ModalAxiom`, `FC := is4FC`.
 
 ## References
 
@@ -311,8 +310,8 @@ theorem is4_canonical_fc : is4FC (@canonicalR Atom IS4ModalAxiom) :=
 
 /-- **Completeness for `IS4`**: any formula that is `IValidFC is4FC` (forced at every world of
 every reflexive-and-transitive birelational model) is derivable from `IS4ModalAxiom`.
-Instantiation of the task-494 parametric `ivalidFC_completeness` at `Axioms := IS4ModalAxiom`,
-`FC := is4FC`, `h_canonFC := is4_canonical_fc`. -/
+Instantiation of `Extension.lean`'s parametric `ivalidFC_completeness` at
+`Axioms := IS4ModalAxiom`, `FC := is4FC`, `h_canonFC := is4_canonical_fc`. -/
 theorem is4_completeness {φ : Proposition Atom} (h_valid : IValidFC.{u, u} is4FC φ) :
     Derivable IS4ModalAxiom φ :=
   ivalidFC_completeness is4FC

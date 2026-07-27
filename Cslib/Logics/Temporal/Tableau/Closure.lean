@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Temporal.Tableau.Branch
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition
 

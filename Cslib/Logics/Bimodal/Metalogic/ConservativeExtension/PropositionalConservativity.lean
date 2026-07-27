@@ -95,7 +95,7 @@ Proof:
    `PL.Evaluate v φ` for any valuation `v`.
 4. CPL completeness (`prop_completeness`) then gives CPL derivability of `φ`. -/
 theorem bimodal_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
-    (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal) :
+    (h : Cslib.Logic.Bimodal.ThDerivable φ.toBimodal) :
     PL.Derivable PropositionalAxiom φ := by
   apply conservative_over_cpl
       (Tgt := Bimodal.Formula Atom)

@@ -22,19 +22,15 @@ Private elimination lemmas: C5/C5' counterexample elimination via Lemma 2.4,
 and G/H-propagation counterexample elimination via midpoint insertion.
 -/
 
+-- All declarations in this module are intentionally `private` (internal elimination
+-- helpers not referenced outside this file); `linter.privateModule` is a module-wide
+-- diagnostic with no per-declaration site to narrow to, so it is suppressed here rather
+-- than exposing lemmas that have no external caller.
 set_option linter.privateModule false
 
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
-
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.privateModule false
 
 attribute [local instance] Classical.propDecidable
 

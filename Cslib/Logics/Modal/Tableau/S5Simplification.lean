@@ -278,7 +278,7 @@ lemma modalApplyOneS5_snd_eq
     (modalApplyOneS5 sf b acc).snd = (modalApplyOne sf b acc).snd := by
   unfold modalApplyOneS5
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
+    simp_all only [List.isEmpty_iff] <;>
     rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
 
 omit [Hashable Atom] in
@@ -381,9 +381,9 @@ lemma modalApplyOneS5_eshape_eq
       | .notApplicable => e) := by
   unfold modalApplyOneS5
   rcases hp : modalApplyOne sf b acc with ⟨kResult, kAcc⟩
-  simp only [hp]
+  simp only []
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
+    simp_all only [List.isEmpty_iff] <;>
     rcases kResult with _ | _ | _ | _ <;> simp <;> split_ifs <;> simp
 
 omit [DecidableEq Atom] [Hashable Atom] in
@@ -402,6 +402,7 @@ private lemma mem_successorsOf_hasEdge_S5 {acc : Accessibility} {w w' : WorldInd
     exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
   · simp at heq
 
+omit [Hashable Atom] in
 /-- At the two S5-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), `modalApplyOneS5` never mints: its
 accessibility output is unchanged (`= acc`), the `RuleResult` is always `.notApplicable` or
 `.persistent`, and every emitted formula's label is a KNOWN world of `b` -- whether it came from
@@ -566,7 +567,8 @@ lemma modalApplyOneS5w_diaNeg_eq
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     modalApplyOneS5w (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-      = modalApplyOneS5 (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
+      = modalApplyOneS5 (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          b acc :=
   rfl
 
 /-- `modalApplyOneS5w` agrees with `modalApplyOneS5` outside the two mint shapes (`T(◇φ)@w`,
@@ -815,6 +817,7 @@ lemma usedTags_mono {φ₀ : Proposition Atom}
   obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hp2
   exact List.any_eq_true.mpr ⟨x, h x hx, hxeq⟩
 
+omit [Hashable Atom] in
 /-- If `T(◇φ)@w ∈ b` and `b` satisfies the tag invariant, the tag `(pos, φ)` a mint at `sf` would
 consume is a member of `mintTags φ₀`, via
 `mem_mintTags_of_diamond_mem`. -/
@@ -827,6 +830,7 @@ lemma modalApplyOneS5w_diamondPos_tag_mem {φ₀ : Proposition Atom}
   simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset] at h
   exact mem_mintTags_of_diamond_mem h.2
 
+omit [Hashable Atom] in
 /-- Dual of `modalApplyOneS5w_diamondPos_tag_mem` for `F(□φ)@w`. -/
 lemma modalApplyOneS5w_boxNeg_tag_mem {φ₀ : Proposition Atom}
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
@@ -837,6 +841,7 @@ lemma modalApplyOneS5w_boxNeg_tag_mem {φ₀ : Proposition Atom}
   simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset] at h
   exact mem_mintTags_of_box_mem h.2
 
+omit [Hashable Atom] in
 /-- Bundles both mint-shape tag facts: whenever `sf ∈ b` is mint-shaped and `b` satisfies the tag
 invariant, the tag `modalApplyOneS5w` would consume on a genuine mint at `sf` is a legitimate
 member of `mintTags φ₀`. This is the fact the counting crux below needs to bound `usedTags`'s
@@ -888,6 +893,7 @@ private lemma mem_boxPositivesOf_S5 {b : List (SignedFormula (Proposition Atom) 
     · simp at hsfeq
   · simp at hsfeq
 
+omit [Hashable Atom] in
 /-- The S5 analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
 `modalApplyOneS5` rather than `modalApplyOne`: either `modalApplyOneS5` leaves `acc` unchanged
 with every emitted formula's label a known world of `b` (covering both the ordinary
@@ -1169,6 +1175,7 @@ private lemma known_label_le_modalMaxWorld_S5w
   obtain ⟨y, hy, hyeq⟩ := (mem_modalKnownWorlds_S5 b w).mp h
   rw [← hyeq]; exact label_le_modalMaxWorld hy
 
+omit [Hashable Atom] in
 /-- Local re-derivation of `FrameSoundness.lean`'s `lemma modalApplyOneS5_fresh_local`
 (unavailable across files, since `FrameSoundness.lean` imports `S5Simplification.lean`, not the
 reverse): `modalApplyOneS5` satisfies the same `freshLocal` dichotomy as `modalApplyOne`. Needed
@@ -1190,7 +1197,8 @@ private lemma modalApplyOneS5_fresh_local_local
 result headed by the new witness. At the reuse arm (`witnessWorldS5 = some w'`), the witness `w'`
 is drawn from `modalKnownWorlds b`, but the edge added (`acc.addEdge sf.label w'`) still fits the
 dichotomy's second disjunct with `rest := []`. At a genuine mint (`witnessWorldS5 = none`),
-`modalApplyOneS5w` falls through verbatim to `modalApplyOneS5` (`modalApplyOneS5w_eq_of_not_mint_shape`,
+`modalApplyOneS5w` falls through verbatim to `modalApplyOneS5`
+(`modalApplyOneS5w_eq_of_not_mint_shape`,
 since diamond-positive/box-negative are not `modalApplyOneS5`'s own two S5-relevant propagation
 shapes), so `modalApplyOneS5_fresh_local_local` applies. Every other shape falls through the same
 way. This is the `hFreshLocal` witness `modalStepBranch_preserves_accTargetsKnown_gen` needs to
@@ -1750,7 +1758,8 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
         exact List.any_eq_true.mpr
           ⟨⟨s, ψ, modalNextWorld b⟩, List.mem_append_left _ hmemnf, by simp⟩
       have hcard : (usedTags φ₀ b).card < (usedTags φ₀ (nf ++ b)).card :=
-        Finset.card_lt_card ((Finset.ssubset_iff_of_subset husedsub).mpr ⟨(s, ψ), hnewmem, hnotused⟩)
+        Finset.card_lt_card
+          ((Finset.ssubset_iff_of_subset husedsub).mpr ⟨(s, ψ), hnewmem, hnotused⟩)
       rw [hmaxeq]
       unfold modalNextWorld
       calc modalMaxWorld b + 1 ≤ (usedTags φ₀ b).card + 1 := Nat.add_le_add_right hW 1

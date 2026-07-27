@@ -7,7 +7,12 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Propositional.Tableau.Defs
+public import Cslib.Foundations.Logic.Tableau.SignedFormula
+public import Cslib.Logics.Propositional.Defs
+public import Mathlib.Data.Finset.Attr
+public import Mathlib.Tactic.Attr.Core
+public import Mathlib.Tactic.SetLike
+public import Mathlib.Tactic.ToAdditive
 
 /-! # Intuitionistic Propositional Tableau Rules
 

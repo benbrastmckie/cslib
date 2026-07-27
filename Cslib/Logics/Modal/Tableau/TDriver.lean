@@ -6,10 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.GenericDriver
 public import Cslib.Logics.Modal.Tableau.FrameRules
-import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 
 /-! # T-System Tableau Driver
@@ -286,6 +284,7 @@ private lemma modalApplyOneT_freshLocal
   · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
     exact modalApplyOne_fresh_local sf b acc
 
+omit [Hashable Atom] in
 /-- **Field 2 (`outputsSubsetUniverse`)**: every formula `modalApplyOneT sf b acc` can emit
 stays inside `modalUniverse φ0`. Outside the two T-relevant shapes this is exactly K's own
 `modalApplyOne_outputs_subset`; at the two T-relevant shapes, the emitted list is K's own
@@ -434,6 +433,7 @@ private lemma modalApplyOneT_persistentFresh
   · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)] at hpers
     exact modalApplyOne_persistent_props sf b acc nf hpers
 
+omit [Hashable Atom] in
 /-- **Field 4 (`rankStep`)**: given `rank` satisfying the depth-bound/edge invariants pre-call,
 `modalApplyOneT sf b acc` yields a `rank'` (agreeing with `rank` off `modalNextWorld b`)
 satisfying the edge invariant on the (unchanged, at the two T-relevant shapes) accessibility
@@ -591,6 +591,7 @@ private lemma modalApplyOneT_outDegStep
   · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
     exact modalApplyOne_outDeg_step sf b e acc houtdeg w
 
+omit [Hashable Atom] in
 /-- **Field 6 (`knownWorldsStep`)**: the known-worlds dichotomy for a single `modalApplyOneT sf b
 acc` call. Outside the two T-relevant shapes this is exactly K's own
 `modalApplyOne_knownWorlds_step`; at the two T-relevant shapes, `modalApplyOneT` never touches
@@ -727,6 +728,7 @@ private lemma modalApplyOneT_branchingLength
 
 /-! ## Discharging F8-F12 (the Hintikka/Saturation Chain Fields) -/
 
+omit [Hashable Atom] in
 /-- **F8 (`localShapeInvariance`)**: outside the two T-relevant shapes (guaranteed here, since
 `φ` is neither box- nor diamond-shaped), `modalApplyOneT` agrees with `modalApplyOne` on both
 calls (`modalApplyOneT_eq_of_not_boxPos_diaNeg`), so K's own `modalApplyOne_fst_eq_of_not_box`

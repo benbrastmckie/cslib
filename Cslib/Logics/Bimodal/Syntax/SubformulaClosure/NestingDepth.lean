@@ -17,12 +17,6 @@ F/P-nesting depth, max nesting depth in closure, and F/P inner formula extractio
 Ported from BimodalLogic/Theories/Bimodal/Syntax/SubformulaClosure/NestingDepth.lean
 -/
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedSimpArgs false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal
@@ -39,30 +33,48 @@ def fNestingDepth : Formula Atom → Nat
 omit [DecidableEq Atom] in
 theorem f_nesting_depth_nonneg (phi : Formula Atom) : fNestingDepth phi ≥ 0 := Nat.zero_le _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem someFuture_unfold (psi : Formula Atom) :
     Formula.someFuture psi = Formula.untl Formula.top psi := by
   rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem f_nesting_depth_someFuture (psi : Formula Atom) :
     fNestingDepth (Formula.someFuture psi) = 1 + fNestingDepth psi := by
   simp only [Formula.someFuture, Formula.top, PropositionalConnectives.top, fNestingDepth]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
 theorem f_nesting_depth_atom (a : Atom) : fNestingDepth (.atom a : Formula Atom) = 0 := rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
 theorem f_nesting_depth_bot : fNestingDepth (.bot : Formula Atom) = 0 := rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
 theorem f_nesting_depth_box (psi : Formula Atom) : fNestingDepth (.box psi) = 0 := rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
-theorem f_nesting_depth_allPast (psi : Formula Atom) : fNestingDepth (Formula.allPast psi) = 0 := by
-  simp only [Formula.allPast, Formula.somePast, Formula.neg, PropositionalConnectives.neg, Formula.top, fNestingDepth]
+theorem f_nesting_depth_allPast (psi : Formula Atom) :
+    fNestingDepth (Formula.allPast psi) = 0 := by
+  simp only [Formula.allPast, Formula.somePast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, fNestingDepth]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
-theorem f_nesting_depth_allFuture (psi : Formula Atom) : fNestingDepth (Formula.allFuture psi) = 0 := by
-  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg, Formula.top, fNestingDepth]
+theorem f_nesting_depth_allFuture (psi : Formula Atom) :
+    fNestingDepth (Formula.allFuture psi) = 0 := by
+  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, fNestingDepth]
 
 /-- The maximum F-nesting depth among all formulas in the closure of `phi`. -/
 def maxFDepthInClosure (phi : Formula Atom) : Nat :=
@@ -77,32 +89,52 @@ def pNestingDepth : Formula Atom → Nat
   | .snce (.imp .bot .bot) inner => 1 + pNestingDepth inner
   | _ => 0
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem p_nesting_depth_nonneg (phi : Formula Atom) : pNestingDepth phi ≥ 0 := Nat.zero_le _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem somePast_unfold (psi : Formula Atom) :
     Formula.somePast psi = Formula.snce Formula.top psi := by
   rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem p_nesting_depth_somePast (psi : Formula Atom) :
     pNestingDepth (Formula.somePast psi) = 1 + pNestingDepth psi := by
   simp only [Formula.somePast, Formula.top, PropositionalConnectives.top, pNestingDepth]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
 theorem p_nesting_depth_atom (a : Atom) : pNestingDepth (.atom a : Formula Atom) = 0 := rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
 theorem p_nesting_depth_bot : pNestingDepth (.bot : Formula Atom) = 0 := rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
 theorem p_nesting_depth_box (psi : Formula Atom) : pNestingDepth (.box psi) = 0 := rfl
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
-theorem p_nesting_depth_allFuture (psi : Formula Atom) : pNestingDepth (Formula.allFuture psi) = 0 := by
-  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg, Formula.top, pNestingDepth]
+theorem p_nesting_depth_allFuture (psi : Formula Atom) :
+    pNestingDepth (Formula.allFuture psi) = 0 := by
+  simp only [Formula.allFuture, Formula.someFuture, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, pNestingDepth]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 @[simp]
-theorem p_nesting_depth_allPast (psi : Formula Atom) : pNestingDepth (Formula.allPast psi) = 0 := by
-  simp only [Formula.allPast, Formula.somePast, Formula.neg, PropositionalConnectives.neg, Formula.top, pNestingDepth]
+theorem p_nesting_depth_allPast (psi : Formula Atom) :
+    pNestingDepth (Formula.allPast psi) = 0 := by
+  simp only [Formula.allPast, Formula.somePast, Formula.neg, PropositionalConnectives.neg,
+    Formula.top, pNestingDepth]
 
 /-- The maximum P-nesting depth among all formulas in the closure of `phi`. -/
 def maxPDepthInClosure (phi : Formula Atom) : Nat :=
@@ -122,10 +154,14 @@ def extractPastInner : Formula Atom → Option (Formula Atom)
   | .snce (.imp .bot .bot) inner => some inner
   | _ => none
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem extractFutureInner_someFuture (chi : Formula Atom) :
     extractFutureInner (Formula.someFuture chi) = some chi := by
   simp only [Formula.someFuture, Formula.top, PropositionalConnectives.top, extractFutureInner]
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem extractPastInner_somePast (chi : Formula Atom) :
     extractPastInner (Formula.somePast chi) = some chi := by
   simp only [Formula.somePast, Formula.top, PropositionalConnectives.top, extractPastInner]

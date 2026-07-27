@@ -6,10 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Temporal.Syntax.Formula
 public import Cslib.Logics.Temporal.Syntax.Subformulas
-public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 
 /-! # Temporal Tableau Definitions
 
@@ -60,7 +58,7 @@ Note: the `asUntl?` and `asSnce?` decomposition adapters in this module return
 
 namespace Cslib.Logic.Temporal.Tableau
 
-open Cslib.Logic.Tableau Cslib.Logic.Temporal
+open Cslib.Logic.Temporal
 
 /-! ## Time Index -/
 

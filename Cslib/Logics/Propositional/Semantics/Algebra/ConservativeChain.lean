@@ -6,13 +6,11 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativityInstances
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 -- Classical conservativity column (Kalmár / truth-assignment method):
 -- CL-A CPL⟨→,⊤⟩ ⊂ CPL, CL-B CPL⟨∧,→,⊤⟩ ⊂ CPL, CL-C CPL⟨∧,→,⊥,⊤⟩ ⊂ CPL
-public import Cslib.Logics.Propositional.Metalogic.ClassicalConjImpBotCompleteness
 
 /-! # Conservative Extension Chain for Propositional Logic
 
@@ -213,19 +211,6 @@ theorem HAValid_implies_GHAValid {Atom : Type u} {φ : PL.Proposition Atom}
 
 /-! ## Inter-Fragment Conservativity Corollaries -/
 
-/-- **API naming-convention alias** for `hilbertConjImpConservativeOverImp`.
-
-This definition exists solely to provide a `_direct` suffixed name that mirrors
-`hilbertConjImpConservativeOverImp_viaIpl`, giving callers a symmetric pair of names
-for the two proof routes (direct vs. via IPL). The body is literally
-`hilbertConjImpConservativeOverImp hITO h` with no independent content.
-
-See also `hilbertConjImpConservativeOverImp_viaIpl` for the alternative route through IPL. -/
-theorem hilbertConjImpConservativeOverImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
-    (hITO : φ.IsImpTopOnly = true) (h : Derivable (@ConjImpAxiom Atom) φ) :
-    Derivable (@ImpAxiom Atom) φ :=
-  hilbertConjImpConservativeOverImp hITO h
-
 /-- **MPL conservative over IPL⟨→,⊤⟩**: for imp-top-only bot-free formulas, MPL derivability
 implies ImpAxiom derivability.
 
@@ -275,8 +260,7 @@ theorem hilbertMplConservativeOverConjImp {Atom : Type u} {φ : PL.Proposition A
 (The biconditionals `impAxiom_iff_chain` / `conjImpAxiom_iff_chain` / `orImpAxiom_iff_chain` /
 `minAxiom_iff_chain` are not restated here: each is a `.symm` of an already-public
 biconditional (`hilbertIplConservativeOverX_iff` / the `minAxiom` case) with no external
-use-site, so a restatement here would add no new content. See `CanAlgComplete.lean` for the
-documented terminal fragment-completeness interface these biconditionals ultimately feed.) -/
+use-site, so a restatement here would add no new content.) -/
 
 /-- **Theory-parametric Glivenko (strength wrapper)**: if every axiom of `A_cl` is a
 `PropositionalAxiom` (classical soundness), and every `IntPropAxiom` is an axiom of `A_int`

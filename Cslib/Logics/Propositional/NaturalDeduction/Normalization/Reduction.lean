@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Propositional.NaturalDeduction.Normalization.Basic
+public import Cslib.Logics.Propositional.NaturalDeduction.Basic
 
 /-! # Reduction and Normalization for Propositional Natural Deduction
 
@@ -17,8 +17,6 @@ This module defines the single-step reduction and fuel-bounded normalization fun
 - `Theory.Derivation.subsOne`: Single-hypothesis substitution for reduction steps.
 - `Theory.Derivation.reduceRoot`: Single-step root reduction (proper redexes and commuting
   conversions).
-- `Theory.Derivation.normalizeAux`: Fuel-bounded normalization function.
-- `Theory.Derivation.normalize`: Normalization using a sufficient fuel bound.
 
 ## References
 
@@ -79,30 +77,5 @@ def Theory.Derivation.reduceRoot : T.Derivation G A → Option (T.Derivation G A
     some (orE G D (impE DA (E.weakCtx (Finset.subset_insert _ _)))
                   (impE DB (E.weakCtx (Finset.subset_insert _ _))))
   | _ => none
-
-/-- Fuel-bounded normalization: normalize subterms, then reduce at root. -/
-def Theory.Derivation.normalizeAux : Nat → T.Derivation G A → T.Derivation G A
-  | 0, d => d
-  | n + 1, d =>
-    let d' : T.Derivation G A :=
-      match d with
-      | ax h => ax h
-      | ass h => ass h
-      | andI G D₁ D₂ => andI G (D₁.normalizeAux n) (D₂.normalizeAux n)
-      | andE1 G D => andE1 G (D.normalizeAux n)
-      | andE2 G D => andE2 G (D.normalizeAux n)
-      | orI1 G D => orI1 G (D.normalizeAux n)
-      | orI2 G D => orI2 G (D.normalizeAux n)
-      | orE G D DA DB => orE G (D.normalizeAux n) (DA.normalizeAux n) (DB.normalizeAux n)
-      | impI G D => impI G (D.normalizeAux n)
-      | impE D E => impE (D.normalizeAux n) (E.normalizeAux n)
-      | efq D => efq (D.normalizeAux n)
-    match d'.reduceRoot with
-    | none => d'
-    | some d'' => d''.normalizeAux n
-
-/-- The normalization function, using `2^height` as a generous fuel bound. -/
-def Theory.Derivation.normalize (d : T.Derivation G A) : T.Derivation G A :=
-  d.normalizeAux (2 ^ d.height)
 
 end Cslib.Logic.PL

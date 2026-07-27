@@ -21,12 +21,6 @@ Sigma defect count on BXPoints and defect-discharge infrastructure.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean
 -/
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.openClassical false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Filtration
@@ -35,6 +29,10 @@ open Cslib.Logic.Bimodal
 open Cslib.Logic.Bimodal.Metalogic.Core
 open Cslib.Logic.Bimodal.Metalogic.Bundle
 open Cslib.Logic.Bimodal.Metalogic.BXCanonical
+-- File-wide `open Classical` (not per-declaration) provides the scoped
+-- `Classical.propDecidable` instance used by `Finset.filter` below; `set_option ... in`
+-- would scope the open to a single command and silently break this instance propagation.
+set_option linter.style.openClassical false
 open Classical
 
 variable {Atom : Type*} [DecidableEq Atom]
@@ -52,6 +50,8 @@ noncomputable def sigmaDefectCount (w : BXPoint Atom) (Sigma : Finset (Formula A
     f ∈ w.formulas ∧
     ∃ φ ψ : Formula Atom, f = Formula.untl φ ψ ∧ ψ ∉ w.formulas)).card
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem sigma_defect_count_bounded (w : BXPoint Atom) (Sigma : Finset (Formula Atom)) :
     sigmaDefectCount w Sigma ≤ Sigma.card := by
   unfold sigmaDefectCount
@@ -59,24 +59,33 @@ theorem sigma_defect_count_bounded (w : BXPoint Atom) (Sigma : Finset (Formula A
 
 /-! ## Defect Step Properties -/
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem defect_step_F_psi {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h_until : Formula.untl φ ψ ∈ w.formulas) :
     Formula.someFuture ψ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.until_F φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_until
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem defect_step_connect {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h_until : Formula.untl φ ψ ∈ w.formulas) :
     Formula.allFuture (Formula.somePast (Formula.untl φ ψ)) ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_future (Formula.untl φ ψ)) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.connect_future (Formula.untl φ ψ)) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_until
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem defect_step_self_accum {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h_until : Formula.untl φ ψ ∈ w.formulas) :
     Formula.untl (Formula.and φ (Formula.untl φ ψ)) ψ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.self_accum_until φ ψ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.self_accum_until φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_until
 
@@ -88,17 +97,23 @@ noncomputable def sigmaSinceDefectCount (w : BXPoint Atom) (Sigma : Finset (Form
     f ∈ w.formulas ∧
     ∃ φ ψ : Formula Atom, f = Formula.snce φ ψ ∧ ψ ∉ w.formulas)).card
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem since_defect_step_P_psi {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h_since : Formula.snce φ ψ ∈ w.formulas) :
     Formula.somePast ψ ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.since_P φ ψ) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_since
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedDecidableInType false in
 theorem since_defect_step_connect {w : BXPoint Atom} {φ ψ : Formula Atom}
     (h_since : Formula.snce φ ψ ∈ w.formulas) :
     Formula.allPast (Formula.someFuture (Formula.snce φ ψ)) ∈ w.formulas := by
-  have h_ax : DerivationTree FrameClass.Base [] _ := DerivationTree.axiom [] _ (Axiom.connect_past (Formula.snce φ ψ)) trivial
+  have h_ax : DerivationTree FrameClass.Base [] _ :=
+    DerivationTree.axiom [] _ (Axiom.connect_past (Formula.snce φ ψ)) trivial
   exact SetMaximalConsistent.implication_property w.is_mcs
     (theoremInMcsFc w.is_mcs h_ax) h_since
 

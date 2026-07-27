@@ -1,0 +1,23 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Appended the verbatim ephemeral-class gitignore block to root /.gitignore (Phase 1), then untracked all 34 ephemeral-class paths reported by check-runtime-file-tracking.sh's live Check B via git rm --cached / git rm -r --cached (Phase 2). check-runtime-file-tracking.sh now exits 0 with Checks A, B, C all passed. Nothing deleted from disk; durable class untouched.",
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/summaries/01_untrack-ephemeral-runtime-files-summary.md"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "none",
+  "files_modified": [".gitignore"],
+  "decisions_made": [
+    "Staged .gitignore with a targeted git add .gitignore (not -A/.) so the staged set is exactly .gitignore plus the 34 index deletions",
+    "Drove the untracking list entirely off a fresh live re-run of check-runtime-file-tracking.sh's Check B output, not the research report's static list"
+  ],
+  "dead_ends": [],
+  "phases_completed": 2,
+  "phases_total": 2,
+  "plan_markers_verified": true
+}

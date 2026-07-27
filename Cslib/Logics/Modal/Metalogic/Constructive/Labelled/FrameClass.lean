@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.CanonicalModel
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical
 

@@ -43,7 +43,6 @@ construction.
 * Cslib/Logics/Modal/Metalogic/Completeness.lean — structural template
 -/
 
-set_option linter.style.setOption false
 
 @[expose] public section
 

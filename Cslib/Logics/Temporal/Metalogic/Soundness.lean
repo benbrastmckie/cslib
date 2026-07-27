@@ -28,7 +28,6 @@ over all serial linear orders (linear orders with `NoMaxOrder` and `NoMinOrder`)
 * [J. Burgess, *Axioms for Tense Logic I: Since and Until*][Burgess1982I] — BX axiom system
 -/
 
-set_option linter.style.setOption false
 
 @[expose] public section
 

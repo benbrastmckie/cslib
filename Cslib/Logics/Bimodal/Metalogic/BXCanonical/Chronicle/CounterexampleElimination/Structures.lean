@@ -17,7 +17,7 @@ public import Mathlib.Tactic.Linarith
 C5/C5' counterexample structures and the fresh-rational helper lemmas
 used by the Burgess chronicle construction.
 
-## Status (task 530, Phase 3a)
+## Status
 
 The fresh-rational Finset helpers (`exists_rat_gt_finset`/`exists_rat_lt_finset`/
 `exists_rat_between_not_in_finset`) are now thin re-exports of
@@ -25,21 +25,14 @@ The fresh-rational Finset helpers (`exists_rat_gt_finset`/`exists_rat_lt_finset`
 `Formula`/`Chronicle` dependency, identical in both trees).
 
 `C5Counterexample`/`C5'Counterexample` stay logic-local, verbatim: they are `structure`s
-indexed by `Chronicle Atom`, referencing the `.f`/`.dom` fields Phase 1 deliberately kept
-logic-local (a `toGeneric` bridge broke downstream `rcases`/`simp` proofs). See the generic
-module's docstring for the full rationale.
+indexed by `Chronicle Atom`, referencing the `.f`/`.dom` fields this generalization effort
+deliberately kept logic-local (a `toGeneric` bridge broke downstream `rcases`/`simp`
+proofs). See the generic module's docstring for the full rationale.
 -/
 
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
-
-set_option linter.unusedSimpArgs false
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
 
 attribute [local instance] Classical.propDecidable
 

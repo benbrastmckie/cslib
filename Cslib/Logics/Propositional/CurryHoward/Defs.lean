@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.NaturalDeduction.Basic
 
 /-! # Curry-Howard Isomorphism: Simply-Typed Lambda Terms

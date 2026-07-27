@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Basic
 
 /-! # Soundness of LK for Classical Propositional Logic

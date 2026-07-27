@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Context
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
 
@@ -67,7 +66,7 @@ bare structural equalities" and that "the correct form is probably an `fm`-level
 
 `InputCtx.fillEmpty_imp_outputPruning_fillRhs` proves, for every `ctx : InputCtx Atom` with
 `ctx.Λ = []` (i.e. the hole sits directly at the outer box's LHS slot — the shape of every
-`InputCtx` example this development has actually built, e.g. Phase 7's `γ₂Ctx`), that
+`InputCtx` example this development has actually built, e.g. `Nested/Context.lean`'s `γ₂Ctx`), that
 `Derivable (ctx.fillEmpty.fm.imp (ctx.outputPruning.fillRhs ctx.π).fm)`: filling with `∅`
 derivably *implies* the output-pruned filling with `π`. Under the repaired `InputCtx.outputPruning`
 (`Nested/Context.lean`, which retains a `∅`-layer at `Λ = []` rather than collapsing it), the proof
@@ -319,7 +318,8 @@ theorem InputCtx.fillLhs_fm_antitone (ctx : InputCtx Atom) {Δ Δ' : NestedLhs A
 /-! ## The Pruning Relation (`Λ`-Empty Case) -/
 
 /-- **`Γ{∅}` derivably implies `Γ⇓{π}`, when `ctx.Λ = []`.** For `ctx : InputCtx Atom` whose hole
-sits directly at the outer box's LHS slot (`ctx.Λ = []`, matching Phase 7's `γ₂Ctx` and every
+sits directly at the outer box's LHS slot (`ctx.Λ = []`, matching `Nested/Context.lean`'s
+`γ₂Ctx` and every
 `InputCtx` example this development has built), `Derivable (ctx.fillEmpty.fm ⊃ (ctx.outputPruning
 .fillRhs ctx.π).fm)`. Under the repaired `outputPruning` (`Nested/Context.lean`), `ctx.Λ = []`
 gives `ctx.outputPruning = ctx.Γ' ++ [∅]`, and the proof splits on `ctx.Γ'` exactly per the plan's

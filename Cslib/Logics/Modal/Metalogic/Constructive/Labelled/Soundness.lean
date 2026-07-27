@@ -489,7 +489,7 @@ theorem dia_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
   | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
   | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
 
-/-! ## `botForces` connectivity-invariance (fallback route PD, Phase 11.PD.1)
+/-! ## `botForces` connectivity-invariance (fallback route PD)
 
 `botForces` is `r`-connectivity-invariant under `cs5FCIncest` + the `CKValidFC` explosion
 conditions: it propagates FORWARD along any `r`-edge via `bf_r` (an explosion condition, not part
@@ -1450,9 +1450,9 @@ noncomputable def nikTr {Atom : Type u} (G : Graph Atom) (Γ : List (LabelledFor
     (hfin : G.X.Finite) (x : Label Atom) (A : Proposition Atom) : Proposition Atom :=
   nikTrFuel G Γ hfin (hfin.toFinset.card + 1) x (Proposition.imp (sigAt G Γ hfin x) A)
 
-/-! ### Sanity `example`s (Phase 8.1 green criterion)
+/-! ### Sanity `example`s (green-criterion check)
 
-Pin `nikTr`'s definition against the two cases the plan's Phase 8.1 green criterion specifies:
+Pin `nikTr`'s definition against the two cases the plan's green-criterion check specifies:
 `Graph.trivial` (no edges: the translation must add no `⊃□` nesting at all, reducing to a
 `⊤`-padded identity on `A`) and a one-edge extension (`Graph.trivial.addEdge` at the root: the
 translation must add EXACTLY one `⊃□` level, wrapping `sigAt` at the new leaf). Both are checked
@@ -1496,7 +1496,7 @@ example {Atom : Type u} (A : Proposition Atom) :
     simp only [nikTr, nikTrFuel, dif_pos hparent]
     rfl⟩
 
-/-! ## Propositional combinator toolkit over `Derivable CS5ModalAxiom` (Phase 8.2)
+/-! ## Propositional combinator toolkit over `Derivable CS5ModalAxiom`
 
 A small, `P`-generic Hilbert-combinator toolkit reused by every constructor case of the adequacy
 induction: composing `Derivable CS5ModalAxiom (P.imp A)`-shaped facts (`P` a fixed antecedent --
@@ -1628,7 +1628,7 @@ theorem nikTr_of_sigAt_imp {Atom : Type u} {G : Graph Atom} {Γ : List (Labelled
     Derivable CS5ModalAxiom (nikTr G Γ hfin x A) :=
   nikTrFuel_of_derivable _ x _ h
 
-/-! ## `sigAt`-core lemmas for the label-local propositional constructors (Phase 8.2)
+/-! ## `sigAt`-core lemmas for the label-local propositional constructors
 
 `sigAt`'s fuel is the GLOBAL constant `hfin.toFinset.card`, which is always `≥ 1` (`G.nonempty`),
 so `sigAt G Γ hfin y` always unfolds one level via `sigAtFuel`'s `(n+1)` branch into
@@ -1992,7 +1992,7 @@ sufficiency side-condition needed (unlike an *equality* between fuel values, whi
 genuine sufficiency bound). This is the tool that reconciles a `sigAt`-unfold's internally-used
 *reduced* fuel (one less than the global constant, for each level descended) with the *canonical*
 `sigAt` (global fuel) that `nikTrFuel`'s antecedent uses for off-spine siblings -- avoiding the
-harder fuel-sufficiency *equality* lemma flagged (but not needed) since Phase 8.1. -/
+harder fuel-sufficiency *equality* lemma flagged earlier in this file (but not needed). -/
 theorem sigAtFuel_mono_fuel {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
     (hfin : G.X.Finite) :
     ∀ (n : ℕ) (z : Label Atom),
@@ -2029,7 +2029,7 @@ What IS true is fuel-*sufficiency*: once fuel is at least the remaining ancestor
 further parent and stops -- so it computes literally the SAME value for any larger sufficient
 fuel (the recursion never touches the "extra" fuel, since the `else` branch fires as soon as no
 parent exists, regardless of how much fuel remains). This is the genuine fuel-sufficiency fact
-flagged (but not yet needed) since Phase 8.1; it IS needed here to reconcile `nikTr`'s globally
+flagged earlier in this file (but not yet needed); it IS needed here to reconcile `nikTr`'s globally
 fixed fuel (`hfin.toFinset.card + 1`, sufficient for EVERY label) with the reduced fuel
 `nikTrFuel`'s own recursion exposes one level up from any given label. -/
 

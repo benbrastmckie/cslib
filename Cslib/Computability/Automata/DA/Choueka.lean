@@ -19,9 +19,9 @@ This file defines the *Choueka language* of a deterministic automaton `da` with 
 accept set `acc`, following section 5 of Choueka's paper (via Ching-Tsun Chou's
 `ctchou/AutomataTheory` port). If `da` (with accept set `acc`) recognizes `l∗` for a regular
 language `l`, the Choueka language `U` of `(da, acc)` is regular and satisfies the identity
-`l^ω = l∗ * U↗ω`. This is the key remaining lemma needed by task 241 (McNaughton's theorem,
-Phase 3) to show that the ω-power of a regular language is recognized by a finite-state
-deterministic Muller automaton.
+`l^ω = l∗ * U↗ω`. This is the key remaining lemma needed by McNaughton's theorem
+(Choueka route, see `Cslib.Computability.Languages.OmegaRegularLanguage`) to show that the
+ω-power of a regular language is recognized by a finite-state deterministic Muller automaton.
 
 ## Main definitions
 

@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Basic
 
 /-! # Constructive (Wijesekera-Style) Modal Forcing

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 576,
+  "next_project_number": 580,
   "active_projects": [
     {
       "project_number": 530,
@@ -2118,8 +2118,95 @@
         ".github/workflows/lean_action_ci.yml"
       ],
       "created": "2026-07-27T06:54:27Z",
-      "last_updated": "2026-07-27T06:54:53Z",
-      "session_id": "sess_1785135293_c62e37"
+      "last_updated": "2026-07-27T17:39:45Z",
+      "session_id": "sess_1785173891_2df686",
+      "artifacts": [
+        {
+          "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md",
+          "type": "plan",
+          "summary": ""
+        }
+      ],
+      "plan_metadata": {
+        "phases": 8,
+        "phases_complete": 1,
+        "phases_partial": 3,
+        "complexity": "moderate",
+        "plan_version": 1,
+        "research_integrated": true,
+        "skeleton": false
+      },
+      "progress_note": "CI gate restored modulo the 5 genuine sorries (expected end state; those are owned by tasks 317 and 553/557). 36 commits. Remaining: Phase 3 task-refs (312 sites, largest), Phase 4 shake, Phase 5 suppressions (288 pure-style are the best target), Phase 6 warn.sorry rescoping, Phase 7 scripts/docs, Phase 8 dead-code deletions (9 of 10 approved-but-unstarted)."
+    },
+    {
+      "project_number": 576,
+      "project_name": "chronicle_namespace_structure_coincidence",
+      "title": "Resolve the Chronicle namespace/structure name coincidence and its 36 load-bearing suppressions",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Bimodal and Temporal Logic",
+      "created": "2026-07-27T08:56:55Z",
+      "last_updated": "2026-07-27T08:56:55Z",
+      "session_id": "sess_1785140072_91c8ab",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "blockers": [],
+      "dependencies": [
+        568
+      ],
+      "file_scope": [
+        "Cslib/Logics/Temporal/Metalogic/Chronicle/ChronicleTypes.lean",
+        "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean",
+        "Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean"
+      ],
+      "description": "Resolve the `namespace Chronicle` / `structure Chronicle` NAME COINCIDENCE, and delete the 36 suppressions it forces (33 @[nolint], 3 set_option) across the three ChronicleTypes/Types files, 9 declarations each.\n\nORIGIN: identified during the repo-wide lint-hygiene work as the genuine residual defect behind a group of dupNamespace suppressions. That work closed its doubled-namespace phase at 7 of 10 files and deliberately EXCLUDED the three Chronicle modules, because the original doubled-namespace diagnosis was WRONG there: `namespace ...Metalogic.Chronicle` contains `structure Chronicle`, so `def Chronicle.c0` correctly declares a structure-projection member that 81 dot-notation call sites (chi.c0, chi.c3, ...) depend on. A mechanical prefix strip fails with \"Invalid field 'c0': the environment does not contain ...Chronicle.Chronicle.c0\". The 36 suppressions are LOAD-BEARING until the coincidence itself is resolved -- do NOT delete them before the restructure lands.\n\nTHE DECISION: either (a) move `structure Chronicle` to the parent namespace, or (b) rename the namespace across the whole Chronicle/ subtree, or (c) a better option surfaced by the dependency below. This alters definitions, which is why it was barred from the hygiene-only lint task.\n\nDEPENDENCY RATIONALE (task 568): 568 asks what the RIGHT Chronicle architecture is for Bimodal/Temporal dedup, evaluating type-alias, label-type parameterization, and typeclass-mediated indexing. Its file_scope is the three Chronicle DIRECTORIES and strictly contains this task's three files. If 568 recommends parameterizing the structure away, the naming question resolves differently -- or evaporates entirely. Renaming first would risk doing the work twice. Sequence after 568 reports.\n\nDEFINITION OF DONE: the namespace/structure coincidence is resolved by an explicit, recorded decision; all 36 suppressions are deleted; dupNamespace is clean across the three files; the 81 dot-notation call sites still resolve; `lake build --wfail --iofail` shows no new warnings and `lake test` is unchanged.\n\nCONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or relocate any sorry.\n"
+    },
+    {
+      "project_number": 578,
+      "project_name": "untrack_ephemeral_orchestrator_runtime_files",
+      "status": "completed",
+      "task_type": "meta",
+      "description": "Untrack and gitignore the 35 ephemeral orchestrator runtime files currently committed in this repository, applying the consumer-repo remediation that the agent-system policy work defined but could not deliver here. VERIFIED PROBLEM: .claude/scripts/check-runtime-file-tracking.sh (shipped by the policy work, present and executable in this repo) FAILS two of its three checks. Check A: 10 ephemeral-class patterns are missing from this repo root .gitignore, which contains ZERO orchestrator/runtime lines. Check C passes, so the durable class is correctly configured and must stay that way. Check B: 35 ephemeral-class files are tracked -- 18 .orchestrator-loop-guard, 7 .orchestrator-churn-state.json, 5 variant .return-meta-{research,teammate-a,lit-05,orchestrate}.json, 2 .drift-inspection.json, 2 .return-meta-multi*.json, 1 .orchestrator-multi-state.json, 1 specs/557_.../.lock/ directory, and specs/.events.lock. WHY THIS IS A CORRECTNESS HAZARD, NOT REPO NOISE: per .claude/context/standards/orchestrator-runtime-files.md, the ephemeral class is read with NO freshness gate -- skill-orchestrate Stage 2 reads cycle_count and infra_failures from whatever loop guard is on disk with no session_id and no mtime comparison. A guard restored by checkout, clone, or branch switch therefore makes a fresh /orchestrate believe it is already mid-run at a stale cycle count. LIVE INSTANCES OBSERVED: specs/317_propositional_tableau_completeness/.orchestrator-loop-guard is committed at cycle_count 11 of max_cycles 16 with hard_mode true; specs/575_repo_lint_hygiene_ci_gate_restoration/.orchestrator-loop-guard was committed at cycle_count 5 of max_cycles 5, which made every subsequent /orchestrate 575 resume at 5/5 and exit having done no work -- permanently killing the documented \"run /orchestrate {N} to continue\" resume affordance until the guard was reset by hand. 537 and 557 hold further committed guards. REQUIRED WORK: (1) add the ephemeral-class block to this repo OWN root /.gitignore, copying it verbatim from the \"Consumer Repo Setup\" section of .claude/context/standards/orchestrator-runtime-files.md -- note that the standard explains the source store CANNOT deliver a repo-root .gitignore contribution automatically, because a specs/* pattern placed in .claude/ would resolve relative to .claude/ and silently match nothing, which is exactly why this must be done by hand once. (2) Untrack all 35 files using git rm --cached (and git rm -r --cached for the .lock directory), which preserves them on disk so any in-flight orchestration is not disrupted -- check-runtime-file-tracking.sh prints the exact per-file remediation command. (3) Do NOT untrack or ignore .orchestrator-handoff.json or .return-meta.json: those are the DURABLE class, are freshness-gated by their consumers, and MUST stay tracked -- Check C currently passes and must still pass afterwards. CONSTRAINT: do not delete any file from disk; this is a git-index and .gitignore change only. DEFINITION OF DONE: bash .claude/scripts/check-runtime-file-tracking.sh exits with all three checks passing.",
+      "file_scope": [
+        ".gitignore"
+      ],
+      "dependencies": [],
+      "last_updated": "2026-07-27T17:30:33Z",
+      "session_id": "sess_1785172606_2da06e",
+      "artifacts": [
+        {
+          "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/reports/01_untrack-ephemeral-runtime-files.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/plans/01_untrack-ephemeral-runtime-files.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/summaries/01_untrack-ephemeral-runtime-files-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "Appended the verbatim ephemeral-class gitignore block to root /.gitignore and untracked all 34 ephemeral-class runtime files reported by check-runtime-file-tracking.sh (git rm --cached / git rm -r --cached, index-only). check-runtime-file-tracking.sh now exits 0 with Checks A, B, and C all passing; durable provenance files remain tracked and un-ignored."
+    },
+    {
+      "project_number": 579,
+      "project_name": "lint_suppression_ratchet_gate",
+      "status": "completed",
+      "task_type": "meta",
+      "description": "Stop the blanket-linter-suppression ratchet by gating file-scoped suppressions in CI and pre-PR, so hygiene holds as new code is written instead of accumulating into periodic cleanup tasks. ROOT CAUSE ESTABLISHED BY SURVEY: a file-scoped `set_option linter.X false` (no trailing `in`) silences every violation in the file INCLUDING every future one, so code later added to that file is unlinted by construction -- coverage accumulates rather than decaying. Ordinary tech debt gets noisier as a file grows and eventually forces attention; this gets quieter, which is why it went unnoticed. Sampling 14 files carrying blanket suppressions found 14 of 14 had the suppression in the files VERY FIRST COMMIT -- none were added later in response to a linter complaining, so this is the authoring habit (copy-paste from a neighbouring file) and not decay under feature pressure. There is no Lean file template in this repo, so there was nothing to fix at the template level; a gate is the intervention that works because it interrupts the copy at the moment it happens. Contributing factors: no active git hooks; scripts/pre-pr-check.sh carries a real --wfail gate but is a manual pre-PR script that almost nothing passes through, since this fork is ~3900 commits ahead of upstream with few PRs; and the CI --wfail gate itself has been exiting 1, and a red gate carries no information. DELIVERED: (1) scripts/check-lint-suppressions.sh -- a ratchet gate reading a per-file ceiling from scripts/lint-suppression-baseline.txt, failing when a file exceeds its allowance or a previously-clean file introduces one, reporting improvements without failing, with --update to re-baseline and --list to rank. Counts may only decrease. Declaration-scoped `... in` suppressions are always allowed and deliberately uncounted, because they die with the declaration they annotate and cannot silence future code. (2) Baseline captured at 276 blanket suppressions across 108 files. (3) Wired as step 6 of scripts/pre-pr-check.sh, deliberately independent of the step-5 --wfail gate: a blanket suppression makes step 5 pass by HIDING a warning rather than fixing it, so a green --wfail build is not evidence suppressions did not grow. (4) New .github/workflows/lint-hygiene.yml rather than a step added to lean_action_ci.yml -- every existing workflow is shared with the leanprover/cslib upstream remote, so editing one adds a conflict hunk to every future sync while a new file conflicts with nothing; the check needs no Lean or Mathlib and runs in seconds. (5) docs/lint-suppression-policy.md documenting the rule, the ratchet rationale, the re-baseline workflow, and the two elaboration traps already hit in this tree (`omit [X] in` changes a declarations elaborated type unlike the warning-only `set_option ... in`; and `set_option ... in` must precede a doc comment or the file fails to parse). CONTRIBUTING.md was deliberately NOT edited because it is shared with upstream; adding a short pointer there is a follow-up judgment call for the user, costing one line of divergence in exchange for contributor visibility. VERIFIED: gate correctly fails a newly-blanket-suppressed file, correctly fails the trailing-comment blanket form, and correctly passes the same file when the suppression is declaration-scoped; clean run at the captured baseline exits 0.",
+      "completion_summary": "Gated blanket file-scoped linter suppressions behind a per-file ratchet (scripts/check-lint-suppressions.sh + baseline at 276 across 108 files), wired into pre-pr-check.sh step 6 and a new local-only Lint Hygiene CI workflow, with docs/lint-suppression-policy.md recording the rationale. Root cause established by survey: 14 of 14 sampled files carried their blanket suppression in their first commit, so this was the authoring habit rather than decay; no file template existed to fix, making a gate the effective intervention.",
+      "file_scope": [
+        "scripts/check-lint-suppressions.sh",
+        "scripts/lint-suppression-baseline.txt",
+        "scripts/pre-pr-check.sh",
+        ".github/workflows/lint-hygiene.yml",
+        "docs/lint-suppression-policy.md"
+      ],
+      "dependencies": []
     }
   ],
   "repository_health": {

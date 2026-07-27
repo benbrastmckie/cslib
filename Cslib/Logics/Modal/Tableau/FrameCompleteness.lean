@@ -1098,6 +1098,7 @@ theorem hAgreeT
     modalApplyOneT sf b acc = modalApplyOne sf b acc :=
   modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc h
 
+omit [Hashable Atom] in
 /-- **S-boxPos for T**: frame-relativized semantic soundness of
 `modalApplyOneT`'s box-positive output at `FC := reflFC`. Splits `RuleResultSat` over the
 `kForms ++ selfNew.filter …` append (`modalApplyOneT_boxPos_fst`, `TDriver.lean`): the
@@ -1153,6 +1154,7 @@ theorem modalApplyOneT_boxPos_soundIn
           subst hmem'
           exact sfSat_pos m f φ lbl hselfSat
 
+omit [Hashable Atom] in
 /-- **S-diaNeg for T**: dual of `modalApplyOneT_boxPos_soundIn` for the
 diamond-negative shape. -/
 theorem modalApplyOneT_diaNeg_soundIn
@@ -1778,6 +1780,7 @@ theorem hAgreeB
     modalApplyOneB sf b acc = modalApplyOne sf b acc :=
   modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc h
 
+omit [Hashable Atom] in
 /-- **S-boxPos for B**: frame-relativized semantic soundness of `modalApplyOneB`'s box-positive
 output at `FC := symmFC`. Splits `RuleResultSat` over the `kForms ++ backNew.filter …` append
 (`modalApplyOneB_boxPos_fst`, `BDriver.lean`): the `kForms` half is K's own
@@ -1825,6 +1828,7 @@ theorem modalApplyOneB_boxPos_soundIn
       · exact hRRSK sf' hmem'
       · exact hback sf' hmem'
 
+omit [Hashable Atom] in
 /-- **S-diaNeg for B**: dual of `modalApplyOneB_boxPos_soundIn` for the diamond-negative
 shape. -/
 theorem modalApplyOneB_diaNeg_soundIn

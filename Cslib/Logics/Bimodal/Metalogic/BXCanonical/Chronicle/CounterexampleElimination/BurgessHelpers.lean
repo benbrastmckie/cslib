@@ -18,13 +18,13 @@ public import Mathlib.Tactic.NormNum
 Helper lemmas for `BurgessR3Maximal fc`: g-content subset, SetDeductivelyClosed,
 bot exclusion, adjacency preservation, and backward h-content construction.
 
-## Status (task 530, Phase 3a)
+## Status
 
 `BurgessR3Maximal_g_content_sub`/`_sdc`/`_bot_not_mem` are now thin re-exports of
 `Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures`.
 `c2'_preserved_on_old_adjacent` and `burgessR3Maximal_from_h_content_sub` stay logic-local,
-verbatim (`Chronicle`-locality and forward Phase-4b-decision dependency respectively — see
-the generic module's docstring).
+verbatim (`Chronicle`-locality and a forward dependency on an earmarking decision
+respectively — see the generic module's docstring).
 -/
 
 @[expose] public section

@@ -19,7 +19,7 @@ public import Mathlib.Order.Zorn
 This module proves the foundational lemmas about the r-relation
 from Burgess 1982 Section 2, adapted for irreflexive (strict) temporal semantics.
 
-## Status (task 530, Phase 2)
+## Status
 
 The ~38-lemma shared core (deductive-closure infrastructure, r-relation/r3
 maximal-extension existence via Zorn, `burgess*_absorption`, `untl/snce_left_mono*`,
@@ -37,7 +37,7 @@ lemmas, `burgessR3_untl_conj_in_A` (Xu's Lemma 3.2.1), and
 `burgessR3Maximal_with_guard` (the latter is a namesake, not the same lemma, as a Temporal
 declaration of the same short name -- see the generic module's docstring).
 
-## Adaptation for Open Guard Semantics (Task 113)
+## Adaptation for Open Guard Semantics
 
 Under open guard semantics (t,s), the evaluation point t is NOT in the guard
 interval. Key consequences:
@@ -73,8 +73,8 @@ variable {Atom : Type*}
 
 Burgess's Lemma 2.2 states: if `gamma U delta in A` for MCS A, then `{gamma}` is
 consistent. This is **FALSE** under strict (irreflexive) Until semantics for gamma = bot;
-see the removed `until_disjunction_in_mcs` lemma (task 113 Phase 3). Withdrawn in Phase 1
-of the revised plan (task 107).
+see the removed `until_disjunction_in_mcs` lemma, withdrawn once discovered to be false
+under strict Until semantics.
 -/
 
 /-! ## BX10/BX5/Guard-Continues Shared Core -/

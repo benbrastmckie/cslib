@@ -2,7 +2,7 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~9.5h spent; Phase 5 is the sole remaining workstream (bounded by the
+- **Effort**: ~10.5h spent; Phase 5 is the sole remaining workstream (bounded by the
   upstream-exposure rescope below — no longer unbounded)
 - **Dependencies**: none blocking. Phases 3, 4, 7, 8's live-task coordination concerns are
   resolved (see Phase 3's closure notes) — no further coordination needed with 317/425/553.
@@ -21,10 +21,48 @@
 
 ## RESUME HERE
 
-Fourteenth resume (cycle 14 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
+Fifteenth resume (cycle 15 closure). Status as of this pass: **Phases 1, 2, 3, 4, 6, 7, 8 all
 COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was re-closed in cycle 12
-after its own reopen). Only Phase 5 (suppression audit) remains, PARTIAL at 193 sites done, 234
+after its own reopen). Only Phase 5 (suppression audit) remains, PARTIAL at 213 sites done, 214
 blanket suppressions across local-only files remaining in scope.**
+
+**Cycle 15 (this dispatch, scope-limited to Phase 5 only)**: processed 4 more files, all
+committed individually after a clean scoped rebuild plus downstream-importer rebuilds —
+`Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean` (5→0, 765 lines, commit `8bb8f6e5`),
+`Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean` (5→0, 870 lines, commit `6771ddeb`),
+`Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Burgess.lean` (5→0, 987 lines, commit
+`b54360e8`), `Bimodal/Metalogic/Decidability/CountermodelExtraction.lean` (5→0, 1088 lines,
+commit `78b7b88a`). Suppression-audit progress: 193 → 213 sites audited cumulative (33 files
+fully processed cumulative). Repo-wide blanket suppression lines (ratchet-tracked): 248 → 228
+(20 fewer; re-baselined in each file's own commit). A live re-count against `upstream/main`
+at cycle-15 close: 228 total = 214 local-only in-scope + 14 upstream-carved-out (the
+upstream-carved-out figure has drifted slightly from the "12" recorded in earlier cycles —
+not re-investigated this dispatch, since the carve-out set itself is unchanged and out of
+scope; use the live re-count, not the historical "12", going forward). Full CSLib CI pipeline
+run once at cycle end: `lake build --wfail --iofail` (exactly 5 baseline sorry warnings —
+`FrameSoundness.lean:1252`, `Intuitionistic/Scheme.lean:570,2583`,
+`Intuitionistic/Completeness.lean:124`, `Minimal/Completeness.lean:118` — zero new anywhere),
+`lake exe checkInitImports` (clean), `lake exe lint-style` (clean, no output), `lake shake
+--add-public --keep-implied --keep-prefix` (pre-existing findings across ~15 files, none
+touched this cycle — flagged below, not fixed, out of this dispatch's scope), `lake exe mk_all
+--module` ("No update necessary"), `lake test` (exit 0, same 5 baseline sorry warnings plus the
+same one pre-existing unrelated `backward.privateInPublic` warning in
+`CslibTests/FreeMonad.lean`). Vacuous-def grep unchanged at the single pre-existing false
+positive (`Computability/URM/Basic.lean:92`); axiom count unchanged at 26.
+
+**Baseline noise found, NOT part of this phase's scope, flagged for the record (unlike the
+cycle-12/13 `--wfail` regression, this one does not affect the wfail gate and was not fixed)**:
+`lake shake --add-public --keep-implied --keep-prefix` reports import-minimization findings
+(mostly `add Mathlib.Tactic.Attr.Core`) across roughly 15 files, none of which this dispatch (or
+any prior Phase 5 cycle) touched — e.g. `Foundations/Logic/Metalogic/ListDeduction.lean`,
+`Foundations/Logic/Theorems/BigConj.lean`, `Languages/CCS/Basic.lean`,
+`Logics/Modal/Basic.lean`, `Logics/Temporal/Tableau/TimeOrdering.lean`. This looks like the same
+class of "landed via an unrelated merge, not a Phase 3/5 edit" drift the cycle-12/13 `--wfail`
+regression was, but for the `lake shake` gate rather than the `--wfail` build gate. It is
+explicitly out of scope for a Phase-5-only dispatch (fixing it would mean editing files with no
+suppression-audit connection) and does not gate CI the way `--wfail` does, so it is recorded here
+rather than fixed or silently ignored. A future cycle (or a dedicated task) should re-run `lake
+shake --fix` on these files if the drift is confirmed unrelated to any in-flight work.
 
 **RESOLVED this cycle — the baseline regression flagged (not fixed) at cycle 12's close is now
 fixed.** `lake build --wfail --iofail` had regressed to **12 warnings across 7 modules**; it is
@@ -62,17 +100,17 @@ new sites.
 To pick Phase 5 up cold:
 
 1. Confirm the baseline (2 commands, ~5 min) — **expect exactly 5 warnings, all documented
-   sorries, as of cycle 14**:
+   sorries, as of cycle 15**:
    ```bash
-   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 14
+   lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings as of cycle 15
    lake test                     # expect exit 0, 0 errors
    ```
    If the warning count or file set differs from the above, something else landed — reconcile
    before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's closure criterion is once again
    empirically satisfied (no further action needed on any of them).
-3. **Only Phase 5 remains.** 29 files are fully processed cumulative (see Phase 5's cycle
-   1/5/6/7/8/9/10/11/12/14 sub-entries for the complete per-file list) — do not revisit any of
+3. **Only Phase 5 remains.** 33 files are fully processed cumulative (see Phase 5's cycle
+   1/5/6/7/8/9/10/11/12/14/15 sub-entries for the complete per-file list) — do not revisit any of
    them. Re-derive the live worst-offender list with the command in Phase 5's latest cycle entry,
    then **filter it through the local-only gate above** before picking a target. Prioritize the
    smaller count-5 files it lists ahead of the larger count-6 files, using the
@@ -715,7 +753,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 193 sites done; 234 blanket suppressions across local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 213 sites done; 214 blanket suppressions across local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -1396,6 +1434,90 @@ needs-real-proof-work, fix what's mechanical, narrow the rest to declaration-sco
 the ratchet in the same commit — carrying forward every safety lesson from cycles 6-14 (see the
 cycle-11/12 addenda above for the full list through cycle 12, plus this cycle's
 declaration-mapping-verification lesson).
+
+**Done (cycle 15)**: processed the 4 smallest remaining count-5 files (per the cycle-14
+addendum's smallest-first ordering), each committed individually after a clean scoped rebuild
+plus downstream-importer rebuilds — `Temporal/Metalogic/Chronicle/PointInsertion/Splitting.lean`
+(5→0, 765 lines: `style.emptyLine`/`style.setOption` vestigial; `unusedSimpArgs` (1 site,
+`Formula.neg`) fixed mechanically; `style.longLine` (~48 sites) fixed mechanically; `flexible`
+(4 declarations: `l27_a_event_list_mem`, `l27_collect_guards_mem_of_B`,
+`l27_guard_snce_xi_val`, `l27_collect_guards_mem_of_snce_xi`) narrowed to declaration-scoped
+`set_option` lines, per the cycle-11 "never trust a flexible Try-this hint" finding; commit
+`8bb8f6e5`), `Temporal/Metalogic/Chronicle/PointInsertion/Burgess.lean` (5→0, 870 lines:
+`style.emptyLine`/`style.setOption` vestigial; `unusedSimpArgs` (2 sites, `List.mem_singleton`)
+fixed mechanically; `style.longLine` (~40 sites) fixed mechanically; `flexible` (6 declarations:
+`neg_mem_of_inconsistent_union`, `closed_under_derivation_inconsistent_eq_univ`,
+`listConjImpliesElem`, `list_conj_mem_dcs`, `list_conj_mem_mcs`, `inconsistent_singleton_false`)
+narrowed to declaration-scoped `set_option` lines; commit `6771ddeb`), `Bimodal/Metalogic/
+BXCanonical/Chronicle/PointInsertion/Burgess.lean` (5→0, 987 lines, structurally near-identical
+to the Temporal `Burgess.lean` processed the same cycle — same `listConj`/`neg_mem_of_
+inconsistent_union` helper family: `style.emptyLine`/`style.setOption` vestigial;
+`unusedSimpArgs` (2 sites, `List.mem_singleton`) fixed mechanically; `style.longLine` (~20 sites)
+fixed mechanically; `flexible` (5 declarations: `neg_mem_of_inconsistent_union`,
+`listConjImpliesElem`, `list_conj_mem_dcs`, `list_conj_mem_mcs`,
+`inconsistent_singleton_false`) narrowed to declaration-scoped `set_option` lines; commit
+`b54360e8`), `Bimodal/Metalogic/Decidability/CountermodelExtraction.lean` (5→0, 1088 lines,
+a different category mix than the other three files this cycle —
+`unusedSectionVars`/`unusedSimpArgs`/`flexible`/`style.longLine`/`style.setOption`, no
+`style.emptyLine`: `style.setOption` vestigial; `unusedSectionVars` (1 site,
+`Formula.beq_top_false_of_ne`) narrowed with `set_option linter.unusedSectionVars false in`
+rather than `omit [...] in`, per the established statement-preserving constraint;
+`unusedSimpArgs` (6 sites: `Option.isSome_some`, `List.findSome?` ×3, `Formula.somePast`) fixed
+mechanically; `style.longLine` (~18 sites) fixed mechanically; `flexible` (5 declarations:
+`sat_no_bot_pos`, `sat_no_contradiction`, `findUnexpanded_none_all_expanded`, `truthLemma_pos`,
+`truthLemma_neg`) narrowed to declaration-scoped `set_option` lines; commit `78b7b88a`).
+Suppression-audit progress: 193 → 213 sites audited cumulative (33 files fully processed
+cumulative). Repo-wide blanket suppression lines (ratchet-tracked): 248 → 228 (20 fewer;
+re-baselined in each file's own commit via `bash scripts/check-lint-suppressions.sh --update`,
+per the per-file ratchet-gate requirement).
+
+**New finding (cycle 15) — the Edit tool's exact-match old_string can match lines with different
+leading whitespace.** On `Decidability/CountermodelExtraction.lean`, an `Edit` call with a
+2-space-indented `old_string` reported "Found 2 matches... set replace_all" even though a plain
+`grep -F` for that exact 2-space string found only one line in the file — the second "match" was
+the same text at 4-space indent inside a different declaration. Confirmed by checking both lines
+with `cat -A`: the indentation genuinely differs. **Lesson for future Phase 5 cycles**: when an
+`Edit` reports more matches than an exact `grep -F` search for the same string finds, do not
+assume the extra match is a true duplicate — read both candidate sites and either widen the
+`old_string` with enough surrounding context (a neighboring unique line) to disambiguate, or
+target each occurrence individually with its own distinguishing context, rather than reaching
+for `replace_all` on the assumption the sites are interchangeable.
+
+**Resume point (cycle 15 close)**: the 4 files above plus all files from cycles 1, 5, 6, 7, 8, 9,
+10, 11, 12, 14 are done — do not revisit (33 files total). Re-verify the worst-offender list
+before starting the next cycle, since resolutions only ever remove entries, and re-gate every
+candidate through `git cat-file -e upstream/main:<path>` (must FAIL) per the upstream-exposure
+rescope:
+```bash
+grep -rln "set_option linter\." Cslib/ | while read f; do
+  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
+  echo "$fs $f"
+done | sort -rn | head -20
+```
+As of cycle 15's end (228 total remaining blanket suppression lines, 214 local-only in-scope per
+a live re-count against `upstream/main` — see the RESUME HERE note on the "12" vs "14"
+upstream-carve-out drift), the count-6 tier is unchanged from cycles 8-14 (all confirmed
+local-only in prior cycles): `Temporal/Metalogic/Chronicle/CounterexampleElimination/
+{RecursiveWalks (1125 lines), MainElimination (1685 lines)}.lean`, `Bimodal/Metalogic/Soundness/
+FrameClassVariants.lean` (931 lines), `Bimodal/Metalogic/Separation/Eliminations.lean` (849
+lines), `Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048
+lines — do not pick this one first), `Bimodal/Metalogic/BXCanonical/Chronicle/
+ChronicleToCountermodelBasic.lean` (1208 lines). The count-5 tier is now down to its final 3
+files (all previously identified, all re-verified local-only and re-measured this cycle):
+`Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/XuGuard.lean` (1146 lines — smallest of
+the three, pick first), `Temporal/Metalogic/Chronicle/ChronicleConstruction.lean` (1435 lines),
+`Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleConstruction.lean` (1532 lines — largest of the
+three). Once these 3 are done, Phase 5's next cycle must re-derive the worst-offender list fresh
+rather than relying on any cached tier framing here, since the count-4 tier (currently ~15+
+files) becomes the new frontier. Apply the same method: remove all of a file's suppressions,
+rebuild, categorize what surfaces into vestigial / mechanically-fixable / needs-real-proof-work,
+fix what's mechanical, narrow the rest to declaration-scope, re-baseline the ratchet in the same
+commit — carrying forward every safety lesson from cycles 6-15 (see the cycle-11/12 addenda
+above for the full list through cycle 12, the cycle-14 declaration-mapping-verification lesson,
+and this cycle's Edit-tool false-duplicate-match lesson above).
+
+**Method**: remove, rebuild, fix whatever surfaces. Only removal-plus-rebuild proves whether a
+suppression is load-bearing.
 
 ### Phase 6: Sorry visibility [COMPLETED]
 

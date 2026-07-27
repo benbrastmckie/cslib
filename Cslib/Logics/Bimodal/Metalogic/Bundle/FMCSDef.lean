@@ -20,9 +20,6 @@ an MCS to each time point, with temporal coherence conditions.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/FMCSDef.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -32,8 +29,10 @@ open Cslib.Logic.Bimodal.Metalogic.Core
 
 variable {Atom : Type*}
 
-/-- A family of maximal consistent sets indexed by a preordered type, respecting G and H propagation. -/
-structure FMCS (Atom : Type*) (D : Type*) [Preorder D] (fc : FrameClass := FrameClass.Base) where
+/-- A family of maximal consistent sets indexed by a preordered type, respecting G and
+H propagation. -/
+structure FMCS (Atom : Type*) (D : Type*) [Preorder D]
+    (fc : FrameClass := FrameClass.Base) where
   /-- The function assigning an MCS to each time point. -/
   mcs : D → Set (Formula Atom)
   is_mcs : ∀ t, SetMaximalConsistent fc (mcs t)

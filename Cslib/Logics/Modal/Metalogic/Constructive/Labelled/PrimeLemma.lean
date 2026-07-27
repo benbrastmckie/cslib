@@ -72,7 +72,10 @@ namespace Cslib.Logic.Modal.Labelled
 universe u
 variable {Atom : Type u} {𝒯 : Set GeomAxiom}
 
-open Classical
+-- `Label Atom` carries no `DecidableEq` for a general `Atom`, so the transposition `swapFn`
+-- below and everything downstream of it need classical decidability. The `low` priority
+-- reproduces exactly the priority of the `Classical.propDecidable` scoped instance.
+attribute [local instance low] Classical.propDecidable
 
 /-! ## The transposition `swapFn a b` -/
 

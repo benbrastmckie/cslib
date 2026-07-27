@@ -56,9 +56,12 @@ which is periodically cleaned; for three it was `specs/literature/` in this repo
 were later removed. None were ever committed to git (verified via `git log --all`), so there is
 no history to restore from.
 
-A further eight documents were found still alive and have been **preserved** to
-`$LITERATURE_DIR/.sources-recovered/` — four of them rescued directly out of `/tmp` scratchpads
-that were pending cleanup. Those are safe and are not listed here.
+A further eight documents were found still alive and have been **preserved** — four of them
+rescued directly out of `/tmp` scratchpads that were pending cleanup. Those are safe and are not
+listed here. **Update**: these recovered sources were subsequently migrated from
+`$LITERATURE_DIR/.sources-recovered/<doc_id>.{pdf,djvu}` into the canonical
+`$LITERATURE_DIR/sources/<doc_id>/source.{pdf,djvu}` layout; `.sources-recovered/` is now empty
+and no longer holds any live sources.
 
 **Massacci 2000 is NOT in this list.** It was briefly believed lost because its `source_path`
 pointed at a deleted staging copy, but the real PDF was present all along at

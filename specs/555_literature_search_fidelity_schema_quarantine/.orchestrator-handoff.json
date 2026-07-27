@@ -1,42 +1,77 @@
 {
-  "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
-  "status": "partial",
-  "summary": "Completed Phases 1-5 of 7. Fixed load_fidelity_map() key derivation at all 4 sites in literature-search.sh (restores default-search visibility for Wijesekera/Simpson). Added --legacy-schema classify+write mode to literature-fidelity-audit.sh; stamped verified_conversion on 4 recoverable Group B docs and unadjudicated on arisakadasstrassburger_2015 (honest quarantined outcome). Phases 6-7 remain BLOCKED soft gates awaiting external resolution (djvulibre install; user decision on 10 unrecoverable docs) -- not implementer failures.",
-  "phases_total": 7,
+  "status": "planned",
+  "task_number": 555,
+  "task_slug": "literature_search_fidelity_schema_quarantine",
+  "phase": "plan",
+  "agent_type": "reviser-agent",
+  "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+  "summary": "Revised the task 555 plan to v2 after research 02 showed both blockers' premises had changed. Phases 1-5 preserved verbatim as [COMPLETED] (committed at 63bf5184 and 335c034a). PHASE 6 rewritten from a BLOCKED djvu-install gate into ACTIONABLE close-out: the gate is moot because chagrovzakharyaschev_1997_modallogic now has source.pdf (53.9MB) beside source.djvu, pdftotext is already the audit extractor and already on PATH, and index.json already reads verified_conversion (word_ratio 1.0209) with default no-flag search returning it non-degraded -- no install and no user authorization required. The old gate check (command -v djvutxt) is recorded as a false negative: it tests PATH, not classifiability. djvulibre 3.5.29 is noted as reachable via nix-shell -p djvulibre (user-level ephemeral shell) but explicitly not used and not hardcoded (the store path has no gcroot). Phase 6 also repoints .sources-recovered/ references (that directory is empty; sources migrated to sources/<doc_id>/source.{pdf,djvu}) and re-adjudicates arisakadasstrassburger_2015, with a verification step asserting default no-flag literature-search.sh returns non-degraded results for the documents touched. PHASE 7 rewritten from a decision gate into a WRITE-UP-AND-SURFACE phase producing summaries/02_group-b-decision-memo.md: restated (b)/(c)/(d) options with concrete costs, the Group A regression, and an explicit statement that no_source_pdf is citable by default. Phase 7 MUST NOT stamp any fidelity value, MUST NOT edit QUARANTINED_FIDELITY_VALUES, and MUST NOT write index.json; its verification asserts all three. File scope held to literature-search.sh and literature-fidelity-audit.sh, with $LITERATURE_DIR/index.json called out explicitly as data rather than repo source wherever a phase requires a write. No Cslib/ or Lean source in scope. THREE FINDINGS MEASURED DURING REVISION that materially change the delegated premises: (1) the working tree has REVERTED all of Phases 1-5's code as an uncommitted 43+/357- diff against HEAD, removing the entire --legacy-schema mode and all four doc_id fallback branches -- Phase 6.1 now restores it from HEAD behind a mandatory git-snapshot.sh --no-revert, since git checkout on a dirty tree is guard-blocked; (2) the Phase 1 fix is now a functional no-op (map-diff old 127 / new 127, added []) and the legacy gate matches 0 of 321 entries because the migration gave every former legacy entry a sources/-prefixed path -- so a --legacy-schema re-run cannot re-adjudicate arisaka, which has itself migrated to the sources/ schema and needs default mode instead; (3) arisaka will NOT be rescued by a re-run -- measured pdftotext 19,439 words vs whole-doc md 10,007 (ratio 0.5148) and chunk-sum 9,968 (ratio 0.5128), both far below the 0.75 threshold, so the plan states a quarantined outcome as the expected honest result and forbids threshold adjustment. Also corrected for the memo: the no_source_pdf set is 66 documents (all verified genuinely sourceless), not the report's 9; 127 entries carry no provenance_fidelity at all; and gabbay_1994 is a second unadjudicated document not previously reported.",
   "artifacts": [
     {
-      "type": "summary",
-      "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md"
+      "type": "plan",
+      "path": "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md",
+      "summary": "Revised plan v2: Phases 1-5 preserved as [COMPLETED]; Phase 6 rewritten as actionable blocker close-out (restore working tree, close djvu gate, repoint .sources-recovered/, re-adjudicate arisaka, verify default search); Phase 7 rewritten as a write-up-and-surface decision memo that stamps nothing and decides nothing."
     }
   ],
+  "phases_completed": 5,
+  "phases_total": 7,
+  "next_steps": "Run /implement 555 to execute Phases 6-7 of plans/02_blocker-resolution-and-decision-memo.md. Phase 6.1 (git-snapshot.sh 555 --no-revert, then git checkout HEAD -- both scripts) is a hard prerequisite: the working tree currently has Phases 1-5's code reverted, so no verification result is attributable until it is restored.",
   "blockers": [
     {
-      "description": "Phase 6 gate: chagrovzakharyaschev_1997_modallogic cannot be classified -- no djvutxt/djvups installed and PyMuPDF 1.27.2 fails on the recovered .djvu. Needs user authorization to install djvulibre; an OCR workaround is explicitly NOT authorized. Gates phase 6 only; phases 1-5 are complete.",
+      "id": "working-tree-revert",
       "phase": "phase-6",
-      "severity": "soft"
+      "severity": "hard",
+      "blocking": true,
+      "description": "Both .claude/scripts/literature-search.sh and .claude/scripts/literature-fidelity-audit.sh are uncommitted-modified in a way that reverts all of Phases 1-5: the diff against HEAD is 43 insertions / 357 deletions and removes the entire --legacy-schema mode plus all four doc_id fallback branches. HEAD (335c034a) has the work; the working tree does not. The revert is uncommitted and unexplained by any commit message. Phase 6.1 restores from HEAD behind a mandatory 'bash .claude/scripts/git-snapshot.sh 555 --no-revert', because git checkout -- <path> on a dirty tree is forbidden by .claude/rules/git-workflow.md and blocked by guard-destructive-git.sh. Restoring is the conservative default (HEAD is the committed record and the snapshot makes it reversible); whether the code should ultimately be kept or retired as dead code is surfaced in the Phase 7 memo, not decided."
     },
     {
-      "description": "Phase 7 gate: disposition of the 10 unrecoverable docs is an explicit USER DECISION between option (b) per-doc adjudication to unverified_no_baseline, option (c) a new non-quarantined fidelity value, and option (d) leave as-is. The implementer did not choose. Gates phase 7 only; phases 1-5 are complete.",
+      "id": "group-b-disposition",
       "phase": "phase-7",
-      "severity": "soft"
+      "severity": "soft",
+      "blocking": false,
+      "description": "Disposition of the sourceless documents remains a genuine user decision, and its polarity has reversed. no_source_pdf is NOT on QUARANTINED_FIDELITY_VALUES, so all 66 documents stamped with it are already returned by default no-flag search, non-degraded and unannounced -- option (c)'s effect is de facto live. Option (d) 'leave as-is' now means CITABLE, not quarantined. Option (b) is now a rollback of live behavior, not a no-op. Phase 7 writes this up as a memo; it does not resolve it. No repository code caused this state: no_source_pdf was always in the audit script's six-value enum, the quarantine constant was never edited, and the stamping came from the Literature repo's commit bb3bf18."
+    },
+    {
+      "id": "group-a-regression",
+      "phase": "phase-7",
+      "severity": "soft",
+      "blocking": false,
+      "description": "Literature repo commit bb3bf18 overwrote wijesekera_1990_constructivemodallogicsi and simpson_1994_intuitionisticmodallogic from ocr_rescanned_reflowed_partial_symbol_loss to verified_conversion (word_ratio now 0.9922 and 0.9828), losing the partial-symbol-loss warning a citing agent previously received. Fixable in 2 jq edits to $LITERATURE_DIR/index.json (data, not repo source), but doing so reverses another repository's deliberate commit, so Phase 7 surfaces it rather than actioning it. This task's SIX_VALUE_ENUM guard works but only constrains literature-fidelity-audit.sh; bb3bf18 wrote by another route."
+    },
+    {
+      "id": "phase-1-5-code-now-no-op",
+      "phase": "phase-7",
+      "severity": "soft",
+      "blocking": false,
+      "description": "The Phase 1 doc_id fallback adds zero keys against the current index.json (map-diff harness: old 127 / new 127, added []) and the --legacy-schema gate matches 0 of 321 entries, because the Literature migration gave every former legacy entry a sources/-prefixed path. The Phase 1-5 work is correct and unchanged; the corpus moved underneath it. Phase 7 puts the keep-or-retire question to the user without answering it."
+    },
+    {
+      "id": "arisaka-stays-quarantined",
+      "phase": "phase-6",
+      "severity": "soft",
+      "blocking": false,
+      "description": "arisakadasstrassburger_2015 has migrated to the sources/ schema (path and id now present), so the delegated '--legacy-schema re-run' cannot reach it -- default mode applies instead. The re-run is mechanical but will NOT rescue it: measured pdftotext 19,439 words vs whole-document md 10,007 (ratio 0.5148) and chunk-sum 9,968 (ratio 0.5128), both far below RATIO_THRESHOLD 0.75 and consistent with the stored 0.539. The markdown genuinely contains about half the source's words. The plan states a quarantined outcome as the expected honest result and forbids adjusting RATIO_THRESHOLD or PROOF_ADEQUACY_THRESHOLD. Only the disclosure/proof-completeness escape path could change the verdict, and the plan requires measuring it rather than predicting it. If the user wants this document citable, re-converting the source is the honest route, not re-adjudication."
     }
   ],
-  "next_action_hint": "none",
-  "files_modified": [
-    ".claude/scripts/literature-search.sh",
-    ".claude/scripts/literature-fidelity-audit.sh",
-    "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md",
-    "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md"
-  ],
-  "decisions_made": [
-    "Patched load_fidelity_map() in place at all four sites; did not factor into a shared module",
-    "Added a SIX_VALUE_ENUM guard to the legacy write loop after catching a real regression: the first write attempt clobbered Group A's pre-existing ocr_rescanned_reflowed_partial_symbol_loss value with the generic verified_conversion classification",
-    "arisakadasstrassburger_2015 landed on unadjudicated (quarantined) -- honest outcome, thresholds untouched",
-    "QUARANTINED_FIDELITY_VALUES never modified; fail-open-to-unverified preserved and verified explicitly"
-  ],
-  "dead_ends": [
-    "Stamping every enumerated legacy entry unconditionally -- overwrites Group A's already-honest out-of-band fidelity value; fixed via SIX_VALUE_ENUM guard"
-  ],
-  "plan_markers_verified": false
+  "metadata": {
+    "reports_integrated": [
+      "01_fidelity-schema-key-derivation.md",
+      "02_blocker-disposition-research.md"
+    ],
+    "supersedes_plan": "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md",
+    "estimated_hours_remaining": 3,
+    "file_scope": [
+      ".claude/scripts/literature-search.sh",
+      ".claude/scripts/literature-fidelity-audit.sh",
+      "specs/literature/SOURCES.md",
+      "specs/555_literature_search_fidelity_schema_quarantine/"
+    ],
+    "data_not_repo_source": [
+      "$LITERATURE_DIR/index.json"
+    ],
+    "out_of_scope": [
+      "Cslib/",
+      "**/*.lean"
+    ]
+  }
 }

@@ -1,0 +1,59 @@
+{
+  "phase": 6,
+  "phase_name": "Blocker close-out — restore working tree, adjudicate, repoint",
+  "started_at": "2026-07-26T18:00:00Z",
+  "last_updated": "2026-07-26T18:45:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "6.1 - snapshot and restore working tree from HEAD",
+      "status": "done",
+      "files_touched": [
+        ".claude/scripts/literature-search.sh",
+        ".claude/scripts/literature-fidelity-audit.sh"
+      ]
+    },
+    {
+      "id": 2,
+      "description": "6.2 - close out chagrovzakharyaschev classification (verification only, no file changes)",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 3,
+      "description": "6.3 - repoint .sources-recovered/ references in audit script and SOURCES.md",
+      "status": "done",
+      "files_touched": [
+        ".claude/scripts/literature-fidelity-audit.sh",
+        "specs/literature/SOURCES.md"
+      ]
+    },
+    {
+      "id": 4,
+      "description": "6.4 - re-adjudicate arisakadasstrassburger_2015 via default-mode audit --write",
+      "status": "done",
+      "files_touched": [],
+      "note": "Writes $LITERATURE_DIR/index.json, which is data not repo source (out of git scope). Deviation recorded: 8 burgess_1984 sub-entries showed incidental word_ratio drift as a side effect of full-corpus --write; no provenance_fidelity class changed."
+    },
+    {
+      "id": 5,
+      "description": "6.5 - re-measure figures for Phase 7 memo, commit Stage C part 1",
+      "status": "done",
+      "files_touched": [
+        "specs/555_literature_search_fidelity_schema_quarantine/plans/02_blocker-resolution-and-decision-memo.md"
+      ]
+    }
+  ],
+  "current_objective": 5,
+  "approaches_tried": [],
+  "deviations": [
+    {
+      "task_id": "6.4",
+      "description": "Diff index.json entry-by-entry against pre-write snapshot and assert changed set contains no document other than arisakadasstrassburger_2015",
+      "type": "altered",
+      "reason": "The audit script's --write mode recomputes the entire sources/ corpus (it has no single-document targeting mode); 8 burgess_1984_sec0N sub-entries showed incidental word_ratio drift (1.0041 -> 1.0033) as a side effect. No provenance_fidelity value changed anywhere. arisaka itself and Group A were confirmed exactly as expected.",
+      "annotation": "*(deviation: altered — reported in Phase 6.4 annotation and Phase 7 memo)*"
+    }
+  ],
+  "handoff_count": 0
+}

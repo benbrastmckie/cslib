@@ -79,8 +79,13 @@
 #   and no `path`/`id` fields at all. --legacy-schema enumerates exactly those entries
 #   (doc_id and chunks_dir both present, path and id both absent-or-null -- this gate
 #   is the entire safety boundary between the two schemas) and classifies each by:
-#     - Resolving its source as $LITERATURE_DIR/.sources-recovered/<doc_id>.pdf (or
-#       .djvu). No source present -> no_source_pdf.
+#     - Resolving its source as $LITERATURE_DIR/sources/<doc_id>/source.pdf (or
+#       source.djvu), falling back to the legacy
+#       $LITERATURE_DIR/.sources-recovered/<doc_id>.pdf (or .djvu) location only if the
+#       sources/ path is absent. Recovered sources were migrated into sources/<doc_id>/
+#       by the Literature repo; .sources-recovered/ is expected to be empty going
+#       forward and its absence or emptiness is not an error. No source present at
+#       either location -> no_source_pdf.
 #     - Summing word_count_text() over ALL chunk_*.md in chunks_dir as md_words (the
 #       chunk-exclusion filter used for the sources/ schema is deliberately NOT
 #       applied here -- for this schema the chunks ARE the document, there is no
@@ -135,8 +140,11 @@ Usage: literature-fidelity-audit.sh [--dry-run|--write] [--legacy-schema] [-h|--
   --write         Backup index.json, then idempotently stamp provenance_fidelity and
                   word_ratio onto the resolved target entries for every directory.
   --legacy-schema Classify the legacy doc_id/chunks_dir-schema entries instead of the
-                  sources/ schema. Orthogonal to --dry-run/--write. Requires
-                  .sources-recovered/ under LITERATURE_DIR.
+                  sources/ schema. Orthogonal to --dry-run/--write. Resolves each
+                  entry's source from sources/<doc_id>/source.{pdf,djvu}, falling back
+                  to the legacy .sources-recovered/<doc_id>.{pdf,djvu} location only if
+                  present under LITERATURE_DIR; an absent or empty
+                  .sources-recovered/ is expected and not an error.
   -h, --help      Show this help.
 EOF
 }
@@ -175,10 +183,12 @@ if [ ! -d "$SOURCES_DIR" ]; then
   exit 1
 fi
 
+# Legacy sources were migrated into sources/<doc_id>/source.{pdf,djvu}; the former
+# .sources-recovered/<doc_id>.{pdf,djvu} location is a fallback only and is expected to
+# be absent or empty post-migration. This is not an error -- do not hard-fail on it.
 RECOVERED_DIR="$LITERATURE_DIR/.sources-recovered"
 if [ "$LEGACY_SCHEMA" = "true" ] && [ ! -d "$RECOVERED_DIR" ]; then
-  echo "Error: --legacy-schema requires .sources-recovered/ under LITERATURE_DIR: $RECOVERED_DIR" >&2
-  exit 1
+  echo "[fidelity-audit] Note: .sources-recovered/ not found under LITERATURE_DIR ($RECOVERED_DIR); this is expected post-migration -- legacy sources are resolved from sources/<doc_id>/ instead." >&2
 fi
 
 INDEX_FILE="$LITERATURE_DIR/index.json"
@@ -482,9 +492,10 @@ def enumerate_legacy_entries(idx):
 def classify_legacy(entry):
     """Classify one legacy doc_id/chunks_dir-schema entry. Mirrors classify_dir()'s
     ratio/disclosure/proof-completeness pipeline exactly, but resolves the source PDF
-    from RECOVERED_DIR by doc_id and sums word_count_text() over ALL chunk_*.md in
-    chunks_dir (no chunk-exclusion filter -- for this schema the chunks ARE the
-    document)."""
+    by doc_id -- preferring sources/<doc_id>/source.{pdf,djvu} and falling back to the
+    legacy RECOVERED_DIR/<doc_id>.{pdf,djvu} location only if the sources/ path is
+    absent -- and sums word_count_text() over ALL chunk_*.md in chunks_dir (no
+    chunk-exclusion filter -- for this schema the chunks ARE the document)."""
     doc_id = entry["doc_id"]
     chunks_dir = entry["chunks_dir"]
 
@@ -502,9 +513,18 @@ def classify_legacy(entry):
         "djvu_blocked": False,
     }
 
+    # Prefer the canonical sources/<doc_id>/ layout that recovered sources were
+    # migrated into; fall back to the legacy RECOVERED_DIR flat layout only if the
+    # sources/ path is absent (RECOVERED_DIR is expected to be empty post-migration).
+    migrated_pdf = os.path.join(SOURCES_DIR, doc_id, "source.pdf")
+    migrated_djvu = os.path.join(SOURCES_DIR, doc_id, "source.djvu")
     src_pdf = os.path.join(RECOVERED_DIR, f"{doc_id}.pdf")
     src_djvu = os.path.join(RECOVERED_DIR, f"{doc_id}.djvu")
-    if os.path.isfile(src_pdf):
+    if os.path.isfile(migrated_pdf):
+        src = migrated_pdf
+    elif os.path.isfile(migrated_djvu):
+        src = migrated_djvu
+    elif os.path.isfile(src_pdf):
         src = src_pdf
     elif os.path.isfile(src_djvu):
         src = src_djvu

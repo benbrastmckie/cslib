@@ -6,7 +6,7 @@ next_project_number: 580
 
 ## Task Order
 
-*Updated 2026-07-27. Generated from state.json dependency graph.*
+*Updated 2026-07-28. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |

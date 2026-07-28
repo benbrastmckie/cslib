@@ -2123,7 +2123,7 @@
         ".github/workflows/lean_action_ci.yml"
       ],
       "created": "2026-07-27T06:54:27Z",
-      "last_updated": "2026-07-27T17:39:45Z",
+      "last_updated": "2026-07-27T22:40:00Z",
       "session_id": "sess_1785173891_2df686",
       "artifacts": [
         {
@@ -2134,14 +2134,14 @@
       ],
       "plan_metadata": {
         "phases": 8,
-        "phases_complete": 1,
-        "phases_partial": 3,
+        "phases_complete": 7,
+        "phases_partial": 1,
         "complexity": "moderate",
         "plan_version": 1,
         "research_integrated": true,
         "skeleton": false
       },
-      "progress_note": "CI gate restored modulo the 5 genuine sorries (expected end state; those are owned by tasks 317 and 553/557). 36 commits. Remaining: Phase 3 task-refs (312 sites, largest), Phase 4 shake, Phase 5 suppressions (288 pure-style are the best target), Phase 6 warn.sorry rescoping, Phase 7 scripts/docs, Phase 8 dead-code deletions (9 of 10 approved-but-unstarted)."
+      "progress_note": "Phase 7 CLOSED by user decision: NOTATION.md local edit authorized as an explicit exception to the upstream-exposure carve-out (Logic notation scoping section landed, documenting all three senses of the token S); the 5 NOTE: blocks are RETAINED and the false \"stale\" premise struck from the plan. 7 of 8 phases now COMPLETED. Phase 5 (suppression audit) is the sole open workstream: 278 sites done across 68 files; 72 local-only blanket suppressions across 49 files remain (86 repo-wide, 14 upstream-shared and carved out). CI gate green modulo the 5 genuine sorries (expected end state). Next Phase 5 target: Temporal/Metalogic/Chronicle/ChronicleToCountermodel.lean (137 lines)."
     },
     {
       "project_number": 576,

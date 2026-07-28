@@ -64,3 +64,46 @@ to learn about it as well!
   bash scripts/check-shake-residue.sh --list      # print the live flagged set
   bash scripts/check-shake-residue.sh --update    # re-baseline from the live flagged set
   ```
+
+**Silent `sorryAx` taint (axiom census) ratchet**
+- `AxiomCensus.lean` / `check-axiom-census.sh` / `axiom-census-baseline.txt` — a ratchet on
+  declarations whose kernel axiom set contains `sorryAx` even though the declaration's own body
+  has no literal `sorry` token. `lake build --wfail --iofail` only fails on a DIRECT sorry
+  token; a declaration that merely calls an already-sorry'd lemma as a dependency never gets its
+  own "declaration uses 'sorry'" warning, so `--wfail` cannot see it. Two genuine, verified
+  examples on this tree: `Cslib.Logic.PL.minimalTableau_decides` and
+  `Cslib.Logic.PL.intuitionisticTableau_decides` — both build clean under `--wfail`, and both
+  still transitively depend on a sorry. `AxiomCensus.lean` (run via
+  `lake env lean --run scripts/AxiomCensus.lean`, needing a completed `lake build` first) walks
+  the whole public `Cslib` API in one process and reports the exact set of tainted declarations;
+  `check-axiom-census.sh` ratchets that set against the frozen baseline, which doubles as a debt
+  ledger keyed on declaration name + owning file + in-source blocking reason (never a task
+  number). Wired into `.github/workflows/lean_action_ci.yml` (with `if: always()`, since the
+  build step it depends on is currently red by design on 4 known bare-sorry files) and as step 9
+  of `pre-pr-check.sh`.
+
+  **Usage:**
+  ```bash
+  bash scripts/check-axiom-census.sh            # verify against the baseline
+  bash scripts/check-axiom-census.sh --list      # print the live tainted set
+  bash scripts/check-axiom-census.sh --update    # re-baseline from the live tainted set
+  ```
+
+**Sorry/suppression volume ratchet**
+- `check-sorry-suppressions.sh` / `sorry-suppression-baseline.txt` — a per-file two-count
+  ceiling ratchet (marker count, true code-position sorry count) over `Cslib/`. A naive
+  `grep -c sorry` massively overcounts on this tree (currently 180): most hits are prose
+  mentions in doc comments, and `\bsorry\b` even matches inside the option name
+  `set_option warn.sorry false` itself. The script's discrimination rule strips block and line
+  comments, excludes lines mentioning `warn.sorry`, then counts word-boundary `sorry`
+  occurrences on what remains -- see the header comment for the exact rule. No build dependency
+  (pure text sweep), so it is wired into `.github/workflows/lean_action_ci.yml` before the build
+  step (fails fast) and as step 8 of `pre-pr-check.sh`. The baseline also doubles as a debt
+  ledger, recording each file's in-source blocking comment beneath the data rows.
+
+  **Usage:**
+  ```bash
+  bash scripts/check-sorry-suppressions.sh            # verify against the baseline
+  bash scripts/check-sorry-suppressions.sh --list      # print current per-file counts
+  bash scripts/check-sorry-suppressions.sh --update    # re-baseline from the current tree
+  ```

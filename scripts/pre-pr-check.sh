@@ -92,6 +92,23 @@ if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-shake-residue.sh"; then
   failed=1
 fi
 
+# Steps 8/9 are independent of step 1's PR-scope sorry check above: step 1 scans a narrow,
+# hand-picked directory set and fails on ANY sorry found there. Steps 8/9 instead ratchet
+# whole-tree sorry/suppression/axiom-taint debt against a frozen baseline, and pass on the
+# existing debt by construction -- they only fail on NEW debt beyond that baseline. The two
+# checks answer different questions and neither substitutes for the other.
+echo "8. Sorry-suppression count ratchet..."
+if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-sorry-suppressions.sh"; then
+  echo "  FAIL: sorry/suppression counts exceeded the baseline ceiling"
+  failed=1
+fi
+
+echo "9. Axiom-census ratchet (needs the completed build from steps 4/5 above)..."
+if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-axiom-census.sh"; then
+  echo "  FAIL: a declaration outside the axiom-census baseline became sorryAx-tainted"
+  failed=1
+fi
+
 echo "=== Pre-PR Verification Complete ==="
 if [ "$failed" -ne 0 ]; then
   echo "One or more checks FAILED."

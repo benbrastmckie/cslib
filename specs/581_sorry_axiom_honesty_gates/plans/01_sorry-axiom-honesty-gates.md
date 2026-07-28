@@ -455,21 +455,21 @@ execute, with the divergence cost recorded inline (D2).
 
 ---
 
-### Phase 5: pre-pr-check.sh and scripts/README.md wiring [NOT STARTED]
+### Phase 5: pre-pr-check.sh and scripts/README.md wiring [COMPLETED]
 
 **Goal**: Both gates are locally runnable through the same numbered pre-PR script every other ratchet
 uses, and are documented in the same style as the preceding guard (D2).
 
 **Tasks**:
-- [ ] Add step 8 to `scripts/pre-pr-check.sh` for the suppression ratchet, following the exact shape of
+- [x] Add step 8 to `scripts/pre-pr-check.sh` for the suppression ratchet, following the exact shape of
       the existing steps 6/7: `echo "8. ..."`, `if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-sorry-suppressions.sh"; then ... failed=1; fi`.
-- [ ] Add step 9 for the axiom census, with an inline note (like step 7's "needs the completed build from
+- [x] Add step 9 for the axiom census, with an inline note (like step 7's "needs the completed build from
       steps 4/5 above") that it needs the completed build from steps 4/5.
-- [ ] Add a short comment above step 8, in the spirit of the existing step-6 comment, explaining why
+- [x] Add a short comment above step 8, in the spirit of the existing step-6 comment, explaining why
       these gates are independent of step 1's PR-scope sorry check: step 1 scans a narrow directory set
       and fails on any sorry there, whereas these two ratchet whole-tree debt and pass on the existing
       debt by construction. They answer different questions.
-- [ ] Add two `scripts/README.md` entries under their own headings, mirroring the
+- [x] Add two `scripts/README.md` entries under their own headings, mirroring the
       `check-shake-residue.sh` entry's structure (rationale paragraph + `**Usage:**` fenced block with
       the bare / `--list` / `--update` invocations).
   - Axiom-census entry must explain silent taint using the `minimalTableau_decides` /
@@ -478,8 +478,9 @@ uses, and are documented in the same style as the preceding guard (D2).
   - Suppression entry must state the discrimination rule in one or two sentences and note that the
     naive `grep -c sorry` figure is an order of magnitude wrong.
   - No task numbers in either entry.
-- [ ] Confirm `bash scripts/pre-pr-check.sh` still has valid syntax (`bash -n scripts/pre-pr-check.sh`).
+- [x] Confirm `bash scripts/pre-pr-check.sh` still has valid syntax (`bash -n scripts/pre-pr-check.sh`).
       Do **not** run the full script here — steps 4/5 rebuild the tree and step 5 is red by design.
+      Confirmed: "syntax OK".
 
 **Timing**: 0.75 hours
 

@@ -79,6 +79,54 @@ apparatus needed by the `RRelation` shared core and the enrichment/walk machiner
 per this consolidation's risk mitigation, fields are expanded conservatively as each later
 stage needs them, mirroring how `SinceSeedInterface` itself was built up incrementally.
 
+## Consolidation Boundary: What Is Generic and What Stays Per-Logic
+
+The Bimodal/Temporal chronicle-construction consolidation this interface anchors is
+deliberately **partial**, and this boundary is stable rather than a temporary stopping
+point awaiting a future lift.
+
+**Generic (lives under `Foundations/Logic/Metalogic/Chronicle/`)**:
+- this interface (`ChronicleInterface`);
+- the shared DCS/r-relation/r-maximality/Burgess-content-relation layer plus conditions
+  c0–c5′, `ValidChronicle`, C3 consequences, and `ChronicleInvariant`
+  (`Types.lean`);
+- the ~38-lemma shared core of deductive-closure infrastructure, r-relation/r3
+  maximal-extension existence via Zorn, `burgess*_absorption`, and the `untl`/`snce`
+  left-monotonicity family (`RRelation.lean`);
+- the counterexample-elimination Kind/result structures and the fresh-rational Finset
+  helpers plus MCS-level `BurgessR3Maximal_g_content_sub`/`_sdc`/`_bot_not_mem` lemmas
+  (`CounterexampleElimination/Structures.lean`).
+
+**Per-logic (duplicated, by design, in both
+`Logics/Bimodal/Metalogic/BXCanonical/Chronicle/` and
+`Logics/Temporal/Metalogic/Chronicle/`)**:
+- the recursive walk machinery (`c5ForwardWalk`, `c5BackwardWalk`, and their result
+  structures `C5ForwardWalkResult`/`C5BackwardWalkResult`);
+- the counterexample-elimination driver (`eliminatePotentialCounterexample`,
+  `eliminateC5Counterexample`, and its `EliminationResult`);
+- the `ChronicleConstruction` module (`singletonChronicle`, `omegaChain`, `limitG`,
+  `chronicle_model_exists`, and the C0–C5/strong-C5 satisfaction lemmas), including the
+  bimodal-only duality theorems `g_content_sub_imp_h_content_sub` /
+  `h_content_sub_imp_g_content_sub`;
+- `C5Counterexample`/`C5'Counterexample` and `c2'_preserved_on_old_adjacent` in the
+  counterexample-elimination layer.
+
+**Structural reason this boundary holds**: every declaration in the second group is
+indexed by, or returns, `χ : Chronicle Atom` — each logic's own **local** `Chronicle`
+structure (defined per-logic in `ChronicleTypes.lean`), which is a genuinely separate
+Lean type from this module tree's generic
+`Cslib.Logic.Metalogic.Chronicle.Types.Chronicle F`, not an alias to it. The walk and
+elimination proof bodies are saturated with `rcases`/`simp only [...]`-style
+pattern-matching on Finset-membership subterms nested inside chronicle-condition
+statements (e.g. destructuring `χ.mem_insert`-shaped hypotheses). A candidate bridge
+(`toGeneric : Chronicle Atom → Chronicle F`) type-checks standalone — it is definitionally
+equal to the local structure's fields — but is not *eagerly reduced*, so inserting it as
+an extra projection layer stops `rcases`/`simp` from recognizing the bridged term as a
+`Finset` at all, breaking every downstream proof that pattern-matches through it. Repairing
+that breakage across the walk/driver/construction proof bodies is proof work, not
+structural deduplication, so the consolidation stops at the interface/types/RRelation/CEE
+Structures layer and leaves the walk-and-below layers local in both logics.
+
 ## References
 
 * Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleTypes.lean

@@ -452,3 +452,71 @@ CSLib:
 - `Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean:76-88` —
   `modalDeductiveClosure`, `modal_subset_deductive_closure`.
 - `Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean` — `prime_set_exclusion`.
+
+---
+
+## Adversarial Self-Verification
+
+Independent verification pass (divergence-audit focus). Every load-bearing claim was checked
+against the current codebase, by re-running axiom checks, or against the ingested literature
+chunks in `~/Projects/Literature/sources/`. Source line numbers below refer to the converted
+markdown files (`{doc_id}/{doc_id}.md`) for literature, and to current HEAD for Lean files.
+
+**Context note**: the report's recommendations have since been implemented (git history: task
+554 phases 2-4 landed the refutation, `CS5PairSeedRightExclusion`, the caller-side bridge, and
+`Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean`). Lean line numbers cited in the report
+body (e.g. `CS5Completeness.lean:373-375`) were accurate at authoring time but have drifted;
+current locations are given in the table.
+
+| Claim | Source/Counterexample | Verdict |
+|-------|----------------------|---------|
+| §0: `seed_refutation.lean` sorry-free, axioms `[propext, Classical.choice, Quot.sound]` | Probe contains no `sorry`; landed twins `cs5PairSeedDisjunctionProperty_false` / `_false_of_boxMem` re-checked this pass via `#print axioms`: exactly `[propext, Classical.choice, Quot.sound]`, no `sorryAx` | VERIFIED |
+| §0: `cs5_subset_is5.lean` sorry-free, axioms `[propext, Quot.sound]` | Landed as `Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean`; `#print axioms` re-run: `cs5Axiom_to_is5Axiom` axiom-free, `cs5_closure_subset_is5_closure` = `[propext, Quot.sound]` | VERIFIED |
+| §1: named obligation carries no hypothesis relating `H` and `A` | `CS5Completeness.lean:395-397` (def unchanged in substance; moved from 373-375) | VERIFIED |
+| §1: every `CS5` theorem ∈ `modalDeductiveClosure CS5ModalAxiom S` for every `S`, witness `[]` | `PrimeTheory.lean:77-81`: `{φ \| ∃ L, (∀ x ∈ L, x ∈ S) ∧ Deriv L φ}` — `L := []` makes the membership condition vacuous | VERIFIED |
+| §1: refutation at `A := ⊥ → ⊥`, uniformly in `H` | Landed `cs5PairSeedDisjunctionProperty_false` (`CS5Completeness.lean:543`); module builds clean; axiom-checked above | VERIFIED |
+| §1.1: hypothesis (ii) `□A ∉ H` does not imply (i) `A ∉ cl_{CS5}(boxInv H)` | `□(B→A), □B ∈ H` gives `B→A, B ∈ boxInv H`, so `A ∈ cl` by MP — reasoning checks; no counterexample found | VERIFIED |
+| §1: round 1's `hOpen ↔ hR` equivalence | Both directions landed, `CS5Completeness.lean:616-638` | VERIFIED |
+| §2.1: MMS Thm 3.3 (TFAE), Thm 6.1 (cut adm., leftmost-topmost via Lemma 6.5), Thm 7.1 [PS86], Thm 7.2, Remark 7.3, `⊠g_klmn` cut-case quote | MMS21 source `:391`, `:604` + `:960`, `:975`, `:991`, `:1054`, `:1025` — all statements match | VERIFIED |
+| §2.2: CSLib `CS5` axioms beyond `k`/`kdia` are one-sided Scott–Lemmon; `(k,l,m,n)` table | `CS5.lean:167-220` constructors match; all six `(k,l,m,n)` assignments arithmetic-checked against `◇^k□^l A ⊃ □^m◇^n A` | VERIFIED |
+| §2.2: `labIK≤`'s base is `IK` not `CK`; §4 derives `k3`/`k4`/`k5` | MMS21 `:140` (IK = IPL + nec + k1–k5), derivations `:418-514` (`k3` :467, `k4` :486, `k5` :514) | VERIFIED |
+| §3.1: ADS15 Def 6.2 safe-pair conditions; `X={t,4}, Y={b}` is safe | ADS15 source `:1138-1143` verbatim; both side conditions check for `X={t,4}, Y={b}` | VERIFIED |
+| §3.1: eq (1.2) axiom forms match CSLib constructors exactly | ADS15 `:188-193` (t/4/b dual forms) vs `CS5.lean:203-220` | VERIFIED |
+| §3.2: Kripke-semantics disclaimer quote | ADS15 `:652-653`, verbatim | VERIFIED |
+| §3.2: ADS15 use cut-elim for non-derivability ("5 axiom alone is not enough to derive k3 or k5") | ADS15 `:999` | VERIFIED |
+| §4: `b ⊢ k3, k5`; "since b is derivable in CS5, both k3 [and] k5 are derivable in CS5" | ADS15 `:252`, `:1001-1002` (source reads "both k3 or k5" — trivial wording variance) | VERIFIED |
+| §4: `□(A∨B) → (□A ∨ □B)` is not a classical `S5` theorem | Two-world universal frame, `A` at `w1` only, `B` at `w2` only: `□(A∨B)` holds, `□A`/`□B` fail — standard countermodel, reasoning checks | VERIFIED |
+| §5.1: `CS5ModalAxiom` constructors are a literal subset of `IS5ModalAxiom`'s | Constructor-by-constructor comparison `CS5.lean:167-220` vs `IS5.lean:83-146`; landed `CS5ToIS5.lean:60` proves it | VERIFIED |
+| §5.1: `IS5ModalAxiom` adds `kdisj` (k3), `kfs` (k4), `kbot` (k5) | Actual constructor names are `cd` (`IS5.lean:119`), `idb` (`:122`), `dbot` (`:125`) — the k3/k4/k5 substance is correct, the names are not | REFUTED |
+| §5.3 (R-a): CSLib's `f2` moves the first coordinate to a `≤`-successor | `IS5.lean:266`: `r w u → u ≤ u' → ∃ w', w ≤ w' ∧ r w' u'` — verbatim match | VERIFIED |
+| §5.3: `cs5Incest` "mechanically false on every world type tried" | Paraphrase of `cs5Incest_cs5CanonMreach_false` (`CS5Canonical.lean:447`) and `cs5Incest_cs5PrimeMreach_false` (`:607` region, "RESULT: FAILURE, mechanized below") — two world types, both mechanized-false | VERIFIED |
+| §5.2: product-model construction, projection lemma, componentwise frame transfer, cross1/cross2 forcing `r u v` | Design-level proposal, not formalized; forcing analysis is consistent with the birelational box semantics but unproven — the report itself gates it behind the (R-a) probe | UNCERTAIN |
+| §6: Pacheco Lemma 16 negation-completeness quote | Pacheco24 source `:478-484`, verbatim ("Then if ϕ ∉ Θ and ψ ∉ Θ, we would have that ¬ϕ ∈ Θ and ¬ψ ∈ Θ. By MP, we would have ¬(ϕ ∨ ψ) ∈ Θ, a contradiction.") | VERIFIED |
+| §6: Lemma 18 asserts the base pair satisfies the constraint list without proof | Pacheco24 Lemma 18 proof: only `ϕ ∉ Υ`, `⊥ ∉ Υ`, `⊥ ∉ Φ` are argued, then "Note that ⟨Υ, Φ⟩ is a pair which satisfies these properties" is bare assertion; `ϕ ∉ Φ` and the cross-closure conditions unargued | VERIFIED |
+| §6: Pacheco's `CS5 = IS5` collapse rests on Lemmas 16/18 | Pacheco24 `:728` ("…constructive and intuitionistic variations of DB, TB, KB5, and S5 coincide"), in the §4 conclusions downstream of Lemmas 16-18 | VERIFIED |
+
+### Correction note (one REFUTED row)
+
+§5.1 (and the probe comment in `cs5_subset_is5.lean:14`) names the three `IS5ModalAxiom`-only
+constructors `kdisj`/`kfs`/`kbot`. The actual constructor names are **`cd`** (k3, Fischer-Servi
+`◇(φ∨ψ) → ◇φ ∨ ◇ψ`), **`idb`** (k4, `(◇φ → □ψ) → □(φ → ψ)`), and **`dbot`** (k5, `◇⊥ → ⊥`) at
+`IS5.lean:119/122/125`. The mathematical content of §5.1 is unaffected — the subset inclusion is
+real and now landed (`CS5ToIS5.lean`) — but anyone writing Lean against the report's names would
+hit unknown-constructor errors. No other claim depends on the wrong names.
+
+### BibKey status
+
+`references.bib` contains `Pacheco2024` (:949), `ArisakaDasStrassburger2015` (:957), and
+`MarinMoralesStrassburger2021` (:1016). The report's shorthand tags `[ADS15]`/`[MMS21]`/
+`[Pacheco24]` do not match those BibKeys exactly; the module docstring's `[Pacheco2024]` does.
+Downstream artifacts citing these works should use the verified BibKeys.
+
+### Analysis-paralysis verdict
+
+**PASS — not analysis-paralysis.** The report delivers a machine-checked refutation (not an
+opinion), a concrete drop-in repair (`CS5PairSeedRightExclusion`, §1.1), a ranked cost table
+(§5.4), a single scoped next probe (§8.2, the (R-a) totality question) with an explicit
+kill-criterion ("if (R-a) fails, mark [BLOCKED]"), and an explicit not-adopted list (§8.3).
+Its land-now recommendations (§8.1 items 1-4) were in fact all implemented in subsequent task
+554 phases, which is direct evidence the recommendations were implementable as stated. No
+deferred decisions without owners; the one open mathematical question is isolated and probe-sized.

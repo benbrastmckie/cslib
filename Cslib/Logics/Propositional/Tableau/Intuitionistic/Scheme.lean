@@ -1164,6 +1164,61 @@ private def IExpandedAccessConsistentQ (edges : IEdges) (rep : Nat → Nat) (b :
     (e : List (ISF Atom)) : Prop :=
   ∀ sf ∈ e, sfAccessSatQ edges rep b sf
 
+/-! ### 5.4 — Quotient-restated branch-level predicates -/
+
+/-- Saturation conditions for an open intuitionistic tableau branch, restated over a
+representative map `rep`: identical to `IBranchSaturation` (`:74-108`) in EVERY field except
+`sat_fimp`, whose ordering witness is required on the QUOTIENT (`rep w ≤ rep w'`) rather than
+on the raw label order — the D5 restatement that makes an ancestor witness admissible. The
+spike prototyped this exact shape (`specs/574_.../handoffs/01_quotient-soundness-spike-decision.md`)
+and confirmed it elaborates with zero diagnostics. -/
+structure IBranchSaturationQ (Atom : Type*) [DecidableEq Atom] [Hashable Atom]
+    (b : IBranch Atom) (rep : Nat → Nat) where
+  /-- T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b (alpha-rule saturation) -/
+  sat_tand : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .pos && sf.formula == .and φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) = true ∧
+      b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w) = true
+  /-- F(φ∧ψ)@w ∈ b → F(φ)@w ∈ b ∨ F(ψ)@w ∈ b (beta-rule: one sub-branch taken) -/
+  sat_fand : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .neg && sf.formula == .and φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∨
+      b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w) = true
+  /-- T(φ∨ψ)@w ∈ b → T(φ)@w ∈ b ∨ T(ψ)@w ∈ b (beta-rule: one sub-branch taken) -/
+  sat_tor : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .pos && sf.formula == .or φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) = true ∨
+      b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w) = true
+  /-- F(φ∨ψ)@w ∈ b → F(φ)@w ∈ b ∧ F(ψ)@w ∈ b (alpha-rule saturation) -/
+  sat_for_ : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .neg && sf.formula == .or φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∧
+      b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w) = true
+  /-- F(φ→ψ)@w ∈ b → ∃ w', rep w ≤ rep w' ∧ T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b (world-creating rule,
+  QUOTIENT-ordered — the sole field that differs from `IBranchSaturation`). -/
+  sat_fimp : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .neg && sf.formula == .imp φ ψ && sf.label == w) = true →
+      ∃ (w' : Nat), rep w ≤ rep w' ∧
+        b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
+        b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
+  /-- T(φ→ψ)@w ∈ b → F(φ)@w ∈ b ∨ T(ψ)@w ∈ b (Fitting Ch. 4 split, reflexive at `w`; copied
+  UNCHANGED from `IBranchSaturation` — `sat_timp` is not in scope, D2). -/
+  sat_timp : ∀ (φ ψ : Proposition Atom) (w : Nat),
+      b.any (fun sf => sf.sign == .pos && sf.formula == .imp φ ψ && sf.label == w) = true →
+      b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∨
+      b.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w) = true
+
+/-- The edge-accessibility payoff, restated over `rep`: every `F(φ→ψ)@w` on the saturated
+branch `b` has a genuinely edge-accessible witness BETWEEN REPRESENTATIVES under `edges`.
+Mirrors `IFimpAccess` (`:442-447`) with `isAccessible edges w w'` replaced by
+`isAccessible edges (rep w) (rep w')`. -/
+def IFimpAccessQ (edges : IEdges) (rep : Nat → Nat) (b : IBranch Atom) : Prop :=
+  ∀ (φ ψ : Proposition Atom) (w : Nat),
+    b.any (fun sf => sf.sign == .neg && sf.formula == .imp φ ψ && sf.label == w) = true →
+    ∃ w' : Nat, isAccessible edges (rep w) (rep w') = true ∧
+      b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
+      b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
+
 omit [Hashable Atom] in
 /-- When `intStepBranch b e nw = none` and `sf ∈ b` with `intApplyRuleFull sf nw b ≠ .notApplicable`
 (i.e., `sf` is a compound formula), then `sf ∈ e`. -/
@@ -1273,6 +1328,96 @@ private lemma IExpandedConsistent_sat
       rw [hsfeq]; simp [intApplyRuleFull]
     have hsat := compound_sat sf hsfb hcomp
     rw [hsfeq] at hsat; simp only [sfSatisfied] at hsat
+    exact hsat
+
+/-- Given `intStepBranch b e nw = none` and `IExpandedConsistentQ rep b e`, every saturation
+condition of `IBranchSaturationQ Atom b rep` holds. Mirrors `IExpandedConsistent_sat`'s proof
+verbatim, `sf`-case by `sf`-case: `sfSatisfiedQ`'s cases have the exact same shape as
+`sfSatisfied`'s, so the same `hsfeq`/`intApplyRuleFull`-unfolding pattern applies; the
+`sat_fimp` bullet closes by `exact hsat` because `sfSatisfiedQ`'s `.neg, .imp` clause and the
+field are definitionally identical (both `∃ w', rep w ≤ rep w' ∧ …`), the same property
+`IExpandedConsistent_sat`'s own `sat_fimp` bullet relies on. -/
+private lemma IExpandedConsistentQ_sat
+    {rep : Nat → Nat} {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    (hstep : intStepBranch b e nw = none)
+    (hIC : IExpandedConsistentQ rep b e) :
+    IBranchSaturationQ Atom b rep := by
+  have compound_sat : ∀ (sf : ISF Atom),
+      sf ∈ b → intApplyRuleFull sf nw b ≠ .notApplicable → sfSatisfiedQ rep b sf := by
+    intro sf hsfb hcomp
+    exact hIC sf (intStepBranch_none_compound_mem hstep sf hsfb hcomp)
+  constructor
+  · -- sat_tand: T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.pos, .and φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfiedQ] at hsat
+    exact hsat
+  · -- sat_fand: F(φ∧ψ)@w ∈ b → F(φ)@w ∈ b ∨ F(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.neg, .and φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfiedQ] at hsat
+    exact hsat
+  · -- sat_tor: T(φ∨ψ)@w ∈ b → T(φ)@w ∈ b ∨ T(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.pos, .or φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfiedQ] at hsat
+    exact hsat
+  · -- sat_for_: F(φ∨ψ)@w ∈ b → F(φ)@w ∈ b ∧ F(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.neg, .or φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfiedQ] at hsat
+    exact hsat
+  · -- sat_fimp: F(φ→ψ)@w ∈ b → ∃ w', rep w ≤ rep w' ∧ T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.neg, .imp φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfiedQ] at hsat
+    exact hsat
+  · -- sat_timp: T(φ→ψ)@w ∈ b → F(φ)@w ∈ b ∨ T(ψ)@w ∈ b
+    intro φ ψ w hmem
+    rw [List.any_eq_true] at hmem
+    obtain ⟨sf, hsfb, hsfp⟩ := hmem
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+    obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+    have hsfeq : sf = ⟨.pos, .imp φ ψ, w⟩ := by cases sf; simp_all
+    have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+      rw [hsfeq]; simp [intApplyRuleFull]
+    have hsat := compound_sat sf hsfb hcomp
+    rw [hsfeq] at hsat; simp only [sfSatisfiedQ] at hsat
     exact hsat
 
 /-- Label-boundedness invariant: every formula on `b` has a label at most `nw`, the
@@ -1740,6 +1885,29 @@ private lemma IExpandedAccessConsistent_sat
     rw [hsfeq]; simp [intApplyRuleFull]
   have hsat := hACC sf (intStepBranch_none_compound_mem hstep sf hsfb hcomp)
   rw [hsfeq] at hsat; simp only [sfAccessSat] at hsat
+  exact hsat
+
+omit [Hashable Atom] in
+/-- Given `intStepBranch b e nw = none` and `IExpandedAccessConsistentQ edges rep b e`,
+`IFimpAccessQ edges rep b` holds. Mirrors `IExpandedAccessConsistent_sat`'s extraction
+pattern verbatim, restricted to the one `.neg, .imp` case `sfAccessSatQ` covers; the two
+definitions are shaped identically modulo the `rep`-wrapping on the accessibility witness, so
+the same `hsfeq`-based rewriting closes it. -/
+private lemma IExpandedAccessConsistentQ_sat
+    {rep : Nat → Nat} {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat} {edges : IEdges}
+    (hstep : intStepBranch b e nw = none)
+    (hACC : IExpandedAccessConsistentQ edges rep b e) :
+    IFimpAccessQ edges rep b := by
+  intro φ ψ w hmem
+  rw [List.any_eq_true] at hmem
+  obtain ⟨sf, hsfb, hsfp⟩ := hmem
+  simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+  obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+  have hsfeq : sf = ⟨.neg, .imp φ ψ, w⟩ := by cases sf; simp_all
+  have hcomp : intApplyRuleFull sf nw b ≠ .notApplicable := by
+    rw [hsfeq]; simp [intApplyRuleFull]
+  have hsat := hACC sf (intStepBranch_none_compound_mem hstep sf hsfb hcomp)
+  rw [hsfeq] at hsat; simp only [sfAccessSatQ] at hsat
   exact hsat
 
 /-! ## Fixed Finite Universe and Counting Work

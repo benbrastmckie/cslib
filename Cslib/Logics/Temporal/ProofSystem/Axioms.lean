@@ -21,8 +21,6 @@ BX temporal proof system.
 - `minFrameClass`: Minimum frame class for each axiom
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal
@@ -79,92 +77,72 @@ Organized into layers:
 -/
 inductive Axiom : Formula Atom → Type u where
   -- Layer 1: Propositional (4)
-
   /-- Propositional K (distribution): (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ)) -/
   | imp_k (φ ψ χ : Formula Atom) :
       Axiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
-
   /-- Propositional S (weakening): φ → (ψ → φ) -/
   | imp_s (φ ψ : Formula Atom) : Axiom (φ.imp (ψ.imp φ))
-
   /-- Ex Falso Quodlibet: ⊥ → φ -/
   | efq (φ : Formula Atom) : Axiom (Formula.bot.imp φ)
-
   /-- Peirce's Law: ((φ → ψ) → φ) → φ -/
   | peirce (φ ψ : Formula Atom) : Axiom (((φ.imp ψ).imp φ).imp φ)
-
   -- Layer 2: BX Temporal (22)
-
   /-- BX1: Serial future: ⊤ → F(⊤) -/
   | serial_future :
       Axiom (Formula.top.imp (Formula.someFuture Formula.top))
-
   /-- BX1': Serial past: ⊤ → P(⊤) -/
   | serial_past :
       Axiom (Formula.top.imp (Formula.somePast Formula.top))
-
   /-- BX2G: Guard monotonicity of Until under G:
       G(φ → ψ) → (φ U χ → ψ U χ) -/
   | left_mono_until_G (φ ψ χ : Formula Atom) :
       Axiom ((φ.imp ψ).allFuture.imp ((Formula.untl φ χ).imp (Formula.untl ψ χ)))
-
   /-- BX2H: Guard monotonicity of Since under H:
       H(φ → ψ) → (φ S χ → ψ S χ) -/
   | left_mono_since_H (φ ψ χ : Formula Atom) :
       Axiom ((φ.imp ψ).allPast.imp ((Formula.snce φ χ).imp (Formula.snce ψ χ)))
-
   /-- BX3: Event monotonicity of Until:
       G(φ → ψ) → (χ U φ → χ U ψ) -/
   | right_mono_until (φ ψ χ : Formula Atom) :
       Axiom ((φ.imp ψ).allFuture.imp ((Formula.untl χ φ).imp (Formula.untl χ ψ)))
-
   /-- BX3': Event monotonicity of Since:
       H(φ → ψ) → (χ S φ → χ S ψ) -/
   | right_mono_since (φ ψ χ : Formula Atom) :
       Axiom ((φ.imp ψ).allPast.imp ((Formula.snce χ φ).imp (Formula.snce χ ψ)))
-
   /-- BX4: Temporal connectedness future: φ → G(P(φ)) -/
   | connect_future (φ : Formula Atom) :
       Axiom (φ.imp (φ.somePast.allFuture))
-
   /-- BX4': Temporal connectedness past: φ → H(F(φ)) -/
   | connect_past (φ : Formula Atom) :
       Axiom (φ.imp (φ.someFuture.allPast))
-
   /-- BX13: Until-Since enrichment:
       p ∧ (φ U ψ) → φ U (ψ ∧ (φ S p)) -/
   | enrichment_until (φ ψ p : Formula Atom) :
       Axiom (Formula.and p (Formula.untl φ ψ) |>.imp
         (Formula.untl φ (Formula.and ψ (Formula.snce φ p))))
-
   /-- BX13': Since-Until enrichment:
       p ∧ (φ S ψ) → φ S (ψ ∧ (φ U p)) -/
   | enrichment_since (φ ψ p : Formula Atom) :
       Axiom (Formula.and p (Formula.snce φ ψ) |>.imp
         (Formula.snce φ (Formula.and ψ (Formula.untl φ p))))
-
   /-- BX5: Self-accumulation of Until:
       φ U ψ → (φ ∧ (φ U ψ)) U ψ -/
   | self_accum_until (φ ψ : Formula Atom) :
       Axiom ((Formula.untl φ ψ).imp
         (Formula.untl (Formula.and φ (Formula.untl φ ψ)) ψ))
-
   /-- BX5': Self-accumulation of Since:
       φ S ψ → (φ ∧ (φ S ψ)) S ψ -/
   | self_accum_since (φ ψ : Formula Atom) :
       Axiom ((Formula.snce φ ψ).imp
         (Formula.snce (Formula.and φ (Formula.snce φ ψ)) ψ))
-
   /-- BX6: Absorption of Until:
       φ U (φ ∧ (φ U ψ)) → φ U ψ -/
   | absorb_until (φ ψ : Formula Atom) :
       Axiom ((Formula.untl φ (Formula.and φ (Formula.untl φ ψ))).imp (Formula.untl φ ψ))
-
   /-- BX6': Absorption of Since:
       φ S (φ ∧ (φ S ψ)) → φ S ψ -/
   | absorb_since (φ ψ : Formula Atom) :
       Axiom ((Formula.snce φ (Formula.and φ (Formula.snce φ ψ))).imp (Formula.snce φ ψ))
-
   /-- BX7: Linearity of Until:
       U(φ,ψ) ∧ U(χ,θ) → U(φ∧χ,ψ∧θ) ∨ U(φ∧χ,ψ∧χ) ∨ U(φ∧χ,φ∧θ) -/
   | linear_until (φ ψ χ θ : Formula Atom) :
@@ -174,7 +152,6 @@ inductive Axiom : Formula Atom → Type u where
             (Formula.untl (Formula.and φ χ) (Formula.and ψ θ))
             (Formula.untl (Formula.and φ χ) (Formula.and ψ χ)))
           (Formula.untl (Formula.and φ χ) (Formula.and φ θ))))
-
   /-- BX7': Linearity of Since:
       S(φ,ψ) ∧ S(χ,θ) → S(φ∧χ,ψ∧θ) ∨ S(φ∧χ,ψ∧χ) ∨ S(φ∧χ,φ∧θ) -/
   | linear_since (φ ψ χ θ : Formula Atom) :
@@ -184,15 +161,12 @@ inductive Axiom : Formula Atom → Type u where
             (Formula.snce (Formula.and φ χ) (Formula.and ψ θ))
             (Formula.snce (Formula.and φ χ) (Formula.and ψ χ)))
           (Formula.snce (Formula.and φ χ) (Formula.and φ θ))))
-
   /-- BX10: Until implies eventuality: U(φ, ψ) → F(ψ) -/
   | until_F (φ ψ : Formula Atom) :
       Axiom ((Formula.untl φ ψ).imp (Formula.someFuture ψ))
-
   /-- BX10': Since implies past eventuality: S(φ, ψ) → P(ψ) -/
   | since_P (φ ψ : Formula Atom) :
       Axiom ((Formula.snce φ ψ).imp (Formula.somePast ψ))
-
   /-- BX11: Temporal linearity:
       F(φ) ∧ F(ψ) → F(φ ∧ ψ) ∨ F(φ ∧ F(ψ)) ∨ F(F(φ) ∧ ψ) -/
   | temp_linearity (φ ψ : Formula Atom) :
@@ -200,7 +174,6 @@ inductive Axiom : Formula Atom → Type u where
         (Formula.or (Formula.someFuture (Formula.and φ ψ))
           (Formula.or (Formula.someFuture (Formula.and φ (Formula.someFuture ψ)))
             (Formula.someFuture (Formula.and (Formula.someFuture φ) ψ)))))
-
   /-- BX11': Temporal linearity past:
       P(φ) ∧ P(ψ) → P(φ ∧ ψ) ∨ P(φ ∧ P(ψ)) ∨ P(P(φ) ∧ ψ) -/
   | temp_linearity_past (φ ψ : Formula Atom) :
@@ -208,74 +181,59 @@ inductive Axiom : Formula Atom → Type u where
         (Formula.or (Formula.somePast (Formula.and φ ψ))
           (Formula.or (Formula.somePast (Formula.and φ (Formula.somePast ψ)))
             (Formula.somePast (Formula.and (Formula.somePast φ) ψ)))))
-
   /-- BX12: F-Until equivalence: F(φ) → U(⊤, φ) -/
   | F_until_equiv (φ : Formula Atom) :
       Axiom ((Formula.someFuture φ).imp (Formula.untl Formula.top φ))
-
   /-- BX12': P-Since equivalence: P(φ) → S(⊤, φ) -/
   | P_since_equiv (φ : Formula Atom) :
       Axiom ((Formula.somePast φ).imp (Formula.snce Formula.top φ))
-
   -- Layer 3: Density (2)
-
   /-- Density axiom: G(G(φ)) → G(φ). Valid on densely ordered frames. -/
   | density (φ : Formula Atom) :
       Axiom (φ.allFuture.allFuture.imp φ.allFuture)
-
   /-- Dense indicator: ¬U(⊥, ⊤). Asserts no immediate successor exists.
       Valid on densely ordered frames. -/
   | dense_indicator :
       Axiom (Formula.untl Formula.bot Formula.top).neg
-
   -- Layer: Metric Uniformity (4)
-
   /-- Metric symmetry (fwd): U(⊥,⊤) → S(⊥,⊤). Immediate successor ⇒ immediate predecessor.
       Metric uniformity / homogeneity of ordered-abelian-group time (negation symmetry). -/
   | discrete_symm_fwd :
       Axiom ((Formula.untl Formula.bot Formula.top).imp
         (Formula.snce Formula.bot Formula.top))
-
   /-- Metric symmetry (bwd): S(⊥,⊤) → U(⊥,⊤). Immediate predecessor ⇒ immediate successor.
       Metric uniformity / homogeneity of ordered-abelian-group time (negation symmetry). -/
   | discrete_symm_bwd :
       Axiom ((Formula.snce Formula.bot Formula.top).imp
         (Formula.untl Formula.bot Formula.top))
-
   /-- Metric propagation (fwd): U(⊥,⊤) → G(U(⊥,⊤)). Metric uniformity / homogeneity of
       ordered-abelian-group time: translation-invariance forwards. -/
   | discrete_propagate_fwd :
       Axiom ((Formula.untl Formula.bot Formula.top).imp
         (Formula.allFuture (Formula.untl Formula.bot Formula.top)))
-
   /-- Metric propagation (bwd): U(⊥,⊤) → H(U(⊥,⊤)). Metric uniformity / homogeneity of
       ordered-abelian-group time: translation-invariance backwards. -/
   | discrete_propagate_bwd :
       Axiom ((Formula.untl Formula.bot Formula.top).imp
         (Formula.allPast (Formula.untl Formula.bot Formula.top)))
-
   -- Layer 4: G/H classical-equivalence bridge axioms (4)
   -- These connect the primitive `allFuture`/`allPast` constructors
   -- to the Foundation-level derived encodings `¬F¬φ` / `¬P¬φ`.
-
   /-- G-to-¬F¬ (bridge): allFuture φ → ¬(someFuture (¬φ)).
       Holds constructively: if φ holds at all future times, then
       there is no future time where ¬φ holds. -/
   | allFuture_to_classic (φ : Formula Atom) :
       Axiom (φ.allFuture.imp (Formula.neg (Formula.someFuture (Formula.neg φ))))
-
   /-- ¬F¬-to-G (bridge): ¬(someFuture (¬φ)) → allFuture φ.
       Requires classical logic (double-negation elimination);
       justified by Peirce's law in the BX axiom system. -/
   | classic_to_allFuture (φ : Formula Atom) :
       Axiom ((Formula.neg (Formula.someFuture (Formula.neg φ))).imp φ.allFuture)
-
   /-- H-to-¬P¬ (bridge): allPast φ → ¬(somePast (¬φ)).
       Holds constructively: if φ held at all past times, then
       there is no past time where ¬φ held. -/
   | allPast_to_classic (φ : Formula Atom) :
       Axiom (φ.allPast.imp (Formula.neg (Formula.somePast (Formula.neg φ))))
-
   /-- ¬P¬-to-H (bridge): ¬(somePast (¬φ)) → allPast φ.
       Requires classical logic; justified by Peirce's law in the BX system. -/
   | classic_to_allPast (φ : Formula Atom) :

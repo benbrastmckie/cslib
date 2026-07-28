@@ -1,30 +1,59 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-28T15:21:59Z",
+  "completed_at": "2026-07-28T16:45:00Z",
   "artifacts": [
+    {"type": "plan", "path": "specs/580_shake_ci_gate_restore_green/plans/01_restore-shake-ci-gate.md"},
+    {"type": "summary", "path": "specs/580_shake_ci_gate_restore_green/summaries/01_restore-shake-ci-gate-summary.md"},
     {"type": "lean_source", "path": "Cslib/Logics/Modal/Basic.lean"},
     {"type": "lean_source", "path": "Cslib/Foundations/Data/HasFresh.lean"},
+    {"type": "ci_workflow", "path": ".github/workflows/lean_action_ci.yml"},
     {"type": "script", "path": "scripts/check-shake-residue.sh"},
     {"type": "baseline", "path": "scripts/shake-residue-baseline.txt"},
     {"type": "script", "path": "scripts/pre-pr-check.sh"},
     {"type": "doc", "path": "scripts/README.md"},
-    {"type": "ci_workflow", "path": ".github/workflows/lean_action_ci.yml"},
     {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase1-handoff.md"},
     {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase2-handoff.md"},
-    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase3-handoff.md"}
+    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase3-handoff.md"},
+    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase4-handoff.md"}
   ],
   "partial_progress": {
-    "stage": "phase_3_complete",
-    "details": "lake shake CI step commented out with full audit-trail rationale block; YAML valid; diff confined to the step + comment block; upstream SHA confirmed unchanged (f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1)",
+    "stage": "complete",
+    "details": "All 4 phases completed and verified. One documented deviation: live shake residue is 9 files not the predicted 10 (LcAt.lean side effect, verified byte-identical to upstream, not itself touched).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 3,
-    "last_completed_phase": "Phase 3: Disable the lake shake CI step with inline alignment rationale"
+    "phases_completed": 4,
+    "last_completed_phase": "Phase 4: Re-verify CI steps and upstream byte-identity"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "axiom_count_note": "repo-wide axiom count unchanged at 26 (pre-task and post-task); zero new axioms introduced by this task's edits",
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_steps": {
+      "lake_build_scoped": "pass",
+      "lake_build_full": "pass (3309/3309 jobs, no new warnings)",
+      "checkInitImports": "pass",
+      "lake_lint_note": "not run as part of this task's CI pipeline check; lake test/mk_all/checkInitImports/lint-style are the four steps this task's Definition of Done specifies",
+      "lint_style": "pass",
+      "shake_minimized_imports": "N/A -- this task's own subject is the shake CI step itself; lake shake --add-public --keep-implied --keep-prefix Cslib exits 1 by design (9 files, all pre-existing upstream-identical debt, tracked in scripts/shake-residue-baseline.txt), CI step now intentionally disabled with inline rationale",
+      "mk_all_module": "pass (No update necessary)",
+      "lake_test": "pass (5 pre-existing warnings only: 4 sorry declarations + 1 privateInPublic, no new warnings)"
+    },
+    "wfail_iofail_sorry_gate": "confirmed RED as expected, out of scope, not modified",
+    "shake_guard": "pass (scripts/check-shake-residue.sh exits 0; clean/regression/improvement/--list/bad-flag paths all proven)",
+    "lint_suppression_guard": "pass (scripts/check-lint-suppressions.sh exits 0, 19/19 unchanged)",
+    "upstream_byte_identity": "pass (all 9 residual files + LcAt.lean confirmed git diff --quiet upstream/main)",
+    "upstream_sha_resolved": "f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1 (unchanged from audit SHA)"
   },
   "metadata": {
     "session_id": "sess_1785251101_8e14cc_580",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

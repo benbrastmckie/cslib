@@ -1,0 +1,53 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "task_number": 580,
+  "session_id": "sess_1785251101_8e14cc_580",
+  "phase": "implement",
+  "status": "implemented",
+  "next_action": "pr",
+  "next_action_hint": "Task implementation complete. Per the PR/push prohibition, no branch was created and no PR was submitted -- invoke /pr 580 (or /merge, depending on task_type routing) to submit for review.",
+  "plan_path": "specs/580_shake_ci_gate_restore_green/plans/01_restore-shake-ci-gate.md",
+  "report_path": "specs/580_shake_ci_gate_restore_green/reports/01_shake_ci_gate_restore_green.md",
+  "summary_path": "specs/580_shake_ci_gate_restore_green/summaries/01_restore-shake-ci-gate-summary.md",
+  "summary": "All 4 phases complete. Phase 1 applied shake's own suggested import deltas to Cslib/Logics/Modal/Basic.lean (+1 import) and Cslib/Foundations/Data/HasFresh.lean (-1, +4 imports); full lake build succeeds with no new warnings (3309/3309 jobs). Phase 2 added scripts/check-shake-residue.sh (exact-set ratchet guard) plus scripts/shake-residue-baseline.txt, wired into scripts/pre-pr-check.sh step 7 and documented in scripts/README.md; clean/regression/improvement/--list/bad-flag paths all proven via .bak-backed baseline copies. Phase 3 commented out the lake shake CI step in .github/workflows/lean_action_ci.yml matching upstream's own commenting shape, with a full inline audit-trail rationale block (date, upstream SHA, byte-identical-residue statement, upstream's own disabling commit, why selective exemption was rejected, pointer to the local guard); YAML valid, diff confined to the step. Phase 4 re-verified: upstream/main SHA unchanged (f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1), all residual files byte-identical to upstream, all four non-build CI steps exit 0, both guards exit 0, sorry gate confirmed still red and untouched as expected. One documented deviation throughout: live shake residue is 9 files not the predicted 10 (LcAt.lean dropped out as a --keep-implied transitive-import side effect of the sanctioned HasFresh.lean edit, verified byte-identical to upstream, not itself touched).",
+  "artifacts": [
+    {"type": "plan", "path": "specs/580_shake_ci_gate_restore_green/plans/01_restore-shake-ci-gate.md"},
+    {"type": "summary", "path": "specs/580_shake_ci_gate_restore_green/summaries/01_restore-shake-ci-gate-summary.md"},
+    {"type": "lean_source", "path": "Cslib/Logics/Modal/Basic.lean"},
+    {"type": "lean_source", "path": "Cslib/Foundations/Data/HasFresh.lean"},
+    {"type": "ci_workflow", "path": ".github/workflows/lean_action_ci.yml"},
+    {"type": "script", "path": "scripts/check-shake-residue.sh"},
+    {"type": "baseline", "path": "scripts/shake-residue-baseline.txt"},
+    {"type": "script", "path": "scripts/pre-pr-check.sh"},
+    {"type": "doc", "path": "scripts/README.md"}
+  ],
+  "blockers": [],
+  "files_modified": [
+    "Cslib/Logics/Modal/Basic.lean",
+    "Cslib/Foundations/Data/HasFresh.lean",
+    ".github/workflows/lean_action_ci.yml",
+    "scripts/check-shake-residue.sh",
+    "scripts/shake-residue-baseline.txt",
+    "scripts/pre-pr-check.sh",
+    "scripts/README.md",
+    "specs/580_shake_ci_gate_restore_green/plans/01_restore-shake-ci-gate.md",
+    "specs/580_shake_ci_gate_restore_green/summaries/01_restore-shake-ci-gate-summary.md",
+    "specs/580_shake_ci_gate_restore_green/handoffs/phase1-handoff.md",
+    "specs/580_shake_ci_gate_restore_green/handoffs/phase2-handoff.md",
+    "specs/580_shake_ci_gate_restore_green/handoffs/phase3-handoff.md",
+    "specs/580_shake_ci_gate_restore_green/handoffs/phase4-handoff.md",
+    "specs/580_shake_ci_gate_restore_green/.return-meta.json"
+  ],
+  "decisions_made": [
+    "The exemption question was not re-litigated: per-file shake annotations (-- shake: keep, keep-all) remain unusable for the residue for the reasons already settled in research and carried into the plan.",
+    "The guard was seeded from the LIVE post-edit shake result (9 files) rather than the research report's predicted 10, since LcAt.lean dropped out of the flagged set as a genuine, twice-verified, reproducible side effect of the sanctioned HasFresh.lean import edit (transitive supply via --keep-implied). LcAt.lean itself was confirmed still byte-identical to upstream in Phase 4, so this is not a NON-GOALS violation.",
+    "The guard is NOT wired into CI this round, per the plan's R5 rationale; it is invoked via scripts/pre-pr-check.sh step 7 only.",
+    "Phase 2 gated Phase 3 as required: the guard was proven working (all four code paths) before Phase 3 disabled the CI step.",
+    "The --wfail --iofail sorry gate was confirmed still red in Phase 4 and was not touched, as required."
+  ],
+  "dead_ends": [],
+  "phases_completed": 4,
+  "phases_total": 4,
+  "plan_markers_verified": true,
+  "orchestrator_mode": true
+}

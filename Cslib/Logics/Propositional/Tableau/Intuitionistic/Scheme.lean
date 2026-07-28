@@ -491,6 +491,157 @@ alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or 
 orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
 dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
 
+/-! ## Blocking-Quotient Frame (task 574, Phase 5)
+
+`intFImpReuseWitnessAnc?`'s ancestor-directed reuse (Phase 3/4) lets an `F(φ→ψ)@l`
+obligation be discharged by an ancestor `x` (`x < l`, `isAccessible edges x l`) that already
+carries `T(φ)@x` and an explicit `F(ψ)@x` entry, instead of by a freshly-created descendant
+`w' ≥ l`. `sfSatisfied`'s `.neg, .imp` clause and `sfAccessSat`'s `.neg, .imp` clause both
+demand a witness in the DESCENDANT direction (`l ≤ w'`, `isAccessible edges l w'`), so an
+ancestor witness cannot discharge them directly — this is D5 of the task's implementation
+plan (`specs/574_tableau_calculus_repair_ancestor_blocking/plans/`).
+
+This section builds the **blocking-quotient frame**: identify every blocked world `l` with
+its blocking ancestor `x` under a representative map `rep`, so `rep l = rep x` makes the
+reversed conjuncts hold **reflexively** on the quotient. The construction follows the
+filtration method of [ChagrovZakharyaschev1997] Part II §5.3 (`p02_kripke-semantics.md`
+lines 397-463, Theorem 5.23 and surrounding discussion): points of
+a model are grouped into equivalence classes `[x]`, and the quotient's accessibility relation
+is built from the (transitive closure of the) finest filtration relation `S`, where `[x]S[y]`
+holds whenever the original points satisfy `xRy` (`p02_kripke-semantics.md:409`, condition
+(iii)) — read `intBlockRep` as computing the equivalence-class representative and
+`intAccessPreorderQ` (5.2, below) as the `rep`-pulled-back accessibility relation, mirroring
+the theorem's own use of the transitive closure `S_` (`p02_kripke-semantics.md:445-457`) to
+obtain a well-behaved quotient order — `intAccessPreorder` is already exactly that closure
+over `isAccessible`. `GargGenoveseNegri2012`/`Fitting1983` remain cited only as design
+provenance for the underlying ancestor-directed blocking check itself (see
+`intFImpReuseWitnessAnc?`'s docstring and the plan's H3 honesty rule); this quotient
+construction is grounded in the one readable source, `ChagrovZakharyaschev1997`. -/
+
+/-! ### 5.1 — The blocking-ancestor representative map -/
+
+omit [Hashable Atom] in
+/-- The `F(φ→ψ)` obligation (if any) recorded at label `w` on `b`, read off directly as a
+`(φ, ψ)` pair. `none` when `w` carries no `.neg`-signed implication. -/
+def negImpAt (b : IBranch Atom) (w : Nat) :
+    Option (Proposition Atom × Proposition Atom) :=
+  b.findSome? fun sf =>
+    if sf.sign == .neg && sf.label == w then
+      match sf.formula with
+      | .imp φ ψ => some (φ, ψ)
+      | _ => none
+    else none
+
+omit [Hashable Atom] in
+/-- One step of the blocking-ancestor search: if `b` carries an `F(φ→ψ)@w` formula
+(`negImpAt`), look for a STRICTLY smaller-labeled ancestor `x < w` (accessible *to* `w`,
+`isAccessible edges x w`) whose forced-set already contains `φ` and lacks `ψ`, with an
+explicit `F(ψ)@x` entry (Option-A, never merely "not forced"). This is the same
+`Sfor`-containment test `intFImpReuseWitnessAnc?` performs during expansion
+(`Expansion.lean:260-284`), replayed post hoc against the finished branch's own `F(φ→ψ)@w`
+entry rather than against a would-be fresh world's `newForms` — so `intBlockRep` and
+`intFImpReuseWitnessAnc?` agree by construction: the label `w` that a reuse event never
+assigned a fresh child to is exactly the label whose `F(φ→ψ)` this step re-discharges against
+the same ancestor `x`. Returns `none` when `w` carries no `F(→)` formula, or when no ancestor
+discharges the one it carries (a fresh world was genuinely created at `w`). -/
+def intBlockRepStep (b : IBranch Atom) (edges : IEdges) (w : Nat) : Option Nat :=
+  match negImpAt b w with
+  | none => none
+  | some φψ =>
+    let candidates := (b.map (·.label)).eraseDups
+    candidates.findSome? fun x =>
+      if x < w
+          && isAccessible edges x w
+          && (posFormulasAt b x).contains φψ.1
+          && !(posFormulasAt b x).contains φψ.2
+          && b.any (fun y => y.sign == .neg && y.formula == φψ.2 && y.label == x) then
+        some x
+      else none
+
+omit [Hashable Atom] in
+/-- `intBlockRepStep` only ever returns a STRICTLY smaller label than its input — the
+termination measure for `intBlockRep`'s well-founded recursion below. -/
+lemma intBlockRepStep_lt {b : IBranch Atom} {edges : IEdges} {w x : Nat}
+    (h : intBlockRepStep b edges w = some x) : x < w := by
+  unfold intBlockRepStep at h
+  cases hn : negImpAt b w with
+  | none => rw [hn] at h; simp at h
+  | some φψ =>
+    rw [hn] at h
+    obtain ⟨x', _hx'mem, hif⟩ := List.exists_of_findSome?_eq_some h
+    by_cases hcond : (x' < w && isAccessible edges x' w
+        && (posFormulasAt b x').contains φψ.1 && !(posFormulasAt b x').contains φψ.2
+        && b.any (fun y => y.sign == .neg && y.formula == φψ.2 && y.label == x')) = true
+    · simp only [hcond, if_true] at hif
+      injection hif with hif; subst hif
+      simp only [Bool.and_eq_true] at hcond
+      obtain ⟨⟨⟨⟨h1, _h2⟩, _h3⟩, _h4⟩, _h5⟩ := hcond
+      exact of_decide_eq_true h1
+    · simp only [Bool.not_eq_true] at hcond
+      simp only [hcond] at hif
+      simp at hif
+
+/-- The blocking-ancestor representative: `intBlockRep b edges w` chases `intBlockRepStep`
+to a fixed point — a world no longer subject to further blocking — returning `w` itself when
+no blocking applies at all. Well-founded on `intBlockRepStep_lt`'s strict label decrease.
+Iterating to a fixed point (rather than stopping after one step) is what makes `rep` a genuine
+representative map (`intBlockRep_idempotent` below): it sends every world to the canonical
+member of its blocking-equivalence class, matching the filtration method's
+representative-per-class role ([ChagrovZakharyaschev1997] §5.3). -/
+def intBlockRep (b : IBranch Atom) (edges : IEdges) : Nat → Nat
+  | w =>
+    match h : intBlockRepStep b edges w with
+    | none => w
+    | some x => intBlockRep b edges x
+termination_by w => w
+decreasing_by exact intBlockRepStep_lt h
+
+omit [Hashable Atom] in
+/-- Unfolding equation for `intBlockRep` at a fixed point (`intBlockRepStep` returns `none`):
+`intBlockRep` returns the world itself. -/
+lemma intBlockRep_eq_none {b : IBranch Atom} {edges : IEdges} {w : Nat}
+    (h : intBlockRepStep b edges w = none) : intBlockRep b edges w = w := by
+  rw [intBlockRep, h]
+
+omit [Hashable Atom] in
+/-- Unfolding equation for `intBlockRep` at a blocking step (`intBlockRepStep` returns
+`some x`): `intBlockRep` recurses on the ancestor `x`. -/
+lemma intBlockRep_eq_some {b : IBranch Atom} {edges : IEdges} {w x : Nat}
+    (h : intBlockRepStep b edges w = some x) :
+    intBlockRep b edges w = intBlockRep b edges x := by
+  rw [intBlockRep, h]
+
+omit [Hashable Atom] in
+/-- `intBlockRep` never increases a world's label: ancestors carry strictly smaller labels
+(`intBlockRepStep_lt`), and this survives the chase-to-fixed-point closure. -/
+lemma intBlockRep_le (b : IBranch Atom) (edges : IEdges) (w : Nat) :
+    intBlockRep b edges w ≤ w := by
+  induction w using Nat.strong_induction_on with
+  | _ w ih =>
+    cases h : intBlockRepStep b edges w with
+    | none => exact le_of_eq (intBlockRep_eq_none h)
+    | some x =>
+      rw [intBlockRep_eq_some h]
+      exact le_trans (ih x (intBlockRepStep_lt h)) (le_of_lt (intBlockRepStep_lt h))
+
+omit [Hashable Atom] in
+/-- `intBlockRep` is idempotent: re-applying it to its own output is a no-op. This is the
+representative-map property the quotient frame (5.2) needs — `rep` picks out one canonical
+member per blocking-equivalence class, and idempotence is exactly "the representative of a
+representative is itself". Follows for free from `intBlockRep`'s well-founded chase-to-a-
+fixed-point definition: at the point the recursion stops (`intBlockRepStep` returns `none`),
+re-running the same deterministic one-step search on that same fixed value reproduces `none`
+again. -/
+lemma intBlockRep_idempotent (b : IBranch Atom) (edges : IEdges) (w : Nat) :
+    intBlockRep b edges (intBlockRep b edges w) = intBlockRep b edges w := by
+  induction w using Nat.strong_induction_on with
+  | _ w ih =>
+    cases h : intBlockRepStep b edges w with
+    | none => simp only [intBlockRep_eq_none h]
+    | some x =>
+      rw [intBlockRep_eq_some h]
+      exact ih x (intBlockRepStep_lt h)
+
 /-! ### `sat_timp` discharge — STOP-gate finding, UPDATED (Deliverable 6
 branching-rule redesign)
 

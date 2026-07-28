@@ -10,6 +10,7 @@ public import Cslib.Init
 public import Cslib.Foundations.Logic.Connectives
 public import Cslib.Foundations.Logic.InferenceSystem
 public import Mathlib.Order.Defs.Unbundled
+public import Mathlib.Order.Notation
 public import Mathlib.Logic.Nonempty
 public import Cslib.Foundations.Relation.Defs
 public import Mathlib.Data.Finset.Attr

@@ -7,7 +7,10 @@ Authors: Fabrizio Montesi, Kenny Lau
 module -- shake: keep-downstream
 
 public import Cslib.Init
-public import Mathlib.Analysis.Normed.Field.Lemmas
+public import Mathlib.Analysis.Normed.Group.Basic
+public import Mathlib.Topology.MetricSpace.Bounded
+public import Mathlib.Data.EReal.Operations
+public import Mathlib.Topology.Algebra.InfiniteSum.Order
 
 /-! Computable chacterization of infinite types. -/
 

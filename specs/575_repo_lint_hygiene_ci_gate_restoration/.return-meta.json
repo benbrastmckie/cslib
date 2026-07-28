@@ -1,38 +1,50 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-27T18:46:37-07:00",
-  "completed_at": "2026-07-27T19:35:00-07:00",
+  "status": "implemented",
+  "started_at": "2026-07-28T02:07:41Z",
+  "completed_at": "2026-07-28T02:30:59Z",
   "artifacts": [
     "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md"
   ],
   "partial_progress": {
-    "stage": "cycle-26 close",
-    "details": "Closed the count-1 actionable tier of Phase 5's suppression audit entirely: all 9 files (Temporal/ProofSystem/Axioms.lean, ConservativeExtension/ExtDerivation.lean, Bimodal/ProofSystem/Axioms.lean, Decidability/ProofExtraction.lean, Decidability/FMP/TruthPreservation.lean, Decidability/Closure.lean, Temporal/Metalogic/MetricCompleteness.lean, Separation/Defs.lean, Decidability/Tableau.lean) cleared to 0 blanket suppressions. Ratchet re-baselined 34 -> 25. Only the deliberately-deferred count-6 file (CounterexampleElimination/Interface.lean, 3048 lines, 6 suppressions) remains actionable in Phase 5, plus 5 unchanged permanent exceptions.",
+    "stage": "cycle-27 close — Phase 5 CLOSED",
+    "details": "Cleared the deliberately-deferred count-6 tier file, CounterexampleElimination/Interface.lean (3048 lines): 6 blanket suppressions -> 0. 194 total warning sites surfaced and fixed (unusedSimpArgs 6, style.show 74, style.longLine 114). Ratchet re-baselined 25 -> 19 in a single commit (fac20125). Phase 5 is now fully closed -- every local-only file in scope is either cleared to 0 blanket suppressions or one of the 5 documented permanent exceptions. All 8 phases of the plan are now COMPLETED. Definition of Done table fully MET.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 7,
+    "phases_completed": 8,
     "phases_total": 8,
-    "suppression_ratchet_start": 34,
-    "suppression_ratchet_end": 25
+    "suppression_ratchet_start": 25,
+    "suppression_ratchet_end": 19
   },
   "verification": {
     "verification_passed": true,
     "sorry_count_wfail": 5,
-    "sorry_count_note": "Non-Goal of this task per plan: 5 sorry warnings are the documented, correct end state and remain unchanged (FrameSoundness.lean:1252, Intuitionistic/Scheme.lean:570,2583, Intuitionistic/Completeness.lean:124, Minimal/Completeness.lean:118). Not zero because clearing them is mathematical work owned elsewhere; not this cycle's target.",
+    "sorry_count_note": "Non-Goal of this task per plan: 5 sorry warnings are the documented, correct end state and remain unchanged (FrameSoundness.lean:1252, Intuitionistic/Scheme.lean:570,2583, Intuitionistic/Completeness.lean:124, Minimal/Completeness.lean:118). Not zero because clearing them is mathematical work owned elsewhere; not this task's target (Non-Goals section of the plan).",
     "vacuous_count": 0,
+    "vacuous_count_note": "One naive-grep match (Cslib/Computability/URM/Basic.lean:92, `theorem J_IsJump ... := trivial`) is a pre-existing, genuine theorem proven by the `trivial` tactic, not a vacuous placeholder; unrelated to and untouched by this cycle's diff.",
     "axiom_count_unchanged": true,
+    "axiom_count_repo_wide": 26,
     "build_passed": true,
     "wfail_build_exit": 1,
-    "wfail_build_note": "Exit 1 is the correct/expected state -- --wfail promotes the 5 documented sorry warnings to failures; no other warnings present.",
+    "wfail_build_note": "Exit 1 is the correct/expected state -- --wfail promotes the 5 documented sorry warnings to failures; no other warnings present anywhere in the repo.",
     "lake_test_exit": 0,
     "checkInitImports_exit": 0,
     "lake_lint_prevention_categories_matches": 0,
+    "lake_lint_note": "All lake lint findings are unusedArguments (out-of-scope, unchanged category per plan); zero matches in the target file or on any of the 7 prevention categories.",
     "lint_style_exit": 0,
     "lake_shake_upstream_shared": 12,
     "lake_shake_local_only": 0,
     "mk_all_update_necessary": false,
     "suppression_ratchet_exit": 0,
+    "suppression_ratchet_value": "19 (baseline ceiling 19)",
     "ci_pipeline_passed": true
+  },
+  "completion_data": {
+    "completion_summary": "Restored lake build --wfail --iofail as a working CI gate and closed the full 8-phase hygiene/lint-debt cleanup for CSLib. Phase 5 (suppression audit), the final open workstream, closed in cycle 27 by clearing the last actionable blanket-suppression file (CounterexampleElimination/Interface.lean, 3048 lines, 6 suppressions removed, 194 warning sites fixed). All 8 phases are now COMPLETED and the plan's Definition of Done is fully MET: the --wfail build shows only the 5 documented, intentionally-remaining sorry warnings; lake test, checkInitImports, lake lint (prevention categories), lint-style, lake shake, and mk_all are all green; the blanket-suppression ratchet sits at 19 repo-wide (14 upstream-shared out of scope, 5 permanent exceptions, 0 actionable local-only remaining).",
+    "roadmap_items": [
+      "CSLib CI gate (lake build --wfail --iofail) is restored and enforceable going forward",
+      "Blanket linter-suppression ratchet (scripts/check-lint-suppressions.sh) locks in the reduction from an original baseline down to 19, preventing regression",
+      "5 documented sorry sites remain as the correct, tracked end state pending the external WeakCanonical discrete-completeness port referenced in Phase 6"
+    ]
   },
   "metadata": {
     "session_id": "sess_1785201767_9dbb98",
@@ -41,8 +53,7 @@
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed",
     "commits": [
-      "469f62ae", "2c4a3e29", "1af48333", "d8c6b4cd", "1daaf38a",
-      "6df8000b", "f8249816", "8532f4ec", "9ff65ebd", "b6e00409"
+      "fac20125"
     ]
   }
 }

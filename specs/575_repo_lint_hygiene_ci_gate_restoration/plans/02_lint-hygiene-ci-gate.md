@@ -1,8 +1,7 @@
 # Repo Lint & Hygiene Cleanup — CI Gate Restoration (v2)
 
 - **Task**: 575
-- **Status**: IMPLEMENTING (all phases complete; final Definition-of-Done sign-off pending
-  postflight)
+- **Status**: COMPLETED (all 8 phases complete; Definition of Done fully MET)
 - **Effort**: ~15h spent. All 8 phases complete. Phase 5 (suppression audit), the sole remaining
   workstream, closed in cycle 27 — the deliberately-deferred count-6 file cleared to 0.
 - **Dependencies**: none blocking.

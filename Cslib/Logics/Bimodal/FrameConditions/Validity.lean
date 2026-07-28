@@ -15,8 +15,6 @@ public import Mathlib.Order.SuccPred.LinearLocallyFinite
 Parameterized validity definitions for TM formulas across different frame classes.
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.FrameConditions

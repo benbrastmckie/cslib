@@ -77,10 +77,7 @@ theorem list_deriv_reflection {Γ : List F} {φ : F}
       unfold ListDeriv
       grind [listImp_axiom_k]
     · -- φ ∈ Ψ, use ih and then weaken
-      have ih' := ih h
-      unfold ListDeriv at ih' ⊢
-      simp only [listImp_cons]
-      exact ModusPonens.mp HasAxiomImplyK.implyK ih'
+      exact ModusPonens.mp HasAxiomImplyK.implyK (ih h)
 
 /-! ## Contextual Modus Ponens -/
 

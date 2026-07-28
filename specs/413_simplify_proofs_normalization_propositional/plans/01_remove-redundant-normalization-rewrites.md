@@ -179,7 +179,7 @@ discrepancy.
 
 ---
 
-### Phase 2: Foundations Tier-B proof-body edits [NOT STARTED]
+### Phase 2: Foundations Tier-B proof-body edits [COMPLETED]
 
 **Goal**: Remove the redundant rewrites from the three Foundations sites whose enclosing
 declarations are `theorem`s (proof-irrelevant, no term-level downstream exposure), leaving the

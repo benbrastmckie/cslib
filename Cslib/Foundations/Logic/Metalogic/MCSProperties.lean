@@ -107,7 +107,7 @@ theorem mcs_mp_axiom {G : Set F}
       · -- Need: (φ → ψ) ∈ G. Use closed_under_derivation with empty list.
         apply algebraic_mcs_closed_under_derivation h_mcs
           (L := []) (fun _ hx => by simp at hx)
-        unfold ListDeriv; simp only [listImp_nil]; exact h_ax
+        exact h_ax
       · rw [List.mem_cons] at hx
         rcases hx with rfl | hx
         · exact h_mem
@@ -122,6 +122,6 @@ theorem mcs_theorem_in_mcs {G : Set F}
     {φ : F} (h_thm : InferenceSystem.DerivableIn S φ) : φ ∈ G := by
   apply algebraic_mcs_closed_under_derivation h_mcs
     (L := []) (fun _ hx => by simp at hx)
-  unfold ListDeriv; simp only [listImp_nil]; exact h_thm
+  exact h_thm
 
 end Cslib.Logic.Metalogic.MCSProperties

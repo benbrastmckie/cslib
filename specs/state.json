@@ -751,11 +751,12 @@
           "summary": "Modal-family proof simplification candidates, LSP-verified"
         },
         {
-          "path": "specs/414_simplify_proofs_normalization_modal_family/plans/01_modal-family-proof-golf.md",
+          "path": "specs/414_simplify_proofs_normalization_modal_family/plans/02_modal-family-proof-golf.md",
           "type": "plan",
-          "summary": "Four-phase plan to remove redundant ListDeriv/listImp_nil normalization pairs from the Modal, Temporal, and Bimodal GenericMCSBridge proofs and to collapse the and/or arms of bimodal_truthAt_toBimodal_iff_satisfies in ModalConservativity.lean, with a per-phase sorry-freeness gate, an explicit when-NOT-to-simplify criterion, and a declared territory split against the sibling Propositional/Foundations proof-golf task."
+          "summary": "Revised plan (v2): retires the three GenericMCSBridge phases as COMPLETED WITH EXCLUSIONS on verified zero-match evidence; preserves Phase 1 ModalConservativity arm collapse; corrects sorry baseline to 5; adds concurrency attribution protocol"
         }
-      ]
+      ],
+      "next_artifact_number": 2
     },
     {
       "project_number": 425,

@@ -1008,17 +1008,26 @@ private lemma IExpandedConsistent_mono {b b' : IBranch Atom} {e : List (ISF Atom
 
 /-! ### Edge-accessibility companion invariant (Route (a))
 
-`sfSatisfied`'s `.neg, .imp` clause only records the numeric proxy `sf.label ≤ w'` (the
-literal `sat_fimp` field, kept as-is — no reformulation, per the Preserved Assets table). That
-proxy is exactly the previously-noted "phantom worlds" gap: it is NOT strong enough to
-instantiate `truthLemma`'s F-imp case over `intAccessPreorder edges` (which needs genuine
-edge-reachability of the witness, not merely a numeric bound). `sfAccessSat`/
-`IExpandedAccessConsistent` is a companion invariant threaded ALONGSIDE `sfSatisfied`/
-`IExpandedConsistent` (not replacing them) purely to upgrade the F(φ→ψ) witness to a real
-`isAccessible` fact. Both the fresh-world-creation site (`intFImpRule`'s new edge
+`sfSatisfied`'s `.neg, .imp` clause records the numeric proxy `sf.label ≤ w'`. The "kept
+as-is — no reformulation, per the Preserved Assets table" directive this note used to state is
+now SUPERSEDED by task 574's Phase 5: `sfSatisfiedQ`/`sfAccessSatQ` (defined further below,
+after `IExpandedAccessConsistent`'s block) restate that proxy over a representative map `rep`
+(`rep sf.label ≤ rep w'` / `isAccessible edges (rep sf.label) (rep w')`), landed ADDITIVELY
+alongside the originals — neither `sfSatisfied` nor `sfAccessSat` is modified in place, and
+`grep -c IBranchSaturation Soundness.lean` stays `0` throughout (the spike's H2 evidence).
+
+This still leaves the "phantom worlds" gap this note originally flagged: the plain (non-Q)
+proxy is NOT strong enough to instantiate `truthLemma`'s F-imp case over `intAccessPreorder
+edges` (which needs genuine edge-reachability of the witness, not merely a numeric bound).
+`sfAccessSat`/`IExpandedAccessConsistent` remains the companion invariant threaded ALONGSIDE
+`sfSatisfied`/`IExpandedConsistent` for that upgrade. The D5 rationale (Phase 5) is that an
+ANCESTOR witness — reachable in the REVERSE direction from what these two demand — is made
+admissible not by editing these definitions in place, but by rep-identifying the blocked world
+with its blocking ancestor (`intBlockRep`) so the Q-restated clauses hold reflexively via
+`intAccessPreorderQ_le_of_rep_eq`. Both the fresh-world-creation site (`intFImpRule`'s new edge
 `(w', w)`, one-hop via `isAccessible_one_step`) and the Option-A dedup reuse site
-(`intFImpReuseWitness?_spec`'s `isAccessible` conjunct) already establish this fact at
-construction time; this invariant only threads it forward. -/
+(`intFImpReuseWitnessAnc?_spec`'s `isAccessible` conjunct) already establish the underlying
+fact at construction time; this invariant (and its Q-restatement) only threads it forward. -/
 
 /-- The `.neg, .imp` edge-accessibility obligation: vacuously `True` for every other
 sign/formula pair (mirrors `sfSatisfied`'s shape, restricted to the one case that needs
@@ -1074,6 +1083,86 @@ private lemma IExpandedAccessConsistent_edges_mono {edges : IEdges} (newEdge : N
     (h : IExpandedAccessConsistent edges b e) :
     IExpandedAccessConsistent (edges ++ [newEdge]) b e :=
   fun sf hsfin => sfAccessSat_edges_mono newEdge (h sf hsfin)
+
+/-! ### 5.3 — Quotient-restated `sf`-level predicates -/
+
+/-- `sfSatisfied`, restated over a representative map `rep`: identical to `sfSatisfied` in
+every case EXCEPT `.neg, .imp`, where the ordering witness is required on the QUOTIENT
+(`rep sf.label ≤ rep w'`) rather than on the raw numeric label order. This is what lets an
+ancestor witness `x` (with `rep sf.label = rep x` per D5) discharge the obligation
+reflexively via `intAccessPreorderQ_le_of_rep_eq`. The `.pos, .imp` case (Deliverable 6's
+reflexive `sat_timp` split) is copied UNCHANGED — `sat_timp` is not in scope (D2). -/
+private def sfSatisfiedQ (rep : Nat → Nat) (b : IBranch Atom) (sf : ISF Atom) : Prop :=
+  match sf.sign, sf.formula with
+  | .pos, .and φ ψ =>
+    b.any (fun x => x.sign == .pos && x.formula == φ && x.label == sf.label) = true ∧
+    b.any (fun x => x.sign == .pos && x.formula == ψ && x.label == sf.label) = true
+  | .neg, .and φ ψ =>
+    b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∨
+    b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == sf.label) = true
+  | .pos, .or φ ψ =>
+    b.any (fun x => x.sign == .pos && x.formula == φ && x.label == sf.label) = true ∨
+    b.any (fun x => x.sign == .pos && x.formula == ψ && x.label == sf.label) = true
+  | .neg, .or φ ψ =>
+    b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∧
+    b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == sf.label) = true
+  | .neg, .imp φ ψ =>
+    ∃ w' : Nat, rep sf.label ≤ rep w' ∧
+      b.any (fun x => x.sign == .pos && x.formula == φ && x.label == w') = true ∧
+      b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
+  | .pos, .imp φ ψ =>
+    b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∨
+    b.any (fun x => x.sign == .pos && x.formula == ψ && x.label == sf.label) = true
+  | _, _ => True
+
+/-- The expanded-set invariant, restated over `rep`: every formula in `e` has its rule
+outputs present on `b`, with the `.neg, .imp` witness ordered on the quotient. -/
+private def IExpandedConsistentQ (rep : Nat → Nat) (b : IBranch Atom)
+    (e : List (ISF Atom)) : Prop :=
+  ∀ sf ∈ e, sfSatisfiedQ rep b sf
+
+omit [Hashable Atom] in
+/-- `sfSatisfiedQ` is monotone under branch inclusion. Mirrors `sfSatisfied_mono`'s proof
+verbatim — the `.neg, .imp` witness's ORDER fact (`rep sf.label ≤ rep w'`) is carried through
+unchanged; only the two membership facts need `any_mono_sub`. -/
+private lemma sfSatisfiedQ_mono {rep : Nat → Nat} {b b' : IBranch Atom} {sf : ISF Atom}
+    (hmono : ∀ x ∈ b, x ∈ b') (h : sfSatisfiedQ rep b sf) : sfSatisfiedQ rep b' sf := by
+  simp only [sfSatisfiedQ] at *
+  rcases sf with ⟨s, f, l⟩
+  cases s <;> cases f <;> simp only [] at * <;>
+    first
+    | exact h
+    | exact ⟨any_mono_sub hmono h.1, any_mono_sub hmono h.2⟩
+    | (rcases h with h | h
+       · exact Or.inl (any_mono_sub hmono h)
+       · exact Or.inr (any_mono_sub hmono h))
+    | (obtain ⟨w', hw', h1, h2⟩ := h
+       exact ⟨w', hw', any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
+
+omit [Hashable Atom] in
+/-- `IExpandedConsistentQ` is monotone under branch inclusion. -/
+private lemma IExpandedConsistentQ_mono {rep : Nat → Nat} {b b' : IBranch Atom}
+    {e : List (ISF Atom)} (hmono : ∀ x ∈ b, x ∈ b') (h : IExpandedConsistentQ rep b e) :
+    IExpandedConsistentQ rep b' e :=
+  fun sf hsfin => sfSatisfiedQ_mono hmono (h sf hsfin)
+
+/-- `sfAccessSat`, restated over a representative map `rep`: the `.neg, .imp` edge-accessibility
+witness is required between REPRESENTATIVES (`isAccessible edges (rep sf.label) (rep w')`)
+rather than between the raw labels. Mirrors `sfAccessSat`'s shape exactly otherwise. -/
+private def sfAccessSatQ (edges : IEdges) (rep : Nat → Nat) (b : IBranch Atom)
+    (sf : ISF Atom) : Prop :=
+  match sf.sign, sf.formula with
+  | .neg, .imp φ ψ =>
+    ∃ w' : Nat, isAccessible edges (rep sf.label) (rep w') = true ∧
+      b.any (fun x => x.sign == .pos && x.formula == φ && x.label == w') = true ∧
+      b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
+  | _, _ => True
+
+/-- The edge-accessibility companion of `IExpandedConsistentQ`: every formula in `e` has its
+F(φ→ψ) witness (if any) genuinely edge-accessible BETWEEN REPRESENTATIVES under `edges`. -/
+private def IExpandedAccessConsistentQ (edges : IEdges) (rep : Nat → Nat) (b : IBranch Atom)
+    (e : List (ISF Atom)) : Prop :=
+  ∀ sf ∈ e, sfAccessSatQ edges rep b sf
 
 omit [Hashable Atom] in
 /-- When `intStepBranch b e nw = none` and `sf ∈ b` with `intApplyRuleFull sf nw b ≠ .notApplicable`

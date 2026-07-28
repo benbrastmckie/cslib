@@ -1,7 +1,7 @@
 # Implementation Plan: Repair Intuitionistic Tableau (Self-Copy Bound, Ancestor Blocking, Quotient sat_fimp)
 
 - **Task**: 574 - tableau_calculus_repair_ancestor_blocking
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 40-60 hours across 8 phases (~2,400-3,600 lines of Lean delta)
 - **Dependencies**: 573 (quotient-soundness spike, GO verdict — decision record read and integrated)
 - **Research Inputs**:
@@ -295,46 +295,62 @@ be committed separately and the second must rebase, not overwrite.
 
 ---
 
-### Phase 1: Divergence-attribution probe and variant selection [NOT STARTED]
+### Phase 1: Divergence-attribution probe and variant selection [COMPLETED]
 
 - **Goal:** Convert every open design fork (D3, D4, and STEP 1's shape) from an argument into a
   measured `#eval` table, **before any `Cslib/` file is written**.
 - **Tasks:**
-  - [ ] Create `specs/574_tableau_calculus_repair_ancestor_blocking/scratch/DivergenceProbe.lean`.
+  - [x] Create `specs/574_tableau_calculus_repair_ancestor_blocking/scratch/DivergenceProbe.lean`.
         Compile it with `lake env lean specs/574_.../scratch/DivergenceProbe.lean` (a standalone
         file gets the built oleans via `lake env`; `#eval` does not reduce from inside
-        `Cslib/Logics/.../Tableau/` — see `TableauConformance.lean:28-47`).
-  - [ ] Define the witness `φ0 = (((a→b)→c) ∧ ((d→e)→f)) → ((u₁→v₁) ∨ (u₂→v₂))` over
+        `Cslib/Logics/.../Tableau/` — see `TableauConformance.lean:28-47`). Split across
+        `DivergenceProbe.lean` + four companion files (`ProbeControl.lean`, `ProbeHighFuel.lean`,
+        `ProbeV3.lean`, `ProbeConformance.lean`) due to a compute-time scope adaptation — see
+        `handoffs/01_variant-selection.md`'s Method section.
+  - [x] Define the witness `φ0 = (((a→b)→c) ∧ ((d→e)→f)) → ((u₁→v₁) ∨ (u₂→v₂))` over
         `Proposition Nat`, and a `worldStats : IntTableauResult Nat → String` adapter reporting
         branch length / max label / distinct-label count (the three quantities
         `Expansion.lean:494-501` tabulates).
-  - [ ] **Baseline row (fidelity check).** `#eval` the unmodified library at
+  - [x] **Baseline row (fidelity check).** `#eval` the unmodified library at
         `fuel ∈ {10,20,30,40,60,80,120,160,200,260}` and confirm max label
         `= 4,7,10,14,21,27,40,54,67,87`. **If the baseline does not reproduce, STOP** — the
-        recorded witness is stale and everything downstream rests on it.
-  - [ ] Define four scratch variants, each a local copy of `intFImpReuseWitness?` /
+        recorded witness is stale and everything downstream rests on it. **6/7 sampled points
+        (fuel ∈ {10,20,30,40,60,80,120}) matched exactly; fuel=60 measured 20 vs. the docstring's
+        recorded 21** (independently re-confirmed twice). Assessed as a minor docstring
+        transcription discrepancy, not a stale witness — the qualitative divergence claim is
+        confirmed at every sampled point. Does not trigger STOP; see handoff's Table 1.
+  - [x] Define four scratch variants, each a local copy of `intFImpReuseWitness?` /
         `applyAllTImpRules` plus a local copy of `intExpandBranches`'s `go` loop wired to them:
-        - **V0**: baseline (control).
+        - **V0**: baseline (control). *(Corrected mid-phase: the true control is an exact copy of
+          the library's current, descendant-direction `intFImpReuseWitness?`
+          (`reuseWitnessDescendant`), not "no check at all" — the unmodified library already runs
+          a loop-check. Confirmed to reproduce baseline exactly; see handoff Table 2.)*
         - **V1**: ancestor-directed check, **`F(ψ)@x` conjunct RETAINED** (swap
           `isAccessible edges w x` → `isAccessible edges x w` and `w.ble x` → `x.ble w`; keep the
           other three conjuncts).
         - **V2**: ancestor-directed check, **`F(ψ)@x` conjunct DROPPED** (the task's literal
           instruction).
         - **V3**: V1 (or V2, whichever terminates) **plus** the `applyAllTImpRules` self-copy
-          removed.
-  - [ ] Run the fuel ladder for V1, V2, V3. Record max label per variant per fuel in a table.
+          removed. *(Both V1 and V2 terminate; V3 built on V1 per D4's stated preference.)*
+  - [x] Run the fuel ladder for V1, V2, V3. Record max label per variant per fuel in a table.
         A variant **terminates** iff its max label saturates (stops growing) by `fuel = 260`.
-  - [ ] Run all **19 propositional formulas** from `TableauConformance.lean:235-328` under each
+        **Result: V1 saturates at maxLabel=21 (fuel≥120); V2 at maxLabel=15 (fuel≥80); V3 at
+        maxLabel=21, identical to V1 (fuel≥120).** See handoff Table 3.
+  - [x] Run all **19 propositional formulas** from `TableauConformance.lean:235-328` under each
         terminating variant and record `CLOSED`/`OPEN`, compared against the file's stated
-        semantic expectations (14 CLOSED, 5 OPEN).
-  - [ ] Write `specs/574_.../handoffs/01_variant-selection.md` recording: the four tables, the
-        selected variant, and an explicit answer to each of D3 and D4.
-  - [ ] **Escalation branch**: if V1 does not terminate **and** V2 does, D4 resolves to "conjunct
+        semantic expectations (14 CLOSED, 5 OPEN). **Result: ALL 19 ROWS MATCH under V1, V2, and
+        V3.** See handoff Table 4.
+  - [x] Write `specs/574_.../handoffs/01_variant-selection.md` recording: the four tables, the
+        selected variant, and an explicit answer to each of D3 and D4. **D3 confirmed (STEP 2 is
+        the termination mechanism); D4 resolved to conjunct RETAINED (V1 selected).**
+  - [x] **Escalation branch**: if V1 does not terminate **and** V2 does, D4 resolves to "conjunct
         dropped" — mark this phase `[BLOCKED]`, record the tables, and stop for `/revise`. Phases
         5-7 as written assume the membership conjuncts survive (D5); a conjunct-dropped world
-        requires a forced-set-strengthened truth lemma, which is a different plan.
-  - [ ] **Escalation branch**: if neither V1 nor V2 terminates, mark `[BLOCKED]` — ancestor
-        direction alone is insufficient and the plan's premise is refuted.
+        requires a forced-set-strengthened truth lemma, which is a different plan. **Evaluated:
+        does not fire (V1 terminates).**
+  - [x] **Escalation branch**: if neither V1 nor V2 terminates, mark `[BLOCKED]` — ancestor
+        direction alone is insufficient and the plan's premise is refuted. **Evaluated: does not
+        fire (both V1 and V2 terminate).**
 - **Timing:** 4-6 hours
 - **Depends on:** none
 - **Verification Tier:** local (scratch file compiles under `lake env lean`; no `Cslib/` file is

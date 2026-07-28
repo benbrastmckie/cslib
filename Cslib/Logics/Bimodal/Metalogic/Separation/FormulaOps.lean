@@ -27,8 +27,6 @@ needed by the separation proof.
 - GHR94, Chapter 10.2: Substitution is used in Lemmas 10.2.5-10.2.8
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation

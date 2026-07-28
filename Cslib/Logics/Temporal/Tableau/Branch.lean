@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Foundations.Logic.Tableau.Blocking
 public import Cslib.Logics.Temporal.Tableau.Rules
 
 /-! # Temporal Tableau Branch Utilities
@@ -109,17 +110,28 @@ def formulasAtTime (b : TBranch Atom) (t : TimeIndex) :
   b.filter fun sf => sf.label == t
 
 /-- Extract the "time type" of a time point: the set of `(sign, formula)` pairs
-at that time, deduplicated. -/
+at that time, deduplicated. Definitional wrapper over the shared
+`Branch.typeAt` from `Cslib.Foundations.Logic.Tableau.Blocking`. -/
 def timeType (b : TBranch Atom) (t : TimeIndex) :
     List (Sign × Formula Atom) :=
-  ((formulasAtTime b t).map fun sf =>
-    (sf.sign, sf.formula)).eraseDups
+  Branch.typeAt b t
 
-/-- Check if the time type at `t_new` is a subset of the time type at `t_anc`. -/
+/-- Check if the time type at `t_new` is a subset of the time type at `t_anc`.
+Definitional wrapper over the shared `Branch.containmentBlocked` from
+`Cslib.Foundations.Logic.Tableau.Blocking`. -/
 def isSubsetBlocked (b : TBranch Atom) (t_new t_anc : TimeIndex) : Bool :=
-  let typeNew := timeType b t_new
-  let typeAnc := timeType b t_anc
-  typeNew.all fun pair => typeAnc.any fun pair' => pair == pair'
+  Branch.containmentBlocked b t_new t_anc
+
+omit [Hashable Atom] in
+/-- `timeType` is definitionally the shared `Branch.typeAt`. -/
+lemma timeType_eq_typeAt (b : TBranch Atom) (t : TimeIndex) :
+    timeType b t = Branch.typeAt b t := rfl
+
+omit [Hashable Atom] in
+/-- `isSubsetBlocked` is definitionally the shared `Branch.containmentBlocked`. -/
+lemma isSubsetBlocked_eq_containmentBlocked (b : TBranch Atom)
+    (t_new t_anc : TimeIndex) :
+    isSubsetBlocked b t_new t_anc = Branch.containmentBlocked b t_new t_anc := rfl
 
 /-! ## Ancestor Times (Transitive Closure) -/
 

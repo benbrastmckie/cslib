@@ -2,8 +2,9 @@
 
 - **Task**: 575
 - **Status**: PARTIAL
-- **Effort**: ~14h spent. Phase 5 is the sole remaining workstream; ~1-2 cycles estimated to close
-  (9 actionable count-1-tier files plus the deferred count-6 file).
+- **Effort**: ~14.5h spent. Phase 5 is the sole remaining workstream; the count-1 actionable tier
+  is now fully closed. Only the deliberately-deferred count-6 file remains (needs a cycle with a
+  large context budget reserved for it specifically).
 - **Dependencies**: none blocking.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
   shared infrastructure), 2026-07-27; findings inlined here rather than filed as separate reports.
@@ -13,7 +14,7 @@
   `.claude/rules/git-workflow.md` (commit-per-green-substep), `CONTRIBUTING.md`
 - **Type**: cslib
 - **Created**: 2026-07-27
-- **Last updated**: 2026-07-28 (cycle-25 close)
+- **Last updated**: 2026-07-27 (cycle-26 close)
 
 > **Why v2 exists.** `01_lint-hygiene-ci-gate.md` reached 2,938 lines, 45% of it a cycle-by-cycle
 > changelog of Phase 5 (18 `Done (cycle N)` entries and 6 verbatim copies of the same `Method`
@@ -29,9 +30,12 @@
 **Only Phase 5 (suppression audit) is open. Phases 1-4 and 6-8 are all CLOSED.** No item requires
 a user decision to make further Phase 5 progress.
 
-**State at cycle-25 close**: 331 sites audited across 103 files. **9 blanket suppressions across
-9 actionable local-only files remain** (34 repo-wide; 14 are upstream-shared and carved out of
-scope; 5 are permanent exceptions; 6 belong to the deliberately-deferred count-6 file).
+**State at cycle-26 close**: 444 sites audited across 112 files. **The count-1 actionable tier is
+now fully closed** — all 9 files that were open at cycle-25 close are cleared to 0 blanket
+suppressions. **25 blanket suppressions remain repo-wide**: 14 are upstream-shared and carved out
+of scope; 5 are permanent exceptions (1 each); 6 belong to the deliberately-deferred count-6 file
+(`CounterexampleElimination/Interface.lean`). **Zero actionable local-only files remain outside
+the deferred count-6 file.**
 
 ### Step 1 — confirm the baseline (~5 min)
 
@@ -39,70 +43,61 @@ scope; 5 are permanent exceptions; 6 belong to the deliberately-deferred count-6
 lake build --wfail --iofail   # expect exit 1, exactly 5 baseline sorry warnings (listed below)
 lake test                     # expect exit 0
 lake shake --add-public --keep-implied --keep-prefix Cslib   # expect exactly 12 upstream-shared files, zero local-only
-bash scripts/check-lint-suppressions.sh   # expect exit 0, "34 (baseline ceiling 34)"
+bash scripts/check-lint-suppressions.sh   # expect exit 0, "25 (baseline ceiling 25)"
 ```
 
 If any differ, something else landed — reconcile before proceeding.
 
 ### Step 2 — pick the next target
 
-**Count-2 tier is CLOSED (cycle 25).** Both `WitnessSeed.lean` and `DenseValidity.lean` cleared
-to 0 blanket suppressions.
+**Count-1 tier is CLOSED (cycle 26).** All 9 files from the cycle-25 worklist cleared to 0
+blanket suppressions (see "Done (cycle 26)" below for the per-file table).
 
-**NEXT TARGET: `Cslib/Logics/Temporal/ProofSystem/Axioms.lean` (297 lines).**
+**NEXT AND ONLY TARGET: `Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean`
+(3048 lines, 6 blanket suppressions) — the deliberately-deferred count-6 tier file.**
 
-Re-verify line and suppression counts live before starting any file; counts only ever go down, so
-this list is stale the moment a cycle lands.
+This is now the *only* remaining actionable item in Phase 5's audit. Re-verify line and
+suppression counts live before starting — counts only ever go down:
 
 ```bash
-# Live worst-offender list, filtered to fs>0 and gated to local-only files
-grep -rln "set_option linter\." Cslib/ | while read f; do
-  fs=$(grep "set_option linter\." "$f" | grep -vc " in$")
-  if [ "$fs" -gt 0 ]; then echo "$fs $f"; fi
-done | sort -rn | while read fs f; do
-  git cat-file -e upstream/main:"$f" 2>/dev/null || echo "$fs $f"
-done
+wc -l Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
+grep -n "set_option linter\." Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
 ```
 
-**Count-1 tier — 9 actionable files, smaller-first:**
-```
-1  297 Cslib/Logics/Temporal/ProofSystem/Axioms.lean
-1  309 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean
-1  313 Cslib/Logics/Bimodal/ProofSystem/Axioms.lean
-1  376 Cslib/Logics/Bimodal/Metalogic/Decidability/ProofExtraction.lean
-1  384 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/TruthPreservation.lean
-1  426 Cslib/Logics/Bimodal/Metalogic/Decidability/Closure.lean
-1  538 Cslib/Logics/Temporal/Metalogic/MetricCompleteness.lean
-1  655 Cslib/Logics/Bimodal/Metalogic/Separation/Defs.lean
-1 1208 Cslib/Logics/Bimodal/Metalogic/Decidability/Tableau.lean
-```
-No pattern hypothesis carries forward to any of these from prior tiers — each has a distinct
-suppression category (verify live with `grep -n "set_option linter\." <file>` before assuming
-`style.emptyLine`/`style.longLine`, cycle 25's dominant categories, still applies. Cycle 25 also
-hit `linter.style.setOption` (MetricSoundness.lean — the suppression was suppressing only
-itself, zero other `set_option` usage in the file) and `linter.privateModule` (Elimination.lean —
-genuinely module-wide, no per-declaration narrowing possible; see new permanent exception below).
+**Cold-start instructions for this file specifically**:
+- Reserve a full cycle's context budget for this file alone — do not start it opportunistically
+  alongside other work, and do not expect to finish it in a single dispatch if context runs low.
+  If a handoff is needed mid-file, document exactly which of the 6 suppressions are resolved,
+  which remain, and the live warning list for any suppression already removed but not yet
+  reconciled.
+- Per the Method (below), remove ALL blanket suppressions in the file at once (or one at a time —
+  either is valid), rebuild, and categorize what surfaces before fixing. Given the file's size
+  (3048 lines), expect a much larger warning surface than any count-1 file this task has
+  processed — E1 (line count does not predict warning count) applies with extra force here.
+- Its sibling file `CounterexampleElimination/Elimination.lean` (244 lines) is a **permanent
+  exception** in the same directory (`linter.privateModule`, C7) — do NOT assume Interface.lean
+  hits the same category; verify live, it may differ (Interface.lean is presumably not
+  all-`private` given it is the public-facing counterpart).
+- No live worst-offender list is needed anymore — this is the only file left. If it clears to 0,
+  Phase 5 (and the whole task) is done pending final Definition-of-Done sign-off; if it bottoms
+  out at a genuine irreducible count, document it the same way as the 5 existing permanent
+  exceptions and close Phase 5 with that as the final state.
 
-**Count-1 tier permanent exceptions — 5 files, do not attempt further reduction:**
+**Permanent exceptions — 5 files, do not attempt further reduction:**
 ```
 1  117 Cslib/Computability/Automata/DA/Conversions.lean                     # pre-existing
 1  120 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean # pre-existing
-1  244 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean # NEW cycle 25 — see finding below
+1  244 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean # cycle 25
 1  435 Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean       # persistent open Classical
 1  871 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean          # persistent open Classical
 ```
 
-**Count-6 tier — 1 file, deliberately deferred:**
-```
-6 3048 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
-```
-Needs a cycle with a large context budget reserved for it specifically. Do not start it
-opportunistically.
-
 ### Step 3 — before editing, read Phase 5's "Accumulated findings"
 
-Particularly the **parse hazard** (P1) and the **new P5 dangling-`by` hazard** found in cycle 25
-— both recur across cycles and are not solved problems.
+Particularly the **parse hazard** (P1) and the **dangling-`by` hazard** (P5) — both recur across
+cycles and are not solved problems. Cycle 26 hit zero new hazard categories, but a 3048-line file
+is far larger than anything processed to date; treat E1 and the existing category-fix catalog
+(C1-C7) as the starting hypothesis set, not an exhaustive one.
 
 ### Do not
 
@@ -209,7 +204,7 @@ that actually caught it.
 | `lake exe checkInitImports` | pass | pass |
 | `lake shake` | 94 files flagged (CI step disabled) | CI step enabled; exactly the 12 upstream-shared files remain (out of scope), zero local-only |
 | Linter sites | 240 | **0** |
-| Blanket `set_option linter.*` | 511 | **34** repo-wide (20 local-only in scope + 14 carved out) |
+| Blanket `set_option linter.*` | 511 | **25** repo-wide (11 local-only in scope + 14 carved out) |
 | `@[nolint]` | 118 | 88 |
 | Task-tracker refs in `Cslib/**` | 376 (undercounted) | 20, all individually accounted for |
 | Doubled public names | 6 cross-module leaks | **0** |
@@ -290,7 +285,7 @@ Clean on the local-only tree — exactly the 12 upstream-shared files remain fla
 scope. A post-close regression across 11 local-only files, landed via an unrelated merge, was
 found and fixed in cycle 16.
 
-### Phase 5: Suppression audit [PARTIAL — 331 sites done across 103 files; 9 blanket suppressions across 9 actionable local-only files remain]
+### Phase 5: Suppression audit [PARTIAL — 444 sites done across 112 files; count-1 actionable tier CLOSED; only the deferred count-6 file (6 blanket suppressions) remains]
 
 The sole open workstream. **Scope**: local-only files only; gate every candidate with
 `git cat-file -e upstream/main:<path>` (must FAIL to be in scope).
@@ -389,6 +384,16 @@ Consolidated from 24 cycles. Read before editing.
   correct permanent resolution for a file whose declarations are intentionally all-private
   (internal helpers with no external caller). Verify by direct removal + rebuild before
   concluding this, per the Method above — do not assume from the doc comment alone.
+- **C8 — `style.emptyLine` inside a large single-command `inductive ... where` block** (found
+  cycle 26): axiom-schema-style inductive types with dozens of constructors often use blank lines
+  as visual separators between constructors and around `-- Layer N` section comments — all inside
+  one command, which the linter forbids. Fix: locate the command's span with
+  `grep -n "^inductive\|^def \|^theorem \|^instance\|^namespace\|^end"`, then delete every blank
+  line strictly between the `inductive` line and the line before the next top-level command
+  (leave the between-command separator blank line untouched). Verify via `diff` that only blank
+  lines were removed before rebuilding. This was the dominant category this cycle (3 of 9 files,
+  93 of 113 surfaced sites) — anywhere else in the codebase with a large hand-written axiom/rule
+  inductive is a likely future hit.
 
 **Directory patterns** (check before deriving an approach from scratch)
 
@@ -453,6 +458,49 @@ exactly the 5 baseline sorry warnings), `lake test` (exit 0), `lake exe checkIni
 `lake lint` (0 matches on the 7 prevention categories), `lake shake` (12 upstream-shared, 0
 local-only), `lake exe mk_all --check` (no update necessary), `scripts/check-lint-suppressions.sh`
 (exit 0, "34 (baseline ceiling 34)").
+
+#### Done (cycle 26)
+
+Closed the count-1 actionable tier entirely — all 9 files from the cycle-25 worklist cleared to 0
+blanket suppressions. Ratchet: 34 → 25 (9 net reduction across 9 commits). All per-file scoped
+rebuilds plus every direct downstream importer verified green; `git diff` confirmed no `sorry`
+line touched and no proof term, definition, or theorem statement altered in any commit.
+
+| File | Suppressions removed | Category | Commit |
+|---|---|---|---|
+| `Temporal/ProofSystem/Axioms.lean` | 1 → 0 | `style.emptyLine` (39 sites, blank lines inside the single-command `inductive Axiom` block, between constructors and `-- Layer N` comments) | `469f62ae` |
+| `ConservativeExtension/ExtDerivation.lean` | 1 → 0 | `style.emptyLine` (7 sites, same `inductive ExtAxiom`-block pattern) | `2c4a3e29` |
+| `Bimodal/ProofSystem/Axioms.lean` | 1 → 0 | `style.emptyLine` (47 sites, same `inductive Axiom`-block pattern; largest single-file site count this task to date) | `1af48333` |
+| `Decidability/ProofExtraction.lean` | 1 → 0 | `style.longLine` (10 sites, 105-151 chars; fixed by wrapping def signatures and a multi-line `let`-chain, plus one Lean string-gap continuation for a long diagnostic string literal — new technique, worked cleanly) | `d8c6b4cd` |
+| `Decidability/FMP/TruthPreservation.lean` | 1 → 0 | `style.emptyLine` (0 surfaced, E2) | `1daaf38a` |
+| `Decidability/Closure.lean` | 1 → 0 | `unusedSectionVars` (2 sites, `SignedFormula.beq_self`/`eq_of_beq_eq_true` auto-included `[Hashable Atom]` unused; fixed with declaration-scoped `omit [Hashable Atom] in`, per P2/C-pattern for this category) | `6df8000b` |
+| `Temporal/Metalogic/MetricCompleteness.lean` | 1 → 0 | `style.setOption` (0 surfaced, E2 — same pattern as cycle 25's MetricSoundness.lean: suppression suppressed only itself) | `f8249816` |
+| `Separation/Defs.lean` | 1 → 0 | `style.emptyLine` (0 surfaced, E2). Heavily-imported core file (10 direct importers); verified via a full rebuild of `Metalogic/Separation.lean` (811 jobs) rather than enumerating importers, per the Verification-per-file exemption | `8532f4ec` |
+| `Decidability/Tableau.lean` | 1 → 0 | `style.longLine` (8 sites, 101-105 chars, all the same shape: `let prop := SignedFormula.X arg { world := ..., time := freshTime }` inside `applyRule`'s auto-propagation branches; fixed by wrapping the record literal onto an indented continuation line). Heavily-imported core file; verified via a full rebuild of `Decidability.lean` (809 jobs) | `9ff65ebd` |
+
+New finding this cycle: **large single-command `inductive ... where` blocks are the dominant
+`style.emptyLine` source** at this file-size tier (three files, 39+7+47=93 of this cycle's 113
+surfaced sites) — blank lines used as visual separators between constructors, or around
+`-- Layer N` section comments, inside one giant command. The fix is always the same: delete the
+blank lines strictly between the `inductive` keyword and the line immediately before the next
+top-level command (found via `grep -n "^inductive\|^def \|^theorem \|^instance\|^namespace\|^end"`
+to locate the command's start/end), while leaving the blank line that separates it from the next
+command untouched. Verified via `diff` after mechanical removal that the only removed lines were
+blank (no content line ever matched the removal filter), before ever running `lake build`.
+
+The Lean string-gap continuation (`\` immediately before a newline inside a string literal, with
+the continuation's leading whitespace elided) worked as a way to wrap an over-length string
+literal without altering its content — confirmed by a clean `lake build` with zero warnings and
+by `git diff` showing only the wrap, not a wording change. Recorded as a technique for future
+`style.longLine` sites that hit a genuinely single long string rather than an over-length
+expression.
+
+Phase-boundary gate re-verified green at cycle close: `lake build --wfail --iofail` (exit 1,
+exactly the 5 baseline sorry warnings), `lake test` (exit 0), `lake exe checkInitImports` (pass),
+`lake lint` (0 matches on the 7 prevention categories, 144 out-of-scope `unusedArguments`
+findings unchanged in kind), `lake exe lint-style` (exit 0), `lake shake` (12 upstream-shared, 0
+local-only), `lake exe mk_all --module` (no update necessary), `scripts/check-lint-suppressions.sh`
+(re-baselined via `--update`, exit 0, "25 (baseline ceiling 25)").
 
 ### Phase 6: Sorry visibility [COMPLETED]
 
@@ -572,7 +620,7 @@ No report artifact was filed: research findings were inlined into this plan.
 | Every `warn.sorry` suppression has a recorded per-site justification, and the Bimodal-vs-rest asymmetry has an explicit disposition | **MET** |
 | `NOTATION.md` documents the scoped-notation rule for the `S` collision, and the 5 `NOTE:` blocks documenting the `@`-application workaround are retained while the collision persists | **MET** |
 | No hygiene edit lands in an upstream-shared file **except where the user has explicitly authorized it, and every such exception is recorded** | **MET, one recorded exception** — `NOTATION.md` (Phase 7). Known consequence, accepted: it will diverge from upstream and need reconciling on the next sync |
-| Suppression audit outcome recorded per site, **for local-only files** | **PARTIAL** — 331 sites done across 103 files; 9 blanket suppressions across 9 actionable local-only files remain (plus 5 permanent exceptions and 6 in the deliberately-deferred count-6 file) |
+| Suppression audit outcome recorded per site, **for local-only files** | **PARTIAL** — 444 sites done across 112 files; the count-1 actionable tier is fully closed. Only the deliberately-deferred count-6 file (`CounterexampleElimination/Interface.lean`, 6 blanket suppressions) remains, plus 5 permanent exceptions with recorded verification |
 
 The last row is the only open criterion. It is **bounded** — the original repo-wide wording was
 open-ended; the upstream-exposure rescope made it finite.

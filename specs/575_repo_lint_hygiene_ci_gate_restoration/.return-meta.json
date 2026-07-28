@@ -1,7 +1,7 @@
 {
   "status": "partial",
-  "started_at": "2026-07-27T00:00:00Z",
-  "completed_at": "2026-07-28T00:33:49Z",
+  "started_at": "2026-07-28T00:36:56Z",
+  "completed_at": "2026-07-28T01:08:17Z",
   "artifacts": [
     {
       "type": "plan",
@@ -9,18 +9,18 @@
     },
     {
       "type": "handoff",
-      "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/handoffs/08_cycle-23-phase5-progress.md"
+      "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/handoffs/09_cycle-24-phase5-progress.md"
     }
   ],
   "partial_progress": {
     "stage": "phase5_suppression_audit",
-    "details": "Cycle 23: processed 17 files (26 blanket-suppression sites cleared), re-baselined the ratchet from 86 to 60. 46 blanket suppressions across 32 local-only files remain in scope (down from 72/49). Full CI pipeline green. Task remains PARTIAL, requires_user_review is false -- this is expected mid-phase progress, not a blocker.",
+    "details": "Cycle 24: processed 7 files (14 blanket-suppression sites cleared), re-baselined the ratchet from 60 to 46. 32 blanket suppressions across 25 local-only files remain in scope (down from 46/32). Full CI pipeline green. Task remains PARTIAL, requires_user_review is false -- this is expected mid-phase progress, not a blocker.",
     "phases_completed": 7,
     "phases_total": 8,
-    "sites_done_cumulative": 304,
-    "files_processed_cumulative": 85,
-    "sites_remaining": 46,
-    "files_remaining": 32
+    "sites_done_cumulative": 318,
+    "files_processed_cumulative": 92,
+    "sites_remaining": 32,
+    "files_remaining": 25
   },
   "verification": {
     "verification_passed": true,
@@ -38,7 +38,7 @@
       "mk_all": "no update necessary",
       "lake_shake": "exactly 12 upstream-shared files, zero local-only",
       "lake_test": "exit 0",
-      "check_lint_suppressions": "exit 0, 60 (baseline ceiling 60)"
+      "check_lint_suppressions": "exit 0, 46 (baseline ceiling 46)"
     }
   },
   "requires_user_review": false,

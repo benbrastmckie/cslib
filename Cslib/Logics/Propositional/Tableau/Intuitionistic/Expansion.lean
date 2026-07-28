@@ -208,172 +208,30 @@ lemma intStepBranch_result_ne_notApplicable
 
 /-! ## Sfor-Containment Loop-Check -/
 
-/-- **SUPERSEDED (task 574, Phase 3):** this def searches **descendants**
-(`isAccessible edges w x`), which is the defect task 574 repairs — a Fitting-style loop check
-must search **ancestors**. See `intFImpReuseWitnessAnc?` below for the ancestor-direction
-replacement; `intExpandBranches`'s call site (`:423`) still calls this def until Phase 4 swaps
-it and retires this declaration. The rest of this docstring is retained verbatim as historical
-record of the (superseded) descendant-direction design; do not treat it as current design intent.
-
-The `Sfor`-containment loop-check (design settled, GO verdict). Wired into `go`'s
-`some (.linearResult newForms nw' (some newEdge), newExp)` branch (see `intExpandBranches`
-below).
+/-- The **ancestor-directed** `Sfor`-containment loop-check (task 574, Phase 3; wired into
+`intExpandBranches`'s call site at Phase 4 — this is now the sole loop-check implementation).
 
 Following the `Sfor`-containment termination technique of Garg, Genovese & Negri,
 *Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
-[`GargGenoveseNegri2012`], this helper will decide
-whether the `F(φ → ψ)`-triggered world-creation in `go`'s
-`some (.linearResult newForms nw' (some newEdge), newExp)` branch — the *only* world-creating
-case, produced solely by `intApplyRuleFull`'s `F(φ → ψ)` clause via `intFImpRule` — can be
-**reused** instead of performed, so that no two worlds on a branch ever end up with
-containment-equal forced-sets (which is what makes the existing `2^(2·complexity+2)` fuel
-bound, sized against the finite space of possible forced-sets, adequate).
+[`GargGenoveseNegri2012`], this helper decides whether the `F(φ → ψ)`-triggered world-creation
+in `go`'s `some (.linearResult newForms nw' (some newEdge), newExp)` branch — the *only*
+world-creating case, produced solely by `intApplyRuleFull`'s `F(φ → ψ)` clause via
+`intFImpRule` — can be **reused** instead of performed, so that no two worlds on a branch ever
+end up with containment-equal forced-sets.
 
-**Which set.** `intFImpRule φ ψ w nextWorld b` returns
-`newForms = [⟨.pos, φ, w'⟩, ⟨.neg, ψ, w'⟩] ++ propagatePersistence b w w'`, and
-`propagatePersistence b w w' = (posFormulasAt b w).map (labeled w')`. So the prospective
-forced-set at the would-be new world `w'`, `Sfor(w') = {φ} ∪ posFormulasAt bPers w`, is exactly
-the `sign = .pos` sub-list of `newForms`; the obligation `ψ` is the unique `sign = .neg` entry.
-Both are read directly off `newForms` — no need to thread `φ`/`ψ` separately.
+A prior descendant-directed formulation of this check (`isAccessible edges w x`, searching
+worlds reachable *from* the source `w`) was the root defect this task repairs: a Fitting-style
+loop check must search **ancestors** — worlds `x` reachable *to* `w` — so that a formula
+obligation can be discharged by something already forced earlier on the same accessibility
+path, not by something not-yet-created. That descendant-directed def and its spec lemma have
+been retired (Phase 4); this ancestor-directed def is now the sole implementation.
 
-**Where it fires.** Inside `go` (the `intExpandBranches` inner loop), in the
-`some (.linearResult newForms nw' (some newEdge), newExp)` case, BEFORE
-`Branch.extendMany bPers newForms` and BEFORE `newEdge` is appended to `edges`. At that point
-`go` already has `bPers : IBranch Atom` and `edges : IEdges` (the pre-extension edge list) in
-its own parameters, and the source world `w = newEdge.2` (`intFImpRule` returns edge
-`(w', w)`). Consequently **no signature change to `intFImpRule`, `intApplyRuleFull`, or
-`intStepBranch` is required**: those keep exactly their current parameters
-(`φ ψ w nextWorld b` / `sf nextWorld b` / `b expanded nextWorld`); `edges` is available one
-level up, exactly where the check needs to run, so the design threads no new parameter through
-the rule layer at all.
-
-**What it returns.** `some x` for a world label `x` (search order: e.g. first match under
-`(bPers.map (·.label)).eraseDups`) such that:
-- `isAccessible edges w x` — `x` is reachable from `w` in the existing Kripke pre-order
-  (reuses `isAccessible` as-is; no new accessibility notion needed), AND
-- `Sfor(w') ⊆ posFormulasAt bPers x` — containment: everything that would hold at the fresh
-  world already holds at `x`, AND
-- `ψ ∉ posFormulasAt bPers x` — the obligation is still open at `x` (no `T(ψ)@x`, so reusing
-  `x` does not vacuously close the branch), AND
-- **`F(ψ)@x` is already an explicit entry on `bPers`** (Option A fix). This is the load-bearing
-  conjunct for soundness: `IBranchSaturation.sat_fimp`/
-  `sfSatisfied`'s `.neg, .imp` case demands an *explicit* `F(ψ)@x` entry, not merely
-  `ψ ∉ posFormulasAt bPers x` — an earlier investigation found a concrete counterexample where
-  the latter alone holds but no `F(ψ)@x` entry exists, breaking the Hintikka condition at the
-  reused witness.
-  Requiring `F(ψ)@x` to already be *literally present* on `bPers` closes that gap for free,
-  with NO branch modification on reuse (the alternative, Option B — appending a fresh `F(ψ)@x`
-  entry unconditionally — was tried and found UNSOUND: `intExpandBranches_closed_unsat`
-  (`Soundness.lean`) needs `intBranchSatisfied` for whatever branch `go` recurses on, and an
-  arbitrary satisfying Kripke model has no obligation to falsify `ψ` at the model-world already
-  assigned to `x` merely because `ψ` is not yet *forced on the branch* — that model-world's
-  value was already pinned by earlier steps, unlike a genuinely fresh label. Requiring `F(ψ)@x`
-  to pre-exist sidesteps this entirely: nothing new is asserted, so the already-established
-  `intBranchSatisfied` witness for `bPers` continues to apply unchanged).
-
-`some x` means do NOT create `w'` — mark `F(φ → ψ)@w` expanded
-(already achieved via `newExp`) and continue on the SAME branch, calling `intExpandBranches`
-with `bPers` (not `Branch.extendMany bPers newForms`) and unmodified `edges` (not
-`edges ++ [newEdge]`). `none` means proceed exactly as today (create `w'` as normal).
-
-**Why not the worlds-free G4ip weight** (Dyckhoff 1992 [`Dyckhoff1992`] / Negri–von Plato 2001
-[`NegriVonPlato2001`] §5.5): that
-measure requires every rule's active formula to be strictly lighter than its principal
-formula, which `propagatePersistence` breaks by unconditionally copying ALL `T`-signed
-formulas at `w` — including compounds not yet expanded there — onto `w'` regardless of
-`complexity(φ → ψ)` (see blocker `R1-measure` in plan 03 / `.orchestrator-handoff.json`). The
-`Sfor`-containment check sidesteps this: instead of a per-step-decreasing measure over branch
-contents, it bounds the *number of distinct worlds* a branch can contain (`Sfor` takes values
-only in the finite lattice of subsets of `Sub(φ)` and grows monotonically along
-`isAccessible`), which is exactly the finite-model argument the `2^(2·complexity+2)` fuel bound
-already assumes.
-
-**GO verdict (R1 gate).** The check is fully expressible against the existing `IBranch`,
-`IEdges`, `posFormulasAt`, `isAccessible` primitives, using only quantities already in scope
-inside `go` (`bPers`, `edges`, `newForms`, `newEdge`). No new persistent field, no new
-structure, and no signature change anywhere in the rule layer is required.
-
-**Search order.** Candidates are the distinct world labels appearing on `bPers`
-(`(bPers.map (·.label)).eraseDups`), in branch order; `List.findSome?` returns the first
-label satisfying all three conditions, or `none` if no label does. -/
-def intFImpReuseWitness? (bPers : IBranch Atom) (edges : IEdges)
-    (newForms : List (ISF Atom)) (newEdge : Nat × Nat) : Option Nat :=
-  -- `w` is the source world of the would-be world-creating edge (`intFImpRule` returns
-  -- edge `(w', w)`, so `newEdge.2 = w`).
-  let w := newEdge.2
-  match newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none) with
-  | none => none  -- malformed input: no obligation entry (should not happen for this rule)
-  | some ψ =>
-    -- Sfor(w') = {φ} ∪ posFormulasAt bPers w, read off newForms's sign = .pos sublist.
-    let sfor : List (Proposition Atom) :=
-      newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none
-    let candidates := (bPers.map (·.label)).eraseDups
-    candidates.findSome? fun x =>
-      let forcedAtX := posFormulasAt bPers x
-      -- `w.ble x` (`w ≤ x`) is a cheap, purely computable, redundant-in-valid-runs check:
-      -- `isAccessible edges w x` already semantically implies `w ≤ x` (descendants get
-      -- strictly larger labels than ancestors), but proving that from `isAccessible`'s raw
-      -- reachability definition would require threading a brand-new "edges are label-ordered"
-      -- invariant through the whole expansion induction. Checking `w ≤ x` directly here makes
-      -- the `sat_fimp`/`sfSatisfied` obligation `w ≤ w'` immediately available at the witness
-      -- `x` with zero new invariant machinery.
-      if isAccessible edges w x
-          && w.ble x
-          && sfor.all (forcedAtX.contains ·)
-          && !(forcedAtX.contains ψ)
-          && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) then
-        some x
-      else
-        none
-
-omit [Hashable Atom] in
-/-- Specification lemma for `intFImpReuseWitness?`:
-when it returns `some x` for the `.neg`-signed obligation `ψ` read off `newForms`, `x`
-satisfies all five search conditions, including the load-bearing Option-A conjunct
-`F(ψ)@x ∈ bPers` (an explicit branch entry, not merely "not forced"). This is the fact
-`Scheme.lean`'s `intExpandBranches_openBranch_sat` reuse case needs to discharge
-`sfSatisfied`/`sat_fimp` at the reused witness without any new invariant machinery. -/
-lemma intFImpReuseWitness?_spec {bPers : IBranch Atom} {edges : IEdges}
-    {newForms : List (ISF Atom)} {newEdge : Nat × Nat} {x : Nat} {ψ : Proposition Atom}
-    (hψ : newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none)
-        = some ψ)
-    (h : intFImpReuseWitness? bPers edges newForms newEdge = some x) :
-    isAccessible edges newEdge.2 x = true ∧
-    newEdge.2 ≤ x ∧
-    (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
-      ((posFormulasAt bPers x).contains ·) = true ∧
-    ¬ (posFormulasAt bPers x).contains ψ ∧
-    bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) = true := by
-  simp only [intFImpReuseWitness?, hψ] at h
-  obtain ⟨x', _hx'mem, hif⟩ := List.exists_of_findSome?_eq_some h
-  by_cases hcond : (isAccessible edges newEdge.2 x'
-      && newEdge.2.ble x'
-      && (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
-        ((posFormulasAt bPers x').contains ·)
-      && !(posFormulasAt bPers x').contains ψ
-      && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x')) = true
-  · simp only [hcond, if_true] at hif
-    injection hif with hif
-    subst hif
-    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hcond
-    obtain ⟨⟨⟨⟨h1, h2⟩, h3⟩, h4⟩, h5⟩ := hcond
-    exact ⟨h1, Nat.le_of_ble_eq_true h2, h3, by simpa using h4, h5⟩
-  · simp only [Bool.not_eq_true] at hcond
-    simp only [hcond] at hif
-    simp at hif
-
-/-- The **ancestor-directed** `Sfor`-containment loop-check (task 574, Phase 3).
-
-`intFImpReuseWitness?` above searches **descendants** of the world-creating source `w`
-(`isAccessible edges w x`), which is the defect this task repairs: a Fitting-style loop check
-must search **ancestors** instead, so that a formula obligation can be discharged by something
-already forced earlier on the same accessibility path, not by something not-yet-created.
-
-**Search direction and why.** Swap `isAccessible edges w x` → `isAccessible edges x w` and
-`w.ble x` → `x.ble w` relative to `intFImpReuseWitness?`; every other conjunct (including the
-`F(ψ)@x` explicit-entry conjunct) is unchanged. The rationale — `Sfor` (the forced-set at a
-world) takes values in the finite subset lattice of `Sub(φ)` and grows monotonically along
-accessibility, so an ancestor's forced-set is a subset of any descendant's — is attributed to
+**Search direction and why.** `isAccessible edges x w` (x reachable to w) and `x.ble w`
+(x carries the strictly smaller, ancestor-side label); every other conjunct (including the
+`F(ψ)@x` explicit-entry conjunct) is as in the retired descendant-directed design. The
+rationale — `Sfor` (the forced-set at a world) takes values in the finite subset lattice of
+`Sub(φ)` and grows monotonically along accessibility, so an ancestor's forced-set is a subset
+of any descendant's — is attributed to
 Garg, Genovese & Negri, *Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
 [`GargGenoveseNegri2012`] and to Fitting, *Proof Methods for Modal and Intuitionistic Logics*
 (1983) [`Fitting1983`] Ch. 4, as **provenance only**: neither source is readable from this
@@ -525,9 +383,12 @@ def intExpandBranches
                 fuel'
                 closurePred
             | some e =>
-              -- World-creating F(φ → ψ) rule: run the Sfor-containment loop-check
-              -- before committing to a fresh world w' = e.1.
-              match intFImpReuseWitness? bPers edges newForms e with
+              -- World-creating F(φ → ψ) rule: run the ancestor-directed Sfor-containment
+              -- loop-check before committing to a fresh world w' = e.1 (Phase 4: repointed
+              -- from the descendant-directed `intFImpReuseWitness?` to the ancestor-directed
+              -- `intFImpReuseWitnessAnc?`, per the spike's GO verdict and Phase 1's V1
+              -- selection).
+              match intFImpReuseWitnessAnc? bPers edges newForms e with
               | some _x =>
                 -- Reuse: an accessible ancestor already contains Sfor(w') and lacks ψ, so
                 -- F(φ → ψ)@w is discharged without creating w'. No new world, no new edge;

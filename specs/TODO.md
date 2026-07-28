@@ -36,7 +36,7 @@ next_project_number: 585
 ### Modal Logic
 
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-554 [PLANNED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
+554 [IMPLEMENTING] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 558 [NOT STARTED] — [Task A of the modal-tableau refactor programme; P0, highest valu
@@ -58,7 +58,7 @@ next_project_number: 585
 
 ### Tableau Infrastructure
 
-456 [PLANNED] — Generalize the Sfor-containment / subset-blocking device recurrin
+456 [IMPLEMENTING] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ### Temporal Logic
 
@@ -331,7 +331,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -491,7 +491,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 456. Shared tableau containment blocking
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: Task 574

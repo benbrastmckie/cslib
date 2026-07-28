@@ -1,13 +1,13 @@
 {
   "status": "in_progress",
   "started_at": "2026-07-28T00:00:00Z",
-  "artifacts": ["scripts/AxiomCensus.lean", "scripts/check-sorry-suppressions.sh", "scripts/sorry-suppression-baseline.txt"],
+  "artifacts": ["scripts/AxiomCensus.lean", "scripts/check-sorry-suppressions.sh", "scripts/sorry-suppression-baseline.txt", "scripts/check-axiom-census.sh", "scripts/axiom-census-baseline.txt"],
   "partial_progress": {
-    "stage": "phase_3_complete",
-    "details": "Phase 1 (AxiomCensus.lean) and Phase 3 (check-sorry-suppressions.sh + baseline) complete. Sorry-suppression baseline verified: 18 markers/5 files, 28 sorries/9 files, exact match to settled split. Regression/improvement/exit-2 paths verified via scratch copies.",
+    "stage": "phase_2_complete",
+    "details": "Phases 1, 2, 3 complete. check-axiom-census.sh verified: 43-row exact-set baseline, all exit codes (0/1/2) confirmed via scratch copies. Wave 1+2 done; proceeding to wave 3 (phases 4, 5).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2
+    "phases_completed": 3
   },
   "metadata": {
     "session_id": "sess_1785251101_8e14cc_581",

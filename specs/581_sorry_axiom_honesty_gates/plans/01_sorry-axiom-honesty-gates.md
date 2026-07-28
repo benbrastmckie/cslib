@@ -268,40 +268,46 @@ exit-2 sanity gate.
 
 ---
 
-### Phase 2: Axiom-census ratchet script and baseline [NOT STARTED]
+### Phase 2: Axiom-census ratchet script and baseline [COMPLETED]
 
 **Goal**: `scripts/check-axiom-census.sh` + `scripts/axiom-census-baseline.txt` implement an exact-set
 ratchet over the Phase 1 output, green on the current tree.
 
 **Tasks**:
-- [ ] Write `scripts/check-axiom-census.sh` modelled structurally on `scripts/check-shake-residue.sh`
+- [x] Write `scripts/check-axiom-census.sh` modelled structurally on `scripts/check-shake-residue.sh`
       (exact-set precedent): `set -uo pipefail`, `REPO_ROOT` resolved from `BASH_SOURCE`, `cd "$REPO_ROOT" || exit 2`,
       `--update` / `--list` / bare / usage-error dispatch, associative-array set comparison, single exit at end.
-- [ ] Header comment block covering: what silent axiom taint is and why `--wfail` cannot see it (use the
+- [x] Header comment block covering: what silent axiom taint is and why `--wfail` cannot see it (use the
       `minimalTableau_decides` / `intuitionisticTableau_decides` worked example — **never** the
       `_complete` pair); why the baseline is an exact set and not a count; that it needs built `.olean`s;
       and the full exit-code contract. No task numbers.
-- [ ] Run helper that invokes `lake env lean --run scripts/AxiomCensus.lean` **exactly once**, capturing
+- [x] Run helper that invokes `lake env lean --run scripts/AxiomCensus.lean` **exactly once**, capturing
       output and exit code into globals (call it directly, never inside `$(...)`, or the assignments are
       lost to a subshell — this is the documented trap in the shake precedent).
-- [ ] Exit-2 conditions, all mandatory:
-  - the `lake env lean --run` invocation exits nonzero;
-  - it exits 0 but no `# total=` summary line is parseable from its output;
-  - the summary reports `total=0` (an empty environment must never read as "zero taint").
-- [ ] Comparison: build the live set from TSV field 1 only. FAIL (regression) for each live name absent
+- [x] Exit-2 conditions, all mandatory:
+  - the `lake env lean --run` invocation exits nonzero; verified via a PATH override removing `lake`
+    (exit 127 -> correctly mapped to exit 2).
+  - it exits 0 but no `# total=` summary line is parseable from its output; verified via a scratch
+    fake-census substitution.
+  - the summary reports `total=0` (an empty environment must never read as "zero taint"); verified via
+    a scratch fake-census substitution reporting `total=0`.
+- [x] Comparison: build the live set from TSV field 1 only. FAIL (regression) for each live name absent
       from the baseline; IMPROVED for each baseline name absent from the live set.
       **The `<file>` and `<reason>` columns are ledger metadata and are NOT compared** — a changed reason
       for an unchanged declaration must never fail the check. State this in the header.
-- [ ] `--update` writes the baseline with the D1 ledger header comment block plus the sorted TSV rows;
+- [x] `--update` writes the baseline with the D1 ledger header comment block plus the sorted TSV rows;
       refuses to write from a run that would have exit-2'd.
-- [ ] Failure message: name the offending declarations, explain that a declaration outside the baseline
+- [x] Failure message: name the offending declarations, explain that a declaration outside the baseline
       became `sorryAx`-tainted, and state that a genuinely justified new entry must be added deliberately
       via `--update` in the same commit with the reason in the commit message — never as a silent side effect.
-- [ ] Improvement message: `ACTION REQUIRED` block naming `bash scripts/check-axiom-census.sh --update`,
+- [x] Improvement message: `ACTION REQUIRED` block naming `bash scripts/check-axiom-census.sh --update`,
       exit 0 (D3).
-- [ ] Generate the baseline via `--update`. **Gate**: confirm it contains exactly 43 data rows before
-      accepting it. If not 43, stop and investigate rather than baselining a different number.
-- [ ] Run the script bare and confirm `exit 0` with "matches the baseline exactly".
+- [x] Generate the baseline via `--update`. **Gate**: confirm it contains exactly 43 data rows before
+      accepting it. If not 43, stop and investigate rather than baselining a different number. Confirmed:
+      43 data rows on the first attempt.
+- [x] Run the script bare and confirm `exit 0` with "matches the baseline exactly". Confirmed: "OK:
+      sorryAx-tainted set matches the baseline exactly.", exit 0. Regression and improvement paths also
+      independently verified via scratch baseline copies (never touching the real baseline file).
 
 **Timing**: 1.5 hours
 

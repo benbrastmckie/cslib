@@ -2123,13 +2123,18 @@
         ".github/workflows/lean_action_ci.yml"
       ],
       "created": "2026-07-27T06:54:27Z",
-      "last_updated": "2026-07-27T22:40:00Z",
+      "last_updated": "2026-07-28T01:14:01Z",
       "session_id": "sess_1785173891_2df686",
       "artifacts": [
         {
           "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md",
           "type": "plan",
           "summary": ""
+        },
+        {
+          "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md",
+          "type": "plan",
+          "summary": "v2 — condensed rewrite; supersedes 01_"
         }
       ],
       "plan_metadata": {
@@ -2137,7 +2142,7 @@
         "phases_complete": 7,
         "phases_partial": 1,
         "complexity": "moderate",
-        "plan_version": 1,
+        "plan_version": 2,
         "research_integrated": true,
         "skeleton": false
       },

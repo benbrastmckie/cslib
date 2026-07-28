@@ -503,7 +503,14 @@ obligation, guarded by the hypothesis `CS5PairSeedDisjunctionProperty` was missi
 already lie in the `CS5`-deductive closure of `H`'s box-inverse. Equivalent, by round 1's
 reduction (`hOpen ↔ hR`), to the disjunction-property form under the same guard; stated directly
 in right-exclusion form since that is what every downstream consumer
-(`cs5Pair_derivExcludes_of_rightExclusion`) actually needs. -/
+(`cs5Pair_derivExcludes_of_rightExclusion`) actually needs.
+
+**Route status.** Both residual hypotheses of the surveyed product-model route toward this
+obligation are machine-closed: discharging the route's box-membership transfer is equivalent to
+the `CS5 = IS5` collapse (`is5_derivable_of_boxNotMem_transport`, `InterSystem/CS5ToIS5.lean`),
+and the route's required total-`r` countermodel supply is refuted —
+total-`r` birelational models validate `□a ∨ ¬□a`, an `IS5` non-theorem
+(`is5TotalCountermodelSupply_false`, `Intuitionistic/IS5TotalModels.lean`). -/
 def CS5PairSeedRightExclusion (H : Set (Proposition Atom)) (A : Proposition Atom) : Prop :=
   A ∉ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H) →
     cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)

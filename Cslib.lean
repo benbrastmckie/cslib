@@ -411,6 +411,7 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5TotalModels
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma

@@ -1,35 +1,31 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-26T00:00:00Z",
-  "completed_at": "2026-07-26T18:30:00Z",
+  "status": "planned",
+  "started_at": "2026-07-28T00:00:00Z",
+  "completed_at": "2026-07-28T00:00:00Z",
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean", "type": "code", "summary": "Added cut + NestedProof.CutFree; added buildRhsChain_box_shape / InputCtx_fillLhs_snd_box / InputCtx_fillEmpty_snd_box verifying InputCtx-shaped rules always produce a .box-shaped RHS"},
-    {"path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md", "type": "plan", "summary": "Phase 14 marked [BLOCKED] with a documented blocker note"},
-    {"path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-14-handoff-20260726.md", "type": "handoff", "summary": "Full writeup of the general-id / efq blocker, what was tried, what not to try, recommended next steps"},
-    {"path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-14-progress.json", "type": "progress", "summary": "Objective-level progress: cut+CutFree done; general id and the 17 axiom derivations blocked"}
+    {
+      "type": "plan",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/03_ra-probe-product-model.md",
+      "summary": "Hard-mode plan: Phase 1 (R-a) probe with explicit kill-criterion (plan-time sharpening: total-r models validate box-a or not-box-a, an IS5 non-theorem, refuting the route-required form); Phase 2 lands the verdict in Cslib and executes the user's kill disposition; Phases 3-6 conditional product-model construction up to the (R-b) interface endpoint. Nested-sequent route not re-planned per explicit user rescope."
+    }
   ],
-  "phases_completed": 13,
-  "phases_total": 32,
-  "partial_progress": {
-    "stage": "blocked",
-    "details": "cut rule and CutFree landed (verified, committed). Proposition 3.1 (general id), needed by all 17 axiom derivations, is blocked at A = bottom: rigorously verified in Lean that every InputCtx-shaped NestedProof constructor produces an unconditionally .box-shaped RHS, never .atom-shaped, so botL cannot supply impR's bare-atom premise. requires_user_review: true."
+  "phase_count": 6,
+  "estimated_hours": 13.5,
+  "postmortem_rules_count": 9,
+  "plan_metadata": {
+    "skeleton": false,
+    "conditional_phases": [3, 4, 5, 6],
+    "kill_criterion": "If (R-a) fails, task closes [BLOCKED] with report 02 section 5.4 cost table as justification (verbatim from user rescope)"
   },
-  "memory_candidates": [
-    "InputCtx.fillLhs / InputCtx.fillEmpty always produce a .box-shaped RHS component, regardless of context length -- a structural invariant of this nested-sequent encoding worth remembering before attempting any 'bare id' or 'general ex falso' derivation in this codebase.",
-    "NestedLhs.comma is a raw, non-quotiented constructor; OutputCtx.fillFull's single-element case always puts the filled formula first in the comma, context-head second -- any derivation needing the opposite order needs an explicit comma-commutativity lemma, not yet landed."
-  ],
   "metadata": {
-    "session_id": "sess_1785046950_33beb4_554",
-    "agent_type": "cslib-implementation-hard-agent",
+    "session_id": "sess_1785275816_a84520_554",
+    "agent_type": "planner-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"]
   },
-  "verification": {
-    "verification_passed": false,
-    "sorry_count": 1,
-    "vacuous_count": 0,
-    "axiom_count": 26,
-    "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build + checkInitImports + lint-style + mk_all verified green; full lake test/lake lint not re-run this dispatch, no full-project changes beyond Rules.lean)"
+  "notes": {
+    "lit_stage4a": "SUBINDEX_PRESENT (34 entries, per-repo briefing mode); no prompt needed, no [lit:auto] fallback required",
+    "current_state_verified": "All report 8.1 land-now items confirmed landed at HEAD with drifted line numbers re-verified (CS5PairSeedRightExclusion at CS5Completeness.lean:507, refutations at :543/:574, CS5ToIS5.lean present, Nested/ sorry-free); prior plan 02 phases 1-13 recorded as preserved assets",
+    "probe_identity": "The plan honors the (R-a) probe as Phase 1 per team-lead directive and user rescope; plan-time analysis of IS5.lean forcing clauses supplies a concrete separating-formula attack making the probe bounded and likely decisive"
   }
 }

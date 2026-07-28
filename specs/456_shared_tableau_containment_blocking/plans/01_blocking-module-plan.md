@@ -1,7 +1,7 @@
 # Implementation Plan: Shared Tableau Containment-Blocking Module (Blocking.lean)
 
 - **Task**: 456 - shared_tableau_containment_blocking
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: 574 (completed — settled the logic-specific side-condition shape)
 - **Research Inputs**: reports/01_blocking-module-research.md (adversarially verified; three proof cores compiled green in research session)
@@ -322,19 +322,19 @@ the Temporal build never sees a half-written Blocking.lean.
 - **Done when:** both grep counts are exactly 1; diff read-through confirms edits confined to
   the two entries; commit.
 
-### Phase 5: CI integration gate (barrel, checkInitImports, full build, lint-style, shake, test) [NOT STARTED]
+### Phase 5: CI integration gate (barrel, checkInitImports, full build, lint-style, shake, test) [COMPLETED]
 
 - **Goal:** Wire the new module into the library barrel and pass the full repository gate set.
 - **Tasks:**
-  - [ ] `lake exe mk_all --module` — register Blocking.lean in the barrel.
-  - [ ] `checkInitImports` passes.
-  - [ ] Full `lake build` green.
-  - [ ] `lake exe lint-style` clean (research probes hit one style-whitespace lint —
+  - [x] `lake exe mk_all --module` — register Blocking.lean in the barrel.
+  - [x] `checkInitImports` passes.
+  - [x] Full `lake build` green.
+  - [x] `lake exe lint-style` clean (research probes hit one style-whitespace lint —
     trivially fixed; expect none after Phase 1/2 discipline).
-  - [ ] `lake shake` — confirm import minimality for Blocking.lean and the Temporal import
+  - [x] `lake shake` — confirm import minimality for Blocking.lean and the Temporal import
     addition; remove any over-imports it flags.
-  - [ ] `lake test` — full suite including all conformance rows.
-  - [ ] Zero-sorry sweep: `grep -n "sorry" ` over all files touched by Phases 1-3 returns
+  - [x] `lake test` — full suite including all conformance rows.
+  - [x] Zero-sorry sweep: `grep -n "sorry" ` over all files touched by Phases 1-3 returns
     nothing.
 - **Timing:** 1 hour (dominated by full build)
 - **Depends on:** 1, 2, 3, 4
@@ -345,13 +345,13 @@ the Temporal build never sees a half-written Blocking.lean.
 
 ## Testing & Validation
 
-- [ ] Scoped `lake build Cslib.Foundations.Logic.Tableau.Blocking` after Phases 1 and 2.
-- [ ] `lean_verify` axiom checks on `Tableau.distinctTypes_le_pow` and
+- [x] Scoped `lake build Cslib.Foundations.Logic.Tableau.Blocking` after Phases 1 and 2.
+- [x] `lean_verify` axiom checks on `Tableau.distinctTypes_le_pow` and
   `Tableau.strictChain_le_card` (no new axioms, no sorryAx).
-- [ ] Interface build of Temporal `Branch` + `Rules` + `Saturation` + `Closure` after Phase 3.
-- [ ] 24 temporal conformance rows in `CslibTests/TableauConformance.lean` pass unchanged.
+- [x] Interface build of Temporal `Branch` + `Rules` + `Saturation` + `Closure` after Phase 3.
+- [x] 24 temporal conformance rows in `CslibTests/TableauConformance.lean` pass unchanged.
 - [x] Duplicate-bibkey greps (Phase 4) both return exactly 1.
-- [ ] Final gate set (Phase 5): mk_all barrel, checkInitImports, full `lake build`,
+- [x] Final gate set (Phase 5): mk_all barrel, checkInitImports, full `lake build`,
   `lake exe lint-style`, `lake shake`, `lake test`, zero-sorry sweep.
 
 ## Artifacts & Outputs

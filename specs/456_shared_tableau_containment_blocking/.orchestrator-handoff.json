@@ -1,28 +1,15 @@
 {
-  "status": "partial",
-  "summary": "Phase 4 complete: references.bib bibliography deliverable. DershowitzManna1979 (Dershowitz & Manna, 'Proving Termination with Multiset Orderings', CACM 22(8):465-476, 1979, doi 10.1145/359138.359142) added as a new @article entry placed in the file's loose D-G alphabetical cluster (after Dyckhoff1992), matching neighbors' column-aligned field formatting. Existing GargGenoveseNegri2012 entry (references.bib:240 after insertion) enriched IN PLACE with pages = {315--324} and doi = {10.1109/LICS.2012.42} — no duplicate key created (the duplicate-bibkey hazard from research). Verified: grep -c for each key returns exactly 1; git diff confined to the two entries. Only Phase 5 (CI integration gate) remains.",
-  "phases_completed": 4,
+  "status": "implemented",
+  "summary": "Phase 5 (CI integration gate) complete — task 456 fully implemented. Barrel registration of Cslib/Foundations/Logic/Tableau/Blocking.lean verified canonical (mk_all: no update necessary) and committed. Full gate set green: checkInitImports exit 0; full lake build 3311 jobs exit 0; lint-style exit 0 repo-wide; shake clean on task files (exit 1 only from 9 pre-existing-drift files); lake lint clean on task files (145 errors confined to 26 pre-existing-drift modules); lake test 9376 jobs exit 0 incl. TableauConformance; zero-sorry sweep clean on all four touched files; lean_verify on distinctTypes_le_pow and strictChain_le_card shows standard 3 axioms only.",
+  "phases_completed": 5,
   "phases_total": 5,
   "skeleton": false,
   "sorry_inventory": [],
   "blockers": [],
-  "continuation_context": {
-    "next_phase": 5,
-    "remaining_phases": [
-      "Phase 5: CI integration gate — mk_all barrel (Blocking.lean still unregistered), checkInitImports, full build, lint-style, shake, lake test, zero-sorry sweep"
-    ],
-    "phase_4_notes": "Both bib edits landed in a single Edit call. DershowitzManna1979 inserted before GargGenoveseNegri2012; Garg entry's existing booktitle ('IEEE/ACM Symposium') and publisher left untouched per enrich-only constraint."
-  },
+  "continuation_context": null,
   "artifacts": [
-    {
-      "path": "references.bib",
-      "type": "bibliography",
-      "summary": "Added DershowitzManna1979; enriched GargGenoveseNegri2012 with pages/doi"
-    },
-    {
-      "path": "specs/456_shared_tableau_containment_blocking/progress/phase-4-progress.json",
-      "type": "progress",
-      "summary": "Phase 4 progress log, all three objectives done"
-    }
+    {"path": "specs/456_shared_tableau_containment_blocking/summaries/01_blocking-module-summary.md", "type": "summary", "summary": "Implementation summary covering all 5 phases with full CI gate results table"},
+    {"path": "Cslib/Foundations/Logic/Tableau/Blocking.lean", "type": "lean_module", "summary": "Shared containment-blocking module: definitional layer (typeAt, posTypeAt, containmentBlocked) + counting layer (distinctTypes_le_pow, strictChain_le_card), zero sorry"},
+    {"path": "Cslib/Logics/Temporal/Tableau/Branch.lean", "type": "lean_module", "summary": "timeType/isSubsetBlocked redirected as defeq wrappers onto Blocking layer; 24 conformance rows green"}
   ]
 }

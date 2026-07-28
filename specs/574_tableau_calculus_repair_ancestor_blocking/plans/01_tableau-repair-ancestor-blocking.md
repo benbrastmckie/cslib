@@ -488,45 +488,60 @@ be committed separately and the second must rebase, not overwrite.
 
 ---
 
-### Phase 4: Repoint the call site and re-verify the acceptance gate [NOT STARTED]
+### Phase 4: Repoint the call site and re-verify the acceptance gate [COMPLETED]
 
 - **Goal:** Swap `intExpandBranches`'s single loop-check call site to `intFImpReuseWitnessAnc?`,
   then re-verify `intExpandBranches_closed_unsat` sorry-free and axiom-clean — **this phase is the
   task's explicit acceptance gate**.
 - **Tasks:**
-  - [ ] Change `Expansion.lean:423` from `intFImpReuseWitness? bPers edges newForms e` to
-        `intFImpReuseWitnessAnc? bPers edges newForms e`. Update the surrounding comment
-        (`:421-422`, `:424-427`) to say *ancestor*, matching the code for the first time.
-  - [ ] **Objective A — arm 1** (`Soundness.lean:1390-1519`, `bp = bh`, `newEdge = some e_val`).
-        The spike mechanically replayed this arm against the swapped definitions and reported
-        `goals_after: []` with the closing block (`:1478-1519`) applied **verbatim**. Capture
-        `lean_goal` at `:1394` and `:1477` and confirm `hgo` reduces to the same shape (`x` absent
-        from `hgo` and from the goal). Expect **zero edits**; if edits are needed, that contradicts
-        the spike's decisive evidence and must be recorded as such.
-  - [ ] **Objective B — arm 2** (`Soundness.lean:1570-1661`, `bp ∈ bt`). The spike explicitly did
-        **not** re-close this arm (§4 Scope Note: "strongly indicated, not proven"). Capture
-        `lean_goal` at `:1573` and `:1626`; verify the closing block `:1621-1661` (which passes
-        `wo hmono_p hsat_p` straight to `ih` with `edgesH`, and needs no
-        `applyPersistenceFixpoint_sat` derivation) still closes. This is a **first-time**
-        verification, not a re-check.
-  - [ ] **Insert exactly one tracked temporary `sorry`** at `Scheme.lean`'s reuse-site discharge
-        (`:2751-2807`), where `intFImpReuseWitness?_spec hψ heq` is destructured into
-        `⟨hacc, hle, hcont, hnotmem, hFpsi⟩` and fed into `sfSatisfied`/`sfAccessSat` at `:2793`
-        and `:2805`. Annotate it inline: `-- TEMPORARY (task phase 4 -> phase 6): reuse-site
-        discharge is restated over the blocking quotient in Phase 6. Closed before task
-        completion.` Per D6 this is the **only** permitted temporary sorry, and it is in
-        `Scheme.lean`, never `Soundness.lean`.
-  - [ ] Delete `intFImpReuseWitness?` and `intFImpReuseWitness?_spec` (`Expansion.lean:210-355`)
-        once nothing references them (`grep -rn "intFImpReuseWitness?" Cslib/` returns only the new
-        `Anc` names). Retire the superseding pointer from Phase 3.
-  - [ ] `lake build Cslib.Logics.Propositional.Tableau.Minimal.Soundness` green.
-  - [ ] **Gate**: `lean_verify Cslib.Logic.PL.intExpandBranches_closed_unsat` returns
-        `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}` — exactly the
-        spike's recorded profile, no `sorryAx`.
-  - [ ] **Gate**: `lean_verify Cslib.Logic.PL.minimalTableau_sound` and
-        `Cslib.Logic.PL.intuitionisticTableau_sound` likewise sorry-free.
-  - [ ] **Gate**: `grep -c "^\s*sorry\s*$" Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean`
-        = 0, and `grep -c "IBranchSaturation" .../Soundness.lean` = 0.
+  - [x] Change `Expansion.lean:423` (now `:530` post Phase-3 line drift) from
+        `intFImpReuseWitness? bPers edges newForms e` to
+        `intFImpReuseWitnessAnc? bPers edges newForms e`. Update the surrounding comment to say
+        *ancestor*, matching the code for the first time.
+  - [x] **Objective A — arm 1** (`Soundness.lean`, `bp = bh`, `newEdge = some e_val`, current file
+        line ~1364). Confirmed the `some _x` reuse arm never uses `x`: `lake build` green with
+        only the `rcases hwit : intFImpReuseWitness? ...` identifier swapped to
+        `intFImpReuseWitnessAnc?` at the match site — the closing block (`hsat_pers` via
+        `applyPersistenceFixpoint_sat`, `ih ... bPers edgesP ?_ wo hmono_p`) applied verbatim,
+        zero additional tactic changes. Matches the spike's H1 evidence exactly.
+  - [x] **Objective B — arm 2** (`Soundness.lean`, `bp ∈ bt`, current file line ~1543). Same
+        identifier-only swap; the closing block (passing `wo hmono_p hsat_p` straight to `ih`
+        with `edgesH`, no `applyPersistenceFixpoint_sat` derivation) closed verbatim on first
+        attempt. This is confirmed as the **first-time** verification the spike had explicitly
+        left open (§4 Scope Note: "strongly indicated, not proven") — it now closes.
+  - [x] **Inserted exactly one tracked temporary `sorry`** at `Scheme.lean`'s reuse-site discharge
+        (current file line 2700, inside `intExpandBranches_openBranch_sat`'s `.imp` reuse case).
+        `intFImpReuseWitness?_spec hψ heq` was repointed to `intFImpReuseWitnessAnc?_spec hψ heq`;
+        the resulting `hacc`/`hle` now witness the reversed ancestor-direction conjuncts
+        (`isAccessible edges x l`, `x ≤ l`) which `sfSatisfied`/`sfAccessSat`'s `.neg,.imp` clauses
+        cannot consume directly (need `l ≤ w'`, `isAccessible edges l w'` — D5). The two
+        `hIC_reuse`/`hACC_reuse` discharges were combined into one `have hreuse_sat : ... ∧ ... :=
+        by sorry` (single `sorry` token) annotated `-- TEMPORARY (task phase 4 -> phase 6):
+        reuse-site discharge is restated over the blocking quotient in Phase 6. ... Closed before
+        task completion.`, with `hIC_reuse`/`hACC_reuse` re-derived as `.1`/`.2` projections so
+        no downstream line changed. Per D6 this is the **only** permitted temporary sorry, and it
+        is in `Scheme.lean`, never `Soundness.lean`.
+  - [x] Deleted `intFImpReuseWitness?` and `intFImpReuseWitness?_spec` from `Expansion.lean`
+        (retained only as historical prose inside the `intFImpReuseWitnessAnc?` docstring).
+        `grep -rn "intFImpReuseWitness?\b" Cslib/ | grep -v Anc` now returns only the spec-lemma
+        name inside the Anc docstring and one untouched Phase-6-scoped comment at
+        `Scheme.lean:834` (out of scope this phase per the plan's Phase 5.3 task list).
+  - [x] `lake build Cslib.Logics.Propositional.Tableau.Minimal.Soundness` green (confirmed via
+        full-project `lake build`, 3309/3309 jobs green).
+  - [x] **Gate**: `lean_verify Cslib.Logic.PL.intExpandBranches_closed_unsat` with
+        `scan_source: false` and a standalone `#print axioms` both return exactly
+        `{"axioms":["propext","Classical.choice","Quot.sound"]}` — the spike's recorded profile,
+        no `sorryAx`. **Tooling note**: `lean_verify` with its default `scan_source: true`
+        spuriously reported `sorryAx` in this theorem's axiom list even though neither `lake
+        build`'s warning output nor a manual `lake env lean` `#print axioms` invocation shows any
+        such dependency — a second `lean_verify` quirk beyond the already-documented `?`-in-name
+        rejection (Phase 3's tooling note). Cross-verified via two independent methods
+        (`scan_source: false` and manual `#print axioms`) before trusting the clean result.
+  - [x] **Gate**: `lean_verify Cslib.Logic.PL.minimalTableau_sound` and
+        `Cslib.Logic.PL.intuitionisticTableau_sound` both return
+        `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}`, sorry-free.
+  - [x] **Gate**: `grep -c "^\s*sorry\s*$" Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean`
+        = 0, and `grep -c "IBranchSaturation" .../Soundness.lean` = 0. Both confirmed.
 - **Timing:** 6-9 hours
 - **Depends on:** 2, 3
 - **Verification Tier:** full — this phase changes the decision procedure's runtime behavior and is
@@ -535,11 +550,19 @@ be committed separately and the second must rebase, not overwrite.
   three green sub-steps)
 - **Scope Hypothesis:** the swap is **one identifier on one line** (`Expansion.lean:423`) plus
   comment updates; the hypothesis is that `Soundness.lean` needs **zero** proof-body edits (spike
-  H1). Confirm by `git diff --stat Cslib/.../Soundness.lean` showing 0 changed lines. A non-zero
-  diff there is a hypothesis miss and must be recorded in the phase's commit message, not
-  normalized.
+  H1). **Partial miss, recorded (not normalized):** `git diff --stat` on `Soundness.lean` shows 10
+  changed lines (6 insertions, 4 deletions), not 0 — because the proof's own
+  `rcases hwit : intFImpReuseWitness? ... with` match sites (arm 1 and arm 2) are themselves
+  identifier occurrences of the swapped function and had to be renamed to
+  `intFImpReuseWitnessAnc?` to stay in sync with `hgo`'s post-swap definitional unfold, plus
+  updated inline comments. This is a **mechanical** identifier-rename miss, not a proof-body/
+  tactic miss: every tactic term in both arms' closing blocks is byte-identical before and after:
+  the substantive claim of H1 (the `some _x` arm never uses `x`'s properties, no new proof
+  obligations) holds exactly as predicted, confirmed by the build going green with no other
+  changes. The literal "0 changed lines" framing undersold that the call site's own definitional
+  identity appears twice more inside the proof file that mirrors `go`'s structure.
 - **Done when:** all four `lean_verify` / `grep` gates above pass and exactly one temporary sorry
-  exists in the tree beyond the 6-entry baseline.
+  exists in the tree beyond the 6-entry baseline. **All satisfied.**
 
 ---
 

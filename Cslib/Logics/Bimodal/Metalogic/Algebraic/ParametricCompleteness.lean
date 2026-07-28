@@ -19,9 +19,6 @@ Proves the D-parametric algebraic completeness theorem for TaskFrame semantics.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/ParametricCompleteness.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricCompleteness
@@ -122,7 +119,8 @@ theorem parametric_canonical_completeness_conditional
   obtain ⟨M, h_mcs, h_neg_in⟩ := not_provable_implies_neg_extends_to_mcs φ h_not_prov
   obtain ⟨B, h_tc, h_buc, h_fuc, fam, hfam, t, h_eq⟩ := construct_bfmcs M h_mcs
   have h_neg_in_fam : φ.neg ∈ fam.mcs t := h_eq ▸ h_neg_in
-  exact ⟨B, h_tc, fam, hfam, t, parametric_completeness_from_neg_membership B h_tc h_buc h_fuc φ fam hfam t h_neg_in_fam⟩
+  exact ⟨B, h_tc, fam, hfam, t,
+    parametric_completeness_from_neg_membership B h_tc h_buc h_fuc φ fam hfam t h_neg_in_fam⟩
 
 /-- Countermodel implies not provable. -/
 theorem countermodel_implies_not_provable

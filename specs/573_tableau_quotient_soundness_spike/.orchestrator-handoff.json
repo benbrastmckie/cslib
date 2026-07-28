@@ -1,0 +1,34 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Wrote a 6-phase, 4-hour time-boxed GO/NO-GO spike plan for the blocking-quotient soundness question. The plan is organized around two falsifiable hypotheses to be tested against live Lean goal state: H1, that the reuse arm of intExpandBranches_closed_unsat (Soundness.lean:1470 and its :1573 mirror) is agnostic to intFImpReuseWitness?'s content and depends only on the go-loop passing bPers/edges/nw unchanged; and H2, that IBranchSaturation is absent from the soundness dependency cone. Phase 5 is a hard ABORT gate; NO-GO and UNCERTAIN are encoded as successful outcomes. No file under Cslib/ is edited.",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md"
+    }
+  ],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md"
+  ],
+  "decisions_made": [
+    "Framed the spike around H1 (soundness is agnostic to the reuse predicate's content, depending only on the go-loop's unchanged-branch recursion shape) and H2 (IBranchSaturation is absent from intExpandBranches_closed_unsat's dependency cone) -- both stated as falsifiable, both required to be tested against live goal state rather than accepted on grep/inspection evidence.",
+    "Isolated the real soundness-relevant variable as branch modification on the reuse path, per the recorded Option B failure at Expansion.lean:256-264, rather than the predicate's search direction per se.",
+    "Made Phase 5 an unconditional hard ABORT gate with numeric stop conditions (3.25h elapsed, 150 scratch lines, 3 consecutive failed tactic batches, 15min rebuild loop) so the spike cannot become a proof effort.",
+    "Encoded NO-GO and UNCERTAIN as successful terminal outcomes; both require the decision record to carry an explicit re-scope instruction for the downstream calculus-repair task.",
+    "Placed the scratch file at specs/573_tableau_quotient_soundness_spike/scratch/QuotientSpike.lean with mandatory deletion in Phase 6 and explicit-path-only staging, so the no-library-changes constraint is verifiable via an empty `git status --porcelain Cslib/`.",
+    "Chose lean_run_code as the primary prototyping vehicle with the scratch file as fallback; Phase 2 makes the viability determination before Phase 4 depends on it."
+  ],
+  "dead_ends": [
+    "Option B (appending F(psi)@x to the branch unconditionally on reuse) is already recorded as UNSOUND against intExpandBranches_closed_unsat at Expansion.lean:256-264 -- the plan explicitly does not retry it, and instead uses its failure mode to isolate what the spike must test.",
+    "The worlds-free G4ip termination weight (Dyckhoff1992 / NegriVonPlato2001 5.5) is already recorded as broken by propagatePersistence at Expansion.lean:271-281 -- out of scope for this spike."
+  ],
+  "phases_completed": 0,
+  "phases_total": 6,
+  "continuation_context": {
+    "orchestrator_mode": true
+  },
+  "plan_markers_verified": true
+}

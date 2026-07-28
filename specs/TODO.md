@@ -28,7 +28,7 @@ next_project_number: 583
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-573 [RESEARCHED] — SMALL, time-boxed research/prototyping spike. Produces a decision
+573 [PLANNED] — SMALL, time-boxed research/prototyping spike. Produces a decision
   └─ 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -279,11 +279,12 @@ Constraints: additive-first (new declarations alongside old, migrate only once b
 
 ### 573. Tableau quotient soundness spike
 - **Effort**: 3-5 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 572
 - **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+- **Plan**: [573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md]
 
 **Description**: SMALL, time-boxed research/prototyping spike. Produces a decision record; does NOT modify any file under Cslib/. Gates the large calculus-repair task that follows it in this programme.
 

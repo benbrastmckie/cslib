@@ -1,0 +1,32 @@
+{
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "session_id": "sess_1785246576_0b1c80",
+  "delegation_depth": 2,
+  "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "planner-agent"],
+  "task_number": 573,
+  "task_name": "tableau_quotient_soundness_spike",
+  "task_type": "cslib",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md"
+    }
+  ],
+  "phase_count": 6,
+  "estimated_hours": 4,
+  "dependency_waves": 6,
+  "files_modified": [
+    "specs/573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md"
+  ],
+  "next_steps": "Run /implement 573 to execute the plan",
+  "memory_candidates": [
+    {
+      "content": "When a proposed change targets a decision predicate consumed by a proof, the soundness question is often not 'is the new predicate correct?' but 'does the proof read the predicate's content at all, or only the control-flow shape of the match it drives?'. In CSLib's intuitionistic tableau, intExpandBranches_closed_unsat's reuse arm passes the branch, edges, and world counter through completely unchanged and discards the witness label with an underscore at the go-loop call site -- so the proof plausibly depends only on which match arm was taken, not on why. The historical failure of the alternative fix is the confirming signal: it broke soundness precisely because it MODIFIED the branch on the reuse path, invalidating an already-established satisfaction witness, not because its predicate was wrong. Planning heuristic: before scoping a predicate-swap spike, first check whether the consuming proof mentions the predicate's spec lemma or the structure being restated at all -- an empty dependency cone converts an expensive proof-repair question into a cheap shape-preservation check, and sharply reduces the spike's phase count.",
+      "category": "PATTERN",
+      "source_artifact": "specs/573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["predicate-swap", "dependency-cone", "soundness-spike", "proof-shape-agnosticism", "lean-planning", "tableau"]
+    }
+  ]
+}

@@ -33,8 +33,6 @@ The derivation tree includes 7 inference rules:
    then `Delta |-[fc] phi`
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal

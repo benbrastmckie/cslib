@@ -11,8 +11,8 @@ next_project_number: 583
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,574 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,400,450,456,497,511,537,551,553,564,568,571 | 36,37,181,425,465,530,554,562,563,574 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,400,409,425,530,534,554,557,558,562,563,569,574 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,456,497,511,537,551,553,564,568,571 | 36,37,181,425,530,554,562,563,574 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
 | 5 | 413,414 | 181,215,300,301,375 | code hygiene |
@@ -26,12 +26,12 @@ next_project_number: 583
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
+400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
-400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
@@ -80,12 +80,6 @@ next_project_number: 583
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
-
-### Pr & Upstreaming
-
-440 [PR READY] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
-465 [PR READY] — Review PR #607 (logical operators): post GitHub review covering t
-466 [PR READY] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
 
 ### Tableau Infrastructure
 
@@ -459,30 +453,6 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 
 ---
 
-### 466. Record zulip settlement pr 648
-- **Status**: [PR READY]
-- **Task Type**: pr
-- **Topic**: PR & Upstreaming
-- **Dependencies**: None
-- **Research**: [466_record_zulip_settlement_pr_648/reports/01_pr-review-research.md]
-- **Plan**: [466_record_zulip_settlement_pr_648/plans/01_pr648-rereview-comment.md]
-- **Pr_response**: [466_record_zulip_settlement_pr_648/pr-comment-draft.md]
-- **Summary**: [466_record_zulip_settlement_pr_648/summaries/01_pr648-rereview-comment-summary.md]
-
-**Description**: Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou
-
----
-
-### 465. Review pr 607 logical operators
-- **Status**: [PR READY]
-- **Task Type**: pr
-- **Topic**: PR & Upstreaming
-- **Dependencies**: None
-
-**Description**: Review PR #607 (logical operators): post GitHub review covering the red CI from the unmigrated HML LogicalEquivalence instance, the imp vs impl naming decision, operator file layout, NOTATION.md precedence documentation, and primitive-bot ownership of the propositional definitions file
-
----
-
 ### 456. Shared tableau containment blocking
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -512,19 +482,6 @@ RESEARCH PHASE MUST SETTLE THE PROOF ROUTE:
 IMPLEMENTATION: In Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean, REPLACE the false temporal_valid_of_bimodal_derivable (:269), restate bimodal_conservative_over_temporal over BX+, and REMOVE set_option warn.sorry false in (:248) and the sorry (:269). Rewrite the module docstring's "Domain Mismatch Resolution" section to the correct account: TM is conservative over METRIC tense logic BX+, not over plain BX (cite Burgess1984 sec 6.1 and Thomason1984). This task OWNS TemporalConservativity.lean; task 444's naming/lint sweep runs AFTER this task so it sees the settled file.
 
 Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must report only [propext, Classical.choice, Quot.sound] with zero sorry; full CI green. If a genuine load-bearing obstruction is hit, escalate with the exact open goal and candidate lemmas; do NOT reintroduce a sorry or a vacuous (:= True / trivial) placeholder.
-
----
-
-### 440. Review pr leanprover cslib 648
-- **Status**: [PR READY]
-- **Task Type**: pr
-- **Topic**: PR & Upstreaming
-- **Dependencies**: None
-- **Research**: [440_review_pr_leanprover_cslib_648/reports/01_pr-review-research.md]
-- **Plan**: [440_review_pr_leanprover_cslib_648/plans/01_ctchou-review-response.md]
-- **Pr_response**: [440_review_pr_leanprover_cslib_648/pr-response.md]
-
-**Description**: PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)
 
 ---
 

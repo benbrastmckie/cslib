@@ -132,78 +132,6 @@
       "topic": "Modal Logic"
     },
     {
-      "project_number": 465,
-      "project_name": "review_pr_607_logical_operators",
-      "status": "pr_ready",
-      "task_type": "pr",
-      "topic": "PR & Upstreaming",
-      "description": "Review PR #607 (logical operators): post GitHub review covering the red CI from the unmigrated HML LogicalEquivalence instance, the imp vs impl naming decision, operator file layout, NOTATION.md precedence documentation, and primitive-bot ownership of the propositional definitions file",
-      "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-26T23:30:00Z",
-      "dependencies": []
-    },
-    {
-      "project_number": 466,
-      "project_name": "record_zulip_settlement_pr_648",
-      "status": "pr_ready",
-      "task_type": "pr",
-      "topic": "PR & Upstreaming",
-      "description": "Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou",
-      "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-26T23:30:00Z",
-      "dependencies": [],
-      "sources": [
-        {
-          "type": "github_pr",
-          "url": "https://github.com/leanprover/cslib/pull/648",
-          "parsed": {
-            "owner": "leanprover",
-            "repo": "cslib",
-            "pr_number": 648
-          }
-        },
-        {
-          "type": "zulip_thread",
-          "url": "https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic",
-          "parsed": {
-            "stream": "CSLib",
-            "topic": "Propositional Logic"
-          }
-        },
-        {
-          "type": "description",
-          "url": null,
-          "parsed": {
-            "text": "Prepare (draft only, do NOT post) a comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Thomas Waring, 2026-06-28) and requesting re-review from ctchou. Local branch feat/propositional-v2 has two unpushed polish commits (bbcbef85, c98c4348): English-only Gentzen citation, implicit-Gamma binders restored, subscript names restored, contra/efqRule re-added, explicit Atom on CPL/LEM/Pierce, set-builder CPL, standard copyright headers. Prior context: task 440 addressed ctchou CHANGES_REQUESTED review (2026-06-15); a reply draft exists at specs/tmp/comment.md."
-          }
-        }
-      ],
-      "session_id": "sess_1783021890_7ec93b",
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/466_record_zulip_settlement_pr_648/reports/01_pr-review-research.md",
-          "summary": "PR review research synthesizing 1 GitHub PR source (1 review, 3 conversation comments, 0 inline comments) and 1 Zulip thread source (35 messages); identifies the settlement message (Thomas Waring, 2026-06-28, id 606970606) and acceptance reply (id 607217129), the local unpushed branch delta (bbcbef85, c98c4348 vs GitHub head c9364b65), and prior draft material in specs/tmp/comment.md and specs/474"
-        },
-        {
-          "path": "specs/466_record_zulip_settlement_pr_648/plans/01_pr648-rereview-comment.md",
-          "type": "plan",
-          "summary": "Two-phase draft-only plan: compose first-person PR #648 re-review comment with settlement permalink, then reviewer-notes appendix with open decisions and push-before-post ordering"
-        },
-        {
-          "type": "pr_response",
-          "path": "specs/466_record_zulip_settlement_pr_648/pr-comment-draft.md",
-          "summary": "Draft GitHub PR comment for #648 addressing ctchou: links the 2026-06-28 Zulip settlement permalink (606970606), recaps the three CHANGES_REQUESTED resolutions, requests re-review; includes not-for-posting reviewer-notes appendix with open decisions and push-before-post ordering"
-        },
-        {
-          "type": "summary",
-          "path": "specs/466_record_zulip_settlement_pr_648/summaries/01_pr648-rereview-comment-summary.md",
-          "summary": "Execution summary for the draft-only PR comment task"
-        }
-      ],
-      "next_artifact_number": 3
-    },
-    {
       "project_number": 456,
       "project_name": "shared_tableau_containment_blocking",
       "status": "not_started",
@@ -219,54 +147,6 @@
       "parent_task": 317,
       "topic": "Tableau Infrastructure",
       "artifacts": []
-    },
-    {
-      "project_number": 440,
-      "project_name": "review_pr_leanprover_cslib_648",
-      "status": "pr_ready",
-      "task_type": "pr",
-      "description": "PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)",
-      "sources": [
-        {
-          "type": "github_pr",
-          "url": "https://github.com/leanprover/cslib/pull/648",
-          "parsed": {
-            "owner": "leanprover",
-            "repo": "cslib",
-            "pr_number": 648
-          }
-        },
-        {
-          "type": "description",
-          "url": null,
-          "parsed": {
-            "text": "Address ctchou CHANGES_REQUESTED review (2026-06-15) on PR #648. Outstanding/verify items as of the 2026-06-29 rework: (1) References: reviewer asked NOT to cite 1930s German papers and to use Avigad textbook (ch.2-3). Avigad2022 was added to references.bib, but NaturalDeduction/Basic.lean (lines ~51,62) still cites Gentzen1935 (German title) — decide to remove/replace with Avigad or justify keeping. (2) Semantics: reviewer said Semantics/Basic.lean + Semantics/Bool.lean are redundant; current PR no longer includes any Semantics files — confirm this resolves the concern. (3) No re-review since rework; reviewDecision still CHANGES_REQUESTED — draft a reply to ctchou summarizing what was addressed. (4) Coordination: #536 is merged (satisfied); coordinate with #587 and #607."
-          }
-        }
-      ],
-      "created": "2026-06-30T17:38:50Z",
-      "last_updated": "2026-07-25T07:01:13Z",
-      "next_artifact_number": 2,
-      "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/440_review_pr_leanprover_cslib_648/reports/01_pr-review-research.md",
-          "summary": "PR #648 review research: 4 outstanding items (references, Semantics-removal, reviewer reply, #587/#607 coord); branch now merge-conflicted"
-        },
-        {
-          "path": "specs/440_review_pr_leanprover_cslib_648/plans/01_ctchou-review-response.md",
-          "type": "plan",
-          "summary": "5-phase plan for ctchou CHANGES_REQUESTED reply on PR #648; terminus [PR READY], no code changes, no rebase"
-        },
-        {
-          "path": "specs/440_review_pr_leanprover_cslib_648/pr-response.md",
-          "type": "pr_response",
-          "summary": "Response to ctchou CHANGES_REQUESTED on PR #648: all 4 review bullets answered; Gentzen citation posed as open question; references.bib conflict acknowledged with rebase commitment"
-        }
-      ],
-      "topic": "PR & Upstreaming",
-      "dependencies": [],
-      "session_id": "sess_1784959340_e4ceeb_440"
     },
     {
       "project_number": 317,

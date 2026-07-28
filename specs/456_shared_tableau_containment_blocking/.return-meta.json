@@ -3,29 +3,20 @@
   "started_at": "2026-07-28T00:00:00Z",
   "artifacts": [
     {
-      "type": "lean_module",
-      "path": "Cslib/Logics/Temporal/Tableau/Branch.lean",
-      "summary": "Phase 3: timeType/isSubsetBlocked redirected as defeq wrappers over shared Branch.typeAt/containmentBlocked, plus rfl bridging lemmas timeType_eq_typeAt and isSubsetBlocked_eq_containmentBlocked (zero sorry)"
+      "type": "bibliography",
+      "path": "references.bib",
+      "summary": "Phase 4: DershowitzManna1979 added (CACM 22(8):465-476, 1979, doi 10.1145/359138.359142); GargGenoveseNegri2012 enriched in place with pages 315--324 and doi 10.1109/LICS.2012.42; no duplicate keys"
     }
   ],
-  "phases_completed": 3,
+  "phases_completed": 4,
   "phases_total": 5,
   "modified_files": [
-    "Cslib/Logics/Temporal/Tableau/Branch.lean",
+    "references.bib",
     "specs/456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md",
-    "specs/456_shared_tableau_containment_blocking/progress/phase-3-progress.json",
+    "specs/456_shared_tableau_containment_blocking/progress/phase-4-progress.json",
     "specs/456_shared_tableau_containment_blocking/.orchestrator-handoff.json"
   ],
-  "memory_candidates": [
-    {
-      "content": "In CSLib module-system files, a defeq wrapper whose body lives in an @[expose] public section must import the module providing the wrapped definition via 'public import', not plain 'import', or downstream consumers of the exposed body fail.",
-      "keywords": ["lean4", "module-system", "public-import", "expose", "cslib"]
-    },
-    {
-      "content": "When a Lean 4 inductive derives only DecidableEq, BEq resolves through instBEqOfDecidableEq; lemmas in a section carrying an unrelated [Hashable A] variable need 'omit [Hashable A] in' to avoid the unusedSectionVars env linter.",
-      "keywords": ["lean4", "omit", "unusedSectionVars", "BEq", "DecidableEq", "lint"]
-    }
-  ],
+  "memory_candidates": [],
   "verification": {
     "verification_passed": true,
     "sorry_count": 0,
@@ -33,13 +24,13 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": false,
-    "notes": "Phase-scoped verification only (single-phase dispatch): lake build of Temporal Branch/Saturation/Closure green (720/720); lake build CslibTests.TableauConformance green (all 24 temporal #guard_msgs rows pass); sorry grep on touched file empty; checkInitImports exit 0. Both rfl bridging lemmas closed on first attempt. Full CI pipeline (lint, shake, mk_all barrel registration of Blocking.lean, lake test) is Phase 5's gate per the plan."
+    "notes": "Phase-scoped prose-tier verification (single-phase dispatch, no Lean files touched): grep -c '@.*{GargGenoveseNegri2012,' == 1 and grep -c '@.*{DershowitzManna1979,' == 1; git diff read-through confirms edits confined to the two entries. Full CI pipeline is Phase 5's gate per the plan."
   },
   "metadata": {
     "session_id": "sess_1785275816_a84520_456",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "phase_number": 3
+    "phase_number": 4
   }
 }

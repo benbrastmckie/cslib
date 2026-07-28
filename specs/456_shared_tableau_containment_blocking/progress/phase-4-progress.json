@@ -1,0 +1,27 @@
+{
+  "task_number": 456,
+  "phase": 4,
+  "phase_name": "references.bib — add DershowitzManna1979, enrich GargGenoveseNegri2012",
+  "session_id": "sess_1785275816_a84520_456",
+  "status": "done",
+  "objectives": [
+    {
+      "id": "4.1",
+      "description": "Append DershowitzManna1979 entry in the D-G cluster (after Dyckhoff1992)",
+      "status": "done",
+      "files_touched": ["references.bib"]
+    },
+    {
+      "id": "4.2",
+      "description": "Enrich existing GargGenoveseNegri2012 in place with pages 315--324 and doi 10.1109/LICS.2012.42; no duplicate key",
+      "status": "done",
+      "files_touched": ["references.bib"]
+    },
+    {
+      "id": "4.3",
+      "description": "Verify grep -c for each key == 1; diff read-through confirms edits confined to the two entries",
+      "status": "done",
+      "files_touched": []
+    }
+  ]
+}

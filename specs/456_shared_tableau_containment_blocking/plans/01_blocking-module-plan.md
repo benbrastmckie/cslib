@@ -303,17 +303,17 @@ the Temporal build never sees a half-written Blocking.lean.
   `Closure`); `lake build CslibTests.TableauConformance` green (725/725, all 24 temporal rows);
   `grep -n '\bsorry\b'` on the touched file empty; `lake exe checkInitImports` exit 0.
 
-### Phase 4: references.bib — add DershowitzManna1979, enrich GargGenoveseNegri2012 [NOT STARTED]
+### Phase 4: references.bib — add DershowitzManna1979, enrich GargGenoveseNegri2012 [COMPLETED]
 
 - **Goal:** Bibliography deliverable, exactly two edits, no duplicate keys.
 - **Tasks:**
-  - [ ] Append the ready `@article{DershowitzManna1979, ...}` entry (Dershowitz & Manna,
+  - [x] Append the ready `@article{DershowitzManna1979, ...}` entry (Dershowitz & Manna,
     "Proving Termination with Multiset Orderings", CACM 22(8):465-476, 1979,
     doi 10.1145/359138.359142) in the file's existing key-ordering convention.
-  - [ ] Enrich the EXISTING `GargGenoveseNegri2012` entry at references.bib:228: add
+  - [x] Enrich the EXISTING `GargGenoveseNegri2012` entry at references.bib:228: add
     `pages = {315--324}` and `doi = {10.1109/LICS.2012.42}`; change nothing else, never add a
     second entry with this key.
-  - [ ] Verify: `grep -c '@.*{GargGenoveseNegri2012,' references.bib` == 1 and
+  - [x] Verify: `grep -c '@.*{GargGenoveseNegri2012,' references.bib` == 1 and
     `grep -c '@.*{DershowitzManna1979,' references.bib` == 1.
 - **Timing:** 15 minutes
 - **Depends on:** none
@@ -350,7 +350,7 @@ the Temporal build never sees a half-written Blocking.lean.
   `Tableau.strictChain_le_card` (no new axioms, no sorryAx).
 - [ ] Interface build of Temporal `Branch` + `Rules` + `Saturation` + `Closure` after Phase 3.
 - [ ] 24 temporal conformance rows in `CslibTests/TableauConformance.lean` pass unchanged.
-- [ ] Duplicate-bibkey greps (Phase 4) both return exactly 1.
+- [x] Duplicate-bibkey greps (Phase 4) both return exactly 1.
 - [ ] Final gate set (Phase 5): mk_all barrel, checkInitImports, full `lake build`,
   `lake exe lint-style`, `lake shake`, `lake test`, zero-sorry sweep.
 

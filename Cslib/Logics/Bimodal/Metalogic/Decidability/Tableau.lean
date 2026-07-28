@@ -61,8 +61,6 @@ monomorphic `Formula`.
 * Wu, M. Verified Decision Procedures for Modal Logics
 -/
 
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability
@@ -717,7 +715,8 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
         -- Auto-propagate all F(U(event', guard')) formulas to freshTime
         let untlNegProps := branch.untlNegFormulas.filterMap fun usf =>
           if usf.label.time == l.time then
-            let prop := SignedFormula.neg usf.formula { world := usf.label.world, time := freshTime }
+            let prop := SignedFormula.neg usf.formula
+              { world := usf.label.world, time := freshTime }
             if branch.contains prop then none else some prop
           else none
         -- Cross-modal-temporal: propagate T(box A) and F(diamond A) to fresh future time
@@ -761,7 +760,8 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
         -- Auto-propagate all F(S(event', guard')) formulas to freshTime
         let snceNegProps := branch.snceNegFormulas.filterMap fun ssf =>
           if ssf.label.time == l.time then
-            let prop := SignedFormula.neg ssf.formula { world := ssf.label.world, time := freshTime }
+            let prop := SignedFormula.neg ssf.formula
+              { world := ssf.label.world, time := freshTime }
             if branch.contains prop then none else some prop
           else none
         -- Cross-modal-temporal: propagate T(box A) and F(diamond A) to fresh past time
@@ -792,7 +792,8 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
               match gsf.formula with
               | .allFuture inner =>
                 if gsf.label.time == l.time then
-                  let prop := SignedFormula.pos inner { world := gsf.label.world, time := freshTime }
+                  let prop := SignedFormula.pos inner
+                    { world := gsf.label.world, time := freshTime }
                   if branch.contains prop then none else some prop
                 else none
               | _ => none
@@ -801,14 +802,16 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
               match fsf.formula with
               | .someFuture inner =>
                 if fsf.label.time == l.time then
-                  let prop := SignedFormula.neg inner { world := fsf.label.world, time := freshTime }
+                  let prop := SignedFormula.neg inner
+                    { world := fsf.label.world, time := freshTime }
                   if branch.contains prop then none else some prop
                 else none
               | _ => none
             -- Auto-propagate OTHER F(U(event', guard')) formulas to freshTime
             let untlNegProps := branch.untlNegFormulas.filterMap fun usf =>
               if usf.label.time == l.time && usf != sf then
-                let prop := SignedFormula.neg usf.formula { world := usf.label.world, time := freshTime }
+                let prop := SignedFormula.neg usf.formula
+                  { world := usf.label.world, time := freshTime }
                 if branch.contains prop then none else some prop
               else none
             -- Cross-modal-temporal: propagate T(box A) and F(diamond A) to fresh future time
@@ -854,7 +857,8 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
               match hsf.formula with
               | .allPast inner =>
                 if hsf.label.time == l.time then
-                  let prop := SignedFormula.pos inner { world := hsf.label.world, time := freshTime }
+                  let prop := SignedFormula.pos inner
+                    { world := hsf.label.world, time := freshTime }
                   if branch.contains prop then none else some prop
                 else none
               | _ => none
@@ -863,14 +867,16 @@ def applyRule (rule : TableauRule) (sf : SignedFormula Atom) (branch : Branch At
               match psf.formula with
               | .somePast inner =>
                 if psf.label.time == l.time then
-                  let prop := SignedFormula.neg inner { world := psf.label.world, time := freshTime }
+                  let prop := SignedFormula.neg inner
+                    { world := psf.label.world, time := freshTime }
                   if branch.contains prop then none else some prop
                 else none
               | _ => none
             -- Auto-propagate OTHER F(S(event', guard')) formulas to freshTime
             let snceNegProps := branch.snceNegFormulas.filterMap fun ssf =>
               if ssf.label.time == l.time && ssf != sf then
-                let prop := SignedFormula.neg ssf.formula { world := ssf.label.world, time := freshTime }
+                let prop := SignedFormula.neg ssf.formula
+                  { world := ssf.label.world, time := freshTime }
                 if branch.contains prop then none else some prop
               else none
             -- Cross-modal-temporal: propagate T(box A) and F(diamond A) to fresh past time

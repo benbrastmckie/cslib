@@ -1,7 +1,7 @@
 # Implementation Plan: Simplify Modal/Temporal/Bimodal Proofs via Existing Normalization Lemmas (v2)
 
 - **Task**: 414 - simplify_proofs_normalization_modal_family
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 2 hours
 - **Dependencies**: None blocking. The task entry in `specs/state.json` declares
   `depends_on: [180, 181, 215, 241, 275, 299, 300, 301, 321]`; see "Dependency Reassessment"
@@ -288,36 +288,49 @@ Phase numbering is preserved from v1 so the two plan versions are diffable arm-f
 
 ---
 
-### Phase 1: ModalConservativity `and` and `or` arms [NOT STARTED]
+### Phase 1: ModalConservativity `and` and `or` arms [COMPLETED]
 
 **Goal**: Replace the hand-rolled classical reasoning in the `and` and `or` arms of
 `bimodal_truthAt_toBimodal_iff_satisfies` with the verified backward-IH-rewrite plus `tauto`,
 leaving the `box` and `diamond` arms untouched.
 
 **Tasks**:
-- [ ] Record a baseline: `lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity`
-      must be green before any edit.
-- [ ] Re-derive the arm boundaries from the arm headers (`| and`, `| or`, `| box`, `| diamond`),
+- [x] Record a baseline: `lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity`
+      must be green before any edit. *(confirmed green pre-edit: 712/712 jobs)*
+- [x] Re-derive the arm boundaries from the arm headers (`| and`, `| or`, `| box`, `| diamond`),
       not from the line numbers in this document. The revision-time reading has `and` at 164-174,
       `or` at 175-185, `box` starting at 186, `diamond` at 211 -- confirm, do not assume.
-- [ ] Replace the `and` arm body (currently lines 165-174, i.e. everything after the arm header)
+      *(re-confirmed exactly at implementation time by reading lines 130-230)*
+- [x] Replace the `and` arm body (currently lines 165-174, i.e. everything after the arm header)
       with the verified single line:
       `simp only [Modal.Proposition.toBimodal, Bimodal.Formula.and, truthAt, Modal.Satisfies,
       ← ih1 w, ← ih2 w]; tauto`
-- [ ] Replace the `or` arm body with the merged single-`simp only` form matching the `and` shape
+- [x] Replace the `or` arm body with the merged single-`simp only` form matching the `and` shape
       (first attempt), substituting `Bimodal.Formula.or` for `Bimodal.Formula.and`. If that
       fails, fall back to the verified two-step form: retain the existing
       `simp only [Modal.Proposition.toBimodal, Bimodal.Formula.or, truthAt, Modal.Satisfies]`
       line and replace the remainder with `simp only [← ih1 w, ← ih2 w]; tauto`.
-- [ ] Use `simp only [← …]`, never `rw [← …]` -- `rw` is a verified failure here because the
+      *(deviation: altered -- the literal first-attempt form
+      (`simp only [Modal.Proposition.toBimodal, Bimodal.Formula.or, truthAt, Modal.Satisfies,
+      ← ih1 w, ← ih2 w]; tauto`) was verified via `lean_multi_attempt` to close the goal, but
+      elaborated with an `unusedSimpArgs` linter warning on `Bimodal.Formula.or` (its unfolding
+      is already subsumed by the other simp lemmas plus the IH rewrites). The linter's own
+      suggested fix -- dropping `Bimodal.Formula.or` from the list -- was independently verified
+      via a second `lean_multi_attempt` to close the goal with zero warnings, and was used
+      instead. This is a strict improvement on the plan's own acceptance bar (criterion 2:
+      elaboration must not introduce fragility/noise), not a substitution of a different
+      strategy.)*
+- [x] Use `simp only [← …]`, never `rw [← …]` -- `rw` is a verified failure here because the
       induction hypotheses are `let`-bound.
-- [ ] Use `lean_multi_attempt` before applying each edit, then `lean_goal` after each replacement,
+- [x] Use `lean_multi_attempt` before applying each edit, then `lean_goal` after each replacement,
       to confirm zero remaining goals in that arm and no "No goals to be solved" error on the
-      following line.
-- [ ] Do **not** touch the `box` or `diamond` arms.
-- [ ] Do **not** touch any file under a `Tableau/` directory (concurrent-session territory).
-- [ ] Apply the "When NOT to Simplify" criteria; revert any arm that fails and record it in a
-      `#### Reasoned Exclusions` table under this phase.
+      following line. *(both arms confirmed `goals_after: []` via `lean_goal`)*
+- [x] Do **not** touch the `box` or `diamond` arms. *(confirmed byte-identical via `git diff`)*
+- [x] Do **not** touch any file under a `Tableau/` directory (concurrent-session territory).
+      *(`git diff --stat` shows exactly one file, not under `Tableau/`)*
+- [x] Apply the "When NOT to Simplify" criteria; revert any arm that fails and record it in a
+      `#### Reasoned Exclusions` table under this phase. *(no site failed; no exclusions table
+      needed)*
 
 **Timing**: 1 hour
 

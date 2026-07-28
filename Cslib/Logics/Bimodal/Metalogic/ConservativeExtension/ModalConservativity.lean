@@ -162,27 +162,10 @@ theorem bimodal_truthAt_toBimodal_iff_satisfies {World Atom : Type}
     exact ⟨fun h he => (ih2 w).mp (h ((ih1 w).mpr he)),
            fun h hm => (ih2 w).mpr (h ((ih1 w).mp hm))⟩
   | and φ ψ ih1 ih2 =>
-    simp only [Modal.Proposition.toBimodal, Bimodal.Formula.and, truthAt, Modal.Satisfies]
-    constructor
-    · intro h
-      constructor
-      · by_contra h1
-        exact h (fun hs => absurd ((ih1 w).mp hs) h1)
-      · by_contra h2
-        exact h (fun _ hs => absurd ((ih2 w).mp hs) h2)
-    · intro ⟨h1, h2⟩ hf
-      exact hf ((ih1 w).mpr h1) ((ih2 w).mpr h2)
+    simp only [Modal.Proposition.toBimodal, Bimodal.Formula.and, truthAt, Modal.Satisfies,
+      ← ih1 w, ← ih2 w]; tauto
   | or φ ψ ih1 ih2 =>
-    simp only [Modal.Proposition.toBimodal, Bimodal.Formula.or, truthAt, Modal.Satisfies]
-    constructor
-    · intro h
-      rcases Classical.em (Modal.Satisfies m w φ) with h1 | h1
-      · exact Or.inl h1
-      · exact Or.inr ((ih2 w).mp (h (fun hs => absurd ((ih1 w).mp hs) h1)))
-    · intro h hn
-      cases h with
-      | inl h => exact absurd ((ih1 w).mpr h) hn
-      | inr h => exact (ih2 w).mpr h
+    simp only [Modal.Proposition.toBimodal, truthAt, Modal.Satisfies, ← ih1 w, ← ih2 w]; tauto
   | box φ ih =>
     simp only [Modal.Proposition.toBimodal, truthAt, Modal.Satisfies]
     constructor

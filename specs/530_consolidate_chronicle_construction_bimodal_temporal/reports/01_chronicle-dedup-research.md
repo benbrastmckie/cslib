@@ -1,6 +1,13 @@
 # Research: Consolidating the Bimodal & Temporal Chronicle Trees
 
 **Task**: Factor the shared Burgess-1982 chronicle / countermodel-elimination machinery
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 duplicated across `Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/` and
 `Cslib/Logics/Temporal/Metalogic/Chronicle/` into a label-generic module under
 `Cslib/Foundations/Logic/Metalogic/Chronicle/`, and have both logics instantiate it.

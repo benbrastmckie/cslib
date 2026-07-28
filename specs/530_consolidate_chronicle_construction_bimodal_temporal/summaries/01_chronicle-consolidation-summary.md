@@ -3,6 +3,10 @@
 - **Task**: 530 - Consolidate chronicle construction (Bimodal/Temporal)
 - **Plan**: plans/01_chronicle-consolidation.md
 - **Status**: PARTIAL -- Phases 0-3a of 9 completed and committed; Phase 3b BLOCKED
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
   (architectural finding, needs plan-owner decision); Phases 3c-5 not attempted pending
   that decision.
 

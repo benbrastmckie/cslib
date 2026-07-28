@@ -3,13 +3,28 @@
 - **Task**: 530 - Consolidate chronicle construction (Bimodal/Temporal)
 - **Plan**: plans/02_chronicle-consolidation-descoped.md
 - **Status**: Phase 5 (the plan's sole remaining actionable phase) COMPLETED and committed.
-  The task-level closing gate (`bash scripts/pre-pr-check.sh`) currently FAILS, but the
-  failure is entirely attributable to pre-existing, unrelated repository state (baseline
-  `sorry` instances in files outside this task's scope, already present in `HEAD~1` before
-  this dispatch and owned by other in-flight tasks) — not to anything Phase 5 touched or
-  introduced. See "Closing Gate Result" below for the full breakdown.
+- **Started**: 2026-07-18
+- **Completed**: 2026-07-28 (partial consolidation; see Overview)
+- **Artifacts**: `plans/02_chronicle-consolidation-descoped.md`,
+  `summaries/02_chronicle-consolidation-descoped-summary.md`,
+  `Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean`
+- **Standards**: CONTRIBUTING.md, NOTATION.md, ORGANISATION.md; `scripts/pre-pr-check.sh`
 
-## What Was Done
+## Overview
+
+This task consolidated the duplicated Chronicle construction shared by the Bimodal and
+Temporal trees. It closes as a **partial consolidation** by design: the generic lifts that
+were structurally achievable landed sorry-free, and the remainder was formally descoped
+after two independent investigations established that the obstacle is structural rather
+than incidental.
+
+The task-level closing gate (`bash scripts/pre-pr-check.sh`) currently FAILS, but the
+failure is entirely attributable to pre-existing, unrelated repository state (baseline
+`sorry` instances in files outside this task's scope, already present in `HEAD~1` before
+this dispatch and owned by other in-flight tasks) — not to anything Phase 5 touched or
+introduced. See "Closing Gate Result" below for the full breakdown.
+
+## What Changed
 
 Per the `[USER SCOPING DECISION 2026-07-26 -- path (B), descope]` recorded in the task
 description, Phases 3b, 3c, 4a, and 4b were confirmed DESCOPED (not attempted, per the
@@ -80,6 +95,37 @@ item "`bash scripts/pre-pr-check.sh` passes end to end" is not met, but only bec
 unrelated, pre-existing repository state outside this task's control and explicitly outside
 this task's permitted scope to fix.
 
+## Decisions
+
+- **Descope Phases 3b, 3c, 4a, 4b** (recorded user scoping decision, path (B)). Two
+  independent investigations established that generically bridging types indexed by each
+  tree's *local* `Chronicle Atom` structure defeats `rcases`/`simp` on Finset-membership
+  subterms nested inside chronicle conditions. Repairing that would be a proof change,
+  exceeding this task's own "structural dedup, not a proof change" mandate. The four phases
+  carry `[DESCOPED]` markers with DO-NOT-IMPLEMENT banners and their task checklists were
+  deleted, so no future dispatch can read them as pending work.
+- **Treat the consolidation boundary as stable, not provisional.** The boundary is now
+  documented in `ChronicleInterface.lean`'s module docstring rather than left implicit, so a
+  later reader does not mistake the partial lift for an unfinished one.
+- **Close as PARTIAL rather than COMPLETED.** Phase 5 and the plan's completion bar are met,
+  but the repo-wide closing gate is not green due to external debt, so the honest terminus is
+  partial pending that debt clearing.
+- **Resolve the Phase 3a deferral permanently.** `burgessR3Maximal_from_h_content_sub` had
+  been deferred pending "the Phase 4b duality-theorem decision"; with 4b descoped, it stays
+  logic-local permanently.
+
+## Impacts
+
+- **Net structural gain**: the interface, generic `Types`, the ~38-lemma `RRelation` shared
+  core, and the CEE `Structures` + Burgess helpers are now shared, all sorry-free.
+- **No proof-surface change**: exactly one Lean file was modified in this phase, docstring-only.
+  Zero new sorries, axioms, suppressions, or shake debt by every ratchet the CI pipeline
+  measures.
+- **Duplication remains** in the recursive walks, the elimination driver, and
+  `ChronicleConstruction` across both trees — deliberately, and now documented as such.
+- **Bimodal discrete-completeness sorries untouched**, as required; they remain blocked on an
+  external port and were never entangled with this work.
+
 ## Plan Deviations
 
 None beyond what is already recorded inline in the plan file's Phase 5 task checklist
@@ -104,7 +150,7 @@ the plan anticipated as the expected outcome, not a deviation).
   heading `[COMPLETED]`, dependency table updated)
 - `summaries/02_chronicle-consolidation-descoped-summary.md` (this file)
 
-## Next Steps
+## Follow-ups
 
 This task's own scope (Chronicle consolidation, Phase 5 cleanup) is complete. The
 outstanding blocker to a fully green `pre-pr-check.sh` is unrelated pre-existing debt in
@@ -116,3 +162,14 @@ outstanding blocker to a fully green `pre-pr-check.sh` is unrelated pre-existing
 currently in-flight tasks. Recommend the user re-run `bash scripts/pre-pr-check.sh` once
 those tasks land, to confirm a fully green gate before any `/pr` submission touching this
 area of the repo.
+
+## References
+
+- Plan: `plans/02_chronicle-consolidation-descoped.md` (current, authoritative)
+- Superseded plan: `plans/01_chronicle-consolidation.md` (historical record only)
+- Research: `reports/01_chronicle-dedup-research.md`
+- Consolidation boundary rationale: the "Consolidation Boundary: What Is Generic and What
+  Stays Per-Logic" subsection of
+  `Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean`'s module docstring
+- Closing gate: `scripts/pre-pr-check.sh`
+- Repository standards: `CONTRIBUTING.md`, `NOTATION.md`, `ORGANISATION.md`

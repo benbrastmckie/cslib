@@ -38,8 +38,6 @@ For our MCS-based approach:
 - Ported from BimodalLogic/Theories/Bimodal/Metalogic/Decidability/FMP/TruthPreservation.lean
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability.FMP

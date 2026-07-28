@@ -59,8 +59,6 @@ not attempted here.
   structure without an extra discreteness axiom)
 -/
 
-set_option linter.style.setOption false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal

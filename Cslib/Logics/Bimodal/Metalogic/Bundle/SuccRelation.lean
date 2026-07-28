@@ -21,9 +21,6 @@ Defines the Succ (immediate successor) relation for discrete temporal frames.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/SuccRelation.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -60,38 +57,47 @@ theorem Succ_implies_CanonicalR (u v : Set (Formula Atom)) (h : Succ u v) :
 /-! ## g/h Duality for Succ -/
 
 theorem Succ_implies_h_content_reverse
-    (u v : Set (Formula Atom)) (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u) (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v)
+    (u v : Set (Formula Atom))
+    (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u)
+    (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v)
     (h_succ : Succ u v) :
     hContent v ⊆ u :=
   g_content_subset_implies_h_content_reverse u v h_mcs_u h_mcs_v h_succ.1
 
 /-! ## Auxiliary Lemmas for Single-Step Forcing -/
 
-lemma G_neg_implies_not_F (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
+lemma G_neg_implies_not_F (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
     (h_G_neg : Formula.allFuture phi.neg ∈ M) :
     Formula.someFuture phi ∉ M := by
   intro h_F
   exact someFuture_allFuture_neg_absurd h_mcs phi h_F h_G_neg
 
-lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
+lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
     (h_neg_FF : (Formula.someFuture (Formula.someFuture phi)).neg ∈ M) :
     Formula.allFuture (Formula.allFuture phi.neg) ∈ M := by
-  rcases SetMaximalConsistent.negation_complete h_mcs (Formula.allFuture (Formula.allFuture phi.neg)) with
+  rcases SetMaximalConsistent.negation_complete h_mcs
+      (Formula.allFuture (Formula.allFuture phi.neg)) with
     h_goal | h_neg_goal
   · exact h_goal
   · exfalso
-    have h_dne1 : DerivationTree FrameClass.Base [] ((Formula.allFuture (Formula.allFuture phi.neg)).neg.imp
+    have h_dne1 : DerivationTree FrameClass.Base []
+        ((Formula.allFuture (Formula.allFuture phi.neg)).neg.imp
         (Formula.someFuture (Formula.allFuture phi.neg).neg)) :=
       Theorems.Propositional.doubleNegation _
     have h_F_neg_G : Formula.someFuture (Formula.allFuture phi.neg).neg ∈ M :=
       SetMaximalConsistent.implication_property h_mcs (theoremInMcs h_mcs h_dne1) h_neg_goal
-    have h_dne2_base : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).neg.neg.imp
+    have h_dne2_base : DerivationTree FrameClass.Base []
+        ((Formula.someFuture phi.neg.neg).neg.neg.imp
         (Formula.someFuture phi.neg.neg)) :=
       Theorems.Propositional.doubleNegation _
-    have h_dne2_nec : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).neg.neg.imp
+    have h_dne2_nec : DerivationTree FrameClass.Base []
+        (((Formula.someFuture phi.neg.neg).neg.neg.imp
         (Formula.someFuture phi.neg.neg)).allFuture) :=
       DerivationTree.temporal_necessitation _ h_dne2_base
-    have h_dne2_bx3 : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).neg.neg.imp
+    have h_dne2_bx3 : DerivationTree FrameClass.Base []
+        (((Formula.someFuture phi.neg.neg).neg.neg.imp
         (Formula.someFuture phi.neg.neg)).allFuture.imp
         ((Formula.untl Formula.top (Formula.someFuture phi.neg.neg).neg.neg).imp
          (Formula.untl Formula.top (Formula.someFuture phi.neg.neg)))) :=
@@ -99,7 +105,8 @@ lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
         (Axiom.right_mono_until
           (Formula.someFuture phi.neg.neg).neg.neg
           (Formula.someFuture phi.neg.neg) Formula.top) trivial
-    have h_F_dne2 : DerivationTree FrameClass.Base [] ((Formula.someFuture (Formula.someFuture phi.neg.neg).neg.neg).imp
+    have h_F_dne2 : DerivationTree FrameClass.Base []
+        ((Formula.someFuture (Formula.someFuture phi.neg.neg).neg.neg).imp
         (Formula.someFuture (Formula.someFuture phi.neg.neg))) :=
       DerivationTree.modus_ponens [] _ _ h_dne2_bx3 h_dne2_nec
     have h_FF_negneg : Formula.someFuture (Formula.someFuture phi.neg.neg) ∈ M :=
@@ -108,21 +115,26 @@ lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
       Theorems.Propositional.doubleNegation _
     have h_dne3_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture) :=
       DerivationTree.temporal_necessitation _ h_dne3_base
-    have h_dne3_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
+    have h_dne3_bx3 : DerivationTree FrameClass.Base []
+        ((phi.neg.neg.imp phi).allFuture.imp
         ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
-    have h_F_dne3 : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
+    have h_F_dne3 : DerivationTree FrameClass.Base []
+        ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
       DerivationTree.modus_ponens [] _ _ h_dne3_bx3 h_dne3_nec
-    have h_lift_nec : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)).allFuture) :=
+    have h_lift_nec : DerivationTree FrameClass.Base []
+        (((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)).allFuture) :=
       DerivationTree.temporal_necessitation _ h_F_dne3
-    have h_lift_bx3 : DerivationTree FrameClass.Base [] (((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)).allFuture.imp
+    have h_lift_bx3 : DerivationTree FrameClass.Base []
+        (((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)).allFuture.imp
         ((Formula.untl Formula.top (Formula.someFuture phi.neg.neg)).imp
          (Formula.untl Formula.top (Formula.someFuture phi)))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_until
           (Formula.someFuture phi.neg.neg) (Formula.someFuture phi) Formula.top) trivial
-    have h_FF_lift : DerivationTree FrameClass.Base [] ((Formula.someFuture (Formula.someFuture phi.neg.neg)).imp
+    have h_FF_lift : DerivationTree FrameClass.Base []
+        ((Formula.someFuture (Formula.someFuture phi.neg.neg)).imp
         (Formula.someFuture (Formula.someFuture phi))) :=
       DerivationTree.modus_ponens [] _ _ h_lift_bx3 h_lift_nec
     have h_FF_phi : Formula.someFuture (Formula.someFuture phi) ∈ M :=
@@ -133,14 +145,17 @@ lemma neg_FF_implies_GG_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
 /-! ## Single-Step Forcing Theorem -/
 
 theorem single_step_forcing
-    (u v : Set (Formula Atom)) (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u) (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v)
+    (u v : Set (Formula Atom))
+    (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u)
+    (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v)
     (phi : Formula Atom)
     (h_F : Formula.someFuture phi ∈ u)
     (h_FF_not : Formula.someFuture (Formula.someFuture phi) ∉ u)
     (h_succ : Succ u v) :
     phi ∈ v := by
   have h_neg_FF : (Formula.someFuture (Formula.someFuture phi)).neg ∈ u := by
-    cases SetMaximalConsistent.negation_complete h_mcs_u (Formula.someFuture (Formula.someFuture phi)) with
+    cases SetMaximalConsistent.negation_complete h_mcs_u
+        (Formula.someFuture (Formula.someFuture phi)) with
     | inl h_in => exact absurd h_in h_FF_not
     | inr h_neg => exact h_neg
   have h_GG_neg : Formula.allFuture (Formula.allFuture phi.neg) ∈ u :=
@@ -157,31 +172,38 @@ theorem single_step_forcing
 
 /-! ## Past Direction Lemmas -/
 
-lemma H_neg_implies_not_P (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
+lemma H_neg_implies_not_P (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
     (h_H_neg : Formula.allPast phi.neg ∈ M) :
     Formula.somePast phi ∉ M := by
   intro h_P
   exact somePast_allPast_neg_absurd h_mcs phi h_P h_H_neg
 
-lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
+lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (phi : Formula Atom)
     (h_neg_PP : (Formula.somePast (Formula.somePast phi)).neg ∈ M) :
     Formula.allPast (Formula.allPast phi.neg) ∈ M := by
-  rcases SetMaximalConsistent.negation_complete h_mcs (Formula.allPast (Formula.allPast phi.neg)) with
+  rcases SetMaximalConsistent.negation_complete h_mcs
+      (Formula.allPast (Formula.allPast phi.neg)) with
     h_goal | h_neg_goal
   · exact h_goal
   · exfalso
-    have h_dne1 : DerivationTree FrameClass.Base [] ((Formula.allPast (Formula.allPast phi.neg)).neg.imp
+    have h_dne1 : DerivationTree FrameClass.Base []
+        ((Formula.allPast (Formula.allPast phi.neg)).neg.imp
         (Formula.somePast (Formula.allPast phi.neg).neg)) :=
       Theorems.Propositional.doubleNegation _
     have h_P_neg_H : Formula.somePast (Formula.allPast phi.neg).neg ∈ M :=
       SetMaximalConsistent.implication_property h_mcs (theoremInMcs h_mcs h_dne1) h_neg_goal
-    have h_dne2_base : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).neg.neg.imp
+    have h_dne2_base : DerivationTree FrameClass.Base []
+        ((Formula.somePast phi.neg.neg).neg.neg.imp
         (Formula.somePast phi.neg.neg)) :=
       Theorems.Propositional.doubleNegation _
-    have h_dne2_nec : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).neg.neg.imp
+    have h_dne2_nec : DerivationTree FrameClass.Base []
+        (((Formula.somePast phi.neg.neg).neg.neg.imp
         (Formula.somePast phi.neg.neg)).allPast) :=
       Theorems.pastNecessitation _ h_dne2_base
-    have h_dne2_bx3 : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).neg.neg.imp
+    have h_dne2_bx3 : DerivationTree FrameClass.Base []
+        (((Formula.somePast phi.neg.neg).neg.neg.imp
         (Formula.somePast phi.neg.neg)).allPast.imp
         ((Formula.snce Formula.top (Formula.somePast phi.neg.neg).neg.neg).imp
          (Formula.snce Formula.top (Formula.somePast phi.neg.neg)))) :=
@@ -189,7 +211,8 @@ lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
         (Axiom.right_mono_since
           (Formula.somePast phi.neg.neg).neg.neg
           (Formula.somePast phi.neg.neg) Formula.top) trivial
-    have h_P_dne2 : DerivationTree FrameClass.Base [] ((Formula.somePast (Formula.somePast phi.neg.neg).neg.neg).imp
+    have h_P_dne2 : DerivationTree FrameClass.Base []
+        ((Formula.somePast (Formula.somePast phi.neg.neg).neg.neg).imp
         (Formula.somePast (Formula.somePast phi.neg.neg))) :=
       DerivationTree.modus_ponens [] _ _ h_dne2_bx3 h_dne2_nec
     have h_PP_negneg : Formula.somePast (Formula.somePast phi.neg.neg) ∈ M :=
@@ -198,21 +221,26 @@ lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
       Theorems.Propositional.doubleNegation _
     have h_dne3_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast) :=
       Theorems.pastNecessitation _ h_dne3_base
-    have h_dne3_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
+    have h_dne3_bx3 : DerivationTree FrameClass.Base []
+        ((phi.neg.neg.imp phi).allPast.imp
         ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
-    have h_P_dne3 : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
+    have h_P_dne3 : DerivationTree FrameClass.Base []
+        ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
       DerivationTree.modus_ponens [] _ _ h_dne3_bx3 h_dne3_nec
-    have h_lift_nec : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)).allPast) :=
+    have h_lift_nec : DerivationTree FrameClass.Base []
+        (((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)).allPast) :=
       Theorems.pastNecessitation _ h_P_dne3
-    have h_lift_bx3 : DerivationTree FrameClass.Base [] (((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)).allPast.imp
+    have h_lift_bx3 : DerivationTree FrameClass.Base []
+        (((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)).allPast.imp
         ((Formula.snce Formula.top (Formula.somePast phi.neg.neg)).imp
          (Formula.snce Formula.top (Formula.somePast phi)))) :=
       DerivationTree.axiom [] _
         (Axiom.right_mono_since
           (Formula.somePast phi.neg.neg) (Formula.somePast phi) Formula.top) trivial
-    have h_PP_lift : DerivationTree FrameClass.Base [] ((Formula.somePast (Formula.somePast phi.neg.neg)).imp
+    have h_PP_lift : DerivationTree FrameClass.Base []
+        ((Formula.somePast (Formula.somePast phi.neg.neg)).imp
         (Formula.somePast (Formula.somePast phi))) :=
       DerivationTree.modus_ponens [] _ _ h_lift_bx3 h_lift_nec
     have h_PP_phi : Formula.somePast (Formula.somePast phi) ∈ M :=
@@ -221,7 +249,9 @@ lemma neg_PP_implies_HH_neg_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalC
       h_PP_phi h_neg_PP
 
 theorem single_step_forcing_past
-    (u v : Set (Formula Atom)) (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u) (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v)
+    (u v : Set (Formula Atom))
+    (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u)
+    (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v)
     (phi : Formula Atom)
     (h_P : Formula.somePast phi ∈ v)
     (h_PP_not : Formula.somePast (Formula.somePast phi) ∉ v)
@@ -229,7 +259,8 @@ theorem single_step_forcing_past
     (h_p_step : pContent v ⊆ u ∪ pContent u) :
     phi ∈ u := by
   have h_neg_PP : (Formula.somePast (Formula.somePast phi)).neg ∈ v := by
-    cases SetMaximalConsistent.negation_complete h_mcs_v (Formula.somePast (Formula.somePast phi)) with
+    cases SetMaximalConsistent.negation_complete h_mcs_v
+        (Formula.somePast (Formula.somePast phi)) with
     | inl h_in => exact absurd h_in h_PP_not
     | inr h_neg => exact h_neg
   have h_HH_neg : Formula.allPast (Formula.allPast phi.neg) ∈ v :=
@@ -253,45 +284,54 @@ theorem single_step_forcing_past
 -- the `port_continuous_completeness_bimodal` task).
 
 set_option warn.sorry false in
-theorem until_unfold_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem until_unfold_in_mcs (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ M) :
-    Formula.untl (Formula.bot : Formula Atom) (Formula.or ψ (Formula.and φ (Formula.untl φ ψ))) ∈ M := by
+    Formula.untl (Formula.bot : Formula Atom)
+      (Formula.or ψ (Formula.and φ (Formula.untl φ ψ))) ∈ M := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
-theorem since_unfold_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem since_unfold_in_mcs (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_S : Formula.snce φ ψ ∈ M) :
-    Formula.snce (Formula.bot : Formula Atom) (Formula.or ψ (Formula.and φ (Formula.snce φ ψ))) ∈ M := by
+    Formula.snce (Formula.bot : Formula Atom)
+      (Formula.or ψ (Formula.and φ (Formula.snce φ ψ))) ∈ M := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
 theorem until_persists_through_succ (u v : Set (Formula Atom))
-    (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u) (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v) (h_succ : Succ u v)
+    (h_mcs_u : SetMaximalConsistent (FrameClass.Base : FrameClass) u)
+    (h_mcs_v : SetMaximalConsistent (FrameClass.Base : FrameClass) v) (h_succ : Succ u v)
     (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ u) (h_neg_psi : Formula.neg ψ ∈ u) :
     Formula.untl φ ψ ∈ v := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
-theorem or_until_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem or_until_in_mcs (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom)
     (h : Formula.or ψ (Formula.and φ (Formula.untl φ ψ)) ∈ M) :
     Formula.untl φ ψ ∈ M := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
-theorem or_since_in_mcs (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem or_since_in_mcs (M : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom)
     (h : Formula.or ψ (Formula.and φ (Formula.snce φ ψ)) ∈ M) :
     Formula.snce φ ψ ∈ M := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
-theorem g_content_subset_mcs (u : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :
+theorem g_content_subset_mcs (u : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :
     gContent u ⊆ u := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 
 set_option warn.sorry false in
-theorem h_content_subset_mcs (u : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :
+theorem h_content_subset_mcs (u : Set (Formula Atom))
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) u) :
     hContent u ⊆ u := by
   sorry  -- blocked on upstream continuous-frame completeness (port_continuous_completeness_bimodal)
 

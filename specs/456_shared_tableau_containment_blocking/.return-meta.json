@@ -1,33 +1,20 @@
 {
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
-  "task_number": 456,
-  "session_id": "sess_1785275816_a84520_456",
+  "status": "planned",
   "artifacts": [
-    "specs/456_shared_tableau_containment_blocking/reports/01_blocking-module-research.md"
-  ],
-  "findings_count": 6,
-  "adversarial_verification_triggered": true,
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "verified: GargGenoveseNegri2012 (references.bib:228, EXISTS - task description stale, enrich-only), Fitting1983 (:211), Smullyan1968 (:236), ChagrovZakharyaschev1997 (:75), Massacci2000 (:1028, in corpus). DershowitzManna1979 MISSING - ready entry in specs/317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md:305-313",
-  "lit_briefing": "per-repo sub-index (SUBINDEX_PRESENT, 34 docs, sparse=false)",
-  "key_decisions": [
-    "Dependency resolved: 456 lands first, 317 consumes (machine truth confirmed by 317 report 14; side-condition shape settled by completed task 574, not 317)",
-    "Task-description distinctTypes_le_pow statement REFUTED by counterexample (sign doubling + list-order sensitivity); corrected Finset-image formulation over signed universe V : Finset (Sign x F), bound 2^V.card - proof core compiled green",
-    "Side conditions (psi not in forced(x), F(psi)@x) stay logic-specific; generic module = containment test + counting layer only",
-    "Bimodal cannot instantiate (local SignedFormula structure, compound labels) - out of scope"
-  ],
-  "memory_candidates": [
     {
-      "title": "Tableau type-counting lemmas must be Finset-image-valued over the signed universe",
-      "content": "List-valued eraseDups counting statements of the form (labels.map typeAt).eraseDups.length <= 2^|U| are false for two independent reasons: list-order sensitivity (eraseDups on List (List _) distinguishes permutations) and sign doubling (types range over Sign x U). The provable shape counts (labels.toFinset.image fun l => (typeAt l).toFinset).card over a signed universe V : Finset (Sign x F) with bound 2^V.card, proved in ~12 lines via Finset.card_le_card into V.powerset + Finset.card_powerset. Bridge from eraseDups code to Finset proofs via List.mem_eraseDups (LawfulBEq); List.eraseDups_eq_dedup and List.toFinset_dedup do NOT exist in Mathlib/stdlib.",
-      "keywords": ["tableau", "counting", "eraseDups", "Finset", "powerset", "blocking"]
-    },
-    {
-      "title": "Containment-blocking side conditions are logic-specific; only containment + counting generalize",
-      "content": "Across CSLib tableau developments the subset-blocking device shares exactly two generic pieces: the containment test (typeAt subset check) and the 2^n type-count/strict-chain bounds. The side conditions differ per logic (intuitionistic: psi not in forced(x) + explicit F(psi)@x entry per Massacci Def 8.2 per-obligation shape; temporal: eventuality-duplication check) and must stay in the per-logic wrappers. Bimodal Decidability uses its own local SignedFormula with compound labels (label.time projection) and cannot instantiate Foundations Branch F L without a migration refactor.",
-      "keywords": ["tableau", "blocking", "abstraction-boundary", "Massacci", "side-conditions"]
+      "type": "plan",
+      "path": "specs/456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md",
+      "summary": "Hard-mode 5-phase plan for label-generic Blocking.lean (definitions + counting layer), Temporal defeq redirection, and references.bib deliverable, with postmortem constraints and preserved-assets accounting"
     }
   ],
-  "next_steps": "Run /plan 456 to create implementation plan"
+  "next_steps": "Dispatch /implement 456 --hard (per-phase); waves: {1,4} parallel, then 2, then 3, then 5",
+  "metadata": {
+    "session_id": "sess_1785275816_a84520_456",
+    "agent_type": "planner-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+    "phase_count": 5,
+    "estimated_hours": 5,
+    "postmortem_rules_count": 8
+  }
 }

@@ -19,8 +19,6 @@ Enriched seed consistency, linearity, and two-defect seeds for temporal logic.
 * Ported from Cslib/Logics/Bimodal/Metalogic/BXCanonical/OrderedSeedConsistency.lean
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle

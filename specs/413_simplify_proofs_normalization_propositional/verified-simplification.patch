@@ -1,0 +1,220 @@
+diff --git a/Cslib/Foundations/Logic/Metalogic/GenericMCS.lean b/Cslib/Foundations/Logic/Metalogic/GenericMCS.lean
+index e4cfc778..b2c934fa 100644
+--- a/Cslib/Foundations/Logic/Metalogic/GenericMCS.lean
++++ b/Cslib/Foundations/Logic/Metalogic/GenericMCS.lean
+@@ -239,9 +239,8 @@ instance (D : List F → F → Type*) [HilbertTree (F := F) D] :
+ `Ψ ⊆ Γ`, produce `Γ ⊢ φ` by iterating modus ponens with assumption trees. -/
+ noncomputable def unfoldListImp [HilbertTree (F := F) D] {Γ : List F} {φ : F} :
+     (Ψ : List F) → D Γ (listImp Ψ φ) → (∀ a ∈ Ψ, a ∈ Γ) → D Γ φ
+-  | [], d, _ => by simpa only [listImp_nil] using d
++  | [], d, _ => d
+   | a :: Ψ', d, h_sub => by
+-      simp only [listImp_cons] at d
+       have ha : a ∈ Γ := h_sub a (List.mem_cons.mpr (Or.inl rfl))
+       exact unfoldListImp Ψ' (HilbertTree.mp d (HilbertTree.assumption ha))
+         (fun x hx => h_sub x (List.mem_cons.mpr (Or.inr hx)))
+diff --git a/Cslib/Foundations/Logic/Metalogic/ListDeduction.lean b/Cslib/Foundations/Logic/Metalogic/ListDeduction.lean
+index 09d749f5..4c9440fa 100644
+--- a/Cslib/Foundations/Logic/Metalogic/ListDeduction.lean
++++ b/Cslib/Foundations/Logic/Metalogic/ListDeduction.lean
+@@ -77,10 +77,7 @@ theorem list_deriv_reflection {Γ : List F} {φ : F}
+       unfold ListDeriv
+       grind [listImp_axiom_k]
+     · -- φ ∈ Ψ, use ih and then weaken
+-      have ih' := ih h
+-      unfold ListDeriv at ih' ⊢
+-      simp only [listImp_cons]
+-      exact ModusPonens.mp HasAxiomImplyK.implyK ih'
++      exact ModusPonens.mp HasAxiomImplyK.implyK (ih h)
+ 
+ /-! ## Contextual Modus Ponens -/
+ 
+diff --git a/Cslib/Foundations/Logic/Metalogic/MCSProperties.lean b/Cslib/Foundations/Logic/Metalogic/MCSProperties.lean
+index 5634909f..62df61ae 100644
+--- a/Cslib/Foundations/Logic/Metalogic/MCSProperties.lean
++++ b/Cslib/Foundations/Logic/Metalogic/MCSProperties.lean
+@@ -107,7 +107,7 @@ theorem mcs_mp_axiom {G : Set F}
+       · -- Need: (φ → ψ) ∈ G. Use closed_under_derivation with empty list.
+         apply algebraic_mcs_closed_under_derivation h_mcs
+           (L := []) (fun _ hx => by simp at hx)
+-        unfold ListDeriv; simp only [listImp_nil]; exact h_ax
++        exact h_ax
+       · rw [List.mem_cons] at hx
+         rcases hx with rfl | hx
+         · exact h_mem
+@@ -122,6 +122,6 @@ theorem mcs_theorem_in_mcs {G : Set F}
+     {φ : F} (h_thm : InferenceSystem.DerivableIn S φ) : φ ∈ G := by
+   apply algebraic_mcs_closed_under_derivation h_mcs
+     (L := []) (fun _ hx => by simp at hx)
+-  unfold ListDeriv; simp only [listImp_nil]; exact h_thm
++  exact h_thm
+ 
+ end Cslib.Logic.Metalogic.MCSProperties
+diff --git a/Cslib/Foundations/Logic/Theorems/BigConj.lean b/Cslib/Foundations/Logic/Theorems/BigConj.lean
+index 110ff441..405376be 100644
+--- a/Cslib/Foundations/Logic/Theorems/BigConj.lean
++++ b/Cslib/Foundations/Logic/Theorems/BigConj.lean
+@@ -111,7 +111,6 @@ theorem bigconj_mem_derivable {L : List F} {φ : F}
+     | nil =>
+       grind
+     | cons b tail =>
+-      simp only [bigconj_cons_cons] at hconj
+       cases hmem with
+       | head => exact ModusPonens.mp lce_imp hconj
+       | tail _ hmem' =>
+@@ -124,15 +123,12 @@ theorem bigconj_derivable_intro {L : List F}
+     InferenceSystem.DerivableIn S (bigconj L) := by
+   induction L with
+   | nil =>
+-    simp only [bigconj_nil]
+     exact identity (S := S) HasBot.bot
+   | cons a rest ih =>
+     cases rest with
+     | nil =>
+-      simp only [bigconj_singleton]
+       exact h a (by simp)
+     | cons b tail =>
+-      simp only [bigconj_cons_cons]
+       have ha := h a (by simp)
+       have hrest : ∀ φ ∈ (b :: tail),
+           InferenceSystem.DerivableIn S φ := by
+diff --git a/Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean b/Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean
+index d0bc2a85..a411884d 100644
+--- a/Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean
++++ b/Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean
+@@ -173,37 +173,18 @@ lemma derivTreeToListFc {fc : FrameClass}
+   | «axiom» Γ ψ h_ax h_fc =>
+     have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ :=
+       ⟨Bimodal.DerivationTree.axiom [] ψ h_ax h_fc⟩
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem]
+-    unfold ListDeriv
+     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
+   | assumption Γ ψ h_mem =>
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem]
+     exact list_deriv_reflection h_mem
+   | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
+     exact list_deriv_mp ih₁ ih₂
+   | @necessitation ψ _d ih =>
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
+-    have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ := by
+-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
+-    unfold ListDeriv; simp only [listImp_nil]
+-    exact ⟨Bimodal.DerivationTree.necessitation ψ h_thm.toDerivation⟩
++    exact ⟨Bimodal.DerivationTree.necessitation ψ ih.toDerivation⟩
+   | @temporal_necessitation ψ _d ih =>
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
+-    have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ := by
+-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
+-    unfold ListDeriv; simp only [listImp_nil]
+-    exact ⟨Bimodal.DerivationTree.temporal_necessitation ψ h_thm.toDerivation⟩
++    exact ⟨Bimodal.DerivationTree.temporal_necessitation ψ ih.toDerivation⟩
+   | @temporal_duality ψ _d ih =>
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
+-    have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ := by
+-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
+-    have h_dual : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ.swapTemporal :=
+-      ⟨Bimodal.DerivationTree.temporal_duality ψ h_thm.toDerivation⟩
+-    unfold ListDeriv; simp only [listImp_nil]
+-    exact h_dual
++    exact ⟨Bimodal.DerivationTree.temporal_duality ψ ih.toDerivation⟩
+   | @weakening Γ' Γ ψ _d h_sub ih =>
+-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
+     exact list_deriv_monotonic h_sub ih
+ 
+ /-! ## FC-Parameterized Backward Bridge -/
+diff --git a/Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean b/Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean
+index 192324c3..32d22f83 100644
+--- a/Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean
++++ b/Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean
+@@ -120,29 +120,14 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
+     have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (DerivationTree Axioms)) ψ :=
+       ⟨DerivationTree.ax [] ψ h_ax⟩
+     -- Lift to the algebraic system via K-weakening: ⊢ ψ → listImp Γ ψ, then MP
+-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem]
+-    unfold ListDeriv
+     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
+   | assumption Γ ψ h_mem =>
+-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem]
+     exact list_deriv_reflection h_mem
+   | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
+-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
+     exact list_deriv_mp ih₁ ih₂
+   | @necessitation ψ _d ih =>
+-    -- ih : modalAlgDS.Deriv [] ψ = ListDeriv [] ψ = DerivableIn (ClosedHilbert ...) ψ
+-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
+-    have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (DerivationTree Axioms)) ψ := by
+-      unfold ListDeriv at ih
+-      simp only [listImp_nil] at ih
+-      exact ih
+-    -- Box-necessitation: ⊢ ψ → ⊢ □ψ in ClosedHilbert (DerivationTree Axioms)
+-    unfold ListDeriv
+-    simp only [listImp_nil]
+-    -- Construct □ψ derivation directly using the tree necessitation constructor
+-    exact ⟨DerivationTree.necessitation ψ h_thm.toDerivation⟩
++    exact ⟨DerivationTree.necessitation ψ ih.toDerivation⟩
+   | @weakening Γ' Γ ψ _d h_sub ih =>
+-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
+     exact list_deriv_monotonic h_sub ih
+ 
+ /-! ## Backward Direction: Algebraic Deriv → DerivationTree -/
+diff --git a/Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean b/Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean
+index 45dd5103..4300c536 100644
+--- a/Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean
++++ b/Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean
+@@ -119,17 +119,12 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
+     have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (PL.DerivationTree Axioms)) ψ :=
+       ⟨PL.DerivationTree.ax [] ψ h_ax⟩
+     -- Lift to the algebraic system via K-weakening: ⊢ ψ → listImp Γ ψ, then MP
+-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
+-    unfold ListDeriv
+     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
+   | assumption Γ ψ h_mem =>
+-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
+     exact list_deriv_reflection h_mem
+   | @modusPonens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
+-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
+     exact list_deriv_mp ih₁ ih₂
+   | @weakening Γ' Γ ψ _d h_sub ih =>
+-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
+     exact list_deriv_monotonic h_sub ih
+ 
+ /-! ## Backward Direction: Algebraic Deriv → DerivationTree -/
+diff --git a/Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean b/Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean
+index 53def98f..df049be4 100644
+--- a/Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean
++++ b/Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean
+@@ -154,31 +154,16 @@ lemma derivTreeToListFc {fc : FrameClass}
+   | «axiom» Γ ψ h_ax h_fc =>
+     have h_thm : InferenceSystem.DerivableIn (HilbertBXFc fc) ψ :=
+       ⟨DerivationTree.axiom [] ψ h_ax h_fc⟩
+-    simp only [temporalAlgDSFc, algebraicDerivationSystem]
+-    unfold ListDeriv
+     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
+   | assumption Γ ψ h_mem =>
+-    simp only [temporalAlgDSFc, algebraicDerivationSystem]
+     exact list_deriv_reflection h_mem
+   | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
+-    simp only [temporalAlgDSFc, algebraicDerivationSystem] at *
+     exact list_deriv_mp ih₁ ih₂
+   | @temporal_necessitation ψ _d ih =>
+-    simp only [temporalAlgDSFc, algebraicDerivationSystem] at *
+-    have h_thm : InferenceSystem.DerivableIn (HilbertBXFc fc) ψ := by
+-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
+-    unfold ListDeriv; simp only [listImp_nil]
+-    exact ⟨DerivationTree.temporal_necessitation ψ h_thm.toDerivation⟩
++    exact ⟨DerivationTree.temporal_necessitation ψ ih.toDerivation⟩
+   | @temporal_duality ψ _d ih =>
+-    simp only [temporalAlgDSFc, algebraicDerivationSystem] at *
+-    have h_thm : InferenceSystem.DerivableIn (HilbertBXFc fc) ψ := by
+-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
+-    have h_dual : InferenceSystem.DerivableIn (HilbertBXFc fc) ψ.swapTemporal :=
+-      ⟨DerivationTree.temporal_duality ψ h_thm.toDerivation⟩
+-    unfold ListDeriv; simp only [listImp_nil]
+-    exact h_dual
++    exact ⟨DerivationTree.temporal_duality ψ ih.toDerivation⟩
+   | @weakening Γ' Γ ψ _d h_sub ih =>
+-    simp only [temporalAlgDSFc, algebraicDerivationSystem] at *
+     exact list_deriv_monotonic h_sub ih
+ 
+ /-! ## FC-Parameterized Backward Bridge -/

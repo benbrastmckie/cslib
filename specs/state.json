@@ -1,6 +1,19 @@
 {
-  "next_project_number": 583,
+  "next_project_number": 584,
   "active_projects": [
+    {
+      "project_number": 583,
+      "project_name": "restate_intexpandbranches_openbranch_sat",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "dependencies": [
+        574
+      ],
+      "description": "Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583, sorry at :2623) so that it is provable, then discharge it.\n\nTHE GOAL IS FALSE AS STATED -- this is not a proof-effort obligation and cannot be closed by proving harder. The in-file comment (Scheme.lean:2598-2622) records an explicit Lean-verified counter-instance to the `fuel = 0` base case: with `branches = [[<.neg, p /\\ q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`, every hypothesis of the lemma holds while `IBranchSaturation` fails. The comment states outright: \"No proof can close this `sorry` at the lemma current statement.\"\n\nSCOPE: determine the correct strengthened statement (most likely an added saturation or fuel-sufficiency precondition on the `fuel = 0` case), restate the lemma, repair its call sites, and discharge the sorry.\n\nRELATIONSHIP TO THE DIVERGENCE REPAIR: the divergence-repair task addresses the root cause shared by all four propositional tableau sorries (the fuel-bounded persistence loop in `applyAllTImpRules` copying `T(phi->psi)` into accessible worlds). The restatement here may fall out of that repair, or may need to be done independently -- resolve that first. This task exists because the restatement obligation is named in no other task description and must not be silently skipped when the divergence repair lands.\n\nVERIFY BEFORE STARTING: re-read Scheme.lean:2598-2622 and confirm the counter-instance still refutes the current statement; if the divergence repair has already restated the lemma, close this task as superseded rather than duplicating the work.",
+      "created": "2026-07-28T17:19:05Z",
+      "last_updated": "2026-07-28T17:19:05Z"
+    },
     {
       "project_number": 582,
       "project_name": "s4_ancestor_redirect_soundness_obstruction",
@@ -580,12 +593,12 @@
     {
       "project_number": 400,
       "project_name": "reconcile_connectives_pr607",
-      "status": "blocked",
+      "status": "not_started",
       "task_type": "cslib",
       "title": "Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)",
       "description": "[ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-07-26T23:30:00Z",
+      "last_updated": "2026-07-28T17:18:33Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -625,9 +638,7 @@
         }
       ],
       "session_id": "sess_1782759395_5a8840",
-      "dependencies": [
-        465
-      ],
+      "dependencies": [],
       "topic": "Propositional Logic",
       "blockers": [
         "Phases 1-4 (agent scaffolding) are COMPLETE: comparison tables, the verified falsum/verum derived-neg bridge (reuse Mathlib Bot/Top, no new HasBot), the empirical grind-direction finding (notation -> constructor helps; constructor -> notation worsens the upstream case), and the consolidated review packet. Phase 5 -- 'a human must author and post the #607 review', which an agent cannot do under the Zulip AI policy -- is exactly the deliverable of the PR #607 review task, which is now [PR READY]. That dependency is now recorded explicitly rather than left implicit; this task was previously blocked with no dependency edge at all. Phases 6-8 (upstream maintainer resolution of the falsum question, then conditional Lean registration of PL.Proposition instances and NOTATION/ORGANISATION updates) are gated on an EXTERNAL third party with no committed timeline. Reassess for [ABANDONED] or [PARTIAL] if the upstream thread goes quiet after the #607 review posts -- an indefinite [BLOCKED] on someone else's inbox is not a useful tracker state."
@@ -660,7 +671,7 @@
     {
       "project_number": 413,
       "project_name": "simplify_proofs_normalization_propositional",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -676,12 +687,20 @@
         375
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-06-29T22:13:39Z"
+      "last_updated": "2026-07-28T17:08:50Z",
+      "session_id": "sess_1785258473_63f7b4_413",
+      "artifacts": [
+        {
+          "path": "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",
+          "type": "report",
+          "summary": "Redundant normalization rewrites; verified diff preserved"
+        }
+      ]
     },
     {
       "project_number": 414,
       "project_name": "simplify_proofs_normalization_modal_family",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -707,7 +726,15 @@
         444
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-01T05:38:47Z"
+      "last_updated": "2026-07-28T17:08:54Z",
+      "session_id": "sess_1785258473_63f7b4_414",
+      "artifacts": [
+        {
+          "path": "specs/414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md",
+          "type": "report",
+          "summary": "Modal-family proof simplification candidates, LSP-verified"
+        }
+      ]
     },
     {
       "project_number": 425,
@@ -1374,7 +1401,7 @@
     {
       "project_number": 557,
       "project_name": "modal_tableau_refactor_abstractions_boneyard",
-      "status": "blocked",
+      "status": "expanded",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": [
@@ -1391,7 +1418,7 @@
       "blockers": [
         "BUILD GATE NOT GREEN (recorded 2026-07-26, session sess_1785105096_50f3c7). The repository does not build: Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329:2 has a non-exhaustive match, 'Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)', introduced by commit 88b198bf (task 554 phase 13.1, 'assemble nested_sound with impL strategic sorry'). The missing Nested/Soundness.olean is a CONSEQUENCE of that error, not a stale artifact, so it cannot be cleared by rebuilding. That file is owned by tasks 554 and 570, NOT by this task; do not repair it here. Until it is green, 'lake build' and 'lake exe checkInitImports' cannot verify anything, so any acceptance gate in this task reading 'checkInitImports clean' is currently vacuous. Measured baseline for this programme is recorded at specs/557_modal_tableau_refactor_abstractions_boneyard/artifacts/baseline.md. ROLE OF THIS TASK, decided 2026-07-26: by explicit user decision this task executes Phase 2 ONLY (stale-build clearance and baseline capture); its plan at plans/01_tableau-refactor-abstractions-boneyard.md remains the REFERENCE DOCUMENT whose phase bodies supply implementation detail for the spawned programme tasks 558-567, which own the remaining phases. Phase 2 is BLOCKED on the build error above. Phase 1 belongs to task 561 and was deliberately NOT executed here."
       ],
-      "last_updated": "2026-07-26T22:53:27Z",
+      "last_updated": "2026-07-28T17:18:33Z",
       "topic": "Modal Logic",
       "ordering_note": "Runs BEFORE the S4 soundness attempt by explicit user decision (2026-07-26): the refactor establishes correct abstractions and module divisions first, rather than attempting a large canonical-model proof on the current factoring. The reverse edge (557 depends on 553) was removed to resolve the cycle created by the soundness plan v5 terminal-condition handoff.",
       "session_id": "sess_1785105096_50f3c7",
@@ -1542,7 +1569,18 @@
         ],
         "skeleton": false,
         "follow_up_tasks": []
-      }
+      },
+      "subtasks": [
+        558,
+        559,
+        561,
+        562,
+        563,
+        564,
+        565,
+        566,
+        567
+      ]
     },
     {
       "project_number": 558,
@@ -1765,7 +1803,9 @@
       "task_type": "cslib",
       "title": "Establish whether continuous time needs axioms beyond density (Burgess 1982)",
       "topic": "Temporal Logic",
-      "dependencies": [],
+      "dependencies": [
+        530
+      ],
       "description": "[Created by the blocked-task review to break a two-task deadlock.] RESEARCH ONLY. Both the temporal and bimodal continuous-completeness tasks are recorded as blocked on 'the continuous case has not been developed upstream' -- but their SHARED real blocker is a literature question that depends on neither, and can be answered today: DO CONTINUOUS (Dedekind-complete) FRAMES REQUIRE ANY AXIOM BEYOND DENSITY? The standard result attributed to Burgess 1982 is that the Until/Since temporal logic over the reals has exactly the same theorems as over the rationals, which would make density sufficient and collapse both continuous tasks to near-trivial transports of the already-landed dense completeness. That equivalence is precisely what has never been checked here. DETERMINE: (1) the exact statement and proof strategy of the Burgess result, from the source -- not from secondary recollection; (2) whether it applies to THIS repository's Until/Since temporal language and frame conditions, or only to a variant; (3) if it applies, the cheapest sound route to a Continuous frame class and its completeness theorem, and whether the bimodal continuous port is needed at all or can be bypassed; (4) if it does NOT apply, which additional axiom schema (Dedekind completeness or equivalent) is required, and what that costs. Run with --lit. A negative or 'genuinely open' verdict is a valid deliverable. CONSUMERS: the temporal continuous-completeness task (which may be re-scoped or unblocked outright on the verdict) and the bimodal continuous port (which may turn out to be unnecessary as a dependency).",
       "file_scope": [
         "Cslib/Logics/Temporal/Metalogic/"
@@ -1863,10 +1903,13 @@
     "Foundations",
     "Propositional Logic",
     "Modal Logic",
+    "Tableau Infrastructure",
     "Temporal Logic",
     "Bimodal Logic",
+    "Bimodal and Temporal Logic",
     "Code Hygiene",
     "PR & Upstreaming"
   ],
-  "_last_updated": "2026-06-27T18:18:00Z"
+  "_last_updated": "2026-06-27T18:18:00Z",
+  "active_goal": "Complete the propositional and modal logic milestone: close the five remaining bare sorries (turning the CI build green), land S4 decidability as the last classical-cube corner, fold tableau into the propositional TFAE, and finish the modal tableau refactor programme."
 }

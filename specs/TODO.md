@@ -1,5 +1,5 @@
 ---
-next_project_number: 583
+next_project_number: 584
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 583
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,425,530,534,554,557,558,562,563,569,574 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,456,497,511,537,551,553,564,568,571 | 36,37,181,425,530,554,562,563,574 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,400,409,425,530,534,554,558,562,563,574 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,456,497,511,537,551,553,564,568,569,571,583 | 36,37,181,425,530,554,562,563,574 | propositional logic, modal logic, tableau infrastructure, ... |
 | 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
 | 5 | 413,414 | 181,215,300,301,375 | code hygiene |
@@ -26,9 +26,10 @@ next_project_number: 583
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
+  └─ 583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -40,7 +41,6 @@ next_project_number: 583
 554 [RESEARCHED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-557 [BLOCKED] — Refactor and restructure the modal Tableau subsystem to library-p
 558 [NOT STARTED] — [Task A of the modal-tableau refactor programme; P0, highest valu
   └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
 562 [NOT STARTED] — [Task D of the modal-tableau refactor programme; P2. Gated on the
@@ -58,13 +58,17 @@ next_project_number: 583
     └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the (see above)
 
+### Tableau Infrastructure
+
+456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
+
 ### Temporal Logic
 
 425 [NOT STARTED] — [Decomposed from the temporal tableau umbrella, blocker C.] BLOCK
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-569 [NOT STARTED] — [Created by the blocked-task review to break a two-task deadlock.
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
+569 [NOT STARTED] — [Created by the blocked-task review to break a two-task deadlock.
 
 ### Bimodal Logic
 
@@ -75,22 +79,36 @@ next_project_number: 583
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
 
-### Code Hygiene
-
-530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
-414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
-
-### Tableau Infrastructure
-
-456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
-
 ### Bimodal And Temporal Logic
 
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
+### Code Hygiene
+
+530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
+413 [RESEARCHING] — Simplify verbose Propositional/ proofs (manual simp only [listImp
+414 [RESEARCHING] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
+
 ## Tasks
+
+### 583. Restate intexpandbranches openbranch sat
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 574
+
+**Description**: Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583, sorry at :2623) so that it is provable, then discharge it.
+
+THE GOAL IS FALSE AS STATED -- this is not a proof-effort obligation and cannot be closed by proving harder. The in-file comment (Scheme.lean:2598-2622) records an explicit Lean-verified counter-instance to the `fuel = 0` base case: with `branches = [[<.neg, p /\ q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`, every hypothesis of the lemma holds while `IBranchSaturation` fails. The comment states outright: "No proof can close this `sorry` at the lemma current statement."
+
+SCOPE: determine the correct strengthened statement (most likely an added saturation or fuel-sufficiency precondition on the `fuel = 0` case), restate the lemma, repair its call sites, and discharge the sorry.
+
+RELATIONSHIP TO THE DIVERGENCE REPAIR: the divergence-repair task addresses the root cause shared by all four propositional tableau sorries (the fuel-bounded persistence loop in `applyAllTImpRules` copying `T(phi->psi)` into accessible worlds). The restatement here may fall out of that repair, or may need to be done independently -- resolve that first. This task exists because the restatement obligation is named in no other task description and must not be silently skipped when the divergence repair lands.
+
+VERIFY BEFORE STARTING: re-read Scheme.lean:2598-2622 and confirm the counter-instance still refutes the current statement; if the divergence repair has already restated the lemma, close this task as superseded rather than duplicating the work.
+
+---
 
 ### 582. Resolve the S4 ancestor-redirect sorry, the only sorry with no owning task
 - **Status**: [NOT STARTED]
@@ -195,7 +213,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 530
 
 **Description**: [Created by the blocked-task review to break a two-task deadlock.] RESEARCH ONLY. Both the temporal and bimodal continuous-completeness tasks are recorded as blocked on 'the continuous case has not been developed upstream' -- but their SHARED real blocker is a literature question that depends on neither, and can be answered today: DO CONTINUOUS (Dedekind-complete) FRAMES REQUIRE ANY AXIOM BEYOND DENSITY? The standard result attributed to Burgess 1982 is that the Until/Since temporal logic over the reals has exactly the same theorems as over the rationals, which would make density sufficient and collapse both continuous tasks to near-trivial transports of the already-landed dense completeness. That equivalence is precisely what has never been checked here. DETERMINE: (1) the exact statement and proof strategy of the Burgess result, from the source -- not from secondary recollection; (2) whether it applies to THIS repository's Until/Since temporal language and frame conditions, or only to a variant; (3) if it applies, the cheapest sound route to a Continuous frame class and its completeness theorem, and whether the bimodal continuous port is needed at all or can be bypassed; (4) if it does NOT apply, which additional axiom schema (Dedekind completeness or equivalent) is required, and what that costs. Run with --lit. A negative or 'genuinely open' verdict is a valid deliverable. CONSUMERS: the temporal continuous-completeness task (which may be re-scoped or unblocked outright on the verdict) and the bimodal continuous port (which may turn out to be unnecessary as a dependency).
 
@@ -282,7 +300,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 557. Modal tableau refactor abstractions boneyard
-- **Status**: [BLOCKED]
+- **Status**: [EXPANDED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -582,20 +600,22 @@ After implementation:
 ---
 
 ### 414. Simplify proofs normalization modal family
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
+- **Research**: [414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md]
 
 **Description**: Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*] lists and long tactic chains) using the EXISTING normalization/embedding lemmas. RECONCILED: original premise cited task-268 'co-tags' which was abandoned - re-scoped to the lemmas that actually exist. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 
 ---
 
 ### 413. Simplify proofs normalization propositional
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 375
+- **Research**: [413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md]
 
 **Description**: Simplify verbose Propositional/ proofs (manual simp only [listImp_*, bigconj_*] lists and long tactic chains) using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in the syntax files). RECONCILED: the original premise cited task-268 'co-tags' as the enabler, but task 268 was abandoned - re-scoped to use the normalization lemmas that actually exist, replacing explicit rewrite lists with simp/grind where they are now redundant. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 
@@ -613,10 +633,10 @@ After implementation:
 ---
 
 ### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 465
+- **Dependencies**: None
 - **Research**:
   - [400_reconcile_connectives_pr607/reports/01_pr607-engagement.md]
   - [400_reconcile_connectives_pr607/reports/02_engagement-strategy.md]

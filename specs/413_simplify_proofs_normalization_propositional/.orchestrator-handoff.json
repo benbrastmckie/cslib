@@ -1,0 +1,85 @@
+{
+  "task_number": 413,
+  "session_id": "sess_1785258473_63f7b4_413",
+  "phase": "research",
+  "status": "research_complete",
+  "agent_type": "cslib-research-agent",
+  "artifacts": [
+    "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",
+    "specs/413_simplify_proofs_normalization_propositional/verified-simplification.patch"
+  ],
+  "report_path": "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",
+  "scope_reconciliation": {
+    "premise_status": "second_reconciliation_required",
+    "original_scope": "Propositional/ proofs with manual simp only [listImp_*, bigconj_*] lists",
+    "finding": "Zero listImp_*/bigconj_* simp-only sites exist under Cslib/Logics/Propositional/. bigconj is never referenced in Propositional/ at all. All 20 sites live in Foundations/, Modal/, Temporal/, Bimodal/, plus one file in Propositional/Metalogic/.",
+    "recommended_scope": "Repo-wide removal of redundant listImp/bigconj normalization rewrites: 8 files, 20 tactic sites, 62 net lines removed. Superset of the original scope (includes Propositional/Metalogic/GenericMCSBridge.lean).",
+    "requires_user_confirmation": true
+  },
+  "key_findings": [
+    "All 20 simp only [listImp_*|bigconj_*] invocations in the repository are redundant: listImp_nil/_cons and bigconj_nil/_singleton/_cons_cons are all proved by rfl, ListDeriv is a transparent def, and DerivationSystem.Deriv is a plain structure field -- so exact discharges every site by defeq.",
+    "15 accompanying 'unfold ListDeriv' and 'simp only [<algDS alias>, treeAlgDS, algebraicDerivationSystem]' unfolds are equally redundant.",
+    "The four per-logic GenericMCSBridge derivTreeToList proofs are copy-pasted variants of one anti-pattern; Bimodal shrinks 32 tactic lines -> 13, Temporal 26 -> 12, Modal 24 -> 11, Propositional 12 -> 7.",
+    "The change set was applied and verified empirically, not merely proposed: full lake build (3309 jobs) green with all 8 files edited simultaneously; lake lint clean on all changed files; grep for residual target sites returns 0.",
+    "GenericMCS.lean:242 unfoldListImp is a noncomputable def returning DATA, so its simpa->exact change alters the produced term; this is why full-project (not per-module) verification is mandatory.",
+    "No new definitions, lemmas, axioms, attributes, or notation are recommended. The task-268 'co-tags' premise is moot: the normalization lemmas already carry @[simp, scoped grind =]."
+  ],
+  "zero_debt": {
+    "sorries_introduced": 0,
+    "axioms_introduced": 0,
+    "vacuous_definitions": 0,
+    "preexisting_sorries_untouched": [
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:570",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:124",
+      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118"
+    ]
+  },
+  "verification": {
+    "full_lake_build": "green (3309 jobs, all 8 files edited)",
+    "lake_lint_on_changed_files": "no output",
+    "residual_target_sites": 0,
+    "working_tree_state": "reverted clean; verified diff preserved as patch artifact"
+  },
+  "recommended_phases": [
+    {
+      "phase": 1,
+      "name": "Foundations tier",
+      "files": [
+        "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean",
+        "Cslib/Foundations/Logic/Metalogic/ListDeduction.lean",
+        "Cslib/Foundations/Logic/Metalogic/MCSProperties.lean",
+        "Cslib/Foundations/Logic/Theorems/BigConj.lean"
+      ],
+      "lines_removed": 10,
+      "verification": "full lake build (required: unfoldListImp is a data-level change)"
+    },
+    {
+      "phase": 2,
+      "name": "Per-logic GenericMCSBridge tier",
+      "files": [
+        "Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean",
+        "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+        "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
+        "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean"
+      ],
+      "lines_removed": 52,
+      "notes": "Preserve the explanatory comments attached to deleted tactic blocks; add a one-line defeq-reliance note at each derivTreeToList*.",
+      "verification": "full lake build"
+    },
+    {
+      "phase": 3,
+      "name": "CI and task-description reconciliation",
+      "verification": "lake build; lake exe checkInitImports; lake lint; lake exe lint-style; lake test; lake shake --add-public --keep-implied --keep-prefix"
+    }
+  ],
+  "risks": [
+    "Defeq fragility: simplified proofs rely on ListDeriv transparency. Mitigation: the bridges' listDerivToTree already delegates purely by defeq, so the dependency is pre-existing; document it in a comment.",
+    "unfoldListImp data-term change requires full-build verification, not per-module.",
+    "7 of 8 files are outside Propositional/ -- scope expansion must be surfaced in the PR description and the task description updated."
+  ],
+  "next_phase": "plan",
+  "blockers": [],
+  "requires_user_review": true,
+  "user_review_reason": "Scope retarget from Propositional/-only to repo-wide (8 files) needs confirmation; secondary question on defeq-reliance policy."
+}

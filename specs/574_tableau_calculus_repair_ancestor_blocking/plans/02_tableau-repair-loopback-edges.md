@@ -688,7 +688,7 @@ territory contract that governed wave 2-3 was:
 
 ---
 
-### Phase 6: Loop-back-edge saturation invariant; retire the temporary sorry [NOT STARTED]
+### Phase 6: Loop-back-edge saturation invariant; retire the temporary sorry [COMPLETED]
 
 - **Goal:** Drop the dead numeric ordering conjunct (D8), thread the invariant-side augmented edge
   list `augSets` through `intExpandBranches_openBranch_sat`'s induction (D7), and close the Phase-4
@@ -713,7 +713,7 @@ before proceeding; do not silently re-derive.
 
 **Tasks (6.1 — retire the `sat_fimp` numeric proxy):**
 
-- [ ] **Step 1.** Amend `sfSatisfied`'s `.neg,.imp` clause (`Scheme.lean:948`ff, the clause at
+- [x] **Step 1.** Amend `sfSatisfied`'s `.neg,.imp` clause (`Scheme.lean:948`ff, the clause at
       `:962-965`): drop the `sf.label ≤ w' ∧`. Target shape:
       ```lean
         | .neg, .imp φ ψ =>
@@ -722,7 +722,7 @@ before proceeding; do not silently re-derive.
             b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
       ```
       *(red)*
-- [ ] **Step 2.** Amend `IBranchSaturation.sat_fimp` (`Scheme.lean:97-101`): drop the `w ≤ w' ∧`.
+- [x] **Step 2.** Amend `IBranchSaturation.sat_fimp` (`Scheme.lean:97-101`): drop the `w ≤ w' ∧`.
       Target shape:
       ```lean
         sat_fimp : ∀ (φ ψ : Proposition Atom) (w : Nat),
@@ -736,7 +736,7 @@ before proceeding; do not silently re-derive.
       monotonically-increasing labels; under ancestor-directed blocking the witness carries a
       *smaller* label; the genuine accessibility content is carried in strictly stronger form by
       `IFimpAccess`. **No task-number references.** *(red)*
-- [ ] **Step 3.** Repair the two arity fallouts:
+- [x] **Step 3.** Repair the two arity fallouts:
       - `sfSatisfied_mono`'s `.neg,.imp` arm (`:1000-1001`):
         ```lean
             | (obtain ⟨w', h1, h2⟩ := h
@@ -751,14 +751,14 @@ before proceeding; do not silently re-derive.
       (7 sorries — the temporary is still present). Then `lake build` (full) to confirm both
       `Completeness.lean` files and `Soundness.lean` are unaffected. Commit
       `task 574 phase 6.1: retire the sat_fimp numeric proxy`.
-- [ ] **Guard**: `IExpandedConsistent_sat` (`:1249`) must remain **unchanged** — `exact hsat` still
+- [x] **Guard**: `IExpandedConsistent_sat` (`:1249`) must remain **unchanged** — `exact hsat` still
       closes `sat_fimp` because the definitional identity between the field and `sfSatisfied`'s clause
       is preserved by dropping the same conjunct from both. If it goes red, one of the two edits is
       asymmetric — fix that, do not weaken the lemma.
 
 **Tasks (6.2 — thread the invariant-side edge list):**
 
-- [ ] **Step 4.** Add `augSets : List IEdges` to `intExpandBranches_openBranch_sat`'s signature
+- [x] **Step 4.** Add `augSets : List IEdges` to `intExpandBranches_openBranch_sat`'s signature
       (`:2930`) and to `generalizing`; retype `hACC` to use `augSets`:
       ```lean
       private lemma intExpandBranches_openBranch_sat (fuel : Nat)
@@ -779,7 +779,7 @@ before proceeding; do not silently re-derive.
       ```
       **No length hypothesis is needed for `augSets`**: `IAllAccessConsistent` is `False` on
       mismatched-length lists, so the shape is forced. *(red)*
-- [ ] **Step 5.** Add `pendingAug`/`doneAug` to the inner `suffices key` (`:2973`), its two
+- [x] **Step 5.** Add `pendingAug`/`doneAug` to the inner `suffices key` (`:2973`), its two
       `IAllAccessConsistent` hypotheses, the `key …` application, and the `nil` branch's `intro`
       arity (13 → 15 underscores):
       ```lean
@@ -807,7 +807,7 @@ before proceeding; do not silently re-derive.
       ```
       **`intExpandBranches.go`'s argument list is UNCHANGED** — the algorithm still threads its own
       `pendingEdges`/`doneEdges`. This decoupling is the mechanism (D7). *(red)*
-- [ ] **Step 6.** Add the `cases hpAug : pendingAug` split nested inside the `pendingEdges` cons case;
+- [x] **Step 6.** Add the `cases hpAug : pendingAug` split nested inside the `pendingEdges` cons case;
       retarget `hACC_bPers` to `augH`:
       ```lean
                 | cons edgesH edgesT =>
@@ -824,7 +824,7 @@ before proceeding; do not silently re-derive.
                       hACC_bh_eH
       ```
       Thread `augT` / `doneAug ++ [augH]` through the `closurePred` recursion. *(red)*
-- [ ] **Step 7.** `none` leaf (`:3049-3050`): `⟨edgesH, …⟩` → `⟨augH, …⟩`:
+- [x] **Step 7.** `none` leaf (`:3049-3050`): `⟨edgesH, …⟩` → `⟨augH, …⟩`:
       ```lean
                       exact ⟨augH, IExpandedConsistent_sat hstep hIC_bPers,
                         IExpandedAccessConsistent_sat hstep hACC_bPers⟩
@@ -838,7 +838,7 @@ before proceeding; do not silently re-derive.
       `doneAug ++ [newEdge.elim augH (fun e => augH ++ [e])] ++ augT` on the `hACC'` side, and
       `branches'.map (fun _ => edgesH)` becomes `branches'.map (fun _ => augH)`); add one `_` to each
       `exact ih …`. *(red)*
-- [ ] **Step 8.** Update `openBranch_countermodel`'s call site (`:3367-3370`) with the explicit `[[]]`
+- [x] **Step 8.** Update `openBranch_countermodel`'s call site (`:3367-3370`) with the explicit `[[]]`
       — `augSets` is otherwise unconstrained by unification:
       ```lean
         obtain ⟨edges, hsat, hfimp⟩ :=
@@ -848,15 +848,15 @@ before proceeding; do not silently re-derive.
       ```
       **Verify**: `lake build …Scheme` **green, with the reuse-site `sorry` still present** (7
       sorries). Commit `task 574 phase 6.2: thread the invariant-side edge list`.
-- [ ] **Boundary guard**: the fuel-0 `sorry` region and its 26-line refutation note (`:2940-2970`)
+- [x] **Boundary guard**: the fuel-0 `sorry` region and its 26-line refutation note (`:2940-2970`)
       must be **byte-identical** after 6.2 — confirm with `git diff` showing no change in that range.
-- [ ] **Boundary guard**: `intExpandBranches_openBranch_initial_mem` (`:3199-3345`) and its own
+- [x] **Boundary guard**: `intExpandBranches_openBranch_initial_mem` (`:3199-3345`) and its own
       `suffices key` (`:3227`) are a **different lemma** and must be untouched — confirm with
       `git diff`.
 
 **Tasks (6.3 — close the reuse-site discharge):**
 
-- [ ] **Step 9.** Replace the reuse-site `sorry` (`:3131-3143`) with the loop-back-edge discharge,
+- [x] **Step 9.** Replace the reuse-site `sorry` (`:3131-3143`) with the loop-back-edge discharge,
       and retype `hACC_reuse`/`hACC''` to `augH ++ [(x, l)]`:
       ```lean
                                  have hreuse_sat : IExpandedConsistent bPers newExp ∧
@@ -889,16 +889,16 @@ before proceeding; do not silently re-derive.
                                  exact ih _ _ _ _ _ hAC'' hLen0'' hACC'' hgo)
       ```
       `hLen0''` is **unchanged** — it still speaks about `doneEdges`/`edgesT`, matching `hgo`.
-- [ ] **Orientation guard**: the edge is `(x, l)`, **not** `(l, x)`. `isAccessible` walks
+- [x] **Orientation guard**: the edge is `(x, l)`, **not** `(l, x)`. `isAccessible` walks
       `(child, parent)` pairs parent→child, and
       `isAccessible_one_step (hmem : (w', w) ∈ edges) : isAccessible edges w w'` (`:349`), so
       `(x, l) ∈ aug` yields `isAccessible aug l x` in one hop — exactly `sfAccessSat`'s conjunct with
       `w' := x`. A wrong orientation fails `isAccessible_one_step (by simp)`.
-- [ ] **Non-vacuity check (replicate the research's falsification test)**: swapping the two witness
+- [x] **Non-vacuity check (replicate the research's falsification test)**: swapping the two witness
       arguments (`houtPhi` ↔ `hFpsi`) must produce an application type mismatch. If it builds either
       way, the term is not doing what it appears to — stop and record.
-- [ ] Remove the `-- TEMPORARY (task phase 4 -> phase 6)` annotation along with the `sorry`.
-- [ ] **Step 11 gates**:
+- [x] Remove the `-- TEMPORARY (task phase 4 -> phase 6)` annotation along with the `sorry`.
+- [x] **Step 11 gates**:
       - `lake build` (full) **green**.
       - `grep -rn "^\s*sorry\s*$" Cslib/ --include=*.lean | wc -l` = **6**, and the six lines are the
         exact baseline declarations (`TemporalConservativity`, `FrameSoundness`, `Scheme` truthLemma
@@ -910,7 +910,7 @@ before proceeding; do not silently re-derive.
         = 0.
       - `git diff --stat` names **only** `Scheme.lean`.
       Commit `task 574 phase 6.3: close the reuse-site discharge`.
-- [ ] **Convergence check**: `diff` the fix's line ranges against `scratch/Scheme.lean.prototype`.
+- [x] **Convergence check**: `diff` the fix's line ranges against `scratch/Scheme.lean.prototype`.
       Any deviation must be justified in the phase record.
 
 - **Timing:** 10-14 hours

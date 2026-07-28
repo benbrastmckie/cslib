@@ -254,9 +254,9 @@ returns the first label satisfying all four conditions, or `none` if no label do
 (create `w'` as normal). This mirrors `intFImpReuseWitness?`'s own contract exactly; only the
 search direction differs.
 
-This declaration is **additive**: `intExpandBranches`'s call site (`:423`) still calls
-`intFImpReuseWitness?`, unchanged, in this phase. The swap is Phase 4's explicit acceptance
-gate. -/
+`intExpandBranches`'s single loop-check call site calls this declaration directly (the swap
+was Phase 4's explicit acceptance gate); the superseded descendant-directed
+`intFImpReuseWitness?` and its `_spec` lemma were deleted in that same phase. -/
 def intFImpReuseWitnessAnc? (bPers : IBranch Atom) (edges : IEdges)
     (newForms : List (ISF Atom)) (newEdge : Nat × Nat) : Option Nat :=
   -- `w` is the source world of the would-be world-creating edge (`intFImpRule` returns

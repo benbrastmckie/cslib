@@ -832,26 +832,30 @@ private lemma IExpandedConsistent_mono {b b' : IBranch Atom} {e : List (ISF Atom
 
 /-! ### Edge-accessibility companion invariant (Route (a))
 
-`sfSatisfied`'s `.neg, .imp` clause records the numeric proxy `sf.label ≤ w'`. The "kept
-as-is — no reformulation, per the Preserved Assets table" directive this note used to state is
-now SUPERSEDED by task 574's Phase 5: `sfSatisfiedQ`/`sfAccessSatQ` (defined further below,
-after `IExpandedAccessConsistent`'s block) restate that proxy over a representative map `rep`
-(`rep sf.label ≤ rep w'` / `isAccessible edges (rep sf.label) (rep w')`), landed ADDITIVELY
-alongside the originals — neither `sfSatisfied` nor `sfAccessSat` is modified in place, and
-`grep -c IBranchSaturation Soundness.lean` stays `0` throughout (the spike's H2 evidence).
+`sfSatisfied`'s `.neg, .imp` clause originally recorded a numeric proxy `sf.label ≤ w'` for
+accessibility; that conjunct has since been DROPPED (it held only under descendant-directed
+label growth and is false under ancestor blocking, where the reuse witness carries a *smaller*
+label — see the definitions above). `sfAccessSat`/`IExpandedAccessConsistent`, defined below,
+carry the genuine content in strictly stronger form: `isAccessible edges sf.label w'` rather
+than a raw `Nat` comparison, needed to instantiate `truthLemma`'s F-imp case over
+`intAccessPreorder edges` (which requires genuine edge-reachability of the witness, not merely
+a numeric bound).
 
-This still leaves the "phantom worlds" gap this note originally flagged: the plain (non-Q)
-proxy is NOT strong enough to instantiate `truthLemma`'s F-imp case over `intAccessPreorder
-edges` (which needs genuine edge-reachability of the witness, not merely a numeric bound).
-`sfAccessSat`/`IExpandedAccessConsistent` remains the companion invariant threaded ALONGSIDE
-`sfSatisfied`/`IExpandedConsistent` for that upgrade. The D5 rationale (Phase 5) is that an
-ANCESTOR witness — reachable in the REVERSE direction from what these two demand — is made
-admissible not by editing these definitions in place, but by rep-identifying the blocked world
-with its blocking ancestor (`intBlockRep`) so the Q-restated clauses hold reflexively via
-`intAccessPreorderQ_le_of_rep_eq`. Both the fresh-world-creation site (`intFImpRule`'s new edge
-`(w', w)`, one-hop via `isAccessible_one_step`) and the Option-A dedup reuse site
-(`intFImpReuseWitnessAnc?_spec`'s `isAccessible` conjunct) already establish the underlying
-fact at construction time; this invariant (and its Q-restatement) only threads it forward. -/
+An ancestor witness `x` — reachable in the REVERSE direction from what `sfAccessSat`'s
+`.neg, .imp` clause demands (`l ≤ w'` shape) — is made admissible not by identifying `x` with
+the blocked world `l` under a representative map, but by recording the blocking event itself as
+an explicit loop-back edge `(x, l)` in an invariant-side augmented edge list (`augSets`,
+threaded through `intExpandBranches_openBranch_sat`'s induction), at the moment each block
+happens. `Sfor`-containment (`hcont : posFormulasAt bPers l ⊆ posFormulasAt bPers x`) together
+with ancestor persistence gives the converse containment, so `x` and `l` force the same positive
+formulas; `IForces` (`Semantics/Kripke.lean`) is defined over `[Preorder World]` with no
+antisymmetry requirement, so the resulting cycle in the enlarged accessibility relation is
+admissible. This is `GargGenoveseNegri2012`'s published countermodel construction
+`M ∪ C` with `C = {x ≤ y | Sfor(x) ⊆ Sfor(y)}` — cited as provenance only; the source is not
+readable in-repo and the design rests on the verified construction here, not on the paper text.
+Both the fresh-world-creation site (`intFImpRule`'s new edge `(w', w)`, one-hop via
+`isAccessible_one_step`) and the reuse-site discharge (which appends `(x, l)` to `augSets`)
+establish the underlying fact at construction time; this invariant only threads it forward. -/
 
 /-- The `.neg, .imp` edge-accessibility obligation: vacuously `True` for every other
 sign/formula pair (mirrors `sfSatisfied`'s shape, restricted to the one case that needs

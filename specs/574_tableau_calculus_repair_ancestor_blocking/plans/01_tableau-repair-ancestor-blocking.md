@@ -695,11 +695,67 @@ the plan specified the type signature and required lemmas, not a literal recursi
 
 ---
 
-### Phase 6: Re-close the reuse-site discharge; retire the temporary sorry [NOT STARTED]
+### Phase 6: Re-close the reuse-site discharge; retire the temporary sorry [BLOCKED]
 
 - **Goal:** Restate `intExpandBranches_openBranch_sat`'s conclusion over the Q-predicates, re-close
   its reuse-site discharge, and remove the Phase-4 temporary sorry — restoring the exact 6-entry
   sorry baseline.
+
+**BLOCKER (dispatch of this phase, working-tree changes reverted — file is back to the exact
+Phase 5 end state, 7 sorries, `lake build` green)**: attempting task 1 (restate the conclusion
+over `IBranchSaturationQ`/`IFimpAccessQ`) surfaces a gap in the Q-predicate shape Phase 5.3
+landed, not fixable by the "one-line substitution" this phase's tasks anticipated.
+
+**What was tried.** Changed the theorem's conclusion (and the inner `suffices key`'s conclusion)
+to `∃ edges, IBranchSaturationQ Atom b (intBlockRep b edges) ∧ IFimpAccessQ edges (intBlockRep b
+edges) b`, per task 1. `lake build` then reports (as expected) that `hIC_bPers :
+IExpandedConsistent bPers eH` (PLAIN) no longer has the type `IExpandedConsistentQ (intBlockRep
+bPers edgesH) bPers eH` that `IExpandedConsistentQ_sat` needs at the `none`-leaf
+(`Scheme.lean:3049-3052` in the current line numbering), and the reuse-site's temporary sorry
+(`Scheme.lean:3143`) is in the same bind: its stated goal type is unchanged (`IExpandedConsistent
+bPers newExp ∧ IExpandedAccessConsistent edgesH bPers newExp`, PLAIN) because `ih`'s hypothesis
+type (from the theorem's own `hAC`/`hACC` parameters, unaffected by a conclusion-only edit) stays
+plain throughout the induction — only `ih`'s *conclusion* becomes the Q form.
+
+**Root finding.** Closing either site requires a general lifting fact "`IExpandedConsistent b e →
+IExpandedConsistentQ (intBlockRep b edges) b e`" (or an equivalent direct derivation), and this is
+**false in general** as `sfSatisfiedQ`'s `.neg, .imp` field is currently stated
+(`Scheme.lean:1109-1112`, landed Phase 5.3): `∃ w', rep sf.label ≤ rep w' ∧ T(φ)@w' ∧ F(ψ)@w'`
+uses **literal `Nat.le` on representatives**, not the reachability-based `intAccessPreorderQ`
+order. Concrete counterexample pattern: let `sf.label = l'` be *unblocked* (`rep l' = l'`) with a
+plain witness `w'` (`l' ≤ w'`, `T(φ)@w'`, `F(ψ)@w'` — a genuine fact, e.g. `w'` was freshly
+created by `intFImpRule` for `l'`'s own obligation). Nothing prevents `w'` from *independently*
+carrying its own, unrelated `F(χ→ξ)@w'` entry (possible whenever `ψ` itself has implication
+shape, since `intFImpRule` plants `F(ψ)@w'` verbatim) that later gets ancestor-blocked to some
+`y < w'` via `intFImpReuseWitnessAnc?`/`intBlockRepStep` — at which point `rep w' = y`, and there
+is no general guarantee `rep l' ≤ y` (`y` was chosen to discharge `χ → ξ`, an obligation unrelated
+to `φ, ψ`, and carries no promised relationship to `l'`, `φ`, or `ψ`). This makes `rep`
+non-monotone in the sense the `.neg, .imp` field's raw `≤` needs, independent of any "does
+blocking change under further branch growth" concern (the counterexample is a single-snapshot
+phenomenon, so it applies equally at the `none` leaf, where `bPers`/`edgesH` are already final).
+
+A tree-structure argument (worlds' edge-ancestors of a common node are totally ordered under
+`isAccessible`, since `IEdges` records a unique-parent tree) shows an accessibility-based
+reformulation of the ordering conjunct (matching `IFimpAccessQ`'s shape, which already uses
+`isAccessible edges (rep w) (rep w')` rather than raw `≤`) resolves the *comparability* half of
+the problem, but not the *witness* half: the alternate world `y` on the shared root-path to `w'`
+is not guaranteed to itself carry `T(φ)@y`/`F(ψ)@y` (it was chosen for a different, unrelated
+signed formula). No witness substitution found in this dispatch closes the gap; a real fix likely
+needs either (a) `sat_fimp`/`sfSatisfiedQ`'s `.neg, .imp` case restated to route through
+`intAccessPreorderQ` **and** a strengthened invariant tying every plain witness's own blocking
+status back to the formula it was chosen for, or (b) an entirely different proof strategy for
+threading the saturation invariant through `intExpandBranches_openBranch_sat`'s induction. Both
+are design-level changes to Phase 5.3's landed `sfSatisfiedQ`/`IBranchSaturationQ` shape, which is
+outside this phase's task list and (per the plan's own D5 note) was only checked to "elaborate
+cleanly," not to be provable as the load-bearing inductive invariant this phase needs.
+
+**Recommendation**: `/revise` this plan's Phase 5.3/Phase 6 boundary — either strengthen
+`sfSatisfiedQ` (and re-verify Phase 5.3/5.4's now-affected lemmas) or redesign the invariant
+threaded through `intExpandBranches_openBranch_sat`'s induction before re-attempting Phase 6.
+The Phase-4 temporary sorry (`Scheme.lean:3143`, unchanged) remains the correct, tracked
+placeholder in the interim; `Soundness.lean` is unaffected throughout (0 sorry, 0
+`IBranchSaturation` references — confirmed after revert).
+
 - **Tasks:**
   - [ ] Change `intExpandBranches_openBranch_sat`'s conclusion (`Scheme.lean:2594-2595`) from
         `∃ edges, IBranchSaturation Atom b ∧ IFimpAccess edges b` to

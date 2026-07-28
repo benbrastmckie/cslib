@@ -19,9 +19,6 @@ for temporal logic. These are the foundational definitions used by all Chronicle
 * Ported from Cslib/Logics/Bimodal/Metalogic/Bundle/TemporalContent.lean
 -/
 
-set_option linter.style.emptyLine false
--- Structural: blank lines between declarations inside @[expose] public section
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic

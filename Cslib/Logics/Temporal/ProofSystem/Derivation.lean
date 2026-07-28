@@ -30,8 +30,6 @@ The derivation tree includes 6 inference rules:
 6. **weakening**: If `Γ ⊢[fc] φ` and `Γ ⊆ Δ` then `Δ ⊢[fc] φ`
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal

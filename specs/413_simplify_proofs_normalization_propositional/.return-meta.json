@@ -1,43 +1,21 @@
 {
-  "status": "research_complete",
-  "started_at": "2026-07-28T17:08:50Z",
-  "finished_at": "2026-07-28T17:45:00Z",
+  "status": "in_progress",
+  "started_at": "2026-07-28T18:20:45Z",
   "artifacts": [
-    "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",
-    "specs/413_simplify_proofs_normalization_propositional/verified-simplification.patch",
-    "specs/413_simplify_proofs_normalization_propositional/.orchestrator-handoff.json"
+    "specs/413_simplify_proofs_normalization_propositional/baseline.md"
   ],
-  "report_path": "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",
   "partial_progress": {
-    "stage": "done",
-    "details": "Full research complete. All 20 candidate sites located, root-caused, empirically simplified, and verified with a full green lake build. Working tree reverted; verified diff saved as a patch artifact."
+    "stage": "phase_1_complete",
+    "details": "Baseline captured: 20 residual sites, 8 files, full lake build green (3309 jobs, 1m15s), 5 pre-existing sorry warnings (report hypothesized 4; extra one is unrelated pre-existing sorry in Modal/Tableau/FrameSoundness.lean, non-blocking). Patch re-verified applicable.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 1,
+    "last_completed_phase": "Phase 1: Baseline capture and patch re-verification"
   },
-  "summary": "Task premise required a second reconciliation: zero listImp_*/bigconj_* simp-only sites exist under Cslib/Logics/Propositional/. All 20 such sites repo-wide (Foundations/, Modal/, Temporal/, Bimodal/, and one Propositional/Metalogic file) are redundant rfl-lemma rewrites that bare `exact` discharges by defeq. Verified by editing all 8 files and running a full green lake build (3309 jobs) plus clean lake lint. Net 62 lines removed. No new definitions, axioms, or sorries.",
-  "scope_change_recommended": true,
-  "requires_user_review": true,
-  "zero_debt": {
-    "sorries_introduced": 0,
-    "axioms_introduced": 0,
-    "new_declarations": 0
-  },
-  "verification": {
-    "full_lake_build": "green",
-    "lake_lint_changed_files": "clean",
-    "residual_target_sites": 0
-  },
-  "next_phase": "plan",
-  "blockers": [],
   "metadata": {
-    "session_id": "sess_1785258473_63f7b4_413",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1785262773_3b10d3",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "research",
-      "cslib-research-agent"
-    ],
-    "files_analyzed": 8,
-    "sites_verified": 20,
-    "lines_removable": 62
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
   }
 }

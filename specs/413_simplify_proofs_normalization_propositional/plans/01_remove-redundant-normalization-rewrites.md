@@ -1,7 +1,7 @@
 # Implementation Plan: Remove Redundant listImp/bigconj Normalization Rewrites
 
 - **Task**: 413 - simplify_proofs_normalization_propositional
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md`
@@ -132,7 +132,7 @@ verification builds serialize even when the edits do not.
 
 ---
 
-### Phase 1: Baseline capture and patch re-verification [NOT STARTED]
+### Phase 1: Baseline capture and patch re-verification [COMPLETED]
 
 **Goal**: Establish the pre-change ground truth — residual-site count, `sorry`/axiom baseline,
 and per-module build timings — so every later phase has something to compare against, and

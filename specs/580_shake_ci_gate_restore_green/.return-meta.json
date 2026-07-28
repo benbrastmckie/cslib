@@ -8,16 +8,18 @@
     {"type": "baseline", "path": "scripts/shake-residue-baseline.txt"},
     {"type": "script", "path": "scripts/pre-pr-check.sh"},
     {"type": "doc", "path": "scripts/README.md"},
+    {"type": "ci_workflow", "path": ".github/workflows/lean_action_ci.yml"},
     {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase1-handoff.md"},
-    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase2-handoff.md"}
+    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase2-handoff.md"},
+    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase3-handoff.md"}
   ],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Guard script + baseline (9 files, live-verified) + pre-pr-check.sh step 7 + README doc all written and verified (clean/regression/improvement/list/bad-flag paths all proven)",
+    "stage": "phase_3_complete",
+    "details": "lake shake CI step commented out with full audit-trail rationale block; YAML valid; diff confined to the step + comment block; upstream SHA confirmed unchanged (f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1)",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2,
-    "last_completed_phase": "Phase 2: Add the local shake-residue guard"
+    "phases_completed": 3,
+    "last_completed_phase": "Phase 3: Disable the lake shake CI step with inline alignment rationale"
   },
   "metadata": {
     "session_id": "sess_1785251101_8e14cc_580",

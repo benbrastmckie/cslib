@@ -248,55 +248,60 @@ new build warnings.
 - `scripts/README.md` - document the new script and baseline
 
 **Verification**:
-- `bash scripts/check-shake-residue.sh` exits 0 with an OK message on the current tree.
-- Baseline contains exactly 10 paths, matching the research report's IDENTICAL rows.
+- `bash scripts/check-shake-residue.sh` exits 0 with an OK message on the current tree. **Proven.**
+- Baseline contains exactly 9 paths (deviation from the plan's predicted 10, documented in Phase
+  1), all matching research report IDENTICAL rows. **Proven.**
 - Deleting a baseline line makes the guard exit 1 with a FAIL naming the unexpected file.
+  **Proven.**
 - Adding a phantom baseline line makes the guard exit 0 with an improvement/re-baseline note.
+  **Proven.**
 - `bash scripts/check-shake-residue.sh --list` and `--update` both behave as specified; an
-  unrecognized flag exits 2.
+  unrecognized flag exits 2. **Proven.**
 
 ---
 
-### Phase 3: Disable the `lake shake` CI step with inline alignment rationale [NOT STARTED]
+### Phase 3: Disable the `lake shake` CI step with inline alignment rationale [COMPLETED]
 
 **Goal**: Comment out the `lake shake` step in `.github/workflows/lean_action_ci.yml`, recording
 the full audit trail inline so a future reader (or a future sync) can tell exactly why it is off
 and what would re-enable it.
 
 **Tasks**:
-- [ ] Read `.github/workflows/lean_action_ci.yml` around the `"lake shake"` step (currently near
+- [x] Read `.github/workflows/lean_action_ci.yml` around the `"lake shake"` step (currently near
       lines 29-32) and check how upstream comments the same block
       (`git show 74600063621f66f0dbfbac31963cd1219e0e05ed -- .github/workflows/lean_action_ci.yml`
       or `git show upstream/main:.github/workflows/lean_action_ci.yml`). Match upstream's commenting
       shape where practical — the closer this hunk is to upstream's, the smaller the future sync
-      conflict.
-- [ ] Comment out the step (the `- name: "lake shake"` line, its `run:` block, and the
+      conflict. *(confirmed upstream/main resolves to f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1,
+      matching plan expectation; upstream comments each line with a leading `#`)*
+- [x] Comment out the step (the `- name: "lake shake"` line, its `run:` block, and the
       `lake shake --add-public --keep-implied --keep-prefix Cslib` invocation). Do not delete it —
       it must remain readable and trivially re-enableable.
-- [ ] Add an inline comment block immediately above the disabled step recording, at minimum:
-  - [ ] Audit date: `2026-07-28`.
-  - [ ] Upstream SHA compared against: `f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1`.
-  - [ ] The explicit statement that after fixing the two locally-modified files, every remaining
+- [x] Add an inline comment block immediately above the disabled step recording, at minimum:
+  - [x] Audit date: `2026-07-28`.
+  - [x] Upstream SHA compared against: `f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1`.
+  - [x] The explicit statement that after fixing the two locally-modified files, every remaining
         flagged file is **byte-identical to upstream** — this is upstream's own unresolved import
         debt, not this fork's.
-  - [ ] Upstream's own disabling commit `74600063621f66f0dbfbac31963cd1219e0e05ed`
+  - [x] Upstream's own disabling commit `74600063621f66f0dbfbac31963cd1219e0e05ed`
         ("ci: disable shake again (#397)"), i.e. upstream disabled this same check for this same
         reason; re-commenting here *reduces* this file's divergence from upstream rather than
         increasing it.
-  - [ ] Why selective exemption was rejected: shake's `-- shake: keep` / `keep-all` annotations
+  - [x] Why selective exemption was rejected: shake's `-- shake: keep` / `keep-all` annotations
         exist but require editing the flagged (pristine) file, and `keep-all` suppresses only
-        removal findings while 9 of the 10 residual files need an *addition*; module-scoping via
+        removal findings while most of the residual files need an *addition*; module-scoping via
         positional args cannot exclude them either, since several are import hubs.
-  - [ ] Pointer to `scripts/check-shake-residue.sh` + `scripts/shake-residue-baseline.txt` as the
+  - [x] Pointer to `scripts/check-shake-residue.sh` + `scripts/shake-residue-baseline.txt` as the
         local guard that still catches this fork's own new import debt, and a one-line note that it
         is deliberately not a CI step (it needs built `.olean`s, so it cannot join the Lean-free
         `lint-hygiene.yml`, and a new step here would add a sync-conflict hunk).
-  - [ ] No task-number references (R6) — cite the date, SHAs, and sibling filenames only.
-- [ ] Confirm the file is still valid YAML: `python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/lean_action_ci.yml'))"`
-      (or `yq . <file>` if available).
-- [ ] Confirm no other step was touched: `git diff .github/workflows/lean_action_ci.yml` must show
+  - [x] No task-number references (R6) — cite the date, SHAs, and sibling filenames only.
+- [x] Confirm the file is still valid YAML: `python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/lean_action_ci.yml'))"`
+      (or `yq . <file>` if available). *(confirmed VALID YAML)*
+- [x] Confirm no other step was touched: `git diff .github/workflows/lean_action_ci.yml` must show
       changes confined to the shake step and its new comment block — `TEST_ARGS`, `lean-action`,
       `mk_all`, `checkInitImports`, and the `lint-style-action` pin must be byte-unchanged.
+      *(confirmed: diff shows only the shake-step hunk)*
 
 **Timing**: 0.5 hours
 

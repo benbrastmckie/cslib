@@ -1036,49 +1036,88 @@ was always in its scope. The only surviving content is deletion plus docstring r
 
 ---
 
-### Phase 8: Conformance regeneration and full CI gate [NOT STARTED]
+### Phase 8: Conformance regeneration and full CI gate [COMPLETED]
 
 - **Goal:** Regenerate `CslibTests/TableauConformance.lean` from real `#eval` output and pass the
   complete CSLib CI pipeline.
 - **Tasks:**
-  - [ ] Re-run all 19 propositional rows via `#guard_msgs in #eval` and record the **actual**
+  - [x] Re-run all 19 propositional rows via `#guard_msgs in #eval` and record the **actual**
         verdicts. Compare each against the file's stated semantic expectation (14 CLOSED / 5 OPEN).
         *Prior evidence*: Phase 1 measured all 19 under V1/V2/V3 and **all matched**; Phases 6-7 are
         proof-side only and cannot move a verdict. A mismatch here therefore indicates something
-        unexpected happened — treat it as a finding, not noise.
-  - [ ] **Divergence handling (binding).** Any row whose actual verdict contradicts the formula's IPC
+        unexpected happened — treat it as a finding, not noise. **Confirmed by real re-execution**:
+        `lake build CslibTests.TableauConformance` was green *before* any Phase 8 edit, which is
+        itself a live re-run of all 19 `#guard_msgs in #eval` assertions (a wrong expected string
+        fails the build) — zero verdicts moved.
+  - [x] **Divergence handling (binding).** Any row whose actual verdict contradicts the formula's IPC
         validity is a **defect in this repair**, not a value to transcribe. Mark this phase
         `[BLOCKED]`, record the offending row(s) and Phase 1's prediction for them, and escalate. Do
-        **not** flip the expected string to match.
-  - [ ] Add **one new row** asserting the divergence witness `φ0` now terminates: a
+        **not** flip the expected string to match. **Not triggered** — no row's actual verdict
+        contradicted its semantic expectation.
+  - [x] Add **one new row** asserting the divergence witness `φ0` now terminates: a
         `#guard_msgs in #eval intVerdict (intuitionisticTableau φ0)` entry with the semantically
         correct verdict, plus a comment naming it as the regression guard for this repair (by
         describing the divergence, not by citing a task number). 19 → 20 propositional rows, 43 → 44
-        total.
-  - [ ] Rewrite the file's "Corpus provenance" docstring (`:59-69`): the "all 43 rows are green /
+        total. **Landed** with atoms `id_`/`ie`/`if_`/`iu1`/`iv1`/`iu2`/`iv2`; `φ0` is not IPC-valid
+        (classically falsified by `a=⊤,b=⊥,d=⊤,e=⊥,u1=⊤,v1=⊥,u2=⊤,v2=⊥`), so the correct — and
+        **actually observed** — verdict is `OPEN`. `lake build` confirmed the row green on first
+        attempt (5.3s), i.e. real execution matched the independent semantic derivation exactly; no
+        divergence-handling branch needed.
+  - [x] Rewrite the file's "Corpus provenance" docstring (`:59-69`): the "all 43 rows are green /
         pure regression guard" paragraph and the "43 rows (24 temporal, 19 propositional)" count both
-        change.
-  - [ ] Leave the 24 temporal rows (`:94-220`) and their docstrings **untouched** — a different
-        calculus.
-  - [ ] Run the CSLib CI pipeline in order (`.claude/rules/cslib.md`):
+        change. **Done** — rewritten to 44 rows (24 temporal, 20 propositional) with a new paragraph
+        naming `φ0`'s row as a termination regression guard, no task-number references.
+  - [x] Leave the 24 temporal rows (`:94-220`) and their docstrings **untouched** — a different
+        calculus. **Confirmed untouched** (`git diff` on this phase's commit shows only the
+        Propositional Corpus section and the file-level docstring changed).
+  - [x] Run the CSLib CI pipeline in order (`.claude/rules/cslib.md`):
         `lake exe cache get` → `lake build` → `lake exe checkInitImports` → `lake lint` →
         `lake exe lint-style` → `lake test` →
         `lake shake --add-public --keep-implied --keep-prefix`.
         **`shake` is its own objective** — Phase 7 removed ~480 lines including two public
         declarations, so an import-minimisation shift is plausible (R3). Run with `--fix`, review the
-        emitted diff, and commit it separately.
-  - [ ] Delete the Phase 1 scratch vehicles (`scratch/DivergenceProbe.lean` and the four companion
+        emitted diff, and commit it separately. **All green** except a documented pre-existing,
+        out-of-scope exception: `lake build` (3309/3309), `checkInitImports` (exit 0),
+        `lake exe lint-style` (clean), `lake test` (9374/9374, includes 20-row propositional +
+        24-row temporal corpus), `mk_all --module` (no update necessary — no new files). `lake lint`
+        exits 1 and `lake shake` (no `--fix` needed) reports diffs, but **both are entirely
+        pre-existing, repo-wide debt in files this task never touches** — 58 `unusedArguments`
+        findings across `Bimodal/`, `LTL/`, `Modal/Tableau/FrameSoundness.lean`,
+        `Temporal/Metalogic/`, none in `Propositional/Tableau/` or `CslibTests/`; and 9 shake
+        import-diffs across unrelated files (`TimeM.lean`, `MultiTape/Deterministic.lean`,
+        `StackTape.lean`, `Relation/{Defs,Confluence}.lean`, `Free.lean`, `CCS/Basic.lean`,
+        `CombinatoryLogic/Defs.lean`, `SingleTape/NonDeterministic.lean`), none in this task's file
+        set — confirming R3 did **not** materialize (Phase 7's deletion caused zero import-ripple in
+        the tableau files). This exact `unusedArguments` category is independently attested as
+        known, pre-existing, repo-wide debt by the (separate, already-archived) repo-wide lint-hygiene
+        task, whose own "Definition of Done" scoped `lake build --wfail --iofail` to specific files
+        and explicitly deferred an "UNBOUNDED" suppression-audit workstream — this task's `lake lint`
+        state is consistent with that already-known baseline, not a regression this task introduced.
+        Fixing either would require editing files far outside this task's declared scope
+        (`Cslib/Logics/Propositional/Tableau/Intuitionistic/{Expansion,Scheme,Soundness}.lean` and
+        `CslibTests/TableauConformance.lean`) and is out of scope per the plan's Non-Goals.
+  - [x] Delete the Phase 1 scratch vehicles (`scratch/DivergenceProbe.lean` and the four companion
         probe files) after confirming their findings are recorded in
         `handoffs/01_variant-selection.md`. **Retain** `scratch/phase6-prototype.patch`,
         `scratch/Scheme.lean.prototype`, and `scratch/Scheme.lean.baseline` until the task is
-        archived — they are the evidence base for Phase 6.
-  - [ ] Write `specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_tableau-repair-summary.md`,
-        including the supersession accounting (Phase 5's ~480 lines landed then deleted) stated
-        honestly rather than elided.
-  - [ ] **Final gates**: repo-wide bare-sorry count = 6 and identical to the baseline table;
+        archived — they are the evidence base for Phase 6. **Done** — deleted `DivergenceProbe.lean`,
+        `ProbeControl.lean`, `ProbeHighFuel.lean`, `ProbeV3.lean`, `ProbeConformance.lean`, and
+        `ProbeSmoke.lean` (five companions, not four — the handoff's own artifact list records a
+        fifth, `ProbeSmoke.lean`, added mid-phase for an isolated re-confirmation; deleted for
+        consistency with the rest). The three prototype/baseline files were retained unedited.
+  - [x] Write `specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md`
+        (dispatch-specified filename; supersedes this bullet's originally-named
+        `01_tableau-repair-summary.md`), including the supersession accounting (Phase 5's ~480 lines
+        landed then deleted) stated honestly rather than elided.
+  - [x] **Final gates**: repo-wide bare-sorry count = 6 and identical to the baseline table;
         `lean_verify Cslib.Logic.PL.intExpandBranches_closed_unsat` axiom profile =
         `{propext, Classical.choice, Quot.sound}`; `git diff --stat` touches no file outside
         `Cslib/Logics/Propositional/Tableau/`, `CslibTests/TableauConformance.lean`, and `specs/`.
+        **All confirmed**: sorry count 6/6 matching the baseline declaration set exactly;
+        `lean_verify` with `scan_source: false` returned exactly
+        `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}`; `git diff --stat`
+        since the Phase 7 completion commit touches only `CslibTests/TableauConformance.lean` plus
+        `specs/574_tableau_calculus_repair_ancestor_blocking/**`.
 - **Timing:** 5-8 hours
 - **Depends on:** 2, 7
 - **Verification Tier:** full — the complete repository gate set
@@ -1097,33 +1136,53 @@ was always in its scope. The only surviving content is deletion plus docstring r
 - [x] Selected variant's max label **saturates** by `fuel = 260` on the divergence witness (V1: 21).
 - [x] All 19 propositional conformance formulas match their semantic expectations under the selected
       variant (Phase 1 pre-run).
-- [ ] `lean_verify Cslib.Logic.PL.intExpandBranches_closed_unsat` →
+- [x] `lean_verify Cslib.Logic.PL.intExpandBranches_closed_unsat` →
       `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}` (**acceptance gate**;
       re-run at every remaining phase boundary, with `scan_source: false` plus a manual
-      `#print axioms` cross-check).
-- [ ] `lean_verify Cslib.Logic.PL.minimalTableau_sound` and
-      `Cslib.Logic.PL.intuitionisticTableau_sound` sorry-free.
-- [ ] `grep -c "^\s*sorry\s*$" Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` = 0
-      at **every** phase boundary.
-- [ ] `grep -c "IBranchSaturation" Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean`
-      = 0.
-- [ ] `grep -rn "^\s*sorry\s*$" Cslib/ --include=*.lean | wc -l` = **6** from the end of Phase 6.3
-      onward, matching the baseline table declaration-for-declaration.
-- [ ] The reuse-site discharge is **non-vacuous**: swapping `houtPhi` ↔ `hFpsi` produces an
-      application type mismatch.
-- [ ] The fuel-0 `sorry` and its 26-line refutation note are byte-identical across Phases 6-8.
-- [ ] `intExpandBranches_openBranch_initial_mem` (and its own `suffices key`) untouched.
-- [ ] Zero orphan references to the deleted quotient stack after Phase 7.
-- [ ] `lake build` green.
-- [ ] `lake exe checkInitImports` green.
-- [ ] `lake lint` green.
-- [ ] `lake exe lint-style` green.
-- [ ] `lake test` green (includes `CslibTests/TableauConformance.lean`).
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` green.
-- [ ] All 24 temporal conformance rows unchanged and green.
-- [ ] No new `axiom` declarations: `git diff | grep "^+axiom"` empty.
-- [ ] No `def X := True` / `theorem X := trivial` vacuous placeholders introduced.
-- [ ] No task-number references in any `Cslib/` or `CslibTests/` file introduced by this task.
+      `#print axioms` cross-check). **Confirmed at Phase 8.**
+- [x] `lean_verify Cslib.Logic.PL.minimalTableau_sound` and
+      `Cslib.Logic.PL.intuitionisticTableau_sound` sorry-free. **Confirmed via `lake build` (full,
+      3309/3309, zero unexpected sorry warnings) at Phase 8.**
+- [x] `grep -c "^\s*sorry\s*$" Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` = 0
+      at **every** phase boundary. **Confirmed 0 at Phase 8.**
+- [x] `grep -c "IBranchSaturation" Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean`
+      = 0. **Confirmed 0 at Phase 8.**
+- [x] `grep -rn "^\s*sorry\s*$" Cslib/ --include=*.lean | wc -l` = **6** from the end of Phase 6.3
+      onward, matching the baseline table declaration-for-declaration. **Confirmed 6/6 at Phase 8.**
+- [x] The reuse-site discharge is **non-vacuous**: swapping `houtPhi` ↔ `hFpsi` produces an
+      application type mismatch. **Confirmed at Phase 6.3** (non-vacuity check landed then; not
+      re-tested at Phase 8 since `Scheme.lean`'s reuse-site region is untouched by Phase 8).
+- [x] The fuel-0 `sorry` and its 26-line refutation note are byte-identical across Phases 6-8.
+      **Confirmed** — Phase 8 touches only `CslibTests/TableauConformance.lean`; `Scheme.lean` is
+      untouched since Phase 7.2.
+- [x] `intExpandBranches_openBranch_initial_mem` (and its own `suffices key`) untouched.
+      **Confirmed** — same reasoning, `Scheme.lean` untouched since Phase 7.2.
+- [x] Zero orphan references to the deleted quotient stack after Phase 7. **Confirmed at Phase 7.2**;
+      not re-swept at Phase 8 (no `Scheme.lean` edits in this phase).
+- [x] `lake build` green. **3309/3309.**
+- [x] `lake exe checkInitImports` green. **Exit 0.**
+- [~] `lake lint` — **not repo-wide green**; exits 1 on 58 pre-existing `unusedArguments` findings in
+      `Bimodal/`, `LTL/`, `Modal/Tableau/FrameSoundness.lean`, `Temporal/Metalogic/` — files this task
+      never touches, zero findings in `Propositional/Tableau/` or `CslibTests/`. Recorded honestly
+      rather than claimed green; see the Phase 8 task-list entry for the full accounting and the
+      cross-reference to the separate, already-archived repo-wide lint-hygiene task that independently
+      attests this category as known pre-existing debt.
+- [x] `lake exe lint-style` green. **Clean.**
+- [x] `lake test` green (includes `CslibTests/TableauConformance.lean`). **9374/9374.**
+- [~] `lake shake --add-public --keep-implied --keep-prefix` — **not repo-wide clean**; reports 9
+      import diffs in files this task never touches (`TimeM.lean`, `MultiTape/Deterministic.lean`,
+      `StackTape.lean`, `Relation/{Defs,Confluence}.lean`, `Free.lean`, `CCS/Basic.lean`,
+      `CombinatoryLogic/Defs.lean`, `SingleTape/NonDeterministic.lean`); **zero diffs in this task's
+      file set**, confirming Risk R3 (an import-minimisation shift from Phase 7's deletion) did not
+      materialize.
+- [x] All 24 temporal conformance rows unchanged and green. **Confirmed** — only the Propositional
+      Corpus section and file-level docstring changed.
+- [x] No new `axiom` declarations: `git diff | grep "^+axiom"` empty. **Confirmed.**
+- [x] No `def X := True` / `theorem X := trivial` vacuous placeholders introduced. **Confirmed —
+      Phase 8 added no definitions beyond seven trivial atom constants.**
+- [x] No task-number references in any `Cslib/` or `CslibTests/` file introduced by this task.
+      **Confirmed by construction** — the new docstring/comment prose cites only declaration names
+      and durable descriptions.
 
 ## Artifacts & Outputs
 
@@ -1137,9 +1196,9 @@ was always in its scope. The only surviving content is deletion plus docstring r
 - `specs/574_tableau_calculus_repair_ancestor_blocking/scratch/phase6-prototype.patch`,
   `scratch/Scheme.lean.prototype`, `scratch/Scheme.lean.baseline` (Phase 6 evidence; retained until
   archival)
-- `specs/574_tableau_calculus_repair_ancestor_blocking/scratch/DivergenceProbe.lean` + four probe
+- `specs/574_tableau_calculus_repair_ancestor_blocking/scratch/DivergenceProbe.lean` + five probe
   companions (Phase 1; deleted in Phase 8)
-- `specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_tableau-repair-summary.md`
+- `specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md`
   (Phase 8)
 - Modified: `Cslib/Logics/Propositional/Tableau/Intuitionistic/{Expansion,Scheme,Soundness}.lean`
 - Modified: `CslibTests/TableauConformance.lean`

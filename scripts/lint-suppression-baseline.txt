@@ -7,8 +7,6 @@
 #
 # Format: <count> <path>
 1 Cslib/Computability/Automata/DA/Conversions.lean
-2 Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean
-2 Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Fsub/Opening.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Fsub/Reduction.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Stlc/Basic.lean
@@ -23,8 +21,6 @@
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/MultiApp.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/StandardReduction.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/StrongNorm.lean
-2 Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean
-2 Cslib/Logics/Bimodal/Metalogic/Bundle/TemporalCoherence.lean
 2 Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 1 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean
 6 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
@@ -32,7 +28,6 @@
 1 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/Closure.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/ClosureMCS.lean
-2 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/Filtration.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/FMP.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/TruthPreservation.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/ProofExtraction.lean
@@ -45,9 +40,7 @@
 1 Cslib/Logics/Bimodal/Metalogic/Separation/NegationEquiv.lean
 2 Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean
 1 Cslib/Logics/Bimodal/ProofSystem/Axioms.lean
-2 Cslib/Logics/Bimodal/ProofSystem/Substitution.lean
 1 Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean
-2 Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean
 1 Cslib/Logics/Temporal/Metalogic/MetricCompleteness.lean
 1 Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean
 1 Cslib/Logics/Temporal/Metalogic/TemporalContent.lean

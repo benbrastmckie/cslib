@@ -1,21 +1,52 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-28T18:20:45Z",
+  "completed_at": "2026-07-28T18:32:00Z",
   "artifacts": [
-    "specs/413_simplify_proofs_normalization_propositional/baseline.md"
+    "specs/413_simplify_proofs_normalization_propositional/baseline.md",
+    "specs/413_simplify_proofs_normalization_propositional/plans/01_remove-redundant-normalization-rewrites.md",
+    "specs/413_simplify_proofs_normalization_propositional/summaries/01_remove-redundant-normalization-rewrites-summary.md"
   ],
-  "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Baseline captured: 20 residual sites, 8 files, full lake build green (3309 jobs, 1m15s), 5 pre-existing sorry warnings (report hypothesized 4; extra one is unrelated pre-existing sorry in Modal/Tableau/FrameSoundness.lean, non-blocking). Patch re-verified applicable.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 1,
-    "last_completed_phase": "Phase 1: Baseline capture and patch re-verification"
+  "summary": "Removed all 20 redundant `simp only [listImp_*|bigconj_*]` rewrite invocations (plus 19 accompanying `unfold ListDeriv` lines) across 8 files repo-wide, replacing each with the bare `exact` that already discharges the goal by defeq. Scope was corrected from the original 'Propositional/-only' framing to repo-wide (Foundations, Modal, Temporal, Bimodal, plus one Propositional/Metalogic file), matching the research report's verified finding. Added four one-line defeq-reliance doc comments to the four per-logic derivTreeToList* bridge lemmas. All 7 plan phases completed with no exclusions, no reverts, and no scope narrowing.",
+  "modified_files": [
+    "Cslib/Foundations/Logic/Metalogic/GenericMCS.lean",
+    "Cslib/Foundations/Logic/Metalogic/ListDeduction.lean",
+    "Cslib/Foundations/Logic/Metalogic/MCSProperties.lean",
+    "Cslib/Foundations/Logic/Theorems/BigConj.lean",
+    "Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean",
+    "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean",
+    "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean",
+    "specs/state.json",
+    "specs/TODO.md"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 5,
+    "sorry_count_note": "Repo-wide baseline unchanged from Phase 1 observed baseline (5 pre-existing warnings, 4 files, none introduced or discharged by this task). Zero sorries in any of the 8 files this task modified.",
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_steps": {
+      "cache_get": "already warm",
+      "lake_build": "green, 3309 jobs",
+      "checkInitImports": "pass, no output",
+      "lake_lint": "pass, no output attributable to the 8 changed files",
+      "lint_style": "pass, no output",
+      "lake_test": "green, 9374 jobs",
+      "lake_shake": "no import changes proposed for any of the 8 changed files"
+    },
+    "residual_site_count": 0,
+    "final_diffstat": "8 files changed, 35 insertions(+), 74 deletions(-)"
   },
   "metadata": {
     "session_id": "sess_1785262773_3b10d3",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed",
+    "phases_completed": 7,
+    "phases_total": 7
   }
 }

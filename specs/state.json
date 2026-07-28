@@ -671,11 +671,11 @@
     {
       "project_number": 413,
       "project_name": "simplify_proofs_normalization_propositional",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
-      "description": "Simplify verbose Propositional/ proofs (manual simp only [listImp_*, bigconj_*] lists and long tactic chains) using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in the syntax files). RECONCILED: the original premise cited task-268 'co-tags' as the enabler, but task 268 was abandoned - re-scoped to use the normalization lemmas that actually exist, replacing explicit rewrite lists with simp/grind where they are now redundant. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.",
+      "description": "Simplify verbose proofs using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in Foundations/Logic/Theorems/BigConj.lean) by deleting redundant simp only [listImp_*|bigconj_*] rewrites and unfold ListDeriv calls that a bare exact already discharges by defeq. RECONCILED (second reconciliation): a repo-wide grep found zero such sites under Propositional/ specifically; all 20 sites (8 files) live in Foundations/, Modal/, Temporal/, and Bimodal/, plus one file under Propositional/Metalogic/. Scope corrected from Propositional/-only to repo-wide. Completed: all 20 sites removed, full lake build green (3309 jobs), zero sorry/axiom regressions, CSLib 7-step CI green.",
       "depends_on": [
         317,
         370,
@@ -687,8 +687,8 @@
         375
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-28T17:59:19Z",
-      "session_id": "sess_1785261185_12b8ff_413",
+      "last_updated": "2026-07-28T18:20:02Z",
+      "session_id": "sess_1785262773_3b10d3",
       "artifacts": [
         {
           "path": "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",

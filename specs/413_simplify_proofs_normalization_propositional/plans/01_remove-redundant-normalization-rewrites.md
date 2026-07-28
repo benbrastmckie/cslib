@@ -1,7 +1,7 @@
 # Implementation Plan: Remove Redundant listImp/bigconj Normalization Rewrites
 
 - **Task**: 413 - simplify_proofs_normalization_propositional
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md`
@@ -441,7 +441,39 @@ revert count is a valid outcome, not a failure — it is recorded as Reasoned Ex
 
 ---
 
-### Phase 7: Full CI pipeline and scope reconciliation [NOT STARTED]
+### Phase 7: Full CI pipeline and scope reconciliation [COMPLETED]
+
+**CI pipeline results** (all six steps, in order):
+- `lake build`: green, 3309 jobs, same 5-warning `sorry` set as the Phase 1 baseline.
+- `lake exe checkInitImports`: no output (pass).
+- `lake lint`: 361 lines of pre-existing output, none attributable to any of the 8 changed
+  files (confirmed by grep).
+- `lake exe lint-style`: no output (pass).
+- `lake test`: all 9374 jobs built/replayed successfully; same pre-existing sorry warnings
+  plus one unrelated pre-existing `CslibTests/FreeMonad.lean` privacy-option warning.
+- `lake shake --add-public --keep-implied --keep-prefix`: proposes changes for 8 unrelated
+  files (`TimeM.lean`, `Deterministic.lean`, `StackTape.lean`, `Defs.lean`,
+  `NonDeterministic.lean`, `Confluence.lean`, `Free.lean`, `Basic.lean`,
+  `CombinatoryLogic/Defs.lean`) — none of the 8 files this task touched. Confirms the
+  `listImp` import is still needed (the `ListDeriv` statement itself uses it).
+
+**Residual-site count**: `grep -rn "simp only \[.*\(listImp\|bigconj\|negBigconj\)" Cslib/ | wc -l`
+-> **0**. No Reasoned Exclusions were recorded in Phase 6, so this is a clean zero, not a
+"zero modulo exclusions."
+
+**Task description reconciliation**: `specs/state.json` task 413's `description` field
+updated to state the corrected repo-wide scope (Foundations/Modal/Temporal/Bimodal plus
+one Propositional/Metalogic file), replacing the original `Propositional/`-only framing.
+`bash .claude/scripts/generate-todo.sh` run to regenerate `TODO.md`.
+
+**Final diffstat** (`git diff --stat` from the pre-task commit to the Phase 6 commit,
+`Cslib/` only): **8 files changed, 35 insertions(+), 74 deletions(-)** — net 39 lines
+removed. This differs from the report's predicted 8 files / 10 insertions / 72 deletions
+(62 net removed): this plan's Phase 6 added 4 one-line-does-not-mean-literal defeq-reliance
+doc comments (7 lines each, including blank-line spacing) across the four bridge files that
+the report's raw verified patch did not include, accounting for the extra 25 insertions.
+The file count (8) and the core deletion shape match the report's verified patch exactly;
+the insertion delta is the intentional documentation this plan's Phase 6 required.
 
 **Goal**: Run the complete CSLib CI order, confirm zero residual sites, and update the task
 description so the repo-wide scope is explicit rather than silently expanded.

@@ -16,9 +16,6 @@ class. Proves that all TM axioms remain valid after temporal swap, and that deri
 implies both local validity and swap validity.
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.SoundnessLemmas
@@ -101,7 +98,8 @@ theorem swap_axiom_tl_valid (φ : Formula Atom) :
   have h_past : ∀ r, r < t → truthAt M Omega τ r φ.swapTemporal := by
     by_contra h_not; push Not at h_not
     obtain ⟨r, hrt, h_neg⟩ := h_not
-    exact h_always fun _ h_inner => h_inner (fun _ h_H => h_H ⟨r, hrt, h_neg, fun _ _ _ hf => absurd hf not_false⟩)
+    exact h_always fun _ h_inner => h_inner (fun _ h_H => h_H ⟨r, hrt, h_neg, fun _ _ _ hf => absurd
+        hf not_false⟩)
   apply h_neg_Gφ_s
   intro ⟨u, hus, h_neg_φ_u, _⟩
   rcases lt_trichotomy u t with h_lt | h_eq | h_gt
@@ -134,7 +132,8 @@ theorem swap_axiom_mf_valid (φ : Formula Atom) :
   unfold Formula.swapTemporal truthAt
   intro h_box_swap σ h_σ_mem ⟨s, hst, h_neg_φ_s, _⟩
   have h_at_shifted := h_box_swap (WorldHistory.timeShift σ (s - t)) (h_sc σ h_σ_mem (s - t))
-  exact h_neg_φ_s ((TimeShift.time_shift_preserves_truth M Omega h_sc σ t s φ.swapTemporal).mp h_at_shifted)
+  exact h_neg_φ_s ((TimeShift.time_shift_preserves_truth M Omega h_sc σ t s φ.swapTemporal).mp
+      h_at_shifted)
 
 /-! ## Rule Preservation -/
 
@@ -326,13 +325,15 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     simp only [Formula.swapTemporal, truthAt]
     intro ⟨s, hst, h_ψs, h_guard⟩
     refine ⟨s, hst, h_ψs, fun r hsr hrt h_imp => ?_⟩
-    exact h_imp (h_guard r hsr hrt) ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr hrt)⟩
+    exact h_imp (h_guard r hsr hrt) ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr
+        hrt)⟩
   | self_accum_since φ ψ =>
     intro ℱ M Omega _h_sc τ _h_mem t
     simp only [Formula.swapTemporal, truthAt]
     intro ⟨s, hts, h_ψs, h_guard⟩
     refine ⟨s, hts, h_ψs, fun r htr hrs h_imp => ?_⟩
-    exact h_imp (h_guard r htr hrs) ⟨s, hrs, h_ψs, fun q hrq hqs => h_guard q (lt_trans htr hrq) hqs⟩
+    exact h_imp (h_guard r htr hrs) ⟨s, hrs, h_ψs, fun q hrq hqs => h_guard q (lt_trans htr hrq)
+        hqs⟩
   | absorb_until φ ψ =>
     intro ℱ M Omega _h_sc τ _h_mem t
     simp only [Formula.swapTemporal, truthAt]
@@ -445,14 +446,16 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
     · -- s1 < s2: P(P(φ') ∧ ψ')
       intro _ _
-      exact ⟨s2, hs2t, fun h_imp => h_imp ⟨s1, h_lt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
+      exact ⟨s2, hs2t, fun h_imp => h_imp ⟨s1, h_lt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩
+          h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
     · -- s1 = s2: P(φ' ∧ ψ')
       subst h_eq
       intro h_neg_first; exfalso; apply h_neg_first
       exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
     · -- s2 < s1: P(φ' ∧ P(ψ'))
       intro _ h_neg_second; exfalso; apply h_neg_second
-      exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 ⟨s2, h_gt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
+      exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 ⟨s2, h_gt, h_ψs2, fun _ _ _ hf => absurd hf
+          not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
   | temp_linearity_past φ ψ =>
     -- swap of past linearity is future linearity with swapped subformulas
     intro ℱ M Omega _h_sc τ _h_mem t
@@ -467,14 +470,16 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
     · -- s1 < s2: F(φ' ∧ F(ψ'))
       intro _ h_neg_second; exfalso; apply h_neg_second
-      exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 ⟨s2, h_lt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
+      exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 ⟨s2, h_lt, h_ψs2, fun _ _ _ hf => absurd hf
+          not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
     · -- s1 = s2: F(φ' ∧ ψ')
       subst h_eq
       intro h_neg_first; exfalso; apply h_neg_first
       exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
     · -- s2 < s1: F(F(φ') ∧ ψ')
       intro _ _
-      exact ⟨s2, hts2, fun h_imp => h_imp ⟨s1, h_gt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
+      exact ⟨s2, hts2, fun h_imp => h_imp ⟨s1, h_gt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩
+          h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   | F_until_equiv φ => exact swap_axiom_F_until_equiv_valid φ
   | P_since_equiv φ => exact swap_axiom_P_since_equiv_valid φ
   | modal_future ψ => exact swap_axiom_mf_valid ψ
@@ -509,7 +514,8 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     apply h_neg
     refine ⟨u - (t - r), sub_lt_self u (sub_pos.mpr hrt), fun h => h, fun c hrc hcu => ?_⟩
     have h1 : r < c + (t - u) := by
-      conv_lhs => rw [show r = u - (t - r) + (t - u) from by rw [sub_add_sub_cancel', sub_sub_cancel]]
+      conv_lhs => rw [show r = u - (t - r) + (t - u) from by rw [sub_add_sub_cancel',
+          sub_sub_cancel]]
       exact add_lt_add_left hrc (t - u)
     have h2 : c + (t - u) < t := by
       conv_rhs => rw [show t = u + (t - u) from by rw [add_comm, sub_add_cancel]]
@@ -522,7 +528,8 @@ theorem axiom_swap_valid (φ : Formula Atom) (h : Axiom φ) [DenselyOrdered D] [
     apply h_neg
     refine ⟨u - (t - r), sub_lt_self u (sub_pos.mpr hrt), fun h => h, fun c hrc hcu => ?_⟩
     have h1 : r < c + (t - u) := by
-      conv_lhs => rw [show r = u - (t - r) + (t - u) from by rw [sub_add_sub_cancel', sub_sub_cancel]]
+      conv_lhs => rw [show r = u - (t - r) + (t - u) from by rw [sub_add_sub_cancel',
+          sub_sub_cancel]]
       exact add_lt_add_left hrc (t - u)
     have h2 : c + (t - u) < t := by
       conv_rhs => rw [show t = u + (t - u) from by rw [add_comm, sub_add_cancel]]
@@ -664,14 +671,16 @@ theorem axiom_temp_linearity_valid (φ ψ : Formula Atom) :
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
   · -- s1 < s2: F(φ ∧ F(ψ))
     intro _ h_neg_second; exfalso; apply h_neg_second
-    exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 ⟨s2, h_lt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
+    exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 ⟨s2, h_lt, h_ψs2, fun _ _ _ hf => absurd hf
+        not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
   · -- s1 = s2: F(φ ∧ ψ)
     subst h_eq
     intro h_neg_first; exfalso; apply h_neg_first
     exact ⟨s1, hts1, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   · -- s2 < s1: F(F(φ) ∧ ψ)
     intro _ _
-    exact ⟨s2, hts2, fun h_imp => h_imp ⟨s1, h_gt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
+    exact ⟨s2, hts2, fun h_imp => h_imp ⟨s1, h_gt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩
+        h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
 
 /-- Past temporal linearity axiom is locally valid. -/
 theorem axiom_temp_linearity_past_valid (φ ψ : Formula Atom) :
@@ -693,14 +702,16 @@ theorem axiom_temp_linearity_past_valid (φ ψ : Formula Atom) :
   rcases lt_trichotomy s1 s2 with h_lt | h_eq | h_gt
   · -- s1 < s2: P(P(φ) ∧ ψ)
     intro _ _
-    exact ⟨s2, hs2t, fun h_imp => h_imp ⟨s1, h_lt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩ h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
+    exact ⟨s2, hs2t, fun h_imp => h_imp ⟨s1, h_lt, h_φs1, fun _ _ _ hf => absurd hf not_false⟩
+        h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   · -- s1 = s2: P(φ ∧ ψ)
     subst h_eq
     intro h_neg_first; exfalso; apply h_neg_first
     exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 h_ψs2, fun _ _ _ hf => absurd hf not_false⟩
   · -- s1 > s2: P(φ ∧ P(ψ))
     intro _ h_neg_second; exfalso; apply h_neg_second
-    exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 ⟨s2, h_gt, h_ψs2, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
+    exact ⟨s1, hs1t, fun h_imp => h_imp h_φs1 ⟨s2, h_gt, h_ψs2, fun _ _ _ hf => absurd hf
+        not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
 
 /-- F-Until equivalence axiom validity (BX12). -/
 theorem axiom_F_until_equiv_valid (φ : Formula Atom) :
@@ -728,7 +739,8 @@ theorem axiom_density_valid [DenselyOrdered D] (φ : Formula Atom) :
   intro h_GG ⟨s, hts, h_neg_φ_s, _h_guard⟩
   apply h_GG
   obtain ⟨r, htr, hrs⟩ := exists_between hts
-  exact ⟨r, htr, fun h_Gφ_r => h_Gφ_r ⟨s, hrs, h_neg_φ_s, fun _ _ _ hf => absurd hf not_false⟩, fun _ _ _ hf => absurd hf not_false⟩
+  exact ⟨r, htr, fun h_Gφ_r => h_Gφ_r ⟨s, hrs, h_neg_φ_s, fun _ _ _ hf => absurd hf not_false⟩, fun
+      _ _ _ hf => absurd hf not_false⟩
 
 /-- Modal-Future axiom is locally valid. -/
 theorem axiom_modal_future_valid (φ : Formula Atom) :
@@ -847,13 +859,15 @@ theorem axiom_locally_valid [DenselyOrdered D] [Nontrivial D] {φ : Formula Atom
     simp only [truthAt]
     intro ⟨s, hts, h_ψs, h_guard⟩
     refine ⟨s, hts, h_ψs, fun r htr hrs h_imp => ?_⟩
-    exact h_imp (h_guard r htr hrs) ⟨s, hrs, h_ψs, fun q hrq hqs => h_guard q (lt_trans htr hrq) hqs⟩
+    exact h_imp (h_guard r htr hrs) ⟨s, hrs, h_ψs, fun q hrq hqs => h_guard q (lt_trans htr hrq)
+        hqs⟩
   | self_accum_since φ ψ =>
     intro ℱ M Omega _h_sc τ _h_mem t
     simp only [truthAt]
     intro ⟨s, hst, h_ψs, h_guard⟩
     refine ⟨s, hst, h_ψs, fun r hsr hrt h_imp => ?_⟩
-    exact h_imp (h_guard r hsr hrt) ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr hrt)⟩
+    exact h_imp (h_guard r hsr hrt) ⟨s, hsr, h_ψs, fun q hsq hqr => h_guard q hsq (lt_trans hqr
+        hrt)⟩
   | absorb_until φ ψ =>
     intro ℱ M Omega _h_sc τ _h_mem t
     simp only [truthAt]
@@ -985,7 +999,8 @@ theorem axiom_locally_valid [DenselyOrdered D] [Nontrivial D] {φ : Formula Atom
       conv_lhs => rw [(sub_sub_cancel u t).symm]
       exact sub_lt_sub_right huc _
     have h2 : c - (u - t) < s := by
-      conv_rhs => rw [show s = u + (s - t) - (u - t) from by rw [add_sub_sub_cancel, sub_add_cancel]]
+      conv_rhs => rw [show s = u + (s - t) - (u - t) from by rw [add_sub_sub_cancel,
+          sub_add_cancel]]
       exact sub_lt_sub_right hcs _
     exact h_guard (c - (u - t)) h1 h2
   | discrete_propagate_bwd =>
@@ -998,7 +1013,8 @@ theorem axiom_locally_valid [DenselyOrdered D] [Nontrivial D] {φ : Formula Atom
       conv_lhs => rw [(sub_sub_cancel u t).symm]
       exact sub_lt_sub_right huc _
     have h2 : c - (u - t) < s := by
-      conv_rhs => rw [show s = u + (s - t) - (u - t) from by rw [add_sub_sub_cancel, sub_add_cancel]]
+      conv_rhs => rw [show s = u + (s - t) - (u - t) from by rw [add_sub_sub_cancel,
+          sub_add_cancel]]
       exact sub_lt_sub_right hcs _
     exact h_guard (c - (u - t)) h1 h2
   | discrete_box_necessity =>
@@ -1067,7 +1083,8 @@ theorem derivable_valid_and_swap_valid [DenselyOrdered D] [Nontrivial D]
     exact ⟨necessitation_preserves_local_valid h_valid, modal_k_preserves_swap_valid ψ' h_swap⟩
   | .temporal_necessitation ψ' d' =>
     obtain ⟨h_valid, h_swap⟩ := derivable_valid_and_swap_valid d'
-    exact ⟨temporal_necessitation_preserves_local_valid h_valid, temporal_k_preserves_swap_valid ψ' h_swap⟩
+    exact ⟨temporal_necessitation_preserves_local_valid h_valid, temporal_k_preserves_swap_valid ψ'
+        h_swap⟩
   | .temporal_duality ψ' d' =>
     obtain ⟨h_valid, h_swap⟩ := derivable_valid_and_swap_valid d'
     constructor

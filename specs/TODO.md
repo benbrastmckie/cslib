@@ -11,8 +11,8 @@ next_project_number: 583
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,574,580 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,400,450,456,497,511,537,551,553,564,568,571,581 | 36,37,181,425,465,530,554,562,563,574,580 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,574 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,400,450,456,497,511,537,551,553,564,568,571 | 36,37,181,425,465,530,554,562,563,574 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
 | 5 | 413,414 | 181,215,300,301,375 | code hygiene |
@@ -78,8 +78,6 @@ next_project_number: 583
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-580 [NOT STARTED] — Bring `lake shake` back to a green, ALIGNMENT-PRESERVING disposit
-  └─ 581 [NOT STARTED] — Add honesty gates that make hidden proof debt impossible to accum
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
@@ -128,10 +126,13 @@ DEFINITION OF DONE: route (a), (b), or (c) is chosen with the reasoning recorded
 ---
 
 ### 581. Add sorryAx census and warn.sorry suppression ratchets so hidden proof debt cannot grow
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 580
+- **Research**: [581_sorry_axiom_honesty_gates/reports/01_sorry_axiom_honesty_gates.md]
+- **Plan**: [581_sorry_axiom_honesty_gates/plans/01_sorry-axiom-honesty-gates.md]
+- **Summary**: [581_sorry_axiom_honesty_gates/summaries/01_sorry-axiom-honesty-gates-summary.md]
 
 **Description**: Add honesty gates that make hidden proof debt impossible to accumulate silently: a `#print axioms` ratchet over the public API, and a `set_option warn.sorry false` suppression ratchet. Neither gate discharges any sorry -- both make the existing debt VISIBLE and prevent it from growing.
 
@@ -159,10 +160,13 @@ DEFINITION OF DONE: both scripts exist, are baselined against the current tree, 
 ---
 
 ### 580. Restore lake shake to a green disposition, disabling only what upstream alignment requires
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [580_shake_ci_gate_restore_green/reports/01_shake_ci_gate_restore_green.md]
+- **Plan**: [580_shake_ci_gate_restore_green/plans/01_restore-shake-ci-gate.md]
+- **Summary**: [580_shake_ci_gate_restore_green/summaries/01_restore-shake-ci-gate-summary.md]
 
 **Description**: Bring `lake shake` back to a green, ALIGNMENT-PRESERVING disposition. The step is currently ENABLED AND FAILING, so CI is red for a second reason independent of the sorry gate.
 

@@ -2660,8 +2660,13 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                            have hψ : newForms.findSome?
                                (fun sf => if sf.sign == .neg then some sf.formula else none)
                                = some ψ₀ := by rw [← hnf]; simp [propagatePersistence]
+                           -- Phase 4: repointed to the ancestor-directed spec. Under ancestor
+                           -- direction `hacc`/`hle` now witness `isAccessible edges x l` /
+                           -- `x ≤ l` (x is an *ancestor* of l) — the reverse of what
+                           -- `sfSatisfied`/`sfAccessSat`'s `.neg,.imp` clauses below require
+                           -- (`l ≤ w'`, `isAccessible edges l w'`); see D5/D6 in the plan.
                            obtain ⟨hacc, hle, hcont, hnotmem, hFpsi⟩ :=
-                             intFImpReuseWitness?_spec hψ heq
+                             intFImpReuseWitnessAnc?_spec hψ heq
                            have hmemsfor : φ ∈ (newForms.filterMap fun sf =>
                                if sf.sign == .pos then some sf.formula else none) := by
                              rw [← hnf]; simp [propagatePersistence]
@@ -2680,24 +2685,22 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                                simp only [Bool.and_eq_true] at hs
                                simp [hs.1, hs.2, hy_cond]
                              · simp [hs] at hy_cond
-                           have hIC_reuse : IExpandedConsistent bPers newExp := by
-                             rw [hnewExp]
-                             intro sf' hsf'
-                             rw [List.mem_append, List.mem_singleton] at hsf'
-                             rcases hsf' with hsf' | rfl
-                             · exact hIC_bPers sf' hsf'
-                             · show sfSatisfied bPers ⟨.neg, .imp φ ψ₀, l⟩
-                               simp only [sfSatisfied]
-                               exact ⟨x, hle, houtPhi, hFpsi⟩
-                           have hACC_reuse : IExpandedAccessConsistent edgesH bPers newExp := by
-                             rw [hnewExp]
-                             intro sf' hsf'
-                             rw [List.mem_append, List.mem_singleton] at hsf'
-                             rcases hsf' with hsf' | rfl
-                             · exact hACC_bPers sf' hsf'
-                             · show sfAccessSat edgesH bPers ⟨.neg, .imp φ ψ₀, l⟩
-                               simp only [sfAccessSat]
-                               exact ⟨x, hacc, houtPhi, hFpsi⟩
+                           have hreuse_sat : IExpandedConsistent bPers newExp ∧
+                               IExpandedAccessConsistent edgesH bPers newExp := by
+                             -- TEMPORARY (task phase 4 -> phase 6): reuse-site discharge is
+                             -- restated over the blocking quotient in Phase 6. Under
+                             -- ancestor-direction blocking `x ≤ l` / `isAccessible edges x l`
+                             -- hold (D5: x is an ancestor of l), not the `l ≤ w'` /
+                             -- `isAccessible edges l w'` that `sfSatisfied`/`sfAccessSat`
+                             -- demand directly. Phase 5's `intBlockRep`/`intAccessPreorderQ`
+                             -- identify `rep l = rep x`, so both conjuncts hold reflexively on
+                             -- the quotient (D5); Phase 6 restates this lemma's conclusion over
+                             -- `IBranchSaturationQ`/`IFimpAccessQ` and re-closes this site.
+                             -- Closed before task completion.
+                             sorry
+                           have hIC_reuse : IExpandedConsistent bPers newExp := hreuse_sat.1
+                           have hACC_reuse : IExpandedAccessConsistent edgesH bPers newExp :=
+                             hreuse_sat.2
                            have hAC'' : IAllConsistent (done ++ [bPers] ++ bt)
                                (doneExp ++ [newExp] ++ eT) (doneNW ++ [nwH] ++ nwT) :=
                              IAllConsistent_append

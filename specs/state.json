@@ -705,7 +705,7 @@
     {
       "project_number": 414,
       "project_name": "simplify_proofs_normalization_modal_family",
-      "status": "planning",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -731,13 +731,18 @@
         444
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-28T17:53:27Z",
+      "last_updated": "2026-07-28T17:59:53Z",
       "session_id": "sess_1785261185_12b8ff_414",
       "artifacts": [
         {
           "path": "specs/414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md",
           "type": "report",
           "summary": "Modal-family proof simplification candidates, LSP-verified"
+        },
+        {
+          "path": "specs/414_simplify_proofs_normalization_modal_family/plans/01_modal-family-proof-golf.md",
+          "type": "plan",
+          "summary": "Four-phase plan to remove redundant ListDeriv/listImp_nil normalization pairs from the Modal, Temporal, and Bimodal GenericMCSBridge proofs and to collapse the and/or arms of bimodal_truthAt_toBimodal_iff_satisfies in ModalConservativity.lean, with a per-phase sorry-freeness gate, an explicit when-NOT-to-simplify criterion, and a declared territory split against the sibling Propositional/Foundations proof-golf task."
         }
       ]
     },

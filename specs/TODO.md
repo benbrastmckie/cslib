@@ -88,7 +88,7 @@ next_project_number: 584
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 413 [PLANNED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
-414 [PLANNING] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
+414 [PLANNED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ## Tasks
 
@@ -601,11 +601,12 @@ After implementation:
 ---
 
 ### 414. Simplify proofs normalization modal family
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
 - **Research**: [414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md]
+- **Plan**: [414_simplify_proofs_normalization_modal_family/plans/01_modal-family-proof-golf.md]
 
 **Description**: Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*] lists and long tactic chains) using the EXISTING normalization/embedding lemmas. RECONCILED: original premise cited task-268 'co-tags' which was abandoned - re-scoped to the lemmas that actually exist. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 

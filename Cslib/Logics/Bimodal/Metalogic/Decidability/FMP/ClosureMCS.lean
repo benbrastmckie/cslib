@@ -35,8 +35,6 @@ closure of the target formula. This ensures:
 - Ported from BimodalLogic/Theories/Bimodal/Metalogic/Decidability/FMP/ClosureMCS.lean
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability.FMP

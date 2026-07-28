@@ -1,31 +1,73 @@
 {
   "status": "partial",
   "task_number": 530,
-  "phases_completed": 4,
-  "phases_total": 9,
-  "last_completed_phase": "Phase 3a: Generic CEE Structures + BurgessHelpers (commit c7493875)",
-  "blocked_phase": "Phase 3b: Generic CEE RecursiveWalks",
-  "continuation_context": "Phase 3a is complete, verified green, and committed (c7493875). Phase 3b is marked [BLOCKED] in specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md -- do NOT re-dispatch a plain /implement expecting it to silently retry the same lift. What was found: c5ForwardWalk/c5BackwardWalk's result structures (C5ForwardWalkResult/C5BackwardWalkResult, both trees) are indexed by each tree's own LOCAL Chronicle Atom structure (confirmed via ChronicleTypes.lean: `structure Chronicle (Atom : Type*) where f : Rat -> Set (Formula Atom) ...`), not the generic Cslib.Foundations.Logic.Metalogic.Chronicle.Types.Chronicle F. The walk proofs are saturated with rcases/simp on Chronicle-structure-literal-derived Finset-membership subterms -- exactly the failure signature Phase 1's own docstring already documented and rejected a toGeneric bridge over. Signature-level grep also confirmed the identical entanglement in Phase 3c's EliminationResult (both trees) and Phase 4a/4b's ChronicleConstruction.lean (singletonChronicle, omegaChain, limitG, chronicle_model_exists all consume/produce Chronicle Atom directly). This is the phase's entire primary deliverable, not a single resistant lemma, so per plan-compliance.md it was escalated as BLOCKED rather than silently descoped. REQUIRED NEXT STEP: a /revise decision between (a) formally descoping Phases 3b-4b to 'confirmed blocked by Chronicle-locality, no generic lift' and moving straight to Phase 5 cleanup (stale RRelation.lean doc-comment fix, barrel audit, confirm no import into ChronicleToCountermodel.lean), accepting that only ChronicleTypes/RRelation/the small Phase-3a lemmas end up shared; or (b) a deeper architectural retry -- replacing each tree's local Chronicle with a true reducible type alias to the generic Chronicle F (abbrev, not a projection function) to test whether that specific technique avoids Phase 1's breakage. Option (b) reopens Phase 1's closed decision and needs explicit owner sign-off before any code is written. Read the plan file's Phase 3b blocker section and the summary's corresponding writeup in full before proceeding either way.",
+  "summary": "Executed Phase 5 (the sole actionable phase in plans/02_chronicle-consolidation-descoped.md) to completion: doc-comment sweep found no residue (5.1); added a 'Consolidation Boundary' docstring subsection to ChronicleInterface.lean naming which layers are generic vs. per-logic and why (5.2); barrel audit confirmed Cslib.lean and both trees' CounterexampleElimination.lean sub-barrels match disk exactly, no discrepancy (5.3); containment check confirmed ChronicleToCountermodel.lean is referenced by no Foundations module and all four sorry-count baselines are unchanged (5.4); explicitly confirmed the optional SinceSeedInterface reconciliation was skipped and SinceSeedConsistency.lean is untouched (5.5). Phases 3b/3c/4a/4b remain DESCOPED and were not attempted; phases 0/1/2/3a remain landed, sorry-free, and unmodified. Only one Lean file was touched (ChronicleInterface.lean, docstring-only). Ran the closing gate bash scripts/pre-pr-check.sh as instructed: it FAILED overall (steps 1 and 5), but the failure is entirely pre-existing, out-of-scope repository debt (sorry instances in Modal/Tableau/FrameSoundness.lean and several Bimodal/Propositional files owned by other in-flight tasks, already present at HEAD~1 before this dispatch) -- not anything this task introduced or touched. The four debt ratchets (steps 6-9) that specifically measure whether this dispatch added new debt all report OK, matching baseline exactly. Task closes with Phase 5 itself fully done and green in its own scope, but the plan's literal completion-bar item 'pre-pr-check.sh passes end to end' is not met, so the task is left PARTIAL pending a clean gate run once the unrelated in-flight tasks land.",
+  "blockers": [
+    {
+      "type": "external_dependency",
+      "description": "bash scripts/pre-pr-check.sh fails overall (steps 1 and 5) due to pre-existing sorry instances in files entirely outside this task's scope: Cslib/Logics/Modal/Tableau/FrameSoundness.lean, Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean, Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean, Cslib/Logics/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean, Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean. All eight files are fully committed at HEAD with a clean git status, and the same sorry content was already present at HEAD~1 (before this dispatch's own commits), confirming this is pre-existing debt from other in-flight tasks (git log attributes several to task-scoped commits for tasks 574 and 575), not a regression caused by task 530. This task's hard guardrails explicitly forbid touching unrelated proof work or the bimodal discrete-completeness sorries, so no attempt was made to fix these. Steps 6-9 (the debt ratchets specific to whether THIS dispatch added debt) all report OK, matching baseline exactly -- task 530 introduced zero new sorries/axioms/suppressions/shake-debt. This is not a task-530 blocker in the traditional sense (no further Chronicle work is needed or possible); it is a note that a fully green pre-pr-check.sh requires those other tasks to land first.",
+      "recorded_at": "2026-07-28"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/02_chronicle-consolidation-descoped.md",
+      "type": "plan",
+      "summary": "Phase 5 checklist items 5.1-5.5 marked complete with inline confirmation notes; phase heading set to [COMPLETED]; dependency-analysis table updated; plan-level Status set to [PARTIAL]; Success Criteria section annotated with the closing-gate result; Testing & Validation checklist updated to reflect the actual (partially-passing) verification outcome."
+    },
+    {
+      "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/summaries/02_chronicle-consolidation-descoped-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary for this dispatch: what Phase 5 did, the full closing-gate breakdown (which steps failed and why they are out of scope, which steps passed), verification results, and recommended next steps (re-run pre-pr-check.sh once tasks 574/575 land)."
+    },
+    {
+      "path": "Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean",
+      "type": "lean_source",
+      "summary": "Added a 'Consolidation Boundary: What Is Generic and What Stays Per-Logic' subsection to the module docstring (Phase 5.2). Docstring-only change; builds clean."
+    }
+  ],
+  "phases_completed": 5,
+  "phases_total": 5,
+  "last_completed_phase": "Phase 5: Cleanup, self-documentation, and partial-consolidation close (commits b6e4b12e, 30aa5208)",
+  "next_actionable_phase": null,
+  "next_steps": "No further Chronicle work is needed or permitted under this plan. To reach a fully green scripts/pre-pr-check.sh, the unrelated sorries in Modal/Tableau/FrameSoundness.lean and the listed Bimodal/Propositional files (owned by tasks 574 and 575) need to land first; re-run the gate at that point. This task itself has no remaining actionable phase.",
+  "continuation_context": "This is the final dispatch for plans/02_chronicle-consolidation-descoped.md. Phases 0/1/2/3a/5 are all done; 3b/3c/4a/4b remain formally DESCOPED per the recorded user scoping decision and must never be re-attempted under this plan. If a future dispatch reopens this task purely to re-verify the closing gate once other tasks land, it should re-run bash scripts/pre-pr-check.sh and, if green, flip plan Status from [PARTIAL] to [COMPLETED] with no further edits -- do not reopen Phase 5's task list or touch any Chronicle file again.",
   "guardrails": {
-    "non_goals": ["Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean", "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean"],
+    "non_goals": [
+      "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+      "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean",
+      "Cslib/Foundations/Logic/Metalogic/Chronicle/SinceSeedConsistency.lean"
+    ],
+    "descoped_phases": ["3b", "3c", "4a", "4b"],
     "must_preserve_sorry_free": ["Cslib/Logics/Temporal/Metalogic/DenseCompleteness.lean"],
+    "sorry_baselines": {
+      "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean": 23,
+      "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean": 2,
+      "Cslib/Logics/Temporal/Metalogic/Chronicle/": 0,
+      "Cslib/Foundations/Logic/Metalogic/Chronicle/": 1
+    },
     "zero_new_sorries": true,
     "zero_new_axioms": true
   },
   "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true
+    "verification_passed": false,
+    "pre_pr_check_passed": false,
+    "pre_pr_check_failure_scope": "out_of_scope_pre_existing",
+    "sorry_baselines_confirmed_unchanged": true,
+    "containment_check_passed": true,
+    "barrel_audit_passed": true,
+    "lean_files_modified": 1,
+    "build_run": true,
+    "debt_ratchets_all_matched_baseline": true
   },
   "modified_files": [
-    "Cslib/Foundations/Logic/Metalogic/Chronicle/CounterexampleElimination/Structures.lean",
-    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/BurgessHelpers.lean",
-    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Structures.lean",
-    "Cslib/Logics/Temporal/Metalogic/Chronicle/CounterexampleElimination/Structures.lean",
-    "Cslib.lean"
+    "Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean",
+    "specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/02_chronicle-consolidation-descoped.md",
+    "specs/530_consolidate_chronicle_construction_bimodal_temporal/summaries/02_chronicle-consolidation-descoped-summary.md",
+    "specs/530_consolidate_chronicle_construction_bimodal_temporal/.orchestrator-handoff.json",
+    "specs/530_consolidate_chronicle_construction_bimodal_temporal/.return-meta.json"
   ],
-  "session_id": "sess_1784402996_48ad02_530"
+  "plan_markers_verified": true,
+  "orchestrator_mode": true,
+  "session_id": "sess_1785271358_1d3346"
 }

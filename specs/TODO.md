@@ -85,7 +85,7 @@ next_project_number: 584
 
 ### Code Hygiene
 
-530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
+530 [PARTIAL] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 
 ## Tasks
 
@@ -416,13 +416,13 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
 - **Research**: [530_consolidate_chronicle_construction_bimodal_temporal/reports/01_chronicle-dedup-research.md]
-- **Plan**: [530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md]
-- **Summary**: [530_consolidate_chronicle_construction_bimodal_temporal/summaries/01_chronicle-consolidation-summary.md]
+- **Plan**: [530_consolidate_chronicle_construction_bimodal_temporal/plans/02_chronicle-consolidation-descoped.md]
+- **Summary**: [530_consolidate_chronicle_construction_bimodal_temporal/summaries/02_chronicle-consolidation-descoped-summary.md]
 
 **Description**: REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them. [USER SCOPING DECISION 2026-07-26 -- path (B), descope]: phases 3b, 3c, 4a and 4b are DESCOPED. Do not attempt further generic lifting of c5ForwardWalk / c5BackwardWalk, the Phase 3c elimination driver, or Phase 4a/4b ChronicleConstruction. Two deep investigations (Phase 1 and Phase 3b) independently confirmed that generically bridging types indexed by each tree's LOCAL Chronicle Atom structure breaks downstream rcases/simp proofs, and repairing that exceeds this task's own 'structural dedup, not a proof change' mandate. Keep every landed lift (ChronicleInterface skeleton, generic Types, RRelation shared core, CEE Structures + BurgessHelpers -- all sorry-free, committed, full lake test green), run Phase 5 cleanup, annotate the plan file's 3b-4b headings as [DESCOPED] with a pointer to this decision, and close as a partial consolidation. Run /revise first to produce the descoped plan version, then /implement. The deeper Chronicle-structure question -- what the highest-quality refactor actually is, given that the walk-result types are structurally the obstacle -- is carried by a dedicated follow-on research task and is NOT to be attempted here.
 

@@ -38,7 +38,7 @@
     {
       "project_number": 530,
       "project_name": "consolidate_chronicle_construction_bimodal_temporal",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "title": "Consolidate the duplicated Chronicle construction across Bimodal and Temporal",
       "description": "REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them. [USER SCOPING DECISION 2026-07-26 -- path (B), descope]: phases 3b, 3c, 4a and 4b are DESCOPED. Do not attempt further generic lifting of c5ForwardWalk / c5BackwardWalk, the Phase 3c elimination driver, or Phase 4a/4b ChronicleConstruction. Two deep investigations (Phase 1 and Phase 3b) independently confirmed that generically bridging types indexed by each tree's LOCAL Chronicle Atom structure breaks downstream rcases/simp proofs, and repairing that exceeds this task's own 'structural dedup, not a proof change' mandate. Keep every landed lift (ChronicleInterface skeleton, generic Types, RRelation shared core, CEE Structures + BurgessHelpers -- all sorry-free, committed, full lake test green), run Phase 5 cleanup, annotate the plan file's 3b-4b headings as [DESCOPED] with a pointer to this decision, and close as a partial consolidation. Run /revise first to produce the descoped plan version, then /implement. The deeper Chronicle-structure question -- what the highest-quality refactor actually is, given that the walk-result types are structurally the obstacle -- is carried by a dedicated follow-on research task and is NOT to be attempted here.",
@@ -49,7 +49,7 @@
         "Cslib/Foundations/Logic/Metalogic/Chronicle/"
       ],
       "created": "2026-07-18T19:24:35Z",
-      "last_updated": "2026-07-26T23:30:00Z",
+      "last_updated": "2026-07-28T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
@@ -58,18 +58,24 @@
           "summary": "Chronicle dedup research"
         },
         {
-          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md",
+          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/02_chronicle-consolidation-descoped.md",
           "type": "plan",
-          "summary": "Chronicle consolidation 9-phase plan"
+          "summary": "Descoped plan revision: 4 completed phases preserved verbatim, 4 phases marked [DESCOPED], Phase 5 cleanup is the only remaining actionable work; task closes as a partial consolidation"
         },
         {
-          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/summaries/01_chronicle-consolidation-summary.md",
+          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/summaries/02_chronicle-consolidation-descoped-summary.md",
           "type": "summary",
-          "summary": "chronicle consolidation summary (backfilled by --sync)"
+          "summary": "Phase 5 cleanup complete; task closes as partial consolidation with 3b-4b descoped"
         }
       ],
-      "session_id": "sess_1784402996_48ad02_530",
-      "blockers": [],
+      "session_id": "sess_1785271358_1d3346",
+      "blockers": [
+        {
+          "type": "external_dependency",
+          "description": "bash scripts/pre-pr-check.sh fails overall (steps 1 and 5) due to pre-existing sorry instances in files entirely outside this task's scope: Cslib/Logics/Modal/Tableau/FrameSoundness.lean, Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean, Cslib/Logics/Bimodal/Metalogic/BXCanonical/Frame.lean, Cslib/Logics/Bimodal/Metalogic/Bundle/UntilSinceCoherence.lean, Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean. All eight files are fully committed at HEAD with a clean git status, and the same sorry content was already present at HEAD~1 (before this dispatch's own commits), confirming this is pre-existing debt from other in-flight tasks (git log attributes several to task-scoped commits for tasks 574 and 575), not a regression caused by task 530. This task's hard guardrails explicitly forbid touching unrelated proof work or the bimodal discrete-completeness sorries, so no attempt was made to fix these. Steps 6-9 (the debt ratchets specific to whether THIS dispatch added debt) all report OK, matching baseline exactly -- task 530 introduced zero new sorries/axioms/suppressions/shake-debt. This is not a task-530 blocker in the traditional sense (no further Chronicle work is needed or possible); it is a note that a fully green pre-pr-check.sh requires those other tasks to land first.",
+          "recorded_at": "2026-07-28"
+        }
+      ],
       "topic": "Code Hygiene"
     },
     {

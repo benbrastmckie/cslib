@@ -1,0 +1,35 @@
+{
+  "status": "partial",
+  "started_at": "2026-07-28T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/01_tableau-repair-ancestor-blocking.md",
+      "type": "plan"
+    }
+  ],
+  "partial_progress": {
+    "stage": "blocked",
+    "details": "Phase 6 marked [BLOCKED] before any Cslib/ write landed. Restating intExpandBranches_openBranch_sat's conclusion over IBranchSaturationQ/IFimpAccessQ (Task 1) surfaced that Phase 5.3's sfSatisfiedQ .neg,.imp field (raw Nat.le on intBlockRep representatives) is not a valid load-bearing invariant for this lemma's induction -- a concrete counterexample shows a plain witness world can be independently, later ancestor-blocked for a reason unrelated to the formula it was chosen to satisfy, breaking the general plain-to-Q lifting both the none-leaf and the reuse-site temp sorry need. All speculative Scheme.lean edits reverted via git checkout; file is byte-identical to Phase 5's committed end state. Full analysis recorded in the plan file's Phase 6 section and in .orchestrator-handoff.json's blockers array. Recommend /revise before re-dispatching Phase 6."
+  },
+  "phases_completed": 5,
+  "phases_total": 8,
+  "memory_candidates": [
+    "When restating a saturation-style inductive invariant over a quotient map (rep : World -> World) for a tableau-completeness proof, a field that pulls back the raw numeric world order through rep (rep w <= rep w') is not automatically a valid load-bearing invariant even if it type-checks/elaborates cleanly: rep must be shown MONOTONE in the sense the proof needs (w <= w' -> rep w <= rep w'), or every plain-to-Q lifting site will hit a counterexample where a witness world is independently, later mapped to an unrelated representative. Prefer routing the ordering conjunct through the same reachability/accessibility relation already used for the accessibility companion invariant (if one exists), since accessibility-based orders have a natural monotonicity argument (common-ancestor comparability in a tree) that raw numeric quotient orders lack.",
+    "A plan's own scope hypothesis claiming a downstream extraction step is a 'one-line substitution' of an earlier phase's additively-landed lemma should be verified by actually attempting the substitution and reading the type-mismatch error, before trusting the estimate -- Phase 5's Q-predicates here type-checked as standalone additive declarations but had not yet been exercised in a real discharge, and doing so revealed the shape itself needed revision, not just a substitution."
+  ],
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 7,
+    "sorry_count_note": "Unchanged from Phase 5's end state (6-entry baseline + Phase 4's tracked temporary sorry at Scheme.lean:3143, which this dispatch attempted and failed to close, then reverted). Soundness.lean remains 0-sorry.",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": null
+  },
+  "metadata": {
+    "session_id": "sess_1785260108_081c2a",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
+}

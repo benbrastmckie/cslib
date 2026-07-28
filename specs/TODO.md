@@ -160,7 +160,9 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 573
-- **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+- **Research**:
+  - [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
+  - [574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md]
 - **Plan**: [574_tableau_calculus_repair_ancestor_blocking/plans/01_tableau-repair-ancestor-blocking.md]
 
 **Description**: LARGE task (~2500-4000 lines estimated, comparable in scope to the modal-K analogue Cslib/Logics/Modal/Tableau/FmpMeasure.lean at 3388 lines). Depends on the predecessor spike task's decision record (its `handoffs/01_quotient-soundness-spike-decision.md`) -- READ IT FIRST; if it reports the quotient approach is NOT compatible with `intExpandBranches_closed_unsat`, STOP and re-scope this task via `/revise` before proceeding, per that spike's explicit instruction.

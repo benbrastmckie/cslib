@@ -1898,6 +1898,11 @@
           "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/01_tableau-repair-ancestor-blocking.md",
           "type": "plan",
           "summary": "8-phase hard-mode implementation plan with postmortem constraints, preserved-assets accounting, and H7 territory contract. Acceptance gate: intExpandBranches_closed_unsat re-verified sorry-free."
+        },
+        {
+          "path": "specs/574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md",
+          "type": "report",
+          "summary": "Phase 6 blocker resolution: remedy (b) provable — thread invariant-side loop-back edges (augSets), no quotient needed; supersedes Phase 5 stack; /revise required. Live-verified prototype closes the temp sorry."
         }
       ],
       "session_id": "sess_1785260108_081c2a"

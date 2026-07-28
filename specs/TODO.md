@@ -141,7 +141,7 @@ DEFINITION OF DONE: route (a), (b), or (c) is chosen with the reasoning recorded
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Bimodal and Temporal Logic
-- **Dependencies**: Task 568
+- **Dependencies**: Task 530, Task 568
 
 **Description**: Resolve the `namespace Chronicle` / `structure Chronicle` NAME COINCIDENCE, and delete the 36 suppressions it forces (33 @[nolint], 3 set_option) across the three ChronicleTypes/Types files, 9 declarations each.
 

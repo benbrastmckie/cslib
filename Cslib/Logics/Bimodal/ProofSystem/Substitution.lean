@@ -26,9 +26,6 @@ are preserved under atom substitution.
 - `derivationSubst`: Derivations are preserved under atom substitution
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.unusedSimpArgs false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal
@@ -362,19 +359,19 @@ def derivationSubst (q r : Atom) {fc : FrameClass} :
     exact DerivationTree.modus_ponens _ _ _ d1' d2'
   | _, _, DerivationTree.necessitation psi d => by
     have d' := derivationSubst q r d
-    simp only [Context.subst, List.map_nil] at d'
+    simp only [Context.subst] at d'
     simp only [Formula.subst_box]
     exact DerivationTree.necessitation
       (psi.subst q r) d'
   | _, _, DerivationTree.temporal_necessitation psi d => by
     have d' := derivationSubst q r d
-    simp only [Context.subst, List.map_nil] at d'
+    simp only [Context.subst] at d'
     simp only [Formula.subst_allFuture]
     exact DerivationTree.temporal_necessitation
       (psi.subst q r) d'
   | _, _, DerivationTree.temporal_duality psi d => by
     have d' := derivationSubst q r d
-    simp only [Context.subst, List.map_nil] at d'
+    simp only [Context.subst] at d'
     rw [swapTemporal_subst]
     exact DerivationTree.temporal_duality
       (psi.subst q r) d'

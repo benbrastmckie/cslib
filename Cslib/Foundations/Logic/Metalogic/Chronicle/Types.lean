@@ -29,9 +29,6 @@ re-export its declarations under their existing names.
 * Burgess 1982: "Axioms for tense logic II: Time periods"
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.dupNamespace false
-
 @[expose] public section
 
 namespace Cslib.Logic.Metalogic.Chronicle
@@ -170,6 +167,10 @@ def R3MaximalSince (I : ChronicleInterface F) (A B C : Set F) : Prop :=
 
 /-! ## Chronicle Structure -/
 
+-- `Chronicle` is a structure-projection namespace, not a doubled one -- see Phase 2's
+-- finding on the three `Chronicle` modules; stripping the prefix breaks dozens of
+-- dot-notation call sites, so the linter's false positive is narrowly suppressed here.
+set_option linter.dupNamespace false in
 /-- A chronicle: a finite rational domain with point-sets `f` and interval-sets `g`
 (Burgess 1982, Section 2). -/
 structure Chronicle (F : Type*) where
@@ -183,31 +184,37 @@ structure Chronicle (F : Type*) where
 
 /-! ## Chronicle Conditions -/
 
+set_option linter.dupNamespace false in
 /-- Condition c0: every point in the domain carries a maximal consistent set. -/
 def Chronicle.c0 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x ∈ chi.dom, CISetMaximalConsistent I (chi.f x)
 
+set_option linter.dupNamespace false in
 /-- Condition c1: every interval-set `g x y` is closed under derivation. -/
 def Chronicle.c1 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → CIClosedUnderDerivation I (chi.g x y)
 
+set_option linter.dupNamespace false in
 /-- Condition c2: the interval-set `g x y` r3-relates the point-sets at each pair of
 domain points. -/
 def Chronicle.c2 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, x ∈ chi.dom → y ∈ chi.dom → x < y → r3Relation I (chi.f x) (chi.g x y) (chi.f y)
 
+set_option linter.dupNamespace false in
 /-- Condition c2': the interval-set is Burgess-R3-maximal at each adjacent pair of domain
 points. -/
 def Chronicle.c2' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
   ∀ x y : Rat, Adjacent chi.dom x y →
     CIBurgessR3Maximal I (chi.f x) (chi.g x y) (chi.f y)
 
+set_option linter.dupNamespace false in
 /-- Condition c3: the interval-set over `[x,z]` decomposes as `g x y ∩ f y ∩ g y z` for
 intermediate `y`. -/
 def Chronicle.c3 (chi : Chronicle F) : Prop :=
   ∀ x y z : Rat, x ∈ chi.dom → y ∈ chi.dom → z ∈ chi.dom →
     x < y → y < z → chi.g x z = chi.g x y ∩ chi.f y ∩ chi.g y z
 
+set_option linter.dupNamespace false in
 /-- Condition c4: if `¬(delta U gamma) ∈ f x` and `delta ∈ f y` then some intermediate
 point witnesses `¬gamma`. -/
 def Chronicle.c4 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
@@ -217,6 +224,7 @@ def Chronicle.c4 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, x < z ∧ z < y ∧ I.imp gamma I.bot ∈ chi.f z
 
+set_option linter.dupNamespace false in
 /-- Condition c4': the since-variant of c4, witnessing `¬gamma` between `y` and `x` in the
 past direction. -/
 def Chronicle.c4' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
@@ -226,6 +234,7 @@ def Chronicle.c4' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
       delta ∈ chi.f y →
       ∃ z ∈ chi.dom, y < z ∧ z < x ∧ I.imp gamma I.bot ∈ chi.f z
 
+set_option linter.dupNamespace false in
 /-- Condition c5: if `delta U gamma ∈ f x` then some future `y` witnesses `delta` with
 `gamma` holding at all intermediate points. -/
 def Chronicle.c5 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
@@ -236,6 +245,7 @@ def Chronicle.c5 (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=
         ∀ z ∈ chi.dom, x < z → z < y →
           gamma ∈ chi.f z ∧ I.untl gamma delta ∈ chi.f z
 
+set_option linter.dupNamespace false in
 /-- Condition c5': the since-variant of c5, witnessing `delta` in the past with `gamma` at
 all intermediate points. -/
 def Chronicle.c5' (I : ChronicleInterface F) (chi : Chronicle F) : Prop :=

@@ -1,81 +1,56 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "partial",
+  "status": "implemented",
   "trigger": "phase_dispatch",
-  "target": "Phase 14: Nested derivations of the CS5 axioms",
-  "phases_completed": 13,
-  "phases_total": 32,
-  "sorry_inventory": [
+  "target": "Plan 03 Phase 1: The (R-a) probe — total-model refutation capacity of is5FC",
+  "phases_completed": 1,
+  "phases_total": 6,
+  "skeleton": false,
+  "probe_verdict": "kill-criterion FIRED — (R-a) REFUTED",
+  "summary": "Phase 1 (R-a) probe complete. PROBE VERDICT: kill-criterion FIRED — (R-a) is REFUTED, machine-checked, stopping condition (a) (P1+P2+P3 sorry-free on the first attempt; fallback not triggered). P1 (total_validates_boxEm): under BForces' box clause (Birelational.lean:118), total r degenerates box to a world-independent global modality, so every total-r model forces (box a).or ((box a).imp bot) at every world — no f1/f2 or valuation monotonicity even needed. P2 (boxEm_not_derivable): that formula is not IS5-derivable, via is5_soundness_derivable and the two-world chain w0 <= w1, r := Eq countermodel — fully constructive, ZERO axioms. P3 (ra_route_refuted): the route-required form of (R-a) — a total-r countermodel (bundled as structure TotalCountermodel, universe-polymorphic in the world carrier) for every (H, A) with A not in modalDeductiveClosure IS5ModalAxiom H — is refuted at the instance H := empty, A := box a or not box a, bridging closure-at-empty to Derivable via the empty witness list. Verification: lake env lean exit 0; inline #print axioms audit — P1/P3 standard axioms only (propext, Classical.choice, Quot.sound), P2 axiom-free, no sorryAx anywhere; verdict sentence at top of probe file; zero Cslib/ files touched, so the repo bare-sorry count (5) and all preserved assets are unchanged by construction. CONSEQUENCE per the plan's dependency table and the user's verbatim kill-criterion: the product-model route is dead; Phases 3-6 are not executable and are to be marked [BLOCKED]: (R-a) refuted, see Phase 1; Phase 2's kill branch is the next and final dispatch.",
+  "sorry_inventory": [],
+  "blockers": [],
+  "artifacts": [
     {
-      "file": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
-      "line": 1315,
-      "statement": "theorem nested_sound_impL (ctx : InputCtx Atom) (A B : Proposition Atom) (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm) (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom B)).fm) : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.imp B))).fm",
-      "strategic": true,
-      "assumption": "Soundness of the impL NestedProof constructor holds for an arbitrary InputCtx ctx.",
-      "why_deferred": "Needs the source's induction-on-n argument over the Lambda chain (page 10); not Phase 13's own task; carried forward unchanged this dispatch.",
-      "follow_up_task": "not yet numbered -- unaffected by this dispatch, carried forward from Phase 13"
-    }
-  ],
-  "blockers": [
-    {
-      "phase": 14,
-      "target": "Derive each of the nine propositional constructors, k, kdia, tBox, tDia, fourBox, fourDia, bBox, bDia as NestedProof (psi-circ)",
-      "verbatim_goal": "Derive each of the nine propositional constructors, `k`, `kdia`, `tBox`, `tDia`, `fourBox`, `fourDia`, `bBox`, `bDia` as `NestedProof (ψ◦)`",
-      "what_was_tried": "Attempted to build Proposition 3.1's general id (NestedProof (ctx.fillFull (A-bullet, A-circ)) for arbitrary formula A, not just atomic) by induction on A, as reusable machinery every one of the 17 axiom derivations needs (each schema is or reduces to an impR application, whose premise needs this fact).",
-      "why_it_failed": "Verified in Lean (buildRhsChain_box_shape, InputCtx_fillLhs_snd_box, InputCtx_fillEmpty_snd_box, now landed sorry-free in Rules.lean) that every InputCtx-shaped constructor (botL is the sole introduction rule for bottom) produces a conclusion whose RHS is unconditionally .box-shaped, never .atom-shaped, at any context length. impR's premise needs a bare .atom-shaped RHS. Hence NestedProof (bottom-bullet, pi) bare is unreachable from the current 20 constructors for any context choice, blocking efq directly and, transitively (since general id is needed for every schema, each universally quantified over formulas that could syntactically be bottom), all 17 axioms. Full analysis: handoffs/phase-14-handoff-20260726.md."
+      "type": "probe",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/ra_total_probe.lean",
+      "summary": "Sorry-free (R-a) probe: P1 total-validity of box a or not box a, P2 IS5-underivability (axiom-free), P3 refutation of the route-required (R-a) statement; verdict sentence in header; #print axioms audit inline"
     },
     {
-      "phase": 14,
-      "target": "Cross-check against §5's Proofs of the axioms d, t, b, 4, and 5 in our system",
-      "verbatim_goal": "Cross-check against §5's \"Proofs of the axioms d, t, b, 4, and 5 in our system\"",
-      "what_was_tried": "Read Figure 5 (page 13) directly from the source PDF; confirmed its t/4/b-axiom derivations do not use w/cut/comma-swap themselves, only id + the logical rules.",
-      "why_it_failed": "Not reached as a completed derivation: Figure 5's own recipes still depend on general id for an arbitrary formula A, which is blocked per the blocker above. Not fully re-verified whether Figure 5's specific axioms are unblocked once general id's A != bottom cases are handled -- out of remaining budget this dispatch."
+      "type": "progress",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-1-progress.json",
+      "summary": "Phase 1 objective tracking, all objectives done"
+    },
+    {
+      "type": "plan",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/03_ra-probe-product-model.md",
+      "summary": "Phase 1 marked [COMPLETED] with verdict block; P1/P2/P3 checklist items checked; fallback annotated NOT TRIGGERED"
     }
   ],
-  "summary": "Phase 14 (Nested derivations of the CS5 axioms) dispatch. Landed and committed: (1) the cut rule (eq. 3.1) as a genuine NestedProof constructor, InputCtx-shaped mirroring impL's output-pruning pattern, plus NestedProof.CutFree gating it out (mirrors SeqProof.cut/CutFree in LJ/Basic.lean) -- scoped build green, no sorry, no new axiom. (2) A rigorous, Lean-verified structural finding: every InputCtx-shaped NestedProof constructor (botL, cut, contract, andL, boxL, diaL, tL, fourL, bStruct, and w per eq 3.1's own stated shape if later added) produces a conclusion whose RHS is unconditionally box-shaped, never atom-shaped, at any context length -- landed as three sorry-free, axiom-free theorems (buildRhsChain_box_shape, InputCtx_fillLhs_snd_box, InputCtx_fillEmpty_snd_box). This blocks Proposition 3.1's general id at A = bottom (since botL is the sole bottom-introduction rule and cannot supply the bare .atom-shaped RHS impR's premise needs), hence blocks efq directly, and transitively blocks every other CS5ModalAxiom schema whose derivation needs general id for an arbitrary (universally-quantified, possibly-bottom) formula -- i.e. all 17 target constructors. No Completeness.lean file was created since a file of 17 non-strategic sorries (all sharing one unresolved root cause, not 17 independent deliberate skeleton points) would violate the anti-analysis strategic-sorry policy. Full writeup, evidence, and what-not-to-try guidance in the phase-14 handoff. A planning decision is needed before further dispatch: either land Phase 19's weakening/exchange admissibility (or equivalent) ahead of this phase, or get a second look at whether Proposition 3.1 has a formalization this dispatch missed (the source calls it straightforward, which is in tension with the wall found).",
-  "artifacts": [
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"},
-    {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-14-handoff-20260726.md"},
-    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-14-progress.json"}
-  ],
-  "next_action_hint": "requires_user_review",
-  "requires_user_review": true,
+  "next_action_hint": "dispatch_phase_2_kill_branch",
+  "requires_user_review": false,
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/ra_total_probe.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/03_ra-probe-product-model.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-1-progress.json"
   ],
   "decisions_made": [
-    "Added cut as a genuine primitive NestedProof constructor (not proved admissible), mirroring SeqProof.cut, exactly per the plan's own task wording.",
-    "Did not add w (weakening) as an extra primitive: verified it shares InputCtx.fillLhs/fillEmpty's own unconditional .box shape, so it would not resolve the efq/general-id wall (a different obstruction than what w addresses).",
-    "Did not create Completeness.lean with placeholder sorries: all 17 axioms share one unresolved root cause, which fails the strategic-sorry policy's per-theorem, independently-justified scoping requirement.",
-    "Marked Phase 14 [BLOCKED] in the plan file rather than silently narrowing scope or fabricating a proof."
+    "Confirmed the plan-time sharpening against the real BForces semantics rather than assuming it: P1's proof uses exactly the degenerate box clause the plan predicted, closing on the first attempt.",
+    "Used a self-contained two-element inductive PW with an explicit local Preorder instance for the P2 countermodel instead of Bool/Fin 2, avoiding any dependency on which Mathlib order instances are in the transitive import closure.",
+    "Formalised P3's route-required statement as a named structure (TotalCountermodel) plus Nonempty, per the plan's own risk-mitigation fallback for existential-telescope friction — the structure is universe-polymorphic in the world carrier so the refutation covers product carriers at any universe.",
+    "Kept the #print axioms audit inline in the probe file as durable machine-checkable evidence of the axiom footprint."
   ],
-  "dead_ends": [
-    "genId as a uniform induction on A targeting OutputCtx.fillFull (A, A): the A = bottom case is a proven dead end (botL is InputCtx-shaped, unconditionally .box-shaped RHS), not a matter of trying harder tactics.",
-    "Using boxR to shed botL's box wrapping: boxR's premise needs an .empty LHS component; botL's output always has bottom (or Lambda.fillLhs bottom) there, never .empty.",
-    "Using the newly-landed cut to bridge a botL-derived boxed fact down to a bare fact: cut's own conclusion (ctx.fillEmpty) is InputCtx-shaped and subject to the exact same box-shape proof.",
-    "A nonempty-length OutputCtx for id (which can itself produce a .box-shaped result) superficially looks promising for matching an InputCtx-shaped premise elsewhere, but id's own comma order (filled-formula first) does not match InputCtx.fillLhs's recursion order (context-head first) at the position needed -- a second, independent obstruction (NestedLhs.comma is a raw, non-quotiented constructor per Syntax.lean's own documented design note)."
-  ],
+  "dead_ends": [],
   "continuation_context": {
-    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-14-handoff-20260726.md",
-    "phases_completed": 13,
-    "phases_total": 32,
+    "next_phase": 2,
+    "branch": "kill",
+    "phases_completed": 1,
+    "phases_total": 6,
     "orchestrator_mode": true,
-    "resume_at": "Stage E, Phase 14 (Nested derivations of the CS5 axioms) is BLOCKED pending a planning decision -- see the handoff's 'Immediate Next Action'. Do not re-dispatch Phase 14 with the same approach without first reading 'What Was Tried' / 'What NOT to Try' in the handoff.",
-    "stage_map": {
-      "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
-      "B": "Phases 6-8 - nested sequent syntax - COMPLETE (all 3 phases)",
-      "C": "Phases 9-10 - the rule systems - COMPLETE (both phases)",
-      "D": "Phases 11-13 - soundness (Theorem 4.1) - COMPLETE (18/19 constructors fully proven; impL is a tracked strategic sorry, not blocking downstream phases)",
-      "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - Phase 14 BLOCKED (cut landed; axiom derivations blocked on general id / efq, see handoff)",
-      "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
-      "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
-    },
-    "literature_access": "Direct PDF render (Read with pages param) of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains authoritative; pdftotext drops/garbles box and diamond glyphs. This dispatch rendered pages 7 (Proposition 3.1, eq 3.1, Figure 3), 8-9 (Figure 4, Theorem 4.1, Lemmas 4.2-4.6), 11-13 (Lemma 4.11 proof, Lemma 4.12, Figure 5) directly.",
-    "existing_infra_pointers": "Rules.lean now has NestedProof.cut, NestedProof.CutFree, and the three box-shape verification theorems (buildRhsChain_box_shape, InputCtx_fillLhs_snd_box, InputCtx_fillEmpty_snd_box) -- reusable evidence for whoever resolves the blocker. Nested/Soundness.lean unchanged this dispatch.",
-    "invariants": "Cslib/ sorry count unchanged (Nested/Soundness.lean's one impL sorry, untouched); axiom count unchanged at 26; no weakened or vacuous restatements; whole-project lake build/lake exe checkInitImports green (verified this dispatch); never touch Cslib/Logics/Modal/Tableau/; never use capital Pi (Π) or capital Sigma as a Lean identifier."
+    "resume_at": "Plan 03 Phase 2, kill branch (expected branch, now confirmed): (1) new file Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean promoting P1/P2/P3 to library-grade names with the MarinMoralesStrassburger2021 sections 7-8 citation and durable anchors (never task numbers); (2) sanctioned docstring cross-reference adjacent to CS5PairSeedRightExclusion (CS5Completeness.lean:507 region) — the ONLY edit allowed to a preserved file; (3) barrel registration via lake exe mk_all --module plus scoped builds; (4) disposition: task closes [BLOCKED] with report 02 section 5.4 cost table, requires_user_review true, both consumers' answers restated. Also mark plan Phases 3-6 [BLOCKED]: (R-a) refuted, see Phase 1. Task summary summaries/03_ra-probe-summary.md is written at that wrap-up per the plan.",
+    "invariants": "Repo-wide bare-sorry count in Cslib/ stays exactly 5; no new axioms; BibKeys Pacheco2024/ArisakaDasStrassburger2015/MarinMoralesStrassburger2021 only (never [Pacheco24]/[ADS15]/[MMS21]); constructor names cd/idb/dbot (never kdisj/kfs/kbot); no (R-b)/collapse pursuit; no edits under Nested/; no PR/push.",
+    "prior_handoff_note": "This file previously held the plan-02 phase-14 nested-sequent blocker handoff, superseded by the 2026-07-26 user rescope; that record is preserved verbatim at handoffs/phase-14-handoff-20260726.md."
   },
   "plan_markers_verified": true
 }

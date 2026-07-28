@@ -1,7 +1,7 @@
 # Implementation Plan: Task #554 (Round 3, hard mode)
 
 - **Task**: 554 - CS5 pair-seed obligation: (R-a) probe and conditional product-model route
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 13.5 hours worst case (probe-kill path: ~4 hours — Phases 1-2 only)
 - **Dependencies**: None
 - **Research Inputs**:
@@ -219,7 +219,7 @@ verdict; the task closes per the disposition in Phase 2.
 
 ---
 
-### Phase 1: The (R-a) probe — total-model refutation capacity of `is5FC` [NOT STARTED]
+### Phase 1: The (R-a) probe — total-model refutation capacity of `is5FC` [COMPLETED]
 
 **Goal**: Decide, machine-checked, whether the product-model route's required form of (R-a)
 holds: *for arbitrary `(H, A)` with the route's side conditions, does a total-`r` `is5FC` model
@@ -232,28 +232,33 @@ below) is a plan-time hypothesis requiring machine confirmation — the phase's 
 confirm or refute it.
 
 **Tasks** (fixed attempt list, in order):
-- [ ] Write `specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/ra_total_probe.lean`.
-- [ ] **P1 (total-validity)**: `∀ {World} [Preorder World] (r) (total : ∀ u v, r u v) (val)`
+- [x] Write `specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/ra_total_probe.lean`.
+- [x] **P1 (total-validity)**: `∀ {World} [Preorder World] (r) (total : ∀ u v, r u v) (val)`
       (val ≤-monotone not required for this lemma) `(w)`, `BForces r val (fun _ => False) w
       ((Proposition.box (.atom a)).or ((Proposition.box (.atom a)).imp .bot))` — by
       `Classical.em (∀ u, BForces … u (.atom a))`-style case split, using the degenerate box
       clause under totality. Atom type generic with one distinguished `a : Atom`.
-- [ ] **P2 (underivability)**: `¬ Derivable IS5ModalAxiom ((□ a).or ((□ a).imp ⊥))` via
+- [x] **P2 (underivability)**: `¬ Derivable IS5ModalAxiom ((□ a).or ((□ a).imp ⊥))` via
       `is5_soundness_derivable` and the two-world chain countermodel (`World` := a two-element
       order `w₀ ≤ w₁`; `r := Eq` — equivalence trivially; `f1`/`f2` discharged with witnesses
       `w'`/`u'`; `val` := true at `w₁` only, monotone). State over a concrete or `Nonempty`
       atom type as convenient.
-- [ ] **P3 (route refutation)**: formalise the route-required statement (∃-telescope over
+- [x] **P3 (route refutation)**: formalise the route-required statement (∃-telescope over
       `World`, `Preorder`, total `r`, monotone `val`, worlds `u v` with `∀ φ ∈ H, u ⊩ φ` and
       `¬ v ⊩ A`, existence for every `(H, A)` with `A ∉ modalDeductiveClosure IS5ModalAxiom H`)
       and refute it at `H := ∅`, `A := □a ∨ ¬□a`, combining P1 (no total model refutes `A`
       anywhere) and P2 (`A ∉ cl_IS5(∅)`, bridging `modalDeductiveClosure` at `∅` to
       `Derivable` via `PrimeTheory.lean:76-88`'s definition with witness list `[]`).
-- [ ] **Fallback (only if P1's proof does not close)**: re-derive the exact box clause from
-      `BForces`'s definition; if under the real semantics a total model CAN refute
-      `□a ∨ ¬□a`, attempt the positive direction instead — a total-`r` model construction for
-      the P2 countermodel's consistent refutation pair — with a budget of 2 distinct strategies;
-      record goal states for whichever fails.
+- [ ] ~~**Fallback (only if P1's proof does not close)**~~ — NOT TRIGGERED: P1 closed on the
+      first attempt against the real `BForces` semantics (`Birelational.lean:118` box clause
+      degenerates under totality exactly as the plan-time sharpening predicted).
+
+**Phase 1 verdict (recorded 2026-07-28)**: stopping condition (a) — P1+P2+P3 sorry-free,
+**kill-criterion FIRED, (R-a) REFUTED**. `lake env lean` exit 0; `#print axioms`:
+`total_validates_boxEm`/`ra_route_refuted` use only `propext, Classical.choice, Quot.sound`;
+`boxEm_not_derivable` is axiom-free (fully constructive). Verdict sentence at top of probe
+file. Per the dependency table, Phases 3-6 are not executable ((R-a) refuted); Phase 2's kill
+branch (land verdict in `Cslib`, execute the user's [BLOCKED] disposition) is next.
 
 **Stopping condition (bounded-unit guarantee)**: the phase ends when exactly one of
 (a) P1+P2+P3 are sorry-free — **kill-criterion FIRED**; (b) a machine-checked counterexample to

@@ -34,9 +34,6 @@ The proof proceeds by structural induction on `φ` with five cases:
 * [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II] — Section 2, Claim 2.11
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle

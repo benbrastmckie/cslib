@@ -9,6 +9,8 @@ module
 import Cslib.Init
 import Cslib.Foundations.Logic.Tableau.Measure
 import Mathlib.Tactic.Ring
+public import Cslib.Foundations.Logic.Tableau.Blocking
+public import Mathlib.Data.Finset.Prod
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
 
 /-! # IntMinScheme: Parameterized Interface for Intuitionistic/Minimal Tableau
@@ -1637,6 +1639,92 @@ lemma intUniverse_length_le (φ : Proposition Atom) :
         (List.range (φ.complexity + 2))).sum
       ≤ (φ.complexity + 2) * (2 * (2 * φ.complexity + 1)) := houter
     _ = 2 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by ring
+
+/-! ## Containment-Blocking Bridge
+
+This section consumes the shared containment-blocking module
+(`Cslib/Foundations/Logic/Tableau/Blocking.lean`) at the intuitionistic propositional
+types. `IBranch Atom` is definitionally `Branch (Proposition Atom) Nat` (`Rules.lean` vs
+`Branch.lean`), so the signed counting layer (`distinctTypes_le_pow`,
+`exists_typeAt_eq_of_card_lt`, `strictChain_le_card`) applies to intuitionistic branches
+without any coercion. The only content gap is between the local persistence projection
+`posFormulasAt` (a raw `filterMap`, `Rules.lean`) and the blocking module's deduplicated
+positive type `Branch.posTypeAt`: the two lists differ by an `eraseDups`, so they agree on
+membership (`posFormulasAt_mem_iff`).
+
+The signed universe is `intSignedUniverse φ := {pos, neg} ×ˢ (intSubfmls φ).toFinset`,
+a `Finset (Sign × Proposition Atom)`, giving the *signed* `2 ^ V.card` type-count bound
+of `distinctTypes_le_pow`. The sign pairing is load-bearing: an unsigned count over the
+bare subformula universe undercounts (two labels can agree on positive formulas while
+differing on negative ones and still have distinct types), which is why the counting layer
+is instantiated only in this signed form. See [GargGenoveseNegri2012], §III, for the
+corresponding count of distinct forced sets. -/
+
+omit [Hashable Atom] in
+/-- Membership bridge between the local persistence projection `posFormulasAt`
+(`Rules.lean`) and the blocking module's deduplicated positive type `Branch.posTypeAt`
+(`Blocking.lean`): the two lists differ only by an `eraseDups`, hence agree on
+membership. `IBranch Atom` is definitionally `Branch (Proposition Atom) Nat`, so no
+coercion is involved. -/
+lemma posFormulasAt_mem_iff {b : IBranch Atom} {w : Nat} {φ : Proposition Atom} :
+    φ ∈ posFormulasAt b w ↔ φ ∈ Branch.posTypeAt b w := by
+  simp only [posFormulasAt, Branch.posTypeAt, List.mem_filterMap, List.mem_eraseDups,
+    List.mem_map, List.mem_filter, Option.ite_none_right_eq_some, Option.some.injEq]
+  constructor
+  · rintro ⟨sf, hmem, hcond, hform⟩
+    exact ⟨sf, ⟨hmem, hcond⟩, hform⟩
+  · rintro ⟨sf, ⟨hmem, hcond⟩, hform⟩
+    exact ⟨sf, hmem, hcond, hform⟩
+
+omit [Hashable Atom] in
+/-- The signed subformula universe for `φ`: both signs paired with every structural
+subformula of `φ`. This is the universe `V : Finset (Sign × Proposition Atom)` at which
+the blocking module's signed counting layer is instantiated for the intuitionistic
+tableau. -/
+def intSignedUniverse (φ : Proposition Atom) : Finset (Sign × Proposition Atom) :=
+  ({.pos, .neg} : Finset Sign) ×ˢ (intSubfmls φ).toFinset
+
+omit [Hashable Atom] in
+/-- Membership in the signed universe ignores the sign: `(s, ψ)` lies in
+`intSignedUniverse φ` exactly when `ψ` is a structural subformula of `φ`. -/
+@[simp]
+lemma mem_intSignedUniverse {φ ψ : Proposition Atom} {s : Sign} :
+    (s, ψ) ∈ intSignedUniverse φ ↔ ψ ∈ intSubfmls φ := by
+  cases s <;> simp [intSignedUniverse]
+
+omit [Hashable Atom] in
+/-- Signed type-count bound at the propositional instantiation: a branch whose formulas
+all lie in `intSubfmls φ` exhibits at most `2 ^ (intSignedUniverse φ).card` distinct
+signed types. Instantiates `distinctTypes_le_pow` at `V := intSignedUniverse φ`. -/
+lemma intDistinctTypes_le_pow (φ : Proposition Atom) (b : IBranch Atom)
+    (hb : ∀ sf ∈ b, sf.formula ∈ intSubfmls φ) :
+    ((Branch.labels b).toFinset.image fun l => (Branch.typeAt b l).toFinset).card
+      ≤ 2 ^ (intSignedUniverse φ).card :=
+  distinctTypes_le_pow b (intSignedUniverse φ) fun sf hsf =>
+    mem_intSignedUniverse.mpr (hb sf hsf)
+
+omit [Hashable Atom] in
+/-- Pigeonhole at the propositional instantiation: a branch whose formulas all lie in
+`intSubfmls φ` and which carries more than `2 ^ (intSignedUniverse φ).card` distinct
+world labels has two distinct labels with the same signed type. Instantiates
+`exists_typeAt_eq_of_card_lt`; this is the loop-detection core the ancestor-blocking
+termination argument consumes. -/
+lemma intExists_typeAt_eq_of_card_lt (φ : Proposition Atom) (b : IBranch Atom)
+    (hb : ∀ sf ∈ b, sf.formula ∈ intSubfmls φ)
+    (hcard : 2 ^ (intSignedUniverse φ).card < (Branch.labels b).toFinset.card) :
+    ∃ l₁ ∈ Branch.labels b, ∃ l₂ ∈ Branch.labels b, l₁ ≠ l₂ ∧
+      (Branch.typeAt b l₁).toFinset = (Branch.typeAt b l₂).toFinset :=
+  exists_typeAt_eq_of_card_lt b (intSignedUniverse φ)
+    (fun sf hsf => mem_intSignedUniverse.mpr (hb sf hsf)) hcard
+
+/- `strictChain_le_card` is already fully generic in the finset element type, so it
+applies at the propositional instantiation with no wrapper: a chain of positive-type
+finsets growing strictly at each of `k` steps and ending inside a subformula universe
+`U` has at most `U.card` steps. Recorded as an `example` to keep the build checking
+direct applicability without adding a redundant declaration. -/
+example {k : Nat} (f : Nat → Finset (Proposition Atom)) (U : Finset (Proposition Atom))
+    (hchain : ∀ i, i < k → f i ⊂ f (i + 1)) (hU : f k ⊆ U) : k ≤ U.card :=
+  strictChain_le_card f U hchain hU
 
 /-! ## Branch-Universe Containment
 

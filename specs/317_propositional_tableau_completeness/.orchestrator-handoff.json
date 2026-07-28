@@ -1,50 +1,59 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "partial",
-  "summary": "Plan v12, Phases 0-1 (verification spike; sat_timp field) were already [COMPLETED] before this dispatch. This dispatch: (1) executed Phase 2 -- relocated the ~1,060-line universe/measure/persistence block (intUniverse, intExpMeasure, applyPersistenceFixpoint_genuine_of_count_le_fuel, etc.) from after tableau_complete to before intExpandBranches_openBranch_sat's docstring, pure code motion verified by an exact sorted-multiset-of-lines identity between pre- and post-move file content; scoped builds green; committed. (2) Began Phase 3 (the world-budget accounting invariant) via its own mandated 30-minute timeboxed alternative check, which escalated into a decisive negative result: direct computation against the real, unmodified intuitionisticTableau/intApplyRuleFull functions produced a concrete, reproducible counterexample showing the plan's stated injection strategy (each world-creating firing maps to a distinct .imp-node position of phi0) is false -- a single static position can fire the world-creating rule multiple times via T-signed persistence copying into sibling worlds. Phase 3 is marked BLOCKED, not PARTIAL, because there is no green Lean artifact to commit for it: the investigation was conducted entirely via throwaway #eval snippets (per the plan's own prohibition on writing speculative Lean against a strategy already known unsound), and no Cslib/ file was edited beyond Phase 2's relocation. Phases 4-9 are transitively blocked. Task-tree sorry count unchanged at 4 (Phase 2 closes no sorry by design; Phase 3 landed no proof).",
-  "artifacts": [
+  "status": "implemented",
+  "skeleton": false,
+  "summary": "Plan v13 Phase 1 (Blocking.lean consumption bridge) complete: Scheme.lean now imports the shared blocking module (public import Cslib.Foundations.Logic.Tableau.Blocking, plus Mathlib.Data.Finset.Prod for the signed-universe product) and consumes its signed counting layer at the propositional types. New 'Containment-Blocking Bridge' section (after intUniverse_length_le): posFormulasAt_mem_iff (membership bridge posFormulasAt <-> Branch.posTypeAt, differing only by eraseDups), intSignedUniverse phi := {.pos,.neg} xS (intSubfmls phi).toFinset : Finset (Sign x Proposition Atom), mem_intSignedUniverse (@[simp]), intDistinctTypes_le_pow (instantiates distinctTypes_le_pow, signed 2^V.card form), intExists_typeAt_eq_of_card_lt (pigeonhole instantiation), and a build-checked example confirming strictChain_le_card applies with no wrapper. All new declarations sorry-free; no existing declaration changed; refuted unsigned eraseDups/2^U.length form NOT used. Verification: scoped build green, full lake build green (3311 jobs), lake exe checkInitImports green, conformance corpus untouched, task-subtree bare-sorry count unchanged at 4.",
+  "phases_completed": 1,
+  "phases_total": 8,
+  "sorry_inventory": [
     {
-      "type": "plan",
-      "path": "specs/317_propositional_tableau_completeness/plans/12_world-bound-prereq-threading.md"
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 619,
+      "statement": "truthLemma T-imp case",
+      "strategic": false,
+      "pre_existing": true,
+      "assumption": "persistence-fixpoint sufficiency for T(phi'->psi') copies",
+      "why_deferred": "Phase 7 target (STOP-gate: closed together with the R1 restatement)",
+      "follow_up_task": "317 phase 7"
     },
     {
-      "type": "handoff",
-      "path": "specs/317_propositional_tableau_completeness/handoffs/12_world-bound-decision.md"
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 2639,
+      "statement": "intExpandBranches_openBranch_sat fuel-0 case (REFUTED as currently stated)",
+      "strategic": false,
+      "pre_existing": true,
+      "assumption": "R1 hypothesis-threading restatement (hUniv/hNW/hFuel)",
+      "why_deferred": "Phase 6 target; requires phases 2-5 fuel-sufficiency development",
+      "follow_up_task": "317 phase 6"
     },
     {
-      "type": "summary",
-      "path": "specs/317_propositional_tableau_completeness/summaries/12_world-bound-prereq-threading-summary.md"
-    }
-  ],
-  "blockers": [
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 133,
+      "statement": "intuitionisticTableau_complete validity bridge (DP-3)",
+      "strategic": true,
+      "pre_existing": true,
+      "assumption": "upward-closure of intExtractValuation along intAccessPreorder (IAtomPersist route)",
+      "why_deferred": "deferred to existing planned task per plan Territory Resolutions",
+      "follow_up_task": 430
+    },
     {
-      "description": "Phase 3's mandated timeboxed alternative check found that the plan's stated world-bound proof strategy -- an injective map from world-creation events into distinct static .imp-node positions of phi0 (backed by intSubfmls_impCount_le) -- is false, verified by a concrete, reproducible counterexample computed directly against the real intuitionisticTableau/intApplyRuleFull functions (not a hand-proof stall). For phi0 = ((p->q)->r /\\ (s->t)) -> ((u1->v1) \\/ (u2->v2) \\/ (u3->v3)) (complexity 10), the single static position 'p->q' fires the world-creating rule at 8 distinct labels, not 1, because the T-signed antecedent-of-antecedent gets copied (via propagatePersistence and applyAllTImpRules's broader accessible-world copy channel) into every sibling world created from its source, and each copy independently BETA-resolves and re-fires world-creation. Whether the target numeric bound (nextWorld <= phi0.complexity + 1) itself holds is unresolved either way -- only the specific proof route is refuted. Two follow-on stress tests intended to compound the effect timed out in the #eval sandbox before returning a conclusive result. See handoffs/12_world-bound-decision.md for full derivation, evidence, and three candidate re-plan directions (amortized/multiset argument, potential-function argument tied to the existing intExpMeasure machinery, or independent reverification of the bound via a faster instrumented harness).",
-      "phase": "phase-3",
-      "severity": "hard"
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 125,
+      "statement": "minimalTableau_complete validity bridge (DP-4)",
+      "strategic": true,
+      "pre_existing": true,
+      "assumption": "upward-closure of intExtractValuation and minBranchBotForces along the frame",
+      "why_deferred": "deferred to existing planned task per plan Territory Resolutions",
+      "follow_up_task": 430
     }
   ],
-  "next_action_hint": "plan",
+  "blockers": [],
+  "continuation_path": null,
   "files_modified": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/317_propositional_tableau_completeness/plans/12_world-bound-prereq-threading.md",
-    "specs/317_propositional_tableau_completeness/handoffs/12_world-bound-decision.md"
+    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md"
   ],
-  "decisions_made": [
-    "Executed Phase 2's block relocation via a verified pure-Python line-slice splice rather than manual Edit tool operations, given the plan's own guidance to avoid whole-file reads and manual edits at this scale; verified purity via an exact sorted-multiset-of-lines identity check between pre- and post-move content.",
-    "Escalated Phase 3's mandated 30-minute timeboxed alternative check into a full computational falsification of the stated injection strategy, using lean_run_code against the real production functions, rather than attempting to hand-prove an argument already suspected (during hand-tracing) to have a gap.",
-    "Did not write any speculative Lean for the accounting invariant once the injection strategy was confirmed false, per the plan's prohibition on writing proof code against a route already known unsound; recorded the finding in a handoff instead, matching the plan's own Rollback/Contingency guidance for this exact phase.",
-    "Marked Phase 3 BLOCKED rather than PARTIAL: PARTIAL implies a green sub-step exists to resume from, but this investigation produced no Lean artifact -- only a decisive negative finding about the plan's own stated strategy."
-  ],
-  "dead_ends": [
-    "The injection 'world-creation event -> distinct .imp-node position of phi0' (as literally stated in three pre-existing in-file docstrings and the plan's Phase 3/4 tasks) is refuted by direct counterexample -- do not attempt to formalize it as stated in a future dispatch.",
-    "Do not trust the in-file docstring's premise 'F-signed formulas never propagate via persistence' as sufficient justification for injectivity -- it is true but irrelevant: the T-signed antecedent-of-antecedent propagates, and each copy's own resolution mints a fresh F-signed instance independently.",
-    "Attempting to stress-test the numeric bound itself via nested implication chains (to amplify the counterexample and determine whether the bound is outright false, not just the proof route) hit #eval sandbox timeouts for chain depth >= 2; this needs a faster computational harness (native-compiled test or hand-instrumented tracing) before it can be resolved, not a bigger #eval budget in the same style."
-  ],
-  "continuation_context": {
-    "handoff_path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-    "phases_completed": 3,
-    "phases_total": 10
-  },
-  "plan_markers_verified": true
+  "next_action_hint": "implement phase 2 (WBound definition + intCreatedChain_le chain-bound lemma; division point DP-1, follow-up task 585 if the pigeonhole proof does not close within the dispatch)",
+  "notes": "Zero sorries introduced this dispatch; the four inventory entries are the pre-existing ones recorded for complete accounting (they match the plan's Planned Strategic Sorries table and phase targets). skeleton:false because this dispatch rests on no strategic sorry it placed."
 }

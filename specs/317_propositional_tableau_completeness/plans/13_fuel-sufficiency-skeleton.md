@@ -1,7 +1,7 @@
 # Implementation Plan: Tableau Completeness — Blocking Bridge, Fuel-Sufficiency Development, R1 Restatement (Skeleton)
 
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 24-40 hours (8 phase-sized dispatches; skeleton — full sorry-zero completion is
   explicitly NOT claimed by this plan alone, see Planned Strategic Sorries)
 - **Dependencies**: 456 (completed — Blocking.lean), 552 (completed), 574 (completed — ancestor
@@ -198,18 +198,25 @@ verification, 583's F6, the in-file directives, and twelve failed prior plan ver
 single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only for the
 `WBound` DEFINITION, not its proof — it proceeds unimpeded if DP-1 is sorried.)
 
-### Phase 1: Blocking.lean consumption bridge [NOT STARTED]
+### Phase 1: Blocking.lean consumption bridge [COMPLETED]
 - **Goal:** The propositional tableau imports and can invoke 456's counting layer.
 - **Tasks:**
-  - [ ] Import `Cslib.Foundations.Logic.Tableau.Blocking` into the intuitionistic development
+  - [x] Import `Cslib.Foundations.Logic.Tableau.Blocking` into the intuitionistic development
     (at `Expansion.lean` or `Scheme.lean`, whichever the lemmas land in; respect shake).
-  - [ ] Bridge lemma `posFormulasAt_mem_iff`: `φ ∈ posFormulasAt b w ↔ φ ∈ Branch.posTypeAt b w`
+    (Landed in `Scheme.lean` — the instantiations need `intSubfmls`, which lives there. Also
+    added `Mathlib.Data.Finset.Prod` for the `×ˢ` signed-universe product.)
+  - [x] Bridge lemma `posFormulasAt_mem_iff`: `φ ∈ posFormulasAt b w ↔ φ ∈ Branch.posTypeAt b w`
     (membership equivalence; `IBranch Atom` is definitionally `Branch (Proposition Atom) Nat`,
     so no coercion is needed — only the local-def-to-`posTypeAt` content equivalence, which
     differs by an `eraseDups`).
-  - [ ] Instantiations at the propositional types: `distinctTypes_le_pow` with
+  - [x] Instantiations at the propositional types: `distinctTypes_le_pow` with
     `V := (intSubfmls φ).toFinset ×ˢ {Sign.pos, Sign.neg}` (or equivalent signed universe) and
     `exists_typeAt_eq_of_card_lt`; confirm `strictChain_le_card` applies without wrapping.
+    (Landed as `intSignedUniverse φ := {.pos, .neg} ×ˢ (intSubfmls φ).toFinset :
+    Finset (Sign × Proposition Atom)` — the `Sign × F` component order `distinctTypes_le_pow`
+    expects — with `mem_intSignedUniverse` simp lemma, `intDistinctTypes_le_pow`,
+    `intExists_typeAt_eq_of_card_lt`; `strictChain_le_card` confirmed to apply with no wrapper
+    via a build-checked `example` at the propositional instantiation.)
 - **Timing:** 1 dispatch. Estimated output: ~120-180 lines.
 - **Depends on:** none
 - **Verification Tier:** local

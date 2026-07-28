@@ -1,44 +1,55 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
+  "phase": "implement",
+  "status": "implemented",
   "task_number": 581,
-  "summary": "6-phase plan for two ratchet honesty gates: an exact-set sorryAx-taint census over the public Cslib API (single-process Lean.collectAxioms driver, ~2.7s, 43 tainted of 18279) and a per-file two-count ceiling on warn.sorry markers and code-position sorries (18 markers/5 files, 28 sorries/9 files). Both baseline the current tree so they land green and fail only on regression. Waves: [1,3] -> [2] -> [4,5] -> [6]. Phase 6 proves regression AND improvement paths for both gates and restores a clean tree. No .lean file under Cslib/ is touched; no lakefile.toml change.",
+  "summary": "All 6 phases complete. Two ratchet honesty gates landed green on the current tree: scripts/check-axiom-census.sh (exact-set, 43 sorryAx-tainted public Cslib declarations) and scripts/check-sorry-suppressions.sh (per-file two-count ceiling, 18 markers/5 files + 28 sorries/9 files). Wired into .github/workflows/lean_action_ci.yml (suppression gate before the build step, census gate after with if: always()) and scripts/pre-pr-check.sh (steps 8/9), documented in scripts/README.md. Phase 6 proved both regression (exit 1) and improvement (exit 0, ACTION REQUIRED) paths for both gates via .bak/scratch-file mechanics, then restored a bit-identical clean tree. Full 7-step CSLib CI pipeline re-verified green (pre-existing, unrelated debt only). No .lean file under Cslib/ was ever modified.",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/581_sorry_axiom_honesty_gates/plans/01_sorry-axiom-honesty-gates.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/581_sorry_axiom_honesty_gates/summaries/01_sorry-axiom-honesty-gates-summary.md"
     }
   ],
   "plan_path": "specs/581_sorry_axiom_honesty_gates/plans/01_sorry-axiom-honesty-gates.md",
   "blockers": [],
-  "next_action_hint": "implement",
+  "next_action_hint": "complete",
   "files_modified": [
+    "scripts/AxiomCensus.lean",
+    "scripts/check-axiom-census.sh",
+    "scripts/axiom-census-baseline.txt",
+    "scripts/check-sorry-suppressions.sh",
+    "scripts/sorry-suppression-baseline.txt",
+    ".github/workflows/lean_action_ci.yml",
+    "scripts/pre-pr-check.sh",
+    "scripts/README.md",
     "specs/581_sorry_axiom_honesty_gates/plans/01_sorry-axiom-honesty-gates.md",
+    "specs/581_sorry_axiom_honesty_gates/summaries/01_sorry-axiom-honesty-gates-summary.md",
     "specs/581_sorry_axiom_honesty_gates/.return-meta.json",
     "specs/581_sorry_axiom_honesty_gates/.orchestrator-handoff.json"
   ],
   "decisions_made": [
-    "D1: baseline ledger uses durable anchors (declaration name + owning file path + in-source blocking-reason string), never task numbers, per the no-task-references-in-deliverables rule; scope item 4's live-debt-ledger intent is fully honored. A grep-based D1 compliance check is in the plan's Testing & Validation list.",
-    "D2: both gates ARE wired into lean_action_ci.yml as scoped, with the dead-step defect fixed -- the Lean-free suppression gate is placed BEFORE the currently-red build step (fails fast, needs no condition), the build-dependent census after it with if: always(); an inline comment records the upstream-sync divergence cost and notes the two sibling guards deliberately chose the other tradeoff. pre-pr-check.sh steps 8/9 and two scripts/README.md entries are added additively, not as a substitute.",
-    "D3: improvements print a loud ACTION REQUIRED re-baseline block but exit 0, matching both in-repo ratchet precedents; making improvement exit 1 would turn a ratchet into an absolute gate that goes red whenever someone fixes something.",
-    "D4: no lakefile.toml change -- the census Lean driver runs via `lake env lean --run scripts/AxiomCensus.lean` rather than as a registered [[lean_exe]], at identical measured cost, keeping the diff to 8 files.",
-    "Axiom-census regression is proven by baseline mutation (delete a row -> live name absent from baseline -> exit 1) instead of the definition-of-done's suggested scratch tainted declaration, because a scratch declaration must be reachable from the Cslib root import to be censused, which requires editing Cslib.lean -- forbidden by the non-goals -- and would cost a full rebuild. The suppression gate's scratch-file probe IS done literally, since its scanner is a pure find-based text sweep with no import or build dependency. The plan states this deviation and its reasoning explicitly.",
-    "Exit 2 (never 0) when the underlying tool fails to run is specified as a hard requirement for both scripts, with three concrete trigger conditions enumerated per script.",
-    "Suppression scanner must use the plain `set_option warn.sorry false` substring, NOT check-lint-suppressions.sh's $-anchored blanket regex -- verified during planning that all 18 markers in the tree are the declaration-scoped `... false in` form, so the anchored regex would count 0.",
-    "Verified during planning that no line in the tree carries both a warn.sorry option and a separate code-position sorry, so the discrimination rule's drop-the-whole-line step loses nothing today; recorded as a currently-vacuous known edge case for the script header.",
-    "File scope expanded from the declared 3 files to 8 (adds scripts/AxiomCensus.lean, the two baseline files, pre-pr-check.sh, scripts/README.md), recorded explicitly in the plan so it is not mistaken for scope creep."
+    "D1: baseline ledger uses durable anchors (declaration name + owning file path + in-source blocking-reason string), never task numbers. Implemented as written in both baseline files' header comments and per-row/per-comment ledger content. Grep verification across all 8 new/modified files confirmed zero task-number references.",
+    "D2: both gates ARE wired into lean_action_ci.yml as scoped -- suppression gate before the (currently-red-by-design) build step, census gate after it with if: always() -- plus additively into pre-pr-check.sh (steps 8/9) and scripts/README.md. Implemented exactly as decided; git diff on the workflow file is purely additive.",
+    "D3: improvements print an ACTION REQUIRED re-baseline block naming the exact --update command and exit 0. Implemented in both scripts; verified via scratch-baseline improvement tests for both gates.",
+    "D4: no lakefile.toml change -- the census driver runs via `lake env lean --run scripts/AxiomCensus.lean`. Implemented as written; lakefile.toml is untouched.",
+    "Axiom-census regression proven by baseline mutation (delete a row), not a scratch tainted declaration, per the plan's own pre-approved Phase 6 Method note. Suppression regression proven literally via a scratch probe file, created and removed within Phase 6.",
+    "NEW finding during Phase 1 implementation, not anticipated by the plan or research: literal `Lean.collectAxioms` calls do NOT hit the exportedAxiomsExt cross-declaration cache for a large fraction of this environment's declarations (measured: repeated calls to the SAME declaration cost ~64ms every time, no speedup; a Mathlib-native declaration was also uncached at 213ms, so this is not Cslib-specific). A literal implementation of the plan's specified mechanism was projected at several minutes total -- unacceptable, and contradicting the research's ~2.7s premise for this exact approach on this exact tree. Fix: scripts/AxiomCensus.lean implements collectAxiomsCached, which reproduces Lean.collectAxioms's own dependency-walk semantics exactly but with an explicit shared cache across the whole run. Verified: reproduces tainted=43 exactly, completes in ~8.6s (single process, no per-module spawning -- every other part of the specified design preserved). Fully documented in the script's own header and in the plan's Phase 1 checklist annotation; treated as a transparent, necessary implementation-detail correction rather than a proof-strategy substitution, since scripts/AxiomCensus.lean is tooling (not a Cslib/ proof) and the correctness/performance bar the plan itself set (tainted=43, 'a few seconds, not minutes') was met exactly."
   ],
   "dead_ends": [
-    "Per-module (one process per .lean file) axiom census: measured by research at ~16-17 minutes (686 files x ~1.45s process+import startup) versus ~2.7s for the whole-root single-process approach, for no accuracy benefit. Rejected; do not re-explore or re-measure.",
-    "Hand-rolled dependency walker via env.find? + getUsedConstants recursion: superseded by builtin Lean.collectAxioms, which is cached via exportedAxiomsExt, sorted, and exactly matches #print axioms semantics.",
-    "Naive `grep -c sorry` for the sorry count: yields 180 on the current tree versus the true 28; useless without the block/line-comment-strip plus warn.sorry-exclusion discrimination rule.",
-    "Using intuitionisticTableau_complete / minimalTableau_complete as Class-1 silent-taint examples: the task description names these but research disproved it -- both contain direct sorry tokens and DO emit `declaration uses sorry`. The genuine witnesses are minimalTableau_decides / intuitionisticTableau_decides.",
-    "Registering the census as a [[lean_exe]] in lakefile.toml (the CheckInitImports precedent): viable but rejected in favor of `lake env lean --run` to keep lakefile.toml out of the diff at identical measured cost.",
-    "Following the sibling guards' CI precedent (lint-hygiene.yml for the Lean-free gate, no CI at all for the build-dependent one): this was the research's own recommendation but was overridden by the orchestrator in favor of the explicit written scope. Do not re-propose it.",
-    "Running shellcheck locally to pre-validate the new scripts: shellcheck is not installed in this environment; mitigation is to model both scripts closely on the two existing passing ratchet scripts and rely on the path-triggered shellcheck.yml CI sweep."
+    "Per-module (one process per .lean file) axiom census: measured by research at ~16-17 minutes. Rejected; not re-explored.",
+    "Calling the builtin Lean.collectAxioms directly, per declaration, with no additional caching: this was the plan's literal specified mechanism, but measured (during this implementation) to cost several minutes total on this tree because exportedAxiomsExt's cross-declaration cache is not being hit for a large fraction of declarations here -- see decisions_made above. Superseded by collectAxiomsCached (same semantics, explicit shared cache), which reproduces the identical tainted=43 result in ~8.6s.",
+    "Naive `grep -c sorry` for the sorry count: yields 180/168 depending on drift; useless without the full discrimination rule.",
+    "Using intuitionisticTableau_complete / minimalTableau_complete as Class-1 silent-taint examples: disproven by research; the genuine witnesses are the `_decides` pair, used exclusively throughout all authored text in this task's deliverables.",
+    "Registering the census as a [[lean_exe]] in lakefile.toml: rejected per D4 in favor of `lake env lean --run`.",
+    "Following the sibling guards' CI precedent (lint-hygiene.yml / no-CI-at-all): overridden by the orchestrator's D2 in favor of the explicit written scope; not re-proposed.",
+    "Running shellcheck locally: not installed in this environment; both new scripts modelled closely on the two existing passing precedents to minimize risk, will be swept by the path-triggered shellcheck.yml CI workflow on push.",
+    "Per-line raw \\bsorry\\b matching for the D1 debt ledger (Phase 3): tested and rejected -- massively overcounts from docstring prose (150 hits vs the true 28), same failure mode the whole task exists to avoid. Ledger extraction instead only harvests a trailing same-line `--` comment on a genuine post-discrimination-rule code-position sorry line; 5 of 9 files legitimately produce no ledger entry because their sorry sites have no trailing comment (blocker context lives in surrounding docstring prose instead, deliberately not parsed)."
   ],
-  "phases_completed": 0,
+  "phases_completed": 6,
   "phases_total": 6,
   "requires_user_review": false,
   "blocked_phase": null,

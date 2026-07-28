@@ -1,10 +1,30 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-28T00:00:00Z",
-  "artifacts": ["scripts/AxiomCensus.lean", "scripts/check-sorry-suppressions.sh", "scripts/sorry-suppression-baseline.txt", "scripts/check-axiom-census.sh", "scripts/axiom-census-baseline.txt", ".github/workflows/lean_action_ci.yml", "scripts/pre-pr-check.sh", "scripts/README.md"],
+  "completion_summary": "Implemented two ratchet honesty gates (axiom-census exact-set, sorry-suppression per-file two-count ceiling) that make existing Cslib proof debt visible without discharging any of it. Both land green on the current tree, are wired into CI and pre-pr-check.sh, documented in scripts/README.md, and demonstrably exit 1 on regression / 0 on improvement (Phase 6 evidence: 1,0,1,0,0,0). No .lean file under Cslib/ was modified. One significant, fully-documented deviation: scripts/AxiomCensus.lean implements a shared-cache axiom walker instead of raw per-declaration Lean.collectAxioms calls, because the latter's cross-declaration cache was measured not to fire in this environment (would have cost several minutes, not the ~2.7s the plan's premise assumed); the shared-cache version reproduces the exact settled tainted=43 baseline in ~8.6s.",
+  "artifacts": [
+    "scripts/AxiomCensus.lean",
+    "scripts/check-axiom-census.sh",
+    "scripts/axiom-census-baseline.txt",
+    "scripts/check-sorry-suppressions.sh",
+    "scripts/sorry-suppression-baseline.txt",
+    ".github/workflows/lean_action_ci.yml",
+    "scripts/pre-pr-check.sh",
+    "scripts/README.md",
+    "specs/581_sorry_axiom_honesty_gates/summaries/01_sorry-axiom-honesty-gates-summary.md"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "sorry_count/vacuous_count/axiom_count are 0 for files this task modified (no .lean file under Cslib/ was touched). Repo-wide Cslib/ baseline figures (168 naive-grep sorries, 1 vacuous-regex false-positive at Cslib/Computability/URM/Basic.lean:92, 26 axioms) are pre-existing and unaffected -- confirmed via git status --porcelain Cslib/ and git diff -- Cslib/, both empty throughout. Full 7-step CI pipeline (cache get, lake build, checkInitImports, lake lint, lint-style, shake, mk_all --check, lake test) re-run and green; lake lint and raw lake shake show only pre-existing, unrelated debt in files this task never touched. Both new gates (check-sorry-suppressions.sh, check-axiom-census.sh) exit 0 on the final restored tree."
+  },
   "partial_progress": {
-    "stage": "phase_6_complete",
-    "details": "All 6 phases complete. Phase 6 regression/improvement proofs recorded: census regression=1, census improvement=0, suppression regression=1, suppression improvement=0, both bare=0. Tree confirmed clean (git status --porcelain Cslib/ empty, no .bak files, baselines match committed state). Proceeding to final CI pipeline verification.",
+    "stage": "complete",
+    "details": "All 6 phases complete and committed. Final CI pipeline verification passed.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 6
@@ -13,6 +33,7 @@
     "session_id": "sess_1785251101_8e14cc_581",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

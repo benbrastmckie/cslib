@@ -11,9 +11,9 @@ next_project_number: 585
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,425,456,534,554,558,562,563,568,569,583,584 | -- | propositional logic, modal logic, tableau infrastructure, ... |
-| 2 | 39,40,215,301,317,450,497,511,537,551,553,564,571,576 | 36,37,181,425,456,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,375,430,506,548,565,566,582 | 39,40,317,511,553,564 | foundations, propositional logic, modal logic |
+| 1 | 36,37,181,226,317,400,409,425,534,554,558,562,563,568,569,583,584 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,430,450,497,511,537,551,553,564,571,576 | 36,37,181,317,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,506,548,565,566,582 | 39,40,511,553,564 | foundations, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -25,12 +25,12 @@ next_project_number: 585
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
+400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
@@ -55,10 +55,6 @@ next_project_number: 585
   └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
     └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the (see above)
-
-### Tableau Infrastructure
-
-456 [IMPLEMENTING] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ### Temporal Logic
 
@@ -492,12 +488,13 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 456. Shared tableau containment blocking
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: Task 574
 - **Research**: [456_shared_tableau_containment_blocking/reports/01_blocking-module-research.md]
 - **Plan**: [456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md]
+- **Summary**: [456_shared_tableau_containment_blocking/summaries/01_blocking-module-summary.md]
 
 **Description**: Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
 

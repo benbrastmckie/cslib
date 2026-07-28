@@ -2,6 +2,24 @@
   "_comment": "Archive state for completed and abandoned tasks",
   "completed_projects": [
     {
+      "project_number": 577,
+      "project_name": "throwaway_verify_meta_task_creation_pipeline",
+      "title": "THROWAWAY VERIFICATION TASK - confirm /meta --local creates a task end-to-end; abandon after checking",
+      "status": "abandoned",
+      "task_type": "meta",
+      "topic": "Code Hygiene",
+      "created": "2026-07-27T10:09:36Z",
+      "last_updated": "2026-07-27T10:09:36Z",
+      "session_id": "sess_1785146872_76fe4e",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "blockers": [],
+      "dependencies": [],
+      "file_scope": [],
+      "description": "Disposable task created solely to verify that `/meta --local` writes its state.json entry, increments `next_project_number`, regenerates TODO.md, and creates the task directory in the CURRENT repo rather than the global agent-system root.\n\nNo system change is intended and no file outside `specs/` should ever be edited under this task.\n\nVERIFICATION IS COMPLETE once the entry appears in BOTH `specs/state.json` and `specs/TODO.md` with a matching directory on disk.\n\nOnce confirmed, run `/task --abandon 577` (or let `/todo` archive it) -- this task must never be researched, planned, or implemented.\n",
+      "abandoned": "2026-07-27T10:12:26Z"
+    },
+    {
       "project_number": 512,
       "project_name": "cs5_box_backward_atom_sum_completeness",
       "status": "abandoned",
@@ -10188,6 +10206,379 @@
       "parent_task": null,
       "completion_summary": "Discharged nested_sound_impL via the source's page-10 Lambda-chain induction, and repaired three pre-existing defects research uncovered that the task brief had not accounted for: lemma 4.7(ii) was never landed (plus a false module-docstring claim that page 10's (i) and (ii) were the same formula); InputCtx.outputPruning was off by one nesting level at Lambda = [], which made the target theorem refutable rather than merely unproved; and nested_sound was missing its NestedProof.cut case, leaving the baseline build RED on a clean tree contrary to the brief's premise. Cslib/ bare-sorry census 41 -> 40 with no Nested/Soundness.lean entry remaining; full-library lake build green (3259/3259); lake test green (9253/9253); nested_sound_impL, nested_sound_cut and nested_sound all axiom-clean ([propext, Classical.choice, Quot.sound], no sorryAx).",
       "archived_at": "2026-07-27T06:32:24Z"
+    },
+    {
+      "project_number": 580,
+      "project_name": "shake_ci_gate_restore_green",
+      "title": "Restore lake shake to a green disposition, disabling only what upstream alignment requires",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "created": "2026-07-28T13:29:56Z",
+      "last_updated": "2026-07-28T15:39:54Z",
+      "session_id": "sess_1785251101_8e14cc_580",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/580_shake_ci_gate_restore_green/reports/01_shake_ci_gate_restore_green.md",
+          "type": "report",
+          "summary": "Live re-classification of shake findings; exemption mechanism confirmed unusable for the 10-file upstream-identical residue"
+        },
+        {
+          "path": "specs/580_shake_ci_gate_restore_green/plans/01_restore-shake-ci-gate.md",
+          "type": "plan",
+          "summary": "4-phase plan: fix 2 diverging files, add residue guard, disable CI step with rationale, verify"
+        },
+        {
+          "path": "specs/580_shake_ci_gate_restore_green/summaries/01_restore-shake-ci-gate-summary.md",
+          "type": "summary",
+          "summary": "4/4 phases: 2 files fixed, residue guard added, CI step disabled with audit trail, CI steps verified"
+        }
+      ],
+      "blockers": [],
+      "dependencies": [],
+      "file_scope": [
+        ".github/workflows/lean_action_ci.yml",
+        "Cslib/Logics/Modal/Basic.lean",
+        "Cslib/Foundations/Data/HasFresh.lean",
+        "scripts/check-shake-residue.sh"
+      ],
+      "description": "Bring `lake shake` back to a green, ALIGNMENT-PRESERVING disposition. The step is currently ENABLED AND FAILING, so CI is red for a second reason independent of the sorry gate.\n\nGOVERNING PRINCIPLE (user decision -- this is the constraint the whole task is shaped around): DISABLE SHAKE ONLY WHERE REQUIRED TO MAINTAIN UPSTREAM ALIGNMENT. Blanket-disabling is NOT the answer. Fix everything fixable that does not fork upstream; disable only the residue that cannot be fixed without diverging, and prove that residue is genuinely irreducible before disabling anything.\n\nVERIFIED PROBLEM (measured live, not inferred): the repo-wide lint-hygiene work uncommented the `lake shake` step in `.github/workflows/lean_action_ci.yml` and recorded it as \"clean\", but it is not. `lake shake --add-public --keep-implied --keep-prefix Cslib` exits 1 and flags 12 files; that CI step runs under `set -e`, so the job goes red.\n\nTHE 12 FLAGGED FILES, classified against `upstream/main` (f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1) at audit time:\n\nFIXABLE AT ZERO ALIGNMENT COST (2) -- these files ALREADY diverge from upstream, so applying shake's suggestion adds no new divergence:\n  - Cslib/Logics/Modal/Basic.lean -- add #[public import Mathlib.Order.Notation]  (single-line change)\n  - Cslib/Foundations/Data/HasFresh.lean -- remove #[public import Mathlib.Analysis.Normed.Field.Lemmas]; add #[public import Mathlib.Analysis.Normed.Group.Basic, Mathlib.Topology.MetricSpace.Bounded, Mathlib.Data.EReal.Operations, Mathlib.Topology.Algebra.InfiniteSum.Order]\n\nBYTE-IDENTICAL TO UPSTREAM (10) -- fixing any of these forks a pristine file and creates merge-conflict cost on every future sync. This is upstream's own import debt, not this fork's; upstream disabled the same check in its commit \"ci: disable shake again (#397)\":\n  Algorithms/Lean/TimeM.lean, Computability/Machines/Turing/MultiTape/Deterministic.lean, Computability/Machines/Turing/SingleTape/NonDeterministic.lean, Foundations/Data/StackTape.lean, Foundations/Relation/Defs.lean, Foundations/Relation/Confluence.lean, Foundations/Control/Monad/Free.lean, Languages/CCS/Basic.lean, Languages/CombinatoryLogic/Defs.lean, Languages/LambdaCalculus/LocallyNameless/Untyped/LcAt.lean\n\nSCOPE:\n1. RE-RUN THE CLASSIFICATION LIVE against current `upstream/main` before acting. The 12/2/10 split above is dated; upstream may have fixed some, and local edits may have moved files between the two buckets. The split drives every decision below, so it must be re-derived, not trusted.\n2. Fix the locally-modified bucket by applying shake's suggestions to those files only. Rebuild and confirm no new warnings.\n3. Determine whether the residual upstream-identical bucket can be EXEMPTED rather than the whole step disabled. Investigate honestly and record the finding: `lake shake` accepts `[<MODULE>...]` arguments but checks everything transitively reachable, and no per-file ignore mechanism was found in the repo or in the importGraph package at audit time -- CONFIRM OR REFUTE THIS. If a scoping or exemption mechanism does exist, prefer it over disabling; that keeps the gate live for this fork's own code, which is the whole point.\n4. Only if step 3 establishes no exemption mechanism exists: comment out the `lake shake` CI step. Record inline WHY, with the audit date, the upstream SHA compared against, and the explicit statement that the residue is upstream-identical -- so a future reader can re-derive the decision instead of re-litigating it.\n5. PREFERRED, and the highest-value part of this task if step 4 is reached: add a local (non-CI, or CI-advisory) guard that runs shake and asserts the flagged set is EXACTLY the known upstream-identical residue. That way this fork's OWN new import debt is still caught while upstream's debt does not fail the build -- disabling the CI step then costs no local enforcement at all. Model it on `scripts/check-lint-suppressions.sh` (checked-in baseline + exact-set comparison + exit 0/1), the established in-repo ratchet pattern.\n6. Re-verify the other CI steps still pass: `lake test`, `lake exe mk_all --check`, `lake exe checkInitImports`, `lake exe lint-style` all exit 0. The `lake build --wfail --iofail` sorry gate is expected to remain red and is out of scope here.\n\nNON-GOALS: do not run a blanket `lake shake --fix`; do not modify any upstream-identical file; do not touch any sorry, proof, definition, or theorem statement; do not alter the `--wfail --iofail` build args.\n\nDEFINITION OF DONE: the locally-modified bucket is shake-clean; the upstream-identical bucket is untouched and still byte-identical to upstream; either the shake gate runs green in CI, or it is disabled with the alignment rationale, audit date and upstream SHA recorded inline AND a local guard pins the exact expected residue; the four other non-build CI steps are re-verified exit 0.\n",
+      "completion_summary": "Restored lake shake to a green, alignment-preserving disposition. Applied shake's own import deltas to the two locally-diverging files (Cslib/Logics/Modal/Basic.lean, Cslib/Foundations/Data/HasFresh.lean), leaving the upstream-identical residue byte-identical to upstream. Confirmed no usable per-file exemption mechanism exists for that residue (keep-all suppresses only removal findings; 9 of 10 residual files need additions), so the CI step was commented out with a full inline audit trail, and enforcement was preserved locally via scripts/check-shake-residue.sh, an exact-set ratchet guard with a checked-in baseline wired into pre-pr-check.sh. Live post-fix residue is 9 files, not the predicted 10. All four non-build CI steps re-verified exit 0.",
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 581,
+      "project_name": "sorry_axiom_honesty_gates",
+      "title": "Add sorryAx census and warn.sorry suppression ratchets so hidden proof debt cannot grow",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "created": "2026-07-28T13:29:56Z",
+      "last_updated": "2026-07-28T16:45:37Z",
+      "session_id": "sess_1785251101_8e14cc_581",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/581_sorry_axiom_honesty_gates/reports/01_sorry_axiom_honesty_gates.md",
+          "type": "report",
+          "summary": "Measured census cost (2.7s whole-root vs 16-17min per-module), verified live counts, discrimination rule, Class-1 correction, two scope conflicts"
+        },
+        {
+          "path": "specs/581_sorry_axiom_honesty_gates/plans/01_sorry-axiom-honesty-gates.md",
+          "type": "plan",
+          "summary": "6-phase plan: Lean census emitter, two ratchet guards with baselines, CI + pre-pr wiring"
+        },
+        {
+          "path": "specs/581_sorry_axiom_honesty_gates/summaries/01_sorry-axiom-honesty-gates-summary.md",
+          "type": "summary",
+          "summary": "6/6 phases: axiom census + suppression ratchets baselined green, CI and pre-pr wired, regression/improvement proven"
+        }
+      ],
+      "blockers": [],
+      "dependencies": [
+        580
+      ],
+      "file_scope": [
+        "scripts/check-axiom-census.sh",
+        "scripts/check-sorry-suppressions.sh",
+        ".github/workflows/lean_action_ci.yml"
+      ],
+      "description": "Add honesty gates that make hidden proof debt impossible to accumulate silently: a `#print axioms` ratchet over the public API, and a `set_option warn.sorry false` suppression ratchet. Neither gate discharges any sorry -- both make the existing debt VISIBLE and prevent it from growing.\n\nVERIFIED PROBLEM (measured live): the repo has two classes of proof debt that no current check can see.\n\nCLASS 1 -- SILENT sorryAx TAINT. A declaration that consumes a sorry'd lemma but contains no `sorry` token emits NO warning and is clean by every syntactic measure. Verified directly:\n    'Cslib.Logic.PL.intuitionisticTableau_complete' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n    'Cslib.Logic.PL.minimalTableau_complete'        depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\nNo `warn.sorry` policy however strict catches this class. Prior work independently identified the same hole for `succ_cofinal` and `limitDomSubtypeIsSuccArchimedean` in ChronicleToCountermodel.lean, and recommended exactly this gate as a separate task.\n\nCLASS 2 -- SUPPRESSED SORRIES. 18 `set_option warn.sorry false in` markers hide sorries from `lake build --wfail --iofail` across 5 files (ChronicleToCountermodel.lean, Bundle/SuccRelation.lean, Bundle/UntilSinceCoherence.lean, ConservativeExtension/TemporalConservativity.lean, BXCanonical/Frame.lean). Nothing stops a 19th being added.\n\nDESIGN CONSTRAINT -- RATCHET, NOT ABSOLUTE GATE. Both gates MUST land GREEN on the current tree by baselining the present state, then failing only on REGRESSION. An absolute gate would be red on arrival and would immediately be disabled, achieving nothing. Model both on the existing `scripts/check-lint-suppressions.sh`, which already implements exactly this pattern (baseline file + ceiling comparison + exit 0/1) and is the in-repo precedent to follow.\n\nSCOPE:\n1. `scripts/check-axiom-census.sh`: enumerate the public API surface, emit each declaration's axiom profile, and diff the set of `sorryAx`-tainted declarations against a checked-in baseline. FAIL when a declaration not in the baseline becomes tainted. PASS (and report) when a baseline entry becomes clean -- and require the baseline to be re-tightened, so the ratchet only ever moves toward zero. Decide and record how the \"public API surface\" is enumerated (whole `Cslib` root import vs. per-module) -- the choice determines runtime, so measure it.\n2. `scripts/check-sorry-suppressions.sh`: count `set_option warn.sorry false` markers and bare `sorry` occurrences in code position across `Cslib/**`, compare against a checked-in baseline ceiling, FAIL on increase. Must distinguish code-position sorries from the many prose mentions of the word \"sorry\" in module docstrings -- a naive `grep -c sorry` over Cslib/ returns ~168 and is useless; the real code-position count is far smaller. State the discrimination rule explicitly in the script.\n3. Wire both into `.github/workflows/lean_action_ci.yml` as their own steps.\n4. Record, in each baseline file, the CURRENT owning task for every entry, so the census doubles as a live debt ledger rather than an opaque number.\n\nNON-GOALS: do not discharge, restate, add, relocate, or hide any sorry; do not remove any existing `set_option warn.sorry false in` marker (their removal belongs to the tasks that fill the underlying sorries); do not alter any proof.\n\nDEFINITION OF DONE: both scripts exist, are baselined against the current tree, and exit 0 on it; both are wired into CI; both demonstrably exit 1 under a deliberately introduced regression (a scratch tainted declaration and a scratch suppression, each reverted after the test); each baseline records the owning task per entry; no `.lean` file under `Cslib/` is modified.\n",
+      "completion_summary": "Implemented two ratchet honesty gates (axiom-census exact-set, sorry-suppression per-file two-count ceiling) that make existing Cslib proof debt visible without discharging any of it. Both land green on the current tree, are wired into CI and pre-pr-check.sh, documented in scripts/README.md, and demonstrably exit 1 on regression / 0 on improvement (Phase 6 evidence: 1,0,1,0,0,0). No .lean file under Cslib/ was modified. One significant, fully-documented deviation: scripts/AxiomCensus.lean implements a shared-cache axiom walker instead of raw per-declaration Lean.collectAxioms calls, because the latter's cross-declaration cache was measured not to fire in this environment (would have cost several minutes, not the ~2.7s the plan's premise assumed); the shared-cache version reproduces the exact settled tainted=43 baseline in ~8.6s.",
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 296,
+      "project_name": "tableau_calculi_architecture",
+      "status": "expanded",
+      "task_type": "formal",
+      "topic": "Foundations",
+      "description": "Research and design a unified tableau calculi architecture for CSLib spanning propositional, modal, temporal, and bimodal logics. The existing PropositionalTableau.lean provides generic rule infrastructure (PropSign, PropSignedFormula, PropTableauRule, applyPropRule) already consumed by the bimodal decidability system (~5,900 lines). The goal is to determine how to build a complete propositional tableau system (branch construction, closure, termination, soundness, completeness, decision procedure) that naturally extends to modal and temporal tableau systems, sharing resources with and relating cleanly to the existing bimodal tableau. Investigate: (1) what generic tableau infrastructure should live in Foundations/ vs logic-specific modules, (2) how modal tableau rules (box/diamond) and temporal rules (until/since) layer on top of propositional rules, (3) whether the bimodal tableau can be refactored to consume shared infrastructure or whether it should remain standalone, (4) what the dependency chain should be between propositional, modal, temporal tableau tasks, (5) how tableau completeness relates to the existing MCS-based completeness proofs and the planned sequent calculus (task 279). Output: a set of precisely scoped implementation tasks with dependency graph covering the full tableau pipeline from propositional through bimodal.",
+      "created": "2026-06-23T17:34:47Z",
+      "last_updated": "2026-06-23T17:47:28Z",
+      "next_artifact_number": 3,
+      "artifacts": [
+        {
+          "path": "specs/296_tableau_calculi_architecture/reports/01_tableau-arch-research.md",
+          "type": "report",
+          "summary": "Tableau architecture research: 6-task design with dependency graph"
+        },
+        {
+          "path": "specs/296_tableau_calculi_architecture/plans/01_tableau-arch-plan.md",
+          "type": "plan",
+          "summary": "5-task metatask plan with dependency graph"
+        }
+      ],
+      "session_id": "sess_1782236153_394da2",
+      "completion_summary": "Metatask expanded into 5 child tasks (297-301) covering full tableau calculi pipeline: Foundations infrastructure (297), propositional tableau with decidability (298), modal K tableau (299), modal extensions T/S4/S5 (300), temporal tableau (301). Dependency graph: 297 -> {298, 301} -> 299 -> 300, with 298 and 301 parallelizable. Total estimated: 7,500-9,700 lines across 44-62 hours.",
+      "child_tasks": [
+        297,
+        298,
+        299,
+        300,
+        301
+      ],
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 279,
+      "project_name": "propositional_sequent_calculus_lk_lj",
+      "status": "expanded",
+      "task_type": "cslib",
+      "description": "Implement a two-sided Gentzen-style sequent calculus (LK for classical, LJ for intuitionistic) for propositional logic with cut elimination. Use Finset-based contexts on both sides, following the CLL sequent calculus in Cslib/Logics/LinearLogic/CLL/Basic.lean as a template. Prove soundness, completeness, cut elimination (Hauptsatz), and equivalence bridges to the existing Hilbert and natural deduction systems (hilbert_iff_lk, nd_iff_lk). This completes the proof-system triad (Hilbert + ND + SC) for propositional logic and would be the first LK/LJ formalization in Lean 4.",
+      "topic": "Propositional Logic",
+      "created": "2026-06-23T02:57:39Z",
+      "last_updated": "2026-06-23T19:33:50Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-a-findings.md",
+          "description": "Teammate A primary research: CLL template, propositional infrastructure, LK/LJ design, cut elimination strategy, bridge proofs"
+        },
+        {
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_team-research.md",
+          "type": "research",
+          "summary": "Team research with 4 teammates: LK/LJ sequent calculus design, CLL template analysis, Mathlib prior art, scope assessment, strategic alignment"
+        },
+        {
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/plans/02_sequent-calculus-plan.md",
+          "type": "plan",
+          "summary": "6-phase implementation plan for LK/LJ sequent calculi with cut elimination and equivalence bridges"
+        },
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-b-findings.md",
+          "summary": "Task 279: Teammate-B Findings — Alternatives Research"
+        },
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-c-findings.md",
+          "summary": "Teammate C Findings: Critic — Gaps, Risks, and Problems"
+        },
+        {
+          "type": "report",
+          "path": "specs/279_propositional_sequent_calculus_lk_lj/reports/01_teammate-d-findings.md",
+          "summary": "Task 279: Horizons Research — Strategic Alignment and Long-Term Direction"
+        }
+      ],
+      "dependencies": [],
+      "session_id": "sess_1782242736_cac36e",
+      "researched": "2026-06-23T19:23:07Z",
+      "completion_summary": "Expanded into task 314 (LK classical sequent calculus) and task 315 (LJ intuitionistic sequent calculus). Research and plan artifacts preserved for subtasks.",
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 278,
+      "project_name": "simplify_proofs_with_normalization_tags",
+      "status": "expanded",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "description": "Simplify proofs using new simp/grind normalization tags. After task 268 adds @[simp, scoped grind =] tags to Hilbert system definitional lemmas, audit all proofs in Propositional/, Modal/, Temporal/, and Bimodal/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, ...]` or verbose tactic chains involving these normalization lemmas. Replace with `grind` or `simp` where the new tags make the explicit lemma lists redundant. Also check Foundations/Logic/ proofs. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake",
+      "depends_on": [
+        41,
+        180,
+        181,
+        299,
+        301,
+        317,
+        321,
+        370,
+        375
+      ],
+      "created": "2026-06-23T02:51:28Z",
+      "last_updated": "2026-06-29T22:13:39Z",
+      "dependencies": [
+        41,
+        180,
+        181,
+        299,
+        301,
+        317,
+        375
+      ],
+      "expanded_into": [
+        412,
+        413,
+        414
+      ],
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 572,
+      "project_name": "tableau_docstring_hygiene_divergence_record",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "The Intuitionistic propositional tableau calculus in Cslib/Logics/Propositional/Tableau/Intuitionistic/ carries three stale docstrings that misled twelve consecutive plan versions attempting to close remaining proof obligations (task 317's plans/01 through plans/12). This task performs ONLY documentation and references.bib edits -- no Lean definition or proof step may change. It must land BEFORE any other work in this repair programme because every downstream research/planning/implementation dispatch reads these docstrings and, absent correction, will re-derive the same refuted claims.\n\nConcrete edits required:\n\n1. Scheme.lean:3020-3041 -- the block beginning 'GAP 2 investigation ... determinacy remains BLOCKED' is STALE and directly contradicted by the current code at Scheme.lean:581, where `sat_timp` is a live `IBranchSaturation` field (also see Scheme.lean:105-108) whose reflexive form `T(phi->psi)@w in b -> F(phi)@w in b \\/ T(psi)@w in b` discharges `truthLemma`'s T-imp case without any converse (the F(phi')@w' arm contradicts IForces w' phi' via ih_phi'.2; the T(psi')@w' arm gives the goal via ih_psi'.1). Rewrite or delete this block so it reflects that GAP 2 (determinacy) is resolved and no converse is needed.\n\n2. Scheme.lean:527 -- claims `sat_timp` is NOT added as an `IBranchSaturation` field. This is false; it is a field at Scheme.lean:105-108. Correct this claim.\n\n3. Expansion.lean:125-126 -- the docstring's termination claim ('termination is unaffected since the number of distinct (implication, world) copies is bounded by intUniverse phi0') is CIRCULAR: it assumes the very world bound that the calculus's own copy-channel interaction destroys (see item 4). Replace this claim with an accurate statement that termination is NOT currently established and the expansion loop is known to diverge on some inputs (cite the module-level note added in item 4).\n\n4. Add a module-level note (in Scheme.lean or Expansion.lean, near the existing termination/measure docstrings) recording the divergence witness so no future dispatch re-attempts proving a world bound: for `phi0 = (((a->b)->c) /\\ ((d->e)->f)) -> ((u1->v1) \\/ (u2->v2))` (complexity 9, Lean-verified via `#eval`), `intExpandBranches` produces branch/world counts 4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260 -- linear growth with no saturation, and from world 3 onward each world is an exact structural duplicate of its grandparent (identical T-set/F-set, period 2). Consequently: (a) `intApplyRuleFull_outputs_subset`'s `hnw : nextWorld <= phi0.complexity + 1` hypothesis (Scheme.lean:1813) is FALSE, refuted by direct counterexample, not merely unproven; (b) `intUniverse`'s label range `List.range (phi.complexity + 2)` (Scheme.lean:1575-1577) is likewise false as an invariant of produced branches; (c) NO numeric world bound of any size exists for the current calculus. Do not schedule any further work attempting to prove `intExpandBranches_world_bound`, `hnw`, or `hUniv` as currently stated -- they are refuted, not merely hard.\n\n5. Also record, at or near the `sorry` at Scheme.lean:2578 (inside `intExpandBranches_openBranch_sat`'s fuel=0 case), that this goal is FALSE AT ITS CURRENT STATEMENT, with the Lean-verified counter-instance: `branches = [[F(p/\\q)@0]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]` -- every hypothesis of the lemma holds (`ILabelBound` holds trivially, `IExpandedConsistent`/`IAllAccessConsistent` are vacuous at `e = []`, lengths are `(1,1)`), the loop returns exactly this branch, and `IBranchSaturation.sat_fand`'s premise evaluates `true` while both disjuncts evaluate `false`. No proof can close this sorry at its current statement; it must be restated later (out of scope for this task -- this task only records the refutation).\n\n6. references.bib -- add the two dangling BibKeys currently cited in docstrings but absent from the file: `GargGenoveseNegri2012` (Garg, Genovese & Negri, 'Countermodels from Sequent Calculi in Multi-Modal Logics', LICS 2012 -- asserted 'added to references.bib in Phase 6' at Expansion.lean:210, but `grep -c GargGenoveseNegri2012 references.bib` returns 0) and a key for Dyckhoff 1992 ('Contraction-free sequent calculi for intuitionistic logic', cited in prose with no BibKey at Expansion.lean:264, `grep -c Dyckhoff references.bib` returns 0).\n\nConstraints: documentation and references.bib only. No `.lean` definition, theorem statement, or proof tactic may change. Do not attempt to close any sorry; do not change sorry locations or counts. Verify `lake build` still succeeds and `lake exe lint-style` passes on the touched files.\n\nOverlap note: task 456 (shared_tableau_containment_blocking, currently [NOT STARTED]) already lists 'add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979' in its own description. This task's edit for `GargGenoveseNegri2012` overlaps task 456's scope for that one key; `DershowitzManna1979` is unaffected and remains task 456's alone. Whichever of this task or task 456 lands `GargGenoveseNegri2012` first should leave a note in the file (or a task comment) for the other to avoid a duplicate/conflicting BibTeX entry.",
+      "effort": "1-2 hours",
+      "parent_task": 317,
+      "topic": "Propositional Logic",
+      "dependencies": [],
+      "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+        "references.bib"
+      ],
+      "created": "2026-07-27T06:06:33Z",
+      "last_updated": "2026-07-27T06:51:56Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/317_propositional_tableau_completeness/reports/14_blocker-analysis.md",
+          "summary": "Spawn analysis from parent task"
+        },
+        {
+          "path": "specs/572_tableau_docstring_hygiene_divergence_record/plans/01_docstring-hygiene-divergence-record.md",
+          "type": "plan",
+          "summary": "Six-phase plan with per-phase lake build / sorry-inventory / no-semantics-changed verification; all description line numbers re-verified against the working tree."
+        },
+        {
+          "path": "specs/572_tableau_docstring_hygiene_divergence_record/summaries/01_docstring-hygiene-divergence-record-summary.md",
+          "type": "summary",
+          "summary": "Phase-by-phase account, verification results, sorry-count table, coordination note."
+        }
+      ],
+      "session_id": "sess_1785133769_9cfe38",
+      "completion_summary": "Corrected three stale docstring claims in the intuitionistic tableau calculus (sat_timp field existence, resolved GAP-2 determinacy, circular termination claim), recorded the expansion-loop divergence witness and the fuel-0 refutation as permanent in-source notes, and added the two missing references.bib entries. Documentation and references.bib only: no Lean definition, statement, or tactic changed; sorry inventory byte-identical; lake build and lint-style green.",
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 573,
+      "project_name": "tableau_quotient_soundness_spike",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "SMALL, time-boxed research/prototyping spike. Produces a decision record; does NOT modify any file under Cslib/. Gates the large calculus-repair task that follows it in this programme.\n\nBackground (self-contained): CSLib's intuitionistic propositional tableau (Cslib/Logics/Propositional/Tableau/Intuitionistic/) implements the world-creating F(phi->psi) rule with T-formula persistence propagation. Two design decisions are in direct mutual conflict: (A) `applyAllTImpRules` (Expansion.lean:136-143) copies every `T(phi->psi)` on the branch to every accessible world lacking a copy, added to make `sat_timp`/`truthLemma`'s T-imp case provable; (B) `intFImpRule`'s `propagatePersistence` (Rules.lean:154-159) copies ALL T-formulas from a world into each freshly-created child world. Under A+B, a world-creating step at w produces a child w' carrying a fresh copy of every `T(phi->psi)` from w; each fresh copy independently BETA-resolves to a fresh `F(phi)@w'`, which (if phi is itself .imp-shaped) mints another world, ad infinitum. Lean-verified to diverge: for `phi0 = (((a->b)->c) /\\ ((d->e)->f)) -> ((u1->v1) \\/ (u2->v2))` (complexity 9), `intExpandBranches` produces unboundedly many worlds with exact period-2 structural repetition from world 3 on (world counts 4/7/10/14/20/27/40/54/67/87 at fuel 10/20/30/40/60/80/120/160/200/260).\n\nThe loop-check meant to prevent this, `intFImpReuseWitness?` (Expansion.lean:283-311), cannot: it searches only worlds reachable FROM the creation site (`isAccessible edges w x`, i.e. descendants), but the blocking world in a standard Fitting-style loop-check (`Fitting1983` Ch. 4, BibKey verified present at references.bib:211) is always an ANCESTOR -- the forced-set `Sfor` at the blocking world already contains everything the new world would force, and `Sfor` grows monotonically ALONG accessibility, so the ancestor is where containment is realized, never a descendant. The standard resolution (`Fitting1983` Ch. 4; the labelled-sequent analogue in `NegriVonPlato2001`, BibKey verified present at references.bib:913) is not to reuse the ancestor as a `sat_fimp` witness directly but to BLOCK the branch and build the countermodel over the finite QUOTIENT frame in which the blocked world is identified with its blocking ancestor -- at which point the needed `w <= x` relation holds in the quotient. This requires restating `IBranchSaturation.sat_fimp` relative to the quotient frame and rewriting `truthLemma`'s F-imp case (Scheme.lean:600-607) to read its witness off the quotient.\n\nThis quotient construction was never prototyped in Lean, and an earlier attempt at a related fix (an 'Option B' appending `F(psi)@x` directly) was found unsound specifically against `intExpandBranches_closed_unsat` (Minimal/Soundness.lean). This soundness interaction is the single largest unretired risk in the repair programme.\n\nTask: determine, against LIVE Lean goal state (not by hand-argument), whether `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) SURVIVES when: (a) `IBranchSaturation.sat_fimp` is restated over the blocking quotient frame (world w identified with its blocking ancestor x when w is blocked), and (b) `intFImpReuseWitness?` is replaced by an ancestor-directed `Sfor`-containment check (search ancestors of the creation site for one whose forced-set already contains what the new world would force), dropping the current `F(psi)@x` conjunct (Expansion.lean:308) -- the conjunct that makes the existing check fail on the F1 divergence witness (at even worlds F(b) is present but not F(e); vice versa at odd worlds, so even the reflexive candidate x=w alternately fails).\n\nMethod: prototype the restated `sat_fimp` and the ancestor-directed containment check as throwaway Lean snippets (via `lean_run_code`/scratch definitions, or an uncommitted scratch file), and attempt the `intExpandBranches_closed_unsat` proof against them, inspecting goal state via `lean_goal` at each step. Do not attempt a full proof if it grows large; the deliverable is a GO/NO-GO determination with the specific goal-state evidence for the call, not a completed proof.\n\nOutput: write a decision record to this task's `handoffs/` directory (e.g. `handoffs/01_quotient-soundness-spike-decision.md`) stating: (1) whether the quotient-restated `sat_fimp` + ancestor-directed containment check appears compatible with `intExpandBranches_closed_unsat`, with the specific goal state or obstruction found; (2) if the answer is NEGATIVE or uncertain, say explicitly that the repair task's shape changes and that it must be RE-SCOPED (via `/revise` or `/spawn`) before it is dispatched -- do not let the repair task proceed against a falsified premise; (3) if POSITIVE, confirm the repair task's quotient/rewrite step is a safe green light.\n\nConstraints: NO library changes -- no file under Cslib/ may be edited/committed by this task. Prototyping happens via `lean_run_code`/scratch snippets or an uncommitted scratch file. Read-only against the existing library plus a decision-record write under this task's own directory.",
+      "effort": "3-5 hours",
+      "parent_task": 317,
+      "topic": "Propositional Logic",
+      "dependencies": [
+        572
+      ],
+      "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/"
+      ],
+      "created": "2026-07-27T06:06:33Z",
+      "last_updated": "2026-07-28T14:13:52Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/317_propositional_tableau_completeness/reports/14_blocker-analysis.md",
+          "summary": "Spawn analysis from parent task"
+        },
+        {
+          "path": "specs/573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md",
+          "type": "plan",
+          "summary": "6-phase time-boxed GO/NO-GO spike plan"
+        },
+        {
+          "path": "specs/573_tableau_quotient_soundness_spike/handoffs/01_quotient-soundness-spike-decision.md",
+          "type": "summary",
+          "summary": "GO/NO-GO decision record with live goal-state evidence"
+        }
+      ],
+      "session_id": "sess_1785246576_0b1c80",
+      "completion_summary": "GO/NO-GO spike concluded GO: the quotient-restated IBranchSaturation.sat_fimp plus the ancestor-directed, F(psi)@x-conjunct-dropping containment check (intFImpReuseWitnessAnc?) are compatible with intExpandBranches_closed_unsat, confirmed against live Lean goal state (not hand-argument). H1 (predicate-content-agnosticism) CONFIRMED: an isolated replay of the first reuse arm, with local context copied verbatim from a live lean_goal capture at the real Soundness.lean:1470, closed completely (no goals) using the UNCHANGED closing tactic block against the swapped intExpandBranchesAnc/intFImpReuseWitnessAnc? definitions. H2 (soundness/saturation disjointness) CONFIRMED: grep and lean_verify both show intExpandBranches_closed_unsat has zero dependency on IBranchSaturation/sat_fimp. No file under Cslib/ was modified (git status/diff both empty); the scratch file was deleted. Downstream calculus-repair task (quotient/rewrite step) has an explicit green light, with named scope limitations (second reuse arm not independently re-closed; termination/realizability of the quotient construction not tested) recorded in the decision record.",
+      "roadmap_items": [
+        "Downstream tableau calculus-repair task (quotient sat_fimp restatement + ancestor-directed intFImpReuseWitnessAnc?) has a GO verdict from the soundness spike and may proceed against intExpandBranches_closed_unsat without re-deriving branch-modification-sensitive soundness machinery."
+      ],
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 575,
+      "project_name": "repo_lint_hygiene_ci_gate_restoration",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "description": "Repo-wide linter and hygiene cleanup, restoring the CI build gate to green. VERIFIED PROBLEM: `lake build` passes (3259/3259) and `lake test` passes (9253/9253), but the exact CI invocation in .github/workflows/lean_action_ci.yml, `lake build --wfail --iofail`, EXITS 1. 27 modules log warnings; --wfail promotes every warning to a build failure. 23 of the 27 fail on linter warnings alone and need no mathematics. FOUR BOUNDED WORKSTREAMS, in this order. (1) LINTER SITES: 460 warnings collapse to 240 DISTINCT source sites across 27 files, because one recurring flexible-simp pattern accounts for 241 warnings at only 42 sites. Distribution: FmpMeasure.lean 64, FrameSoundness.lean 49, LoopChecking.lean 34, Completeness.lean 21, SoundnessStep.lean 17, Intuitionistic/Scheme.lean 10, S5Simplification.lean 9, Modal/Basic.lean 6, LK/Soundness.lean 4, then 18 files with 1-3 each. Linter breakdown: flexible 283, unusedSimpArgs 75, unusedDecidableInType 35, unusedSectionVars 32, style.longLine 12, style.show 4, unusedVariables 3, unnecessarySeqFocus 2, style.openClassical 2, plus singletons. Most flexible warnings carry an exact machine-generated `Try this:` replacement (simp [X] at h becomes simp only [...] at h), so the edit is mechanical, but each rewrite can break a downstream proof and MUST be rebuild-verified. (2) TASK-NUMBER REFERENCES: 121 `task N` citations have regressed into Cslib deliverable files, violating .claude/rules/no-task-references-in-deliverables.md; roughly 918 were stripped by an earlier cleanup, so this is a regression, not the original debt. Worst: Intuitionistic/Scheme.lean 37, ChronicleToCountermodel.lean 22, Intuitionistic/Completeness.lean 9, Bundle/SuccRelation.lean 9, Intuitionistic/Expansion.lean 6. Replace each with a durable anchor (sibling filename, section heading, verified fact), never delete the surrounding explanation. (3) SHAKE / IMPORT GATE: `lake shake --add-public --keep-implied --keep-prefix Cslib` is COMMENTED OUT at lean_action_ci.yml lines 29-32. Running it flags 94 files (93 in Logics/: Propositional 48, Modal 39, Temporal 6, Foundations/Logic 1) with 91 remove-directives and 19 add-directives. Fix the imports and re-enable the CI step. (4) SUPPRESSION AUDIT (the one UNBOUNDED workstream, sequenced LAST so the first three land regardless): 511 `set_option linter.* false` directives and 118 @[nolint] attributes. Removing a suppression surfaces new warnings whose count is unknown until attempted. Worst files: Separation/DedekindZ/Cases.lean 12, CounterexampleElimination/Elimination.lean 8, then several at 6-7. Highest-priority sub-case, and a genuine correctness concern rather than style: 12 `set_option warn.sorry false` directives hide ALL 23 Bimodal sorries from the build and from the --wfail CI gate, at Bundle/SuccRelation.lean:253,259,265,272,279,286,291; Bundle/UntilSinceCoherence.lean:35,40; BXCanonical/Frame.lean:159; ConservativeExtension/TemporalConservativity.lean:248; and BXCanonical/Chronicle/ChronicleToCountermodel.lean:46. That last one omits the trailing `in`, making it FILE-SCOPED across a file holding 12 sorries. Propositional and Modal do NOT suppress their sorries, so Bimodal is inconsistent with the rest of the tree. Decide per site whether the suppression is justified and documented; at minimum narrow the file-scoped one to per-declaration. METRIC CORRECTION TO CARRY FORWARD: the projects own bare-sorry figures are inflated because `warn.sorry` matches a naive `\\bsorry\\b` scan. TRUE census is 28 (Bimodal 23, Propositional 4, Modal 1, Temporal 0, Foundations 0), not 40 or 41. Any future sorry count must exclude lines containing `warn.sorry`. CONSTRAINTS: do not discharge, add, or relocate any sorry; this task is hygiene-only and must not alter any proof term, definition, or theorem statement. The 4 files failing CI on genuine sorries (Intuitionistic/Completeness.lean, Minimal/Completeness.lean, and the mixed Intuitionistic/Scheme.lean and FrameSoundness.lean) will remain CI-red after this task and that is expected and correct. Modal/Tableau/ is the epicentre and is under an active refactor programme; coordinate with that line so the lint edits do not collide. VERIFICATION PROTOCOL, set by explicit user decision: rebuild after EACH file and commit only when that file is green, per .claude/rules/git-workflow.md commit-per-green-substep. DEFINITION OF DONE: `lake build --wfail --iofail` reports no failures other than the 4 genuine-sorry modules; `lake shake` clean and its CI step uncommented; zero `task N` strings in Cslib/**; `lake test` still 9253/9253; suppression audit outcome recorded per site.",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+        "Cslib/Logics/Modal/Tableau/Completeness.lean",
+        "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+        "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean",
+        "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodel.lean",
+        ".github/workflows/lean_action_ci.yml"
+      ],
+      "created": "2026-07-27T06:54:27Z",
+      "last_updated": "2026-07-28T02:33:59Z",
+      "session_id": "sess_1785201767_9dbb98",
+      "artifacts": [
+        {
+          "path": "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md",
+          "type": "plan",
+          "summary": "Cycle 27: Phase 5 closed, all 8 phases complete"
+        }
+      ],
+      "plan_metadata": {
+        "phases": 8,
+        "phases_complete": 7,
+        "phases_partial": 1,
+        "complexity": "moderate",
+        "plan_version": 2,
+        "research_integrated": true,
+        "skeleton": false
+      },
+      "progress_note": "Phase 7 CLOSED by user decision: NOTATION.md local edit authorized as an explicit exception to the upstream-exposure carve-out (Logic notation scoping section landed, documenting all three senses of the token S); the 5 NOTE: blocks are RETAINED and the false \"stale\" premise struck from the plan. 7 of 8 phases now COMPLETED. Phase 5 (suppression audit) is the sole open workstream: 278 sites done across 68 files; 72 local-only blanket suppressions across 49 files remain (86 repo-wide, 14 upstream-shared and carved out). CI gate green modulo the 5 genuine sorries (expected end state). Next Phase 5 target: Temporal/Metalogic/Chronicle/ChronicleToCountermodel.lean (137 lines).",
+      "completion_summary": "Restored lake build --wfail --iofail as a working CI gate and closed the full 8-phase hygiene/lint-debt cleanup for CSLib. Phase 5 (suppression audit), the final open workstream, closed in cycle 27 by clearing the last actionable blanket-suppression file (CounterexampleElimination/Interface.lean, 3048 lines, 6 suppressions removed, 194 warning sites fixed). All 8 phases are now COMPLETED and the plan's Definition of Done is fully MET: the --wfail build shows only the 5 documented, intentionally-remaining sorry warnings; lake test, checkInitImports, lake lint (prevention categories), lint-style, lake shake, and mk_all are all green; the blanket-suppression ratchet sits at 19 repo-wide (14 upstream-shared out of scope, 5 permanent exceptions, 0 actionable local-only remaining).",
+      "roadmap_items": [
+        "CSLib CI gate (lake build --wfail --iofail) is restored and enforceable going forward",
+        "Blanket linter-suppression ratchet (scripts/check-lint-suppressions.sh) locks in the reduction from an original baseline down to 19, preventing regression",
+        "5 documented sorry sites remain as the correct, tracked end state pending the external WeakCanonical discrete-completeness port referenced in Phase 6"
+      ],
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 578,
+      "project_name": "untrack_ephemeral_orchestrator_runtime_files",
+      "status": "completed",
+      "task_type": "meta",
+      "description": "Untrack and gitignore the 35 ephemeral orchestrator runtime files currently committed in this repository, applying the consumer-repo remediation that the agent-system policy work defined but could not deliver here. VERIFIED PROBLEM: .claude/scripts/check-runtime-file-tracking.sh (shipped by the policy work, present and executable in this repo) FAILS two of its three checks. Check A: 10 ephemeral-class patterns are missing from this repo root .gitignore, which contains ZERO orchestrator/runtime lines. Check C passes, so the durable class is correctly configured and must stay that way. Check B: 35 ephemeral-class files are tracked -- 18 .orchestrator-loop-guard, 7 .orchestrator-churn-state.json, 5 variant .return-meta-{research,teammate-a,lit-05,orchestrate}.json, 2 .drift-inspection.json, 2 .return-meta-multi*.json, 1 .orchestrator-multi-state.json, 1 specs/557_.../.lock/ directory, and specs/.events.lock. WHY THIS IS A CORRECTNESS HAZARD, NOT REPO NOISE: per .claude/context/standards/orchestrator-runtime-files.md, the ephemeral class is read with NO freshness gate -- skill-orchestrate Stage 2 reads cycle_count and infra_failures from whatever loop guard is on disk with no session_id and no mtime comparison. A guard restored by checkout, clone, or branch switch therefore makes a fresh /orchestrate believe it is already mid-run at a stale cycle count. LIVE INSTANCES OBSERVED: specs/317_propositional_tableau_completeness/.orchestrator-loop-guard is committed at cycle_count 11 of max_cycles 16 with hard_mode true; specs/575_repo_lint_hygiene_ci_gate_restoration/.orchestrator-loop-guard was committed at cycle_count 5 of max_cycles 5, which made every subsequent /orchestrate 575 resume at 5/5 and exit having done no work -- permanently killing the documented \"run /orchestrate {N} to continue\" resume affordance until the guard was reset by hand. 537 and 557 hold further committed guards. REQUIRED WORK: (1) add the ephemeral-class block to this repo OWN root /.gitignore, copying it verbatim from the \"Consumer Repo Setup\" section of .claude/context/standards/orchestrator-runtime-files.md -- note that the standard explains the source store CANNOT deliver a repo-root .gitignore contribution automatically, because a specs/* pattern placed in .claude/ would resolve relative to .claude/ and silently match nothing, which is exactly why this must be done by hand once. (2) Untrack all 35 files using git rm --cached (and git rm -r --cached for the .lock directory), which preserves them on disk so any in-flight orchestration is not disrupted -- check-runtime-file-tracking.sh prints the exact per-file remediation command. (3) Do NOT untrack or ignore .orchestrator-handoff.json or .return-meta.json: those are the DURABLE class, are freshness-gated by their consumers, and MUST stay tracked -- Check C currently passes and must still pass afterwards. CONSTRAINT: do not delete any file from disk; this is a git-index and .gitignore change only. DEFINITION OF DONE: bash .claude/scripts/check-runtime-file-tracking.sh exits with all three checks passing.",
+      "file_scope": [
+        ".gitignore"
+      ],
+      "dependencies": [],
+      "last_updated": "2026-07-27T17:30:33Z",
+      "session_id": "sess_1785172606_2da06e",
+      "artifacts": [
+        {
+          "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/reports/01_untrack-ephemeral-runtime-files.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/plans/01_untrack-ephemeral-runtime-files.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/578_untrack_ephemeral_orchestrator_runtime_files/summaries/01_untrack-ephemeral-runtime-files-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "Appended the verbatim ephemeral-class gitignore block to root /.gitignore and untracked all 34 ephemeral-class runtime files reported by check-runtime-file-tracking.sh (git rm --cached / git rm -r --cached, index-only). check-runtime-file-tracking.sh now exits 0 with Checks A, B, and C all passing; durable provenance files remain tracked and un-ignored.",
+      "archived": "2026-07-28T17:02:38Z"
+    },
+    {
+      "project_number": 579,
+      "project_name": "lint_suppression_ratchet_gate",
+      "status": "completed",
+      "task_type": "meta",
+      "description": "Stop the blanket-linter-suppression ratchet by gating file-scoped suppressions in CI and pre-PR, so hygiene holds as new code is written instead of accumulating into periodic cleanup tasks. ROOT CAUSE ESTABLISHED BY SURVEY: a file-scoped `set_option linter.X false` (no trailing `in`) silences every violation in the file INCLUDING every future one, so code later added to that file is unlinted by construction -- coverage accumulates rather than decaying. Ordinary tech debt gets noisier as a file grows and eventually forces attention; this gets quieter, which is why it went unnoticed. Sampling 14 files carrying blanket suppressions found 14 of 14 had the suppression in the files VERY FIRST COMMIT -- none were added later in response to a linter complaining, so this is the authoring habit (copy-paste from a neighbouring file) and not decay under feature pressure. There is no Lean file template in this repo, so there was nothing to fix at the template level; a gate is the intervention that works because it interrupts the copy at the moment it happens. Contributing factors: no active git hooks; scripts/pre-pr-check.sh carries a real --wfail gate but is a manual pre-PR script that almost nothing passes through, since this fork is ~3900 commits ahead of upstream with few PRs; and the CI --wfail gate itself has been exiting 1, and a red gate carries no information. DELIVERED: (1) scripts/check-lint-suppressions.sh -- a ratchet gate reading a per-file ceiling from scripts/lint-suppression-baseline.txt, failing when a file exceeds its allowance or a previously-clean file introduces one, reporting improvements without failing, with --update to re-baseline and --list to rank. Counts may only decrease. Declaration-scoped `... in` suppressions are always allowed and deliberately uncounted, because they die with the declaration they annotate and cannot silence future code. (2) Baseline captured at 276 blanket suppressions across 108 files. (3) Wired as step 6 of scripts/pre-pr-check.sh, deliberately independent of the step-5 --wfail gate: a blanket suppression makes step 5 pass by HIDING a warning rather than fixing it, so a green --wfail build is not evidence suppressions did not grow. (4) New .github/workflows/lint-hygiene.yml rather than a step added to lean_action_ci.yml -- every existing workflow is shared with the leanprover/cslib upstream remote, so editing one adds a conflict hunk to every future sync while a new file conflicts with nothing; the check needs no Lean or Mathlib and runs in seconds. (5) docs/lint-suppression-policy.md documenting the rule, the ratchet rationale, the re-baseline workflow, and the two elaboration traps already hit in this tree (`omit [X] in` changes a declarations elaborated type unlike the warning-only `set_option ... in`; and `set_option ... in` must precede a doc comment or the file fails to parse). CONTRIBUTING.md was deliberately NOT edited because it is shared with upstream; adding a short pointer there is a follow-up judgment call for the user, costing one line of divergence in exchange for contributor visibility. VERIFIED: gate correctly fails a newly-blanket-suppressed file, correctly fails the trailing-comment blanket form, and correctly passes the same file when the suppression is declaration-scoped; clean run at the captured baseline exits 0.",
+      "completion_summary": "Gated blanket file-scoped linter suppressions behind a per-file ratchet (scripts/check-lint-suppressions.sh + baseline at 276 across 108 files), wired into pre-pr-check.sh step 6 and a new local-only Lint Hygiene CI workflow, with docs/lint-suppression-policy.md recording the rationale. Root cause established by survey: 14 of 14 sampled files carried their blanket suppression in their first commit, so this was the authoring habit rather than decay; no file template existed to fix, making a gate the effective intervention.",
+      "file_scope": [
+        "scripts/check-lint-suppressions.sh",
+        "scripts/lint-suppression-baseline.txt",
+        "scripts/pre-pr-check.sh",
+        ".github/workflows/lint-hygiene.yml",
+        "docs/lint-suppression-policy.md"
+      ],
+      "dependencies": [],
+      "archived": "2026-07-28T17:02:38Z"
     }
   ],
   "archived_at": "2026-07-23T17:00:30Z",

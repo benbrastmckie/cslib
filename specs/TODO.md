@@ -28,7 +28,7 @@ next_project_number: 584
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
-317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
+317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
@@ -666,7 +666,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [BLOCKED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 456, Task 552

@@ -19,8 +19,6 @@ Defines the finite subformula closure for the Hintikka-set quasimodel constructi
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/Quasimodel/SubformulaClosure.lean
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical.Quasimodel

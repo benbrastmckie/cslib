@@ -497,7 +497,7 @@ uses, and are documented in the same style as the preceding guard (D2).
 
 ---
 
-### Phase 6: Prove regression and improvement paths, restore clean tree [NOT STARTED]
+### Phase 6: Prove regression and improvement paths, restore clean tree [COMPLETED]
 
 **Goal**: Demonstrate, with recorded evidence, that each gate exits 1 under a deliberately introduced
 regression and exits 0 (reporting IMPROVED) under a deliberately introduced improvement — then leave
@@ -514,24 +514,43 @@ FAIL -> exit 1) with zero risk to the library and no rebuild. The suppression ga
 that one is done literally as the definition of done describes.
 
 **Tasks**:
-- [ ] Axiom census, **regression**: `cp scripts/axiom-census-baseline.txt scripts/axiom-census-baseline.txt.bak`;
+- [x] Axiom census, **regression**: `cp scripts/axiom-census-baseline.txt scripts/axiom-census-baseline.txt.bak`;
       delete one data row from the baseline; run the script; confirm it prints `FAIL` naming that
       declaration and exits **1**; restore with `mv` from the `.bak`. Record the observed exit code.
-- [ ] Axiom census, **improvement**: `.bak` the baseline again; append a data row for a declaration that
+      Done exactly as specified (deleted the `minimalTableau_decides` row). Observed: **exit 1**,
+      `FAIL  Cslib.Logic.PL.minimalTableau_decides ... not in the baseline.`. Restored via `mv`.
+- [x] Axiom census, **improvement**: `.bak` the baseline again; append a data row for a declaration that
       does not exist (e.g. `Cslib.ZZNonexistentCensusProbe`); run the script; confirm it prints
       `IMPROVED` plus the `ACTION REQUIRED` re-baseline instruction and exits **0**; restore via `mv`.
-- [ ] Suppressions, **regression (scratch file probe)**: create a new untracked file
+      Done exactly as specified. Observed: **exit 0**, `IMPROVED  Cslib.ZZNonexistentCensusProbe` plus
+      the `ACTION REQUIRED` block naming `bash scripts/check-axiom-census.sh --update`. Restored via `mv`.
+- [x] Suppressions, **regression (scratch file probe)**: create a new untracked file
       `Cslib/ZZScratchSuppressionProbe.lean` containing one `set_option warn.sorry false in` marker and
       one code-position `sorry`; run the script; confirm it prints `FAIL` for that path (introducing
       counts where the baseline has none) and exits **1**; then `rm` the probe file. Do not build during
       this window and do not leave the file in place.
-- [ ] Suppressions, **improvement**: `.bak` the baseline; raise one file's ceilings above its live counts;
+      Done exactly as specified. Observed: **exit 1**,
+      `FAIL  Cslib/ZZScratchSuppressionProbe.lean ... 1 marker(s), baseline allows 0.` /
+      `... 1 sorrie(s), baseline allows 0.`. Probe file removed immediately after; no build was run
+      during this window.
+- [x] Suppressions, **improvement**: `.bak` the baseline; raise one file's ceilings above its live counts;
       run the script; confirm it reports `IMPROVED` and exits **0**; restore via `mv`.
-- [ ] Re-run both scripts bare and confirm both exit **0** on the restored tree.
-- [ ] Assert the tree is clean of test residue: `git status --porcelain Cslib/` is **empty**; no `.bak`
+      Done exactly as specified (raised `SuccRelation.lean`'s ceiling from 7/7 to 9/9). Observed:
+      **exit 0**, `ACTION REQUIRED` block naming `bash scripts/check-sorry-suppressions.sh --update`.
+      Restored via `mv`.
+- [x] Re-run both scripts bare and confirm both exit **0** on the restored tree.
+      Confirmed: `check-sorry-suppressions.sh` -> **exit 0** ("OK: sorry/suppression counts match the
+      baseline (or improved)."); `check-axiom-census.sh` -> **exit 0** ("OK: sorryAx-tainted set matches
+      the baseline exactly.").
+- [x] Assert the tree is clean of test residue: `git status --porcelain Cslib/` is **empty**; no `.bak`
       files remain under `scripts/`; `git diff -- scripts/axiom-census-baseline.txt scripts/sorry-suppression-baseline.txt`
       shows the baselines exactly as generated in Phases 2/3.
-- [ ] Record all six observed exit codes in the implementation summary as the definition-of-done evidence.
+      Confirmed all three: `git status --porcelain Cslib/` printed nothing; `find scripts/ -name "*.bak"`
+      printed nothing; `git diff -- scripts/axiom-census-baseline.txt scripts/sorry-suppression-baseline.txt`
+      printed nothing (both files bit-identical to their Phase 2/3 committed state).
+- [x] Record all six observed exit codes in the implementation summary as the definition-of-done evidence.
+      Summary: census regression=1, census improvement=0, suppression regression=1, suppression
+      improvement=0, suppression bare=0, census bare=0.
 
 **Timing**: 1.5 hours
 
@@ -550,24 +569,33 @@ that one is done literally as the definition of done describes.
 
 ## Testing & Validation
 
-- [ ] `lake env lean --run scripts/AxiomCensus.lean` exits 0 and reports `tainted=43`.
-- [ ] `bash scripts/check-axiom-census.sh` exits 0 on the clean tree.
-- [ ] `bash scripts/check-sorry-suppressions.sh` exits 0 on the clean tree.
-- [ ] `bash scripts/check-axiom-census.sh --list` and `--update` behave as specified; `--update` refuses
-      to write from a failed run.
-- [ ] `bash scripts/check-sorry-suppressions.sh --list` and `--update` behave as specified.
-- [ ] Both scripts exit 2 (not 0, not 1) when their underlying tool cannot run — verify at least the
+- [x] `lake env lean --run scripts/AxiomCensus.lean` exits 0 and reports `tainted=43`. Confirmed.
+- [x] `bash scripts/check-axiom-census.sh` exits 0 on the clean tree. Confirmed.
+- [x] `bash scripts/check-sorry-suppressions.sh` exits 0 on the clean tree. Confirmed.
+- [x] `bash scripts/check-axiom-census.sh --list` and `--update` behave as specified; `--update` refuses
+      to write from a failed run. Confirmed (`--update` refusal verified via the unparseable/zero-total
+      exit-2 scratch tests, which also apply to `--update`'s own `run_and_validate_census` gate).
+- [x] `bash scripts/check-sorry-suppressions.sh --list` and `--update` behave as specified. Confirmed.
+- [x] Both scripts exit 2 (not 0, not 1) when their underlying tool cannot run — verify at least the
       census case by invoking with a deliberately broken `lake` on `PATH`, or by asserting the code path
       is present and unreachable-by-construction if that cannot be simulated safely.
-- [ ] Suppression baseline totals: 18 markers / 5 files; 28 sorries / 9 files with the verified split.
-- [ ] Axiom census baseline: exactly 43 rows, three tab-separated fields each.
-- [ ] Phase 6's six exit-code observations all match expectation.
-- [ ] `bash -n scripts/pre-pr-check.sh` clean; the workflow YAML parses.
-- [ ] `git status --porcelain Cslib/` is empty and `git diff -- Cslib/` is empty at the end.
-- [ ] `grep -rnE 'task [0-9]+|tasks [0-9]+' scripts/check-axiom-census.sh scripts/check-sorry-suppressions.sh scripts/axiom-census-baseline.txt scripts/sorry-suppression-baseline.txt scripts/AxiomCensus.lean scripts/README.md .github/workflows/lean_action_ci.yml`
-      returns nothing (D1 compliance check).
-- [ ] Neither the `_complete` pair nor any other incorrect Class-1 example appears in any authored text;
-      the `_decides` pair is used wherever the mechanism is explained.
+      Confirmed for both: census verified via PATH override removing `lake` (exit 127 -> exit 2) plus
+      unparseable-output and zero-total scratch simulations; suppressions verified via PATH override
+      removing `perl` (exit 2) and a scratch SCAN_ROOT pointed at a nonexistent directory (exit 2).
+- [x] Suppression baseline totals: 18 markers / 5 files; 28 sorries / 9 files with the verified split.
+      Confirmed via direct baseline inspection.
+- [x] Axiom census baseline: exactly 43 rows, three tab-separated fields each. Confirmed.
+- [x] Phase 6's six exit-code observations all match expectation. Confirmed (see Phase 6 above).
+- [x] `bash -n scripts/pre-pr-check.sh` clean; the workflow YAML parses. Confirmed.
+- [x] `git status --porcelain Cslib/` is empty and `git diff -- Cslib/` is empty at the end. Confirmed.
+- [x] `grep -rnE 'task [0-9]+|tasks [0-9]+' scripts/check-axiom-census.sh scripts/check-sorry-suppressions.sh scripts/axiom-census-baseline.txt scripts/sorry-suppression-baseline.txt scripts/AxiomCensus.lean scripts/README.md .github/workflows/lean_action_ci.yml`
+      returns nothing (D1 compliance check). Confirmed empty (also re-checked including
+      `scripts/pre-pr-check.sh`).
+- [x] Neither the `_complete` pair nor any other incorrect Class-1 example appears in any authored text;
+      the `_decides` pair is used wherever the mechanism is explained. Confirmed: the `_complete` pair
+      never appears in any script/workflow/README text (only `_decides` is used as the worked example);
+      the pair only appears as data in the generated baseline's own `reason` column (a mechanical,
+      correct single-hop dependency attribution, not authored prose).
 
 ## Artifacts & Outputs
 

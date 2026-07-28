@@ -3,11 +3,11 @@
   "started_at": "2026-07-28T00:00:00Z",
   "artifacts": ["scripts/AxiomCensus.lean", "scripts/check-sorry-suppressions.sh", "scripts/sorry-suppression-baseline.txt", "scripts/check-axiom-census.sh", "scripts/axiom-census-baseline.txt", ".github/workflows/lean_action_ci.yml", "scripts/pre-pr-check.sh", "scripts/README.md"],
   "partial_progress": {
-    "stage": "phase_5_complete",
-    "details": "Phase 5 complete: pre-pr-check.sh steps 8/9 added, scripts/README.md documents both gates. bash -n clean. Waves 1-3 done; proceeding to wave 4 (phase 6: regression/improvement proofs).",
+    "stage": "phase_6_complete",
+    "details": "All 6 phases complete. Phase 6 regression/improvement proofs recorded: census regression=1, census improvement=0, suppression regression=1, suppression improvement=0, both bare=0. Tree confirmed clean (git status --porcelain Cslib/ empty, no .bak files, baselines match committed state). Proceeding to final CI pipeline verification.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5
+    "phases_completed": 6
   },
   "metadata": {
     "session_id": "sess_1785251101_8e14cc_581",

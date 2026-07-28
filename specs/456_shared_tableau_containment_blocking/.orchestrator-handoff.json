@@ -1,25 +1,30 @@
 {
   "status": "partial",
-  "summary": "Phase 1 complete: created Cslib/Foundations/Logic/Tableau/Blocking.lean with the definitional layer — Branch.typeAt (signed filter-then-map + eraseDups, NOT via formulasAt per postmortem constraint), Branch.posTypeAt (Sfor projection), Branch.containmentBlocked (all/any containment test) — plus spec lemmas mem_typeAt_iff and containmentBlocked_iff under LawfulBEq, both sorry-free and axiom-clean (propext, Quot.sound only). Scoped build green; checkInitImports passes. Scope Hypothesis confirmed: no Mathlib import needed for the definitional layer. Phases 2-5 remain (counting layer; Temporal redirection; references.bib; CI gate).",
-  "phases_completed": 1,
+  "summary": "Phase 2 complete: counting layer landed in Cslib/Foundations/Logic/Tableau/Blocking.lean — card_image_le_pow_of_forall_subset (powerset counting), toFinset_eraseDups bridge (List.mem_eraseDups membership route), distinctTypes_le_pow (corrected signed-universe statement over V : Finset (Sign × F), bound 2^V.card — the false task-description form was never used), exists_typeAt_eq_of_card_lt (pigeonhole via Finset.exists_ne_map_eq_of_card_lt_of_maps_to), strictChain_le_card (GGN chain bound, induction + Finset.card_lt_card + omega). All five sorry-free; scoped build green on first attempt; lean_verify on all three named counting lemmas reports standard axioms only (propext, Classical.choice, Quot.sound), zero warnings; checkInitImports exit 0. Mathlib imports added (public): Data.Finset.Card, Data.Finset.Dedup, Data.Finset.Powerset — sanctioned by plan, shake confirms minimality in Phase 5. Phases 3 (Temporal redirection), 4 (references.bib), 5 (CI gate) remain.",
+  "phases_completed": 2,
   "phases_total": 5,
   "skeleton": false,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
-    "next_phase": 2,
-    "notes": "Phase 2 (counting layer) depends on Phase 1 — now unblocked. Phase 4 (references.bib) was already dispatchable in wave 1. Proof note for Phase 2 authors: in this module context, simp with List.all_eq_true/List.any_eq_true must NOT be combined with eq_comm (loops); plain simp closes containmentBlocked_iff."
+    "next_phase": 3,
+    "notes": "Phase 3 (Temporal redirection) now unblocked (deps 1, 2 done). Phase 4 (references.bib) independently dispatchable. Naming note for Phase 3/5 authors: the counting lemmas live DIRECTLY in namespace Cslib.Logic.Tableau (Cslib.Logic.Tableau.distinctTypes_le_pow etc.), not in a nested Tableau sub-namespace — the H3 table's Cslib.Logic.Tableau.Tableau.* form would trip the dupNamespace linter. Deviation record: strictChain_le_card landed without the unused [DecidableEq β] instance (unusedArguments linter at the Phase 5 lint gate); statement otherwise verbatim."
   },
   "artifacts": [
     {
       "path": "Cslib/Foundations/Logic/Tableau/Blocking.lean",
       "type": "lean_module",
-      "summary": "New module, definitional layer only (3 defs + 2 spec lemmas, ~110 lines, zero sorry)"
+      "summary": "Definitional layer (phase 1) + counting layer (phase 2): 3 defs, 2 spec lemmas, 5 counting lemmas, ~200 lines, zero sorry"
     },
     {
       "path": "specs/456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md",
       "type": "plan",
-      "summary": "Phase 1 marked [COMPLETED], all 5 checklist items checked, Scope Hypothesis confirmation recorded"
+      "summary": "Phase 2 marked [COMPLETED], all 6 checklist items checked, Scope Hypothesis confirmation + verification record + naming/signature deviations recorded"
+    },
+    {
+      "path": "specs/456_shared_tableau_containment_blocking/progress/phase-2-progress.json",
+      "type": "progress",
+      "summary": "Phase 2 objective-level progress, all done"
     }
   ]
 }

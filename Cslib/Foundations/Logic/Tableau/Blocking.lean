@@ -7,6 +7,9 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+public import Mathlib.Data.Finset.Card
+public import Mathlib.Data.Finset.Dedup
+public import Mathlib.Data.Finset.Powerset
 public import Cslib.Foundations.Logic.Tableau.Branch
 
 /-! # Containment Blocking
@@ -39,6 +42,12 @@ logic-specific.
 - `Branch.mem_typeAt_iff`: Membership in `typeAt` is membership of the corresponding
   signed formula on the branch.
 - `Branch.containmentBlocked_iff`: `containmentBlocked` decides type containment.
+- `distinctTypes_le_pow`: A branch over a signed universe `V` exhibits at most
+  `2 ^ V.card` distinct types.
+- `exists_typeAt_eq_of_card_lt`: Pigeonhole — more than `2 ^ V.card` labels force two
+  labels with the same type.
+- `strictChain_le_card`: A strictly growing chain of finsets inside `U` has at most
+  `U.card` steps.
 
 ## References
 
@@ -100,6 +109,93 @@ lemma containmentBlocked_iff [BEq F] [BEq L] [LawfulBEq F] [LawfulBEq L] {b : Br
   simp [containmentBlocked, List.all_eq_true, List.any_eq_true]
 
 end Branch
+
+/-! ## Counting layer
+
+The lemmas below bound the number of distinct types a branch can exhibit, which is what
+makes containment blocking terminate: over a signed universe `V` there are at most
+`2 ^ V.card` distinct types (`distinctTypes_le_pow`), so a branch with more labels than
+that must repeat a type (`exists_typeAt_eq_of_card_lt`), and a strictly growing chain of
+types has length at most `V.card` (`strictChain_le_card`, the chain bound of
+[GargGenoveseNegri2012]).
+
+The universe is *signed*: types range over subsets of `Sign × F`, so the count is
+`2 ^ V.card` over `V : Finset (Sign × F)` — instantiating `V = S ×ˢ {pos, neg}` for a
+subformula universe `S` yields a `2 ^ (2 · S.card)` bound, and the positive projection
+(`Branch.posTypeAt`) over `U : Finset F` yields `2 ^ U.card`. -/
+
+/-- Powerset counting: if `f` maps every element of `s` into a subset of `U`, then `f`
+takes at most `2 ^ U.card` distinct values on `s`. Projection-agnostic helper shared by
+the signed (`Branch.typeAt`) and positive (`Branch.posTypeAt`) instantiations. -/
+theorem card_image_le_pow_of_forall_subset [DecidableEq β] (s : Finset α)
+    (f : α → Finset β) (U : Finset β) (h : ∀ a ∈ s, f a ⊆ U) :
+    (s.image f).card ≤ 2 ^ U.card := by
+  calc (s.image f).card ≤ U.powerset.card := by
+        refine Finset.card_le_card fun t ht => ?_
+        rw [Finset.mem_powerset]
+        obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp ht
+        exact h a ha
+    _ = 2 ^ U.card := Finset.card_powerset U
+
+/-- `eraseDups` does not change the set of elements of a list: the `Finset` bridge
+between the `List`-valued types and the counting layer. -/
+theorem toFinset_eraseDups [DecidableEq α] [BEq α] [LawfulBEq α] (l : List α) :
+    l.eraseDups.toFinset = l.toFinset := by
+  ext a
+  simp [List.mem_eraseDups]
+
+/-- A branch whose signed formulas all lie in the signed universe `V` exhibits at most
+`2 ^ V.card` distinct types. See [GargGenoveseNegri2012], §III, for the corresponding
+count of distinct forced sets. -/
+theorem distinctTypes_le_pow [DecidableEq F] [DecidableEq L] [BEq F] [LawfulBEq F]
+    [BEq L] [LawfulBEq L] (b : Branch F L) (V : Finset (Sign × F))
+    (hV : ∀ sf ∈ b, (sf.sign, sf.formula) ∈ V) :
+    (b.labels.toFinset.image fun l => (b.typeAt l).toFinset).card ≤ 2 ^ V.card := by
+  refine card_image_le_pow_of_forall_subset _ _ _ fun l _ => ?_
+  intro x hx
+  obtain ⟨s, φ⟩ := x
+  rw [List.mem_toFinset, Branch.mem_typeAt_iff] at hx
+  exact hV _ hx
+
+/-- Pigeonhole: a branch over the signed universe `V` with more than `2 ^ V.card`
+distinct labels has two distinct labels with the same type. This is the loop-detection
+core behind containment blocking. -/
+theorem exists_typeAt_eq_of_card_lt [DecidableEq F] [DecidableEq L] [BEq F] [LawfulBEq F]
+    [BEq L] [LawfulBEq L] (b : Branch F L) (V : Finset (Sign × F))
+    (hV : ∀ sf ∈ b, (sf.sign, sf.formula) ∈ V)
+    (hcard : 2 ^ V.card < b.labels.toFinset.card) :
+    ∃ l₁ ∈ b.labels, ∃ l₂ ∈ b.labels, l₁ ≠ l₂ ∧
+      (b.typeAt l₁).toFinset = (b.typeAt l₂).toFinset := by
+  have hmaps : ∀ l ∈ b.labels.toFinset, (b.typeAt l).toFinset ∈ V.powerset := by
+    intro l _
+    rw [Finset.mem_powerset]
+    intro x hx
+    obtain ⟨s, φ⟩ := x
+    rw [List.mem_toFinset, Branch.mem_typeAt_iff] at hx
+    exact hV _ hx
+  have hlt : V.powerset.card < b.labels.toFinset.card := by
+    rwa [Finset.card_powerset]
+  obtain ⟨l₁, hl₁, l₂, hl₂, hne, heq⟩ :=
+    Finset.exists_ne_map_eq_of_card_lt_of_maps_to hlt hmaps
+  exact ⟨l₁, List.mem_toFinset.mp hl₁, l₂, List.mem_toFinset.mp hl₂, hne, heq⟩
+
+/-- Strict-chain bound: a chain of finsets growing strictly at each of `k` steps and
+ending inside `U` has at most `U.card` steps. This is the chain argument of
+[GargGenoveseNegri2012] behind termination of blocking tableau constructions. -/
+theorem strictChain_le_card {k : Nat} (f : Nat → Finset β) (U : Finset β)
+    (hchain : ∀ i, i < k → f i ⊂ f (i + 1)) (hU : f k ⊆ U) : k ≤ U.card := by
+  have key : ∀ i, i ≤ k → i ≤ (f i).card := by
+    intro i
+    induction i with
+    | zero => exact fun _ => Nat.zero_le _
+    | succ n ih =>
+      intro hn
+      have h1 : n ≤ (f n).card := ih (Nat.le_of_succ_le hn)
+      have h2 : (f n).card < (f (n + 1)).card := Finset.card_lt_card (hchain n hn)
+      omega
+  have h1 := key k le_rfl
+  have h2 := Finset.card_le_card hU
+  omega
 
 end Cslib.Logic.Tableau
 

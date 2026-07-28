@@ -199,31 +199,40 @@ the Temporal build never sees a half-written Blocking.lean.
 - **Done when:** `lake build Cslib.Foundations.Logic.Tableau.Blocking` is green; zero `sorry`
   in the file; both spec lemmas stated and proved; commit per green substep.
 
-### Phase 2: Blocking.lean counting layer (powerset bound, bridge, distinctTypes_le_pow, pigeonhole, strictChain_le_card) [NOT STARTED]
+### Phase 2: Blocking.lean counting layer (powerset bound, bridge, distinctTypes_le_pow, pigeonhole, strictChain_le_card) [COMPLETED]
 
 - **Goal:** Land the five counting-layer lemmas in Blocking.lean, all sorry-free. Every proof
   core was already compiled green during research — this phase is transcription into the
   module context, not proof discovery.
 - **Tasks:**
-  - [ ] Add minimal Mathlib import(s) for `Finset` powerset/card API (candidates:
+  - [x] Add minimal Mathlib import(s) for `Finset` powerset/card API (candidates:
     `Mathlib.Data.Finset.Powerset`; adjust to whatever the research probes used; shake
-    confirms later).
-  - [ ] `card_image_le_pow_of_forall_subset [DecidableEq β] (s : Finset α) (f : α → Finset β)
+    confirms later). **Landed**: `Mathlib.Data.Finset.Card` + `Mathlib.Data.Finset.Dedup` +
+    `Mathlib.Data.Finset.Powerset` (all `public import`, matching the
+    `Modal/Tableau/LoopChecking.lean` sibling's convention; shake trims in Phase 5 if any
+    is implied).
+  - [x] `card_image_le_pow_of_forall_subset [DecidableEq β] (s : Finset α) (f : α → Finset β)
     (U : Finset β) (h : ∀ a ∈ s, f a ⊆ U) : (s.image f).card ≤ 2 ^ U.card` — via
     `Finset.card_le_card` into `U.powerset` (`Finset.mem_powerset`) + `Finset.card_powerset`.
     Projection-agnostic Branch-free helper shared by signed and Sfor instantiations.
-  - [ ] Bridge lemma: `l.eraseDups.toFinset = l.toFinset` under `[DecidableEq α] [BEq α]
+  - [x] Bridge lemma: `l.eraseDups.toFinset = l.toFinset` under `[DecidableEq α] [BEq α]
     [LawfulBEq α]` via `List.mem_eraseDups` membership extensionality (the ONLY available
-    route — see Postmortem Constraints).
-  - [ ] `Tableau.distinctTypes_le_pow` — the corrected F2 statement (signed universe
+    route — see Postmortem Constraints). Landed as `toFinset_eraseDups`.
+  - [x] `Tableau.distinctTypes_le_pow` — the corrected F2 statement (signed universe
     `V : Finset (Sign × F)`, Finset-image count, bound `2 ^ V.card`); composition of the two
-    lemmas above with `(b.typeAt l).toFinset ⊆ V` extracted from `hV` + filter/map membership.
-  - [ ] `exists_typeAt_eq_of_card_lt` — pigeonhole corollary via
+    lemmas above with `(b.typeAt l).toFinset ⊆ V` extracted from `hV` + filter/map membership
+    (extraction goes through `Branch.mem_typeAt_iff`, which already packages the
+    filter/map/eraseDups membership chain).
+  - [x] `exists_typeAt_eq_of_card_lt` — pigeonhole corollary via
     `Finset.exists_ne_map_eq_of_card_lt_of_maps_to`: `2 ^ V.card < b.labels.toFinset.card →
     ∃ l₁ ∈ b.labels, ∃ l₂ ∈ b.labels, l₁ ≠ l₂ ∧ (b.typeAt l₁).toFinset = (b.typeAt l₂).toFinset`.
-  - [ ] `Tableau.strictChain_le_card [DecidableEq β] {k : Nat} (f : Nat → Finset β)
+  - [x] `Tableau.strictChain_le_card [DecidableEq β] {k : Nat} (f : Nat → Finset β)
     (U : Finset β) (hchain : ∀ i, i < k → f i ⊂ f (i + 1)) (hU : f k ⊆ U) : k ≤ U.card` —
     induction + `Finset.card_lt_card` + `omega` (research's 13-line green proof).
+    **Deviation (signature hygiene)**: landed WITHOUT `[DecidableEq β]` — the proof route
+    (`Finset.card_lt_card`/`Finset.card_le_card`/`omega`) never uses it, and an unused
+    instance argument trips the `unusedArguments` env linter at the Phase 5 `lake lint`
+    gate. Statement and proof route are otherwise exactly as specified.
 - **Timing:** 1.5 hours
 - **Depends on:** 1
 - **Verification Tier:** local
@@ -232,9 +241,19 @@ the Temporal build never sees a half-written Blocking.lean.
   proof core transcribes without new helper lemmas beyond the listed bridge. Confirm during
   implementation; if a sixth helper is genuinely required, add it in this phase and record it
   in the summary (do not defer).
+  **CONFIRMED at implementation**: exactly five lemmas, no sixth helper; scoped build was
+  green on the first attempt. Naming resolution: the counting lemmas live directly in
+  `namespace Cslib.Logic.Tableau` (referable as `Tableau.distinctTypes_le_pow` etc.), NOT in
+  a nested `Tableau` sub-namespace — the fully-qualified
+  `Cslib.Logic.Tableau.Tableau.*` form in the H3 table would trip the `dupNamespace` env
+  linter at the Phase 5 gate.
 - **Done when:** scoped `lake build Cslib.Foundations.Logic.Tableau.Blocking` green; zero
   `sorry`; `lean_verify` axiom-check passes for `Tableau.distinctTypes_le_pow` and
   `Tableau.strictChain_le_card`; commit per green substep.
+  **VERIFIED 2026-07-28**: scoped build green (708/708); `grep -n '\bsorry\b'` empty;
+  `lake exe checkInitImports` exit 0; `lean_verify` on `distinctTypes_le_pow`,
+  `strictChain_le_card`, AND `exists_typeAt_eq_of_card_lt` all report exactly
+  `[propext, Classical.choice, Quot.sound]`, zero warnings.
 
 ### Phase 3: Temporal redirection (timeType/isSubsetBlocked defeq wrappers + conformance re-run) [NOT STARTED]
 

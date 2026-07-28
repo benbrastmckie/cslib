@@ -1,7 +1,7 @@
 # Implementation Plan: Simplify Modal/Temporal/Bimodal Proofs via Existing Normalization Lemmas (v2)
 
 - **Task**: 414 - simplify_proofs_normalization_modal_family
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: None blocking. The task entry in `specs/state.json` declares
   `depends_on: [180, 181, 215, 241, 275, 299, 300, 301, 321]`; see "Dependency Reassessment"
@@ -463,7 +463,7 @@ phase must be reopened.
 
 ---
 
-### Phase 4: Gate and sorry-freeness audit [NOT STARTED]
+### Phase 4: Gate and sorry-freeness audit [COMPLETED]
 
 **Goal**: Confirm the Phase 1 proof-body edit breaks nothing, that no touched declaration acquired
 a `sorry` or an unexpected axiom, and that any repo-wide gate failure is correctly attributed
@@ -472,42 +472,56 @@ between this task and the concurrent tableau session before any revert decision 
 **Tasks**:
 
 *File-scoped audit (binding):*
-- [ ] `lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity` green.
-- [ ] `grep -n "sorry"` returns nothing on all four files this task ever claimed:
-      `ModalConservativity.lean` and the three `GenericMCSBridge.lean` files.
-- [ ] `lean_verify` on `bimodal_truthAt_toBimodal_iff_satisfies` reports no `sorryAx` and no
-      unexpected axioms.
-- [ ] `git diff --stat` lists exactly one modified source file
+- [x] `lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity` green.
+      *(712/712 jobs, no warnings)*
+- [x] `grep -n "sorry"` returns nothing on all four files this task ever claimed:
+      `ModalConservativity.lean` and the three `GenericMCSBridge.lean` files. *(zero matches,
+      confirmed)*
+- [x] `lean_verify` on `bimodal_truthAt_toBimodal_iff_satisfies` reports no `sorryAx` and no
+      unexpected axioms. *(axioms: `propext`, `Classical.choice`, `Quot.sound` only; no warnings)*
+- [x] `git diff --stat` lists exactly one modified source file
       (`ModalConservativity.lean`). Any second source file is scope drift and must be reconciled
-      before the gate is declared passing.
-- [ ] `git diff` contains proof-body hunks only. Any hunk touching a `theorem`/`lemma`/`def`
+      before the gate is declared passing. *(confirmed: exactly one file, 3 insertions, 20
+      deletions)*
+- [x] `git diff` contains proof-body hunks only. Any hunk touching a `theorem`/`lemma`/`def`
       statement line, an attribute, or an import is a scope violation and must be reverted.
-- [ ] Confirm no hunk under any `Tableau/` directory, under `Cslib/Foundations/`, or under
-      `Cslib/Logics/Propositional/`.
-- [ ] Confirm the `box`/`diamond` arms of `bimodal_truthAt_toBimodal_iff_satisfies` are
-      byte-identical to their pre-task content.
+      *(confirmed: only the `and`/`or` arm tactic bodies changed)*
+- [x] Confirm no hunk under any `Tableau/` directory, under `Cslib/Foundations/`, or under
+      `Cslib/Logics/Propositional/`. *(confirmed)*
+- [x] Confirm the `box`/`diamond` arms of `bimodal_truthAt_toBimodal_iff_satisfies` are
+      byte-identical to their pre-task content. *(confirmed via `git diff` -- no hunk in that
+      range)*
 
 *Repo-wide gate (run, but attribution-gated):*
-- [ ] `lake exe cache get` if the Mathlib cache is cold.
-- [ ] Full `lake build`.
-- [ ] `lake exe checkInitImports`.
-- [ ] `lake lint`.
-- [ ] `lake exe lint-style`.
-- [ ] `lake test`.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — expect no import removals (the
+- [x] `lake exe cache get` if the Mathlib cache is cold. *(already warm: "No files to download,
+      Already decompressed 8651 file(s)")*
+- [x] Full `lake build`. *(3309/3309 jobs, exit 0; only warnings are the 5 pre-existing
+      `Tableau/`-scoped sorries plus one unrelated unused-variable hint in `Scheme.lean`)*
+- [x] `lake exe checkInitImports`. *(silent success)*
+- [x] `lake lint`. *(exit 0; all findings are pre-existing `unusedArguments` warnings in files
+      this task never touched -- none in `ModalConservativity.lean` or the three
+      `GenericMCSBridge.lean` files)*
+- [x] `lake exe lint-style`. *(silent success)*
+- [x] `lake test`. *(9374/9374 jobs, exit 0; same pre-existing warning set as the full build plus
+      one unrelated `FreeMonad.lean` privacy-option notice)*
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — expect no import removals (the
       *statements* still depend on `truthAt` and the embedding, so no import becomes redundant);
-      investigate if it reports any.
+      investigate if it reports any. *(confirmed: zero import-shape suggestions for
+      `ModalConservativity.lean` or any of the three `GenericMCSBridge.lean` files; the handful
+      of reported add/remove suggestions are all in unrelated pre-existing files)*
 
 *Attribution protocol (run before treating ANY repo-wide failure as caused by this task):*
-- [ ] Identify the failing module. If it lives under any `Tableau/` directory, it is the
+- [x] Identify the failing module. If it lives under any `Tableau/` directory, it is the
       concurrent session's territory: record the failure, do **not** revert any Phase-1 edit, and
-      do not block this task on it.
-- [ ] Check whether the failing module transitively imports
+      do not block this task on it. *(no repo-wide gate failed; all 7 steps exited 0. Nothing to
+      attribute)*
+- [x] Check whether the failing module transitively imports
       `Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity`. If it does not,
-      this task's edit cannot be the cause.
-- [ ] If still ambiguous, `git stash` this task's edit and re-run the single failing gate. A
-      failure that persists without this task's edit is not this task's failure.
-- [ ] Record the repo-wide `sorry`-warning count for information. The reference baseline is
+      this task's edit cannot be the cause. *(n/a -- no failure occurred)*
+- [x] If still ambiguous, `git stash` this task's edit and re-run the single failing gate. A
+      failure that persists without this task's edit is not this task's failure. *(n/a -- no
+      ambiguity; all gates green)*
+- [x] Record the repo-wide `sorry`-warning count for information. The reference baseline is
       **5 warnings across 4 files** (`Modal/Tableau/FrameSoundness.lean:1252`,
       `Propositional/Tableau/Intuitionistic/Scheme.lean` x2,
       `Propositional/Tableau/Intuitionistic/Completeness.lean`,
@@ -515,8 +529,16 @@ between this task and the concurrent tableau session before any revert decision 
       while the concurrent session runs: it has already recorded a new temporary `sorry` under
       `Scheme.lean` (its commit `178cd446`). All five baseline sites and the new one are under
       `Tableau/`, i.e. entirely outside this task's territory. **This count is never a pass/fail
-      gate for this task**; the file-scoped audit above is.
-- [ ] Record the total tactic-line reduction and any reverted sites for the task summary.
+      gate for this task**; the file-scoped audit above is. *(observed at implementation time:
+      exactly 5 `declaration uses sorry` warnings from `lake build`/`lake test`, all under
+      `Tableau/` -- `FrameSoundness.lean:1252`, `Scheme.lean` at two drifted line numbers (721/756
+      and 2638/2673 across the two gate runs, consistent with the plan's documented drift
+      caution), `Intuitionistic/Completeness.lean:124`, `Minimal/Completeness.lean:118`. Matches
+      the 5-warning baseline exactly; no net increase attributable to this task.)*
+- [x] Record the total tactic-line reduction and any reverted sites for the task summary. *(18
+      tactic lines removed across the `and`/`or` arms, net file diff 3 insertions / 20 deletions;
+      zero sites reverted -- both arms' verified single-line forms compiled cleanly on first
+      application)*
 
 **Timing**: 1 hour
 
@@ -551,23 +573,24 @@ failed the gate).
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity` green
+- [x] `lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity` green
       (binding; unaffected by concurrent tableau work).
-- [ ] `grep -n "sorry"` returns nothing on `ModalConservativity.lean` and on all three
+- [x] `grep -n "sorry"` returns nothing on `ModalConservativity.lean` and on all three
       `GenericMCSBridge.lean` files.
-- [ ] `bimodal_truthAt_toBimodal_iff_satisfies` confirmed sorry-free and axiom-clean via
+- [x] `bimodal_truthAt_toBimodal_iff_satisfies` confirmed sorry-free and axiom-clean via
       `lean_verify`.
-- [ ] Full `lake build` green, **or** every failure attributed to the concurrent tableau session.
-- [ ] `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`,
+- [x] Full `lake build` green, **or** every failure attributed to the concurrent tableau session.
+      *(green: 3309/3309, no failure to attribute)*
+- [x] `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`,
       `lake shake --add-public --keep-implied --keep-prefix` all pass, under the same attribution
-      caveat.
-- [ ] `git diff` contains proof-body hunks only — no statement, attribute, or import changes.
-- [ ] `ModalConservativity.lean` `box`/`diamond` arms unchanged.
-- [ ] No file modified under any `Tableau/` directory, under `Cslib/Foundations/`, or under
+      caveat. *(all exit 0)*
+- [x] `git diff` contains proof-body hunks only — no statement, attribute, or import changes.
+- [x] `ModalConservativity.lean` `box`/`diamond` arms unchanged.
+- [x] No file modified under any `Tableau/` directory, under `Cslib/Foundations/`, or under
       `Cslib/Logics/Propositional/`.
-- [ ] Exactly one source file in this task's diff.
-- [ ] Repo-wide `sorry`-warning count recorded and compared against the **5**-warning /
-      4-file baseline, for information only.
+- [x] Exactly one source file in this task's diff.
+- [x] Repo-wide `sorry`-warning count recorded and compared against the **5**-warning /
+      4-file baseline, for information only. *(observed 5, matching baseline exactly)*
 
 ## Artifacts & Outputs
 

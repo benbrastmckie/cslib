@@ -23,8 +23,6 @@ Provides integer-arithmetic lemmas needed by the separation proof:
   (particularly Lemma 10.2.2, the negation equivalence)
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation

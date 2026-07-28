@@ -1,0 +1,40 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+      "summary": "Hard-mode skeleton plan v13: 8 sequential phases (Blocking.lean bridge, WBound + chain lemma, enlarged universe/measure engine, intFuel resize, hUniv/hNW threading, R1 restatement discharging Scheme.lean:2551, sat_timp discharge at Scheme.lean:617, full CI gate) with strategic-sorry division points DP-1/DP-2 and territory resolutions (subsumes 583, defers bridges to 430)."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/317_propositional_tableau_completeness/.skeleton-return.json",
+      "summary": "Skeleton new_tasks declaration: one follow-up task ({{FOLLOWUP:0}}) for the DP-1/DP-2 world-bound combinatorics, dependent on the skeleton task."
+    }
+  ],
+  "next_steps": "skill-planner-hard postflight: allocate the {{FOLLOWUP:0}} task number, substitute placeholders in the plan, set plan_metadata.skeleton=true and follow_up_tasks; orchestrator: dispatch /implement 317 --hard per-phase (strictly sequential waves); user/orchestrator: close task 583 as superseded when Phase 6 lands.",
+  "metadata": {
+    "session_id": "sess_1785275816_a84520_317",
+    "agent_type": "planner-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+    "phase_count": 8,
+    "estimated_hours": 32,
+    "postmortem_rules_count": 10,
+    "skeleton": true,
+    "plan_version": 13
+  },
+  "modified_files": [
+    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+    "specs/317_propositional_tableau_completeness/.skeleton-return.json"
+  ],
+  "memory_candidates": [
+    {
+      "content": "When all remaining sorries of a formal-verification task bottom out in one unproven prerequisite (here: a post-blocking termination bound), incorporate the prerequisite as an in-plan phase-block with strategic-sorry division points at the research-grade risk concentrations, rather than optimistic gating (which produced 12 failed plan versions) or spawning a separate task mid-development in the same files. The skeleton lands all mechanical value (definitions, parametric engine re-targets, hypothesis threading, restatements) even if the hard combinatorics sorries out.",
+      "category": "WORKFLOW",
+      "source_artifact": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["skeleton-plan", "strategic-sorry", "fuel-sufficiency", "tableau", "hard-mode"]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 ---
-next_project_number: 585
+next_project_number: 586
 ---
 
 # TODO
@@ -12,7 +12,7 @@ next_project_number: 585
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,317,400,409,425,534,554,558,562,563,568,569,583,584 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,430,450,497,511,537,551,553,564,571,576 | 36,37,181,317,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,430,450,497,511,537,551,553,564,571,576,585 | 36,37,181,317,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,506,548,565,566,582 | 39,40,511,553,564 | foundations, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
 
@@ -25,9 +25,10 @@ next_project_number: 585
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
+317 [PLANNED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
+  └─ 585 [NOT STARTED] — Discharge the strategic sorries DP-1 and DP-2 left by task 317's 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
@@ -82,7 +83,18 @@ next_project_number: 585
 
 584 [NOT STARTED] — Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a s
 
+### Uncategorized
+
 ## Tasks
+
+### 585. Prove post blocking world bound chain and mint invariant
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 317
+
+**Description**: Discharge the strategic sorries DP-1 and DP-2 left by task 317's fuel-sufficiency skeleton plan (plans/13_fuel-sufficiency-skeleton.md), IF the implementer placed them: (DP-1) the ancestor-chain bound lemma `intCreatedChain_le` in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean — along any edge chain of worlds created by unblocked intFImpRule firings, chain length <= intChainBound phi, proved via the (posTypeAt, psi)-pair pigeonhole (Blocking.lean's exists_typeAt_eq_of_card_lt / strictChain_le_card) against the five-conjunct negation of intFImpReuseWitnessAnc? = none; (DP-2) the hNW-preservation lemma for the fresh-mint recursion arm — labels minted on a branch <= tree size <= WBound phi. Exact file:line locations are recorded in the implementation summary's sorry_inventory. Acceptance gate: both sorries discharged, lake build green, repo bare-sorry count strictly decreased accordingly, no weakening of any statement. Constraints binding from the parent plan's Postmortem Constraints section apply verbatim (never the unsigned eraseDups/2^U.length bound form; never edit intFImpReuseWitnessAnc?; bound must come from blocking combinatorics, never intUniverse's linear range). If the parent implementation closed both proofs inline and placed no sorry, close this task as unnecessary.
+
+---
 
 ### 584. Give pre-pr-check.sh step 1 a baseline ratchet or changed-files mode
 - **Status**: [NOT STARTED]
@@ -685,20 +697,10 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 456, Task 552
-- **Plan**:
-  - [plans/03_b2-fuel-sufficiency.md]
-  - [317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md]
-  - [317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md]
-  - [317_propositional_tableau_completeness/plans/03_b2-fuel-sufficiency.md]
-  - [317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md]
-  - [317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md]
-  - [317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md]
-  - [317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md]
-  - [317_propositional_tableau_completeness/plans/12_world-bound-prereq-threading.md]
 - **Handoff**:
   - [317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md]
   - [317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md]
@@ -719,6 +721,7 @@ After implementation:
 - **Probe**:
   - [317_propositional_tableau_completeness/probes/int_tableau.py]
   - [317_propositional_tableau_completeness/probes/check_atom_persist.py]
+- **Plan**: [317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md]
 
 **Description**: Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.
 

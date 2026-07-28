@@ -1,5 +1,5 @@
 {
-  "next_project_number": 585,
+  "next_project_number": 586,
   "active_projects": [
     {
       "project_number": 583,
@@ -202,19 +202,14 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.\n\n---\n\n## CORRECTION (repo-wide lint/CI audit, upstream/main f36649cf): ITEM (3) AS WRITTEN IS IMPOSSIBLE\n\nItem (3) above instructs the implementer to \"close the fuel=0 base case of `intExpandBranches_openBranch_sat`\". THAT GOAL IS FALSE AT THE LEMMA'S CURRENT STATEMENT and cannot be closed by any proof. The refutation is recorded IN THE SOURCE, in-proof at the sorry site -- read it before touching this item.\n\nThe counter-instance (Lean-verified, not conjectured): `branches = [[<.neg, p AND q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`. Every hypothesis holds -- `ILabelBound` trivially (the single formula sits at label 0 < 1), `IExpandedConsistent` and `IAllAccessConsistent` vacuously (empty expanded-set and empty edge list), and all length hypotheses are (1,1). With `fuel = 0`, `intExpandBranches` returns `.openBranch b` with `b` the branch unmodified -- never saturated. But `IBranchSaturation.sat_fand`'s premise (`F(p AND q)@0` present) is `true` while BOTH required disjuncts (`F(p)@0`, `F(q)@0`) are `false`. So the existential goal is unsatisfiable at an instance where every hypothesis holds.\n\nWHAT ITEM (3) ACTUALLY REQUIRES: RESTATING the lemma -- e.g. adding a saturation-establishing precondition on the initial worklist that rules out the counter-instance -- and only then proving it. Do not attempt to prove it as stated; do not force it via a weakened or vacuous statement (the sibling docstring at the truthLemma site issues the same prohibition for the same reason).\n\n## CORRECTED LINE NUMBERS (verified live; the numbers in the body above are stale)\n\n- truthLemma's T-imp case: `Intuitionistic/Scheme.lean:607` (the lemma itself begins at :570) -- body above says :592\n- `intExpandBranches_openBranch_sat` fuel-0 base case: `Intuitionistic/Scheme.lean:2583` -- body above says :1498\n- IValid bridge: `Intuitionistic/Completeness.lean:124` -- body above says :133\n- MValid bridge: `Minimal/Completeness.lean:118` -- body above says :125\n\nRe-derive live before use; these move on every edit.\n\n## DEPENDENCY NOTE\n\nOf this task's two declared dependencies, 552 (tableau_calculus_conformance_rule_completeness_repair) is COMPLETED and archived. The only live blocker is 456, itself behind 574 -> 573. The status marker should be re-evaluated against that single remaining edge rather than treated as blocked on two.\n\n## CI CONTEXT\n\nThese four sorries are exactly the ones that keep `lake build --wfail --iofail` red, together with the fifth in Modal/Tableau/FrameSoundness.lean (separately owned). The Definition of Done's \"CI green (... lake shake)\" clause should be read against the shake-disposition task: shake currently exits 1 on 12 files, 10 of them byte-identical to upstream, and its CI step is being re-scoped.\n",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-27T06:06:50Z",
+      "last_updated": "2026-07-28T23:42:33Z",
       "next_artifact_number": 14,
       "artifacts": [
-        {
-          "type": "plan",
-          "path": "plans/03_b2-fuel-sufficiency.md",
-          "summary": "B2 fuel-sufficiency + none-case wiring plan (v3)"
-        },
         {
           "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md",
           "type": "handoff",
@@ -224,46 +219,6 @@
           "path": "specs/317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md",
           "type": "handoff",
           "summary": "Phase 2 blocker: forward-reference + missing intExpandBranches_world_bound lemma, with a positive finding on Phase 3's zero case"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md",
-          "type": "plan",
-          "summary": "tableau completeness plan (backfilled by --sync)"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md",
-          "type": "plan",
-          "summary": "tableau completeness unified (backfilled by --sync)"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/03_b2-fuel-sufficiency.md",
-          "type": "plan",
-          "summary": "b2 fuel sufficiency (backfilled by --sync)"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
-          "type": "plan",
-          "summary": "sfor dedup fuel sufficiency (backfilled by --sync)"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
-          "type": "plan",
-          "summary": "frame change and fuel raise (backfilled by --sync)"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
-          "type": "plan",
-          "summary": "route a frame plumbing (backfilled by --sync)"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md",
-          "type": "plan",
-          "summary": "Hard-mode plan v7: 8 phases, verification spike first, invariant threading split, preserved-assets accounting against v6, 12 postmortem constraints"
-        },
-        {
-          "path": "specs/317_propositional_tableau_completeness/plans/12_world-bound-prereq-threading.md",
-          "type": "plan",
-          "summary": "Plan v12: preserves Phases 0-1 as landed, inserts block-relocation and intExpandBranches_world_bound prerequisites, merges v11 non-separable Phases 2-3, carries v11 Phases 4-7 forward as 6-9"
         },
         {
           "path": "specs/317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md",
@@ -340,6 +295,11 @@
           "path": "specs/317_propositional_tableau_completeness/probes/check_atom_persist.py",
           "type": "probe",
           "summary": "Audits IAtomPersist / full T-persistence / T-implication copy completeness / edge-endpoint containment on the branches the real algorithm produces. All four hold across five formulas and both closure predicates -- a positive finding preserving the phase-0 spike's premise-narrowing route for the two Completeness bridges."
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+          "type": "plan",
+          "summary": "8-phase skeleton plan v13: fuel-sufficiency development inline (phases 2-5), subsumes 583 (phase 6), defers bridges to 430; follow-up task 585 declared for DP-1/DP-2"
         }
       ],
       "dependencies": [
@@ -347,7 +307,7 @@
         552
       ],
       "parent_task": 298,
-      "session_id": "sess_1785132027_6f0ff7",
+      "session_id": "sess_1785275816_a84520_317",
       "blockers": [],
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
@@ -399,7 +359,11 @@
       ],
       "completion_summary": "Phase 2 (pure code relocation of the universe/measure/persistence block) completed and committed. Phase 3 (world-budget accounting invariant) is BLOCKED: its own mandated 30-minute timeboxed alternative check escalated into a decisive computational falsification of the plan's stated proof strategy -- direct evaluation against the real intuitionisticTableau/intApplyRuleFull functions produced a concrete counterexample (a single static .imp-node position of phi0 firing the world-creating rule 8 times, not once, via T-signed persistence copying into sibling worlds) refuting the claim that world-creation events inject into distinct static positions. No sorry, axiom, or vacuous statement was introduced. Phases 4-9 are transitively blocked; the task requires re-planning before Phase 3/4 can be attempted again. See handoffs/12_world-bound-decision.md for full evidence and candidate re-plan directions.",
       "previous_status": "researched",
-      "blocked_reason": []
+      "blocked_reason": [],
+      "skeleton": true,
+      "follow_up_tasks": [
+        585
+      ]
     },
     {
       "project_number": 300,
@@ -2047,6 +2011,19 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "topic": "Code Hygiene"
+    },
+    {
+      "project_number": 585,
+      "project_name": "prove_post_blocking_world_bound_chain_and_mint_invariant",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Discharge the strategic sorries DP-1 and DP-2 left by task 317's fuel-sufficiency skeleton plan (plans/13_fuel-sufficiency-skeleton.md), IF the implementer placed them: (DP-1) the ancestor-chain bound lemma `intCreatedChain_le` in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean — along any edge chain of worlds created by unblocked intFImpRule firings, chain length <= intChainBound phi, proved via the (posTypeAt, psi)-pair pigeonhole (Blocking.lean's exists_typeAt_eq_of_card_lt / strictChain_le_card) against the five-conjunct negation of intFImpReuseWitnessAnc? = none; (DP-2) the hNW-preservation lemma for the fresh-mint recursion arm — labels minted on a branch <= tree size <= WBound phi. Exact file:line locations are recorded in the implementation summary's sorry_inventory. Acceptance gate: both sorries discharged, lake build green, repo bare-sorry count strictly decreased accordingly, no weakening of any statement. Constraints binding from the parent plan's Postmortem Constraints section apply verbatim (never the unsigned eraseDups/2^U.length bound form; never edit intFImpReuseWitnessAnc?; bound must come from blocking combinatorics, never intUniverse's linear range). If the parent implementation closed both proofs inline and placed no sorry, close this task as unnecessary.",
+      "effort_estimate": "12-25 hours (research-grade combinatorics; corroborated hard by blocked S4 analogues)",
+      "dependencies": [
+        317
+      ],
+      "created": "2026-07-28",
+      "source": "skeleton follow-up declared by plans/13_fuel-sufficiency-skeleton.md"
     }
   ],
   "repository_health": {

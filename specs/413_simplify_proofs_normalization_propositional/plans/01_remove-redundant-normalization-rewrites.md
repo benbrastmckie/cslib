@@ -276,7 +276,7 @@ into this phase (not left in a `local`-tier phase).
 
 ---
 
-### Phase 4: Propositional and Modal bridge forward proofs [NOT STARTED]
+### Phase 4: Propositional and Modal bridge forward proofs [COMPLETED]
 
 **Goal**: Strip the redundant per-arm prologues from `derivTreeToList` in the Propositional and
 Modal bridges, preserving their explanatory comments.

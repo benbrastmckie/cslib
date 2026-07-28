@@ -119,17 +119,12 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
     have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (PL.DerivationTree Axioms)) ψ :=
       ⟨PL.DerivationTree.ax [] ψ h_ax⟩
     -- Lift to the algebraic system via K-weakening: ⊢ ψ → listImp Γ ψ, then MP
-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
-    unfold ListDeriv
     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
   | assumption Γ ψ h_mem =>
-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem]
     exact list_deriv_reflection h_mem
   | @modusPonens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_mp ih₁ ih₂
   | @weakening Γ' Γ ψ _d h_sub ih =>
-    simp only [propAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
 /-! ## Backward Direction: Algebraic Deriv → DerivationTree -/

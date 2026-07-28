@@ -120,29 +120,16 @@ lemma derivTreeToList [HasMinimalAxioms Axioms]
     have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (DerivationTree Axioms)) ψ :=
       ⟨DerivationTree.ax [] ψ h_ax⟩
     -- Lift to the algebraic system via K-weakening: ⊢ ψ → listImp Γ ψ, then MP
-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem]
-    unfold ListDeriv
     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
   | assumption Γ ψ h_mem =>
-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem]
     exact list_deriv_reflection h_mem
   | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_mp ih₁ ih₂
   | @necessitation ψ _d ih =>
     -- ih : modalAlgDS.Deriv [] ψ = ListDeriv [] ψ = DerivableIn (ClosedHilbert ...) ψ
-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
-    have h_thm : InferenceSystem.DerivableIn (ClosedHilbert (DerivationTree Axioms)) ψ := by
-      unfold ListDeriv at ih
-      simp only [listImp_nil] at ih
-      exact ih
     -- Box-necessitation: ⊢ ψ → ⊢ □ψ in ClosedHilbert (DerivationTree Axioms)
-    unfold ListDeriv
-    simp only [listImp_nil]
-    -- Construct □ψ derivation directly using the tree necessitation constructor
-    exact ⟨DerivationTree.necessitation ψ h_thm.toDerivation⟩
+    exact ⟨DerivationTree.necessitation ψ ih.toDerivation⟩
   | @weakening Γ' Γ ψ _d h_sub ih =>
-    simp only [modalAlgDS, treeAlgDS, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
 /-! ## Backward Direction: Algebraic Deriv → DerivationTree -/

@@ -25,7 +25,7 @@ next_project_number: 586
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [PLANNED] — Fill the remaining propositional/intuitionistic tableau completen
+317 [IMPLEMENTING] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
   └─ 585 [NOT STARTED] — Discharge the strategic sorries DP-1 and DP-2 left by task 317's 
@@ -697,7 +697,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 456, Task 552

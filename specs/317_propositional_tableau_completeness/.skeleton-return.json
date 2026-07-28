@@ -1,0 +1,16 @@
+{
+  "skeleton": true,
+  "plan_path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+  "new_tasks": [
+    {
+      "index": 0,
+      "title": "prove_post_blocking_world_bound_chain_and_mint_invariant",
+      "description": "Discharge the strategic sorries DP-1 and DP-2 left by task 317's fuel-sufficiency skeleton plan (plans/13_fuel-sufficiency-skeleton.md), IF the implementer placed them: (DP-1) the ancestor-chain bound lemma `intCreatedChain_le` in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean — along any edge chain of worlds created by unblocked intFImpRule firings, chain length <= intChainBound phi, proved via the (posTypeAt, psi)-pair pigeonhole (Blocking.lean's exists_typeAt_eq_of_card_lt / strictChain_le_card) against the five-conjunct negation of intFImpReuseWitnessAnc? = none; (DP-2) the hNW-preservation lemma for the fresh-mint recursion arm — labels minted on a branch <= tree size <= WBound phi. Exact file:line locations are recorded in the implementation summary's sorry_inventory. Acceptance gate: both sorries discharged, lake build green, repo bare-sorry count strictly decreased accordingly, no weakening of any statement. Constraints binding from the parent plan's Postmortem Constraints section apply verbatim (never the unsigned eraseDups/2^U.length bound form; never edit intFImpReuseWitnessAnc?; bound must come from blocking combinatorics, never intUniverse's linear range). If the parent implementation closed both proofs inline and placed no sorry, close this task as unnecessary.",
+      "effort": "12-25 hours (research-grade combinatorics; corroborated hard by blocked S4 analogues)",
+      "task_type": "cslib",
+      "dependencies": ["317"]
+    }
+  ],
+  "dependency_order": [0],
+  "notes": "Reversed dependency direction per skeleton contract: the follow-up depends on the skeleton task (317), not vice versa. DP-3/DP-4 in the plan's Planned Strategic Sorries table cite EXISTING task 430 directly and require no task creation. Task 583 is subsumed by Phase 6 (close as superseded when it lands)."
+}

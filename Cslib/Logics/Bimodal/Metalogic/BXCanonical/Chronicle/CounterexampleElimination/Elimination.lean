@@ -23,9 +23,13 @@ and G/H-propagation counterexample elimination via midpoint insertion.
 -/
 
 -- All declarations in this module are intentionally `private` (internal elimination
--- helpers not referenced outside this file); `linter.privateModule` is a module-wide
--- diagnostic with no per-declaration site to narrow to, so it is suppressed here rather
--- than exposing lemmas that have no external caller.
+-- helpers not referenced outside this file). `linter.privateModule` fires once at the
+-- module's first line (1:0), reporting "the current module only contains private
+-- declarations" -- this is a genuinely module-wide diagnostic, not a per-declaration
+-- one, so there is no declaration to attach a narrowed `set_option ... in` to.
+-- Verified by direct removal + rebuild (cycle 25): the warning reappears at 1:0
+-- regardless of the already-present `@[expose] public section` below, because every
+-- declaration in the file is explicitly `private`.
 set_option linter.privateModule false
 
 @[expose] public section

@@ -1358,10 +1358,11 @@ lemma intExpandBranches_closed_unsat
                           List.mem_append]
                       exact Or.inr (by simp)
                     · -- World-creating F(φ → ψ) rule: newEdge = some e_val. Run the
-                      -- Sfor-containment loop-check exactly as `go` does.
+                      -- ancestor-directed Sfor-containment loop-check exactly as `go` does
+                      -- (Phase 4: repointed to `intFImpReuseWitnessAnc?`).
                       rw [hnE] at hgo hresult_sf
                       simp only [] at hgo
-                      rcases hwit : intFImpReuseWitness? bPers edgesP newForms e_val with _ | x
+                      rcases hwit : intFImpReuseWitnessAnc? bPers edgesP newForms e_val with _ | x
                       · -- No reusable ancestor: create w' exactly as pre-dedup.
                         rw [hwit] at hgo
                         simp only [] at hgo
@@ -1537,10 +1538,11 @@ lemma intExpandBranches_closed_unsat
                           hfreshCombLin hgo bp edgesP ?_ wo hmono_p hsat_p
                       rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
                       exact Or.inr hmem_rest
-                    · -- World-creating F(φ → ψ) rule: newEdge = some e_val.
+                    · -- World-creating F(φ → ψ) rule: newEdge = some e_val. Ancestor-directed
+                      -- loop-check (Phase 4: repointed to `intFImpReuseWitnessAnc?`).
                       rw [hnE] at hgo hresult_sf
                       simp only [] at hgo
-                      rcases hwit : intFImpReuseWitness? bPers edgesH newForms e_val with _ | x
+                      rcases hwit : intFImpReuseWitnessAnc? bPers edgesH newForms e_val with _ | x
                       · -- No reusable ancestor: create w' exactly as pre-dedup.
                         rw [hwit] at hgo
                         simp only [] at hgo

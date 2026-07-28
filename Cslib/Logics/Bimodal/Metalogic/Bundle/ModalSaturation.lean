@@ -23,9 +23,6 @@ is true in some family has a witness family where the inner formula is true.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/ModalSaturation.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -50,7 +47,8 @@ def isModallySaturated (B : BFMCS Atom D) : Prop :=
 lemma diamond_eq (phi : Formula Atom) :
     phi.diamond = Formula.neg (Formula.box (Formula.neg phi)) := rfl
 
-lemma diamond_excludes_box_neg {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) Omega)
+lemma diamond_excludes_box_neg {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) Omega)
     (psi : Formula Atom) (h_diamond : psi.diamond ∈ Omega) :
     Formula.box (Formula.neg psi) ∉ Omega := by
   intro h_box
@@ -60,7 +58,8 @@ lemma diamond_excludes_box_neg {Omega : Set (Formula Atom)} (h_mcs : SetMaximalC
 
 /-! ## MCS Existence for Consistent Formulas -/
 
-lemma diamond_implies_psi_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) Omega)
+lemma diamond_implies_psi_consistent {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) Omega)
     (psi : Formula Atom) (h_diamond : psi.diamond ∈ Omega) :
     SetConsistent FrameClass.Base ({psi} : Set (Formula Atom)) := by
   intro L hL ⟨d⟩
@@ -91,30 +90,41 @@ lemma diamond_implies_psi_consistent {Omega : Set (Formula Atom)} (h_mcs : SetMa
         exact h_psi_in_L List.mem_cons_self
     rw [h_L_empty] at d
     have h_bot_in : (Formula.bot : Formula Atom) ∈ Omega := theoremInMcs h_mcs d
-    have h_deriv : DerivationTree FrameClass.Base [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) :=
-      DerivationTree.assumption [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)
+    have h_deriv :
+        DerivationTree FrameClass.Base
+          [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) :=
+      DerivationTree.assumption
+        [(Formula.bot : Formula Atom)] (Formula.bot : Formula Atom) (by simp)
     have h_sub : ∀ x ∈ [(Formula.bot : Formula Atom)], x ∈ Omega := by simp [h_bot_in]
     exact h_mcs.1 [(Formula.bot : Formula Atom)] h_sub ⟨h_deriv⟩
 
 /-! ## Helper Lemmas for Modal Backward Proof -/
 
 /-- Derives the double negation elimination theorem in the base frame class. -/
-noncomputable def dneTheorem (phi : Formula Atom) : DerivationTree FrameClass.Base [] (Formula.neg (Formula.neg phi) |>.imp phi) :=
+noncomputable def dneTheorem (phi : Formula Atom) :
+    DerivationTree FrameClass.Base [] (Formula.neg (Formula.neg phi) |>.imp phi) :=
   Theorems.Propositional.doubleNegation phi
 
 /-- Derives the box-distributed double negation elimination theorem. -/
 noncomputable def boxDneTheorem (phi : Formula Atom) :
-    DerivationTree FrameClass.Base [] ((Formula.box (Formula.neg (Formula.neg phi))).imp (Formula.box phi)) := by
-  have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) := dneTheorem phi
-  have h_box_dne : DerivationTree FrameClass.Base [] (Formula.box ((Formula.neg (Formula.neg phi)).imp phi)) :=
+    DerivationTree FrameClass.Base []
+      ((Formula.box (Formula.neg (Formula.neg phi))).imp (Formula.box phi)) := by
+  have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) :=
+    dneTheorem phi
+  have h_box_dne :
+      DerivationTree FrameClass.Base []
+        (Formula.box ((Formula.neg (Formula.neg phi)).imp phi)) :=
     DerivationTree.necessitation _ h_dne
-  have h_K : DerivationTree FrameClass.Base [] ((Formula.box ((Formula.neg (Formula.neg phi)).imp phi)).imp
+  have h_K : DerivationTree FrameClass.Base []
+      ((Formula.box ((Formula.neg (Formula.neg phi)).imp phi)).imp
                ((Formula.box (Formula.neg (Formula.neg phi))).imp (Formula.box phi))) :=
     DerivationTree.axiom [] _ (Axiom.modal_k_dist _ _) trivial
   exact DerivationTree.modus_ponens [] _ _ h_K h_box_dne
 
-lemma SetMaximalConsistent.contrapositive_lemma {fc : FrameClass} {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc Omega)
-    {A B : Formula Atom} (hImpl : DerivationTree fc [] (A.imp B)) (h_negB : B.neg ∈ Omega) : A.neg ∈ Omega := by
+lemma SetMaximalConsistent.contrapositive_lemma {fc : FrameClass} {Omega : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent fc Omega)
+    {A B : Formula Atom} (hImpl : DerivationTree fc [] (A.imp B)) (h_negB : B.neg ∈ Omega) :
+    A.neg ∈ Omega := by
   have h1 : DerivationTree fc [A, B.neg] A :=
     DerivationTree.assumption _ A (by simp)
   have h2 : DerivationTree fc [A, B.neg] (A.imp B) :=
@@ -179,12 +189,16 @@ noncomputable def modal5CollapseTheorem (phi : Formula Atom) :
 
 /-- Derives negative introspection: absence of box-phi implies box of its absence. -/
 noncomputable def axiom5NegativeIntrospection (phi : Formula Atom) :
-    DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) := by
-  have h_collapse : DerivationTree FrameClass.Base [] ((Formula.box phi).diamond.imp (Formula.box phi)) :=
+    DerivationTree FrameClass.Base []
+      ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) := by
+  have h_collapse :
+      DerivationTree FrameClass.Base [] ((Formula.box phi).diamond.imp (Formula.box phi)) :=
     modal5CollapseTheorem phi
-  have h_contra : DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box phi).diamond.neg) :=
+  have h_contra :
+      DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box phi).diamond.neg) :=
     Theorems.Propositional.contraposition h_collapse
-  have h_dne : DerivationTree FrameClass.Base [] (((Formula.box phi).neg.box.neg.neg).imp ((Formula.box phi).neg.box)) :=
+  have h_dne : DerivationTree FrameClass.Base []
+      (((Formula.box phi).neg.box.neg.neg).imp ((Formula.box phi).neg.box)) :=
     Theorems.Propositional.doubleNegation ((Formula.box phi).neg.box)
   have h_contra_expanded :
     (Formula.box phi).diamond.neg = (Formula.box phi).neg.box.neg.neg := rfl
@@ -193,13 +207,16 @@ noncomputable def axiom5NegativeIntrospection (phi : Formula Atom) :
 
 /-- Derives that negation of box implies box of the negation, via axiom 5. -/
 noncomputable def negBoxToBoxNegBox (phi : Formula Atom) :
-    DerivationTree FrameClass.Base [] ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) :=
+    DerivationTree FrameClass.Base []
+      ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) :=
   axiom5NegativeIntrospection phi
 
-lemma SetMaximalConsistent.neg_box_implies_box_neg_box {fc : FrameClass} {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc Omega)
+lemma SetMaximalConsistent.neg_box_implies_box_neg_box {fc : FrameClass}
+    {Omega : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc Omega)
     (phi : Formula Atom) (h_neg_box : (Formula.box phi).neg ∈ Omega) :
     Formula.box (Formula.box phi).neg ∈ Omega := by
-  have h_ax5 : DerivationTree fc [] ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) :=
+  have h_ax5 :
+      DerivationTree fc [] ((Formula.box phi).neg.imp (Formula.box (Formula.box phi).neg)) :=
     (negBoxToBoxNegBox phi).lift (FrameClass.base_le fc)
   have h_ax5_in := theoremInMcsFc h_mcs h_ax5
   exact SetMaximalConsistent.implication_property h_mcs h_ax5_in h_neg_box

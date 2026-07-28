@@ -278,7 +278,7 @@ file), contains zero `sorry`, and its header states the verdict in one sentence.
 
 ---
 
-### Phase 2: Land the probe verdict in `Cslib` and execute the disposition [NOT STARTED]
+### Phase 2: Land the probe verdict in `Cslib` and execute the disposition [COMPLETED]
 
 **Goal**: Promote Phase 1's mathematical content to a library-grade module and put the task in
 the state the user's kill-criterion prescribes.
@@ -289,20 +289,21 @@ the state the user's kill-criterion prescribes.
 exact lemma set depends on Phase 1's verdict.
 
 **Tasks (kill branch — expected)**:
-- [ ] New file `Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean`: P1 as a
+- [x] New file `Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean`: P1 as a
       general totality lemma, P2, and the route-refutation corollary (P3), renamed to
       library-grade names; module docstring explaining that total-`r` birelational models
       collapse `□` to a world-independent global modality, hence validate `□a ∨ ¬□a`, hence
       cannot refute `IS5` non-theorems — citing [MarinMoralesStrassburger2021] §7-8 for the
       `≤`/frame-condition delicacy and using durable anchors (file/section names), never task
       numbers.
-- [ ] Docstring cross-reference in `CS5Completeness.lean` adjacent to
+- [x] Docstring cross-reference in `CS5Completeness.lean` adjacent to
       `CS5PairSeedRightExclusion` (`:507` region): both residuals of the product-model route
       are now machine-closed — (R-b) ⟹ collapse (`is5_derivable_of_boxNotMem_transport`) and
       (R-a) refuted (`IS5TotalModels.lean`). No other edit to the preserved file.
-- [ ] Barrel registration: `lake exe mk_all --module`; scoped `lake build` of the new module
-      and `CS5Completeness`.
-- [ ] Disposition: report task closure per rescope — `[BLOCKED]`, justification = report 02
+- [x] Barrel registration: `lake exe mk_all --module`; scoped `lake build` of the new module
+      and `CS5Completeness`. (mk_all also surfaced the unregistered `Tableau/Blocking.lean`
+      owned by a concurrent task; that line was dropped from this commit — out of territory.)
+- [x] Disposition: report task closure per rescope — `[BLOCKED]`, justification = report 02
       §5.4 cost table + the two machine-checked route closures, `requires_user_review: true`,
       and the two consumers' answers restated (pair-Lindenbaum consumer: obligation not
       dischargeable by any surveyed route without user-authorised collapse; labelled-soundness
@@ -328,7 +329,7 @@ dispatch return.
 
 ---
 
-### Phase 3: Product frame on `W × W` with componentwise conditions [NOT STARTED]
+### Phase 3: Product frame on `W × W` with componentwise conditions [BLOCKED]: (R-a) refuted, see Phase 1
 
 **Conditional**: execute only if Phase 1 ended in verdict (b) — (R-a) survives. If the
 kill-criterion fired, mark this and all later phases `[BLOCKED]: (R-a) refuted, see Phase 1`.
@@ -356,7 +357,7 @@ checkInitImports, lint-style clean.
 
 ---
 
-### Phase 4: The projection lemma [NOT STARTED]
+### Phase 4: The projection lemma [BLOCKED]: (R-a) refuted, see Phase 1
 
 **Conditional**: as Phase 3.
 
@@ -378,7 +379,7 @@ the failing case as the negative result).
 
 ---
 
-### Phase 5: `CS5PairAxiom` validity and seed forcing on the product [NOT STARTED]
+### Phase 5: `CS5PairAxiom` validity and seed forcing on the product [BLOCKED]: (R-a) refuted, see Phase 1
 
 **Conditional**: as Phase 3.
 
@@ -401,7 +402,7 @@ soundness); `cross1`/`cross2` via totality of `r`. Then seed forcing: with `u �
 
 ---
 
-### Phase 6: Exclusion theorem and the (R-b) interface endpoint [NOT STARTED]
+### Phase 6: Exclusion theorem and the (R-b) interface endpoint [BLOCKED]: (R-a) refuted, see Phase 1
 
 **Conditional**: as Phase 3.
 

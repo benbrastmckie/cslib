@@ -1,48 +1,48 @@
 {
   "status": "partial",
-  "started_at": "2026-07-28T01:24:11Z",
-  "requires_user_review": false,
+  "started_at": "2026-07-27T18:46:37-07:00",
+  "completed_at": "2026-07-27T19:35:00-07:00",
   "artifacts": [
-    "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md",
-    "Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Separation/Distributivity.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Separation/NegationEquiv.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/FMP.lean",
-    "Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean",
-    "Cslib/Logics/Temporal/Metalogic/TemporalContent.lean",
-    "Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean",
-    "Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Separation/FormulaOps.lean",
-    "Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/ClosureMCS.lean",
-    "scripts/lint-suppression-baseline.txt"
+    "specs/575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md"
   ],
   "partial_progress": {
-    "stage": "phase5_cycle25_closed",
-    "details": "Cycle 25 closed the count-2 tier (WitnessSeed.lean, DenseValidity.lean, both 2->0) and processed 9 count-1-tier files: 8 fully cleared to 0 (Distributivity.lean, NegationEquiv.lean, FMP.lean, Bridge.lean, TemporalContent.lean, MetricSoundness.lean, FormulaOps.lean, ClosureMCS.lean), 1 verified as a new permanent exception (Elimination.lean, linter.privateModule, 1->1 unchanged). Suppression ratchet re-baselined 46 -> 34 across 11 individual commits plus a plan-update commit. Only Phase 5 remains open; 9 actionable count-1-tier files and 1 deliberately-deferred count-6 file remain.",
+    "stage": "cycle-26 close",
+    "details": "Closed the count-1 actionable tier of Phase 5's suppression audit entirely: all 9 files (Temporal/ProofSystem/Axioms.lean, ConservativeExtension/ExtDerivation.lean, Bimodal/ProofSystem/Axioms.lean, Decidability/ProofExtraction.lean, Decidability/FMP/TruthPreservation.lean, Decidability/Closure.lean, Temporal/Metalogic/MetricCompleteness.lean, Separation/Defs.lean, Decidability/Tableau.lean) cleared to 0 blanket suppressions. Ratchet re-baselined 34 -> 25. Only the deliberately-deferred count-6 file (CounterexampleElimination/Interface.lean, 3048 lines, 6 suppressions) remains actionable in Phase 5, plus 5 unchanged permanent exceptions.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 7,
     "phases_total": 8,
-    "suppression_ratchet_start": 46,
-    "suppression_ratchet_end": 34,
-    "files_fully_cleared": 10,
-    "files_verified_permanent_exception": 1
+    "suppression_ratchet_start": 34,
+    "suppression_ratchet_end": 25
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 0,
+    "sorry_count_wfail": 5,
+    "sorry_count_note": "Non-Goal of this task per plan: 5 sorry warnings are the documented, correct end state and remain unchanged (FrameSoundness.lean:1252, Intuitionistic/Scheme.lean:570,2583, Intuitionistic/Completeness.lean:124, Minimal/Completeness.lean:118). Not zero because clearing them is mathematical work owned elsewhere; not this cycle's target.",
     "vacuous_count": 0,
-    "axiom_count": 0,
+    "axiom_count_unchanged": true,
     "build_passed": true,
-    "ci_pipeline_passed": true,
-    "notes": "sorry_count/vacuous_count/axiom_count above refer to NEW introductions by this cycle's edits, all zero -- confirmed via git diff and per-file grep on every touched file. The repository's pre-existing, unchanged baseline is exactly 5 sorry warnings (lake build --wfail --iofail, matching the documented baseline) and 1 pre-existing vacuous-def grep false positive (Computability/URM/Basic.lean:92, unrelated to this cycle, not a file this cycle touched). lake build --wfail --iofail: exit failure with exactly the 5 baseline sorry warnings (FrameSoundness.lean:1252, Intuitionistic/Scheme.lean:570+2583, Intuitionistic/Completeness.lean:124, Minimal/Completeness.lean:118). lake test: exit 0. lake exe checkInitImports: pass. lake lint: 0 matches on docBlame/defLemma/defsWithUnderscore/simpNF/unusedSectionVars/topNamespace/dupNamespace. lake shake --add-public --keep-implied --keep-prefix Cslib: exactly 12 upstream-shared files flagged, 0 local-only. lake exe mk_all --check: no update necessary. bash scripts/check-lint-suppressions.sh: exit 0, 34 (baseline ceiling 34)."
+    "wfail_build_exit": 1,
+    "wfail_build_note": "Exit 1 is the correct/expected state -- --wfail promotes the 5 documented sorry warnings to failures; no other warnings present.",
+    "lake_test_exit": 0,
+    "checkInitImports_exit": 0,
+    "lake_lint_prevention_categories_matches": 0,
+    "lint_style_exit": 0,
+    "lake_shake_upstream_shared": 12,
+    "lake_shake_local_only": 0,
+    "mk_all_update_necessary": false,
+    "suppression_ratchet_exit": 0,
+    "ci_pipeline_passed": true
   },
   "metadata": {
     "session_id": "sess_1785201767_9dbb98",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "passed",
+    "commits": [
+      "469f62ae", "2c4a3e29", "1af48333", "d8c6b4cd", "1daaf38a",
+      "6df8000b", "f8249816", "8532f4ec", "9ff65ebd", "b6e00409"
+    ]
   }
 }

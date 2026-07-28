@@ -328,7 +328,7 @@ containing `lemma derivTreeToList` or its type ascription).
 
 ---
 
-### Phase 5: Temporal and Bimodal bridge forward proofs [NOT STARTED]
+### Phase 5: Temporal and Bimodal bridge forward proofs [COMPLETED]
 
 **Goal**: Same treatment for `derivTreeToListFc` in the Temporal and Bimodal bridges, which
 carry the extra `temporal_necessitation` and `temporal_duality` arms (the largest single win).

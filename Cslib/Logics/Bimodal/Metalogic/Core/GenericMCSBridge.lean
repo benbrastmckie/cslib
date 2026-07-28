@@ -173,37 +173,18 @@ lemma derivTreeToListFc {fc : FrameClass}
   | «axiom» Γ ψ h_ax h_fc =>
     have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ :=
       ⟨Bimodal.DerivationTree.axiom [] ψ h_ax h_fc⟩
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem]
-    unfold ListDeriv
     exact ModusPonens.mp (listImp_axiom_k ψ Γ) h_thm
   | assumption Γ ψ h_mem =>
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem]
     exact list_deriv_reflection h_mem
   | @modus_ponens Γ χ ψ _d₁ _d₂ ih₁ ih₂ =>
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
     exact list_deriv_mp ih₁ ih₂
   | @necessitation ψ _d ih =>
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
-    have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ := by
-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
-    unfold ListDeriv; simp only [listImp_nil]
-    exact ⟨Bimodal.DerivationTree.necessitation ψ h_thm.toDerivation⟩
+    exact ⟨Bimodal.DerivationTree.necessitation ψ ih.toDerivation⟩
   | @temporal_necessitation ψ _d ih =>
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
-    have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ := by
-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
-    unfold ListDeriv; simp only [listImp_nil]
-    exact ⟨Bimodal.DerivationTree.temporal_necessitation ψ h_thm.toDerivation⟩
+    exact ⟨Bimodal.DerivationTree.temporal_necessitation ψ ih.toDerivation⟩
   | @temporal_duality ψ _d ih =>
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
-    have h_thm : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ := by
-      unfold ListDeriv at ih; simp only [listImp_nil] at ih; exact ih
-    have h_dual : InferenceSystem.DerivableIn (HilbertTMFc fc) ψ.swapTemporal :=
-      ⟨Bimodal.DerivationTree.temporal_duality ψ h_thm.toDerivation⟩
-    unfold ListDeriv; simp only [listImp_nil]
-    exact h_dual
+    exact ⟨Bimodal.DerivationTree.temporal_duality ψ ih.toDerivation⟩
   | @weakening Γ' Γ ψ _d h_sub ih =>
-    simp only [bimodalAlgDSFc, algebraicDerivationSystem] at *
     exact list_deriv_monotonic h_sub ih
 
 /-! ## FC-Parameterized Backward Bridge -/

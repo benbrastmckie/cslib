@@ -33,7 +33,6 @@
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/Tableau.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/DedekindZ/QLemma.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Defs.lean
-1 Cslib/Logics/Bimodal/Metalogic/Separation/Distributivity.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/FormulaOps.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/NegationEquiv.lean

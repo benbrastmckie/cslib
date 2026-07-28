@@ -26,8 +26,6 @@ linear flows of time (not just integers).
 - GHR94, Lemma 10.2.1, p. 571
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation

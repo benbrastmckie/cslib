@@ -48,9 +48,6 @@ Ported from BimodalLogic/Metalogic/Decidability/Correctness.lean with
 adaptations for universe-polymorphic `Formula Atom`.
 -/
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability
@@ -72,6 +69,7 @@ section Soundness
 
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /--
 Soundness of the decision procedure: if a formula has a `FrameClass.Base`
 derivation (as produced by `decide` returning `.valid proof`), then the

@@ -14,8 +14,6 @@ public import Cslib.Logics.Bimodal.Metalogic.Soundness.Soundness
 Soundness theorems for the TM proof system using typeclass constraints.
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.FrameConditions

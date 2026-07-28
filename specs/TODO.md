@@ -1,5 +1,5 @@
 ---
-next_project_number: 584
+next_project_number: 585
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 584
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,425,456,534,554,558,562,563,568,569,583 | -- | propositional logic, modal logic, tableau infrastructure, ... |
+| 1 | 36,37,181,226,400,409,425,456,534,554,558,562,563,568,569,583,584 | -- | propositional logic, modal logic, tableau infrastructure, ... |
 | 2 | 39,40,215,301,317,450,497,511,537,551,553,564,571,576 | 36,37,181,425,456,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,375,430,506,548,565,566,582 | 39,40,317,511,553,564 | foundations, propositional logic, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
@@ -27,7 +27,7 @@ next_project_number: 584
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
+583 [RESEARCHING] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -58,7 +58,7 @@ next_project_number: 584
 
 ### Tableau Infrastructure
 
-456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
+456 [RESEARCHING] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ### Temporal Logic
 
@@ -82,10 +82,32 @@ next_project_number: 584
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
+### Code Hygiene
+
+584 [NOT STARTED] — Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a s
+
 ## Tasks
 
-### 583. Restate intexpandbranches openbranch sat
+### 584. Give pre-pr-check.sh step 1 a baseline ratchet or changed-files mode
 - **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a scoped label. It finds every *.lean under four whole trees (Cslib/Foundations/Logic/, Cslib/Logics/Modal/, Cslib/Logics/Temporal/, Cslib/Logics/Bimodal/) and fails on ANY sorry found anywhere in them, despite announcing itself as 'Checking for sorry instances in PR scope...'. The script's own comment above the step-8/9 ratchets states the contrast outright: step 1 'scans a narrow, hand-picked directory set and fails on ANY sorry found there', whereas steps 8/9 'ratchet whole-tree sorry/suppression/axiom-taint debt against a frozen baseline, and pass on the existing debt by construction'.
+
+CONSEQUENCE: the completion bar 'pre-pr-check.sh passes end to end' is unsatisfiable by construction for ANY scoped task -- it can only be met when the entire repository is simultaneously sorry-free. It is worse for a task whose guardrails deliberately FREEZE a sorry baseline inside its own file_scope: such a task cannot make step 1 pass without violating the scoping decision that defines it. This already forced one completed consolidation task into a spurious [PARTIAL] and a blocker-escalation cycle that resolved by correcting the completion bar rather than by any proof work. Every future scoped Lean task inherits the same wall.
+
+MEASURED STATE (verified 2026-07-28, full gate run): steps 1 and 5 FAIL; steps 2, 3, 4, 6, 7, 8, 9 all pass with every ratchet exactly at baseline (blanket suppressions 19/19, shake-flagged files 9/9, markers 18/18, sorries 28/28, sorryAx-tainted declarations 43/43). Step 1's real failure set is 24 sorry hits across 6 files: ChronicleToCountermodel.lean (12), Bundle/SuccRelation.lean (7), Bundle/UntilSinceCoherence.lean (2), Modal/Tableau/FrameSoundness.lean (1), ConservativeExtension/TemporalConservativity.lean (1), BXCanonical/Frame.lean (1).
+
+WORK: give step 1 the treatment steps 6-9 already have -- either a frozen per-file sorry baseline it ratchets against (failing only on NEW debt), or a changed-files mode that scans only what the current branch actually touches (e.g. `git diff --name-only` against the merge base), or both behind a flag. scripts/check-sorry-suppressions.sh is the working in-repo pattern to mirror; prefer reusing its baseline machinery over inventing a second one. Fix step 1's misleading 'in PR scope' wording to match whatever behaviour is chosen.
+
+EXPLICIT NON-GOAL: do NOT narrow step 5 (`lake build --wfail --iofail`). It deliberately mirrors CI and must keep failing on repo-wide sorry warnings; weakening it would hide real regressions. Note also that steps 1 and 5 have DIFFERENT scopes and are not redundant -- three Propositional/Tableau/* files trip step 5 but are not scanned by step 1 at all, so neither check substitutes for the other. Do not attempt to resolve any of the existing sorries as part of this task; this is gate-scoping work, not proof work.
+
+---
+
+### 583. Restate intexpandbranches openbranch sat
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 574
@@ -468,7 +490,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 456. Shared tableau containment blocking
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: Task 574

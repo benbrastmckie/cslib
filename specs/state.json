@@ -1,10 +1,10 @@
 {
-  "next_project_number": 584,
+  "next_project_number": 585,
   "active_projects": [
     {
       "project_number": 583,
       "project_name": "restate_intexpandbranches_openbranch_sat",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "dependencies": [
@@ -12,7 +12,8 @@
       ],
       "description": "Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583, sorry at :2623) so that it is provable, then discharge it.\n\nTHE GOAL IS FALSE AS STATED -- this is not a proof-effort obligation and cannot be closed by proving harder. The in-file comment (Scheme.lean:2598-2622) records an explicit Lean-verified counter-instance to the `fuel = 0` base case: with `branches = [[<.neg, p /\\ q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`, every hypothesis of the lemma holds while `IBranchSaturation` fails. The comment states outright: \"No proof can close this `sorry` at the lemma current statement.\"\n\nSCOPE: determine the correct strengthened statement (most likely an added saturation or fuel-sufficiency precondition on the `fuel = 0` case), restate the lemma, repair its call sites, and discharge the sorry.\n\nRELATIONSHIP TO THE DIVERGENCE REPAIR: the divergence-repair task addresses the root cause shared by all four propositional tableau sorries (the fuel-bounded persistence loop in `applyAllTImpRules` copying `T(phi->psi)` into accessible worlds). The restatement here may fall out of that repair, or may need to be done independently -- resolve that first. This task exists because the restatement obligation is named in no other task description and must not be silently skipped when the divergence repair lands.\n\nVERIFY BEFORE STARTING: re-read Scheme.lean:2598-2622 and confirm the counter-instance still refutes the current statement; if the divergence repair has already restated the lemma, close this task as superseded rather than duplicating the work.",
       "created": "2026-07-28T17:19:05Z",
-      "last_updated": "2026-07-28T17:19:05Z"
+      "last_updated": "2026-07-28T21:58:32Z",
+      "session_id": "sess_1785275816_a84520_583"
     },
     {
       "project_number": 582,
@@ -157,13 +158,13 @@
     {
       "project_number": 456,
       "project_name": "shared_tableau_containment_blocking",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "priority": "medium",
       "description": "Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.",
       "created": "2026-07-01T13:59:22Z",
-      "last_updated": "2026-07-27T06:06:50Z",
-      "session_id": "sess_1782914362_65e1c0",
+      "last_updated": "2026-07-28T21:58:36Z",
+      "session_id": "sess_1785275816_a84520_456",
       "dependencies": [
         574
       ],
@@ -1989,6 +1990,25 @@
         "Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean"
       ],
       "description": "Resolve the `namespace Chronicle` / `structure Chronicle` NAME COINCIDENCE, and delete the 36 suppressions it forces (33 @[nolint], 3 set_option) across the three ChronicleTypes/Types files, 9 declarations each.\n\nORIGIN: identified during the repo-wide lint-hygiene work as the genuine residual defect behind a group of dupNamespace suppressions. That work closed its doubled-namespace phase at 7 of 10 files and deliberately EXCLUDED the three Chronicle modules, because the original doubled-namespace diagnosis was WRONG there: `namespace ...Metalogic.Chronicle` contains `structure Chronicle`, so `def Chronicle.c0` correctly declares a structure-projection member that 81 dot-notation call sites (chi.c0, chi.c3, ...) depend on. A mechanical prefix strip fails with \"Invalid field 'c0': the environment does not contain ...Chronicle.Chronicle.c0\". The 36 suppressions are LOAD-BEARING until the coincidence itself is resolved -- do NOT delete them before the restructure lands.\n\nTHE DECISION: either (a) move `structure Chronicle` to the parent namespace, or (b) rename the namespace across the whole Chronicle/ subtree, or (c) a better option surfaced by the dependency below. This alters definitions, which is why it was barred from the hygiene-only lint task.\n\nDEPENDENCY RATIONALE (task 568): 568 asks what the RIGHT Chronicle architecture is for Bimodal/Temporal dedup, evaluating type-alias, label-type parameterization, and typeclass-mediated indexing. Its file_scope is the three Chronicle DIRECTORIES and strictly contains this task's three files. If 568 recommends parameterizing the structure away, the naming question resolves differently -- or evaporates entirely. Renaming first would risk doing the work twice. Sequence after 568 reports.\n\nDEFINITION OF DONE: the namespace/structure coincidence is resolved by an explicit, recorded decision; all 36 suppressions are deleted; dupNamespace is clean across the three files; the 81 dot-notation call sites still resolve; `lake build --wfail --iofail` shows no new warnings and `lake test` is unchanged.\n\nCONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or relocate any sorry.\n"
+    },
+    {
+      "project_number": 584,
+      "project_name": "scope_pre_pr_check_sorry_gate",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Give pre-pr-check.sh step 1 a baseline ratchet or changed-files mode",
+      "description": "Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a scoped label. It finds every *.lean under four whole trees (Cslib/Foundations/Logic/, Cslib/Logics/Modal/, Cslib/Logics/Temporal/, Cslib/Logics/Bimodal/) and fails on ANY sorry found anywhere in them, despite announcing itself as 'Checking for sorry instances in PR scope...'. The script's own comment above the step-8/9 ratchets states the contrast outright: step 1 'scans a narrow, hand-picked directory set and fails on ANY sorry found there', whereas steps 8/9 'ratchet whole-tree sorry/suppression/axiom-taint debt against a frozen baseline, and pass on the existing debt by construction'.\n\nCONSEQUENCE: the completion bar 'pre-pr-check.sh passes end to end' is unsatisfiable by construction for ANY scoped task -- it can only be met when the entire repository is simultaneously sorry-free. It is worse for a task whose guardrails deliberately FREEZE a sorry baseline inside its own file_scope: such a task cannot make step 1 pass without violating the scoping decision that defines it. This already forced one completed consolidation task into a spurious [PARTIAL] and a blocker-escalation cycle that resolved by correcting the completion bar rather than by any proof work. Every future scoped Lean task inherits the same wall.\n\nMEASURED STATE (verified 2026-07-28, full gate run): steps 1 and 5 FAIL; steps 2, 3, 4, 6, 7, 8, 9 all pass with every ratchet exactly at baseline (blanket suppressions 19/19, shake-flagged files 9/9, markers 18/18, sorries 28/28, sorryAx-tainted declarations 43/43). Step 1's real failure set is 24 sorry hits across 6 files: ChronicleToCountermodel.lean (12), Bundle/SuccRelation.lean (7), Bundle/UntilSinceCoherence.lean (2), Modal/Tableau/FrameSoundness.lean (1), ConservativeExtension/TemporalConservativity.lean (1), BXCanonical/Frame.lean (1).\n\nWORK: give step 1 the treatment steps 6-9 already have -- either a frozen per-file sorry baseline it ratchets against (failing only on NEW debt), or a changed-files mode that scans only what the current branch actually touches (e.g. `git diff --name-only` against the merge base), or both behind a flag. scripts/check-sorry-suppressions.sh is the working in-repo pattern to mirror; prefer reusing its baseline machinery over inventing a second one. Fix step 1's misleading 'in PR scope' wording to match whatever behaviour is chosen.\n\nEXPLICIT NON-GOAL: do NOT narrow step 5 (`lake build --wfail --iofail`). It deliberately mirrors CI and must keep failing on repo-wide sorry warnings; weakening it would hide real regressions. Note also that steps 1 and 5 have DIFFERENT scopes and are not redundant -- three Propositional/Tableau/* files trip step 5 but are not scanned by step 1 at all, so neither check substitutes for the other. Do not attempt to resolve any of the existing sorries as part of this task; this is gate-scoping work, not proof work.",
+      "dependencies": [],
+      "file_scope": [
+        "scripts/pre-pr-check.sh",
+        "scripts/check-sorry-suppressions.sh",
+        "scripts/README.md"
+      ],
+      "created": "2026-07-28T21:15:00Z",
+      "last_updated": "2026-07-28T21:15:00Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "topic": "Code Hygiene"
     }
   ],
   "repository_health": {

@@ -375,7 +375,23 @@ target sites (expect zero) and by confirming `git diff` shows no change to eithe
 
 ---
 
-### Phase 6: Fragility adjudication and defeq documentation [NOT STARTED]
+### Phase 6: Fragility adjudication and defeq documentation [COMPLETED]
+
+**Review pass result**: `git diff da1fa666 HEAD -- Cslib/` across all 8 touched files was
+audited as a single pass. Exactly one comment line was net-removed relative to the
+pre-change files: `-- Construct □ψ derivation directly using the tree necessitation
+constructor` in the Modal `necessitation` arm. This is not "the only explanation" of that
+arm (criterion 6) — the two comments the plan explicitly named for preservation (`-- ih :
+...` and `-- Box-necessitation: ...`) remain in place immediately above the one-line
+`exact ⟨DerivationTree.necessitation ψ ih.toDerivation⟩`, which is now self-explanatory.
+No comment is restored; this is a considered, defensible loss, not an oversight.
+
+Per-module build-time comparison against the Phase 1 baseline (all four bridges, full
+`lake build`, 3309 jobs, green): Propositional 792ms (baseline 956ms), Modal 820ms
+(baseline 982ms), Temporal 804ms (baseline 1.1s), Bimodal 885ms (baseline 968ms) — no
+module regressed; all four are faster or flat. No site reverted under any criterion.
+Full-build `sorry` warning set unchanged from the Phase 1 baseline (same 5 warnings, same
+4 files/lines). No `#### Reasoned Exclusions` subsection is needed.
 
 **Goal**: Decide, on evidence rather than by default, which simplifications to keep; document the
 defeq reliance the kept ones now depend on; and revert any site that fails the "Do Not Simplify"

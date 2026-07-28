@@ -145,7 +145,12 @@ instance (fc : FrameClass) : HilbertTree (F := Temporal.Formula Atom) (Derivatio
 
 Structural induction on the tree. Propositional/temporal constructors all map
 cleanly; necessitation and duality constructors have empty context and use
-`listImp_axiom_k` to weaken to arbitrary `Γ`. -/
+`listImp_axiom_k` to weaken to arbitrary `Γ`.
+
+Defeq reliance: `(temporalAlgDSFc fc).Deriv Γ φ`, `ListDeriv Γ φ`, and
+`InferenceSystem.DerivableIn S (listImp Γ φ)` are all definitionally equal, so each arm below
+closes with a bare `exact` — no rewriting needed. This mirrors the reliance `listDerivToTree`
+(Foundations) already has on the same defeq chain. -/
 lemma derivTreeToListFc {fc : FrameClass}
     {Γ : Context Atom} {φ : Formula Atom}
     (d : DerivationTree fc Γ φ) :

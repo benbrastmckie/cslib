@@ -164,7 +164,12 @@ instance (fc : FrameClass) :
 
 Structural induction on the tree. Propositional/modal/temporal constructors all
 map cleanly; necessitation/duality constructors have empty context and use
-`listImp_axiom_k` to produce a result at the same empty context. -/
+`listImp_axiom_k` to produce a result at the same empty context.
+
+Defeq reliance: `(bimodalAlgDSFc fc).Deriv Γ φ`, `ListDeriv Γ φ`, and
+`InferenceSystem.DerivableIn S (listImp Γ φ)` are all definitionally equal, so each arm below
+closes with a bare `exact` — no rewriting needed. This mirrors the reliance `listDerivToTree`
+(Foundations) already has on the same defeq chain. -/
 lemma derivTreeToListFc {fc : FrameClass}
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom}
     (d : Bimodal.DerivationTree fc Γ φ) :

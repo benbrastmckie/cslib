@@ -109,7 +109,12 @@ produce `(modalAlgDS Axioms).Deriv Γ φ` by structural induction on the derivat
 - **assumption**: reflected directly.
 - **modus_ponens**: contextual modus ponens.
 - **necessitation**: box-necessitation gives `⊢ □ψ` in `ClosedHilbert (DerivationTree Axioms)`.
-- **weakening**: monotone in the context. -/
+- **weakening**: monotone in the context.
+
+Defeq reliance: `(modalAlgDS Axioms).Deriv Γ φ`, `ListDeriv Γ φ`, and
+`InferenceSystem.DerivableIn S (listImp Γ φ)` are all definitionally equal, so each arm below
+closes with a bare `exact` — no rewriting needed. This mirrors the reliance `listDerivToTree`
+(Foundations) already has on the same defeq chain. -/
 lemma derivTreeToList [HasMinimalAxioms Axioms]
     {Γ : List (Proposition Atom)} {φ : Proposition Atom}
     (d : DerivationTree Axioms Γ φ) :

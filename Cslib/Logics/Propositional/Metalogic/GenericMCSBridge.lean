@@ -108,7 +108,12 @@ produce `(propAlgDS Axioms).Deriv Γ φ` by structural induction on the derivati
   via K-weakening.
 - **assumption**: reflected directly.
 - **modusPonens**: contextual modus ponens.
-- **weakening**: monotone in the context. -/
+- **weakening**: monotone in the context.
+
+Defeq reliance: `(propAlgDS Axioms).Deriv Γ φ`, `ListDeriv Γ φ`, and
+`InferenceSystem.DerivableIn S (listImp Γ φ)` are all definitionally equal, so each arm below
+closes with a bare `exact` — no rewriting needed. This mirrors the reliance `listDerivToTree`
+(Foundations) already has on the same defeq chain. -/
 lemma derivTreeToList [HasMinimalAxioms Axioms]
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (d : PL.DerivationTree Axioms Γ φ) :

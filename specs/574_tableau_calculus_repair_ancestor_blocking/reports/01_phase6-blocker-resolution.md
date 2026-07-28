@@ -1,6 +1,13 @@
 # Research Report: Phase 6 Blocker Resolution — Ancestor-Blocking Witness Admissibility
 
 - **Task**: 574 - tableau_calculus_repair_ancestor_blocking
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Date**: 2026-07-28
 - **Agent**: cslib-research-hard-agent (H2 anti-analysis, H3 reference grounding, H4 adversarial
   self-verification)

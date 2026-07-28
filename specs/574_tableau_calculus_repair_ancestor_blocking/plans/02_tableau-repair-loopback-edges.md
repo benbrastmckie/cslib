@@ -1,7 +1,7 @@
 # Implementation Plan (v02): Repair Intuitionistic Tableau — Self-Copy Bound, Ancestor Blocking, Loop-Back-Edge Saturation Invariant
 
 - **Task**: 574 - tableau_calculus_repair_ancestor_blocking
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 52-78 hours across 8 phases (~33-50h landed in Phases 1-5; ~19-28h remaining in
   Phases 6-8)
 - **Dependencies**: 573 (quotient-soundness spike, GO verdict — decision record read and

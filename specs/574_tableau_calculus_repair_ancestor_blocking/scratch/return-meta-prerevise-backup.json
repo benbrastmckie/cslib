@@ -1,0 +1,54 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-28T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md",
+      "type": "report"
+    },
+    {
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/01_tableau-repair-ancestor-blocking.md",
+      "type": "plan"
+    },
+    {
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/scratch/phase6-prototype.patch",
+      "type": "scratch"
+    },
+    {
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/scratch/Scheme.lean.prototype",
+      "type": "scratch"
+    }
+  ],
+  "findings_count": 8,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "verified: ChagrovZakharyaschev1997 (references.bib:75, in corpus), GargGenoveseNegri2012 (:228, web-verified only), NegriVonPlato2001 (:931, IN corpus - plan's H3 table is wrong), Fitting1983 (:211, provenance only), Dyckhoff1992 (:218, provenance only). Massacci 2000 is navigable in the corpus but has NO references.bib entry; recommend adding one.",
+  "summary": "Phase 6 blocker resolved. Neither remedy (a) nor a rep-quotient works; remedy (b) is provable, realized as an invariant-side augmented edge list (augSets) threaded alongside the algorithm's edgeSets, recording each blocking event as a loop-back edge (x, l) at the moment it happens. This exploits intExpandBranches_openBranch_sat's EXISTENTIAL edges in its conclusion, so no rep function and no quotient are needed. Additionally, IBranchSaturation.sat_fimp's numeric ordering conjunct (w <= w') is dead (produced, never consumed) and false under ancestor blocking; it must be dropped. Verified live: full lake build green (3309 jobs), the Phase-4 temporary sorry CLOSED, repo-wide bare-sorry count back to the exact 6-entry baseline, lean_verify on the acceptance gate axiom-clean, Soundness.lean untouched. Literature (GGN LICS 2012, verbatim) confirms the add-an-edge design and explicitly reports the filtration/quotient route as unworkable for this technique.",
+  "verification": {
+    "verification_passed": true,
+    "prototype_only": true,
+    "sorry_count": 6,
+    "sorry_count_note": "Prototype achieves the exact 6-entry baseline (Phase-4 temporary sorry closed). Cslib/ was REVERTED to the Phase 5 end state at dispatch end; git diff --stat Cslib/ is empty. Prototype preserved at scratch/Scheme.lean.prototype and scratch/phase6-prototype.patch.",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "falsification_test_passed": true,
+    "ci_pipeline_passed": null,
+    "ci_note": "lake lint / lake exe lint-style / lake shake NOT run this dispatch (Phase 8 gate)."
+  },
+  "plan_revision_required": true,
+  "plan_revision_reason": "The fix abandons the plan's stated Goal of a blocking-quotient frame, supersedes Phase 5's ~480 landed lines (4 commits) rather than amending them, empties Phase 7, and requires two factual corrections to the plan's H3 source table. Recommend /revise 574 before re-dispatching Phase 6.",
+  "memory_candidates": [
+    "When an inductive lemma's conclusion EXISTENTIALLY quantifies a structure the algorithm also threads (here: `exists edges, IFimpAccess edges b` in a tableau saturation lemma), the proof is free to thread its OWN copy of that structure alongside the algorithm's and let the two diverge. This dissolves a whole class of 'I need a quotient/representative map computed on the FINAL state, but my induction runs forward' obstructions: instead of reconstructing the identification post hoc via a rep function, record each identifying event as an extra edge in the invariant-side copy at the moment it happens. Cost is two extra list parameters on the inner `suffices` and one extra case split; benefit is that every lemma about the structure stays usable verbatim because it was already parametric in it.",
+    "Before building a quotient/representative-map stack to fix a direction mismatch in a saturation invariant, check whether the offending conjunct is actually CONSUMED downstream. A conjunct that is produced by an extraction lemma but never read (grep for the field accessor, not the field name -- docstrings pollute the name grep) is dead weight; if it is also FALSE under the new algorithm, dropping it is a correction, not a weakening. Here `IBranchSaturation.sat_fimp`'s numeric `w <= w'` proxy was dead: the consumer (truthLemma's F-imp case) read the accessibility companion `IFimpAccess` instead. Dropping it removed one of the two failing sites outright.",
+    "For loop-check / ancestor-blocking tableau completeness, the published Sfor-containment method (Garg-Genovese-Negri, LICS 2012, Def. III.4) builds the countermodel as `M union {x <= y | Sfor(x) subset-of Sfor(y)}` -- by ADDING loop-back edges, relying on preorder (non-tree, cyclic) semantics -- and its authors explicitly report they could NOT find a workable filtration on the equivalence classes ('extremely difficult to satisfy the back condition'). Chagrov-Zakharyaschev independently warn that a filtration relation in the S-lower/S-upper interval may be nontransitive even when R is transitive and that not all such S give filtrations of INTUITIONISTIC models. So: for intuitionistic ancestor blocking, prefer the added-edge design over the quotient design, and expect a separate valuation-monotonicity obligation (GGN Lemma III.5) plus a truth lemma by lexicographic induction on (formula, ORIGINAL tree order) (GGN Lemma III.6).",
+    "A post-hoc 'replay' of an algorithm's decision procedure against the final data structure is not automatically faithful to what the algorithm actually did, even when written by the same author in the same session. Here `intBlockRepStep` was documented as 'the same Sfor-containment test intFImpReuseWitnessAnc? performs, replayed post hoc', but it tests containment of ONE formula where the original tests `sfor.all` containment of the whole forced set, and it uses `List.findSome?` to pick an arbitrary first obligation where the original is per-obligation. Any 'agrees by construction' docstring claim between an online check and its offline replay should be discharged by a lemma, not asserted."
+  ],
+  "next_steps": "Run /revise 574 to restructure the plan (supersede Phase 5, replace Phase 6 with the report's 11-step fix path, collapse Phase 7, correct the H3 table), then re-dispatch implementation.",
+  "metadata": {
+    "session_id": "sess_1785260108_081c2a",
+    "agent_type": "cslib-research-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"]
+  }
+}

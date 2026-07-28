@@ -11,10 +11,10 @@ next_project_number: 584
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,425,530,534,554,558,562,563,574 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,456,497,511,537,551,553,564,568,569,571,583 | 36,37,181,425,530,554,562,563,574 | propositional logic, modal logic, tableau infrastructure, ... |
-| 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
-| 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
+| 1 | 36,37,181,226,400,409,425,456,530,534,554,558,562,563,583 | -- | propositional logic, modal logic, tableau infrastructure, ... |
+| 2 | 39,40,215,301,317,450,497,511,537,551,553,564,568,569,571 | 36,37,181,425,456,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,375,430,506,548,565,566,576,582 | 39,40,317,511,553,564,568 | foundations, propositional logic, modal logic, ... |
+| 4 | 300,567 | 506,558,565,566 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -27,8 +27,7 @@ next_project_number: 584
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-574 [PLANNED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
-  └─ 583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
+583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -156,7 +155,7 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 
 ### 574. Tableau calculus repair ancestor blocking
 - **Effort**: 2500-4000 lines; multi-dispatch, recommend --hard with phase-sized dispatches
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 573
@@ -164,6 +163,7 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
   - [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
   - [574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md]
 - **Plan**: [574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md]
+- **Summary**: [574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md]
 
 **Description**: LARGE task (~2500-4000 lines estimated, comparable in scope to the modal-K analogue Cslib/Logics/Modal/Tableau/FmpMeasure.lean at 3388 lines). Depends on the predecessor spike task's decision record (its `handoffs/01_quotient-soundness-spike-decision.md`) -- READ IT FIRST; if it reports the quotient approach is NOT compatible with `intExpandBranches_closed_unsat`, STOP and re-scope this task via `/revise` before proceeding, per that spike's explicit instruction.
 

@@ -1,0 +1,109 @@
+{
+  "task_number": 414,
+  "session_id": "sess_1785258473_63f7b4_414",
+  "phase": "research",
+  "agent_type": "cslib-research-agent",
+  "status": "research_complete",
+  "requires_user_review": false,
+  "artifacts": [
+    "specs/414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md"
+  ],
+  "summary": "Verified three concrete, low-risk proof simplifications in the Modal/Temporal/Bimodal family using existing normalization and embedding lemmas. All candidates tested against the live LSP with lean_multi_attempt; no files edited. Also identified one confirmed dead end and a large out-of-scope duplication landscape.",
+  "key_findings": [
+    {
+      "id": "F1",
+      "confidence": "verified",
+      "title": "unfold ListDeriv; simp only [listImp_nil] is redundant at 14 sites",
+      "detail": "ListDeriv [] phi is definitionally DerivableIn S phi (ListDeriv unfolds to DerivableIn S (listImp Gamma phi); listImp_nil is rfl). 'exact ih' alone succeeds. Verified at Bimodal GenericMCSBridge:188 and Temporal GenericMCSBridge:169. Verified that Bimodal GenericMCSBridge:189 can be deleted outright. IMPORTANT: 'simpa using ih' FAILS - must use 'exact'.",
+      "sites": [
+        "Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean:188,189,194,195,200,203",
+        "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean:169,170,175,178",
+        "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean:136,137,140,141",
+        "Cslib/Foundations/Logic/Metalogic/MCSProperties.lean:110,125 (optional, outside Logics/)"
+      ]
+    },
+    {
+      "id": "F2",
+      "confidence": "verified",
+      "title": "ModalConservativity and/or cases collapse 11 lines to 2",
+      "detail": "Backward-rewriting the IHs turns the Lukasiewicz-encoded goal into a propositional tautology. Verified for 'and': 'simp only [Modal.Proposition.toBimodal, Bimodal.Formula.and, truthAt, Modal.Satisfies, <- ih1 w, <- ih2 w]; tauto' closes the whole case. Verified for 'or': 'simp only [<- ih1 w, <- ih2 w]; tauto' at line 177 closes the case. Plain tauto, constructor <;> tauto, and rw [<- ih1 w] all FAIL - the simp-only backward rewrite is essential (IHs are let-bound, so rw rejects them).",
+      "sites": [
+        "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean:164-174 (and)",
+        "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean:175-185 (or)"
+      ]
+    },
+    {
+      "id": "F3",
+      "confidence": "verified_negative",
+      "title": "box and diamond cases are NOT simplifiable - do not attempt",
+      "detail": "simp only [<- ih w] on the diamond goal reports 'simp made no progress'. The IH is stated at world w while the goal quantifies over accessible sigma/w'. The kripkeAdapterOmega_eq_of_accessible transport rewrites are load-bearing.",
+      "sites": [
+        "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean:186-229"
+      ]
+    },
+    {
+      "id": "F4",
+      "confidence": "recommendation",
+      "title": "Do NOT add a listDeriv_nil lemma",
+      "detail": "lean_local_search confirms none exists, but F1 eliminates every site by deletion, so a new lemma would have zero consumers. A @[simp] lemma with Iff.rfl proof on a def-headed LHS also risks a simpNF lint warning."
+    },
+    {
+      "id": "F5",
+      "confidence": "flagged_out_of_scope",
+      "title": "Duplicated bigconj",
+      "detail": "Cslib.Logic.Temporal.bigconj (Cslib/Logics/Temporal/Syntax/BigConj.lean:32, native Formula.and) duplicates Cslib.Logic.Theorems.BigConj.bigconj (Cslib/Foundations/Logic/Theorems/BigConj.lean:60, Lukasiewicz encoding). NOT definitionally interchangeable - unifying is a semantic refactor, not proof golf. Separate task."
+    },
+    {
+      "id": "A1-A6",
+      "confidence": "surveyed_out_of_scope",
+      "title": "Large duplication landscape documented in report appendix",
+      "detail": "Four cloned ~540-line tableau soundness proofs in Modal/Tableau/FrameSoundness.lean sharing a 16x-repeated 9-line motif (count verified); 15x and 14x repeated motifs in LoopChecking.lean; ~60% duplicate axiom-case proofs between Bimodal Soundness/DenseValidity.lean and Soundness/FrameClassVariants.lean; four untagged truthAt characterisation lemmas in Bimodal/Semantics/Truth.lean:76,90,106,142 against 158 raw 'simp only [truthAt]' sites (both counts verified). Recommend separate tasks; explicitly excluded from task 414."
+    }
+  ],
+  "recommended_phases": [
+    {
+      "phase": 1,
+      "name": "ModalConservativity and/or cases",
+      "files": ["Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ModalConservativity.lean"],
+      "verify": "lake build Cslib.Logics.Bimodal.Metalogic.ConservativeExtension.ModalConservativity",
+      "est_lines_removed": 18
+    },
+    {
+      "phase": 2,
+      "name": "Bimodal GenericMCSBridge ListDeriv normalization removal",
+      "files": ["Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean"],
+      "verify": "lake build Cslib.Logics.Bimodal.Metalogic.Core.GenericMCSBridge",
+      "est_lines_removed": 9
+    },
+    {
+      "phase": 3,
+      "name": "Temporal + Modal GenericMCSBridge ListDeriv normalization removal",
+      "files": [
+        "Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean",
+        "Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean"
+      ],
+      "verify": "lake build Cslib.Logics.Temporal.Metalogic.GenericMCSBridge Cslib.Logics.Modal.Metalogic.GenericMCSBridge",
+      "est_lines_removed": 8
+    },
+    {
+      "phase": 4,
+      "name": "OPTIONAL: Foundations MCSProperties same idiom",
+      "files": ["Cslib/Foundations/Logic/Metalogic/MCSProperties.lean"],
+      "verify": "lake build",
+      "note": "Wider rebuild blast radius; include only if fixing the idiom library-wide is wanted"
+    },
+    {
+      "phase": 5,
+      "name": "Final verification",
+      "verify": "lake build && lake lint && lake exe lint-style"
+    }
+  ],
+  "zero_debt_assessment": {
+    "sorry_risk": "none",
+    "new_axioms": 0,
+    "new_declarations": 0,
+    "rationale": "All recommendations are proof-body edits only. No signature changes, no new declarations, no vacuous definitions. Each edit compiles or does not; per-site revert to the existing sorry-free proof is always available as fallback. No [BLOCKED] escalation path is required."
+  },
+  "blockers": [],
+  "next_phase": "plan"
+}

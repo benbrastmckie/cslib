@@ -320,18 +320,18 @@ ratchet over the Phase 1 output, green on the current tree.
 
 ---
 
-### Phase 3: Sorry-suppression count ratchet and baseline [NOT STARTED]
+### Phase 3: Sorry-suppression count ratchet and baseline [COMPLETED]
 
 **Goal**: `scripts/check-sorry-suppressions.sh` + `scripts/sorry-suppression-baseline.txt` implement a
 per-file two-count ceiling (markers, code-position sorries), green on the current tree, with no build
 dependency.
 
 **Tasks**:
-- [ ] Write the script modelled structurally on `scripts/check-lint-suppressions.sh` (per-file ceiling
+- [x] Write the script modelled structurally on `scripts/check-lint-suppressions.sh` (per-file ceiling
       precedent): `set -uo pipefail`, `SCAN_ROOT="Cslib"`, `--update` / `--list` / bare / usage dispatch,
       associative-array ceiling comparison, assign-then-default around `grep -c` (it exits 1 on zero
       matches, so `|| echo 0` would emit two lines).
-- [ ] **State the discrimination rule explicitly in the header**, as the tested rule, in this order:
+- [x] **State the discrimination rule explicitly in the header**, as the tested rule, in this order:
       1. strip block comments `/- ... -/` non-greedily across the whole file (`perl -0777 -pe 's/\/-.*?-\///gs'`),
          which also captures doc comments since `/--` starts with `/-`;
       2. strip line comments (`--` to end of line) per surviving line;
@@ -342,35 +342,50 @@ dependency.
       non-word character); and step 3's known edge case — a single line carrying both a `warn.sorry`
       option and a separate code-position `sorry` would be undercounted — **does not occur anywhere on
       the current tree** (verified), but is recorded so a future reader knows the limit.
-- [ ] Marker count: plain substring `set_option warn.sorry false`. **Do NOT copy
+- [x] Marker count: plain substring `set_option warn.sorry false`. **Do NOT copy
       `check-lint-suppressions.sh`'s `$`-anchored blanket regex** — all 18 markers in this tree are the
       declaration-scoped `... false in` form and the anchored regex would count 0. State in the header
       that this gate deliberately counts BOTH the file-scoped and `in`-scoped forms, because its ratchet
       is on total suppression volume, not on scope discipline (which is the sibling script's job).
-- [ ] Emit a baseline row `<markers> <sorries> <path>` for every file with `markers > 0 || sorries > 0`,
+- [x] Emit a baseline row `<markers> <sorries> <path>` for every file with `markers > 0 || sorries > 0`,
       path-sorted for a stable diff.
-- [ ] D1 ledger: `--update` also emits, as `#` comment lines beneath the data, the distinct in-source
+- [x] D1 ledger: `--update` also emits, as `#` comment lines beneath the data, the distinct in-source
       blocker annotations found at each file's sorry sites (the trailing `-- blocked on X` /
       `-- TODO: depends on Y` / `-- depends on Z` comment text on lines carrying a code-position sorry),
       formatted `#   <path>: <blocker text>`. Comment lines are skipped by the parser, so the ledger
       never affects comparison. No task numbers.
-- [ ] Exit-2 conditions, all mandatory:
-  - `perl` is not on `PATH` (`command -v perl`);
+      *(deviation: altered -- ledger extraction only emits an entry where the code-position sorry line
+      itself carries a trailing `--` comment; 5 of the 9 files (the ones with no `warn.sorry` marker,
+      i.e. already-red bare-sorry files) have bare `sorry` with no trailing comment on that exact line
+      (their blocker context lives in surrounding docstring prose instead, which is intentionally not
+      parsed for the ledger to avoid false positives from unrelated prose mentions of the word
+      "sorry" -- verified this would otherwise massively overcount, see the naive-grep 180 vs true 28
+      discrepancy). One entry (`BXCanonical/Frame.lean`) is truncated at its line boundary because its
+      blocker comment continues onto a second physical line; the ledger extracts only the first line's
+      trailing comment. Both are cosmetic limits of an explicitly informational, non-load-bearing
+      mechanism -- comment lines are skipped by the comparison parser -- not a correctness defect in
+      the ceiling counts themselves, which were independently verified against the exact settled
+      18/5-files and 28/9-files split.)*
+- [x] Exit-2 conditions, all mandatory:
+  - `perl` is not on `PATH` (`command -v perl`); verified via a PATH override.
   - the `find "$SCAN_ROOT" -name '*.lean'` sweep yields **zero** files (a scan root that resolves to
-    nothing must never report "0 sorries, clean");
+    nothing must never report "0 sorries, clean"); verified via a scratch copy with SCAN_ROOT pointed
+    at a nonexistent directory.
   - the `perl` comment-stripping pass exits nonzero on any file.
-- [ ] Comparison: FAIL when a file's live marker count OR live sorry count exceeds its baseline ceiling
+- [x] Comparison: FAIL when a file's live marker count OR live sorry count exceeds its baseline ceiling
       (including a file with no baseline row introducing either); IMPROVED when either count is below
-      baseline. Report both counts distinctly so a maintainer can tell which moved.
-- [ ] Improvement message: `ACTION REQUIRED` block naming `bash scripts/check-sorry-suppressions.sh --update`,
+      baseline. Report both counts distinctly so a maintainer can tell which moved. Verified both paths
+      via scratch baseline copies (never touching the real baseline).
+- [x] Improvement message: `ACTION REQUIRED` block naming `bash scripts/check-sorry-suppressions.sh --update`,
       exit 0 (D3).
-- [ ] Generate the baseline via `--update`. **Gate**: confirm marker total == 18 across exactly 5 files,
+- [x] Generate the baseline via `--update`. **Gate**: confirm marker total == 18 across exactly 5 files,
       and sorry total == 28 across exactly 9 files with the per-file split listed in Research Integration
       (12/7/2/1/1 for the Bimodal five, 2/1 for Intuitionistic Scheme/Completeness, 1 for Minimal
       Completeness, 1 for Modal FrameSoundness). If occurrence counting does not reproduce 28, try
       line counting, and document whichever reproduces the verified split. Do not silently baseline a
-      different number.
-- [ ] Run the script bare and confirm `exit 0`.
+      different number. Confirmed: occurrence counting reproduces 18/5 and 28/9 exactly, matching the
+      exact per-file split, on the first attempt (no fallback to line counting needed).
+- [x] Run the script bare and confirm `exit 0`.
 
 **Timing**: 1.5 hours
 

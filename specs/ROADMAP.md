@@ -122,19 +122,40 @@ flowchart TB
 | Temporal: syntax, semantics, 26-axiom BX proof system, soundness, completeness (+ dense), tableau, chronicle pipeline | `Logics/Temporal/` |
 | Bimodal embeddings (Propositional / Modal / Temporal) | `Logics/Bimodal/Embedding/` |
 
+### Consolidation & completeness landed since the mid-2026 review
+
+| Component | Module |
+|-----------|--------|
+| Intuitionistic-modal truth lemma — IK/IT/IS4/IS5 now fully sorry-free | `Logics/Modal/Metalogic/Intuitionistic/` |
+| Constructive **CS5 ≡ IS5** completeness (labelled bounded-context) — the constructive capstone | `Logics/Modal/Metalogic/Constructive/` |
+| 14 `Systems/<S>/Soundness.lean` consumers wired to the correspondence library | `Logics/Modal/Metalogic/FrameCorrespondence.lean` |
+| Schema-union axiom combinator replacing 14 hand-written per-system axiom inductives | `Logics/Modal/ProofSystem/Instances/` |
+| Single generic canonical-model truth lemma (the three-way `k_`/`d_`/plain split retired) | `Logics/Modal/Metalogic/Completeness.lean` |
+| Wrap/unwrap propositional-combinator bridge layers retired across three families | `Foundations/Logic/Theorems/` |
+| Lindenbaum/MCS/conservativity consolidation onto shared generic-MCS + morphism-lift machinery | `Foundations/Logic/Metalogic/` |
+| KB5 `'`/`''` tableau rule variants merged into one rule | `Logics/Modal/Tableau/` |
+| LTL ↔ Temporal semantic-preservation bridge | `Logics/LTL/` |
+| Validity/derivability naming and notation unified; stale `[BLOCKED]` docstrings and task provenance stripped | repo-wide |
+| BX+ metric tense base + completeness over group flows | `Logics/Bimodal/Metalogic/` |
+| CI honesty gates: sorry-suppression, axiom-census, shake-residue and lint-suppression ratchets | `scripts/`, `.github/workflows/` |
+
 ## Remaining
 
 ### A. Completeness / decidability gaps
 
+Verified sorry counts (2026-07-28): **28** code-position sorries repo-wide — Bimodal 23,
+Propositional 4, Modal 1. Temporal, LTL, HML, LinearLogic and Foundations are sorry-free.
+The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 4 and Modal 1 are **bare**,
+and are the stated reason `lake build --wfail --iofail` is red on this tree.
+
 | Item | Tracking | Notes |
 |------|----------|-------|
-| **S4** (reflexive-transitive) loop-checking termination bound + decidability | 511 (in progress) → 506 → umbrella 300 | the last classical-cube decidability corner; `2^\|Sf\|` bound |
-| Intuitionistic-modal truth lemma (3 sorries) | 533 | makes IK/IT/IS4/IS5 fully sorry-free |
-| Constructive **CS5 == IS5** completeness (labelled bounded-context) | 517 (in progress) | the constructive capstone |
+| **S4** (reflexive-transitive) loop-checking termination bound + decidability | 511 → 506 → umbrella 300 | the last classical-cube decidability corner; `2^\|Sf\|` bound. Gated on the box-plus birth-keys task (563) |
 | Pure-K5 / pure-5 Euclidean completeness (no equivalence route) | 534 | corner deferred out of the KB5/Euclidean task |
-| Propositional tableau completeness (7 sorries) + atom-persistence lemma | 317 (in progress), 430 | int/min truth-lemma bridge |
-| Bimodal **discrete** completeness pipeline (43 sorries) | 36, 37, 215 | gated on external BimodalLogic port; the *dense* pipeline is complete |
-| Bimodal → temporal conservativity (6 sorries) | 450 (+ 449, 451 BX+ metric tense) | density/embedding gaps |
+| Propositional tableau completeness (**4 sorries**) + atom-persistence lemma | 574 → 456 → 317, 430, 583 | all four share one root cause: the fuel-bounded persistence loop in `applyAllTImpRules`. 583 owns the one lemma that is false as stated and needs restating |
+| **S4 keyed loop-check guard soundness** (1 sorry, the only Modal one) | 553 → 582 | `branchSatisfiableIn_s4FC_ancestor_redirect`. The cited source (Massacci 2000, Thm 8.1) states the result and never proves it — see the in-file docstring |
+| Bimodal **discrete** completeness pipeline (**23 sorries**) | 36, 37, 215 | gated on external BimodalLogic port; the *dense* pipeline is complete |
+| Bimodal → temporal conservativity (1 sorry) | 450 | domain mismatch: bimodal soundness needs `AddCommGroup D`, temporal completeness an arbitrary serial linear order |
 
 ### B. Abstraction & Redundancy Cleanup (current priority — elegance & non-redundancy)
 
@@ -143,16 +164,11 @@ has a single shared abstraction. Confirmed duplication and its tracking:
 
 | Cleanup | Tracking | Target |
 |---------|----------|--------|
-| Wire 14 `Systems/<S>/Soundness.lean` consumers to the correspondence library (kill case-by-case axiom-frame reproving) | 522 | `FrameCorrespondence.lean` is built; consumers not yet delegating |
-| Schema-union axiom combinator replacing 14 hand-written per-system axiom inductives | 523 | `Modal/ProofSystem/Instances/*.lean` (S5 already the target pattern) |
-| Consolidate duplicated Lindenbaum/MCS/conservativity constructions — `GenericMCSBridge` ×4, `LiftViaMorphism` ×3, Lindenbaum-algebra variants | 393 | onto the shared Foundations generic-MCS + morphism-lift machinery |
+| **Modal tableau refactor programme** (tasks A–I): private-dedup, `RuleApplySt` ladder, box-plus birth keys, S4-keyed migration, `LoopChecking.lean` split, `Boneyard/` quarantine, acceptance gate | 557 (expanded) → 558, 562, 563, 564, 565, 566, 567 | `Modal/Tableau/`; `LoopChecking.lean` alone is 10,723 lines / 230 declarations |
 | Consolidate the duplicated Chronicle construction (bimodal vs temporal, ~89% overlap, 8 shared filenames) | 530 | shared `Foundations/Logic/Metalogic/Chronicle/` module |
-| Merge the KB5 `'`/`''` tableau rule variants (200 vs 377 refs, complementary) into one rule | 531 (after 529 lint fix) | proof-merge, retire redundant lemma pairs |
 | Fold tableau edges into the propositional proof-system TFAE (sequent edges already done) | 375 | `Propositional/ProofSystemEquivalence.lean` |
 | Generalize the Sfor-containment / subset-blocking device into one label-generic module | 456 | `Foundations/Logic/Tableau/Blocking.lean` (new) |
-| Reconcile stale `[BLOCKED]` docstrings left by delivered decidability tasks | 532 | `GenericDriver.lean` et al. |
 | Proof-style simplification over existing normalization lemmas (propositional / modal family) | 413, 414 | decoupled from the abandoned co-tag task; lower priority |
-| Modal tableau soundness proof-style cleanup | 405 (pr_ready) | awaiting user PR |
 
 **Open decision (no task yet):** the three bimodal completeness constructions — `Algebraic` +
 `Bundle` form the wired pipeline; `BXCanonical` is an incomplete leaf (14 sorries) nothing

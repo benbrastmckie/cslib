@@ -8,6 +8,8 @@ next_project_number: 584
 
 *Updated 2026-07-28. Generated from state.json dependency graph.*
 
+**Goal**: Complete the propositional and modal logic milestone: close the five remaining bare sorries (turning the CI build green), land S4 decidability as the last classical-cube corner, fold tableau into the propositional TFAE, and finish the modal tableau refactor programme.
+
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|

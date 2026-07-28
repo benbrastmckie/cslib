@@ -18,9 +18,6 @@ Proves the Ordered Seed Consistency Theorem for BXCanonical.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/BXCanonical/OrderedSeedConsistency.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.BXCanonical
@@ -74,7 +71,8 @@ theorem ordered_two_defect_seed_consistent {M : Set (Formula Atom)}
   enriched_resolving_seed_consistent h_mcs ψ₁ (Formula.someFuture ψ₂) h_F
 
 /-- BX11 at MCS level. -/
-theorem temp_linearity_mcs {M : Set (Formula Atom)} (h_mcs : SetMaximalConsistent (fc := FrameClass.Base) M)
+theorem temp_linearity_mcs {M : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent (fc := FrameClass.Base) M)
     (A B : Formula Atom)
     (h_FA : Formula.someFuture A ∈ M) (h_FB : Formula.someFuture B ∈ M) :
     Formula.someFuture (Formula.and A B) ∈ M ∨
@@ -88,7 +86,8 @@ theorem temp_linearity_mcs {M : Set (Formula Atom)} (h_mcs : SetMaximalConsisten
     exact SetMaximalConsistent.implication_property h_mcs
       (SetMaximalConsistent.implication_property h_mcs
         (theoremInMcsFc h_mcs h_pair) h_FA) h_FB
-  have h_ax : DerivationTree FrameClass.Base [] ((Formula.and (Formula.someFuture A) (Formula.someFuture B)).imp
+  have h_ax : DerivationTree FrameClass.Base []
+      ((Formula.and (Formula.someFuture A) (Formula.someFuture B)).imp
       (Formula.or (Formula.someFuture (Formula.and A B))
         (Formula.or (Formula.someFuture (Formula.and A (Formula.someFuture B)))
           (Formula.someFuture (Formula.and (Formula.someFuture A) B))))) :=
@@ -130,7 +129,8 @@ theorem two_defect_consistent_seed {M : Set (Formula Atom)}
 
 /-- No new F-defects in successor. -/
 theorem no_new_f_defects {M M' : Set (Formula Atom)}
-    (h_mcs : SetMaximalConsistent (fc := FrameClass.Base) M) (h_mcs' : SetMaximalConsistent (fc := FrameClass.Base) M')
+    (h_mcs : SetMaximalConsistent (fc := FrameClass.Base) M)
+    (h_mcs' : SetMaximalConsistent (fc := FrameClass.Base) M')
     (h_g_sub : gContent M ⊆ M')
     (α : Formula Atom) (h_neg : Formula.allFuture (Formula.neg α) ∈ M) :
     Formula.someFuture α ∉ M' := by

@@ -642,6 +642,41 @@ lemma intBlockRep_idempotent (b : IBranch Atom) (edges : IEdges) (w : Nat) :
       rw [intBlockRep_eq_some h]
       exact ih x (intBlockRepStep_lt h)
 
+/-! ### 5.2 — The quotient preorder -/
+
+/-- The `rep`-pullback of `intAccessPreorder edges`: `w ≤ w'` on the quotient iff `rep w ≤
+rep w'` in the original edge-accessibility order. Mirrors `intAccessPreorder`'s own
+`Relation.ReflTransGen` construction (`:318-324`) pointwise through `rep`, so the same `letI`
+installation idiom works at use sites. This is the filtration method's quotient accessibility
+relation ([ChagrovZakharyaschev1997] §5.3, condition (iii): `xRy` implies `[x]S[y]`) —
+`intAccessPreorder` is already the reflexive-transitive closure the theorem's own construction
+needs, so pulling it back through `rep` suffices without re-deriving transitivity. -/
+@[reducible] def intAccessPreorderQ (edges : IEdges) (rep : Nat → Nat) : Preorder Nat where
+  le w w' := Relation.ReflTransGen (fun x y => isAccessible edges x y = true) (rep w) (rep w')
+  lt w w' := Relation.ReflTransGen (fun x y => isAccessible edges x y = true) (rep w) (rep w') ∧
+    ¬ Relation.ReflTransGen (fun x y => isAccessible edges x y = true) (rep w') (rep w)
+  le_refl _ := Relation.ReflTransGen.refl
+  le_trans _ _ _ := Relation.ReflTransGen.trans
+  lt_iff_le_not_ge _ _ := Iff.rfl
+
+/-- Any direct `isAccessible` fact between two worlds' representatives lifts into the
+`intAccessPreorderQ` order. The Q-analogue of `intAccessPreorder_le_of_isAccessible`
+(`:326-333`) — the single bridging fact every Q-level witness needs. -/
+lemma intAccessPreorderQ_le_of_isAccessible {edges : IEdges} {rep : Nat → Nat} {w w' : Nat}
+    (h : isAccessible edges (rep w) (rep w') = true) :
+    @LE.le Nat (intAccessPreorderQ edges rep).toLE w w' :=
+  Relation.ReflTransGen.single h
+
+/-- Two worlds with the same representative are `intAccessPreorderQ`-related in BOTH
+directions — reflexively, since their images under `rep` coincide. This is what makes an
+ancestor witness admissible on the quotient (D5): `rep w = rep x` gives both `w ≤ x` and
+`x ≤ w`. -/
+lemma intAccessPreorderQ_le_of_rep_eq {edges : IEdges} {rep : Nat → Nat} {w w' : Nat}
+    (h : rep w = rep w') :
+    @LE.le Nat (intAccessPreorderQ edges rep).toLE w w' := by
+  change Relation.ReflTransGen (fun x y => isAccessible edges x y = true) (rep w) (rep w')
+  rw [h]
+
 /-! ### `sat_timp` discharge — STOP-gate finding, UPDATED (Deliverable 6
 branching-rule redesign)
 

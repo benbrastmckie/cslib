@@ -36,8 +36,6 @@ Filtration is a technique to construct finite models from infinite ones:
 - Ported from BimodalLogic/Theories/Bimodal/Metalogic/Decidability/FMP/Filtration.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability.FMP
@@ -209,7 +207,7 @@ noncomputable def RefinedFilteredTaskFrame (phi : Formula Atom) :
         exact le_antisymm (neg_nonneg.mp hy) hx
       have hy0 : y = 0 := by
         have h1 : y = -x := (neg_eq_of_add_eq_zero_right hxy).symm
-        rw [hx0] at h1; simp at h1; exact h1
+        rw [hx0, neg_zero] at h1; exact h1
       have h1 : w = u := by simpa [hx0] using h_wu
       have h2 : u = v := by simpa [hy0] using h_uv
       exact h1.trans h2

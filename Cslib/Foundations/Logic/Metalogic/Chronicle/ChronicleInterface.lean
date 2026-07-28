@@ -93,9 +93,6 @@ stage needs them, mirroring how `SinceSeedInterface` itself was built up increme
 
 namespace Cslib.Logic.Metalogic.Chronicle
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 variable {F : Type*}
 
 /-! ## `ChronicleInterface`: the shared chronicle-construction apparatus

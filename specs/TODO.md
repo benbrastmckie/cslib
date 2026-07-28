@@ -28,7 +28,7 @@ next_project_number: 584
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-574 [PLANNED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
+574 [IMPLEMENTING] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
   └─ 583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -87,8 +87,8 @@ next_project_number: 584
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-413 [RESEARCHED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
-414 [RESEARCHED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
+413 [PLANNED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
+414 [PLANNING] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ## Tasks
 
@@ -159,7 +159,7 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 
 ### 574. Tableau calculus repair ancestor blocking
 - **Effort**: 2500-4000 lines; multi-dispatch, recommend --hard with phase-sized dispatches
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 573
@@ -601,7 +601,7 @@ After implementation:
 ---
 
 ### 414. Simplify proofs normalization modal family
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
@@ -612,11 +612,12 @@ After implementation:
 ---
 
 ### 413. Simplify proofs normalization propositional
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 375
 - **Research**: [413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md]
+- **Plan**: [413_simplify_proofs_normalization_propositional/plans/01_remove-redundant-normalization-rewrites.md]
 
 **Description**: Simplify verbose Propositional/ proofs (manual simp only [listImp_*, bigconj_*] lists and long tactic chains) using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in the syntax files). RECONCILED: the original premise cited task-268 'co-tags' as the enabler, but task 268 was abandoned - re-scoped to use the normalization lemmas that actually exist, replacing explicit rewrite lists with simp/grind where they are now redundant. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 

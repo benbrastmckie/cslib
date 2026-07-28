@@ -233,7 +233,7 @@ data, move that site to Phase 3's `full`-tier treatment instead of handling it h
 
 ---
 
-### Phase 3: `unfoldListImp` data-level edit [NOT STARTED]
+### Phase 3: `unfoldListImp` data-level edit [COMPLETED]
 
 **Goal**: Apply the single edit that changes a produced *term* rather than a proof, under
 full-project verification, isolated so that any downstream reduction breakage is unambiguously

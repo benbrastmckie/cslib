@@ -239,9 +239,9 @@ instance (D : List F → F → Type*) [HilbertTree (F := F) D] :
 `Ψ ⊆ Γ`, produce `Γ ⊢ φ` by iterating modus ponens with assumption trees. -/
 noncomputable def unfoldListImp [HilbertTree (F := F) D] {Γ : List F} {φ : F} :
     (Ψ : List F) → D Γ (listImp Ψ φ) → (∀ a ∈ Ψ, a ∈ Γ) → D Γ φ
-  | [], d, _ => by simpa only [listImp_nil] using d
+  -- `listImp [] φ` reduces to `φ` by `rfl` (`listImp_nil`), so `d` already has type `D Γ φ`.
+  | [], d, _ => d
   | a :: Ψ', d, h_sub => by
-      simp only [listImp_cons] at d
       have ha : a ∈ Γ := h_sub a (List.mem_cons.mpr (Or.inl rfl))
       exact unfoldListImp Ψ' (HilbertTree.mp d (HilbertTree.assumption ha))
         (fun x hx => h_sub x (List.mem_cons.mpr (Or.inr hx)))

@@ -26,8 +26,6 @@ to an extended derivation, preserving the proof structure.
 - `embedDerivation`: Lifting of base derivations to extended derivations
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.ConservativeExtension
@@ -50,7 +48,6 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
   | imp_s (φ ψ : ExtFormula Atom) : ExtAxiom (φ.imp (ψ.imp φ))
   | efq (φ : ExtFormula Atom) : ExtAxiom (ExtFormula.bot.imp φ)
   | peirce (φ ψ : ExtFormula Atom) : ExtAxiom (((φ.imp ψ).imp φ).imp φ)
-
   -- Layer 2: S5 Modal (5)
   | modal_t (φ : ExtFormula Atom) : ExtAxiom (ExtFormula.box φ |>.imp φ)
   | modal_4 (φ : ExtFormula Atom) :
@@ -61,7 +58,6 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
       ExtAxiom (φ.box.diamond.imp φ.box)
   | modal_k_dist (φ ψ : ExtFormula Atom) :
       ExtAxiom ((φ.imp ψ).box.imp (φ.box.imp ψ.box))
-
   -- Layer 3: BX Temporal
   | serial_future :
       ExtAxiom (ExtFormula.top.imp (ExtFormula.someFuture ExtFormula.top))
@@ -129,11 +125,9 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
       ExtAxiom ((ExtFormula.someFuture φ).imp (ExtFormula.untl ExtFormula.top φ))
   | P_since_equiv (φ : ExtFormula Atom) :
       ExtAxiom ((ExtFormula.somePast φ).imp (ExtFormula.snce ExtFormula.top φ))
-
   -- Layer 4: Modal-Temporal Interaction (1)
   | modal_future (φ : ExtFormula Atom) :
       ExtAxiom ((ExtFormula.box φ).imp (ExtFormula.box (ExtFormula.allFuture φ)))
-
   -- Layer 5: Uniformity Axioms (5)
   | discrete_symm_fwd :
       ExtAxiom ((ExtFormula.untl ExtFormula.bot ExtFormula.top).imp
@@ -150,17 +144,14 @@ inductive ExtAxiom : ExtFormula Atom → Type u where
   | discrete_box_necessity :
       ExtAxiom ((ExtFormula.untl ExtFormula.bot ExtFormula.top).imp
         (ExtFormula.box (ExtFormula.untl ExtFormula.bot ExtFormula.top)))
-
   -- Layer 6: Prior Axioms (2)
   | prior_UZ (φ : ExtFormula Atom) :
       ExtAxiom (φ.someFuture.imp (ExtFormula.untl φ.neg φ))
   | prior_SZ (φ : ExtFormula Atom) :
       ExtAxiom (φ.somePast.imp (ExtFormula.snce φ.neg φ))
-
   -- Layer 7: Z1 (1)
   | z1 (φ : ExtFormula Atom) :
       ExtAxiom ((φ.allFuture.imp φ).allFuture.imp (φ.allFuture.someFuture.imp φ.allFuture))
-
   -- Layer 8: Density (2)
   | density (φ : ExtFormula Atom) :
       ExtAxiom ((φ.allFuture.allFuture).imp φ.allFuture)

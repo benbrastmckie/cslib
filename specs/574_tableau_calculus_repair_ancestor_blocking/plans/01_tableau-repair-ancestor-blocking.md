@@ -566,7 +566,7 @@ be committed separately and the second must rebase, not overwrite.
 
 ---
 
-### Phase 5: Blocking-quotient frame and quotient-restated saturation predicates [NOT STARTED]
+### Phase 5: Blocking-quotient frame and quotient-restated saturation predicates [COMPLETED]
 
 - **Goal:** Build the `rep`-based quotient frame in `Scheme.lean` and restate the full saturation
   predicate stack over it, additively, alongside the existing `intAccessPreorder` /
@@ -574,63 +574,105 @@ be committed separately and the second must rebase, not overwrite.
 - **Sub-phase structure:** four bounded units — 5.1 (representative map), 5.2 (quotient preorder),
   5.3 (`sf`-level predicates), 5.4 (branch-level predicates and their extraction lemmas). Each is
   its own green commit; 5.1-5.2 must land before 5.3-5.4.
-- **Tasks (5.1 — the representative map):**
-  - [ ] Before writing, read `ChagrovZakharyaschev1997`'s filtration material via
+- **Tasks (5.1 — the representative map):** **[COMPLETED]**
+  - [x] Before writing, read `ChagrovZakharyaschev1997`'s filtration material via
         `bash .claude/scripts/literature-search.sh --toc chagrovzakharyaschev_1997_modallogic`,
         then the `p02_kripke-semantics.md` chapter entry (selective filtration; Thm 5.51's
         reflexive-transitive-closure model). This is the **one readable** source backing D5; cite
-        the chunk actually read, not the BibTeX key alone.
-  - [ ] Insert a new section after `Scheme.lean:492` (after the `intExtractValuation` monotonicity
+        the chunk actually read, not the BibTeX key alone. Read lines 395-470 (filtration
+        definition, Theorem 5.23, the finest/coarsest interval, and the transitive-closure
+        construction); cited in the new section's docstring by line range, not just the BibTeX key.
+  - [x] Insert a new section after `Scheme.lean:492` (after the `intExtractValuation` monotonicity
         STOP-gate note, before the `sat_timp` note). Define
         `intBlockRep (b : IBranch Atom) (edges : IEdges) : Nat → Nat` — the blocking-ancestor
         representative: `intBlockRep b edges w = x` when `w` was blocked by ancestor `x`, else `w`.
         Derive it from the same `Sfor`-containment + `isAccessible edges x w` test
-        `intFImpReuseWitnessAnc?` uses, so the two agree by construction.
-  - [ ] Prove `intBlockRep_idempotent : intBlockRep b edges (intBlockRep b edges w) =
+        `intFImpReuseWitnessAnc?` uses, so the two agree by construction. **Implementation note**
+        (not a plan deviation — the plan specifies the type signature and semantics but not a
+        literal recursive body): `intBlockRep` is defined via well-founded recursion chasing a
+        one-step helper `intBlockRepStep` (itself the same `Sfor`-containment test, replayed
+        post hoc against `negImpAt b w`'s `F(φ→ψ)@w` entry) to a fixed point, using a STRICT `x <
+        w` conjunct (justified by this task's own "ancestors carry strictly smaller labels" text
+        below) as the termination measure. Chasing to a fixed point rather than stopping after one
+        step is what makes `intBlockRep_idempotent` hold — see that lemma's docstring for why this
+        is definitionally free, not an extra proof burden.
+  - [x] Prove `intBlockRep_idempotent : intBlockRep b edges (intBlockRep b edges w) =
         intBlockRep b edges w` and `intBlockRep_le : intBlockRep b edges w ≤ w` (ancestors carry
-        strictly smaller labels).
-- **Tasks (5.2 — the quotient preorder):**
-  - [ ] Define `intAccessPreorderQ (edges : IEdges) (rep : Nat → Nat) : Preorder Nat` as the
+        strictly smaller labels). Both proved by strong induction on `w`, via two small unfolding
+        equation lemmas `intBlockRep_eq_none`/`intBlockRep_eq_some`. `lake build
+        Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` green (only the pre-existing
+        truthLemma T-imp sorry and the Phase-4 tracked temporary sorry remain in this file).
+        Committed as `task 574 phase 5.1` (b70eadc0).
+- **Tasks (5.2 — the quotient preorder):** **[COMPLETED]**
+  - [x] Define `intAccessPreorderQ (edges : IEdges) (rep : Nat → Nat) : Preorder Nat` as the
         `rep`-pullback of `intAccessPreorder edges` (i.e. `w ≤ w' := rep w ≤_{intAccessPreorder} rep w'`),
         mirroring `intAccessPreorder`'s own `Relation.ReflTransGen` construction (`:330-430`) so
         the same `letI` installation idiom works.
-  - [ ] Prove `intAccessPreorderQ_le_of_isAccessible` — the Q-analogue of `:330`, lifting a raw
+  - [x] Prove `intAccessPreorderQ_le_of_isAccessible` — the Q-analogue of `:330`, lifting a raw
         `isAccessible edges (rep w) (rep w')` fact into the Q-order. This is the single bridging
         fact every downstream witness needs.
-  - [ ] Prove `intAccessPreorderQ_le_of_rep_eq : rep w = rep w' → w ≤ w'` — the fact that makes an
+  - [x] Prove `intAccessPreorderQ_le_of_rep_eq : rep w = rep w' → w ≤ w'` — the fact that makes an
         **ancestor** witness admissible (D5: `rep w = rep x`, so `w ≤ x` and `x ≤ w` both hold).
-  - [ ] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` — expect green except
-        the single Phase-4 temporary sorry. Commit 5.1-5.2 before starting 5.3.
-- **Tasks (5.3 — the `sf`-level predicates):**
-  - [ ] Define `sfSatisfiedQ (rep : Nat → Nat) (b : IBranch Atom) (sf : ISF Atom) : Prop` mirroring
+  - [x] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` — expect green except
+        the single Phase-4 temporary sorry. Commit 5.1-5.2 before starting 5.3. **Confirmed**:
+        green, only the truthLemma T-imp sorry and the Phase-4 tracked temp sorry remain.
+        Committed as `task 574 phase 5.2` (1a1eba9f).
+- **Tasks (5.3 — the `sf`-level predicates):** **[COMPLETED]**
+  - [x] Define `sfSatisfiedQ (rep : Nat → Nat) (b : IBranch Atom) (sf : ISF Atom) : Prop` mirroring
         `sfSatisfied` (`:762-787`) with **only** the `.neg, .imp` case changed: `sf.label ≤ w'`
         becomes `rep sf.label ≤ rep w'`. Every other case (including the `.pos, .imp` reflexive
         disjunction at `:781-786`) is copied unchanged — `sat_timp` is not in scope (D2).
-  - [ ] Define `sfAccessSatQ (edges : IEdges) (rep : Nat → Nat) (b) (sf) : Prop` mirroring
+  - [x] Define `sfAccessSatQ (edges : IEdges) (rep : Nat → Nat) (b) (sf) : Prop` mirroring
         `sfAccessSat` (`:836-843`), with `isAccessible edges sf.label w'` replaced by the Q-order
         fact `isAccessible edges (rep sf.label) (rep w')`.
-  - [ ] Define `IExpandedConsistentQ` / `IExpandedAccessConsistentQ` (mirroring `:789-791`,
+  - [x] Define `IExpandedConsistentQ` / `IExpandedAccessConsistentQ` (mirroring `:789-791`,
         `:845-848`) and prove `sfSatisfiedQ_mono` / `IExpandedConsistentQ_mono` (mirroring
-        `:801-821`).
-  - [ ] Rewrite the superseded design note at `Scheme.lean:823-834`. Its "`sat_fimp` … kept as-is —
+        `:801-821`). Both mono proofs transfer verbatim from `sfSatisfied_mono`/
+        `IExpandedConsistent_mono`'s tactic bodies — the order fact is untouched by the
+        branch-inclusion step.
+  - [x] Rewrite the superseded design note at `Scheme.lean:823-834`. Its "`sat_fimp` … kept as-is —
         no reformulation, per the Preserved Assets table" directive is now false; replace it with
-        the D5 rationale and a pointer to this plan's phase.
-- **Tasks (5.4 — the branch-level predicates and their extraction):**
-  - [ ] Define `IBranchSaturationQ (Atom) (b) (rep : Nat → Nat)` — a copy of `IBranchSaturation`
+        the D5 rationale and a pointer to this plan's phase. Also fixed a stale
+        `intFImpReuseWitness?_spec` reference in the same note to the Phase 4 renamed
+        `intFImpReuseWitnessAnc?_spec`. `lake build …Scheme` green on first attempt (only the two
+        expected sorries remain). Committed as `task 574 phase 5.3` (a9eb2e47).
+- **Tasks (5.4 — the branch-level predicates and their extraction):** **[COMPLETED]**
+  - [x] Define `IBranchSaturationQ (Atom) (b) (rep : Nat → Nat)` — a copy of `IBranchSaturation`
         (`:74-108`) with `sat_fimp` restated as
         `∃ w', rep w ≤ rep w' ∧ T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b`. The spike prototyped this exact shape
         and confirmed it elaborates with zero diagnostics
         (`Cslib.Logic.PL.IBranchSaturationQ.{u_2} (Atom) [DecidableEq Atom] [Hashable Atom]
         (b : IBranch Atom) (rep : ℕ → ℕ) : Prop`). All five other fields copied verbatim.
-  - [ ] Define `IFimpAccessQ (edges : IEdges) (rep : Nat → Nat) (b : IBranch Atom) : Prop`
+  - [x] Define `IFimpAccessQ (edges : IEdges) (rep : Nat → Nat) (b : IBranch Atom) : Prop`
         mirroring `IFimpAccess` (`:442-447`) with `isAccessible edges w w'` replaced by
         `isAccessible edges (rep w) (rep w')`.
-  - [ ] Prove `IExpandedConsistentQ_sat` (mirroring `:914-1001`) and
+  - [x] Prove `IExpandedConsistentQ_sat` (mirroring `:914-1001`) and
         `IExpandedAccessConsistentQ_sat` (mirroring `:1465-1484`). Both proofs are mechanical: the
         `sat_fimp` bullet at `:979-990` closes by `exact hsat` because `sfSatisfied`'s clause and
         the field are definitionally identical — preserve that property in the Q-versions so the
-        same one-liner works.
-  - [ ] `lake build …Scheme` — green except the single temporary sorry.
+        same one-liner works. **Confirmed**: both proofs transferred verbatim, `sf`-case by
+        `sf`-case, from `IExpandedConsistent_sat`/`IExpandedAccessConsistent_sat`'s tactic bodies
+        with only the definition names swapped (`sfSatisfied`→`sfSatisfiedQ`, etc.) — no new
+        tactic steps needed in either proof, matching the plan's "mechanical" characterization
+        exactly.
+  - [x] `lake build …Scheme` — green except the single temporary sorry. **Confirmed**: green on
+        the full 5.4 addition (no intermediate red steps needed); `lake build
+        …Minimal.Soundness` also confirmed green (no downstream regression). Committed as
+        `task 574 phase 5.4` (07ab747c).
+
+**Phase 5 summary**: all four sub-phases (5.1-5.4) landed additively in `Scheme.lean` across
+four green commits (b70eadc0, 1a1eba9f, a9eb2e47, 07ab747c). The full blocking-quotient frame
+now exists side by side with the original `intAccessPreorder`/`IBranchSaturation`/`IFimpAccess`
+stack: `intBlockRep`/`intBlockRepStep` (5.1), `intAccessPreorderQ` (5.2), `sfSatisfiedQ`/
+`sfAccessSatQ`/`IExpandedConsistentQ`/`IExpandedAccessConsistentQ` (5.3), and
+`IBranchSaturationQ`/`IFimpAccessQ`/`IExpandedConsistentQ_sat`/`IExpandedAccessConsistentQ_sat`
+(5.4). `Soundness.lean` remains untouched throughout (0 sorry, `grep -c IBranchSaturation` = 0).
+Repo-wide bare-sorry count unchanged at exactly 7 (the 6-entry baseline plus Phase 4's one
+tracked temporary sorry at `Scheme.lean`'s reuse-site discharge, now at line ~3143 after this
+phase's insertions — still the same declaration, still tracked, still Phase 6's job to close).
+No plan deviations beyond the documented implementation-choice note in 5.1 (a well-founded
+chase-to-fixed-point body for `intBlockRep`, needed to make `intBlockRep_idempotent` provable;
+the plan specified the type signature and required lemmas, not a literal recursive body).
 - **Timing:** 14-21 hours (5.1-5.2: 6-9h; 5.3-5.4: 8-12h)
 - **Depends on:** 3
 - **Verification Tier:** local (purely additive declarations in `Scheme.lean`; no existing

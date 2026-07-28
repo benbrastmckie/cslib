@@ -11,7 +11,7 @@ next_project_number: 580
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573,575 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574 | 36,37,181,425,465,530,554,562,563,573 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,456,506,548,565,566,576 | 39,40,511,564,568,574 | foundations, modal logic, bimodal and temporal logic, ... |
 | 4 | 300,317,567 | 456,506,558,565,566 | propositional logic, modal logic |
@@ -79,7 +79,6 @@ next_project_number: 580
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-575 [IMPLEMENTING] — Repo-wide linter and hygiene cleanup, restoring the CI build gate
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
@@ -142,13 +141,11 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 ---
 
 ### 575. Repo lint hygiene ci gate restoration
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
-- **Plan**:
-  - [575_repo_lint_hygiene_ci_gate_restoration/plans/01_lint-hygiene-ci-gate.md]
-  - [575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md]
+- **Plan**: [575_repo_lint_hygiene_ci_gate_restoration/plans/02_lint-hygiene-ci-gate.md]
 
 **Description**: Repo-wide linter and hygiene cleanup, restoring the CI build gate to green. VERIFIED PROBLEM: `lake build` passes (3259/3259) and `lake test` passes (9253/9253), but the exact CI invocation in .github/workflows/lean_action_ci.yml, `lake build --wfail --iofail`, EXITS 1. 27 modules log warnings; --wfail promotes every warning to a build failure. 23 of the 27 fail on linter warnings alone and need no mathematics. FOUR BOUNDED WORKSTREAMS, in this order. (1) LINTER SITES: 460 warnings collapse to 240 DISTINCT source sites across 27 files, because one recurring flexible-simp pattern accounts for 241 warnings at only 42 sites. Distribution: FmpMeasure.lean 64, FrameSoundness.lean 49, LoopChecking.lean 34, Completeness.lean 21, SoundnessStep.lean 17, Intuitionistic/Scheme.lean 10, S5Simplification.lean 9, Modal/Basic.lean 6, LK/Soundness.lean 4, then 18 files with 1-3 each. Linter breakdown: flexible 283, unusedSimpArgs 75, unusedDecidableInType 35, unusedSectionVars 32, style.longLine 12, style.show 4, unusedVariables 3, unnecessarySeqFocus 2, style.openClassical 2, plus singletons. Most flexible warnings carry an exact machine-generated `Try this:` replacement (simp [X] at h becomes simp only [...] at h), so the edit is mechanical, but each rewrite can break a downstream proof and MUST be rebuild-verified. (2) TASK-NUMBER REFERENCES: 121 `task N` citations have regressed into Cslib deliverable files, violating .claude/rules/no-task-references-in-deliverables.md; roughly 918 were stripped by an earlier cleanup, so this is a regression, not the original debt. Worst: Intuitionistic/Scheme.lean 37, ChronicleToCountermodel.lean 22, Intuitionistic/Completeness.lean 9, Bundle/SuccRelation.lean 9, Intuitionistic/Expansion.lean 6. Replace each with a durable anchor (sibling filename, section heading, verified fact), never delete the surrounding explanation. (3) SHAKE / IMPORT GATE: `lake shake --add-public --keep-implied --keep-prefix Cslib` is COMMENTED OUT at lean_action_ci.yml lines 29-32. Running it flags 94 files (93 in Logics/: Propositional 48, Modal 39, Temporal 6, Foundations/Logic 1) with 91 remove-directives and 19 add-directives. Fix the imports and re-enable the CI step. (4) SUPPRESSION AUDIT (the one UNBOUNDED workstream, sequenced LAST so the first three land regardless): 511 `set_option linter.* false` directives and 118 @[nolint] attributes. Removing a suppression surfaces new warnings whose count is unknown until attempted. Worst files: Separation/DedekindZ/Cases.lean 12, CounterexampleElimination/Elimination.lean 8, then several at 6-7. Highest-priority sub-case, and a genuine correctness concern rather than style: 12 `set_option warn.sorry false` directives hide ALL 23 Bimodal sorries from the build and from the --wfail CI gate, at Bundle/SuccRelation.lean:253,259,265,272,279,286,291; Bundle/UntilSinceCoherence.lean:35,40; BXCanonical/Frame.lean:159; ConservativeExtension/TemporalConservativity.lean:248; and BXCanonical/Chronicle/ChronicleToCountermodel.lean:46. That last one omits the trailing `in`, making it FILE-SCOPED across a file holding 12 sorries. Propositional and Modal do NOT suppress their sorries, so Bimodal is inconsistent with the rest of the tree. Decide per site whether the suppression is justified and documented; at minimum narrow the file-scoped one to per-declaration. METRIC CORRECTION TO CARRY FORWARD: the projects own bare-sorry figures are inflated because `warn.sorry` matches a naive `\bsorry\b` scan. TRUE census is 28 (Bimodal 23, Propositional 4, Modal 1, Temporal 0, Foundations 0), not 40 or 41. Any future sorry count must exclude lines containing `warn.sorry`. CONSTRAINTS: do not discharge, add, or relocate any sorry; this task is hygiene-only and must not alter any proof term, definition, or theorem statement. The 4 files failing CI on genuine sorries (Intuitionistic/Completeness.lean, Minimal/Completeness.lean, and the mixed Intuitionistic/Scheme.lean and FrameSoundness.lean) will remain CI-red after this task and that is expected and correct. Modal/Tableau/ is the epicentre and is under an active refactor programme; coordinate with that line so the lint edits do not collide. VERIFICATION PROTOCOL, set by explicit user decision: rebuild after EACH file and commit only when that file is green, per .claude/rules/git-workflow.md commit-per-green-substep. DEFINITION OF DONE: `lake build --wfail --iofail` reports no failures other than the 4 genuine-sorry modules; `lake shake` clean and its CI step uncommented; zero `task N` strings in Cslib/**; `lake test` still 9253/9253; suppression audit outcome recorded per site.
 

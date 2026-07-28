@@ -50,10 +50,16 @@
     "session_id": "sess_1785201767_9dbb98",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
     "compliance_check": "passed",
     "commits": [
       "fac20125"
-    ]
+    ],
+    "cycles_used": 5,
+    "final_state": "completed"
   }
 }

@@ -22,9 +22,6 @@ Lindenbaum-Tarski algebraic completeness theorem.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Algebraic/ParametricCanonical.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.ParametricCanonical
@@ -44,7 +41,8 @@ section TaskRel
 
 variable {fc : FrameClass} {D : Type*} [AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
 
-/-- Parametric canonical task relation: forward accessibility with converse for negative durations. -/
+/-- Parametric canonical task relation: forward accessibility with converse for negative
+durations. -/
 def parametricCanonicalTaskRel (M : ParametricCanonicalWorldState Atom fc) (d : D)
     (N : ParametricCanonicalWorldState Atom fc) : Prop :=
   if d > 0 then ExistsTask M.val N.val

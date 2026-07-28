@@ -1,30 +1,29 @@
 {
   "status": "partial",
-  "summary": "Phase 2 complete: counting layer landed in Cslib/Foundations/Logic/Tableau/Blocking.lean — card_image_le_pow_of_forall_subset (powerset counting), toFinset_eraseDups bridge (List.mem_eraseDups membership route), distinctTypes_le_pow (corrected signed-universe statement over V : Finset (Sign × F), bound 2^V.card — the false task-description form was never used), exists_typeAt_eq_of_card_lt (pigeonhole via Finset.exists_ne_map_eq_of_card_lt_of_maps_to), strictChain_le_card (GGN chain bound, induction + Finset.card_lt_card + omega). All five sorry-free; scoped build green on first attempt; lean_verify on all three named counting lemmas reports standard axioms only (propext, Classical.choice, Quot.sound), zero warnings; checkInitImports exit 0. Mathlib imports added (public): Data.Finset.Card, Data.Finset.Dedup, Data.Finset.Powerset — sanctioned by plan, shake confirms minimality in Phase 5. Phases 3 (Temporal redirection), 4 (references.bib), 5 (CI gate) remain.",
-  "phases_completed": 2,
+  "summary": "Phase 3 complete: Temporal timeType/isSubsetBlocked redirected onto the shared Blocking.lean layer as defeq wrappers (Branch.typeAt / Branch.containmentBlocked), with rfl bridging lemmas timeType_eq_typeAt and isSubsetBlocked_eq_containmentBlocked — both closed by rfl on the FIRST attempt of the 3-attempt ladder. Consumers (isTemporallyBlocked, findBlockedTime, Rules/Saturation/Closure call sites) required zero edits; Completeness.lean mentions are prose only; formulasAtTime kept unchanged. All 24 temporal conformance rows pass (each #guard_msgs-gated; lake build CslibTests.TableauConformance green 725/725). Scoped build of Temporal Branch/Saturation/Closure green (720/720), sorry sweep on touched file empty, checkInitImports exit 0. Barrel registration of Blocking.lean was NOT needed for phase 3 builds — deferred to Phase 5 per plan. Phases 4 (references.bib) and 5 (CI gate) remain.",
+  "phases_completed": 3,
   "phases_total": 5,
   "skeleton": false,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
-    "next_phase": 3,
-    "notes": "Phase 3 (Temporal redirection) now unblocked (deps 1, 2 done). Phase 4 (references.bib) independently dispatchable. Naming note for Phase 3/5 authors: the counting lemmas live DIRECTLY in namespace Cslib.Logic.Tableau (Cslib.Logic.Tableau.distinctTypes_le_pow etc.), not in a nested Tableau sub-namespace — the H3 table's Cslib.Logic.Tableau.Tableau.* form would trip the dupNamespace linter. Deviation record: strictChain_le_card landed without the unused [DecidableEq β] instance (unusedArguments linter at the Phase 5 lint gate); statement otherwise verbatim."
+    "next_phase": 4,
+    "remaining_phases": [
+      "Phase 4: references.bib — add DershowitzManna1979, enrich GargGenoveseNegri2012 (wave-1, independent of phase 3)",
+      "Phase 5: CI integration gate — mk_all barrel (Blocking.lean still unregistered), checkInitImports, full build, lint-style, shake, lake test, zero-sorry sweep"
+    ],
+    "phase_3_notes": "Wrapper import landed as 'public import Cslib.Foundations.Logic.Tableau.Blocking' (bodies in @[expose] public section). Both bridging lemmas carry 'omit [Hashable Atom] in' (Formula derives only DecidableEq; BEq via instBEqOfDecidableEq — Hashable would be auto-included unused)."
   },
   "artifacts": [
     {
-      "path": "Cslib/Foundations/Logic/Tableau/Blocking.lean",
+      "path": "Cslib/Logics/Temporal/Tableau/Branch.lean",
       "type": "lean_module",
-      "summary": "Definitional layer (phase 1) + counting layer (phase 2): 3 defs, 2 spec lemmas, 5 counting lemmas, ~200 lines, zero sorry"
+      "summary": "Temporal redirection: timeType/isSubsetBlocked as defeq wrappers over shared Blocking layer + 2 rfl bridging lemmas"
     },
     {
-      "path": "specs/456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md",
-      "type": "plan",
-      "summary": "Phase 2 marked [COMPLETED], all 6 checklist items checked, Scope Hypothesis confirmation + verification record + naming/signature deviations recorded"
-    },
-    {
-      "path": "specs/456_shared_tableau_containment_blocking/progress/phase-2-progress.json",
+      "path": "specs/456_shared_tableau_containment_blocking/progress/phase-3-progress.json",
       "type": "progress",
-      "summary": "Phase 2 objective-level progress, all done"
+      "summary": "Phase 3 progress log, both objectives done"
     }
   ]
 }

@@ -4,26 +4,26 @@
   "artifacts": [
     {
       "type": "lean_module",
-      "path": "Cslib/Foundations/Logic/Tableau/Blocking.lean",
-      "summary": "Definitional layer (phase 1) + counting layer (phase 2): card_image_le_pow_of_forall_subset, toFinset_eraseDups, distinctTypes_le_pow, exists_typeAt_eq_of_card_lt, strictChain_le_card (zero sorry)"
+      "path": "Cslib/Logics/Temporal/Tableau/Branch.lean",
+      "summary": "Phase 3: timeType/isSubsetBlocked redirected as defeq wrappers over shared Branch.typeAt/containmentBlocked, plus rfl bridging lemmas timeType_eq_typeAt and isSubsetBlocked_eq_containmentBlocked (zero sorry)"
     }
   ],
-  "phases_completed": 2,
+  "phases_completed": 3,
   "phases_total": 5,
   "modified_files": [
-    "Cslib/Foundations/Logic/Tableau/Blocking.lean",
+    "Cslib/Logics/Temporal/Tableau/Branch.lean",
     "specs/456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md",
-    "specs/456_shared_tableau_containment_blocking/progress/phase-2-progress.json",
+    "specs/456_shared_tableau_containment_blocking/progress/phase-3-progress.json",
     "specs/456_shared_tableau_containment_blocking/.orchestrator-handoff.json"
   ],
   "memory_candidates": [
     {
-      "content": "Mathlib's dupNamespace env linter flags fully-qualified names with a consecutive repeated component (e.g. Cslib.Logic.Tableau.Tableau.foo); when a plan names lemmas 'Tableau.foo' inside namespace Cslib.Logic.Tableau, declare them directly in that namespace rather than opening a nested Tableau sub-namespace.",
-      "keywords": ["lean4", "dupNamespace", "namespace", "lint", "cslib"]
+      "content": "In CSLib module-system files, a defeq wrapper whose body lives in an @[expose] public section must import the module providing the wrapped definition via 'public import', not plain 'import', or downstream consumers of the exposed body fail.",
+      "keywords": ["lean4", "module-system", "public-import", "expose", "cslib"]
     },
     {
-      "content": "For CSLib counting lemmas over Finset chains, Finset.card_lt_card and Finset.card_le_card need no DecidableEq; including an unused [DecidableEq β] instance argument trips the unusedArguments env linter at lake lint.",
-      "keywords": ["lean4", "unusedArguments", "DecidableEq", "Finset", "lint"]
+      "content": "When a Lean 4 inductive derives only DecidableEq, BEq resolves through instBEqOfDecidableEq; lemmas in a section carrying an unrelated [Hashable A] variable need 'omit [Hashable A] in' to avoid the unusedSectionVars env linter.",
+      "keywords": ["lean4", "omit", "unusedSectionVars", "BEq", "DecidableEq", "lint"]
     }
   ],
   "verification": {
@@ -33,13 +33,13 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": false,
-    "notes": "Phase-scoped verification only (single-phase dispatch): scoped build green (708/708), checkInitImports exit 0, lean_verify axiom-clean (propext, Classical.choice, Quot.sound) with zero warnings on distinctTypes_le_pow, strictChain_le_card, exists_typeAt_eq_of_card_lt. Full CI pipeline (lint, shake, mk_all, test) is Phase 5's gate per the plan."
+    "notes": "Phase-scoped verification only (single-phase dispatch): lake build of Temporal Branch/Saturation/Closure green (720/720); lake build CslibTests.TableauConformance green (all 24 temporal #guard_msgs rows pass); sorry grep on touched file empty; checkInitImports exit 0. Both rfl bridging lemmas closed on first attempt. Full CI pipeline (lint, shake, mk_all barrel registration of Blocking.lean, lake test) is Phase 5's gate per the plan."
   },
   "metadata": {
     "session_id": "sess_1785275816_a84520_456",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "phase_number": 2
+    "phase_number": 3
   }
 }

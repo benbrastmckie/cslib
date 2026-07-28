@@ -58,15 +58,23 @@ distinction stays visible rather than being asserted only in a docstring elsewhe
 
 ## Corpus provenance
 
-Every row's expected verdict is transcribed from Finding 0 of the task's research report, and
-justified below by the formula's own mathematical validity — never by what the decision
-procedure happens to print. Finding 0's summary table groups some rows into `k`-indexed families
-(`𝐆p → 𝐅^k p` for `k = 1..5`; `𝐅^k p → 𝐅^k p` for `k = 0..6`); expanding those families into
-individually-asserted formulas yields **43** individually-executed rows (24 temporal, 19
-propositional), rather than the plan's rounded "44 rows" summary figure, which counts some
-multi-formula families as a single row. All 43 rows are green: the rule-completeness repairs
-this task landed are complete, and this file is now a pure regression guard — a future edit that
-reopens any row here is a real defect, not an expected transitional state.
+Every row's expected verdict is justified below by the formula's own mathematical validity —
+never by what the decision procedure happens to print. The corpus groups some rows into
+`k`-indexed families (`𝐆p → 𝐅^k p` for `k = 1..5`; `𝐅^k p → 𝐅^k p` for `k = 0..6`); expanding
+those families into individually-asserted formulas yields **44** individually-executed rows: 24
+temporal and 20 propositional.
+
+The propositional corpus's 20th row is the divergence witness `φ0` documented in
+`Expansion.lean`'s "Divergence witness: no world bound exists for this calculus" note. Under the
+unrepaired calculus, `intExpandBranches` never returned a verdict for `φ0` at all (unbounded
+world growth); under the ancestor-directed blocking check that repairs the calculus, `φ0` now
+terminates. This row asserts `φ0`'s correct semantic verdict as a termination regression guard —
+a future edit that reintroduces unbounded growth on this witness fails this row instead of
+hanging silently.
+
+All 44 rows are green: the rule-completeness repairs are complete, and this file is a regression
+guard — a future edit that reopens any row here is a real defect, not an expected transitional
+state.
 -/
 
 namespace CslibTests.TableauConformance
@@ -221,7 +229,7 @@ end TemporalCorpus
 
 /-! ## Propositional Corpus (`intuitionisticTableau`, `Proposition Nat`)
 
-19 rows, all green: 14 closed (IPC-valid) + 5 open (IPC-invalid). -/
+20 rows, all green: 14 closed (IPC-valid) + 6 open (IPC-invalid). -/
 
 section PropositionalCorpus
 
@@ -326,6 +334,26 @@ def ic : Proposition Nat := .atom 2
 /-- info: "OPEN" -/
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau ((¬ ia → (ib ∨ ic)) → ((¬ ia → ib) ∨ (¬ ia → ic))))
+
+/-- Additional atoms for the divergence-witness row below, test-only. -/
+def id_ : Proposition Nat := .atom 3
+def ie : Proposition Nat := .atom 4
+def if_ : Proposition Nat := .atom 5
+def iu1 : Proposition Nat := .atom 6
+def iv1 : Proposition Nat := .atom 7
+def iu2 : Proposition Nat := .atom 8
+def iv2 : Proposition Nat := .atom 9
+
+-- φ0 = (((a→b)→c) ∧ ((d→e)→f)) → ((u1→v1) ∨ (u2→v2)) : OPEN, not IPC-valid — classically
+-- falsified by a=⊤,b=⊥,d=⊤,e=⊥,u1=⊤,v1=⊥,u2=⊤,v2=⊥ (both antecedent conjuncts are vacuously
+-- true via a false hypothesis; both consequent disjuncts are false). This is the divergence
+-- witness documented in `Expansion.lean`'s "Divergence witness: no world bound exists for this
+-- calculus" note: under the unrepaired calculus `intExpandBranches` never returned a verdict for
+-- it; under ancestor-directed blocking it now terminates. Termination regression guard.
+/-- info: "OPEN" -/
+#guard_msgs in
+#eval intVerdict (intuitionisticTableau
+  ((((ia → ib) → ic) ∧ ((id_ → ie) → if_)) → ((iu1 → iv1) ∨ (iu2 → iv2))))
 
 end PropositionalCorpus
 

@@ -18,10 +18,41 @@ jobs:
         run: |
           echo "TEST_ARGS=''" >> $GITHUB_ENV
         shell: bash
+      # The next two steps are new, local (non-upstream) additions to this shared, synced
+      # workflow file. Adding steps here is a deliberate divergence-cost tradeoff: every future
+      # sync from upstream now carries a conflict hunk at this point. The two preceding local
+      # ratchet guards in this repo (scripts/check-lint-suppressions.sh,
+      # scripts/check-shake-residue.sh) both chose the OPPOSITE tradeoff -- they live only in
+      # lint-hygiene.yml / pre-pr-check.sh, never in this file -- specifically to avoid that
+      # sync cost. This pair is wired in here anyway because it is an explicit, written scope
+      # requirement for these two gates specifically; the sync-conflict cost is accepted, not
+      # overlooked.
+      #
+      # Placement: the sorry-suppression gate is Lean-free (a pure text sweep) and placed
+      # BEFORE the lean-action build step below, so it runs unconditionally and fails fast. The
+      # axiom-census gate needs built .olean files, so it is placed AFTER the build step and
+      # carries `if: always()`. That `if: always()` is not optional: the build step above has no
+      # `continue-on-error`, and `lake build --wfail --iofail` is currently RED on this tree by
+      # design (4 files carry bare, genuinely-unsuppressed sorries -- an accepted, out-of-scope
+      # condition, see this repo's own sorry-suppression baseline). Without `if: always()`, a
+      # step placed after an already-failing build step would never execute at all -- a gate
+      # that never runs is not a gate. If the census step itself shows red in a run, read that
+      # as "the build is broken" first (it exits 2, never a silent clean pass, when it cannot
+      # find built .olean files) -- NOT as "the census found new taint" -- and check the build
+      # step's own result before investigating the census.
+      - name: "sorry-suppression ratchet"
+        run: |
+          set -e
+          bash scripts/check-sorry-suppressions.sh
       - uses: leanprover/lean-action@v1
         with:
           build-args: "--wfail --iofail"
           test-args: ""
+      - name: "axiom-census ratchet"
+        if: always()
+        run: |
+          set -e
+          bash scripts/check-axiom-census.sh
       - name: "lake exe mk_all --check"
         run: |
           set -e

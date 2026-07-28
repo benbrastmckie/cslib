@@ -410,20 +410,20 @@ dependency.
 
 ---
 
-### Phase 4: CI wiring in lean_action_ci.yml [NOT STARTED]
+### Phase 4: CI wiring in lean_action_ci.yml [COMPLETED]
 
 **Goal**: Both gates run as their own steps in `.github/workflows/lean_action_ci.yml` and actually
 execute, with the divergence cost recorded inline (D2).
 
 **Tasks**:
-- [ ] Add the **suppression** step **before** the `uses: leanprover/lean-action@v1` step (after the
+- [x] Add the **suppression** step **before** the `uses: leanprover/lean-action@v1` step (after the
       `Set TEST_ARGS manually` step). It is Lean-free and takes seconds, so placing it first makes it
       fail fast and removes any need for `if: always()`. Follow the existing step style:
       `name: "sorry-suppression ratchet"` with `run: |` + `set -e` + `bash scripts/check-sorry-suppressions.sh`.
-- [ ] Add the **axiom census** step **after** the `lean-action` build step, carrying `if: always()`, so
+- [x] Add the **axiom census** step **after** the `lean-action` build step, carrying `if: always()`, so
       it still executes while the build step remains red on the four known bare-sorry files. Same
       `run: |` + `set -e` + `bash scripts/check-axiom-census.sh` shape.
-- [ ] Add an inline comment block above the two new steps recording, without task numbers:
+- [x] Add an inline comment block above the two new steps recording, without task numbers:
   - that this workflow file is shared with the `leanprover/cslib` upstream remote and actively synced,
     so each new step adds a conflict hunk to every future sync — this is the accepted, deliberate cost
     of wiring these two gates into CI directly;
@@ -435,10 +435,11 @@ execute, with the divergence cost recorded inline (D2).
     execute, and a gate that never executes is not a gate);
   - that the census step exits 2 when `.olean`s are missing, so a red census step means the build is
     broken, not that the census is broken — it never silently reports a clean empty result.
-- [ ] Confirm no other step's behaviour changed (the `mk_all --check`, `checkInitImports`, and
+- [x] Confirm no other step's behaviour changed (the `mk_all --check`, `checkInitImports`, and
       `lint-style-action` steps keep their existing conditions; only the two new steps carry `if: always()`).
-- [ ] Validate the YAML parses (`python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/lean_action_ci.yml'))"`
-      or equivalent).
+      Confirmed via `git diff`: purely additive hunk, no other step lines touched.
+- [x] Validate the YAML parses (`python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/lean_action_ci.yml'))"`
+      or equivalent). Confirmed: "YAML OK".
 
 **Timing**: 0.75 hours
 

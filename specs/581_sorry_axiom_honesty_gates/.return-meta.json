@@ -1,13 +1,13 @@
 {
   "status": "in_progress",
   "started_at": "2026-07-28T00:00:00Z",
-  "artifacts": ["scripts/AxiomCensus.lean", "scripts/check-sorry-suppressions.sh", "scripts/sorry-suppression-baseline.txt", "scripts/check-axiom-census.sh", "scripts/axiom-census-baseline.txt"],
+  "artifacts": ["scripts/AxiomCensus.lean", "scripts/check-sorry-suppressions.sh", "scripts/sorry-suppression-baseline.txt", "scripts/check-axiom-census.sh", "scripts/axiom-census-baseline.txt", ".github/workflows/lean_action_ci.yml"],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Phases 1, 2, 3 complete. check-axiom-census.sh verified: 43-row exact-set baseline, all exit codes (0/1/2) confirmed via scratch copies. Wave 1+2 done; proceeding to wave 3 (phases 4, 5).",
+    "stage": "phase_4_complete",
+    "details": "Phase 4 CI wiring complete: sorry-suppression ratchet step before lean-action build, axiom-census ratchet step after with if: always(), divergence-cost comment block. YAML validated, diff purely additive.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 3
+    "phases_completed": 4
   },
   "metadata": {
     "session_id": "sess_1785251101_8e14cc_581",

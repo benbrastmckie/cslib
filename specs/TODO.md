@@ -1,5 +1,5 @@
 ---
-next_project_number: 580
+next_project_number: 583
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 580
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574 | 36,37,181,425,465,530,554,562,563,573 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,456,506,548,565,566,576 | 39,40,511,564,568,574 | foundations, modal logic, bimodal and temporal logic, ... |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573,580 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574,581 | 36,37,181,425,465,530,554,562,563,573,580 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,456,506,548,565,566,576,582 | 39,40,511,553,564,568,574 | foundations, modal logic, bimodal and temporal logic, ... |
 | 4 | 300,317,567 | 456,506,558,565,566 | propositional logic, modal logic |
 | 5 | 375,414,430 | 181,215,300,301,317 | propositional logic, code hygiene |
 | 6 | 413 | 375 | code hygiene |
@@ -57,6 +57,7 @@ next_project_number: 580
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
   └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+    └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the (see above)
 
 ### Temporal Logic
@@ -79,6 +80,8 @@ next_project_number: 580
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
+580 [NOT STARTED] — Bring `lake shake` back to a green, ALIGNMENT-PRESERVING disposit
+  └─ 581 [NOT STARTED] — Add honesty gates that make hidden proof debt impossible to accum
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
@@ -98,6 +101,99 @@ next_project_number: 580
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
 ## Tasks
+
+### 582. Resolve the S4 ancestor-redirect sorry, the only sorry with no owning task
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 553
+
+**Description**: Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1252) -- the ONLY sorry in the repository with no owning task.
+
+WHY THIS TASK EXISTS: every other sorry in Cslib/ is owned (the intuitionistic/minimal tableau completeness cluster, the bimodal discrete-gated set, the bimodal strict-Until/Since set, and the temporal conservativity obligation each have a task). This one is protected but not owned: the Boneyard-migration task carves it out as IMMOVABLE precisely BECAUSE it carries a retained sorry, which keeps it in the tree indefinitely without anyone being tasked to close it.
+
+THE OBSTRUCTION IS DOCUMENTED AND UNUSUAL -- READ THE IN-FILE DOCSTRING FIRST (FrameSoundness.lean, immediately above the lemma). Its central finding: successive soundness routes for this guard have appealed to Massacci (2000), "Single Step Tableaux for Modal Logics", Theorem 8.1 (blocking preserves satisfiability), but IN THAT PAPER THEOREM 8.1 IS STATED AND NEVER PROVED. Its Appendix B.2, headed "PROOFS OF SECTION 8", proves Theorem 8.4 only; where the section-8 (pi-modal-completed) extension is discussed, the paper defers it to the completeness proofs of its references [7] (prefixed tableaux) and [20] (completeness via model graphs). CONSEQUENCE: any further attempt to close this sorry by following that citation will find nothing to follow. Do not re-derive this finding from scratch; it is recorded so it is not rediscovered a fourth time.
+
+CONSUMER AUDIT (re-run live at task creation, superseding the docstring's stale "1 hit" phrasing): 3 grep hits for the name across Cslib/ and CslibTests/, of which exactly ONE is the declaration itself; the other two are docstrings -- one at FrameSoundness.lean:1231 quoting the audit command, one at LoopChecking.lean:113 cross-referencing it. So the substantive claim holds: ZERO code consumers. The sorry propagates into no other result and is a recorded obstruction rather than load-bearing debt. RE-RUN THIS AUDIT at execution time before acting on it.
+
+THE DECISION THIS TASK MUST MAKE (research first, then choose explicitly and record why):
+(a) IMPORT the model-graph construction from Massacci's references [7]/[20] and prove the guard sound. Largest scope; the only route that yields a genuine proof.
+(b) RESTATE the lemma to something provable from the driver-independent hypothesis set actually available, if a weaker but still meaningful statement exists. The docstring's obstruction paragraph describes what that hypothesis set can and cannot supply -- start there.
+(c) DELETE the lemma. Legitimate precisely because it has zero code consumers: removing it discharges the sorry without weakening any result that anything depends on. This requires reversing the retain-by-user-decision that currently keeps it, and coordinating with the Boneyard-migration task, whose carve-out rationale ("it carries the retained sorry") evaporates the moment the sorry is gone.
+
+DO NOT close this sorry by weakening the statement into something vacuous or trivially true. If (b) is chosen, the restated lemma must still say something about satisfiability preservation under ancestor redirect, and the restatement must be justified in the commit and the docstring.
+
+DEPENDENCY RATIONALE: sequenced after the S4 loop-guard soundness task, which holds explicit authorization to edit the otherwise-frozen keyed-guard code and lists FrameSoundness.lean in its own file_scope. Its finding -- whether the guard can be narrowed at all without collapsing the termination argument -- directly informs whether route (b) has a target at all. Starting first risks doing the work twice.
+
+DEFINITION OF DONE: route (a), (b), or (c) is chosen with the reasoning recorded in the plan AND in the file (or in the commit, if the file is removed); FrameSoundness.lean contains no sorry; `lake build --wfail --iofail` emits strictly fewer sorry warnings than before and no new warnings of any kind; `lake test` stays exit 0; no other proof, definition, or theorem statement is altered; if route (c) is taken, the Boneyard-migration task's carve-out is updated to record that its rationale no longer applies.
+
+---
+
+### 581. Add sorryAx census and warn.sorry suppression ratchets so hidden proof debt cannot grow
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: Task 580
+
+**Description**: Add honesty gates that make hidden proof debt impossible to accumulate silently: a `#print axioms` ratchet over the public API, and a `set_option warn.sorry false` suppression ratchet. Neither gate discharges any sorry -- both make the existing debt VISIBLE and prevent it from growing.
+
+VERIFIED PROBLEM (measured live): the repo has two classes of proof debt that no current check can see.
+
+CLASS 1 -- SILENT sorryAx TAINT. A declaration that consumes a sorry'd lemma but contains no `sorry` token emits NO warning and is clean by every syntactic measure. Verified directly:
+    'Cslib.Logic.PL.intuitionisticTableau_complete' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+    'Cslib.Logic.PL.minimalTableau_complete'        depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+No `warn.sorry` policy however strict catches this class. Prior work independently identified the same hole for `succ_cofinal` and `limitDomSubtypeIsSuccArchimedean` in ChronicleToCountermodel.lean, and recommended exactly this gate as a separate task.
+
+CLASS 2 -- SUPPRESSED SORRIES. 18 `set_option warn.sorry false in` markers hide sorries from `lake build --wfail --iofail` across 5 files (ChronicleToCountermodel.lean, Bundle/SuccRelation.lean, Bundle/UntilSinceCoherence.lean, ConservativeExtension/TemporalConservativity.lean, BXCanonical/Frame.lean). Nothing stops a 19th being added.
+
+DESIGN CONSTRAINT -- RATCHET, NOT ABSOLUTE GATE. Both gates MUST land GREEN on the current tree by baselining the present state, then failing only on REGRESSION. An absolute gate would be red on arrival and would immediately be disabled, achieving nothing. Model both on the existing `scripts/check-lint-suppressions.sh`, which already implements exactly this pattern (baseline file + ceiling comparison + exit 0/1) and is the in-repo precedent to follow.
+
+SCOPE:
+1. `scripts/check-axiom-census.sh`: enumerate the public API surface, emit each declaration's axiom profile, and diff the set of `sorryAx`-tainted declarations against a checked-in baseline. FAIL when a declaration not in the baseline becomes tainted. PASS (and report) when a baseline entry becomes clean -- and require the baseline to be re-tightened, so the ratchet only ever moves toward zero. Decide and record how the "public API surface" is enumerated (whole `Cslib` root import vs. per-module) -- the choice determines runtime, so measure it.
+2. `scripts/check-sorry-suppressions.sh`: count `set_option warn.sorry false` markers and bare `sorry` occurrences in code position across `Cslib/**`, compare against a checked-in baseline ceiling, FAIL on increase. Must distinguish code-position sorries from the many prose mentions of the word "sorry" in module docstrings -- a naive `grep -c sorry` over Cslib/ returns ~168 and is useless; the real code-position count is far smaller. State the discrimination rule explicitly in the script.
+3. Wire both into `.github/workflows/lean_action_ci.yml` as their own steps.
+4. Record, in each baseline file, the CURRENT owning task for every entry, so the census doubles as a live debt ledger rather than an opaque number.
+
+NON-GOALS: do not discharge, restate, add, relocate, or hide any sorry; do not remove any existing `set_option warn.sorry false in` marker (their removal belongs to the tasks that fill the underlying sorries); do not alter any proof.
+
+DEFINITION OF DONE: both scripts exist, are baselined against the current tree, and exit 0 on it; both are wired into CI; both demonstrably exit 1 under a deliberately introduced regression (a scratch tainted declaration and a scratch suppression, each reverted after the test); each baseline records the owning task per entry; no `.lean` file under `Cslib/` is modified.
+
+---
+
+### 580. Restore lake shake to a green disposition, disabling only what upstream alignment requires
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Bring `lake shake` back to a green, ALIGNMENT-PRESERVING disposition. The step is currently ENABLED AND FAILING, so CI is red for a second reason independent of the sorry gate.
+
+GOVERNING PRINCIPLE (user decision -- this is the constraint the whole task is shaped around): DISABLE SHAKE ONLY WHERE REQUIRED TO MAINTAIN UPSTREAM ALIGNMENT. Blanket-disabling is NOT the answer. Fix everything fixable that does not fork upstream; disable only the residue that cannot be fixed without diverging, and prove that residue is genuinely irreducible before disabling anything.
+
+VERIFIED PROBLEM (measured live, not inferred): the repo-wide lint-hygiene work uncommented the `lake shake` step in `.github/workflows/lean_action_ci.yml` and recorded it as "clean", but it is not. `lake shake --add-public --keep-implied --keep-prefix Cslib` exits 1 and flags 12 files; that CI step runs under `set -e`, so the job goes red.
+
+THE 12 FLAGGED FILES, classified against `upstream/main` (f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1) at audit time:
+
+FIXABLE AT ZERO ALIGNMENT COST (2) -- these files ALREADY diverge from upstream, so applying shake's suggestion adds no new divergence:
+  - Cslib/Logics/Modal/Basic.lean -- add #[public import Mathlib.Order.Notation]  (single-line change)
+  - Cslib/Foundations/Data/HasFresh.lean -- remove #[public import Mathlib.Analysis.Normed.Field.Lemmas]; add #[public import Mathlib.Analysis.Normed.Group.Basic, Mathlib.Topology.MetricSpace.Bounded, Mathlib.Data.EReal.Operations, Mathlib.Topology.Algebra.InfiniteSum.Order]
+
+BYTE-IDENTICAL TO UPSTREAM (10) -- fixing any of these forks a pristine file and creates merge-conflict cost on every future sync. This is upstream's own import debt, not this fork's; upstream disabled the same check in its commit "ci: disable shake again (#397)":
+  Algorithms/Lean/TimeM.lean, Computability/Machines/Turing/MultiTape/Deterministic.lean, Computability/Machines/Turing/SingleTape/NonDeterministic.lean, Foundations/Data/StackTape.lean, Foundations/Relation/Defs.lean, Foundations/Relation/Confluence.lean, Foundations/Control/Monad/Free.lean, Languages/CCS/Basic.lean, Languages/CombinatoryLogic/Defs.lean, Languages/LambdaCalculus/LocallyNameless/Untyped/LcAt.lean
+
+SCOPE:
+1. RE-RUN THE CLASSIFICATION LIVE against current `upstream/main` before acting. The 12/2/10 split above is dated; upstream may have fixed some, and local edits may have moved files between the two buckets. The split drives every decision below, so it must be re-derived, not trusted.
+2. Fix the locally-modified bucket by applying shake's suggestions to those files only. Rebuild and confirm no new warnings.
+3. Determine whether the residual upstream-identical bucket can be EXEMPTED rather than the whole step disabled. Investigate honestly and record the finding: `lake shake` accepts `[<MODULE>...]` arguments but checks everything transitively reachable, and no per-file ignore mechanism was found in the repo or in the importGraph package at audit time -- CONFIRM OR REFUTE THIS. If a scoping or exemption mechanism does exist, prefer it over disabling; that keeps the gate live for this fork's own code, which is the whole point.
+4. Only if step 3 establishes no exemption mechanism exists: comment out the `lake shake` CI step. Record inline WHY, with the audit date, the upstream SHA compared against, and the explicit statement that the residue is upstream-identical -- so a future reader can re-derive the decision instead of re-litigating it.
+5. PREFERRED, and the highest-value part of this task if step 4 is reached: add a local (non-CI, or CI-advisory) guard that runs shake and asserts the flagged set is EXACTLY the known upstream-identical residue. That way this fork's OWN new import debt is still caught while upstream's debt does not fail the build -- disabling the CI step then costs no local enforcement at all. Model it on `scripts/check-lint-suppressions.sh` (checked-in baseline + exact-set comparison + exit 0/1), the established in-repo ratchet pattern.
+6. Re-verify the other CI steps still pass: `lake test`, `lake exe mk_all --check`, `lake exe checkInitImports`, `lake exe lint-style` all exit 0. The `lake build --wfail --iofail` sorry gate is expected to remain red and is out of scope here.
+
+NON-GOALS: do not run a blanket `lake shake --fix`; do not modify any upstream-identical file; do not touch any sorry, proof, definition, or theorem statement; do not alter the `--wfail --iofail` build args.
+
+DEFINITION OF DONE: the locally-modified bucket is shake-clean; the upstream-identical bucket is untouched and still byte-identical to upstream; either the shake gate runs green in CI, or it is disabled with the alignment rationale, audit date and upstream SHA recorded inline AND a local guard pins the exact expected residue; the four other non-build CI steps are re-verified exit 0.
+
+---
 
 ### 579. Lint suppression ratchet gate
 - **Status**: [COMPLETED]
@@ -250,6 +346,14 @@ Overlap note: task 456 (shared_tableau_containment_blocking, currently [NOT STAR
 - Bundle/UntilSinceCoherence.lean: 2 sorries (lines 38, 43)
 
 All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T axioms) under the strict Until/Since reading. They are therefore not merely unproved -- the statements may need restating before they are provable at all. Gated on the bimodal continuous port, which is itself gated on upstream BimodalLogic tasks 390/391 (Dedekind carrier construction and FrameClass scaffolding), both [NOT STARTED] upstream. Line numbers are as measured 2026-07-26. BEFORE PLANNING, establish whether the 9 obligations are stated soundly under the current semantics: if the removed axioms were genuinely unsound, some of these may need to be restated or retired rather than proved, and that determination should precede any port dependency.
+
+---
+
+## LINE NUMBERS ARE STALE (repo-wide lint/CI audit)
+
+The line numbers in the body above are dated 2026-07-26 and have since moved -- the repo-wide lint-hygiene pass rewrapped long lines, deleted blank lines inside single-command blocks, and narrowed blanket linter suppressions to declaration scope across these files. RE-DERIVE EVERY LINE NUMBER LIVE (`grep -n sorry <file>`) before acting; do not trust the recorded positions.
+
+The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accurate. The sorries in these files are currently hidden from `lake build --wfail --iofail` by `set_option warn.sorry false in` markers; filling them must also DELETE the corresponding marker, so the suppression count drops with the sorry count. A suppression ratchet is being added under a separate task to enforce exactly that.
 
 ---
 
@@ -779,6 +883,33 @@ After implementation:
 
 ---
 
+## CORRECTION (repo-wide lint/CI audit, upstream/main f36649cf): ITEM (3) AS WRITTEN IS IMPOSSIBLE
+
+Item (3) above instructs the implementer to "close the fuel=0 base case of `intExpandBranches_openBranch_sat`". THAT GOAL IS FALSE AT THE LEMMA'S CURRENT STATEMENT and cannot be closed by any proof. The refutation is recorded IN THE SOURCE, in-proof at the sorry site -- read it before touching this item.
+
+The counter-instance (Lean-verified, not conjectured): `branches = [[<.neg, p AND q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`. Every hypothesis holds -- `ILabelBound` trivially (the single formula sits at label 0 < 1), `IExpandedConsistent` and `IAllAccessConsistent` vacuously (empty expanded-set and empty edge list), and all length hypotheses are (1,1). With `fuel = 0`, `intExpandBranches` returns `.openBranch b` with `b` the branch unmodified -- never saturated. But `IBranchSaturation.sat_fand`'s premise (`F(p AND q)@0` present) is `true` while BOTH required disjuncts (`F(p)@0`, `F(q)@0`) are `false`. So the existential goal is unsatisfiable at an instance where every hypothesis holds.
+
+WHAT ITEM (3) ACTUALLY REQUIRES: RESTATING the lemma -- e.g. adding a saturation-establishing precondition on the initial worklist that rules out the counter-instance -- and only then proving it. Do not attempt to prove it as stated; do not force it via a weakened or vacuous statement (the sibling docstring at the truthLemma site issues the same prohibition for the same reason).
+
+## CORRECTED LINE NUMBERS (verified live; the numbers in the body above are stale)
+
+- truthLemma's T-imp case: `Intuitionistic/Scheme.lean:607` (the lemma itself begins at :570) -- body above says :592
+- `intExpandBranches_openBranch_sat` fuel-0 base case: `Intuitionistic/Scheme.lean:2583` -- body above says :1498
+- IValid bridge: `Intuitionistic/Completeness.lean:124` -- body above says :133
+- MValid bridge: `Minimal/Completeness.lean:118` -- body above says :125
+
+Re-derive live before use; these move on every edit.
+
+## DEPENDENCY NOTE
+
+Of this task's two declared dependencies, 552 (tableau_calculus_conformance_rule_completeness_repair) is COMPLETED and archived. The only live blocker is 456, itself behind 574 -> 573. The status marker should be re-evaluated against that single remaining edge rather than treated as blocked on two.
+
+## CI CONTEXT
+
+These four sorries are exactly the ones that keep `lake build --wfail --iofail` red, together with the fifth in Modal/Tableau/FrameSoundness.lean (separately owned). The Definition of Done's "CI green (... lake shake)" clause should be read against the shake-disposition task: shake currently exits 1 on 12 files, 10 of them byte-identical to upstream, and its CI step is being re-scoped.
+
+---
+
 ### 301. Temporal tableau
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
@@ -870,6 +1001,14 @@ After implementation:
 - BXCanonical/Frame.lean: 1 sorry (line 161)
 
 All are gated on the discrete completeness pipeline (discrete_embed_strictMono, gap_contradicts_prior, the discrete FMCS construction), which the discrete port task delivers. Counts above are as measured 2026-07-26, superseding the earlier asserted figures. The strict-Until/Since sorries are tracked separately. Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completeness_dense (Dense.lean:122) were carved off previously and remain out of scope.
+
+---
+
+## LINE NUMBERS ARE STALE (repo-wide lint/CI audit)
+
+The line numbers in the body above are dated 2026-07-26 and have since moved -- the repo-wide lint-hygiene pass rewrapped long lines, deleted blank lines inside single-command blocks, and narrowed blanket linter suppressions to declaration scope across these files. RE-DERIVE EVERY LINE NUMBER LIVE (`grep -n sorry <file>`) before acting; do not trust the recorded positions.
+
+The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accurate. The sorries in these files are currently hidden from `lake build --wfail --iofail` by `set_option warn.sorry false in` markers; filling them must also DELETE the corresponding marker, so the suppression count drops with the sorry count. A suppression ratchet is being added under a separate task to enforce exactly that.
 
 ---
 

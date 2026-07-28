@@ -25,9 +25,6 @@ Contains core temporal coherence definitions and backward lemmas.
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/TemporalCoherence.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -41,24 +38,30 @@ variable {Atom : Type*} {fc : FrameClass} {D : Type*} [Preorder D] [Zero D]
 
 /-- Derives G-operator double negation elimination in the base frame class. -/
 noncomputable def gDneTheorem (phi : Formula Atom) :
-    DerivationTree FrameClass.Base [] ((Formula.allFuture (Formula.neg (Formula.neg phi))).imp (Formula.allFuture phi)) := by
+    DerivationTree FrameClass.Base []
+      ((Formula.allFuture (Formula.neg (Formula.neg phi))).imp (Formula.allFuture phi)) := by
   have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) :=
     dneTheorem phi
-  have h_G_dne : DerivationTree FrameClass.Base [] (Formula.allFuture ((Formula.neg (Formula.neg phi)).imp phi)) :=
+  have h_G_dne : DerivationTree FrameClass.Base []
+      (Formula.allFuture ((Formula.neg (Formula.neg phi)).imp phi)) :=
     DerivationTree.temporal_necessitation _ h_dne
-  have h_K : DerivationTree FrameClass.Base [] ((Formula.allFuture ((Formula.neg (Formula.neg phi)).imp phi)).imp
+  have h_K : DerivationTree FrameClass.Base []
+      ((Formula.allFuture ((Formula.neg (Formula.neg phi)).imp phi)).imp
                ((Formula.allFuture (Formula.neg (Formula.neg phi))).imp (Formula.allFuture phi))) :=
     Theorems.TemporalDerived.tempKDistDerived (Formula.neg (Formula.neg phi)) phi
   exact DerivationTree.modus_ponens [] _ _ h_K h_G_dne
 
 /-- Derives H-operator double negation elimination in the base frame class. -/
 noncomputable def hDneTheorem (phi : Formula Atom) :
-    DerivationTree FrameClass.Base [] ((Formula.allPast (Formula.neg (Formula.neg phi))).imp (Formula.allPast phi)) := by
+    DerivationTree FrameClass.Base []
+      ((Formula.allPast (Formula.neg (Formula.neg phi))).imp (Formula.allPast phi)) := by
   have h_dne : DerivationTree FrameClass.Base [] ((Formula.neg (Formula.neg phi)).imp phi) :=
     dneTheorem phi
-  have h_H_dne : DerivationTree FrameClass.Base [] (Formula.allPast ((Formula.neg (Formula.neg phi)).imp phi)) :=
+  have h_H_dne : DerivationTree FrameClass.Base []
+      (Formula.allPast ((Formula.neg (Formula.neg phi)).imp phi)) :=
     Theorems.pastNecessitation _ h_dne
-  have h_K : DerivationTree FrameClass.Base [] ((Formula.allPast ((Formula.neg (Formula.neg phi)).imp phi)).imp
+  have h_K : DerivationTree FrameClass.Base []
+      ((Formula.allPast ((Formula.neg (Formula.neg phi)).imp phi)).imp
                ((Formula.allPast (Formula.neg (Formula.neg phi))).imp (Formula.allPast phi))) :=
     Theorems.pastKDist _ _
   exact DerivationTree.modus_ponens [] _ _ h_K h_H_dne
@@ -69,7 +72,8 @@ lemma neg_allFuture_to_someFuture_neg (M : Set (Formula Atom)) (h_mcs : SetMaxim
   have h_eq : Formula.neg (Formula.allFuture phi) =
               Formula.neg (Formula.neg (Formula.someFuture (Formula.neg phi))) := rfl
   rw [h_eq] at h_neg_G
-  have h_dne : DerivationTree fc [] ((Formula.neg (Formula.neg (Formula.someFuture (Formula.neg phi)))).imp
+  have h_dne : DerivationTree fc []
+      ((Formula.neg (Formula.neg (Formula.someFuture (Formula.neg phi)))).imp
                      (Formula.someFuture (Formula.neg phi))) :=
     (dneTheorem (Formula.someFuture (Formula.neg phi))).lift (FrameClass.base_le fc)
   exact SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_dne) h_neg_G
@@ -80,12 +84,14 @@ lemma neg_allPast_to_somePast_neg (M : Set (Formula Atom)) (h_mcs : SetMaximalCo
   have h_eq : Formula.neg (Formula.allPast phi) =
               Formula.neg (Formula.neg (Formula.somePast (Formula.neg phi))) := rfl
   rw [h_eq] at h_neg_H
-  have h_dne : DerivationTree fc [] ((Formula.neg (Formula.neg (Formula.somePast (Formula.neg phi)))).imp
+  have h_dne : DerivationTree fc []
+      ((Formula.neg (Formula.neg (Formula.somePast (Formula.neg phi)))).imp
                      (Formula.somePast (Formula.neg phi))) :=
     (dneTheorem (Formula.somePast (Formula.neg phi))).lift (FrameClass.base_le fc)
   exact SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_dne) h_neg_H
 
-lemma SetMaximalConsistent.double_neg_elim {M : Set (Formula Atom)} (h_mcs : SetMaximalConsistent fc M)
+lemma SetMaximalConsistent.double_neg_elim {M : Set (Formula Atom)}
+    (h_mcs : SetMaximalConsistent fc M)
     (phi : Formula Atom) (h_neg_neg : Formula.neg (Formula.neg phi) ∈ M) : phi ∈ M := by
   have h_dne : DerivationTree fc [] ((Formula.neg (Formula.neg phi)).imp phi) :=
     (dneTheorem phi).lift (FrameClass.base_le fc)
@@ -95,7 +101,8 @@ lemma SetMaximalConsistent.double_neg_elim {M : Set (Formula Atom)} (h_mcs : Set
 /-! ## TemporalCoherentFamily and Backward Lemmas -/
 
 /-- Extends an FMCS with witnesses for F and P eventualities at every time point. -/
-structure TemporalCoherentFamily (Atom : Type*) (fc : FrameClass := FrameClass.Base) (D : Type*) [Preorder D] [Zero D] extends FMCS Atom D fc where
+structure TemporalCoherentFamily (Atom : Type*) (fc : FrameClass := FrameClass.Base) (D : Type*)
+    [Preorder D] [Zero D] extends FMCS Atom D fc where
   forward_F : ∀ t : D, ∀ φ : Formula Atom,
     Formula.someFuture φ ∈ mcs t → ∃ s : D, t < s ∧ φ ∈ mcs s
   backward_P : ∀ t : D, ∀ φ : Formula Atom,
@@ -172,15 +179,18 @@ theorem temporal_backward_H_with_bwd_P {D : Type*} [Preorder D]
 /-- Predicate asserting every family in the bundle witnesses F and P eventualities. -/
 def BFMCS.temporallyCoherent (B : BFMCS Atom D fc) : Prop :=
   ∀ fam ∈ B.families,
-    (∀ t : D, ∀ φ : Formula Atom, Formula.someFuture φ ∈ fam.mcs t → ∃ s : D, t < s ∧ φ ∈ fam.mcs s) ∧
-    (∀ t : D, ∀ φ : Formula Atom, Formula.somePast φ ∈ fam.mcs t → ∃ s : D, s < t ∧ φ ∈ fam.mcs s)
+    (∀ t : D, ∀ φ : Formula Atom,
+      Formula.someFuture φ ∈ fam.mcs t → ∃ s : D, t < s ∧ φ ∈ fam.mcs s) ∧
+    (∀ t : D, ∀ φ : Formula Atom,
+      Formula.somePast φ ∈ fam.mcs t → ∃ s : D, s < t ∧ φ ∈ fam.mcs s)
 
 /-! ## Restricted Temporal Coherence -/
 
 section DecidableAtom
 variable [DecidableEq Atom]
 
-/-- Restricted temporal coherence predicate for eventualities within the deferral closure of a root formula. -/
+/-- Restricted temporal coherence predicate for eventualities within the deferral closure of a
+root formula. -/
 def BFMCS.restrictedTemporallyCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ : Formula Atom, φ ∈ deferralClosure root →
@@ -328,7 +338,8 @@ def BFMCS.forwardUntilSinceCoherent (B : BFMCS Atom D fc) : Prop :=
 section DecidableAtom2
 variable [DecidableEq Atom]
 
-/-- Restricted forward until/since coherence for subformulas within the subformula closure of a root. -/
+/-- Restricted forward until/since coherence for subformulas within the subformula closure of a
+root. -/
 def BFMCS.restrictedForwardUntilSinceCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,
@@ -349,7 +360,8 @@ theorem BFMCS.forward_implies_restricted_forward (B : BFMCS Atom D fc) (root : F
   exact ⟨fun t φ ψ _ h_mem => h_fwd_U t φ ψ h_mem,
          fun t φ ψ _ h_mem => h_fwd_S t φ ψ h_mem⟩
 
-/-- Restricted backward until/since coherence for subformulas within the subformula closure of a root. -/
+/-- Restricted backward until/since coherence for subformulas within the subformula closure of a
+root. -/
 def BFMCS.restrictedBackwardUntilSinceCoherent (B : BFMCS Atom D fc) (root : Formula Atom) : Prop :=
   ∀ fam ∈ B.families,
     (∀ t : D, ∀ φ ψ : Formula Atom,

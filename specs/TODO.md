@@ -11,12 +11,11 @@ next_project_number: 583
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,573,580 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,400,450,497,511,537,551,553,564,568,571,574,581 | 36,37,181,425,465,530,554,562,563,573,580 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,456,506,548,565,566,576,582 | 39,40,511,553,564,568,574 | foundations, modal logic, bimodal and temporal logic, ... |
-| 4 | 300,317,567 | 456,506,558,565,566 | propositional logic, modal logic |
-| 5 | 375,414,430 | 181,215,300,301,317 | propositional logic, code hygiene |
-| 6 | 413 | 375 | code hygiene |
+| 1 | 36,37,181,226,409,425,440,465,466,530,534,554,557,558,562,563,569,574,580 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,400,450,456,497,511,537,551,553,564,568,571,581 | 36,37,181,425,465,530,554,562,563,574,580 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
+| 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
+| 5 | 413,414 | 181,215,300,301,375 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -28,8 +27,7 @@ next_project_number: 583
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-573 [PLANNED] — SMALL, time-boxed research/prototyping spike. Produces a decision
-  └─ 574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
+574 [RESEARCHED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -279,12 +277,13 @@ Constraints: additive-first (new declarations alongside old, migrate only once b
 
 ### 573. Tableau quotient soundness spike
 - **Effort**: 3-5 hours
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 572
 - **Research**: [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
 - **Plan**: [573_tableau_quotient_soundness_spike/plans/01_quotient-soundness-spike.md]
+- **Summary**: [573_tableau_quotient_soundness_spike/handoffs/01_quotient-soundness-spike-decision.md]
 
 **Description**: SMALL, time-boxed research/prototyping spike. Produces a decision record; does NOT modify any file under Cslib/. Gates the large calculus-repair task that follows it in this programme.
 

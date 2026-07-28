@@ -2942,15 +2942,16 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
     (expandedSets : List (List (ISF Atom)))
     (nextWorlds : List Nat)
     (edgeSets : List IEdges)
+    (augSets : List IEdges)
     (closurePred : IBranch Atom → Bool)
     (b : IBranch Atom)
     (hAC : IAllConsistent branches expandedSets nextWorlds)
     (hLen0 : branches.length = edgeSets.length)
-    (hACC : IAllAccessConsistent branches expandedSets edgeSets)
+    (hACC : IAllAccessConsistent branches expandedSets augSets)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
         = .openBranch b) :
     ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
-  induction fuel generalizing branches expandedSets nextWorlds edgeSets hAC hLen0 hACC with
+  induction fuel generalizing branches expandedSets nextWorlds edgeSets augSets hAC hLen0 hACC with
   | zero =>
     -- fuel=0 base case: THE GOAL IS FALSE AT ITS CURRENT STATEMENT, refuted by a
     -- Lean-verified counter-instance, not merely unproven.
@@ -2984,29 +2985,31 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
         (pendingExp : List (List (ISF Atom)))
         (pendingNW : List Nat)
         (pendingEdges : List IEdges)
+        (pendingAug : List IEdges)
         (done : List (IBranch Atom))
         (doneExp : List (List (ISF Atom)))
         (doneNW : List Nat)
-        (doneEdges : List IEdges),
+        (doneEdges : List IEdges)
+        (doneAug : List IEdges),
         IAllConsistent pending pendingExp pendingNW →
         pending.length = pendingEdges.length →
         IAllConsistent done doneExp doneNW →
         done.length = doneEdges.length →
-        IAllAccessConsistent pending pendingExp pendingEdges →
-        IAllAccessConsistent done doneExp doneEdges →
+        IAllAccessConsistent pending pendingExp pendingAug →
+        IAllAccessConsistent done doneExp doneAug →
         intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
             done doneExp doneNW doneEdges = .openBranch b →
         ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b from
-      key branches expandedSets nextWorlds edgeSets [] [] [] []
+      key branches expandedSets nextWorlds edgeSets augSets [] [] [] [] []
         hAC hLen0 (by trivial) rfl hACC (by trivial) h
     intro pending
     induction pending with
     | nil =>
-      intro _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
+      intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
       simp only [intExpandBranches.go] at hgo
       simp at hgo
     | cons bh bt ih_inner =>
-      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges
+      intro pendingExp pendingNW pendingEdges pendingAug done doneExp doneNW doneEdges doneAug
         hPending hLenP hDone hLenD hPendingACC hDoneACC hgo
       cases hpE : pendingExp with
       | nil =>
@@ -3021,10 +3024,14 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
             simp only [hpEdges, List.length_cons, List.length_nil] at hLenP
             omega
           | cons edgesH edgesT =>
+           cases hpAug : pendingAug with
+           | nil =>
+             simp only [hpE, hpAug, IAllAccessConsistent] at hPendingACC
+           | cons augH augT =>
             rw [hpE, hpNW, hpEdges] at hgo
             simp only [hpE, hpNW, IAllConsistent] at hPending
             obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
-            simp only [hpE, hpEdges, IAllAccessConsistent] at hPendingACC
+            simp only [hpE, hpAug, IAllAccessConsistent] at hPendingACC
             obtain ⟨hACC_bh_eH, hPendingACCTail⟩ := hPendingACC
             simp only [hpEdges, List.length_cons, Nat.add_right_cancel_iff] at hLenP
             set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
@@ -3034,15 +3041,16 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                 hIC_bh_eH
             have hLB_bPers : ILabelBound bPers nwH :=
               ILabelBound_applyPersistenceFixpoint (fuel' + 1) hLB_bh_nwH
-            have hACC_bPers : IExpandedAccessConsistent edgesH bPers eH :=
+            have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
               IExpandedAccessConsistent_mono
                 (fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (fuel' + 1) x hx)
                 hACC_bh_eH
             simp only [intExpandBranches.go] at hgo
             by_cases hcl : closurePred bPers = true
             · rw [if_pos hcl] at hgo
-              refine ih_inner eT nwT edgesT
+              refine ih_inner eT nwT edgesT augT
                   (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
+                  (doneAug ++ [augH])
                   hPendingTail hLenP
                   (IAllConsistent_append hDone ⟨hIC_bPers, hLB_bPers, by trivial⟩)
                   (by simp [hLenD]) hPendingACCTail
@@ -3056,7 +3064,7 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                 -- bPers is already recorded in eH (`intStepBranch_none_compound_mem`), and
                 -- `hIC_bPers`/`hACC_bPers` give its rule-outputs / edge-access witnesses on
                 -- bPers -- exactly `IBranchSaturation` + `IFimpAccess`.
-                exact ⟨edgesH, IExpandedConsistent_sat hstep hIC_bPers,
+                exact ⟨augH, IExpandedConsistent_sat hstep hIC_bPers,
                   IExpandedAccessConsistent_sat hstep hACC_bPers⟩
               | some step =>
                 obtain ⟨result, newExp⟩ := step
@@ -3081,13 +3089,13 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                       IAllAccessConsistent
                         (done ++ [Branch.extendMany bPers newForms] ++ bt)
                         (doneExp ++ [newExp] ++ eT)
-                        (doneEdges ++ [newEdge.elim edgesH (fun e => edgesH ++ [e])] ++ edgesT) :=
+                        (doneAug ++ [newEdge.elim augH (fun e => augH ++ [e])] ++ augT) :=
                     IAllAccessConsistent_append
                       (IAllAccessConsistent_append hDoneACC ⟨hACC_ext, by trivial⟩)
                       hPendingACCTail
                   split at hgo <;> (try split at hgo) <;>
                     first
-                    | exact ih _ _ _ _ hAC' hLen0' hACC' hgo
+                    | exact ih _ _ _ _ _ hAC' hLen0' hACC' hgo
                     | (rename_i newEdgeVar edgeVar deadVar x heq
                        obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
                        obtain ⟨s, ff, l⟩ := sf
@@ -3139,20 +3147,16 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                                simp [hs.1, hs.2, hy_cond]
                              · simp [hs] at hy_cond
                            have hreuse_sat : IExpandedConsistent bPers newExp ∧
-                               IExpandedAccessConsistent edgesH bPers newExp := by
-                             -- TEMPORARY (task phase 4 -> phase 6): reuse-site discharge is
-                             -- restated over the blocking quotient in Phase 6. Under
-                             -- ancestor-direction blocking `x ≤ l` / `isAccessible edges x l`
-                             -- hold (D5: x is an ancestor of l), not the `l ≤ w'` /
-                             -- `isAccessible edges l w'` that `sfSatisfied`/`sfAccessSat`
-                             -- demand directly. Phase 5's `intBlockRep`/`intAccessPreorderQ`
-                             -- identify `rep l = rep x`, so both conjuncts hold reflexively on
-                             -- the quotient (D5); Phase 6 restates this lemma's conclusion over
-                             -- `IBranchSaturationQ`/`IFimpAccessQ` and re-closes this site.
-                             -- Closed before task completion.
+                               IExpandedAccessConsistent augH bPers newExp := by
+                             -- Reuse-site discharge under ancestor-direction blocking: `x` is
+                             -- below `l` (`x ≤ l`, `isAccessible edges x l`), the reverse of
+                             -- what `sfSatisfied`/`sfAccessSat`'s `.neg,.imp` clauses demand
+                             -- directly. Phase 6.3 closes this with the loop-back edge `(x, l)`
+                             -- recorded into the invariant-side list; this step only threads the
+                             -- unaugmented `augH` through the signature change.
                              sorry
                            have hIC_reuse : IExpandedConsistent bPers newExp := hreuse_sat.1
-                           have hACC_reuse : IExpandedAccessConsistent edgesH bPers newExp :=
+                           have hACC_reuse : IExpandedAccessConsistent augH bPers newExp :=
                              hreuse_sat.2
                            have hAC'' : IAllConsistent (done ++ [bPers] ++ bt)
                                (doneExp ++ [newExp] ++ eT) (doneNW ++ [nwH] ++ nwT) :=
@@ -3162,11 +3166,11 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                            have hLen0'' : (done ++ [bPers] ++ bt).length =
                                (doneEdges ++ [edgesH] ++ edgesT).length := by simp; omega
                            have hACC'' : IAllAccessConsistent (done ++ [bPers] ++ bt)
-                               (doneExp ++ [newExp] ++ eT) (doneEdges ++ [edgesH] ++ edgesT) :=
+                               (doneExp ++ [newExp] ++ eT) (doneAug ++ [augH] ++ augT) :=
                              IAllAccessConsistent_append
                                (IAllAccessConsistent_append hDoneACC ⟨hACC_reuse, trivial⟩)
                                hPendingACCTail
-                           exact ih _ _ _ _ hAC'' hLen0'' hACC'' hgo)
+                           exact ih _ _ _ _ _ hAC'' hLen0'' hACC'' hgo)
                 | branchingResult branches' nw' =>
                   simp only at hgo
                   have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hACC_bPers hstep
@@ -3187,12 +3191,12 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                       IAllAccessConsistent
                         (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt)
                         (doneExp ++ branches'.map (fun _ => newExp) ++ eT)
-                        (doneEdges ++ branches'.map (fun _ => edgesH) ++ edgesT) :=
+                        (doneAug ++ branches'.map (fun _ => augH) ++ augT) :=
                     IAllAccessConsistent_append
                       (IAllAccessConsistent_append hDoneACC
                         (IAllAccessConsistent_map (Branch.extendMany bPers ·)
                           (fun br hbr' => (hbr br hbr').2.2))) hPendingACCTail
-                  exact ih _ _ _ _ hAC' hLen0' hACC' hgo
+                  exact ih _ _ _ _ _ hAC' hLen0' hACC' hgo
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq
                   -- hstep : intStepBranch bPers eH nwH = some (.notApplicable, newExp)
@@ -3375,7 +3379,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- Obtain the saturation witness and its accumulated edges, together
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
   obtain ⟨edges, hsat, hfimp⟩ :=
-    intExpandBranches_openBranch_sat _ _ _ _ _ _ _
+    intExpandBranches_openBranch_sat _ _ _ _ _ [[]] _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl
       (by simp [IAllAccessConsistent, IExpandedAccessConsistent]) h
   -- Apply the truth lemma's F-branch direction over the `intAccessPreorder edges` frame.

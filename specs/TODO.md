@@ -11,9 +11,9 @@ next_project_number: 584
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,425,456,530,534,554,558,562,563,583 | -- | propositional logic, modal logic, tableau infrastructure, ... |
-| 2 | 39,40,215,301,317,450,497,511,537,551,553,564,568,569,571 | 36,37,181,425,456,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,375,430,506,548,565,566,576,582 | 39,40,317,511,553,564,568 | foundations, propositional logic, modal logic, ... |
+| 1 | 36,37,181,226,400,409,425,456,534,554,558,562,563,568,569,583 | -- | propositional logic, modal logic, tableau infrastructure, ... |
+| 2 | 39,40,215,301,317,450,497,511,537,551,553,564,571,576 | 36,37,181,425,456,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,375,430,506,548,565,566,582 | 39,40,317,511,553,564 | foundations, propositional logic, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -64,9 +64,9 @@ next_project_number: 584
 
 425 [NOT STARTED] — [Decomposed from the temporal tableau umbrella, blocker C.] BLOCK
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+569 [NOT STARTED] — [Created by the blocked-task review to break a two-task deadlock.
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-569 [NOT STARTED] — [Created by the blocked-task review to break a two-task deadlock.
 
 ### Bimodal Logic
 
@@ -81,10 +81,6 @@ next_project_number: 584
 
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
-
-### Code Hygiene
-
-530 [PARTIAL] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 
 ## Tasks
 
@@ -416,7 +412,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None

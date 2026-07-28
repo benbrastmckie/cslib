@@ -366,30 +366,32 @@ be committed separately and the second must rebase, not overwrite.
 
 ---
 
-### Phase 2: Bound the T-implication self-copy channel (STEP 1) [NOT STARTED]
+### Phase 2: Bound the T-implication self-copy channel (STEP 1) [COMPLETED]
 
 - **Goal:** Remove (or gate, per Phase 1's verdict) `applyAllTImpRules`'s `T(φ→ψ)` self-copy and
   repair the two `Soundness.lean` lemmas structurally coupled to its definition.
 - **Tasks:**
-  - [ ] Edit `applyAllTImpRules` (`Expansion.lean:135-153`). If Phase 1 selected removal: delete
+  - [x] Edit `applyAllTImpRules` (`Expansion.lean:135-153`). If Phase 1 selected removal: delete
         the `accessibleWorlds`/`copies` block (142-149) and let `combined := toAdd`. If Phase 1
         selected gating: add the gate exactly as the probe measured it — no improvised variant.
-  - [ ] Rewrite the def's docstring (`Expansion.lean:113-134`): the Deliverable-6 paragraph
+        **Removal** (Phase 1/D3 selected V3's shape): `combined` is now literally `toAdd`
+        (`intTImpRule`'s output), no `++ copies`.
+  - [x] Rewrite the def's docstring (`Expansion.lean:113-134`): the Deliverable-6 paragraph
         (119-126) is now false. State what changed, that `sat_timp`-as-a-field is unaffected
         (D2, with the `Soundness.lean:141-164` `le_rfl` reference), and that
         `sat_timp`-at-accessible-worlds (Gap 1) remains open and out of scope.
-  - [ ] Repair `applyAllTImpRules_sat` (`Soundness.lean:374-454`): the `by_cases hemp` term at
+  - [x] Repair `applyAllTImpRules_sat` (`Soundness.lean:374-454`): the `by_cases hemp` term at
         400-409 and the `List.mem_append` split at 412-413 match the old concatenation verbatim and
         must be re-derived against the new body; the `hmem_copy` arm (441-454) is deleted if the
         copy is removed. Note `_v_uc`/`_bf_uc` become unused if 453's `iforces_persistence` call
         goes — they are already underscore-prefixed, so no linter break, but confirm with
-        `lake lint`.
-  - [ ] Repair `freshAbove_applyAllTImpRules` (`Soundness.lean:791-830`): it unfolds
+        `lake lint`. Confirmed: `lake lint` emits no new warning for this file.
+  - [x] Repair `freshAbove_applyAllTImpRules` (`Soundness.lean:791-830`): it unfolds
         `applyAllTImpRules` at 797 and case-splits `.pos/.imp` at 802-806.
-  - [ ] Confirm `applyPersistenceFixpoint_sat` (`:458`) and
+  - [x] Confirm `applyPersistenceFixpoint_sat` (`:458`) and
         `freshAbove_applyPersistenceFixpoint` (`:832`) need **no statement change** — they delegate
-        at 474 / 841 only.
-  - [ ] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness` green;
+        at 474 / 841 only. Confirmed via `git diff` — zero lines changed in either.
+  - [x] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness` green;
         `grep -c "^\s*sorry\s*$" Soundness.lean` = 0.
 - **Timing:** 5-8 hours
 - **Depends on:** 1
@@ -402,9 +404,31 @@ be committed separately and the second must rebase, not overwrite.
   (`applyAllTImpRules`, its docstring, `applyAllTImpRules_sat`, `freshAbove_applyAllTImpRules`).
   Confirm by `git diff --stat` naming no third file. If a third `Soundness.lean` declaration turns
   red, that is a hypothesis miss — record it, do not silently widen the batch.
+  **HYPOTHESIS MISS (recorded, not silently absorbed):** a third file, `Scheme.lean`, turned red
+  after the `Soundness.lean` repair — not a third `Soundness.lean` declaration, but the same
+  class of collateral break the hypothesis was watching for. `lake build …Minimal.Soundness
+  …Scheme` surfaced two `rfl`-based unfoldings of `applyAllTImpRules`'s literal old body
+  (`applyPersistenceFixpoint_genuine_of_count_le_fuel`, two occurrences) plus three more
+  declarations that pattern-matched the old `toAdd ++ copies` shape structurally
+  (`applyAllTImpRules_subset`, `applyAllTImpRules_count_drop`,
+  `ILabelBound_applyAllTImpRules`) and one now-dead helper deleted outright
+  (`applyAllTImpRules_copy_notMem`, whose only purpose was reasoning about the removed copy
+  branch). This was foreseeable — the Verification Tier field on this very phase already
+  enumerated `Scheme.lean` as a direct dependent — but the Scope Hypothesis's specific
+  file-count claim (2 files) undersold it. Fixed forward per the recovery contract (no
+  revert): each site's `rfl`/`simp`-unfolding was updated to the new `if toAdd.isEmpty then
+  none else some toAdd` shape and its now-vacuous "copy" case-split removed. Actual delta:
+  3 files, `Expansion.lean` (37 lines net), `Soundness.lean` (112 lines net),
+  `Scheme.lean` (156 lines net, mostly deletions of dead copy-case proof branches). Full
+  `lake build` (whole project) confirmed green after the repair; `intExpandBranches_closed_unsat`
+  (`lean_verify`) unaffected: `{"axioms":["propext","Classical.choice","Quot.sound"],
+  "warnings":[]}`, matching the spike's recorded profile exactly.
 - **Done when:** the Soundness module builds green with 0 sorries and
   `grep -n "copies\|accessibleWorlds" Expansion.lean` shows no match inside `applyAllTImpRules`
-  (removal case) or shows exactly the measured gate (gating case).
+  (removal case) or shows exactly the measured gate (gating case). **Both satisfied**: 0 sorries
+  in `Soundness.lean`; `grep -n "copies\|accessibleWorlds" Expansion.lean` returns zero matches
+  (the def no longer references either identifier at all). Repo-wide bare-sorry count remains
+  exactly 6 (baseline unchanged); `lake exe checkInitImports` clean.
 
 ---
 

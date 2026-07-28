@@ -116,14 +116,24 @@ For each T(φ → ψ) formula at world w on the branch, and for each accessible 
 w' (reachable via the edge list from w) with T(φ) at w', if T(ψ) is not yet at w',
 add T(ψ) at w'.
 
-Also copies T(φ → ψ) **itself** to every world w' accessible from w that does not
-already carry its own copy (Deliverable 6 companion to the `.pos, .imp` branching arm in
-`intApplyRuleFull`). That arm only ever fires reflexively, at the label of the specific
-signed-formula copy it is given, so realizing the source's "for every w' accessible from
-w, either F(φ)@w' or T(ψ)@w'" obligation requires each accessible w' to eventually carry
-its own `⟨.pos, φ → ψ, w'⟩` copy, which `intStepBranch`/`intApplyRuleFull` can then resolve
-independently (and which `expanded` then tracks per-`(implication, world)` pair, since each
-copy is a distinct `ISF`). This mirrors `intTImpRule`'s own accessibility scan.
+**STEP 1 (task 574): the `T(φ → ψ)` self-copy channel has been removed.** A prior
+revision of this def also copied `T(φ → ψ)` itself to every accessible world lacking its
+own copy ("Deliverable 6"), intended to feed `intApplyRuleFull`'s `.pos, .imp` branching arm
+at every accessible world. Task 574's Phase 1 divergence probe
+(`specs/574_tableau_calculus_repair_ancestor_blocking/handoffs/01_variant-selection.md`,
+Table 3, variant V3) measured that this self-copy is **not** the mechanism that bounds world
+creation: with ancestor-directed loop-check blocking active (`intFImpReuseWitnessAnc?`, Phase
+3 of that plan), removing the self-copy channel entirely reaches the *exact same* saturated
+branch (`len=219, maxLabel=21, distinctLabels=22`) as keeping it. The self-copy was, at best,
+redundant hygiene; at worst, a second unbounded-growth feed alongside `propagatePersistence`
+(`Rules.lean`) — see D3 in the task's plan. `sat_timp` as an `IBranchSaturation` *field* is
+unaffected by this removal: it is stated reflexively at the copy's own label and is already
+discharged by `intApplyRuleFull`'s `.pos, .imp` branching arm via `expanded`-set guarding,
+independently of whether a self-copy exists on the branch
+(`Soundness.lean`'s `applyAllTImpRules_sat`, the `le_rfl` reflexive case). Whether
+`sat_timp` can additionally be established *at accessible worlds* (not just reflexively) is
+Gap 1 and remains out of scope for this task; `truthLemma`'s T-imp `sorry`
+(`Scheme.lean:607`) is untouched by this change.
 
 Termination of the overall expansion loop (`intExpandBranches`, below) is NOT currently
 established, and the loop is known to diverge on some inputs: the `intUniverse φ0` bound this
@@ -139,16 +149,7 @@ def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
       | .pos, .imp φ ψ =>
         -- Get all accessible worlds w' with T(φ) at w' but not yet T(ψ)
         let toAdd := intTImpRule φ ψ sf.label edges b
-        -- Copy T(φ → ψ) itself to every accessible world lacking its own copy.
-        let accessibleWorlds :=
-          (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
-        let copies := accessibleWorlds.filterMap fun w' =>
-          if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
-            none
-          else
-            some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
-        let combined := toAdd ++ copies
-        if combined.isEmpty then none else some combined
+        if toAdd.isEmpty then none else some toAdd
       | _, _ => none
   b ++ newForms.flatten
 

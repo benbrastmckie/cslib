@@ -936,7 +936,7 @@ before proceeding; do not silently re-derive.
 
 ---
 
-### Phase 7: Retire the superseded quotient stack; docstring and reference reconciliation [NOT STARTED]
+### Phase 7: Retire the superseded quotient stack; docstring and reference reconciliation [COMPLETED]
 
 - **Goal:** Delete the ~480 lines of dead Phase 5 machinery (Supersession Accounting above), rewrite
   the design notes it leaves behind, and confirm zero orphan references — replacing v01's Phase 7,
@@ -951,7 +951,7 @@ was always in its scope. The only surviving content is deletion plus docstring r
 
 **Tasks (7.1 — deletion):**
 
-- [ ] Re-run the Supersession Accounting grep sweep to confirm the reference counts are still
+- [x] Re-run the Supersession Accounting grep sweep to confirm the reference counts are still
       outside-`Scheme.lean`-zero **at deletion time** (Phase 6 changed the file; re-verify, do not
       inherit):
       ```bash
@@ -963,7 +963,7 @@ was always in its scope. The only surviving content is deletion plus docstring r
       ```
       Expected: empty. **A non-empty result is a stop-and-record event**, not a licence to leave the
       declaration in place silently.
-- [ ] Delete, with their section headers and docstrings:
+- [x] Delete, with their section headers and docstrings:
       - `negImpAt`, `intBlockRepStep`, `intBlockRep`, `intBlockRep_idempotent`, `intBlockRep_le`, and
         the two unfolding equation lemmas (`Scheme.lean:526-643` region)
       - `intAccessPreorderQ`, `intAccessPreorderQ_le_of_isAccessible`,
@@ -973,12 +973,12 @@ was always in its scope. The only surviving content is deletion plus docstring r
       - `IBranchSaturationQ` (`:1175`), `IFimpAccessQ` (`:1215`) — **public**, but grep-confirmed
         unreferenced
       - `IExpandedConsistentQ_sat` (`:1340`), `IExpandedAccessConsistentQ_sat` (`:1896`)
-- [ ] `lake build` (full) green after deletion. `lake exe checkInitImports` exit 0.
-- [ ] Commit `task 574 phase 7.1: retire the superseded quotient stack`.
+- [x] `lake build` (full) green after deletion. `lake exe checkInitImports` exit 0.
+- [x] Commit `task 574 phase 7.1: retire the superseded quotient stack`.
 
 **Tasks (7.2 — docstring and reference reconciliation):**
 
-- [ ] Rewrite the D5 design note (`Scheme.lean:~1009-1030`, landed Phase 5.3). It currently describes
+- [x] Rewrite the D5 design note (`Scheme.lean:~1009-1030`, landed Phase 5.3). It currently describes
       the quotient as the mechanism and points at the Q-predicates, which no longer exist. Replace it
       with the loop-back-edge rationale: the saturation lemma's `edges` is existentially quantified,
       so the invariant threads its own edge list and records each blocking event as `(x, l)` at block
@@ -988,17 +988,28 @@ was always in its scope. The only surviving content is deletion plus docstring r
       explicit note that the source is **not readable in-repo** and the design rests on the verified
       construction here. **No task-number references** (durable anchors only: declaration names,
       BibKeys, section headings).
-- [ ] Confirm the `intFImpReuseWitnessAnc?` docstring (`Expansion.lean`, Phase 3) is still accurate
+- [x] Confirm the `intFImpReuseWitnessAnc?` docstring (`Expansion.lean`, Phase 3) is still accurate
       after Phases 6-7 — in particular its reuse contract paragraph. Amend only if a statement is now
-      false; do not rewrite for style.
-- [ ] Sweep for orphan references to the deleted names in prose and comments across
+      false; do not rewrite for style. **Reuse contract paragraph (`:250-255`) was accurate,
+      unchanged. Found and fixed a separate false statement: the trailing "additive" paragraph
+      (`:257-259`) still described the pre-Phase-4 state ("call site still calls
+      `intFImpReuseWitness?`, unchanged, in this phase") and named a declaration deleted in Phase 4.
+      Replaced with the current state (single call site to `intFImpReuseWitnessAnc?`;
+      `intFImpReuseWitness?`/`_spec` deleted in Phase 4).**
+- [x] Sweep for orphan references to the deleted names in prose and comments across
       `Cslib/Logics/Propositional/Tableau/`: `grep -rn "Q\b\|intBlockRep\|quotient\|filtration"` and
       fix any dangling mention. A stale docstring pointing at a deleted declaration is the exact
-      failure mode this task's postmortem constraints exist to prevent.
-- [ ] Record Defect 1 and Defect 2 as **resolved-by-deletion** / **corrected-in-plan** respectively in
-      the phase record. Neither produces a `Cslib/` change beyond the deletion.
-- [ ] `lake build` (full) green; `lake lint` green; repo-wide bare-sorry count still exactly **6**.
-- [ ] Commit `task 574 phase 7.2: reconcile design notes after quotient retirement`.
+      failure mode this task's postmortem constraints exist to prevent. **Zero orphan references
+      found** (also swept `CslibTests/`, one unrelated false-positive match on `EFQ`).
+- [x] Record Defect 1 and Defect 2 as **resolved-by-deletion** / **corrected-in-plan** respectively in
+      the phase record. Neither produces a `Cslib/` change beyond the deletion. **Defect 1**
+      (`intBlockRepStep`'s false "agrees by construction" docstring claim) is resolved by deletion —
+      the declaration and its docstring no longer exist in the tree. **Defect 2** (v01's H3
+      availability table errors on `NegriVonPlato2001` and Massacci 2000) was already corrected in
+      this plan's H3 table (see Source-to-Implementation Mapping above); no further action needed —
+      D9 holds, no new `references.bib` entries were added.
+- [x] `lake build` (full) green; `lake lint` green; repo-wide bare-sorry count still exactly **6**.
+- [x] Commit `task 574 phase 7.2: reconcile design notes after quotient retirement`.
 
 - **Timing:** 4-6 hours
 - **Depends on:** 6
@@ -1011,8 +1022,17 @@ was always in its scope. The only surviving content is deletion plus docstring r
   of docstring rewrite; **zero** lines added elsewhere and **zero** other files touched. Confirm with
   `git diff --stat` naming only `Scheme.lean` with deletions dominating. If deletion turns any
   declaration red, the grep sweep was wrong — record it and re-scope before continuing.
+  **Outcome (recorded, not silently absorbed):** 7.1 deleted exactly 434 lines from `Scheme.lean`
+  only (close to the ~480 estimate; the estimate over-counted slightly, no under-count risk
+  materialized — deletion turned nothing red). 7.2's docstring rewrite touched `Scheme.lean` (24
+  insertions / 20 deletions) as hypothesized, **plus** a second file,
+  `Expansion.lean` (6 lines) — a **minor, explicitly-authorized hypothesis miss**: task 7.2's own
+  checklist item directs confirming and, if false, amending the `intFImpReuseWitnessAnc?`
+  docstring in `Expansion.lean`, and the orphan-reference sweep surfaced exactly one stale
+  paragraph there (describing the pre-Phase-4 "call site still calls the old function" state,
+  naming a declaration deleted in Phase 4) — fixed per that same checklist item.
 - **Done when:** all twelve superseded declarations are gone, no orphan reference remains, full
-  `lake build` and `lake lint` are green, and the sorry count is exactly 6.
+  `lake build` and `lake lint` are green, and the sorry count is exactly 6. **All satisfied.**
 
 ---
 

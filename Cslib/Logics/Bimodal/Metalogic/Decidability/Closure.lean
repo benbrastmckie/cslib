@@ -52,8 +52,6 @@ adaptations for universe-polymorphic `Formula Atom`.
 * Gore, R. (1999). Tableau Methods for Modal and Temporal Logics
 -/
 
-set_option linter.unusedSectionVars false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability
@@ -84,10 +82,12 @@ definitionally `decide (a = b)`, so `LawfulBEq` follows directly.
 -- its BEq instance comes from `DecidableEq` and is definitionally `decide (a = b)`.
 -- This makes it `LawfulBEq` by construction.
 
+omit [Hashable Atom] in
 /-- BEq reflexivity for `SignedFormula Atom`. -/
 theorem SignedFormula.beq_self (sf : SignedFormula Atom) : (sf == sf) = true :=
   decide_eq_true rfl
 
+omit [Hashable Atom] in
 /-- If `sf1 == sf2 = true` then `sf1 = sf2`. -/
 theorem SignedFormula.eq_of_beq_eq_true {sf1 sf2 : SignedFormula Atom}
     (h : (sf1 == sf2) = true) : sf1 = sf2 :=

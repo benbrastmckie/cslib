@@ -41,9 +41,6 @@ the modal T-axiom `□φ → φ` is still valid (modal accessibility is reflexiv
   (1 sorry in G_monotone resolved using tempKDistDerived)
 -/
 
-set_option linter.style.show false
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Algebraic.InteriorOperators
@@ -87,7 +84,7 @@ theorem G_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : gQuot a ≤ gQuot 
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives φ.allFuture ψ.allFuture
+  change Derives φ.allFuture ψ.allFuture
   have h' : Derives φ ψ := h
   obtain ⟨d⟩ := h'
   have d_temp : DerivationTree FrameClass.Base [] (Formula.allFuture (φ.imp ψ)) :=
@@ -109,7 +106,7 @@ theorem H_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : hQuot a ≤ hQuot 
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives φ.allPast ψ.allPast
+  change Derives φ.allPast ψ.allPast
   have h' : Derives φ ψ := h
   obtain ⟨d⟩ := h'
   exact ⟨Theorems.Perpetuity.pastMono d⟩
@@ -129,7 +126,7 @@ Uses T-axiom `modal_t`: `□φ → φ`.
 theorem box_le_self (a : LindenbaumAlg Atom) : boxQuot a ≤ a := by
   induction a using Quotient.ind
   rename_i φ
-  show Derives φ.box φ
+  change Derives φ.box φ
   exact ⟨DerivationTree.axiom [] _ (Axiom.modal_t φ) trivial⟩
 
 /--
@@ -141,7 +138,7 @@ theorem box_monotone (a b : LindenbaumAlg Atom) (h : a ≤ b) : boxQuot a ≤ bo
   induction a using Quotient.ind
   induction b using Quotient.ind
   rename_i φ ψ
-  show Derives φ.box ψ.box
+  change Derives φ.box ψ.box
   have h' : Derives φ ψ := h
   obtain ⟨d⟩ := h'
   have d_box : DerivationTree FrameClass.Base [] (Formula.box (φ.imp ψ)) :=
@@ -159,7 +156,7 @@ theorem box_idempotent (a : LindenbaumAlg Atom) : boxQuot (boxQuot a) = boxQuot 
   induction a using Quotient.ind
   rename_i φ
   apply Quotient.sound
-  show ProvEquiv φ.box.box φ.box
+  change ProvEquiv φ.box.box φ.box
   constructor
   · exact ⟨DerivationTree.axiom [] _ (Axiom.modal_t φ.box) trivial⟩
   · exact ⟨DerivationTree.axiom [] _ (Axiom.modal_4 φ) trivial⟩

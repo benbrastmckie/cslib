@@ -15,7 +15,7 @@ next_project_number: 584
 | 2 | 39,40,215,301,450,456,497,511,537,551,553,564,568,569,571,583 | 36,37,181,425,530,554,562,563,574 | propositional logic, modal logic, tableau infrastructure, ... |
 | 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
-| 5 | 413,414 | 181,215,300,301,375 | code hygiene |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -87,7 +87,6 @@ next_project_number: 584
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-413 [IMPLEMENTING] — Simplify verbose proofs using the EXISTING normalization lemmas (
 414 [PLANNED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ## Tasks
@@ -613,12 +612,14 @@ After implementation:
 ---
 
 ### 413. Simplify proofs normalization propositional
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 375
-- **Research**: [413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md]
+- **Baseline**: [413_simplify_proofs_normalization_propositional/baseline.md]
 - **Plan**: [413_simplify_proofs_normalization_propositional/plans/01_remove-redundant-normalization-rewrites.md]
+- **Research**: [413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md]
+- **Summary**: [413_simplify_proofs_normalization_propositional/summaries/01_remove-redundant-normalization-rewrites-summary.md]
 
 **Description**: Simplify verbose proofs using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in Foundations/Logic/Theorems/BigConj.lean) by deleting redundant simp only [listImp_*|bigconj_*] rewrites and unfold ListDeriv calls that a bare exact already discharges by defeq. RECONCILED (second reconciliation): a repo-wide grep found zero such sites under Propositional/ specifically; all 20 sites (8 files) live in Foundations/, Modal/, Temporal/, and Bimodal/, plus one file under Propositional/Metalogic/. Scope corrected from Propositional/-only to repo-wide. Completed: all 20 sites removed, full lake build green (3309 jobs), zero sorry/axiom regressions, CSLib 7-step CI green.
 

@@ -671,7 +671,7 @@
     {
       "project_number": 413,
       "project_name": "simplify_proofs_normalization_propositional",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -687,20 +687,31 @@
         375
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-28T18:20:02Z",
+      "last_updated": "2026-07-28T18:35:46Z",
       "session_id": "sess_1785262773_3b10d3",
       "artifacts": [
+        {
+          "path": "specs/413_simplify_proofs_normalization_propositional/baseline.md",
+          "type": "baseline",
+          "summary": "Phase 1 baseline capture: 20-site/8-file scope confirmed; 5 pre-existing sorry warnings recorded as reference"
+        },
+        {
+          "path": "specs/413_simplify_proofs_normalization_propositional/plans/01_remove-redundant-normalization-rewrites.md",
+          "type": "plan",
+          "summary": "Seven-phase plan to remove the 20 redundant simp only [listImp_*|bigconj_*] rewrites and 15 accompanying unfolds across 8 files, isolating the single data-level unfoldListImp change under full-build verification, with an explicit do-not-simplify criterion and per-phase sorry-freeness gates."
+        },
         {
           "path": "specs/413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md",
           "type": "report",
           "summary": "Redundant normalization rewrites; verified diff preserved"
         },
         {
-          "path": "specs/413_simplify_proofs_normalization_propositional/plans/01_remove-redundant-normalization-rewrites.md",
-          "type": "plan",
-          "summary": "Seven-phase plan to remove the 20 redundant simp only [listImp_*|bigconj_*] rewrites and 15 accompanying unfolds across 8 files, isolating the single data-level unfoldListImp change under full-build verification, with an explicit do-not-simplify criterion and per-phase sorry-freeness gates."
+          "path": "specs/413_simplify_proofs_normalization_propositional/summaries/01_remove-redundant-normalization-rewrites-summary.md",
+          "type": "summary",
+          "summary": "Execution summary: 20 redundant normalization rewrites + 19 unfolds removed across 8 files; 7/7 phases; full CI green"
         }
-      ]
+      ],
+      "completion_summary": "Removed all 20 redundant `simp only [listImp_*|bigconj_*]` rewrite invocations (plus 19 accompanying `unfold ListDeriv` lines) across 8 files repo-wide, replacing each with the bare `exact` that already discharges the goal by defeq. Scope was corrected from the original 'Propositional/-only' framing to repo-wide (Foundations, Modal, Temporal, Bimodal, plus one Propositional/Metalogic file), matching the research report's verified finding. Added four one-line defeq-reliance doc comments to the four per-logic derivTreeToList* bridge lemmas. All 7 plan phases completed with no exclusions, no reverts, and no scope narrowing."
     },
     {
       "project_number": 414,

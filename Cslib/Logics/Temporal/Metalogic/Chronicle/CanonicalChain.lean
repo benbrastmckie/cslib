@@ -18,8 +18,6 @@ MCS-level lemmas for BX axioms and delegation bridges.
 * Ported from Cslib/Logics/Bimodal/Metalogic/BXCanonical/CanonicalChain.lean
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle

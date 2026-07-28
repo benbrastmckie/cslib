@@ -111,6 +111,7 @@ public import Cslib.Foundations.Logic.Metalogic.ProofSystemMorphism
 public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
 public import Cslib.Foundations.Logic.Tableau
+public import Cslib.Foundations.Logic.Tableau.Blocking
 public import Cslib.Foundations.Logic.Tableau.Branch
 public import Cslib.Foundations.Logic.Tableau.Closure
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition

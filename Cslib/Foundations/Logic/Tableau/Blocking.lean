@@ -103,7 +103,7 @@ lemma mem_typeAt_iff [BEq F] [BEq L] [LawfulBEq F] [LawfulBEq L] {b : Branch F L
 
 /-- `containmentBlocked` decides containment of signed types: it is `true` exactly when
 every pair in the type of `l₁` is also in the type of `l₂`. -/
-lemma containmentBlocked_iff [BEq F] [BEq L] [LawfulBEq F] [LawfulBEq L] {b : Branch F L}
+lemma containmentBlocked_iff [BEq F] [BEq L] [LawfulBEq F] {b : Branch F L}
     {l₁ l₂ : L} :
     b.containmentBlocked l₁ l₂ = true ↔ ∀ x ∈ b.typeAt l₁, x ∈ b.typeAt l₂ := by
   simp [containmentBlocked, List.all_eq_true, List.any_eq_true]

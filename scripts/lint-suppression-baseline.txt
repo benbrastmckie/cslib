@@ -27,7 +27,6 @@
 1 Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/Closure.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/ClosureMCS.lean
-1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/FMP.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/TruthPreservation.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/ProofExtraction.lean
 1 Cslib/Logics/Bimodal/Metalogic/Decidability/Tableau.lean

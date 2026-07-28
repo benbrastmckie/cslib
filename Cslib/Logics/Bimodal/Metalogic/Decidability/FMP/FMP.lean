@@ -32,8 +32,6 @@ satisfiable in a finite model whose size is bounded by 2^|closure(φ)|.
 - Ported from BimodalLogic/Theories/Bimodal/Metalogic/Decidability/FMP/FMP.lean
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability.FMP

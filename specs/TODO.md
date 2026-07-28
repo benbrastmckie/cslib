@@ -8,8 +8,6 @@ next_project_number: 584
 
 *Updated 2026-07-28. Generated from state.json dependency graph.*
 
-**Goal**: Complete the propositional and modal logic milestone: close the five remaining bare sorries (turning the CI build green), land S4 decidability as the last classical-cube corner, fold tableau into the propositional TFAE, and finish the modal tableau refactor programme.
-
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
@@ -89,8 +87,8 @@ next_project_number: 584
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-413 [RESEARCHING] — Simplify verbose Propositional/ proofs (manual simp only [listImp
-414 [RESEARCHING] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
+413 [RESEARCHED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
+414 [RESEARCHED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ## Tasks
 
@@ -602,7 +600,7 @@ After implementation:
 ---
 
 ### 414. Simplify proofs normalization modal family
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
@@ -613,7 +611,7 @@ After implementation:
 ---
 
 ### 413. Simplify proofs normalization propositional
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 375

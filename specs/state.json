@@ -671,7 +671,7 @@
     {
       "project_number": 413,
       "project_name": "simplify_proofs_normalization_propositional",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -687,7 +687,7 @@
         375
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-28T17:08:50Z",
+      "last_updated": "2026-07-28T17:29:00Z",
       "session_id": "sess_1785258473_63f7b4_413",
       "artifacts": [
         {
@@ -700,7 +700,7 @@
     {
       "project_number": 414,
       "project_name": "simplify_proofs_normalization_modal_family",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -726,7 +726,7 @@
         444
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-28T17:08:54Z",
+      "last_updated": "2026-07-28T17:29:04Z",
       "session_id": "sess_1785258473_63f7b4_414",
       "artifacts": [
         {

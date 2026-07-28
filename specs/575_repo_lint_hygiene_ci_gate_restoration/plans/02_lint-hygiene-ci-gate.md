@@ -1,10 +1,10 @@
 # Repo Lint & Hygiene Cleanup — CI Gate Restoration (v2)
 
 - **Task**: 575
-- **Status**: PARTIAL
-- **Effort**: ~14.5h spent. Phase 5 is the sole remaining workstream; the count-1 actionable tier
-  is now fully closed. Only the deliberately-deferred count-6 file remains (needs a cycle with a
-  large context budget reserved for it specifically).
+- **Status**: IMPLEMENTING (all phases complete; final Definition-of-Done sign-off pending
+  postflight)
+- **Effort**: ~15h spent. All 8 phases complete. Phase 5 (suppression audit), the sole remaining
+  workstream, closed in cycle 27 — the deliberately-deferred count-6 file cleared to 0.
 - **Dependencies**: none blocking.
 - **Research Inputs**: four parallel subsystem reviews (Propositional, Modal, Temporal/Bimodal,
   shared infrastructure), 2026-07-27; findings inlined here rather than filed as separate reports.
@@ -14,7 +14,7 @@
   `.claude/rules/git-workflow.md` (commit-per-green-substep), `CONTRIBUTING.md`
 - **Type**: cslib
 - **Created**: 2026-07-27
-- **Last updated**: 2026-07-27 (cycle-26 close)
+- **Last updated**: 2026-07-27 (cycle-27 close)
 
 > **Why v2 exists.** `01_lint-hygiene-ci-gate.md` reached 2,938 lines, 45% of it a cycle-by-cycle
 > changelog of Phase 5 (18 `Done (cycle N)` entries and 6 verbatim copies of the same `Method`
@@ -27,61 +27,29 @@
 
 ## RESUME HERE
 
-**Only Phase 5 (suppression audit) is open. Phases 1-4 and 6-8 are all CLOSED.** No item requires
-a user decision to make further Phase 5 progress.
+**All 8 phases are CLOSED as of cycle 27.** Phase 5 (suppression audit) was the last open
+workstream; it closed when the deliberately-deferred count-6 file
+(`CounterexampleElimination/Interface.lean`) cleared to 0 blanket suppressions. The Definition of
+Done table (below) shows every row **MET**. Nothing in this plan requires further implementation
+work. If resumed, the only remaining action is final sign-off / task closure — re-verify the
+baseline below, confirm the Definition of Done table still holds, and close the task.
 
-**State at cycle-26 close**: 444 sites audited across 112 files. **The count-1 actionable tier is
-now fully closed** — all 9 files that were open at cycle-25 close are cleared to 0 blanket
-suppressions. **25 blanket suppressions remain repo-wide**: 14 are upstream-shared and carved out
-of scope; 5 are permanent exceptions (1 each); 6 belong to the deliberately-deferred count-6 file
-(`CounterexampleElimination/Interface.lean`). **Zero actionable local-only files remain outside
-the deferred count-6 file.**
+**State at cycle-27 close**: 638 sites audited across 113 files. **Zero actionable local-only
+files remain anywhere in Phase 5's scope.** 19 blanket suppressions remain repo-wide: 14 are
+upstream-shared and carved out of scope (unchanged, out-of-scope by design); 5 are permanent
+exceptions (1 each, all previously verified — see table below). No file has an unresolved,
+in-scope blanket suppression.
 
-### Step 1 — confirm the baseline (~5 min)
+### Step 1 — confirm the baseline still holds (~5 min)
 
 ```bash
 lake build --wfail --iofail   # expect exit 1, exactly 5 baseline sorry warnings (listed below)
 lake test                     # expect exit 0
 lake shake --add-public --keep-implied --keep-prefix Cslib   # expect exactly 12 upstream-shared files, zero local-only
-bash scripts/check-lint-suppressions.sh   # expect exit 0, "25 (baseline ceiling 25)"
+bash scripts/check-lint-suppressions.sh   # expect exit 0, "19 (baseline ceiling 19)"
 ```
 
-If any differ, something else landed — reconcile before proceeding.
-
-### Step 2 — pick the next target
-
-**Count-1 tier is CLOSED (cycle 26).** All 9 files from the cycle-25 worklist cleared to 0
-blanket suppressions (see "Done (cycle 26)" below for the per-file table).
-
-**NEXT AND ONLY TARGET: `Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean`
-(3048 lines, 6 blanket suppressions) — the deliberately-deferred count-6 tier file.**
-
-This is now the *only* remaining actionable item in Phase 5's audit. Re-verify line and
-suppression counts live before starting — counts only ever go down:
-
-```bash
-wc -l Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
-grep -n "set_option linter\." Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
-```
-
-**Cold-start instructions for this file specifically**:
-- Reserve a full cycle's context budget for this file alone — do not start it opportunistically
-  alongside other work, and do not expect to finish it in a single dispatch if context runs low.
-  If a handoff is needed mid-file, document exactly which of the 6 suppressions are resolved,
-  which remain, and the live warning list for any suppression already removed but not yet
-  reconciled.
-- Per the Method (below), remove ALL blanket suppressions in the file at once (or one at a time —
-  either is valid), rebuild, and categorize what surfaces before fixing. Given the file's size
-  (3048 lines), expect a much larger warning surface than any count-1 file this task has
-  processed — E1 (line count does not predict warning count) applies with extra force here.
-- Its sibling file `CounterexampleElimination/Elimination.lean` (244 lines) is a **permanent
-  exception** in the same directory (`linter.privateModule`, C7) — do NOT assume Interface.lean
-  hits the same category; verify live, it may differ (Interface.lean is presumably not
-  all-`private` given it is the public-facing counterpart).
-- No live worst-offender list is needed anymore — this is the only file left. If it clears to 0,
-  Phase 5 (and the whole task) is done pending final Definition-of-Done sign-off; if it bottoms
-  out at a genuine irreducible count, document it the same way as the 5 existing permanent
-  exceptions and close Phase 5 with that as the final state.
+If any differ, something else landed since cycle 27 — reconcile before closing the task.
 
 **Permanent exceptions — 5 files, do not attempt further reduction:**
 ```
@@ -92,12 +60,9 @@ grep -n "set_option linter\." Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronic
 1  871 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean          # persistent open Classical
 ```
 
-### Step 3 — before editing, read Phase 5's "Accumulated findings"
-
-Particularly the **parse hazard** (P1) and the **dangling-`by` hazard** (P5) — both recur across
-cycles and are not solved problems. Cycle 26 hit zero new hazard categories, but a 3048-line file
-is far larger than anything processed to date; treat E1 and the existing category-fix catalog
-(C1-C7) as the starting hypothesis set, not an exhaustive one.
+`CounterexampleElimination/Interface.lean` (the former count-6 tier file, 3048 lines) is **no
+longer an open item** — it cleared to 0 blanket suppressions in cycle 27 (see "Done (cycle 27)"
+in Phase 5's body for the full per-category breakdown and verification evidence).
 
 ### Do not
 
@@ -105,6 +70,8 @@ is far larger than anything processed to date; treat E1 and the existing categor
 - Re-open Phase 3's citation census, Phase 7's `NOTATION.md`/`NOTE:`-block items, or any other
   closed phase. They are settled; their sections record the outcome.
 - Touch the five permanent exceptions listed above (Phase 5, "Permanent exceptions").
+- Re-open Phase 5 to chase the 14 upstream-shared suppressions — they are intentionally out of
+  scope (see "Upstream-exposure scope").
 
 ---
 
@@ -285,7 +252,7 @@ Clean on the local-only tree — exactly the 12 upstream-shared files remain fla
 scope. A post-close regression across 11 local-only files, landed via an unrelated merge, was
 found and fixed in cycle 16.
 
-### Phase 5: Suppression audit [PARTIAL — 444 sites done across 112 files; count-1 actionable tier CLOSED; only the deferred count-6 file (6 blanket suppressions) remains]
+### Phase 5: Suppression audit [COMPLETED — 638 sites done across 113 files; every actionable local-only file cleared to 0 blanket suppressions; 19 remain repo-wide (14 upstream-shared, 5 permanent exceptions)]
 
 The sole open workstream. **Scope**: local-only files only; gate every candidate with
 `git cat-file -e upstream/main:<path>` (must FAIL to be in scope).
@@ -502,6 +469,49 @@ findings unchanged in kind), `lake exe lint-style` (exit 0), `lake shake` (12 up
 local-only), `lake exe mk_all --module` (no update necessary), `scripts/check-lint-suppressions.sh`
 (re-baselined via `--update`, exit 0, "25 (baseline ceiling 25)").
 
+#### Done (cycle 27) — Phase 5 closed
+
+Cleared the deliberately-deferred count-6 tier file, the last actionable item in the audit:
+`BXCanonical/Chronicle/CounterexampleElimination/Interface.lean` (3048 lines) went from 6 blanket
+suppressions to 0. Ratchet: 25 → 19 (6 net reduction, single commit; re-baselined via `--update`).
+
+| File | Suppressions removed | Category | Notes |
+|---|---|---|---|
+| `.../CounterexampleElimination/Interface.lean` | 6 → 0 | `linter.unusedSimpArgs` (6 sites — dropped just the unused lemma/hyp from each `simp only [...]` list per C3, including one case, `decreasing_by ... simp_all only [gt_iff_lt]`, where the sole argument was unused and the fix was `simp_all only []`); `linter.style.show` (74 sites, C5 — mechanical `show` → `change`, verified column-exact against the linter's own reported position before rewriting, zero mismatches); `style.longLine` (114 sites, C1 — mechanical wrap via line-indexed Python scripts, each replacement verified against the exact current line text before writing and re-checked ≤100 chars after) | Not hit despite being hypothesized as likely: C8 (`style.emptyLine` inside a large single-command `inductive` block) — this file has no such block; C7 (`linter.privateModule`) — confirmed the sibling file's category does NOT apply here (Interface.lean's declarations are public, not all-`private`). `style.setOption` and `linter.flexible` both surfaced 0 warnings on removal (E2) |
+
+**Method note for this cycle**: with 194 total warning occurrences across 3048 lines (E1 confirmed
+again — far more than any file processed to date, 2.5x the previous largest), line-indexed Python
+replacement (verify-then-write, matching by exact original line number and content, applied in a
+single pass per batch) was used instead of the Edit tool's string-uniqueness matching for the bulk
+of the `style.longLine` and `unusedSimpArgs` fixes — several sites had textually identical
+tactic-call patterns (only distinguished by indentation or line position, e.g. repeated
+`exact ⟨B', D, B'', ...⟩` closings across parallel Until/Since mirror branches), which the Edit
+tool's uniqueness requirement cannot disambiguate without brittle extra context. Every batch's
+replacements were verified against the file's exact current content immediately before writing
+(hard failure on any mismatch), and every replacement line's length was re-checked ≤100 chars
+after writing — several first-pass wraps still exceeded 100 chars on deeply-nested lines (indent
+20-28) and needed a second wrap pass. All 194 sites are confirmed clear on a subsequent zero-warning
+scoped rebuild.
+
+Verification: scoped rebuild of the file (0 warnings, 968 jobs) plus its sole direct downstream
+importer `CounterexampleElimination.lean` (green), plus a full-repo `lake build --wfail --iofail`
+(exit 1, exactly the same 5 baseline sorry warnings — nothing else surfaced). `git diff` confirmed
+zero `sorry` lines touched and no proof term, definition, or theorem statement altered — only the
+suppression-option block removal, `show`→`change` rewrites, `simp only [...]` argument trims, and
+line wraps (indentation/newline insertion only).
+
+Phase-boundary gate re-verified green at cycle close: `lake build --wfail --iofail` (exit 1,
+exactly the 5 baseline sorry warnings), `lake test` (exit 0), `lake exe checkInitImports` (pass),
+`lake lint` (0 matches on the 7 prevention categories; only out-of-scope `unusedArguments`
+findings, unchanged in kind), `lake exe lint-style` (exit 0), `lake shake --add-public
+--keep-implied --keep-prefix Cslib` (exactly 12 upstream-shared files, 0 local-only),
+`lake exe mk_all --module` (no update necessary), `scripts/check-lint-suppressions.sh`
+(re-baselined via `--update`, exit 0, "19 (baseline ceiling 19)").
+
+**Phase 5 is now CLOSED.** Every local-only file in scope has been audited: cleared to 0 blanket
+suppressions, or verified and recorded as one of the 5 permanent exceptions below. The 14
+upstream-shared suppressions remain correctly out of scope per "Upstream-exposure scope".
+
 ### Phase 6: Sorry visibility [COMPLETED]
 
 All 18 declaration-scoped `warn.sorry` sites (0 file-scoped) verified to carry a documented
@@ -620,10 +630,9 @@ No report artifact was filed: research findings were inlined into this plan.
 | Every `warn.sorry` suppression has a recorded per-site justification, and the Bimodal-vs-rest asymmetry has an explicit disposition | **MET** |
 | `NOTATION.md` documents the scoped-notation rule for the `S` collision, and the 5 `NOTE:` blocks documenting the `@`-application workaround are retained while the collision persists | **MET** |
 | No hygiene edit lands in an upstream-shared file **except where the user has explicitly authorized it, and every such exception is recorded** | **MET, one recorded exception** — `NOTATION.md` (Phase 7). Known consequence, accepted: it will diverge from upstream and need reconciling on the next sync |
-| Suppression audit outcome recorded per site, **for local-only files** | **PARTIAL** — 444 sites done across 112 files; the count-1 actionable tier is fully closed. Only the deliberately-deferred count-6 file (`CounterexampleElimination/Interface.lean`, 6 blanket suppressions) remains, plus 5 permanent exceptions with recorded verification |
+| Suppression audit outcome recorded per site, **for local-only files** | **MET** — 638 sites done across 113 files. Every local-only file cleared to 0 blanket suppressions, including the deliberately-deferred count-6 file (`CounterexampleElimination/Interface.lean`, cycle 27), except the 5 permanent exceptions, each with recorded verification. 19 blanket suppressions remain repo-wide: 14 upstream-shared (out of scope), 5 permanent exceptions (1 each) |
 
-The last row is the only open criterion. It is **bounded** — the original repo-wide wording was
-open-ended; the upstream-exposure rescope made it finite.
+All criteria are now **MET**. Phase 5 — the sole open workstream — is closed as of cycle 27.
 
 ## Rollback/Contingency
 

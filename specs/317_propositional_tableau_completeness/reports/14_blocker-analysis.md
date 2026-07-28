@@ -153,3 +153,97 @@ conflict between the self-copy channel and persistence propagation that makes `i
 diverge, replacing the unbounded linear world-creation behavior with one bounded by task 456's
 exponential blocking argument -- at which point task 317's four sorries become genuine assembly
 work rather than attempts to prove or use a refuted invariant.
+
+## Adversarial Self-Verification
+
+**Verification date**: 2026-07-28, session `sess_1785275816_a84520_317` (H4 pass, `--hard`,
+focus: divergence audit). Reports 13/14 were written BEFORE the spawned chain executed. Since
+then: the quotient-soundness spike (`specs/archive/573_tableau_quotient_soundness_spike`,
+completed), the calculus repair (task 574, completed), and the shared blocking module (task
+456, completed, landing `Cslib/Foundations/Logic/Tableau/Blocking.lean`) have ALL landed, and
+task 583's post-repair research
+(`specs/583_restate_intexpandbranches_openbranch_sat/reports/01_restate-openbranch-sat.md`)
+mechanically re-verified the fuel-0 refutation against the repaired code. Each load-bearing
+claim of reports 13/14 was re-checked against that new reality, with evidence gathered by
+direct grep/read of current sources plus two fresh `lean_verify` runs.
+
+### Claim Verification Table
+
+| Claim | Source/Counterexample | Verdict | Current evidence (file:line) |
+|-------|----------------------|---------|------------------------------|
+| Four sorries remain in scope; assembly cannot close them | Report 13 §Context; report 14 preamble | VERIFIED (line drift) | Bare sorries now at `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:617` (was 599), `Scheme.lean:2551` (was 2578), `Intuitionistic/Completeness.lean:133`, `Minimal/Completeness.lean:125` — confirmed by grep 2026-07-28 |
+| `Scheme.lean:2578` fuel-0 goal is FALSE as stated (counter-instance `[[F(p∧q)@0]]`) | Report 13 F-summary bullet 3 / Decision 2 | VERIFIED (post-repair) | Refutation survives the 574 repair: 583's report re-ran the `#eval` counter-instance on current code (its Verification Log); refutation recorded in-proof at `Scheme.lean:2526-2550`, sorry at `Scheme.lean:2551` |
+| No world bound of any size exists for the calculus (F1/F2 divergence) | Report 13 F1/F2 | VERIFIED for the RETIRED calculus; superseded for current code | In-code divergence note + `intUniverse` warning at `Scheme.lean:1591-1605`; regression row 20 in `CslibTests/TableauConformance.lean:67-72,338-350`. The ancestor-blocked calculus (574) empirically terminates on the witness, but NO post-blocking termination theorem exists — the bound question is re-OPEN (unproven), not re-refuted |
+| Loop-check searches descendants; must become ancestor-directed (F5) | Report 13 F5; report 14 "named structural conflict" | DISCHARGED-BY-574 | `intFImpReuseWitnessAnc?` landed at `Expansion.lean:260`, spec lemma `Expansion.lean:~290`; descendant-directed `intFImpReuseWitness?` deleted (per docstring `Expansion.lean:253-259`) |
+| `sat_fimp` must be restated over the blocking QUOTIENT frame; "single largest unretired risk" vs `intExpandBranches_closed_unsat` | Report 13 F5/Option A step 3; report 14 New Task 2 rationale | DISCHARGED-BY-574 (prediction REFUTED in detail) | Spike 573 completed; the landed design instead DROPPED the numeric `w ≤ w'` conjunct from `sat_fimp` (decision D8, docstring `Scheme.lean:100-106`) and kept the explicit `F(ψ)@x` conjunct with ancestor direction (`Expansion.lean:273-282`). No quotient restatement of `sat_fimp` exists or is needed; the risk is retired |
+| Task 456 provides `(b.labels.map b.typeAt).eraseDups.length ≤ 2^U.length` (report 14 Follow-Up 1's stated form) | Report 14 "Required Follow-Ups" item 1 | REFUTED — corrected form DISCHARGED-BY-456 | 456's own research refuted this exact statement (sign doubling: 5 distinct type-lists over `U = [p,q]` vs bound 4; two independent falsity sources — `specs/456_shared_tableau_containment_blocking/reports/01_blocking-module-research.md:68-78,248`). The landed, corrected form is signed and Finset-valued: `Cslib.Logic.Tableau.distinctTypes_le_pow` over `V : Finset (Sign × F)` with bound `2 ^ V.card` (`Blocking.lean:150-158`); `lean_verify` 2026-07-28: axioms `{propext, Classical.choice, Quot.sound}`, no sorryAx |
+| Dependency direction must be re-pointed: repair → 456 → 317 | Report 14 "Required Follow-Ups" item 1 | VERIFIED (applied) | `specs/state.json`: 456 `dependencies: [574]` (completed), 317 `dependencies: [456, 552]` (both completed); 574 `dependencies: [573]` (completed) |
+| Three-task decomposition (hygiene → spike → repair) | Report 14 Proposed New Tasks | VERIFIED (executed) | 573 `tableau_quotient_soundness_spike` completed (archive); 574 `tableau_calculus_repair_ancestor_blocking` completed; docstring corrections in-code (stale "determinacy remains BLOCKED" block gone — only a benign GAP-2 mention survives at `Scheme.lean:2326`; `sat_timp` live field at `Scheme.lean:115`) |
+| D3/D4 dangling BibKeys (`GargGenoveseNegri2012`, Dyckhoff) | Report 13 F7 defects | DISCHARGED | `references.bib:211` (`Fitting1983`), `:218` (`Dyckhoff1992`), `:239` (`GargGenoveseNegri2012`), `:1041` (`Massacci2000`) — all resolve |
+| FMP decidability already sorry-free (F8) | Report 13 F8 | VERIFIED (re-run) | `lean_verify Cslib.Logic.PL.decidableDerivableIntPropAxiomFMP` re-run 2026-07-28 post-upstream-merge (`d5b6da26`): axioms `{propext, Classical.choice, Quot.sound}` |
+| `IAtomPersist` premise-narrowing route viable for the two Completeness bridges | Report 13 F7 (medium confidence, empirical) | UNCERTAIN (unchanged) | Still empirical, not a theorem; now has a dedicated planned task in the queue (430 `prove_atom_persistence_upward_closure_for_intexpan`, status planned) |
+| "After completion ... task 317's four sorries become genuine assembly work" | Report 14 closing paragraph | REFUTED as stated | 583's F3 equivalence result: with the sole call site `openBranch_countermodel` at `intFuel φ`, ANY provable restatement of the fuel-0 lemma is equivalent to the fuel-sufficiency theorem, which is NOT provable today — the landed measure engine (`Scheme.lean:1913-2487`, sorry-free, unused) is blocked on the refuted/unproven universe-containment invariant, and no post-blocking replacement bound has been proven. The repair made termination empirical, not theorematic; the sorries are NOT yet assembly |
+| Plan 04 Phase 5.1's `intExpandBranches_world_bound_dedup` / `intExpandBranches_fuel_sufficient` obligations | plans/04, Phase 5.1/5.x | VERIFIED still open (never landed) | 0 grep hits for either name in `Cslib/` or `CslibTests/`. These are the same obligation 583's F5 names as the missing prerequisite (post-blocking `WBound φ` + `intUniverseExt`/`intExpMeasureExt` re-target + `intFuel` resize + threading invariants) |
+
+### Additional freshness findings (not claims of reports 13/14)
+
+1. **Blocking.lean is NOT yet consumed by the propositional tableau.** Only
+   `Cslib/Logics/Temporal/Tableau/Branch.lean:9` imports
+   `Cslib.Foundations.Logic.Tableau.Blocking` (its `timeType`/`isSubsetBlocked` are `rfl`-equal
+   wrappers, `Branch.lean:126-134`). The intuitionistic ancestor check uses a LOCAL
+   `posFormulasAt` with inline containment (`Expansion.lean:268-282`), not
+   `Branch.posTypeAt`/`containmentBlocked`. Consuming the counting layer therefore needs a
+   small bridge (local `posFormulasAt` ↔ `Branch.posTypeAt`, `Blocking.lean:77`) or direct use
+   of the projection-agnostic helper `card_image_le_pow_of_forall_subset` (`Blocking.lean:130`).
+2. **Territory collision with task 583.** Task 583 (status blocked) owns the restatement of the
+   `Scheme.lean:2551` sorry — one of 317's four. Its report specifies the target restatement
+   (form R1: `hUniv`/`hNW`/`hFuel` hypothesis threading) and the prerequisite's acceptance
+   gate. A 317 plan that also schedules that sorry duplicates 583's scope; the overlap must be
+   resolved explicitly (subsume 583 or defer to it) before dispatch.
+3. **No task in the queue covers the fuel-sufficiency prerequisite.** The only related queue
+   entries are the S4 analogues (511, 506 — both blocked, corroborating the difficulty) and
+   430 (atom persistence, planned). 583's recommended `/spawn` of the prerequisite has not
+   happened.
+
+### Analysis-Paralysis Verdict
+
+**Not analysis-paralysis — but now stale.** Reports 13/14 produced a concrete, executed
+decomposition: three tasks were spawned and ALL completed (573 spike, 574 repair, 456 blocking
+module), the dependency re-point was applied, and the in-code refutation/divergence notes
+landed. That is the opposite of analysis-only output. However, reports 13/14 are no longer
+accurate as planning inputs: their description of what 456 would provide is the refuted
+pre-correction bound form, their quotient-`sat_fimp` prediction was superseded by the D8
+design, and their closing claim that the four sorries "become genuine assembly" after the chain
+lands is refuted by 583's post-repair equivalence result. The load-bearing current ground truth
+is: this section, 583's report 01, and the in-code notes (`Scheme.lean:1591-1605`,
+`Scheme.lean:2526-2550`, `Expansion.lean`'s divergence-witness note).
+
+### Planning Readiness
+
+The next plan version (v13) for task 317 must be built on the post-456/574 reality, not on
+reports 13/14's pre-repair scoping. Concretely, it must **consume from
+`Cslib/Foundations/Logic/Tableau/Blocking.lean`** (namespace `Cslib.Logic.Tableau`; all
+sorry-free, `lean_verify`-clean): `Branch.posTypeAt` (`:77`, the Sfor projection) with
+`mem_typeAt_iff` (`:91`), the projection-agnostic counting helper
+`card_image_le_pow_of_forall_subset` (`:130`), `toFinset_eraseDups` (`:142`),
+`distinctTypes_le_pow` (`:150`, SIGNED form: bound `2 ^ V.card` over `V : Finset (Sign × F)`;
+instantiate `V = S ×ˢ {pos, neg}` for `2 ^ (2·|S|)`, or use `posTypeAt` over `U : Finset F`
+for `2 ^ U.card` — the old `eraseDups.length ≤ 2^U.length` form is FALSE and must not be
+planned against), `exists_typeAt_eq_of_card_lt` (`:163`, pigeonhole), and
+`strictChain_le_card` (`:185`, the chain bound matching "Sfor strictly grows past every
+unblocked ancestor ⇒ chain length ≤ |Sub(φ)|" — the natural discharge shape for plan 04 Phase
+5.1's never-landed `intExpandBranches_world_bound_dedup`). The genuinely open obligations are:
+(a) the **fuel-sufficiency development** — post-blocking world bound `WBound φ`, enlarged
+`intUniverseExt`/`intExpMeasureExt`, `intFuel` resize, and `hUniv`/`hNW` threading invariants
+per 583's F5 acceptance gate — on which BOTH `Scheme.lean:2551` (via 583's F3 equivalence) and
+`Scheme.lean:617` (via `applyPersistenceFixpoint_genuine_of_count_le_fuel`, `Scheme.lean:2424`,
+whose `hb` premise is the same containment invariant; the in-file STOP-gate directs both be
+closed in one pass) directly depend; and (b) the two Completeness bridges
+(`Intuitionistic/Completeness.lean:133`, `Minimal/Completeness.lean:125`) via the `IAtomPersist`
+route (task 430's scope), which itself presupposes saturated branches and therefore also sits
+downstream of (a). **All four remaining sorries depend on the fuel-sufficiency gap 583
+identified**; no queued task covers it, so the plan must either open with it as its own
+phase-block (consuming Blocking.lean's counting layer plus the already-landed, currently-unused
+measure engine at `Scheme.lean:1913-2487`) or direct a `/spawn` for it first — and must resolve
+the `Scheme.lean:2551` territory overlap with blocked task 583 explicitly before any dispatch
+touches that sorry.

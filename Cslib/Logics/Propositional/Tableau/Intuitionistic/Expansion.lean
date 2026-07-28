@@ -208,7 +208,14 @@ lemma intStepBranch_result_ne_notApplicable
 
 /-! ## Sfor-Containment Loop-Check -/
 
-/-- The `Sfor`-containment loop-check (design settled, GO verdict). Wired into `go`'s
+/-- **SUPERSEDED (task 574, Phase 3):** this def searches **descendants**
+(`isAccessible edges w x`), which is the defect task 574 repairs — a Fitting-style loop check
+must search **ancestors**. See `intFImpReuseWitnessAnc?` below for the ancestor-direction
+replacement; `intExpandBranches`'s call site (`:423`) still calls this def until Phase 4 swaps
+it and retires this declaration. The rest of this docstring is retained verbatim as historical
+record of the (superseded) descendant-direction design; do not treat it as current design intent.
+
+The `Sfor`-containment loop-check (design settled, GO verdict). Wired into `go`'s
 `some (.linearResult newForms nw' (some newEdge), newExp)` branch (see `intExpandBranches`
 below).
 
@@ -341,6 +348,105 @@ lemma intFImpReuseWitness?_spec {bPers : IBranch Atom} {edges : IEdges}
   obtain ⟨x', _hx'mem, hif⟩ := List.exists_of_findSome?_eq_some h
   by_cases hcond : (isAccessible edges newEdge.2 x'
       && newEdge.2.ble x'
+      && (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
+        ((posFormulasAt bPers x').contains ·)
+      && !(posFormulasAt bPers x').contains ψ
+      && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x')) = true
+  · simp only [hcond, if_true] at hif
+    injection hif with hif
+    subst hif
+    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hcond
+    obtain ⟨⟨⟨⟨h1, h2⟩, h3⟩, h4⟩, h5⟩ := hcond
+    exact ⟨h1, Nat.le_of_ble_eq_true h2, h3, by simpa using h4, h5⟩
+  · simp only [Bool.not_eq_true] at hcond
+    simp only [hcond] at hif
+    simp at hif
+
+/-- The **ancestor-directed** `Sfor`-containment loop-check (task 574, Phase 3).
+
+`intFImpReuseWitness?` above searches **descendants** of the world-creating source `w`
+(`isAccessible edges w x`), which is the defect this task repairs: a Fitting-style loop check
+must search **ancestors** instead, so that a formula obligation can be discharged by something
+already forced earlier on the same accessibility path, not by something not-yet-created.
+
+**Search direction and why.** Swap `isAccessible edges w x` → `isAccessible edges x w` and
+`w.ble x` → `x.ble w` relative to `intFImpReuseWitness?`; every other conjunct (including the
+`F(ψ)@x` explicit-entry conjunct) is unchanged. The rationale — `Sfor` (the forced-set at a
+world) takes values in the finite subset lattice of `Sub(φ)` and grows monotonically along
+accessibility, so an ancestor's forced-set is a subset of any descendant's — is attributed to
+Garg, Genovese & Negri, *Countermodels from Sequent Calculi in Multi-Modal Logics* (LICS 2012)
+[`GargGenoveseNegri2012`] and to Fitting, *Proof Methods for Modal and Intuitionistic Logics*
+(1983) [`Fitting1983`] Ch. 4, as **provenance only**: neither source is readable from this
+repository (BibTeX key only, no entry in the navigable literature corpus — see the plan's H3
+honesty rule). The actual evidence for this design is
+`specs/574_tableau_calculus_repair_ancestor_blocking/handoffs/01_variant-selection.md` Table 3:
+real `#eval` measurement on the complexity-9 divergence witness shows the ancestor-directed
+check (variant V1, conjunct retained) saturates at `fuel ≥ 120` (`maxLabel = 21`, stable across
+four independent evaluations), where the descendant-directed `intFImpReuseWitness?` diverges
+without bound on the same input.
+
+**Search order.** Identical to `intFImpReuseWitness?`: candidates are the distinct world labels
+appearing on `bPers` (`(bPers.map (·.label)).eraseDups`), in branch order; `List.findSome?`
+returns the first label satisfying all four conditions, or `none` if no label does.
+
+**Reuse contract.** `some x` means the ancestor `x` discharges the obligation: do NOT create
+`w'`, recurse `intExpandBranches` on `bPers` **unmodified** (never Option B — appending a fresh
+`F(ψ)@x` entry on reuse was tried and found UNSOUND, `Expansion.lean:256-264`), with `edges`
+**unchanged** and the world counter **unconsumed**. `none` means proceed exactly as today
+(create `w'` as normal). This mirrors `intFImpReuseWitness?`'s own contract exactly; only the
+search direction differs.
+
+This declaration is **additive**: `intExpandBranches`'s call site (`:423`) still calls
+`intFImpReuseWitness?`, unchanged, in this phase. The swap is Phase 4's explicit acceptance
+gate. -/
+def intFImpReuseWitnessAnc? (bPers : IBranch Atom) (edges : IEdges)
+    (newForms : List (ISF Atom)) (newEdge : Nat × Nat) : Option Nat :=
+  -- `w` is the source world of the would-be world-creating edge (`intFImpRule` returns
+  -- edge `(w', w)`, so `newEdge.2 = w`).
+  let w := newEdge.2
+  match newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none) with
+  | none => none  -- malformed input: no obligation entry (should not happen for this rule)
+  | some ψ =>
+    -- Sfor(w') = {φ} ∪ posFormulasAt bPers w, read off newForms's sign = .pos sublist.
+    let sfor : List (Proposition Atom) :=
+      newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none
+    let candidates := (bPers.map (·.label)).eraseDups
+    candidates.findSome? fun x =>
+      let forcedAtX := posFormulasAt bPers x
+      -- Ancestor direction: `x` is reachable *to* `w` (`isAccessible edges x w`), and carries
+      -- a strictly smaller label (`x.ble w`) — the reverse of `intFImpReuseWitness?`'s
+      -- descendant-direction checks.
+      if isAccessible edges x w
+          && x.ble w
+          && sfor.all (forcedAtX.contains ·)
+          && !(forcedAtX.contains ψ)
+          && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) then
+        some x
+      else
+        none
+
+omit [Hashable Atom] in
+/-- Specification lemma for `intFImpReuseWitnessAnc?`:
+when it returns `some x` for the `.neg`-signed obligation `ψ` read off `newForms`, `x`
+satisfies all five search conditions in **ancestor** direction, including the load-bearing
+Option-A conjunct `F(ψ)@x ∈ bPers` (an explicit branch entry, not merely "not forced"). The
+proof structure is `intFImpReuseWitness?_spec`'s, transferred verbatim with the two directional
+conjuncts (`isAccessible`, `≤`) reversed. -/
+lemma intFImpReuseWitnessAnc?_spec {bPers : IBranch Atom} {edges : IEdges}
+    {newForms : List (ISF Atom)} {newEdge : Nat × Nat} {x : Nat} {ψ : Proposition Atom}
+    (hψ : newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none)
+        = some ψ)
+    (h : intFImpReuseWitnessAnc? bPers edges newForms newEdge = some x) :
+    isAccessible edges x newEdge.2 = true ∧
+    x ≤ newEdge.2 ∧
+    (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
+      ((posFormulasAt bPers x).contains ·) = true ∧
+    ¬ (posFormulasAt bPers x).contains ψ ∧
+    bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) = true := by
+  simp only [intFImpReuseWitnessAnc?, hψ] at h
+  obtain ⟨x', _hx'mem, hif⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hcond : (isAccessible edges x' newEdge.2
+      && x'.ble newEdge.2
       && (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
         ((posFormulasAt bPers x').contains ·)
       && !(posFormulasAt bPers x').contains ψ

@@ -432,12 +432,12 @@ be committed separately and the second must rebase, not overwrite.
 
 ---
 
-### Phase 3: Ancestor-directed blocking check, additive [NOT STARTED]
+### Phase 3: Ancestor-directed blocking check, additive [COMPLETED]
 
 - **Goal:** Land `intFImpReuseWitnessAnc?` and `intFImpReuseWitnessAnc?_spec` alongside the
   existing pair, with **no call-site change** (additive-first — nothing goes red).
 - **Tasks:**
-  - [ ] Append to `Expansion.lean`'s `## Sfor-Containment Loop-Check` section (after `:355`) a new
+  - [x] Append to `Expansion.lean`'s `## Sfor-Containment Loop-Check` section (after `:355`) a new
         `def intFImpReuseWitnessAnc? (bPers : IBranch Atom) (edges : IEdges)
         (newForms : List (ISF Atom)) (newEdge : Nat × Nat) : Option Nat` — **type-identical** to
         `intFImpReuseWitness?` (the spike confirmed this signature elaborates:
@@ -446,22 +446,29 @@ be committed separately and the second must rebase, not overwrite.
         - `isAccessible edges w x` → `isAccessible edges x w` (ancestor direction), and
         - `w.ble x` → `x.ble w` (matching numeric direction), and
         - the `F(ψ)@x` conjunct per Phase 1's D4 verdict.
-  - [ ] Write the def's docstring **from scratch**, stating: the search direction and why
+  - [x] Write the def's docstring **from scratch**, stating: the search direction and why
         (ancestors, `Sfor` grows monotonically along accessibility — attributed to
         `GargGenoveseNegri2012`/`Fitting1983` as *provenance*, with an explicit note that those
         sources are not readable in-repo and the design rests on the Phase 1 measurement); the
         exact search order (`(bPers.map (·.label)).eraseDups`, `List.findSome?`, first match); and
         the reuse contract (recurse on `bPers` unchanged, `edges` unchanged, world counter
         unconsumed — never Option B, `Expansion.lean:256-264`).
-  - [ ] State and prove `intFImpReuseWitnessAnc?_spec`, mirroring `:328-355`, with the conjunct
+  - [x] State and prove `intFImpReuseWitnessAnc?_spec`, mirroring `:328-355`, with the conjunct
         directions reversed and the arity matching D4's verdict (5-tuple if the `F(ψ)@x` conjunct
         is retained, 4-tuple if dropped). The proof structure of `:339-355`
         (`List.exists_of_findSome?_eq_some` → `by_cases hcond` → `injection` →
-        `Nat.le_of_ble_eq_true`) transfers verbatim.
-  - [ ] Mark the old `intFImpReuseWitness?` docstring (`:210-290`) as superseded with a one-line
+        `Nat.le_of_ble_eq_true`) transfers verbatim. **5-tuple landed (conjunct retained, D4
+        verdict), proof transferred verbatim with the two directional conjuncts swapped.**
+  - [x] Mark the old `intFImpReuseWitness?` docstring (`:210-290`) as superseded with a one-line
         pointer; do **not** delete the def yet (Phase 4 retires it).
-  - [ ] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion` green;
+  - [x] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion` green;
         `lean_verify Cslib.Logic.PL.intFImpReuseWitnessAnc?_spec` shows no `sorryAx`.
+        **Tooling note**: the `lean_verify` MCP tool rejects theorem names containing `?`
+        (`"Invalid theorem name"`, reproduced identically against the pre-existing
+        `intFImpReuseWitness?_spec` for a control check) — a tool limitation, not a code issue.
+        Verified equivalently via `lake build` (clean, no `sorry`/warning/error in the module's
+        build output) plus `grep -n "sorry" Expansion.lean` (only match is a prose reference
+        inside an unrelated docstring, line 135, not a `sorry` tactic).
 - **Timing:** 4-6 hours
 - **Depends on:** 1
 - **Verification Tier:** local (purely additive declarations in one module; no existing signature
@@ -469,9 +476,15 @@ be committed separately and the second must rebase, not overwrite.
 - **Commit Mode:** per-substep
 - **Scope Hypothesis:** ~130 lines added to exactly one file (`Expansion.lean`), zero lines
   removed, zero other files touched. Confirm by `git diff --stat` showing one file with `0`
-  deletions outside the superseded-docstring pointer.
+  deletions outside the superseded-docstring pointer. **Confirmed**: `git diff --stat` shows
+  exactly one file, `Expansion.lean`, `107 insertions(+), 1 deletion(-)` — the single deletion is
+  the superseded-docstring pointer edit (replacing the original opening line with the pointer +
+  the original line), matching the hypothesis exactly.
 - **Done when:** the Expansion module builds green and both new declarations exist with the old
-  pair still present and still green.
+  pair still present and still green. **Confirmed**: both `intFImpReuseWitness?`/`_spec` (lines
+  299, 336) and `intFImpReuseWitnessAnc?`/`_spec` (lines 402, 435) exist side by side;
+  `lake build` green; `lake exe checkInitImports` exit 0; repo-wide bare-sorry count unchanged at
+  exactly 6 (baseline preserved).
 
 ---
 

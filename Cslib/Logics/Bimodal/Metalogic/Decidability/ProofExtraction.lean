@@ -45,8 +45,6 @@ adaptations for universe-polymorphic `Formula Atom`.
 * Wu, M. Verified Decision Procedures for Modal Logics
 -/
 
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Decidability
@@ -64,13 +62,15 @@ variable {Atom : Type u} [DecidableEq Atom] [Hashable Atom]
 Build a proof of bot -> phi (via efq).
 This is used when we have a contradiction in the branch.
 -/
-def proofFromBot (phi : Formula Atom) : DerivationTree .Base ([] : Context Atom) (Formula.bot.imp phi) :=
+def proofFromBot (phi : Formula Atom) :
+    DerivationTree .Base ([] : Context Atom) (Formula.bot.imp phi) :=
   DerivationTree.axiom [] _ (Axiom.efq phi) (FrameClass.base_le _)
 
 /--
 Build a proof of phi from an axiom witness.
 -/
-def proofFromAxiom (phi : Formula Atom) (ax : Axiom phi) (h_fc : ax.minFrameClass ≤ FrameClass.Base) :
+def proofFromAxiom (phi : Formula Atom) (ax : Axiom phi)
+    (h_fc : ax.minFrameClass ≤ FrameClass.Base) :
     DerivationTree .Base ([] : Context Atom) phi :=
   DerivationTree.axiom [] phi ax h_fc
 
@@ -180,14 +180,22 @@ def buildCompositionalProof (phi : Formula Atom) (fuel : Nat) :
           DerivationTree.axiom [] _ (Axiom.modal_t Formula.bot) (FrameClass.base_le _)
         let exFalso : DerivationTree .Base ([] : Context Atom) (Formula.bot.imp rhs) :=
           DerivationTree.axiom [] _ (Axiom.efq rhs) (FrameClass.base_le _)
-        let impS : DerivationTree .Base ([] : Context Atom) ((Formula.bot.imp rhs).imp (boxBot.imp (Formula.bot.imp rhs))) :=
-          DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot.imp rhs) boxBot) (FrameClass.base_le _)
+        let impS : DerivationTree .Base ([] : Context Atom)
+            ((Formula.bot.imp rhs).imp (boxBot.imp (Formula.bot.imp rhs))) :=
+          DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot.imp rhs) boxBot)
+            (FrameClass.base_le _)
         let step1 : DerivationTree .Base ([] : Context Atom) (boxBot.imp (Formula.bot.imp rhs)) :=
-          DerivationTree.modus_ponens [] (Formula.bot.imp rhs) (boxBot.imp (Formula.bot.imp rhs)) impS exFalso
-        let impK : DerivationTree .Base ([] : Context Atom) ((boxBot.imp (Formula.bot.imp rhs)).imp ((boxBot.imp Formula.bot).imp (boxBot.imp rhs))) :=
+          DerivationTree.modus_ponens [] (Formula.bot.imp rhs)
+            (boxBot.imp (Formula.bot.imp rhs)) impS exFalso
+        let impK :
+            DerivationTree .Base ([] : Context Atom)
+              ((boxBot.imp (Formula.bot.imp rhs)).imp
+                ((boxBot.imp Formula.bot).imp (boxBot.imp rhs))) :=
           DerivationTree.axiom [] _ (Axiom.imp_k boxBot Formula.bot rhs) (FrameClass.base_le _)
-        let step2 : DerivationTree .Base ([] : Context Atom) ((boxBot.imp Formula.bot).imp (boxBot.imp rhs)) :=
-          DerivationTree.modus_ponens [] (boxBot.imp (Formula.bot.imp rhs)) ((boxBot.imp Formula.bot).imp (boxBot.imp rhs)) impK step1
+        let step2 : DerivationTree .Base ([] : Context Atom)
+            ((boxBot.imp Formula.bot).imp (boxBot.imp rhs)) :=
+          DerivationTree.modus_ponens [] (boxBot.imp (Formula.bot.imp rhs))
+            ((boxBot.imp Formula.bot).imp (boxBot.imp rhs)) impK step1
         some (DerivationTree.modus_ponens [] (boxBot.imp Formula.bot) (boxBot.imp rhs) step2 modalT)
     -- General implication: A → B
     | .imp a b =>
@@ -304,7 +312,9 @@ def extractProof (phi : Formula Atom) (tableau : ExpandedTableau Atom)
       match enhancedSearch phi with
       | some proof => .success proof
       | none =>
-          .incomplete "All extraction strategies exhausted (formula is valid but proof term could not be constructed)"
+          .incomplete
+            "All extraction strategies exhausted (formula is valid but proof term \
+              could not be constructed)"
 
 /-!
 ## Proof Search Integration
@@ -345,7 +355,8 @@ This is automatically enforced by Lean's type system, but we provide
 this function for documentation and potential runtime checks.
 -/
 @[nolint unusedArguments]
-def verifyProof (_phi : Formula Atom) (_proof : DerivationTree .Base ([] : Context Atom) _phi) : Bool :=
+def verifyProof (_phi : Formula Atom)
+    (_proof : DerivationTree .Base ([] : Context Atom) _phi) : Bool :=
   true  -- Type system ensures well-formedness
 
 /--

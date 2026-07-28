@@ -1872,7 +1872,7 @@
     {
       "project_number": 574,
       "project_name": "tableau_calculus_repair_ancestor_blocking",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "description": "LARGE task (~2500-4000 lines estimated, comparable in scope to the modal-K analogue Cslib/Logics/Modal/Tableau/FmpMeasure.lean at 3388 lines). Depends on the predecessor spike task's decision record (its `handoffs/01_quotient-soundness-spike-decision.md`) -- READ IT FIRST; if it reports the quotient approach is NOT compatible with `intExpandBranches_closed_unsat`, STOP and re-scope this task via `/revise` before proceeding, per that spike's explicit instruction.\n\nBackground (self-contained): the intuitionistic propositional tableau in Cslib/Logics/Propositional/Tableau/Intuitionistic/ has a Lean-verified divergence: `intExpandBranches` does not terminate on `phi0 = (((a->b)->c) /\\ ((d->e)->f)) -> ((u1->v1) \\/ (u2->v2))` (complexity 9) -- world count grows unboundedly with fuel (4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260), with exact period-2 structural repetition from world 3 on. Root cause: `applyAllTImpRules` (Expansion.lean:136-143) copies `T(phi->psi)` itself into every accessible world lacking a copy (added to make `sat_timp` provable), which conflicts with `intFImpRule`'s `propagatePersistence` (Rules.lean:154-159, copies ALL T-formulas parent->child): each fresh copy BETA-resolves to a fresh `F(antecedent)` at the fresh world, minting another world, which receives another copy, forever. `intFImpReuseWitness?` (Expansion.lean:283-311) cannot cut this because it searches descendants (`isAccessible edges w x`) while the blocking world in a Fitting-style loop-check is always an ancestor.\n\nImplement, in dependency order, built ADDITIVELY FIRST per repo convention (add new declarations alongside the old, bridge, then migrate -- so already-landed green theorems never go red mid-flight):\n\nSTEP 1 -- Remove or bound the Deliverable-6 self-copy channel. Either drop the `T(phi->psi)` self-copy from `applyAllTImpRules` (Expansion.lean:136-143) and instead recover `sat_timp`-at-accessible-worlds by making the `.pos, .imp` rule (Rules.lean:274-275) range over EXISTING accessible labels (Fitting's actual rule shape per `Fitting1983` Ch. 4), rather than firing only reflexively at the label of the specific copy it is handed; or gate the copy so it structurally cannot re-trigger world creation. Either way, this removes the mechanism that makes world creation unbounded.\n\nSTEP 2 -- Replace `intFImpReuseWitness?` (Expansion.lean:283-311) with an ancestor-directed `Sfor`-containment blocking check: search ANCESTORS of the creation site (not descendants) for one whose forced-set `Sfor` already contains what the new world would force, and DROP the current `F(psi)@x` conjunct (Expansion.lean:308) -- the conjunct that made the old check alternately fail on the F1 divergence witness.\n\nSTEP 3 -- Restate `IBranchSaturation.sat_fimp` over the resulting BLOCKING QUOTIENT frame (the blocked world is identified with its blocking ancestor) and rewrite `truthLemma`'s F-imp case (Scheme.lean:600-607) to read its witness off the quotient rather than off `w <= w'` directly. Re-verify that `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) still holds under the restated frame -- this is the exact obligation the predecessor spike task was dispatched to de-risk; follow its documented approach if it reported GO, but DO re-verify the full proof (the spike was a bounded prototype, not a completed proof).\n\nExplicit acceptance gate: `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) re-verified sorry-free under the new calculus.\n\nREQUIRED explicit statement for whoever picks up this task: the 43-row regression guard `CslibTests/TableauConformance.lean` WILL CHANGE as a direct consequence of this work, because the algorithm's OUTPUTS change (fewer/different worlds, different branch shapes) once the self-copy channel and loop-check are altered. Task 317's previously-standing constraint that this guard 'must stay green' unchanged is WRONG under this repair and must not be inherited or treated as a constraint here -- the guard's expected values must be regenerated against the repaired algorithm's actual output, and its row count/shapes may differ from 43 rows in their current form.\n\nOut of scope for this task (left for task 317 itself, downstream, blocked on task 456's exponential world bound landing after this task): re-deriving the numeric world bound (task 456, `shared_tableau_containment_blocking`, already scopes the correct EXPONENTIAL replacement `Tableau.distinctTypes_le_pow`, `(b.labels.map b.typeAt).eraseDups.length <= 2^U.length` for a subformula-closed universe U) and closing the four remaining assembly sorries in task 317 (Scheme.lean:599 truthLemma T-imp case, the fuel=0 base case of `intExpandBranches_openBranch_sat`, and the two Completeness.lean bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125) -- those depend on this task's calculus landing plus task 456's bound.\n\nConstraints: additive-first (new declarations alongside old, migrate only once bridged and re-verified); no new axioms; no `sorry` left as a permanent artifact at task completion (temporary sorries during in-progress phases are acceptable per the repo's phase-based workflow but must be closed before this task completes); `lake build`, `lake exe checkInitImports`, `lake exe lint-style`, and `lake shake` must be green at completion; `CslibTests/TableauConformance.lean` must be UPDATED (not merely left accidentally green) to reflect the repaired algorithm's actual output, with row count and shapes re-derived from real `#eval`/proof output, not guessed.",
       "effort": "2500-4000 lines; multi-dispatch, recommend --hard with phase-sized dispatches",
@@ -1887,7 +1887,7 @@
         "CslibTests/TableauConformance.lean"
       ],
       "created": "2026-07-27T06:06:33Z",
-      "last_updated": "2026-07-28T19:17:12Z",
+      "last_updated": "2026-07-28T20:44:01Z",
       "artifacts": [
         {
           "type": "research",
@@ -1895,17 +1895,55 @@
           "summary": "Spawn analysis from parent task"
         },
         {
-          "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/01_tableau-repair-ancestor-blocking.md",
-          "type": "plan",
-          "summary": "8-phase hard-mode implementation plan with postmortem constraints, preserved-assets accounting, and H7 territory contract. Acceptance gate: intExpandBranches_closed_unsat re-verified sorry-free."
-        },
-        {
           "path": "specs/574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md",
           "type": "report",
           "summary": "Phase 6 blocker resolution: remedy (b) provable — thread invariant-side loop-back edges (augSets), no quotient needed; supersedes Phase 5 stack; /revise required. Live-verified prototype closes the temp sorry."
+        },
+        {
+          "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md",
+          "type": "plan",
+          "summary": "v02: replaces the blocking-quotient mechanism with an invariant-side loop-back-edge list (GGN M-union-C countermodel construction), exploiting the saturation lemma's existentially-quantified edges; drops the never-consumed sat_fimp numeric ordering conjunct; Phase 5 quotient stack superseded and scheduled for deletion. 8 phases, 5 completed, acceptance gate unchanged."
         }
       ],
-      "session_id": "sess_1785260108_081c2a"
+      "session_id": "sess_1785260108_081c2a",
+      "plan_metadata": {
+        "phases": 8,
+        "total_effort_hours": 65,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 2,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            6
+          ],
+          [
+            7
+          ],
+          [
+            8
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_phase6-blocker-resolution.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-07-28"
+          }
+        ],
+        "skeleton": false,
+        "follow_up_tasks": []
+      }
     },
     {
       "project_number": 576,

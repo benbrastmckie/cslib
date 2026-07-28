@@ -27,7 +27,7 @@ next_project_number: 584
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-574 [IMPLEMENTING] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
+574 [PLANNED] — LARGE task (~2500-4000 lines estimated, comparable in scope to th
   └─ 583 [NOT STARTED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [BLOCKED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -156,14 +156,14 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 
 ### 574. Tableau calculus repair ancestor blocking
 - **Effort**: 2500-4000 lines; multi-dispatch, recommend --hard with phase-sized dispatches
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 573
 - **Research**:
   - [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
   - [574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md]
-- **Plan**: [574_tableau_calculus_repair_ancestor_blocking/plans/01_tableau-repair-ancestor-blocking.md]
+- **Plan**: [574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md]
 
 **Description**: LARGE task (~2500-4000 lines estimated, comparable in scope to the modal-K analogue Cslib/Logics/Modal/Tableau/FmpMeasure.lean at 3388 lines). Depends on the predecessor spike task's decision record (its `handoffs/01_quotient-soundness-spike-decision.md`) -- READ IT FIRST; if it reports the quotient approach is NOT compatible with `intExpandBranches_closed_unsat`, STOP and re-scope this task via `/revise` before proceeding, per that spike's explicit instruction.
 

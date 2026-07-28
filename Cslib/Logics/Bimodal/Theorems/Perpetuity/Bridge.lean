@@ -30,8 +30,6 @@ monotonicity lemmas, and the proof of perpetuity principle P6.
 * Ported from BimodalLogic/Theories/Bimodal/Theorems/Perpetuity/Bridge.lean
 -/
 
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Theorems.Perpetuity
@@ -84,7 +82,8 @@ def diamondMono {φ₁ φ₂ : Bimodal.Formula Atom} (h : ⊢ φ₁.imp φ₂) :
   contraposition (boxMono (contraposition h))
 
 /-- Future monotonicity: from `⊢ A → B`, derive `⊢ GA → GB`. -/
-def futureMono {φ₁ φ₂ : Bimodal.Formula Atom} (h : ⊢ φ₁.imp φ₂) : ⊢ φ₁.allFuture.imp φ₂.allFuture := by
+def futureMono {φ₁ φ₂ : Bimodal.Formula Atom} (h : ⊢ φ₁.imp φ₂) :
+    ⊢ φ₁.allFuture.imp φ₂.allFuture := by
   have g_h := Bimodal.DerivationTree.temporal_necessitation _ h
   have fk := futureKDist φ₁ φ₂
   exact Bimodal.DerivationTree.modus_ponens [] _ _ fk g_h
@@ -98,7 +97,8 @@ def pastMono {φ₁ φ₂ : Bimodal.Formula Atom} (h : ⊢ φ₁.imp φ₂) : �
   -- Apply temporal duality again to get H(A → B)
   have past_raw := Bimodal.DerivationTree.temporal_duality _ g_swap
   have h_past : ⊢ (φ₁.imp φ₂).allPast := by
-    simp only [Bimodal.Formula.swapTemporal_allFuture, Bimodal.Formula.swapTemporal_involution] at past_raw
+    simp only [Bimodal.Formula.swapTemporal_allFuture,
+      Bimodal.Formula.swapTemporal_involution] at past_raw
     exact past_raw
   have pk := pastKDist φ₁ φ₂
   exact Bimodal.DerivationTree.modus_ponens [] _ _ pk h_past

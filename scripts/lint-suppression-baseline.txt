@@ -36,5 +36,4 @@
 1 Cslib/Logics/Bimodal/Metalogic/Separation/FormulaOps.lean
 1 Cslib/Logics/Bimodal/ProofSystem/Axioms.lean
 1 Cslib/Logics/Temporal/Metalogic/MetricCompleteness.lean
-1 Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean
 1 Cslib/Logics/Temporal/ProofSystem/Axioms.lean

@@ -42,8 +42,6 @@ and `NoMinOrder`, so Base-axiom delegation to `axiom_sound` requires no extra hy
 * [J. Burgess, *Basic Tense Logic*][Burgess1984] §6.1 — metric tense = ordered abelian group time
 -/
 
-set_option linter.style.setOption false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal

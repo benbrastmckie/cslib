@@ -33,9 +33,6 @@ and a point function `limitF`. We define:
 * [J. Burgess, *Axioms for Tense Logic II: Time Periods*][Burgess1982II] — Section 2, Claim 2.11
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic.Chronicle
@@ -79,7 +76,7 @@ instance chronicle_nontrivial (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaxi
             exact ⟨.axiom [] _ (.serial_future) trivial⟩))
       h_top
   obtain ⟨y, hy, hlt, _⟩ := limit_F_resolution A h_mcs 0 h0 Formula.top h_f_top
-  exact ⟨⟨⟨0, h0⟩, ⟨y, hy⟩, by simp; exact ne_of_lt hlt⟩⟩
+  exact ⟨⟨⟨0, h0⟩, ⟨y, hy⟩, by simp only [ne_eq, Subtype.mk.injEq]; exact ne_of_lt hlt⟩⟩
 
 /-- NoMaxOrder: for any point t in the limit domain, there exists a strictly
 larger point.

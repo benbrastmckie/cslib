@@ -1,0 +1,26 @@
+{
+  "task_number": 456,
+  "phase_number": 1,
+  "session_id": "sess_1785275816_a84520_456",
+  "status": "done",
+  "objectives": [
+    {
+      "id": "1.1",
+      "description": "Create Blocking.lean with sibling conventions and the three definitions (typeAt, posTypeAt, containmentBlocked)",
+      "status": "done",
+      "files_touched": ["Cslib/Foundations/Logic/Tableau/Blocking.lean"]
+    },
+    {
+      "id": "1.2",
+      "description": "Spec lemmas mem_typeAt_iff and containmentBlocked_iff under LawfulBEq, proved sorry-free",
+      "status": "done",
+      "files_touched": ["Cslib/Foundations/Logic/Tableau/Blocking.lean"]
+    }
+  ],
+  "verification": {
+    "scoped_build": "green (lake build Cslib.Foundations.Logic.Tableau.Blocking)",
+    "checkInitImports": "exit 0",
+    "sorry_count": 0,
+    "axioms": "propext, Quot.sound only (lean_verify on both spec lemmas)"
+  }
+}

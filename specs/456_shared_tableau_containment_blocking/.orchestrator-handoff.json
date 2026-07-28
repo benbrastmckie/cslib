@@ -1,0 +1,25 @@
+{
+  "status": "partial",
+  "summary": "Phase 1 complete: created Cslib/Foundations/Logic/Tableau/Blocking.lean with the definitional layer — Branch.typeAt (signed filter-then-map + eraseDups, NOT via formulasAt per postmortem constraint), Branch.posTypeAt (Sfor projection), Branch.containmentBlocked (all/any containment test) — plus spec lemmas mem_typeAt_iff and containmentBlocked_iff under LawfulBEq, both sorry-free and axiom-clean (propext, Quot.sound only). Scoped build green; checkInitImports passes. Scope Hypothesis confirmed: no Mathlib import needed for the definitional layer. Phases 2-5 remain (counting layer; Temporal redirection; references.bib; CI gate).",
+  "phases_completed": 1,
+  "phases_total": 5,
+  "skeleton": false,
+  "sorry_inventory": [],
+  "blockers": [],
+  "continuation_context": {
+    "next_phase": 2,
+    "notes": "Phase 2 (counting layer) depends on Phase 1 — now unblocked. Phase 4 (references.bib) was already dispatchable in wave 1. Proof note for Phase 2 authors: in this module context, simp with List.all_eq_true/List.any_eq_true must NOT be combined with eq_comm (loops); plain simp closes containmentBlocked_iff."
+  },
+  "artifacts": [
+    {
+      "path": "Cslib/Foundations/Logic/Tableau/Blocking.lean",
+      "type": "lean_module",
+      "summary": "New module, definitional layer only (3 defs + 2 spec lemmas, ~110 lines, zero sorry)"
+    },
+    {
+      "path": "specs/456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md",
+      "type": "plan",
+      "summary": "Phase 1 marked [COMPLETED], all 5 checklist items checked, Scope Hypothesis confirmation recorded"
+    }
+  ]
+}

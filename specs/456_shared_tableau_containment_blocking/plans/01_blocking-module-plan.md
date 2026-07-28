@@ -1,7 +1,7 @@
 # Implementation Plan: Shared Tableau Containment-Blocking Module (Blocking.lean)
 
 - **Task**: 456 - shared_tableau_containment_blocking
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5 hours
 - **Dependencies**: 574 (completed — settled the logic-specific side-condition shape)
 - **Research Inputs**: reports/01_blocking-module-research.md (adversarially verified; three proof cores compiled green in research session)
@@ -162,26 +162,26 @@ Phases within the same wave can execute in parallel. Territory (H7): Phase 1/2 o
 exclusively; Phase 5 owns barrel/CI files. Phase 3 is deliberately serialized after Phase 2 so
 the Temporal build never sees a half-written Blocking.lean.
 
-### Phase 1: Blocking.lean definitional layer (typeAt, posTypeAt, containmentBlocked + specs) [NOT STARTED]
+### Phase 1: Blocking.lean definitional layer (typeAt, posTypeAt, containmentBlocked + specs) [COMPLETED]
 
 - **Goal:** Create `Cslib/Foundations/Logic/Tableau/Blocking.lean` with the three definitions
   and their spec lemmas, compiling green in isolation.
 - **Tasks:**
-  - [ ] Create file with sibling conventions: `module` header, `import Cslib.Init`,
+  - [x] Create file with sibling conventions: `module` header, `import Cslib.Init`,
     `import Cslib.Foundations.Logic.Tableau.Branch`, minimal Mathlib import(s) needed by this
     phase (definitions are BEq-only; likely none beyond Branch's own), `@[expose] public
     section`, namespace `Cslib.Logic.Tableau`.
-  - [ ] `Branch.typeAt [BEq F] [BEq L] (b : Branch F L) (l : L) : List (Sign × F)` —
+  - [x] `Branch.typeAt [BEq F] [BEq L] (b : Branch F L) (l : L) : List (Sign × F)` —
     filter-then-map keeping the sign, then `eraseDups` (exact definition from research F3; do
     NOT route through `formulasAt`).
-  - [ ] `Branch.posTypeAt [BEq F] [BEq L] (b : Branch F L) (l : L) : List F` — positive-only
+  - [x] `Branch.posTypeAt [BEq F] [BEq L] (b : Branch F L) (l : L) : List F` — positive-only
     Sfor projection (research F3).
-  - [ ] `Branch.containmentBlocked [BEq F] [BEq L] (b : Branch F L) (l_new l_anc : L) : Bool` —
+  - [x] `Branch.containmentBlocked [BEq F] [BEq L] (b : Branch F L) (l_new l_anc : L) : Bool` —
     `(b.typeAt l_new).all fun pair => (b.typeAt l_anc).any (pair == ·)`.
-  - [ ] Spec lemmas under `[LawfulBEq F] [LawfulBEq L]`: `mem_typeAt_iff` (membership
+  - [x] Spec lemmas under `[LawfulBEq F] [LawfulBEq L]`: `mem_typeAt_iff` (membership
     characterization via filter/map/`List.mem_eraseDups`) and `containmentBlocked_iff`
     (`= true ↔ ∀ x ∈ b.typeAt l₁, x ∈ b.typeAt l₂`, via `List.all_eq_true`/`List.any_eq_true`).
-  - [ ] Docstrings + References section: `[Fitting1983]`, `[GargGenoveseNegri2012]` as
+  - [x] Docstrings + References section: `[Fitting1983]`, `[GargGenoveseNegri2012]` as
     provenance only; `[Massacci2000]` may be cited substantively (in corpus) for the
     per-obligation scoping remark.
 - **Timing:** 1 hour
@@ -191,6 +191,11 @@ the Temporal build never sees a half-written Blocking.lean.
 - **Scope Hypothesis:** definitional layer needs no Mathlib import beyond what
   `Branch.lean` transitively provides (BEq-only layer). Confirm at first scoped build; if a
   Mathlib import is needed for Phase 1 (not just Phase 2), record which and why.
+  **CONFIRMED at implementation**: no Mathlib import needed; `List.eraseDups`,
+  `List.mem_eraseDups`, `List.all_eq_true`, `List.any_eq_true` all resolve from Branch's
+  transitive imports. One deviation from the phase sketch: `containmentBlocked_iff` closes by
+  plain `simp [containmentBlocked, List.all_eq_true, List.any_eq_true]` — adding `eq_comm`
+  (first attempt) made the two list lemmas loop.
 - **Done when:** `lake build Cslib.Foundations.Logic.Tableau.Blocking` is green; zero `sorry`
   in the file; both spec lemmas stated and proved; commit per green substep.
 

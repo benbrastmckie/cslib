@@ -295,3 +295,65 @@ functor-over-relation lifting would be the first implementation step, not a rese
 - Live sources: `Cslib/Logics/Propositional/NaturalDeduction/{Basic, Normalization/*}.lean`,
   `CurryHoward/{Defs, Isomorphism, Reduction}.lean`, and the base+extension precedent
   `Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean`.
+
+---
+
+## Adversarial Self-Verification
+
+Independent H4 verification pass (divergence audit focus). Every load-bearing claim was
+re-checked against the live codebase; the two headline modules were rebuilt
+(`lake build Cslib.Logics.Propositional.NaturalDeduction.Normalization.SubformulaProperty
+Cslib.Logics.Propositional.CurryHoward.Isomorphism` — completed successfully, 672 jobs).
+
+| Claim | Source/Counterexample | Verdict |
+|---|---|---|
+| `Theory.Derivation` is a single 11-ctor inductive with gated `efq` (Basic.lean:146-183) | `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean:146` (inductive), `:182-183` (`efq {…} [IsIntuitionistic T]`) | VERIFIED |
+| `IsBotRuleFree` predicate, `efq ⇒ False` (Basic.lean:223, 235) | `NaturalDeduction/Basic.lean:223` (def), `:235` (`efq _ => False`) | VERIFIED |
+| `MinimalDerivation := MPL.Derivation` abbrev (Basic.lean:242-243) | `NaturalDeduction/Basic.lean:242` | VERIFIED |
+| Consumer sweep negative: `MinimalDerivation`/`IsBotRuleFree` referenced only inside `NaturalDeduction/Basic.lean` | `grep -rn` over `Cslib/`: hits only in `NaturalDeduction/Basic.lean` (defs + docstrings) plus the *distinct* `SeqProof.IsBotRuleFree` in `SequentCalculus/LJ/Basic.lean:237` (parallel predicate, not a consumer) | VERIFIED |
+| Trigger condition NOT met (no physically-⊥-free consumer) | Follows from the verified negative sweep + verified STLC independence (below); no counterexample found in `Cslib/` | VERIFIED |
+| Subformula property under `efq` is currently closed via `IsIntuitionistic.efq` axiom-grounding (SubformulaProperty.lean:282-294) | `Normalization/SubformulaProperty.lean:282` (`@efq` case), `:291-292` (`IsIntuitionistic.efq A` + `imp_left`); main theorem `:305-309`; `_of_isStronglyNormal` `:52` | VERIFIED |
+| Removing the gate re-opens the hard point (extension `efq` has no `⊥ → A ∈ T` axiom to ground on) | Logical consequence of the verified proof shape at `SubformulaProperty.lean:291` — the closing witness is literally the theory-membership axiom; a structural `efq` with no membership has no such witness | VERIFIED (reasoning, not a file fact) |
+| STLC is standalone: no bottom, no abort, not built on `Theory.Term` | `Cslib/Languages/LambdaCalculus/LocallyNameless/Stlc/Basic.lean:39` (`Ty`), `:51` (`Typing`); `grep` for `Bot`/`abort`/`Theory.Term`/`Propositional` over `Cslib/Languages/LambdaCalculus/`: zero hits | VERIFIED |
+| Task 407 landed option C | `specs/archive/407_mpl_base_structure_first_redesign/decisions.md:5` (Q1 = "Option C … option B stays deferred to task 409. No proof churn.") — note directory is now under `specs/archive/` | VERIFIED |
+| "No task 398 spec directory exists (`specs/398_*` absent)" | `specs/archive/398_efq_nd_rule_ipl_base_keep_mpl/` EXISTS with `plans/`, `reports/`, `summaries/` | REFUTED (as stated) |
+| Structural metatheory anchors: `weak` 286 (`efq` 301-303), `cut` 334, `subs` 363-389 (`efq` 389), `substAtom` 392-408 (`efq` 408), `instIsIntuitionisticExtension` used at 302 | `NaturalDeduction/Basic.lean:286,301-302,334,363,389,392,408` — all exact | VERIFIED |
+| `IsIntuitionistic` class with `efq A : (⊥ → A) ∈ T` | `Cslib/Logics/Propositional/Defs.lean:166-167` | VERIFIED |
+| Normalization anchors: `height` 49, `isNormal` 72, `isStronglyNormal` 136, `formulas` 237, `SubformulaProperty` 252 | `Normalization/Basic.lean:49,72,136,237,252` — all exact | VERIFIED |
+| CH mirror anchors: `Theory.Term` inductive "57-104", `efq` ctor "100-104"; Isomorphism `curryHowardForward` "54" (`efq` "67"), `curryHowardBackward` "74" | Actual: `CurryHoward/Defs.lean:56` (inductive), `:102` (`efq`); `Isomorphism.lean:53` (`forward`), `:66` (`efq`), `:73` (`backward`) — off-by-one/two throughout; structure and content correct | VERIFIED (line anchors ±1-2) |
+| Reduction anchors: `subsOne` "45", `reduceRoot` "66" | Actual `Normalization/Reduction.lean:43,64` — off-by-two; content correct | VERIFIED (line anchors ±2) |
+| `Termination.lean` "1103 lines"; `CurryHoward/Reduction.lean` "274 lines"; `snForm`/`exists_stronglyNormal_form` present | Actual `wc -l`: Termination 1113, CH Reduction 274; `snForm` at `Termination.lean:1071` | VERIFIED (1113 not 1103; immaterial) |
+| `ExtDerivationTree`/`ExtAxiom` precedent with `embedAxiom`/`embedDerivation` lifts, at "185/46/209/26" | File and structure confirmed, but actual anchors: `ExtAxiom` `:44`, `ExtDerivationTree` `:176`, `embedAxiom` def `:201`, `embedDerivation` def `:280` (`Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/ExtDerivation.lean`) | VERIFIED (substance) / line anchors imprecise |
+| `SeqProof.IsBotRuleFree` "238-249"; LM gated-`botL` design + `not_isIntuitionistic_mpl` "20-54" | Actual: LJ def at `SequentCalculus/LJ/Basic.lean:237` (body through 248); `not_isIntuitionistic_mpl` at `LM/Basic.lean:54` | VERIFIED (±1) |
+| FromHilbert anchors: `botE` 97, `botEDeriv` 195, `efq` subst at 240 | Actual `FromHilbert.lean:98,196,241` — off-by-one; content correct | VERIFIED (±1) |
+| `InferenceSystem` imported by Basic.lean:9 | `NaturalDeduction/Basic.lean:9`: `public import Cslib.Foundations.Logic.InferenceSystem` | VERIFIED |
+| Option-C assets "green on main" | `lake build` of `SubformulaProperty` + `CurryHoward.Isomorphism` completed successfully (672 jobs) on current main | VERIFIED |
+
+**Correction note (the one REFUTED row)**: §2's claim "No task 398 spec directory exists
+(`specs/398_*` absent)" is wrong as stated — the directory was *archived*, not lost:
+`specs/archive/398_efq_nd_rule_ipl_base_keep_mpl/` exists with full `plans/`, `reports/`, and
+`summaries/`. Consequence: the decided-strategy provenance for the subformula-property hard point
+(atomic restriction + permutation conversions) is available *first-hand* in the 398 archive, not
+only second-hand via 407 report 01 as §2 suggests. This *strengthens* the report's §5.2 guidance
+(the strategy source is richer than claimed); it does not weaken any conclusion. Similarly, task
+407's directory now lives at `specs/archive/407_mpl_base_structure_first_redesign/` (task 407 is
+archived/completed) — all §8 provenance paths beginning `specs/407_...` should be read as
+`specs/archive/407_...`. The predecessor assumptions themselves (option C landed; gated `efq`;
+`IsBotRuleFree` + `MinimalDerivation` naming devices present) all hold on current main, verified
+above against the live code.
+
+**Uncertain claims (none blocking)**: the §5 hypothetical split map (E1′ vs E2 costs, transport
+surface) is design projection, not codebase fact — it is internally consistent with the verified
+inventory but cannot be "verified" until implemented; confidence: high for the transport-surface
+list (it enumerates exactly the verified `efq`-threading sites), medium for the E1′-vs-E2
+trade-off framing.
+
+**Analysis-paralysis verdict: PASS.** The report does not defer decisions. It delivers a
+concrete, falsifiable recommendation (do NOT pursue option B; keep 409 deferred or `[BLOCKED]`
+with reason "trigger condition unmet"), an explicit re-trigger signal list (§4.3), and — for the
+contingency — a named implementation route (E1′ mirroring `ExtDerivation.lean`, or E2) with the
+exact transport surface enumerated. The "do nothing now" conclusion is the *substantive answer*
+to this task's own gate ("only pursue if a concrete downstream consumer needs a physically ⊥-free
+derivation object"), backed by a verified-negative consumer sweep, not an evasion of work.
+**Overall H4 verdict: report VERIFIED with one corrected provenance claim; recommendation
+stands.**

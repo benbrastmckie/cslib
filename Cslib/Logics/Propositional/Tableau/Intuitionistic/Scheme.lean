@@ -3147,16 +3147,29 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                                simp [hs.1, hs.2, hy_cond]
                              · simp [hs] at hy_cond
                            have hreuse_sat : IExpandedConsistent bPers newExp ∧
-                               IExpandedAccessConsistent augH bPers newExp := by
-                             -- Reuse-site discharge under ancestor-direction blocking: `x` is
-                             -- below `l` (`x ≤ l`, `isAccessible edges x l`), the reverse of
-                             -- what `sfSatisfied`/`sfAccessSat`'s `.neg,.imp` clauses demand
-                             -- directly. Phase 6.3 closes this with the loop-back edge `(x, l)`
-                             -- recorded into the invariant-side list; this step only threads the
-                             -- unaugmented `augH` through the signature change.
-                             sorry
+                               IExpandedAccessConsistent (augH ++ [(x, l)]) bPers newExp := by
+                             subst hnewExp
+                             constructor
+                             · intro sf' hsf'
+                               rcases List.mem_append.mp hsf' with h' | h'
+                               · exact hIC_bPers sf' h'
+                               · rw [List.mem_singleton] at h'
+                                 subst h'
+                                 show sfSatisfied bPers ⟨.neg, .imp φ ψ₀, l⟩
+                                 simp only [sfSatisfied]
+                                 exact ⟨x, houtPhi, hFpsi⟩
+                             · intro sf' hsf'
+                               rcases List.mem_append.mp hsf' with h' | h'
+                               · exact sfAccessSat_edges_mono (x, l) (hACC_bPers sf' h')
+                               · rw [List.mem_singleton] at h'
+                                 subst h'
+                                 show sfAccessSat (augH ++ [(x, l)]) bPers
+                                   ⟨.neg, .imp φ ψ₀, l⟩
+                                 simp only [sfAccessSat]
+                                 exact ⟨x, isAccessible_one_step (by simp), houtPhi, hFpsi⟩
                            have hIC_reuse : IExpandedConsistent bPers newExp := hreuse_sat.1
-                           have hACC_reuse : IExpandedAccessConsistent augH bPers newExp :=
+                           have hACC_reuse :
+                               IExpandedAccessConsistent (augH ++ [(x, l)]) bPers newExp :=
                              hreuse_sat.2
                            have hAC'' : IAllConsistent (done ++ [bPers] ++ bt)
                                (doneExp ++ [newExp] ++ eT) (doneNW ++ [nwH] ++ nwT) :=
@@ -3166,7 +3179,8 @@ private lemma intExpandBranches_openBranch_sat (fuel : Nat)
                            have hLen0'' : (done ++ [bPers] ++ bt).length =
                                (doneEdges ++ [edgesH] ++ edgesT).length := by simp; omega
                            have hACC'' : IAllAccessConsistent (done ++ [bPers] ++ bt)
-                               (doneExp ++ [newExp] ++ eT) (doneAug ++ [augH] ++ augT) :=
+                               (doneExp ++ [newExp] ++ eT)
+                               (doneAug ++ [augH ++ [(x, l)]] ++ augT) :=
                              IAllAccessConsistent_append
                                (IAllAccessConsistent_append hDoneACC ⟨hACC_reuse, trivial⟩)
                                hPendingACCTail

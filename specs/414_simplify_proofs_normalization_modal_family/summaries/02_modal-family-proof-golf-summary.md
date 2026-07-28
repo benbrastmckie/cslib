@@ -3,6 +3,10 @@
 - **Task**: 414 - simplify_proofs_normalization_modal_family
 - **Plan**: `specs/414_simplify_proofs_normalization_modal_family/plans/02_modal-family-proof-golf.md` (v2)
 - **Status**: implemented
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Type**: cslib
 
 ## What Was Done

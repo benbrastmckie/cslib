@@ -716,7 +716,7 @@
     {
       "project_number": 414,
       "project_name": "simplify_proofs_normalization_modal_family",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "parent_task": 278,
@@ -742,8 +742,8 @@
         444
       ],
       "created": "2026-06-29T22:13:39Z",
-      "last_updated": "2026-07-28T17:59:53Z",
-      "session_id": "sess_1785261185_12b8ff_414",
+      "last_updated": "2026-07-28T19:40:23Z",
+      "session_id": "sess_1785267029_9c87d5",
       "artifacts": [
         {
           "path": "specs/414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md",
@@ -754,9 +754,15 @@
           "path": "specs/414_simplify_proofs_normalization_modal_family/plans/02_modal-family-proof-golf.md",
           "type": "plan",
           "summary": "Revised plan (v2): retires the three GenericMCSBridge phases as COMPLETED WITH EXCLUSIONS on verified zero-match evidence; preserves Phase 1 ModalConservativity arm collapse; corrects sorry baseline to 5; adds concurrency attribution protocol"
+        },
+        {
+          "path": "specs/414_simplify_proofs_normalization_modal_family/summaries/02_modal-family-proof-golf-summary.md",
+          "type": "summary",
+          "summary": "Phase 1 arm collapse + Phase 4 gate/sorry-freeness audit; one plan deviation (or-arm simp set drops Bimodal.Formula.or per linter unusedSimpArgs fix)"
         }
       ],
-      "next_artifact_number": 2
+      "next_artifact_number": 2,
+      "completion_summary": "Collapsed the hand-rolled classical reasoning in the and/or arms of bimodal_truthAt_toBimodal_iff_satisfies (ModalConservativity.lean) to single-line simp only + tauto forms (3 insertions, 20 deletions); box/diamond arms untouched. GenericMCSBridge phases re-confirmed COMPLETED WITH EXCLUSIONS on zero-match evidence. Full CI pipeline green (build 3309/3309, test 9374/9374, lint, lint-style, shake, checkInitImports); touched files sorry-free."
     },
     {
       "project_number": 425,

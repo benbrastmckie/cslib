@@ -15,7 +15,6 @@ next_project_number: 584
 | 2 | 39,40,215,301,450,456,497,511,537,551,553,564,568,569,571,583 | 36,37,181,425,530,554,562,563,574 | propositional logic, modal logic, tableau infrastructure, ... |
 | 3 | 41,317,506,548,565,566,576,582 | 39,40,456,511,553,564,568 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,375,430,567 | 317,506,558,565,566 | propositional logic, modal logic |
-| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -87,7 +86,6 @@ next_project_number: 584
 ### Code Hygiene
 
 530 [PLANNED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-414 [PLANNED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ## Tasks
 
@@ -600,12 +598,13 @@ After implementation:
 ---
 
 ### 414. Simplify proofs normalization modal family
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
 - **Research**: [414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md]
 - **Plan**: [414_simplify_proofs_normalization_modal_family/plans/02_modal-family-proof-golf.md]
+- **Summary**: [414_simplify_proofs_normalization_modal_family/summaries/02_modal-family-proof-golf-summary.md]
 
 **Description**: Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*] lists and long tactic chains) using the EXISTING normalization/embedding lemmas. RECONCILED: original premise cited task-268 'co-tags' which was abandoned - re-scoped to the lemmas that actually exist. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 

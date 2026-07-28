@@ -1,6 +1,13 @@
 # Research Report: Simplify Verbose Modal/Temporal/Bimodal Proofs
 
 **Task**: 414
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Type**: cslib
 **Session**: sess_1785258473_63f7b4_414
 **Date**: 2026-07-28

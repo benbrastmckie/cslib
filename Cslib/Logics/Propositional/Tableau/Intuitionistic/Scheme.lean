@@ -69,8 +69,12 @@ These conditions are established structurally by `intExpandBranches_openBranch_s
 implies every compound formula in `b` is in `e`, and formulas in `e` had their rule outputs
 added to an ancestor branch; branch monotonicity carries them forward to `b`.
 
-Note on `sat_fimp`: the new world `w'` satisfies `w ≤ w'` because the expansion assigns
-strictly increasing world labels (nextWorld starts at 1 and only increments). -/
+Note on `sat_fimp`: the numeric ordering conjunct `w ≤ w'` was dropped (see the field's own
+doc comment for the D8 rationale). It was a raw-`Nat` proxy for accessibility, sound only under
+descendant-directed world creation where labels increase monotonically; under ancestor-directed
+blocking the witness `w'` can carry a *smaller* label than `w`. The genuine accessibility
+content — that the witness is reachable from `w` — is carried in strictly stronger form by
+`IFimpAccess`, which the F-imp case of `truthLemma` reads from directly. -/
 structure IBranchSaturation (Atom : Type*) [DecidableEq Atom] [Hashable Atom]
     (b : IBranch Atom) where
   /-- T(φ∧ψ)@w ∈ b → T(φ)@w ∈ b ∧ T(ψ)@w ∈ b (alpha-rule saturation) -/
@@ -93,10 +97,16 @@ structure IBranchSaturation (Atom : Type*) [DecidableEq Atom] [Hashable Atom]
       b.any (fun sf => sf.sign == .neg && sf.formula == .or φ ψ && sf.label == w) = true →
       b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∧
       b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w) = true
-  /-- F(φ→ψ)@w ∈ b → ∃ w' ≥ w, T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b (world-creating rule) -/
+  /-- F(φ→ψ)@w ∈ b → ∃ w', T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b (world-creating rule). The numeric
+  ordering conjunct `w ≤ w'` is dropped (D8): it was a raw-`Nat` proxy for accessibility that
+  held only because the original descendant-directed expansion assigned strictly increasing
+  world labels. Under ancestor-directed blocking the reuse witness can sit at a *smaller* label
+  than `w`, so the conjunct is false in general — and it is never consumed downstream (verified:
+  `truthLemma`'s F-imp case reads its witness from `IFimpAccess`, never from this field), so
+  dropping it loses no content. -/
   sat_fimp : ∀ (φ ψ : Proposition Atom) (w : Nat),
       b.any (fun sf => sf.sign == .neg && sf.formula == .imp φ ψ && sf.label == w) = true →
-      ∃ (w' : Nat), w ≤ w' ∧
+      ∃ (w' : Nat),
         b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
         b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
   /-- T(φ→ψ)@w ∈ b → F(φ)@w ∈ b ∨ T(ψ)@w ∈ b (Fitting Ch. 4 split, beta-rule, reflexive at the
@@ -960,7 +970,7 @@ private def sfSatisfied (b : IBranch Atom) (sf : ISF Atom) : Prop :=
     b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∧
     b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == sf.label) = true
   | .neg, .imp φ ψ =>
-    ∃ w' : Nat, sf.label ≤ w' ∧
+    ∃ w' : Nat,
       b.any (fun x => x.sign == .pos && x.formula == φ && x.label == w') = true ∧
       b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
   | .pos, .imp φ ψ =>
@@ -997,8 +1007,8 @@ private lemma sfSatisfied_mono {b b' : IBranch Atom} {sf : ISF Atom}
     | (rcases h with h | h
        · exact Or.inl (any_mono_sub hmono h)
        · exact Or.inr (any_mono_sub hmono h))
-    | (obtain ⟨w', hw', h1, h2⟩ := h
-       exact ⟨w', hw', any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
+    | (obtain ⟨w', h1, h2⟩ := h
+       exact ⟨w', any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
 
 omit [Hashable Atom] in
 /-- `IExpandedConsistent` is monotone under branch inclusion. -/
@@ -1560,7 +1570,7 @@ private lemma intStepBranch_linear_preserves
         · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
         · show sfSatisfied (Branch.extendMany b newForms) ⟨.neg, .imp φ ψ, l⟩
           simp only [sfSatisfied]
-          refine ⟨nw, hsfl, List.any_eq_true.mpr ⟨⟨.pos, φ, nw⟩, hmemNew _ ?_, by simp⟩,
+          refine ⟨nw, List.any_eq_true.mpr ⟨⟨.pos, φ, nw⟩, hmemNew _ ?_, by simp⟩,
                   List.any_eq_true.mpr ⟨⟨.neg, ψ, nw⟩, hmemNew _ ?_, by simp⟩⟩ <;>
             rw [← hnf] <;> simp
       · intro sf' hsf'

@@ -21,9 +21,6 @@ Shared definitions for gContent, hContent, fContent, pContent, uContent, sConten
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/TemporalContent.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -104,7 +101,9 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
     have h_bx3 : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture.imp
         ((Formula.untl Formula.top phi).imp (Formula.untl Formula.top phi.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_until phi phi.neg.neg Formula.top) trivial
-    have h_sf_impl : DerivationTree FrameClass.Base [] ((Formula.someFuture phi).imp (Formula.someFuture phi.neg.neg)) :=
+    have h_sf_impl :
+        DerivationTree FrameClass.Base [] ((Formula.someFuture phi).imp
+          (Formula.someFuture phi.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
     have h_sf_nn_in : Formula.someFuture phi.neg.neg ∈ M :=
       SetMaximalConsistent.implication_property h_mcs
@@ -121,7 +120,9 @@ theorem f_content_iff_not_neg_in_g_content {M : Set (Formula Atom)}
       have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
           ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
         DerivationTree.axiom [] _ (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
-      have h_sf_impl : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
+      have h_sf_impl :
+          DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp
+            (Formula.someFuture phi)) :=
         DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dne
       exact SetMaximalConsistent.implication_property h_mcs
         (theoremInMcsFc h_mcs h_sf_impl) h_in
@@ -147,7 +148,9 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
     have h_bx3p : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast.imp
         ((Formula.snce Formula.top phi).imp (Formula.snce Formula.top phi.neg.neg))) :=
       DerivationTree.axiom [] _ (Axiom.right_mono_since phi phi.neg.neg Formula.top) trivial
-    have h_sp_impl : DerivationTree FrameClass.Base [] ((Formula.somePast phi).imp (Formula.somePast phi.neg.neg)) :=
+    have h_sp_impl :
+        DerivationTree FrameClass.Base [] ((Formula.somePast phi).imp
+          (Formula.somePast phi.neg.neg)) :=
       DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dni
     have h_sp_nn_in : Formula.somePast phi.neg.neg ∈ M :=
       SetMaximalConsistent.implication_property h_mcs
@@ -164,7 +167,9 @@ theorem p_content_iff_not_neg_in_h_content {M : Set (Formula Atom)}
       have h_bx3p : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
           ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
         DerivationTree.axiom [] _ (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
-      have h_sp_impl : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
+      have h_sp_impl :
+          DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp
+            (Formula.somePast phi)) :=
         DerivationTree.modus_ponens [] _ _ h_bx3p h_H_dne
       exact SetMaximalConsistent.implication_property h_mcs
         (theoremInMcsFc h_mcs h_sp_impl) h_in

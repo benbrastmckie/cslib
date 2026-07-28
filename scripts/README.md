@@ -45,3 +45,22 @@ to learn about it as well!
 
 **Init Imports**
 - `CheckInitImports.lean` (run by `lake exe checkInitImports`) checks that all files transitively import `Cslib.Init`.
+
+**Import minimization (`lake shake`) local guard**
+- `check-shake-residue.sh` / `shake-residue-baseline.txt` — a local (non-CI) ratchet on
+  `lake shake --add-public --keep-implied --keep-prefix Cslib` import-minimization debt. The
+  baseline is an exact set of repo-relative paths known to already be flagged (frozen residue
+  that is byte-identical to upstream as of a recorded audit date/SHA, so it is upstream's own
+  unresolved debt, not this fork's); the check fails only when the live flagged set contains a
+  path outside that baseline, i.e. new import debt this fork introduced. Needs a completed
+  `lake build` first (shake inspects the build graph), which is why it is invoked as step 7 of
+  `pre-pr-check.sh` rather than joining the Lean-free `lint-hygiene.yml` CI workflow. See the
+  header comment in `check-shake-residue.sh` for the full rationale, including why the `--fix`
+  flag and the per-file `-- shake: keep` annotation are not usable for the frozen residue.
+
+  **Usage:**
+  ```bash
+  bash scripts/check-shake-residue.sh            # verify against the baseline
+  bash scripts/check-shake-residue.sh --list      # print the live flagged set
+  bash scripts/check-shake-residue.sh --update    # re-baseline from the live flagged set
+  ```

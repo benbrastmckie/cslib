@@ -1,13 +1,23 @@
 {
   "status": "in_progress",
   "started_at": "2026-07-28T15:21:59Z",
-  "artifacts": [],
+  "artifacts": [
+    {"type": "lean_source", "path": "Cslib/Logics/Modal/Basic.lean"},
+    {"type": "lean_source", "path": "Cslib/Foundations/Data/HasFresh.lean"},
+    {"type": "script", "path": "scripts/check-shake-residue.sh"},
+    {"type": "baseline", "path": "scripts/shake-residue-baseline.txt"},
+    {"type": "script", "path": "scripts/pre-pr-check.sh"},
+    {"type": "doc", "path": "scripts/README.md"},
+    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase1-handoff.md"},
+    {"type": "handoff", "path": "specs/580_shake_ci_gate_restore_green/handoffs/phase2-handoff.md"}
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
+    "stage": "phase_2_complete",
+    "details": "Guard script + baseline (9 files, live-verified) + pre-pr-check.sh step 7 + README doc all written and verified (clean/regression/improvement/list/bad-flag paths all proven)",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 2,
+    "last_completed_phase": "Phase 2: Add the local shake-residue guard"
   },
   "metadata": {
     "session_id": "sess_1785251101_8e14cc_580",

@@ -176,55 +176,61 @@ new build warnings.
 
 ---
 
-### Phase 2: Add the local shake-residue guard [NOT STARTED]
+### Phase 2: Add the local shake-residue guard [COMPLETED]
 
 **Goal**: Add `scripts/check-shake-residue.sh` + `scripts/shake-residue-baseline.txt` so that any
 *new* import debt this fork introduces still fails a check, even with the CI step disabled.
 
 **Tasks**:
-- [ ] Inspect `/tmp/shake-post.log` (from Phase 1) to determine shake's exact stdout line format
+- [x] Inspect `/tmp/shake-post.log` (from Phase 1) to determine shake's exact stdout line format
       for a flagged file. Do not guess the format — derive the extractor from the live output, then
-      normalize extracted paths to repo-root-relative form.
-- [ ] Write `scripts/check-shake-residue.sh`, mirroring `scripts/check-lint-suppressions.sh`'s
+      normalize extracted paths to repo-root-relative form. *(confirmed: absolute path lines
+      matching `^/.*\.lean:$`, distinct from the delta lines and from build-noise lines)*
+- [x] Write `scripts/check-shake-residue.sh`, mirroring `scripts/check-lint-suppressions.sh`'s
       structure (header comment explaining the problem and the rule, `REPO_ROOT` resolution + `cd`,
       `set -uo pipefail` **without** `-e` per R4, a `case` on `${1:-}` for flags, then the
       comparison):
-  - [ ] No args: run `lake shake --add-public --keep-implied --keep-prefix Cslib`, capture stdout
+  - [x] No args: run `lake shake --add-public --keep-implied --keep-prefix Cslib`, capture stdout
         and the exit code explicitly.
-  - [ ] **Exit 2 on environment error** (R3): shake exit code outside `{0,1}`, or output that
+  - [x] **Exit 2 on environment error** (R3): shake exit code outside `{0,1}`, or output that
         yields no parseable file lines while shake reported suggestions. A failed shake run must
         never be reported as a clean/empty flagged set.
-  - [ ] Exact-set comparison against the baseline, not a count ceiling:
+  - [x] Exact-set comparison against the baseline, not a count ceiling:
     - File in live flagged set but NOT in baseline -> `FAIL`, exit 1. This is new import debt owned
       by this fork and is exactly what the disabled CI step used to catch.
     - File in baseline but NOT in live flagged set -> report as an improvement, exit 0, print
       "re-baseline with: bash scripts/check-shake-residue.sh --update". Ratchet-only-decreases,
       same philosophy as the lint-suppression baseline.
     - Sets equal -> `OK`, exit 0.
-  - [ ] `--update`: rewrite the baseline from the live flagged set, with a generated header
+  - [x] `--update`: rewrite the baseline from the live flagged set, with a generated header
         matching `lint-suppression-baseline.txt`'s style (do-not-hand-edit note, the ratchet rule,
         the format line).
-  - [ ] `--list`: print the live flagged set, exit 0.
-  - [ ] Any other argument: usage message to stderr, exit 2.
-  - [ ] Header comment must state the alignment rationale in durable terms: the baseline entries
+  - [x] `--list`: print the live flagged set, exit 0.
+  - [x] Any other argument: usage message to stderr, exit 2.
+  - [x] Header comment must state the alignment rationale in durable terms: the baseline entries
         are files byte-identical to upstream `f36649cff2c9d9fa1f91a848caa5c5a6f9d6bab1` as of
         2026-07-28, so they are upstream's own import debt, not this fork's; no task numbers (R6).
-- [ ] Generate `scripts/shake-residue-baseline.txt` via `bash scripts/check-shake-residue.sh --update`
+- [x] Generate `scripts/shake-residue-baseline.txt` via `bash scripts/check-shake-residue.sh --update`
       and confirm by eye that it contains exactly the 10 paths from the research report §1
-      IDENTICAL rows — no more, no fewer.
-- [ ] `chmod +x scripts/check-shake-residue.sh`.
-- [ ] Verify the clean path: `bash scripts/check-shake-residue.sh` -> exit 0, "OK".
-- [ ] Verify the regression path without touching the Lean tree: `cp` the baseline to a `.bak`,
+      IDENTICAL rows — no more, no fewer. *(deviation: altered -- contains exactly the 9 paths from
+      the Phase 1 live-verified residue, not 10, per the documented LcAt.lean side effect. All 9 are
+      confirmed IDENTICAL rows from the research report §1 table; none is one of the two
+      locally-modified files.)*
+- [x] `chmod +x scripts/check-shake-residue.sh`.
+- [x] Verify the clean path: `bash scripts/check-shake-residue.sh` -> exit 0, "OK".
+- [x] Verify the regression path without touching the Lean tree: `cp` the baseline to a `.bak`,
       delete one line from the baseline, re-run the guard (expect `FAIL` + exit 1), then restore
       with `mv` from the `.bak`. Use `cp`/`mv` — do **not** use `git checkout -- <path>` or
-      `git restore <path>` to restore, both are forbidden on a dirty tree.
-- [ ] Verify the improvement path the same way: append a fabricated extra path to a `.bak`-backed
-      copy of the baseline, re-run (expect exit 0 plus the re-baseline note), then restore.
-- [ ] Wire into `scripts/pre-pr-check.sh` as step 7, following the existing step-6
+      `git restore <path>` to restore, both are forbidden on a dirty tree. *(proven: deleting
+      TimeM.lean's baseline line produced FAIL + exit 1; restored via mv)*
+- [x] Verify the improvement path the same way: append a fabricated extra path to a `.bak`-backed
+      copy of the baseline, re-run (expect exit 0 plus the re-baseline note), then restore. *(proven:
+      fabricated path produced IMPROVED + exit 0 + re-baseline note; restored via mv)*
+- [x] Wire into `scripts/pre-pr-check.sh` as step 7, following the existing step-6
       `check-lint-suppressions.sh` block verbatim in shape (accumulate into `failed`, do not
       `set -e`). Note in a comment that this step requires a completed `lake build` (step 4/5
       already provide one in that script's ordering).
-- [ ] Add a row for `check-shake-residue.sh` and `shake-residue-baseline.txt` to
+- [x] Add a row for `check-shake-residue.sh` and `shake-residue-baseline.txt` to
       `scripts/README.md`'s "Current scripts and their purpose" section.
 
 **Timing**: 1 hour

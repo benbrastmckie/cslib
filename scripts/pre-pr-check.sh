@@ -86,6 +86,12 @@ if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-lint-suppressions.sh"; then
   failed=1
 fi
 
+echo "7. Shake import-debt ratchet (needs the completed build from steps 4/5 above)..."
+if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-shake-residue.sh"; then
+  echo "  FAIL: lake shake flagged new import debt not in the baseline"
+  failed=1
+fi
+
 echo "=== Pre-PR Verification Complete ==="
 if [ "$failed" -ne 0 ]; then
   echo "One or more checks FAILED."

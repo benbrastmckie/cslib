@@ -15,13 +15,14 @@
   `.claude/rules/git-workflow.md` (commit-per-green-substep), `CONTRIBUTING.md`
 - **Type**: cslib
 - **Created**: 2026-07-27
-- **Last updated**: 2026-07-27 (cycle-23 close — Phase 5 remains the sole open workstream at 304
-  sites done, 46 local-only blanket suppressions across 32 files remaining (down from 72/49 at
-  cycle 22's close; 17 files cleared this cycle) — figure re-verified live at this update; see
-  "Upstream-exposure scope" for the rescope this denominator is measured against. Phase 7 remains
-  CLOSED per the cycle-22 user-decision pass: the user authorized the local `NOTATION.md` edit as
-  an explicit, recorded exception to the upstream-exposure carve-out, and directed that the false
-  "stale" premise behind the 5 `NOTE:`-block deletions be struck rather than executed.)
+- **Last updated**: 2026-07-28 (cycle-24 close — Phase 5 remains the sole open workstream at 318
+  sites done, 32 local-only blanket suppressions across 25 files remaining (down from 46/32 at
+  cycle 23's close; 7 files / 14 sites cleared this cycle) — figure re-verified live at this
+  update; see "Upstream-exposure scope" for the rescope this denominator is measured against.
+  Phase 7 remains CLOSED per the cycle-22 user-decision pass: the user authorized the local
+  `NOTATION.md` edit as an explicit, recorded exception to the upstream-exposure carve-out, and
+  directed that the false "stale" premise behind the 5 `NOTE:`-block deletions be struck rather
+  than executed.)
 
 ---
 
@@ -52,60 +53,40 @@ cycle-22 close and the Phase 5 worklist, which the decisions above do not affect
 
 ---
 
-Twenty-fourth resume (cycle 23 closure — processed via `/implement`, resuming the
+Twenty-fifth resume (cycle 24 closure — processed via `/implement`, resuming the
 paused `/orchestrate` invocation per its continuation_context). Status as of this pass: **Phases
-1, 2, 3, 4, 6, 8 all COMPLETED (Phase 1's regression was re-closed in cycle 13; Phase 3 was
-re-closed in cycle 12 after its own reopen; Phase 4's post-close `lake shake` regression was
-re-closed in cycle 16); Phase 7 is CLOSED (both blockers resolved by user decision, recorded
-above, not re-investigated this cycle). Only Phase 5 (suppression audit) remains, PARTIAL at 304
-sites done (85 files fully processed), 46 blanket suppressions across 32 local-only files
-remaining in scope (down from 72/49 at cycle 22's close). This cycle processed 17 files, all
-1-2→0 clean, each individually verified by scoped rebuild of the file plus every direct
-downstream importer (two heavily-imported core files — `Bimodal/ProofSystem/Derivation.lean` and,
-transitively via its own downstream fan-out, `Bundle/CanonicalFrame.lean` — were instead verified
-with a full `lake build`/targeted multi-target rebuild rather than an exhaustively enumerated
-importer list) before its own commit (17 individual commits):
-`Temporal/Metalogic/Chronicle/ChronicleToCountermodel.lean` (137 lines; 1 bare-`simp` flexible
-site replaced with the linter-suggested `simp only [ne_eq, Subtype.mk.injEq]`),
-`Bimodal/Metalogic/Algebraic/ParametricCompleteness.lean` (143 lines; 1 longLine wrap),
-`Bimodal/Metalogic/Decidability/Correctness.lean` (147 lines; 1 `unusedSectionVars` +
-`unusedDecidableInType` pair on `decide_sound`, both resolved together via
-`omit [DecidableEq Atom] [Hashable Atom] in`, matching the existing pattern already used in
-`SignedFormula.lean`/`BDriver.lean`), `Bimodal/Metalogic/BXCanonical/OrderedSeedConsistency.lean`
-(149 lines; 3 longLine wraps), `Bimodal/Metalogic/Algebraic/ParametricCanonical.lean` (156 lines;
-1 longLine doc-comment wrap), `Bimodal/Metalogic/Algebraic/InteriorOperators.lean` (176 lines; 5
-`show`-tactic sites the linter flagged as goal-changing, each replaced with the
-linter-recommended `change`), `Bimodal/Metalogic/Bundle/ModalSaturation.lean` (207 lines; 18
-longLine wraps — the largest single-file wrap count this cycle),
-`Bimodal/Metalogic/Bundle/CanonicalFrame.lean` (267 lines; 12 longLine wraps across four
-`canonical_forward_F`/`backward_P`/`forward_U`/`backward_S` signatures plus two `have`-statement
-sites), `Bimodal/Metalogic/Bundle/TemporalContent.lean` (173 lines — newly surfaced at fs=2 this
-cycle, not on cycle 22's tracked count-2 list; 4 longLine wraps across `have`-statement type
-annotations), `Temporal/Metalogic/Chronicle/CanonicalChain.lean` (76 lines; 1
-`style.emptyLine` blanket removed, zero warnings surfaced — unnecessary),
-`Temporal/ProofSystem/Derivation.lean` (98 lines; same, zero warnings surfaced),
-`Bimodal/Metalogic/BXCanonical/Quasimodel/SubformulaClosure.lean` (99 lines; same, zero warnings,
-no downstream importers), `Bimodal/FrameConditions/Soundness.lean` (117 lines; same, zero
-warnings), `Bimodal/FrameConditions/Validity.lean` (118 lines; same, zero warnings),
-`Temporal/Metalogic/Chronicle/OrderedSeedConsistency.lean` (135 lines; same, zero warnings),
-`Bimodal/Metalogic/Separation/IntHelpers.lean` (159 lines; same, zero warnings),
-`Bimodal/ProofSystem/Derivation.lean` (168 lines; same, zero warnings — this is the shared
-`DerivationTree` base type for Bimodal, imported (directly or transitively) by most of the
-Bimodal tree, so verified via a full `lake build` (3309/3309, only the 5 documented baseline
-sorry warnings) rather than an enumerated importer list).
-**The count-2 tier now has 9 files remaining** (down from 19 at cycle 22's close; the 9 smallest
+1, 2, 3, 4, 6, 8 all COMPLETED; Phase 7 is CLOSED** (both blockers resolved by user decision,
+recorded above, not re-investigated this cycle). Only Phase 5 (suppression audit) remains,
+PARTIAL at 318 sites done (92 files fully processed), 32 blanket suppressions across 25
+local-only files remaining in scope (down from 46/32 at cycle 23's close). This cycle processed
+7 files, all cleared to fs=0 blanket (2 sites each, 14 total), each individually verified by
+scoped rebuild of the file plus every direct downstream importer, before its own commit (7
+individual commits): `Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean` (294 lines;
+`linter.style.setOption`+`linter.flexible` both unnecessary, zero warnings surfaced),
+`Temporal/Metalogic/Chronicle/TruthLemma.lean` (294 lines; same, both unnecessary),
+`Bimodal/Metalogic/Bundle/SuccRelation.lean` (298 lines; `emptyLine` unnecessary, `longLine`
+genuine at 35 sites — all wrapped, including 9 theorem/lemma signatures immediately above the
+file's 7 pre-existing `set_option warn.sorry false in`-scoped sorries; only the signatures were
+touched, no sorry line or proof term altered),
+`Bimodal/Metalogic/Decidability/FMP/Filtration.lean` (301 lines; `setOption` unnecessary,
+`flexible` genuine at 1 site — `rw [hx0] at h1; simp at h1; exact h1` replaced with
+`rw [hx0, neg_zero] at h1; exact h1`, avoiding the bare-simp-modifying-hypothesis pattern),
+`Foundations/Logic/Metalogic/Chronicle/Types.lean` (363 lines; `emptyLine` unnecessary,
+`dupNamespace` genuine at 14 sites across the `Chronicle` structure and its 9 `Chronicle.c0`..
+`c5'` condition defs — narrowed to 10 declaration-scoped `set_option ... in` markers rather than
+removed, since this is the same structure-projection-namespace-not-a-doubled-one pattern
+documented by Phase 2's finding on the three `Chronicle` modules),
+`Bimodal/ProofSystem/Substitution.lean` (390 lines; `emptyLine` unnecessary,
+`unusedSimpArgs` genuine at 3 identical sites — dropped the unused `List.map_nil` argument from
+`simp only [Context.subst, List.map_nil] at d'`, verified via `replace_all` after confirming all
+3 sites were textually identical), `Bimodal/Metalogic/Bundle/TemporalCoherence.lean` (398 lines;
+`emptyLine` unnecessary, `longLine` genuine at 14 sites, all wrapped — confirms the Bundle
+directory's pure-longLine skew noted in cycle 23's findings).
+**The count-2 tier now has 2 files remaining** (down from 9 at cycle 23's close; the 7 smallest
 were all cleared this cycle — see the file list above). The count-6 tier remains at exactly 1
-file (`Interface.lean`, 3048 lines, still deliberately deferred). **Two files inspected this
-cycle turned out to be permanent, already-justified exceptions, not further work**:
-`Computability/Automata/DA/Conversions.lean` (117 lines, `linter.privateModule`) carries an
-inline comment explaining the file consists exclusively of `proof_wanted` stubs with no
-declaration to attach the suppression to, so narrowing is impossible without changing
-mathematical content; `Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean` (120 lines,
-`linter.style.openClassical`) carries an inline comment explaining the file-wide `open Classical`
-(not per-declaration) is required for `Finset.filter`'s `Classical.propDecidable` instance
-propagation, and a `... in` scoping would silently break it. Both join `QLemma.lean` as
-documented, permanent 1-line-suppression end states — do not attempt to reduce either further;
-treat their presence on the worklist below as informational, not actionable.
+file (`Interface.lean`, 3048 lines, still deliberately deferred). No new permanent exceptions
+were found this cycle; the previously documented ones (`Conversions.lean`, `DefectChain.lean`,
+`QLemma.lean`, `Eliminations.lean`) were not re-touched.
 
 **Live re-derived survey of the full remaining worklist, taken at this cycle's close** (fs =
 blanket-suppression count, lc = line count, sorted fs desc then lc asc; re-verify both live
@@ -116,34 +97,21 @@ Count-6 tier (1 file, deliberately deferred):
 6 3048 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
 ```
 
-Count-2 tier (9 files, smaller-first is the recommended order — NEXT TARGET is
-`ChronicleInterface.lean` or `TruthLemma.lean`, both 294 lines):
+Count-2 tier (2 files, smaller-first is the recommended order — NEXT TARGET is
+`WitnessSeed.lean`):
 ```
-2  294 Cslib/Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean
-2  294 Cslib/Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean
-2  298 Cslib/Logics/Bimodal/Metalogic/Bundle/SuccRelation.lean
-2  301 Cslib/Logics/Bimodal/Metalogic/Decidability/FMP/Filtration.lean
-2  363 Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean
-2  390 Cslib/Logics/Bimodal/ProofSystem/Substitution.lean
-2  398 Cslib/Logics/Bimodal/Metalogic/Bundle/TemporalCoherence.lean
 2  605 Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 2 1104 Cslib/Logics/Bimodal/Metalogic/Soundness/DenseValidity.lean
 ```
-(Note, carried forward from cycle 22: `ChronicleInterface.lean` and `Types.lean` both live in
-`Foundations/Logic/Metalogic/Chronicle/` alongside `SinceSeedConsistency.lean`, closed cycle 22
-— check whether either reuses that file's bare-`simp [...] at h` flexible pattern before
-re-deriving an approach from scratch. `TruthLemma.lean` is in `Temporal/Metalogic/Chronicle/`,
-alongside `ChronicleToCountermodel.lean`, `CanonicalChain.lean`, and
-`OrderedSeedConsistency.lean`, all closed this cycle or cycle 21 — same caveat, and also check
-whether it reuses `ChronicleToCountermodel.lean`'s bare-`simp` → linter-suggested-`simp only`
-pattern from this cycle. `SuccRelation.lean`, `TemporalCoherence.lean`, and `WitnessSeed.lean`
-all live in `Bimodal/Metalogic/Bundle/` alongside `CanonicalFrame.lean`, `ModalSaturation.lean`,
-and `TemporalContent.lean`, all closed this cycle — check for shared longLine wrap patterns
-before re-deriving from scratch, since three consecutive Bundle-directory files this cycle were
-pure longLine-wrap jobs with no other category.)
+(`WitnessSeed.lean` lives in `Bimodal/Metalogic/Bundle/` alongside `CanonicalFrame.lean`,
+`ModalSaturation.lean`, `TemporalContent.lean`, `SuccRelation.lean`, and `TemporalCoherence.lean`
+— all five closed across cycles 23-24, all either pure-`longLine`-wrap jobs or unnecessary
+blanket suppressions. Check for the same pattern before re-deriving an approach from scratch.
+`DenseValidity.lean` at 1104 lines is the largest remaining count-2 file and has not yet been
+inspected — no pattern hypothesis carries over to it.)
 
-Count-1 tier (22 files, smaller-first; `Conversions.lean` and `DefectChain.lean` from cycle 22's
-list are REMOVED from this tier — see the permanent-exception note above):
+Count-1 tier (22 files, unchanged from cycle 23's close — smaller-first; `Conversions.lean` and
+`DefectChain.lean` remain excluded, see the permanent-exception note above):
 ```
 1  172 Cslib/Logics/Bimodal/Metalogic/Separation/Distributivity.lean
 1  178 Cslib/Logics/Bimodal/Metalogic/Separation/NegationEquiv.lean
@@ -166,20 +134,19 @@ list are REMOVED from this tier — see the permanent-exception note above):
 1  871 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean
 1 1208 Cslib/Logics/Bimodal/Metalogic/Decidability/Tableau.lean
 ```
-(`QLemma.lean` is documented in earlier cycles as correctly bottoming out at 1 remaining blanket
-line for a persistent non-`in` `open Classical` — verify this is still that same, correct,
-permanent end state before attempting further reduction on it; do not treat "1 remaining" alone
-as a signal that it is incomplete. `Eliminations.lean` carries the same documented
-`style.openClassical` end-state pattern.)
+(`QLemma.lean` and `Eliminations.lean` are documented in earlier cycles as correctly bottoming
+out at 1 remaining blanket line for a persistent non-`in` `open Classical` — verify this is
+still the correct permanent end state before attempting further reduction on either; do not
+treat "1 remaining" alone as a signal that it is incomplete.)
 
-Total: 46 blanket suppressions across 32 local-only files (1 count-6 + 9 count-2 + 22 count-1
+Total: 32 blanket suppressions across 25 local-only files (1 count-6 + 2 count-2 + 22 count-1
 tier files — note the count-1 list above shows 20 rows, not 22; `Conversions.lean` and
 `DefectChain.lean`, both permanent exceptions, are excluded from the actionable list but still
-counted in the 32/46 totals and in `check-lint-suppressions.sh`'s repo-wide ratchet). At this
-cycle's rate (26 sites/17 files, mostly mechanical single- and few-site fixes), and given the
-count-1 tier's actionable files average almost exactly 1 site each, clearing the remainder is
-estimated at **roughly 2-4 more cycles**, faster than the prior 4-6-cycle estimate now that the
-count-1 tier's two permanent exceptions are identified and the count-2 tier is down to 9 files.
+counted in the 25/32 totals and in `check-lint-suppressions.sh`'s repo-wide ratchet). At this
+cycle's rate (14 sites/7 files, all mechanical), clearing the remainder is estimated at
+**roughly 2-3 more cycles**: the count-2 tier is down to 2 files (one of them, `DenseValidity.lean`
+at 1104 lines, is the largest count-2 file left and unexplored), and the count-1 tier's 20
+actionable files average almost exactly 1 site each.
 
 Re-derive the live worst-offender list with (filter to `fs > 0`, then gate each candidate through
 the upstream check before treating it as in-scope):
@@ -191,86 +158,80 @@ done | sort -rn | while read fs f; do
   git cat-file -e upstream/main:"$f" 2>/dev/null || echo "$fs $f"
 done
 ```
-Next target as of cycle 23's close: `Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean`
-or `Logics/Temporal/Metalogic/Chronicle/TruthLemma.lean` (both 294 lines, tied for smallest in
-the count-2 tier), per smaller-files-first.
+Next target as of cycle 24's close: `Bimodal/Metalogic/Bundle/WitnessSeed.lean` (605 lines), per
+smaller-files-first within the 2-file count-2 tier.
 
-**New findings this cycle**: (1) not every file on a prior cycle's worklist is actionable —
-`Conversions.lean` and `DefectChain.lean` both carry pre-existing inline comments justifying a
-permanent blanket suppression (a `proof_wanted`-only file with no declaration to attach a
-narrower suppression to; a file-wide `open Classical` whose declaration-scoped equivalent would
-silently break instance propagation), so always read the file's existing comments before
-assuming a worklist entry needs work — this is the same pattern as `QLemma.lean`/
-`Eliminations.lean`'s permanent `style.openClassical` end state, just for two more categories
-(`privateModule`, and a second `openClassical` instance); (2) a bare `simp` (not `simp [X]`) that
-the `linter.flexible` warning suggests replacing with a specific `simp only [...]` is usually
-directly usable verbatim — `ChronicleToCountermodel.lean`'s single site took the suggested
-`simp only [ne_eq, Subtype.mk.injEq]` with no adjustment needed and rebuilt clean immediately;
-(3) `linter.style.show` (a `show` tactic the linter says "changed the goal") is mechanically
-fixable by replacing `show` with `change` — semantically identical (`change` is the tactic
-`show` is discouraged from doing implicitly), confirmed via rebuild across all 5 sites in
-`InteriorOperators.lean`; this is a new category not seen in cycles 1-22's findings; (4) three
-consecutive files in `Bimodal/Metalogic/Bundle/` this cycle (`ModalSaturation.lean`,
-`CanonicalFrame.lean`, `TemporalContent.lean`) were pure `emptyLine`+`longLine` jobs with no
-`flexible`/`dupNamespace`/`unusedSectionVars` complexity at all, and `ModalSaturation.lean` alone
-had 18 longLine sites — the Bundle directory appears to skew toward pure-longLine files, worth
-checking first for the three remaining Bundle-directory count-2 files (`SuccRelation.lean`,
-`TemporalCoherence.lean`, `WitnessSeed.lean`); (5) a file not on a prior cycle's tracked worklist
-can still surface at the live re-derivation (`TemporalContent.lean` in `Bundle/`, fs=2, was not
-in cycle 22's 19-file count-2 list) — always trust the live `grep`/upstream-gate re-derivation
-over a prior cycle's static snapshot, per the standing instruction, and treat any such
-discrepancy as itself worth a one-line note rather than silently absorbing it; (6) for a
-heavily-imported core file (many dozens of transitive importers), enumerating every downstream
-importer individually is not practical — a full `lake build` (confirming exact baseline sorry
-count, zero new warnings) is an acceptable, faster substitute verification method for exactly
-this case (used for `Bimodal/ProofSystem/Derivation.lean` this cycle).
+**New findings this cycle**: (1) removing a blanket suppression and rebuilding is the correct
+first move even for files with a `linter.flexible`/`setOption` pair that turns out to be
+entirely unnecessary — 4 of this cycle's 7 files (`ChronicleInterface.lean`, `TruthLemma.lean`,
+`Filtration.lean`'s `setOption` half, `Substitution.lean`'s `emptyLine` half) had zero
+corresponding warnings, confirming cycle 23's finding (1) generalizes beyond the two
+`Conversions.lean`/`DefectChain.lean` cases to ordinary unnecessary pairs, not just permanent
+exceptions; (2) a `structure` declaration with many `def Struct.field` accessor-style
+declarations following it (the `Chronicle`/`Chronicle.c0`..`c5'` pattern in `Types.lean`) needs
+one `set_option ... in` before the `structure` itself (covering its own dupNamespace warning
+plus the auto-generated field-projection and constructor warnings) and one more before each
+subsequent `def Struct.field` — 10 markers total replacing one 2-line blanket, still zero net
+new blanket suppressions; (3) `linter.unusedSimpArgs` (an unused argument inside an otherwise-used
+`simp only [...]` list, e.g. `List.map_nil` in `simp only [Context.subst, List.map_nil] at d'`)
+is mechanically fixable by dropping just the unused argument, not the whole `simp only` call —
+new category, not seen in cycles 1-23's findings; (4) the `lean_multi_attempt` MCP tool's
+`setup-file` step can hit an unrelated Lean/Mathlib toolchain-version mismatch in this repo's
+current environment (observed on `Filtration.lean`, unrelated to the fix being tested) — when
+this happens, skip the MCP tool and verify directly via `lake build` on the scoped module
+instead, which is unaffected; (5) the Bundle-directory pure-longLine skew (cycle 23 finding 4)
+now holds for 5 of 6 inspected Bundle files (`ModalSaturation.lean`, `CanonicalFrame.lean`,
+`TemporalContent.lean`, `SuccRelation.lean`, `TemporalCoherence.lean`) — worth checking first for
+`WitnessSeed.lean`, the one remaining Bundle-directory count-2 file.
 
-**Cycle 21-22 findings, still relevant** (see the plan's git history for full cycle-20/21/22 body
-text if a specific mechanism needs re-deriving; summarized here): declaration-scoped
+**Cycle 21-23 findings, still relevant** (see the plan's git history for full cycle-20/21/22/23
+body text if a specific mechanism needs re-deriving; summarized here): declaration-scoped
 `dupNamespace` narrowing for intentional structure/namespace-name collisions (the `Chronicle`
 pattern); `longLine` wraps on `have h : DerivationTree ... := ...` are always mechanically safe;
 `replace_all` for verbatim-recurring `simp only [...]` blanket-replacement candidates only after
 confirming every site has the identical fully-reduced argument list; bare `simp [X]` pulling the
 full default simp set favors declaration-scoped `linter.flexible false in` over manual
 reconstruction; the `unusedDecidableInType` vs `unusedSectionVars` distinction and when `omit
-[...] in` is the correct combined fix (an *unused* instance in an *unused* section-var position,
-confirmed on `Correctness.lean`'s `decide_sound` this cycle); `lake lint`'s `unusedArguments`
-findings are a distinct, out-of-scope linter, unchanged at 147 errors.
+[...] in` is the correct combined fix; a bare `simp` the `linter.flexible` warning suggests
+replacing with a specific `simp only [...]` is usually directly usable verbatim;
+`linter.style.show` is mechanically fixable via `show`→`change`; `lake lint`'s `unusedArguments`
+findings are a distinct, out-of-scope linter, unchanged; a full `lake build` is an acceptable
+substitute verification for heavily-imported core files where enumerating every importer is
+impractical.
 
 **Do not** re-derive the sorry census with a naive grep. Use the method in "Measurement notes"
 (also implemented in `scripts/pre-pr-check.sh`). The `--wfail --iofail` build reconfirmed exactly
-5 baseline *sorry* warnings at cycle 8, 12, 13, 14, 22, and 23's (this cycle's) end.
+5 baseline *sorry* warnings at cycle 8, 12, 13, 14, 22, 23, and 24's (this cycle's) end.
 **Phase 3 is closed** — its task/phase/report-string census is no longer a live worklist; see its
 section for the final fixed/excluded/false-positive breakdown instead of re-deriving one.
 
 To pick Phase 5 up cold:
 
 1. Confirm the baseline (4 commands, ~5 min) — **expect exactly 5 warnings, all documented
-   sorries, lake shake reporting only the 12 upstream-shared files, and the ratchet reporting 60
-   (baseline ceiling 60), as of cycle 23**:
+   sorries, lake shake reporting only the 12 upstream-shared files, and the ratchet reporting 46
+   (baseline ceiling 46), as of cycle 24**:
    ```bash
    lake build --wfail --iofail   # expect exit 1; exactly 5 baseline sorry warnings
    lake test                     # expect exit 0, 0 errors
    lake shake --add-public --keep-implied --keep-prefix Cslib   # expect exactly 12 upstream-shared files, zero local-only
-   bash scripts/check-lint-suppressions.sh   # expect exit 0, "60 (baseline ceiling 60)"
+   bash scripts/check-lint-suppressions.sh   # expect exit 0, "46 (baseline ceiling 46)"
    ```
    If any of these differ from the above, something else landed — reconcile before proceeding.
 2. **Phases 1-4 and 6-8 are all CLOSED**, and Phase 1's and Phase 4's closure criteria are once
    again empirically satisfied (no further action needed on any of them).
-3. **Only Phase 5 remains.** 85 files are fully processed cumulative (see Phase 5's cycle
-   sub-entries, cycles 1 through 23, for the complete per-file list) — do not revisit any of
+3. **Only Phase 5 remains.** 92 files are fully processed cumulative (see Phase 5's cycle
+   sub-entries, cycles 1 through 24, for the complete per-file list) — do not revisit any of
    them. Re-derive the live worst-offender list with the command above, then **filter it through
    the local-only gate** before picking a target, and **skip `Conversions.lean` and
    `DefectChain.lean`** (permanent exceptions, see above) if they appear. Start with the count-2
-   tier, smaller-first: `ChronicleInterface.lean` or `TruthLemma.lean` (both 294 lines) next,
-   using the method Phase 5's section documents: remove all of a file's suppressions, rebuild,
-   categorize what surfaces, fix the mechanical categories, narrow the rest to
-   declaration/usage-site scope.
-4. **Before starting, read this cycle's six new findings above** (permanent-exception detection,
-   the `simp`→suggested-`simp only` pattern, `show`→`change` for `linter.style.show`, the Bundle
-   directory's pure-longLine skew, live-worklist files not on a prior static snapshot, and the
-   full-`lake build` verification substitute for heavily-imported core files) plus the carried
-   cycle 21-22 findings summarized above.
+   tier, smaller-first: `WitnessSeed.lean` (605 lines) next, using the method Phase 5's section
+   documents: remove all of a file's suppressions, rebuild, categorize what surfaces, fix the
+   mechanical categories, narrow the rest to declaration/usage-site scope.
+4. **Before starting, read this cycle's five new findings above** (unnecessary pairs generalizing
+   beyond the permanent-exception cases, the structure-plus-field-defs `dupNamespace` narrowing
+   pattern, the new `unusedSimpArgs` category, the `lean_multi_attempt` toolchain-mismatch
+   workaround, and the Bundle directory's now-5-of-6 pure-longLine confirmation) plus the carried
+   cycle 21-23 findings summarized above.
 5. No items require a user decision to make further Phase 5 progress. Phase 7's two former
    blockers are CLOSED (see the top of this RESUME HERE section) and are not Phase 5 concerns.
 
@@ -942,7 +903,7 @@ update necessary"), then `lake shake --add-public --keep-implied --keep-prefix C
 clean (exit 0, zero files flagged). CI step uncommented at
 `.github/workflows/lean_action_ci.yml:29-32`.
 
-### Phase 5: Suppression audit [PARTIAL — 304 sites done; 46 blanket suppressions across 32 local-only files remain in scope]
+### Phase 5: Suppression audit [PARTIAL — 318 sites done; 32 blanket suppressions across 25 local-only files remain in scope]
 
 **Scope (rescoped — read before picking a target)**: this phase now covers **local-only files
 only**. Remaining in-scope worklist: **264 blanket (file-scoped) suppressions across 96
@@ -2252,6 +2213,31 @@ files). See the RESUME HERE section's cycle-23 entry for the full per-file findi
 live re-derived count-2/count-1 tier survey (including the two newly-identified permanent
 exceptions), and the effort estimate for future cycles — not repeated here.
 
+**Done (cycle 24, resumed via `/implement` from the paused `/orchestrate` invocation)**:
+processed 7 files, clearing the 7 smallest remaining count-2-tier files, all 2→0 clean. All 7
+committed individually after a clean scoped rebuild plus every direct downstream importer's
+rebuild: `Foundations/Logic/Metalogic/Chronicle/ChronicleInterface.lean` (294 lines, 2→0, commit
+`16f9acad` — both `setOption`/`flexible` unnecessary), `Temporal/Metalogic/Chronicle/
+TruthLemma.lean` (294 lines, 2→0, commit `035d4a3c` — same, both unnecessary),
+`Bimodal/Metalogic/Bundle/SuccRelation.lean` (298 lines, 2→0, commit `a5cf2221` — `emptyLine`
+unnecessary, 35 genuine `longLine` sites wrapped, including 9 signatures immediately above the
+file's 7 pre-existing `warn.sorry false in`-scoped sorries, none of which were touched),
+`Bimodal/Metalogic/Decidability/FMP/Filtration.lean` (301 lines, 2→0, commit `5c301fcf` —
+`setOption` unnecessary, 1 genuine `flexible` site fixed via `rw [hx0, neg_zero] at h1; exact h1`
+replacing `rw [hx0] at h1; simp at h1; exact h1`), `Foundations/Logic/Metalogic/Chronicle/
+Types.lean` (363 lines, 2→0, commit `1e98fc1f` — `emptyLine` unnecessary, `dupNamespace`
+narrowed to 10 declaration-scoped `set_option ... in` markers over the `Chronicle` structure and
+its 9 `Chronicle.c0`..`c5'` condition defs, same structure-projection-namespace pattern as Phase
+2's finding), `Bimodal/ProofSystem/Substitution.lean` (390 lines, 2→0, commit `33c52111` —
+`emptyLine` unnecessary, 3 identical `unusedSimpArgs` sites fixed by dropping `List.map_nil` from
+`simp only [Context.subst, List.map_nil] at d'`, a new category), `Bimodal/Metalogic/Bundle/
+TemporalCoherence.lean` (398 lines, 2→0, commit `9f13c9b7` — `emptyLine` unnecessary, 14 genuine
+`longLine` sites wrapped). Also re-baselined the `check-lint-suppressions.sh` ratchet
+(`6c394d44`) — now 46 blanket suppressions across 39 files repo-wide (includes the 14
+upstream-carved-out; the local-only in-scope figure is 32 across 25 files). See the RESUME HERE
+section's cycle-24 entry for the full per-file finding detail, the live re-derived count-2/count-1
+tier survey, and the effort estimate for future cycles — not repeated here.
+
 ### Phase 6: Sorry visibility [COMPLETED]
 
 **REOPENED by exclusion audit — partial close.** The *narrowing* work below is verified complete
@@ -2799,8 +2785,8 @@ Inputs** in the metadata block) rather than written as separate `reports/` files
 - ~~Suppression audit outcome recorded per site (repo-wide, ~570).~~ **Restated (upstream-exposure
   rescope)**: suppression audit outcome recorded per site **for local-only files**; blanket
   suppressions in files shared with `upstream` are recorded for a follow-up upstream PR rather
-  than edited here. **[PARTIAL]** — 304 sites done (85 files fully processed cumulative); **46
-  blanket suppressions across 32 local-only files remain in scope** (60 repo-wide, so 14 in
+  than edited here. **[PARTIAL]** — 318 sites done (92 files fully processed cumulative); **32
+  blanket suppressions across 25 local-only files remain in scope** (46 repo-wide, so 14 in
   upstream-shared files are carved out). All three figures re-derived live at this update, not
   carried forward from a prior cycle's report. See Phase 5's resume point. This criterion is now
   **bounded** — where the original repo-wide wording was open-ended.

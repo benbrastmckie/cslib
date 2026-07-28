@@ -255,26 +255,32 @@ the Temporal build never sees a half-written Blocking.lean.
   `strictChain_le_card`, AND `exists_typeAt_eq_of_card_lt` all report exactly
   `[propext, Classical.choice, Quot.sound]`, zero warnings.
 
-### Phase 3: Temporal redirection (timeType/isSubsetBlocked defeq wrappers + conformance re-run) [NOT STARTED]
+### Phase 3: Temporal redirection (timeType/isSubsetBlocked defeq wrappers + conformance re-run) [COMPLETED]
 
 - **Goal:** Redirect Temporal's `timeType` and `isSubsetBlocked`
   (`Cslib/Logics/Temporal/Tableau/Branch.lean:106-122`) to the shared definitions without any
   behavioral change, verified by the temporal conformance corpus.
 - **Tasks:**
-  - [ ] Add `import Cslib.Foundations.Logic.Tableau.Blocking` to
-    `Cslib/Logics/Temporal/Tableau/Branch.lean`.
-  - [ ] Redefine `timeType b t := Branch.typeAt b t` and
+  - [x] Add `import Cslib.Foundations.Logic.Tableau.Blocking` to
+    `Cslib/Logics/Temporal/Tableau/Branch.lean`. **Landed as `public import`** (the wrapper
+    bodies are in an `@[expose] public section`, matching the file's existing Rules import).
+  - [x] Redefine `timeType b t := Branch.typeAt b t` and
     `isSubsetBlocked b t t' := Branch.containmentBlocked b t t'` (the `TBranch Atom` →
     `Branch (Formula Atom) TimeIndex` abbrev chain via `TSF`/`SignedFormula`, Rules.lean:56-59,
     makes these type-correct).
-  - [ ] Add `rfl` bridging lemmas (`timeType_eq_typeAt`, `isSubsetBlocked_eq_containmentBlocked`)
-    locking the defeq. Fallback ladder if `rfl` does not close: see Risks & Mitigations (max 3
-    attempts, then [BLOCKED], never churn).
-  - [ ] Confirm consumers untouched: `isTemporallyBlocked`, `findBlockedTime`, and the
-    eventuality side conditions stay local; call sites in `Rules.lean` (~:242,333,426),
-    `Saturation.lean` (~:154-161,209), `Closure.lean` (~:90) require zero edits.
-  - [ ] Re-run the temporal conformance rows in `CslibTests/TableauConformance.lean` — all 24
-    temporal rows pass unchanged.
+  - [x] Add `rfl` bridging lemmas (`timeType_eq_typeAt`, `isSubsetBlocked_eq_containmentBlocked`)
+    locking the defeq. Both closed by `rfl` on the FIRST attempt of the 3-attempt ladder.
+    Each lemma needs `omit [Hashable Atom] in` — `Formula` derives only `DecidableEq`, so
+    `BEq (Formula Atom)` routes through `instBEqOfDecidableEq` and the section's
+    `[Hashable Atom]` would otherwise be auto-included unused (unusedSectionVars lint).
+  - [x] Confirm consumers untouched: `isTemporallyBlocked`, `findBlockedTime`, and the
+    eventuality side conditions stay local; call sites in `Rules.lean`, `Saturation.lean`,
+    `Closure.lean` required zero edits (grep-verified: all code consumers route through
+    `isTemporallyBlocked`/`findBlockedTime`; `Completeness.lean` mentions are docstring
+    prose only). `formulasAtTime` kept unchanged.
+  - [x] Re-run the temporal conformance rows in `CslibTests/TableauConformance.lean` — all 24
+    temporal rows pass unchanged (`lake build CslibTests.TableauConformance` green; each row
+    is `#guard_msgs`-gated, so a verdict change fails the build).
 - **Timing:** 1 hour
 - **Depends on:** 1, 2
 - **Verification Tier:** interface
@@ -284,8 +290,18 @@ the Temporal build never sees a half-written Blocking.lean.
   count is exactly the six call-site clusters listed and the conformance corpus has exactly 24
   temporal rows. Confirm both at implementation time; line numbers cited are hypotheses subject
   to drift.
+  **CONFIRMED at implementation**: (a) defeq held — both bridging lemmas closed by `rfl` on
+  the first attempt (old `timeType` body delta-unfolds through `formulasAtTime` to exactly the
+  generic `typeAt` body; `(pair == ·)` vs `fun pair' => pair == pair'` is eta); (b) consumer
+  clusters as listed, all through `isTemporallyBlocked`/`findBlockedTime`, zero edits; the
+  conformance corpus has exactly 24 temporal `#guard_msgs` rows (grep count 24). Barrel
+  registration of Blocking.lean was NOT needed for this phase's builds — deferred to Phase 5
+  per plan.
 - **Done when:** `lake build Cslib.Logics.Temporal.Tableau.Branch` plus its direct dependents
   (`Rules`, `Saturation`, `Closure`) green; conformance test rows pass; zero `sorry`; commit.
+  **VERIFIED 2026-07-28**: scoped build green (720/720 incl. `Rules` transitively, `Saturation`,
+  `Closure`); `lake build CslibTests.TableauConformance` green (725/725, all 24 temporal rows);
+  `grep -n '\bsorry\b'` on the touched file empty; `lake exe checkInitImports` exit 0.
 
 ### Phase 4: references.bib — add DershowitzManna1979, enrich GargGenoveseNegri2012 [NOT STARTED]
 

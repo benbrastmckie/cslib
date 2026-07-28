@@ -1,0 +1,30 @@
+{
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 583,
+  "session_id": "sess_1785275816_a84520_583",
+  "artifacts": [
+    "specs/583_restate_intexpandbranches_openbranch_sat/reports/01_restate-openbranch-sat.md"
+  ],
+  "findings_count": 6,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 3,
+  "bibkey_verification_status": "verified: Fitting1983 (references.bib:211), GargGenoveseNegri2012 (references.bib:228), Dyckhoff1992 (references.bib:217); no local literature chunks for these sources in the per-repo sub-index",
+  "lit_mode": "SUBINDEX_PRESENT (per-repo briefing, 34 docs)",
+  "counter_instance_reverified": true,
+  "superseded_by_574": false,
+  "recommendation": "Mark task [BLOCKED]; spawn prerequisite (post-blocking world bound + intExpMeasure re-target + intFuel resize = fuel-sufficiency theorem); then land restatement R1 (hUniv/hNW/hFuel hypothesis threading) and discharge the sorry together with truthLemma's T-imp case",
+  "memory_candidates": [
+    {
+      "title": "Fuel-exhaustion openBranch lemmas: dischargeable restatement is equivalent to call-site fuel-sufficiency",
+      "content": "For a deterministic fuel-bounded tableau loop whose fuel-0 arm returns the first open branch, any added precondition making an 'openBranch result implies saturation' lemma provable must be preserved through the fuel induction (IH reaches fuel 0 mid-run) and dischargeable at the concrete-fuel call site; by determinism the weakest such precondition is 'the run does not exhaust fuel with an open branch', i.e. fuel-sufficiency itself. Cheap preconditions (0 < fuel, initial-saturation, fuel-stability across consecutive fuels) all fail one of the two requirements — checked concretely against intExpandBranches_openBranch_sat and applicable to the S4 loop-checking termination obligations.",
+      "keywords": ["tableau", "fuel", "termination", "measure", "intExpandBranches", "restatement"]
+    },
+    {
+      "title": "Intuitionistic tableau measure engine exists sorry-free but is gated on universe containment",
+      "content": "intWork/intExpMeasure, intExpMeasure_step_lt(_branch), intExpMeasure_init_le_fuel, applyAllTImpRules_count_drop, and applyPersistenceFixpoint_genuine_of_count_le_fuel are all landed sorry-free in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean but unused by any proof: every strict-decrease lemma takes hb : forall x in b, x in intUniverse phi0, and that containment is explicitly documented as NOT an invariant of intExpandBranches (world labels escape List.range (complexity+2)). Unlocking the engine requires a post-ancestor-blocking world-label bound and an enlarged universe/measure domain, then resizing intFuel to 3 ^ |enlarged universe|.",
+      "keywords": ["intExpMeasure", "intUniverse", "containment", "fuel-sufficiency", "ancestor blocking", "Scheme.lean"]
+    }
+  ],
+  "next_steps": "Run /plan 583 to create implementation plan"
+}

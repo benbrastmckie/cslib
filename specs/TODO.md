@@ -26,8 +26,8 @@ next_project_number: 585
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-583 [RESEARCHING] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
+409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -58,7 +58,7 @@ next_project_number: 585
 
 ### Tableau Infrastructure
 
-456 [RESEARCHING] — Generalize the Sfor-containment / subset-blocking device recurrin
+456 [RESEARCHED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ### Temporal Logic
 
@@ -107,10 +107,11 @@ EXPLICIT NON-GOAL: do NOT narrow step 5 (`lake build --wfail --iofail`). It deli
 ---
 
 ### 583. Restate intexpandbranches openbranch sat
-- **Status**: [RESEARCHING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 574
+- **Research**: [583_restate_intexpandbranches_openbranch_sat/reports/01_restate-openbranch-sat.md]
 
 **Description**: Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583, sorry at :2623) so that it is provable, then discharge it.
 
@@ -490,10 +491,11 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 456. Shared tableau containment blocking
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: Task 574
+- **Research**: [456_shared_tableau_containment_blocking/reports/01_blocking-module-research.md]
 
 **Description**: Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
 
@@ -645,7 +647,7 @@ After implementation:
 ---
 
 ### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 407

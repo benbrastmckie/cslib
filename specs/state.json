@@ -4,7 +4,7 @@
     {
       "project_number": 583,
       "project_name": "restate_intexpandbranches_openbranch_sat",
-      "status": "researching",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "dependencies": [
@@ -12,8 +12,18 @@
       ],
       "description": "Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:2583, sorry at :2623) so that it is provable, then discharge it.\n\nTHE GOAL IS FALSE AS STATED -- this is not a proof-effort obligation and cannot be closed by proving harder. The in-file comment (Scheme.lean:2598-2622) records an explicit Lean-verified counter-instance to the `fuel = 0` base case: with `branches = [[<.neg, p /\\ q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`, every hypothesis of the lemma holds while `IBranchSaturation` fails. The comment states outright: \"No proof can close this `sorry` at the lemma current statement.\"\n\nSCOPE: determine the correct strengthened statement (most likely an added saturation or fuel-sufficiency precondition on the `fuel = 0` case), restate the lemma, repair its call sites, and discharge the sorry.\n\nRELATIONSHIP TO THE DIVERGENCE REPAIR: the divergence-repair task addresses the root cause shared by all four propositional tableau sorries (the fuel-bounded persistence loop in `applyAllTImpRules` copying `T(phi->psi)` into accessible worlds). The restatement here may fall out of that repair, or may need to be done independently -- resolve that first. This task exists because the restatement obligation is named in no other task description and must not be silently skipped when the divergence repair lands.\n\nVERIFY BEFORE STARTING: re-read Scheme.lean:2598-2622 and confirm the counter-instance still refutes the current statement; if the divergence repair has already restated the lemma, close this task as superseded rather than duplicating the work.",
       "created": "2026-07-28T17:19:05Z",
-      "last_updated": "2026-07-28T21:58:32Z",
-      "session_id": "sess_1785275816_a84520_583"
+      "last_updated": "2026-07-28T22:14:07Z",
+      "session_id": "sess_1785275816_a84520_583",
+      "artifacts": [
+        {
+          "path": "specs/583_restate_intexpandbranches_openbranch_sat/reports/01_restate-openbranch-sat.md",
+          "type": "report",
+          "summary": "Restatement research: lemma false as stated; prerequisite WBound development needed; recommends BLOCKED + spawn"
+        }
+      ],
+      "blockers": [
+        "Research (report 01_restate-openbranch-sat.md, adversarially verified) mechanically re-confirmed the lemma is FALSE as stated post-574 (live #eval counter-instance at fuel=0; sorry now Scheme.lean:2551). Every cheap restatement (0 < fuel, initial saturation, fuel-stability) fails IH-preservation or call-site dischargeability (Finding F3); the trichotomy alternative merely relocates the identical obligation into tableau_complete and instDecidableIValid. The provable restatement (Finding F5, R1: hUniv/hNW/hFuel hypotheses) is gated on a fuel-sufficiency development that does not exist yet: post-blocking world-label bound WBound(phi) from ancestor-blocking combinatorics + enlarged intUniverseExt/intExpMeasureExt + intFuel resize + threading invariants (the sorry-free but unused measure engine at Scheme.lean:1913-2487 is gated on unproven universe containment). Recommended next step: /spawn 583 to create the prerequisite task; then discharge together with truthLemma T-imp sorry (Scheme.lean:617) per the in-file STOP-gate."
+      ]
     },
     {
       "project_number": 582,
@@ -158,19 +168,25 @@
     {
       "project_number": 456,
       "project_name": "shared_tableau_containment_blocking",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "priority": "medium",
       "description": "Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.",
       "created": "2026-07-01T13:59:22Z",
-      "last_updated": "2026-07-28T21:58:36Z",
+      "last_updated": "2026-07-28T22:13:47Z",
       "session_id": "sess_1785275816_a84520_456",
       "dependencies": [
         574
       ],
       "parent_task": 317,
       "topic": "Tableau Infrastructure",
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/456_shared_tableau_containment_blocking/reports/01_blocking-module-research.md",
+          "type": "report",
+          "summary": "Blocking module research: corrected counting lemma (2^V.card over signed Finset universe); proof cores compiled green; 456-first dependency confirmed"
+        }
+      ]
     },
     {
       "project_number": 317,
@@ -659,12 +675,12 @@
     {
       "project_number": 409,
       "project_name": "bot_rule_free_nd_option_b",
-      "status": "researched",
+      "status": "blocked",
       "task_type": "cslib",
       "title": "Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization",
       "description": "SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- OPTIONAL / advanced. Task 407 adopts option C (re-frame the task-398 gated efq constructor as the explosion property module; the base relation is ⊥-rule-free UP TO the IsIntuitionistic gate). Option B is the LITERAL structure-first ND: split Theory.Derivation into a genuinely ⊥-rule-free base inductive MinDerivation (no efq constructor) plus an Explosion extension, prove all structural metatheory once on the base, and recover IPL-ND by adjoining efq. TRIGGER CONDITION: only pursue if a concrete downstream consumer needs a physically ⊥-free derivation object (e.g. a minimal-ND normalization theorem, or a lambda-calculus without an abort/efq combinator). COST/RISK: re-opens the single genuinely hard point from task 398 -- the subformula property under efq -- and forces re-cutting Curry-Howard (Theory.Term mirror) and Prawitz normalization (Basic/Reduction/Termination/SubformulaProperty) against the split. Reuse the task-398 decided strategy (atomic restriction + permutation conversions); treat any non-green proof as [BLOCKED], never sorry. HIGH effort -- use --hard. Depends on 407 (and ideally 408). Source: task 407 report 01 §5 option B / §7 W6, report 02 §5. ALIGNMENT NOTE: this two-inductive split is the Design-B-flavored route that the universal-algebra approach (task 407 option C) deliberately AVOIDS, because it duplicates derivation structure (exclude-then-add at the derivation level). Default remains task 407 option C: ONE derivation type with explosion as a property module. Pursue 409 ONLY if the trigger condition above fires.",
       "created": "2026-06-29T00:00:00Z",
-      "last_updated": "2026-07-24T15:46:47Z",
+      "last_updated": "2026-07-28T22:14:12Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -673,12 +689,15 @@
           "summary": "Option-B ⊥-free ND split research: trigger condition unmet (no consumer needs a physically ⊥-free derivation); recommend defer/BLOCKED. Inventory + base+extension precedent (ExtDerivation) delivered."
         }
       ],
-      "session_id": "sess_1784907631_dfd0bb_409",
+      "session_id": "sess_1785275816_a84520_409",
       "dependencies": [
         407
       ],
       "topic": "Propositional Logic",
-      "parent_task": 407
+      "parent_task": 407,
+      "blockers": [
+        "Research (report 01_bot-free-nd-option-b-research.md, adversarially verified 19/20 claims) concluded: do NOT pursue Option B now — the trigger condition is unmet. Grep-verified negative consumer sweep: MinimalDerivation/IsBotRuleFree are referenced nowhere outside their defining file (Basic.lean:223/242); STLC is standalone with no bottom/abort dependency; subformula-property-under-efq is closed via the IsIntuitionistic.efq axiom route and green on main. Keeping the task as a tripwire with explicit re-trigger signals named in the report (a consumer of MinimalDerivation appearing, or the efq axiom crutch needing removal); contingency route E1-prime (mirroring ExtDerivation.lean) is specified if re-triggered. Alternative: abandon the task."
+      ]
     },
     {
       "project_number": 413,

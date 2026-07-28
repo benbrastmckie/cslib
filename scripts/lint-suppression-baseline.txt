@@ -35,7 +35,6 @@
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Defs.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/Eliminations.lean
 1 Cslib/Logics/Bimodal/Metalogic/Separation/FormulaOps.lean
-1 Cslib/Logics/Bimodal/Metalogic/Separation/NegationEquiv.lean
 1 Cslib/Logics/Bimodal/ProofSystem/Axioms.lean
 1 Cslib/Logics/Bimodal/Theorems/Perpetuity/Bridge.lean
 1 Cslib/Logics/Temporal/Metalogic/MetricCompleteness.lean

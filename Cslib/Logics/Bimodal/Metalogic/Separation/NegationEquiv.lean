@@ -17,8 +17,6 @@ public import Cslib.Logics.Bimodal.Metalogic.Separation.IntHelpers
 - GHR94, Lemma 10.2.2, p. 572
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Separation

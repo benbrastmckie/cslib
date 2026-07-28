@@ -21,7 +21,6 @@
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/MultiApp.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/StandardReduction.lean
 1 Cslib/Languages/LambdaCalculus/LocallyNameless/Untyped/StrongNorm.lean
-2 Cslib/Logics/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 1 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Elimination.lean
 6 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/Interface.lean
 1 Cslib/Logics/Bimodal/Metalogic/BXCanonical/Filtration/DefectChain.lean

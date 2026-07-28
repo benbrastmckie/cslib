@@ -41,9 +41,6 @@ reverse, and vice versa).
 * Ported from BimodalLogic/Theories/Bimodal/Metalogic/Bundle/WitnessSeed.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Bundle
@@ -71,8 +68,10 @@ lemma someFuture_allFuture_neg_absurd {fc : FrameClass} {M : Set (Formula Atom)}
     DerivationTree.temporal_necessitation _ h_dni
   have h_bx3 : DerivationTree fc [] ((psi.imp psi.neg.neg).allFuture.imp
       ((Formula.untl Formula.top psi).imp (Formula.untl Formula.top psi.neg.neg))) :=
-    DerivationTree.axiom [] _ (Axiom.right_mono_until psi psi.neg.neg Formula.top) (FrameClass.base_le fc)
-  have hImpl : DerivationTree fc [] ((Formula.someFuture psi).imp (Formula.someFuture psi.neg.neg)) :=
+    DerivationTree.axiom [] _ (Axiom.right_mono_until psi psi.neg.neg Formula.top)
+        (FrameClass.base_le fc)
+  have hImpl : DerivationTree fc [] ((Formula.someFuture psi).imp (Formula.someFuture psi.neg.neg))
+      :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_G_dni
   have h_sf_nn : Formula.someFuture psi.neg.neg ∈ M :=
     SetMaximalConsistent.implication_property h_mcs
@@ -89,7 +88,8 @@ lemma somePast_allPast_neg_absurd {fc : FrameClass} {M : Set (Formula Atom)}
     Theorems.pastNecessitation _ h_dni
   have h_bx3 : DerivationTree fc [] ((psi.imp psi.neg.neg).allPast.imp
       ((Formula.snce Formula.top psi).imp (Formula.snce Formula.top psi.neg.neg))) :=
-    DerivationTree.axiom [] _ (Axiom.right_mono_since psi psi.neg.neg Formula.top) (FrameClass.base_le fc)
+    DerivationTree.axiom [] _ (Axiom.right_mono_since psi psi.neg.neg Formula.top)
+        (FrameClass.base_le fc)
   have hImpl : DerivationTree fc [] ((Formula.somePast psi).imp (Formula.somePast psi.neg.neg)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_H_dni
   have h_sp_nn : Formula.somePast psi.neg.neg ∈ M :=
@@ -107,15 +107,18 @@ lemma neg_someFuture_to_allFuture_neg {fc : FrameClass} {M : Set (Formula Atom)}
     (h_neg_F : Formula.neg (Formula.someFuture phi) ∈ M) :
     Formula.allFuture (Formula.neg phi) ∈ M := by
   -- Build derivation chain at Base level, then lift to fc
-  have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) := Theorems.Propositional.doubleNegation _
+  have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) :=
+      Theorems.Propositional.doubleNegation _
   have h_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture) :=
     DerivationTree.temporal_necessitation _ h_dne
   have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allFuture.imp
       ((Formula.untl Formula.top phi.neg.neg).imp (Formula.untl Formula.top phi))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_until phi.neg.neg phi Formula.top) trivial
-  have h_F_mono : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp (Formula.someFuture phi)) :=
+  have h_F_mono : DerivationTree FrameClass.Base [] ((Formula.someFuture phi.neg.neg).imp
+      (Formula.someFuture phi)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_nec
-  have h_contra : DerivationTree FrameClass.Base [] ((Formula.someFuture phi).neg.imp (Formula.someFuture phi.neg.neg).neg) :=
+  have h_contra : DerivationTree FrameClass.Base [] ((Formula.someFuture phi).neg.imp
+      (Formula.someFuture phi.neg.neg).neg) :=
     Theorems.Propositional.contraposition h_F_mono
   exact SetMaximalConsistent.implication_property h_mcs
     (theoremInMcsFc h_mcs (h_contra.lift (FrameClass.base_le fc))) h_neg_F
@@ -126,15 +129,18 @@ lemma neg_somePast_to_allPast_neg {fc : FrameClass} {M : Set (Formula Atom)}
     (h_neg_P : Formula.neg (Formula.somePast phi) ∈ M) :
     Formula.allPast (Formula.neg phi) ∈ M := by
   -- Build derivation chain at Base level, then lift to fc
-  have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) := Theorems.Propositional.doubleNegation _
+  have h_dne : DerivationTree FrameClass.Base [] (phi.neg.neg.imp phi) :=
+      Theorems.Propositional.doubleNegation _
   have h_nec : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast) :=
     Theorems.pastNecessitation _ h_dne
   have h_bx3 : DerivationTree FrameClass.Base [] ((phi.neg.neg.imp phi).allPast.imp
       ((Formula.snce Formula.top phi.neg.neg).imp (Formula.snce Formula.top phi))) :=
     DerivationTree.axiom [] _ (Axiom.right_mono_since phi.neg.neg phi Formula.top) trivial
-  have h_P_mono : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp (Formula.somePast phi)) :=
+  have h_P_mono : DerivationTree FrameClass.Base [] ((Formula.somePast phi.neg.neg).imp
+      (Formula.somePast phi)) :=
     DerivationTree.modus_ponens [] _ _ h_bx3 h_nec
-  have h_contra : DerivationTree FrameClass.Base [] ((Formula.somePast phi).neg.imp (Formula.somePast phi.neg.neg).neg) :=
+  have h_contra : DerivationTree FrameClass.Base [] ((Formula.somePast phi).neg.imp
+      (Formula.somePast phi.neg.neg).neg) :=
     Theorems.Propositional.contraposition h_P_mono
   exact SetMaximalConsistent.implication_property h_mcs
     (theoremInMcsFc h_mcs (h_contra.lift (FrameClass.base_le fc))) h_neg_P
@@ -161,21 +167,19 @@ lemma g_content_subset_forward_temporal_witness_seed (M : Set (Formula Atom)) (p
 Forward temporal witness seed consistency: If F(psi) is in an MCS M, then
 `{psi} ∪ gContent(M)` is consistent.
 -/
-theorem forward_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc M)
+theorem forward_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formula Atom)) (h_mcs :
+    SetMaximalConsistent fc M)
     (psi : Formula Atom) (h_F : Formula.someFuture psi ∈ M) :
     SetConsistent fc (forwardTemporalWitnessSeed M psi) := by
   intro L hL_sub ⟨d⟩
-
   by_cases h_psi_in : psi ∈ L
   · -- Case: psi ∈ L
     let L_filt := L.filter (fun y => decide (y ≠ psi))
     have h_perm := cons_filter_neq_perm h_psi_in
     have d_reord : DerivationTree fc (psi :: L_filt) (Formula.bot : Formula Atom) :=
       derivationExchange d (fun x => (h_perm x).symm)
-
     have d_neg : DerivationTree fc L_filt (Formula.neg psi) :=
       deductionTheorem L_filt psi Formula.bot d_reord
-
     -- Get G chi ∈ M for each chi ∈ L_filt from gContent
     have h_G_filt_in_M : ∀ chi ∈ L_filt, Formula.allFuture chi ∈ M := by
       intro chi h_mem
@@ -187,11 +191,10 @@ theorem forward_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (For
       rcases h_in_seed with h_eq | h_gcontent
       · exact absurd h_eq h_ne
       · exact h_gcontent
-
     -- Apply generalized temporal K (G distributes over derivation)
-    have d_G_neg : DerivationTree fc (Context.map Formula.allFuture L_filt) (Formula.allFuture (Formula.neg psi)) :=
+    have d_G_neg : DerivationTree fc (Context.map Formula.allFuture L_filt) (Formula.allFuture
+        (Formula.neg psi)) :=
       Theorems.generalizedTemporalK L_filt (Formula.neg psi) d_neg
-
     -- All formulas in G(L_filt) are in M
     have h_G_context_in_M : ∀ phi ∈ Context.map Formula.allFuture L_filt, phi ∈ M := by
       intro phi h_mem
@@ -199,15 +202,12 @@ theorem forward_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (For
       rcases h_mem with ⟨chi, h_chi_in, h_eq⟩
       rw [← h_eq]
       exact h_G_filt_in_M chi h_chi_in
-
     -- By MCS closure under derivation, G(neg psi) ∈ M
     have h_G_neg_in_M : Formula.allFuture (Formula.neg psi) ∈ M :=
       SetMaximalConsistent.closed_under_derivation h_mcs (Context.map Formula.allFuture L_filt)
         h_G_context_in_M d_G_neg
-
     -- Contradiction: F(psi) and G(neg psi) cannot both be in MCS
     exact someFuture_allFuture_neg_absurd h_mcs psi h_F h_G_neg_in_M
-
   · -- Case: psi ∉ L, so L ⊆ gContent M
     have h_G_all_in_M : ∀ chi ∈ L, Formula.allFuture chi ∈ M := by
       intro chi h_mem
@@ -216,11 +216,10 @@ theorem forward_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (For
       rcases h_in_seed with h_eq | h_gcontent
       · exact absurd h_eq (fun h => h_psi_in (h ▸ h_mem))
       · exact h_gcontent
-
     -- From L ⊢ ⊥, by generalized temporal K: G(L) ⊢ G(⊥)
-    have d_G_bot : DerivationTree fc (Context.map Formula.allFuture L) (Formula.allFuture (Formula.bot : Formula Atom)) :=
+    have d_G_bot : DerivationTree fc (Context.map Formula.allFuture L) (Formula.allFuture
+        (Formula.bot : Formula Atom)) :=
       Theorems.generalizedTemporalK L Formula.bot d
-
     -- All formulas in G(L) are in M
     have h_G_L_in_M : ∀ phi ∈ Context.map Formula.allFuture L, phi ∈ M := by
       intro phi h_mem
@@ -228,31 +227,32 @@ theorem forward_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (For
       rcases h_mem with ⟨chi, h_chi_in, h_eq⟩
       rw [← h_eq]
       exact h_G_all_in_M chi h_chi_in
-
     -- So G(⊥) ∈ M
     have h_G_bot_in_M : Formula.allFuture (Formula.bot : Formula Atom) ∈ M :=
       SetMaximalConsistent.closed_under_derivation h_mcs (Context.map Formula.allFuture L)
         h_G_L_in_M d_G_bot
-
     -- ⊢ ⊥ → ¬psi by imp_s (weakening)
-    have h_bot_imp_neg : DerivationTree fc [] ((Formula.bot : Formula Atom).imp (Formula.neg psi)) :=
-      DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot : Formula Atom) psi) (FrameClass.base_le fc)
-
+    have h_bot_imp_neg : DerivationTree fc [] ((Formula.bot : Formula Atom).imp (Formula.neg psi))
+        :=
+      DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot : Formula Atom) psi) (FrameClass.base_le
+          fc)
     -- By temporal necessitation: ⊢ G(⊥ → ¬psi)
-    have h_G_ef : DerivationTree fc [] (Formula.allFuture ((Formula.bot : Formula Atom).imp (Formula.neg psi))) :=
+    have h_G_ef : DerivationTree fc [] (Formula.allFuture ((Formula.bot : Formula Atom).imp
+        (Formula.neg psi))) :=
       DerivationTree.temporal_necessitation _ h_bot_imp_neg
-
     -- By temporal K distribution: ⊢ G(⊥ → ¬psi) → (G(⊥) → G(¬psi))
-    have h_K : DerivationTree fc [] ((Formula.allFuture ((Formula.bot : Formula Atom).imp (Formula.neg psi))).imp
-                     ((Formula.allFuture (Formula.bot : Formula Atom)).imp (Formula.allFuture (Formula.neg psi)))) :=
-      (Theorems.TemporalDerived.tempKDistDerived (Formula.bot : Formula Atom) (Formula.neg psi)).lift (FrameClass.base_le fc)
-
+    have h_K : DerivationTree fc [] ((Formula.allFuture ((Formula.bot : Formula Atom).imp
+        (Formula.neg psi))).imp
+                     ((Formula.allFuture (Formula.bot : Formula Atom)).imp (Formula.allFuture
+                         (Formula.neg psi)))) :=
+      (Theorems.TemporalDerived.tempKDistDerived (Formula.bot : Formula Atom) (Formula.neg
+          psi)).lift (FrameClass.base_le fc)
     -- Modus ponens twice: G(¬psi) ∈ M
-    have h_G_imp : DerivationTree fc [] ((Formula.allFuture (Formula.bot : Formula Atom)).imp (Formula.allFuture (Formula.neg psi))) :=
+    have h_G_imp : DerivationTree fc [] ((Formula.allFuture (Formula.bot : Formula Atom)).imp
+        (Formula.allFuture (Formula.neg psi))) :=
       DerivationTree.modus_ponens [] _ _ h_K h_G_ef
     have h_G_neg_psi : Formula.allFuture (Formula.neg psi) ∈ M :=
       SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_G_imp) h_G_bot_in_M
-
     -- Contradiction: F(psi) and G(neg psi) cannot both be in MCS
     exact someFuture_allFuture_neg_absurd h_mcs psi h_F h_G_neg_psi
 
@@ -278,21 +278,19 @@ lemma h_content_subset_past_temporal_witness_seed (M : Set (Formula Atom)) (psi 
 Past temporal witness seed consistency: If P(psi) is in an MCS M, then
 `{psi} ∪ hContent(M)` is consistent.
 -/
-theorem past_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc M)
+theorem past_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formula Atom)) (h_mcs :
+    SetMaximalConsistent fc M)
     (psi : Formula Atom) (h_P : Formula.somePast psi ∈ M) :
     SetConsistent fc (pastTemporalWitnessSeed M psi) := by
   intro L hL_sub ⟨d⟩
-
   by_cases h_psi_in : psi ∈ L
   · -- Case: psi ∈ L
     let L_filt := L.filter (fun y => decide (y ≠ psi))
     have h_perm := cons_filter_neq_perm h_psi_in
     have d_reord : DerivationTree fc (psi :: L_filt) (Formula.bot : Formula Atom) :=
       derivationExchange d (fun x => (h_perm x).symm)
-
     have d_neg : DerivationTree fc L_filt (Formula.neg psi) :=
       deductionTheorem L_filt psi Formula.bot d_reord
-
     -- Get H chi ∈ M for each chi ∈ L_filt from hContent
     have h_H_filt_in_M : ∀ chi ∈ L_filt, Formula.allPast chi ∈ M := by
       intro chi h_mem
@@ -304,11 +302,10 @@ theorem past_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formul
       rcases h_in_seed with h_eq | h_hcontent
       · exact absurd h_eq h_ne
       · exact h_hcontent
-
     -- Apply generalized past K (H distributes over derivation)
-    have d_H_neg : DerivationTree fc (Context.map Formula.allPast L_filt) (Formula.allPast (Formula.neg psi)) :=
+    have d_H_neg : DerivationTree fc (Context.map Formula.allPast L_filt) (Formula.allPast
+        (Formula.neg psi)) :=
       Theorems.generalizedPastK L_filt (Formula.neg psi) d_neg
-
     -- All formulas in H(L_filt) are in M
     have h_H_context_in_M : ∀ phi ∈ Context.map Formula.allPast L_filt, phi ∈ M := by
       intro phi h_mem
@@ -316,15 +313,12 @@ theorem past_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formul
       rcases h_mem with ⟨chi, h_chi_in, h_eq⟩
       rw [← h_eq]
       exact h_H_filt_in_M chi h_chi_in
-
     -- By MCS closure under derivation, H(neg psi) ∈ M
     have h_H_neg_in_M : Formula.allPast (Formula.neg psi) ∈ M :=
       SetMaximalConsistent.closed_under_derivation h_mcs (Context.map Formula.allPast L_filt)
         h_H_context_in_M d_H_neg
-
     -- Contradiction: P(psi) and H(neg psi) cannot both be in MCS
     exact somePast_allPast_neg_absurd h_mcs psi h_P h_H_neg_in_M
-
   · -- Case: psi ∉ L, so L ⊆ hContent M
     have h_H_all_in_M : ∀ chi ∈ L, Formula.allPast chi ∈ M := by
       intro chi h_mem
@@ -333,11 +327,10 @@ theorem past_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formul
       rcases h_in_seed with h_eq | h_hcontent
       · exact absurd h_eq (fun h => h_psi_in (h ▸ h_mem))
       · exact h_hcontent
-
     -- From L ⊢ ⊥, by generalized past K: H(L) ⊢ H(⊥)
-    have d_H_bot : DerivationTree fc (Context.map Formula.allPast L) (Formula.allPast (Formula.bot : Formula Atom)) :=
+    have d_H_bot : DerivationTree fc (Context.map Formula.allPast L) (Formula.allPast (Formula.bot :
+        Formula Atom)) :=
       Theorems.generalizedPastK L Formula.bot d
-
     -- All formulas in H(L) are in M
     have h_H_L_in_M : ∀ phi ∈ Context.map Formula.allPast L, phi ∈ M := by
       intro phi h_mem
@@ -345,31 +338,32 @@ theorem past_temporal_witness_seed_consistent {fc : FrameClass} (M : Set (Formul
       rcases h_mem with ⟨chi, h_chi_in, h_eq⟩
       rw [← h_eq]
       exact h_H_all_in_M chi h_chi_in
-
     -- So H(⊥) ∈ M
     have h_H_bot_in_M : Formula.allPast (Formula.bot : Formula Atom) ∈ M :=
       SetMaximalConsistent.closed_under_derivation h_mcs (Context.map Formula.allPast L)
         h_H_L_in_M d_H_bot
-
     -- ⊢ ⊥ → ¬psi by imp_s
-    have h_bot_imp_neg : DerivationTree fc [] ((Formula.bot : Formula Atom).imp (Formula.neg psi)) :=
-      DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot : Formula Atom) psi) (FrameClass.base_le fc)
-
+    have h_bot_imp_neg : DerivationTree fc [] ((Formula.bot : Formula Atom).imp (Formula.neg psi))
+        :=
+      DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot : Formula Atom) psi) (FrameClass.base_le
+          fc)
     -- By past necessitation: ⊢ H(⊥ → ¬psi)
-    have h_H_ef : DerivationTree fc [] (Formula.allPast ((Formula.bot : Formula Atom).imp (Formula.neg psi))) :=
+    have h_H_ef : DerivationTree fc [] (Formula.allPast ((Formula.bot : Formula Atom).imp
+        (Formula.neg psi))) :=
       Theorems.pastNecessitation _ h_bot_imp_neg
-
     -- By past K distribution: ⊢ H(⊥ → ¬psi) → (H(⊥) → H(¬psi))
-    have h_K : DerivationTree fc [] ((Formula.allPast ((Formula.bot : Formula Atom).imp (Formula.neg psi))).imp
-                     ((Formula.allPast (Formula.bot : Formula Atom)).imp (Formula.allPast (Formula.neg psi)))) :=
-      (Theorems.pastKDist (Formula.bot : Formula Atom) (Formula.neg psi)).lift (FrameClass.base_le fc)
-
+    have h_K : DerivationTree fc [] ((Formula.allPast ((Formula.bot : Formula Atom).imp (Formula.neg
+        psi))).imp
+                     ((Formula.allPast (Formula.bot : Formula Atom)).imp (Formula.allPast
+                         (Formula.neg psi)))) :=
+      (Theorems.pastKDist (Formula.bot : Formula Atom) (Formula.neg psi)).lift (FrameClass.base_le
+          fc)
     -- Modus ponens twice: H(¬psi) ∈ M
-    have h_H_imp : DerivationTree fc [] ((Formula.allPast (Formula.bot : Formula Atom)).imp (Formula.allPast (Formula.neg psi))) :=
+    have h_H_imp : DerivationTree fc [] ((Formula.allPast (Formula.bot : Formula Atom)).imp
+        (Formula.allPast (Formula.neg psi))) :=
       DerivationTree.modus_ponens [] _ _ h_K h_H_ef
     have h_H_neg_psi : Formula.allPast (Formula.neg psi) ∈ M :=
       SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_H_imp) h_H_bot_in_M
-
     -- Contradiction: P(psi) and H(neg psi) cannot both be in MCS
     exact somePast_allPast_neg_absurd h_mcs psi h_P h_H_neg_psi
 
@@ -395,11 +389,11 @@ lemma g_content_subset_until_witness_seed (M : Set (Formula Atom)) (ψ : Formula
 Until witness seed consistency: If `φ U ψ ∈ M` and M is MCS, then
 `{ψ} ∪ gContent(M)` is consistent.
 -/
-theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent
+    (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_U : Formula.untl φ ψ ∈ M) :
     SetConsistent FrameClass.Base (untilWitnessSeed M ψ) := by
   intro L hL_sub ⟨d⟩
-
   -- Extract G(¬ψ) ∈ M from the inconsistency of {ψ} ∪ gContent(M)
   have h_G_neg_psi : Formula.allFuture (Formula.neg ψ) ∈ M := by
     by_cases h_psi_in : ψ ∈ L
@@ -420,7 +414,8 @@ theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
         rcases h_in_seed with h_eq | h_gcontent
         · exact absurd h_eq h_ne
         · exact h_gcontent
-      have d_G_neg : DerivationTree FrameClass.Base (Context.map Formula.allFuture L_filt) (Formula.allFuture (Formula.neg ψ)) :=
+      have d_G_neg : DerivationTree FrameClass.Base (Context.map Formula.allFuture L_filt)
+          (Formula.allFuture (Formula.neg ψ)) :=
         Theorems.generalizedTemporalK L_filt (Formula.neg ψ) d_neg
       have h_G_context_in_M : ∀ f ∈ Context.map Formula.allFuture L_filt, f ∈ M := by
         intro f h_mem
@@ -438,7 +433,8 @@ theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
         rcases h_in_seed with h_eq | h_gcontent
         · exact absurd h_eq (fun h => h_psi_in (h ▸ h_mem))
         · exact h_gcontent
-      have d_G_bot : DerivationTree FrameClass.Base (Context.map Formula.allFuture L) (Formula.allFuture (Formula.bot : Formula Atom)) :=
+      have d_G_bot : DerivationTree FrameClass.Base (Context.map Formula.allFuture L)
+          (Formula.allFuture (Formula.bot : Formula Atom)) :=
         Theorems.generalizedTemporalK L Formula.bot d
       have h_G_L_in_M : ∀ f ∈ Context.map Formula.allFuture L, f ∈ M := by
         intro f h_mem
@@ -449,18 +445,22 @@ theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
       have h_G_bot_in_M : Formula.allFuture (Formula.bot : Formula Atom) ∈ M :=
         SetMaximalConsistent.closed_under_derivation h_mcs
           (Context.map Formula.allFuture L) h_G_L_in_M d_G_bot
-      have h_bot_imp_neg : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp (Formula.neg ψ)) :=
+      have h_bot_imp_neg : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp
+          (Formula.neg ψ)) :=
         DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot : Formula Atom) ψ) trivial
-      have h_G_ef : DerivationTree FrameClass.Base [] (Formula.allFuture ((Formula.bot : Formula Atom).imp (Formula.neg ψ))) :=
+      have h_G_ef : DerivationTree FrameClass.Base [] (Formula.allFuture ((Formula.bot : Formula
+          Atom).imp (Formula.neg ψ))) :=
         DerivationTree.temporal_necessitation _ h_bot_imp_neg
-      have h_K : DerivationTree FrameClass.Base [] ((Formula.allFuture ((Formula.bot : Formula Atom).imp (Formula.neg ψ))).imp
-                       ((Formula.allFuture (Formula.bot : Formula Atom)).imp (Formula.allFuture (Formula.neg ψ)))) :=
+      have h_K : DerivationTree FrameClass.Base [] ((Formula.allFuture ((Formula.bot : Formula
+          Atom).imp (Formula.neg ψ))).imp
+                       ((Formula.allFuture (Formula.bot : Formula Atom)).imp (Formula.allFuture
+                           (Formula.neg ψ)))) :=
         Theorems.TemporalDerived.tempKDistDerived (Formula.bot : Formula Atom) (Formula.neg ψ)
-      have h_G_imp : DerivationTree FrameClass.Base [] ((Formula.allFuture (Formula.bot : Formula Atom)).imp (Formula.allFuture (Formula.neg ψ))) :=
+      have h_G_imp : DerivationTree FrameClass.Base [] ((Formula.allFuture (Formula.bot : Formula
+          Atom)).imp (Formula.allFuture (Formula.neg ψ))) :=
         DerivationTree.modus_ponens [] _ _ h_K h_G_ef
       exact SetMaximalConsistent.implication_property h_mcs
         (theoremInMcsFc h_mcs h_G_imp) h_G_bot_in_M
-
   -- BX10 contradiction: (φ U ψ) → F(ψ) by BX10, and F(ψ) = ¬G(¬ψ), contradicting G(¬ψ) ∈ M
   have h_F_psi : ψ.someFuture ∈ M :=
     SetMaximalConsistent.implication_property h_mcs
@@ -471,11 +471,11 @@ theorem until_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
 Since witness seed consistency: If `φ S ψ ∈ M` and M is MCS, then
 `{ψ} ∪ hContent(M)` is consistent.
 -/
-theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaximalConsistent
+    (FrameClass.Base : FrameClass) M)
     (φ ψ : Formula Atom) (h_S : Formula.snce φ ψ ∈ M) :
     SetConsistent FrameClass.Base (pastTemporalWitnessSeed M ψ) := by
   intro L hL_sub ⟨d⟩
-
   -- Extract H(¬ψ) ∈ M from the inconsistency of {ψ} ∪ hContent(M)
   have h_H_neg_psi : Formula.allPast (Formula.neg ψ) ∈ M := by
     by_cases h_psi_in : ψ ∈ L
@@ -495,7 +495,8 @@ theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
         rcases h_in_seed with h_eq | h_hcontent
         · exact absurd h_eq h_ne
         · exact h_hcontent
-      have d_H_neg : DerivationTree FrameClass.Base (Context.map Formula.allPast L_filt) (Formula.allPast (Formula.neg ψ)) :=
+      have d_H_neg : DerivationTree FrameClass.Base (Context.map Formula.allPast L_filt)
+          (Formula.allPast (Formula.neg ψ)) :=
         Theorems.generalizedPastK L_filt (Formula.neg ψ) d_neg
       have h_H_context_in_M : ∀ f ∈ Context.map Formula.allPast L_filt, f ∈ M := by
         intro f h_mem
@@ -512,7 +513,8 @@ theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
         rcases h_in_seed with h_eq | h_hcontent
         · exact absurd h_eq (fun h => h_psi_in (h ▸ h_mem))
         · exact h_hcontent
-      have d_H_bot : DerivationTree FrameClass.Base (Context.map Formula.allPast L) (Formula.allPast (Formula.bot : Formula Atom)) :=
+      have d_H_bot : DerivationTree FrameClass.Base (Context.map Formula.allPast L) (Formula.allPast
+          (Formula.bot : Formula Atom)) :=
         Theorems.generalizedPastK L Formula.bot d
       have h_H_L_in_M : ∀ f ∈ Context.map Formula.allPast L, f ∈ M := by
         intro f h_mem
@@ -523,18 +525,22 @@ theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
       have h_H_bot_in_M : Formula.allPast (Formula.bot : Formula Atom) ∈ M :=
         SetMaximalConsistent.closed_under_derivation h_mcs
           (Context.map Formula.allPast L) h_H_L_in_M d_H_bot
-      have h_bot_imp_neg : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp (Formula.neg ψ)) :=
+      have h_bot_imp_neg : DerivationTree FrameClass.Base [] ((Formula.bot : Formula Atom).imp
+          (Formula.neg ψ)) :=
         DerivationTree.axiom [] _ (Axiom.imp_s (Formula.bot : Formula Atom) ψ) trivial
-      have h_H_ef : DerivationTree FrameClass.Base [] (Formula.allPast ((Formula.bot : Formula Atom).imp (Formula.neg ψ))) :=
+      have h_H_ef : DerivationTree FrameClass.Base [] (Formula.allPast ((Formula.bot : Formula
+          Atom).imp (Formula.neg ψ))) :=
         Theorems.pastNecessitation _ h_bot_imp_neg
-      have h_K : DerivationTree FrameClass.Base [] ((Formula.allPast ((Formula.bot : Formula Atom).imp (Formula.neg ψ))).imp
-                       ((Formula.allPast (Formula.bot : Formula Atom)).imp (Formula.allPast (Formula.neg ψ)))) :=
+      have h_K : DerivationTree FrameClass.Base [] ((Formula.allPast ((Formula.bot : Formula
+          Atom).imp (Formula.neg ψ))).imp
+                       ((Formula.allPast (Formula.bot : Formula Atom)).imp (Formula.allPast
+                           (Formula.neg ψ)))) :=
         Theorems.pastKDist (Formula.bot : Formula Atom) (Formula.neg ψ)
-      have h_H_imp : DerivationTree FrameClass.Base [] ((Formula.allPast (Formula.bot : Formula Atom)).imp (Formula.allPast (Formula.neg ψ))) :=
+      have h_H_imp : DerivationTree FrameClass.Base [] ((Formula.allPast (Formula.bot : Formula
+          Atom)).imp (Formula.allPast (Formula.neg ψ))) :=
         DerivationTree.modus_ponens [] _ _ h_K h_H_ef
       exact SetMaximalConsistent.implication_property h_mcs
         (theoremInMcsFc h_mcs h_H_imp) h_H_bot_in_M
-
   -- BX10' contradiction: (φ S ψ) → P(ψ) by BX10', and P(ψ) = ¬H(¬ψ), contradicting H(¬ψ) ∈ M
   have h_P_psi : ψ.somePast ∈ M :=
     SetMaximalConsistent.implication_property h_mcs
@@ -548,7 +554,8 @@ theorem since_witness_seed_consistent (M : Set (Formula Atom)) (h_mcs : SetMaxim
 /-- If gContent(M) ⊆ M', then hContent(M') ⊆ M.
 Uses connect_future: φ → G(P(φ)). -/
 theorem g_content_subset_implies_h_content_reverse
-    (M M' : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (h_mcs' : SetMaximalConsistent (FrameClass.Base : FrameClass) M')
+    (M M' : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+        (h_mcs' : SetMaximalConsistent (FrameClass.Base : FrameClass) M')
     (h_GC : gContent M ⊆ M') :
     hContent M' ⊆ M := by
   intro phi h_H_phi_in_M'
@@ -557,15 +564,18 @@ theorem g_content_subset_implies_h_content_reverse
     rcases SetMaximalConsistent.negation_complete h_mcs phi with h | h
     · exact absurd h h_not_phi
     · exact h
-  have h_ta : DerivationTree FrameClass.Base [] ((Formula.neg phi).imp (Formula.allFuture (Formula.neg phi).somePast)) :=
+  have h_ta : DerivationTree FrameClass.Base [] ((Formula.neg phi).imp (Formula.allFuture
+      (Formula.neg phi).somePast)) :=
     DerivationTree.axiom [] _ (Axiom.connect_future (Formula.neg phi)) trivial
   have h_G_P_neg : Formula.allFuture (Formula.neg phi).somePast ∈ M :=
     SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_ta) h_neg_phi
   have h_P_neg_M' : (Formula.neg phi).somePast ∈ M' := h_GC h_G_P_neg
-  have h_dni : DerivationTree FrameClass.Base [] (phi.imp phi.neg.neg) := Theorems.Combinators.dni phi
+  have h_dni : DerivationTree FrameClass.Base [] (phi.imp phi.neg.neg) := Theorems.Combinators.dni
+      phi
   have h_H_dni : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast) :=
     Theorems.pastNecessitation _ h_dni
-  have h_pk : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast.imp (phi.allPast.imp phi.neg.neg.allPast)) :=
+  have h_pk : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allPast.imp (phi.allPast.imp
+      phi.neg.neg.allPast)) :=
     Theorems.pastKDist phi phi.neg.neg
   have h_H_imp : DerivationTree FrameClass.Base [] (phi.allPast.imp phi.neg.neg.allPast) :=
     DerivationTree.modus_ponens [] _ _ h_pk h_H_dni
@@ -576,7 +586,8 @@ theorem g_content_subset_implies_h_content_reverse
 /-- If hContent(M) ⊆ M', then gContent(M') ⊆ M.
 Uses connect_past: φ → H(F(φ)). -/
 theorem h_content_subset_implies_g_content_reverse
-    (M M' : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M) (h_mcs' : SetMaximalConsistent (FrameClass.Base : FrameClass) M')
+    (M M' : Set (Formula Atom)) (h_mcs : SetMaximalConsistent (FrameClass.Base : FrameClass) M)
+        (h_mcs' : SetMaximalConsistent (FrameClass.Base : FrameClass) M')
     (h_HC : hContent M ⊆ M') :
     gContent M' ⊆ M := by
   intro phi h_G_phi_in_M'
@@ -586,15 +597,18 @@ theorem h_content_subset_implies_g_content_reverse
     rcases SetMaximalConsistent.negation_complete h_mcs phi with h | h
     · exact absurd h h_not_phi
     · exact h
-  have h_pta : DerivationTree FrameClass.Base [] ((Formula.neg phi).imp (Formula.neg phi).someFuture.allPast) :=
+  have h_pta : DerivationTree FrameClass.Base [] ((Formula.neg phi).imp (Formula.neg
+      phi).someFuture.allPast) :=
     DerivationTree.axiom [] _ (Axiom.connect_past (Formula.neg phi)) trivial
   have h_H_F_neg : (Formula.neg phi).someFuture.allPast ∈ M :=
     SetMaximalConsistent.implication_property h_mcs (theoremInMcsFc h_mcs h_pta) h_neg_phi
   have h_F_neg_M' : (Formula.neg phi).someFuture ∈ M' := h_HC h_H_F_neg
-  have h_dni : DerivationTree FrameClass.Base [] (phi.imp phi.neg.neg) := Theorems.Combinators.dni phi
+  have h_dni : DerivationTree FrameClass.Base [] (phi.imp phi.neg.neg) := Theorems.Combinators.dni
+      phi
   have h_G_dni : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture) :=
     DerivationTree.temporal_necessitation _ h_dni
-  have h_fk : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture.imp (phi.allFuture.imp phi.neg.neg.allFuture)) :=
+  have h_fk : DerivationTree FrameClass.Base [] ((phi.imp phi.neg.neg).allFuture.imp
+      (phi.allFuture.imp phi.neg.neg.allFuture)) :=
     Theorems.Perpetuity.futureKDist phi phi.neg.neg
   have h_G_imp : DerivationTree FrameClass.Base [] (phi.allFuture.imp phi.neg.neg.allFuture) :=
     DerivationTree.modus_ponens [] _ _ h_fk h_G_dni

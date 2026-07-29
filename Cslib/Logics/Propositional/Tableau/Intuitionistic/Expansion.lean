@@ -321,6 +321,43 @@ lemma intFImpReuseWitnessAnc?_spec {bPers : IBranch Atom} {edges : IEdges}
     simp only [hcond] at hif
     simp at hif
 
+omit [Hashable Atom] in
+/-- The `none` direction of `intFImpReuseWitnessAnc?_spec` (DP-2 support, report section 5.2):
+when the reuse check returns `none`, EVERY candidate label `x` in
+`(bPers.map (·.label)).eraseDups` fails the conjunction of the five search conditions. This lets
+a `none` result be instantiated at a SPECIFIC candidate (e.g. a `par`-ancestor known to be a
+branch member) to conclude that candidate's conjunct-3 (the containment conjunct) must fail,
+given the other four conjuncts are separately established — the mint-time residue argument
+(Phase 5). Proved mechanically from `List.findSome?_eq_none` plus the same `if`-unfold
+`intFImpReuseWitnessAnc?_spec` uses; `intFImpReuseWitnessAnc?` itself is NOT modified. -/
+lemma intFImpReuseWitnessAnc?_none_spec {bPers : IBranch Atom} {edges : IEdges}
+    {newForms : List (ISF Atom)} {newEdge : Nat × Nat} {x : Nat} {ψ : Proposition Atom}
+    (hψ : newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none)
+        = some ψ)
+    (h : intFImpReuseWitnessAnc? bPers edges newForms newEdge = none)
+    (hx : x ∈ (bPers.map (·.label)).eraseDups) :
+    ¬ (isAccessible edges x newEdge.2 = true ∧
+       x ≤ newEdge.2 ∧
+       (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
+         ((posFormulasAt bPers x).contains ·) = true ∧
+       ¬ (posFormulasAt bPers x).contains ψ ∧
+       bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) = true) := by
+  simp only [intFImpReuseWitnessAnc?, hψ] at h
+  rw [List.findSome?_eq_none_iff] at h
+  have hnone := h x hx
+  rintro ⟨h1, h2, h3, h4, h5⟩
+  have hb2 : x.ble newEdge.2 = true := Nat.ble_eq_true_of_le h2
+  have hb4 : (posFormulasAt bPers x).contains ψ = false := by simpa using h4
+  have hcond : (isAccessible edges x newEdge.2
+      && x.ble newEdge.2
+      && (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none).all
+        ((posFormulasAt bPers x).contains ·)
+      && !(posFormulasAt bPers x).contains ψ
+      && bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x)) = true := by
+    simp only [h1, hb2, h3, hb4, h5, Bool.and_self, Bool.not_false]
+  simp only [hcond, if_true] at hnone
+  exact absurd hnone (by simp)
+
 /-! ### Divergence witness: no world bound exists for this calculus -/
 
 /-!

@@ -213,7 +213,14 @@ reintroduces the same fuel deficit). Phase 6's `IWorldHist` definition should ac
 
 ---
 
-### Phase 2: intFImpReuseWitnessAnc?_none_spec [NOT STARTED]
+### Phase 2: intFImpReuseWitnessAnc?_none_spec [COMPLETED]
+
+Added `intFImpReuseWitnessAnc?_none_spec` in `Expansion.lean`, additive only (37 lines), proved
+from `List.findSome?_eq_none_iff` (the correct Lean-core name; the plan referenced
+`List.findSome?_eq_none`, which does not exist) plus the same boolean-conjunct unfold
+`intFImpReuseWitnessAnc?_spec` uses. `lake build` green;
+`git diff Cslib/.../Expansion.lean` shows only additive lines, `intFImpReuseWitnessAnc?` itself
+byte-identical.
 
 - **Goal:** Supply the absent `none` direction of the reuse-check spec, so the runtime `none` can
   be instantiated at a specific candidate label (report section 5.2).

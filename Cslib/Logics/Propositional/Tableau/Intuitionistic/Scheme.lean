@@ -2128,6 +2128,277 @@ lemma intApplyRuleFull_outputs_subset {φ0 : Proposition Atom} {sf : ISF Atom}
           exact hxeq ▸ mem_intUniverse_of hnw (hsf'eq ▸ intUniverse_mem_formula hsf'U)
         · simp at hsf'eq
 
+/-! ## Enlarged Universe (post-blocking)
+
+`intUniverseExt` is the measure domain the post-blocking fuel-sufficiency development
+runs over: the same `(sign, subformula, world)` cell structure as `intUniverse`, with
+the world range enlarged from the refuted linear range `0 .. φ.complexity + 1` to the
+post-blocking world bound `0 .. WBound φ` (derived from the ancestor-blocking
+combinatorics via `intChainBound` — see *Post-Blocking World Bound* above — never from
+`intUniverse`'s linear range, which is refuted as a branch invariant). `intExpMeasure`
+is already parametric in the universe list `U`, so no separate `Ext` measure definition
+is needed: the enlarged measure is the partial application
+`intExpMeasure (intUniverseExt φ)`. Only the universe, its length bound, its membership
+lemmas, and the containment family below are new; they mirror the `intUniverse` family
+above line-for-line, except that the world-creating arm of
+`intApplyRuleFull_outputs_subset_ext` consumes `hnw : nextWorld ≤ WBound φ0` as a
+threaded premise. Unlike the refuted linear `hnw` (see the warning on
+`intApplyRuleFull_outputs_subset`), this premise is the one the `hNW` threading
+invariant of the fuel-sufficiency development is designed to discharge; that discharge
+is owned by the invariant-threading side, not by this section. -/
+
+omit [Hashable Atom] in
+/-- The enlarged `(sign, subformula, world)`-cell universe for `φ`: both signs, every
+subformula of `φ`, at every world label `0 .. WBound φ`. Same cell structure as
+`intUniverse`, with the refuted linear world range replaced by the post-blocking world
+bound `WBound φ`. -/
+def intUniverseExt (φ : Proposition Atom) : List (ISF Atom) :=
+  (List.range (WBound φ + 1)).flatMap (fun w =>
+    (intSubfmls φ).flatMap (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩]))
+
+omit [Hashable Atom] in
+/-- The enlarged universe has length at most
+`2 * (2 * φ.complexity + 1) * (WBound φ + 1)` (mirrors `intUniverse_length_le`, with
+the linear world-range factor swapped for the enlarged range) -- the bound the
+`intFuel` resize is sized against. -/
+lemma intUniverseExt_length_le (φ : Proposition Atom) :
+    (intUniverseExt φ).length ≤ 2 * (2 * φ.complexity + 1) * (WBound φ + 1) := by
+  have hinner : ∀ w : Nat,
+      ((intSubfmls φ).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩])).length
+        ≤ 2 * (2 * φ.complexity + 1) := by
+    intro w
+    rw [List.length_flatMap]
+    have hb : (List.map (fun ψ =>
+        ([(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩]).length)
+        (intSubfmls φ)).sum ≤ (intSubfmls φ).length * 2 :=
+      sum_map_le_length_mul (intSubfmls φ) _ 2 (fun ψ _ => by simp)
+    have hlen := intSubfmls_length_le φ
+    omega
+  unfold intUniverseExt
+  rw [List.length_flatMap]
+  have houter : (List.map (fun w =>
+      ((intSubfmls φ).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩])).length)
+      (List.range (WBound φ + 1))).sum
+      ≤ (List.range (WBound φ + 1)).length * (2 * (2 * φ.complexity + 1)) :=
+    sum_map_le_length_mul (List.range (WBound φ + 1)) _
+      (2 * (2 * φ.complexity + 1)) (fun w _ => hinner w)
+  rw [List.length_range] at houter
+  calc (List.map (fun w =>
+        ((intSubfmls φ).flatMap
+          (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩])).length)
+        (List.range (WBound φ + 1))).sum
+      ≤ (WBound φ + 1) * (2 * (2 * φ.complexity + 1)) := houter
+    _ = 2 * (2 * φ.complexity + 1) * (WBound φ + 1) := by ring
+
+omit [Hashable Atom] in
+/-- Constructor direction for `intUniverseExt` membership: a signed formula with any
+sign, a subformula of `φ0`, at a world label within the post-blocking bound, is in the
+enlarged universe (mirrors `mem_intUniverse_of`). -/
+private lemma mem_intUniverseExt_of {φ0 : Proposition Atom} {s : Sign}
+    {φ : Proposition Atom} {w : Nat} (hw : w ≤ WBound φ0) (hφ : φ ∈ intSubfmls φ0) :
+    (⟨s, φ, w⟩ : ISF Atom) ∈ intUniverseExt φ0 := by
+  have hlt : w < WBound φ0 + 1 := by omega
+  simp only [intUniverseExt, List.mem_flatMap, List.mem_range]
+  exact ⟨w, hlt, φ, hφ, by cases s <;> simp⟩
+
+omit [Hashable Atom] in
+/-- Generic form of `mem_intUniverseExt_of`, stated for an arbitrary signed formula `z`
+(mirrors `mem_intUniverse_of'`). -/
+private lemma mem_intUniverseExt_of' {φ0 : Proposition Atom} {z : ISF Atom}
+    (hw : z.label ≤ WBound φ0) (hφ : z.formula ∈ intSubfmls φ0) :
+    z ∈ intUniverseExt φ0 := by
+  obtain ⟨s, φ, w⟩ := z
+  exact mem_intUniverseExt_of hw hφ
+
+omit [Hashable Atom] in
+/-- Extraction: the formula-component of any `intUniverseExt φ0` member is a subformula
+of `φ0` (mirrors `intUniverse_mem_formula`). -/
+private lemma intUniverseExt_mem_formula {φ0 : Proposition Atom} {x : ISF Atom}
+    (hx : x ∈ intUniverseExt φ0) : x.formula ∈ intSubfmls φ0 := by
+  simp only [intUniverseExt, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
+
+omit [Hashable Atom] in
+/-- Extraction: the label-component of any `intUniverseExt φ0` member is bounded by
+`WBound φ0` (mirrors `intUniverse_mem_label`). -/
+private lemma intUniverseExt_mem_label {φ0 : Proposition Atom} {x : ISF Atom}
+    (hx : x ∈ intUniverseExt φ0) : x.label ≤ WBound φ0 := by
+  simp only [intUniverseExt, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, hw, ψ, -, heq | heq⟩ := hx <;>
+    (subst heq; change w ≤ WBound φ0; omega)
+
+omit [Hashable Atom] in
+/-- Containment for the persistent `T(φ → ψ)` rule over the enlarged universe (mirrors
+`intTImpRule_outputs_subset`): every emitted formula stays inside `intUniverseExt φ0`,
+given the branch invariant `hb` and the source membership `hsf`. As in the original,
+the emitted label `w'` is always an EXISTING label already appearing on `b`, so no
+world-bound hypothesis is needed here. -/
+private lemma intTImpRule_outputs_subset_ext {φ0 : Proposition Atom} {b : IBranch Atom}
+    {edges : IEdges} {φ ψ : Proposition Atom} {w : Nat}
+    (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0)
+    (hsf : (⟨.pos, .imp φ ψ, w⟩ : ISF Atom) ∈ b) :
+    ∀ x ∈ intTImpRule φ ψ w edges b, x ∈ intUniverseExt φ0 := by
+  have hψsub : ψ ∈ intSubfmls φ0 := by
+    have himp : (Proposition.imp φ ψ) ∈ intSubfmls φ0 :=
+      intUniverseExt_mem_formula (hb _ hsf)
+    have hψmem : ψ ∈ intSubfmls (Proposition.imp φ ψ) := by simp [intSubfmls]
+    exact intSubfmls_trans hψmem himp
+  intro x hx
+  simp only [intTImpRule, List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+    List.mem_map] at hx
+  obtain ⟨w', ⟨⟨y, hymem, hyeq⟩, -⟩, hxeq⟩ := hx
+  have hwle : w' ≤ WBound φ0 := by
+    subst hyeq; exact intUniverseExt_mem_label (hb y hymem)
+  split at hxeq
+  · split at hxeq
+    · simp at hxeq
+    · simp only [Option.some.injEq] at hxeq
+      exact hxeq ▸ mem_intUniverseExt_of hwle hψsub
+  · simp at hxeq
+
+omit [Hashable Atom] in
+/-- Containment for one full round of `applyAllTImpRules` over the enlarged universe
+(mirrors `applyAllTImpRules_subset`): the new formulas it appends stay inside
+`intUniverseExt φ0`, given the branch invariant `hb`. -/
+private lemma applyAllTImpRules_subset_ext {φ0 : Proposition Atom} {b : IBranch Atom}
+    {edges : IEdges} (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0) :
+    ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverseExt φ0 := by
+  intro x hx
+  simp only [applyAllTImpRules, List.mem_append] at hx
+  rcases hx with hxb | hxnew
+  · exact hb x hxb
+  · simp only [List.mem_flatten, List.mem_filterMap] at hxnew
+    obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxnew
+    obtain ⟨s, ff, l⟩ := sf
+    cases s with
+    | neg => simp at hsfeq
+    | pos =>
+      cases ff with
+      | atom p => simp at hsfeq
+      | bot => simp at hsfeq
+      | and a c => simp at hsfeq
+      | or a c => simp at hsfeq
+      | imp φ ψ =>
+        simp only at hsfeq
+        split at hsfeq
+        · simp at hsfeq
+        · simp only [Option.some.injEq] at hsfeq
+          rw [← hsfeq] at hxmem
+          exact intTImpRule_outputs_subset_ext hb hsfmem x hxmem
+
+omit [Hashable Atom] in
+/-- Containment is a loop invariant of `applyPersistenceFixpoint` over the enlarged
+universe (mirrors `applyPersistenceFixpoint_subset`): iterating `applyAllTImpRules` to
+fixpoint never breaches `intUniverseExt φ0`, given the branch invariant at entry. -/
+private lemma applyPersistenceFixpoint_subset_ext {φ0 : Proposition Atom}
+    (b : IBranch Atom) (edges : IEdges) (fuel : Nat)
+    (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0) :
+    ∀ x ∈ applyPersistenceFixpoint b edges fuel, x ∈ intUniverseExt φ0 := by
+  induction fuel generalizing b with
+  | zero => simpa [applyPersistenceFixpoint] using hb
+  | succ fuel' ih =>
+    simp only [applyPersistenceFixpoint]
+    split
+    · exact hb
+    · exact ih _ (applyAllTImpRules_subset_ext hb)
+
+omit [Hashable Atom] in
+/-- **Step-level containment dispatch over the enlarged universe** (mirrors
+`intApplyRuleFull_outputs_subset`): every signed formula emitted by
+`intApplyRuleFull sf nextWorld b` stays inside `intUniverseExt φ0`, given the branch
+invariant `hb`, the source membership `hsf`, and the post-blocking world-bound
+hypothesis `hnw : nextWorld ≤ WBound φ0` (consumed only by the world-creating
+`F(φ → ψ)` case, to show the freshly minted label stays inside the enlarged range).
+
+This is the load-bearing replacement of the original's refuted linear `hnw`: unlike
+`nextWorld ≤ φ0.complexity + 1` (false at actual expansion call sites, see the warning
+on `intApplyRuleFull_outputs_subset`), `nextWorld ≤ WBound φ0` is the bound the
+blocking combinatorics supports. Here it is threaded as a premise only; its discharge
+at the `intExpandBranches` call sites is owned by the `hNW` threading invariant of the
+fuel-sufficiency development. -/
+lemma intApplyRuleFull_outputs_subset_ext {φ0 : Proposition Atom} {sf : ISF Atom}
+    {nextWorld : Nat} {b : IBranch Atom}
+    (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0) (hsf : sf ∈ b)
+    (hnw : nextWorld ≤ WBound φ0) :
+    (match intApplyRuleFull sf nextWorld b with
+      | .linearResult formulas _ _ => ∀ x ∈ formulas, x ∈ intUniverseExt φ0
+      | .branchingResult branches _ => ∀ x ∈ branches.flatten, x ∈ intUniverseExt φ0
+      | .notApplicable => True) := by
+  have hsfU : sf ∈ intUniverseExt φ0 := hb sf hsf
+  obtain ⟨s, ff, l⟩ := sf
+  unfold intApplyRuleFull
+  cases s with
+  | pos =>
+    cases ff with
+    | atom p => trivial
+    | bot => trivial
+    | imp φ ψ =>
+      have hsub : (Proposition.imp φ ψ) ∈ intSubfmls φ0 := intUniverseExt_mem_formula hsfU
+      have hlab : l ≤ WBound φ0 := intUniverseExt_mem_label hsfU
+      intro x hx
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hx
+      obtain ⟨t, (rfl | rfl), hxt⟩ := hx <;>
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hxt <;>
+        (subst hxt
+         exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub))
+    | and φ ψ =>
+      have hsub : (Proposition.and φ ψ) ∈ intSubfmls φ0 := intUniverseExt_mem_formula hsfU
+      have hlab : l ≤ WBound φ0 := intUniverseExt_mem_label hsfU
+      intro x hx
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+      rcases hx with rfl | rfl
+      · exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+      · exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+    | or φ ψ =>
+      have hsub : (Proposition.or φ ψ) ∈ intSubfmls φ0 := intUniverseExt_mem_formula hsfU
+      have hlab : l ≤ WBound φ0 := intUniverseExt_mem_label hsfU
+      intro x hx
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hx
+      obtain ⟨t, (rfl | rfl), hxt⟩ := hx <;>
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hxt <;>
+        (subst hxt
+         exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub))
+  | neg =>
+    cases ff with
+    | atom p => trivial
+    | bot => trivial
+    | and φ ψ =>
+      have hsub : (Proposition.and φ ψ) ∈ intSubfmls φ0 := intUniverseExt_mem_formula hsfU
+      have hlab : l ≤ WBound φ0 := intUniverseExt_mem_label hsfU
+      intro x hx
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hx
+      obtain ⟨t, (rfl | rfl), hxt⟩ := hx <;>
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hxt <;>
+        (subst hxt
+         exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub))
+    | or φ ψ =>
+      have hsub : (Proposition.or φ ψ) ∈ intSubfmls φ0 := intUniverseExt_mem_formula hsfU
+      have hlab : l ≤ WBound φ0 := intUniverseExt_mem_label hsfU
+      intro x hx
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+      rcases hx with rfl | rfl
+      · exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+      · exact mem_intUniverseExt_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+    | imp φ ψ =>
+      have himp : (Proposition.imp φ ψ) ∈ intSubfmls φ0 := intUniverseExt_mem_formula hsfU
+      simp only [intFImpRule, propagatePersistence, posFormulasAt]
+      intro x hx
+      simp only [List.mem_append, List.mem_cons, List.not_mem_nil, or_false,
+        List.mem_map, List.mem_filterMap] at hx
+      rcases hx with (rfl | rfl) | ⟨ψ', ⟨sf', hsf'mem, hsf'eq⟩, hxeq⟩
+      · exact mem_intUniverseExt_of hnw (intSubfmls_trans (by simp [intSubfmls]) himp)
+      · exact mem_intUniverseExt_of hnw (intSubfmls_trans (by simp [intSubfmls]) himp)
+      · split at hsf'eq
+        · simp only [Option.some.injEq] at hsf'eq
+          have hsf'U : sf' ∈ intUniverseExt φ0 := hb sf' hsf'mem
+          exact hxeq ▸
+            mem_intUniverseExt_of hnw (hsf'eq ▸ intUniverseExt_mem_formula hsf'U)
+        · simp at hsf'eq
+
 omit [Hashable Atom] in
 /-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
 `FmpMeasure.lean:190-193`): the number of universe elements not yet on the branch, plus
@@ -2295,8 +2566,12 @@ active branch `bh` by a single successor `b'` -- covering the ALPHA arm (`newEdg
 (`b' = bh` unchanged, `hsub` trivially reflexive) -- strictly decreases `intExpMeasure`. Takes the
 branch-containment invariant `hb` as a hypothesis (as the Modal-K template does for its own `hb`),
 NOT `intExpandBranches_world_bound` (a distinct, harder distinct-label-count fact this lemma does
-not need): only `sf ∈ intUniverse φ0` is required, obtained directly from `hb` together with
-`sf ∈ bh` (read off `intStepBranch`'s internal `findSome?` witness). -/
+not need): only `sf ∈ intUniverseExt φ0` is required, obtained directly from `hb` together with
+`sf ∈ bh` (read off `intStepBranch`'s internal `findSome?` witness).
+
+Re-targeted over the enlarged universe `intUniverseExt` (the post-blocking
+fuel-sufficiency development): the statement is parametric in the universe list, and
+the proof consumes `hb`-membership only -- it never unfolds the world range. -/
 lemma intExpMeasure_step_lt
     (φ0 : Proposition Atom)
     (done bt : List (List (ISF Atom)))
@@ -2305,12 +2580,12 @@ lemma intExpMeasure_step_lt
     (bh e : List (ISF Atom)) (nw nw' : Nat) (newForms : List (ISF Atom))
     (newEdge : Option (Nat × Nat)) (b' : List (ISF Atom))
     (hdlen : done.length = doneExp.length)
-    (hb : ∀ x ∈ bh, x ∈ intUniverse φ0)
+    (hb : ∀ x ∈ bh, x ∈ intUniverseExt φ0)
     (hsub : ∀ z ∈ bh, z ∈ b')
     (hstep : intStepBranch bh e nw = some (.linearResult newForms nw' newEdge, newExp)) :
-    intExpMeasure (intUniverse φ0) (done ++ [b'] ++ bt) (doneExp ++ [newExp] ++ es) + 1
-      ≤ intExpMeasure (intUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
-  set U := intUniverse φ0 with hUdef
+    intExpMeasure (intUniverseExt φ0) (done ++ [b'] ++ bt) (doneExp ++ [newExp] ++ es) + 1
+      ≤ intExpMeasure (intUniverseExt φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  set U := intUniverseExt φ0 with hUdef
   have hrhs := intExpMeasure_split U done doneExp bh e bt es hdlen
   have hlhs : intExpMeasure U (done ++ [b'] ++ bt) (doneExp ++ [newExp] ++ es) =
       intExpMeasure U done doneExp + 3 ^ intWork U b' newExp + intExpMeasure U bt es := by
@@ -2364,7 +2639,11 @@ with the next-world counter unchanged (`nw' = nw`, since branching never creates
 Applies `intWork_drop` twice (once per sub-branch, each `hsub` trivial since every sub-branch is
 `bh` extended by exactly one new formula) and combines via `pow3_two_add_one_le`
 (`Cslib/Foundations/Logic/Tableau/Measure.lean:117`), exactly mirroring the Modal-K template's
-own branching case. -/
+own branching case.
+
+Re-targeted over the enlarged universe `intUniverseExt` (the post-blocking
+fuel-sufficiency development), exactly as `intExpMeasure_step_lt` above: the proof
+consumes `hb`-membership only and never unfolds the world range. -/
 lemma intExpMeasure_step_lt_branch
     (φ0 : Proposition Atom)
     (done bt : List (List (ISF Atom)))
@@ -2373,13 +2652,13 @@ lemma intExpMeasure_step_lt_branch
     (bh e : List (ISF Atom)) (nw nw' : Nat)
     (branches' : List (List (ISF Atom)))
     (hdlen : done.length = doneExp.length)
-    (hb : ∀ x ∈ bh, x ∈ intUniverse φ0)
+    (hb : ∀ x ∈ bh, x ∈ intUniverseExt φ0)
     (hstep : intStepBranch bh e nw = some (.branchingResult branches' nw', newExp)) :
-    intExpMeasure (intUniverse φ0)
+    intExpMeasure (intUniverseExt φ0)
         (done ++ branches'.map (Branch.extendMany bh ·) ++ bt)
         (doneExp ++ branches'.map (fun _ => newExp) ++ es) + 1
-      ≤ intExpMeasure (intUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
-  set U := intUniverse φ0 with hUdef
+      ≤ intExpMeasure (intUniverseExt φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  set U := intUniverseExt φ0 with hUdef
   have hrhs := intExpMeasure_split U done doneExp bh e bt es hdlen
   have hlhs : intExpMeasure U (done ++ branches'.map (Branch.extendMany bh ·) ++ bt)
         (doneExp ++ branches'.map (fun _ => newExp) ++ es) =
@@ -2542,11 +2821,13 @@ lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
 Closes GAP 1 of the `sat_timp` STOP-gate above: a genuine termination bound for
 `applyPersistenceFixpoint`'s OWN recursion, distinct from `intExpMeasure_step_lt` (which bounds
 the OUTER alpha/beta/world-creation loop only). The key fact: each non-fixpoint round of
-`applyAllTImpRules` strictly drops the count of `intUniverse φ0`-cells not yet on the branch
+`applyAllTImpRules` strictly drops the count of `intUniverseExt φ0`-cells not yet on the branch
 (mirrors the `intWork`/`intCount_notMem_append_drop` engine above, restricted to the
 branch-membership term alone, since persistence has no separate `e` "expanded" set). Since this
-count is bounded above by `|intUniverse φ0|` (a fixed polynomial in `φ0.complexity`), fuel at
-least this count suffices for a genuine fixpoint. GAP 2 (determinacy) is NOT addressed here — see
+count is bounded above by `|intUniverseExt φ0|` (a fixed function of `φ0` via
+`intUniverseExt_length_le`), fuel at least this count suffices for a genuine fixpoint.
+Re-targeted over the enlarged universe `intUniverseExt` (the post-blocking fuel-sufficiency
+development). GAP 2 (determinacy) is NOT addressed here — see
 the investigation note after `applyPersistenceFixpoint_genuine_of_count_le_fuel` below. -/
 
 omit [Hashable Atom] in
@@ -2574,16 +2855,16 @@ private lemma intTImpRule_output_notMem {φ ψ : Proposition Atom} {w : Nat} {ed
   · simp at hxeq
 
 omit [Hashable Atom] in
-/-- One non-fixpoint round of `applyAllTImpRules` strictly drops the count of `intUniverse φ0`
-cells not yet on the branch, given branch-containment `hb` (the fuel-sufficiency gap 1
-continuation; mirrors `intWork_drop`'s combinatorial core, restricted to the branch-membership
-term since persistence tracks no separate expanded set). -/
+/-- One non-fixpoint round of `applyAllTImpRules` strictly drops the count of
+`intUniverseExt φ0` cells not yet on the branch, given branch-containment `hb` (the
+fuel-sufficiency gap 1 continuation; mirrors `intWork_drop`'s combinatorial core, restricted
+to the branch-membership term since persistence tracks no separate expanded set). -/
 private lemma applyAllTImpRules_count_drop
     {φ0 : Proposition Atom} {b : IBranch Atom} {edges : IEdges}
-    (hb : ∀ x ∈ b, x ∈ intUniverse φ0)
+    (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0)
     (hne : (applyAllTImpRules b edges).length ≠ b.length) :
-    (intUniverse φ0).countP (fun sf => !((applyAllTImpRules b edges).any (· == sf))) + 1 ≤
-      (intUniverse φ0).countP (fun sf => !(b.any (· == sf))) := by
+    (intUniverseExt φ0).countP (fun sf => !((applyAllTImpRules b edges).any (· == sf))) + 1 ≤
+      (intUniverseExt φ0).countP (fun sf => !(b.any (· == sf))) := by
   have happend : applyAllTImpRules b edges =
       b ++ (b.filterMap fun sf =>
         match sf.sign, sf.formula with
@@ -2602,8 +2883,8 @@ private lemma applyAllTImpRules_count_drop
     apply hne
     rw [happend, hcontra, List.append_nil]
   obtain ⟨x, hxmem⟩ := List.exists_mem_of_ne_nil _ hne'
-  have hxU : x ∈ intUniverse φ0 := by
-    have hsub := applyAllTImpRules_subset (φ0 := φ0) (edges := edges) hb (x := x)
+  have hxU : x ∈ intUniverseExt φ0 := by
+    have hsub := applyAllTImpRules_subset_ext (φ0 := φ0) (edges := edges) hb (x := x)
     apply hsub
     rw [happend]
     exact List.mem_append_right b hxmem
@@ -2627,8 +2908,8 @@ private lemma applyAllTImpRules_count_drop
           rw [← hsfeq] at hxmem
           -- STEP 1, task 574: `toAdd` is the whole result (no self-copy branch anymore).
           exact intTImpRule_output_notMem hxmem
-  have hdrop := intCount_notMem_append_drop (intUniverse φ0) b x hxU hxnotb
-  have hmono := intCount_notMem_mono (intUniverse φ0) (b ++ [x]) (applyAllTImpRules b edges)
+  have hdrop := intCount_notMem_append_drop (intUniverseExt φ0) b x hxU hxnotb
+  have hmono := intCount_notMem_mono (intUniverseExt φ0) (b ++ [x]) (applyAllTImpRules b edges)
     (by
       rw [happend]
       intro z hz
@@ -2641,13 +2922,13 @@ private lemma applyAllTImpRules_count_drop
 omit [Hashable Atom] in
 /-- **Genuine-fixpoint sufficiency** (closes `sat_timp` STOP-gate GAP 1):
 `applyPersistenceFixpoint b edges fuel` is a genuine fixpoint of `applyAllTImpRules` — applying
-one more round changes nothing — whenever the fuel is at least the count of `intUniverse φ0`
-cells not yet claimed by `b`. Combined with `intUniverse_length_le` (a fixed polynomial bound in
-`φ0.complexity`), any fuel `≥ |intUniverse φ0|` suffices regardless of `b`'s shape. -/
+one more round changes nothing — whenever the fuel is at least the count of `intUniverseExt φ0`
+cells not yet claimed by `b`. Combined with `intUniverseExt_length_le` (a fixed bound depending
+only on `φ0`), any fuel `≥ |intUniverseExt φ0|` suffices regardless of `b`'s shape. -/
 private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
     {φ0 : Proposition Atom} {edges : IEdges} (b : IBranch Atom) (fuel : Nat)
-    (hb : ∀ x ∈ b, x ∈ intUniverse φ0)
-    (hfuel : (intUniverse φ0).countP (fun sf => !(b.any (· == sf))) ≤ fuel) :
+    (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0)
+    (hfuel : (intUniverseExt φ0).countP (fun sf => !(b.any (· == sf))) ≤ fuel) :
     applyAllTImpRules (applyPersistenceFixpoint b edges fuel) edges
       = applyPersistenceFixpoint b edges fuel := by
   induction fuel generalizing b with
@@ -2701,9 +2982,9 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
       rw [happend, hflat, List.append_nil]
     · rename_i hlenb
       rw [Bool.not_eq_true, beq_eq_false_iff_ne] at hlenb
-      have hb' : ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverse φ0 :=
-        applyAllTImpRules_subset hb
-      have hfuel' : (intUniverse φ0).countP
+      have hb' : ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverseExt φ0 :=
+        applyAllTImpRules_subset_ext hb
+      have hfuel' : (intUniverseExt φ0).countP
           (fun sf => !((applyAllTImpRules b edges).any (· == sf))) ≤ fuel' := by
         have := applyAllTImpRules_count_drop (φ0 := φ0) hb hlenb
         omega

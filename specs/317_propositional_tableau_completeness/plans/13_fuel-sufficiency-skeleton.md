@@ -281,7 +281,7 @@ single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only
 - **Done when:** `WBound`/`intChainBound` defined; `intCreatedChain_le` stated with its final
   hypothesis set and either proved or carrying exactly the DP-1 sorry; scoped build green.
 
-### Phase 3: `intUniverseExt` / `intExpMeasureExt` + engine re-target [NOT STARTED]
+### Phase 3: `intUniverseExt` / `intExpMeasureExt` + engine re-target [IN PROGRESS]
 - **Goal:** The F2 measure engine runs over the enlarged universe
   `List.range (WBound φ + 1)` in place of `List.range (φ.complexity + 2)`.
 - **Tasks:**

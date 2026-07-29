@@ -633,7 +633,7 @@ below are suggestions; the constraint set is binding, the naming is implementer 
   `openBranch_countermodel`/`tableau_complete` statements unchanged (only the private
   `intExpandBranches_openBranch_sat` gained `φ0`/`hUniv`/`hNW`/`hFuel`).
 
-### Phase 7: `truthLemma` T-imp discharge via persistence fixpoint sufficiency [NOT STARTED]
+### Phase 7: `truthLemma` T-imp discharge via persistence fixpoint sufficiency [BLOCKED]
 - **Goal:** `Scheme.lean:617` discharged, honoring the STOP-gate's one-pass directive with
   Phase 6 (same invariants, consecutive dispatches). Unchanged in substance from v13
   (reports/15 §7); the fuel fact it consumes is now per-branch.
@@ -655,6 +655,52 @@ below are suggestions; the constraint set is binding, the naming is implementer 
 - **Verification Tier:** local
 - **Done when:** sorry at `Scheme.lean:617` GONE; count strictly decreased by one again;
   `truthLemma`'s statement unchanged; scoped build green.
+
+#### Blocker (dispatch against this phase, `[IN PROGRESS] → [BLOCKED]`)
+
+**The premise of this phase's first task no longer holds in this codebase; this is a confirmed
+structural blocker, not an unattempted proof.** The task list's "every world accessible from a
+`T(φ'→ψ')` source carries its own copy (the `applyAllTImpRules` copy channel at a fixpoint)"
+describes the "Deliverable 6" self-copy mechanism. That mechanism was **deliberately removed**
+by the completed ancestor-blocking calculus-repair dependency (commit `a70187dd`, "bound the
+T-implication self-copy channel (STEP 1)"), verified by direct diff inspection: the `copies`/
+`combined` block that used to copy `T(φ → ψ)` itself to every accessible world was deleted from
+`applyAllTImpRules`. That commit's own docstring on `applyAllTImpRules` (`Expansion.lean`)
+states explicitly that Gap 1 (`sat_timp` at accessible, not just reflexive, worlds) "remains out
+of scope for this task" and that `truthLemma`'s T-imp sorry "is untouched by this change" — i.e.
+the dependency task knew it was leaving this exact gap open, and this plan's Phase 7 was written
+(after that dependency was already listed as completed, see `## Overview` `Preserved Assets`)
+without re-checking that the specific mechanism it names still existed.
+
+**What was tried.** The full STOP-gate note in `Scheme.lean` (immediately above `truthLemma`,
+"GAP 1 UPDATE" paragraph, this dispatch) documents: (1) direct diff/commit verification that the
+self-copy channel is gone; (2) that `applyAllTImpRules`'s surviving ψ-consequence propagation
+(`intTImpRule`) still gives a genuine-fixpoint fact `T(φ)@w'∈b → T(ψ)@w'∈b` at any accessible
+`w'` from a `T(φ→ψ)@w` source, WITHOUT needing a copy at `w'` — a real, provable fact, stronger
+in one sense than the removed mechanism; (3) that this fact is nonetheless insufficient to close
+the case, because the goal needs `IForces` (semantic forcing) at `w'`, not branch membership,
+and `truthLemma`'s own induction hypotheses only give `T(_)@w'∈b → Force` / `F(_)@w'∈b →
+¬Force`, never the converse `Force → T(_)@w'∈b` needed to invoke the surviving fact. No
+bivalence/totality fact bridging that gap exists elsewhere in this file. No sorry was relocated,
+weakened, or vacuously discharged.
+
+**Why it cannot be completed as written in this dispatch.** Closing this case now requires
+either (a) a new, *bounded* copy-propagation variant (gated so it cannot itself trigger fresh
+world creation) validated by its own divergence probe — the exact methodology the ancestor-
+blocking repair used before removing the old channel — or (b) the quotient/blocking-frame
+reconstruction of `sat_fimp`/`sat_timp` that an earlier research report proposed as Option A
+step 3. Both are calculus-level changes to `Expansion.lean`/`Rules.lean`, outside this phase's
+`Scheme.lean`-only territory, and (a) specifically risks re-opening the ancestor-blocking
+repair's settled, tested, already-landed design — not a call this dispatch is authorized to make
+unilaterally.
+
+**What is needed to unblock.** A follow-up scoped exactly like the ancestor-blocking repair
+itself: a dedicated calculus investigation (divergence probing a bounded copy-channel variant,
+or prototyping the quotient frame against `Minimal/Soundness.lean`'s
+`intExpandBranches_closed_unsat` as the soundness regression gate) before any further
+`Scheme.lean`-side attempt at this case. Until that lands, this phase's sorry stays exactly
+where it is, tracked in the handoff `sorry_inventory` with `discharge_phase: null` (no phase of
+*this* plan can discharge it).
 
 ### Phase 8: Documentation accuracy + full CI gate [NOT STARTED]
 - **Goal:** No stale claim survives; the full repository gate passes.

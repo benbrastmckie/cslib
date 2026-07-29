@@ -1,40 +1,46 @@
 {
-  "status": "implemented",
+  "status": "partial",
   "started_at": "2026-07-28T00:00:00Z",
   "completed_at": "2026-07-28T00:00:00Z",
+  "requires_user_review": true,
   "artifacts": [
     {
       "path": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
       "type": "plan",
-      "summary": "Phase 6 heading marked [COMPLETED]; all 4 Phase 6 task checkboxes checked off with DONE annotations recording what was built."
+      "summary": "Phase 7 heading marked [BLOCKED] with a documented #### Blocker subsection: what was tried, why it cannot be completed as written, what is needed to unblock."
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-6-progress.json",
-      "type": "progress",
-      "summary": "All 7 Phase 6 objectives marked done, with verification results (scoped build, full build, checkInitImports, sorry census, lean_verify) recorded."
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase6-r1-restatement-fuel0-discharge-summary.md",
-      "type": "summary",
-      "summary": "Phase 6 implementation summary: what was proven/built, verification results, sorry inventory, plan deviations (none)"
+      "path": "specs/317_propositional_tableau_completeness/handoffs/16_phase7-gap1-self-copy-removed.md",
+      "type": "handoff",
+      "summary": "Continuation handoff: immediate next action, current state, key decisions, what NOT to try, verbatim remaining goals, references."
     }
   ],
-  "partial_progress": null,
-  "phase_number": "6",
+  "partial_progress": {
+    "stage": "blocked",
+    "details": "Phase 7's task list depends on the applyAllTImpRules self-copy channel to close truthLemma's T-imp case, but that channel was deliberately removed by the ancestor-blocking calculus-repair dependency (commit a70187dd), whose own docstring declares this exact gap ('Gap 1') out of scope. Verified by direct diff inspection, not inference. Documentation-only changes made: Scheme.lean's STOP-gate note above truthLemma updated with a full 'GAP 1 UPDATE' analysis (what was removed, what survives, two live-but-unattempted continuation options); the inline T-imp comment updated to match; plan Phase 7 marked [BLOCKED]. No sorry relocated, weakened, or discharged."
+  },
+  "phase_number": "7",
   "phases_completed": 8,
   "phases_total": 10,
   "sorry_inventory": [
-    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 514, "kind": "pre_existing", "note": "truthLemma T-imp case; discharge planned Phase 7 (this phase supplied the hUniv/hNW/hFuel invariants Phase 7 consumes)"},
-    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 2515, "kind": "strategic", "note": "intFreshMint_preserves_nw, DP-2 fresh-mint hNW preservation; consumed as a black box by this phase's case7, owned by task 585"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 602, "kind": "strategic", "note": "truthLemma T-imp case; Gap 1 (sat_timp at accessible worlds) closure route removed by the ancestor-blocking calculus repair; needs a new calculus-level mechanism outside this phase's territory -- see STOP-gate note GAP 1 UPDATE paragraph"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 2566, "kind": "strategic", "note": "intFreshMint_preserves_nw, DP-2 fresh-mint hNW preservation; untouched this dispatch, owned by task 585"},
     {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean", "line": 133, "kind": "pre_existing", "note": "DP-3, intuitionistic validity bridge, owned by task 430"},
     {"file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean", "line": 125, "kind": "pre_existing", "note": "DP-4, minimal validity bridge, owned by task 430"}
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "phase": 7,
+      "target": "truthLemma T-imp case",
+      "summary": "Closure route (applyAllTImpRules self-copy channel) removed by the ancestor-blocking calculus repair (commit a70187dd); that commit's docstring declares the gap explicitly out of scope. Requires a new calculus-level mechanism (bounded copy-channel variant + divergence probe, or a quotient/blocking-frame reconstruction) outside a Scheme.lean-only dispatch's territory."
+    }
+  ],
   "next_phase": 7,
   "modified_files": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "specs/317_propositional_tableau_completeness/progress/phase-6-progress.json"
+    "specs/317_propositional_tableau_completeness/handoffs/16_phase7-gap1-self-copy-removed.md",
+    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
   ],
   "verification": {
     "verification_passed": true,
@@ -42,8 +48,11 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": true
+    "ci_pipeline_passed": false
   },
+  "memory_candidates": [
+    "When a hard-mode plan's phase depends on a mechanism from a completed sibling task, re-verify the mechanism still exists in the current codebase before dispatching -- a plan can list a dependency as [COMPLETED] while silently carrying stale task-list wording describing machinery that dependency deliberately removed. Cross-check the dependency's own docstrings/commit messages, not just its completion status."
+  ],
   "metadata": {
     "session_id": "sess_1785294636_11f932",
     "agent_type": "cslib-implementation-hard-agent",

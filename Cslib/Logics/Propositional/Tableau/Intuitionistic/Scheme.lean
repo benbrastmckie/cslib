@@ -484,11 +484,56 @@ a converse is needed, but because the disjunction is only available at `w'` once
 its own `T(φ'→ψ')` copy — Gap 1 above, which is not yet established. `intRule_preserves_sat`'s
 `.pos, .imp` case (`Soundness.lean`) is already landed and sorry-free — that lemma reasons about
 a real Kripke model's forcing relation directly (classical excluded middle on `IForces`), not
-about branch-syntactic saturation, so it does not depend on Gap 1 at all. Recommendation for
-continuation: build the persistence fuel-sufficiency measure (Gap 1) as its own effort, then
-revisit `truthLemma`'s T-imp case together with `intExpandBranches_openBranch_sat`'s fuel-0
-`sorry` in one pass, since both bottom out in the same missing invariant. Do NOT attempt to
-force either `sorry` via a weakened/vacuous statement. -/
+about branch-syntactic saturation, so it does not depend on Gap 1 at all.
+
+**GAP 1 UPDATE (post-ancestor-blocking calculus repair): the anticipated closure route no
+longer exists in this codebase; this is a confirmed structural blocker, not an unattempted
+proof.** A later dispatch's task list proposed closing Gap 1 by threading
+`applyPersistenceFixpoint_genuine_of_count_le_fuel` (below, `:3444` at time of writing) so the
+returned branch is a genuine fixpoint of `applyAllTImpRules`, on the premise that "every world
+accessible from a `T(φ'→ψ')` source carries its own copy (the `applyAllTImpRules` copy channel
+at a fixpoint)". **That copy channel ("Deliverable 6") was deliberately removed**, commit
+`a70187dd` ("bound the T-implication self-copy channel (STEP 1)"), which deleted exactly the
+`copies`/`combined` block of `applyAllTImpRules` that used to copy `T(φ → ψ)` itself to every
+accessible world lacking one — verified by direct diff inspection, not inference. That commit's
+own docstring on `applyAllTImpRules` (`Expansion.lean`, "STEP 1" note) states explicitly:
+*"Whether `sat_timp` can additionally be established at accessible worlds (not just reflexively)
+is Gap 1 and remains out of scope for this task; `truthLemma`'s T-imp `sorry` … is untouched by
+this change."* The removal happened because a companion divergence probe (variant V3) measured
+the channel as termination-irrelevant hygiene once ancestor-directed blocking is active — a
+correct and well-evidenced call for that repair's own goal — but it leaves the `sat_timp`
+discharge below without the mechanism the later task list named.
+
+**What survives, and where the remaining gap actually sits (partial progress, recorded for the
+next attempt).** `applyAllTImpRules`'s ψ-CONSEQUENCE propagation (`intTImpRule`, unaffected by
+the self-copy removal) still fires FROM the source world, not needing any copy AT `w'`: at a
+genuine fixpoint, for `T(φ→ψ)@w ∈ b` and `w'` accessible from `w`, `T(φ)@w' ∈ b → T(ψ)@w' ∈ b`
+(else `intTImpRule φ ψ w edges b` would be non-empty, contradicting fixpoint-ness — a
+straightforward `filterMap`/`countP` argument mirroring `applyAllTImpRules_count_drop` above).
+This is *stronger* than what a copy-then-reflexive-branch route gives, in that it needs no copy
+of `T(φ→ψ)` at `w'` at all. But it is not sufficient to close the `sorry` below: the goal after
+`intro w' hacc hforce_φ'` needs `IForces … w' ψ'` from `IForces … w' φ'` (semantic forcing), and
+the ψ-consequence fact above only fires from *branch membership* `T(φ)@w' ∈ b`, not from
+semantic `IForces`. `truthLemma`'s own induction hypotheses (`ih_φ'`/`ih_ψ'`) give
+`T(_)@w'∈b → Force` and `F(_)@w'∈b → ¬Force`, never the converse `Force → T(_)@w'∈b` — so there
+is no way to recover membership from `hforce_φ'` alone without an independent
+bivalence/totality fact (`T(φ')@w'∈b ∨ F(φ')@w'∈b`) that nothing in this file currently
+establishes. This is the same totality gap the original copy-then-branch route existed to
+sidestep (a copy at `w'` lets `intApplyRuleFull`'s `.pos,.imp` arm supply the disjunction
+directly, without needing prior membership of `φ'` itself) — removing the copy channel removed
+that sidestep, not the underlying need for it.
+
+**Recommendation for continuation.** Do not re-add the self-copy channel in this file — that
+would re-open the ancestor-blocking repair's settled, measured, tested design (`Expansion.lean`
+is also out of scope for a `Scheme.lean`-only dispatch in any case). Two live options, neither
+attempted here: (a) a *bounded* variant of the removed channel — copy `T(φ→ψ)` to accessible
+worlds only when doing so cannot itself trigger new world creation (e.g. gate on `φ` not being
+`.imp`-shaped, or on the target world already being terminal) — would need its own divergence
+probe before being trusted, mirroring the original repair's own methodology; (b) the
+quotient/blocking-frame reconstruction proposed elsewhere (restating `sat_fimp`/`sat_timp` over
+a blocking quotient rather than raw accessibility). Both are calculus-level changes outside a
+single `Scheme.lean`-scoped dispatch. Do NOT attempt to force either `sorry` via a
+weakened/vacuous statement. -/
 
 /-! ## Parametric Truth Lemma -/
 
@@ -539,14 +584,20 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- `sat_timp` (a live `IBranchSaturation` field, `:105-108`) supplies exactly
       -- `∀ w' accessible from w, F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b` at any world `w'` carrying its
       -- own `T(φ'→ψ')` copy: the `F(φ')@w'` arm contradicts `IForces val w' φ'` via `ih_φ'.2`,
-      -- and the `T(ψ')@w'` arm yields the goal via `ih_ψ'.1` -- see the updated
-      -- "`sat_timp` discharge" STOP-gate note above this lemma. What remains, UNCHANGED, is
-      -- Gap 1: the disjunction is only available at `w'` once `w'` actually carries its own
-      -- `T(φ'→ψ')` copy, which `applyAllTImpRules`'s copy-propagation only guarantees at a
-      -- GENUINE fixpoint of the fuel-bounded persistence loop -- an invariant not yet built
-      -- (see the STOP-gate note for the exact call-site analysis). This case stays `sorry`
-      -- because that copy-propagation invariant is not established, not because `sat_timp` is
-      -- missing or because a converse of the induction hypothesis is needed.
+      -- and the `T(ψ')@w'` arm yields the goal via `ih_ψ'.1` -- see the "GAP 1 UPDATE" paragraph
+      -- of the "`sat_timp` discharge" STOP-gate note above this lemma. Gap 1 -- the disjunction
+      -- is only available at `w'` once `w'` actually carries its own `T(φ'→ψ')` copy -- is now
+      -- CONFIRMED unclosable with the machinery currently in this file, not merely unattempted:
+      -- the `applyAllTImpRules` self-copy channel the STOP-gate note's original route depended
+      -- on was deliberately removed by the ancestor-blocking calculus repair (commit
+      -- `a70187dd`), whose own docstring declares Gap 1 explicitly out of scope. The surviving
+      -- ψ-consequence propagation gives branch-membership implication at accessible worlds
+      -- (`T(φ)@w'∈b → T(ψ)@w'∈b`), but this goal needs `IForces` (semantic), not membership, and
+      -- `ih_φ'`/`ih_ψ'` never supply `Force → T(_)@w'∈b`. See the STOP-gate note for the full
+      -- analysis and the two live-but-unattempted continuation options. This case stays `sorry`
+      -- because that copy-propagation (or an equivalent totality fact) is not establishable from
+      -- current library facts, not because `sat_timp` is missing or because a converse of the
+      -- induction hypothesis is needed.
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.

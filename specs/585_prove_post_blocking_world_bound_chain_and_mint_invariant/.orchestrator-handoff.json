@@ -1,17 +1,41 @@
 {
-  "status": "success",
-  "phase": "research",
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
   "task_number": 585,
-  "session_id": "sess_1785342409_76dad9",
+  "session_id": "sess_1785345125_26a56f",
+  "summary": "Created an 11-phase plan discharging DP-2. The plan follows the research report over the task description: the numeric premise route is rejected as non-inductive (the threaded invariant must be structural), and the final-branch transfer is rejected as non-derivable (the residue is consumed at mint time instead). Phase 5 is an explicit go/no-go gate isolating the single unproven step as a standalone lemma before the invariant bulk is built on it.",
   "artifacts": [
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/reports/01_dp2-mint-invariant-transfer.md"
+    {
+      "type": "plan",
+      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
+    }
   ],
-  "next_action": "plan",
-  "summary": "DP-2 researched and grounded in source at 37e75e68. Two corrections to the task's framing: (1) the numeric strict premise nw < WBound is not inductive, so the threaded invariant must be structural, not numeric; (2) the final-branch form of intCreatedChain_le's hunb is not derivable from the runtime check at all, but the obligation is dischargeable at mint time into a snapshot-free residue that feeds the same pigeonhole. DP-2 is the FMP core, not a leaf arithmetic lemma. Estimated 900-1400 new Lean lines across 9 phases; phases 1-3 are additive and independently verifiable; phase 5 is the go/no-go gate.",
   "blockers": [],
-  "warnings": [
-    "Scope is large (900-1400 lines). Phase 5 (mint-time derivation of the snapshot-free residue) is unverified in Lean and is the single point where the route can fail; plan must carry an explicit [BLOCKED] instruction there rather than a placeholder.",
-    "Serialize against specs/430_prove_atom_persistence_upward_closure_for_intexpan/ - both edit Scheme.lean (disjoint line ranges)."
+  "next_action_hint": "implement",
+  "next_action": "implement",
+  "files_modified": [
+    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
   ],
-  "timestamp": "2026-07-29T16:40:15Z"
+  "decisions_made": [
+    "Threaded invariant is structural (IWorldHist over par/obl/sfor/fire), not a numeric strengthening of IAllNW; the numeric bound nw <= WBound is re-derived as a corollary at each consumption site.",
+    "The runtime reuse-check 'none' is consumed at mint time while bPers is current, yielding the snapshot-free residue not(sfor c subset sfor c'); the final-branch transfer is never attempted.",
+    "The report's 9-phase decomposition was refined to 11 phases: the residue derivation is hoisted into its own standalone gate phase (Phase 5) stated with all five inputs as explicit hypotheses, so the go/no-go risk is testable before the large IWorldHist threading development is built on it.",
+    "intCreatedChain_le stays byte-identical and sorry-free; the new depth bound is a sibling lemma copied from its pigeonhole body, and its docstring records the negative result rather than the lemma being deleted.",
+    "Phases 3 and 4 both edit intExpandBranches_openBranch_sat's signature and key induction, so they are placed in different waves and must never be dispatched in parallel."
+  ],
+  "dead_ends": [
+    "Restating intFreshMint_preserves_nw with the numeric premise nw < WBound phi0 and threading it: not inductive, since a mint yields nw + 1 <= WBound, not nw + 1 < WBound, which the next mint on the same branch needs.",
+    "Supplying intCreatedChain_le's hunb by monotonicity from the runtime check: conjunct 3 runs backwards under branch growth because positive content at x only grows. No monotonicity argument or extra final-branch invariant recovers it.",
+    "Bounding the counter by the fuel (nw <= 1 + intFuelExt): provably circular, since intFuelExt must dominate 2 * (intUniverseExt).length and F >= 4(2c+1)(F+1) has no solution in Nat.",
+    "Flat pigeonhole over (sfor, obl) pairs without the tree: the reuse check is ancestor-directed and siblings never block each other, so no bound follows. depth x branching is unavoidable and is exactly what WBound's shape encodes."
+  ],
+  "phases_completed": 0,
+  "phases_total": 11,
+  "continuation_path": null,
+  "warnings": [
+    "Phase 5 is the go/no-go gate and carries an explicit [BLOCKED] instruction: on failure record the failing conjunct, the verbatim goal state, and the tactics attempted; never substitute a placeholder, relocate the sorry, or add an undischarged hypothesis, and do not proceed to Phases 6-11.",
+    "Serialize against specs/430_prove_atom_persistence_upward_closure_for_intexpan/ - both edit Scheme.lean. Do not run task 430 while this task is in [IMPLEMENTING]."
+  ],
+  "timestamp": "2026-07-29T17:15:00Z"
 }

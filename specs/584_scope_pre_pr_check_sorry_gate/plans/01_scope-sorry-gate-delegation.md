@@ -245,7 +245,9 @@ touches, as an opt-in flag that is never the sole predicate and defaults OFF eve
 
 ---
 
-### Phase 3: Rewire pre-pr-check.sh step 1 and fix its comments [NOT STARTED]
+### Phase 3: Rewire pre-pr-check.sh step 1 and fix its comments [COMPLETED]
+
+**Scope Hypothesis confirmed at implementation time**: `grep -rn 'step [0-9] of .*pre-pr-check' scripts/ docs/` plus a broader `grep -n 'step [0-9]'` sweep of `scripts/README.md`, `docs/lint-suppression-policy.md`, and `scripts/pre-pr-check.sh` itself together yield exactly seven citations naming a specific step number: `scripts/README.md` lines 56 (step 7), 82 (step 9), 101 (step 8); `docs/lint-suppression-policy.md` line 11 (step 6); `scripts/check-sorry-suppressions.sh` line 62 (step 1, the stale claim Phase 4 fixes); and `scripts/pre-pr-check.sh` lines 80 (step 6) and 95 (steps 8/9, the rationale block this phase rewrites). Since step numbering is preserved, none of the seven need edits for renumbering reasons — two (check-sorry-suppressions.sh:62 in Phase 4, pre-pr-check.sh:95 in this phase) are edited anyway for content-accuracy reasons unrelated to numbering.
 
 **Goal**: Replace step 1's inline tree-wide sorry sweep with a scoped delegation to
 `check-sorry-suppressions.sh`, correct the misleading wording, and repair the two in-file

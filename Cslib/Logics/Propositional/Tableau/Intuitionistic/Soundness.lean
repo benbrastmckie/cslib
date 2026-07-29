@@ -433,7 +433,7 @@ private lemma applyAllTImpRules_sat
 
 omit [Hashable Atom] in
 /-- Persistence fixpoint preserves satisfiability when `worldOf` is monotone. -/
-private lemma applyPersistenceFixpoint_sat
+lemma applyPersistenceFixpoint_sat
     {World : Type*} [Preorder World]
     (val : World → Atom → Prop) (botForces : World → Prop)
     (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
@@ -675,7 +675,7 @@ edge set `edges ++ [(nw, parentLabel)]` whenever the original `worldOf` was mono
 for `edges` and `worldOf parentLabel ≤ worldOf' nw`.
 
 Requires: `nw` is completely fresh — it does not appear anywhere in `edges`. -/
-private lemma monotoneEdges_update
+lemma monotoneEdges_update
     {World : Type*} [Preorder World]
     (worldOf : Nat → World)
     (edges : IEdges)
@@ -799,7 +799,7 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
 
 omit [Hashable Atom] in
 /-- The persistence fixpoint preserves `FreshAbove`. -/
-private lemma freshAbove_applyPersistenceFixpoint (b : IBranch Atom) (edges : IEdges) (nw : Nat)
+lemma freshAbove_applyPersistenceFixpoint (b : IBranch Atom) (edges : IEdges) (nw : Nat)
     (fuel : Nat) (hfresh : FreshAbove b edges nw) :
     FreshAbove (applyPersistenceFixpoint b edges fuel) edges nw := by
   induction fuel generalizing b with
@@ -813,7 +813,7 @@ private lemma freshAbove_applyPersistenceFixpoint (b : IBranch Atom) (edges : IE
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- A non-world-creating expansion step preserves `FreshAbove` when all new forms use
 existing labels (`sf'.label < nw` for all `sf' ∈ newForms`). -/
-private lemma freshAbove_extendMany (b : IBranch Atom) (edges : IEdges) (nw : Nat)
+lemma freshAbove_extendMany (b : IBranch Atom) (edges : IEdges) (nw : Nat)
     (newForms : List (ISF Atom))
     (hfresh : FreshAbove b edges nw)
     (hnew : ∀ sf' ∈ newForms, sf'.label < nw) :
@@ -828,7 +828,7 @@ private lemma freshAbove_extendMany (b : IBranch Atom) (edges : IEdges) (nw : Na
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The F(→) world-creating step produces `FreshAbove … (nw+1)` for the new branch
 and extended edge set. The new world `nw` and its parent edge both become `< nw + 1`. -/
-private lemma freshAbove_world_create (b : IBranch Atom) (edges : IEdges) (nw parentLabel : Nat)
+lemma freshAbove_world_create (b : IBranch Atom) (edges : IEdges) (nw parentLabel : Nat)
     (newForms : List (ISF Atom))
     (hfresh : FreshAbove b edges nw)
     (hparent_lt : parentLabel < nw)
@@ -853,7 +853,7 @@ labels `≠ nw`, then `MonotoneEdges worldOf' edges` follows from `MonotoneEdges
 
 Used for non-world-creating (T∧/F∨) rule applications where the world function only
 changes at the fresh label `nw`, which is not in the existing edge set. -/
-private lemma monotoneEdges_of_agree
+lemma monotoneEdges_of_agree
     {World : Type*} [Preorder World]
     (wo wo' : Nat → World) (edges : IEdges) (nw : Nat)
     (hfresh_edges : ∀ c p, (c, p) ∈ edges → c < nw ∧ p < nw)
@@ -910,7 +910,7 @@ private lemma monotoneEdges_of_agree
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a non-world-creating linear result (`newEdge = none`), all new forms have the
 same label as the expanded signed formula `sf`. -/
-private lemma intApplyRuleFull_none_labels
+lemma intApplyRuleFull_none_labels
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
     (newForms : List (ISF Atom)) (nw' : Nat)
     (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' none) :
@@ -940,7 +940,7 @@ private lemma intApplyRuleFull_none_labels
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a branching result, all new forms in each branch have the same label as `sf`. -/
-private lemma intApplyRuleFull_branching_labels
+lemma intApplyRuleFull_branching_labels
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
     (branches' : List (List (ISF Atom))) (nw' : Nat)
     (h : intApplyRuleFull sf nwH b = .branchingResult branches' nw') :
@@ -983,7 +983,7 @@ private lemma intApplyRuleFull_branching_labels
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a world-creating linear result (`newEdge = some e`), the new edge is `(nwH, sf.label)`,
 `nw' = nwH + 1`, and all new forms have label `= nwH`. -/
-private lemma intApplyRuleFull_some_info
+lemma intApplyRuleFull_some_info
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
     (newForms : List (ISF Atom)) (nw' : Nat) (e : Nat × Nat)
     (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' (some e)) :
@@ -1012,7 +1012,7 @@ private lemma intApplyRuleFull_some_info
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a non-world-creating linear result (`newEdge = none`), the next world number `nw'`
 equals the current world number `nwH`. -/
-private lemma intApplyRuleFull_none_nw
+lemma intApplyRuleFull_none_nw
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
     (newForms : List (ISF Atom)) (nw' : Nat)
     (h : intApplyRuleFull sf nwH b = .linearResult newForms nw' none) :
@@ -1036,7 +1036,7 @@ private lemma intApplyRuleFull_none_nw
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- For a branching result, the next world number `nw'` equals the current world number `nwH`. -/
-private lemma intApplyRuleFull_branching_nw
+lemma intApplyRuleFull_branching_nw
     (sf : ISF Atom) (nwH : Nat) (b : IBranch Atom)
     (branches' : List (List (ISF Atom))) (nw' : Nat)
     (h : intApplyRuleFull sf nwH b = .branchingResult branches' nw') :

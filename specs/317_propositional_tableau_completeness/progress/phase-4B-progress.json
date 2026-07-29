@@ -13,8 +13,12 @@
     {
       "id": "4B.2",
       "description": "Port intExpandBranches_closed_unsat (Soundness.lean:1078, ~690 lines) to intExpandBranchesB_closed_unsat in Scheme.lean (import direction forces placement; needs de-privatized Soundness helpers). This objective is the plan's pre-authorized 4B.1 split boundary.",
-      "status": "pending",
-      "files_touched": []
+      "status": "done",
+      "files_touched": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"
+      ],
+      "verification": "lake build Scheme + Soundness green; lean_verify axioms {propext, Classical.choice, Quot.sound}, no sorryAx. Soundness.lean edit = de-privatizing 11 helper lemmas (visibility only, statements/proofs untouched). Statement gains fuels + fuels-length hypothesis; single functional induction replaces outer-fuel/inner-go nesting; fuel-exhaustion arm returns .openBranch so the old fuel-0 findSome? analysis disappears."
     },
     {
       "id": "4B.3",

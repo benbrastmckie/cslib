@@ -243,22 +243,46 @@ and a Gate B failure makes Phase 1's compute spend worthless.
 - **Files to modify:** `specs/.../430.../scratch/PersistPrototype.lean` (new). Zero writes to
   `Cslib/`.
 
-### Phase 3: Reinstate the copy channel (revert `a70187dd`'s three hunks) [NOT STARTED]
+### Phase 3: Reinstate the copy channel (revert `a70187dd`'s three hunks) [COMPLETED]
 
 - **Goal:** Restore the copy channel in the form Gate A selected, returning the tree to a green
   build with the channel present.
 - **Tasks:**
-  - [ ] `Expansion.lean`: restore the `accessibleWorlds` / `copies` / `combined` block (a literal
+  - [x] `Expansion.lean`: restore the `accessibleWorlds` / `copies` / `combined` block (a literal
         restoration for V1; the generalized filter for V4) plus the docstring the removal rewrote.
-  - [ ] `Scheme.lean`: restore the `rfl`-level pattern-match repairs the removal made —
+        *(altered: implemented as V4's generalized `genCopies` channel — copies every positive
+        formula, not just `T(φ→ψ)` — as a separate `let` appended alongside `newForms`, per Gate
+        A's selection, rather than a literal `a70187dd^` restoration)*
+  - [x] `Scheme.lean`: restore the `rfl`-level pattern-match repairs the removal made —
         `ILabelBound_applyAllTImpRules`, `applyAllTImpRules_subset`, `applyAllTImpRules_count_drop`,
         `applyPersistenceFixpoint_genuine_of_count_le_fuel` — and restore the helper
-        `applyAllTImpRules_copy_notMem`, which the diff preserves in full.
-  - [ ] `Soundness.lean`: restore `applyAllTImpRules_sat` and `freshAbove_applyAllTImpRules`.
-  - [ ] Re-verify `intExpandBranches_closed_unsat` is sorry-free and axiom-clean; confirm
-        `Soundness.lean` remains sorry-free.
-  - [ ] Re-run the `TableauConformance.lean` propositional rows against the real library (not the
-        probe harness) and confirm they match Gate A's measurement.
+        `applyAllTImpRules_copy_notMem`, which the diff preserves in full. *(altered: also updated
+        `ILabelBoundStrict_applyAllTImpRules` and `applyAllTImpRules_subset_ext`, two lemmas added
+        after `a70187dd` that pattern-matched the same copy-free body and were not in the original
+        diff's scope; generalized `applyAllTImpRules_copy_notMem` to an arbitrary formula `χ`
+        rather than `φ → ψ` specifically; added a new shared helper
+        `applyAllTImpRules_eq_self_of_length_eq` to avoid tripling the zero-both-channels
+        argument across the three call sites)*
+  - [x] `Soundness.lean`: restore `applyAllTImpRules_sat` and `freshAbove_applyAllTImpRules`.
+        *(altered: both proofs restructured for the 3-way append (`b`, ψ-consequence
+        `newForms.flatten`, generalized `genCopies.flatten`) and the new copy case is closed via
+        `iforces_persistence` at the general formula, not the `imp`-specific `iforces_persistence`
+        application the old removed code used)*
+  - [x] Re-verify `intExpandBranches_closed_unsat` is sorry-free and axiom-clean; confirm
+        `Soundness.lean` remains sorry-free. *(confirmed: `lean_verify` reports
+        `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}`; `Soundness.lean`
+        has zero bare sorries)*
+  - [x] Re-run the `TableauConformance.lean` propositional rows against the real library (not the
+        probe harness) and confirm they match Gate A's measurement. *(confirmed: `lake test`
+        builds `CslibTests.TableauConformance` green with the reinstated channel live)*
+- **Verification results:** `lake build` (full project) green; `lake exe checkInitImports` clean;
+  `lake lint` shows zero new warnings in the three touched files (144 pre-existing repo-wide
+  warnings, all outside this task's territory); `lake exe lint-style` clean; `lake shake` shows no
+  new findings in the touched files; `lake test` green including `TableauConformance`. Repo-wide
+  bare-sorry count is 5 (DP-3 `Completeness.lean:140`, DP-4 `Minimal/Completeness.lean:128`, DP-5
+  `Scheme.lean:727`, plus two unrelated sorries in Bimodal/Modal files outside this task's scope).
+  DP-2 does not appear — task 585 retired it before this dispatch, confirmed by direct grep, not
+  touched here.
 - **Timing:** ~1 dispatch
 - **Depends on:** 1, 2
 - **Verification Tier:** full

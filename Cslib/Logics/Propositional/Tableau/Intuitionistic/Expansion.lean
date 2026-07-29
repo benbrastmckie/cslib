@@ -118,24 +118,35 @@ For each T(φ → ψ) formula at world w on the branch, and for each accessible 
 w' (reachable via the edge list from w) with T(φ) at w', if T(ψ) is not yet at w',
 add T(ψ) at w'.
 
-**STEP 1 (task 574): the `T(φ → ψ)` self-copy channel has been removed.** A prior
-revision of this def also copied `T(φ → ψ)` itself to every accessible world lacking its
-own copy ("Deliverable 6"), intended to feed `intApplyRuleFull`'s `.pos, .imp` branching arm
-at every accessible world. Task 574's Phase 1 divergence probe
+**Also copies every POSITIVE-signed formula `T(χ)@w` to every world `w'` accessible from `w`
+that does not already carry its own copy** (a generalized reinstatement of the "Deliverable 6"
+channel described in the channel-history note below). This subsumes the original self-copy
+channel (which copied only `T(φ → ψ)` itself) as the special case `χ = φ → ψ`: every
+accessible `w'` eventually carries its own copy of *any* positive formula present at its
+source, which `intStepBranch`/`intApplyRuleFull` can then resolve independently (and which
+`expanded` then tracks per-`(formula, world)` pair, since each copy is a distinct `ISF`). This
+mirrors `intTImpRule`'s own accessibility scan, generalized from `imp`-shaped formulas to all
+positive formulas.
+
+**Channel history.** A prior revision of this def copied only `T(φ → ψ)` itself to accessible
+worlds lacking their own copy ("Deliverable 6"). A divergence probe
 (`specs/574_tableau_calculus_repair_ancestor_blocking/handoffs/01_variant-selection.md`,
-Table 3, variant V3) measured that this self-copy is **not** the mechanism that bounds world
-creation: with ancestor-directed loop-check blocking active (`intFImpReuseWitnessAnc?`, Phase
-3 of that plan), removing the self-copy channel entirely reaches the *exact same* saturated
-branch (`len=219, maxLabel=21, distinctLabels=22`) as keeping it. The self-copy was, at best,
-redundant hygiene; at worst, a second unbounded-growth feed alongside `propagatePersistence`
-(`Rules.lean`) — see D3 in the task's plan. `sat_timp` as an `IBranchSaturation` *field* is
-unaffected by this removal: it is stated reflexively at the copy's own label and is already
-discharged by `intApplyRuleFull`'s `.pos, .imp` branching arm via `expanded`-set guarding,
-independently of whether a self-copy exists on the branch
-(`Soundness.lean`'s `applyAllTImpRules_sat`, the `le_rfl` reflexive case). Whether
-`sat_timp` can additionally be established *at accessible worlds* (not just reflexively) is
-Gap 1 and remains out of scope for this task; `truthLemma`'s T-imp `sorry`
-(`Scheme.lean:607`) is untouched by this change.
+Table 3, variant V3) measured that this narrower self-copy is not the mechanism that bounds
+world creation under ancestor-directed blocking (`intFImpReuseWitnessAnc?`), and it was removed
+(commit `a70187dd`) as orthogonal hygiene. A later re-probe
+(`specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/`
+`01_gate-a-variant-selection.md`) measured BOTH the narrow self-copy (**V1**, the literal
+`a70187dd^` reinstatement) and this
+generalized every-positive-formula channel (**V4**) against the same complexity-9 divergence
+witness and the full 20-row propositional conformance corpus: both terminate, both saturate at
+the identical fixed point as the copy-free tree (`len=219, maxLabel=21`, stable
+`fuel ∈ {120,160,200}`), and both pass every conformance row. V4 was selected because it makes
+positive-formula persistence hold at *every* formula shape via one channel, closing the atom
+and T-implication persistence gaps uniformly rather than only at `imp`-shaped formulas.
+`sat_timp` as an `IBranchSaturation` *field* does not depend on this channel: it is stated
+reflexively at a copy's own label and is discharged by `intApplyRuleFull`'s `.pos, .imp`
+branching arm via `expanded`-set guarding, independently of whether any copy exists on the
+branch (`Soundness.lean`'s `applyAllTImpRules_sat`, the `le_rfl` reflexive case).
 
 The overall expansion loop (`intExpandBranches`, `Intuitionistic/Scheme.lean`) terminates
 unconditionally by its per-branch fuel discipline, but SATURATION is not established: the
@@ -153,7 +164,22 @@ def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
         let toAdd := intTImpRule φ ψ sf.label edges b
         if toAdd.isEmpty then none else some toAdd
       | _, _ => none
-  b ++ newForms.flatten
+  -- Generalized copy channel: every POSITIVE formula on the branch, copied to every
+  -- accessible world lacking its own copy (not just `T(φ → ψ)`-shaped formulas).
+  let genCopies :=
+    b.filterMap fun sf =>
+      match sf.sign with
+      | .pos =>
+        let accessibleWorlds :=
+          (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+        let copies := accessibleWorlds.filterMap fun w' =>
+          if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+            none
+          else
+            some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+        if copies.isEmpty then none else some copies
+      | .neg => none
+  b ++ newForms.flatten ++ genCopies.flatten
 
 /-- Repeatedly apply persistence until fixpoint.
 

@@ -382,8 +382,8 @@ monotone with respect to the edge set. -/
 private lemma applyAllTImpRules_sat
     {World : Type*} [Preorder World]
     (val : World → Atom → Prop) (botForces : World → Prop)
-    (_v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
-    (_bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
     (worldOf : Nat → World)
     (b : IBranch Atom) (edges : IEdges)
     (hsat : intBranchSatisfied val botForces worldOf b)
@@ -391,9 +391,11 @@ private lemma applyAllTImpRules_sat
     intBranchSatisfied val botForces worldOf (applyAllTImpRules b edges) := by
   intro sf hmem
   simp only [applyAllTImpRules, List.mem_append] at hmem
-  rcases hmem with h | h
+  rcases hmem with (h | h) | h
   · exact hsat sf h
-  · simp only [List.mem_flatten, List.mem_filterMap] at h
+  · -- `newForms.flatten`: the ψ-consequence propagation, imp-shaped sources only (unaffected
+    -- by the generalized copy channel added below).
+    simp only [List.mem_flatten, List.mem_filterMap] at h
     obtain ⟨newForms, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, houter⟩, hmem_inner⟩ := h
     cases sign_o with
     | neg => simp only at houter; exact absurd houter (by simp)
@@ -409,9 +411,6 @@ private lemma applyAllTImpRules_sat
         · simp only [hemp, ite_true] at houter; exact absurd houter (by simp)
         · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
           rw [← houter] at hmem_inner
-          -- Existing T(ψ)-consequence case (STEP 1, task 574: the self-copy arm that used to
-          -- sit alongside this one via `List.mem_append` is gone — `applyAllTImpRules` no
-          -- longer copies `T(φ → ψ)` itself to accessible worlds, see its docstring).
           simp only [intTImpRule, List.mem_filterMap] at hmem_inner
           obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_inner
           simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
@@ -438,6 +437,35 @@ private lemma applyAllTImpRules_sat
               exact ⟨fun _ => himpimp (worldOf w') hle hphi_forces,
                     fun h => by simp at h⟩
           · simp [hphi] at hw'_sf
+  · -- `genCopies.flatten`: the generalized copy channel — a copy of ANY positive formula
+    -- `χ` at an accessible world `w'`. Sound by `iforces_persistence`, which applies to any
+    -- formula (not just `imp`), unlike the ψ-consequence case above.
+    simp only [List.mem_flatten, List.mem_filterMap] at h
+    obtain ⟨cs, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, hmatch⟩, hmem_cs⟩ := h
+    cases sign_o with
+    | neg => simp only at hmatch; exact absurd hmatch (by simp)
+    | pos =>
+      simp only at hmatch
+      by_cases hemp : (List.filterMap
+          (fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == form_o && y.label == w') then none
+            else some (⟨.pos, form_o, w'⟩ : ISF Atom))
+          (List.filter (isAccessible edges label_o ·) (b.map (·.label)).eraseDups)).isEmpty
+          = true
+      · simp only [hemp, ite_true] at hmatch; exact absurd hmatch (by simp)
+      · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at hmatch
+        rw [← hmatch] at hmem_cs
+        simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+          List.mem_map] at hmem_cs
+        obtain ⟨w', hw'_acc, hcopy⟩ := hmem_cs
+        obtain ⟨_, hw'_access⟩ := hw'_acc
+        split_ifs at hcopy with hcond
+        simp only [Option.some.injEq] at hcopy
+        rw [← hcopy]
+        have hforces_o := (hsat ⟨.pos, form_o, label_o⟩ hmem_outer).1 rfl
+        have hle : worldOf label_o ≤ worldOf w' := hmono _ _ hw'_access
+        have hpersist := iforces_persistence v_uc bf_uc hle hforces_o
+        exact ⟨fun _ => hpersist, fun h => by simp at h⟩
 
 omit [Hashable Atom] in
 /-- Persistence fixpoint preserves satisfiability when `worldOf` is monotone. -/
@@ -780,10 +808,13 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
   obtain ⟨hbounds, hedges⟩ := hfresh
   refine ⟨?_, hedges⟩
   intro sf hmem
-  simp only [applyAllTImpRules, List.mem_append, List.mem_flatten, List.mem_filterMap] at hmem
-  rcases hmem with hmem | ⟨newForms, ⟨sf', hmem', houter⟩, hmem_inner⟩
+  simp only [applyAllTImpRules, List.mem_append] at hmem
+  rcases hmem with (hmem | hmem) | hmem
   · exact hbounds sf hmem
-  · cases hsign : sf'.sign with
+  · -- `newForms.flatten`: the ψ-consequence propagation (imp-shaped sources only).
+    simp only [List.mem_flatten, List.mem_filterMap] at hmem
+    obtain ⟨newForms, ⟨sf', hmem', houter⟩, hmem_inner⟩ := hmem
+    cases hsign : sf'.sign with
     | neg => simp only [hsign] at houter; simp at houter
     | pos =>
       cases hform : sf'.formula with
@@ -793,8 +824,6 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
         simp only [hsign, hform] at houter
         split_ifs at houter with hemp
         · simp only [Option.some.injEq] at houter
-          -- STEP 1, task 574: `applyAllTImpRules` no longer copies `T(φ → ψ)` itself to
-          -- accessible worlds, so `hmem_inner` ranges only over `intTImpRule`'s output.
           rw [← houter] at hmem_inner
           simp only [intTImpRule, List.mem_filterMap] at hmem_inner
           obtain ⟨w', hw'_mem, hw'_sf⟩ := hmem_inner
@@ -804,6 +833,24 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
           · simp only [Option.some.injEq] at hw'_sf
             rw [← hw'_sf]; simp only; rw [← hlab]
             exact hbounds sf'' hmem''
+  · -- `genCopies.flatten`: the generalized copy channel — the copy's label is drawn from
+    -- `b.map (·.label)` directly, so it is bounded exactly like any other pre-existing label.
+    simp only [List.mem_flatten, List.mem_filterMap] at hmem
+    obtain ⟨cs, ⟨sf', hmem', hmatch⟩, hmem_cs⟩ := hmem
+    cases hsign : sf'.sign with
+    | neg => simp only [hsign] at hmatch; simp at hmatch
+    | pos =>
+      simp only [hsign] at hmatch
+      split_ifs at hmatch with hemp
+      · simp only [Option.some.injEq] at hmatch
+        rw [← hmatch] at hmem_cs
+        simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+          List.mem_map] at hmem_cs
+        obtain ⟨w', ⟨⟨sf'', hmem'', hlab⟩, -⟩, hcopy⟩ := hmem_cs
+        split_ifs at hcopy with hcond
+        simp only [Option.some.injEq] at hcopy
+        rw [← hcopy]; simp only; rw [← hlab]
+        exact hbounds sf'' hmem''
 
 omit [Hashable Atom] in
 /-- The persistence fixpoint preserves `FreshAbove`. -/

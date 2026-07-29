@@ -780,7 +780,7 @@ private lemma applyPersistenceFixpoint_mem_preserved
     simp only [applyPersistenceFixpoint]
     split_ifs
     · exact h
-    · apply ih; simp only [applyAllTImpRules, List.mem_append]; exact Or.inl h
+    · apply ih; simp only [applyAllTImpRules, List.mem_append]; exact Or.inl (Or.inl h)
 
 /-! ## Expansion Invariant Helpers -/
 
@@ -1482,7 +1482,7 @@ private lemma ILabelBound_applyAllTImpRules {b : IBranch Atom} {edges : IEdges} 
     (h : ILabelBound b nw) : ILabelBound (applyAllTImpRules b edges) nw := by
   intro sf hmem
   simp only [applyAllTImpRules, List.mem_append] at hmem
-  rcases hmem with hmem | hmem
+  rcases hmem with (hmem | hmem) | hmem
   · exact h sf hmem
   · simp only [List.mem_flatten, List.mem_filterMap] at hmem
     obtain ⟨newForms, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, houter⟩, hmem_inner⟩ := hmem
@@ -1499,8 +1499,6 @@ private lemma ILabelBound_applyAllTImpRules {b : IBranch Atom} {edges : IEdges} 
         by_cases hemp : (intTImpRule φ ψ label_o edges b).isEmpty = true
         · simp only [hemp, ite_true] at houter; exact absurd houter (by simp)
         · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
-          -- STEP 1, task 574: `hmem_inner` ranges only over `intTImpRule`'s output; the
-          -- self-copy branch (`hmem_copy`) no longer exists.
           rw [← houter] at hmem_inner
           simp only [intTImpRule, List.mem_filterMap] at hmem_inner
           obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_inner
@@ -1516,6 +1514,30 @@ private lemma ILabelBound_applyAllTImpRules {b : IBranch Atom} {edges : IEdges} 
               rw [← hw'_sf]
               simpa [← hxeq] using h x hxb
           · simp [hphi] at hw'_sf
+  · -- Generalized copy channel: the copy's label `w'` is drawn from `b.map (·.label)`
+    -- directly, bounded exactly like any other pre-existing label.
+    simp only [List.mem_flatten, List.mem_filterMap] at hmem
+    obtain ⟨cs, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, hmatch⟩, hmem_cs⟩ := hmem
+    cases sign_o with
+    | neg => simp only at hmatch; exact absurd hmatch (by simp)
+    | pos =>
+      simp only at hmatch
+      by_cases hemp : (List.filterMap
+          (fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == form_o && y.label == w') then none
+            else some (⟨.pos, form_o, w'⟩ : ISF Atom))
+          (List.filter (isAccessible edges label_o ·) (b.map (·.label)).eraseDups)).isEmpty
+          = true
+      · simp only [hemp, ite_true] at hmatch; exact absurd hmatch (by simp)
+      · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at hmatch
+        rw [← hmatch] at hmem_cs
+        simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+          List.mem_map] at hmem_cs
+        obtain ⟨w', ⟨⟨x, hxb, hxeq⟩, -⟩, hcopy⟩ := hmem_cs
+        split_ifs at hcopy with hcond
+        simp only [Option.some.injEq] at hcopy
+        rw [← hcopy]
+        simpa [← hxeq] using h x hxb
 
 omit [Hashable Atom] in
 /-- **Phase 4**: `applyAllTImpRules` only introduces new formulas whose label already appears
@@ -1525,7 +1547,7 @@ private lemma ILabelBoundStrict_applyAllTImpRules {b : IBranch Atom} {edges : IE
     (h : ILabelBoundStrict b nw) : ILabelBoundStrict (applyAllTImpRules b edges) nw := by
   intro sf hmem
   simp only [applyAllTImpRules, List.mem_append] at hmem
-  rcases hmem with hmem | hmem
+  rcases hmem with (hmem | hmem) | hmem
   · exact h sf hmem
   · simp only [List.mem_flatten, List.mem_filterMap] at hmem
     obtain ⟨newForms, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, houter⟩, hmem_inner⟩ := hmem
@@ -1557,6 +1579,28 @@ private lemma ILabelBoundStrict_applyAllTImpRules {b : IBranch Atom} {edges : IE
               rw [← hw'_sf]
               simpa [← hxeq] using h x hxb
           · simp [hphi] at hw'_sf
+  · simp only [List.mem_flatten, List.mem_filterMap] at hmem
+    obtain ⟨cs, ⟨⟨sign_o, form_o, label_o⟩, hmem_outer, hmatch⟩, hmem_cs⟩ := hmem
+    cases sign_o with
+    | neg => simp only at hmatch; exact absurd hmatch (by simp)
+    | pos =>
+      simp only at hmatch
+      by_cases hemp : (List.filterMap
+          (fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == form_o && y.label == w') then none
+            else some (⟨.pos, form_o, w'⟩ : ISF Atom))
+          (List.filter (isAccessible edges label_o ·) (b.map (·.label)).eraseDups)).isEmpty
+          = true
+      · simp only [hemp, ite_true] at hmatch; exact absurd hmatch (by simp)
+      · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at hmatch
+        rw [← hmatch] at hmem_cs
+        simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+          List.mem_map] at hmem_cs
+        obtain ⟨w', ⟨⟨x, hxb, hxeq⟩, -⟩, hcopy⟩ := hmem_cs
+        split_ifs at hcopy with hcond
+        simp only [Option.some.injEq] at hcopy
+        rw [← hcopy]
+        simpa [← hxeq] using h x hxb
 
 omit [Hashable Atom] in
 /-- `ILabelBound` is preserved by `applyPersistenceFixpoint` (any number of fixpoint
@@ -2304,7 +2348,7 @@ private lemma applyAllTImpRules_subset {φ0 : Proposition Atom} {b : IBranch Ato
     ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverse φ0 := by
   intro x hx
   simp only [applyAllTImpRules, List.mem_append] at hx
-  rcases hx with hxb | hxnew
+  rcases hx with (hxb | hxnew) | hxcopy
   · exact hb x hxb
   · simp only [List.mem_flatten, List.mem_filterMap] at hxnew
     obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxnew
@@ -2323,8 +2367,30 @@ private lemma applyAllTImpRules_subset {φ0 : Proposition Atom} {b : IBranch Ato
         · simp at hsfeq
         · simp only [Option.some.injEq] at hsfeq
           rw [← hsfeq] at hxmem
-          -- STEP 1, task 574: `toAdd` is the whole result (no self-copy branch anymore).
           exact intTImpRule_outputs_subset hb hsfmem x hxmem
+  · -- Generalized copy channel: `x = ⟨.pos, sf'.formula, w'⟩` for some `sf' ∈ b`; the
+    -- formula is literally `sf'.formula` (no subformula step needed) and `w'` is an
+    -- existing branch label.
+    simp only [List.mem_flatten, List.mem_filterMap] at hxcopy
+    obtain ⟨cs, ⟨sf', hsf'mem, hmatch⟩, hxmem⟩ := hxcopy
+    cases hsign : sf'.sign with
+    | neg => simp only [hsign] at hmatch; exact absurd hmatch (by simp)
+    | pos =>
+      simp only [hsign] at hmatch
+      split at hmatch
+      · simp at hmatch
+      · simp only [Option.some.injEq] at hmatch
+        rw [← hmatch] at hxmem
+        simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+          List.mem_map] at hxmem
+        obtain ⟨w', ⟨⟨y, hymem, hyeq⟩, -⟩, hxeq⟩ := hxmem
+        have hwle : w' ≤ φ0.complexity + 1 := by
+          subst hyeq; exact intUniverse_mem_label (hb y hymem)
+        have hformsub : sf'.formula ∈ intSubfmls φ0 := intUniverse_mem_formula (hb sf' hsf'mem)
+        split at hxeq
+        · simp at hxeq
+        · simp only [Option.some.injEq] at hxeq
+          exact hxeq ▸ mem_intUniverse_of hwle hformsub
 
 omit [Hashable Atom] in
 /-- Containment is a loop invariant of `applyPersistenceFixpoint` (`Expansion.lean:133-139`):
@@ -2581,7 +2647,7 @@ private lemma applyAllTImpRules_subset_ext {φ0 : Proposition Atom} {b : IBranch
     ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverseExt φ0 := by
   intro x hx
   simp only [applyAllTImpRules, List.mem_append] at hx
-  rcases hx with hxb | hxnew
+  rcases hx with (hxb | hxnew) | hxcopy
   · exact hb x hxb
   · simp only [List.mem_flatten, List.mem_filterMap] at hxnew
     obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxnew
@@ -2601,6 +2667,29 @@ private lemma applyAllTImpRules_subset_ext {φ0 : Proposition Atom} {b : IBranch
         · simp only [Option.some.injEq] at hsfeq
           rw [← hsfeq] at hxmem
           exact intTImpRule_outputs_subset_ext hb hsfmem x hxmem
+  · -- Generalized copy channel, mirrors `applyAllTImpRules_subset`'s copy case over the
+    -- enlarged universe.
+    simp only [List.mem_flatten, List.mem_filterMap] at hxcopy
+    obtain ⟨cs, ⟨sf', hsf'mem, hmatch⟩, hxmem⟩ := hxcopy
+    cases hsign : sf'.sign with
+    | neg => simp only [hsign] at hmatch; exact absurd hmatch (by simp)
+    | pos =>
+      simp only [hsign] at hmatch
+      split at hmatch
+      · simp at hmatch
+      · simp only [Option.some.injEq] at hmatch
+        rw [← hmatch] at hxmem
+        simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+          List.mem_map] at hxmem
+        obtain ⟨w', ⟨⟨y, hymem, hyeq⟩, -⟩, hxeq⟩ := hxmem
+        have hwle : w' ≤ WBound φ0 := by
+          subst hyeq; exact intUniverseExt_mem_label (hb y hymem)
+        have hformsub : sf'.formula ∈ intSubfmls φ0 :=
+          intUniverseExt_mem_formula (hb sf' hsf'mem)
+        split at hxeq
+        · simp at hxeq
+        · simp only [Option.some.injEq] at hxeq
+          exact hxeq ▸ mem_intUniverseExt_of hwle hformsub
 
 omit [Hashable Atom] in
 /-- Containment is a loop invariant of `applyPersistenceFixpoint` over the enlarged
@@ -4850,6 +4939,37 @@ private lemma intTImpRule_output_notMem {φ ψ : Proposition Atom} {w : Nat} {ed
   · simp at hxeq
 
 omit [Hashable Atom] in
+/-- The generalized copy-propagation output (`genCopies`'s copy of a positive formula `χ` at
+an accessible world `w'` lacking one) is never already on the branch: the
+`if b.any … then none else …` guard in its construction is exactly this fact, restated as
+membership. Generalizes the retired `T(φ → ψ)`-only self-copy version of this fact to an
+arbitrary formula `χ`. -/
+private lemma applyAllTImpRules_copy_notMem {χ : Proposition Atom} {l : Nat} {edges : IEdges}
+    {b : IBranch Atom} {x : ISF Atom}
+    (hx : x ∈ List.filterMap
+        (fun w' =>
+          if (List.any b fun y => y.sign == Sign.pos && y.formula == χ && y.label == w')
+              = true then none
+          else some (⟨.pos, χ, w'⟩ : ISF Atom))
+        (List.filter (fun w => isAccessible edges l w)
+          (List.map (fun y => y.label) b).eraseDups)) :
+    b.any (· == x) = false := by
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  split at hxeq
+  · simp at hxeq
+  · simp only [Option.some.injEq] at hxeq
+    rw [← hxeq, Bool.eq_false_iff]
+    intro hcon
+    rename_i hnotmem
+    apply hnotmem
+    rw [List.any_eq_true] at hcon ⊢
+    obtain ⟨sf, hsfmem, hsfeq⟩ := hcon
+    refine ⟨sf, hsfmem, ?_⟩
+    rw [beq_iff_eq] at hsfeq
+    simp [hsfeq]
+
+omit [Hashable Atom] in
 /-- One non-fixpoint round of `applyAllTImpRules` strictly drops the count of
 `intUniverseExt φ0` cells not yet on the branch, given branch-containment `hb` (the
 fuel-sufficiency gap 1 continuation; mirrors `intWork_drop`'s combinatorial core, restricted
@@ -4861,58 +4981,148 @@ private lemma applyAllTImpRules_count_drop
     (intUniverseExt φ0).countP (fun sf => !((applyAllTImpRules b edges).any (· == sf))) + 1 ≤
       (intUniverseExt φ0).countP (fun sf => !(b.any (· == sf))) := by
   have happend : applyAllTImpRules b edges =
-      b ++ (b.filterMap fun sf =>
+      (b ++ (b.filterMap fun sf =>
         match sf.sign, sf.formula with
         | .pos, .imp φ ψ =>
           let toAdd := intTImpRule φ ψ sf.label edges b
           if toAdd.isEmpty then none else some toAdd
-        | _, _ => none).flatten := rfl
+        | _, _ => none).flatten) ++
+      (b.filterMap fun sf =>
+        match sf.sign with
+        | .pos =>
+          let accessibleWorlds :=
+            (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+          let copies := accessibleWorlds.filterMap fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+              none
+            else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+          if copies.isEmpty then none else some copies
+        | .neg => none).flatten := rfl
   set nf := (b.filterMap fun sf =>
         match sf.sign, sf.formula with
         | .pos, .imp φ ψ =>
           let toAdd := intTImpRule φ ψ sf.label edges b
           if toAdd.isEmpty then none else some toAdd
         | _, _ => none) with hnf_def
-  have hne' : nf.flatten ≠ [] := by
-    intro hcontra
+  set gc := (b.filterMap fun sf =>
+        match sf.sign with
+        | .pos =>
+          let accessibleWorlds :=
+            (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+          let copies := accessibleWorlds.filterMap fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+              none
+            else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+          if copies.isEmpty then none else some copies
+        | .neg => none) with hgc_def
+  have hne' : nf.flatten ≠ [] ∨ gc.flatten ≠ [] := by
+    by_contra hcontra
+    push Not at hcontra
     apply hne
-    rw [happend, hcontra, List.append_nil]
-  obtain ⟨x, hxmem⟩ := List.exists_mem_of_ne_nil _ hne'
-  have hxU : x ∈ intUniverseExt φ0 := by
-    have hsub := applyAllTImpRules_subset_ext (φ0 := φ0) (edges := edges) hb (x := x)
-    apply hsub
+    rw [happend, hcontra.1, hcontra.2, List.append_nil, List.append_nil]
+  obtain ⟨x, hxor⟩ : ∃ x, x ∈ nf.flatten ∨ x ∈ gc.flatten := by
+    rcases hne' with hne' | hne'
+    · obtain ⟨x, hx⟩ := List.exists_mem_of_ne_nil _ hne'
+      exact ⟨x, Or.inl hx⟩
+    · obtain ⟨x, hx⟩ := List.exists_mem_of_ne_nil _ hne'
+      exact ⟨x, Or.inr hx⟩
+  have hxmemApply : x ∈ applyAllTImpRules b edges := by
     rw [happend]
-    exact List.mem_append_right b hxmem
+    rcases hxor with hxor | hxor
+    · exact List.mem_append_left _ (List.mem_append_right b hxor)
+    · exact List.mem_append_right _ hxor
+  have hxU : x ∈ intUniverseExt φ0 :=
+    applyAllTImpRules_subset_ext (φ0 := φ0) (edges := edges) hb (x := x) hxmemApply
   have hxnotb : b.any (· == x) = false := by
-    simp only [hnf_def, List.mem_flatten, List.mem_filterMap] at hxmem
-    obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxmem
-    obtain ⟨s, ff, l⟩ := sf
-    cases s with
-    | neg => simp at hsfeq
-    | pos =>
-      cases ff with
-      | atom p => simp at hsfeq
-      | bot => simp at hsfeq
-      | and a c => simp at hsfeq
-      | or a c => simp at hsfeq
-      | imp φ ψ =>
-        simp only at hsfeq
-        split at hsfeq
-        · simp at hsfeq
-        · simp only [Option.some.injEq] at hsfeq
-          rw [← hsfeq] at hxmem
-          -- STEP 1, task 574: `toAdd` is the whole result (no self-copy branch anymore).
-          exact intTImpRule_output_notMem hxmem
+    rcases hxor with hxmem | hxmem
+    · simp only [hnf_def, List.mem_flatten, List.mem_filterMap] at hxmem
+      obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxmem
+      obtain ⟨s, ff, l⟩ := sf
+      cases s with
+      | neg => simp at hsfeq
+      | pos =>
+        cases ff with
+        | atom p => simp at hsfeq
+        | bot => simp at hsfeq
+        | and a c => simp at hsfeq
+        | or a c => simp at hsfeq
+        | imp φ ψ =>
+          simp only at hsfeq
+          split at hsfeq
+          · simp at hsfeq
+          · simp only [Option.some.injEq] at hsfeq
+            rw [← hsfeq] at hxmem
+            exact intTImpRule_output_notMem hxmem
+    · simp only [hgc_def, List.mem_flatten, List.mem_filterMap] at hxmem
+      obtain ⟨cs, ⟨sf', hsf'mem, hmatch⟩, hxmem⟩ := hxmem
+      cases hsign : sf'.sign with
+      | neg => simp only [hsign] at hmatch; exact absurd hmatch (by simp)
+      | pos =>
+        simp only [hsign] at hmatch
+        split at hmatch
+        · simp at hmatch
+        · simp only [Option.some.injEq] at hmatch
+          rw [← hmatch] at hxmem
+          exact applyAllTImpRules_copy_notMem hxmem
   have hdrop := intCount_notMem_append_drop (intUniverseExt φ0) b x hxU hxnotb
   have hmono := intCount_notMem_mono (intUniverseExt φ0) (b ++ [x]) (applyAllTImpRules b edges)
     (by
-      rw [happend]
       intro z hz
       rw [List.mem_append, List.mem_singleton] at hz
       rcases hz with hz | rfl
-      · exact List.mem_append_left _ hz
-      · exact List.mem_append_right _ hxmem)
+      · rw [happend, List.mem_append]
+        exact Or.inl (List.mem_append_left _ hz)
+      · exact hxmemApply)
   omega
+
+omit [Hashable Atom] in
+/-- If one round of `applyAllTImpRules` does not change the branch length, it does not
+change the branch at all: both the ψ-consequence channel (`newForms`) and the generalized
+copy channel (`genCopies`) must be empty. -/
+private lemma applyAllTImpRules_eq_self_of_length_eq
+    {b : IBranch Atom} {edges : IEdges}
+    (hlen : (applyAllTImpRules b edges).length = b.length) :
+    applyAllTImpRules b edges = b := by
+  have happend : applyAllTImpRules b edges =
+      (b ++ (b.filterMap fun sf =>
+        match sf.sign, sf.formula with
+        | .pos, .imp φ ψ =>
+          let toAdd := intTImpRule φ ψ sf.label edges b
+          if toAdd.isEmpty then none else some toAdd
+        | _, _ => none).flatten) ++
+      (b.filterMap fun sf =>
+        match sf.sign with
+        | .pos =>
+          let accessibleWorlds :=
+            (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+          let copies := accessibleWorlds.filterMap fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+              none
+            else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+          if copies.isEmpty then none else some copies
+        | .neg => none).flatten := rfl
+  rw [happend] at hlen ⊢
+  rw [List.length_append, List.length_append] at hlen
+  have hnf0 : (b.filterMap fun sf =>
+        match sf.sign, sf.formula with
+        | .pos, .imp φ ψ =>
+          let toAdd := intTImpRule φ ψ sf.label edges b
+          if toAdd.isEmpty then none else some toAdd
+        | _, _ => none).flatten = [] :=
+    List.length_eq_zero_iff.mp (by omega)
+  have hgc0 : (b.filterMap fun sf =>
+        match sf.sign with
+        | .pos =>
+          let accessibleWorlds :=
+            (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+          let copies := accessibleWorlds.filterMap fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+              none
+            else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+          if copies.isEmpty then none else some copies
+        | .neg => none).flatten = [] :=
+    List.length_eq_zero_iff.mp (by omega)
+  rw [hnf0, hgc0, List.append_nil, List.append_nil]
 
 omit [Hashable Atom] in
 /-- **Genuine-fixpoint sufficiency** (closes `sat_timp` STOP-gate GAP 1):
@@ -4932,49 +5142,15 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
       by_contra hne
       have := applyAllTImpRules_count_drop (φ0 := φ0) hb hne
       omega
-    have hval : applyAllTImpRules b edges = b := by
-      have happend : applyAllTImpRules b edges = b ++
-          (b.filterMap fun sf =>
-            match sf.sign, sf.formula with
-            | .pos, .imp φ ψ =>
-              let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
-            | _, _ => none).flatten := rfl
-      rw [happend] at hlen ⊢
-      have hflat : (b.filterMap fun sf =>
-            match sf.sign, sf.formula with
-            | .pos, .imp φ ψ =>
-              let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
-            | _, _ => none).flatten = [] := by
-        have hlen2 := hlen
-        rw [List.length_append] at hlen2
-        exact List.length_eq_zero_iff.mp (by omega)
-      rw [hflat, List.append_nil]
+    have hval : applyAllTImpRules b edges = b :=
+      applyAllTImpRules_eq_self_of_length_eq hlen
     simpa [applyPersistenceFixpoint] using hval
   | succ fuel' ih =>
     simp only [applyPersistenceFixpoint]
     split
     · rename_i hlenb
       rw [beq_iff_eq] at hlenb
-      have happend : applyAllTImpRules b edges = b ++
-          (b.filterMap fun sf =>
-            match sf.sign, sf.formula with
-            | .pos, .imp φ ψ =>
-              let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
-            | _, _ => none).flatten := rfl
-      rw [happend] at hlenb
-      have hflat : (b.filterMap fun sf =>
-            match sf.sign, sf.formula with
-            | .pos, .imp φ ψ =>
-              let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
-            | _, _ => none).flatten = [] := by
-        have hlen2 := hlenb
-        rw [List.length_append] at hlen2
-        exact List.length_eq_zero_iff.mp (by omega)
-      rw [happend, hflat, List.append_nil]
+      exact applyAllTImpRules_eq_self_of_length_eq hlenb
     · rename_i hlenb
       rw [Bool.not_eq_true, beq_eq_false_iff_ne] at hlenb
       have hb' : ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverseExt φ0 :=

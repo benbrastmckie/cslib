@@ -1,0 +1,24 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-29T00:00:00Z",
+  "completed_at": "2026-07-29T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md"
+    }
+  ],
+  "report_path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md",
+  "blockers": [],
+  "next_action_hint": "plan",
+  "partial_progress": {
+    "stage": "research_written",
+    "details": "Report and orchestrator handoff written. Recommendation: step 1 delegates to check-sorry-suppressions.sh via a new --scope filter; --changed opt-in. No blockers."
+  },
+  "metadata": {
+    "session_id": "sess_1785339483_6a7f21_584",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

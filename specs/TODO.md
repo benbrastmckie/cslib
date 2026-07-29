@@ -78,7 +78,7 @@ next_project_number: 586
 
 ### Code Hygiene
 
-584 [NOT STARTED] — Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a s
+584 [RESEARCHED] — Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a s
 
 ### Uncategorized
 
@@ -144,10 +144,11 @@ BINDING CONSTRAINTS (carried forward from the parent plan's Postmortem Constrain
 ---
 
 ### 584. Give pre-pr-check.sh step 1 a baseline ratchet or changed-files mode
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md]
 
 **Description**: Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a scoped label. It finds every *.lean under four whole trees (Cslib/Foundations/Logic/, Cslib/Logics/Modal/, Cslib/Logics/Temporal/, Cslib/Logics/Bimodal/) and fails on ANY sorry found anywhere in them, despite announcing itself as 'Checking for sorry instances in PR scope...'. The script's own comment above the step-8/9 ratchets states the contrast outright: step 1 'scans a narrow, hand-picked directory set and fails on ANY sorry found there', whereas steps 8/9 'ratchet whole-tree sorry/suppression/axiom-taint debt against a frozen baseline, and pass on the existing debt by construction'.
 

@@ -1544,7 +1544,7 @@
     {
       "project_number": 584,
       "project_name": "scope_pre_pr_check_sorry_gate",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Give pre-pr-check.sh step 1 a baseline ratchet or changed-files mode",
       "description": "Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a scoped label. It finds every *.lean under four whole trees (Cslib/Foundations/Logic/, Cslib/Logics/Modal/, Cslib/Logics/Temporal/, Cslib/Logics/Bimodal/) and fails on ANY sorry found anywhere in them, despite announcing itself as 'Checking for sorry instances in PR scope...'. The script's own comment above the step-8/9 ratchets states the contrast outright: step 1 'scans a narrow, hand-picked directory set and fails on ANY sorry found there', whereas steps 8/9 'ratchet whole-tree sorry/suppression/axiom-taint debt against a frozen baseline, and pass on the existing debt by construction'.\n\nCONSEQUENCE: the completion bar 'pre-pr-check.sh passes end to end' is unsatisfiable by construction for ANY scoped task -- it can only be met when the entire repository is simultaneously sorry-free. It is worse for a task whose guardrails deliberately FREEZE a sorry baseline inside its own file_scope: such a task cannot make step 1 pass without violating the scoping decision that defines it. This already forced one completed consolidation task into a spurious [PARTIAL] and a blocker-escalation cycle that resolved by correcting the completion bar rather than by any proof work. Every future scoped Lean task inherits the same wall.\n\nMEASURED STATE (verified 2026-07-28, full gate run): steps 1 and 5 FAIL; steps 2, 3, 4, 6, 7, 8, 9 all pass with every ratchet exactly at baseline (blanket suppressions 19/19, shake-flagged files 9/9, markers 18/18, sorries 28/28, sorryAx-tainted declarations 43/43). Step 1's real failure set is 24 sorry hits across 6 files: ChronicleToCountermodel.lean (12), Bundle/SuccRelation.lean (7), Bundle/UntilSinceCoherence.lean (2), Modal/Tableau/FrameSoundness.lean (1), ConservativeExtension/TemporalConservativity.lean (1), BXCanonical/Frame.lean (1).\n\nWORK: give step 1 the treatment steps 6-9 already have -- either a frozen per-file sorry baseline it ratchets against (failing only on NEW debt), or a changed-files mode that scans only what the current branch actually touches (e.g. `git diff --name-only` against the merge base), or both behind a flag. scripts/check-sorry-suppressions.sh is the working in-repo pattern to mirror; prefer reusing its baseline machinery over inventing a second one. Fix step 1's misleading 'in PR scope' wording to match whatever behaviour is chosen.\n\nEXPLICIT NON-GOAL: do NOT narrow step 5 (`lake build --wfail --iofail`). It deliberately mirrors CI and must keep failing on repo-wide sorry warnings; weakening it would hide real regressions. Note also that steps 1 and 5 have DIFFERENT scopes and are not redundant -- three Propositional/Tableau/* files trip step 5 but are not scanned by step 1 at all, so neither check substitutes for the other. Do not attempt to resolve any of the existing sorries as part of this task; this is gate-scoping work, not proof work.",
@@ -1555,10 +1555,17 @@
         "scripts/README.md"
       ],
       "created": "2026-07-28T21:15:00Z",
-      "last_updated": "2026-07-28T21:15:00Z",
+      "last_updated": "2026-07-29T15:45:19Z",
       "next_artifact_number": 1,
-      "artifacts": [],
-      "topic": "Code Hygiene"
+      "artifacts": [
+        {
+          "path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md",
+          "type": "report",
+          "summary": ""
+        }
+      ],
+      "topic": "Code Hygiene",
+      "session_id": "sess_1785339483_6a7f21_584"
     },
     {
       "project_number": 585,

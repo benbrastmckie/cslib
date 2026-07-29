@@ -405,7 +405,7 @@ territory is single-owner and waves are strictly sequential.
   statements); zero new sorries in this phase; the ORIGINAL `intUniverse` block is left intact
   (deprecation notes deferred to Phase 8).
 
-### Phase 4A: `intFuelExt` + per-branch-fuel B-engine + init bound (parallel build; no consumer flipped) [IN PROGRESS]
+### Phase 4A: `intFuelExt` + per-branch-fuel B-engine + init bound (parallel build; no consumer flipped) [COMPLETED]
 
 Replaces plan-13 Phase 4, whose global-scalar resize was structurally unimplementable (defect
 record: plan 13 Phase 4; reports/15 §1). Spec source: reports/15 §6, Phase 4A. All new names
@@ -414,16 +414,16 @@ below are suggestions; the constraint set is binding, the naming is implementer 
 - **Goal:** The per-branch fuel budget and the new engine exist beside the old engine, with an
   unconditional termination measure and a provable init bound; nothing downstream is flipped.
 - **Tasks:**
-  - [ ] Record the pre-change `lake test` wall-time baseline (for the 4C timing gate) in the
+  - [x] Record the pre-change `lake test` wall-time baseline (for the 4C timing gate) in the
     progress file before any edit.
-  - [ ] Def `intFuelExt (φ) : Nat := 4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1`, in
+  - [x] Def `intFuelExt (φ) : Nat := 4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1`, in
     `Scheme.lean` after `WBound`. MUST be this closed arithmetic form — NEVER
     `2 * (intUniverseExt φ).length + 1` (Postmortem constraint 11: the list has `Θ(WBound)`
     elements and is unmaterializable; only the numeral is feasible; it dominates
     `2 * |intUniverseExt φ| + 1` via `intUniverseExt_length_le`). Docstring records this
     prohibition and the `s ≲ 22` corpus-row feasibility envelope (fuel digits scale as
     `2^s·s·log₁₀(s+1)`; ~0.5 GB numeral at `s ≈ 25`).
-  - [ ] New engine `intExpandBranchesB` (working name), in `Scheme.lean`: same worklist shape
+  - [x] New engine `intExpandBranchesB` (working name), in `Scheme.lean`: same worklist shape
     and parallel lists as `intExpandBranches` (Expansion.lean:333-426), with the single global
     `fuel : Nat` replaced by `fuels : List Nat` as a fourth parallel list. Arms:
     - active branch's `f + 1` → `f` on linear / world-creating / reuse arms;
@@ -442,13 +442,13 @@ below are suggestions; the constraint set is binding, the naming is implementer 
     lists (Rules.lean:259 T-and, :262 F-or, :280 T-imp split). UNCONDITIONAL — no
     branch-containment or world-bound hypothesis may appear in the definition (that would be
     candidate (b); Postmortem constraint 12).
-  - [ ] Lemma `intWork_init_lt_intFuelExt (φ) :
+  - [x] Lemma `intWork_init_lt_intFuelExt (φ) :
     intWork (intUniverseExt φ) [⟨.neg, φ, 0⟩] [] < intFuelExt φ` — the REPLACEMENT for
     plan-13's `intExpMeasureExt_init_le_fuel` (it is Phase 6's call-site `hFuel` discharge).
     Proof shape: the countP bookkeeping of `intExpMeasure_init_le_fuel` (Scheme.lean:2787-2812)
     + `intUniverseExt_length_le`, closing by `omega` — no pow manipulation, strictly easier
     than the lemma it replaces.
-  - [ ] `#eval` parity probe: `intVerdictB = intVerdict` on all 20 propositional corpus rows
+  - [x] `#eval` parity probe: `intVerdictB = intVerdict` on all 20 propositional corpus rows
     (not committed, or committed as a clearly-marked temporary CslibTests section removed at
     4C). Any mismatch is a hard failure of this phase.
 - **Timing:** 1 dispatch. Estimated output: ~200-350 lines.
@@ -661,7 +661,7 @@ sorry (one of the four), transported 1-for-1 and discharged in Phase 6.
 
 - [ ] Per-phase scoped `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`
   (plus `.Soundness` at 4B, `.Expansion` when touched) — every phase.
-- [ ] Phase 4A: `#eval` parity probe `intVerdictB = intVerdict` on all 20 propositional
+- [x] Phase 4A: `#eval` parity probe `intVerdictB = intVerdict` on all 20 propositional
   corpus rows; `lake test` wall-time baseline recorded.
 - [ ] `lake test` at Phases 4C and 8 (conformance corpus, all 44 rows, esp. divergence-witness
   row 20), with the 4C TIMING GATE: ≤ 3 minutes total or ≤ 5× the 4A baseline, whichever is

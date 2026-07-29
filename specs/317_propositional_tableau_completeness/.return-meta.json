@@ -1,19 +1,53 @@
 {
-  "status": "planned",
-  "artifacts": [{
-    "type": "plan",
-    "path": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "summary": "Plan v14: per-branch fuel materialization repair — replaces plan-13 Phase 4 with 4A/4B/4C (candidate (a) per report 15), per-branch hFuel form for Phase 6, phases 1-3 carried forward as [COMPLETED]"
-  }],
-  "next_steps": "Orchestrator resumes per-phase dispatch from plan v14 at Phase 4A (task stays [IMPLEMENTING])",
+  "status": "implemented",
+  "started_at": "2026-07-28T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4a-b-engine-summary.md",
+      "summary": "Phase 4A summary: intFuelExt + per-branch-fuel B-engine + init bound, parity probe green on all 20 rows"
+    },
+    {
+      "type": "progress",
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-4A-progress.json",
+      "summary": "Phase 4A objectives + lake test timing baseline (7.231s) for the 4C gate"
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+    "specs/317_propositional_tableau_completeness/progress/phase-4A-progress.json",
+    "specs/317_propositional_tableau_completeness/summaries/14_phase4a-b-engine-summary.md",
+    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
+  ],
+  "phases_completed": 4,
+  "phases_total": 10,
+  "phase_number": "4A",
+  "next_steps": "Orchestrator dispatches Phase 4B (port the four engine-quantifying lemmas to the B-engine; in-phase split provision 4B.1/4B.2 pre-authorized). Note line drift: fuel-0 sorry now Scheme.lean:3361.",
+  "memory_candidates": [
+    {
+      "content": "Lean 4 WF recursion over a worklist with per-item fuel: use lex measure (sum of 3^fuel over pending++done, pending.length); skip arms permute the fuel multiset (sum unchanged, length shrinks), step arms replace 3^(f+1) with k*3^f for k<3 children. Bind match discriminant equations (match h : ... with) so decreasing_by can consume shape lemmas (e.g. exactly-2-children) about the scrutinee; omega closes the pow arithmetic given pow_succ and one_le_pow facts in context.",
+      "topic": "lean4-wf-lex-fuel-worklist"
+    },
+    {
+      "content": "omega consumes hypotheses from context without syntactic reference, so Lean's unusedVariables linter flags `have h : ...` facts omega actually used inside decreasing_by; underscore-prefix such binders (_hp, _hstep) instead of deleting them.",
+      "topic": "lean4-omega-unusedvariables-linter"
+    }
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 4,
+    "sorry_count_note": "all 4 pre-existing (plan DP/phase targets); zero new sorries this phase",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_detail": "full lake build green (3311 jobs); checkInitImports 0; lint-style 0; lake test 0; lake lint green; lean_verify clean on all new decls (no sorryAx); parity probe 20/20; conformance corpus untouched"
+  },
   "metadata": {
     "session_id": "sess_1785275816_a84520_317",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "phase_count": 10,
-    "phases_completed": 3,
-    "estimated_hours": 35,
-    "skeleton": true,
-    "reports_integrated": ["15_fuel-materialization-repair.md"]
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

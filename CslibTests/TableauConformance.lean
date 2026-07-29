@@ -8,11 +8,11 @@ module
 
 import Cslib.Logics.Temporal.Tableau.Saturation
 import Cslib.Logics.Temporal.Syntax.Formula
-import Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion
+import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
 import Cslib.Logics.Propositional.Defs
 public meta import Cslib.Logics.Temporal.Tableau.Saturation
 public meta import Cslib.Logics.Temporal.Syntax.Formula
-public meta import Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion
+public meta import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
 public meta import Cslib.Logics.Propositional.Defs
 
 /-! # Tableau Calculus Conformance Harness

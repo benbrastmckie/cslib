@@ -510,24 +510,27 @@ below are suggestions; the constraint set is binding, the naming is implementer 
   sorry); old engine, old lemmas, and all Preserved-Assets rows untouched and green; scoped
   build of `Scheme`, `Soundness` green.
 
-### Phase 4C: Flip entry points + retire old engine + 44-row corpus gate with timing [NOT STARTED]
+### Phase 4C: Flip entry points + retire old engine + 44-row corpus gate with timing [COMPLETED]
 - **Goal:** The B-engine IS the engine: entry points consume it with materializable fuel, the
   old global-fuel engine is retired, and the full corpus certifies the executed procedure with
   unchanged verdicts inside a declared time budget.
 - **Tasks:**
-  - [ ] Execute the settled entry-point move (option (i)): relocate `intuitionisticTableau`
+  - [x] Execute the settled entry-point move (option (i)): relocate `intuitionisticTableau`
     and `minimalTableau` from `Expansion.lean` into `Scheme.lean` (after
     `WBound`/`intFuelExt`/the engine), redefined via the B-engine with
     `fuels := [intFuelExt φ]`; repoint the corpus import
     (CslibTests/TableauConformance.lean:11,15 — currently imports only `Expansion`).
-  - [ ] Rename the B-engine to `intExpandBranches`, retiring the old engine, old `intFuel`,
+  - [x] Rename the B-engine to `intExpandBranches`, retiring the old engine, old `intFuel`,
     and `intExpMeasure_init_le_fuel` (immediate removal; their docstring history is captured
     by the Phase 8 doc pass — the fuel-doubling note at Expansion.lean:498-509 is superseded
     by `intFuelExt`'s docstring).
-  - [ ] Repoint consumers at the ported lemmas: `tableau_sound` (Soundness.lean),
+  - [x] Repoint consumers at the ported lemmas: `tableau_sound` (Soundness.lean),
     `openBranch_countermodel` (Scheme.lean:3448), `tableau_complete` (Scheme.lean:3504), and
-    the Minimal-side consumers. Update the `propExpandBranches` alias.
-  - [ ] Remove the temporary 4A parity-probe section if it was committed.
+    the Minimal-side consumers. Update the `propExpandBranches` alias. (Note: the old
+    `intExpandBranches_closed_unsat` + `intuitionisticTableau_sound` in Soundness.lean, and the
+    old `minimalTableau_sound` in Minimal/Soundness.lean, were dead global-fuel-typed code left
+    over from before the flip; retired in this dispatch as part of this task.)
+  - [x] Remove the temporary 4A parity-probe section if it was committed. (None found; no-op.)
 - **Timing:** 1 dispatch. Estimated output: ~150-300 lines (net; mostly repointing).
 - **Depends on:** 4B
 - **Verification Tier:** interface (changed defs consumed by `DecisionProcedure.lean`, both

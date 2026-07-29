@@ -1,52 +1,55 @@
 {
   "status": "implemented",
   "started_at": "2026-07-28T00:00:00Z",
+  "completed_at": "2026-07-28T00:00:00Z",
   "artifacts": [
     {
-      "type": "summary",
-      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4b-lemma-ports-summary.md",
-      "summary": "Phase 4B summary: four B-engine lemma ports, proof-route validation, fuel-0 consumption carry, CI results, deviations"
+      "path": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+      "type": "plan",
+      "summary": "Phase 4C heading marked [COMPLETED]; Phase 4C task checkboxes checked off; a stray Phase 5 [IN PROGRESS] marker (left over from a prior interrupted dispatch) reverted to [NOT STARTED] since Phase 5 was not touched."
     },
     {
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-4C-progress.json",
       "type": "progress",
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-4B-progress.json",
-      "summary": "Phase 4B objectives (all done) with per-objective commits"
+      "summary": "All 8 Phase 4C objectives marked done, with verification results (build, lint, shake, sorry census, lean_verify, timing gate) recorded."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4c-engine-flip-summary.md",
+      "type": "summary",
+      "summary": "Phase 4C implementation summary: what was done, verification results, sorry inventory, plan deviations"
     }
   ],
+  "partial_progress": null,
+  "phase_number": "4C",
+  "phases_completed": 6,
+  "phases_total": 10,
+  "sorry_inventory": [
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 551, "kind": "pre_existing", "note": "truthLemma T-imp case; discharge planned Phase 7"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 4479, "kind": "strategic", "note": "fuel-0 exhaustion arm of intExpandBranches_openBranch_sat, moved 1-for-1 in the flip from the retired global-fuel lemma; discharge planned Phase 6 (R1 restatement)"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean", "line": 133, "kind": "pre_existing", "note": "DP-3, intuitionistic validity bridge, owned by task 430"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean", "line": 125, "kind": "pre_existing", "note": "DP-4, minimal validity bridge, owned by task 430"}
+  ],
+  "blockers": [],
+  "next_phase": 5,
   "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean",
+    "CslibTests/TableauConformance.lean",
     "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "specs/317_propositional_tableau_completeness/progress/phase-4B-progress.json",
-    "specs/317_propositional_tableau_completeness/summaries/14_phase4b-lemma-ports-summary.md",
-    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
-  ],
-  "phases_completed": 5,
-  "phases_total": 10,
-  "phase_number": "4B",
-  "next_steps": "Orchestrator dispatches Phase 4C (flip entry points + retire old engine + 44-row corpus gate with timing). 4C must materialize the fuel-0 sorry into intExpandBranchesB_openBranch_sat's exhaustion arm when retiring the old lemma (census unchanged at 4); 4C call sites discharge the new fuels-length hypotheses by rfl on [intFuelExt φ].",
-  "memory_candidates": [
-    {
-      "content": "Lean 4 functional induction over a WF worklist def (f.induct): the `have x := ...` binders in the definition occupy with-pattern slots in each case; a case whose scrutinee shape is generic (e.g. fuel not constructor-headed) cannot unfold via simp only [f] (leaf equations are shape-conditional) — use rw [f.eq_def] + simp only [] there; a dependent `match h : disc with` in the body resists rw [hstep] (motive not type-correct) — instead `split at hgo`, reconcile each arm with the induction-provided step equation via hstep.symm.trans heq (defeq bridges let-bound locals), subst the injEq components, and let iota reduction make `exact ih hgo` typecheck against the unreduced matcher application. Option.noConfusion can mis-infer universes on some/none mismatches; absurd h (by simp) is robust.",
-      "topic": "lean4-functional-induction-wf-worklist"
-    },
-    {
-      "content": "Carrying a pre-existing strategic sorry through a parallel-build port without raising the bare-sorry census: instead of duplicating the sorry token in the ported lemma, have the ported lemma's corresponding case CONSUME the old sorried lemma at a degenerate instantiation (e.g. fuel := 0 on a singleton worklist whose fuel-0 arm returns exactly the needed result). The obligation flows via sorryAx, grep census is unchanged, and the retirement commit later swaps token locations 1-for-1.",
-      "topic": "lean4-sorry-carry-by-consumption"
-    }
+    "specs/317_propositional_tableau_completeness/progress/phase-4C-progress.json"
   ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 4,
-    "sorry_count_note": "all 4 pre-existing (Scheme.lean:619, Scheme.lean:3361, Int/Completeness.lean:133, Min/Completeness.lean:125); zero new sorry tokens this phase; B openBranch_sat port carries the fuel-0 sorry via sorryAx by consuming the old lemma at fuel := 0",
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": true,
-    "ci_detail": "full lake build green (3311 jobs); checkInitImports 0; lake lint 0; lint-style 0; shake 0 (pre-existing advisories in unrelated files only); lake test 0 (corpus untouched); lean_verify: openBranch_closed {propext,Quot.sound}; closed_unsat {propext,Classical.choice,Quot.sound}; initial_mem {propext,Quot.sound}; openBranch_sat {propext,sorryAx,Classical.choice,Quot.sound} (sorryAx by design)"
+    "ci_pipeline_passed": true
   },
   "metadata": {
-    "session_id": "sess_1785275816_a84520_317",
+    "session_id": "sess_1785294636_11f932",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

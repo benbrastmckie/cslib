@@ -17,7 +17,11 @@ closes on `φ` (starting from `F(φ)` at world 0), then `φ` is minimally valid.
 ## Main Results
 
 - `minClosed_unsatisfiable`: A minimally closed branch is unsatisfiable in any Kripke model.
-- `minimalTableau_sound`: If `minimalTableau φ = closed`, then `MValid φ`.
+
+`minimalTableau_sound` (and the generic `tableau_sound`/`intExpandBranches_closed_unsat` it
+instantiates) now lives in `Intuitionistic/Scheme.lean`, alongside the per-branch-fuel
+expansion engine it is stated over; this module supplies `minClosed_unsatisfiable`, the
+Kripke-side closure lemma that proof consumes.
 
 ## Strategy
 
@@ -28,7 +32,7 @@ Soundness proceeds by contrapositive, reusing the intuitionistic infrastructure:
    and `¬ IForces val bf w φ` for any `botForces`. This is simpler than the intuitionistic
    case (which required `botForces = fun _ => False` specifically).
 
-2. `minimalTableau_sound` instantiates `intExpandBranches_closed_unsat` with
+2. `Scheme.lean`'s `minimalTableau_sound` instantiates `intExpandBranches_closed_unsat` with
    `isMinimallyClosed` and `minClosed_unsatisfiable`, mirroring `intuitionisticTableau_sound`.
 
 ## Design
@@ -40,8 +44,8 @@ The difference lies only in how `botForces` is instantiated at use sites.
 
 ## Notes on sorry
 
-This module is sorry-free. `intExpandBranches_closed_unsat` is proved in
-`Intuitionistic.Soundness`, and `minimalTableau_sound` inherits no outstanding obligations.
+This module is sorry-free. `minClosed_unsatisfiable` carries no outstanding obligations;
+`minimalTableau_sound` (in `Scheme.lean`) is likewise sorry-free.
 Both Minimal and Intuitionistic Tableau soundness are fully proved.
 
 ## References
@@ -103,55 +107,6 @@ lemma minClosed_unsatisfiable {World : Type*} [Preorder World]
     exact hsat_neg.2 rfl (hsat_pos.1 rfl)
   · simp at hcond
   · simp at hcond
-
-/-! ## Main Soundness Theorem -/
-
-omit [Hashable Atom] in
-/-- **Minimal Tableau Soundness**: If `minimalTableau φ = closed`, then `MValid φ`.
-
-The proof instantiates `intExpandBranches_closed_unsat` with `isMinimallyClosed` and
-`minClosed_unsatisfiable`, mirroring `intuitionisticTableau_sound` exactly. The key
-differences from the intuitionistic case:
-- `botForces` is arbitrary (from the MValid quantifier).
-- `isMinimallyClosed` (all complementary pairs) is used instead of `isIntuitionisticallyClosed`.
-
-This theorem is sorry-free; `intExpandBranches_closed_unsat` is now fully proved. -/
-theorem minimalTableau_sound (φ : Proposition Atom)
-    (h : minimalTableau φ = .closed) : MValid φ := by
-  intro World _ val botForces v_uc bf_uc w₀
-  by_contra hneg
-  let worldOf : Nat → World := fun _ => w₀
-  have hsat : intBranchSatisfied val botForces worldOf [⟨.neg, φ, 0⟩] := by
-    intro sf hmem
-    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
-    subst hmem
-    exact ⟨fun h' => absurd h' (Sign.noConfusion), fun _ => hneg⟩
-  simp only [minimalTableau] at h
-  apply intExpandBranches_closed_unsat val botForces v_uc bf_uc _
-    isMinimallyClosed
-    (fun worldOf' b hcl => minClosed_unsatisfiable val botForces worldOf' b hcl)
-    [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
-      (by
-        intro b edges nw hmem
-        simp only [List.zip_cons_cons, List.zip_nil_right,
-          List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
-        obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
-        subst hb; subst he; subst hnw
-        refine ⟨?_, ?_⟩
-        · intro sf hsf
-          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf
-          simp [hsf]
-        · intro c p hcp
-          simp only [List.not_mem_nil] at hcp) h
-    [⟨.neg, φ, 0⟩] []
-  · simp [List.zip_cons_cons, List.zip_nil_right]
-  · exact fun w w' hacc => by
-      simp only [isAccessible] at hacc
-      split_ifs at hacc with heq
-      · have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
-        exact le_of_eq (congrArg worldOf hw)
-      · simp [isAccessible.go] at hacc
-  · exact hsat
 
 /-! ## Countermodel Bot Predicate and No-Contradiction
 

@@ -1,0 +1,46 @@
+{
+  "phase": "4C",
+  "plan": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+  "session_id": "sess_1785294636_11f932",
+  "objectives": [
+    {"id": 1, "desc": "Retire old-engine lemmas in Scheme.lean (openBranch_closed, openBranch_sat+sorry, initial_mem, intExpMeasure_init_le_fuel, old tableau_sound section)", "status": "done"},
+    {"id": 2, "desc": "Materialize fuel-0 sorry into B openBranch_sat exhaustion arm (census stays 4)", "status": "done"},
+    {"id": 3, "desc": "Rename intExpandBranchesB -> intExpandBranches; docstring accuracy on renamed decls", "status": "done"},
+    {"id": 4, "desc": "Entry points + propExpandBranches alias into Scheme.lean on the B-engine with [intFuelExt phi]", "status": "done"},
+    {"id": 5, "desc": "Restate/relocate tableau_sound, intuitionisticTableau_sound, minimalTableau_sound; repoint openBranch_countermodel + tableau_complete", "status": "done"},
+    {"id": 6, "desc": "Retire old engine/intFuel/entry points from Expansion.lean; old closed_unsat + int sound from Soundness.lean; min sound from Minimal/Soundness.lean", "status": "done"},
+    {"id": 7, "desc": "Repoint corpus import; full lake build green", "status": "done"},
+    {"id": 8, "desc": "44-row corpus gate with timing (<=3min or <=5x 4A baseline); census exactly 4; CI steps; lean_verify flipped entry points", "status": "done"}
+  ],
+  "files_touched": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean",
+    "CslibTests/TableauConformance.lean"
+  ],
+  "commit_mode_note": "Objectives 1-7 form the flip batch (tree is red mid-batch by nature of a flip); first commit at full-build green, then corpus/CI commits.",
+  "resumed_from": "Objectives 1-4 (and most of the private-lemma bodies for 5) were already landed uncommitted in the working tree at dispatch start (a prior 4C dispatch had been interrupted before committing -- git status showed Scheme.lean/Expansion.lean already modified). This dispatch: (a) verified those changes were correct and complete; (b) retired the dead old-engine `intExpandBranches_closed_unsat` + `intuitionisticTableau_sound` from Soundness.lean (Objective 6) and the dead old `minimalTableau_sound` from Minimal/Soundness.lean (Objective 6); (c) fixed the resulting `omit [Hashable Atom] in` placement and stale module docstrings; (d) repointed CslibTests/TableauConformance.lean's import from Expansion.lean to Scheme.lean (Objective 7); (e) applied three `lake shake` import fixes caused by the flip (drop Subformula from Expansion.lean, add it to Scheme.lean, add Mathlib.Data.List.Basic to Soundness.lean); (f) ran the full CI gate and the corpus timing gate (Objective 8).",
+  "verification": {
+    "full_lake_build": "green (3311/3311 jobs)",
+    "cslib_tests_build": "green, CslibTests.TableauConformance fresh-compiled in 5.7s (includes all #eval corpus rows, incl. divergence-witness row 20)",
+    "lake_test_wall_time": "3.4s total (timing gate: <=3min or <=5x 4A baseline -- passes with large margin)",
+    "checkInitImports": "exit 0",
+    "lake_lint": "0 findings in Tableau/Intuitionistic, Tableau/Minimal, or TableauConformance (pre-existing findings elsewhere in the repo, out of territory, untouched)",
+    "lint_style": "exit 0",
+    "lake_shake": "0 remaining findings in territory after the three import fixes",
+    "sorry_census": 4,
+    "sorry_locations": [
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:551 (truthLemma T-imp, discharge Phase 7)",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:4479 (fuel-0 exhaustion arm of intExpandBranches_openBranch_sat, discharge Phase 6)",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:133 (DP-3, owned by task 430)",
+      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:125 (DP-4, owned by task 430)"
+    ],
+    "lean_verify": {
+      "intuitionisticTableau_sound": "sorry-free ({propext, Classical.choice, Quot.sound})",
+      "minimalTableau_sound": "sorry-free ({propext, Classical.choice, Quot.sound})",
+      "tableau_complete": "carries sorryAx (expected, transitively via the fuel-0 sorry)",
+      "openBranch_countermodel": "carries sorryAx (expected, transitively via the fuel-0 sorry)"
+    }
+  }
+}

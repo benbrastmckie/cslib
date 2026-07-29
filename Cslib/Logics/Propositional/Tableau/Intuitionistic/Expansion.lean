@@ -9,7 +9,6 @@ module
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
 public import Cslib.Foundations.Logic.Tableau.ClosureCondition
-public import Cslib.Logics.Propositional.Subformula
 
 /-! # Intuitionistic Propositional Tableau Expansion
 
@@ -21,13 +20,16 @@ T(φ)/F(φ) pairs at the same label).
 ## Main Definitions
 
 - `IntTableauResult`: Result of the intuitionistic expansion (closed or open).
-- `intExpandBranches`/`propExpandBranches`: Fuel-based expansion loop, **parameterized by
-  `closurePred`** — the generic workhorse. `intuitionisticTableau` instantiates it with
-  `isIntuitionisticallyClosed`; `minimalTableau` instantiates it with `isMinimallyClosed`.
-  `propExpandBranches` is an alias that emphasizes this generic, closure-predicate-parameterized
-  design.
-- `intuitionisticTableau`: Starting from `F(φ)` at world 0, closes iff `IValid φ`.
-- `minimalTableau`: Same as above but uses `isMinimallyClosed`; closes iff `MValid φ`.
+- `isIntuitionisticallyClosed`/`isMinimallyClosed`: The two closure predicates.
+- `applyPersistenceFixpoint`, `intStepBranch`, `intFImpReuseWitnessAnc?`: The
+  single-step expansion machinery (persistence, rule application, ancestor-directed
+  loop-check) consumed by the expansion loop.
+
+The expansion loop itself (`intExpandBranches`, **parameterized by `closurePred`**,
+with the per-branch fuel lists) and the entry points `intuitionisticTableau`/
+`minimalTableau` live in `Intuitionistic/Scheme.lean`: their per-branch fuel budget
+`intFuelExt` is sized by the blocking-derived world bound `WBound`, which is developed
+there.
 
 ## Tableau Unification
 
@@ -39,7 +41,7 @@ Point 1 is handled here by the `closurePred` parameter.
 Point 2 is handled in `Intuitionistic/Scheme.lean` via `IntMinScheme`.
 
 There is no duplicate expansion function: both tableau variants are instances of
-the single `intExpandBranches`/`propExpandBranches` loop.
+the single `intExpandBranches`/`propExpandBranches` loop (`Intuitionistic/Scheme.lean`).
 
 ## Design
 
@@ -135,11 +137,11 @@ independently of whether a self-copy exists on the branch
 Gap 1 and remains out of scope for this task; `truthLemma`'s T-imp `sorry`
 (`Scheme.lean:607`) is untouched by this change.
 
-Termination of the overall expansion loop (`intExpandBranches`, below) is NOT currently
-established, and the loop is known to diverge on some inputs: the `intUniverse φ0` bound this
-docstring previously appealed to is itself refuted, not merely unproven. See the
-*Divergence witness* note below in this file (`## Decision Procedures`, immediately preceding
-`intFuel`) for the counterexample and its consequences.
+The overall expansion loop (`intExpandBranches`, `Intuitionistic/Scheme.lean`) terminates
+unconditionally by its per-branch fuel discipline, but SATURATION is not established: the
+`intUniverse φ0` bound this docstring previously appealed to is itself refuted, not merely
+unproven. See the *Divergence witness* note at the end of this file for the counterexample
+and its consequences.
 
 Returns the updated branch with all pending persistence applications. -/
 def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
@@ -319,142 +321,16 @@ lemma intFImpReuseWitnessAnc?_spec {bPers : IBranch Atom} {edges : IEdges}
     simp only [hcond] at hif
     simp at hif
 
-/-! ## Expansion Loop -/
-
-/-- Expand a list of intuitionistic tableau branches with a fuel counter.
-
-For each open branch, applies persistence and then one expansion step.
-Branches are processed sequentially; branching rules create new sub-branches.
-
-The `edgeSets` parameter is a parallel list (one per branch) of parent-child edge lists
-tracking the Kripke accessibility relation for each branch. When a world-creating rule
-fires, the new edge is added to the current branch's edge set. When a branching rule
-fires, both sub-branches inherit the current edge set. -/
-def intExpandBranches
-    (branches : List (IBranch Atom))
-    (expandedSets : List (List (ISF Atom)))
-    (nextWorlds : List Nat)
-    (edgeSets : List IEdges)
-    (fuel : Nat)
-    (closurePred : IBranch Atom → Bool) :
-    IntTableauResult Atom :=
-  match fuel with
-  | 0 =>
-    -- Out of fuel: return first open branch as countermodel
-    match branches.findSome? (fun b => if closurePred b then none else some b) with
-    | some b => .openBranch b
-    | none => .closed
-  | fuel' + 1 =>
-    -- Inner loop: apply persistence and expand the first open branch.
-    -- Iterates through pending branches, skipping closed ones and expanding the first open one.
-    let rec @[nolint docBlame] go (pending : List (IBranch Atom))
-        (pendingExp : List (List (ISF Atom)))
-        (pendingNW : List Nat)
-        (pendingEdges : List IEdges)
-        (done : List (IBranch Atom))
-        (doneExp : List (List (ISF Atom)))
-        (doneNW : List Nat)
-        (doneEdges : List IEdges)
-        : IntTableauResult Atom :=
-      match pending, pendingExp, pendingNW, pendingEdges with
-      | [], _, _, _ => .closed  -- All branches closed
-      | b :: restBs, e :: restEs, nw :: restNW, edges :: restEdges =>
-        -- First apply persistence to get all T(φ → ψ) consequences
-        let bPers := applyPersistenceFixpoint b edges (fuel' + 1)
-        if closurePred bPers then
-          -- Branch is closed
-          go restBs restEs restNW restEdges
-            (done ++ [bPers]) (doneExp ++ [e]) (doneNW ++ [nw]) (doneEdges ++ [edges])
-        else
-          match intStepBranch bPers e nw with
-          | none =>
-            -- Branch is saturated and open: countermodel
-            .openBranch bPers
-          | some (.linearResult newForms nw' newEdge, newExp) =>
-            -- Alpha-rule or world-creation: extend branch
-            match newEdge with
-            | none =>
-              -- Alpha-rule: no new world, edges unchanged.
-              intExpandBranches
-                (done ++ [Branch.extendMany bPers newForms] ++ restBs)
-                (doneExp ++ [newExp] ++ restEs)
-                (doneNW ++ [nw'] ++ restNW)
-                (doneEdges ++ [edges] ++ restEdges)
-                fuel'
-                closurePred
-            | some e =>
-              -- World-creating F(φ → ψ) rule: run the ancestor-directed Sfor-containment
-              -- loop-check before committing to a fresh world w' = e.1 (Phase 4: repointed
-              -- from the descendant-directed `intFImpReuseWitness?` to the ancestor-directed
-              -- `intFImpReuseWitnessAnc?`, per the spike's GO verdict and Phase 1's V1
-              -- selection).
-              match intFImpReuseWitnessAnc? bPers edges newForms e with
-              | some _x =>
-                -- Reuse: an accessible ancestor already contains Sfor(w') and lacks ψ, so
-                -- F(φ → ψ)@w is discharged without creating w'. No new world, no new edge;
-                -- the world counter is left at `nw` (unconsumed) since w' was never built.
-                intExpandBranches
-                  (done ++ [bPers] ++ restBs)
-                  (doneExp ++ [newExp] ++ restEs)
-                  (doneNW ++ [nw] ++ restNW)
-                  (doneEdges ++ [edges] ++ restEdges)
-                  fuel'
-                  closurePred
-              | none =>
-                -- No reusable ancestor: create w' exactly as before.
-                intExpandBranches
-                  (done ++ [Branch.extendMany bPers newForms] ++ restBs)
-                  (doneExp ++ [newExp] ++ restEs)
-                  (doneNW ++ [nw'] ++ restNW)
-                  (doneEdges ++ [edges ++ [e]] ++ restEdges)
-                  fuel'
-                  closurePred
-          | some (.branchingResult branches' nw', newExp) =>
-            -- Beta-rule: split into sub-branches (each inherits current edge set)
-            intExpandBranches
-              (done ++ branches'.map (Branch.extendMany bPers ·) ++ restBs)
-              (doneExp ++ branches'.map (fun _ => newExp) ++ restEs)
-              (doneNW ++ branches'.map (fun _ => nw') ++ restNW)
-              (doneEdges ++ branches'.map (fun _ => edges) ++ restEdges)
-              fuel'
-              closurePred
-          | some (.notApplicable, _) =>
-            -- This case shouldn't happen (intStepBranch filters notApplicable)
-            .openBranch bPers
-      | _ :: restBs, _, _, _ =>
-        go restBs [] [] [] done doneExp doneNW doneEdges
-    go branches expandedSets nextWorlds edgeSets [] [] [] []
-
-/-! ## Generic Alias -/
-
-/-- `propExpandBranches` is the generic propositional tableau expansion loop,
-parameterized by `closurePred : IBranch Atom → Bool`.
-
-This is a documentation alias for `intExpandBranches`, emphasizing that the expansion loop
-is closure-predicate-agnostic. The two concrete instantiations are:
-- `intuitionisticTableau`: `closurePred = isIntuitionisticallyClosed`
-- `minimalTableau`: `closurePred = isMinimallyClosed`
-
-The `IntMinScheme` structure in `Scheme.lean` bundles both divergence points (closure
-predicate and countermodel `botForces`) into a single parameterized interface. -/
-@[inline] def propExpandBranches
-    (branches : List (IBranch Atom))
-    (expandedSets : List (List (ISF Atom)))
-    (nextWorlds : List Nat)
-    (edgeSets : List IEdges)
-    (fuel : Nat)
-    (closurePred : IBranch Atom → Bool) :
-    IntTableauResult Atom :=
-  intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
-
 /-! ### Divergence witness: no world bound exists for this calculus -/
 
 /-!
-`intExpandBranches` does not terminate on every input: it diverges on a complexity-9 witness
-formula, and no numeric world bound (of any size) can be substituted for the one
-`intUniverse`/`intApplyRuleFull_outputs_subset` assume. This note is the durable, greppable
-record of that fact, obtained by evaluating `intExpandBranches` on the witness formula below at
-increasing fuel and observing the branch/world counts.
+Historical record, measured on the RETIRED global-fuel expansion loop (the predecessor of
+the per-branch-fuel `intExpandBranches` in `Intuitionistic/Scheme.lean`; `intExpandBranches`
+below refers to that retired engine, whose step behavior on this input is identical): the
+loop never saturates on a complexity-9 witness formula, and no numeric world bound (of any
+size) can be substituted for the one `intUniverse`/`intApplyRuleFull_outputs_subset` assume.
+This note is the durable, greppable record of that fact, obtained by evaluating the loop on
+the witness formula below at increasing fuel and observing the branch/world counts.
 
 **Witness formula** (complexity 9):
 `φ0 = (((a→b)→c) ∧ ((d→e)→f)) → ((u₁→v₁) ∨ (u₂→v₂))`
@@ -493,49 +369,6 @@ branch contents across worlds; re-verified directly in Lean on the unmodified li
 by an external harness.
 -/
 
-/-! ## Decision Procedures -/
-
-/-- Fuel bound for the intuitionistic/minimal tableau expansion loop, as a function of
-formula complexity. Set to `3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (doubling
-the earlier exponent to mirror the Modal-K `modalFuel`'s built-in factor-of-2,
-`FmpMeasure.lean:232-233`), replacing the earlier
-`2 ^ (2 * φ.complexity + 2)` bound which was insufficient to guarantee saturation. The
-earlier exponent (`2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, un-doubled) was verified
-insufficient for `intExpMeasure_init_le_fuel`: the initial worklist measure scales as
-`3 ^ (2 * |intUniverse φ| - 1)`, i.e. ~twice `intUniverse_length_le`'s bound, not once (see
-`Scheme.lean`'s `intExpMeasure_init_le_fuel`). Shared by `intuitionisticTableau`,
-`minimalTableau`, and by the fuel-pinned lemmas in `Scheme.lean` (`tableau_sound`,
-`openBranch_countermodel`, `tableau_complete`) so that all fuel-dependent call sites stay in
-sync. -/
-def intFuel (φ : Proposition Atom) : Nat :=
-  3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2))
-
-/-- The intuitionistic propositional tableau decision procedure.
-
-Given `φ`, starts with `F(φ)` at world 0 and expands using `IntuitionisticClosure`.
-- Returns `closed` iff `φ` is intuitionistically valid (IValid).
-- Returns `openBranch b` iff `φ` is not intuitionistically valid, with `b` an open
-  saturated branch giving a Kripke countermodel.
-
-The fuel bound `intFuel φ` accounts for the exponential blowup possible in intuitionistic
-proofs (finite model property gives this bound). -/
-def intuitionisticTableau (φ : Proposition Atom) : IntTableauResult Atom :=
-  let initialBranch : IBranch Atom := [⟨.neg, φ, 0⟩]
-  let fuel := intFuel φ
-  intExpandBranches [initialBranch] [[]] [1] [[]] fuel isIntuitionisticallyClosed
-
-/-- The minimal propositional tableau decision procedure.
-
-Identical to the intuitionistic tableau but uses `isMinimallyClosed` instead of
-`isIntuitionisticallyClosed`: a branch closes when T(φ) and F(φ) coexist at the same
-world for any formula φ (not only T(⊥)).
-
-- Returns `closed` iff `φ` is minimally valid (MValid).
-- Returns `openBranch b` iff `φ` is not minimally valid. -/
-def minimalTableau (φ : Proposition Atom) : IntTableauResult Atom :=
-  let initialBranch : IBranch Atom := [⟨.neg, φ, 0⟩]
-  let fuel := intFuel φ
-  intExpandBranches [initialBranch] [[]] [1] [[]] fuel isMinimallyClosed
 
 end Cslib.Logic.PL
 

@@ -12,6 +12,7 @@ import Mathlib.Tactic.Ring
 public import Cslib.Foundations.Logic.Tableau.Blocking
 public import Mathlib.Data.Finset.Prod
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
+public import Cslib.Logics.Propositional.Subformula
 
 /-! # IntMinScheme: Parameterized Interface for Intuitionistic/Minimal Tableau
 
@@ -238,75 +239,6 @@ def minScheme : IntMinScheme Atom where
       exact minOpen_no_contradiction b hopen (HasBot.bot : Proposition Atom) w ⟨hTbot, hFbot⟩
   no_contradiction := fun b hopen φ w =>
     minOpen_no_contradiction b hopen φ w
-
-/-! ## Generic Tableau Soundness -/
-
-/-- **Generic Tableau Soundness**: If the tableau with closure predicate `S.closurePred`
-closes on `φ`, then `φ` is intuitionistically valid (`IValid φ`).
-
-The proof instantiates `intExpandBranches_closed_unsat` with `S.closurePred` and the
-provided `closed_unsat` argument. This gives a parametric wrap of
-`intuitionisticTableau_sound` that ranges over all `IntMinScheme` instances.
-
-The `closed_unsat` parameter is passed separately (not stored in `IntMinScheme`) because
-it is universe-polymorphic (`∀ {World : Type*} ...`) while the completeness theorems in
-`IntMinScheme` use `World = Nat`. Storing `closed_unsat` in the struct would make
-`IntMinScheme` universe-polymorphic and cause universe metavariables in the completeness
-theorems. See the `IntMinScheme` docstring.
-
-The conclusion is `IValid φ` (validity with `botForces = fun _ => False`), matching
-the `botForces = fun _ => False` specialization typically used with this function.
-
-- At `intScheme`/`intClosed_unsatisfiable`: equivalent to `intuitionisticTableau_sound`.
-- At `minScheme`/`minClosed_unsatisfiable (fun _ => False)`: minimal soundness sub-case.
-
-## References
-
-* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
-theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
-    (closed_unsat : ∀ {World : Type u_world} [Preorder World]
-        (val : World → Atom → Prop) (worldOf : Nat → World)
-        (b : IBranch Atom),
-        S.closurePred b = true → ¬ intBranchSatisfied val (fun _ => False) worldOf b)
-    (φ : Proposition Atom)
-    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-        (intFuel φ) S.closurePred = .closed) :
-    IValid.{_, u_world} φ := by
-  intro World _ val v_uc w₀
-  by_contra hneg
-  let worldOf : Nat → World := fun _ => w₀
-  have hsat : intBranchSatisfied val (fun _ => False) worldOf [⟨.neg, φ, 0⟩] := by
-    intro sf hmem
-    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
-    subst hmem
-    exact ⟨fun h' => absurd h' (Sign.noConfusion), fun _ => hneg⟩
-  apply intExpandBranches_closed_unsat val (fun _ => False) v_uc
-      (fun {_ _} _ hf => absurd hf id) _
-      S.closurePred
-      (fun (worldOf' : Nat → World) (b : IBranch Atom) hcl =>
-          closed_unsat val worldOf' b hcl)
-      [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] (by rfl) (by rfl) (by rfl)
-      (by
-        intro b edges nw hmem
-        simp only [List.zip_cons_cons, List.zip_nil_right,
-          List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
-        obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
-        subst hb; subst he; subst hnw
-        refine ⟨?_, ?_⟩
-        · intro sf hsf
-          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf
-          simp [hsf]
-        · intro c p hcp
-          simp only [List.not_mem_nil] at hcp) h
-      [⟨.neg, φ, 0⟩] []
-  · simp [List.zip_cons_cons, List.zip_nil_right]
-  · exact fun w w' hacc => by
-      simp only [isAccessible] at hacc
-      split_ifs at hacc with heq
-      · have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
-        exact le_of_eq (congrArg worldOf hw)
-      · simp [isAccessible.go] at hacc
-  · exact hsat
 
 /-! ## Edge-Accessibility Preorder
 
@@ -673,98 +605,6 @@ private lemma applyPersistenceFixpoint_mem_preserved
     split_ifs
     · exact h
     · apply ih; simp only [applyAllTImpRules, List.mem_append]; exact Or.inl h
-
-omit [Hashable Atom] in
-/-- If the expansion loop returns `.openBranch b`, then `closurePred b = false`.
-
-In the fuel=0 case, `findSome?` only yields a branch when `closurePred b = false`.
-In the fuel+1 case, the inner go returns `.openBranch bPers` only inside the `else`
-branch of `if closurePred bPers`, so `closurePred bPers = false`. When a rule fires
-it recurses to `intExpandBranches` with fuel', and the outer IH applies. -/
-private lemma intExpandBranches_openBranch_closed (fuel : Nat)
-    (branches : List (IBranch Atom))
-    (expandedSets : List (List (ISF Atom)))
-    (nextWorlds : List Nat)
-    (edgeSets : List IEdges)
-    (closurePred : IBranch Atom → Bool)
-    (b : IBranch Atom)
-    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
-        = .openBranch b) :
-    closurePred b = false := by
-  induction fuel generalizing branches expandedSets nextWorlds edgeSets with
-  | zero =>
-    simp only [intExpandBranches] at h
-    cases hfs : branches.findSome? (fun b' => if closurePred b' then none else some b') with
-    | none => simp [hfs] at h
-    | some b' =>
-      simp only [hfs] at h; injection h with heq; subst heq
-      obtain ⟨b₀, _, hcond⟩ := List.exists_of_findSome?_eq_some hfs
-      cases heq : closurePred b₀ with
-      | true => simp [heq] at hcond
-      | false =>
-        simp only [heq, Bool.false_eq_true, if_false, Option.some.injEq] at hcond
-        exact hcond ▸ heq
-  | succ fuel' ih =>
-    simp only [intExpandBranches] at h
-    suffices key : ∀ (pending : List (IBranch Atom))
-        (pendingExp : List (List (ISF Atom)))
-        (pendingNW : List Nat)
-        (pendingEdges : List IEdges)
-        (done : List (IBranch Atom))
-        (doneExp : List (List (ISF Atom)))
-        (doneNW : List Nat)
-        (doneEdges : List IEdges),
-        intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
-            done doneExp doneNW doneEdges = .openBranch b →
-        closurePred b = false from
-      key branches expandedSets nextWorlds edgeSets [] [] [] [] h
-    intro pending
-    induction pending with
-    | nil =>
-      intro _ _ _ _ _ _ _ hgo
-      simp only [intExpandBranches.go] at hgo
-      simp at hgo
-    | cons bh bt ih_inner =>
-      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges hgo
-      cases hpE : pendingExp with
-      | nil =>
-        rw [hpE] at hgo; simp only [intExpandBranches.go] at hgo
-        exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
-      | cons eH eT =>
-        cases hpNW : pendingNW with
-        | nil =>
-          rw [hpE, hpNW] at hgo; simp only [intExpandBranches.go] at hgo
-          exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
-        | cons nwH nwT =>
-          cases hpEdges : pendingEdges with
-          | nil =>
-            rw [hpE, hpNW, hpEdges] at hgo; simp only [intExpandBranches.go] at hgo
-            exact ih_inner [] [] [] done doneExp doneNW doneEdges hgo
-          | cons edgesH edgesT =>
-            rw [hpE, hpNW, hpEdges] at hgo
-            set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
-            simp only [intExpandBranches.go] at hgo
-            by_cases hcl : closurePred bPers = true
-            · rw [if_pos hcl] at hgo
-              exact ih_inner eT nwT edgesT
-                  (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
-                  hgo
-            · simp only [Bool.not_eq_true] at hcl
-              rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
-              cases hstep : intStepBranch bPers eH nwH with
-              | none =>
-                rw [hstep] at hgo; injection hgo with heq; subst heq; exact hcl
-              | some step =>
-                obtain ⟨result, newExp⟩ := step
-                rw [hstep] at hgo
-                cases result with
-                | linearResult newForms nw' newEdge =>
-                  simp only at hgo
-                  split at hgo <;> (try split at hgo) <;> exact ih _ _ _ _ hgo
-                | branchingResult branches' nw' =>
-                  simp only at hgo; exact ih _ _ _ _ hgo
-                | notApplicable =>
-                  simp only at hgo; injection hgo with heq; subst heq; exact hcl
 
 /-! ## Expansion Invariant Helpers -/
 
@@ -1770,7 +1610,7 @@ lemma WBound_pos (φ : Proposition Atom) : 1 ≤ WBound φ :=
 
 omit [Hashable Atom] in
 /-- Materializable per-branch fuel budget for the per-branch-fuel expansion engine
-(`intExpandBranchesB`): one unit above twice the size bound of the enlarged cell
+(`intExpandBranches`): one unit above twice the size bound of the enlarged cell
 universe, `4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1`.
 
 **This MUST stay a closed arithmetic form.** Never define it as
@@ -2789,59 +2629,12 @@ lemma intExpMeasure_step_lt_branch
             (e ++ [⟨.neg, .and φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
         exact pow3_two_add_one_le hC h0 h1
 
-omit [Hashable Atom] in
-/-- At the tableau entry point, the worklist measure over the universe `intUniverse φ` is
-bounded by `intFuel φ` (mirrors `modalExpMeasure_entry_le_fuel`,
-`FmpMeasure.lean:208-251`). The initial singleton branch `[⟨.neg, φ, 0⟩]` with empty
-expanded-set `[]` gives `intWork (intUniverse φ) [⟨.neg, φ, 0⟩] [] ≤ 2 * |intUniverse φ|`
-(the branch-exclusion term is bounded by `List.countP_le_length`, the expanded-set term is
-exactly the full length since `e = []` excludes nothing); `intUniverse_length_le` then bounds
-`|intUniverse φ|` by `2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, so `2 * |intUniverse φ|`
-is bounded by `4 * (2 * φ.complexity + 1) * (φ.complexity + 2)` -- exactly the doubled exponent
-`intFuel φ` was raised to (`Expansion.lean`), closing with equality (no slack
-needed, unlike the modal analogue's messier world-bound formula). -/
-lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
-    intExpMeasure (intUniverse φ) [[(⟨.neg, φ, 0⟩ : ISF Atom)]] [[]] ≤ intFuel φ := by
-  have hmeas : intExpMeasure (intUniverse φ) [[(⟨.neg, φ, 0⟩ : ISF Atom)]] [[]]
-      = 3 ^ intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] := by
-    simp [intExpMeasure]
-  rw [hmeas]
-  have hwork : intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] ≤
-      2 * (intUniverse φ).length := by
-    have heq : intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] =
-        (intUniverse φ).countP
-          (fun sf => !(([(⟨.neg, φ, 0⟩ : ISF Atom)]).any (· == sf))) +
-        (intUniverse φ).countP
-          (fun sf => !((([] : List (ISF Atom))).any (· == sf))) := rfl
-    rw [heq]
-    have h2 : (intUniverse φ).countP
-        (fun sf => !((([] : List (ISF Atom))).any (· == sf))) = (intUniverse φ).length := by
-      simp
-    rw [h2]
-    have h1 : (intUniverse φ).countP
-        (fun sf => !(([(⟨.neg, φ, 0⟩ : ISF Atom)]).any (· == sf))) ≤
-        (intUniverse φ).length :=
-      List.countP_le_length
-    omega
-  have hUlen := intUniverse_length_le φ
-  have hfinal : intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] ≤
-      4 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by
-    have h2U : 2 * (intUniverse φ).length ≤
-        2 * (2 * (2 * φ.complexity + 1) * (φ.complexity + 2)) :=
-      Nat.mul_le_mul_left 2 hUlen
-    have heq : 2 * (2 * (2 * φ.complexity + 1) * (φ.complexity + 2)) =
-        4 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by ring
-    omega
-  calc 3 ^ intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] []
-      ≤ 3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2)) :=
-        Nat.pow_le_pow_right (by norm_num) hfinal
-    _ = intFuel φ := rfl
+/-! ## Per-Branch-Fuel Expansion Engine
 
-/-! ## Per-Branch-Fuel Expansion Engine (B-engine)
-
-The per-branch-fuel replacement for `intExpandBranches` (`Expansion.lean`), built in
-PARALLEL to the old engine — no existing consumer is flipped here. The single global
-`fuel : Nat` becomes `fuels : List Nat`, a fourth parallel list carrying each branch's
+THE tableau expansion engine (the retired global-fuel predecessor lived in
+`Expansion.lean`; all consumers, including the `intuitionisticTableau`/`minimalTableau`
+entry points below, now run on this engine). The old single global `fuel : Nat` is
+replaced by `fuels : List Nat`, a fourth parallel list carrying each branch's
 remaining fuel budget, sized by the materializable `intFuelExt` (above `WBound`).
 Termination is UNCONDITIONAL (no branch-containment or world-bound hypotheses) by the
 lexicographic measure `(Σ 3 ^ fuelᵢ over pending ++ done, pending.length)`. -/
@@ -2850,7 +2643,7 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every branching rule of the intuitionistic calculus splits into exactly two
 sub-branches: the three `branchingResult` sites of `intApplyRuleFull` (F-and, T-or, and
 the T-imp split) all emit literal 2-element lists. Consumed (via
-`intStepBranch_branchingResult_length`) by `intExpandBranchesB.go`'s termination
+`intStepBranch_branchingResult_length`) by `intExpandBranches.go`'s termination
 argument: the beta arm's fuel-sum decrease is `2 * 3 ^ f < 3 ^ (f + 1)`. -/
 lemma intApplyRuleFull_branchingResult_length {sf : ISF Atom} {nextWorld : Nat}
     {b : IBranch Atom} {brs : List (List (ISF Atom))} {nw' : Nat}
@@ -2887,7 +2680,7 @@ lemma intStepBranch_branchingResult_length {b : IBranch Atom}
       exact hbrs ▸ intApplyRuleFull_branchingResult_length hint
 
 /-- Sum of `3 ^ ·` over a constant-fuel list is `length * 3 ^ c` (beta-arm bookkeeping
-for `intExpandBranchesB.go`'s termination proof). -/
+for `intExpandBranches.go`'s termination proof). -/
 private lemma sum_map_pow_const {α : Type*} (l : List α) (c : Nat) :
     ((l.map (fun _ => c)).map (fun fl => 3 ^ fl)).sum = l.length * 3 ^ c := by
   induction l with
@@ -2897,7 +2690,7 @@ private lemma sum_map_pow_const {α : Type*} (l : List α) (c : Nat) :
     ring
 
 /-- Lexicographic decrease from an equal-or-smaller first component and a strictly
-smaller second component (termination helper for `intExpandBranchesB.go`). -/
+smaller second component (termination helper for `intExpandBranches.go`). -/
 private lemma lex_lt_of_le_of_lt {a a' b b' : Nat} (ha : a' ≤ a) (hb : b' < b) :
     Prod.Lex (· < ·) (· < ·) (a', b') (a, b) := by
   rcases Nat.eq_or_lt_of_le ha with heq | hlt
@@ -2906,10 +2699,10 @@ private lemma lex_lt_of_le_of_lt {a a' b b' : Nat} (ha : a' ≤ a) (hb : b' < b)
   · exact Prod.Lex.left _ _ hlt
 
 omit [Hashable Atom] in
-/-- Inner worklist loop of `intExpandBranchesB`, lifted to a top-level definition so
+/-- Inner worklist loop of `intExpandBranches`, lifted to a top-level definition so
 that well-founded elaboration and functional induction are available.
 
-Mirrors `intExpandBranches`'s nested `go` (`Expansion.lean`) with the single global
+Mirrors the retired global-fuel engine's nested `go` with the single global
 fuel replaced by the parallel fuel lists `pendingFuels`/`doneFuels`:
 - persistence receives the ACTIVE BRANCH's remaining fuel `f` (mirroring the old
   engine's `fuel' + 1` shape);
@@ -2927,7 +2720,7 @@ fuel multiset between the two lists (sum unchanged) and shrinks `pending`;
 single-successor arms replace `3 ^ (f + 1)` by `3 ^ f`; the beta arm replaces
 `3 ^ (f + 1)` by `2 * 3 ^ f`, sound because every branching rule emits exactly two
 children (`intStepBranch_branchingResult_length`). -/
-def intExpandBranchesB.go
+def intExpandBranches.go
     (closurePred : IBranch Atom → Bool)
     (pending : List (IBranch Atom))
     (pendingExp : List (List (ISF Atom)))
@@ -2948,7 +2741,7 @@ def intExpandBranchesB.go
     let bPers := applyPersistenceFixpoint b edges f
     if closurePred bPers then
       -- Branch is closed: move it (with its fuel) to done
-      intExpandBranchesB.go closurePred restBs restEs restNW restEdges restFs
+      intExpandBranches.go closurePred restBs restEs restNW restEdges restFs
         (done ++ [bPers]) (doneExp ++ [e]) (doneNW ++ [nw]) (doneEdges ++ [edges])
         (doneFuels ++ [f])
     else
@@ -2966,7 +2759,7 @@ def intExpandBranchesB.go
           match newEdge with
           | none =>
             -- Alpha-rule: no new world, edges unchanged
-            intExpandBranchesB.go closurePred
+            intExpandBranches.go closurePred
               (done ++ [Branch.extendMany bPers newForms] ++ restBs)
               (doneExp ++ [newExp] ++ restEs)
               (doneNW ++ [nw'] ++ restNW)
@@ -2980,7 +2773,7 @@ def intExpandBranchesB.go
             | some _x =>
               -- Reuse: F(φ → ψ)@w discharged without creating the world; the world
               -- counter stays at `nw` (unconsumed)
-              intExpandBranchesB.go closurePred
+              intExpandBranches.go closurePred
                 (done ++ [bPers] ++ restBs)
                 (doneExp ++ [newExp] ++ restEs)
                 (doneNW ++ [nw] ++ restNW)
@@ -2989,7 +2782,7 @@ def intExpandBranchesB.go
                 [] [] [] [] []
             | none =>
               -- No reusable ancestor: create the world exactly as before
-              intExpandBranchesB.go closurePred
+              intExpandBranches.go closurePred
                 (done ++ [Branch.extendMany bPers newForms] ++ restBs)
                 (doneExp ++ [newExp] ++ restEs)
                 (doneNW ++ [nw'] ++ restNW)
@@ -2999,7 +2792,7 @@ def intExpandBranchesB.go
         | some (.branchingResult branches' nw', newExp) =>
           -- Beta-rule: split into sub-branches (each inherits the edge set and the
           -- parent's decremented fuel `f'`)
-          intExpandBranchesB.go closurePred
+          intExpandBranches.go closurePred
             (done ++ branches'.map (Branch.extendMany bPers ·) ++ restBs)
             (doneExp ++ branches'.map (fun _ => newExp) ++ restEs)
             (doneNW ++ branches'.map (fun _ => nw') ++ restNW)
@@ -3010,7 +2803,7 @@ def intExpandBranchesB.go
           -- This case shouldn't happen (intStepBranch filters notApplicable)
           .openBranch bPers
   | _ :: restBs, _pExp, _pNW, _pEdges, _pFuels =>
-    intExpandBranchesB.go closurePred restBs [] [] [] [] done doneExp doneNW doneEdges
+    intExpandBranches.go closurePred restBs [] [] [] [] done doneExp doneNW doneEdges
       doneFuels
 termination_by
   (((pendingFuels ++ doneFuels).map (fun fl => 3 ^ fl)).sum, pending.length)
@@ -3062,16 +2855,15 @@ decreasing_by
     exact lex_lt_of_le_of_lt hle (by simp)
 
 omit [Hashable Atom] in
-/-- Per-branch-fuel expansion loop for the intuitionistic/minimal tableau (the
-"B-engine", built in parallel to `intExpandBranches` — no consumer is flipped to it
-yet).
+/-- Per-branch-fuel expansion loop for the intuitionistic/minimal tableau — the engine
+behind `intuitionisticTableau` and `minimalTableau` (below).
 
-Same worklist shape and parallel lists as `intExpandBranches` (`Expansion.lean`), with
-the single global `fuel : Nat` replaced by `fuels : List Nat`, a fourth parallel list
+Same worklist shape and parallel lists as the retired global-fuel engine, with the
+single global `fuel : Nat` replaced by `fuels : List Nat`, a fourth parallel list
 carrying each branch's remaining fuel budget (sized by `intFuelExt` at the entry
-points). See `intExpandBranchesB.go` for the arm-by-arm fuel discipline and the
+points). See `intExpandBranches.go` for the arm-by-arm fuel discipline and the
 unconditional lexicographic termination measure. -/
-def intExpandBranchesB
+def intExpandBranches
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
     (nextWorlds : List Nat)
@@ -3079,7 +2871,7 @@ def intExpandBranchesB
     (fuels : List Nat)
     (closurePred : IBranch Atom → Bool) :
     IntTableauResult Atom :=
-  intExpandBranchesB.go closurePred branches expandedSets nextWorlds edgeSets fuels
+  intExpandBranches.go closurePred branches expandedSets nextWorlds edgeSets fuels
     [] [] [] [] []
 
 omit [Hashable Atom] in
@@ -3120,6 +2912,60 @@ lemma intWork_init_lt_intFuelExt (φ : Proposition Atom) :
       4 * (2 * φ.complexity + 1) * (WBound φ + 1) := by ring
   unfold intFuelExt
   omega
+
+/-! ## Decision Procedure Entry Points
+
+The two tableau entry points, running on the per-branch-fuel engine above with the
+singleton fuel list `[intFuelExt φ]` (they live here, after `WBound`/`intFuelExt`/the
+engine, because `intFuelExt` needs `WBound`; the expansion rules themselves stay in
+`Expansion.lean`). -/
+
+/-- `propExpandBranches` is the generic propositional tableau expansion loop,
+parameterized by `closurePred : IBranch Atom → Bool`.
+
+This is a documentation alias for `intExpandBranches`, emphasizing that the expansion
+loop is closure-predicate-agnostic. The two concrete instantiations are:
+- `intuitionisticTableau`: `closurePred = isIntuitionisticallyClosed`
+- `minimalTableau`: `closurePred = isMinimallyClosed`
+
+The `IntMinScheme` structure (above) bundles both divergence points (closure
+predicate and countermodel `botForces`) into a single parameterized interface. -/
+@[inline] def propExpandBranches
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (fuels : List Nat)
+    (closurePred : IBranch Atom → Bool) :
+    IntTableauResult Atom :=
+  intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
+
+/-- The intuitionistic propositional tableau decision procedure.
+
+Given `φ`, starts with `F(φ)` at world 0 and expands using `IntuitionisticClosure`.
+- Returns `closed` iff `φ` is intuitionistically valid (IValid).
+- Returns `openBranch b` iff `φ` is not intuitionistically valid, with `b` an open
+  saturated branch giving a Kripke countermodel.
+
+The initial branch's per-branch fuel budget is `intFuelExt φ` — the materializable
+closed arithmetic form sized by the post-blocking world bound `WBound` (see
+`intFuelExt`'s docstring for the feasibility envelope and
+`intWork_init_lt_intFuelExt` for the entry-point sufficiency bound it satisfies). -/
+def intuitionisticTableau (φ : Proposition Atom) : IntTableauResult Atom :=
+  intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+    isIntuitionisticallyClosed
+
+/-- The minimal propositional tableau decision procedure.
+
+Identical to the intuitionistic tableau but uses `isMinimallyClosed` instead of
+`isIntuitionisticallyClosed`: a branch closes when T(φ) and F(φ) coexist at the same
+world for any formula φ (not only T(⊥)).
+
+- Returns `closed` iff `φ` is minimally valid (MValid).
+- Returns `openBranch b` iff `φ` is not minimally valid. -/
+def minimalTableau (φ : Proposition Atom) : IntTableauResult Atom :=
+  intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+    isMinimallyClosed
 
 /-! ## Persistence-loop fuel-sufficiency (`sat_timp` STOP-gate gap 1 continuation,
 `Scheme.lean:485-533`)
@@ -3296,450 +3142,21 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
         omega
       exact ih (applyAllTImpRules b edges) hb' hfuel'
 
-/-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
-every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
-Additionally exposes the accumulated `IEdges` active for `b` at the point of saturation
-(plumbing), so the completeness side can install edge-accessibility as the
-countermodel frame instead of the ambient numeric `≤`. The conclusion also
-carries `IFimpAccess edges b`: every `F(φ→ψ)@w ∈ b` has a genuinely edge-accessible witness
-(not merely the numeric `sat_fimp` proxy), the fact `truthLemma`'s F-imp case needs to
-instantiate over `intAccessPreorder edges` (Route (a)).
+/-! ## Engine-Quantifying Lemmas
 
-The proof mirrors `intExpandBranches_openBranch_closed`: induction on `fuel`, with inner
-induction on the `pending` list in the `go` helper, threading the combined `IAllConsistent`
-invariant AND its edge-accessibility companion `IAllAccessConsistent`. In
-the recursive cases (`linearResult`, `branchingResult`), the fuel IH closes the goal once both
-invariants are re-established for the extended/branched state via
-`intStepBranch_linear_preserves`/`intStepBranch_branch_preserves` (the exposed `edges` witness
-passes through the IH, growing by one edge exactly at world-creation). In the `none` leaf
-case, the returned branch equals `bPers` directly, `edgesH` (the edge list active at that
-point) is the exposed witness, and `IExpandedConsistent_sat`/`IExpandedAccessConsistent_sat`
-discharge both conjuncts directly from the threaded invariants. The fuel-0 base case's goal is
-REFUTED at its current statement, not merely gapped: see the in-proof note at the `sorry`
-below for the Lean-verified counter-instance and why no proof can close it as written. -/
-private lemma intExpandBranches_openBranch_sat (fuel : Nat)
-    (branches : List (IBranch Atom))
-    (expandedSets : List (List (ISF Atom)))
-    (nextWorlds : List Nat)
-    (edgeSets : List IEdges)
-    (augSets : List IEdges)
-    (closurePred : IBranch Atom → Bool)
-    (b : IBranch Atom)
-    (hAC : IAllConsistent branches expandedSets nextWorlds)
-    (hLen0 : branches.length = edgeSets.length)
-    (hACC : IAllAccessConsistent branches expandedSets augSets)
-    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
-        = .openBranch b) :
-    ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
-  induction fuel generalizing branches expandedSets nextWorlds edgeSets augSets hAC hLen0 hACC with
-  | zero =>
-    -- fuel=0 base case: THE GOAL IS FALSE AT ITS CURRENT STATEMENT, refuted by a
-    -- Lean-verified counter-instance, not merely unproven.
-    --
-    -- Counter-instance: `branches = [[⟨.neg, p ∧ q, 0⟩]]`, `expandedSets = [[]]`,
-    -- `nextWorlds = [1]`, `edgeSets = [[]]`.
-    --
-    -- Every hypothesis of this lemma holds at that instance: `ILabelBound` holds trivially
-    -- (the single branch's one formula sits at label `0 < 1`); `IExpandedConsistent` and
-    -- `IAllAccessConsistent` are vacuous, since `expandedSets = [[]]` supplies the empty
-    -- expanded-set `e = []` and `edgeSets = [[]]` supplies the empty edge list; the length
-    -- hypotheses `hLen0` (`branches.length = edgeSets.length`) and the analogous
-    -- `expandedSets`/`nextWorlds` lengths are all `(1, 1)`.
-    --
-    -- With `fuel = 0`, `intExpandBranches` returns `.openBranch b` for `b` = the branch
-    -- itself, `[⟨.neg, p ∧ q, 0⟩]`, unmodified -- it is never saturated. But
-    -- `IBranchSaturation.sat_fand`'s premise (`F(p ∧ q)@0` present) evaluates `true` while
-    -- BOTH disjuncts it requires (`F(p)@0` or `F(q)@0` present) evaluate `false`: neither is
-    -- on the branch. So `IBranchSaturation Atom b` is false at this `b`, and the existential
-    -- goal (`∃ edges, IBranchSaturation Atom b ∧ IFimpAccess edges b`) is unsatisfiable at
-    -- this instance despite every hypothesis holding.
-    --
-    -- Consequence: no proof can close this `sorry` at the lemma's current statement. Closing
-    -- it requires RESTATING the lemma (e.g. with a saturation-establishing precondition on
-    -- the initial worklist, ruling out the counter-instance above) -- out of scope here. This
-    -- note only records the refutation so no future attempt re-derives it from scratch.
-    sorry
-  | succ fuel' ih =>
-    simp only [intExpandBranches] at h
-    suffices key : ∀ (pending : List (IBranch Atom))
-        (pendingExp : List (List (ISF Atom)))
-        (pendingNW : List Nat)
-        (pendingEdges : List IEdges)
-        (pendingAug : List IEdges)
-        (done : List (IBranch Atom))
-        (doneExp : List (List (ISF Atom)))
-        (doneNW : List Nat)
-        (doneEdges : List IEdges)
-        (doneAug : List IEdges),
-        IAllConsistent pending pendingExp pendingNW →
-        pending.length = pendingEdges.length →
-        IAllConsistent done doneExp doneNW →
-        done.length = doneEdges.length →
-        IAllAccessConsistent pending pendingExp pendingAug →
-        IAllAccessConsistent done doneExp doneAug →
-        intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
-            done doneExp doneNW doneEdges = .openBranch b →
-        ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b from
-      key branches expandedSets nextWorlds edgeSets augSets [] [] [] [] []
-        hAC hLen0 (by trivial) rfl hACC (by trivial) h
-    intro pending
-    induction pending with
-    | nil =>
-      intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
-      simp only [intExpandBranches.go] at hgo
-      simp at hgo
-    | cons bh bt ih_inner =>
-      intro pendingExp pendingNW pendingEdges pendingAug done doneExp doneNW doneEdges doneAug
-        hPending hLenP hDone hLenD hPendingACC hDoneACC hgo
-      cases hpE : pendingExp with
-      | nil =>
-        simp only [hpE, IAllConsistent] at hPending
-      | cons eH eT =>
-        cases hpNW : pendingNW with
-        | nil =>
-          simp only [hpE, hpNW, IAllConsistent] at hPending
-        | cons nwH nwT =>
-          cases hpEdges : pendingEdges with
-          | nil =>
-            simp only [hpEdges, List.length_cons, List.length_nil] at hLenP
-            omega
-          | cons edgesH edgesT =>
-           cases hpAug : pendingAug with
-           | nil =>
-             simp only [hpE, hpAug, IAllAccessConsistent] at hPendingACC
-           | cons augH augT =>
-            rw [hpE, hpNW, hpEdges] at hgo
-            simp only [hpE, hpNW, IAllConsistent] at hPending
-            obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
-            simp only [hpE, hpAug, IAllAccessConsistent] at hPendingACC
-            obtain ⟨hACC_bh_eH, hPendingACCTail⟩ := hPendingACC
-            simp only [hpEdges, List.length_cons, Nat.add_right_cancel_iff] at hLenP
-            set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
-            have hIC_bPers : IExpandedConsistent bPers eH :=
-              IExpandedConsistent_mono
-                (fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (fuel' + 1) x hx)
-                hIC_bh_eH
-            have hLB_bPers : ILabelBound bPers nwH :=
-              ILabelBound_applyPersistenceFixpoint (fuel' + 1) hLB_bh_nwH
-            have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
-              IExpandedAccessConsistent_mono
-                (fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (fuel' + 1) x hx)
-                hACC_bh_eH
-            simp only [intExpandBranches.go] at hgo
-            by_cases hcl : closurePred bPers = true
-            · rw [if_pos hcl] at hgo
-              refine ih_inner eT nwT edgesT augT
-                  (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
-                  (doneAug ++ [augH])
-                  hPendingTail hLenP
-                  (IAllConsistent_append hDone ⟨hIC_bPers, hLB_bPers, by trivial⟩)
-                  (by simp [hLenD]) hPendingACCTail
-                  (IAllAccessConsistent_append hDoneACC ⟨hACC_bPers, by trivial⟩) hgo
-            · simp only [Bool.not_eq_true] at hcl
-              rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
-              cases hstep : intStepBranch bPers eH nwH with
-              | none =>
-                rw [hstep] at hgo; injection hgo with heq; subst heq
-                -- b = bPers; intStepBranch returned none, so every compound formula in
-                -- bPers is already recorded in eH (`intStepBranch_none_compound_mem`), and
-                -- `hIC_bPers`/`hACC_bPers` give its rule-outputs / edge-access witnesses on
-                -- bPers -- exactly `IBranchSaturation` + `IFimpAccess`.
-                exact ⟨augH, IExpandedConsistent_sat hstep hIC_bPers,
-                  IExpandedAccessConsistent_sat hstep hACC_bPers⟩
-              | some step =>
-                obtain ⟨result, newExp⟩ := step
-                rw [hstep] at hgo
-                cases result with
-                | linearResult newForms nw' newEdge =>
-                  simp only at hgo
-                  obtain ⟨hIC_ext, hLB_ext, hACC_ext⟩ :=
-                    intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers hstep
-                  have hAC' :
-                      IAllConsistent
-                        (done ++ [Branch.extendMany bPers newForms] ++ bt)
-                        (doneExp ++ [newExp] ++ eT) (doneNW ++ [nw'] ++ nwT) :=
-                    IAllConsistent_append
-                      (IAllConsistent_append hDone ⟨hIC_ext, hLB_ext, by trivial⟩) hPendingTail
-                  have hLen0' :
-                      (done ++ [Branch.extendMany bPers newForms] ++ bt).length =
-                        (doneEdges ++ [newEdge.elim edgesH (fun e => edgesH ++ [e])]
-                          ++ edgesT).length := by
-                    cases newEdge <;> simp <;> omega
-                  have hACC' :
-                      IAllAccessConsistent
-                        (done ++ [Branch.extendMany bPers newForms] ++ bt)
-                        (doneExp ++ [newExp] ++ eT)
-                        (doneAug ++ [newEdge.elim augH (fun e => augH ++ [e])] ++ augT) :=
-                    IAllAccessConsistent_append
-                      (IAllAccessConsistent_append hDoneACC ⟨hACC_ext, by trivial⟩)
-                      hPendingACCTail
-                  split at hgo <;> (try split at hgo) <;>
-                    first
-                    | exact ih _ _ _ _ _ hAC' hLen0' hACC' hgo
-                    | (rename_i newEdgeVar edgeVar deadVar x heq
-                       obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
-                       obtain ⟨s, ff, l⟩ := sf
-                       cases s with
-                       | pos =>
-                         cases ff with
-                         | atom _ => simp [intApplyRuleFull] at hint
-                         | bot => simp [intApplyRuleFull] at hint
-                         | imp _ _ => simp [intApplyRuleFull] at hint
-                         | or _ _ => simp [intApplyRuleFull] at hint
-                         | and _ _ => simp [intApplyRuleFull] at hint
-                       | neg =>
-                         cases ff with
-                         | atom _ => simp [intApplyRuleFull] at hint
-                         | bot => simp [intApplyRuleFull] at hint
-                         | and _ _ => simp [intApplyRuleFull] at hint
-                         | or _ _ => simp [intApplyRuleFull] at hint
-                         | imp φ ψ₀ =>
-                           simp only [intApplyRuleFull, intFImpRule,
-                             IntRuleResult.linearResult.injEq, Option.some.injEq] at hint
-                           obtain ⟨hnf, hnw', hed⟩ := hint
-                           obtain rfl := hed.symm
-                           have hψ : newForms.findSome?
-                               (fun sf => if sf.sign == .neg then some sf.formula else none)
-                               = some ψ₀ := by rw [← hnf]; simp [propagatePersistence]
-                           -- Phase 4: repointed to the ancestor-directed spec. Under ancestor
-                           -- direction `hacc`/`hle` now witness `isAccessible edges x l` /
-                           -- `x ≤ l` (x is an *ancestor* of l) — the reverse of what
-                           -- `sfSatisfied`/`sfAccessSat`'s `.neg,.imp` clauses below require
-                           -- (`l ≤ w'`, `isAccessible edges l w'`); see D5/D6 in the plan.
-                           obtain ⟨hacc, hle, hcont, hnotmem, hFpsi⟩ :=
-                             intFImpReuseWitnessAnc?_spec hψ heq
-                           have hmemsfor : φ ∈ (newForms.filterMap fun sf =>
-                               if sf.sign == .pos then some sf.formula else none) := by
-                             rw [← hnf]; simp [propagatePersistence]
-                           have hphi : (posFormulasAt bPers x).contains φ = true :=
-                             List.all_eq_true.mp hcont φ hmemsfor
-                           have houtPhi : bPers.any
-                               (fun y => y.sign == .pos && y.formula == φ && y.label == x)
-                               = true := by
-                             rw [List.contains_iff_mem] at hphi
-                             simp only [posFormulasAt, List.mem_filterMap] at hphi
-                             obtain ⟨y, hy_mem, hy_cond⟩ := hphi
-                             rw [List.any_eq_true]
-                             refine ⟨y, hy_mem, ?_⟩
-                             by_cases hs : y.sign == .pos && y.label == x
-                             · simp only [hs, if_true, Option.some.injEq] at hy_cond
-                               simp only [Bool.and_eq_true] at hs
-                               simp [hs.1, hs.2, hy_cond]
-                             · simp [hs] at hy_cond
-                           have hreuse_sat : IExpandedConsistent bPers newExp ∧
-                               IExpandedAccessConsistent (augH ++ [(x, l)]) bPers newExp := by
-                             subst hnewExp
-                             constructor
-                             · intro sf' hsf'
-                               rcases List.mem_append.mp hsf' with h' | h'
-                               · exact hIC_bPers sf' h'
-                               · rw [List.mem_singleton] at h'
-                                 subst h'
-                                 show sfSatisfied bPers ⟨.neg, .imp φ ψ₀, l⟩
-                                 simp only [sfSatisfied]
-                                 exact ⟨x, houtPhi, hFpsi⟩
-                             · intro sf' hsf'
-                               rcases List.mem_append.mp hsf' with h' | h'
-                               · exact sfAccessSat_edges_mono (x, l) (hACC_bPers sf' h')
-                               · rw [List.mem_singleton] at h'
-                                 subst h'
-                                 show sfAccessSat (augH ++ [(x, l)]) bPers
-                                   ⟨.neg, .imp φ ψ₀, l⟩
-                                 simp only [sfAccessSat]
-                                 exact ⟨x, isAccessible_one_step (by simp), houtPhi, hFpsi⟩
-                           have hIC_reuse : IExpandedConsistent bPers newExp := hreuse_sat.1
-                           have hACC_reuse :
-                               IExpandedAccessConsistent (augH ++ [(x, l)]) bPers newExp :=
-                             hreuse_sat.2
-                           have hAC'' : IAllConsistent (done ++ [bPers] ++ bt)
-                               (doneExp ++ [newExp] ++ eT) (doneNW ++ [nwH] ++ nwT) :=
-                             IAllConsistent_append
-                               (IAllConsistent_append hDone ⟨hIC_reuse, hLB_bPers, trivial⟩)
-                               hPendingTail
-                           have hLen0'' : (done ++ [bPers] ++ bt).length =
-                               (doneEdges ++ [edgesH] ++ edgesT).length := by simp; omega
-                           have hACC'' : IAllAccessConsistent (done ++ [bPers] ++ bt)
-                               (doneExp ++ [newExp] ++ eT)
-                               (doneAug ++ [augH ++ [(x, l)]] ++ augT) :=
-                             IAllAccessConsistent_append
-                               (IAllAccessConsistent_append hDoneACC ⟨hACC_reuse, trivial⟩)
-                               hPendingACCTail
-                           exact ih _ _ _ _ _ hAC'' hLen0'' hACC'' hgo)
-                | branchingResult branches' nw' =>
-                  simp only at hgo
-                  have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hACC_bPers hstep
-                  have hAC' :
-                      IAllConsistent
-                        (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt)
-                        (doneExp ++ branches'.map (fun _ => newExp) ++ eT)
-                        (doneNW ++ branches'.map (fun _ => nw') ++ nwT) :=
-                    IAllConsistent_append
-                      (IAllConsistent_append hDone
-                        (IAllConsistent_map (Branch.extendMany bPers ·)
-                          (fun br hbr' => ⟨(hbr br hbr').1, (hbr br hbr').2.1⟩))) hPendingTail
-                  have hLen0' :
-                      (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt).length =
-                        (doneEdges ++ branches'.map (fun _ => edgesH) ++ edgesT).length := by
-                    simp; omega
-                  have hACC' :
-                      IAllAccessConsistent
-                        (done ++ branches'.map (Branch.extendMany bPers ·) ++ bt)
-                        (doneExp ++ branches'.map (fun _ => newExp) ++ eT)
-                        (doneAug ++ branches'.map (fun _ => augH) ++ augT) :=
-                    IAllAccessConsistent_append
-                      (IAllAccessConsistent_append hDoneACC
-                        (IAllAccessConsistent_map (Branch.extendMany bPers ·)
-                          (fun br hbr' => (hbr br hbr').2.2))) hPendingACCTail
-                  exact ih _ _ _ _ _ hAC' hLen0' hACC' hgo
-                | notApplicable =>
-                  simp only at hgo; injection hgo with heq; subst heq
-                  -- hstep : intStepBranch bPers eH nwH = some (.notApplicable, newExp)
-                  -- This contradicts intStepBranch_result_ne_notApplicable.
-                  exact absurd rfl (intStepBranch_result_ne_notApplicable hstep)
+The four lemmas whose induction skeleton is the engine recursion, stated over the
+per-branch-fuel engine (`intExpandBranches`, above; ported from their retired
+global-fuel forms). Statements carry the `fuels` parallel list and proofs run by
+functional induction on `intExpandBranches.go` (one flat worklist induction replaces
+the retired outer-fuel/inner-`go` nesting). -/
 
 omit [Hashable Atom] in
-/-- Every formula in every initial branch appears in the open branch returned by
-`intExpandBranches`. This shows that F(φ)@0, present in the initial branch, is still
-on the open countermodel branch.
+/-- If the per-branch-fuel loop returns `.openBranch b`, then `closurePred b = false`.
 
-Both `applyPersistenceFixpoint` and `Branch.extendMany` only prepend/append formulas,
-so membership is monotone throughout the expansion. -/
-private lemma intExpandBranches_openBranch_initial_mem (fuel : Nat)
-    (sf : ISF Atom) :
-    ∀ (branches : List (IBranch Atom))
-      (expandedSets : List (List (ISF Atom)))
-      (nextWorlds : List Nat)
-      (edgeSets : List IEdges)
-      (closurePred : IBranch Atom → Bool),
-      (∀ b₀ ∈ branches, sf ∈ b₀) →
-      ∀ b, intExpandBranches branches expandedSets nextWorlds edgeSets fuel closurePred
-          = .openBranch b →
-        sf ∈ b := by
-  induction fuel with
-  | zero =>
-    intro branches expandedSets nextWorlds edgeSets closurePred hAll b h
-    simp only [intExpandBranches] at h
-    cases hfs : branches.findSome? (fun b' => if closurePred b' then none else some b') with
-    | none => simp [hfs] at h
-    | some b' =>
-      simp only [hfs] at h; injection h with heq; subst heq
-      obtain ⟨b₀, hb₀_mem, hcond⟩ := List.exists_of_findSome?_eq_some hfs
-      cases heq : closurePred b₀ with
-      | true => simp [heq] at hcond
-      | false =>
-        simp only [heq, Bool.false_eq_true, if_false, Option.some.injEq] at hcond
-        exact hcond ▸ hAll b₀ hb₀_mem
-  | succ fuel' ih =>
-    intro branches expandedSets nextWorlds edgeSets closurePred hAll b h
-    simp only [intExpandBranches] at h
-    suffices key : ∀ (pending : List (IBranch Atom))
-        (pendingExp : List (List (ISF Atom)))
-        (pendingNW : List Nat)
-        (pendingEdges : List IEdges)
-        (done : List (IBranch Atom))
-        (doneExp : List (List (ISF Atom)))
-        (doneNW : List Nat)
-        (doneEdges : List IEdges),
-        (∀ bp ∈ pending, sf ∈ bp) →
-        (∀ bd ∈ done, sf ∈ bd) →
-        intExpandBranches.go closurePred fuel' pending pendingExp pendingNW pendingEdges
-            done doneExp doneNW doneEdges = .openBranch b →
-        sf ∈ b from
-      key branches expandedSets nextWorlds edgeSets [] [] [] []
-          (fun b₀ hb₀ => hAll b₀ hb₀) (by simp) h
-    intro pending
-    induction pending with
-    | nil =>
-      intro _ _ _ _ _ _ _ _ _ hgo
-      simp only [intExpandBranches.go] at hgo
-      simp at hgo
-    | cons bh bt ih_inner =>
-      intro pendingExp pendingNW pendingEdges done doneExp doneNW doneEdges hPend hDone hgo
-      cases hpE : pendingExp with
-      | nil =>
-        rw [hpE] at hgo; simp only [intExpandBranches.go] at hgo
-        exact ih_inner [] [] [] done doneExp doneNW doneEdges
-            (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
-      | cons eH eT =>
-        cases hpNW : pendingNW with
-        | nil =>
-          rw [hpE, hpNW] at hgo; simp only [intExpandBranches.go] at hgo
-          exact ih_inner [] [] [] done doneExp doneNW doneEdges
-              (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
-        | cons nwH nwT =>
-          cases hpEdges : pendingEdges with
-          | nil =>
-            rw [hpE, hpNW, hpEdges] at hgo; simp only [intExpandBranches.go] at hgo
-            exact ih_inner [] [] [] done doneExp doneNW doneEdges
-                (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
-          | cons edgesH edgesT =>
-            rw [hpE, hpNW, hpEdges] at hgo
-            set bPers := applyPersistenceFixpoint bh edgesH (fuel' + 1) with hbPers_def
-            have hbh_sf : sf ∈ bh := hPend bh List.mem_cons_self
-            have hbPers_sf : sf ∈ bPers :=
-              applyPersistenceFixpoint_mem_preserved bh edgesH (fuel' + 1) sf hbh_sf
-            simp only [intExpandBranches.go] at hgo
-            by_cases hcl : closurePred bPers = true
-            · rw [if_pos hcl] at hgo
-              exact ih_inner eT nwT edgesT
-                  (done ++ [bPers]) (doneExp ++ [eH]) (doneNW ++ [nwH]) (doneEdges ++ [edgesH])
-                  (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp))
-                  (by intro bd hbd
-                      simp only [List.mem_append, List.mem_singleton] at hbd
-                      rcases hbd with h1 | rfl
-                      · exact hDone bd h1
-                      · exact hbPers_sf)
-                  hgo
-            · simp only [Bool.not_eq_true] at hcl
-              rw [if_neg (by simp [← hbPers_def, hcl])] at hgo
-              cases hstep : intStepBranch bPers eH nwH with
-              | none =>
-                rw [hstep] at hgo; injection hgo with heq; subst heq; exact hbPers_sf
-              | some step =>
-                obtain ⟨result, newExp⟩ := step
-                rw [hstep] at hgo
-                cases result with
-                | linearResult newForms nw' newEdge =>
-                  simp only at hgo
-                  split at hgo <;> (try split at hgo) <;>
-                    (refine ih _ _ _ _ _ ?_ b hgo
-                     intro b₀ hb₀
-                     simp only [List.mem_append, List.mem_singleton] at hb₀
-                     rcases hb₀ with ((hd | rfl) | hbt)
-                     · exact hDone b₀ hd
-                     · first
-                       | exact hbPers_sf
-                       | (simp only [Branch.extendMany, List.mem_append]
-                          exact Or.inr hbPers_sf)
-                     · exact hPend b₀ (List.mem_cons_of_mem _ hbt))
-                | branchingResult branches' nw' =>
-                  simp only at hgo
-                  refine ih _ _ _ _ _ ?_ b hgo
-                  intro b₀ hb₀
-                  simp only [List.mem_append, List.mem_map] at hb₀
-                  rcases hb₀ with ((hd | ⟨x, _, rfl⟩) | hbt)
-                  · exact hDone b₀ hd
-                  · simp only [Branch.extendMany, List.mem_append]; exact Or.inr hbPers_sf
-                  · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
-                | notApplicable =>
-                  simp only at hgo; injection hgo with heq; subst heq; exact hbPers_sf
-
-/-! ## B-Engine Ports of the Engine-Quantifying Lemmas
-
-Ports of the four lemmas whose induction skeleton is the engine recursion onto the
-per-branch-fuel B-engine (`intExpandBranchesB`, above). The old engine and its lemmas
-stay green and untouched until the flip; statements gain the `fuels` parallel list and
-proofs run by functional induction on `intExpandBranchesB.go` (one flat worklist
-induction replaces the old outer-fuel/inner-`go` nesting). -/
-
-omit [Hashable Atom] in
-/-- B-engine port of `intExpandBranches_openBranch_closed`: if the per-branch-fuel
-loop returns `.openBranch b`, then `closurePred b = false`.
-
-Every `.openBranch` return site of `intExpandBranchesB.go` (per-branch exhaustion at
+Every `.openBranch` return site of `intExpandBranches.go` (per-branch exhaustion at
 `f = 0`, saturation, and the defensive `notApplicable` arm) sits inside the `else`
 branch of `if closurePred bPers`, so the returned branch is open. -/
-private lemma intExpandBranchesB_openBranch_closed
+private lemma intExpandBranches_openBranch_closed
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
     (nextWorlds : List Nat)
@@ -3747,10 +3164,10 @@ private lemma intExpandBranchesB_openBranch_closed
     (fuels : List Nat)
     (closurePred : IBranch Atom → Bool)
     (b : IBranch Atom)
-    (h : intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
         = .openBranch b) :
     closurePred b = false := by
-  rw [intExpandBranchesB] at h
+  rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
       (pendingNW : List Nat)
@@ -3761,34 +3178,34 @@ private lemma intExpandBranchesB_openBranch_closed
       (doneNW : List Nat)
       (doneEdges : List IEdges)
       (doneFuels : List Nat),
-      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges pendingFuels
+      intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges pendingFuels
           done doneExp doneNW doneEdges doneFuels = .openBranch b →
       closurePred b = false from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] h
   intro pending pendingExp pendingNW pendingEdges pendingFuels done doneExp doneNW doneEdges
     doneFuels
   induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp, doneNW,
-      doneEdges, doneFuels using intExpandBranchesB.go.induct (closurePred := closurePred) with
+      doneEdges, doneFuels using intExpandBranches.go.induct (closurePred := closurePred) with
   | case1 =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     exact absurd hgo (by simp)
   | case2 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl ih =>
     intro hgo
-    rw [intExpandBranchesB.go.eq_def] at hgo
+    rw [intExpandBranches.go.eq_def] at hgo
     simp only [] at hgo
     rw [if_pos hcl] at hgo
     exact ih hgo
   | case3 _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     injection hgo with heq
     subst heq
     simpa using hcl
   | case4 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · injection hgo with heq
@@ -3802,7 +3219,7 @@ private lemma intExpandBranchesB_openBranch_closed
       exact absurd (hstep.symm.trans heq) (by simp)
   | case5 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep _ ih =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -3822,7 +3239,7 @@ private lemma intExpandBranchesB_openBranch_closed
       simp at hcon
   | case6 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep hwit _ ih =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -3851,7 +3268,7 @@ private lemma intExpandBranchesB_openBranch_closed
       simp at hcon
   | case7 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep hwit _ ih =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -3880,7 +3297,7 @@ private lemma intExpandBranchesB_openBranch_closed
       simp at hcon
   | case8 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep ih =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -3900,7 +3317,7 @@ private lemma intExpandBranchesB_openBranch_closed
       simp at hcon
   | case9 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -3916,21 +3333,20 @@ private lemma intExpandBranchesB_openBranch_closed
       simpa using hcl
   | case10 _ _ _ _ _ _ _ _ _ _ _ hmismatch ih =>
     intro hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     exact ih hgo
 
 omit [Hashable Atom] in
-/-- B-engine port of `intExpandBranches_closed_unsat` (`Soundness.lean`): if the
-per-branch-fuel engine returns `closed`, then every input branch is unsatisfiable.
+/-- If the per-branch-fuel engine returns `closed`, then every input branch is
+unsatisfiable. This is the core loop invariant for the soundness theorems below.
 
-The statement gains the `fuels` parallel list (with its length hypothesis); the proof
-replaces the old outer-fuel/inner-`go` induction nesting with a single functional
-induction on `intExpandBranchesB.go`. Per-arm content (persistence satisfaction via
-`applyPersistenceFixpoint_sat`, rule preservation via `intRule_preserves_sat`, and the
-`FreshAbove`/`MonotoneEdges` bookkeeping) transfers from the old proof arm-by-arm;
-the per-branch fuel-exhaustion arm returns `.openBranch`, never `.closed`, so the
-old fuel-0 `findSome?` analysis disappears entirely. -/
-private lemma intExpandBranchesB_closed_unsat
+The statement carries the `fuels` parallel list (with its length hypothesis); the
+proof runs by functional induction on `intExpandBranches.go` (per-arm content:
+persistence satisfaction via `applyPersistenceFixpoint_sat`, rule preservation via
+`intRule_preserves_sat`, and the `FreshAbove`/`MonotoneEdges` bookkeeping); the
+per-branch fuel-exhaustion arm returns `.openBranch`, never `.closed`, so no
+fuel-0 `findSome?` analysis is needed. -/
+private lemma intExpandBranches_closed_unsat
     {World : Type*} [Preorder World]
     (val : World → Atom → Prop) (botForces : World → Prop)
     (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
@@ -3949,7 +3365,7 @@ private lemma intExpandBranchesB_closed_unsat
       fuels.length = branches.length →
       (∀ b edges nw, ((b, edges), nw) ∈ (branches.zip edgeSets).zip nextWorlds →
           FreshAbove b edges nw) →
-      intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+      intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
           = .closed →
       ∀ (b : IBranch Atom) (edges : IEdges),
           (b, edges) ∈ branches.zip edgeSets →
@@ -3978,14 +3394,14 @@ private lemma intExpandBranchesB_closed_unsat
           FreshAbove b e nw) →
       (∀ b e nw, ((b, e), nw) ∈ (done.zip doneEdges).zip doneNW →
           FreshAbove b e nw) →
-      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges
+      intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges
           pendingFuels done doneExp doneNW doneEdges doneFuels = .closed →
       ∀ bp edgesP, (bp, edgesP) ∈ pending.zip pendingEdges →
           ∀ (wo : Nat → World), MonotoneEdges wo edgesP →
           ¬ intBranchSatisfied val botForces wo bp from by
     intro branches expandedSets nextWorlds edgeSets fuels hlenE hlenN hlenEd hlenF
         hfresh h b edges hbe worldOf hmono hsat
-    rw [intExpandBranchesB] at h
+    rw [intExpandBranches] at h
     exact key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] []
         hlenE hlenN hlenEd hlenF rfl rfl rfl rfl hfresh
         (fun _ _ _ hmem => by simp at hmem) h b edges hbe worldOf hmono hsat
@@ -3993,7 +3409,7 @@ private lemma intExpandBranchesB_closed_unsat
     doneEdges doneFuels
   induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp,
       doneNW, doneEdges, doneFuels
-      using intExpandBranchesB.go.induct (closurePred := closurePred) with
+      using intExpandBranches.go.induct (closurePred := closurePred) with
   | case1 =>
     intro _ _ _ _ _ _ _ _ _ _ _ bp edgesP hzip_p _ _ _
     simp at hzip_p
@@ -4001,7 +3417,7 @@ private lemma intExpandBranchesB_closed_unsat
       bPers hcl ih =>
     intro hlenE hlenN hlenEd hlenF hdlenE hdlenN hdlenEd hdlenF hfreshPend hfreshDone hgo
         bp edgesP hzip_p wo hmono_p hsat_p
-    rw [intExpandBranchesB.go.eq_def] at hgo
+    rw [intExpandBranches.go.eq_def] at hgo
     simp only [] at hgo
     rw [if_pos hcl] at hgo
     simp only [List.length_cons] at hlenE hlenN hlenEd hlenF
@@ -4049,13 +3465,13 @@ private lemma intExpandBranchesB_closed_unsat
   | case3 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT
       bPers hcl =>
     intro _ _ _ _ _ _ _ _ _ _ hgo bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     exact absurd hgo (by simp)
   | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       bPers hcl hstep =>
     intro _ _ _ _ _ _ _ _ _ _ hgo bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · exact absurd hgo (by simp)
@@ -4069,7 +3485,7 @@ private lemma intExpandBranchesB_closed_unsat
       newForms nw' newExp bPers hcl hstep hstep2 ih =>
     intro hlenE hlenN hlenEd hlenF hdlenE hdlenN hdlenEd hdlenF hfreshPend hfreshDone hgo
         bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -4175,7 +3591,7 @@ private lemma intExpandBranchesB_closed_unsat
       newForms nw' newExp newE _x bPers hcl hstep hwit hstep2 ih =>
     intro hlenE hlenN hlenEd hlenF hdlenE hdlenN hdlenEd hdlenF hfreshPend hfreshDone hgo
         bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -4272,7 +3688,7 @@ private lemma intExpandBranchesB_closed_unsat
       newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
     intro hlenE hlenN hlenEd hlenF hdlenE hdlenN hdlenEd hdlenF hfreshPend hfreshDone hgo
         bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -4402,7 +3818,7 @@ private lemma intExpandBranchesB_closed_unsat
       branches' nw' newExp bPers hcl hstep ih =>
     intro hlenE hlenN hlenEd hlenF hdlenE hdlenN hdlenEd hdlenF hfreshPend hfreshDone hgo
         bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -4522,7 +3938,7 @@ private lemma intExpandBranchesB_closed_unsat
   | case9 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       snd bPers hcl hstep =>
     intro _ _ _ _ _ _ _ _ _ _ hgo bp edgesP hzip_p wo hmono_p hsat_p
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -4565,14 +3981,144 @@ private lemma intExpandBranchesB_closed_unsat
               (hmismatch e restEs nw restNW edges restEdges f restFs hpE hpN hpEd hpF)
               id
 
+/-! ## Tableau Soundness -/
+
+/-- **Generic Tableau Soundness**: If the tableau with closure predicate `S.closurePred`
+closes on `φ`, then `φ` is intuitionistically valid (`IValid φ`).
+
+The proof instantiates `intExpandBranches_closed_unsat` with `S.closurePred` and the
+provided `closed_unsat` argument. This gives a parametric wrap of
+`intuitionisticTableau_sound` that ranges over all `IntMinScheme` instances.
+
+The `closed_unsat` parameter is passed separately (not stored in `IntMinScheme`) because
+it is universe-polymorphic (`∀ {World : Type*} ...`) while the completeness theorems in
+`IntMinScheme` use `World = Nat`. Storing `closed_unsat` in the struct would make
+`IntMinScheme` universe-polymorphic and cause universe metavariables in the completeness
+theorems. See the `IntMinScheme` docstring.
+
+The conclusion is `IValid φ` (validity with `botForces = fun _ => False`), matching
+the `botForces = fun _ => False` specialization typically used with this function.
+
+- At `intScheme`/`intClosed_unsatisfiable`: equivalent to `intuitionisticTableau_sound`.
+- At `minScheme`/`minClosed_unsatisfiable (fun _ => False)`: minimal soundness sub-case.
+
+## References
+
+* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
+theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
+    (closed_unsat : ∀ {World : Type u_world} [Preorder World]
+        (val : World → Atom → Prop) (worldOf : Nat → World)
+        (b : IBranch Atom),
+        S.closurePred b = true → ¬ intBranchSatisfied val (fun _ => False) worldOf b)
+    (φ : Proposition Atom)
+    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+        [intFuelExt φ] S.closurePred = .closed) :
+    IValid.{_, u_world} φ := by
+  intro World _ val v_uc w₀
+  by_contra hneg
+  let worldOf : Nat → World := fun _ => w₀
+  have hsat : intBranchSatisfied val (fun _ => False) worldOf [⟨.neg, φ, 0⟩] := by
+    intro sf hmem
+    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+    subst hmem
+    exact ⟨fun h' => absurd h' (Sign.noConfusion), fun _ => hneg⟩
+  apply intExpandBranches_closed_unsat val (fun _ => False) v_uc
+      (fun {_ _} _ hf => absurd hf id)
+      S.closurePred
+      (fun (worldOf' : Nat → World) (b : IBranch Atom) hcl =>
+          closed_unsat val worldOf' b hcl)
+      [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+      (by rfl) (by rfl) (by rfl) (by rfl)
+      (by
+        intro b edges nw hmem
+        simp only [List.zip_cons_cons, List.zip_nil_right,
+          List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
+        obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
+        subst hb; subst he; subst hnw
+        refine ⟨?_, ?_⟩
+        · intro sf hsf
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf
+          simp [hsf]
+        · intro c p hcp
+          simp only [List.not_mem_nil] at hcp) h
+      [⟨.neg, φ, 0⟩] []
+  · simp [List.zip_cons_cons, List.zip_nil_right]
+  · exact fun w w' hacc => by
+      simp only [isAccessible] at hacc
+      split_ifs at hacc with heq
+      · have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
+        exact le_of_eq (congrArg worldOf hw)
+      · simp [isAccessible.go] at hacc
+  · exact hsat
+
+/-- **Intuitionistic Tableau Soundness**: If `intuitionisticTableau φ = closed`, then
+`φ` is intuitionistically valid (`IValid φ`).
+
+Instantiates `tableau_sound` at `intScheme` with `intClosed_unsatisfiable`
+(`Soundness.lean`); `intuitionisticTableau φ` is definitionally the engine at the
+initial singleton worklist with fuel list `[intFuelExt φ]`. -/
+theorem intuitionisticTableau_sound (φ : Proposition Atom)
+    (h : intuitionisticTableau φ = .closed) : IValid φ :=
+  tableau_sound intScheme
+    (fun val worldOf b hcl => intClosed_unsatisfiable val worldOf b hcl) φ h
+
 omit [Hashable Atom] in
-/-- B-engine port of `intExpandBranches_openBranch_initial_mem`: every formula in
-every initial branch appears in the open branch returned by `intExpandBranchesB`.
+/-- **Minimal Tableau Soundness**: If `minimalTableau φ = closed`, then `MValid φ`.
+
+The proof instantiates `intExpandBranches_closed_unsat` with `isMinimallyClosed` and
+`minClosed_unsatisfiable`, mirroring `intuitionisticTableau_sound` exactly. The key
+differences from the intuitionistic case:
+- `botForces` is arbitrary (from the MValid quantifier), so this cannot route through
+  `tableau_sound` (whose conclusion pins `botForces = fun _ => False`).
+- `isMinimallyClosed` (all complementary pairs) is used instead of
+  `isIntuitionisticallyClosed`. -/
+theorem minimalTableau_sound (φ : Proposition Atom)
+    (h : minimalTableau φ = .closed) : MValid φ := by
+  intro World _ val botForces v_uc bf_uc w₀
+  by_contra hneg
+  let worldOf : Nat → World := fun _ => w₀
+  have hsat : intBranchSatisfied val botForces worldOf [⟨.neg, φ, 0⟩] := by
+    intro sf hmem
+    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+    subst hmem
+    exact ⟨fun h' => absurd h' (Sign.noConfusion), fun _ => hneg⟩
+  simp only [minimalTableau] at h
+  apply intExpandBranches_closed_unsat val botForces v_uc bf_uc
+    isMinimallyClosed
+    (fun worldOf' b hcl => minClosed_unsatisfiable val botForces worldOf' b hcl)
+    [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+    (by rfl) (by rfl) (by rfl) (by rfl)
+      (by
+        intro b edges nw hmem
+        simp only [List.zip_cons_cons, List.zip_nil_right,
+          List.mem_cons, List.mem_nil_iff, or_false, Prod.mk.injEq] at hmem
+        obtain ⟨⟨hb, he⟩, hnw⟩ := hmem
+        subst hb; subst he; subst hnw
+        refine ⟨?_, ?_⟩
+        · intro sf hsf
+          simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf
+          simp [hsf]
+        · intro c p hcp
+          simp only [List.not_mem_nil] at hcp) h
+    [⟨.neg, φ, 0⟩] []
+  · simp [List.zip_cons_cons, List.zip_nil_right]
+  · exact fun w w' hacc => by
+      simp only [isAccessible] at hacc
+      split_ifs at hacc with heq
+      · have hw : w = w' := by exact_mod_cast beq_iff_eq.mp heq
+        exact le_of_eq (congrArg worldOf hw)
+      · simp [isAccessible.go] at hacc
+  · exact hsat
+
+omit [Hashable Atom] in
+/-- Every formula in every initial branch appears in the open branch returned by
+`intExpandBranches`. This shows that F(φ)@0, present in the initial branch, is still
+on the open countermodel branch.
 
 Both `applyPersistenceFixpoint` and `Branch.extendMany` only prepend/append formulas,
 so membership is monotone throughout the expansion; the per-branch fuel-exhaustion arm
 returns the persistence-closed head branch, which inherits the head's membership. -/
-private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
+private lemma intExpandBranches_openBranch_initial_mem (sf : ISF Atom) :
     ∀ (branches : List (IBranch Atom))
       (expandedSets : List (List (ISF Atom)))
       (nextWorlds : List Nat)
@@ -4580,11 +4126,11 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
       (fuels : List Nat)
       (closurePred : IBranch Atom → Bool),
       (∀ b₀ ∈ branches, sf ∈ b₀) →
-      ∀ b, intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+      ∀ b, intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
           = .openBranch b →
         sf ∈ b := by
   intro branches expandedSets nextWorlds edgeSets fuels closurePred hAll b h
-  rw [intExpandBranchesB] at h
+  rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
       (pendingNW : List Nat)
@@ -4597,7 +4143,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
       (doneFuels : List Nat),
       (∀ bp ∈ pending, sf ∈ bp) →
       (∀ bd ∈ done, sf ∈ bd) →
-      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges
+      intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
       sf ∈ b from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] []
@@ -4606,15 +4152,15 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
     doneEdges doneFuels
   induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp,
       doneNW, doneEdges, doneFuels
-      using intExpandBranchesB.go.induct (closurePred := closurePred) with
+      using intExpandBranches.go.induct (closurePred := closurePred) with
   | case1 =>
     intro _ _ hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     exact absurd hgo (by simp)
   | case2 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT f fT
       bPers hcl ih =>
     intro hPend hDone hgo
-    rw [intExpandBranchesB.go.eq_def] at hgo
+    rw [intExpandBranches.go.eq_def] at hgo
     simp only [] at hgo
     rw [if_pos hcl] at hgo
     have hbPers_sf : sf ∈ bPers :=
@@ -4628,7 +4174,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case3 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT
       bPers hcl =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     injection hgo with heq
     subst heq
@@ -4637,7 +4183,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       bPers hcl hstep =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · injection hgo with heq
@@ -4653,7 +4199,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case5 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp bPers hcl hstep hstep2 ih =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hbPers_sf : sf ∈ bPers :=
       applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
@@ -4682,7 +4228,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case6 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp newE _x bPers hcl hstep hwit hstep2 ih =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hbPers_sf : sf ∈ bPers :=
       applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
@@ -4719,7 +4265,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case7 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hbPers_sf : sf ∈ bPers :=
       applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
@@ -4757,7 +4303,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case8 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       branches' nw' newExp bPers hcl hstep ih =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hbPers_sf : sf ∈ bPers :=
       applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
@@ -4788,7 +4334,7 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case9 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       snd bPers hcl hstep =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -4806,23 +4352,21 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
   | case10 done doneExp doneNW doneEdges doneFuels head restBs pExp pNW pEdges pFuels
       hmismatch ih =>
     intro hPend hDone hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     exact ih (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
 
-/-- B-engine port of `intExpandBranches_openBranch_sat` (succ-case content): if the
-per-branch-fuel engine returns `.openBranch b`, then `b` is Hintikka-saturated and
-carries an `IFimpAccess` edge witness. Statement gains `fuels` (with its length
-hypothesis); NO R1 hypotheses yet — those arrive with the restatement in a later
-phase.
+/-- If the per-branch-fuel engine returns `.openBranch b`, then `b` is
+Hintikka-saturated and carries an `IFimpAccess` edge witness. Statement carries
+`fuels` (with its length hypothesis); NO R1 hypotheses yet — those arrive with the
+hypothesis-threading restatement (`hUniv`/`hNW`/per-branch `hFuel`).
 
 The per-branch fuel-exhaustion arm (`f = 0`) is EXACTLY the refuted fuel-0 goal of the
-old lemma (see the counter-instance note at the old lemma's `sorry`): it is discharged
-here by consuming the OLD `intExpandBranches_openBranch_sat` at `fuel := 0` on the
-singleton worklist `[bPers]` (whose fuel-0 `findSome?` arm returns `.openBranch bPers`
-for the open `bPers`). This carries the pre-existing fuel-0 sorry 1-for-1 through
-`sorryAx` — the bare-sorry census is unchanged, and the obligation is discharged when
-the restated lemma lands. All other arms transfer from the old succ-case proof. -/
-private lemma intExpandBranchesB_openBranch_sat
+retired global-fuel lemma and carries its strategic `sorry` (with the Lean-verified
+counter-instance record, moved 1-for-1 in the flip — the bare-sorry census is
+unchanged). The R1 restatement discharges it: per-branch `hFuel` at that arm gives
+`intWork … < 0`, absurd by `omega`. All other arms transferred from the retired
+proof's succ case. -/
+private lemma intExpandBranches_openBranch_sat
     (branches : List (IBranch Atom))
     (expandedSets : List (List (ISF Atom)))
     (nextWorlds : List Nat)
@@ -4835,10 +4379,10 @@ private lemma intExpandBranchesB_openBranch_sat
     (hLen0 : branches.length = edgeSets.length)
     (hLenF0 : fuels.length = branches.length)
     (hACC : IAllAccessConsistent branches expandedSets augSets)
-    (h : intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
         = .openBranch b) :
     ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
-  rw [intExpandBranchesB] at h
+  rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
       (pendingNW : List Nat)
@@ -4858,7 +4402,7 @@ private lemma intExpandBranchesB_openBranch_sat
       doneFuels.length = done.length →
       IAllAccessConsistent pending pendingExp pendingAug →
       IAllAccessConsistent done doneExp doneAug →
-      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges
+      intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
       ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets []
@@ -4867,16 +4411,16 @@ private lemma intExpandBranchesB_openBranch_sat
     doneEdges doneFuels
   induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp,
       doneNW, doneEdges, doneFuels
-      using intExpandBranchesB.go.induct (closurePred := closurePred) with
+      using intExpandBranches.go.induct (closurePred := closurePred) with
   | case1 =>
     intro _ _ _ _ _ _ _ _ _ _ hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     exact absurd hgo (by simp)
   | case2 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT f fT
       bPers hcl ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    rw [intExpandBranchesB.go.eq_def] at hgo
+    rw [intExpandBranches.go.eq_def] at hgo
     simp only [] at hgo
     rw [if_pos hcl] at hgo
     simp only [IAllConsistent] at hPending
@@ -4905,40 +4449,39 @@ private lemma intExpandBranchesB_openBranch_sat
           (IAllAccessConsistent_append hDoneACC ⟨hACC_bPers, trivial⟩) hgo
   | case3 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT
       bPers hcl =>
-    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    intro _pendingAug _doneAug _hPending _hLenP _hLenPF _hDone _hLenD _hLenDF _hPendingACC
+        _hDoneACC hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     injection hgo with heq
     subst heq
-    simp only [IAllConsistent] at hPending
-    obtain ⟨hIC_bh_eH, hLB_bh_nwH, -⟩ := hPending
-    cases hpAug : pendingAug with
-    | nil =>
-      rw [hpAug] at hPendingACC
-      simp only [IAllAccessConsistent] at hPendingACC
-    | cons augH augT =>
-      rw [hpAug] at hPendingACC
-      simp only [IAllAccessConsistent] at hPendingACC
-      obtain ⟨hACC_bh_eH, -⟩ := hPendingACC
-      simp only [Bool.not_eq_true] at hcl
-      have hmemP : ∀ x ∈ bh, x ∈ bPers :=
-        fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH 0 x hx
-      have hIC_bPers : IExpandedConsistent bPers eH :=
-        IExpandedConsistent_mono hmemP hIC_bh_eH
-      have hLB_bPers : ILabelBound bPers nwH :=
-        ILabelBound_applyPersistenceFixpoint 0 hLB_bh_nwH
-      have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
-        IExpandedAccessConsistent_mono hmemP hACC_bh_eH
-      exact intExpandBranches_openBranch_sat 0 [bPers] [eH] [nwH] [edgesH] [augH]
-        closurePred bPers ⟨hIC_bPers, hLB_bPers, trivial⟩ rfl
-        ⟨hACC_bPers, trivial⟩
-        (by simp [intExpandBranches, hcl])
+    -- Per-branch fuel-exhaustion arm: the returned open branch `bPers` need not be
+    -- saturated, so the goal is unprovable AT THIS STATEMENT — refuted, not merely gapped.
+    --
+    -- Counter-instance (carried verbatim from the retired global-fuel lemma's fuel-0 arm,
+    -- where it was Lean-verified; the durable record of why the hypotheses below must
+    -- exist): with the singleton worklist `[[⟨.neg, p ∧ q, 0⟩]]`, `expandedSets = [[]]`,
+    -- `nextWorlds = [1]`, `edgeSets = [[]]` and per-branch fuel `0`, every hypothesis of
+    -- this lemma holds (`ILabelBound` trivially, `IExpandedConsistent`/
+    -- `IAllAccessConsistent` vacuously, all lengths `(1, 1)`), and the engine returns
+    -- `.openBranch [⟨.neg, p ∧ q, 0⟩]` unmodified — never saturated. But
+    -- `IBranchSaturation.sat_fand`'s premise (`F(p ∧ q)@0` present) evaluates `true` while
+    -- both required disjuncts (`F(p)@0` or `F(q)@0` present) evaluate `false`, so
+    -- `IBranchSaturation` is false at that branch and the existential goal is
+    -- unsatisfiable despite every hypothesis holding.
+    --
+    -- sorry: assumes the active branch's fuel never reaches 0 before saturation (i.e.
+    -- this arm is unreachable under the entry points' `intFuelExt` budget); deferred
+    -- because the discharge requires the R1 hypothesis-threading restatement
+    -- (`hUniv`/`hNW`/per-branch `hFuel : intWork … < fuelᵢ`), which lands in Phase 6 —
+    -- there `hFuel` at this arm gives `intWork … < 0`, absurd by `omega`;
+    -- follow-up: Phase 6 (R1 restatement + fuel-0 discharge + call-site repair).
+    sorry
   | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       bPers hcl hstep =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · injection hgo with heq
@@ -4971,7 +4514,7 @@ private lemma intExpandBranchesB_openBranch_sat
       newForms nw' newExp bPers hcl hstep hstep2 ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -5024,7 +4567,7 @@ private lemma intExpandBranchesB_openBranch_sat
       newForms nw' newExp newE x bPers hcl hstep hwit hstep2 ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -5154,7 +4697,7 @@ private lemma intExpandBranchesB_openBranch_sat
       newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -5218,7 +4761,7 @@ private lemma intExpandBranchesB_openBranch_sat
       branches' nw' newExp bPers hcl hstep ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -5278,7 +4821,7 @@ private lemma intExpandBranchesB_openBranch_sat
       snd bPers hcl hstep =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
         hDoneACC hgo
-    simp only [intExpandBranchesB.go] at hgo
+    simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
     · rename_i heq
@@ -5350,7 +4893,7 @@ packaging the `edges` the countermodel frame (`intAccessPreorder edges`) is inst
 lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     (b : IBranch Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-        (intFuel φ) S.closurePred = .openBranch b) :
+        [intFuelExt φ] S.closurePred = .openBranch b) :
     ∃ edges : IEdges,
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
@@ -5370,7 +4913,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
   obtain ⟨edges, hsat, hfimp⟩ :=
     intExpandBranches_openBranch_sat _ _ _ _ _ [[]] _ _
-      (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl
+      (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
       (by simp [IAllAccessConsistent, IExpandedAccessConsistent]) h
   -- Apply the truth lemma's F-branch direction over the `intAccessPreorder edges` frame.
   exact ⟨edges, (truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem⟩
@@ -5407,10 +4950,10 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
     (hvalid : ∀ (edges : IEdges) (b : IBranch Atom),
       @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ) :
     intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-        (intFuel φ) S.closurePred = .closed := by
+        [intFuelExt φ] S.closurePred = .closed := by
   by_contra hne
   cases hresult : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-      (intFuel φ) S.closurePred with
+      [intFuelExt φ] S.closurePred with
   | closed => exact hne hresult
   | openBranch b =>
     obtain ⟨edges, hcm⟩ := openBranch_countermodel S φ b hresult

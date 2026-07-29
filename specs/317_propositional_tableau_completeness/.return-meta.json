@@ -6,39 +6,35 @@
     {
       "path": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
       "type": "plan",
-      "summary": "Phase 4C heading marked [COMPLETED]; Phase 4C task checkboxes checked off; a stray Phase 5 [IN PROGRESS] marker (left over from a prior interrupted dispatch) reverted to [NOT STARTED] since Phase 5 was not touched."
+      "summary": "Phase 6 heading marked [COMPLETED]; all 4 Phase 6 task checkboxes checked off with DONE annotations recording what was built."
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-4C-progress.json",
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-6-progress.json",
       "type": "progress",
-      "summary": "All 8 Phase 4C objectives marked done, with verification results (build, lint, shake, sorry census, lean_verify, timing gate) recorded."
+      "summary": "All 7 Phase 6 objectives marked done, with verification results (scoped build, full build, checkInitImports, sorry census, lean_verify) recorded."
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4c-engine-flip-summary.md",
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase6-r1-restatement-fuel0-discharge-summary.md",
       "type": "summary",
-      "summary": "Phase 4C implementation summary: what was done, verification results, sorry inventory, plan deviations"
+      "summary": "Phase 6 implementation summary: what was proven/built, verification results, sorry inventory, plan deviations (none)"
     }
   ],
   "partial_progress": null,
-  "phase_number": "4C",
-  "phases_completed": 6,
+  "phase_number": "6",
+  "phases_completed": 8,
   "phases_total": 10,
   "sorry_inventory": [
-    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 551, "kind": "pre_existing", "note": "truthLemma T-imp case; discharge planned Phase 7"},
-    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 4479, "kind": "strategic", "note": "fuel-0 exhaustion arm of intExpandBranches_openBranch_sat, moved 1-for-1 in the flip from the retired global-fuel lemma; discharge planned Phase 6 (R1 restatement)"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 514, "kind": "pre_existing", "note": "truthLemma T-imp case; discharge planned Phase 7 (this phase supplied the hUniv/hNW/hFuel invariants Phase 7 consumes)"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 2515, "kind": "strategic", "note": "intFreshMint_preserves_nw, DP-2 fresh-mint hNW preservation; consumed as a black box by this phase's case7, owned by task 585"},
     {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean", "line": 133, "kind": "pre_existing", "note": "DP-3, intuitionistic validity bridge, owned by task 430"},
     {"file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean", "line": 125, "kind": "pre_existing", "note": "DP-4, minimal validity bridge, owned by task 430"}
   ],
   "blockers": [],
-  "next_phase": 5,
+  "next_phase": 7,
   "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-    "Cslib/Logics/Propositional/Tableau/Minimal/Soundness.lean",
-    "CslibTests/TableauConformance.lean",
     "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "specs/317_propositional_tableau_completeness/progress/phase-4C-progress.json"
+    "specs/317_propositional_tableau_completeness/progress/phase-6-progress.json"
   ],
   "verification": {
     "verification_passed": true,

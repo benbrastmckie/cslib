@@ -3,17 +3,17 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": true,
-  "summary": "Phase 5 complete (plan v14): hUniv/hNW threading invariants (division point DP-2). Added IAllUniv/IAllNW parallel-list invariants (private defs, threaded ALONGSIDE the existing IAllConsistent/IAllAccessConsistent pair, same companion-not-merged shape) with _append/_map combinator lemmas. Supplied per-arm step-preservation lemmas for hUniv (intStepBranch_linear_preserves_univ, intStepBranch_branch_preserves_univ -- direct corollaries of the already-proved intApplyRuleFull_outputs_subset_ext + applyPersistenceFixpoint_subset_ext) covering the ALPHA, BETA, and fresh-mint arms; the ancestor-reuse arm needs no lemma since the branch is literally unchanged. Supplied per-arm step-preservation lemmas for hNW: the ALPHA/BETA arms are sorry-free (intApplyRuleFull_linearResult_nextWorld/intApplyRuleFull_branchingResult_nextWorld establish nw' = nw by direct case analysis on intApplyRuleFull's constructor; intStepBranch_linear_preserves_nw_of_none/intStepBranch_branch_preserves_nw wrap these), the reuse arm is trivial by construction (go keeps nw unconsumed). The fresh-mint arm's hNW preservation (intFreshMint_preserves_nw) carries the ONE DP-2 strategic sorry explicitly authorized by the plan's STOPPING CONDITION: the bare hnwB : nw <= WBound phi0 hypothesis IAllNW threads is insufficient (consistent with nw = WBound phi0); the missing strict premise requires the 'labels minted so far <= tree size <= WBound phi0' creation-count invariant tied to intCreatedChain_le's pigeonhole bound (Phase 2) via the runtime-check-to-final-branch transfer that lemma's own docstring flags as owned by this development and not yet done -- genuinely open research, named explicitly in the sorry comment rather than papered over with a weakened statement. Scoped build green; full `lake build` green (3311/3311 jobs); `lake exe checkInitImports` exit 0. Bare-sorry census: 4 -> 5 (exactly the one authorized DP-2 addition).",
-  "phases_completed": 7,
+  "summary": "Phase 6 complete (plan v14): R1 restatement of intExpandBranches_openBranch_sat + fuel-0 discharge + call-site repair. Added IAllFuel (per-branch parallel-list invariant, simultaneous 3-list recursion mirroring IAllConsistent) plus _append/_map combinators, intWork_persistence_le (persistence-to-bPers bridge), and intStepBranch_some_exists_fuel (exposes the e.any(.==sf)=false witness intWork_drop needs). intExpandBranches_openBranch_sat gains a phi0 parameter and hUniv/hNW/hFuel hypotheses; all 10 cases of the intExpandBranches.go.induct functional induction thread the three invariants using the same double-append pattern IAllConsistent/IAllAccessConsistent already used (case1/case4/case9/case10 need no threading -- vacuous or leaf; case2/case5/case6/case7/case8 re-establish via Phase 5's step-preservation lemmas + intWork_drop+omega). The fuel-0 exhaustion arm (case3, formerly the bare sorry) is discharged: hFuel's head component gives intWork ... < 0, absurd by omega. Call-site repair in openBranch_countermodel discharges hUniv (singleton membership via mem_intUniverseExt_of + intSubfmls_self_mem), hNW (WBound_pos), hFuel (intWork_init_lt_intFuelExt). Case7's hNW forward preservation (fresh-mint arm) consumes the pre-existing DP-2 strategic sorry (intFreshMint_preserves_nw) as a black box, untouched. Scoped build green; full lake build green (3311/3311 jobs); lake exe checkInitImports exit 0. Bare-sorry census: 5 -> 4 (fuel-0 sorry discharged; the three remaining strategic sorries -- T-imp, DP-2, DP-3, DP-4 -- are pre-existing and unchanged).",
+  "phases_completed": 8,
   "phases_total": 10,
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 551,
+      "line": 514,
       "statement": "truthLemma T-imp case",
       "strategic": true,
       "assumption": "persistence-fixpoint sufficiency threading",
-      "why_deferred": "requires the R1 hypothesis-threading restatement landing in Phase 7",
+      "why_deferred": "requires the R1 hypothesis-threading restatement landing in Phase 7 (this phase supplied the hUniv/hNW/hFuel invariants Phase 7 will consume)",
       "discharge_phase": "7",
       "pre_existing": true,
       "follow_up_task": null
@@ -24,21 +24,10 @@
       "statement": "intFreshMint_preserves_nw : nw <= WBound phi0 -> nw + 1 <= WBound phi0 (fresh-mint arm hNW preservation)",
       "strategic": true,
       "assumption": "the creation-count invariant 'labels minted so far <= tree size <= WBound phi0' (equivalently: this fresh-mint firing is licensed by the pigeonhole tree-size bound, not merely that the counter has not yet overflowed)",
-      "why_deferred": "the bare hnwB : nw <= WBound phi0 hypothesis is insufficient on its own (consistent with nw = WBound phi0); the missing strict premise (nw < WBound phi0) requires tying intCreatedChain_le's pigeonhole bound (Phase 2) to the runtime next-world counter via the runtime-check-to-final-branch transfer that lemma's docstring explicitly flags as owned by this development and not yet done -- genuinely open research work, exceeding Phase 5's STOPPING CONDITION budget",
+      "why_deferred": "the bare hnwB : nw <= WBound phi0 hypothesis is insufficient on its own (consistent with nw = WBound phi0); the missing strict premise (nw < WBound phi0) requires tying intCreatedChain_le's pigeonhole bound (Phase 2) to the runtime next-world counter via the runtime-check-to-final-branch transfer that lemma's docstring explicitly flags as owned by this development and not yet done -- genuinely open research work. Consumed as a black box by this phase's case7 (fresh-mint arm), not re-proved or re-opened.",
       "discharge_phase": null,
-      "pre_existing": false,
-      "follow_up_task": 585
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 4732,
-      "statement": "fuel-0 exhaustion arm of intExpandBranches_openBranch_sat (per-branch-fuel engine, post-flip)",
-      "strategic": true,
-      "assumption": "R1 restatement (hUniv/hNW/per-branch hFuel) discharges it: hFuel at this arm gives intWork ... < 0, absurd by omega",
-      "why_deferred": "requires the R1 hypothesis-threading restatement (Phase 5's hUniv/hNW plus Phase 6's per-branch hFuel) landing in Phase 6",
-      "discharge_phase": "6",
       "pre_existing": true,
-      "follow_up_task": null
+      "follow_up_task": 585
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
@@ -66,31 +55,39 @@
   "blockers": [],
   "continuation_context": null,
   "continuation_path": null,
-  "next_phase": "6",
+  "next_phase": "7",
   "notes_for_next_dispatch": [
-    "Phase 6 (R1 restatement of intExpandBranches_openBranch_sat + fuel-0 discharge + call-site repair) is next. It threads Phase 5's IAllUniv/IAllNW invariants (and step-preservation lemmas) through the existing intExpandBranches_openBranch_sat functional induction (Scheme.lean, cases case1..case10 via intExpandBranches.go.induct), the SAME induction that already threads IAllConsistent/IAllAccessConsistent -- add IAllUniv/IAllNW as a THIRD thread alongside them, following the exact append/extend pattern each case already uses for the first two.",
-    "At the fresh-mint arm (case5/case6-equivalent for hNW, matching case5 in the current induction which is the world-creating-with-no-reuse arm), Phase 6 will either need to discharge intFreshMint_preserves_nw's sorry itself (if it turns out tractable with Phase 6's additional per-branch hFuel machinery in scope) or simply propagate the DP-2 sorry forward -- both are legitimate; if propagated, keep follow_up_task: 585 and strategic: true in the next handoff's sorry_inventory.",
-    "Per-branch hFuel form (per plan v14 Phase 6 task list): IAllFuel-style invariant `forall i, intWork (intUniverseExt phi0) b_i e_i < fuels_i`, NOT the retired global intExpMeasure <= fuel form.",
-    "Fuel-0 discharge target: Scheme.lean:4732 (line drifted again after Phase 5's ~250-line insertion before it -- re-grep for the sorry before editing, do not trust this line number verbatim).",
-    "Call-site repair target: openBranch_countermodel, hFuel via intWork_init_lt_intFuelExt (Phase 4A), hUniv via singleton membership, hNW via WBound_pos (Scheme.lean)."
+    "Phase 7 (truthLemma T-imp discharge via persistence fixpoint sufficiency) is next, at Scheme.lean:514 (line drifts -- re-grep for the sorry before editing).",
+    "Phase 7 consumes the SAME hUniv/hNW/per-branch hFuel invariants this phase landed on intExpandBranches_openBranch_sat -- thread applyPersistenceFixpoint_genuine_of_count_le_fuel (Phase 3; Scheme.lean, enlarged-universe version) through the open-branch extraction so the returned branch is at a GENUINE persistence fixpoint.",
+    "At the R1 leaf the active branch's remaining fuel f'+1 satisfies countP <= intWork <= f' from the threaded per-branch hFuel -- same consumption shape as v13, now per-branch.",
+    "Close the T-imp case (Scheme.lean:601-617-equivalent, lines have shifted) with sat_timp per the in-file STOP-gate analysis: the F(phi')@w' arm contradicts via ih_phi'.2, the T(psi')@w' arm closes via ih_psi'.1.",
+    "Update the STOP-gate note in Scheme.lean from 'Gap 1 UNCHANGED' to resolved, citing the fixpoint-sufficiency route.",
+    "IAllFuel/intWork_persistence_le/intStepBranch_some_exists_fuel (new this phase, in the section right before intExpandBranches.go's definition) are reusable if Phase 7's proof needs per-branch fuel facts directly."
   ],
   "modified_files": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "specs/317_propositional_tableau_completeness/progress/phase-5-progress.json"
+    "specs/317_propositional_tableau_completeness/progress/phase-6-progress.json",
+    "specs/317_propositional_tableau_completeness/summaries/14_phase6-r1-restatement-fuel0-discharge-summary.md"
   ],
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-5-progress.json",
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-6-progress.json",
       "type": "progress",
-      "summary": "Phase 5 objective-level progress record with verification results"
+      "summary": "Phase 6 objective-level progress record with verification results"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase6-r1-restatement-fuel0-discharge-summary.md",
+      "type": "summary",
+      "summary": "Phase 6 implementation summary"
     }
   ],
   "verification": {
     "scoped_build": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme)",
     "full_build": "green (3311/3311 jobs)",
     "checkInitImports": "exit 0",
-    "bare_sorry_census_subtree": 5,
-    "bare_sorry_census_note": "4 pre-existing + 1 new DP-2 strategic sorry, exactly as authorized by plan v14 Phase 5's explicit STOPPING CONDITION and Planned Strategic Sorries table. Full CI pipeline (lake lint, lint-style, shake, mk_all, test) not run this dispatch -- Phase 5's declared Verification Tier is 'local', not 'full'; the full gate is Phase 8's job."
+    "bare_sorry_census_subtree": 4,
+    "bare_sorry_census_note": "5 -> 4: the fuel-0 exhaustion arm sorry is discharged by this phase. The remaining 4 (T-imp/DP-2/DP-3/DP-4) are all pre-existing, unchanged, and were not touched by this dispatch. Full CI pipeline (lake lint, lint-style, shake, mk_all, test) not run this dispatch -- Phase 6's declared Verification Tier is 'local', not 'full'; the full gate is Phase 8's job.",
+    "lean_verify_openBranch_countermodel": "axioms = {propext, Classical.choice, Quot.sound, sorryAx}; sorryAx present only via truthLemma's pre-existing T-imp sorry, not introduced by this phase"
   }
 }

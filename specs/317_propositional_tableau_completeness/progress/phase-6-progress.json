@@ -1,0 +1,53 @@
+{
+  "phase": "6",
+  "plan": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+  "session_id": "sess_1785294636_11f932",
+  "objectives": [
+    {
+      "id": "hFuel-invariant",
+      "desc": "IAllFuel per-branch parallel-list invariant (simultaneous 3-list recursion mirroring IAllConsistent) + append/map combinators",
+      "status": "done"
+    },
+    {
+      "id": "hFuel-bridging-infra",
+      "desc": "intWork_persistence_le (persistence-to-bPers bridge) + intStepBranch_some_exists_fuel (exposes e.any (.==sf) = false witness intWork_drop needs)",
+      "status": "done"
+    },
+    {
+      "id": "R1-restatement",
+      "desc": "intExpandBranches_openBranch_sat gains phi0 param + hUniv/hNW/hFuel hypotheses; key-statement threading extended with 6 new hypotheses (pending + done triples)",
+      "status": "done"
+    },
+    {
+      "id": "fuel-0-discharge",
+      "desc": "case3 (fuel-exhaustion arm) closed via hFuel's head component + omega, replacing the sorry",
+      "status": "done"
+    },
+    {
+      "id": "succ-case-threading",
+      "desc": "case2 (closed-skip), case5 (ALPHA), case6 (ancestor-reuse), case7 (fresh-mint), case8 (BETA) re-establish hUniv/hNW/hFuel via Phase 5's preservation lemmas + intWork_drop; case1/case4/case9/case10 need no threading (vacuous or leaf)",
+      "status": "done"
+    },
+    {
+      "id": "call-site-repair",
+      "desc": "openBranch_countermodel discharges hUniv (singleton membership via mem_intUniverseExt_of + intSubfmls_self_mem), hNW (WBound_pos), hFuel (intWork_init_lt_intFuelExt)",
+      "status": "done"
+    },
+    {
+      "id": "comment-cleanup",
+      "desc": "fuel-0 refutation comment block updated to record PRE-R1 vs R1 distinction, counter-instance citation kept",
+      "status": "done"
+    }
+  ],
+  "verification": {
+    "scoped_build": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme)",
+    "full_build": "green (3311/3311 jobs)",
+    "checkInitImports": "exit 0",
+    "bare_sorry_census": "4 in subtree (down from 5): Scheme.lean:514 (truthLemma T-imp, Phase 7), Scheme.lean:2515 (intFreshMint_preserves_nw, DP-2, task 585), Intuitionistic/Completeness.lean:133 (DP-3, task 430), Minimal/Completeness.lean:125 (DP-4, task 430). Fuel-0 sorry GONE.",
+    "lean_verify_openBranch_countermodel": "axioms = {propext, Classical.choice, Quot.sound, sorryAx} -- sorryAx present only via truthLemma's pre-existing T-imp sorry (Phase 7), not from this phase's changes."
+  },
+  "files_touched": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md"
+  ]
+}

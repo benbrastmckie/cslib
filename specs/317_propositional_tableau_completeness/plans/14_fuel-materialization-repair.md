@@ -582,41 +582,56 @@ below are suggestions; the constraint set is binding, the naming is implementer 
 - **Done when:** both invariants stated in final form and threaded-form lemmas build, with at
   most the DP-2 sorry; scoped build green.
 
-### Phase 6: R1 restatement of `intExpandBranches_openBranch_sat` + fuel-0 discharge + call-site repair [NOT STARTED]
+### Phase 6: R1 restatement of `intExpandBranches_openBranch_sat` + fuel-0 discharge + call-site repair [COMPLETED]
 - **Goal:** The fuel-0 sorry (Scheme.lean:3055 pre-port) discharged. Implements EXACTLY 583's
   F5 form R1 (subsumes task 583), with `hFuel` in the per-branch form of reports/15 §7.
 - **Tasks:**
-  - [ ] Add hypotheses `hUniv`, `hNW` (Phase 5's invariants), and the per-branch `hFuel` to
+  - [x] Add hypotheses `hUniv`, `hNW` (Phase 5's invariants), and the per-branch `hFuel` to
     the (ported) `intExpandBranches_openBranch_sat`; the lemma gains a `φ0` parameter if not
     already threaded. **`hFuel` form (CHANGED from v13/583-F5's global-measure form)**: a
     per-branch parallel-list invariant (`IAllFuel`-style, mirroring `IAllConsistent`):
     `∀ i, intWork (intUniverseExt φ0) bᵢ eᵢ < fuelsᵢ` — never
-    `intExpMeasure … ≤ fuel` (the global form died with the old engine).
-  - [ ] Fuel-0 discharge, SIMPLIFIED from 583 F5's measure-0 argument: the exhaustion arm
+    `intExpMeasure … ≤ fuel` (the global form died with the old engine). DONE: `IAllFuel`
+    added (simultaneous 3-list recursion, mirrors `IAllConsistent`) with `_append`/`_map`
+    combinators, plus `intWork_persistence_le` (bridges the threaded `bh`-relative fact to
+    the persisted `bPers` the engine actually consumes) and
+    `intStepBranch_some_exists_fuel` (exposes the `e.any (·==sf) = false` witness
+    `intWork_drop` needs). `φ0` added as the lemma's new first explicit parameter.
+  - [x] Fuel-0 discharge, SIMPLIFIED from 583 F5's measure-0 argument: the exhaustion arm
     fires at active-branch `f = 0`; `hFuel` at that branch gives `intWork … < 0`, absurd by
     `omega`. No `3^k ≥ 1` measure reasoning, no saturation reasoning at fuel 0. (No other
-    change to the F5 shape.)
-  - [ ] Succ-case re-establishment of the three hypotheses through the ported proof body,
+    change to the F5 shape.) DONE: case3 of the induction (`Scheme.lean`, formerly the
+    fuel-0 sorry) now extracts `hFuel`'s head component and closes by `omega`.
+  - [x] Succ-case re-establishment of the three hypotheses through the ported proof body,
     per arm: linear/world-create/reuse arms via `intWork_drop` (arm-agnostic, covers reuse
     with `b' = b`); the persistence prefix via `intCount_notMem_mono`; each beta child via
     `intWork_drop` at its inherited `f`; `hUniv`/`hNW` via Phase 5's preservation lemmas.
     (The heavy sum-measure lemmas `intExpMeasure_step_lt`(+`_branch`) are NOT consumed —
-    they remain retained-but-unconsumed assets.)
-  - [ ] Call-site repair in `openBranch_countermodel` (Scheme.lean:3448): discharge `hFuel`
+    they remain retained-but-unconsumed assets.) DONE across all 10 induction cases
+    (case1/case9 vacuous, case4 leaf/unused, case10 vacuous from `IAllConsistent`'s own
+    shape mismatch — no threading needed; case2/case5/case6/case7/case8 thread and
+    re-establish `hUniv`/`hNW`/`hFuel`). Case7's `hNW` forward preservation for the
+    fresh-mint arm consumes the pre-existing DP-2 strategic sorry
+    (`intFreshMint_preserves_nw`) as a black box, untouched.
+  - [x] Call-site repair in `openBranch_countermodel` (Scheme.lean:3448): discharge `hFuel`
     at the singleton worklist by `intWork_init_lt_intFuelExt` (Phase 4A), `hUniv` by
-    singleton membership, `hNW` by `WBound_pos` (Scheme.lean:1768).
-  - [ ] Replace the fuel-0 refutation comment block (adjacent to the sorry) with a short note
+    singleton membership, `hNW` by `WBound_pos` (Scheme.lean:1768). DONE.
+  - [x] Replace the fuel-0 refutation comment block (adjacent to the sorry) with a short note
     recording that the refutation applied to the PRE-R1 statement and pointing at R1's
     hypotheses (keep the counter-instance citation — it is the durable record of why the
-    hypotheses exist).
+    hypotheses exist). DONE.
 - **Timing:** 1 dispatch. Estimated output: ~300-450 lines (net; much is hypothesis threading
-  through the existing succ-case body).
+  through the existing succ-case body). ACTUAL: ~440 net new/changed lines (infrastructure +
+  restated lemma + call-site repair).
 - **Depends on:** 4A, 4C, 5
 - **Verification Tier:** local
 - **Done when:** the fuel-0 sorry GONE; repo bare-sorry count in the subtree strictly
   decreased by one (modulo DP-2 which lives in a different declaration);
   `openBranch_countermodel` and `tableau_complete` build unchanged in statement; scoped build
-  green.
+  green. VERIFIED: bare-sorry census in the subtree is 4 (was 5), scoped build green,
+  full `lake build` green (3311/3311), `lake exe checkInitImports` exit 0,
+  `openBranch_countermodel`/`tableau_complete` statements unchanged (only the private
+  `intExpandBranches_openBranch_sat` gained `φ0`/`hUniv`/`hNW`/`hFuel`).
 
 ### Phase 7: `truthLemma` T-imp discharge via persistence fixpoint sufficiency [NOT STARTED]
 - **Goal:** `Scheme.lean:617` discharged, honoring the STOP-gate's one-pass directive with

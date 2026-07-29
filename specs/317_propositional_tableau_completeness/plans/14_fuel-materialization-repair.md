@@ -1,0 +1,725 @@
+# Implementation Plan: Tableau Completeness — Per-Branch Fuel Materialization Repair (Skeleton, v14)
+
+- **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
+- **Status**: [IMPLEMENTING]
+- **Effort**: 26-44 hours (10 phase-sized dispatches, 3 completed; skeleton — full sorry-zero
+  completion is explicitly NOT claimed by this plan alone, see Planned Strategic Sorries)
+- **Dependencies**: 456 (completed — Blocking.lean), 552 (completed), 574 (completed — ancestor
+  blocking repair). Subsumes: 583 (blocked — its R1 restatement is Phase 6 of this plan; close
+  583 as superseded when Phase 6 lands). Defers to: 430 (planned — the two Completeness.lean
+  bridge sorries stay in 430's territory; this plan does not touch them)
+- **Research Inputs**:
+  - reports/15_fuel-materialization-repair.md (PRIMARY for Phases 4A-4C and the Phase 5-8
+    deltas; adjudicates the plan-13 Phase 4 blocker — candidate (a) GO, candidates (b)/(c)
+    NO-GO with recorded rationale)
+  - reports/14_blocker-analysis.md — "## Adversarial Self-Verification" section only (the
+    pre-repair body of reports 13/14 is STALE and must not be planned from)
+  - specs/583_restate_intexpandbranches_openbranch_sat/reports/01_restate-openbranch-sat.md
+    (F3 equivalence, F5 restatement R1, F6 prohibitions, prerequisite acceptance gate)
+  - In-code notes at HEAD: Scheme.lean:100-111 (D8), Scheme.lean:504-557 (STOP-gate),
+    Scheme.lean:1591-1605 (intUniverse warning), fuel-0 refutation record (now adjacent to the
+    fuel-0 sorry at Scheme.lean:3055), Expansion.lean:450-494 (divergence witness),
+    Expansion.lean:246-320 (ancestor loop-check)
+  - plans/13_fuel-sufficiency-skeleton.md (prior plan: Phases 1-3 landed and are carried
+    forward verbatim below; its Phase 4 is superseded by Phases 4A-4C here — the blocker
+    defect record lives in plan 13's Phase 4 body and in reports/15 §1)
+- **Artifacts**: plans/14_fuel-materialization-repair.md (this file)
+- **Standards**:
+  - .claude/context/formats/plan-format.md
+  - .claude/rules/artifact-formats.md
+  - .claude/rules/state-management.md
+  - .claude/rules/plan-compliance.md
+  - .claude/rules/lean4.md
+  - .claude/rules/cslib.md
+- **Type**: cslib
+- **Plan Version**: 14
+- **Skeleton**: true (see `## Planned Strategic Sorries`; `plan_metadata.skeleton: true`)
+
+## Overview
+
+Four bare sorries remain (count re-verified by reports/15 at HEAD): `Intuitionistic/Scheme.lean:617`
+(truthLemma T-imp), `Intuitionistic/Scheme.lean:3055` (fuel-0 case of
+`intExpandBranches_openBranch_sat`, REFUTED as stated pre-R1; line was :2551 at plan-13 time,
+drifted by the Phase 1-3 insertions), `Intuitionistic/Completeness.lean:133`,
+`Minimal/Completeness.lean:125`. Per 583's F3 equivalence result, all four bottom out in one
+missing development: the post-blocking fuel-sufficiency theorem. Plan 13 landed its Phases 1-3
+(Blocking.lean consumption bridge; `WBound`/`intChainBound` + `intCreatedChain_le` PROVED —
+DP-1 closed inline; `intUniverseExt` + engine re-target) and then hit a structural blocker at
+Phase 4: **any global-scalar fuel dominating the enlarged measure is a `3^Θ(WBound φ)`-bit
+numeral, physically unmaterializable for 19 of 20 propositional corpus rows** (defect record:
+plan 13 Phase 4; reports/15 §1 re-verifies it at HEAD and proves no tighter global resize can
+exist).
+
+**This revision (v14)** replaces the old Phase 4 with the repair adjudicated in reports/15:
+**candidate (a), per-branch fuel restructuring of `intExpandBranches`**, realized
+shape-preservingly (a `fuels : List Nat` fourth parallel list; well-founded recursion on the
+unconditional lex measure `((fuels.map (3 ^ ·)).sum, pending.length)`). Per-branch sufficiency
+shrinks the required budget from `3^(2|U|)` to `2|U| + 1`-class numerals — materializable for
+every corpus row (worst row 20: ~13.0-million-digit numeral, 599 ms probe, ~5.4 MB; see the 4C
+timing gate). The restructure is delivered as three H8-bounded phases (4A build-parallel,
+4B port lemmas, 4C flip + retire + corpus gate) so the tree is green at every commit boundary.
+Candidates (b) and (c) are NO-GO and constitutionally forbidden below (Postmortem Constraints).
+
+**Honest scope verdict** (unchanged from v13): full four-sorry completion in one plan is NOT
+credible. This plan is a SKELETON: Phases 4A-4C, 6, 7 land unconditional or
+conditional-but-provable value; Phase 5 carries the remaining research-grade risk (DP-2; DP-1
+was proved in Phase 2, no sorry placed). The two Completeness bridges (DP-3, DP-4) are
+pre-existing sorries deferred to existing task 430 and NOT in this plan's discharge scope.
+Definition of done for this plan: sorries at `Scheme.lean:3055` and `Scheme.lean:617`
+discharged (modulo at most DP-2), no false statement remains anywhere in the subtree, build
+green, full CI gate passed.
+
+### Territory Resolutions (settled up front)
+
+| Overlap | Resolution |
+|---------|------------|
+| Task 583 (blocked) owns the fuel-0/`openBranch_sat` restatement | **SUBSUMED**: Phase 6 implements exactly 583's F5 form R1 (`hUniv`/`hNW`/`hFuel` hypothesis threading, with `hFuel` in the per-branch form of reports/15 §7). When Phase 6 lands, 583 should be closed as superseded — orchestrator/user action, not this plan's |
+| Task 430 (planned) owns the two Completeness bridges (IAtomPersist route) | **DEFERRED**: this plan does not modify `Intuitionistic/Completeness.lean` or `Minimal/Completeness.lean` beyond comment accuracy. 430's existing dependency on 317 is already the right direction |
+| Task 456's Blocking.lean consumption | **CONSUMED** (Phase 1, landed) |
+
+### Settled Planner Decision: entry points move to `Scheme.lean` (import direction)
+
+`intFuelExt` needs `WBound` (Scheme.lean:1762), but the entry points
+(`intuitionisticTableau`, `minimalTableau`) currently live in `Expansion.lean`, which
+`Scheme.lean` imports. **DECIDED: option (i) of reports/15 §6 — move the two entry-point defs
+into `Scheme.lean` (after `WBound`/`intFuelExt`/the B-engine) and repoint the corpus import
+(`CslibTests/TableauConformance.lean:11,15`, which currently imports only `Expansion`).** This
+is the smaller import-direction change; option (ii) (moving `intSubfmls`/`intChainBound`/
+`WBound` and their lemma closure below the engine) is rejected. Consequences: the B-engine and
+`intFuelExt` land in `Scheme.lean` at Phase 4A; the entry-point move + corpus-import repoint
+execute at Phase 4C (the flip commit). Do not re-open this decision without a concrete
+elaboration failure.
+
+### Source-to-Implementation Mapping (H3; Tier 3 primary, Tier 1 anchors)
+
+Literature note: per-repo sub-index present (34 entries) but contains no chunks for the anchors
+below; Tier 1 anchoring rests on `references.bib` entries (all BibKeys re-verified by
+reports/15: `references.bib:211` Fitting1983, `:218` Dyckhoff1992, `:239`
+GargGenoveseNegri2012, `:1041` Massacci2000) plus in-file provenance notes. Reports/15
+introduces no new literature claims; its grounding is Tier 3 (implementation-backed).
+
+| Source | Claim | Lean Target | Status |
+|--------|-------|-------------|--------|
+| Fitting1983, Ch. 4 | Systematic intuitionistic tableau: open saturated branch yields Kripke countermodel; construction presumes the procedure terminates in saturation | `openBranch_countermodel` (Scheme.lean:3448), `intExpandBranches_openBranch_sat` restatement R1 (Phase 6) | pending |
+| GargGenoveseNegri2012, §III | Count of distinct forced sets bounds blocking chains | `distinctTypes_le_pow`, `strictChain_le_card` (Blocking.lean:150,185); consumed via `intCreatedChain_le` (Phase 2, PROVED) | landed |
+| Massacci2000, Tech. 8.1/8.2 | Blocking side conditions are logic-specific | ψ-conditioned ancestor check `intFImpReuseWitnessAnc?` (Expansion.lean:260 — landed, 574); never edited here | transcribed (574) |
+| Dyckhoff1992 | Termination via calculus-side contraction-free design (contrast route; not taken) | (none — provenance only) | n/a |
+| 583 report F5 | Restatement R1 exact hypothesis set; fuel-0 discharge shape; call-site repair shape | Phase 6 (with reports/15 §7's per-branch `hFuel` form and omega fuel-0 discharge) | pending |
+| reports/15 §2, §6 | Per-branch fuel sufficiency needs only `intWork_drop` + `intCount_notMem_mono` + init bound; termination decrease is unconditional (exactly-2-way branching, `Rules.lean:259,262,280`) | `intFuelExt`, `intExpandBranchesB`, `intWork_init_lt_intFuelExt` (Phases 4A-4C) | pending |
+
+### Preserved Assets
+
+The following work is complete, `lake build`-green at HEAD, and must not regress. The
+**Restructure impact** column is reports/15 §7's verified engine-independence audit — rows
+marked "untouched" contain no reference to the engine or fuel in statements or proofs and MUST
+stay green with zero edits through Phases 4A-4C.
+
+| Component | File | Status | Restructure impact |
+|-----------|------|--------|--------------------|
+| Ancestor-blocking repair: `intFImpReuseWitnessAnc?` + `_spec` | Expansion.lean:260,293 | [COMPLETED] (574) | untouched |
+| D8 `sat_fimp` + live `sat_timp` field | Scheme.lean:100-118 | [COMPLETED] (574/552) | untouched |
+| `.pos, .imp` branching arm | Rules.lean:245-268 | [COMPLETED] (552) | untouched (read by 4A's termination argument: emits literal 2-element list) |
+| `intCreatedChain_le` + `WBound` + `intChainBound` + `WBound_pos` (Phase 2, DP-1 PROVED) | Scheme.lean:1753-1839 | [COMPLETED] | **untouched** — no engine/fuel reference anywhere (reports/15 audit) |
+| `intUniverseExt` family: def, `_length_le`, membership lemmas, `_outputs_subset_ext` containment family (Phase 3) | Scheme.lean:2155-2401 | [COMPLETED] | **untouched** |
+| Persistence-fuel lemmas: `applyAllTImpRules_count_drop`, `applyPersistenceFixpoint_genuine_of_count_le_fuel` | Scheme.lean:2862, 2928 | [COMPLETED] | **untouched** — inner persistence loop, not the outer engine |
+| `intWork_drop`, `intCount_notMem_mono` (+ `_append_drop`) | Scheme.lean:2516-2531, 2500-2513 | [COMPLETED] | untouched; **PROMOTED to the load-bearing sufficiency core** |
+| Both step-lt lemmas: `intExpMeasure_step_lt`, `intExpMeasure_step_lt_branch` (re-targeted Phase 3) | Scheme.lean:2575, 2647 | [COMPLETED] | stay green **untouched** (statements never mention the engine); demoted to retained-but-unconsumed after 4C |
+| Succ-fuel case of `intExpandBranches_openBranch_sat` incl. saturation leaf | Scheme.lean:3014- (fuel-0 sorry at :3055) | [COMPLETED] (succ case) | ported mechanically in 4B (content transfers arm-by-arm; fuel-0 sorry carries 1-for-1) |
+| `intExpandBranches_closed_unsat` / `tableau_sound` (sorry-free) | Soundness.lean:1078 (~690 lines; unfolds `.go` at :1161,:1223) | [COMPLETED] | ported in 4B — biggest regression surface; old proof retained green until the 4C flip |
+| Shared blocking module + counting layer | Cslib/Foundations/Logic/Tableau/Blocking.lean | [COMPLETED] (456), lean_verify clean | untouched (read-only for this task) |
+| Conformance corpus, 44 rows incl. divergence-witness regression row 20 | CslibTests/TableauConformance.lean | [COMPLETED] | zero row edits; verdicts preserved a priori (identical step sequences); row 20 gains ~0.6 s materialization + seconds of bignum stepping — 4C timing gate |
+| FMP decidability route | `Cslib.Logic.PL.decidableDerivableIntPropAxiomFMP` | [COMPLETED], sorry-free | untouched |
+| In-code refutation/divergence records | Scheme.lean:1591-1605 + fuel-0 refutation block; Expansion.lean:450-494 | [COMPLETED] | comment updates only (Phases 6, 8) |
+
+## Postmortem Constraints
+
+Binding rules for all implementation dispatches. Rows 1-10 carry forward verbatim from plan 13
+(derived from the reports-13/14 adversarial verification, 583's F6, the in-file directives, and
+twelve failed prior plan versions); rows 11-13 are new, from reports/15.
+
+**Do NOT**:
+1. Plan against or state the refuted bound form `(b.labels.map b.typeAt).eraseDups.length ≤
+   2^U.length` — REFUTED by sign doubling (456's research: 5 distinct type-lists over
+   `U = [p,q]` vs bound 4). Only the landed signed form is valid: `distinctTypes_le_pow` with
+   `2 ^ V.card` over `V : Finset (Sign × F)`, or `posTypeAt` over `U : Finset F` for `2 ^ U.card`.
+2. Re-add the D8-dropped `w ≤ w'` conjunct to `sat_fimp` (Scheme.lean:100-106) — false under
+   ancestor blocking, and never consumed downstream.
+3. Attempt the containment invariant `∀ x ∈ b, x ∈ intUniverse φ` against the CURRENT
+   `intUniverse` linear range — refuted (Scheme.lean:1591-1599); any new bound must come from
+   the blocking combinatorics, i.e. `WBound` (landed, Phase 2).
+4. Edit `intFImpReuseWitnessAnc?` or its `_spec` (Expansion.lean:260-320) — 574's landed
+   contract. In particular never Option B (appending fresh `F(ψ)@x` on reuse — proven UNSOUND,
+   see Expansion.lean:250-253).
+5. Weaken/vacuize `intExpandBranches_openBranch_sat`, `tableau_complete`, or relocate a sorry
+   into `tableau_complete`, the `Decidable` instance, or a standalone "no-exhaustion" axiom
+   (583 F6 forbidden-deferral list; in-file prohibition Scheme.lean:502, 556-557).
+6. Add `.fuelExhausted` to `IntTableauResult` (583's R2 fallback) — rejected: relocates the
+   identical obligation into `tableau_complete` and `instDecidableIValid` where nothing closes
+   it. R1 hypothesis-threading is the settled form.
+7. Discharge the fuel-0 sorry (`Scheme.lean:3055`) or `Scheme.lean:617` alone via a weakened
+   statement — the in-file STOP-gate (Scheme.lean:554-557) directs both be closed together in
+   one pass over the same invariants (Phases 6-7, consecutive).
+8. Touch `Intuitionistic/Completeness.lean:133` or `Minimal/Completeness.lean:125` (430's
+   territory) beyond comment-accuracy updates in Phase 8.
+9. Re-derive the divergence refutation or re-attempt `intExpandBranches_world_bound` /
+   `hnw : nextWorld ≤ φ.complexity + 1` as previously stated — refuted, not hard.
+10. Place any sorry not corresponding to a `## Planned Strategic Sorries` row without flagging
+    it as a plan-unanticipated deviation in the summary (plan-format deviation flag).
+11. **(NEW)** Define `intFuelExt` via `(intUniverseExt φ).length` — the LIST has `Θ(WBound φ)`
+    elements (~10^13,000,000 for corpus row 20) and can never be built. `intFuelExt` MUST be
+    the closed arithmetic form `4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1`; only the
+    NUMERAL is materializable. The same prohibition applies to any runtime membership check
+    against the `intUniverseExt` list.
+12. **(NEW)** Candidate (b) — well-founded recursion on the measure as the engine definition —
+    is FORBIDDEN until DP-2 is proved: its `decreasing_by` needs exactly Phase 5's `hNW`
+    fresh-mint preservation, and a `decreasing_by sorry` defines the function via `sorryAx`,
+    tainting `instDecidableIValid` and every downstream theorem (no strategic-sorry placement
+    keeps the definition clean; it also inverts the skeleton's risk concentration). It remains
+    a legitimate elective cleanup AFTER DP-2 closes — future work, never the Phase-4 repair.
+13. **(NEW)** Candidate (c) — splitting a proof-side procedure from the `#eval` corpus
+    procedure — is FORBIDDEN outright: the equivalence obligation is
+    false-or-unprovable (persistence receives remaining outer fuel, `Expansion.lean:363`, so
+    verdict-stability under fuel change is exactly the unavailable sufficiency fact), per-row
+    equivalence is not kernel-checkable (`decide`/`rfl` stall on the engine's `let rec`s), and
+    it reintroduces the exact sorry-free-but-wrong-verdict hazard class the conformance corpus
+    was built to close and the ancestor-blocking repair closed. Do not re-propose.
+
+**MUST preserve**:
+- Everything in the Preserved Assets table. Rows marked "untouched" in the Restructure-impact
+  column must survive Phases 4A-4C with ZERO edits; the two ported proof families
+  (`closed_unsat`, `openBranch_sat` succ case) keep their OLD copies green until the 4C flip.
+- Repo-wide bare-sorry count must never increase net of the declared division points: the count
+  stays exactly 4 through Phases 4A-4C (the fuel-0 sorry carries 1-for-1 in the 4B port), each
+  new sorry must be a DP row, and Phases 6-7 must each strictly decrease the count by one.
+- `Blocking.lean` is read-only for this task (Foundations module owned by 456's landed design).
+
+**Design decisions are SETTLED** (do not re-open without concrete counterexample):
+- R1 hypothesis-threading restatement (not R2 trichotomy) — adversarially challenged and
+  retained in 583's report; `hFuel` takes the per-branch form (reports/15 §7).
+- Per-branch fuel restructuring, candidate (a), in the shape-preserving parallel-lists form
+  with parallel-build-then-flip staging (reports/15 §5 go/no-go).
+- Entry points move to `Scheme.lean` (option (i)) — see Settled Planner Decision above.
+- Ancestor-directed blocking with explicit `F(ψ)@x` conjunct; D8 conjunct drop.
+- This plan subsumes 583 and defers the bridges to 430 (Territory Resolutions above).
+- The signed, Finset-valued counting layer from Blocking.lean is the only counting substrate.
+- Fuel-sufficiency is incorporated here (not spawned) — inseparable from the restatement
+  threading in the same files.
+
+## Goals & Non-Goals
+
+- **Goals**:
+  - Restructure `intExpandBranches` to per-branch fuel (`fuels : List Nat`) with an
+    unconditional termination measure, making every corpus fuel numeral materializable
+    (Phases 4A-4C, parallel-build-then-flip).
+  - Land `intFuelExt` (arithmetic form) and `intWork_init_lt_intFuelExt` as the call-site
+    discharge replacing the unmaterializable `intExpMeasureExt_init_le_fuel` route.
+  - Thread the `hUniv`/`hNW` invariants (Phase 5, DP-2 risk concentrated there).
+  - Restate `intExpandBranches_openBranch_sat` per R1 with per-branch `hFuel` and discharge
+    the fuel-0 sorry (`Scheme.lean:3055`).
+  - Discharge `truthLemma`'s T-imp case (`Scheme.lean:617`) in the same pass (STOP-gate).
+  - Leave zero FALSE statements in the subtree; leave all remaining sorries tracked (DP rows).
+- **Non-Goals**:
+  - The two Completeness bridge sorries (430's scope — IAtomPersist route).
+  - Any change to `Blocking.lean`, `intFImpReuseWitnessAnc?`, or the conformance corpus's
+    landed rows (row additions for new regression checks are allowed in Phase 8).
+  - A termination THEOREM for the decision procedure beyond what the engine's WF measure and
+    `WBound` require.
+  - Evaluability of `intuitionisticTableau` for arbitrarily large formulas: per-branch fuel
+    digits scale as `2^s·s·log₁₀(s+1)` and materialization dies again around `s ≈ 25`.
+    Candidate (a) makes the corpus (max `s = 19`) and small formulas evaluable; the
+    sufficiency THEOREM is unaffected (proof-side, all φ). Future corpus rows must keep
+    `s ≲ 22` — recorded in Phase 8 docs.
+  - Candidate (b) as future work (post-DP-2 elective) — recorded, not executed here.
+
+## Risks & Mitigations
+
+- **Risk**: The 4B port of `intExpandBranchesB_closed_unsat` (~690 lines, unfolds `.go`
+  directly at Soundness.lean:1161,1223) exceeds one dispatch.
+  **Mitigation**: parallel-build staging means underestimation costs schedule, not greenness
+  (old proof stays green). If mid-dispatch it is clear 4B cannot land in one pass, split at a
+  lemma boundary into 4B.1 (`closed_unsat` port alone) and 4B.2 (the three remaining ports) —
+  a pre-authorized H8 split, not a deviation.
+- **Risk**: Functional induction (`.induct`) may not be available for a mutual WF pair with
+  the lifted `go` (reports/15: medium-high confidence it works).
+  **Mitigation** (named in-spec fallbacks, in order): manual WF induction on the lex measure;
+  then selector-refactor of `go` into a total non-recursive-into-engine helper.
+- **Risk**: Row 20's post-flip `#eval` wall time (estimated +2-20 s from ~8 ms/bignum-op ×
+  observed step counts; exact step count not re-measured).
+  **Mitigation**: the 4C timing gate is a done-criterion — a bad surprise blocks the phase,
+  not the library. Baseline `lake test` wall time recorded in Phase 4A before any change.
+- **Risk**: `hNW` preservation (Phase 5) needs a creation-count invariant relating minted
+  labels to tree size — additional threading beyond 583's sketch (unchanged from v13).
+  **Mitigation**: DP-2 strategic sorry, tracked, follow-up task 585.
+- **Risk**: Corpus verdict drift under the new engine despite the a-priori identity argument
+  (fuel affects behavior only via the exhaustion arm; per-branch budgets ≫ observed step
+  counts; persistence fuel shape preserved).
+  **Mitigation**: empirical parity is an explicit 4A done-criterion (`intVerdictB = intVerdict`
+  probe on all 20 propositional rows) and again at 4C (`lake test`, all 44 rows).
+- **Risk**: Same-file churn — most phases write `Scheme.lean`. **Mitigation**: strictly
+  sequential waves (H7: no parallel dispatch; single-owner territory), commit-per-green-substep.
+
+## Implementation Phases
+
+**Dependency Analysis**:
+| Wave | Phases | Blocked by |
+|------|--------|------------|
+| 1 | 1 [COMPLETED] | -- |
+| 2 | 2 [COMPLETED] | 1 |
+| 3 | 3 [COMPLETED] | 2 |
+| 4 | 4A | 3 |
+| 5 | 4B | 4A |
+| 6 | 4C | 4B |
+| 7 | 5 | 2, 3, 4C |
+| 8 | 6 | 4A, 4C, 5 |
+| 9 | 7 | 5, 6 |
+| 10 | 8 | 1-7 |
+
+**Parallel opportunities: NONE — declared explicitly.** All remaining phases write
+`Cslib/Logics/Propositional/Tableau/Intuitionistic/{Scheme,Expansion,Soundness}.lean`; H7
+territory is single-owner and waves are strictly sequential.
+
+### Phase 1: Blocking.lean consumption bridge [COMPLETED]
+- **Goal:** The propositional tableau imports and can invoke 456's counting layer.
+- **Tasks:**
+  - [x] Import `Cslib.Foundations.Logic.Tableau.Blocking` into the intuitionistic development
+    (at `Expansion.lean` or `Scheme.lean`, whichever the lemmas land in; respect shake).
+    (Landed in `Scheme.lean` — the instantiations need `intSubfmls`, which lives there. Also
+    added `Mathlib.Data.Finset.Prod` for the `×ˢ` signed-universe product.)
+  - [x] Bridge lemma `posFormulasAt_mem_iff`: `φ ∈ posFormulasAt b w ↔ φ ∈ Branch.posTypeAt b w`
+    (membership equivalence; `IBranch Atom` is definitionally `Branch (Proposition Atom) Nat`,
+    so no coercion is needed — only the local-def-to-`posTypeAt` content equivalence, which
+    differs by an `eraseDups`).
+  - [x] Instantiations at the propositional types: `distinctTypes_le_pow` with
+    `V := (intSubfmls φ).toFinset ×ˢ {Sign.pos, Sign.neg}` (or equivalent signed universe) and
+    `exists_typeAt_eq_of_card_lt`; confirm `strictChain_le_card` applies without wrapping.
+    (Landed as `intSignedUniverse φ := {.pos, .neg} ×ˢ (intSubfmls φ).toFinset :
+    Finset (Sign × Proposition Atom)` — the `Sign × F` component order `distinctTypes_le_pow`
+    expects — with `mem_intSignedUniverse` simp lemma, `intDistinctTypes_le_pow`,
+    `intExists_typeAt_eq_of_card_lt`; `strictChain_le_card` confirmed to apply with no wrapper
+    via a build-checked `example` at the propositional instantiation.)
+- **Timing:** 1 dispatch. Estimated output: ~120-180 lines.
+- **Depends on:** none
+- **Verification Tier:** local
+- **Done when:** bridge lemmas build sorry-free under a scoped
+  `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`; zero new sorries;
+  no change to any existing declaration.
+
+### Phase 2: `WBound` definition + ancestor-chain bound lemma (division point DP-1) [COMPLETED]
+- **Goal:** A concrete `WBound : Proposition Atom → Nat` and the chain lemma that makes it a
+  bound: along any edge chain of created worlds on a branch, chain length is bounded via the
+  pigeonhole/strict-chain layer, because an over-long chain forces two chain worlds with equal
+  positive type and equal creation obligation ψ, contradicting
+  `intFImpReuseWitnessAnc?_spec`'s negation at the later creation site.
+- **Tasks:**
+  - [x] Define `intChainBound φ` (per-chain depth bound, of order
+    `(impCount + 1) * 2 ^ (2 * |Sub φ|)` — exact form implementer's choice, from the blocking
+    combinatorics ONLY, never from `intUniverse`'s linear range) and
+    `WBound φ` (total world bound: branching factor ≤ imp-subformula count per world, so a
+    tree bound of order `(impCount + 1) ^ (intChainBound φ + 1)`; exponential-in-exponential
+    is acceptable — it is a proof-side bound, not an evaluation step count).
+    (Landed as `intChainBound φ := 2 ^ |Sub φ| * |Sub φ|` — the `(posTypeAt, ψ)`-pair count
+    over `(intSubfmls φ).toFinset`, positive-projection `2 ^ U.card` form — and
+    `WBound φ := (|Sub φ| + 1) ^ (intChainBound φ + 1)`, plus `WBound_pos : 1 ≤ WBound φ`
+    for the Phase 6 singleton call-site. Scheme.lean "Post-Blocking World Bound" section.)
+  - [x] State the chain lemma (working name `intCreatedChain_le`): for an edge chain
+    `w_0 → … → w_k` of worlds created by unblocked `intFImpRule` firings on branch `b`,
+    `k ≤ intChainBound φ`. Proof route: pigeonhole (`exists_typeAt_eq_of_card_lt` over
+    `(posTypeAt, ψ)` pairs, Phase 1 instantiations) + the five-conjunct negation of
+    `intFImpReuseWitnessAnc? = none` at the later site.
+    (Landed. Final hypothesis set, all stated against the final branch `b`: `hsub`
+    subformula containment; `hψ` obligations in `Sub φ0`; `hobl` explicit `F(ψs i)` entry at
+    each created world; `hnotpos` openness; `hacc`/`hle` chain accessibility/label
+    monotonicity; `hunb` the five-conjunct unblockedness negation transcribed against `b`.
+    The `(posTypeAt, ψ)`-pair pigeonhole is `Finset.exists_ne_map_eq_of_card_lt_of_maps_to`
+    over `Sub.powerset ×ˢ Sub` — the same core lemma `exists_typeAt_eq_of_card_lt` wraps;
+    the Phase-1 label-indexed instantiation does not fit the chain-indexed quantification,
+    a named-lemma substitution within the plan's declared route, not a route change.)
+  - [x] Attempt the proof within this dispatch. STOPPING CONDITION (bounded-unit): either the
+    proof closes, or place the DP-1 strategic sorry on exactly `intCreatedChain_le` (one
+    declaration) with the mandated comment
+    (`-- sorry: assumes the ψ-conditioned pigeonhole closes; deferred: research-grade
+    combinatorics; follow-up: task 585`), record it in `sorry_inventory` with
+    `strategic: true`, and proceed. Do NOT iterate past one dispatch.
+    (**PROOF CLOSED — DP-1 PROVED INLINE, no strategic sorry placed.** `lean_verify`
+    axioms: `{propext, Classical.choice, Quot.sound}`, no `sorryAx`. The Scope Hypothesis
+    held: the `(posTypeAt, ψ)`-pair index sufficed with no enlargement — the `F(ψ)@x`
+    conjunct is supplied at the earlier created world by its own creation obligation
+    (`hobl`), exactly as anticipated. NOTE for Phase 5 / follow-up owner: `hunb` is the
+    five-conjunct negation stated against the FINAL branch; the transfer from the runtime
+    check (evaluated on the firing-time branch state) to the final branch is owned by the
+    invariant-threading side (DP-2 territory), documented in the lemma docstring. DP-1's
+    contingent follow-up in the Planned Strategic Sorries table is NOT needed for Phase 2;
+    whether it stays open for DP-2 is decided at Phase 5.)
+- **Timing:** 1 dispatch. Estimated output: ~200-350 lines.
+- **Depends on:** 1
+- **Verification Tier:** local
+- **Scope Hypothesis:** the ψ-conditioned check admits a `(posTypeAt, ψ)`-pair pigeonhole with
+  no further side condition; confirm at implementation against `intFImpReuseWitnessAnc?_spec`'s
+  exact five conjuncts (in particular the `F(ψ)@x ∈ bPers` conjunct's availability at the
+  earlier chain world). If a further condition is needed, enlarge the pigeonhole index type —
+  never weaken the check.
+- **Done when:** `WBound`/`intChainBound` defined; `intCreatedChain_le` stated with its final
+  hypothesis set and either proved or carrying exactly the DP-1 sorry; scoped build green.
+
+### Phase 3: `intUniverseExt` / `intExpMeasureExt` + engine re-target [COMPLETED]
+- **Goal:** The F2 measure engine runs over the enlarged universe
+  `List.range (WBound φ + 1)` in place of `List.range (φ.complexity + 2)`.
+- **Tasks:**
+  - [x] Define `intUniverseExt φ` (same cell structure as `intUniverse`, world range
+    `WBound φ + 1`) and `intExpMeasureExt φ := intExpMeasure (intUniverseExt φ)` (or keep
+    `intExpMeasure` parametric in `U` as it already is and only add the `Ext` universe + its
+    length lemma `intUniverseExt_length_le`).
+    (Landed: the parenthetical option — `intExpMeasure` stays parametric in `U`, no
+    `intExpMeasureExt` def; the `hFuel` spec text writes
+    `intExpMeasure (intUniverseExt φ0) …`. New "Enlarged Universe (post-blocking)" section
+    in Scheme.lean: `intUniverseExt`, `intUniverseExt_length_le`
+    (`≤ 2 * (2 * φ.complexity + 1) * (WBound φ + 1)`), membership lemmas
+    `mem_intUniverseExt_of`/`_of'`, `intUniverseExt_mem_formula`, `intUniverseExt_mem_label`.)
+  - [x] Re-target the engine: `intExpMeasure_step_lt`, `intExpMeasure_step_lt_branch`,
+    `applyAllTImpRules_count_drop`, `applyPersistenceFixpoint_genuine_of_count_le_fuel` over
+    `intUniverseExt`. Per 583 F5 these are parametric in the universe list ("statements are
+    parametric; proofs re-run"); the load-bearing generalization is
+    `intApplyRuleFull_outputs_subset`'s replacement: subformula-content closure into
+    `intUniverseExt` under the hypothesis `nextWorld ≤ WBound φ` (the hypothesis is DISCHARGED
+    in Phase 5; here it is threaded as a premise, which is provable without DP-1).
+    (Landed. Scope Hypothesis CONFIRMED: all four proofs re-ran verbatim over the enlarged
+    universe on the first elaboration — none unfolds the world range; only `set U := …` /
+    membership-lemma names changed. The load-bearing replacement landed as
+    `intApplyRuleFull_outputs_subset_ext` with `hnw : nextWorld ≤ WBound φ0` threaded as a
+    premise, plus the Ext containment family `intTImpRule_outputs_subset_ext`,
+    `applyAllTImpRules_subset_ext`, `applyPersistenceFixpoint_subset_ext` (the last needed by
+    Phase 5's `hUniv` preservation). Original `intUniverse` block and its containment family
+    left intact; deprecation notes deferred to Phase 8. `lean_verify` on
+    `intApplyRuleFull_outputs_subset_ext`, `intExpMeasure_step_lt`,
+    `applyPersistenceFixpoint_genuine_of_count_le_fuel`, `intUniverseExt_length_le`: axioms
+    `{propext, Classical.choice, Quot.sound}`, no `sorryAx`.)
+- **Timing:** 1 dispatch. Estimated output: ~250-400 lines.
+- **Depends on:** 2 (definition only — proceeds if DP-1 is sorried)
+- **Verification Tier:** local
+- **Scope Hypothesis:** every engine proof re-runs over the enlarged universe with only
+  membership/length facts about `U` (confirm by re-elaboration; the engine lemmas take
+  `hb : ∀ x ∈ b, x ∈ intUniverse φ0` as a premise and nowhere unfold the world range). If one
+  proof step uses the literal range, generalize that single lemma over an abstract `U` with a
+  closure hypothesis.
+- **Done when:** enlarged-universe engine lemmas build sorry-free (given only Phase 2's
+  statements); zero new sorries in this phase; the ORIGINAL `intUniverse` block is left intact
+  (deprecation notes deferred to Phase 8).
+
+### Phase 4A: `intFuelExt` + per-branch-fuel B-engine + init bound (parallel build; no consumer flipped) [NOT STARTED]
+
+Replaces plan-13 Phase 4, whose global-scalar resize was structurally unimplementable (defect
+record: plan 13 Phase 4; reports/15 §1). Spec source: reports/15 §6, Phase 4A. All new names
+below are suggestions; the constraint set is binding, the naming is implementer latitude.
+
+- **Goal:** The per-branch fuel budget and the new engine exist beside the old engine, with an
+  unconditional termination measure and a provable init bound; nothing downstream is flipped.
+- **Tasks:**
+  - [ ] Record the pre-change `lake test` wall-time baseline (for the 4C timing gate) in the
+    progress file before any edit.
+  - [ ] Def `intFuelExt (φ) : Nat := 4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1`, in
+    `Scheme.lean` after `WBound`. MUST be this closed arithmetic form — NEVER
+    `2 * (intUniverseExt φ).length + 1` (Postmortem constraint 11: the list has `Θ(WBound)`
+    elements and is unmaterializable; only the numeral is feasible; it dominates
+    `2 * |intUniverseExt φ| + 1` via `intUniverseExt_length_le`). Docstring records this
+    prohibition and the `s ≲ 22` corpus-row feasibility envelope (fuel digits scale as
+    `2^s·s·log₁₀(s+1)`; ~0.5 GB numeral at `s ≈ 25`).
+  - [ ] New engine `intExpandBranchesB` (working name), in `Scheme.lean`: same worklist shape
+    and parallel lists as `intExpandBranches` (Expansion.lean:333-426), with the single global
+    `fuel : Nat` replaced by `fuels : List Nat` as a fourth parallel list. Arms:
+    - active branch's `f + 1` → `f` on linear / world-creating / reuse arms;
+    - beta arm: children each inherit `f` (from the parent's `f + 1`);
+    - active-branch `f = 0` → `.openBranch bPers` (exhaustion arm, mirroring today's global
+      exhaustion arm);
+    - persistence keeps receiving the active branch's remaining fuel (mirroring today's
+      `fuel' + 1` shape at Expansion.lean:363);
+    - skip-closed arm (`go` moving a closed branch to done) unchanged in content.
+    `go` lifted to a top-level (mutual or selector-refactored) def so WF elaboration and
+    functional induction work. `termination_by` the lex measure
+    `((fuels.map (3 ^ ·)).sum, pending.length)`; `decreasing_by` via the `pow3` family
+    (`Cslib/Foundations/Logic/Tableau/Measure.lean`): skip-closed leaves the sum unchanged and
+    shrinks pending; single-successor arms use `3^f < 3^(f+1)`; the beta arm uses
+    `2·3^f < 3^(f+1)` — sound because all three `branchingResult` sites emit literal 2-element
+    lists (Rules.lean:259 T-and, :262 F-or, :280 T-imp split). UNCONDITIONAL — no
+    branch-containment or world-bound hypothesis may appear in the definition (that would be
+    candidate (b); Postmortem constraint 12).
+  - [ ] Lemma `intWork_init_lt_intFuelExt (φ) :
+    intWork (intUniverseExt φ) [⟨.neg, φ, 0⟩] [] < intFuelExt φ` — the REPLACEMENT for
+    plan-13's `intExpMeasureExt_init_le_fuel` (it is Phase 6's call-site `hFuel` discharge).
+    Proof shape: the countP bookkeeping of `intExpMeasure_init_le_fuel` (Scheme.lean:2787-2812)
+    + `intUniverseExt_length_le`, closing by `omega` — no pow manipulation, strictly easier
+    than the lemma it replaces.
+  - [ ] `#eval` parity probe: `intVerdictB = intVerdict` on all 20 propositional corpus rows
+    (not committed, or committed as a clearly-marked temporary CslibTests section removed at
+    4C). Any mismatch is a hard failure of this phase.
+- **Timing:** 1 dispatch. Estimated output: ~200-350 lines.
+- **Depends on:** 3
+- **Verification Tier:** local
+- **Scope Hypothesis:** WF elaboration accepts the lifted `go` with the lex measure and the
+  `pow3` decrease obligations as stated (reports/15 verified the arithmetic and the 2-way
+  branching by source; fallbacks for `.induct` availability are named in Risks and consumed in
+  4B, not here — 4A only needs the definition to elaborate and `#eval` to run).
+- **Done when:** `intFuelExt`, `intExpandBranchesB`, and `intWork_init_lt_intFuelExt` build
+  sorry-free (scoped build); parity probe passes on all 20 propositional rows; `lake test`
+  baseline recorded; ZERO changes to existing declarations.
+
+### Phase 4B: Port the four engine-quantifying lemmas to the B-engine (old ones untouched) [NOT STARTED]
+- **Goal:** Every theorem whose induction skeleton is the engine recursion exists in a
+  B-engine form; the old lemmas and old engine remain green and untouched.
+- **Tasks:**
+  - [ ] `intExpandBranchesB_closed_unsat` — port of `intExpandBranches_closed_unsat`
+    (Soundness.lean:1078, ~690 lines, sorry-free; unfolds `intExpandBranches.go` directly at
+    :1161, :1223 — the largest single porting risk). Statement gains `fuels`; proof by
+    functional induction on the B-engine, falling back per the Risks ladder (manual WF
+    induction on the lex measure; then the `go` selector-refactor). Per-arm content transfers.
+  - [ ] `intExpandBranchesB_openBranch_closed` (port of Scheme.lean:684) and
+    `intExpandBranchesB_openBranch_initial_mem` (port of Scheme.lean:3301): fuel plays no role
+    in their content; wrapper-only ports.
+  - [ ] Mechanical port of `intExpandBranches_openBranch_sat`'s succ case (Scheme.lean:3014)
+    to the B-engine: statement gains `fuels`; NO R1 hypotheses yet (that is Phase 6); the
+    pre-existing fuel-0 sorry (Scheme.lean:3055) carries over 1-for-1 — subtree bare-sorry
+    count stays exactly 4.
+  - [ ] IN-PHASE SPLIT PROVISION (pre-authorized, not a deviation): if the `closed_unsat` port
+    alone fills the dispatch, land it as 4B.1 (commit, green) and complete the remaining three
+    ports as 4B.2 in the next dispatch at the same spec.
+- **Timing:** 1-2 dispatches (reports/15 sizes the `closed_unsat` port at medium confidence).
+  Estimated output: ~450-800 lines.
+- **Depends on:** 4A
+- **Verification Tier:** local
+- **Scope Hypothesis:** the four listed lemmas are the COMPLETE set of engine-induction proofs
+  (reports/15 §2: `intExpMeasure_step_lt`(+`_branch`) quantify over worklists and
+  `intStepBranch` only, never the engine — checked by statement). Confirm by grepping
+  `intExpandBranches` consumers before editing; any additional engine-quantifying lemma found
+  is ported in this phase and flagged in the summary.
+- **Done when:** all four B-lemmas build with exactly one sorry total (the carried fuel-0
+  sorry); old engine, old lemmas, and all Preserved-Assets rows untouched and green; scoped
+  build of `Scheme`, `Soundness` green.
+
+### Phase 4C: Flip entry points + retire old engine + 44-row corpus gate with timing [NOT STARTED]
+- **Goal:** The B-engine IS the engine: entry points consume it with materializable fuel, the
+  old global-fuel engine is retired, and the full corpus certifies the executed procedure with
+  unchanged verdicts inside a declared time budget.
+- **Tasks:**
+  - [ ] Execute the settled entry-point move (option (i)): relocate `intuitionisticTableau`
+    and `minimalTableau` from `Expansion.lean` into `Scheme.lean` (after
+    `WBound`/`intFuelExt`/the engine), redefined via the B-engine with
+    `fuels := [intFuelExt φ]`; repoint the corpus import
+    (CslibTests/TableauConformance.lean:11,15 — currently imports only `Expansion`).
+  - [ ] Rename the B-engine to `intExpandBranches`, retiring the old engine, old `intFuel`,
+    and `intExpMeasure_init_le_fuel` (immediate removal; their docstring history is captured
+    by the Phase 8 doc pass — the fuel-doubling note at Expansion.lean:498-509 is superseded
+    by `intFuelExt`'s docstring).
+  - [ ] Repoint consumers at the ported lemmas: `tableau_sound` (Soundness.lean),
+    `openBranch_countermodel` (Scheme.lean:3448), `tableau_complete` (Scheme.lean:3504), and
+    the Minimal-side consumers. Update the `propExpandBranches` alias.
+  - [ ] Remove the temporary 4A parity-probe section if it was committed.
+- **Timing:** 1 dispatch. Estimated output: ~150-300 lines (net; mostly repointing).
+- **Depends on:** 4B
+- **Verification Tier:** interface (changed defs consumed by `DecisionProcedure.lean`, both
+  `Completeness.lean` files, `Soundness.lean`, and `CslibTests/TableauConformance.lean` —
+  build all dependents in-phase)
+- **Scope Hypothesis:** no conformance row pins a literal fuel VALUE (verified by reports/15's
+  grep: rows assert verdict strings only); verdicts are preserved a priori because fuel
+  influences behavior only through the exhaustion arm and per-branch budgets vastly exceed
+  observed step counts (row 20 saturates within hundreds of steps, Expansion.lean:462-468).
+- **Done when:** full `lake build` green; `lake test` green with ALL 44 corpus rows unchanged
+  (especially divergence-witness row 20); **TIMING GATE**: post-flip `lake test` wall time
+  within the declared budget — ≤ 3 minutes total or ≤ 5× the 4A-recorded baseline, whichever
+  is looser (row 20 is expected to add ~0.6 s materialization plus ~2-20 s of bignum stepping;
+  this is a timing gate, NOT a digit cap — the ~13.0-million-digit row-20 numeral is in-budget
+  by measurement, reports/15 probe: 599 ms materialization); dependents build green; subtree
+  bare-sorry count still exactly 4.
+
+### Phase 5: `hUniv`/`hNW` threading invariants (division point DP-2) [NOT STARTED]
+- **Goal:** Preservation lemmas for the two new R1 hypotheses through all four recursion arms
+  of the (post-flip, per-branch-fuel) `intExpandBranches` (linear, branching, world-creating
+  with reuse, world-creating with fresh mint). Substance unchanged from v13 (reports/15 §7:
+  same four arms, same fresh-mint `hNW` risk, same `applyPersistenceFixpoint_subset_ext`
+  consumption); stated against the B-engine's arms (identical arm structure).
+- **Tasks:**
+  - [ ] `hUniv` preservation: rule outputs stay in `intUniverseExt φ0` — subformula-content
+    side via the existing subformula closure lemmas; world-label side via `hNW`.
+  - [ ] `hNW` preservation (`∀ nw ∈ nextWorlds, nw ≤ WBound φ0`): only the fresh-mint arm
+    increments; needs the creation-count invariant "labels minted so far ≤ tree size ≤
+    `WBound φ0`" tied to Phase 2's chain lemma (including the runtime-check-to-final-branch
+    transfer noted in `intCreatedChain_le`'s docstring). This is the remaining research-grade
+    concentration. STOPPING CONDITION: prove within this dispatch, or place the DP-2 strategic
+    sorry on exactly the one `hNW`-preservation lemma for the fresh-mint arm, with the mandated
+    comment and `sorry_inventory` entry (`follow-up: task 585`), and proceed.
+  - [ ] Package both as `IAllConsistent`-style parallel-list invariants R1's induction will
+    thread (mirror `IAllConsistent`/`IAllAccessConsistent`'s existing shape).
+- **Timing:** 1 dispatch. Estimated output: ~250-400 lines.
+- **Depends on:** 2, 3, 4C
+- **Verification Tier:** local
+- **Done when:** both invariants stated in final form and threaded-form lemmas build, with at
+  most the DP-2 sorry; scoped build green.
+
+### Phase 6: R1 restatement of `intExpandBranches_openBranch_sat` + fuel-0 discharge + call-site repair [NOT STARTED]
+- **Goal:** The fuel-0 sorry (Scheme.lean:3055 pre-port) discharged. Implements EXACTLY 583's
+  F5 form R1 (subsumes task 583), with `hFuel` in the per-branch form of reports/15 §7.
+- **Tasks:**
+  - [ ] Add hypotheses `hUniv`, `hNW` (Phase 5's invariants), and the per-branch `hFuel` to
+    the (ported) `intExpandBranches_openBranch_sat`; the lemma gains a `φ0` parameter if not
+    already threaded. **`hFuel` form (CHANGED from v13/583-F5's global-measure form)**: a
+    per-branch parallel-list invariant (`IAllFuel`-style, mirroring `IAllConsistent`):
+    `∀ i, intWork (intUniverseExt φ0) bᵢ eᵢ < fuelsᵢ` — never
+    `intExpMeasure … ≤ fuel` (the global form died with the old engine).
+  - [ ] Fuel-0 discharge, SIMPLIFIED from 583 F5's measure-0 argument: the exhaustion arm
+    fires at active-branch `f = 0`; `hFuel` at that branch gives `intWork … < 0`, absurd by
+    `omega`. No `3^k ≥ 1` measure reasoning, no saturation reasoning at fuel 0. (No other
+    change to the F5 shape.)
+  - [ ] Succ-case re-establishment of the three hypotheses through the ported proof body,
+    per arm: linear/world-create/reuse arms via `intWork_drop` (arm-agnostic, covers reuse
+    with `b' = b`); the persistence prefix via `intCount_notMem_mono`; each beta child via
+    `intWork_drop` at its inherited `f`; `hUniv`/`hNW` via Phase 5's preservation lemmas.
+    (The heavy sum-measure lemmas `intExpMeasure_step_lt`(+`_branch`) are NOT consumed —
+    they remain retained-but-unconsumed assets.)
+  - [ ] Call-site repair in `openBranch_countermodel` (Scheme.lean:3448): discharge `hFuel`
+    at the singleton worklist by `intWork_init_lt_intFuelExt` (Phase 4A), `hUniv` by
+    singleton membership, `hNW` by `WBound_pos` (Scheme.lean:1768).
+  - [ ] Replace the fuel-0 refutation comment block (adjacent to the sorry) with a short note
+    recording that the refutation applied to the PRE-R1 statement and pointing at R1's
+    hypotheses (keep the counter-instance citation — it is the durable record of why the
+    hypotheses exist).
+- **Timing:** 1 dispatch. Estimated output: ~300-450 lines (net; much is hypothesis threading
+  through the existing succ-case body).
+- **Depends on:** 4A, 4C, 5
+- **Verification Tier:** local
+- **Done when:** the fuel-0 sorry GONE; repo bare-sorry count in the subtree strictly
+  decreased by one (modulo DP-2 which lives in a different declaration);
+  `openBranch_countermodel` and `tableau_complete` build unchanged in statement; scoped build
+  green.
+
+### Phase 7: `truthLemma` T-imp discharge via persistence fixpoint sufficiency [NOT STARTED]
+- **Goal:** `Scheme.lean:617` discharged, honoring the STOP-gate's one-pass directive with
+  Phase 6 (same invariants, consecutive dispatches). Unchanged in substance from v13
+  (reports/15 §7); the fuel fact it consumes is now per-branch.
+- **Tasks:**
+  - [ ] Thread `applyPersistenceFixpoint_genuine_of_count_le_fuel` (enlarged-universe version,
+    Phase 3; Scheme.lean:2928) through the open-branch extraction so the returned branch is at
+    a GENUINE persistence fixpoint: every world accessible from a `T(φ'→ψ')` source carries
+    its own copy (the `applyAllTImpRules` copy channel at a fixpoint). At the R1 leaf the
+    active branch's remaining fuel `f' + 1` satisfies `countP ≤ intWork ≤ f'` from the
+    threaded per-branch `hFuel` — same consumption as v13, per-branch. Likely lands as an
+    extra conjunct in the R1 conclusion or a companion lemma over the same induction —
+    implementer's choice, but the STATEMENT of `truthLemma` itself must not weaken.
+  - [ ] Close the T-imp case (Scheme.lean:601-617) with `sat_timp` per the in-file analysis:
+    the `F(φ')@w'` arm contradicts via `ih_φ'.2`, the `T(ψ')@w'` arm closes via `ih_ψ'.1`.
+  - [ ] Update the STOP-gate note (Scheme.lean:504-557) from "Gap 1 UNCHANGED" to resolved,
+    citing the fixpoint-sufficiency route.
+- **Timing:** 1 dispatch. Estimated output: ~200-350 lines.
+- **Depends on:** 5, 6
+- **Verification Tier:** local
+- **Done when:** sorry at `Scheme.lean:617` GONE; count strictly decreased by one again;
+  `truthLemma`'s statement unchanged; scoped build green.
+
+### Phase 8: Documentation accuracy + full CI gate [NOT STARTED]
+- **Goal:** No stale claim survives; the full repository gate passes.
+- **Tasks:**
+  - [ ] Update `intUniverse`'s warning docstring (Scheme.lean:1585-1599) to point at
+    `intUniverseExt`/`WBound` as the live development; keep the refutation record.
+  - [ ] Engine-restructure documentation (reports/15 §7 additions): the `intFuel` →
+    `intFuelExt` story and per-branch fuel semantics; update the divergence-witness note
+    (Expansion.lean:450-494 region or its post-move home) for per-branch fuel; mark the
+    sum-measure engine (`intExpMeasure`, `intExpMeasure_step_lt`(+`_branch`), splits) as
+    retained-but-unconsumed (statements never mention the engine — they stay green); record
+    the `s ≲ 22` corpus-row feasibility envelope; record candidate (b) as elective post-DP-2
+    future work and candidate (c) as rejected (pointer to reports/15 §3-§4) so neither is
+    re-proposed.
+  - [ ] Sync comments in both `Completeness.lean` files ONLY where they now misstate what is
+    deferred (the bridge sorries themselves are untouched — 430's territory).
+  - [ ] Optionally add a conformance regression row exercising the per-branch fuel path
+    (within the `s ≲ 22` envelope).
+  - [ ] Sorry accounting: exactly the DP rows remain (DP-3/DP-4 always; DP-2 only if placed) —
+    enumerate in the summary's `sorry_inventory`.
+  - [ ] Full CI gate in order: `lake build`, `lake exe checkInitImports`, `lake lint`,
+    `lake exe lint-style`, `lake test` (re-check the 4C timing budget), `lake exe mk_all
+    --module` (only if a new file was added), `lake shake --add-public --keep-implied
+    --keep-prefix`.
+- **Timing:** 1 dispatch. Estimated output: ~100-180 lines.
+- **Depends on:** 1-7
+- **Verification Tier:** full
+- **Done when:** all gates green; summary written; `sorry_inventory` complete and matching the
+  Planned Strategic Sorries table (or flagging deviations).
+
+## Planned Strategic Sorries
+
+| Division Point | File / Line / Statement | Assumption | Why Deferred | Follow-Up Task |
+|-----------------|--------------------------|------------|---------------|----------------|
+| DP-1: chain-bound lemma — **RESOLVED, PROVED INLINE (Phase 2)** | Scheme.lean:1805 (`intCreatedChain_le`) | (was: the ψ-conditioned pigeonhole bounds created-world chains) | No sorry placed; `lean_verify` clean. Row retained for accounting continuity only | 585 (needed only if DP-2 is placed — decided at Phase 5) |
+| DP-2: `hNW` preservation, fresh-mint arm | Scheme.lean, TBD (Phase 5) | Labels minted on a branch ≤ tree size ≤ `WBound φ` (incl. the runtime-check-to-final-branch transfer noted in `intCreatedChain_le`'s docstring) | Creation-count invariant beyond 583's sketch; the remaining research-grade concentration | 585 |
+| DP-3: intuitionistic validity bridge (pre-existing, NOT placed by this plan) | Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:133 (`intuitionisticTableau_complete`) | Upward-closure of `intExtractValuation b` along `intAccessPreorder edges` (IAtomPersist route) | Owned by existing planned task 430 (deps already point 430 → 317); presupposes saturated branches, i.e. this plan's output | 430 |
+| DP-4: minimal validity bridge (pre-existing, NOT placed by this plan) | Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:125 (`minimalTableau_complete`) | Upward-closure of `intExtractValuation b` AND `minBranchBotForces b` along the frame | Same as DP-3 | 430 |
+
+Notes: DP-2 is contingent — if the Phase 5 proof closes within budget, no sorry is placed and
+the follow-up task 585 should be closed as unnecessary by the orchestrator/user (DP-1 already
+closed without it). DP-3/DP-4 are pre-existing sorries recorded for complete accounting; they
+are not new placements and cite the existing task number directly. The fuel-0 sorry that
+Phase 4B carries through the port is NOT a DP row — it is the pre-existing `Scheme.lean:3055`
+sorry (one of the four), transported 1-for-1 and discharged in Phase 6.
+
+## Testing & Validation
+
+- [ ] Per-phase scoped `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`
+  (plus `.Soundness` at 4B, `.Expansion` when touched) — every phase.
+- [ ] Phase 4A: `#eval` parity probe `intVerdictB = intVerdict` on all 20 propositional
+  corpus rows; `lake test` wall-time baseline recorded.
+- [ ] `lake test` at Phases 4C and 8 (conformance corpus, all 44 rows, esp. divergence-witness
+  row 20), with the 4C TIMING GATE: ≤ 3 minutes total or ≤ 5× the 4A baseline, whichever is
+  looser.
+- [ ] Sorry census: exactly 4 bare sorries in the subtree through 4A-4C (the fuel-0 sorry
+  carried 1-for-1); strictly decreasing by one at each of Phases 6 and 7.
+- [ ] `lean_verify` on the restated `intExpandBranches_openBranch_sat` consumers
+  (`openBranch_countermodel`, `tableau_complete`) at Phase 8: axiom set
+  `{propext, Classical.choice, Quot.sound}` plus `sorryAx` ONLY via the declared DP
+  declarations.
+- [ ] Sorry census at Phase 8: bare sorries in the subtree = {DP-3, DP-4} ∪ (DP-2 if placed);
+  anything else is a defect.
+- [ ] Full CI order per cslib.md (Phase 8 checklist).
+
+## Artifacts & Outputs
+
+- plans/14_fuel-materialization-repair.md (this file)
+- specs/317_propositional_tableau_completeness/.skeleton-return.json (companion; `new_tasks`
+  declaration for 585 — needed only if DP-2 is placed)
+- summaries/14_fuel-materialization-repair-summary.md (implementation summary, on completion)
+- Modified: Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean,
+  Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean,
+  Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean (4B/4C ports and
+  repointing), possibly Minimal-side consumer files (4C repointing only);
+  CslibTests/TableauConformance.lean (import repoint at 4C; optional Phase 8 row addition;
+  possible temporary 4A parity section)
+
+## Rollback/Contingency
+
+- Every phase commits per green substep (`task 317 phase {P}.{O}: …`); rollback = revert the
+  phase's commits. No phase leaves the tree red at a commit boundary. The
+  parallel-build-then-flip staging (4A/4B beside the old engine; single flip commit at 4C)
+  guarantees the old engine and all its consumers stay green until the flip is fully proven.
+- If 4A's WF elaboration fails through ALL named fallbacks (functional induction → manual WF
+  induction → `go` selector-refactor), STOP at Phase 3's landed value, mark the plan
+  [BLOCKED], and hand the finding to the orchestrator — do not force the engine and do not
+  fall back to candidates (b)/(c) (Postmortem constraints 12-13).
+- If the 4C timing gate fails (row 20 wall time out of budget), the phase is BLOCKED, not
+  worked around: do not remove or weaken row 20 (the divergence-witness regression), do not
+  cap digits — surface the measurement to the orchestrator.
+- If DP-2 is sorried AND Phase 6's succ-case threading additionally fails, the skeleton
+  premise is broken: mark [BLOCKED] with a handoff enumerating exactly which invariant
+  re-establishment failed, rather than landing a hollow shell.
+
+## Research Integration
+
+- **Newly integrated**: reports/15_fuel-materialization-repair.md — supplies the entire
+  Phase 4A/4B/4C replacement spec (§6), the Phase 5-8 impact deltas (§7: per-branch `hFuel`
+  form, omega fuel-0 discharge, `intWork_init_lt_intFuelExt` call-site discharge, Phase 8 doc
+  additions), the engine-independence audit backing the Preserved Assets table, the
+  candidate (b)/(c) prohibitions (Postmortem constraints 12-13), the row-20 numeral
+  correction (~13.0M digits, 599 ms — encoded as the 4C timing gate, not a digit cap), and
+  the `s ≲ 22` feasibility envelope.
+- **Carried forward** (already integrated in v13): reports/14 adversarial-verification
+  section; 583's report (F3/F5/F6); reports/01-11 lineage as superseded background.
+- `reports_integrated`: 01_tableau-completeness-research.md, 03_tableau-completeness-approach.md,
+  04_fuel-sufficiency-measure.md, 05_fuel-sufficiency-literature.md,
+  06_sfor-dedup-reuse-abstraction.md, 07_option-b-fuel-bound.md, 08_b1-truthlemma-timp.md,
+  09_phase2-escape-routes.md, 10_wave-a-atomic-derisk.md, 11_team-research.md,
+  13_blocker-root-cause-and-correct-approach.md (adversarial section only),
+  14_blocker-analysis.md (adversarial section only), 15_fuel-materialization-repair.md

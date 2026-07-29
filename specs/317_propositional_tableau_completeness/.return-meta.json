@@ -1,45 +1,19 @@
 {
-  "status": "researched",
-  "task_number": 317,
-  "session_id": "sess_1785275816_a84520_317",
-  "focus": "blocker research: fuel materialization (plan-13 Phase 4)",
-  "artifacts": [
-    {
-      "type": "report",
-      "path": "specs/317_propositional_tableau_completeness/reports/15_fuel-materialization-repair.md",
-      "summary": "Adjudication of the three Phase-4 repair candidates with empirical probes; recommends candidate (a) per-branch fuel restructuring with a 4A/4B/4C statement-level replacement spec"
-    }
-  ],
-  "findings_count": 7,
-  "adversarial_verification_triggered": true,
-  "reference_grounding_tier": 3,
-  "bibkey_verification_status": "verified: Fitting1983 (references.bib:211), Dyckhoff1992 (:218), GargGenoveseNegri2012 (:239), Massacci2000 (:1041); no new citations introduced",
-  "key_findings": [
-    "Candidate (a) per-branch fuel: GO. Sufficiency shrinks to intWork-based per-branch budgets (intFuelExt = 4*(2c+1)*(WBound+1)+1), consuming only the already-proved intWork_drop + intCount_notMem_mono; termination is unconditional WF on (sum 3^fuel_i, pending.length) since all branching sites emit exactly 2 children (Rules.lean:259,262,280).",
-    "Handoff correction: '<= ~4,700-digit numerals for all corpus rows' is REFUTED for row 20 (s=19, chainBound=9,961,472, fuel ~13.0M digits) but the numeral materializes in 599 ms (probe), so (a) remains feasible with a new 4C lake-test timing gate.",
-    "Candidate (b) WF-on-measure: NO-GO as the repair; the decreasing_by obligation requires the unproven DP-2 (hNW) invariant inside the engine DEFINITION (intExpMeasure_step_lt needs hb at Scheme.lean:2583; hb-maintenance needs hnw at :2323); decreasing_by sorry would sorryAx-taint the whole procedure. Elective post-DP-2 cleanup only.",
-    "Candidate (c) proof/eval split: NO-GO; equivalence blocked because remaining fuel leaks into bPers via applyPersistenceFixpoint (Expansion.lean:363), per-row equivalence not kernel-checkable (let recs), and the split reintroduces the sorry-free-but-wrong-verdict hazard the corpus exists to close.",
-    "No global-scalar fuel of any size can work: branch count is worst-case exponential in |intUniverseExt| = Theta(WBound), so the repair must change fuel architecture, not constants.",
-    "Blast radius of (a): four engine-induction proofs need wrapper ports (closed_unsat ~690 lines is the largest); mitigated by parallel-build-then-flip (4A engine, 4B lemma ports, 4C flip+corpus gate).",
-    "Phases 6-7 simplify under (a): R1's hFuel becomes a per-branch intWork bound with fuel-0 discharge by omega; Phase 7's genuine-fixpoint consumption unchanged; Phase 2/3 assets (intCreatedChain_le, WBound, intUniverseExt family) verified engine-independent and untouched."
-  ],
-  "memory_candidates": [
-    {
-      "content": "Fuel-based tableau/decision engines in Lean: a global scalar fuel must bound TOTAL steps (branch count is worst-case exponential in the universe size), so when the universe is blow-up-sized (e.g. Theta(WBound) from blocking pigeonhole bounds) no materializable global fuel exists. Per-branch fuel lists fix this: per-branch step count is linear in the universe (intWork-style counting measure), termination becomes unconditional WF on (sum of 3^fuel_i, pending.length) when branching is exactly binary, and no invariants enter the definition. WF-on-the-semantic-measure engines are worse: they force invariant preservation proofs into decreasing_by, putting research-grade obligations on the definition's critical path where a sorry taints everything.",
-      "topic": "lean-tableau-termination",
-      "type": "pattern"
-    },
-    {
-      "content": "Lean 4 #eval bignum performance facts (probed on cslib toolchain): Nat.pow uses fast exponentiation - 20^9961473 (a 43-Mbit / ~13M-digit result) materializes in ~0.6 s; but every subsequent Nat op on such a numeral (decrement, +1) costs ~8 ms (full-copy scale), so a fuel-counting loop doing N steps on a huge fuel numeral adds ~8N ms. Budget test suites accordingly and gate with a wall-time criterion; feasibility envelope for doubly-exponential-derived numerals dies around 0.5 GB (e.g. subformula count s~25 for (s+1)^(2^s*s) shapes).",
-      "topic": "lean-eval-bignum-performance",
-      "type": "fact"
-    }
-  ],
-  "next_steps": "Run /plan 317 (revise plan 13) to replace Phase 4 with the 4A/4B/4C spec in reports/15_fuel-materialization-repair.md section 6, applying the section 7 deltas to Phases 6-8",
+  "status": "planned",
+  "artifacts": [{
+    "type": "plan",
+    "path": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+    "summary": "Plan v14: per-branch fuel materialization repair — replaces plan-13 Phase 4 with 4A/4B/4C (candidate (a) per report 15), per-branch hFuel form for Phase 6, phases 1-3 carried forward as [COMPLETED]"
+  }],
+  "next_steps": "Orchestrator resumes per-phase dispatch from plan v14 at Phase 4A (task stays [IMPLEMENTING])",
   "metadata": {
     "session_id": "sess_1785275816_a84520_317",
-    "agent_type": "cslib-research-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"]
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 10,
+    "phases_completed": 3,
+    "estimated_hours": 35,
+    "skeleton": true,
+    "reports_integrated": ["15_fuel-materialization-repair.md"]
   }
 }

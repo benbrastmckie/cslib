@@ -297,9 +297,9 @@
           "summary": "Audits IAtomPersist / full T-persistence / T-implication copy completeness / edge-endpoint containment on the branches the real algorithm produces. All four hold across five formulas and both closure predicates -- a positive finding preserving the phase-0 spike's premise-narrowing route for the two Completeness bridges."
         },
         {
-          "path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+          "path": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
           "type": "plan",
-          "summary": "8-phase skeleton plan v13: fuel-sufficiency development inline (phases 2-5), subsumes 583 (phase 6), defers bridges to 430; follow-up task 585 declared for DP-1/DP-2"
+          "summary": "Plan v14: candidate-(a) per-branch fuel repair (4A/4B/4C) replacing blocked phase 4; phases 1-3 carried [COMPLETED]; 10 phases total"
         }
       ],
       "dependencies": [

@@ -2866,6 +2866,41 @@ private lemma intApplyRuleFull_linearResult_nextWorld {sf : ISF Atom} {nw nw' : 
       exact Or.inr ⟨_, hed.symm, hnw'.symm⟩
 
 omit [Hashable Atom] [DecidableEq Atom] in
+/-- Full inversion for the world-creating arm of `intApplyRuleFull`: a `linearResult` carrying
+`some newE` can only come from firing `F(φ → ψ)@l` via `intFImpRule`, and then every output
+component is pinned: the new forms are the two planted facts at the fresh world `nw` followed
+by the persistence group propagated from `l`, the counter increments by one, and the recorded
+edge is `(nw, l)` (child, parent). Strengthens `intApplyRuleFull_linearResult_nextWorld`'s
+`some`-branch with the full output shapes, as the mint arm's `IWorldHist` re-establishment
+needs all of them (Phase 7). -/
+private lemma intApplyRuleFull_some_edge_inv {sf : ISF Atom} {nw nw' : Nat}
+    {b : IBranch Atom} {newForms : List (ISF Atom)} {newE : Nat × Nat}
+    (hint : intApplyRuleFull sf nw b = .linearResult newForms nw' (some newE)) :
+    ∃ φ ψ l, sf = ⟨.neg, .imp φ ψ, l⟩ ∧
+      newForms = [⟨.pos, φ, nw⟩, ⟨.neg, ψ, nw⟩] ++ propagatePersistence b l nw ∧
+      nw' = nw + 1 ∧ newE = (nw, l) := by
+  obtain ⟨s, ff, l⟩ := sf
+  cases s with
+  | pos =>
+    cases ff with
+    | atom p => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ => simp [intApplyRuleFull] at hint
+    | and φ ψ => simp [intApplyRuleFull] at hint
+  | neg =>
+    cases ff with
+    | atom p => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | and φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ => simp [intApplyRuleFull] at hint
+    | imp φ ψ =>
+      simp only [intApplyRuleFull, intFImpRule, IntRuleResult.linearResult.injEq,
+        Option.some.injEq] at hint
+      obtain ⟨hnf, hnw', hed⟩ := hint
+      exact ⟨φ, ψ, l, rfl, hnf.symm, hnw'.symm, hed.symm⟩
+
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- The next-world counter output by `intApplyRuleFull`'s `branchingResult` case is
 always unchanged (none of `.neg,.and` / `.pos,.or` / `.pos,.imp` create a world). -/
 private lemma intApplyRuleFull_branchingResult_nextWorld {sf : ISF Atom} {nw nw' : Nat}
@@ -2987,7 +3022,19 @@ survive `edges`'s growth via `isAccessible_append_mono`, and the newly-minted wo
 accessibility from every ancestor of its parent is built by composing the parent's
 (inductively already-established) accessibility with `isAccessible_one_hop_ext` -- never
 re-derived from scratch. This restatement is additive to the report's draft (H1)-(H5); it does
-not remove or weaken any of them. -/
+not remove or weaken any of them.
+
+**Two further amendments (Phase 7, discovered at the mint-arm discharge)**, both additive:
+(H0) `par 0 = 0` — without root normalization, the universally-quantified (H1-acc)/(H5)
+`parAncestor` chains can pass through the root into unconstrained `par` values, and the mint
+arm cannot re-establish (H1-acc) for the fresh world when the fired label is `0` (see
+`parAncestor_le`/`parAncestor_of_extend`, the orbit-boundedness pair this clause enables); and
+(H3-exp) `⟨.neg, fire c, par c⟩ ∈ e` — the previously-phantom expanded-set parameter `e` now
+carries real data: each created world's fired implication is recorded in `e`, which is exactly
+the fact needed to discharge (H4) between the fresh mint and any OLD world (the mint's fired
+triple is fresh w.r.t. `e` by `intStepBranch`'s duplicate check, so equality of `(parent,
+fired)` records with an old world is contradictory). Both amendments hold vacuously at entry
+and are monotone along every arm (`e` only grows along a lineage). -/
 
 /-- Reflexive-transitive closure of `par`, read as ancestry: `parAncestor par x y` holds iff
 `x` is obtained from `y` by iterating `par` zero or more times (`x = y`, `x = par y`,
@@ -2995,6 +3042,57 @@ not remove or weaken any of them. -/
 (H1) clause of `IWorldHist` below). -/
 private def parAncestor (par : Nat → Nat) (x y : Nat) : Prop :=
   Relation.ReflTransGen (fun a b => a = par b) x y
+
+/-- With the root normalized (`par 0 = 0`, `IWorldHist`'s (H0) clause below), the only
+`parAncestor`-ancestor of the root world `0` is `0` itself: the ancestor chain from `0` can
+only self-loop. Needed at the mint arm's (H1-acc) discharge when the fired label is `0`. -/
+private lemma parAncestor_zero {par : Nat → Nat} (hpar0 : par 0 = 0)
+    {c' : Nat} (h : parAncestor par c' 0) : c' = 0 := by
+  induction h using Relation.ReflTransGen.head_induction_on with
+  | refl => rfl
+  | head hab _hchain ih =>
+    subst ih
+    rw [hpar0] at hab
+    exact hab
+
+/-- Orbit boundedness: under (H0)-normalization and (H1)-descent, every
+`parAncestor`-ancestor of a created world `c < nw` is `≤ c` — the ancestor chain descends
+through `[1, nw)` (where (H1) forces `par x < x`) and bottoms out at the self-looping root.
+This is what keeps the universally-quantified (H1-acc)/(H5) chains inside the range where the
+invariant carries data, and it is the reason (H0) had to be ADDED to the report's draft
+(H1)-(H5): without `par 0 = 0` a chain can pass through the root into unconstrained `par`
+values, making (H1-acc) unprovable at the mint. -/
+private lemma parAncestor_le {par : Nat → Nat} {nw : Nat}
+    (hpar0 : par 0 = 0) (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x)
+    {c' c : Nat} (hc : c < nw) (h : parAncestor par c' c) : c' ≤ c := by
+  induction h using Relation.ReflTransGen.head_induction_on with
+  | refl => exact Nat.le_refl c
+  | head hab hchain ih =>
+    rename_i _a b
+    subst hab
+    rcases Nat.eq_zero_or_pos b with rfl | hb
+    · rw [hpar0]
+      exact Nat.zero_le c
+    · have := hdesc b hb (Nat.lt_of_le_of_lt ih hc)
+      omega
+
+/-- Chain transfer at a mint: extending `par` by one point AT the fresh world `nw` does not
+create new ancestor chains for any target `c < nw` — every chain under the extended function
+is already a chain under the original `par`, because (by `parAncestor_le`) all chain elements
+stay `≤ c < nw` and never touch the extension point. -/
+private lemma parAncestor_of_extend {par : Nat → Nat} {nw l : Nat}
+    (hpar0 : par 0 = 0) (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x)
+    {c' c : Nat} (hc : c < nw)
+    (h : parAncestor (fun x => if x = nw then l else par x) c' c) :
+    parAncestor par c' c := by
+  induction h using Relation.ReflTransGen.head_induction_on with
+  | refl => exact Relation.ReflTransGen.refl
+  | head hab hchain ih =>
+    rename_i _a b
+    have hble : b ≤ c := parAncestor_le hpar0 hdesc hc ih
+    have hbne : b ≠ nw := by omega
+    simp only [if_neg hbne] at hab
+    exact Relation.ReflTransGen.head hab ih
 
 /-- The structural creation-history invariant threaded per-branch across the world-creation
 recursion (report section 3.2, with the (H1-acc) restatement documented above). Every created
@@ -3005,10 +3103,15 @@ in `intSubfmls φ0`; (H3) the recorded obligation and positive set are actually 
 CURRENT branch `b` (monotone facts, surviving every later append); (H4) a `(parent, fired
 implication)` pair determines its child uniquely (sibling uniqueness); (H5) the snapshot-free
 mint-time reuse residue `(★)` of `intFImp_mint_residue` (above). -/
-private def IWorldHist (φ0 : Proposition Atom) (b : IBranch Atom) (_e : List (ISF Atom))
+private def IWorldHist (φ0 : Proposition Atom) (b : IBranch Atom) (e : List (ISF Atom))
     (nw : Nat) (edges : IEdges) : Prop :=
   ∃ (par : Nat → Nat) (obl : Nat → Proposition Atom)
     (sfor : Nat → List (Proposition Atom)) (fire : Nat → Proposition Atom),
+    -- (H0) root normalization: the root world is its own parent, so `parAncestor` chains
+    -- bottom out at the self-looping root instead of escaping into unconstrained `par`
+    -- values (see `parAncestor_le`; a Phase 7 amendment, required to make (H1-acc)
+    -- establishable at the mint arm when the fired label is the root)
+    par 0 = 0 ∧
     ∀ c, 1 ≤ c → c < nw →
       -- (H1) tree structure
       (c, par c) ∈ edges ∧ par c < c ∧
@@ -3020,6 +3123,12 @@ private def IWorldHist (φ0 : Proposition Atom) (b : IBranch Atom) (_e : List (I
       -- (H3) planted, monotone facts (survive every later append to b)
       (⟨.neg, obl c, c⟩ : ISF Atom) ∈ b ∧
       (∀ χ ∈ sfor c, χ ∈ posFormulasAt b c) ∧
+      -- (H3-exp) the fired implication is recorded in the CURRENT expanded set `e`
+      -- (monotone: `e` only ever grows along a lineage; a Phase 7 amendment, required to
+      -- discharge (H4) between the fresh mint and any OLD world: the mint's fired triple
+      -- is fresh w.r.t. `e` by `intStepBranch`'s duplicate check, so no old world can
+      -- carry the same `(parent, fired implication)` record)
+      (⟨.neg, fire c, par c⟩ : ISF Atom) ∈ e ∧
       -- (H4) sibling uniqueness: (parent, fired implication) determines the child
       (∀ c', 1 ≤ c' → c' < nw → par c = par c' → fire c = fire c' → c = c') ∧
       -- (H5) the snapshot-free residue of the mint-time reuse check (★, section 4.2)
@@ -3035,8 +3144,27 @@ on them. -/
 private lemma IWorldHist_entry (φ0 : Proposition Atom) (b : IBranch Atom)
     (e : List (ISF Atom)) (edges : IEdges) :
     IWorldHist φ0 b e 1 edges :=
-  ⟨fun _ => 0, fun _ => φ0, fun _ => [], fun _ => φ0,
+  ⟨fun _ => 0, fun _ => φ0, fun _ => [], fun _ => φ0, rfl,
     fun c hc1 hc2 => absurd hc2 (by omega)⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `IWorldHist` is monotone in the branch and the expanded set: every clause referencing `b`
+((H3)'s planted facts) or `e` ((H3-exp)'s fired record) is a membership fact, preserved under
+any superset; all other clauses reference only the fixed witness data, `nw`, and `edges`.
+This is the single transfer lemma used by every NON-minting arm (skip-closed, alpha, reuse,
+beta), where `nw` and `edges` are unchanged and both `b` and `e` only grow. -/
+private lemma IWorldHist_mono {φ0 : Proposition Atom} {b b' : IBranch Atom}
+    {e e' : List (ISF Atom)} {nw : Nat} {edges : IEdges}
+    (hmem : ∀ x ∈ b, x ∈ b') (hexp : ∀ x ∈ e, x ∈ e')
+    (h : IWorldHist φ0 b e nw edges) : IWorldHist φ0 b' e' nw edges := by
+  obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := h
+  refine ⟨par, obl, sfor, fire, hpar0, fun c hc1 hc2 => ?_⟩
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11⟩ := hall c hc1 hc2
+  refine ⟨h1, h2, h3, h4, h5, h6, hmem _ h7, fun χ hχ => ?_, hexp _ h9, h10, h11⟩
+  have hχ' := h8 χ hχ
+  simp only [posFormulasAt, List.mem_filterMap] at hχ' ⊢
+  obtain ⟨sf, hsf, hcond⟩ := hχ'
+  exact ⟨sf, hmem sf hsf, hcond⟩
 
 /-- Counter-redundancy (report section 3.1): the next-world counter is exactly one more than
 the number of edges recorded so far. Only the mint arm changes either side, and it changes
@@ -3148,6 +3276,196 @@ private lemma IAllWorldHist_map_const {φ0 : Proposition Atom} {branches' : List
   | cons bh bt ih =>
     simp only [List.map_cons, IAllWorldHist]
     exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
+
+omit [Hashable Atom] in
+/-- **Mint-arm preservation of `IWorldHist` (Phase 7, report section 5.5's mint case)**: when
+the reuse check fails (`hnone`) and the world-creating `F(φ → ψ)@l` rule mints the fresh world
+`nwH` (extending the branch by `intFImpRule`'s output, the expanded set by the fired triple,
+and the edge list by `(nwH, l)`), the invariant is re-established at counter `nwH + 1` by
+extending the four witness functions at the single new point `c = nwH`:
+`par nwH = l`, `obl nwH = ψ`, `sfor nwH = φ :: posFormulasAt bPers l`, `fire nwH = φ → ψ`.
+
+Clause discharge: (H1) is the appended edge plus the strict label bound `hl`; (H1-acc)
+composes the parent's inherited ancestor-accessibility with `isAccessible_one_hop_ext` for the
+fresh world and transfers old chains via `parAncestor_of_extend` + `isAccessible_append_mono`;
+(H2) extracts subformula membership from `hUniv` via `intUniverseExt_mem_formula`; (H3) reads
+the planted facts off `intFImpRule`'s literal output; (H3-exp) is the appended fired triple;
+(H4) between the mint and any old world is refuted by `hsfe` (the fired triple is fresh
+w.r.t. `eH`, but an old equal record would put it in `eH` by (H3-exp)); (H5) at the mint is
+exactly `intFImp_mint_residue` (Phase 5's (★)), fed `hacc`/`hle` from the transferred chain
+and `hmem`/`hsub` from the old (H3). -/
+private lemma IWorldHist_mint {φ0 : Proposition Atom} {bPers : IBranch Atom}
+    {eH : List (ISF Atom)} {nwH l : Nat} {edgesH : IEdges} {φ ψ : Proposition Atom}
+    (hWH : IWorldHist φ0 bPers eH nwH edgesH)
+    (hnone : intFImpReuseWitnessAnc? bPers edgesH
+        ([⟨.pos, φ, nwH⟩, ⟨.neg, ψ, nwH⟩] ++ propagatePersistence bPers l nwH)
+        (nwH, l) = none)
+    (hsfe : eH.any (· == (⟨.neg, .imp φ ψ, l⟩ : ISF Atom)) = false)
+    (hNC : ∀ (χ : Proposition Atom) (w : Nat), (⟨.neg, χ, w⟩ : ISF Atom) ∈ bPers →
+        χ ∉ posFormulasAt bPers w)
+    (hUniv : ∀ x ∈ bPers, x ∈ intUniverseExt φ0)
+    (hsfb : (⟨.neg, .imp φ ψ, l⟩ : ISF Atom) ∈ bPers)
+    (hl : l < nwH) :
+    IWorldHist φ0
+      (Branch.extendMany bPers
+        ([⟨.pos, φ, nwH⟩, ⟨.neg, ψ, nwH⟩] ++ propagatePersistence bPers l nwH))
+      (eH ++ [⟨.neg, .imp φ ψ, l⟩]) (nwH + 1) (edgesH ++ [(nwH, l)]) := by
+  obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := hWH
+  have hdesc : ∀ x, 1 ≤ x → x < nwH → par x < x := fun x hx1 hx2 => (hall x hx1 hx2).2.1
+  -- Universe facts for the fired implication and the propagated positive set
+  have himp : Proposition.imp φ ψ ∈ intSubfmls φ0 :=
+    intUniverseExt_mem_formula (hUniv _ hsfb)
+  have hφsub : φ ∈ intSubfmls φ0 :=
+    intSubfmls_trans (by
+      simp only [intSubfmls]
+      exact List.mem_cons_of_mem _ (List.mem_append_left _ (intSubfmls_self_mem φ))) himp
+  have hψsub : ψ ∈ intSubfmls φ0 :=
+    intSubfmls_trans (by
+      simp only [intSubfmls]
+      exact List.mem_cons_of_mem _ (List.mem_append_right _ (intSubfmls_self_mem ψ))) himp
+  have hposSub : ∀ χ ∈ posFormulasAt bPers l, χ ∈ intSubfmls φ0 := by
+    intro χ hχ
+    simp only [posFormulasAt, List.mem_filterMap] at hχ
+    obtain ⟨sf', hsf', hcond⟩ := hχ
+    by_cases hc : sf'.sign == .pos && sf'.label == l
+    · simp only [hc, if_true, Option.some.injEq] at hcond
+      exact hcond ▸ intUniverseExt_mem_formula (hUniv sf' hsf')
+    · simp [hc] at hcond
+  -- The mint's recorded positive set, as `intFImpRule`'s propagated positives
+  have hsfor_eq :
+      (([⟨.pos, φ, nwH⟩, ⟨.neg, ψ, nwH⟩] ++ propagatePersistence bPers l nwH)
+          : List (ISF Atom)).filterMap
+        (fun sf => if sf.sign == .pos then some sf.formula else none)
+      = φ :: posFormulasAt bPers l := by
+    simp [propagatePersistence, List.filterMap_map]
+  have hψeq :
+      (([⟨.pos, φ, nwH⟩, ⟨.neg, ψ, nwH⟩] ++ propagatePersistence bPers l nwH)
+          : List (ISF Atom)).findSome?
+        (fun sf => if sf.sign == .neg then some sf.formula else none) = some ψ := by
+    simp
+  have hnotmem : (⟨.neg, .imp φ ψ, l⟩ : ISF Atom) ∉ eH := by
+    intro hmem'
+    have htrue : eH.any (· == (⟨.neg, .imp φ ψ, l⟩ : ISF Atom)) = true :=
+      List.any_eq_true.mpr ⟨_, hmem', by simp⟩
+    rw [htrue] at hsfe
+    simp at hsfe
+  -- Ancestor-accessibility of the parent `l` from each of its `par`-ancestors under the
+  -- PRE-mint edges (l = 0: the chain collapses to the reflexive case; l ≥ 1: (H1-acc) at l)
+  have hancL : ∀ c', parAncestor par c' l → isAccessible edgesH c' l = true := by
+    intro c' hchain
+    rcases Nat.eq_zero_or_pos l with rfl | hl1
+    · have hc0 : c' = 0 := parAncestor_zero hpar0 hchain
+      subst hc0
+      simp [isAccessible]
+    · exact (hall l hl1 hl).2.2.1 c' hchain
+  refine ⟨fun c => if c = nwH then l else par c,
+      fun c => if c = nwH then ψ else obl c,
+      fun c => if c = nwH then φ :: posFormulasAt bPers l else sfor c,
+      fun c => if c = nwH then .imp φ ψ else fire c,
+      ?_, fun c hc1 hc2 => ?_⟩
+  · -- (H0): the root is not the fresh world (`nwH > l ≥ 0`), so normalization carries over
+    have h0 : (0 : Nat) ≠ nwH := by omega
+    simp only [if_neg h0, hpar0]
+  · by_cases hcn : c = nwH
+    · -- The freshly minted world
+      subst hcn
+      simp only [if_pos]
+      refine ⟨List.mem_append_right _ (List.mem_singleton_self _), hl, ?_, hψsub, himp,
+        ?_, ?_, ?_, List.mem_append_right _ (List.mem_singleton_self _), ?_, ?_⟩
+      · -- (H1-acc) for the fresh world
+        intro c' hchain
+        rcases Relation.ReflTransGen.cases_tail hchain with heq | ⟨b, hchain', hstep⟩
+        · subst heq
+          simp [isAccessible]
+        · simp only [if_pos] at hstep
+          subst hstep
+          exact isAccessible_one_hop_ext
+            (hancL c' (parAncestor_of_extend hpar0 hdesc hl hchain'))
+      · -- (H2) for the mint's positive set
+        intro χ hχ
+        rcases List.mem_cons.mp hχ with rfl | hχ'
+        · exact hφsub
+        · exact hposSub χ hχ'
+      · -- (H3) obligation planted at the fresh world
+        simp only [Branch.extendMany, List.mem_append]
+        simp
+      · -- (H3) positive set planted at the fresh world
+        intro χ hχ
+        have hmem' : (⟨.pos, χ, c⟩ : ISF Atom) ∈
+            ([⟨.pos, φ, c⟩, ⟨.neg, ψ, c⟩] ++ propagatePersistence bPers l c
+              : List (ISF Atom)) := by
+          rcases List.mem_cons.mp hχ with rfl | hχ'
+          · exact List.mem_append_left _ (by simp)
+          · refine List.mem_append_right _ ?_
+            simp only [propagatePersistence, List.mem_map]
+            exact ⟨χ, hχ', rfl⟩
+        simp only [posFormulasAt, List.mem_filterMap]
+        refine ⟨⟨.pos, χ, c⟩, ?_, by simp⟩
+        simp only [Branch.extendMany, List.mem_append]
+        exact Or.inl (List.mem_append.mp hmem')
+      · -- (H4) between the mint and any world
+        intro c' hc'1 hc'2 hpar hfire
+        by_cases hc'n : c' = c
+        · exact hc'n.symm
+        · exfalso
+          simp only [if_neg hc'n] at hpar hfire
+          have hc'lt : c' < c := by omega
+          have hrec := (hall c' hc'1 hc'lt).2.2.2.2.2.2.2.2.1
+          rw [← hfire, ← hpar] at hrec
+          exact hnotmem hrec
+      · -- (H5) the mint-time residue (★)
+        intro c' hc'1 hc'lt hchain hobl
+        have hc'n : c' ≠ c := by omega
+        simp only [if_neg hc'n] at hobl ⊢
+        have hc'ltnw : c' < c := by omega
+        have hchainL : parAncestor par c' l :=
+          parAncestor_of_extend hpar0 hdesc hl hchain
+        have hobl_mem : (⟨.neg, ψ, c'⟩ : ISF Atom) ∈ bPers := by
+          rw [← hobl]
+          exact (hall c' hc'1 hc'ltnw).2.2.2.2.2.2.1
+        have hle : c' ≤ l := parAncestor_le hpar0 hdesc hl hchainL
+        have hres := intFImp_mint_residue hψeq hnone hobl_mem (hancL c' hchainL) hle hNC
+          ((hall c' hc'1 hc'ltnw).2.2.2.2.2.2.2.1)
+        rw [hsfor_eq] at hres
+        exact hres
+    · -- An old world: every clause carried, monotone in `b`/`e`/`edges`
+      have hclt : c < nwH := by omega
+      obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11⟩ := hall c hc1 hclt
+      simp only [if_neg hcn]
+      refine ⟨List.mem_append_left _ h1, h2, ?_, h4, h5, h6, ?_, ?_,
+        List.mem_append_left _ h9, ?_, ?_⟩
+      · -- (H1-acc): chains never touch the fresh point, and the edge list only grew
+        intro c' hchain
+        exact isAccessible_append_mono _
+          (h3 c' (parAncestor_of_extend hpar0 hdesc hclt hchain))
+      · -- (H3) obligation, monotone under the branch append
+        simp only [Branch.extendMany, List.mem_append]
+        exact Or.inr h7
+      · -- (H3) positive set, monotone under the branch append
+        intro χ hχ
+        have hχ' := h8 χ hχ
+        simp only [posFormulasAt, List.mem_filterMap] at hχ' ⊢
+        obtain ⟨sf', hsf', hcond⟩ := hχ'
+        refine ⟨sf', ?_, hcond⟩
+        simp only [Branch.extendMany, List.mem_append]
+        exact Or.inr hsf'
+      · -- (H4), now also against the fresh world
+        intro c' hc'1 hc'2 hpar hfire
+        by_cases hc'n : c' = nwH
+        · exfalso
+          subst hc'n
+          simp only [if_pos] at hpar hfire
+          rw [hfire, hpar] at h9
+          exact hnotmem h9
+        · have hc'lt : c' < nwH := by omega
+          simp only [if_neg hc'n] at hpar hfire
+          exact h10 c' hc'1 hc'lt hpar hfire
+      · -- (H5): chain targets stay strictly below the fresh point
+        intro c' hc'1 hc'lt hchain hobl
+        have hc'n : c' ≠ nwH := by omega
+        simp only [if_neg hc'n] at hobl ⊢
+        have hparlt : par c < nwH := by omega
+        exact h11 c' hc'1 hc'lt (parAncestor_of_extend hpar0 hdesc hparlt hchain) hobl
 
 omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
@@ -5444,6 +5762,8 @@ private lemma intExpandBranches_openBranch_sat
     (hNW : IAllNW φ0 nextWorlds)
     (hFuel : IAllFuel φ0 branches expandedSets fuels)
     (hLBS : IAllLabelBoundStrict branches nextWorlds)
+    (hWH : IAllWorldHist φ0 branches expandedSets nextWorlds edgeSets)
+    (hWHC : IAllWorldHistCounter nextWorlds edgeSets)
     (hNC : ∀ (b' : IBranch Atom), closurePred b' = false →
         ∀ (ψ : Proposition Atom) (w : Nat), (⟨.neg, ψ, w⟩ : ISF Atom) ∈ b' →
           ψ ∉ posFormulasAt b' w)
@@ -5478,26 +5798,31 @@ private lemma intExpandBranches_openBranch_sat
       IAllFuel φ0 done doneExp doneFuels →
       IAllLabelBoundStrict pending pendingNW →
       IAllLabelBoundStrict done doneNW →
+      IAllWorldHist φ0 pending pendingExp pendingNW pendingEdges →
+      IAllWorldHist φ0 done doneExp doneNW doneEdges →
+      IAllWorldHistCounter pendingNW pendingEdges →
+      IAllWorldHistCounter doneNW doneEdges →
       intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
       ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets []
       hAC hLen0 hLenF0 trivial rfl rfl hACC trivial
       hUniv hNW hFuel (by simp [IAllUniv]) (by simp [IAllNW]) trivial
-      hLBS (by simp [IAllLabelBoundStrict]) h
+      hLBS (by simp [IAllLabelBoundStrict]) hWH trivial hWHC trivial h
   intro pending pendingExp pendingNW pendingEdges pendingFuels done doneExp doneNW
     doneEdges doneFuels
   induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp,
       doneNW, doneEdges, doneFuels
       using intExpandBranches.go.induct (closurePred := closurePred) with
   | case1 =>
-    intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
+    intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
     simp only [intExpandBranches.go] at hgo
     exact absurd hgo (by simp)
   | case2 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT f fT
       bPers hcl ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hgo
+        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP
+        hWHCD hgo
     rw [intExpandBranches.go.eq_def] at hgo
     simp only [] at hgo
     rw [if_pos hcl] at hgo
@@ -5513,6 +5838,10 @@ private lemma intExpandBranches_openBranch_sat
     obtain ⟨hFuel_bh_eH, hFuelP_tail⟩ := hFuelP
     simp only [IAllLabelBoundStrict] at hLBSP
     obtain ⟨hLBS_bh_nwH, hLBSP_tail⟩ := hLBSP
+    simp only [IAllWorldHist] at hWHP
+    obtain ⟨hWH_head, hWHP_tail⟩ := hWHP
+    simp only [IAllWorldHistCounter] at hWHCP
+    obtain ⟨hWHC_head, hWHCP_tail⟩ := hWHCP
     cases hpAug : pendingAug with
     | nil =>
       rw [hpAug] at hPendingACC
@@ -5550,11 +5879,16 @@ private lemma intExpandBranches_openBranch_sat
             (fun nw' hnw' => by
               simp only [List.mem_singleton] at hnw'; subst hnw'; exact hNWP_head))
           (IAllFuel_append hFuelD ⟨hFuel_bPers, trivial⟩)
-          hLBSP_tail (IAllLabelBoundStrict_append hLBSD ⟨hLBS_bPers, trivial⟩) hgo
+          hLBSP_tail (IAllLabelBoundStrict_append hLBSD ⟨hLBS_bPers, trivial⟩)
+          hWHP_tail
+          (IAllWorldHist_append hWHD
+            ⟨IWorldHist_mono hmemP (fun x hx => hx) hWH_head, trivial⟩)
+          hWHCP_tail (IAllWorldHistCounter_append hWHCD ⟨hWHC_head, trivial⟩) hgo
   | case3 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT
       bPers hcl =>
     intro _pendingAug _doneAug _hPending _hLenP _hLenPF _hDone _hLenD _hLenDF _hPendingACC
-        _hDoneACC _hUnivP _hNWP hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD hgo
+        _hDoneACC _hUnivP _hNWP hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD
+        _hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     injection hgo with heq
@@ -5583,7 +5917,8 @@ private lemma intExpandBranches_openBranch_sat
   | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       bPers hcl hstep =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD hgo
+        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD
+        _hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
@@ -5616,7 +5951,8 @@ private lemma intExpandBranches_openBranch_sat
   | case5 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp bPers hcl hstep hstep2 ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hgo
+        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP
+        hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hUnivP_head : ∀ x ∈ bh, x ∈ intUniverseExt φ0 := hUnivP bh List.mem_cons_self
@@ -5629,6 +5965,10 @@ private lemma intExpandBranches_openBranch_sat
     obtain ⟨hFuel_bh_eH, hFuelP_tail⟩ := hFuelP
     simp only [IAllLabelBoundStrict] at hLBSP
     obtain ⟨hLBS_bh_nwH, hLBSP_tail⟩ := hLBSP
+    simp only [IAllWorldHist] at hWHP
+    obtain ⟨hWH_head, hWHP_tail⟩ := hWHP
+    simp only [IAllWorldHistCounter] at hWHCP
+    obtain ⟨hWHC_head, hWHCP_tail⟩ := hWHCP
     have hUniv_bPers : ∀ x ∈ bPers, x ∈ intUniverseExt φ0 :=
       applyPersistenceFixpoint_subset_ext bh edgesH (f' + 1) hUnivP_head
     have hFuel_bPers : intWork (intUniverseExt φ0) bPers eH < f' + 1 :=
@@ -5685,6 +6025,15 @@ private lemma intExpandBranches_openBranch_sat
         rw [← hnewExp] at hdrop
         have hFuel_ext : intWork (intUniverseExt φ0)
             (Branch.extendMany bPers newForms) newExp < f' := by omega
+        -- `IWorldHist` transfer for the non-minting (alpha/reuse) linear arm: `nw`/`edges`
+        -- are unchanged (`hnw'_eq`), and `newExp = eH ++ [sf]` is a strict append, so the
+        -- old witness carries over via `IWorldHist_mono` composed through `bh ⊆ bPers ⊆
+        -- Branch.extendMany bPers newForms`.
+        have hexp_ext : ∀ x ∈ eH, x ∈ newExp := fun x hx => hnewExp ▸ List.mem_append_left _ hx
+        have hWH_ext : IWorldHist φ0 (Branch.extendMany bPers newForms) newExp nw' edgesH := by
+          rw [hnw'_eq]
+          exact IWorldHist_mono (fun x hx => hsub _ (hmemP x hx)) hexp_ext hWH_head
+        have hWHC_ext : IWorldHistCounter nw' edgesH := hnw'_eq ▸ hWHC_head
         refine ih (doneAug ++ [augH] ++ augT) []
             (IAllConsistent_append
               (IAllConsistent_append hDone ⟨hIC_ext, hLB_ext, trivial⟩) hPendingTail)
@@ -5712,6 +6061,12 @@ private lemma intExpandBranches_openBranch_sat
             (IAllLabelBoundStrict_append
               (IAllLabelBoundStrict_append hLBSD ⟨hLBS_ext, trivial⟩) hLBSP_tail)
             (by simp [IAllLabelBoundStrict])
+            (IAllWorldHist_append
+              (IAllWorldHist_append hWHD ⟨hWH_ext, trivial⟩) hWHP_tail)
+            (by simp [IAllWorldHist])
+            (IAllWorldHistCounter_append
+              (IAllWorldHistCounter_append hWHCD ⟨hWHC_ext, trivial⟩) hWHCP_tail)
+            (by simp [IAllWorldHistCounter])
             hgo
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
@@ -5720,7 +6075,8 @@ private lemma intExpandBranches_openBranch_sat
   | case6 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp newE x bPers hcl hstep hwit hstep2 ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hgo
+        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP
+        hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hUnivP_head : ∀ x ∈ bh, x ∈ intUniverseExt φ0 := hUnivP bh List.mem_cons_self
@@ -5733,6 +6089,10 @@ private lemma intExpandBranches_openBranch_sat
     obtain ⟨hFuel_bh_eH, hFuelP_tail⟩ := hFuelP
     simp only [IAllLabelBoundStrict] at hLBSP
     obtain ⟨hLBS_bh_nwH, hLBSP_tail⟩ := hLBSP
+    simp only [IAllWorldHist] at hWHP
+    obtain ⟨hWH_head, hWHP_tail⟩ := hWHP
+    simp only [IAllWorldHistCounter] at hWHCP
+    obtain ⟨hWHC_head, hWHCP_tail⟩ := hWHCP
     have hUniv_bPers : ∀ x ∈ bPers, x ∈ intUniverseExt φ0 :=
       applyPersistenceFixpoint_subset_ext bh edgesH (f' + 1) hUnivP_head
     have hFuel_bPers : intWork (intUniverseExt φ0) bPers eH < f' + 1 :=
@@ -5848,6 +6208,13 @@ private lemma intExpandBranches_openBranch_sat
                         ⟨.neg, .imp φ ψ₀, l⟩
                       simp only [sfAccessSat]
                       exact ⟨x, isAccessible_one_step (by simp), houtPhi, hFpsi⟩
+                -- `IWorldHist` transfer for the reuse arm: the branch `bPers` is reused
+                -- unchanged (no mint), `nw`/`edges` stay `nwH`/`edgesH`, and `newExp` only
+                -- grows by the fired triple (`hnewExp`), so `IWorldHist_mono` applies.
+                have hexp_ext : ∀ x ∈ eH, x ∈ newExp := fun x hx =>
+                  hnewExp ▸ List.mem_append_left _ hx
+                have hWH_ext : IWorldHist φ0 bPers newExp nwH edgesH :=
+                  IWorldHist_mono hmemP hexp_ext hWH_head
                 refine ih (doneAug ++ [augH ++ [(x, l)]] ++ augT) []
                     (IAllConsistent_append
                       (IAllConsistent_append hDone
@@ -5881,6 +6248,12 @@ private lemma intExpandBranches_openBranch_sat
                     (IAllLabelBoundStrict_append
                       (IAllLabelBoundStrict_append hLBSD ⟨hLBS_bPers, trivial⟩) hLBSP_tail)
                     (by simp [IAllLabelBoundStrict])
+                    (IAllWorldHist_append
+                      (IAllWorldHist_append hWHD ⟨hWH_ext, trivial⟩) hWHP_tail)
+                    (by simp [IAllWorldHist])
+                    (IAllWorldHistCounter_append
+                      (IAllWorldHistCounter_append hWHCD ⟨hWHC_head, trivial⟩) hWHCP_tail)
+                    (by simp [IAllWorldHistCounter])
                     hgo
         · rename_i hwit1
           exact absurd (hwit.symm.trans hwit1) (by simp)
@@ -5891,7 +6264,8 @@ private lemma intExpandBranches_openBranch_sat
   | case7 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hgo
+        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP
+        hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hUnivP_head : ∀ x ∈ bh, x ∈ intUniverseExt φ0 := hUnivP bh List.mem_cons_self
@@ -5904,6 +6278,10 @@ private lemma intExpandBranches_openBranch_sat
     obtain ⟨hFuel_bh_eH, hFuelP_tail⟩ := hFuelP
     simp only [IAllLabelBoundStrict] at hLBSP
     obtain ⟨hLBS_bh_nwH, hLBSP_tail⟩ := hLBSP
+    simp only [IAllWorldHist] at hWHP
+    obtain ⟨hWH_head, hWHP_tail⟩ := hWHP
+    simp only [IAllWorldHistCounter] at hWHCP
+    obtain ⟨hWHC_head, hWHCP_tail⟩ := hWHCP
     have hUniv_bPers : ∀ x ∈ bPers, x ∈ intUniverseExt φ0 :=
       applyPersistenceFixpoint_subset_ext bh edgesH (f' + 1) hUnivP_head
     have hFuel_bPers : intWork (intUniverseExt φ0) bPers eH < f' + 1 :=
@@ -5976,6 +6354,28 @@ private lemma intExpandBranches_openBranch_sat
             rw [← hnewExp] at hdrop
             have hFuel_ext : intWork (intUniverseExt φ0)
                 (Branch.extendMany bPers newForms) newExp < f' := by omega
+            -- `IWorldHist` re-establishment for the mint arm: `IWorldHist_mint` (Phase 7,
+            -- report section 5.5). `sf` is pinned to `⟨.neg, φ → ψ, l⟩` by
+            -- `intApplyRuleFull_some_edge_inv`, which also gives `newForms`/`nw'`/`newE`'s
+            -- literal shapes -- exactly what `IWorldHist_mint`'s conclusion needs.
+            obtain ⟨φm, ψm, lm, hsfEq, hnfEq, hnw'Eq2, hnewEEq⟩ :=
+              intApplyRuleFull_some_edge_inv hintSf
+            have hWH_bPers : IWorldHist φ0 bPers eH nwH edgesH :=
+              IWorldHist_mono hmemP (fun x hx => hx) hWH_head
+            have hl_strict : lm < nwH := by simpa [hsfEq] using hLBS_bPers sf hsfb
+            have hnone : intFImpReuseWitnessAnc? bPers edgesH
+                ([⟨.pos, φm, nwH⟩, ⟨.neg, ψm, nwH⟩] ++ propagatePersistence bPers lm nwH)
+                (nwH, lm) = none := by rw [← hnfEq, ← hnewEEq]; exact hwit
+            have hclFalse : closurePred bPers = false := by simpa using hcl
+            have hWH_ext : IWorldHist φ0 (Branch.extendMany bPers newForms) newExp nw'
+                (edgesH ++ [newE]) := by
+              rw [hnw'_eq, hnfEq, hnewExp, hsfEq, hnewEEq]
+              exact IWorldHist_mint hWH_bPers hnone (hsfEq ▸ hsfe) (hNC bPers hclFalse)
+                hUniv_bPers (hsfEq ▸ hsfb) hl_strict
+            have hWHC_ext : IWorldHistCounter nw' (edgesH ++ [newE]) := by
+              simp only [IWorldHistCounter, List.length_append, List.length_cons,
+                List.length_nil] at hWHC_head ⊢
+              omega
             refine ih (doneAug ++ [augH ++ [newE]] ++ augT) []
                 (IAllConsistent_append
                   (IAllConsistent_append hDone ⟨hIC_ext, hLB_ext, trivial⟩)
@@ -6004,6 +6404,12 @@ private lemma intExpandBranches_openBranch_sat
                 (IAllLabelBoundStrict_append
                   (IAllLabelBoundStrict_append hLBSD ⟨hLBS_ext, trivial⟩) hLBSP_tail)
                 (by simp [IAllLabelBoundStrict])
+                (IAllWorldHist_append
+                  (IAllWorldHist_append hWHD ⟨hWH_ext, trivial⟩) hWHP_tail)
+                (by simp [IAllWorldHist])
+                (IAllWorldHistCounter_append
+                  (IAllWorldHistCounter_append hWHCD ⟨hWHC_ext, trivial⟩) hWHCP_tail)
+                (by simp [IAllWorldHistCounter])
                 hgo
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
@@ -6012,7 +6418,8 @@ private lemma intExpandBranches_openBranch_sat
   | case8 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       branches' nw' newExp bPers hcl hstep ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hgo
+        hDoneACC hUnivP hNWP hFuelP hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP
+        hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     have hUnivP_head : ∀ x ∈ bh, x ∈ intUniverseExt φ0 := hUnivP bh List.mem_cons_self
@@ -6025,6 +6432,10 @@ private lemma intExpandBranches_openBranch_sat
     obtain ⟨hFuel_bh_eH, hFuelP_tail⟩ := hFuelP
     simp only [IAllLabelBoundStrict] at hLBSP
     obtain ⟨hLBS_bh_nwH, hLBSP_tail⟩ := hLBSP
+    simp only [IAllWorldHist] at hWHP
+    obtain ⟨hWH_head, hWHP_tail⟩ := hWHP
+    simp only [IAllWorldHistCounter] at hWHCP
+    obtain ⟨hWHC_head, hWHCP_tail⟩ := hWHCP
     have hUniv_bPers : ∀ x ∈ bPers, x ∈ intUniverseExt φ0 :=
       applyPersistenceFixpoint_subset_ext bh edgesH (f' + 1) hUnivP_head
     have hFuel_bPers : intWork (intUniverseExt φ0) bPers eH < f' + 1 :=
@@ -6083,6 +6494,19 @@ private lemma intExpandBranches_openBranch_sat
             (Branch.extendMany bPers br) eH sf hsfU hsfe hsub
           rw [← hnewExp] at hdrop
           omega
+        -- `IWorldHist` transfer for the BETA (branching) arm: `nw`/`edges` are unchanged
+        -- (`hnw'_eq`), `newExp` only grows (`hnewExp`), and every child branch is
+        -- `Branch.extendMany bPers br`, so the same monotone witness transfers to each.
+        have hexp_ext : ∀ x ∈ eH, x ∈ newExp := fun x hx => hnewExp ▸ List.mem_append_left _ hx
+        have hWH_branch : ∀ br ∈ branches',
+            IWorldHist φ0 (Branch.extendMany bPers br) newExp nw' edgesH := by
+          intro br _hbr
+          rw [hnw'_eq]
+          exact IWorldHist_mono
+            (fun x hx => by
+              simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hmemP x hx))
+            hexp_ext hWH_head
+        have hWHC_ext : IWorldHistCounter nw' edgesH := by rw [hnw'_eq]; exact hWHC_head
         refine ih (doneAug ++ branches'.map (fun _ => augH) ++ augT) []
             (IAllConsistent_append
               (IAllConsistent_append hDone
@@ -6116,6 +6540,16 @@ private lemma intExpandBranches_openBranch_sat
                 (IAllLabelBoundStrict_map (Branch.extendMany bPers ·) hbrLBS))
               hLBSP_tail)
             (by simp [IAllLabelBoundStrict])
+            (IAllWorldHist_append
+              (IAllWorldHist_append hWHD
+                (IAllWorldHist_map_const (f := Branch.extendMany bPers) hWH_branch))
+              hWHP_tail)
+            (by simp [IAllWorldHist])
+            (IAllWorldHistCounter_append
+              (IAllWorldHistCounter_append hWHCD
+                (IAllWorldHistCounter_map_const (l := branches') hWHC_ext))
+              hWHCP_tail)
+            (by simp [IAllWorldHistCounter])
             hgo
     · rename_i heq
       have hcon := hstep.symm.trans heq
@@ -6123,7 +6557,8 @@ private lemma intExpandBranches_openBranch_sat
   | case9 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       snd bPers hcl hstep =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD hgo
+        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD
+        _hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
@@ -6139,7 +6574,8 @@ private lemma intExpandBranches_openBranch_sat
   | case10 done doneExp doneNW doneEdges doneFuels head restBs pExp pNW pEdges pFuels
       hmismatch ih =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD hgo
+        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD
+        _hWHCP _hWHCD hgo
     cases hpE : pExp with
     | nil =>
       rw [hpE] at hPending
@@ -6215,7 +6651,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- Obtain the saturation witness and its accumulated edges, together
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
   obtain ⟨edges, hsat, hfimp⟩ :=
-    intExpandBranches_openBranch_sat φ _ _ _ _ _ [[]] _ _
+    intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+      [[]] _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
       (by simp [IAllAccessConsistent, IExpandedAccessConsistent])
       (fun b hb x hx => by
@@ -6227,6 +6664,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
       (fun nw hnw => by simp only [List.mem_singleton] at hnw; subst hnw; exact WBound_pos φ)
       (by simp only [IAllFuel]; exact ⟨intWork_init_lt_intFuelExt φ, trivial⟩)
       (by simp [IAllLabelBoundStrict, ILabelBoundStrict])
+      ⟨IWorldHist_entry _ _ _ _, trivial⟩
+      ⟨IWorldHistCounter_entry, trivial⟩
       (fun b' hb' ψ w hmem hcontra => by
         simp only [posFormulasAt, List.mem_filterMap] at hcontra
         obtain ⟨sf, hsfmem, hif⟩ := hcontra

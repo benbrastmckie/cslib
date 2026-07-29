@@ -1,8 +1,68 @@
 # Implementation Summary: DP-2 World-History Invariant and Mint Residue (Partial)
 
 - **Task**: 585 - prove_post_blocking_world_bound_chain_and_mint_invariant
-- **Status**: [PARTIAL] -- 6 of 11 phases complete; DP-2's sorry is NOT yet retired
+- **Status**: [PARTIAL] -- 8 of 11 phases complete; DP-2's sorry is NOT yet retired
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Plan**: `specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md`
+
+## Update (this dispatch: Phases 7-8, resumed from a broken build)
+
+This dispatch resumed from `handoffs/RESUME-broken-build.md`, written by an operator after a
+prior dispatch died mid-edit on API errors, leaving `Scheme.lean` red (25 build errors, +349/-10
+uncommitted). The goal was explicitly a green build, not necessarily Phase 7 completion, with
+route A (finish the deferred `IAllWorldHist`/`IAllWorldHistCounter` wiring) preferred over route
+B (revert the signature change) only if achievable without ending on a red build.
+
+**Route A was chosen and completed successfully.** Three findings, in order of discovery:
+
+1. **The handoff's leading hypothesis for cluster 2 was wrong, but its instinct (one structural
+   cause, not eight) was right.** The actual cause: `subst hcn` in the new `IWorldHist_mint`
+   lemma (at the `by_cases hcn : c = nwH` / `subst hcn` step) eliminates the `nwH` local
+   variable, replacing every occurrence with `c` throughout the context and goal -- so the
+   proof's subsequent literal uses of `nwH` (lines ~3393-3419) referenced an identifier that no
+   longer existed post-substitution. Fixed by renaming `nwH` to `c` in the post-subst branch,
+   plus two small `Or`/append-membership mismatches this exposed (`simp` and
+   `List.mem_append.mp` fixes) and one unrelated `rw`-vs-`simp` beta-reduction issue in the
+   pre-existing helper `parAncestor_of_extend`. `IWorldHist_mint` (Phase 6's already-complete
+   standalone lemma, now touched only for this bug) is sorry-free and clean.
+2. **Cluster 1 (the real Phase 7/8 gap) was completed in full**, not deferred. Across
+   `intExpandBranches.go.induct`'s ten cases: `case5` (alpha arm) and `case6` (reuse-witness
+   arm) needed an `IWorldHist_mono` transfer plus the four missing `ih` call arguments; `case7`
+   (the actual MINT arm -- "No reusable ancestor: fresh world creation") needed a full
+   `IWorldHist_mint` application, extracting `φ`/`ψ`/`l` from the fired formula via the
+   pre-built `intApplyRuleFull_some_edge_inv` helper (already present, with a docstring noting
+   it exists exactly for this purpose); `case8` (beta/branching arm) needed the same
+   `IWorldHist_mono` transfer via `IAllWorldHist_map_const`. `case6`/`case7`/`case8`'s `intro`
+   lines were missing `hWHP hWHD hWHCP hWHCD` bindings entirely, which silently misbound `hgo`
+   to the wrong hypothesis type (a second latent bug, distinct from the `nwH` one, caught by
+   Lean's type errors rather than by inspection). `case9`/`case10` (terminal contradiction
+   cases) needed placeholder bindings only. The `openBranch_countermodel` entry point needed
+   `hWH`/`hWHC` witnesses (`IWorldHist_entry`/`IWorldHistCounter_entry`, both from Phase 6) --
+   this required pinning `branches`/`expandedSets`/`nextWorlds`/`edgeSets`/`fuels` explicitly
+   rather than via `_`, since anonymous-constructor notation cannot elaborate against an
+   unresolved metavariable.
+3. Two lint warnings (missing `omit [DecidableEq Atom] [Hashable Atom] in` on `IWorldHist_mono`;
+   an unused `Function.comp_def` simp argument) were fixed proactively, per the lint-prevention
+   contract, even though they are not in PR CI.
+
+**Verification**: full CSLib CI pipeline green -- `lake build` (both scoped, 858 jobs, and
+project-wide, 3311 jobs), `lake exe checkInitImports`, `lake lint` (zero warnings in
+`Scheme.lean`), `lake exe lint-style`, `lake shake` (no changes needed to this file),
+`lake exe mk_all --module` (no update needed), `lake test`. Sorry census unchanged at 4
+(`Scheme.lean:725` DP-5, `Scheme.lean:3493` DP-2 -- this task's target, still open as expected
+since Phases 9-11 remain -- `Completeness.lean:140` DP-3, `Minimal/Completeness.lean:128` DP-4;
+the latter three are owned by other tasks and were not touched). No new axioms, no vacuous
+definitions.
+
+Plan phases 7 and 8 are marked `[COMPLETED]` with inline deviation annotations (the actual
+case/lemma names used, versus the plan's pre-shift line-number references, which had drifted
+after Phase 6's edits).
+
+**Phases remaining: 9, 10, 11** (pigeonhole depth bound from (*), path-injection size bound /
+`intWorldHist_nw_le`, retire the DP-2 sorry and rewire the call site).
 
 ## Update (this dispatch: Phase 6)
 

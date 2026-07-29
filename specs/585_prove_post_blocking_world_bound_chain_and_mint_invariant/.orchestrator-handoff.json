@@ -1,50 +1,14 @@
 {
-  "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
   "status": "partial",
-  "task_number": 585,
-  "session_id": "sess_1785345125_26a56f",
-  "summary": "Resumed at Phase 6 and completed it: added IWorldHist (the structural creation-history invariant, report section 3.2's (H1)-(H5) plus a new (H1-acc) ancestor-accessibility clause resolving the Phase 1 fuel-deficit finding), parAncestor, the standalone entry lemma IWorldHist_entry, the counter-redundancy predicate IWorldHistCounter with its entry lemma, the 2-list companion IAllWorldHistCounter with _append/_map_const plumbing, and the 4-list companion IAllWorldHist (a new shape, one list wider than any existing companion in the file) with its own _append/_map_const plumbing. All six new declarations verified sorry-free via a temporary (removed) #print axioms pass. lake build green (scoped 858 jobs; full project 3311 jobs). git diff --stat shows a single file changed (Scheme.lean, +187/-0, purely additive). Sorry census unchanged (Tableau subtree 4, repo-wide 6, as expected for an additive-only phase). Per this phase's own Exit Criteria, wiring the new companions into intExpandBranches_openBranch_sat's signature and key induction statement is explicitly deferred to Phases 7-8 (documented as a plan deviation, not a silent omission -- the plan's task-list wording and its own Exit Criteria are in tension, and the Exit Criteria, being the acceptance gate, controls). Phase 3's hNC hypothesis remains linter-flagged as unreferenced; concluded (not punted) that its sole consumer is Phase 7's mint arm, which this phase's Exit Criteria forbids touching. Phases 1-6 are now COMPLETED (6 of 11); Phases 7-11 (mint-arm and non-mint-arm preservation, pigeonhole and path-injection bounds, final sorry retirement) remain NOT STARTED.",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
-    },
-    {
-      "type": "summary",
-      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/handoffs/phase-6-handoff.md"
-    }
-  ],
+  "summary": "Resumed from a broken build (25 errors, +349/-10 uncommitted from an interrupted Phase-7 dispatch). Chose route A (finish the IAllWorldHist/IAllWorldHistCounter wiring) and completed it fully rather than falling back to route B. Root-caused and fixed three error clusters: a `subst`-eliminated `nwH` naming bug in the new IWorldHist_mint lemma (not the constructor-arity mismatch the handoff had hypothesized), a beta-reduction/rw-vs-simp issue in a pre-existing helper, and the real Phase-7 gap -- completing IAllWorldHist/IAllWorldHistCounter threading across all 10 intExpandBranches.go.induct cases (including the actual mint arm via IWorldHist_mint) and the openBranch_countermodel entry point. Full CSLib CI pipeline is green (project-wide lake build, checkInitImports, lake lint, lint-style, lake shake, mk_all, lake test). Plan phases 7 and 8 are now genuinely [COMPLETED]. Sorry census unchanged at 4 (DP-2 at Scheme.lean:3493, this task's target, still open as expected for phases 9-11). No new axioms, no vacuous definitions.",
   "blockers": [],
-  "next_action_hint": "implement",
-  "next_action": "implement",
-  "files_modified": [
+  "artifacts": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/handoffs/phase-6-handoff.md"
+    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/.return-meta.json"
   ],
-  "decisions_made": [
-    "IWorldHist gained an additional clause (H1-acc): '∀ c', parAncestor par c' c → isAccessible edges c' c = true', beyond the report's literal (H1)-(H5), because (H1) alone (bare edge membership) cannot supply Phase 7's mint-arm need for genuine multi-hop isAccessible facts about arbitrary-distance ancestors without re-deriving them from a fixed edges snapshot -- which Phase 1 already showed has a provable one-unit fuel deficit. This is additive; none of (H1)-(H5) were removed or weakened.",
-    "The plan's Phase 6 task list ('thread both companions through the key induction's hypothesis list') was NOT executed literally, because this same phase's own Exit Criteria explicitly prohibits asserting the invariant as an established conclusion of the induction before the arms are proved, and explicitly sanctions deferring the induction wiring to Phases 7-8 when intermediate scaffolding is unavoidable. All pieces were delivered as complete, sorry-free, standalone declarations instead; intExpandBranches_openBranch_sat's signature and key statement are unchanged by this phase.",
-    "Phase 3's hNC hypothesis remains linter-flagged as unreferenced by design, not neglect: its sole planned consumer (intFImp_mint_residue's hNC parameter) is reachable only from inside the mint arm, which this phase's Exit Criteria forbids touching. Fabricating an artificial use to silence the linter was rejected as gaming the warning rather than addressing it.",
-    "parAncestor was defined via Relation.ReflTransGen (fun a b => a = par b), matching the file's existing intAccessPreorder style (also built on Relation.ReflTransGen), rather than a hand-rolled inductive relation.",
-    "IWorldHist's second explicit parameter (the expanded-set list e, present for signature parity with the file's other 4-list-zip companions) is named _e (not e) to silence the unusedVariables linter, since IWorldHist's own clauses do not reference it -- matching the report's own draft signature, which likewise never uses e in the body."
-  ],
-  "dead_ends": [],
-  "phases_completed": 6,
+  "phases_completed": 8,
   "phases_total": 11,
-  "continuation_path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md, resume at Phase 7",
-  "warnings": [
-    "Phases 7-11 (mint-arm and non-mint-arm preservation, pigeonhole depth bound, path-injection size bound, final sorry retirement -- likely 600-900+ Lean lines) are NOT started. DP-2's sorry at Scheme.lean is still present -- do not report this task as implemented/complete until Phase 11 retires it and the sorry census reads Tableau-subtree 3 / repo-wide 5.",
-    "Serialize against specs/430_prove_atom_persistence_upward_closure_for_intexpan/ -- both edit Scheme.lean. Do not run task 430 concurrently while this task is in [IMPLEMENTING]/[PARTIAL].",
-    "Phase 7 must FIRST wire IAllWorldHist/IAllWorldHistCounter into intExpandBranches_openBranch_sat's signature and key induction statement (deferred by Phase 6) before it can begin discharging the mint arm's clauses -- this wiring work was not yet attempted and its own scope has not been separately estimated.",
-    "The (H1-acc) clause added in Phase 6 is a design decision that Phase 7 must validate in practice: if isAccessible_append_mono + isAccessible_one_hop_ext do not compose as cleanly as anticipated at the actual mint-arm call site, Phase 7 may need to revisit IWorldHist's exact clause shape again. Phase 6's own build/proof only establishes that the STATEMENT type-checks and its entry/plumbing lemmas are sorry-free -- it does not yet prove the invariant is actually PRESERVED by any arm."
-  ],
-  "timestamp": "2026-07-29T00:00:00Z",
-  "phase_count_note": "phases_completed=6 counted directly from the plan file's phase headings: Phases 1,2,3,4,5,6 all read [COMPLETED]; Phases 7-11 all read [NOT STARTED]."
+  "plan_markers_verified": true,
+  "continuation_path": "Phase 9: Pigeonhole depth bound from (*); then Phase 10 (path-injection size bound / intWorldHist_nw_le); then Phase 11 (retire the sorry, rewire call site, final verification)"
 }

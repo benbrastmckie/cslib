@@ -610,38 +610,26 @@ signature and `key` statement.
 
 ---
 
-### Phase 7: Mint-arm preservation of IWorldHist [NOT STARTED]
+### Phase 7: Mint-arm preservation of IWorldHist [COMPLETED]
 
 - **Goal:** Prove `IWorldHist` is preserved by the fresh-mint arm of `intExpandBranches.go`
   (`Scheme.lean:3263-3272`), consuming Phase 5's (*) lemma (report section 5.5, the mint case).
 - **Tasks:**
-  - [ ] Locate the mint arm: `edges` is appended in exactly one place,
-        `doneEdges ++ [edges ++ [newE]] ++ restEdges` (`Scheme.lean:3272`), and `nw` increments in
-        exactly the same arm (`nw'`, `Scheme.lean:3271`).
-  - [ ] Use `intApplyRuleFull_linearResult_nextWorld` (`Scheme.lean:2494-2522`) for
-        `nw' = nw + 1` on this arm.
-  - [ ] Extend the four witness functions (`par`, `obl`, `sfor`, `fire`) by one point at `c = nw`:
-        `par nw = l` (the label of the fired `F(phi -> psi)`), `obl nw = psi`,
-        `sfor nw = phi :: posFormulasAt bPers l`, `fire nw = phi -> psi`.
-  - [ ] Discharge (H1): `newE = (nw, l)` from `intFImpRule` (`Rules.lean:159-164`), and
-        `par nw = l < nw` from Phase 4's strict label bound.
-  - [ ] Discharge (H2): `obl`, `fire`, and every member of `sfor` lie in `intSubfmls phi0`.
-  - [ ] Discharge (H3): the planted facts `(neg, obl nw, nw) in b` and
-        `forall chi in sfor nw, chi in posFormulasAt b nw` hold at the post-mint branch and are
-        monotone under every later append (`Branch.extendMany b sfs = sfs ++ b`,
-        `Foundations/Logic/Tableau/Branch.lean:62`; `applyPersistenceFixpoint_mem_preserved`, used
-        at `Scheme.lean:5341`).
-  - [ ] Discharge (H4) sibling uniqueness: from `intStepBranch_some_exists_fuel`
-        (`Scheme.lean:3163-3182`), `e.any (. == sf) = false` together with `newExp = e ++ [sf]`
-        means the expanded set is duplicate-free along a lineage and never shrinks, so
-        `(neg, chi, p)` fires at most once (report section 4.4).
-  - [ ] Discharge (H5) using Phase 5's standalone lemma. Supply its hypotheses from the local
-        context: `hnone` from the reuse check at the mint, `hmem`/`hsub` from the inherited (H3),
-        `hacc` from Phase 1's one-hop extension applied along the `par` chain, `hle` from (H1)'s
-        `par c < c`, and the no-contradiction property from Phase 3's threaded hypothesis together
-        with `hcl : not (closurePred bPers = true)` (`rw [if_neg hcl] at hgo`, `Scheme.lean:5295`).
-  - [ ] Discharge the counter-redundancy invariant on this arm: both `nw` and `edges.length`
-        increase by exactly one.
+  - [x] Locate the mint arm: `edges` is appended in exactly one place *(deviation: located at
+        `intExpandBranches.go.induct`'s `case7` -- "No reusable ancestor: fresh world creation" --
+        rather than the plan's cited line numbers, which had shifted after Phase 6's edits;
+        `edgesH ++ [newE]` is the appended edge set)*.
+  - [x] Use `intApplyRuleFull_linearResult_nextWorld`/`intApplyRuleFull_some_edge_inv` for
+        `nw' = nw + 1` *(deviation: used the more specific `intApplyRuleFull_some_edge_inv`,
+        already present pre-built for exactly this purpose per its own docstring, which pins
+        `sf`, `newForms`, `nw'`, and `newE`'s literal shapes in one step)*.
+  - [x] Extend the four witness functions via `IWorldHist_mint` (Phase 6's standalone lemma,
+        `Scheme.lean:~3300`), applied directly rather than re-derived inline.
+  - [x] Discharge (H1)/(H2)/(H3)/(H3-exp)/(H4)/(H5) -- all internal to `IWorldHist_mint`'s proof
+        (Phase 6), invoked here via `IWorldHist_mint hWH_bPers hnone (hsfEq ▸ hsfe)
+        (hNC bPers hclFalse) hUniv_bPers (hsfEq ▸ hsfb) hl_strict`.
+  - [x] Discharge the counter-redundancy invariant on this arm (`hWHC_ext`): `nw' = nwH + 1` and
+        `(edgesH ++ [newE]).length + 1 = nwH + 1` from `hWHC_head` via `omega`.
 - **Timing:** 2 hours
 - **Depends on:** 3, 4, 5, 6
 - **Verification Tier:** full
@@ -666,21 +654,27 @@ signature and `key` statement.
 
 ---
 
-### Phase 8: Alpha, beta, and reuse arm preservation [NOT STARTED]
+### Phase 8: Alpha, beta, and reuse arm preservation [COMPLETED]
 
 - **Goal:** Prove `IWorldHist` and the counter-redundancy invariant are preserved by the three
   non-minting arms (report section 5.5).
 - **Tasks:**
-  - [ ] Confirm from `intExpandBranches.go` (`Scheme.lean:3206-3338`) that the alpha arm
-        (`~3249`), reuse arm (`~3263`), and beta arm (`~3282`) all pass `edges` through unchanged
-        and leave `nw` unchanged (`intApplyRuleFull_linearResult_nextWorld`, `Scheme.lean:2494-2522`).
-  - [ ] Reuse the SAME witness functions unchanged (no extension is needed -- no world is created).
-  - [ ] Discharge (H1), (H2), (H4), (H5) by constancy of `edges`, `nw`, and the recorded data.
-  - [ ] Discharge (H3) by monotonicity of `b` under `Branch.extendMany` and
-        `applyPersistenceFixpoint_mem_preserved` -- the planted facts survive every append.
-  - [ ] Discharge counter-redundancy by constancy of both sides.
-  - [ ] Discharge the strict label bound on these arms (labels unchanged) if Phase 4 left any arm
-        obligation open.
+  - [x] Confirm the alpha arm (`case5`), reuse arm (`case6`), and beta arm (`case8`) of
+        `intExpandBranches.go.induct` all pass `edges` through unchanged and leave `nw` unchanged
+        *(deviation: identified by induct case rather than the plan's line numbers, which had
+        shifted; verified via `hnw'_eq`/`hstep`'s literal `newEdge = none` in each arm)*.
+  - [x] Reuse the SAME witness functions unchanged via `IWorldHist_mono` (Phase 6's transfer
+        lemma) composed through `bh ⊆ bPers ⊆` (extended branch) -- no witness extension needed.
+  - [x] Discharge (H1), (H2), (H4), (H5) -- internal to `IWorldHist_mono`'s proof (constancy of
+        the fixed witness data, `nw`, and `edges`).
+  - [x] Discharge (H3) by `IWorldHist_mono`'s `hmem`/`hexp` monotonicity arguments, instantiated
+        per-arm: `hmemP`/`hsub` composition (alpha, case5), `hmemP` directly (reuse, case6;
+        branch is literally reused unchanged), and `hmemP`/`Branch.extendMany bPers br` per child
+        (beta, case8, via `IAllWorldHist_map_const`).
+  - [x] Discharge counter-redundancy (`hWHC_ext`) by constancy: `nw'=nwH`/`edges` unchanged in
+        all three arms, so `hWHC_head` transfers directly (via `hnw'_eq ▸`).
+  - [x] Strict label bound: no additional obligation was open on these arms (Phase 4's
+        `ILabelBoundStrict` threading already covers them).
 - **Timing:** 1.5 hours
 - **Depends on:** 6
 - **Verification Tier:** interface

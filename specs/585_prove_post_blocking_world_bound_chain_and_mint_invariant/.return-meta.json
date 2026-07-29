@@ -1,57 +1,53 @@
 {
   "status": "partial",
-  "started_at": "2026-07-29T00:00:00Z",
-  "requires_user_review": false,
-  "review_reason": null,
+  "started_at": "2026-07-29T20:30:16Z",
+  "completed_at": "2026-07-29T20:56:35Z",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
-    },
-    {
-      "type": "summary",
-      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/handoffs/phase-6-handoff.md"
-    }
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
   ],
+  "requires_user_review": false,
+  "review_reason": "Not a blocker -- honest mid-task checkpoint. Build is green and phases 7-8 are genuinely complete; phases 9-11 (pigeonhole depth bound, path-injection size bound, retire DP-2 sorry) remain and are the natural next dispatch.",
+  "partial_progress": {
+    "stage": "phases_7_and_8_completed_green_build_restored",
+    "phases_completed": 8,
+    "last_completed_phase": "Phase 8: Alpha, beta, and reuse arm preservation",
+    "details": "Resumed from RESUME-broken-build.md (25-error red build, +349/-10 uncommitted). Route A (finish the IAllWorldHist/IAllWorldHistCounter wiring) chosen and completed successfully rather than falling back to route B. Root causes found and fixed: (1) cluster 2 'unknown identifier nwH' was NOT a constructor-arity mismatch as the handoff hypothesized -- `subst hcn` at IWorldHist_mint eliminated the nwH local, replacing it with c throughout context; fixed by renaming nwH->c post-subst plus two small Or/append-membership mismatches. (2) cluster 3 was a beta-reduction issue in a pre-existing helper (parAncestor_of_extend) needing simp only instead of rw. (3) cluster 1 (the real Phase-7 deferred wiring) required completing the IAllWorldHist/IAllWorldHistCounter threading across all 10 intExpandBranches.go.induct cases plus the openBranch_countermodel entry point: case5 (alpha) and case6 (reuse) needed IWorldHist_mono transfer + missing ih args; case7 (the actual MINT arm) needed a full IWorldHist_mint application (using the pre-existing intApplyRuleFull_some_edge_inv helper to extract phi/psi/l from the fired formula); case8 (beta) needed IWorldHist_mono transfer via IAllWorldHist_map_const; case6/7/8's intro lines were missing hWHP/hWHD/hWHCP/hWHCD bindings entirely (causing hgo to be misbound to the wrong hypothesis); case9/case10 needed placeholder bindings only; the entry point needed hWH/hWHC witnesses (IWorldHist_entry/IWorldHistCounter_entry) plus pinning branches/expandedSets/nextWorlds/edgeSets/fuels explicitly (anonymous-constructor-on-metavariable elaboration failure otherwise). Also fixed two lint warnings (missing omit clause on IWorldHist_mono, unused simp arg) proactively. Full CSLib CI pipeline run clean: lake build (project-wide, 3311 jobs), checkInitImports, lake lint (zero warnings in Scheme.lean), lint-style, lake shake (no changes needed to this file), mk_all --module (no update needed), lake test. Plan phases 7 and 8 marked [COMPLETED] with inline deviation annotations (actual case/lemma names vs the plan's pre-shift line-number references). Phases 9-11 (pigeonhole depth bound, path-injection size bound, retire-the-sorry/rewire-call-site) remain untouched -- DP-2 sorry at Scheme.lean:~3493 still present as expected."
+  },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 0,
+    "sorry_count": 4,
+    "sorry_inventory": [
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:725 (DP-5, owned by another task)",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:3493 (DP-2, this task's target)",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:140 (DP-3, owned by another task)",
+      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:128 (DP-4, owned by another task)"
+    ],
     "vacuous_count": 0,
-    "axiom_count": 0,
+    "axiom_count_new": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (full lake build green, 3311 jobs; lint/shake/mk_all/test not run for this in-progress, non-PR partial dispatch)",
-    "note": "sorry_count/axiom_count/vacuous_count are 0 NEW introductions by this dispatch. Repo-wide bare-sorry census and Tableau-subtree bare-sorry census are UNCHANGED from the pre-task baseline (6 / 4 respectively), as expected: Phase 6 is additive-only (new IWorldHist structural invariant, parAncestor, counter-redundancy companion, 4-list companion IAllWorldHist, and all plumbing -- none wired into the existing induction yet, per this phase's own Exit Criteria). DP-2's sorry is retired only in Phase 11, which was not reached this dispatch. All six new declarations verified sorry-free via a temporary (removed) #print axioms pass."
+    "ci_pipeline_passed": true,
+    "ci_steps": {
+      "lake_build_scoped": "pass",
+      "lake_build_full": "pass (3311 jobs)",
+      "checkInitImports": "pass",
+      "lake_lint": "pass (zero warnings in Scheme.lean)",
+      "lint_style": "pass",
+      "lake_shake": "pass (no changes needed to Scheme.lean)",
+      "mk_all_module": "pass (no update needed)",
+      "lake_test": "pass"
+    }
   },
-  "partial_progress": {
-    "stage": "phase_6_complete",
-    "details": "Phase 6 (IWorldHist definition, counter-redundancy, plumbing, entry case) COMPLETED this dispatch: added IWorldHist (with an added (H1-acc) ancestor-accessibility clause beyond the report's literal (H1)-(H5), resolving the Phase 1 fuel-deficit finding), parAncestor, IWorldHist_entry, IWorldHistCounter + IWorldHistCounter_entry, IAllWorldHistCounter (2-list companion) with _append/_map_const plumbing, and IAllWorldHist (4-list companion, a new shape) with _append/_map_const plumbing. lake build green (scoped 858 jobs; full project 3311 jobs). git diff --stat shows only Scheme.lean changed (+187/-0, purely additive). Per this phase's own Exit Criteria, the induction wiring into intExpandBranches_openBranch_sat's signature/key statement is explicitly deferred to Phases 7-8 (documented as a plan deviation, not a silent omission). Phases 1-6 now COMPLETED; Phases 7-11 remain NOT STARTED.",
-    "phases_completed": 6,
-    "phases_total": 11,
-    "last_completed_phase": "Phase 6: IWorldHist definition, counter-redundancy, plumbing, entry case"
-  },
+  "blockers": [],
+  "phases_completed": 8,
+  "phases_total": 11,
+  "plan_markers_verified": true,
+  "continuation_path": "Phase 9: Pigeonhole depth bound from (*); then Phase 10 (path-injection size bound / intWorldHist_nw_le); then Phase 11 (retire the sorry, rewire call site, final verification)",
   "metadata": {
-    "session_id": "sess_1785345125_26a56f",
+    "session_id": "sess_1785356767_090add",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "implement",
-      "skill-cslib-implementation"
-    ],
-    "compliance_check": "passed",
-    "cycles_used": 5,
-    "final_state": "implementing"
-  },
-  "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/handoffs/phase-6-handoff.md"
-  ],
-  "next_steps": "Resume with Phase 7 (mint-arm preservation of IWorldHist and counter-redundancy). This requires first wiring IAllWorldHist/IAllWorldHistCounter into intExpandBranches_openBranch_sat's signature and key induction statement (deferred by Phase 6), discharging entry via IWorldHist_entry/IWorldHistCounter_entry, then threading through all ten intExpandBranches.go.induct cases, with the mint arm consuming intFImp_mint_residue (Phase 5) for (H5), supplying hacc from the new (H1-acc) clause, hmem/hsub from (H3), hNC from Phase 3's threaded hypothesis. See handoffs/phase-6-handoff.md for the full next-steps checklist. Then Phase 8 (non-mint arms), 9 (pigeonhole depth bound), 10 (path-injection size bound), 11 (retire the DP-2 sorry).",
-  "phases_completed": 6
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

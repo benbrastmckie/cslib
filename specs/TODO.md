@@ -11,7 +11,7 @@ next_project_number: 586
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,430,534,554,558,562,563,568,569,583,584,585 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,430,534,554,558,562,563,568,569,583,585 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,511,537,551,553,564,571,576 | 36,37,181,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,506,548,565,566,582 | 39,40,511,553,564 | foundations, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
@@ -75,10 +75,6 @@ next_project_number: 586
 
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
-
-### Code Hygiene
-
-584 [PLANNED] — Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a s
 
 ### Uncategorized
 
@@ -144,12 +140,13 @@ BINDING CONSTRAINTS (carried forward from the parent plan's Postmortem Constrain
 ---
 
 ### 584. Give pre-pr-check.sh step 1 a baseline ratchet or changed-files mode
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
 - **Research**: [584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md]
 - **Plan**: [584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md]
+- **Summary**: [584_scope_pre_pr_check_sorry_gate/summaries/01_scope-sorry-gate-delegation-summary.md]
 
 **Description**: Step 1 of scripts/pre-pr-check.sh is a TREE-WIDE gate wearing a scoped label. It finds every *.lean under four whole trees (Cslib/Foundations/Logic/, Cslib/Logics/Modal/, Cslib/Logics/Temporal/, Cslib/Logics/Bimodal/) and fails on ANY sorry found anywhere in them, despite announcing itself as 'Checking for sorry instances in PR scope...'. The script's own comment above the step-8/9 ratchets states the contrast outright: step 1 'scans a narrow, hand-picked directory set and fails on ANY sorry found there', whereas steps 8/9 'ratchet whole-tree sorry/suppression/axiom-taint debt against a frozen baseline, and pass on the existing debt by construction'.
 

@@ -1,12 +1,49 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-28T00:00:00Z",
-  "artifacts": [],
-  "partial_progress": {
-    "stage": "initializing",
-    "details": "Phase 3 dispatch started: intUniverseExt / intExpMeasureExt + engine re-target"
-  },
+  "completed_at": "2026-07-28T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "handoff",
+      "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
+      "summary": "Phase 3 handoff: implemented, 3/8 phases, zero new sorries, no blockers"
+    },
+    {
+      "type": "lean-source",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "summary": "Enlarged Universe (post-blocking) section: intUniverseExt, intUniverseExt_length_le, membership lemmas, Ext containment family incl. intApplyRuleFull_outputs_subset_ext (hnw : nextWorld <= WBound); four engine lemmas re-targeted over intUniverseExt (all sorry-free)"
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+    "specs/317_propositional_tableau_completeness/progress/plan13-phase-3-progress.json",
+    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
+  ],
+  "phases_completed": 3,
+  "phases_total": 8,
   "phase_number": 3,
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_delta": 0,
+    "pre_existing_subtree_sorries": 4,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "new_axioms": [],
+    "build_passed": true,
+    "scoped_build_passed": true,
+    "check_init_imports_passed": true,
+    "lint_style_passed": true,
+    "lake_test_passed": true,
+    "lean_verify_axioms": ["propext", "Classical.choice", "Quot.sound"]
+  },
+  "memory_candidates": [
+    {
+      "content": "Re-targeting a measure engine onto an enlarged universe in Lean: when strict-decrease lemmas consume only a membership premise (hb : forall x in b, x in U) and never unfold the universe's construction, the re-target is a pure statement substitution -- proofs re-run verbatim. Only the membership constructor/extractor family (which does unfold the range) needs mirrored copies at the new universe.",
+      "topic": "lean-tableau-termination",
+      "type": "pattern"
+    }
+  ],
   "metadata": {
     "session_id": "sess_1785275816_a84520_317",
     "agent_type": "cslib-implementation-hard-agent",

@@ -3,58 +3,22 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": false,
-  "summary": "Plan v13 Phase 2 (WBound + ancestor-chain bound, division point DP-1) complete. DP-1 VERDICT: PROVED INLINE — no strategic sorry placed, one-dispatch attempt budget respected. New 'Post-Blocking World Bound' section in Scheme.lean (after the Containment-Blocking Bridge): intChainBound phi := 2^|Sub phi| * |Sub phi| (the (posTypeAt, psi)-pair count, positive-projection 2^U.card form from the blocking combinatorics ONLY — intUniverse's linear range plays no role), WBound phi := (|Sub phi| + 1)^(intChainBound phi + 1), WBound_pos (1 <= WBound, for the Phase 6 singleton call-site), mem_intSubfmls_of_mem_posFormulasAt (universe-containment helper), and intCreatedChain_le PROVED sorry-free: chain length <= intChainBound phi0 along created-world edge chains, by Finset.exists_ne_map_eq_of_card_lt_of_maps_to over Sub.powerset xS Sub — a repeated (posType, obligation) pair makes the earlier created world a reuse witness satisfying all five conjuncts of intFImpReuseWitnessAnc? at the later creation site, contradicting unblockedness. Hypothesis-set decision (documented in docstring + plan annotation): the five-conjunct unblockedness negation is transcribed against the FINAL branch b; the transfer from the runtime check (firing-time branch state) to the final branch is owned by the Phase 5 invariant-threading side. lean_verify axioms: {propext, Classical.choice, Quot.sound}. Full lake build green (3311 jobs), checkInitImports exit 0, lake test exit 0 (conformance corpus, all rows incl. row 20). Subtree bare-sorry count unchanged at 4 (all pre-existing). Task 585 is NOT needed for DP-1; whether it stays open for DP-2 is decided at Phase 5.",
-  "phases_completed": 2,
+  "summary": "Plan v13 Phase 3 (intUniverseExt / intExpMeasureExt + engine re-target) complete. New 'Enlarged Universe (post-blocking)' section in Scheme.lean (after intApplyRuleFull_outputs_subset, before intWork): intUniverseExt phi (same cell structure as intUniverse, world range List.range (WBound phi + 1)), intUniverseExt_length_le (<= 2 * (2 * phi.complexity + 1) * (WBound phi + 1) — the bound the Phase 4 intFuel resize is sized against), membership lemmas mem_intUniverseExt_of/_of', intUniverseExt_mem_formula/_mem_label, and the Ext containment family: intTImpRule_outputs_subset_ext, applyAllTImpRules_subset_ext, applyPersistenceFixpoint_subset_ext, and the load-bearing intApplyRuleFull_outputs_subset_ext with hnw : nextWorld <= WBound phi0 THREADED AS A PREMISE (discharge owned by Phase 5's hNW invariant; firing-time-to-final-branch transfer remains DP-2 territory per the Phase 2 handoff note). All four engine lemmas re-targeted over intUniverseExt: intExpMeasure_step_lt, intExpMeasure_step_lt_branch, applyAllTImpRules_count_drop, applyPersistenceFixpoint_genuine_of_count_le_fuel. Scope Hypothesis CONFIRMED: every engine proof re-ran verbatim on first elaboration — none unfolds the world range; only membership-lemma names / set U changed. Implementer's choice within the plan's declared option: intExpMeasure stays parametric in U, no intExpMeasureExt def (Phase 6 spec text writes intExpMeasure (intUniverseExt phi0) directly). Original intUniverse block and its containment family left intact (deprecation notes deferred to Phase 8). lean_verify on intApplyRuleFull_outputs_subset_ext, intExpMeasure_step_lt, applyPersistenceFixpoint_genuine_of_count_le_fuel, intUniverseExt_length_le: axioms {propext, Classical.choice, Quot.sound}, no sorryAx. Scoped + full lake build green (3311 jobs), checkInitImports exit 0, lake test exit 0 (conformance corpus incl. row 20), lint-style exit 0. Subtree bare-sorry count unchanged at 4 (all pre-existing). lake lint / shake / mk_all not run (no new files, imports unchanged).",
+  "phases_completed": 3,
   "phases_total": 8,
-  "sorry_inventory": [
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 619,
-      "statement": "truthLemma T-imp case",
-      "strategic": false,
-      "pre_existing": true,
-      "assumption": "persistence-fixpoint sufficiency for T(phi'->psi') copies",
-      "why_deferred": "Phase 7 target (STOP-gate: closed together with the R1 restatement)",
-      "follow_up_task": "317 phase 7"
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 2774,
-      "statement": "intExpandBranches_openBranch_sat fuel-0 case (REFUTED as currently stated)",
-      "strategic": false,
-      "pre_existing": true,
-      "assumption": "R1 hypothesis-threading restatement (hUniv/hNW/hFuel)",
-      "why_deferred": "Phase 6 target; requires phases 3-5 fuel-sufficiency development",
-      "follow_up_task": "317 phase 6"
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
-      "line": 133,
-      "statement": "intuitionisticTableau_complete validity bridge (DP-3)",
-      "strategic": true,
-      "pre_existing": true,
-      "assumption": "upward-closure of intExtractValuation along intAccessPreorder (IAtomPersist route)",
-      "why_deferred": "deferred to existing planned task per plan Territory Resolutions",
-      "follow_up_task": 430
-    },
-    {
-      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
-      "line": 125,
-      "statement": "minimalTableau_complete validity bridge (DP-4)",
-      "strategic": true,
-      "pre_existing": true,
-      "assumption": "upward-closure of intExtractValuation and minBranchBotForces along the frame",
-      "why_deferred": "deferred to existing planned task per plan Territory Resolutions",
-      "follow_up_task": 430
-    }
-  ],
+  "sorry_inventory": [],
   "blockers": [],
   "continuation_path": null,
-  "files_modified": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
-    "specs/317_propositional_tableau_completeness/progress/plan13-phase-2-progress.json"
-  ],
-  "next_action_hint": "implement phase 3 (intUniverseExt / intExpMeasureExt + engine re-target over List.range (WBound phi + 1); depends on Phase 2's DEFINITIONS only, which are landed and proved)",
-  "notes": "Zero sorries introduced this dispatch; DP-1 closed without its contingent sorry. The four inventory entries are the pre-existing ones recorded for complete accounting (matching the plan's Planned Strategic Sorries table and phase targets). skeleton:false because no strategic sorry was placed. Minor plan-noted substitution: the pigeonhole uses Finset.exists_ne_map_eq_of_card_lt_of_maps_to directly (the core lemma the Phase 1 label-indexed instantiation wraps) because the chain-indexed (posTypeAt, psi)-pair quantification does not fit exists_typeAt_eq_of_card_lt's label-indexed form — annotated in the plan checklist."
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "lean-source",
+      "summary": "Enlarged Universe (post-blocking) section + four engine lemmas re-targeted over intUniverseExt, all sorry-free"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/progress/plan13-phase-3-progress.json",
+      "type": "progress",
+      "summary": "Phase 3 progress: all 4 objectives done"
+    }
+  ]
 }

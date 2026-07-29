@@ -281,21 +281,38 @@ single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only
 - **Done when:** `WBound`/`intChainBound` defined; `intCreatedChain_le` stated with its final
   hypothesis set and either proved or carrying exactly the DP-1 sorry; scoped build green.
 
-### Phase 3: `intUniverseExt` / `intExpMeasureExt` + engine re-target [IN PROGRESS]
+### Phase 3: `intUniverseExt` / `intExpMeasureExt` + engine re-target [COMPLETED]
 - **Goal:** The F2 measure engine runs over the enlarged universe
   `List.range (WBound φ + 1)` in place of `List.range (φ.complexity + 2)`.
 - **Tasks:**
-  - [ ] Define `intUniverseExt φ` (same cell structure as `intUniverse`, world range
+  - [x] Define `intUniverseExt φ` (same cell structure as `intUniverse`, world range
     `WBound φ + 1`) and `intExpMeasureExt φ := intExpMeasure (intUniverseExt φ)` (or keep
     `intExpMeasure` parametric in `U` as it already is and only add the `Ext` universe + its
     length lemma `intUniverseExt_length_le`).
-  - [ ] Re-target the engine: `intExpMeasure_step_lt`, `intExpMeasure_step_lt_branch`,
+    (Landed: the parenthetical option — `intExpMeasure` stays parametric in `U`, no
+    `intExpMeasureExt` def; Phase 6's `hFuel` spec text already writes
+    `intExpMeasure (intUniverseExt φ0) …`. New "Enlarged Universe (post-blocking)" section
+    in Scheme.lean: `intUniverseExt`, `intUniverseExt_length_le`
+    (`≤ 2 * (2 * φ.complexity + 1) * (WBound φ + 1)`), membership lemmas
+    `mem_intUniverseExt_of`/`_of'`, `intUniverseExt_mem_formula`, `intUniverseExt_mem_label`.)
+  - [x] Re-target the engine: `intExpMeasure_step_lt`, `intExpMeasure_step_lt_branch`,
     `applyAllTImpRules_count_drop`, `applyPersistenceFixpoint_genuine_of_count_le_fuel` over
     `intUniverseExt`. Per 583 F5 these are parametric in the universe list ("statements are
     parametric; proofs re-run"); the load-bearing generalization is
     `intApplyRuleFull_outputs_subset`'s replacement: subformula-content closure into
     `intUniverseExt` under the hypothesis `nextWorld ≤ WBound φ` (the hypothesis is DISCHARGED
     in Phase 5; here it is threaded as a premise, which is provable without DP-1).
+    (Landed. Scope Hypothesis CONFIRMED: all four proofs re-ran verbatim over the enlarged
+    universe on the first elaboration — none unfolds the world range; only `set U := …` /
+    membership-lemma names changed. The load-bearing replacement landed as
+    `intApplyRuleFull_outputs_subset_ext` with `hnw : nextWorld ≤ WBound φ0` threaded as a
+    premise, plus the Ext containment family `intTImpRule_outputs_subset_ext`,
+    `applyAllTImpRules_subset_ext`, `applyPersistenceFixpoint_subset_ext` (the last needed by
+    Phase 5's `hUniv` preservation). Original `intUniverse` block and its containment family
+    left intact; deprecation notes deferred to Phase 8. `lean_verify` on
+    `intApplyRuleFull_outputs_subset_ext`, `intExpMeasure_step_lt`,
+    `applyPersistenceFixpoint_genuine_of_count_le_fuel`, `intUniverseExt_length_le`: axioms
+    `{propext, Classical.choice, Quot.sound}`, no `sorryAx`.)
 - **Timing:** 1 dispatch. Estimated output: ~250-400 lines.
 - **Depends on:** 2 (definition only — proceeds if DP-1 is sorried)
 - **Verification Tier:** local

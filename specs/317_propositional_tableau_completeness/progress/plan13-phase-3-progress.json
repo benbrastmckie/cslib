@@ -3,31 +3,41 @@
   "phase": 3,
   "phase_name": "intUniverseExt / intExpMeasureExt + engine re-target",
   "session_id": "sess_1785275816_a84520_317",
+  "status": "done",
   "objectives": [
     {
       "id": 1,
       "description": "intUniverseExt def + intUniverseExt_length_le + membership lemmas (mem_intUniverseExt_of/of', intUniverseExt_mem_formula/label)",
-      "status": "in_progress",
+      "status": "done",
       "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"]
     },
     {
       "id": 2,
       "description": "Ext containment family: intTImpRule_outputs_subset_ext, applyAllTImpRules_subset_ext, applyPersistenceFixpoint_subset_ext, intApplyRuleFull_outputs_subset_ext (hnw : nextWorld <= WBound)",
-      "status": "in_progress",
+      "status": "done",
       "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"]
     },
     {
       "id": 3,
       "description": "Engine re-target over intUniverseExt: intExpMeasure_step_lt, intExpMeasure_step_lt_branch, applyAllTImpRules_count_drop, applyPersistenceFixpoint_genuine_of_count_le_fuel",
-      "status": "in_progress",
+      "status": "done",
       "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"]
     },
     {
       "id": 4,
       "description": "Verification: scoped + full lake build green, subtree bare-sorry count unchanged (4), conformance corpus green",
-      "status": "pending",
+      "status": "done",
+      "verification": {
+        "scoped_build": "pass",
+        "full_build": "pass (3311 jobs)",
+        "lake_test": "pass (exit 0)",
+        "checkInitImports": "pass (exit 0)",
+        "lint_style": "pass (exit 0)",
+        "subtree_bare_sorries": 4,
+        "lean_verify_axioms": ["propext", "Classical.choice", "Quot.sound"]
+      },
       "files_touched": []
     }
   ],
-  "design_notes": "Plan's parenthetical option taken: intExpMeasure stays parametric in U; no intExpMeasureExt def (Phase 6 spec text writes intExpMeasure (intUniverseExt phi0) directly). Original intUniverse block left intact; deprecation notes deferred to Phase 8."
+  "design_notes": "Plan's parenthetical option taken: intExpMeasure stays parametric in U; no intExpMeasureExt def (Phase 6 spec text writes intExpMeasure (intUniverseExt phi0) directly). Scope Hypothesis confirmed: all four engine proofs re-ran verbatim on first elaboration. Original intUniverse block left intact; deprecation notes deferred to Phase 8."
 }

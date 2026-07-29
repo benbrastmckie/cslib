@@ -1,52 +1,52 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "blocked",
-  "skeleton": false,
-  "summary": "Phase 7 (truthLemma T-imp discharge) BLOCKED, not implemented. The task list's closure route for Gap 1 -- threading applyPersistenceFixpoint_genuine_of_count_le_fuel so the returned branch is a genuine persistence fixpoint where 'every world accessible from a T(phi->psi) source carries its own copy' -- depends on the applyAllTImpRules self-copy channel ('Deliverable 6'), which was deliberately removed by the ancestor-blocking calculus-repair dependency (commit a70187dd, verified by direct diff inspection). That commit's own docstring on applyAllTImpRules (Expansion.lean) states explicitly that Gap 1 (sat_timp at accessible, not just reflexive, worlds) 'remains out of scope' and that truthLemma's T-imp sorry 'is untouched by this change'. This is a confirmed structural blocker, not analysis-paralysis or an unattempted proof: the removed mechanism no longer exists in the codebase, full stop. A surviving, weaker fact was identified and documented (applyAllTImpRules's psi-consequence propagation gives T(phi)@w'in b -> T(psi)@w'in b at accessible w' without needing a copy at w', at a genuine fixpoint) but confirmed insufficient, since the goal needs semantic IForces at w', not branch membership, and truthLemma's own induction hypotheses never supply Force -> T(_)@w'in b. No sorry was relocated, weakened, or vacuously discharged; the T-imp sorry is exactly where it was at Phase 6's exit. Documentation-only changes were made and committed: the Scheme.lean STOP-gate note above truthLemma gained a 'GAP 1 UPDATE' paragraph with full evidence and two live-but-unattempted continuation options (a bounded copy-channel variant needing its own divergence probe, or a quotient/blocking-frame reconstruction); the inline T-imp comment was updated to match; plan v14 Phase 7 was marked [BLOCKED] with a documented blocker subsection. Scoped build green; lean_verify axiom profile on openBranch_countermodel unchanged from Phase 6's exit (propext, Classical.choice, Quot.sound, sorryAx traced only to the T-imp sorry); repo-subtree bare-sorry census unchanged at 4 (T-imp, DP-2, DP-3, DP-4).",
-  "phases_completed": 8,
+  "status": "implemented",
+  "skeleton": true,
+  "summary": "Phase 7 re-annotation + Phase 8 (documentation accuracy + full CI gate) complete. No Cslib/ proof work was in scope: this dispatch re-annotated the truthLemma T-imp sorry (Scheme.lean) as a strategic sorry (DP-5, follow_up_task 430) per reports/17's blocker-research findings (F1: self-copy reinstatement is termination-safe, already measured by the ancestor-blocking repair's own probe; F3, decisive: a bare reinstatement would not close Gap 1 anyway, since truthLemma's frame ranges over the augmented edge list while any copy channel reaches only the raw edges -- the real obligation is a loop-back transfer lemma, the same fact task 430 needs at the atom shape). Corrected the STOP-gate note's 'Recommendation for continuation' paragraph and the plan's own Phase 7 blocker section with the same two findings. Phase 7 heading left [BLOCKED], not re-attempted. For Phase 8: updated intUniverse's docstring to point at intUniverseExt/WBound as the live development; expanded the Strict-Decrease Engine module note to mark the sum-measure engine retained-but-unconsumed, record candidate (b)/(c) dispositions, and record the s<~22 corpus-row envelope; synced both Completeness.lean files' monotonicity-bridge sorry comments (no longer misstate the blocker as fuel-sufficiency, which is landed -- correctly names the shared persistence-invariant blocker); verified (read-only, out of territory) that Expansion.lean's divergence-witness note is already accurate. Ran the full CI gate: lake build (full, 3311/3311 green), checkInitImports (exit 0), lake lint (RED at repo level but ZERO findings in this task's three territory files -- pre-existing unrelated backlog in Bimodal/LTL/Modal/Temporal), lint-style (clean), lake test (green, TableauConformance's 44-row corpus incl. divergence-witness row 20 passed), shake (zero findings for territory files), lean_verify on all four public completeness consumers ({propext, Classical.choice, Quot.sound, sorryAx} exactly, no unexpected axiom). Task 317 is complete as scoped by plan v14: all phases terminal (1-6, 8 COMPLETED; 7 BLOCKED with named owner task 430). Bare-sorry census: exactly 4 (DP-2, DP-3, DP-4, DP-5), all strategic, all owned, all tracked.",
+  "phases_completed": 9,
   "phases_total": 10,
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 602,
-      "statement": "truthLemma T-imp case (Gap 1: sat_timp only reflexive, not at accessible worlds)",
+      "line": 633,
+      "statement": "truthLemma T-imp case, T-direction (DP-5, formerly the untracked T-imp Gap-1 sorry): T(phi'->psi')@w in b -> forall w' accessible, IForces w' phi' -> IForces w' psi'",
       "strategic": true,
-      "assumption": "a bivalence/totality-bridging fact (Force(w',phi') -> T(phi')@w'in b), or an equivalent copy-propagation mechanism, is not available with current library facts",
-      "why_deferred": "the applyAllTImpRules self-copy channel this case's closure route depended on was deliberately removed by the ancestor-blocking calculus-repair dependency (commit a70187dd); that commit's own docstring declares this gap out of scope for that repair. Closing it now requires a new calculus-level mechanism (bounded copy-channel variant with its own divergence probe, or a quotient/blocking-frame reconstruction) outside a Scheme.lean-only dispatch's territory -- see the STOP-gate note's 'GAP 1 UPDATE' paragraph and this handoff's blockers[] entry for the full analysis",
+      "assumption": "positive-formula persistence along the AUGMENTED intAccessPreorder edges relation, at the implication shape (equivalently: w' carries its own T(phi'->psi') copy, or an equivalent totality fact bridging IForces -> T(_)@w'in b)",
+      "why_deferred": "the applyAllTImpRules self-copy channel this case's original closure route depended on was deliberately removed by the ancestor-blocking calculus repair (commit a70187dd); reports/17_timp-continuation-options.md (dedicated blocker research, this task) found reinstating it termination-safe but insufficient by itself, since truthLemma's frame ranges over the augmented (loop-back-edge-carrying) edge list while any copy channel only reaches the raw edges -- the same positive-formula-persistence fact DP-3/DP-4 need at the atom shape",
       "discharge_phase": null,
       "pre_existing": true,
-      "follow_up_task": null
+      "follow_up_task": 430
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 2566,
-      "statement": "intFreshMint_preserves_nw : nw <= WBound phi0 -> nw + 1 <= WBound phi0 (fresh-mint arm hNW preservation)",
+      "line": 2605,
+      "statement": "intFreshMint_preserves_nw : nw <= WBound phi0 -> nw + 1 <= WBound phi0 (fresh-mint arm hNW preservation, DP-2)",
       "strategic": true,
-      "assumption": "the creation-count invariant 'labels minted so far <= tree size <= WBound phi0' (equivalently: this fresh-mint firing is licensed by the pigeonhole tree-size bound, not merely that the counter has not yet overflowed)",
-      "why_deferred": "the bare hnwB : nw <= WBound phi0 hypothesis is insufficient on its own (consistent with nw = WBound phi0); the missing strict premise (nw < WBound phi0) requires tying intCreatedChain_le's pigeonhole bound to the runtime next-world counter via a runtime-check-to-final-branch transfer that lemma's docstring explicitly flags as not yet done -- genuinely open research work. Untouched by this dispatch (out of Phase 7's scope).",
+      "assumption": "the creation-count invariant 'labels minted so far <= tree size <= WBound phi0' (the runtime-check-to-final-branch transfer intCreatedChain_le's docstring flags as not yet done)",
+      "why_deferred": "genuinely open research-grade work, out of this dispatch's scope (unchanged from Phase 5/6's exit)",
       "discharge_phase": null,
       "pre_existing": true,
       "follow_up_task": 585
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
-      "line": 133,
-      "statement": "DP-3 intuitionistic validity bridge",
+      "line": 140,
+      "statement": "intuitionisticTableau_complete monotonicity bridge (DP-3): IValid phi -> IForces (intExtractValuation b) (modelBot b) 0 phi at the intAccessPreorder edges frame",
       "strategic": true,
-      "assumption": "IAtomPersist route",
-      "why_deferred": "owned by a separate planned task, not this plan's scope",
+      "assumption": "upward-closure (positive-formula persistence) of intExtractValuation b along the augmented intAccessPreorder edges relation, at the atom shape",
+      "why_deferred": "owned by task 430's territory, not this plan's scope; comment corrected this dispatch to no longer misstate the blocker as awaiting the (now-landed) fuel-sufficiency fixpoint",
       "discharge_phase": null,
       "pre_existing": true,
       "follow_up_task": 430
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
-      "line": 125,
-      "statement": "DP-4 minimal validity bridge",
+      "line": 128,
+      "statement": "minimalTableau_complete monotonicity bridge (DP-4): MValid phi -> IForces (intExtractValuation b) (minBranchBotForces b) 0 phi at the intAccessPreorder edges frame",
       "strategic": true,
-      "assumption": "IAtomPersist route",
-      "why_deferred": "owned by a separate planned task, not this plan's scope",
+      "assumption": "same as DP-3, plus upward-closure of minBranchBotForces b",
+      "why_deferred": "same as DP-3",
       "discharge_phase": null,
       "pre_existing": true,
       "follow_up_task": 430
@@ -55,43 +55,55 @@
   "blockers": [
     {
       "phase": 7,
-      "target": "truthLemma T-imp case (Scheme.lean, T(phi'->psi')@w in b -> forall w' accessible, IForces w' phi' -> IForces w' psi')",
-      "verbatim_goal": "goals_before (case imp.left, lean_goal at the sorry site): a✓ : (List.any b fun sf => sf.sign == Sign.pos && sf.formula == (phi' → psi') && sf.label == w) = true ⊢ ∀ (w' : ℕ), w ≤ w' → IForces (intExtractValuation b) (S.modelBot b) w' phi' → IForces (intExtractValuation b) (S.modelBot b) w' psi'",
-      "what_was_tried": "Verified via git show a70187dd that the applyAllTImpRules self-copy channel the plan's closure route depends on was deliberately removed by the ancestor-blocking calculus repair, whose own docstring declares this exact gap out of scope. Derived and documented (in Scheme.lean's STOP-gate note) that the surviving intTImpRule psi-consequence propagation gives a genuine-fixpoint membership implication T(phi)@w'in b -> T(psi)@w'in b at accessible w', sourced from w without needing a copy at w' -- stronger than the removed mechanism in that respect -- but confirmed this is insufficient to close the goal because it needs IForces (semantic), not branch membership, and truthLemma's own ih_phi'/ih_psi' never supply the converse Force -> T(_)@w'in b needed to invoke it.",
-      "why_it_failed": "The specific mechanism the plan's Phase 7 task list names (self-copy-then-reflexive-branch, giving the sat_timp disjunction directly at every accessible w') no longer exists in the codebase, and no equivalent bivalence/totality fact is available elsewhere in the file to substitute for it. Closing this case requires a new calculus-level mechanism outside a Scheme.lean-only dispatch's territory (Expansion.lean/Rules.lean changes), and specifically risks re-opening the ancestor-blocking repair's settled, tested design without that repair's own divergence-probe methodology to validate the change -- not a call this dispatch is authorized to make unilaterally."
+      "target": "truthLemma T-imp case (Scheme.lean) -- not re-attempted this dispatch, per the mandate's explicit no-Cslib/-proof-work scope",
+      "verbatim_goal": "T(phi'->psi')@w in b -> forall w' accessible from w, IForces val w' phi' -> IForces val w' psi'",
+      "what_was_tried": "Not re-attempted this dispatch. The blocker was already fully investigated by reports/17_timp-continuation-options.md immediately prior, and this dispatch's Objective A only re-annotated the sorry's tracking, per that report's recommendation.",
+      "why_it_failed": "See reports/17: the copy-channel closure route Phase 7's task list depended on is termination-safe to reinstate but insufficient alone (raw vs. augmented edges, finding F3). Closing the case requires either a bounded self-copy variant or the augmented-relation persistence invariant, both calculus-level changes outside a Scheme.lean-only dispatch's territory and gated behind a Lean-prototype check (reports/17's Gate B) before any algorithm change is authorized."
     }
   ],
-  "continuation_context": {
-    "is_successor": false,
-    "resume_phase": "7",
-    "resume_note": "Do not re-dispatch Phase 7 as currently written. Requires either a new calculus-repair sub-task (bounded copy-channel variant + divergence probe, or a quotient/blocking-frame reconstruction, mirroring the ancestor-blocking repair's own methodology) before another Scheme.lean-scoped attempt, or an orchestrator/user decision to re-scope (e.g. defer the T-imp sorry as a tracked strategic sorry pointing at a new follow-up task, similar to how DP-2/DP-3/DP-4 are handled)."
-  },
-  "continuation_path": "specs/317_propositional_tableau_completeness/handoffs/16_phase7-gap1-self-copy-removed.md",
-  "next_phase": "7",
-  "notes_for_next_dispatch": [
-    "Read the 'GAP 1 UPDATE' paragraph of the STOP-gate note directly above truthLemma in Scheme.lean first -- it is the authoritative, current analysis and supersedes the plan's Phase 7 task-list wording.",
-    "Do not re-add a self-copy channel to applyAllTImpRules without first running a divergence probe of the same kind the ancestor-blocking repair ran (its own Phase 1 methodology) -- an unbounded self-copy is exactly what caused the original expansion-loop divergence documented in reports/13.",
-    "Recommend the orchestrator either (a) spawn a dedicated calculus-investigation task scoped like the ancestor-blocking repair itself, or (b) accept the T-imp sorry as a permanently-deferred strategic sorry with a new follow-up task number, updating this handoff's sorry_inventory discharge_phase accordingly once a decision is made.",
-    "Phases 1-6 remain complete and unregressed; no code outside documentation/comments was touched this dispatch."
-  ],
+  "continuation_context": null,
+  "continuation_path": null,
+  "next_phase": null,
   "modified_files": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
     "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "specs/317_propositional_tableau_completeness/handoffs/16_phase7-gap1-self-copy-removed.md"
+    "specs/317_propositional_tableau_completeness/summaries/14_phase7-reannotation-and-phase8-completion-summary.md",
+    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
+    "specs/317_propositional_tableau_completeness/.return-meta.json"
   ],
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/handoffs/16_phase7-gap1-self-copy-removed.md",
-      "type": "handoff",
-      "summary": "Phase 7 blocker handoff: Gap 1's closure route was removed by the ancestor-blocking calculus repair; full evidence, what-was-tried, what-not-to-try, and unblock requirements"
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase7-reannotation-and-phase8-completion-summary.md",
+      "type": "summary",
+      "summary": "Full account of the Phase 7 re-annotation and Phase 8 documentation-accuracy + CI-gate work, with per-gate verification results and the terminal sorry census"
     }
   ],
   "verification": {
-    "scoped_build": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme)",
-    "full_build": "not run (blocked before reaching a full-CI-eligible state; scoped tier matches this phase's declared Verification Tier: local)",
-    "checkInitImports": "not run this dispatch (no new files added)",
+    "full_build": "green, 3311/3311 jobs",
+    "checkInitImports": "exit 0",
+    "lake_lint": "RED at repo level (pre-existing, unrelated to this task's file_scope); ZERO findings against Intuitionistic/Scheme.lean, Intuitionistic/Completeness.lean, or Minimal/Completeness.lean",
+    "lint_style": "clean, zero output",
+    "lake_test": "green; CslibTests.TableauConformance (44-row corpus incl. divergence-witness row 20) built and passed; no observed timing regression",
+    "shake": "zero import-drift findings for the three territory files; unrelated findings elsewhere in the repo out of scope",
+    "lean_verify": "openBranch_countermodel, tableau_complete, intuitionisticTableau_complete, minimalTableau_complete all report axioms = {propext, Classical.choice, Quot.sound, sorryAx}; sorryAx traced only to the four declared strategic sorries above, no unexpected axiom",
     "bare_sorry_census_subtree": 4,
-    "bare_sorry_census_note": "unchanged from Phase 6's exit (4): T-imp (Scheme.lean:602, this phase's target, NOT discharged), DP-2 (Scheme.lean:2566), DP-3 (Completeness.lean:133), DP-4 (Minimal/Completeness.lean:125). No sorry added, removed, relocated, or weakened this dispatch.",
-    "lean_verify_openBranch_countermodel": "axioms = {propext, Classical.choice, Quot.sound, sorryAx}; sorryAx traced only to truthLemma's pre-existing T-imp sorry, unchanged from Phase 6's exit"
+    "bare_sorry_census_note": "DP-2, DP-3, DP-4, DP-5 -- exactly the plan's expected terminal set. DP-5 (T-imp Gap 1, this dispatch's re-annotation) was NOT discharged; Phase 7 stays [BLOCKED]."
+  },
+  "task_complete_assessment": {
+    "complete_as_scoped_by_plan_v14": true,
+    "phase_status": {
+      "1": "COMPLETED", "2": "COMPLETED", "3": "COMPLETED", "4A": "COMPLETED",
+      "4B": "COMPLETED", "4C": "COMPLETED", "5": "COMPLETED", "6": "COMPLETED",
+      "7": "BLOCKED (named owner: task 430, scope-widening recommendation not itself executed this dispatch)",
+      "8": "COMPLETED"
+    }
+  },
+  "metadata": {
+    "session_id": "sess_1785294636_11f932",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

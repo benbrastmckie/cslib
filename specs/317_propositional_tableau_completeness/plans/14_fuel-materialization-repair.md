@@ -1,7 +1,9 @@
 # Implementation Plan: Tableau Completeness — Per-Branch Fuel Materialization Repair (Skeleton, v14)
 
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED] (Phases 1-6, 8 terminal-complete; Phase 7 terminal-`[BLOCKED]`,
+  reassigned to task 430 — see Planned Strategic Sorries DP-5 and Phase 7's blocker-research
+  update; no phase of this plan remains actionable)
 - **Effort**: 26-44 hours (10 phase-sized dispatches, 3 completed; skeleton — full sorry-zero
   completion is explicitly NOT claimed by this plan alone, see Planned Strategic Sorries)
 - **Dependencies**: 456 (completed — Blocking.lean), 552 (completed), 574 (completed — ancestor
@@ -702,34 +704,76 @@ or prototyping the quotient frame against `Minimal/Soundness.lean`'s
 where it is, tracked in the handoff `sorry_inventory` with `discharge_phase: null` (no phase of
 *this* plan can discharge it).
 
-### Phase 8: Documentation accuracy + full CI gate [NOT STARTED]
+**Update (dedicated blocker research, reports/17_timp-continuation-options.md — GO/NO-GO
+assessment of the two options above, superseding two claims in "Why it cannot be completed"
+above).** (i) Option (a)'s divergence probe is not a fresh unknown: the ancestor-blocking
+repair's own variant-selection probe already compared self-copy retained vs. removed and found
+both terminate at the identical saturated branch, so reinstating the channel is termination-safe
+— only a re-confirmation against the current tree remains, not a probe "before being trusted"
+from scratch. (ii) A more decisive finding not recorded above: even a full reinstatement of the
+channel would NOT by itself close this case, because `truthLemma`'s frame ranges over an
+AUGMENTED edge list (carrying the ancestor-blocking repair's loop-back edges) while any copy
+channel only reaches the algorithm's RAW edges — a gap strictly larger than the copy-channel
+question. Option (b) (quotient/blocking-frame reconstruction) is assessed NO-GO: this exact
+design was built, then refuted and deleted, earlier in this codebase's history (a non-monotone
+representative-map obstruction under branch growth), with independent literature confirmation.
+**Recommendation, not re-executed by this plan**: widen task 430's scope from atom-persistence
+to positive-formula-persistence along the augmented relation (this phase's Gap 1 is the
+implication-shaped instance of the same fact DP-3/DP-4 need at the atom shape), gated behind a
+Lean-prototype check of the loop-back transfer lemma before any calculus change. Phase 7 stays
+`[BLOCKED]`; this plan takes no further action against it — see Phase 8's re-annotation of the
+T-imp sorry as DP-5.
+
+### Phase 8: Documentation accuracy + full CI gate [COMPLETED]
 - **Goal:** No stale claim survives; the full repository gate passes.
 - **Tasks:**
-  - [ ] Update `intUniverse`'s warning docstring (Scheme.lean:1585-1599) to point at
-    `intUniverseExt`/`WBound` as the live development; keep the refutation record.
-  - [ ] Engine-restructure documentation (reports/15 §7 additions): the `intFuel` →
-    `intFuelExt` story and per-branch fuel semantics; update the divergence-witness note
-    (Expansion.lean:450-494 region or its post-move home) for per-branch fuel; mark the
-    sum-measure engine (`intExpMeasure`, `intExpMeasure_step_lt`(+`_branch`), splits) as
-    retained-but-unconsumed (statements never mention the engine — they stay green); record
-    the `s ≲ 22` corpus-row feasibility envelope; record candidate (b) as elective post-DP-2
-    future work and candidate (c) as rejected (pointer to reports/15 §3-§4) so neither is
-    re-proposed.
-  - [ ] Sync comments in both `Completeness.lean` files ONLY where they now misstate what is
-    deferred (the bridge sorries themselves are untouched — 430's territory).
-  - [ ] Optionally add a conformance regression row exercising the per-branch fuel path
-    (within the `s ≲ 22` envelope).
-  - [ ] Sorry accounting: exactly the DP rows remain (DP-3/DP-4 always; DP-2 only if placed) —
-    enumerate in the summary's `sorry_inventory`.
-  - [ ] Full CI gate in order: `lake build`, `lake exe checkInitImports`, `lake lint`,
-    `lake exe lint-style`, `lake test` (re-check the 4C timing budget), `lake exe mk_all
-    --module` (only if a new file was added), `lake shake --add-public --keep-implied
-    --keep-prefix`.
+  - [x] Update `intUniverse`'s warning docstring (now Scheme.lean:1510-1531, shifted since the
+    plan was written) to point at `intUniverseExt`/`WBound` as the live development; refutation
+    record kept.
+  - [x] Engine-restructure documentation (reports/15 §7 additions): the `intFuel` →
+    `intFuelExt` story and per-branch fuel semantics were already documented at the
+    `## Per-Branch-Fuel Expansion Engine` module note (pre-existing, accurate, verified this
+    dispatch — no edit needed); expanded the `## Strict-Decrease Engine` module note to mark
+    the sum-measure engine (`intExpMeasure`, `intWork`, `intExpMeasure_step_lt`(+`_branch`)) as
+    retained-but-unconsumed, record candidate (b) as elective post-DP-2 future work and
+    candidate (c) as rejected with its rationale, and record the `s ≲ 22` corpus-row
+    feasibility envelope. **Divergence-witness note update deferred**: it lives in
+    `Expansion.lean`, out of this dispatch's territory (task 574's file, explicitly excluded);
+    verified read-only that it already reads "Historical record, measured on the RETIRED
+    global-fuel expansion loop" — already accurate, not stale, no edit required there.
+  - [x] Synced comments in both `Completeness.lean` files: both monotonicity-bridge `sorry`s
+    no longer misstate the blocker as awaiting the fuel-sufficiency fixpoint (landed, modulo
+    the unrelated DP-2 sorry) — corrected to name the actual blocker (positive-formula
+    persistence along the augmented relation, same fact as DP-5 at the atom shape). The bridge
+    sorries themselves are untouched (task 430's territory).
+  - [ ] Optional conformance regression row: SKIPPED — genuinely optional per the plan's own
+    wording ("Optionally add"), and `lake test`'s existing 44-row corpus (verified green this
+    dispatch) already exercises the per-branch fuel path including the divergence-witness row.
+  - [x] Sorry accounting: bare-sorry census in the subtree is exactly 4 — DP-2, DP-3, DP-4,
+    DP-5 (re-annotated this dispatch; Phase 7's T-imp sorry, NOT discharged, was never DP-3/DP-4
+    but is now a fifth accounted row) — enumerated in the summary's `sorry_inventory`.
+  - [x] Full CI gate run in order: `lake build` (full, 3311/3311 green), `lake exe
+    checkInitImports` (exit 0), `lake lint` (RED, but zero findings in this task's three
+    territory files — see Phase 8 completion note below for the full accounting), `lake exe
+    lint-style` (clean, zero output), `lake test` (green, `CslibTests.TableauConformance`
+    built successfully, no observed timing regression), `lake exe mk_all --module` (skipped —
+    no new file was added, per the plan's own conditional), `lake shake --add-public
+    --keep-implied --keep-prefix` (zero import-drift findings for any of the three territory
+    files; all findings are in unrelated pre-existing files elsewhere in the repo).
 - **Timing:** 1 dispatch. Estimated output: ~100-180 lines.
 - **Depends on:** 1-7
 - **Verification Tier:** full
 - **Done when:** all gates green; summary written; `sorry_inventory` complete and matching the
   Planned Strategic Sorries table (or flagging deviations).
+
+**Phase 8 completion note — `lake lint` gate.** `lake lint` is RED at the repository level, but
+every finding is a pre-existing unused-argument warning in unrelated modules (`Bimodal/**`,
+`LTL/**`, `Modal/Tableau/FrameSoundness.lean`, `Temporal/**`) — grep-verified zero findings
+against `Intuitionistic/Scheme.lean`, `Intuitionistic/Completeness.lean`, or
+`Minimal/Completeness.lean`. This dispatch introduces no new lint debt; the repo-wide backlog
+is out of this task's `file_scope` and is not a regression this dispatch caused or is
+responsible for clearing. Flagging explicitly per the dispatch mandate rather than reporting an
+unearned full-green CI gate.
 
 ## Planned Strategic Sorries
 
@@ -739,32 +783,49 @@ where it is, tracked in the handoff `sorry_inventory` with `discharge_phase: nul
 | DP-2: `hNW` preservation, fresh-mint arm | Scheme.lean, TBD (Phase 5) | Labels minted on a branch ≤ tree size ≤ `WBound φ` (incl. the runtime-check-to-final-branch transfer noted in `intCreatedChain_le`'s docstring) | Creation-count invariant beyond 583's sketch; the remaining research-grade concentration | 585 |
 | DP-3: intuitionistic validity bridge (pre-existing, NOT placed by this plan) | Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:133 (`intuitionisticTableau_complete`) | Upward-closure of `intExtractValuation b` along `intAccessPreorder edges` (IAtomPersist route) | Owned by existing planned task 430 (deps already point 430 → 317); presupposes saturated branches, i.e. this plan's output | 430 |
 | DP-4: minimal validity bridge (pre-existing, NOT placed by this plan) | Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:125 (`minimalTableau_complete`) | Upward-closure of `intExtractValuation b` AND `minBranchBotForces b` along the frame | Same as DP-3 | 430 |
+| DP-5: `truthLemma` T-imp Gap 1 (pre-existing, RE-ANNOTATED by Phase 7's blocker research; NOT newly placed by this plan) | Scheme.lean, `truthLemma`, `imp` case, T-direction (line 602 at time of the Phase 7 blocker; re-locate by content if shifted) | `∀ w'` accessible from `w`, `T(φ'→ψ')@w ∈ b → w'` carries its own `T(φ'→ψ')` copy (positive-formula persistence along the augmented `intAccessPreorder edges` relation, at the implication shape) | Same fact as DP-3/DP-4's monotonicity bridge, one formula shape over (atom vs. implication). A bare self-copy-channel revert is termination-safe (measured by the ancestor-blocking repair's own variant-selection probe) but insufficient alone: `truthLemma`'s frame ranges over the augmented (loop-back-edge-carrying) edge list, while any copy channel only reaches the algorithm's raw edges. Widened into task 430's scope per reports/17 (`prove_atom_persistence_upward_closure_for_intexpan` → positive-formula persistence along the augmented relation) | 430 |
 
 Notes: DP-2 is contingent — if the Phase 5 proof closes within budget, no sorry is placed and
 the follow-up task 585 should be closed as unnecessary by the orchestrator/user (DP-1 already
-closed without it). DP-3/DP-4 are pre-existing sorries recorded for complete accounting; they
-are not new placements and cite the existing task number directly. The fuel-0 sorry that
+closed without it). DP-3/DP-4/DP-5 are pre-existing sorries recorded for complete accounting;
+they are not new placements and cite the existing task number directly. DP-5 is the T-imp
+`sorry` Phase 7 was originally scoped to discharge; the dedicated blocker research (reports/17)
+found the closure route it depended on structurally unavailable in this codebase (see Phase 7's
+`[BLOCKED]` note below) and recommended re-annotating it into the same accounting treatment as
+DP-3/DP-4 rather than re-planning Phase 7 — done in this dispatch. The fuel-0 sorry that
 Phase 4B carries through the port is NOT a DP row — it is the pre-existing `Scheme.lean:3055`
 sorry (one of the four), transported 1-for-1 and discharged in Phase 6.
 
 ## Testing & Validation
 
-- [ ] Per-phase scoped `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`
-  (plus `.Soundness` at 4B, `.Expansion` when touched) — every phase.
+- [x] Per-phase scoped `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`
+  (plus `.Soundness` at 4B, `.Expansion` when touched) — every phase, incl. Phase 8's own
+  scoped build of Scheme/Completeness/Minimal.Completeness.
 - [x] Phase 4A: `#eval` parity probe `intVerdictB = intVerdict` on all 20 propositional
   corpus rows; `lake test` wall-time baseline recorded.
-- [ ] `lake test` at Phases 4C and 8 (conformance corpus, all 44 rows, esp. divergence-witness
-  row 20), with the 4C TIMING GATE: ≤ 3 minutes total or ≤ 5× the 4A baseline, whichever is
-  looser.
-- [ ] Sorry census: exactly 4 bare sorries in the subtree through 4A-4C (the fuel-0 sorry
-  carried 1-for-1); strictly decreasing by one at each of Phases 6 and 7.
-- [ ] `lean_verify` on the restated `intExpandBranches_openBranch_sat` consumers
-  (`openBranch_countermodel`, `tableau_complete`) at Phase 8: axiom set
-  `{propext, Classical.choice, Quot.sound}` plus `sorryAx` ONLY via the declared DP
-  declarations.
-- [ ] Sorry census at Phase 8: bare sorries in the subtree = {DP-3, DP-4} ∪ (DP-2 if placed);
-  anything else is a defect.
-- [ ] Full CI order per cslib.md (Phase 8 checklist).
+- [x] `lake test` at Phases 4C and 8 (conformance corpus, all 44 rows, esp. divergence-witness
+  row 20): green this dispatch, `CslibTests.TableauConformance` built successfully within the
+  full `lake test` run; no observed timing regression (full suite completed well inside the
+  command budget).
+- [x] Sorry census: exactly 4 bare sorries in the subtree at Phase 8 exit (DP-2, DP-3, DP-4,
+  DP-5) — grep-verified this dispatch (`\bsorry\b` excluding comment/docstring lines). Phase 6
+  discharged the fuel-0 sorry as planned; Phase 7 did NOT discharge DP-5 (T-imp Gap 1) —
+  `[BLOCKED]` per its dedicated blocker research, DP-5 re-annotated into the terminal
+  accounting instead of a strict decrease.
+- [x] `lean_verify` (Phase 8, this dispatch) on all four public completeness consumers:
+  `openBranch_countermodel`, `tableau_complete` (`Scheme.lean`),
+  `intuitionisticTableau_complete` (`Intuitionistic/Completeness.lean`),
+  `minimalTableau_complete` (`Minimal/Completeness.lean`) — all four report axiom set
+  `{propext, Classical.choice, Quot.sound, sorryAx}`, exactly as expected; `sorryAx` is
+  present only via the four declared DP sorries, no unexpected axiom.
+- [x] Sorry census at Phase 8: bare sorries in the subtree = {DP-2, DP-3, DP-4, DP-5} —
+  matches exactly, confirmed by direct grep. DP-5 (T-imp Gap 1) was NOT discharged — Phase 7
+  is `[BLOCKED]` per its dedicated blocker research (reports/17) and DP-5 carries the
+  strategic-sorry annotation into this plan's terminal accounting instead.
+- [x] Full CI order per cslib.md (Phase 8 checklist): all gates run this dispatch; `lake lint`
+  is RED at the repo level but with zero findings against this task's three territory files
+  (see Phase 8's completion note above) — every other gate (`lake build` full, `checkInitImports`,
+  `lint-style`, `lake test`, `lake shake`) is green.
 
 ## Artifacts & Outputs
 

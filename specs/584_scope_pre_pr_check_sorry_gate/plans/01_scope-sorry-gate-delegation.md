@@ -312,7 +312,7 @@ rather than the asserted number.
 
 ---
 
-### Phase 4: Update the script header and scripts/README.md [NOT STARTED]
+### Phase 4: Update the script header and scripts/README.md [COMPLETED]
 
 **Goal**: Bring the two documentation surfaces in scope into agreement with the new behaviour,
 including the pre-existing stale cross-reference the research report flagged.

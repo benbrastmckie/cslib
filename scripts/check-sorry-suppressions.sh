@@ -58,24 +58,50 @@
 #
 # Unlike `scripts/check-axiom-census.sh`, this is a pure text sweep over `Cslib/*.lean` source
 # files — it needs no built `.olean`s and no `lake build`. That is why it is placed before the
-# build step in `.github/workflows/lean_action_ci.yml` (see the comment there) and can run as
-# step 1 of `scripts/pre-pr-check.sh`'s local checks.
+# build step in `.github/workflows/lean_action_ci.yml` (see the comment there). It is wired as
+# step 8 of `scripts/pre-pr-check.sh` (whole-tree, unscoped), and separately, as of the
+# `--scope` flag documented below, ALSO invoked at step 1 of that same script (scoped to four
+# hand-picked trees, for early fast-fail feedback against the identical baseline). Step 1
+# contributes no unique failure coverage over step 8 — see the rationale comment above step 8 in
+# `pre-pr-check.sh`.
 #
 # EXIT-CODE CONTRACT (READ BEFORE CHANGING)
 #
-#   0  clean or improved (ratchet-only-decreases: an improvement is reported, never failed)
+#   0  clean or improved (ratchet-only-decreases: an improvement is reported, never failed), OR
+#      an empty --changed set ("nothing to check" -- see below; deliberately NOT exit 2, unlike
+#      the --scope zero-file case)
 #   1  regression: some file exceeds its baseline marker or sorry ceiling
 #   2  usage or environment error — MUST be used whenever the underlying tooling fails to RUN,
-#      never silently reported as "0 suppressions, clean". Three such conditions, all fatal:
+#      never silently reported as "0 suppressions, clean". Conditions, all fatal:
 #        - `perl` is not on `PATH` (needed for the block-comment strip);
-#        - the `find "$SCAN_ROOT" -name '*.lean'` sweep yields zero files (a scan root that
-#          resolves to nothing must never read as "clean" — it reads as broken);
-#        - the block-comment-stripping pass itself exits nonzero on any file.
+#        - the default or `--scope`-restricted sweep yields zero files (a scan root, or a
+#          mistyped `--scope` path, that resolves to nothing must never read as "clean" — it
+#          reads as broken). This is DELIBERATELY DISTINCT from an empty `--changed` set (see
+#          above): a mistyped path is a real usage error, while "this branch changed nothing in
+#          scope" is a genuinely clean result. The two must never collapse into each other;
+#        - the block-comment-stripping pass itself exits nonzero on any file;
+#        - `--changed`'s merge-base resolution fails (unresolvable base ref, absent remote, or a
+#          detached HEAD with no common ancestor) — an environment error, never a silent empty
+#          changed-set;
+#        - `--update` combined with `--scope` or `--changed` (see below).
+#
+# WHY --update REFUSES --scope AND --changed
+#
+# `--update` always rewrites the WHOLE-TREE baseline from a fresh whole-tree sweep, unscoped, by
+# construction. If it instead accepted `--scope`/`--changed`, a partial sweep would overwrite
+# the same whole-tree baseline file, silently lowering every out-of-scope file's ceiling to 0 —
+# a silent ratchet break that reads as "clean" the next time those files are swept (0 exceeds
+# nothing). So combining `--update` with either flag is refused outright with `exit 2`, before
+# any write to `$BASELINE`. To re-baseline after a scoped/changed run confirms an improvement,
+# always run the bare, unscoped `bash scripts/check-sorry-suppressions.sh --update`.
 #
 # Usage:
-#   check-sorry-suppressions.sh            verify against the baseline (exit 1 on regression)
-#   check-sorry-suppressions.sh --update   rewrite the baseline from the current tree
-#   check-sorry-suppressions.sh --list     print current per-file counts, highest sorry-count first
+#   check-sorry-suppressions.sh                       verify against the baseline (exit 1 on regression)
+#   check-sorry-suppressions.sh --update              rewrite the whole-tree baseline (refuses --scope/--changed)
+#   check-sorry-suppressions.sh --list                print current per-file counts, highest sorry-count first
+#   check-sorry-suppressions.sh --scope PATH...       verify, restricted to the given PATH(s) (fatal if none match)
+#   check-sorry-suppressions.sh --changed [--base REF]  verify, restricted to changed .lean files
+#                                                        (opt-in; default base ref origin/main; empty result is exit 0)
 
 set -uo pipefail
 

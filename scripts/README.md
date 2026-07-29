@@ -101,9 +101,18 @@ to learn about it as well!
   step (fails fast) and as step 8 of `pre-pr-check.sh`. The baseline also doubles as a debt
   ledger, recording each file's in-source blocking comment beneath the data rows.
 
+  **Dual wiring in `pre-pr-check.sh`**: this script is invoked at both step 1 (scoped, via
+  `--scope` to four hand-picked trees, for early fast-fail feedback) and step 8 (unscoped,
+  whole-tree). Both compare against the same baseline, so step 1 contributes no unique failure
+  coverage over step 8 and can never fail where step 8 passes -- see the rationale comment
+  above step 8 in `pre-pr-check.sh` for the full relationship, including why step 1 and step 5
+  (`lake build --wfail --iofail`) are NOT redundant despite both mentioning sorries.
+
   **Usage:**
   ```bash
-  bash scripts/check-sorry-suppressions.sh            # verify against the baseline
-  bash scripts/check-sorry-suppressions.sh --list      # print current per-file counts
-  bash scripts/check-sorry-suppressions.sh --update    # re-baseline from the current tree
+  bash scripts/check-sorry-suppressions.sh                      # verify against the baseline
+  bash scripts/check-sorry-suppressions.sh --list                # print current per-file counts
+  bash scripts/check-sorry-suppressions.sh --update               # re-baseline from the current tree
+  bash scripts/check-sorry-suppressions.sh --scope PATH...        # verify, restricted to PATH...
+  bash scripts/check-sorry-suppressions.sh --changed [--base REF] # verify, restricted to changed .lean files (opt-in; default base origin/main)
   ```

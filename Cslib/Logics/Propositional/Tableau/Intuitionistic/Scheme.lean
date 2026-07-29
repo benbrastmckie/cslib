@@ -3592,6 +3592,111 @@ private lemma intWorldHist_chain_le {φ0 : Proposition Atom} {par : Nat → Nat}
   · exact key i j h hj heqT heqObl
   · exact key j i (Nat.lt_of_le_of_ne h fun e => hne e.symm) hi heqT.symm heqObl.symm
 
+/-! ## Phase 10: Path-Injection Size Bound and `intWorldHist_nw_le` (DP-2, report §4.5)
+
+Converts the depth bound (Phase 9) plus the sibling-uniqueness branching bound (H4) into
+`nw ≤ WBound φ0`, matching `WBound`'s exact shape `(B+1)^(D+1)` via an explicit injection from
+created worlds into root-to-world paths of fired implications. -/
+
+omit [Hashable Atom] in
+/-- `parIter`'s "apply-last" unfolding (the defining equation is "apply-first":
+`parIter par (n+1) c = parIter par n (par c)`; this is the other, non-definitional
+decomposition, needed to reconstruct a chain forward from the root in the injectivity
+argument below). -/
+private lemma parIter_succ' (par : Nat → Nat) :
+    ∀ n c, parIter par (n + 1) c = par (parIter par n c)
+  | 0, _ => rfl
+  | n + 1, c =>
+      calc parIter par (n + 1 + 1) c = parIter par (n + 1) (par c) := rfl
+        _ = par (parIter par n (par c)) := parIter_succ' par n (par c)
+        _ = par (parIter par (n + 1) c) := rfl
+
+/-- Fuel-bounded depth-to-root: the number of `par`-steps from `c` down to `0`, computed with
+an explicit decreasing fuel argument (structural recursion, no well-foundedness proof needed).
+`fuel = 0` returns `0` unconditionally (a safe default; never invoked in that regime by
+`parDepth`, which always supplies `fuel = c ≥` the true depth, `parDepthFuel_spec` below). -/
+private def parDepthFuel (par : Nat → Nat) : Nat → Nat → Nat
+  | 0, _ => 0
+  | fuel + 1, c => if c = 0 then 0 else parDepthFuel par fuel (par c) + 1
+
+/-- Depth-to-root of `c`, fuelled by `c` itself (sound since the true depth is always `≤ c`,
+`parDepthFuel_spec` below). -/
+private def parDepth (par : Nat → Nat) (c : Nat) : Nat := parDepthFuel par c c
+
+omit [Hashable Atom] in
+/-- Fuel-generalized correctness of `parDepthFuel`: whenever the fuel dominates the start value
+(`c ≤ fuel`), `parDepthFuel` computes an honest depth -- it reaches `0` after exactly that many
+steps, and every earlier iterate is still positive (hence a genuinely created world). Proved by
+induction on the FUEL, not on `c`, so the recursive call's fuel/value mismatch (fuel drops by
+exactly `1`, `c` drops to `par c`, possibly by much more) never needs a separate
+fuel-invariance lemma. -/
+private lemma parDepthFuel_spec {par : Nat → Nat} {nw : Nat}
+    (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x) :
+    ∀ fuel c, c < nw → c ≤ fuel →
+      parIter par (parDepthFuel par fuel c) c = 0 ∧
+        ∀ i, i < parDepthFuel par fuel c → 1 ≤ parIter par i c
+  | 0, c, _, hcf => by
+      have hc0 : c = 0 := by omega
+      subst hc0
+      refine ⟨rfl, fun i hi => absurd hi ?_⟩
+      simp [parDepthFuel]
+  | fuel + 1, c, hc, hcf => by
+      rcases Nat.eq_zero_or_pos c with rfl | hpos
+      · refine ⟨rfl, fun i hi => absurd hi ?_⟩
+        simp [parDepthFuel]
+      · have hc0 : c ≠ 0 := by omega
+        have hlt : par c < c := hdesc c hpos hc
+        have hltnw : par c < nw := Nat.lt_trans hlt hc
+        have hlef : par c ≤ fuel := by omega
+        obtain ⟨hz, hp⟩ := parDepthFuel_spec hdesc fuel (par c) hltnw hlef
+        have heqD : parDepthFuel par (fuel + 1) c = parDepthFuel par fuel (par c) + 1 := by
+          simp [parDepthFuel, hc0]
+        rw [heqD]
+        refine ⟨hz, fun i hi => ?_⟩
+        rcases Nat.eq_zero_or_pos i with rfl | hipos
+        · show 1 ≤ parIter par 0 c
+          simp only [parIter]
+          omega
+        · have hi' : i - 1 < parDepthFuel par fuel (par c) := by omega
+          have hp' := hp (i - 1) hi'
+          have heqi : parIter par i c = parIter par (i - 1) (par c) := by
+            have hii : i = (i - 1) + 1 := by omega
+            rw [hii]
+            rfl
+          rw [heqi]
+          exact hp'
+
+omit [Hashable Atom] in
+/-- **Phase 10 (report §4.5)**: `parDepth` is a sound depth measure for every world inside the
+created range -- it reaches `0` and every earlier iterate is positive. Corollary of
+`parDepthFuel_spec` at `fuel := c`. -/
+private lemma parDepth_spec {par : Nat → Nat} {nw : Nat}
+    (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x) {c : Nat} (hc : c < nw) :
+    parIter par (parDepth par c) c = 0 ∧ ∀ i, i < parDepth par c → 1 ≤ parIter par i c :=
+  parDepthFuel_spec hdesc c c hc (Nat.le_refl c)
+
+omit [Hashable Atom] in
+/-- **Phase 10**: `parDepth` never exceeds `intChainBound φ0` for a world inside `IWorldHist`'s
+witness data. Instantiates Phase 9's abstract chain bound (`intWorldHist_chain_le`) at
+`ws := fun i => parIter par i c`. -/
+private lemma parDepth_le_intChainBound {φ0 : Proposition Atom} {par : Nat → Nat}
+    {obl : Nat → Proposition Atom} {sfor : Nat → List (Proposition Atom)} {nw : Nat}
+    (hpar0 : par 0 = 0) (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x)
+    (hoblSub : ∀ c, 1 ≤ c → c < nw → obl c ∈ intSubfmls φ0)
+    (hsforSub : ∀ c, 1 ≤ c → c < nw → ∀ χ ∈ sfor c, χ ∈ intSubfmls φ0)
+    (hres : ∀ c, 1 ≤ c → c < nw → ∀ c', 1 ≤ c' → c' < c →
+        parAncestor par c' (par c) → obl c' = obl c →
+        ¬ (∀ χ ∈ sfor c, χ ∈ sfor c'))
+    {c : Nat} (hc : c < nw) :
+    parDepth par c ≤ intChainBound φ0 := by
+  obtain ⟨-, hpos⟩ := parDepth_spec hdesc hc
+  refine intWorldHist_chain_le hdesc hoblSub hsforSub hres
+    (ws := fun i => parIter par i c) (D := parDepth par c)
+    (fun i => parIter_succ' par i c) hpos ?_
+  intro i _hi
+  exact Nat.lt_of_le_of_lt
+    (parAncestor_le hpar0 hdesc hc (parAncestor_parIter par i c)) hc
+
 omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
 arm -- when `intStepBranch` returns a world-creating `linearResult` (`newEdge = some

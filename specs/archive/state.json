@@ -2,6 +2,37 @@
   "_comment": "Archive state for completed and abandoned tasks",
   "completed_projects": [
     {
+      "project_number": 226,
+      "project_name": "propositional_semantics_upstream_pr",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "description": "Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean — BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.",
+      "topic": "Propositional Logic",
+      "dependencies": [],
+      "created": "2026-06-16T23:00:00Z",
+      "last_updated": "2026-07-24T15:47:42Z",
+      "session_id": "sess_1784907631_dfd0bb_226",
+      "artifacts": [
+        {
+          "path": "specs/226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md",
+          "type": "research",
+          "summary": "Cherry-pick GHA semantics research (pre-revision, stale)"
+        },
+        {
+          "path": "specs/226_propositional_semantics_upstream_pr/reports/02_three-way-comparison.md",
+          "type": "research",
+          "summary": "Three-way comparison: our semantics vs Thomas Waring vs Matthew Doty implementations"
+        },
+        {
+          "type": "report",
+          "path": "specs/226_propositional_semantics_upstream_pr/reports/03_upstream-packaging-research.md",
+          "summary": "Upstream-packaging research: 4 files now 819 LOC (over <500 budget); PR #648 base has only Defs+ND; recommend Package A (Algebra+Bool+Bridge=487 LOC), defer SemanticConsequence (non-upstream deps)."
+        }
+      ],
+      "next_artifact_number": 4,
+      "abandoned": "2026-07-29T15:35:48Z"
+    },
+    {
       "project_number": 466,
       "project_name": "record_zulip_settlement_pr_648",
       "status": "abandoned",

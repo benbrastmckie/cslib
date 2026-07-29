@@ -11,7 +11,7 @@ next_project_number: 586
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,375,400,409,425,430,534,554,558,562,563,568,569,583,584,585 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,430,534,554,558,562,563,568,569,583,584,585 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,511,537,551,553,564,571,576 | 36,37,181,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,506,548,565,566,582 | 39,40,511,553,564 | foundations, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
@@ -24,7 +24,6 @@ next_project_number: 586
 
 ### Propositional Logic
 
-226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
@@ -672,20 +671,6 @@ DP-5 (`Scheme.lean:633`), DP-3 (`Intuitionistic/Completeness.lean:140`) and DP-4
 - **Plan**: [300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md]
 
 **Description**: Umbrella task for modal frame extensions T/S4/S5 (and the derived B/D/5/Euclidean cube corners). RECONCILED: T (instDecidableTValid), B (instDecidableBValid), S5 (instDecidableS5Valid), and 5/Euclidean (instDecidableFiveValid/instDecidableKb5Valid) are all delivered sorry-free in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean via the generic tableau driver. The SOLE remaining phase is S4 (reflexive-transitive) loop-checking termination bound and decidability, tracked by task 506 (gated on the S4 termination task). This umbrella closes when S4 decidability (instDecidableS4Valid) lands.
-
----
-
-### 226. Propositional semantics upstream pr
-- **Status**: [RESEARCHED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: None
-- **Research**:
-  - [226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md]
-  - [226_propositional_semantics_upstream_pr/reports/02_three-way-comparison.md]
-  - [226_propositional_semantics_upstream_pr/reports/03_upstream-packaging-research.md]
-
-**Description**: Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean — BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.
 
 ---
 

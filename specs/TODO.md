@@ -78,14 +78,15 @@ next_project_number: 586
 
 ### Uncategorized
 
-585 [NOT STARTED] — Discharge the single remaining strategic sorry DP-2 in Cslib/Logi
+585 [RESEARCHING] — Discharge the single remaining strategic sorry DP-2 in Cslib/Logi
 
 ## Tasks
 
 ### 585. Prove post blocking world bound chain and mint invariant
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Dependencies**: Task 317
+- **Research**: [585_prove_post_blocking_world_bound_chain_and_mint_invariant/reports/01_dp2-mint-invariant-transfer.md]
 
 **Description**: Discharge the single remaining strategic sorry DP-2 in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean, left by the parent task's plan v14 (specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md), which superseded the v13 fuel-sufficiency skeleton this task was originally scoped against.
 

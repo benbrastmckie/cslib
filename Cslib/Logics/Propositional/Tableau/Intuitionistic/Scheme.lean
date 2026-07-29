@@ -2669,6 +2669,48 @@ private lemma intStepBranch_branch_preserves_nw
   exact intApplyRuleFull_branchingResult_nextWorld hint
 
 omit [Hashable Atom] in
+/-- **Phase 5 (DP-2 go/no-go gate; report section 4.2, the (★) residue)**: the mint-time
+snapshot-free residue. Given a mint arm's runtime reuse-check result of `none` (`hnone`), and a
+candidate world `c'` that (1) is accessible to the fired implication's source world `newE.2`
+under the CURRENT edges (`hacc`, to be supplied downstream by Phase 1's one-hop extension
+applied along the `par`-ancestor chain), (2) carries a smaller-or-equal label (`hle`), (3) is not
+itself a contradiction source (`hNC`, `IntMinScheme.no_contradiction` specialized), (4) carries
+the SAME obligation `ψ` the fired implication targets (`hmem`), and (5) has some recorded
+forced-set `sforC'` contained in its actual forced formulas (`hsub`, the future (H3) planting
+fact), concludes the residue: `sforC'` cannot contain every member of the mint's own propagated
+positive set `newForms.filterMap (pos)`. The conclusion mentions no branch, no edge list, and no
+snapshot beyond the two RECORDED sets `sforC'`/`newForms`'s filtered positives and the fixed
+label `c'` -- it is permanently true (given its five hypotheses) and is exactly clause (H5) of
+the (subsequent) `IWorldHist` invariant, discharged in Phase 7's mint arm by supplying `hacc`
+from Phase 1, `hmem`/`hsub` from (H3), and `hNC` from Phase 3's threaded hypothesis. -/
+private lemma intFImp_mint_residue {bPers : IBranch Atom} {edges : IEdges}
+    {newForms : List (ISF Atom)} {newE : Nat × Nat} {ψ : Proposition Atom} {c' : Nat}
+    {sforC' : List (Proposition Atom)}
+    (hψ : newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none)
+        = some ψ)
+    (hnone : intFImpReuseWitnessAnc? bPers edges newForms newE = none)
+    (hmem : (⟨.neg, ψ, c'⟩ : ISF Atom) ∈ bPers)
+    (hacc : isAccessible edges c' newE.2 = true)
+    (hle : c' ≤ newE.2)
+    (hNC : ∀ (χ : Proposition Atom) (w : Nat), (⟨.neg, χ, w⟩ : ISF Atom) ∈ bPers →
+        χ ∉ posFormulasAt bPers w)
+    (hsub : ∀ χ ∈ sforC', χ ∈ posFormulasAt bPers c') :
+    ¬ (∀ χ ∈ (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none),
+        χ ∈ sforC') := by
+  intro hsubAll
+  have hx : c' ∈ (bPers.map (·.label)).eraseDups := by
+    simp only [List.mem_eraseDups, List.mem_map]
+    exact ⟨⟨.neg, ψ, c'⟩, hmem, rfl⟩
+  have hnotpos : ψ ∉ posFormulasAt bPers c' := hNC ψ c' hmem
+  have hnotposB : ¬ (posFormulasAt bPers c').contains ψ = true :=
+    fun hcon => hnotpos (List.contains_iff_mem.mp hcon)
+  refine intFImpReuseWitnessAnc?_none_spec hψ hnone hx ⟨hacc, hle, ?_, hnotposB,
+    List.any_eq_true.mpr ⟨_, hmem, by simp⟩⟩
+  rw [List.all_eq_true]
+  intro χ hχ
+  exact List.contains_iff_mem.mpr (hsub χ (hsubAll χ hχ))
+
+omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
 arm -- when `intStepBranch` returns a world-creating `linearResult` (`newEdge = some
 _`) and `go`'s ancestor-directed loop-check (`intFImpReuseWitnessAnc?`) finds no

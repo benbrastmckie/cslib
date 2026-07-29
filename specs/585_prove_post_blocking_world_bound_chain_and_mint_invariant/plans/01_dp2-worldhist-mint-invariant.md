@@ -349,7 +349,50 @@ requirement, which concerns discharge not yet-consumption).
 
 ---
 
-### Phase 5: GO/NO-GO GATE -- standalone mint-residue lemma (*) [NOT STARTED]
+### Phase 5: GO/NO-GO GATE -- standalone mint-residue lemma (*) [COMPLETED -- GO]
+
+**Reordering note**: per the plan's own dependency-wave table (Wave 2: Phases 4 and 5 both
+depend only on 1-3, and are mutually independent), Phase 5 was executed BEFORE Phase 4, since
+Phase 5 is the single highest-value/highest-risk checkpoint and Phase 4 (strict label bound,
+threaded through all ten cases of the `key` induction) is large, self-contained, and not a
+prerequisite for Phase 5's standalone statement (all five inputs are supplied as explicit
+hypotheses, per the phase's own instruction). Phase 4 remains [NOT STARTED] and is next in queue.
+
+**Outcome: GO.** Proved `intFImp_mint_residue` in `Scheme.lean` (private, additive, sorry-free,
+placed immediately before the DP-2 sorry it will eventually replace). All five conjunct
+discharges succeeded exactly as the report's section 4.2 predicted:
+- Candidate membership: `c' ∈ (bPers.map (·.label)).eraseDups` from `hmem` via
+  `List.mem_eraseDups`/`List.mem_map`.
+- Conjuncts 1, 2, 4, 5 supplied directly from `hacc`, `hle`, `hNC ψ c' hmem`
+  (converted to the `.contains`-Bool form via `List.contains_iff_mem`), and `hmem` itself.
+- Conjunct 3's negation (`¬ (sfor ⊆ posFormulasAt bPers c')`, in `.all`/`.contains` form) follows
+  from `intFImpReuseWitnessAnc?_none_spec` (Phase 2) instantiated at `x := c'`.
+- Combined with `hsub` (the (H3) planting fact, here an explicit hypothesis), `intro hsubAll`
+  (assuming `sfor ⊆ sforC'`) plus the conjunct-3 negation closes by contradiction.
+
+`lake build` green; the only `declaration uses 'sorry'` warnings are the two PRE-EXISTING ones
+(DP-5 at the shifted line, and DP-2's own `intFreshMint_preserves_nw` sorry, still present since
+it has not yet been retired -- that is Phase 11's job). The conclusion's free variables
+(`newForms`, `sforC'`, `c'`) contain neither a branch nor an edge list, confirming the residue is
+genuinely snapshot-free.
+
+**Signature actually proved** (adapted names, per the phase's own allowance):
+```lean
+private lemma intFImp_mint_residue {bPers : IBranch Atom} {edges : IEdges}
+    {newForms : List (ISF Atom)} {newE : Nat × Nat} {ψ : Proposition Atom} {c' : Nat}
+    {sforC' : List (Proposition Atom)}
+    (hψ : newForms.findSome? (fun sf => if sf.sign == .neg then some sf.formula else none)
+        = some ψ)
+    (hnone : intFImpReuseWitnessAnc? bPers edges newForms newE = none)
+    (hmem : (⟨.neg, ψ, c'⟩ : ISF Atom) ∈ bPers)
+    (hacc : isAccessible edges c' newE.2 = true)
+    (hle : c' ≤ newE.2)
+    (hNC : ∀ (χ : Proposition Atom) (w : Nat), (⟨.neg, χ, w⟩ : ISF Atom) ∈ bPers →
+        χ ∉ posFormulasAt bPers w)
+    (hsub : ∀ χ ∈ sforC', χ ∈ posFormulasAt bPers c') :
+    ¬ (∀ χ ∈ (newForms.filterMap fun sf => if sf.sign == .pos then some sf.formula else none),
+        χ ∈ sforC')
+```
 
 - **Goal:** Manufacture the snapshot-free residue **(*) `not (sfor subset sfor_c')`** from the
   runtime `none`, as a **standalone lemma with all five inputs supplied as explicit hypotheses**.

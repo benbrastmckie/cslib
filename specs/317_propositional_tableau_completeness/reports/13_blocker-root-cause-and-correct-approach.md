@@ -43,6 +43,8 @@
   `search_world_bound.py`, `random_search.py`, `sweep_out.txt`
 
 **Standards**: status-markers.md, artifact-management.md, tasks.md, report-format.md
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
 
 ---
 

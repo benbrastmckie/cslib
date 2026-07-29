@@ -1,6 +1,13 @@
 # Research Report: Task 317 — Wave A Atomic De-Risk (Verified Against Live Tree)
 
 - **Task**: 317 `propositional_tableau_completeness`
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Session**: sess_1783922075_911857_317r
 - **Agent**: cslib-research-hard-agent
 - **Date**: 2026-07-12

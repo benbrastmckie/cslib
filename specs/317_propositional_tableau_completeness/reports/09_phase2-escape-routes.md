@@ -1,6 +1,13 @@
 # Report 09 — Phase 2 Escape Routes: Signature Un-Pin (a) vs `IForces` Redefinition (b)
 
 - **Task**: 317, Phase 2 blocker of plan v5 (`plans/05_frame-change-and-fuel-raise.md`).
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Scope**: RESEARCH ONLY. No `.lean` file edited. All claims grounded by direct `Read` + `grep`
   against **cslib** at HEAD (`553df99d` at read time; concurrent sessions committing — read-only, no
   contention). Line numbers are current-HEAD.

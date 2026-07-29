@@ -1,6 +1,13 @@
 # Report 05 — B2 Fuel-Sufficiency: Literature / Prior-Art Spike (HARD mode)
 
 - **Task**: 317 — B2 fuel-sufficiency blocker (`intExpandBranches` saturation termination)
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Type**: cslib / research-only (NO `.lean` edits)
 - **Agent**: cslib-research-hard-agent
 - **Reference grounding tier**: **Tier 1 (literature-backed)** — BibKey verification against `references.bib` performed

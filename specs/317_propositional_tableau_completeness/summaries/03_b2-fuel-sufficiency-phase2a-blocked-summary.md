@@ -1,6 +1,11 @@
 # Phase 2a Summary: Measure Spike — R1 Gate BLOCKED
 
 - **Task**: 317 - Close the two residual B2 sorries in the propositional tableau completeness proof
+- **Status**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Plan**: `plans/03_b2-fuel-sufficiency.md`, Phase 2a
 - **Outcome**: BLOCKED (legitimate, expected outcome per the plan's own R1 risk gate)
 - **Files changed**: none in `Cslib/` (no edits made — the R1 gate blocked before any def/lemma

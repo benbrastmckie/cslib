@@ -1,6 +1,13 @@
 # Research Report: Fuel-Materialization Repair for Plan-13 Phase 4
 
 - **Task**: 317 - propositional_tableau_completeness (blocker research)
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Session**: sess_1785275816_a84520_317
 - **Focus**: Adjudicate the three repair candidates for the Phase 4 blocker
   ("intFuel resize target cannot be materialized by #eval corpus") and produce a

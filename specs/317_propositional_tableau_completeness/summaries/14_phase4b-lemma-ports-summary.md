@@ -5,6 +5,10 @@
 - **Phase**: 4B (old engine and old lemmas untouched and green)
 - **Session**: sess_1785275816_a84520_317
 - **Status**: [COMPLETED] — all four ports landed in one dispatch; the pre-authorized
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
   4B.1/4B.2 split was not needed
 
 ## What Was Proven / Built

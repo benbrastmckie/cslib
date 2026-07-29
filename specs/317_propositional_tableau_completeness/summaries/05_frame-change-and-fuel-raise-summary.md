@@ -3,6 +3,10 @@
 - **Task**: 317 - propositional_tableau_completeness
 - **Plan**: `plans/05_frame-change-and-fuel-raise.md` (v5)
 - **Status**: [BLOCKED] (Phase 1 of 11 COMPLETED; Phase 2 BLOCKED at STOP-gate a; Phases 3-11 not
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
   reached, gated on Phase 2)
 - **Session**: `sess_1782919268_2df8d8_317`
 

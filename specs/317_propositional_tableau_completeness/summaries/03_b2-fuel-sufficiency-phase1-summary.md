@@ -3,6 +3,10 @@
 - **Task**: 317 - Close the two residual B2 sorries in the propositional tableau completeness proof
 - **Plan**: plans/03_b2-fuel-sufficiency.md, Phase 1 (close B2 `none` case, Scheme.lean:713)
 - **Status**: [COMPLETED]
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Session**: sess_1782890716_9a7f59
 
 ## What Was Done

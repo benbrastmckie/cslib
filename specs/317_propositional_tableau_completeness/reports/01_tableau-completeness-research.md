@@ -1,6 +1,13 @@
 # Research Report: Task 317 -- Propositional Tableau Completeness
 
 - **Task**: 317 -- Fill sorry instances in propositional tableau completeness proofs
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Date**: 2026-06-24
 - **Type**: cslib research
 - **Session**: sess_1750723200_orchestrate_batch_317

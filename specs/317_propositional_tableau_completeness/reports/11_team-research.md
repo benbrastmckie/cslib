@@ -1,6 +1,13 @@
 # Research Report: Task #317 — Propositional/Intuitionistic Tableau Completeness
 
 **Task**: Fill the remaining propositional/intuitionistic tableau completeness sorries
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Date**: 2026-07-26
 **Mode**: Team Research (4 teammates: Primary, Alternatives, Critic, Horizons)
 **Session**: sess_1785106431_e662fa

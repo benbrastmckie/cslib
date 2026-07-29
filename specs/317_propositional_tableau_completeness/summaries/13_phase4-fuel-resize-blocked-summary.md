@@ -3,6 +3,10 @@
 - **Task**: 317 (propositional_tableau_completeness)
 - **Plan**: `plans/13_fuel-sufficiency-skeleton.md`, Phase 4
 - **Status**: [BLOCKED] — no Lean edits landed; build/test remain green at the Phase 3 state
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Session**: sess_1785275816_a84520_317
 
 ## What Happened

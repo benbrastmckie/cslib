@@ -89,6 +89,13 @@ approved the exact three-task decomposition below.
 
 ### New Task 3: Repair intuitionistic tableau calculus (self-copy bound, ancestor blocking, quotient sat_fimp)
 - **Effort**: 2500-4000 lines; multi-dispatch, recommend `--hard` with phase-sized dispatches
+- **Task**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Task Type**: cslib
 - **Rationale**: Implements report 13's Option A steps 1-3 (bound the self-copy channel, replace
   the descendant-searching loop-check with an ancestor-directed one, restate `sat_fimp` over the

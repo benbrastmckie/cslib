@@ -1,6 +1,13 @@
 # Report 06 — Sfor Dedup / Loop-Check: Reuse & Abstraction Evaluation
 
 - **Task**: 317 (evaluative research, standalone — NOT part of the 317 implementation lifecycle)
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Question**: Does the Garg–Genovese–Negri (LICS 2012) `Sfor`-containment dedup / loop-check +
   fuel-sufficiency measure machinery being built for 317 present opportunities to (a) apply to
   other tableau/sequent developments in CSLib and/or (b) be abstracted into shared, reusable

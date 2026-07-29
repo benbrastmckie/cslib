@@ -1,6 +1,13 @@
 # Research Report: Task 317 — Tableau Completeness Approach (Int/Min)
 
 - **Task**: 317 — Discharge the open completeness obligations for the intuitionistic and
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
   minimal propositional tableaux (post task-369 parametric refactor)
 - **Date**: 2026-06-28
 - **Type**: cslib research (study/recommendation; no implementation)

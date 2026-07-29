@@ -1,6 +1,13 @@
 # T-implication Gap 1: Continuation Options Assessed (go/no-go)
 
 - **Task**: 317 - propositional_tableau_completeness
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Date**: 2026-07-28
 - **Agent**: cslib-research-hard-agent (H2 anti-analysis, H3 reference grounding, H4 adversarial
   self-verification)

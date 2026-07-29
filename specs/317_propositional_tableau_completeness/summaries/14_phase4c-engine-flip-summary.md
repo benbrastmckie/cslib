@@ -3,6 +3,10 @@
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
 - **Plan**: plans/14_fuel-materialization-repair.md, Phase 4C
 - **Status**: [COMPLETED]
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 
 ## What Was Done
 

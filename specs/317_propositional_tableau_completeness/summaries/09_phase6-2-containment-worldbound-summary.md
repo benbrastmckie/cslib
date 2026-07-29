@@ -1,6 +1,11 @@
 # Phase 6.2: Branch-Universe Containment and World-Bound Continuation
 
 **Task**: 317 (Propositional Tableau Completeness) | **Session**: sess_1783962327_d9c0b3
+- **Status**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 
 ## Scope
 

@@ -1,6 +1,13 @@
 # Report 04 — B2 Fuel-Sufficiency Measure Design (HARD-mode spike)
 
 - **Task**: 317, Phase 2a R1 blocker resolution
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Scope**: RESEARCH ONLY. No `.lean` file was edited.
 - **Sorry under repair**: `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:985`
   (`intExpandBranches_openBranch_sat`, `fuel = 0` base case).

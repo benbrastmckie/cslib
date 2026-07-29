@@ -1,6 +1,13 @@
 # Report 07 — Option B, the Fuel Bound, and What Actually Closes Sorry 986 (HARD mode)
 
 - **Task**: 317, Phase 5/7 blocker resolution — feed a plan v5 revision.
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Scope**: RESEARCH ONLY. No `.lean` file was edited. All code claims grounded by direct
   `Read` + live `lean-lsp` (`lean_goal`, `lean_local_search`) against the **cslib** project
   (confirmed live: `lean_goal` at `Scheme.lean:986` returned a well-formed `Cslib` goal state).

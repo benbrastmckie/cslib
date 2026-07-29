@@ -1,0 +1,21 @@
+{
+  "phase": "4A",
+  "plan": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+  "session_id": "sess_1785275816_a84520_317",
+  "lake_test_baseline": {
+    "recorded_at": "pre-change (HEAD bb597c9d, before any Phase 4A edit)",
+    "real": "0m7.231s",
+    "user": "0m8.888s",
+    "sys": "0m3.998s",
+    "exit_code": 0,
+    "note": "4C timing gate: post-flip lake test must be <= 3 min total or <= 5x this baseline, whichever is looser"
+  },
+  "objectives": [
+    {"id": "baseline", "desc": "Record pre-change lake test wall-time baseline", "status": "done"},
+    {"id": "intFuelExt", "desc": "Def intFuelExt in closed arithmetic form", "status": "pending"},
+    {"id": "engineB", "desc": "intExpandBranchesB + lifted go with unconditional lex WF", "status": "pending"},
+    {"id": "init-bound", "desc": "intWork_init_lt_intFuelExt", "status": "pending"},
+    {"id": "parity-probe", "desc": "#eval parity probe on 20 propositional corpus rows", "status": "pending"}
+  ],
+  "files_touched": []
+}

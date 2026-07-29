@@ -405,7 +405,7 @@ territory is single-owner and waves are strictly sequential.
   statements); zero new sorries in this phase; the ORIGINAL `intUniverse` block is left intact
   (deprecation notes deferred to Phase 8).
 
-### Phase 4A: `intFuelExt` + per-branch-fuel B-engine + init bound (parallel build; no consumer flipped) [NOT STARTED]
+### Phase 4A: `intFuelExt` + per-branch-fuel B-engine + init bound (parallel build; no consumer flipped) [IN PROGRESS]
 
 Replaces plan-13 Phase 4, whose global-scalar resize was structurally unimplementable (defect
 record: plan 13 Phase 4; reports/15 §1). Spec source: reports/15 §6, Phase 4A. All new names

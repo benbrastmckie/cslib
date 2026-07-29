@@ -1768,6 +1768,28 @@ obligation at singleton call sites. -/
 lemma WBound_pos (φ : Proposition Atom) : 1 ≤ WBound φ :=
   Nat.one_le_pow _ _ (Nat.succ_pos _)
 
+omit [Hashable Atom] in
+/-- Materializable per-branch fuel budget for the per-branch-fuel expansion engine
+(`intExpandBranchesB`): one unit above twice the size bound of the enlarged cell
+universe, `4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1`.
+
+**This MUST stay a closed arithmetic form.** Never define it as
+`2 * (intUniverseExt φ).length + 1` (nor via any other runtime traversal or membership
+check against the `intUniverseExt` list): the LIST has `Θ(WBound φ)` elements — around
+`10 ^ 13000000` for the conformance corpus's divergence-witness row — and can never be
+built. Only the NUMERAL is feasible to materialize. The arithmetic form dominates
+`2 * (intUniverseExt φ).length + 1` via `intUniverseExt_length_le`, which is all the
+init bound `intWork_init_lt_intFuelExt` needs.
+
+**Feasibility envelope**: for a formula with `s` distinct subformulas the fuel numeral
+has on the order of `2 ^ s * s * log₁₀ (s + 1)` digits — comfortably materializable for
+the conformance corpus (`s ≲ 22`; the largest corpus row's ~13.0-million-digit numeral
+materializes in ~0.6 s), but around 0.5 GB of digits by `s ≈ 25`. This is an
+evaluation-side envelope only; the proof side manipulates the closed form
+symbolically. -/
+def intFuelExt (φ : Proposition Atom) : Nat :=
+  4 * (2 * φ.complexity + 1) * (WBound φ + 1) + 1
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The positive projection of a branch stays inside the subformula universe:
 `posFormulasAt` only reads formulas off branch entries. -/
@@ -2814,6 +2836,290 @@ lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
       ≤ 3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2)) :=
         Nat.pow_le_pow_right (by norm_num) hfinal
     _ = intFuel φ := rfl
+
+/-! ## Per-Branch-Fuel Expansion Engine (B-engine)
+
+The per-branch-fuel replacement for `intExpandBranches` (`Expansion.lean`), built in
+PARALLEL to the old engine — no existing consumer is flipped here. The single global
+`fuel : Nat` becomes `fuels : List Nat`, a fourth parallel list carrying each branch's
+remaining fuel budget, sized by the materializable `intFuelExt` (above `WBound`).
+Termination is UNCONDITIONAL (no branch-containment or world-bound hypotheses) by the
+lexicographic measure `(Σ 3 ^ fuelᵢ over pending ++ done, pending.length)`. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every branching rule of the intuitionistic calculus splits into exactly two
+sub-branches: the three `branchingResult` sites of `intApplyRuleFull` (F-and, T-or, and
+the T-imp split) all emit literal 2-element lists. Consumed (via
+`intStepBranch_branchingResult_length`) by `intExpandBranchesB.go`'s termination
+argument: the beta arm's fuel-sum decrease is `2 * 3 ^ f < 3 ^ (f + 1)`. -/
+lemma intApplyRuleFull_branchingResult_length {sf : ISF Atom} {nextWorld : Nat}
+    {b : IBranch Atom} {brs : List (List (ISF Atom))} {nw' : Nat}
+    (h : intApplyRuleFull sf nextWorld b = .branchingResult brs nw') :
+    brs.length = 2 := by
+  obtain ⟨s, ff, l⟩ := sf
+  cases s <;> cases ff <;>
+    first
+      | (simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at h
+         exact h.1 ▸ rfl)
+      | simp [intApplyRuleFull] at h
+
+omit [Hashable Atom] in
+/-- `intStepBranch` lift of `intApplyRuleFull_branchingResult_length`: a branching step
+always produces exactly two sub-branch extension lists. -/
+lemma intStepBranch_branchingResult_length {b : IBranch Atom}
+    {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {brs : List (List (ISF Atom))} {nw' : Nat} {exp' : List (ISF Atom)}
+    (h : intStepBranch b expanded nextWorld = some (.branchingResult brs nw', exp')) :
+    brs.length = 2 := by
+  simp only [intStepBranch] at h
+  obtain ⟨sf, _, hsf⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hexp : (expanded.any (· == sf)) = true
+  · simp [hexp] at hsf
+  · simp only [Bool.not_eq_true] at hexp
+    simp only [hexp, Bool.false_eq_true, ↓reduceIte] at hsf
+    cases hint : intApplyRuleFull sf nextWorld b with
+    | notApplicable => simp [hint] at hsf
+    | linearResult fs nw2 e => simp [hint] at hsf
+    | branchingResult bs nw2 =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨h1, -⟩ := hsf
+      injection h1 with hbrs hnw
+      exact hbrs ▸ intApplyRuleFull_branchingResult_length hint
+
+/-- Sum of `3 ^ ·` over a constant-fuel list is `length * 3 ^ c` (beta-arm bookkeeping
+for `intExpandBranchesB.go`'s termination proof). -/
+private lemma sum_map_pow_const {α : Type*} (l : List α) (c : Nat) :
+    ((l.map (fun _ => c)).map (fun fl => 3 ^ fl)).sum = l.length * 3 ^ c := by
+  induction l with
+  | nil => simp
+  | cons hd tl ih =>
+    simp only [List.map_cons, List.sum_cons, List.length_cons, ih]
+    ring
+
+/-- Lexicographic decrease from an equal-or-smaller first component and a strictly
+smaller second component (termination helper for `intExpandBranchesB.go`). -/
+private lemma lex_lt_of_le_of_lt {a a' b b' : Nat} (ha : a' ≤ a) (hb : b' < b) :
+    Prod.Lex (· < ·) (· < ·) (a', b') (a, b) := by
+  rcases Nat.eq_or_lt_of_le ha with heq | hlt
+  · subst heq
+    exact Prod.Lex.right a' hb
+  · exact Prod.Lex.left _ _ hlt
+
+omit [Hashable Atom] in
+/-- Inner worklist loop of `intExpandBranchesB`, lifted to a top-level definition so
+that well-founded elaboration and functional induction are available.
+
+Mirrors `intExpandBranches`'s nested `go` (`Expansion.lean`) with the single global
+fuel replaced by the parallel fuel lists `pendingFuels`/`doneFuels`:
+- persistence receives the ACTIVE BRANCH's remaining fuel `f` (mirroring the old
+  engine's `fuel' + 1` shape);
+- the skip-closed arm is unchanged in content — the closed branch moves to `done`
+  together with its fuel;
+- an open active branch with `f = 0` is returned as `.openBranch` (the per-branch
+  exhaustion arm, mirroring the old global fuel-0 arm; closed branches are still
+  skipped first, so `.openBranch` only ever returns open branches);
+- the linear, world-creating, and reuse arms step the active branch's `f + 1` to `f`;
+- the beta arm gives each child `f` (from the parent's `f + 1`).
+
+Termination is UNCONDITIONAL, by the lexicographic measure
+`(Σ 3 ^ fuelᵢ over pending ++ done, pending.length)`: the skip-closed arm permutes the
+fuel multiset between the two lists (sum unchanged) and shrinks `pending`;
+single-successor arms replace `3 ^ (f + 1)` by `3 ^ f`; the beta arm replaces
+`3 ^ (f + 1)` by `2 * 3 ^ f`, sound because every branching rule emits exactly two
+children (`intStepBranch_branchingResult_length`). -/
+def intExpandBranchesB.go
+    (closurePred : IBranch Atom → Bool)
+    (pending : List (IBranch Atom))
+    (pendingExp : List (List (ISF Atom)))
+    (pendingNW : List Nat)
+    (pendingEdges : List IEdges)
+    (pendingFuels : List Nat)
+    (done : List (IBranch Atom))
+    (doneExp : List (List (ISF Atom)))
+    (doneNW : List Nat)
+    (doneEdges : List IEdges)
+    (doneFuels : List Nat) :
+    IntTableauResult Atom :=
+  match pending, pendingExp, pendingNW, pendingEdges, pendingFuels with
+  | [], _, _, _, _ => .closed  -- All branches closed
+  | b :: restBs, e :: restEs, nw :: restNW, edges :: restEdges, f :: restFs =>
+    -- First apply persistence (at the active branch's remaining fuel) to get all
+    -- T(φ → ψ) consequences
+    let bPers := applyPersistenceFixpoint b edges f
+    if closurePred bPers then
+      -- Branch is closed: move it (with its fuel) to done
+      intExpandBranchesB.go closurePred restBs restEs restNW restEdges restFs
+        (done ++ [bPers]) (doneExp ++ [e]) (doneNW ++ [nw]) (doneEdges ++ [edges])
+        (doneFuels ++ [f])
+    else
+      match f with
+      | 0 =>
+        -- Per-branch fuel exhausted: return the (open) branch as countermodel
+        .openBranch bPers
+      | f' + 1 =>
+        match _hstep : intStepBranch bPers e nw with
+        | none =>
+          -- Branch is saturated and open: countermodel
+          .openBranch bPers
+        | some (.linearResult newForms nw' newEdge, newExp) =>
+          -- Alpha-rule or world-creation: extend branch
+          match newEdge with
+          | none =>
+            -- Alpha-rule: no new world, edges unchanged
+            intExpandBranchesB.go closurePred
+              (done ++ [Branch.extendMany bPers newForms] ++ restBs)
+              (doneExp ++ [newExp] ++ restEs)
+              (doneNW ++ [nw'] ++ restNW)
+              (doneEdges ++ [edges] ++ restEdges)
+              (doneFuels ++ [f'] ++ restFs)
+              [] [] [] [] []
+          | some newE =>
+            -- World-creating F(φ → ψ) rule: ancestor-directed Sfor-containment
+            -- loop-check before committing to the fresh world (as in the old engine)
+            match intFImpReuseWitnessAnc? bPers edges newForms newE with
+            | some _x =>
+              -- Reuse: F(φ → ψ)@w discharged without creating the world; the world
+              -- counter stays at `nw` (unconsumed)
+              intExpandBranchesB.go closurePred
+                (done ++ [bPers] ++ restBs)
+                (doneExp ++ [newExp] ++ restEs)
+                (doneNW ++ [nw] ++ restNW)
+                (doneEdges ++ [edges] ++ restEdges)
+                (doneFuels ++ [f'] ++ restFs)
+                [] [] [] [] []
+            | none =>
+              -- No reusable ancestor: create the world exactly as before
+              intExpandBranchesB.go closurePred
+                (done ++ [Branch.extendMany bPers newForms] ++ restBs)
+                (doneExp ++ [newExp] ++ restEs)
+                (doneNW ++ [nw'] ++ restNW)
+                (doneEdges ++ [edges ++ [newE]] ++ restEdges)
+                (doneFuels ++ [f'] ++ restFs)
+                [] [] [] [] []
+        | some (.branchingResult branches' nw', newExp) =>
+          -- Beta-rule: split into sub-branches (each inherits the edge set and the
+          -- parent's decremented fuel `f'`)
+          intExpandBranchesB.go closurePred
+            (done ++ branches'.map (Branch.extendMany bPers ·) ++ restBs)
+            (doneExp ++ branches'.map (fun _ => newExp) ++ restEs)
+            (doneNW ++ branches'.map (fun _ => nw') ++ restNW)
+            (doneEdges ++ branches'.map (fun _ => edges) ++ restEdges)
+            (doneFuels ++ branches'.map (fun _ => f') ++ restFs)
+            [] [] [] [] []
+        | some (.notApplicable, _) =>
+          -- This case shouldn't happen (intStepBranch filters notApplicable)
+          .openBranch bPers
+  | _ :: restBs, _pExp, _pNW, _pEdges, _pFuels =>
+    intExpandBranchesB.go closurePred restBs [] [] [] [] done doneExp doneNW doneEdges
+      doneFuels
+termination_by
+  (((pendingFuels ++ doneFuels).map (fun fl => 3 ^ fl)).sum, pending.length)
+decreasing_by
+  · -- Skip-closed arm: fuel multiset permuted between the lists, pending shrinks
+    have hsum : ((restFs ++ (doneFuels ++ [f])).map (fun fl => 3 ^ fl)).sum
+        = (((f :: restFs) ++ doneFuels).map (fun fl => 3 ^ fl)).sum := by
+      simp only [List.map_append, List.map_cons, List.map_nil, List.sum_append,
+        List.sum_cons, List.sum_nil]
+      omega
+    rw [hsum]
+    exact Prod.Lex.right _ (by simp)
+  · -- Alpha arm: 3 ^ (f' + 1) replaced by 3 ^ f'
+    apply Prod.Lex.left
+    have _hp : (3 : Nat) ^ (f' + 1) = 3 ^ f' * 3 := pow_succ 3 f'
+    have h1 : 1 ≤ (3 : Nat) ^ f' := Nat.one_le_pow _ _ (by norm_num)
+    simp only [List.map_append, List.map_cons, List.map_nil, List.sum_append,
+      List.sum_cons, List.sum_nil, List.append_nil]
+    omega
+  · -- Reuse arm: 3 ^ (f' + 1) replaced by 3 ^ f'
+    apply Prod.Lex.left
+    have _hp : (3 : Nat) ^ (f' + 1) = 3 ^ f' * 3 := pow_succ 3 f'
+    have h1 : 1 ≤ (3 : Nat) ^ f' := Nat.one_le_pow _ _ (by norm_num)
+    simp only [List.map_append, List.map_cons, List.map_nil, List.sum_append,
+      List.sum_cons, List.sum_nil, List.append_nil]
+    omega
+  · -- Fresh-world arm: 3 ^ (f' + 1) replaced by 3 ^ f'
+    apply Prod.Lex.left
+    have _hp : (3 : Nat) ^ (f' + 1) = 3 ^ f' * 3 := pow_succ 3 f'
+    have h1 : 1 ≤ (3 : Nat) ^ f' := Nat.one_le_pow _ _ (by norm_num)
+    simp only [List.map_append, List.map_cons, List.map_nil, List.sum_append,
+      List.sum_cons, List.sum_nil, List.append_nil]
+    omega
+  · -- Beta arm: 3 ^ (f' + 1) replaced by 2 * 3 ^ f' (exactly two children)
+    apply Prod.Lex.left
+    have hlen : branches'.length = 2 := intStepBranch_branchingResult_length _hstep
+    have hconst := sum_map_pow_const branches' f'
+    rw [hlen] at hconst
+    have _hp : (3 : Nat) ^ (f' + 1) = 3 ^ f' * 3 := pow_succ 3 f'
+    have h1 : 1 ≤ (3 : Nat) ^ f' := Nat.one_le_pow _ _ (by norm_num)
+    simp only [List.map_append, List.map_cons, List.sum_append,
+      List.sum_cons, List.append_nil, hconst]
+    omega
+  · -- Mismatch arm: fuel sum can only shrink (pending fuels dropped), pending shrinks
+    have hle : ((([] : List Nat) ++ doneFuels).map (fun fl => 3 ^ fl)).sum
+        ≤ ((_pFuels ++ doneFuels).map (fun fl => 3 ^ fl)).sum := by
+      simp only [List.nil_append, List.map_append, List.sum_append]
+      omega
+    exact lex_lt_of_le_of_lt hle (by simp)
+
+omit [Hashable Atom] in
+/-- Per-branch-fuel expansion loop for the intuitionistic/minimal tableau (the
+"B-engine", built in parallel to `intExpandBranches` — no consumer is flipped to it
+yet).
+
+Same worklist shape and parallel lists as `intExpandBranches` (`Expansion.lean`), with
+the single global `fuel : Nat` replaced by `fuels : List Nat`, a fourth parallel list
+carrying each branch's remaining fuel budget (sized by `intFuelExt` at the entry
+points). See `intExpandBranchesB.go` for the arm-by-arm fuel discipline and the
+unconditional lexicographic termination measure. -/
+def intExpandBranchesB
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (fuels : List Nat)
+    (closurePred : IBranch Atom → Bool) :
+    IntTableauResult Atom :=
+  intExpandBranchesB.go closurePred branches expandedSets nextWorlds edgeSets fuels
+    [] [] [] [] []
+
+omit [Hashable Atom] in
+/-- At the tableau entry point, the worklist count over the ENLARGED universe
+`intUniverseExt φ` is strictly below the materializable per-branch fuel budget
+`intFuelExt φ` — the call-site `hFuel` discharge for the per-branch-fuel restatement
+(replacing the retired global-measure form `intExpMeasure_init_le_fuel` on the
+B-engine side). The initial singleton branch `[⟨.neg, φ, 0⟩]` with empty expanded set
+gives `intWork ≤ 2 * |intUniverseExt φ|` (branch-exclusion term via
+`List.countP_le_length`; the expanded-set term is the full length since `e = []`
+excludes nothing); `intUniverseExt_length_le` then bounds the length, and the strict
+`+ 1` slack of `intFuelExt` closes by `omega` — no pow manipulation. -/
+lemma intWork_init_lt_intFuelExt (φ : Proposition Atom) :
+    intWork (intUniverseExt φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] < intFuelExt φ := by
+  have hwork : intWork (intUniverseExt φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] ≤
+      2 * (intUniverseExt φ).length := by
+    have heq : intWork (intUniverseExt φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] =
+        (intUniverseExt φ).countP
+          (fun sf => !(([(⟨.neg, φ, 0⟩ : ISF Atom)]).any (· == sf))) +
+        (intUniverseExt φ).countP
+          (fun sf => !((([] : List (ISF Atom))).any (· == sf))) := rfl
+    rw [heq]
+    have h2 : (intUniverseExt φ).countP
+        (fun sf => !((([] : List (ISF Atom))).any (· == sf)))
+        = (intUniverseExt φ).length := by
+      simp
+    rw [h2]
+    have h1 : (intUniverseExt φ).countP
+        (fun sf => !(([(⟨.neg, φ, 0⟩ : ISF Atom)]).any (· == sf))) ≤
+        (intUniverseExt φ).length :=
+      List.countP_le_length
+    omega
+  have hUlen := intUniverseExt_length_le φ
+  have h2U : 2 * (intUniverseExt φ).length ≤
+      2 * (2 * (2 * φ.complexity + 1) * (WBound φ + 1)) :=
+    Nat.mul_le_mul_left 2 hUlen
+  have heq2 : 2 * (2 * (2 * φ.complexity + 1) * (WBound φ + 1)) =
+      4 * (2 * φ.complexity + 1) * (WBound φ + 1) := by ring
+  unfold intFuelExt
+  omega
 
 /-! ## Persistence-loop fuel-sufficiency (`sat_timp` STOP-gate gap 1 continuation,
 `Scheme.lean:485-533`)

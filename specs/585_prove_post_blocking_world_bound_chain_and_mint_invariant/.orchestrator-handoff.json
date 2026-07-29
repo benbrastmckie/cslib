@@ -32,12 +32,13 @@
   "dead_ends": [
     "The literal Phase 1 statement '(c,p) in edges -> isAccessible edges x p -> isAccessible edges x c' (fixed edges, no append) is not provable in general: isAccessible edges x y always uses fuel exactly edges.length for every pair, so any one-hop composition costs one unit of fuel that a fixed snapshot cannot supply. Do not re-attempt this literal form; use the append-specialized form or thread accessibility incrementally instead."
   ],
-  "phases_completed": 5,
+  "phases_completed": 4,
   "phases_total": 11,
   "continuation_path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md, resume at Phase 4",
   "warnings": [
     "Phase 4 (strict label bound) and Phases 6-11 (the ~700-1000 remaining Lean lines of IWorldHist threading, pigeonhole, and path-injection work) are NOT started. DP-2's sorry at Scheme.lean is still present -- do not report this task as implemented/complete until Phase 11 retires it and the sorry census reads Tableau-subtree 3 / repo-wide 5.",
     "Serialize against specs/430_prove_atom_persistence_upward_closure_for_intexpan/ -- both edit Scheme.lean. Do not run task 430 concurrently while this task is in [IMPLEMENTING]/[PARTIAL]."
   ],
-  "timestamp": "2026-07-29T00:00:00Z"
+  "timestamp": "2026-07-29T00:00:00Z",
+  "phase_count_note": "corrected from writer-reported 5 to 4; plan headings show Phases 1,2,3,5 [COMPLETED], Phase 4 [NOT STARTED]"
 }

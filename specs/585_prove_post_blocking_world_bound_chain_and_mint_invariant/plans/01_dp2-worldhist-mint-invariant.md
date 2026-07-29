@@ -309,7 +309,7 @@ requirement, which concerns discharge not yet-consumption).
 
 ---
 
-### Phase 4: Strict label bound as a parallel invariant [NOT STARTED]
+### Phase 4: Strict label bound as a parallel invariant [IN PROGRESS]
 
 - **Goal:** Add the strict label-bound companion needed for `par c < c` (report section 5.4).
   The existing `ILabelBound b nw := forall sf in b, sf.label <= nw` (`Scheme.lean:953-954`) is too
@@ -349,7 +349,7 @@ requirement, which concerns discharge not yet-consumption).
 
 ---
 
-### Phase 5: GO/NO-GO GATE -- standalone mint-residue lemma (*) [COMPLETED -- GO]
+### Phase 5: GO/NO-GO GATE -- standalone mint-residue lemma (*) [COMPLETED]
 
 **Reordering note**: per the plan's own dependency-wave table (Wave 2: Phases 4 and 5 both
 depend only on 1-3, and are mutually independent), Phase 5 was executed BEFORE Phase 4, since

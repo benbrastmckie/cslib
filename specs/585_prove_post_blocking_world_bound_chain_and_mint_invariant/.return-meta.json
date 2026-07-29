@@ -33,7 +33,11 @@
     "session_id": "sess_1785345125_26a56f",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
     "compliance_check": "passed"
   },
   "modified_files": [
@@ -42,5 +46,6 @@
     "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md",
     "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md"
   ],
-  "next_steps": "Resume with Phase 4 (strict label bound threading across the key induction's ten cases), then Phase 6 (IWorldHist definition -- incorporate the ancestor-accessibility threading finding recorded in the plan's Phase 1 section and the summary), then Phases 7-11 in wave order."
+  "next_steps": "Resume with Phase 4 (strict label bound threading across the key induction's ten cases), then Phase 6 (IWorldHist definition -- incorporate the ancestor-accessibility threading finding recorded in the plan's Phase 1 section and the summary), then Phases 7-11 in wave order.",
+  "phases_completed": 4
 }

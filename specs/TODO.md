@@ -11,7 +11,7 @@ next_project_number: 586
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,430,534,554,558,562,563,568,569,583,585 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,430,534,554,558,562,563,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,511,537,551,553,564,571,576 | 36,37,181,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,506,548,565,566,582 | 39,40,511,553,564 | foundations, modal logic |
 | 4 | 300,567 | 506,558,565,566 | modal logic |
@@ -76,14 +76,10 @@ next_project_number: 586
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
-### Uncategorized
-
-585 [IMPLEMENTING] — Discharge the single remaining strategic sorry DP-2 in Cslib/Logi
-
 ## Tasks
 
 ### 585. Prove post blocking world bound chain and mint invariant
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 317
 - **Research**: [585_prove_post_blocking_world_bound_chain_and_mint_invariant/reports/01_dp2-mint-invariant-transfer.md]

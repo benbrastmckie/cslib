@@ -1,7 +1,7 @@
 # Implementation Plan: Scope pre-pr-check step 1's sorry gate
 
 - **Task**: 584 - scope_pre_pr_check_sorry_gate
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md
@@ -119,7 +119,9 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Add `--scope PATH...` to check-sorry-suppressions.sh [NOT STARTED]
+### Phase 1: Add `--scope PATH...` to check-sorry-suppressions.sh [COMPLETED]
+
+**Scope Hypothesis confirmed at implementation time**: `grep -n 'find "\$SCAN_ROOT"' scripts/check-sorry-suppressions.sh` returns exactly three executable call sites (lines 142 `current_counts()`, 181 `--update` guard, 232 verify-path guard), matching the asserted count. (A fourth match at line 71 is inside the header comment block, not an executable call site.)
 
 **Goal**: Give the existing ratchet gate a scope filter that narrows which files are swept while
 leaving the baseline, the comparison keying, and every existing invocation byte-for-byte

@@ -86,6 +86,14 @@ SCAN_ROOT="Cslib"
 BASELINE="scripts/sorry-suppression-baseline.txt"
 MARKER_STR="set_option warn.sorry false"
 
+# Scope/changed-set state, populated by the argument loop below. When SCOPE_PATHS is empty and
+# CHANGED=0, every sweep below is exactly the pre-existing whole-tree behaviour: SCAN_ROOT only,
+# with no filtering. `--changed` is reserved for Phase 2 wiring; see the argument loop below.
+MODE=""
+SCOPE_PATHS=()
+CHANGED=0
+BASE_REF="origin/main"
+
 if ! command -v perl >/dev/null 2>&1; then
   echo "ERROR: perl is not on PATH -- required for the block-comment-stripping pass. This is" >&2
   echo "an environment error, not a clean/empty result." >&2
@@ -123,6 +131,21 @@ count_sorries() {
   return 0
 }
 
+# Emits the sorted list of `.lean` files to sweep. When SCOPE_PATHS is empty this is exactly the
+# pre-existing whole-tree sweep (find "$SCAN_ROOT" -name '*.lean' -type f | sort) -- unchanged
+# behaviour for the no-arg, --list, and --update paths. When SCOPE_PATHS is non-empty, the sweep
+# is restricted to those paths only; a path that does not exist contributes no files (silently,
+# from find's perspective) rather than erroring here -- the caller is responsible for treating a
+# resulting empty sweep as fatal where that is the desired semantics (see the zero-file checks
+# below, which is exactly where a mistyped --scope path is caught).
+sweep_files() {
+  if [ ${#SCOPE_PATHS[@]} -eq 0 ]; then
+    find "$SCAN_ROOT" -name '*.lean' -type f | sort
+  else
+    find "${SCOPE_PATHS[@]}" -name '*.lean' -type f 2>/dev/null | sort -u
+  fi
+}
+
 # Emits "<markers> <sorries> <path>" for every file with markers>0 or sorries>0, path-sorted.
 # Sets $current_counts_failed=1 (global) if any file's block-comment strip failed.
 current_counts_failed=0
@@ -139,7 +162,7 @@ current_counts() {
     if [ "$markers" -gt 0 ] || [ "$sorries" -gt 0 ]; then
       printf '%s %s %s\n' "$markers" "$sorries" "$f"
     fi
-  done < <(find "$SCAN_ROOT" -name '*.lean' -type f | sort)
+  done < <(sweep_files)
 }
 
 # D1 ledger: for files with sorries, extract the distinct trailing blocker comment (`-- ...`)
@@ -163,22 +186,71 @@ ledger_for_file() {
   ' | sort -u
 }
 
-case "${1:-}" in
-  --list)
+# Argument loop. Recognizes --list, --update, and --scope PATH... (consuming paths until the
+# next --prefixed token or end of args). --changed / --base REF are reserved for Phase 2; any
+# other token, including those two today, falls through to the usage-error catch-all below.
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --list)
+      if [ -n "$MODE" ] && [ "$MODE" != "list" ]; then
+        echo "Usage: $0 [--update|--list] [--scope PATH...]" >&2
+        exit 2
+      fi
+      MODE="list"
+      shift
+      ;;
+    --update)
+      if [ -n "$MODE" ] && [ "$MODE" != "update" ]; then
+        echo "Usage: $0 [--update|--list] [--scope PATH...]" >&2
+        exit 2
+      fi
+      MODE="update"
+      shift
+      ;;
+    --scope)
+      shift
+      if [ $# -eq 0 ] || [[ "$1" == --* ]]; then
+        echo "Usage: --scope requires at least one PATH argument" >&2
+        exit 2
+      fi
+      while [ $# -gt 0 ] && [[ "$1" != --* ]]; do
+        SCOPE_PATHS+=("$1")
+        shift
+      done
+      ;;
+    *)
+      echo "Usage: $0 [--update|--list] [--scope PATH...]" >&2
+      exit 2
+      ;;
+  esac
+done
+
+# --update refuses --scope: a partial sweep would rewrite the whole-tree baseline and silently
+# zero out-of-scope rows -- a silent ratchet break. This runs BEFORE any write to $BASELINE.
+# (Once Phase 2 lands, --changed joins this same refusal.)
+if [ "$MODE" = "update" ] && [ ${#SCOPE_PATHS[@]} -gt 0 ]; then
+  echo "ERROR: --update refuses --scope -- a partial sweep would rewrite the whole-tree" >&2
+  echo "baseline and silently zero out-of-scope rows (a silent ratchet break). Run" >&2
+  echo "'bash $0 --update' unscoped instead." >&2
+  exit 2
+fi
+
+case "$MODE" in
+  list)
     current_counts | sort -k2,2rn
     if [ "$current_counts_failed" -ne 0 ]; then
       exit 2
     fi
     exit 0
     ;;
-  --update)
+  update)
     live=$(current_counts)
     if [ "$current_counts_failed" -ne 0 ]; then
       echo "ERROR: refusing to update baseline -- one or more files failed the block-comment" >&2
       echo "strip pass (see errors above)." >&2
       exit 2
     fi
-    nfiles=$(find "$SCAN_ROOT" -name '*.lean' -type f | wc -l)
+    nfiles=$(sweep_files | wc -l)
     if [ "$nfiles" -eq 0 ]; then
       echo "ERROR: '$SCAN_ROOT' contains no .lean files -- refusing to update baseline from an" >&2
       echo "empty sweep (this would silently record a clean/empty result for a broken scan root)." >&2
@@ -216,12 +288,8 @@ case "${1:-}" in
     echo "Baseline updated: $marker_total marker(s), $sorry_total sorrie(s), across $file_count file(s)."
     exit 0
     ;;
-  "") : ;;
-  *)
-    echo "Usage: $0 [--update|--list]" >&2
-    exit 2
-    ;;
 esac
+# MODE="" (verify) falls through past the case with neither branch matched.
 
 if [ ! -f "$BASELINE" ]; then
   echo "FAIL: baseline $BASELINE is missing. Generate it with:" >&2
@@ -229,10 +297,11 @@ if [ ! -f "$BASELINE" ]; then
   exit 2
 fi
 
-nfiles=$(find "$SCAN_ROOT" -name '*.lean' -type f | wc -l)
+nfiles=$(sweep_files | wc -l)
 if [ "$nfiles" -eq 0 ]; then
-  echo "ERROR: '$SCAN_ROOT' contains no .lean files. Environment likely broken (wrong working" >&2
-  echo "directory, or the scan root was renamed) -- this is NOT reported as a clean/empty result." >&2
+  echo "ERROR: the sweep (${SCOPE_PATHS[*]:-$SCAN_ROOT}) contains no .lean files. Environment" >&2
+  echo "likely broken (wrong working directory, scan root renamed, or a mistyped --scope path)" >&2
+  echo "-- this is NOT reported as a clean/empty result." >&2
   exit 2
 fi
 
@@ -284,7 +353,23 @@ done <<< "$live"
 base_marker_total=$(grep -vE '^[[:space:]]*#' "$BASELINE" | awk 'NF>=3 {s+=$1} END {print s+0}')
 base_sorry_total=$(grep -vE '^[[:space:]]*#' "$BASELINE" | awk 'NF>=3 {s+=$2} END {print s+0}')
 
-echo "markers: $cur_marker_total (baseline ceiling $base_marker_total); sorries: $cur_sorry_total (baseline ceiling $base_sorry_total)"
+if [ ${#SCOPE_PATHS[@]} -gt 0 ]; then
+  # Scoped run: restrict the *displayed* ceiling to the swept paths only, so e.g. a 24-vs-28
+  # comparison never misreads as a spurious improvement when the real story is "the other 4
+  # files simply weren't swept". Display-only: base_markers/base_sorries and the per-file
+  # comparison loop above stay whole-baseline-keyed and untouched by this.
+  scoped_marker_total=0
+  scoped_sorry_total=0
+  while IFS= read -r p; do
+    [ -z "$p" ] && continue
+    scoped_marker_total=$((scoped_marker_total + ${base_markers[$p]:-0}))
+    scoped_sorry_total=$((scoped_sorry_total + ${base_sorries[$p]:-0}))
+  done < <(sweep_files)
+  echo "scoped run (paths: ${SCOPE_PATHS[*]})"
+  echo "markers: $cur_marker_total (scoped baseline ceiling $scoped_marker_total; whole-tree ceiling $base_marker_total); sorries: $cur_sorry_total (scoped baseline ceiling $scoped_sorry_total; whole-tree ceiling $base_sorry_total)"
+else
+  echo "markers: $cur_marker_total (baseline ceiling $base_marker_total); sorries: $cur_sorry_total (baseline ceiling $base_sorry_total)"
+fi
 
 if [ "$improvements" -gt 0 ]; then
   cat <<EOF
@@ -295,6 +380,14 @@ ACTION REQUIRED (not a failure -- this check still exits 0):
     bash $0 --update
   Then commit the updated scripts/sorry-suppression-baseline.txt.
 EOF
+  if [ ${#SCOPE_PATHS[@]} -gt 0 ]; then
+    cat <<EOF
+  NOTE: this was a scoped run that only swept part of the tree. Do NOT try to re-baseline with
+  a scoped --update -- --update always refuses --scope (a partial sweep would rewrite the
+  whole-tree baseline and silently zero out-of-scope rows). Run the bare command above,
+  unscoped, from the repo root.
+EOF
+  fi
 fi
 
 if [ "$regressions" -gt 0 ]; then

@@ -1,45 +1,53 @@
 {
   "status": "implemented",
   "started_at": "2026-07-28T00:00:00Z",
+  "completed_at": "2026-07-28T00:00:00Z",
   "artifacts": [
     {
       "type": "handoff",
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-      "summary": "Phase 1 handoff: implemented, 1/8 phases, zero new sorries, no blockers"
+      "summary": "Phase 2 handoff: implemented, 2/8 phases, DP-1 PROVED INLINE, zero new sorries, no blockers"
+    },
+    {
+      "type": "lean-source",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "summary": "Post-Blocking World Bound section: intChainBound, WBound, WBound_pos, mem_intSubfmls_of_mem_posFormulasAt, intCreatedChain_le (proved sorry-free)"
     }
   ],
-  "phases_completed": 1,
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+    "specs/317_propositional_tableau_completeness/progress/plan13-phase-2-progress.json",
+    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
+  ],
+  "phases_completed": 2,
   "phases_total": 8,
+  "phase_number": 2,
+  "dp1_verdict": "PROVED_INLINE",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_delta": 0,
+    "pre_existing_subtree_sorries": 4,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "new_axioms": [],
+    "build_passed": true,
+    "scoped_build_passed": true,
+    "check_init_imports_passed": true,
+    "lake_test_passed": true,
+    "lean_verify_axioms": ["propext", "Classical.choice", "Quot.sound"]
+  },
+  "memory_candidates": [
+    {
+      "content": "Chain-bound pigeonhole for ancestor-blocking tableaux: stating the unblockedness negation against the final branch (with the runtime-to-final transfer owned by the invariant-threading side) turns the research-grade chain bound into a pure product-finset pigeonhole (Finset.exists_ne_map_eq_of_card_lt_of_maps_to over Sub.powerset xS Sub) that closes in one dispatch.",
+      "topic": "lean-tableau-termination",
+      "type": "pattern"
+    }
+  ],
   "metadata": {
     "session_id": "sess_1785275816_a84520_317",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "phase_number": 1
-  },
-  "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
-    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
-  ],
-  "verification": {
-    "verification_passed": true,
-    "new_sorry_count": 0,
-    "pre_existing_sorry_count": 4,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "scoped_build_passed": true,
-    "check_init_imports_passed": true,
-    "conformance_corpus": "untouched"
-  },
-  "memory_candidates": [
-    {
-      "content": "When bridging a label-generic tableau foundation module (Branch/Blocking counting layer) onto a concrete calculus whose branch type is a definitional abbrev of Branch F L, no coercion layer is needed: state bridge lemmas with explicit namespace application (Branch.posTypeAt b w, not dot notation, since abbrevs resolve dot notation to List), and the only content lemma required is a membership equivalence across an eraseDups. The Finset product notation xS for a signed universe requires Mathlib.Data.Finset.Prod in the import closure.",
-      "category": "TECHNIQUE",
-      "source_artifact": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "confidence": 0.7,
-      "suggested_keywords": ["tableau", "blocking", "bridge-lemma", "abbrev", "finset-product"]
-    }
-  ]
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

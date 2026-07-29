@@ -224,30 +224,52 @@ single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only
   `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`; zero new sorries;
   no change to any existing declaration.
 
-### Phase 2: `WBound` definition + ancestor-chain bound lemma (division point DP-1) [IN PROGRESS]
+### Phase 2: `WBound` definition + ancestor-chain bound lemma (division point DP-1) [COMPLETED]
 - **Goal:** A concrete `WBound : Proposition Atom → Nat` and the chain lemma that makes it a
   bound: along any edge chain of created worlds on a branch, chain length is bounded via the
   pigeonhole/strict-chain layer, because an over-long chain forces two chain worlds with equal
   positive type and equal creation obligation ψ, contradicting
   `intFImpReuseWitnessAnc?_spec`'s negation at the later creation site.
 - **Tasks:**
-  - [ ] Define `intChainBound φ` (per-chain depth bound, of order
+  - [x] Define `intChainBound φ` (per-chain depth bound, of order
     `(impCount + 1) * 2 ^ (2 * |Sub φ|)` — exact form implementer's choice, from the blocking
     combinatorics ONLY, never from `intUniverse`'s linear range) and
     `WBound φ` (total world bound: branching factor ≤ imp-subformula count per world, so a
     tree bound of order `(impCount + 1) ^ (intChainBound φ + 1)`; exponential-in-exponential
     is acceptable — it is a proof-side bound, not an evaluation step count).
-  - [ ] State the chain lemma (working name `intCreatedChain_le`): for an edge chain
+    (Landed as `intChainBound φ := 2 ^ |Sub φ| * |Sub φ|` — the `(posTypeAt, ψ)`-pair count
+    over `(intSubfmls φ).toFinset`, positive-projection `2 ^ U.card` form — and
+    `WBound φ := (|Sub φ| + 1) ^ (intChainBound φ + 1)`, plus `WBound_pos : 1 ≤ WBound φ`
+    for the Phase 6 singleton call-site. Scheme.lean "Post-Blocking World Bound" section.)
+  - [x] State the chain lemma (working name `intCreatedChain_le`): for an edge chain
     `w_0 → … → w_k` of worlds created by unblocked `intFImpRule` firings on branch `b`,
     `k ≤ intChainBound φ`. Proof route: pigeonhole (`exists_typeAt_eq_of_card_lt` over
     `(posTypeAt, ψ)` pairs, Phase 1 instantiations) + the five-conjunct negation of
     `intFImpReuseWitnessAnc? = none` at the later site.
-  - [ ] Attempt the proof within this dispatch. STOPPING CONDITION (bounded-unit): either the
+    (Landed. Final hypothesis set, all stated against the final branch `b`: `hsub`
+    subformula containment; `hψ` obligations in `Sub φ0`; `hobl` explicit `F(ψs i)` entry at
+    each created world; `hnotpos` openness; `hacc`/`hle` chain accessibility/label
+    monotonicity; `hunb` the five-conjunct unblockedness negation transcribed against `b`.
+    The `(posTypeAt, ψ)`-pair pigeonhole is `Finset.exists_ne_map_eq_of_card_lt_of_maps_to`
+    over `Sub.powerset ×ˢ Sub` — the same core lemma `exists_typeAt_eq_of_card_lt` wraps;
+    the Phase-1 label-indexed instantiation does not fit the chain-indexed quantification,
+    a named-lemma substitution within the plan's declared route, not a route change.)
+  - [x] Attempt the proof within this dispatch. STOPPING CONDITION (bounded-unit): either the
     proof closes, or place the DP-1 strategic sorry on exactly `intCreatedChain_le` (one
     declaration) with the mandated comment
     (`-- sorry: assumes the ψ-conditioned pigeonhole closes; deferred: research-grade
     combinatorics; follow-up: task 585`), record it in `sorry_inventory` with
     `strategic: true`, and proceed. Do NOT iterate past one dispatch.
+    (**PROOF CLOSED — DP-1 PROVED INLINE, no strategic sorry placed.** `lean_verify`
+    axioms: `{propext, Classical.choice, Quot.sound}`, no `sorryAx`. The Scope Hypothesis
+    held: the `(posTypeAt, ψ)`-pair index sufficed with no enlargement — the `F(ψ)@x`
+    conjunct is supplied at the earlier created world by its own creation obligation
+    (`hobl`), exactly as anticipated. NOTE for Phase 5 / follow-up owner: `hunb` is the
+    five-conjunct negation stated against the FINAL branch; the transfer from the runtime
+    check (evaluated on the firing-time branch state) to the final branch is owned by the
+    invariant-threading side (DP-2 territory), documented in the lemma docstring. DP-1's
+    contingent follow-up in the Planned Strategic Sorries table is NOT needed for Phase 2;
+    whether it stays open for DP-2 is decided at Phase 5.)
 - **Timing:** 1 dispatch. Estimated output: ~200-350 lines.
 - **Depends on:** 1
 - **Verification Tier:** local

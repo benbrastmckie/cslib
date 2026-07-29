@@ -3,11 +3,16 @@
   "plan": "plans/13_fuel-sufficiency-skeleton.md",
   "phase": 2,
   "session_id": "sess_1785275816_a84520_317",
+  "status": "completed",
+  "dp1_verdict": "PROVED_INLINE",
   "objectives": [
-    {"id": "2.1", "description": "Define intChainBound and WBound + WBound_pos", "status": "in_progress"},
-    {"id": "2.2", "description": "State intCreatedChain_le with final hypothesis set", "status": "pending"},
-    {"id": "2.3", "description": "Bounded proof attempt (DP-1, one-dispatch budget)", "status": "pending"},
-    {"id": "2.4", "description": "Scoped + full build green, conformance corpus green, handoff", "status": "pending"}
+    {"id": "2.1", "description": "Define intChainBound and WBound + WBound_pos", "status": "done"},
+    {"id": "2.2", "description": "State intCreatedChain_le with final hypothesis set", "status": "done"},
+    {"id": "2.3", "description": "Bounded proof attempt (DP-1, one-dispatch budget)", "status": "done", "result": "proof closed, no sorry; axioms propext/Classical.choice/Quot.sound"},
+    {"id": "2.4", "description": "Scoped + full build green, conformance corpus green, handoff", "status": "done", "result": "lake build (3311 jobs) green; checkInitImports exit 0; lake test exit 0"}
   ],
-  "files_touched": []
+  "files_touched": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+  ],
+  "sorry_count_delta": 0
 }

@@ -3,8 +3,8 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": false,
-  "summary": "Plan v13 Phase 1 (Blocking.lean consumption bridge) complete: Scheme.lean now imports the shared blocking module (public import Cslib.Foundations.Logic.Tableau.Blocking, plus Mathlib.Data.Finset.Prod for the signed-universe product) and consumes its signed counting layer at the propositional types. New 'Containment-Blocking Bridge' section (after intUniverse_length_le): posFormulasAt_mem_iff (membership bridge posFormulasAt <-> Branch.posTypeAt, differing only by eraseDups), intSignedUniverse phi := {.pos,.neg} xS (intSubfmls phi).toFinset : Finset (Sign x Proposition Atom), mem_intSignedUniverse (@[simp]), intDistinctTypes_le_pow (instantiates distinctTypes_le_pow, signed 2^V.card form), intExists_typeAt_eq_of_card_lt (pigeonhole instantiation), and a build-checked example confirming strictChain_le_card applies with no wrapper. All new declarations sorry-free; no existing declaration changed; refuted unsigned eraseDups/2^U.length form NOT used. Verification: scoped build green, full lake build green (3311 jobs), lake exe checkInitImports green, conformance corpus untouched, task-subtree bare-sorry count unchanged at 4.",
-  "phases_completed": 1,
+  "summary": "Plan v13 Phase 2 (WBound + ancestor-chain bound, division point DP-1) complete. DP-1 VERDICT: PROVED INLINE — no strategic sorry placed, one-dispatch attempt budget respected. New 'Post-Blocking World Bound' section in Scheme.lean (after the Containment-Blocking Bridge): intChainBound phi := 2^|Sub phi| * |Sub phi| (the (posTypeAt, psi)-pair count, positive-projection 2^U.card form from the blocking combinatorics ONLY — intUniverse's linear range plays no role), WBound phi := (|Sub phi| + 1)^(intChainBound phi + 1), WBound_pos (1 <= WBound, for the Phase 6 singleton call-site), mem_intSubfmls_of_mem_posFormulasAt (universe-containment helper), and intCreatedChain_le PROVED sorry-free: chain length <= intChainBound phi0 along created-world edge chains, by Finset.exists_ne_map_eq_of_card_lt_of_maps_to over Sub.powerset xS Sub — a repeated (posType, obligation) pair makes the earlier created world a reuse witness satisfying all five conjuncts of intFImpReuseWitnessAnc? at the later creation site, contradicting unblockedness. Hypothesis-set decision (documented in docstring + plan annotation): the five-conjunct unblockedness negation is transcribed against the FINAL branch b; the transfer from the runtime check (firing-time branch state) to the final branch is owned by the Phase 5 invariant-threading side. lean_verify axioms: {propext, Classical.choice, Quot.sound}. Full lake build green (3311 jobs), checkInitImports exit 0, lake test exit 0 (conformance corpus, all rows incl. row 20). Subtree bare-sorry count unchanged at 4 (all pre-existing). Task 585 is NOT needed for DP-1; whether it stays open for DP-2 is decided at Phase 5.",
+  "phases_completed": 2,
   "phases_total": 8,
   "sorry_inventory": [
     {
@@ -19,12 +19,12 @@
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 2639,
+      "line": 2774,
       "statement": "intExpandBranches_openBranch_sat fuel-0 case (REFUTED as currently stated)",
       "strategic": false,
       "pre_existing": true,
       "assumption": "R1 hypothesis-threading restatement (hUniv/hNW/hFuel)",
-      "why_deferred": "Phase 6 target; requires phases 2-5 fuel-sufficiency development",
+      "why_deferred": "Phase 6 target; requires phases 3-5 fuel-sufficiency development",
       "follow_up_task": "317 phase 6"
     },
     {
@@ -52,8 +52,9 @@
   "continuation_path": null,
   "files_modified": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md"
+    "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+    "specs/317_propositional_tableau_completeness/progress/plan13-phase-2-progress.json"
   ],
-  "next_action_hint": "implement phase 2 (WBound definition + intCreatedChain_le chain-bound lemma; division point DP-1, follow-up task 585 if the pigeonhole proof does not close within the dispatch)",
-  "notes": "Zero sorries introduced this dispatch; the four inventory entries are the pre-existing ones recorded for complete accounting (they match the plan's Planned Strategic Sorries table and phase targets). skeleton:false because this dispatch rests on no strategic sorry it placed."
+  "next_action_hint": "implement phase 3 (intUniverseExt / intExpMeasureExt + engine re-target over List.range (WBound phi + 1); depends on Phase 2's DEFINITIONS only, which are landed and proved)",
+  "notes": "Zero sorries introduced this dispatch; DP-1 closed without its contingent sorry. The four inventory entries are the pre-existing ones recorded for complete accounting (matching the plan's Planned Strategic Sorries table and phase targets). skeleton:false because no strategic sorry was placed. Minor plan-noted substitution: the pigeonhole uses Finset.exists_ne_map_eq_of_card_lt_of_maps_to directly (the core lemma the Phase 1 label-indexed instantiation wraps) because the chain-indexed (posTypeAt, psi)-pair quantification does not fit exists_typeAt_eq_of_card_lt's label-indexed form — annotated in the plan checklist."
 }

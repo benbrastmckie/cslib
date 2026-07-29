@@ -257,7 +257,18 @@ byte-identical.
 
 ---
 
-### Phase 3: closurePred no-contradiction hypothesis threading [NOT STARTED]
+### Phase 3: closurePred no-contradiction hypothesis threading [COMPLETED]
+
+Added `hNC` hypothesis to `intExpandBranches_openBranch_sat`'s signature (shape:
+`closurePred b' = false -> (neg,psi,w) in b' -> psi not in posFormulasAt b' w`), discharged at
+the sole call site (`openBranch_countermodel`) via `S.no_contradiction`. Since `hNC` does not
+depend on `pending`/`done`, it needed no explicit threading through the `key` induction's
+argument list -- it is a fixed outer hypothesis of the enclosing lemma, automatically in scope
+for every case of the induction. `grep -rn "intExpandBranches_openBranch_sat"` confirms exactly
+one definition and one call site, both accounted for. `lake build` green; only warning is
+"`hNC` is not explicitly referenced" (expected -- it is not yet CONSUMED until Phase 7's mint
+arm; it IS discharged with a real proof at the call site, satisfying the anti-weakening
+requirement, which concerns discharge not yet-consumption).
 
 - **Goal:** Give `intExpandBranches_openBranch_sat` access to the fact that an unclosed branch has
   no `F(psi)@w` together with `psi` positive at `w`, and discharge the new hypothesis at its sole

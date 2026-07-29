@@ -4962,6 +4962,9 @@ private lemma intExpandBranches_openBranch_sat
     (hUniv : IAllUniv φ0 branches)
     (hNW : IAllNW φ0 nextWorlds)
     (hFuel : IAllFuel φ0 branches expandedSets fuels)
+    (hNC : ∀ (b' : IBranch Atom), closurePred b' = false →
+        ∀ (ψ : Proposition Atom) (w : Nat), (⟨.neg, ψ, w⟩ : ISF Atom) ∈ b' →
+          ψ ∉ posFormulasAt b' w)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
         = .openBranch b) :
     ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
@@ -5698,6 +5701,21 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
         exact mem_intUniverseExt_of (Nat.zero_le _) (intSubfmls_self_mem φ))
       (fun nw hnw => by simp only [List.mem_singleton] at hnw; subst hnw; exact WBound_pos φ)
       (by simp only [IAllFuel]; exact ⟨intWork_init_lt_intFuelExt φ, trivial⟩)
+      (fun b' hb' ψ w hmem hcontra => by
+        simp only [posFormulasAt, List.mem_filterMap] at hcontra
+        obtain ⟨sf, hsfmem, hif⟩ := hcontra
+        by_cases hcond : sf.sign == .pos && sf.label == w
+        · simp only [hcond, ite_true, Option.some.injEq] at hif
+          simp only [Bool.and_eq_true] at hcond
+          have hposAny : b'.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w)
+              = true :=
+            List.any_eq_true.mpr ⟨sf, hsfmem, by simp [hcond.1, hcond.2, hif]⟩
+          have hnegAny : b'.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w)
+              = true :=
+            List.any_eq_true.mpr ⟨_, hmem, by simp⟩
+          exact S.no_contradiction b' hb' ψ w ⟨hposAny, hnegAny⟩
+        · simp only [hcond, Bool.false_eq_true, ite_false] at hif
+          exact absurd hif (by simp))
       h
   -- Apply the truth lemma's F-branch direction over the `intAccessPreorder edges` frame.
   exact ⟨edges, (truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem⟩

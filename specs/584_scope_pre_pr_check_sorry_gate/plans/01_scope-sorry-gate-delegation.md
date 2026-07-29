@@ -191,7 +191,7 @@ count differs, route every occurrence found through the helper rather than the t
 
 ---
 
-### Phase 2: Add opt-in `--changed [--base REF]` narrowing [NOT STARTED]
+### Phase 2: Add opt-in `--changed [--base REF]` narrowing [COMPLETED]
 
 **Goal**: Add a git-aware extra narrowing that restricts the sweep to files this branch actually
 touches, as an opt-in flag that is never the sole predicate and defaults OFF everywhere.

@@ -131,15 +131,79 @@ count_sorries() {
   return 0
 }
 
-# Emits the sorted list of `.lean` files to sweep. When SCOPE_PATHS is empty this is exactly the
-# pre-existing whole-tree sweep (find "$SCAN_ROOT" -name '*.lean' -type f | sort) -- unchanged
-# behaviour for the no-arg, --list, and --update paths. When SCOPE_PATHS is non-empty, the sweep
-# is restricted to those paths only; a path that does not exist contributes no files (silently,
-# from find's perspective) rather than erroring here -- the caller is responsible for treating a
-# resulting empty sweep as fatal where that is the desired semantics (see the zero-file checks
-# below, which is exactly where a mistyped --scope path is caught).
+# True iff $1 lies inside one of SCOPE_PATHS (or SCOPE_PATHS is empty, in which case everything
+# is in scope). Prefix-matches on a path-component boundary so "Cslib/Logics/Modal" does not
+# spuriously match "Cslib/Logics/ModalX".
+path_in_scope() {
+  local p="$1" sp
+  [ ${#SCOPE_PATHS[@]} -eq 0 ] && return 0
+  for sp in "${SCOPE_PATHS[@]}"; do
+    case "$p" in
+      "$sp"|"$sp"/*) return 0 ;;
+    esac
+  done
+  return 1
+}
+
+# Resolves the merge-base commit for --changed into the global $MERGE_BASE, or exits 2 on
+# failure. MUST be called directly from the main script body, never from inside a pipe or
+# command-substitution subshell -- bash forks a subshell for the non-last stage of a pipeline,
+# and an `exit` there would only terminate that subshell, silently leaving the parent script
+# running with an empty/bogus result instead of actually failing. This is why merge-base
+# resolution is split out from the pipe-safe listing helpers below.
+resolve_merge_base() {
+  if ! MERGE_BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null); then
+    echo "ERROR: cannot resolve a merge-base between HEAD and '$BASE_REF' for --changed --" >&2
+    echo "unresolvable base ref, absent remote, or a detached HEAD with no common ancestor." >&2
+    echo "This is an environment error, never a silent empty/clean changed-file set." >&2
+    exit 2
+  fi
+}
+
+# Pipe-safe: raw union of changed paths (working tree + index + committed-since-merge-base),
+# each category using --diff-filter=d (lowercase) so a deleted path is never emitted for
+# downstream stat'ing. No filtering by extension, scan root, or scope yet -- see
+# resolve_changed_files() below for that.
+changed_files_raw() {
+  {
+    git diff --name-only --diff-filter=d "$MERGE_BASE" HEAD
+    git diff --name-only --diff-filter=d HEAD
+    git diff --name-only --diff-filter=d --cached
+    git ls-files --others --exclude-standard
+  } 2>/dev/null | sort -u
+}
+
+# Pipe-safe: the --changed sweep list, restricted to "*.lean" under $SCAN_ROOT, intersected with
+# SCOPE_PATHS when --scope is also given, and defensively dropping any path that no longer
+# exists on disk (e.g. renamed/removed since the diff was taken).
+resolve_changed_files() {
+  changed_files_raw | while IFS= read -r p; do
+    case "$p" in
+      "$SCAN_ROOT"/*.lean) : ;;
+      *) continue ;;
+    esac
+    [ -f "$p" ] || continue
+    path_in_scope "$p" || continue
+    printf '%s\n' "$p"
+  done | sort -u
+}
+
+# Emits the sorted list of `.lean` files to sweep.
+#   - CHANGED=1: the --changed set (git-diff-derived, filtered/scoped -- see
+#     resolve_changed_files above). Requires $MERGE_BASE already resolved via
+#     resolve_merge_base(), called from the main script body before this is ever reached.
+#   - CHANGED=0, SCOPE_PATHS empty: exactly the pre-existing whole-tree sweep
+#     (find "$SCAN_ROOT" -name '*.lean' -type f | sort) -- unchanged behaviour for the no-arg,
+#     --list, and --update paths.
+#   - CHANGED=0, SCOPE_PATHS non-empty: restricted to those paths only; a path that does not
+#     exist contributes no files (silently, from find's perspective) rather than erroring here --
+#     the caller is responsible for treating a resulting empty sweep as fatal where that is the
+#     desired semantics (see the zero-file checks below, which is exactly where a mistyped
+#     --scope path is caught).
 sweep_files() {
-  if [ ${#SCOPE_PATHS[@]} -eq 0 ]; then
+  if [ "$CHANGED" -eq 1 ]; then
+    resolve_changed_files
+  elif [ ${#SCOPE_PATHS[@]} -eq 0 ]; then
     find "$SCAN_ROOT" -name '*.lean' -type f | sort
   else
     find "${SCOPE_PATHS[@]}" -name '*.lean' -type f 2>/dev/null | sort -u
@@ -186,14 +250,14 @@ ledger_for_file() {
   ' | sort -u
 }
 
-# Argument loop. Recognizes --list, --update, and --scope PATH... (consuming paths until the
-# next --prefixed token or end of args). --changed / --base REF are reserved for Phase 2; any
-# other token, including those two today, falls through to the usage-error catch-all below.
+# Argument loop. Recognizes --list, --update, --scope PATH... (consuming paths until the next
+# --prefixed token or end of args), --changed, and --base REF. Any other token is a usage error.
+USAGE="Usage: $0 [--update|--list] [--scope PATH...] [--changed] [--base REF]"
 while [ $# -gt 0 ]; do
   case "$1" in
     --list)
       if [ -n "$MODE" ] && [ "$MODE" != "list" ]; then
-        echo "Usage: $0 [--update|--list] [--scope PATH...]" >&2
+        echo "$USAGE" >&2
         exit 2
       fi
       MODE="list"
@@ -201,7 +265,7 @@ while [ $# -gt 0 ]; do
       ;;
     --update)
       if [ -n "$MODE" ] && [ "$MODE" != "update" ]; then
-        echo "Usage: $0 [--update|--list] [--scope PATH...]" >&2
+        echo "$USAGE" >&2
         exit 2
       fi
       MODE="update"
@@ -218,21 +282,41 @@ while [ $# -gt 0 ]; do
         shift
       done
       ;;
+    --changed)
+      CHANGED=1
+      shift
+      ;;
+    --base)
+      shift
+      if [ $# -eq 0 ] || [[ "$1" == --* ]]; then
+        echo "Usage: --base requires a REF argument" >&2
+        exit 2
+      fi
+      BASE_REF="$1"
+      shift
+      ;;
     *)
-      echo "Usage: $0 [--update|--list] [--scope PATH...]" >&2
+      echo "$USAGE" >&2
       exit 2
       ;;
   esac
 done
 
-# --update refuses --scope: a partial sweep would rewrite the whole-tree baseline and silently
-# zero out-of-scope rows -- a silent ratchet break. This runs BEFORE any write to $BASELINE.
-# (Once Phase 2 lands, --changed joins this same refusal.)
-if [ "$MODE" = "update" ] && [ ${#SCOPE_PATHS[@]} -gt 0 ]; then
-  echo "ERROR: --update refuses --scope -- a partial sweep would rewrite the whole-tree" >&2
-  echo "baseline and silently zero out-of-scope rows (a silent ratchet break). Run" >&2
-  echo "'bash $0 --update' unscoped instead." >&2
+# --update refuses --scope and --changed: a partial sweep would rewrite the whole-tree baseline
+# and silently zero out-of-scope rows -- a silent ratchet break. This runs BEFORE any write to
+# $BASELINE.
+if [ "$MODE" = "update" ] && { [ ${#SCOPE_PATHS[@]} -gt 0 ] || [ "$CHANGED" -eq 1 ]; }; then
+  echo "ERROR: --update refuses --scope/--changed -- a partial sweep would rewrite the" >&2
+  echo "whole-tree baseline and silently zero out-of-scope rows (a silent ratchet break)." >&2
+  echo "Run 'bash $0 --update' unscoped instead." >&2
   exit 2
+fi
+
+# Resolve the --changed merge-base up front, from the main script body (not inside a pipe), so
+# an unresolvable base ref/absent remote fails the whole script via exit 2 -- see
+# resolve_merge_base()'s own comment for why this call site matters.
+if [ "$CHANGED" -eq 1 ]; then
+  resolve_merge_base
 fi
 
 case "$MODE" in
@@ -299,6 +383,14 @@ fi
 
 nfiles=$(sweep_files | wc -l)
 if [ "$nfiles" -eq 0 ]; then
+  if [ "$CHANGED" -eq 1 ]; then
+    # Distinct from the --scope zero-file case below: an empty --changed set genuinely means
+    # "this branch touches nothing in scope" and is a clean, expected outcome, not an error.
+    # This must stay a separate branch -- collapsing it with the --scope case would make a
+    # mistyped --scope path read as "nothing to check" instead of the fatal error it is.
+    echo "OK: no changed .lean files in scope; nothing to check."
+    exit 0
+  fi
   echo "ERROR: the sweep (${SCOPE_PATHS[*]:-$SCAN_ROOT}) contains no .lean files. Environment" >&2
   echo "likely broken (wrong working directory, scan root renamed, or a mistyped --scope path)" >&2
   echo "-- this is NOT reported as a clean/empty result." >&2

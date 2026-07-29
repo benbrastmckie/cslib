@@ -1,0 +1,43 @@
+{
+  "phase": "5",
+  "plan": "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+  "session_id": "sess_1785294636_11f932",
+  "objectives": [
+    {
+      "id": "hUniv-invariant",
+      "desc": "IAllUniv parallel-list invariant + append/map combinators",
+      "status": "done"
+    },
+    {
+      "id": "hUniv-step-preservation",
+      "desc": "intStepBranch_linear_preserves_univ / intStepBranch_branch_preserves_univ (alpha + beta + fresh-mint arms, ancestor-reuse arm needs no lemma)",
+      "status": "done"
+    },
+    {
+      "id": "hNW-invariant",
+      "desc": "IAllNW parallel-list invariant + append/map combinators",
+      "status": "done"
+    },
+    {
+      "id": "hNW-trivial-arms",
+      "desc": "intApplyRuleFull_linearResult_nextWorld / intApplyRuleFull_branchingResult_nextWorld / intStepBranch_linear_preserves_nw_of_none / intStepBranch_branch_preserves_nw (alpha + beta arms; reuse arm trivial by construction)",
+      "status": "done"
+    },
+    {
+      "id": "hNW-fresh-mint-arm",
+      "desc": "intFreshMint_preserves_nw (DP-2)",
+      "status": "deferred-strategic-sorry",
+      "note": "STOPPING CONDITION invoked per plan v14 Phase 5. Statement kept honest: hnwB : nw <= WBound phi0 is documented as insufficient (consistent with nw = WBound phi0); the missing strict premise and its dependency on intCreatedChain_le's runtime-check-to-final-branch transfer are named in the sorry comment. follow_up: task 585 (DP-2 row in plan's Planned Strategic Sorries table)."
+    }
+  ],
+  "verification": {
+    "scoped_build": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme)",
+    "full_build": "green (3311 jobs)",
+    "checkInitImports": "exit 0",
+    "bare_sorry_census": "5 in subtree (up from 4): Scheme.lean:551 (truthLemma T-imp, pre-existing), Scheme.lean:~2515 (intFreshMint_preserves_nw, NEW DP-2, authorized), Scheme.lean:~4732 (fuel-0, pre-existing), Intuitionistic/Completeness.lean:133 (pre-existing), Minimal/Completeness.lean:125 (pre-existing). +1 matches plan's explicit STOPPING CONDITION allowance."
+  },
+  "files_touched": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md"
+  ]
+}

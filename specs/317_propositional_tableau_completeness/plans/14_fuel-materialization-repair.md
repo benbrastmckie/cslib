@@ -548,24 +548,34 @@ below are suggestions; the constraint set is binding, the naming is implementer 
   by measurement, reports/15 probe: 599 ms materialization); dependents build green; subtree
   bare-sorry count still exactly 4.
 
-### Phase 5: `hUniv`/`hNW` threading invariants (division point DP-2) [NOT STARTED]
+### Phase 5: `hUniv`/`hNW` threading invariants (division point DP-2) [COMPLETED]
 - **Goal:** Preservation lemmas for the two new R1 hypotheses through all four recursion arms
   of the (post-flip, per-branch-fuel) `intExpandBranches` (linear, branching, world-creating
   with reuse, world-creating with fresh mint). Substance unchanged from v13 (reports/15 §7:
   same four arms, same fresh-mint `hNW` risk, same `applyPersistenceFixpoint_subset_ext`
   consumption); stated against the B-engine's arms (identical arm structure).
 - **Tasks:**
-  - [ ] `hUniv` preservation: rule outputs stay in `intUniverseExt φ0` — subformula-content
-    side via the existing subformula closure lemmas; world-label side via `hNW`.
-  - [ ] `hNW` preservation (`∀ nw ∈ nextWorlds, nw ≤ WBound φ0`): only the fresh-mint arm
+  - [x] `hUniv` preservation: rule outputs stay in `intUniverseExt φ0` — subformula-content
+    side via the existing subformula closure lemmas; world-label side via `hNW`. DONE:
+    `intStepBranch_linear_preserves_univ`/`intStepBranch_branch_preserves_univ`
+    (Scheme.lean), direct corollaries of `intApplyRuleFull_outputs_subset_ext` +
+    `applyPersistenceFixpoint_subset_ext`; the ancestor-reuse arm needs no lemma (branch
+    unchanged). Sorry-free.
+  - [x] `hNW` preservation (`∀ nw ∈ nextWorlds, nw ≤ WBound φ0`): only the fresh-mint arm
     increments; needs the creation-count invariant "labels minted so far ≤ tree size ≤
     `WBound φ0`" tied to Phase 2's chain lemma (including the runtime-check-to-final-branch
     transfer noted in `intCreatedChain_le`'s docstring). This is the remaining research-grade
     concentration. STOPPING CONDITION: prove within this dispatch, or place the DP-2 strategic
     sorry on exactly the one `hNW`-preservation lemma for the fresh-mint arm, with the mandated
-    comment and `sorry_inventory` entry (`follow-up: task 585`), and proceed.
-  - [ ] Package both as `IAllConsistent`-style parallel-list invariants R1's induction will
-    thread (mirror `IAllConsistent`/`IAllAccessConsistent`'s existing shape).
+    comment and `sorry_inventory` entry (`follow-up: task 585`), and proceed. DONE (deferred
+    per STOPPING CONDITION): the three trivial arms (alpha/beta/reuse) proved sorry-free
+    (`intStepBranch_linear_preserves_nw_of_none`, `intStepBranch_branch_preserves_nw`); the
+    fresh-mint arm carries the one authorized DP-2 strategic sorry
+    (`intFreshMint_preserves_nw`), documented with the missing premise named explicitly
+    (`nw < WBound φ0` strict, not derivable from the threaded `nw ≤ WBound φ0` alone).
+  - [x] Package both as `IAllConsistent`-style parallel-list invariants R1's induction will
+    thread (mirror `IAllConsistent`/`IAllAccessConsistent`'s existing shape). DONE: `IAllUniv`/
+    `IAllNW` with `_append`/`_map` combinator lemmas (Scheme.lean).
 - **Timing:** 1 dispatch. Estimated output: ~250-400 lines.
 - **Depends on:** 2, 3, 4C
 - **Verification Tier:** local

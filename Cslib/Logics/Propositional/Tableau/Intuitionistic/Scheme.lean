@@ -2261,6 +2261,259 @@ lemma intApplyRuleFull_outputs_subset_ext {φ0 : Proposition Atom} {sf : ISF Ato
             mem_intUniverseExt_of hnw (hsf'eq ▸ intUniverseExt_mem_formula hsf'U)
         · simp at hsf'eq
 
+/-! ## `hUniv`/`hNW` Threading Invariants (Phase 5, division point DP-2)
+
+Packages the two additional R1 hypotheses (Phase 6's per-branch fuel restatement of
+`intExpandBranches_openBranch_sat`) as parallel-list invariants threaded ALONGSIDE
+`IAllConsistent`/`IAllAccessConsistent` (same "companion, not merged" shape as that
+pair, `IAllAccessConsistent`'s docstring above): `IAllUniv` (every branch stays inside
+the enlarged universe `intUniverseExt φ0`) and `IAllNW` (every next-world counter stays
+within the post-blocking bound `WBound φ0`). Supplies the per-arm STEP-preservation
+lemmas Phase 6's functional induction over `intExpandBranches.go` consumes at each
+case, mirroring `intStepBranch_linear_preserves`/`intStepBranch_branch_preserves`'s
+existing shape.
+
+Three of the four recursion arms (ALPHA, BETA, and the ancestor-reuse world-creating
+arm) preserve both invariants by direct, complete proofs below. The fourth (the
+fresh-mint world-creating arm, when `intFImpReuseWitnessAnc?` finds no reusable
+ancestor) preserves `hUniv` unconditionally (`intApplyRuleFull_outputs_subset_ext`
+already supplies this, GIVEN `hNW` holds at the point of creation) but carries the
+DP-2 strategic sorry for `hNW`'s OWN forward preservation (`nw + 1 ≤ WBound φ0`): the
+"labels minted so far ≤ tree size ≤ WBound φ0" creation-count invariant tied to
+`intCreatedChain_le`'s pigeonhole bound (Phase 2), including the runtime-check-to-
+final-branch transfer that lemma's docstring flags as owned by this very development.
+Per plan v14 Phase 5's STOPPING CONDITION, this lemma's proof is deferred; the
+statement is NOT weakened to dodge the gap -- the sorry comment records exactly which
+premise (`nw < WBound φ0`, strict) is missing from the bare `hnwB : nw ≤ WBound φ0`
+threaded by `IAllNW`. Follow-up: DP-2, see the plan's Planned Strategic Sorries
+table. -/
+
+/-- Branch-universe containment threaded across the pending/done worklists: every
+formula on every branch stays inside `intUniverseExt φ0`. Unlike `IAllConsistent`,
+this does not need simultaneous multi-list recursion (it constrains a single list),
+so it is a plain `∀`, not a custom match-recursive `def`. -/
+private def IAllUniv (φ0 : Proposition Atom) (bs : List (IBranch Atom)) : Prop :=
+  ∀ b ∈ bs, ∀ x ∈ b, x ∈ intUniverseExt φ0
+
+omit [Hashable Atom] in
+/-- `IAllUniv` combines under list append (mirrors `IAllConsistent_append`; used to
+extend `done` with the just-processed branch, and to combine `done` with the still-
+`pending` tail). -/
+private lemma IAllUniv_append {φ0 : Proposition Atom} {bs1 bs2 : List (IBranch Atom)}
+    (h1 : IAllUniv φ0 bs1) (h2 : IAllUniv φ0 bs2) :
+    IAllUniv φ0 (bs1 ++ bs2) := by
+  intro b hb
+  rcases List.mem_append.mp hb with hb | hb
+  · exact h1 b hb
+  · exact h2 b hb
+
+omit [Hashable Atom] in
+/-- `IAllUniv` holds along a (possibly non-uniform) `map`: if every branch obtained by
+applying `f` to a member of `branches'` satisfies `hUniv`, then `IAllUniv` holds of the
+mapped list (mirrors `IAllConsistent_map`; covers the BETA arm's
+`branches'.map (Branch.extendMany bPers ·)`). -/
+private lemma IAllUniv_map {φ0 : Proposition Atom} {branches' : List (IBranch Atom)}
+    (f : IBranch Atom → IBranch Atom)
+    (h : ∀ br ∈ branches', ∀ x ∈ f br, x ∈ intUniverseExt φ0) :
+    IAllUniv φ0 (branches'.map f) := by
+  intro b hb
+  simp only [List.mem_map] at hb
+  obtain ⟨br, hbr, rfl⟩ := hb
+  exact h br hbr
+
+/-- Next-world-counter boundedness threaded across the pending/done worklists: every
+counter stays within the post-blocking bound `WBound φ0`. -/
+private def IAllNW (φ0 : Proposition Atom) (nws : List Nat) : Prop :=
+  ∀ nw ∈ nws, nw ≤ WBound φ0
+
+omit [Hashable Atom] in
+/-- `IAllNW` combines under list append (mirrors `IAllConsistent_append`). -/
+private lemma IAllNW_append {φ0 : Proposition Atom} {nws1 nws2 : List Nat}
+    (h1 : IAllNW φ0 nws1) (h2 : IAllNW φ0 nws2) :
+    IAllNW φ0 (nws1 ++ nws2) := by
+  intro nw hnw
+  rcases List.mem_append.mp hnw with hnw | hnw
+  · exact h1 nw hnw
+  · exact h2 nw hnw
+
+omit [Hashable Atom] in
+/-- `IAllNW` holds along a constant-valued `map` (mirrors `IAllConsistent_map`; covers
+the BETA arm's `branches'.map (fun _ => nw')`, where every child inherits the SAME
+counter). -/
+private lemma IAllNW_map_const {φ0 : Proposition Atom} {α : Type*} {l : List α} {c : Nat}
+    (h : c ≤ WBound φ0) :
+    IAllNW φ0 (l.map (fun _ => c)) := by
+  intro nw hnw
+  simp only [List.mem_map] at hnw
+  obtain ⟨_, -, rfl⟩ := hnw
+  exact h
+
+omit [Hashable Atom] in
+/-- Branch-universe containment (`hUniv`) is preserved by a `linearResult` step of
+`intStepBranch`, GIVEN the current next-world counter is within the post-blocking bound
+(`hnwB`): covers both the ALPHA arm (`newEdge = none`) and the world-creating arm
+(`newEdge = some _`, whether `go` later decides to reuse an ancestor or mint fresh --
+that split happens downstream of `intStepBranch`, so this lemma is agnostic to it).
+Direct corollary of `intApplyRuleFull_outputs_subset_ext` unfolded against
+`intStepBranch_some_exists` and `Branch.extendMany`'s prepend shape. Companion of
+`intStepBranch_linear_preserves` (which threads `IExpandedConsistent`/`ILabelBound`/
+`IExpandedAccessConsistent`), threaded alongside it for `hUniv`. -/
+private lemma intStepBranch_linear_preserves_univ {φ0 : Proposition Atom}
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {newForms : List (ISF Atom)} {nw' : Nat} {newEdge : Option (Nat × Nat)}
+    {newExp : List (ISF Atom)}
+    (hUniv : ∀ x ∈ b, x ∈ intUniverseExt φ0) (hnwB : nw ≤ WBound φ0)
+    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    ∀ x ∈ Branch.extendMany b newForms, x ∈ intUniverseExt φ0 := by
+  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hstep
+  have houts := intApplyRuleFull_outputs_subset_ext hUniv hsfb hnwB
+  simp only [hint] at houts
+  intro x hx
+  simp only [Branch.extendMany, List.mem_append] at hx
+  rcases hx with hx | hx
+  · exact houts x hx
+  · exact hUniv x hx
+
+omit [Hashable Atom] in
+/-- Branch-universe containment (`hUniv`) is preserved by a `branchingResult` step of
+`intStepBranch` on every sub-branch, GIVEN the current next-world counter is within the
+post-blocking bound (`hnwB`). Covers the BETA arm. Companion of
+`intStepBranch_branch_preserves`, threaded alongside it for `hUniv`. -/
+private lemma intStepBranch_branch_preserves_univ {φ0 : Proposition Atom}
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
+    (hUniv : ∀ x ∈ b, x ∈ intUniverseExt φ0) (hnwB : nw ≤ WBound φ0)
+    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    ∀ br ∈ branches', ∀ x ∈ Branch.extendMany b br, x ∈ intUniverseExt φ0 := by
+  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hstep
+  have houts := intApplyRuleFull_outputs_subset_ext hUniv hsfb hnwB
+  simp only [hint] at houts
+  intro br hbr x hx
+  simp only [Branch.extendMany, List.mem_append] at hx
+  rcases hx with hx | hx
+  · exact houts x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)
+  · exact hUniv x hx
+
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- The next-world counter output by `intApplyRuleFull`'s `linearResult` case is
+unchanged when no edge is created (`.pos,.and` / `.neg,.or`, the ALPHA arm), and
+increments by exactly one when an edge is created (`.neg,.imp`, the world-creating
+rule -- the sole source of `newEdge = some _`, per `intFImpRule`'s
+`nextWorld + 1` third component). Packages both the trivial and the fresh-mint
+next-world facts as a single case split, feeding both `hNW` step lemmas below. -/
+private lemma intApplyRuleFull_linearResult_nextWorld {sf : ISF Atom} {nw nw' : Nat}
+    {b : IBranch Atom} {newForms : List (ISF Atom)} {newEdge : Option (Nat × Nat)}
+    (hint : intApplyRuleFull sf nw b = .linearResult newForms nw' newEdge) :
+    (newEdge = none ∧ nw' = nw) ∨ ∃ ed, newEdge = some ed ∧ nw' = nw + 1 := by
+  obtain ⟨s, ff, l⟩ := sf
+  cases s with
+  | pos =>
+    cases ff with
+    | atom p => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ => simp [intApplyRuleFull] at hint
+    | and φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.linearResult.injEq] at hint
+      obtain ⟨-, hnw', hed⟩ := hint
+      exact Or.inl ⟨hed.symm, hnw'.symm⟩
+  | neg =>
+    cases ff with
+    | atom p => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | and φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.linearResult.injEq] at hint
+      obtain ⟨-, hnw', hed⟩ := hint
+      exact Or.inl ⟨hed.symm, hnw'.symm⟩
+    | imp φ ψ =>
+      simp only [intApplyRuleFull, intFImpRule, IntRuleResult.linearResult.injEq] at hint
+      obtain ⟨-, hnw', hed⟩ := hint
+      exact Or.inr ⟨_, hed.symm, hnw'.symm⟩
+
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- The next-world counter output by `intApplyRuleFull`'s `branchingResult` case is
+always unchanged (none of `.neg,.and` / `.pos,.or` / `.pos,.imp` create a world). -/
+private lemma intApplyRuleFull_branchingResult_nextWorld {sf : ISF Atom} {nw nw' : Nat}
+    {b : IBranch Atom} {branches' : List (List (ISF Atom))}
+    (hint : intApplyRuleFull sf nw b = .branchingResult branches' nw') :
+    nw' = nw := by
+  obtain ⟨s, ff, l⟩ := sf
+  cases s with
+  | pos =>
+    cases ff with
+    | atom p => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | and φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+      exact hint.2.symm
+    | imp φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+      exact hint.2.symm
+  | neg =>
+    cases ff with
+    | atom p => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ => simp [intApplyRuleFull] at hint
+    | and φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+      exact hint.2.symm
+
+omit [Hashable Atom] in
+/-- `hNW` is preserved by a `linearResult` step of `intStepBranch` when no edge is
+created (the ALPHA arm): the world counter is untouched. -/
+private lemma intStepBranch_linear_preserves_nw_of_none
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {newForms : List (ISF Atom)} {nw' : Nat} {newExp : List (ISF Atom)}
+    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' none, newExp)) :
+    nw' = nw := by
+  obtain ⟨sf, -, hint, -⟩ := intStepBranch_some_exists hstep
+  rcases intApplyRuleFull_linearResult_nextWorld hint with ⟨-, heq⟩ | ⟨ed, hcon, -⟩
+  · exact heq
+  · exact absurd hcon (by simp)
+
+omit [Hashable Atom] in
+/-- `hNW` is preserved by a `branchingResult` step of `intStepBranch` on every
+sub-branch (the BETA arm): the world counter is untouched, and every child inherits
+the same (unchanged) counter. -/
+private lemma intStepBranch_branch_preserves_nw
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
+    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    nw' = nw := by
+  obtain ⟨sf, -, hint, -⟩ := intStepBranch_some_exists hstep
+  exact intApplyRuleFull_branchingResult_nextWorld hint
+
+omit [Hashable Atom] in
+/-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
+arm -- when `intStepBranch` returns a world-creating `linearResult` (`newEdge = some
+_`) and `go`'s ancestor-directed loop-check (`intFImpReuseWitnessAnc?`) finds no
+reusable ancestor (a world IS actually minted, `nw' = nw + 1` by
+`intApplyRuleFull_linearResult_nextWorld`), the freshly incremented counter stays
+within the post-blocking world bound `WBound φ0`.
+
+The bare hypothesis `hnwB : nw ≤ WBound φ0` (the form `IAllNW` threads and the only
+fact locally available at this call site) is NOT by itself sufficient: it is
+consistent with `nw = WBound φ0`, which would make the conclusion false. The missing
+premise is the STRICT form `nw < WBound φ0` at the point of firing, which requires the
+"labels minted so far ≤ tree size ≤ WBound φ0" creation-count invariant tied to
+`intCreatedChain_le`'s pigeonhole bound (Phase 2) -- including the runtime-check-to-
+final-branch transfer that lemma's docstring explicitly flags as owned by "the
+invariant-threading development" (this phase), not yet done. This is the remaining
+research-grade concentration plan v14 Phase 5 names explicitly.
+
+sorry: assumes the creation-count invariant above (equivalently, that this fresh-mint
+firing is licensed by the pigeonhole tree-size bound, not merely that the counter has
+not yet overflowed); deferred because establishing the runtime-check-to-final-branch
+transfer is genuinely unproven research work, exceeding this phase's STOPPING
+CONDITION budget; follow-up: DP-2, see the plan's Planned Strategic Sorries table. -/
+private lemma intFreshMint_preserves_nw {φ0 : Proposition Atom} {nw : Nat}
+    (hnwB : nw ≤ WBound φ0) :
+    nw + 1 ≤ WBound φ0 := by
+  sorry
+
 omit [Hashable Atom] in
 /-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
 `FmpMeasure.lean:190-193`): the number of universe elements not yet on the branch, plus

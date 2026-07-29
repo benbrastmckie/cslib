@@ -1,41 +1,43 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
+  "phase": "implement",
+  "status": "partial",
   "task_number": 585,
   "session_id": "sess_1785345125_26a56f",
-  "summary": "Created an 11-phase plan discharging DP-2. The plan follows the research report over the task description: the numeric premise route is rejected as non-inductive (the threaded invariant must be structural), and the final-branch transfer is rejected as non-derivable (the residue is consumed at mint time instead). Phase 5 is an explicit go/no-go gate isolating the single unproven step as a standalone lemma before the invariant bulk is built on it.",
+  "summary": "Completed 5 of 11 plan phases with all work additive, sorry-free, and lake-build-green (full project). Critically, Phase 5 -- the plan's explicit go/no-go gate for the whole DP-2 route -- PASSED: the standalone mint-time snapshot-free residue lemma (intFImp_mint_residue) was proved exactly as the research report's section 4.2 predicted, de-risking the remainder of the route. Phase 4 (strict label bound, threaded across a large ten-case induction) was deferred (not blocking Phase 5 per the plan's own wave table) and is next in queue, followed by Phases 6-11 (IWorldHist definition, mint/non-mint arm preservation, pigeonhole and path-injection size bounds, and final sorry retirement).",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md"
     }
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "next_action": "implement",
   "files_modified": [
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md"
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md",
+    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md"
   ],
   "decisions_made": [
-    "Threaded invariant is structural (IWorldHist over par/obl/sfor/fire), not a numeric strengthening of IAllNW; the numeric bound nw <= WBound is re-derived as a corollary at each consumption site.",
-    "The runtime reuse-check 'none' is consumed at mint time while bPers is current, yielding the snapshot-free residue not(sfor c subset sfor c'); the final-branch transfer is never attempted.",
-    "The report's 9-phase decomposition was refined to 11 phases: the residue derivation is hoisted into its own standalone gate phase (Phase 5) stated with all five inputs as explicit hypotheses, so the go/no-go risk is testable before the large IWorldHist threading development is built on it.",
-    "intCreatedChain_le stays byte-identical and sorry-free; the new depth bound is a sibling lemma copied from its pigeonhole body, and its docstring records the negative result rather than the lemma being deleted.",
-    "Phases 3 and 4 both edit intExpandBranches_openBranch_sat's signature and key induction, so they are placed in different waves and must never be dispatched in parallel."
+    "Phase 1's one-hop extension lemma was specialized from the plan's literal fixed-edges statement to the append form (edges ++ [(c,p)]), since the fixed-edges form has a provable one-unit fuel deficit (isAccessible always uses fuel exactly edges.length, so composing one more hop from an already-fixed-fuel fact cannot be recovered by growing fuel alone). The append form is fuel-exact and matches the mint arm's real edges growth.",
+    "Phase 5 was executed before Phase 4: both are Wave 2 in the plan's dependency table (blocked only by Phases 1-3, mutually independent), and Phase 5 is the highest-risk/highest-value checkpoint to de-risk before committing to Phase 4's large induction-threading work.",
+    "Discovered and recorded (in the plan's Phase 1 section and the summary) that ancestor-accessibility needed for Phase 5/7's hacc input cannot be derived post-hoc from a fixed edges snapshot by induction on the ancestor chain -- it must be threaded incrementally, growing by exactly one hop per mint via isAccessible_append_mono + isAccessible_one_hop_ext. This is a design input Phase 6's IWorldHist definition must incorporate."
   ],
   "dead_ends": [
-    "Restating intFreshMint_preserves_nw with the numeric premise nw < WBound phi0 and threading it: not inductive, since a mint yields nw + 1 <= WBound, not nw + 1 < WBound, which the next mint on the same branch needs.",
-    "Supplying intCreatedChain_le's hunb by monotonicity from the runtime check: conjunct 3 runs backwards under branch growth because positive content at x only grows. No monotonicity argument or extra final-branch invariant recovers it.",
-    "Bounding the counter by the fuel (nw <= 1 + intFuelExt): provably circular, since intFuelExt must dominate 2 * (intUniverseExt).length and F >= 4(2c+1)(F+1) has no solution in Nat.",
-    "Flat pigeonhole over (sfor, obl) pairs without the tree: the reuse check is ancestor-directed and siblings never block each other, so no bound follows. depth x branching is unavoidable and is exactly what WBound's shape encodes."
+    "The literal Phase 1 statement '(c,p) in edges -> isAccessible edges x p -> isAccessible edges x c' (fixed edges, no append) is not provable in general: isAccessible edges x y always uses fuel exactly edges.length for every pair, so any one-hop composition costs one unit of fuel that a fixed snapshot cannot supply. Do not re-attempt this literal form; use the append-specialized form or thread accessibility incrementally instead."
   ],
-  "phases_completed": 0,
+  "phases_completed": 5,
   "phases_total": 11,
-  "continuation_path": null,
+  "continuation_path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md, resume at Phase 4",
   "warnings": [
-    "Phase 5 is the go/no-go gate and carries an explicit [BLOCKED] instruction: on failure record the failing conjunct, the verbatim goal state, and the tactics attempted; never substitute a placeholder, relocate the sorry, or add an undischarged hypothesis, and do not proceed to Phases 6-11.",
-    "Serialize against specs/430_prove_atom_persistence_upward_closure_for_intexpan/ - both edit Scheme.lean. Do not run task 430 while this task is in [IMPLEMENTING]."
+    "Phase 4 (strict label bound) and Phases 6-11 (the ~700-1000 remaining Lean lines of IWorldHist threading, pigeonhole, and path-injection work) are NOT started. DP-2's sorry at Scheme.lean is still present -- do not report this task as implemented/complete until Phase 11 retires it and the sorry census reads Tableau-subtree 3 / repo-wide 5.",
+    "Serialize against specs/430_prove_atom_persistence_upward_closure_for_intexpan/ -- both edit Scheme.lean. Do not run task 430 concurrently while this task is in [IMPLEMENTING]/[PARTIAL]."
   ],
-  "timestamp": "2026-07-29T17:15:00Z"
+  "timestamp": "2026-07-29T00:00:00Z"
 }

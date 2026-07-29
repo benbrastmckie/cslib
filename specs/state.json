@@ -1608,7 +1608,7 @@
         {
           "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md",
           "type": "summary",
-          "summary": "DP-2 phases 1,2,3,5 complete (5/11)"
+          "summary": "DP-2 phases 1-6 complete (6/11)"
         }
       ]
     }

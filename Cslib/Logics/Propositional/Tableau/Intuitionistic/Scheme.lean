@@ -2962,6 +2962,193 @@ private lemma intFImp_mint_residue {bPers : IBranch Atom} {edges : IEdges}
   intro χ hχ
   exact List.contains_iff_mem.mpr (hsub χ (hsubAll χ hχ))
 
+/-! ## `IWorldHist`: the Structural Creation-History Invariant (Phase 6, DP-2)
+
+Replaces the false numeric restatement `intFreshMint_preserves_nw` below with the structural
+invariant report `01_dp2-mint-invariant-transfer.md` section 3.2 identifies as the actually
+threadable quantity: for every created world `1 ≤ c < nw`, four witness functions record its
+parent (`par`), the obligation it was created to satisfy (`obl`), the propagated positive set
+(`sfor`), and the implication that fired to create it (`fire`). Every clause below is either
+fixed arithmetic/subformula data or monotone in the CURRENT branch `b` -- no branch snapshot
+appears anywhere, which is exactly what makes the invariant threadable across the mint-arm
+recursion (Phases 7-8).
+
+**Deviation from report section 3.2** (recorded per the plan's Phase 6 escape hatch): the
+report's draft (H1) clause is bare edge membership `(c, par c) ∈ edges`. That alone is
+insufficient to discharge Phase 7's mint-arm proof of (H5): `intFImp_mint_residue` (above)
+needs `hacc : isAccessible edges c' p = true` for an ARBITRARY `parAncestor`-ancestor `c'` of
+the new parent `p`, and this cannot be re-derived post-hoc from a fixed `edges` snapshot by
+induction on the ancestor chain -- `isAccessible_one_hop_ext` (Phase 1, `Scheme.lean:451`) is
+proved ONLY in the append-specialized shape `edges ++ [(c, p)]`; the corresponding
+fixed-`edges` one-hop lemma has a provable one-unit fuel deficit (Phase 1's own deviation
+note). The fix, added here as clause (H1-acc), carries genuine `isAccessible`
+ancestor-accessibility as invariant DATA, maintained incrementally at each mint: OLD pairs
+survive `edges`'s growth via `isAccessible_append_mono`, and the newly-minted world's
+accessibility from every ancestor of its parent is built by composing the parent's
+(inductively already-established) accessibility with `isAccessible_one_hop_ext` -- never
+re-derived from scratch. This restatement is additive to the report's draft (H1)-(H5); it does
+not remove or weaken any of them. -/
+
+/-- Reflexive-transitive closure of `par`, read as ancestry: `parAncestor par x y` holds iff
+`x` is obtained from `y` by iterating `par` zero or more times (`x = y`, `x = par y`,
+`x = par (par y)`, …). Well-founded whenever every step in range satisfies `par c < c` (the
+(H1) clause of `IWorldHist` below). -/
+private def parAncestor (par : Nat → Nat) (x y : Nat) : Prop :=
+  Relation.ReflTransGen (fun a b => a = par b) x y
+
+/-- The structural creation-history invariant threaded per-branch across the world-creation
+recursion (report section 3.2, with the (H1-acc) restatement documented above). Every created
+world `c` (`1 ≤ c < nw`) satisfies: (H1) its parent edge is recorded and strictly smaller;
+(H1-acc) it is genuinely edge-accessible from every `parAncestor`-ancestor under the CURRENT
+`edges`; (H2) the recorded obligation, firing implication, and propagated positive set all lie
+in `intSubfmls φ0`; (H3) the recorded obligation and positive set are actually planted on the
+CURRENT branch `b` (monotone facts, surviving every later append); (H4) a `(parent, fired
+implication)` pair determines its child uniquely (sibling uniqueness); (H5) the snapshot-free
+mint-time reuse residue `(★)` of `intFImp_mint_residue` (above). -/
+private def IWorldHist (φ0 : Proposition Atom) (b : IBranch Atom) (_e : List (ISF Atom))
+    (nw : Nat) (edges : IEdges) : Prop :=
+  ∃ (par : Nat → Nat) (obl : Nat → Proposition Atom)
+    (sfor : Nat → List (Proposition Atom)) (fire : Nat → Proposition Atom),
+    ∀ c, 1 ≤ c → c < nw →
+      -- (H1) tree structure
+      (c, par c) ∈ edges ∧ par c < c ∧
+      -- (H1-acc) genuine ancestor-accessibility under the CURRENT edges (incremental)
+      (∀ c', parAncestor par c' c → isAccessible edges c' c = true) ∧
+      -- (H2) universe containment of the recorded data
+      obl c ∈ intSubfmls φ0 ∧ fire c ∈ intSubfmls φ0 ∧
+      (∀ χ ∈ sfor c, χ ∈ intSubfmls φ0) ∧
+      -- (H3) planted, monotone facts (survive every later append to b)
+      (⟨.neg, obl c, c⟩ : ISF Atom) ∈ b ∧
+      (∀ χ ∈ sfor c, χ ∈ posFormulasAt b c) ∧
+      -- (H4) sibling uniqueness: (parent, fired implication) determines the child
+      (∀ c', 1 ≤ c' → c' < nw → par c = par c' → fire c = fire c' → c = c') ∧
+      -- (H5) the snapshot-free residue of the mint-time reuse check (★, section 4.2)
+      (∀ c', 1 ≤ c' → c' < c → parAncestor par c' (par c) → obl c' = obl c →
+        ¬ (∀ χ ∈ sfor c, χ ∈ sfor c'))
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Entry discharge (report section 5.5, entry case): with `nw = 1`, no `c` satisfies
+`1 ≤ c < 1`, so `IWorldHist` holds vacuously for ANY branch, expanded set, and edge list --
+the witness functions are irrelevant since the body is never invoked. Generalized over `b`,
+`e`, `edges` (not just the literal initial state) since the vacuity argument does not depend
+on them. -/
+private lemma IWorldHist_entry (φ0 : Proposition Atom) (b : IBranch Atom)
+    (e : List (ISF Atom)) (edges : IEdges) :
+    IWorldHist φ0 b e 1 edges :=
+  ⟨fun _ => 0, fun _ => φ0, fun _ => [], fun _ => φ0,
+    fun c hc1 hc2 => absurd hc2 (by omega)⟩
+
+/-- Counter-redundancy (report section 3.1): the next-world counter is exactly one more than
+the number of edges recorded so far. Only the mint arm changes either side, and it changes
+both by exactly one (Phase 7); the other three arms change neither (Phase 8). Threaded as a
+companion parallel-list invariant below, not merged into `IAllNW`. -/
+private def IWorldHistCounter (nw : Nat) (edges : IEdges) : Prop :=
+  nw = edges.length + 1
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Entry discharge: `openBranch_countermodel`'s initial state has `nw = 1`, `edges = []`, so
+`1 = 0 + 1` holds by `rfl`. -/
+private lemma IWorldHistCounter_entry : IWorldHistCounter 1 ([] : IEdges) := rfl
+
+/-- List companion of `IWorldHistCounter`, a 2-list zip over `(nws, edgeSets)` mirroring
+`IAllLabelBoundStrict`'s shape (companion, not merged, of `IAllNW`). -/
+private def IAllWorldHistCounter (nws : List Nat) (edgeSets : List IEdges) : Prop :=
+  match nws, edgeSets with
+  | [], [] => True
+  | nw :: nws', edges :: edgeSets' =>
+      IWorldHistCounter nw edges ∧ IAllWorldHistCounter nws' edgeSets'
+  | _, _ => False
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `IAllWorldHistCounter` combines under list append (mirrors `IAllLabelBoundStrict_append`). -/
+private lemma IAllWorldHistCounter_append {nws1 nws2 : List Nat}
+    {edgeSets1 edgeSets2 : List IEdges}
+    (h1 : IAllWorldHistCounter nws1 edgeSets1) (h2 : IAllWorldHistCounter nws2 edgeSets2) :
+    IAllWorldHistCounter (nws1 ++ nws2) (edgeSets1 ++ edgeSets2) := by
+  induction nws1 generalizing edgeSets1 with
+  | nil =>
+    cases edgeSets1 with
+    | nil => simpa using h2
+    | cons eh et => simp [IAllWorldHistCounter] at h1
+  | cons nwh nwt ih =>
+    cases edgeSets1 with
+    | nil => simp [IAllWorldHistCounter] at h1
+    | cons eh et =>
+      simp only [IAllWorldHistCounter] at h1
+      obtain ⟨hc, hrest⟩ := h1
+      simp only [List.cons_append]
+      exact ⟨hc, ih hrest⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `IAllWorldHistCounter` holds along a constant-valued `map` (mirrors `IAllNW_map_const`;
+covers the BETA arm, where every child inherits the SAME counter and edge list). -/
+private lemma IAllWorldHistCounter_map_const {α : Type*} {l : List α} {nw' : Nat}
+    {edges' : IEdges} (h : IWorldHistCounter nw' edges') :
+    IAllWorldHistCounter (l.map (fun _ => nw')) (l.map (fun _ => edges')) := by
+  induction l with
+  | nil => simp [IAllWorldHistCounter]
+  | cons _ t ih => simp only [List.map_cons, IAllWorldHistCounter]; exact ⟨h, ih⟩
+
+/-- List companion of `IWorldHist`, a 4-list zip over `(bs, es, nws, edgeSets)` -- a new shape
+not present elsewhere in this file (existing companions `IAllConsistent`/`IAllAccessConsistent`
+are 3-list zips only). Threaded ALONGSIDE `IAllConsistent`/`IAllNW` (companion, not merged). -/
+private def IAllWorldHist (φ0 : Proposition Atom) (bs : List (IBranch Atom))
+    (es : List (List (ISF Atom))) (nws : List Nat) (edgeSets : List IEdges) : Prop :=
+  match bs, es, nws, edgeSets with
+  | [], [], [], [] => True
+  | b :: bs', e :: es', nw :: nws', edges :: edgeSets' =>
+      IWorldHist φ0 b e nw edges ∧ IAllWorldHist φ0 bs' es' nws' edgeSets'
+  | _, _, _, _ => False
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `IAllWorldHist` combines under list append (mirrors `IAllNW_append`). -/
+private lemma IAllWorldHist_append {φ0 : Proposition Atom}
+    {bs1 bs2 : List (IBranch Atom)} {es1 es2 : List (List (ISF Atom))}
+    {nws1 nws2 : List Nat} {edgeSets1 edgeSets2 : List IEdges}
+    (h1 : IAllWorldHist φ0 bs1 es1 nws1 edgeSets1)
+    (h2 : IAllWorldHist φ0 bs2 es2 nws2 edgeSets2) :
+    IAllWorldHist φ0 (bs1 ++ bs2) (es1 ++ es2) (nws1 ++ nws2) (edgeSets1 ++ edgeSets2) := by
+  induction bs1 generalizing es1 nws1 edgeSets1 with
+  | nil =>
+    cases es1 with
+    | nil =>
+      cases nws1 with
+      | nil =>
+        cases edgeSets1 with
+        | nil => simpa using h2
+        | cons _ _ => simp [IAllWorldHist] at h1
+      | cons _ _ => simp [IAllWorldHist] at h1
+    | cons _ _ => simp [IAllWorldHist] at h1
+  | cons bh bt ih =>
+    cases es1 with
+    | nil => simp [IAllWorldHist] at h1
+    | cons eh et =>
+      cases nws1 with
+      | nil => simp [IAllWorldHist] at h1
+      | cons nwh nwt =>
+        cases edgeSets1 with
+        | nil => simp [IAllWorldHist] at h1
+        | cons edgesh edgest =>
+          simp only [IAllWorldHist] at h1
+          obtain ⟨hWH, hrest⟩ := h1
+          simp only [List.cons_append]
+          exact ⟨hWH, ih hrest⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `IAllWorldHist` holds along a constant-valued `map` (mirrors `IAllNW_map_const` /
+`IAllAccessConsistent_map`; covers the BETA arm, where every sub-branch shares the same
+expanded set, counter, and edge list, and only the branch itself varies via `f`). -/
+private lemma IAllWorldHist_map_const {φ0 : Proposition Atom} {branches' : List (IBranch Atom)}
+    (f : IBranch Atom → IBranch Atom) {newExp : List (ISF Atom)} {nw' : Nat} {edges' : IEdges}
+    (h : ∀ br ∈ branches', IWorldHist φ0 (f br) newExp nw' edges') :
+    IAllWorldHist φ0 (branches'.map f) (branches'.map (fun _ => newExp))
+      (branches'.map (fun _ => nw')) (branches'.map (fun _ => edges')) := by
+  induction branches' with
+  | nil => simp [IAllWorldHist]
+  | cons bh bt ih =>
+    simp only [List.map_cons, IAllWorldHist]
+    exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
+
 omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
 arm -- when `intStepBranch` returns a world-creating `linearResult` (`newEdge = some

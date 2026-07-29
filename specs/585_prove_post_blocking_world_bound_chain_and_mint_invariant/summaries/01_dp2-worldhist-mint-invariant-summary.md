@@ -1,8 +1,56 @@
 # Implementation Summary: DP-2 World-History Invariant and Mint Residue (Partial)
 
 - **Task**: 585 - prove_post_blocking_world_bound_chain_and_mint_invariant
-- **Status**: [PARTIAL] -- 5 of 11 phases complete; DP-2's sorry is NOT yet retired
+- **Status**: [PARTIAL] -- 6 of 11 phases complete; DP-2's sorry is NOT yet retired
 - **Plan**: `specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md`
+
+## Update (this dispatch: Phase 6)
+
+**Phase 6 is now COMPLETED** (previously NOT STARTED). Added the structural creation-history
+invariant `IWorldHist φ0 b _e nw edges` (private, additive, sorry-free) and its full supporting
+infrastructure: `parAncestor` (reflexive-transitive closure of `par`, via
+`Relation.ReflTransGen`), the counter-redundancy predicate `IWorldHistCounter nw edges :=
+nw = edges.length + 1` with its entry lemma (`rfl`), the 2-list companion
+`IAllWorldHistCounter` with `_append`/`_map_const` plumbing, the 4-list companion `IAllWorldHist`
+over `(bs, es, nws, edgeSets)` -- a genuinely new shape, one list wider than any existing
+companion in the file -- with its own `_append`/`_map_const` plumbing, and the standalone entry
+lemma `IWorldHist_entry` (vacuously true at `nw = 1`, generalized over the branch/expanded-set/
+edges arguments). All six new declarations verified sorry-free via a temporary `#print axioms`
+pass (only `propext`/`Quot.sound`; the temporary lines were removed before this commit). `lake
+build` green, both scoped (858 jobs) and full-project (3311 jobs). `git diff --stat`: single file
+(`Scheme.lean`, +187/-0), purely additive. Sorry census unchanged (Tableau subtree 4, repo-wide
+6 -- correct, this phase is additive-only).
+
+**Design deviation, resolving the Phase 1 finding flagged in the previous dispatch's summary**:
+`IWorldHist` gained an additional clause (H1-acc) beyond the report's literal (H1)-(H5):
+`∀ c', parAncestor par c' c → isAccessible edges c' c = true`, carrying genuine
+ancestor-accessibility as invariant DATA rather than as a value the mint-arm proof would need to
+re-derive post-hoc from a fixed `edges` snapshot (which Phase 1 showed has a provable one-unit
+fuel deficit). This clause is additive to the report's draft; nothing in (H1)-(H5) was removed
+or weakened. It is designed so Phase 7's mint arm can discharge it mechanically: old
+ancestor-accessibility pairs survive `edges`'s growth via `isAccessible_append_mono`, and the
+newly-minted world's accessibility from every ancestor of its parent follows by composing the
+parent's already-established accessibility with `isAccessible_one_hop_ext`.
+
+**`hNC` disposition**: Phase 3's `hNC` hypothesis remains linter-flagged as unreferenced, exactly
+as Phase 3 itself predicted. This phase concluded (rather than punting) that `hNC` is genuinely
+needed, not dead: its sole consumer is `intFImp_mint_residue`'s `hNC` parameter (Phase 5), reachable
+only from inside the mint arm of `intExpandBranches.go`'s recursion -- code this phase's own Exit
+Criteria explicitly forbid touching. See the plan's Phase 6 section for the full reasoning.
+
+**Task-list vs. Exit-Criteria tension**: the plan's Phase 6 task list asks to "thread both
+companions through the `key` induction's hypothesis list," but this phase's own Exit Criteria
+(the authoritative acceptance gate) explicitly prohibits asserting the invariant as an established
+conclusion of the induction before the arms are proved, and explicitly sanctions deferring
+"the induction wiring to Phases 7-8" when intermediate scaffolding is unavoidable. Wiring new
+hypotheses into `key`'s statement requires supplying them at every recursive `ih` call across all
+ten `intExpandBranches.go.induct` cases, which requires the per-arm preservation proofs that ARE
+Phases 7-8's entire content. This phase therefore built all pieces as complete, sorry-free,
+standalone declarations and deferred the wiring, per the Exit Criteria's own resolution; the
+checklist item is marked with an inline deviation annotation in the plan file rather than silently
+left unticked.
+
+**Phases remaining: 7, 8, 9, 10, 11** (unchanged in scope from the original plan).
 
 ## Update (this dispatch: Phase 4)
 
@@ -59,10 +107,15 @@ de-risk before committing to Phase 4's large, self-contained invariant-threading
 all ten cases of `intExpandBranches_openBranch_sat`'s `key` induction. See the "Update (this
 dispatch: Phase 4)" section above for the outcome.
 
-**Phases 6-11 (NOT STARTED)**: `IWorldHist` definition and 4-list companion (Phase 6), mint-arm
-and non-mint-arm preservation (Phases 7-8), the pigeonhole depth bound (Phase 9), the
-path-injection size bound (Phase 10), and the final sorry retirement + call-site rewiring
-(Phase 11).
+**Phase 6 (COMPLETED, this dispatch)**: `IWorldHist` structural invariant, `parAncestor`, the
+counter-redundancy companion, the 4-list companion `IAllWorldHist`, all plumbing, and the
+standalone entry lemma. See the "Update (this dispatch: Phase 6)" section above for the outcome
+and the (H1-acc) design deviation.
+
+**Phases 7-11 (NOT STARTED)**: mint-arm and non-mint-arm preservation of `IWorldHist` and the
+counter-redundancy invariant, wiring both into `intExpandBranches_openBranch_sat`'s signature and
+`key` induction (Phases 7-8), the pigeonhole depth bound (Phase 9), the path-injection size bound
+(Phase 10), and the final sorry retirement + call-site rewiring (Phase 11).
 
 ## Verification (as of this dispatch)
 
@@ -73,38 +126,37 @@ path-injection size bound (Phase 10), and the final sorry retirement + call-site
 - `intFImpReuseWitnessAnc?` (`Expansion.lean`) byte-identical to its pre-task state.
 - `intCreatedChain_le` untouched (Phase 9 not yet started).
 - `IAllConsistent`/`ILabelBound` byte-identical to their pre-Phase-4 bodies (new declarations only).
+- `IWorldHist`, `parAncestor`, `IWorldHistCounter`, `IAllWorldHistCounter`, `IAllWorldHist`, and
+  their plumbing all verified sorry-free by a temporary (removed) `#print axioms` pass.
 - Only `Scheme.lean` and `Expansion.lean` were modified across the whole task so far, matching
   the plan's file-scope hypothesis.
 - DP-3 (`Intuitionistic/Completeness.lean:129`), DP-4 (`Minimal/Completeness.lean:118`), DP-5
   (`Scheme.lean:669`) untouched.
 
-## Key Finding Worth Recording for the Next Dispatch
+## Key Finding, Now Resolved in Phase 6
 
-While investigating Phase 1's one-hop extension, a genuine subtlety was discovered and is
-recorded in the plan's Phase 1 section: **ancestor-accessibility (`isAccessible edges c' p` for
-an arbitrary-distance `par`-ancestor `c'` of `p`) cannot be derived post-hoc from a fixed `edges`
-snapshot** -- `isAccessible edges x y` always uses fuel exactly `edges.length` for every pair, so
-composing multiple hops from already-fixed-fuel facts creates a one-unit-per-hop deficit that
-cannot be recovered (fuel can only be grown, never shrunk, via the existing
-`isAccessible_go_fuel_mono`). The fix is architectural: ancestor-accessibility must be threaded
-as an INCREMENTAL invariant, updated by exactly one hop (via `isAccessible_append_mono` +
-`isAccessible_one_hop_ext`) in lockstep with `edges`'s real growth at each mint -- never
-recomputed from scratch by induction over a fixed ancestor chain. **This means Phase 6's
-`IWorldHist` definition likely needs an additional clause (or an accompanying companion
-invariant) tracking per-created-world ancestor-accessibility, beyond the report's literal
-(H1)-(H5) clauses**, so that Phase 7's mint arm can discharge (H5)'s `hacc` input by threading
-forward rather than re-deriving. This is flagged now so the next dispatch does not re-discover
-it from scratch.
+The previous dispatch's summary flagged a genuine subtlety discovered while investigating Phase
+1's one-hop extension: **ancestor-accessibility (`isAccessible edges c' p` for an
+arbitrary-distance `par`-ancestor `c'` of `p`) cannot be derived post-hoc from a fixed `edges`
+snapshot** (a provable one-unit-per-hop fuel deficit). Phase 6 resolves this by adding clause
+(H1-acc) directly to `IWorldHist`, carrying genuine ancestor-accessibility as invariant DATA,
+incrementally maintainable via `isAccessible_append_mono` + `isAccessible_one_hop_ext`. See the
+"Update (this dispatch: Phase 6)" section above for the full design and the plan's Phase 6
+section for the complete deviation record.
 
 ## Continuation Pointer
 
-Resume with Phase 6, incorporating the ancestor-accessibility threading note above into
-`IWorldHist`'s design before committing to its exact clause list. Phases 7-8 consume Phase 5's
-`intFImp_mint_residue` lemma directly at the mint arm (supplying `hacc` from the
-incrementally-threaded accessibility invariant, `hmem`/`hsub` from (H3), `hNC` from Phase 3's
-already-threaded hypothesis, `hψ`/`hnone`/`hle` from local mint-site facts), and now also have
-Phase 4's `ILabelBoundStrict`/`IAllLabelBoundStrict` available to supply `par c < c` (H1) directly
-from the threaded strict bound at the mint site, without re-deriving it.
+Resume with Phase 7 (mint-arm preservation of `IWorldHist` and the counter-redundancy invariant).
+This requires wiring `IAllWorldHist`/`IAllWorldHistCounter` into `intExpandBranches_openBranch_sat`'s
+signature and `key` induction statement (deferred by Phase 6, per its own Exit Criteria), then
+discharging the mint arm's five `IWorldHist` clauses plus counter-redundancy. Phase 7 consumes
+Phase 5's `intFImp_mint_residue` lemma directly at the mint arm (supplying `hacc` from the
+newly-added (H1-acc) clause -- now genuinely available as an inductive hypothesis rather than
+needing re-derivation, `hmem`/`hsub` from (H3), `hNC` from Phase 3's already-threaded hypothesis,
+`hψ`/`hnone`/`hle` from local mint-site facts), and has Phase 4's `ILabelBoundStrict`/
+`IAllLabelBoundStrict` available to supply `par c < c` (H1) directly from the threaded strict
+bound at the mint site, without re-deriving it. (H4) sibling uniqueness should come from
+`intStepBranch_some_exists_fuel`'s duplicate-free fact per the plan's Phase 7 task list.
 
 ## Plan Deviations
 
@@ -118,6 +170,12 @@ from the threaded strict bound at the mint site, without re-deriving it.
   expanded-set component and a spurious third list would carry no information. Added-line count
   (309) exceeds the ~120-180 estimate; see the plan's Phase 4 section for why this is benign
   (argument threading across ten induction cases, not invariant merging).
+- Phase 6: `IWorldHist` gained an additional clause (H1-acc, ancestor-accessibility as invariant
+  data) beyond the report's literal (H1)-(H5), per the Phase 1 finding; see the plan's Phase 6
+  section for the full design rationale. The final task-list item ("thread both companions
+  through the `key` induction's hypothesis list") was deferred to Phases 7-8, per this phase's
+  own Exit Criteria, which explicitly forbids wiring the induction before the arms are proved;
+  all pieces were instead delivered as complete, sorry-free, standalone declarations.
 
 ## AI Tools Used
 

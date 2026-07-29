@@ -492,32 +492,98 @@ private lemma intFImp_mint_residue {bPers : IBranch Atom} {edges : IEdges}
 
 ---
 
-### Phase 6: IWorldHist definition, counter-redundancy, plumbing, entry case [NOT STARTED]
+### Phase 6: IWorldHist definition, counter-redundancy, plumbing, entry case [COMPLETED]
+
+**Outcome.** Added `IWorldHist φ0 b _e nw edges` (private, additive, sorry-free), `parAncestor`
+(reflexive-transitive closure of `par` via `Relation.ReflTransGen`, matching the existing
+`intAccessPreorder` style rather than a hand-rolled inductive), the counter-redundancy predicate
+`IWorldHistCounter nw edges := nw = edges.length + 1` with its entry lemma
+(`IWorldHistCounter_entry : IWorldHistCounter 1 []`, by `rfl`), the 2-list companion
+`IAllWorldHistCounter` (mirroring `IAllLabelBoundStrict`'s 2-list-zip shape) with `_append`/
+`_map_const` plumbing, the 4-list companion `IAllWorldHist` over `(bs, es, nws, edgeSets)` with
+its own `_append`/`_map_const` plumbing, and the standalone entry lemma `IWorldHist_entry`
+(generalized over `b`, `_e`, `edges` -- vacuously true for ANY of them at `nw = 1`, since no `c`
+satisfies `1 ≤ c < 1`). All six new declarations verified sorry-free via a temporary
+`#print axioms` pass (only `propext`/`Quot.sound`, never `sorryAx`; removed before this commit).
+`lake build` green, both scoped (858 jobs) and full-project (3311 jobs). `git diff --stat` shows
+a single file changed (`Scheme.lean`, +187/-0, additive only). Sorry census unchanged at 4
+(Tableau subtree) / 6 (repo-wide), exactly as expected for an additive-only phase.
+
+**Deviation note (per this phase's own escape hatch, and the orchestrator's explicit
+instruction)**: the report's draft (H1) clause -- bare edge membership `(c, par c) ∈ edges` --
+is insufficient for Phase 7's mint-arm proof of (H5): `intFImp_mint_residue` (Phase 5) needs
+`hacc : isAccessible edges c' p = true` for an ARBITRARY `parAncestor`-ancestor `c'` of the new
+parent `p`, and this cannot be re-derived post-hoc from a fixed `edges` snapshot by induction on
+the ancestor chain -- `isAccessible_one_hop_ext` (Phase 1) is proved ONLY in the
+append-specialized shape `edges ++ [(c, p)]`, and the corresponding fixed-`edges` one-hop lemma
+has a provable one-unit fuel deficit (Phase 1's own deviation note). `IWorldHist` is therefore
+restated with an added clause (H1-acc): `∀ c', parAncestor par c' c → isAccessible edges c' c =
+true`, carrying genuine ancestor-accessibility as invariant DATA rather than as a
+post-hoc-derivable consequence of (H1) alone. This clause is additive to the report's (H1)-(H5);
+none are removed or weakened. It is designed to make Phase 7's mint-arm proof mechanical: OLD
+ancestor-accessibility pairs survive `edges`'s growth via `isAccessible_append_mono`, and the
+newly-minted world's accessibility from every ancestor of its parent follows by composing the
+parent's (already-established, by the induction hypothesis) accessibility with
+`isAccessible_one_hop_ext` -- never re-derived from scratch.
+
+**`hNC` disposition (orchestrator's explicit ask)**: Phase 3's `hNC` hypothesis on
+`intExpandBranches_openBranch_sat` remains flagged by the linter ("`hNC` is not explicitly
+referenced") after this phase, UNCHANGED from Phase 3's own prediction. This is a reasoned
+conclusion, not a punt: `hNC`'s sole planned consumer is `intFImp_mint_residue`'s `hNC` parameter
+(Phase 5), which is invoked only inside the mint arm of `intExpandBranches.go`'s recursion --
+code this phase's own Exit Criteria explicitly forbid touching (see the wiring deferral below).
+Manufacturing an artificial use here to silence the linter would be gaming the warning, not
+addressing it; the honest disposition is "needed, but not yet reachable," and its concrete
+consumption site is named precisely (Phase 7's mint arm) rather than left open-ended.
+
+**Task-list deviation**: the final task-list item ("Thread both companions through the `key`
+induction's hypothesis list ... this phase only adds the hypotheses and closes entry") conflicts
+with this phase's own Exit Criteria, which is the authoritative acceptance gate and explicitly
+states: "Because arms are not yet proved, this phase must NOT assert the invariant as an
+established conclusion of the induction ... if intermediate scaffolding is unavoidable, prove the
+pieces as standalone lemmas and defer the induction wiring to Phases 7-8." Wiring the new
+hypotheses into `key`'s quantified statement requires supplying them at every recursive `ih` call
+across all ten `intExpandBranches.go.induct` cases, which in turn requires per-arm preservation
+proofs (mint-arm (H1)-(H5) preservation is Phase 7's entire content; the three non-mint arms are
+Phase 8's). Attempting that wiring in this phase would mean either fabricating placeholder
+preservation proofs (prohibited) or leaving genuinely-unproved obligations dangling mid-phase
+(also prohibited, per the "no sorry to bridge unproved arms" instruction in this same Exit
+Criteria). Per the Exit Criteria's own resolution, all pieces are instead built as standalone,
+fully-proved declarations, ready for Phase 7/8 to wire into `intExpandBranches_openBranch_sat`'s
+signature and `key` statement.
 
 - **Goal:** Define the threaded structural invariant and its list companion, prove the counter is
   redundant with `edges`, and discharge the (vacuous) entry case (report sections 3.1, 3.2, 5.5).
 - **Tasks:**
-  - [ ] Define `IWorldHist phi0 b e nw edges` per report section 3.2, with witness functions
+  - [x] Define `IWorldHist phi0 b e nw edges` per report section 3.2, with witness functions
         `par`, `obl`, `sfor`, `fire` and clauses (H1) tree structure, (H2) universe containment,
         (H3) planted monotone facts, (H4) sibling uniqueness, (H5) the (*) residue from Phase 5.
-  - [ ] Define `parAncestor par x y` as reflexive-transitive iteration of `par`, well-founded by
-        `par c < c`.
-  - [ ] Confirm every clause is either fixed arithmetic/subformula data (H1, H2, H4, H5) or
+        *(completed, with an added (H1-acc) ancestor-accessibility clause -- see Deviation note)*
+  - [x] Define `parAncestor par x y` as reflexive-transitive iteration of `par`, well-founded by
+        `par c < c`. *(completed, via `Relation.ReflTransGen (fun a b => a = par b)`)*
+  - [x] Confirm every clause is either fixed arithmetic/subformula data (H1, H2, H4, H5) or
         monotone in `b` (H3). **No branch snapshot may appear anywhere** -- this is the property
         that makes the invariant threadable at all. If a snapshot creeps in, the definition is
-        wrong.
-  - [ ] Prove the counter-redundancy invariant `nw = edges.length + 1` (report section 3.1) as a
+        wrong. *(completed; confirmed by reading the statement back -- only `b`, `nw`, `edges`,
+        and fixed `φ0`-derived data appear, no snapshot)*
+  - [x] Prove the counter-redundancy invariant `nw = edges.length + 1` (report section 3.1) as a
         separate parallel-list invariant over `(pendingNW, pendingEdges)`, in the same
-        "companion, not merged" shape. Entry gives `1 = 0 + 1`.
-  - [ ] Define the list companion `IAllWorldHist` over the FOUR parallel lists (`bs`, `es`,
+        "companion, not merged" shape. Entry gives `1 = 0 + 1`. *(completed:
+        `IWorldHistCounter`/`IAllWorldHistCounter`/`IWorldHistCounter_entry`)*
+  - [x] Define the list companion `IAllWorldHist` over the FOUR parallel lists (`bs`, `es`,
         `nws`, `edgeSets`). Note this is a new shape: the existing companions `IAllConsistent`
-        and `IAllAccessConsistent` are 3-list zips only.
-  - [ ] Prove `_append` and `_map_const` plumbing for the 4-list companion, mirroring
+        and `IAllAccessConsistent` are 3-list zips only. *(completed)*
+  - [x] Prove `_append` and `_map_const` plumbing for the 4-list companion, mirroring
         `IAllNW_append` (`Scheme.lean:2421`) and `IAllNW_map_const` (`Scheme.lean:2433`).
-  - [ ] Discharge the entry case: `nw = 1`, so no `c` satisfies `1 <= c < 1` and the invariant is
+        *(completed: `IAllWorldHist_append`/`IAllWorldHist_map_const`, plus the analogous pair for
+        the 2-list counter companion)*
+  - [x] Discharge the entry case: `nw = 1`, so no `c` satisfies `1 <= c < 1` and the invariant is
         vacuously true at `openBranch_countermodel`'s initial state (`Scheme.lean:5578`).
+        *(completed: `IWorldHist_entry`, generalized over `b`/`_e`/`edges`)*
   - [ ] Thread both companions through the `key` induction's hypothesis list (arms are Phases 7
-        and 8; this phase only adds the hypotheses and closes entry).
+        and 8; this phase only adds the hypotheses and closes entry). *(deviation: deferred to
+        Phase 7/8 -- this phase's own Exit Criteria forbids wiring the induction before the arms
+        are proved; see the Task-list deviation note above)*
 - **Timing:** 2 hours
 - **Depends on:** 5
 - **Verification Tier:** local

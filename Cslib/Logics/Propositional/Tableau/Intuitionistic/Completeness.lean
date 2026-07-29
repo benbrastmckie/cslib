@@ -119,17 +119,24 @@ Proof strategy: `tableau_complete intScheme φ` takes `∀ edges b, IForces (int
 b) (intScheme.modelBot b) 0 φ` at the `intAccessPreorder edges` frame. For the intuitionistic
 scheme, `modelBot b = fun _ => False`. This follows from `IValid φ` by instantiating at
 `World = Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val = intExtractValuation b`, with
-the upward-closure of `intExtractValuation b` ALONG THAT FRAME — the deferred-monotonicity
-obligation folded into the fuel-sufficiency fixpoint, not yet available. -/
+the upward-closure of `intExtractValuation b` ALONG THAT FRAME. The fuel-sufficiency fixpoint
+this bridge once waited on is now landed sorry-free (`Scheme.lean`,
+`applyPersistenceFixpoint_genuine_of_count_le_fuel`, modulo the unrelated fresh-mint
+`hNW`-preservation sorry); the actual remaining obligation is a positive-formula persistence
+(upward-closure) fact along the AUGMENTED accessibility relation `intAccessPreorder edges` —
+the same fact `truthLemma`'s T-imp `sorry` needs at the `φ = φ'→ψ'` shape, here needed at
+`φ = atom p`. -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
   intro edges _b
   -- Deferred-monotonicity bridge: `h` instantiated at `intAccessPreorder edges` needs
-  -- `intExtractValuation _b`'s upward-closure along that frame, which is not available
-  -- until the fuel-sufficiency fixpoint.
-  -- The bridge SHAPE (accepting `edges`) is now Route (a)-correct; only this monotonicity
-  -- premise remains deferred.
+  -- `intExtractValuation _b`'s upward-closure along that frame -- the augmented (loop-back-
+  -- edge-carrying) relation, not the algorithm's raw edges. This is NOT blocked on
+  -- fuel-sufficiency (that fixpoint is landed); it is blocked on the same persistence
+  -- invariant `Scheme.lean`'s `truthLemma` T-imp `sorry` (DP-5) needs at the implication
+  -- shape, here needed at the atom shape. The bridge SHAPE (accepting `edges`) is
+  -- Route (a)-correct; only this persistence premise remains deferred.
   sorry
 
 end Cslib.Logic.PL

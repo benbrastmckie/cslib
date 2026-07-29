@@ -1517,10 +1517,18 @@ Modal-K `modalWorldBound`).
 before its `## Decision Procedures` section) for the counterexample: on a complexity-9 witness
 formula, world labels grow linearly and unboundedly in fuel, with no saturation. `intUniverse`
 is retained here only as the *measure domain* `intExpMeasure` is built over (a finite-cell
-bookkeeping convenience for the fuel-sufficiency argument), NOT as a containment guarantee that
-every world an actual expansion run visits lies within `0 .. φ.complexity + 1`. Do not read
-`∀ x ∈ b, x ∈ intUniverse φ` as an established invariant of `intExpandBranches`; the *Divergence
-witness* note shows a direct counterexample. -/
+bookkeeping convenience for the now retained-but-unconsumed sum-measure engine below), NOT as a
+containment guarantee that every world an actual expansion run visits lies within
+`0 .. φ.complexity + 1`. Do not read `∀ x ∈ b, x ∈ intUniverse φ` as an established invariant of
+`intExpandBranches`; the *Divergence witness* note shows a direct counterexample.
+
+**Live development**: the per-branch-fuel expansion engine's own containment/fuel-sufficiency
+argument does NOT use `intUniverse`/`intExpMeasure` -- it uses the enlarged, post-blocking-aware
+universe `intUniverseExt` (below) sized against `WBound`, the world bound the ancestor-blocking
+calculus repair's saturation actually respects. `intUniverse`/`intExpMeasure`/
+`intExpMeasure_step_lt`(+`_branch`) remain in the file, build-green, but unconsumed by any
+current statement; treat `intUniverseExt`/`WBound` as the live account of the world bound, and
+this section as a retained, superseded alternative. -/
 def intUniverse (φ : Proposition Atom) : List (ISF Atom) :=
   (List.range (φ.complexity + 2)).flatMap (fun w =>
     (intSubfmls φ).flatMap (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩]))
@@ -2611,7 +2619,36 @@ def intExpMeasure (U : List (ISF Atom))
     (branches expandedSets : List (List (ISF Atom))) : Nat :=
   ((branches.zip expandedSets).map (fun p => 3 ^ intWork U p.1 p.2)).sum
 
-/-! ## Strict-Decrease Engine -/
+/-! ## Strict-Decrease Engine
+
+**Retained-but-unconsumed (post-fuel-materialization-repair).** This section, together with
+`intExpMeasure`/`intWork`/`intUniverse` above, was the sum-measure sufficiency argument for the
+now-retired GLOBAL-fuel expansion engine: a single `fuel : Nat` decremented once per step across
+*all* branches, requiring `fuel ≥ intExpMeasure … = 3^Θ(WBound φ)` — a numeral physically
+unmaterializable beyond small formulas. The live engine (`## Per-Branch-Fuel Expansion Engine`
+below) replaced the global fuel with a per-branch budget `intFuelExt`, whose sufficiency needs
+only `intWork_drop` + `intCount_notMem_mono` (linear in `WBound`, not exponential); this
+section's lemmas quantify only over worklists and `intStepBranch`, never over
+`intExpandBranches` itself, so they remain build-green and correct but are no longer consumed by
+any live statement.
+
+Two design alternatives considered and NOT adopted for the per-branch-fuel repair, recorded so
+neither is re-proposed without re-litigating the reasons below:
+- **Well-founded recursion directly on this measure** (skip the fuel numeral entirely): rejected
+  for the repair because the measure only strictly decreases UNDER the `hb`/`hnw` containment
+  invariants, which would then have to be re-established inside the engine's own
+  `decreasing_by` obligations — exactly DP-2's unproven creation-count fact, but now
+  load-bearing for the engine's *existence* rather than one theorem's conclusion. Remains a
+  legitimate elective cleanup once DP-2 is closed, not a substitute for the fuel repair.
+- **Splitting a proof-side (huge-fuel) procedure from an eval-side (small-fuel) procedure**:
+  rejected because the equivalence obligation between the two procedures is not dischargeable —
+  the engine's persistence call depends on remaining fuel beyond exhaustion, so two runs at
+  different fuels compute different intermediate branches unless small-fuel sufficiency (the
+  same fact the split was meant to avoid proving) is already available.
+
+The per-branch-fuel engine is empirically feasible only up to `s ≲ 22` (fuel-numeral digit count
+grows as `2^s · s · log₁₀(s+1)`; the conformance corpus's largest row sits at `s = 19`). Future
+conformance rows must stay within that envelope. -/
 
 omit [Hashable Atom] in
 /-- **Combinatorial core** (mirrors `modalCount_notMem_append_drop`, `FmpMeasure.lean:2440`):

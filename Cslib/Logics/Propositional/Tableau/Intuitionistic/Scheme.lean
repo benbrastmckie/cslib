@@ -9,6 +9,8 @@ module
 import Cslib.Init
 import Cslib.Foundations.Logic.Tableau.Measure
 import Mathlib.Tactic.Ring
+import Mathlib.Data.Fintype.Pi
+import Mathlib.Data.Fintype.BigOperators
 public import Cslib.Foundations.Logic.Tableau.Blocking
 public import Mathlib.Data.Finset.Prod
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
@@ -3838,6 +3840,90 @@ private lemma pathOf_injOn {φ0 : Proposition Atom} {par : Nat → Nat} {fire : 
       exact hH4 _ hp1 hlt1 _ hp2 hlt2 hpar_eq hjfire
   have hfin := hstep (parDepth par c) (le_refl _)
   simpa [parIter] using hfin
+
+omit [Hashable Atom] in
+/-- **Phase 10 (report §4.5, DP-2)**: the post-blocking world bound, derived purely from
+`IWorldHist`'s structural creation-history invariant. Combines the depth bound (Phase 9,
+via `parDepth_le_intChainBound`) with the path-injection's injectivity (`pathOf_injOn`) to
+inject every created world into `Fin (intChainBound φ0 + 1) → Option S`
+(`S := {χ // χ ∈ (intSubfmls φ0).toFinset}`), whose cardinality is exactly `WBound φ0` by
+`Fintype.card_pi_const` -- matching `WBound`'s `(B + 1) ^ (D + 1)` shape by design, purely
+from blocking combinatorics (chain depth × branching), never from `intUniverse`'s linear
+range. -/
+private lemma intWorldHist_nw_le {φ0 : Proposition Atom} {b : IBranch Atom}
+    {e : List (ISF Atom)} {nw : Nat} {edges : IEdges} (hWH : IWorldHist φ0 b e nw edges) :
+    nw ≤ WBound φ0 := by
+  obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := hWH
+  have hdesc : ∀ x, 1 ≤ x → x < nw → par x < x := by
+    intro x hx1 hx2
+    obtain ⟨-, h2, -, -, -, -, -, -, -, -, -⟩ := hall x hx1 hx2
+    exact h2
+  have hoblSub : ∀ x, 1 ≤ x → x < nw → obl x ∈ intSubfmls φ0 := by
+    intro x hx1 hx2
+    obtain ⟨-, -, -, h4, -, -, -, -, -, -, -⟩ := hall x hx1 hx2
+    exact h4
+  have hfireSub : ∀ x, 1 ≤ x → x < nw → fire x ∈ intSubfmls φ0 := by
+    intro x hx1 hx2
+    obtain ⟨-, -, -, -, h5, -, -, -, -, -, -⟩ := hall x hx1 hx2
+    exact h5
+  have hsforSub : ∀ x, 1 ≤ x → x < nw → ∀ χ ∈ sfor x, χ ∈ intSubfmls φ0 := by
+    intro x hx1 hx2
+    obtain ⟨-, -, -, -, -, h6, -, -, -, -, -⟩ := hall x hx1 hx2
+    exact h6
+  have hH4 : ∀ x, 1 ≤ x → x < nw → ∀ x', 1 ≤ x' → x' < nw →
+      par x = par x' → fire x = fire x' → x = x' := by
+    intro x hx1 hx2
+    obtain ⟨-, -, -, -, -, -, -, -, -, h10, -⟩ := hall x hx1 hx2
+    exact h10
+  have hres : ∀ x, 1 ≤ x → x < nw → ∀ x', 1 ≤ x' → x' < x →
+      parAncestor par x' (par x) → obl x' = obl x →
+      ¬ (∀ χ ∈ sfor x, χ ∈ sfor x') := by
+    intro x hx1 hx2
+    obtain ⟨-, -, -, -, -, -, -, -, -, -, h11⟩ := hall x hx1 hx2
+    exact h11
+  have hDbound : ∀ c, c < nw → parDepth par c ≤ intChainBound φ0 :=
+    fun c hc => parDepth_le_intChainBound hpar0 hdesc hoblSub hsforSub hres hc
+  -- Build the target Finset EXPLICITLY via `Fintype.piFinset`/`Finset.attach`/`Finset.image`,
+  -- rather than relying on a global `Fintype (Fin (D+1) → Option S)` instance: instance search
+  -- for that Pi-type-of-a-Subtype-of-a-Finset combination does not resolve in this file's
+  -- ambient context (confirmed empirically), even though every piece resolves individually.
+  -- `piFinset` sidesteps the issue entirely -- it only needs per-coordinate `Finset`s, no
+  -- `Fintype` instance for the codomain type itself.
+  set S := {χ // χ ∈ (intSubfmls φ0).toFinset} with hS_def
+  set sFin : Finset S := (intSubfmls φ0).toFinset.attach with hsFin_def
+  set optFin : Finset (Option S) := insert none (sFin.image some) with hoptFin_def
+  set target : Finset (Fin (intChainBound φ0 + 1) → Option S) :=
+    Fintype.piFinset (fun _ : Fin (intChainBound φ0 + 1) => optFin) with htarget_def
+  have hinj : Set.InjOn (fun c => pathOf φ0 par fire (intChainBound φ0) c)
+      (↑(Finset.range nw) : Set Nat) := by
+    intro c hc c' hc' heqf
+    simp only [Finset.coe_range, Set.mem_Iio] at hc hc'
+    exact pathOf_injOn hpar0 hdesc hfireSub hH4 hc hc' (hDbound c hc) (hDbound c' hc')
+      (fun k => congrFun heqf k)
+  have hmaps : Set.MapsTo (fun c => pathOf φ0 par fire (intChainBound φ0) c)
+      (↑(Finset.range nw) : Set Nat) (↑target : Set (Fin (intChainBound φ0 + 1) → Option S)) := by
+    intro c _
+    rw [Finset.mem_coe, htarget_def, Fintype.mem_piFinset]
+    intro k
+    rw [hoptFin_def]
+    rcases hval : pathOf φ0 par fire (intChainBound φ0) c k with _ | val
+    · exact Finset.mem_insert.mpr (Or.inl hval)
+    · refine Finset.mem_insert_of_mem ?_
+      rw [Finset.mem_image]
+      exact ⟨val, Finset.mem_attach _ val, hval.symm⟩
+  have hcard := Finset.card_le_card_of_injOn (fun c => pathOf φ0 par fire (intChainBound φ0) c)
+    hmaps hinj
+  rw [Finset.card_range] at hcard
+  have hnotmem : (none : Option S) ∉ sFin.image some := by simp
+  have hoptcard : optFin.card = sFin.card + 1 := by
+    rw [hoptFin_def, Finset.card_insert_of_notMem hnotmem,
+      Finset.card_image_of_injective _ (Option.some_injective S)]
+  have hsFincard : sFin.card = (intSubfmls φ0).toFinset.card := by
+    rw [hsFin_def, Finset.card_attach]
+  have htargetcard : target.card = WBound φ0 := by
+    rw [htarget_def, Fintype.card_piFinset_const, hoptcard, hsFincard]
+    rfl
+  rwa [htargetcard] at hcard
 
 omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint

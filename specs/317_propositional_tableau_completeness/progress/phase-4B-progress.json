@@ -2,39 +2,56 @@
   "task_number": 317,
   "phase": "4B",
   "session_id": "sess_1785275816_a84520_317",
+  "status": "done",
   "objectives": [
     {
       "id": "4B.1",
       "description": "Port intExpandBranches_openBranch_closed to the B-engine (intExpandBranchesB_openBranch_closed) — validates the functional-induction route (intExpandBranchesB.go.induct, 10 cases)",
       "status": "done",
       "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"],
-      "verification": "lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme green; only 2 pre-existing sorry warnings"
+      "verification": "scoped build green; lean_verify {propext, Quot.sound}",
+      "commit": "3ecbd527"
     },
     {
       "id": "4B.2",
-      "description": "Port intExpandBranches_closed_unsat (Soundness.lean:1078, ~690 lines) to intExpandBranchesB_closed_unsat in Scheme.lean (import direction forces placement; needs de-privatized Soundness helpers). This objective is the plan's pre-authorized 4B.1 split boundary.",
+      "description": "Port intExpandBranches_closed_unsat (~690 lines) to intExpandBranchesB_closed_unsat in Scheme.lean (import direction forces placement; 11 Soundness.lean helpers de-privatized, visibility-only). Plan's pre-authorized split boundary — split not needed.",
       "status": "done",
       "files_touched": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean"
       ],
-      "verification": "lake build Scheme + Soundness green; lean_verify axioms {propext, Classical.choice, Quot.sound}, no sorryAx. Soundness.lean edit = de-privatizing 11 helper lemmas (visibility only, statements/proofs untouched). Statement gains fuels + fuels-length hypothesis; single functional induction replaces outer-fuel/inner-go nesting; fuel-exhaustion arm returns .openBranch so the old fuel-0 findSome? analysis disappears."
+      "verification": "scoped builds green; lean_verify {propext, Classical.choice, Quot.sound}, no sorryAx",
+      "commit": "7ce75870"
     },
     {
       "id": "4B.3",
       "description": "Port intExpandBranches_openBranch_initial_mem to the B-engine",
-      "status": "pending",
-      "files_touched": []
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"],
+      "verification": "scoped build green; lean_verify {propext, Quot.sound}",
+      "commit": "c6c0123e"
     },
     {
       "id": "4B.4",
-      "description": "Port intExpandBranches_openBranch_sat succ case to the B-engine; fuel-0 exhaustion case discharged by consuming the OLD sorried lemma at fuel := 0 (carries the sorry 1-for-1 via sorryAx, keeping the bare-sorry census at exactly 4)",
-      "status": "pending",
-      "files_touched": []
+      "description": "Port intExpandBranches_openBranch_sat succ case; fuel-exhaustion arm discharged by consuming the OLD sorried lemma at fuel := 0 (sorry carried 1-for-1 via sorryAx; bare-sorry census unchanged at 4)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"],
+      "verification": "full lake build green (3311 jobs); lean_verify {propext, sorryAx, Classical.choice, Quot.sound} — sorryAx by design (the carried fuel-0 sorry)",
+      "commit": "f3428ba1"
     }
   ],
+  "ci": {
+    "lake_build_full": "green (3311 jobs)",
+    "checkInitImports": "exit 0",
+    "lake_lint": "exit 0 (pre-existing advisory reports in Temporal/DenseSoundness only)",
+    "lint_style": "exit 0",
+    "lake_shake": "exit 0 (pre-existing advisory adds in unrelated files only)",
+    "mk_all": "skipped — no new files",
+    "lake_test": "exit 0 (conformance corpus untouched, 44 rows)",
+    "sorry_census": "exactly 4 bare tokens: Scheme.lean:619, Scheme.lean:3361, Intuitionistic/Completeness.lean:133, Minimal/Completeness.lean:125"
+  },
   "notes": [
-    "Proof recipe validated on 4B.1: induction ... using intExpandBranchesB.go.induct with 10 cases; the `have bPers` binder occupies a with-pattern slot; generic-fuel skip case needs rw [go.eq_def] + simp only [] instead of simp only [go]; dependent `match _hstep :` discriminants need split at hgo + Eq.trans reconciliation with the case's step equation (rw [hstep] fails on the dependent motive); iota-reduction lets `exact ih hgo` accept unreduced matcher applications after subst.",
-    "Engine-quantifying lemma set confirmed = the four planned lemmas (grep of intExpandBranches consumers; step_lt lemmas quantify over intStepBranch only)."
+    "Proof recipe (reusable for any future engine-induction port): induction ... using intExpandBranchesB.go.induct; the `have bPers` binder occupies a with-pattern slot; generic-fuel skip case needs rw [go.eq_def] + simp only [] (leaf equations are fuel-shape-conditional); dependent `match _hstep :` discriminants need split at hgo + Eq.trans reconciliation with the case's step equation (rw [hstep] fails on the dependent motive); after subst, iota-reduction lets `exact ih hgo` accept unreduced matcher applications; Option.noConfusion mis-infers here — use absurd h (by simp).",
+    "4C NOTE: retiring the old openBranch_sat requires materializing the fuel-0 sorry into intExpandBranchesB_openBranch_sat's exhaustion arm (census unchanged), unless Phase 6 lands first."
   ]
 }

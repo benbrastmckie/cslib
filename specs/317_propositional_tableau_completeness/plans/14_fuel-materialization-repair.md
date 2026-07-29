@@ -462,25 +462,41 @@ below are suggestions; the constraint set is binding, the naming is implementer 
   sorry-free (scoped build); parity probe passes on all 20 propositional rows; `lake test`
   baseline recorded; ZERO changes to existing declarations.
 
-### Phase 4B: Port the four engine-quantifying lemmas to the B-engine (old ones untouched) [IN PROGRESS]
+### Phase 4B: Port the four engine-quantifying lemmas to the B-engine (old ones untouched) [COMPLETED]
 - **Goal:** Every theorem whose induction skeleton is the engine recursion exists in a
   B-engine form; the old lemmas and old engine remain green and untouched.
 - **Tasks:**
-  - [ ] `intExpandBranchesB_closed_unsat` — port of `intExpandBranches_closed_unsat`
+  - [x] `intExpandBranchesB_closed_unsat` — port of `intExpandBranches_closed_unsat`
     (Soundness.lean:1078, ~690 lines, sorry-free; unfolds `intExpandBranches.go` directly at
     :1161, :1223 — the largest single porting risk). Statement gains `fuels`; proof by
     functional induction on the B-engine, falling back per the Risks ladder (manual WF
     induction on the lex measure; then the `go` selector-refactor). Per-arm content transfers.
-  - [ ] `intExpandBranchesB_openBranch_closed` (port of Scheme.lean:684) and
+    (Landed in Scheme.lean — the import direction Expansion → Soundness → Scheme forces the
+    B-port to live where the B-engine is visible; enabled by de-privatizing 11 Soundness.lean
+    helper lemmas, a visibility-only edit. `intExpandBranchesB.go.induct` worked on the
+    primary route (10 cases, one flat worklist induction replaces the old outer-fuel/inner-go
+    nesting); no fallback needed. Statement also gains `fuels.length = branches.length`.
+    lean_verify: `{propext, Classical.choice, Quot.sound}`, no sorryAx.)
+  - [x] `intExpandBranchesB_openBranch_closed` (port of Scheme.lean:684) and
     `intExpandBranchesB_openBranch_initial_mem` (port of Scheme.lean:3301): fuel plays no role
-    in their content; wrapper-only ports.
-  - [ ] Mechanical port of `intExpandBranches_openBranch_sat`'s succ case (Scheme.lean:3014)
+    in their content; wrapper-only ports. (Both landed sorry-free, same functional-induction
+    skeleton; `openBranch_closed` was landed first as the route-validation probe.)
+  - [x] Mechanical port of `intExpandBranches_openBranch_sat`'s succ case (Scheme.lean:3014)
     to the B-engine: statement gains `fuels`; NO R1 hypotheses yet (that is Phase 6); the
     pre-existing fuel-0 sorry (Scheme.lean:3055) carries over 1-for-1 — subtree bare-sorry
     count stays exactly 4.
-  - [ ] IN-PHASE SPLIT PROVISION (pre-authorized, not a deviation): if the `closed_unsat` port
+    (Landed as `intExpandBranchesB_openBranch_sat`. The 1-for-1 carry is realized by
+    CONSUMPTION, not token duplication: the B-engine's fuel-exhaustion arm (`f = 0`,
+    open branch) is discharged by invoking the OLD sorried lemma at `fuel := 0` on the
+    singleton worklist `[bPers]`, whose fuel-0 `findSome?` arm returns exactly
+    `.openBranch bPers` — the sorry flows through `sorryAx` and the bare-sorry census
+    stays at exactly 4. NOTE FOR 4C: retiring the old lemma requires materializing the
+    sorry into the B-lemma's exhaustion arm at that point (census unchanged: old token
+    removed, new token added), unless Phase 6's restatement lands the discharge first.)
+  - [x] IN-PHASE SPLIT PROVISION (pre-authorized, not a deviation): if the `closed_unsat` port
     alone fills the dispatch, land it as 4B.1 (commit, green) and complete the remaining three
-    ports as 4B.2 in the next dispatch at the same spec.
+    ports as 4B.2 in the next dispatch at the same spec. (NOT NEEDED — all four ports landed
+    in one dispatch.)
 - **Timing:** 1-2 dispatches (reports/15 sizes the `closed_unsat` port at medium confidence).
   Estimated output: ~450-800 lines.
 - **Depends on:** 4A

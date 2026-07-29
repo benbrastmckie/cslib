@@ -1,11 +1,11 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "blocked",
-  "skeleton": false,
-  "summary": "Plan v13 Phase 4 (intFuel resize + init_le_fuel analogue + corpus re-verify) is BLOCKED: unimplementable as specified. The resize target 3^(4*(2c+1)*(WBound phi + 1)) must be materialized as a Nat numeral by every #eval corpus row — intuitionisticTableau strictly binds `let fuel := intFuel phi` (Expansion.lean:522-525) BEFORE intExpandBranches runs, so early exit bounds fuel CONSUMPTION but not fuel MATERIALIZATION. WBound is doubly-exponential ((s+1)^(2^s*s+1), s = (intSubfmls phi).toFinset.card): for corpus row 2 (a -> (b -> a)), s=4, WBound = 5^65 (~2.7e45), resized-fuel exponent ~5.4e46, representation ~1e37 GB. Empirical probe against the LANDED definitions (s, complexity, WBound digits, exponent digits): row 1 (2,1,5,6) feasible at 112,700 digits; row 2 (4,2,46,47), row 4 (5,3,126,127), row 6 (9,6,4610,4611), (a->b)v(b->a) class (5,3,126,127) all infeasible — 19 of 20 rows. Bounded materialization attempt of row 2's fuel (4 GB / 90 s) aborts with lean allocation failure. Root cause is structural, not a Phase 2/3 artifact: fuel-dominates-enlarged-measure (proof requirement, forces fuel >= 3^(~2|intUniverseExt|) with |intUniverseExt| = Theta(WBound)) and #eval-ability of intuitionisticTableau (corpus requirement) are jointly unsatisfiable; both are Phase 4 done-criteria. NO Lean edits landed — build/test remain green at the Phase 3 state; subtree bare-sorry count unchanged at 4 (all pre-existing). Full four-element defect record + three repair candidates in the plan's Phase 4 BLOCKER section; repair choice is planner-level (per-branch fuel restructuring / well-founded recursion on measure / proof-side-vs-eval-side procedure split) and gates Phases 6-7, which consume intExpMeasureExt_init_le_fuel.",
-  "phases_completed": 3,
-  "phases_total": 8,
+  "status": "implemented",
+  "skeleton": true,
+  "summary": "Phase 4B complete (plan v14): all FOUR engine-quantifying lemmas ported to the B-engine in one dispatch — the pre-authorized 4B.1/4B.2 split was NOT needed. Ports (all in Scheme.lean, new 'B-Engine Ports' section, pure insertions): intExpandBranchesB_openBranch_closed (probe, sorry-free), intExpandBranchesB_closed_unsat (~660-line port of the Soundness.lean lemma; sorry-free; lean_verify {propext, Classical.choice, Quot.sound}; landed in Scheme.lean because the import direction Expansion→Soundness→Scheme makes the B-engine invisible from Soundness.lean — enabled by de-privatizing 11 Soundness.lean helper lemmas, visibility-only edit), intExpandBranchesB_openBranch_initial_mem (sorry-free), intExpandBranchesB_openBranch_sat (succ-case content; NO R1 hypotheses yet — Phase 6). Fuel-0 carry realized by CONSUMPTION: the B-engine's exhaustion arm is discharged by invoking the OLD sorried lemma at fuel := 0 on the singleton [bPers] (its findSome? arm returns .openBranch bPers), so the pre-existing sorry flows via sorryAx with ZERO new bare-sorry tokens — census stays exactly 4, satisfying both the phase gate and the plan's carried-1-for-1 note. Primary proof route validated: functional induction intExpandBranchesB.go.induct (10 cases); no fallback needed. Both big ports gain a fuels.length = branches.length hypothesis (needed for the engine's list-mismatch arm; call sites supply it trivially). Old engine + old lemmas + all Preserved-Assets rows untouched and green. CI: full lake build green (3311 jobs); checkInitImports 0; lake lint 0; lint-style 0; shake 0; lake test 0 (corpus untouched).",
+  "phases_completed": 5,
+  "phases_total": 10,
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
@@ -13,63 +13,55 @@
       "statement": "truthLemma T-imp case",
       "strategic": true,
       "assumption": "persistence-fixpoint sufficiency threading",
-      "why_deferred": "pre-existing before this dispatch; owned by Phase 7",
-      "follow_up_task": 317
+      "discharge_phase": "7",
+      "pre_existing": true
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 3055,
-      "statement": "intExpandBranches_openBranch_sat fuel-0 gap (pre-R1 statement)",
+      "line": 3361,
+      "statement": "fuel-0 case of intExpandBranches_openBranch_sat (OLD lemma; REFUTED as stated pre-R1). The 4B port intExpandBranchesB_openBranch_sat CONSUMES this lemma at fuel := 0 for its exhaustion arm, so the same single sorry underlies both (sorryAx flow, one bare token).",
       "strategic": true,
-      "assumption": "R1 hypotheses (hUniv, hNW, hFuel) added per Phase 6",
-      "why_deferred": "pre-existing before this dispatch; owned by Phase 6",
-      "follow_up_task": 317
+      "assumption": "R1 restatement (hUniv/hNW/per-branch hFuel) discharges it",
+      "discharge_phase": "6",
+      "pre_existing": true
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
       "line": 133,
-      "statement": "intuitionisticTableau_complete IValid bridge",
+      "statement": "DP-3 intuitionistic validity bridge",
       "strategic": true,
-      "assumption": "IAtomPersist bridge route",
-      "why_deferred": "explicit plan non-goal (Completeness bridge sorries)",
-      "follow_up_task": 430
+      "assumption": "IAtomPersist route (task 430's territory)",
+      "discharge_phase": "task 430",
+      "pre_existing": true
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
       "line": 125,
-      "statement": "minimal tableau completeness IValid bridge",
+      "statement": "DP-4 minimal validity bridge",
       "strategic": true,
-      "assumption": "IAtomPersist bridge route",
-      "why_deferred": "explicit plan non-goal (Completeness bridge sorries)",
-      "follow_up_task": 430
+      "assumption": "IAtomPersist route (task 430's territory)",
+      "discharge_phase": "task 430",
+      "pre_existing": true
     }
   ],
-  "blockers": [
-    {
-      "phase": 4,
-      "title": "intFuel resize target cannot be materialized by #eval corpus rows",
-      "detail": "Joint unsatisfiability of two Phase 4 done-criteria: (a) intFuel must dominate intExpMeasure (intUniverseExt phi) [[(.neg, phi, 0)]] [[]], forcing fuel >= 3^(~2*|intUniverseExt phi|) with |intUniverseExt phi| = Theta(WBound phi), WBound doubly-exponential; (b) lake test must stay green, but every propositional corpus row #evals intuitionisticTableau, which strictly materializes the fuel numeral before any expansion step. For s >= 4 (19 of 20 rows) the numeral needs >= ~1e46 bits. The phase's Scope Hypothesis ('#eval cost is unaffected because runs exit at saturation/closure before consuming fuel') is refuted: early exit bounds consumption, not materialization.",
-      "verbatim_unmet_criteria": "Done when: resize landed, init_le_fuel analogue sorry-free, lake test green, dependents build green.",
-      "requires": "Planner decision among repair candidates: (a) per-branch fuel restructuring of intExpandBranches (sufficiency then needs only 2*|intUniverseExt|-class fuel values, <= ~4700-digit numerals, materializable for all corpus rows); (b) well-founded recursion on the measure, removing fuel from the computational path; (c) split proof-side procedure from #eval corpus procedure (currently a plan non-goal). Choice gates Phases 6-7.",
-      "no_lean_edits_landed": true
-    }
+  "blockers": [],
+  "continuation_context": null,
+  "next_phase": "4C",
+  "notes_for_next_dispatch": [
+    "4C NOTE (recorded in plan checklist + progress file): retiring the old engine/lemmas requires materializing the fuel-0 sorry into intExpandBranchesB_openBranch_sat's exhaustion arm (old token removed, new token added — census unchanged at 4), since the B-port currently consumes the old lemma there.",
+    "Both closed_unsat and openBranch_sat B-ports take a fuels-length hypothesis fuels.length = branches.length; 4C call sites discharge it with rfl on the singleton [intFuelExt φ].",
+    "Reusable proof recipe for any further engine-induction work is recorded in progress/phase-4B-progress.json notes and the phase summary."
   ],
-  "continuation_path": null,
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
-      "type": "plan",
-      "summary": "Phase 4 marked [BLOCKED] with full four-element defect record and repair candidates in phase body"
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/summaries/13_phase4-fuel-resize-blocked-summary.md",
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4b-lemma-ports-summary.md",
       "type": "summary",
-      "summary": "Phase 4 blocked-dispatch summary: defect record, empirical probe data, repair candidates"
+      "summary": "Phase 4B summary: four B-engine lemma ports, proof-route validation, fuel-0 consumption carry, CI results, deviations"
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/plan13-phase-4-progress.json",
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-4B-progress.json",
       "type": "progress",
-      "summary": "Phase 4 progress: objective 4.0 (feasibility verification) done; 4.1-4.3 blocked"
+      "summary": "Phase 4B objectives (all done) with per-objective commits and the reusable functional-induction recipe"
     }
   ]
 }

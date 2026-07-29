@@ -4,45 +4,46 @@
   "artifacts": [
     {
       "type": "summary",
-      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4a-b-engine-summary.md",
-      "summary": "Phase 4A summary: intFuelExt + per-branch-fuel B-engine + init bound, parity probe green on all 20 rows"
+      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4b-lemma-ports-summary.md",
+      "summary": "Phase 4B summary: four B-engine lemma ports, proof-route validation, fuel-0 consumption carry, CI results, deviations"
     },
     {
       "type": "progress",
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-4A-progress.json",
-      "summary": "Phase 4A objectives + lake test timing baseline (7.231s) for the 4C gate"
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-4B-progress.json",
+      "summary": "Phase 4B objectives (all done) with per-objective commits"
     }
   ],
   "modified_files": [
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
     "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
-    "specs/317_propositional_tableau_completeness/progress/phase-4A-progress.json",
-    "specs/317_propositional_tableau_completeness/summaries/14_phase4a-b-engine-summary.md",
+    "specs/317_propositional_tableau_completeness/progress/phase-4B-progress.json",
+    "specs/317_propositional_tableau_completeness/summaries/14_phase4b-lemma-ports-summary.md",
     "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
   ],
-  "phases_completed": 4,
+  "phases_completed": 5,
   "phases_total": 10,
-  "phase_number": "4A",
-  "next_steps": "Orchestrator dispatches Phase 4B (port the four engine-quantifying lemmas to the B-engine; in-phase split provision 4B.1/4B.2 pre-authorized). Note line drift: fuel-0 sorry now Scheme.lean:3361.",
+  "phase_number": "4B",
+  "next_steps": "Orchestrator dispatches Phase 4C (flip entry points + retire old engine + 44-row corpus gate with timing). 4C must materialize the fuel-0 sorry into intExpandBranchesB_openBranch_sat's exhaustion arm when retiring the old lemma (census unchanged at 4); 4C call sites discharge the new fuels-length hypotheses by rfl on [intFuelExt φ].",
   "memory_candidates": [
     {
-      "content": "Lean 4 WF recursion over a worklist with per-item fuel: use lex measure (sum of 3^fuel over pending++done, pending.length); skip arms permute the fuel multiset (sum unchanged, length shrinks), step arms replace 3^(f+1) with k*3^f for k<3 children. Bind match discriminant equations (match h : ... with) so decreasing_by can consume shape lemmas (e.g. exactly-2-children) about the scrutinee; omega closes the pow arithmetic given pow_succ and one_le_pow facts in context.",
-      "topic": "lean4-wf-lex-fuel-worklist"
+      "content": "Lean 4 functional induction over a WF worklist def (f.induct): the `have x := ...` binders in the definition occupy with-pattern slots in each case; a case whose scrutinee shape is generic (e.g. fuel not constructor-headed) cannot unfold via simp only [f] (leaf equations are shape-conditional) — use rw [f.eq_def] + simp only [] there; a dependent `match h : disc with` in the body resists rw [hstep] (motive not type-correct) — instead `split at hgo`, reconcile each arm with the induction-provided step equation via hstep.symm.trans heq (defeq bridges let-bound locals), subst the injEq components, and let iota reduction make `exact ih hgo` typecheck against the unreduced matcher application. Option.noConfusion can mis-infer universes on some/none mismatches; absurd h (by simp) is robust.",
+      "topic": "lean4-functional-induction-wf-worklist"
     },
     {
-      "content": "omega consumes hypotheses from context without syntactic reference, so Lean's unusedVariables linter flags `have h : ...` facts omega actually used inside decreasing_by; underscore-prefix such binders (_hp, _hstep) instead of deleting them.",
-      "topic": "lean4-omega-unusedvariables-linter"
+      "content": "Carrying a pre-existing strategic sorry through a parallel-build port without raising the bare-sorry census: instead of duplicating the sorry token in the ported lemma, have the ported lemma's corresponding case CONSUME the old sorried lemma at a degenerate instantiation (e.g. fuel := 0 on a singleton worklist whose fuel-0 arm returns exactly the needed result). The obligation flows via sorryAx, grep census is unchanged, and the retirement commit later swaps token locations 1-for-1.",
+      "topic": "lean4-sorry-carry-by-consumption"
     }
   ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 4,
-    "sorry_count_note": "all 4 pre-existing (plan DP/phase targets); zero new sorries this phase",
+    "sorry_count_note": "all 4 pre-existing (Scheme.lean:619, Scheme.lean:3361, Int/Completeness.lean:133, Min/Completeness.lean:125); zero new sorry tokens this phase; B openBranch_sat port carries the fuel-0 sorry via sorryAx by consuming the old lemma at fuel := 0",
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "ci_detail": "full lake build green (3311 jobs); checkInitImports 0; lint-style 0; lake test 0; lake lint green; lean_verify clean on all new decls (no sorryAx); parity probe 20/20; conformance corpus untouched"
+    "ci_detail": "full lake build green (3311 jobs); checkInitImports 0; lake lint 0; lint-style 0; shake 0 (pre-existing advisories in unrelated files only); lake test 0 (corpus untouched); lean_verify: openBranch_closed {propext,Quot.sound}; closed_unsat {propext,Classical.choice,Quot.sound}; initial_mem {propext,Quot.sound}; openBranch_sat {propext,sorryAx,Classical.choice,Quot.sound} (sorryAx by design)"
   },
   "metadata": {
     "session_id": "sess_1785275816_a84520_317",

@@ -2097,7 +2097,21 @@ The chain data is carried by the hypotheses, all stated against the final branch
 Proof: pigeonhole on `(posTypeAt, ψ)` pairs. More than `2 ^ |Sub φ0| * |Sub φ0|`
 chain steps repeat a pair `(positive type of the created world, obligation)`; at the
 later creation site the earlier created world is then a reuse witness satisfying all
-five conjuncts, contradicting `hunb`. See [GargGenoveseNegri2012], §III. -/
+five conjuncts, contradicting `hunb`. See [GargGenoveseNegri2012], §III.
+
+**DP-2 status (report §4.1, plan Phase 9)**: this lemma is CORRECT and stays as originally
+proved, but it is NOT the route consumed by the DP-2 development. Report §4.1 refutes the
+runtime-check-to-final-branch transfer `hunb` would need (evaluated at firing time, then
+transported to the final branch `b`): conjunct 3 of the reuse check moves the wrong way under
+branch growth (positive content at a world only grows over time, so the implication that would
+transport `hunb` from the firing-time branch to the final branch runs backwards), and no
+monotonicity or additional final-branch invariant recovers it. The working route instead
+consumes the runtime `none` result at MINT TIME, while the firing-time branch is still current
+(`intFImp_mint_residue`, feeding `IWorldHist`'s (H5) clause), and re-derives an equivalent
+depth bound directly from the STRUCTURAL invariant's witness functions rather than from `b`'s
+final state (`intWorldHist_chain_le`, immediately below `IWorldHist_mint`). This lemma is
+therefore preserved, unconsumed by that route, and untouched by the Phase 9 pigeonhole sibling:
+its proof body is byte-identical to its pre-Phase-9 state (docstring-only change). -/
 lemma intCreatedChain_le (φ0 : Proposition Atom) (b : IBranch Atom) (edges : IEdges)
     {k : Nat} (ws : Nat → Nat) (ψs : Nat → Proposition Atom)
     (hsub : ∀ sf ∈ b, sf.formula ∈ intSubfmls φ0)
@@ -3466,6 +3480,117 @@ private lemma IWorldHist_mint {φ0 : Proposition Atom} {bPers : IBranch Atom}
         simp only [if_neg hc'n] at hobl ⊢
         have hparlt : par c < nwH := by omega
         exact h11 c' hc'1 hc'lt (parAncestor_of_extend hpar0 hdesc hparlt hchain) hobl
+
+/-! ## Phase 9: Pigeonhole Depth Bound (DP-2, report §4.3)
+
+Bounds the length of any `par`-ancestor chain of created worlds by `intChainBound φ0`, purely
+from (H5) of `IWorldHist` (the mint-time reuse residue (★)). `parIter` is the iterated-`par`
+step function (needed to STATE the chain-length bound, hence introduced here rather than
+deferred entirely to Phase 10, which reuses it for the path injection); the actual minimal-depth
+construction and the size-bound injection are Phase 10's job. -/
+
+/-- Iterating `par` `n` times from `c`, applying `par` first and then recursing (so that
+`ws (i + k) = parIter par k (ws i)` composes directly with a chain's defining equation
+`ws (i+1) = par (ws i)`, `ws_eq_parIter` below). -/
+private def parIter (par : Nat → Nat) : Nat → Nat → Nat
+  | 0, c => c
+  | n + 1, c => parIter par n (par c)
+
+omit [Hashable Atom] in
+/-- Every iterate of `par` from `c` is a `parAncestor`-ancestor of `c`. -/
+private lemma parAncestor_parIter (par : Nat → Nat) : ∀ n c, parAncestor par (parIter par n c) c
+  | 0, _ => Relation.ReflTransGen.refl
+  | n + 1, c =>
+      (parAncestor_parIter par n (par c)).trans (Relation.ReflTransGen.single rfl)
+
+omit [Hashable Atom] in
+/-- A chain `ws` obeying the single-step law `ws (i+1) = par (ws i)` agrees with iterated `par`
+composition: the value `k` steps past `ws i` is `parIter par k (ws i)`. -/
+private lemma ws_eq_parIter {par : Nat → Nat} {ws : Nat → Nat}
+    (hwsdec : ∀ i, ws (i + 1) = par (ws i)) : ∀ k i, ws (i + k) = parIter par k (ws i)
+  | 0, i => by simp [parIter]
+  | k + 1, i => by
+      have ih := ws_eq_parIter hwsdec k (i + 1)
+      rw [show i + (k + 1) = (i + 1) + k from by omega, ih, hwsdec i]
+      rfl
+
+omit [Hashable Atom] in
+/-- **Pigeonhole depth bound**: adapts `intCreatedChain_le`'s pigeonhole body (above), replacing
+`posFormulasAt b (ws (i+1))` with `sfor` and the runtime unblockedness hypothesis `hunb` with
+(H5)'s snapshot-free residue `hres`. Given a `par`-descent chain `ws` (`hwsdec`) that stays a
+genuinely created world (`hwspos`/`hwslt`) for every index below `D`, the chain length `D` is at
+most `intChainBound φ0`. `ws` is instantiated to `parIter par · c` at Phase 10's sole call site;
+stating the lemma over an abstract `ws` keeps the pigeonhole argument itself free of `parIter`'s
+recursive unfolding. -/
+private lemma intWorldHist_chain_le {φ0 : Proposition Atom} {par : Nat → Nat}
+    {obl : Nat → Proposition Atom} {sfor : Nat → List (Proposition Atom)} {nw : Nat}
+    (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x)
+    (hoblSub : ∀ c, 1 ≤ c → c < nw → obl c ∈ intSubfmls φ0)
+    (hsforSub : ∀ c, 1 ≤ c → c < nw → ∀ χ ∈ sfor c, χ ∈ intSubfmls φ0)
+    (hres : ∀ c, 1 ≤ c → c < nw → ∀ c', 1 ≤ c' → c' < c →
+        parAncestor par c' (par c) → obl c' = obl c →
+        ¬ (∀ χ ∈ sfor c, χ ∈ sfor c'))
+    {ws : Nat → Nat} {D : Nat} (hwsdec : ∀ i, ws (i + 1) = par (ws i))
+    (hwspos : ∀ i, i < D → 1 ≤ ws i) (hwslt : ∀ i, i < D → ws i < nw) :
+    D ≤ intChainBound φ0 := by
+  by_contra hD
+  rw [Nat.not_le] at hD
+  -- Single-step strict descent for indices below `D`.
+  have hstepLt : ∀ i, i < D → ws (i + 1) < ws i := by
+    intro i hi
+    rw [hwsdec i]
+    exact hdesc (ws i) (hwspos i hi) (hwslt i hi)
+  -- Chained strict descent: `i < j ≤ D → ws j < ws i`.
+  have hchainLt : ∀ i j, i < j → j ≤ D → ws j < ws i := by
+    intro i j
+    induction j with
+    | zero => omega
+    | succ j ih =>
+      intro hij hjD
+      rcases Nat.lt_or_ge i j with h | h
+      · exact Nat.lt_trans (hstepLt j (by omega)) (ih h (by omega))
+      · have : i = j := by omega
+        subst this
+        exact hstepLt i (by omega)
+  have hmaps : ∀ i ∈ Finset.range D,
+      (((sfor (ws i)).toFinset, obl (ws i)) : Finset (Proposition Atom) × Proposition Atom) ∈
+        (intSubfmls φ0).toFinset.powerset ×ˢ (intSubfmls φ0).toFinset := by
+    intro i hi
+    rw [Finset.mem_range] at hi
+    rw [Finset.mem_product, Finset.mem_powerset]
+    refine ⟨fun χ hχ => ?_, List.mem_toFinset.mpr (hoblSub (ws i) (hwspos i hi) (hwslt i hi))⟩
+    rw [List.mem_toFinset] at hχ ⊢
+    exact hsforSub (ws i) (hwspos i hi) (hwslt i hi) χ hχ
+  have hcard : ((intSubfmls φ0).toFinset.powerset ×ˢ (intSubfmls φ0).toFinset).card <
+      (Finset.range D).card := by
+    rw [Finset.card_product, Finset.card_powerset, Finset.card_range]
+    simpa [intChainBound] using hD
+  obtain ⟨i, hi, j, hj, hne, heq⟩ :=
+    Finset.exists_ne_map_eq_of_card_lt_of_maps_to hcard hmaps
+  rw [Finset.mem_range] at hi hj
+  rw [Prod.mk.injEq] at heq
+  obtain ⟨heqT, heqObl⟩ := heq
+  have key : ∀ i j, i < j → j < D →
+      (sfor (ws i)).toFinset = (sfor (ws j)).toFinset →
+      obl (ws i) = obl (ws j) → False := by
+    intro i j hij hjD hT hOeq
+    have hancestor : parAncestor par (ws j) (par (ws i)) := by
+      rw [← hwsdec i]
+      have hj' : (i + 1) + (j - (i + 1)) = j := by omega
+      have heq : ws j = parIter par (j - (i + 1)) (ws (i + 1)) := by
+        have hstep := ws_eq_parIter hwsdec (j - (i + 1)) (i + 1)
+        rwa [hj'] at hstep
+      rw [heq]
+      exact parAncestor_parIter par (j - (i + 1)) (ws (i + 1))
+    refine hres (ws i) (hwspos i (Nat.lt_trans hij hjD)) (hwslt i (Nat.lt_trans hij hjD))
+      (ws j) (hwspos j hjD) (hchainLt i j hij (Nat.le_of_lt hjD)) hancestor hOeq.symm ?_
+    intro χ hχ
+    have h1 : χ ∈ (sfor (ws i)).toFinset := List.mem_toFinset.mpr hχ
+    rw [hT] at h1
+    exact List.mem_toFinset.mp h1
+  rcases Nat.lt_or_ge i j with h | h
+  · exact key i j h hj heqT heqObl
+  · exact key j i (Nat.lt_of_le_of_ne h fun e => hne e.symm) hi heqT.symm heqObl.symm
 
 omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint

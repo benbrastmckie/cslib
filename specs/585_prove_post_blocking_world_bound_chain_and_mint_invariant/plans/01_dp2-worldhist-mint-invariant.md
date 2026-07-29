@@ -694,7 +694,16 @@ signature and `key` statement.
 
 ---
 
-### Phase 9: Pigeonhole depth bound from (*) [NOT STARTED]
+### Phase 9: Pigeonhole depth bound from (*) [COMPLETED]
+
+**Deviation (additive, disclosed)**: `parIter` (originally scoped to Phase 10) was defined in
+this phase because the chain-length bound's own statement needs it to express the abstract
+chain `ws`. Phase 9's pigeonhole lemma (`intWorldHist_chain_le`) is stated over an abstract
+`ws : Nat → Nat` satisfying the single-step law `ws (i+1) = par (ws i)`, so the pigeonhole
+argument itself never unfolds `parIter`'s recursion; Phase 10 instantiates `ws := parIter par · c`
+at its sole call site and reuses `parIter`/`parAncestor_parIter` for the injection's path
+construction. `intCreatedChain_le` itself received a docstring-only change (see below); its
+proof body is unchanged (`git diff` shows zero changed lines in the proof).
 
 - **Goal:** Bound the length of any `par`-ancestor chain of created worlds by `intChainBound phi0`
   (report section 4.3).

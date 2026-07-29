@@ -1,35 +1,19 @@
 {
-  "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
   "task_number": 584,
-  "summary": "5-phase, ~5h plan implementing the research report's Option 1: step 1 of pre-pr-check.sh becomes a scoped delegation to check-sorry-suppressions.sh rather than a second baseline. P1 adds --scope PATH... (argument-loop refactor, a sweep_files() helper routing all three find call sites, and the critical --update refusal guard that exits 2 before any baseline write). P2 adds opt-in --changed [--base REF] defaulting to origin/main, keeping the empty changed-set exit 0 strictly separate from the mistyped-scope exit 2. P3 rewires step 1, fixes the 'in PR scope' wording, and repairs the steps 8/9 rationale comment plus the file-top 'steps 1-3 are advisory greps' claim. P4 fixes the stale 'can run as step 1' header cross-reference and extends scripts/README.md additively. P5 runs the report's 8-item verification including both scratch-probe experiments (in-scope red; out-of-scope green-for-step-1, red-for-step-8) and proves sorry-suppression-baseline.txt byte-identical. Step numbering preserved throughout, so all seven external 'step N of pre-pr-check.sh' citations need zero edits.",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md"
-    }
-  ],
-  "plan_path": "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md",
-  "blockers": [],
-  "next_action_hint": "implement",
-  "files_modified": [
-    "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md",
-    "specs/584_scope_pre_pr_check_sorry_gate/.return-meta.json",
-    "specs/584_scope_pre_pr_check_sorry_gate/.orchestrator-handoff.json"
-  ],
-  "decisions_made": [
-    "Adopted the report's Option 1 (delegation via --scope) over Option 2 (delete step 1 and renumber). Step numbering is preserved deliberately; Phase 3 carries a Scope Hypothesis requiring the implementer to re-derive the seven citation sites with grep rather than trusting the asserted count.",
-    "--changed is Phase 2, sequenced AFTER the mandatory --scope work and never wired into pre-pr-check.sh. The plan states explicitly that changed-files narrowing does not fix satisfiability on its own (3 of 6 debt files are in the changed set) and must never be the sole predicate.",
-    "The --update refusal guard is placed in Phase 1, not deferred to Phase 2, so the highest-risk trap closes before --changed even exists; it is verified twice (Phase 1 verification, and Phase 5 item 5 with an mtime check).",
-    "Added a design detail the report did not specify: a scoped run's summary line would otherwise compare a scoped current total (24) against the whole-tree ceiling (28) and read as a spurious improvement. Phase 1 restricts the DISPLAYED ceiling to swept paths only, with an explicit instruction that this must not touch base_markers/base_sorries or the per-file comparison, preserving the report's whole-file-keyed baseline-loading constraint.",
-    "Verification tiers: interface for both check-sorry-suppressions.sh phases (its CLI is consumed by pre-pr-check.sh step 8 and lean_action_ci.yml, so a parser regression is cross-file), local for the pre-pr-check.sh rewire, prose for the comment/README phase, full for the verification sweep.",
-    "All four non-goals restated as plan guardrails and as asserted invariants in Artifacts & Outputs: step 5 untouched, no Cslib/ edit, no sorry resolved, sorry-suppression-baseline.txt byte-identical."
-  ],
-  "dead_ends": [],
-  "phases_completed": 0,
+  "status": "implemented",
+  "phases_completed": 5,
   "phases_total": 5,
+  "plan_path": "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md",
+  "summary_path": "specs/584_scope_pre_pr_check_sorry_gate/summaries/01_scope-sorry-gate-delegation-summary.md",
+  "modified_files": [
+    "scripts/check-sorry-suppressions.sh",
+    "scripts/pre-pr-check.sh",
+    "scripts/README.md",
+    "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md"
+  ],
+  "verification_passed": true,
   "requires_user_review": false,
   "blocked_phase": null,
-  "orchestrator_mode": true
+  "notes": "All 5 phases completed. pre-pr-check.sh step 1 is now a scoped delegation to check-sorry-suppressions.sh --scope; --changed/--base added as opt-in, unwired. Baseline byte-identical. No Cslib/ file touched. Step 5 remains red by design (declared non-goal, unrelated to this task).",
+  "session_id": "sess_1785339483_6a7f21_584"
 }

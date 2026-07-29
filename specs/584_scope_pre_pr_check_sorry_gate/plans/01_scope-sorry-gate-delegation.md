@@ -1,7 +1,7 @@
 # Implementation Plan: Scope pre-pr-check step 1's sorry gate
 
 - **Task**: 584 - scope_pre_pr_check_sorry_gate
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md
@@ -366,7 +366,7 @@ set of cited step numbers must be identical.
 
 ---
 
-### Phase 5: Full verification sweep and baseline invariance proof [NOT STARTED]
+### Phase 5: Full verification sweep and baseline invariance proof [COMPLETED]
 
 **Goal**: Demonstrate both the pass path and the fail path, prove the two zero-file conditions
 stay distinct, prove the `--update` guard holds, and restore a bit-identical tree.

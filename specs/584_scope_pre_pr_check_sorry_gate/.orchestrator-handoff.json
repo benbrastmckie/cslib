@@ -1,40 +1,34 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "research",
-  "status": "researched",
+  "phase": "plan",
+  "status": "planned",
   "task_number": 584,
-  "summary": "Step 1 of scripts/pre-pr-check.sh is not merely mislabelled -- its sorry-detection logic is a verbatim duplicate of check-sorry-suppressions.sh's count_sorries(), and its entire 24-hit/6-file failure set is already present, per file and exactly (7,2,12,1,1,1), in scripts/sorry-suppression-baseline.txt, whose scan root (Cslib) is a strict superset of step 1's four hand-picked trees. So the task's option (a) 'add a frozen per-file baseline' is not a new gate to build -- it already exists as step 8, and reuse means DELEGATION, not a second baseline. Second decisive finding: option (b) alone provably does not work -- measured against merge-base with origin/main, 114 in-scope .lean files are changed and 3 of the 6 debt files (SuccRelation, UntilSinceCoherence, Frame) are among them, so a changed-files gate that still fails on ANY sorry reproduces the same wall. Recommendation: step 1 delegates to check-sorry-suppressions.sh via a new --scope filter (preserves step numbering, so zero renumbering of the 7 external 'step N of pre-pr-check.sh' citations), with --changed as an opt-in extra narrowing. Blast radius is low: pre-pr-check.sh is fork-local (absent from upstream/main), is not wired into either CI workflow or the /pr 7-step pipeline, and the 'passes end to end' completion bar is per-plan prose with no template in agent-system/extensions/cslib. Highest-risk implementation trap identified: a scoped --update would rewrite the whole-tree baseline from a partial sweep and silently zero the out-of-scope Propositional/Tableau rows -- must exit 2.",
+  "summary": "5-phase, ~5h plan implementing the research report's Option 1: step 1 of pre-pr-check.sh becomes a scoped delegation to check-sorry-suppressions.sh rather than a second baseline. P1 adds --scope PATH... (argument-loop refactor, a sweep_files() helper routing all three find call sites, and the critical --update refusal guard that exits 2 before any baseline write). P2 adds opt-in --changed [--base REF] defaulting to origin/main, keeping the empty changed-set exit 0 strictly separate from the mistyped-scope exit 2. P3 rewires step 1, fixes the 'in PR scope' wording, and repairs the steps 8/9 rationale comment plus the file-top 'steps 1-3 are advisory greps' claim. P4 fixes the stale 'can run as step 1' header cross-reference and extends scripts/README.md additively. P5 runs the report's 8-item verification including both scratch-probe experiments (in-scope red; out-of-scope green-for-step-1, red-for-step-8) and proves sorry-suppression-baseline.txt byte-identical. Step numbering preserved throughout, so all seven external 'step N of pre-pr-check.sh' citations need zero edits.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md"
+      "type": "plan",
+      "path": "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md"
     }
   ],
-  "report_path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md",
+  "plan_path": "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md",
   "blockers": [],
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
   "files_modified": [
-    "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md",
+    "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md",
     "specs/584_scope_pre_pr_check_sorry_gate/.return-meta.json",
     "specs/584_scope_pre_pr_check_sorry_gate/.orchestrator-handoff.json"
   ],
   "decisions_made": [
-    "RECOMMENDED DESIGN (Option 1): step 1 becomes a scoped invocation of check-sorry-suppressions.sh via a new '--scope PATH...' filter, passing the same four trees. Chosen over authoring a per-file baseline inside pre-pr-check.sh because that baseline already exists (sorry-suppression-baseline.txt) and a second one would be a strict-subset duplicate that can never fail where step 8 passes.",
-    "Step numbering is DELIBERATELY PRESERVED. Seven external sites cite pre-pr-check.sh steps by number (scripts/README.md:57/83/101, docs/lint-suppression-policy.md:11, and header comments in check-sorry-suppressions.sh:62, check-shake-residue.sh:41, check-axiom-census.sh:46). Option 2 (delete step 1, renumber 2-9 to 1-8, move the sorry ratchet to the front) is technically the cleanest end state and strictly more coverage, but was rejected on the 7-site renumbering cost; recorded in the report as a considered alternative rather than dropped.",
-    "--changed is specified as an OPT-IN flag defaulting OFF in pre-pr-check.sh, not as the primary mechanism, because the measurement shows it does not fix satisfiability on its own and because defaulting it on would make a local gate's result depend on git state.",
-    "Default base ref for --changed is origin/main, not upstream/main: merge-base with upstream/main yields 626 changed .lean files (this fork has diverged substantially), which is useless as a filter. origin/main yields 132 (114 in-scope).",
-    "No agent-system/extensions/** change is in scope. Grep of agent-system/extensions/cslib/, .claude/skills/skill-cslib-*/ and .claude/agents/cslib-*.md found zero occurrences of 'pre-pr-check' or an equivalent completion-bar template -- every citation is per-task prose under specs/. The source-store/deploy-boundary rule is not engaged either, since scripts/ is a real tracked repo directory, not a .claude/** deploy artifact.",
-    "Both declared non-goals upheld and restated as plan guardrails: step 5 (lake build --wfail --iofail) is untouched, and no file under Cslib/ is edited (no sorry is resolved). sorry-suppression-baseline.txt must remain byte-identical -- the ratchet is currently exactly at baseline (18/18 markers, 28/28 sorries, verified this dispatch)."
+    "Adopted the report's Option 1 (delegation via --scope) over Option 2 (delete step 1 and renumber). Step numbering is preserved deliberately; Phase 3 carries a Scope Hypothesis requiring the implementer to re-derive the seven citation sites with grep rather than trusting the asserted count.",
+    "--changed is Phase 2, sequenced AFTER the mandatory --scope work and never wired into pre-pr-check.sh. The plan states explicitly that changed-files narrowing does not fix satisfiability on its own (3 of 6 debt files are in the changed set) and must never be the sole predicate.",
+    "The --update refusal guard is placed in Phase 1, not deferred to Phase 2, so the highest-risk trap closes before --changed even exists; it is verified twice (Phase 1 verification, and Phase 5 item 5 with an mtime check).",
+    "Added a design detail the report did not specify: a scoped run's summary line would otherwise compare a scoped current total (24) against the whole-tree ceiling (28) and read as a spurious improvement. Phase 1 restricts the DISPLAYED ceiling to swept paths only, with an explicit instruction that this must not touch base_markers/base_sorries or the per-file comparison, preserving the report's whole-file-keyed baseline-loading constraint.",
+    "Verification tiers: interface for both check-sorry-suppressions.sh phases (its CLI is consumed by pre-pr-check.sh step 8 and lean_action_ci.yml, so a parser regression is cross-file), local for the pre-pr-check.sh rewire, prose for the comment/README phase, full for the verification sweep.",
+    "All four non-goals restated as plan guardrails and as asserted invariants in Artifacts & Outputs: step 5 untouched, no Cslib/ edit, no sorry resolved, sorry-suppression-baseline.txt byte-identical."
   ],
-  "dead_ends": [
-    "Implementing a second, step-1-local frozen sorry baseline (the literal reading of the task's option (a)): rejected. check-sorry-suppressions.sh's baseline already contains step 1's failure set exactly, over a superset scan root, using byte-identical discrimination logic; a second baseline would duplicate the rule the existing script's header explicitly says not to weaken, and could never report a failure step 8 misses.",
-    "A changed-files mode that still fails on ANY sorry (option (b) with the original predicate): empirically disproven this dispatch. 3 of the 6 debt-carrying files (Bundle/SuccRelation.lean, Bundle/UntilSinceCoherence.lean, BXCanonical/Frame.lean) are inside the changed set vs merge-base with origin/main, so the gate would still be unsatisfiable for any task touching them -- the same wall, narrower.",
-    "A changed-files DELTA gate (fail when a changed file exceeds its baseline entry): strictly weaker than step 8, which already applies that predicate to every file in Cslib. No unique signal.",
-    "upstream/main as the --changed base ref: 626 changed .lean files, no filtering value.",
-    "Copying check-lint-suppressions.sh's $-anchored blanket-only regex or its exact-set shape from check-shake-residue.sh: both are the wrong shape here (counts vs set membership), and check-sorry-suppressions.sh's own header already documents why the anchored form must NOT be copied to the sorry gate (all 18 markers on this tree are the declaration-scoped '... false in' form, so an anchored regex would count 0)."
-  ],
+  "dead_ends": [],
   "phases_completed": 0,
-  "phases_total": 0,
+  "phases_total": 5,
   "requires_user_review": false,
   "blocked_phase": null,
   "orchestrator_mode": true

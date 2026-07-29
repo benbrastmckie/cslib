@@ -1,24 +1,19 @@
 {
-  "status": "researched",
-  "started_at": "2026-07-29T00:00:00Z",
-  "completed_at": "2026-07-29T00:00:00Z",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 584,
+  "session_id": "sess_1785339483_6a7f21_584",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md"
+      "type": "plan",
+      "path": "specs/584_scope_pre_pr_check_sorry_gate/plans/01_scope-sorry-gate-delegation.md",
+      "summary": "5-phase plan: add --scope (and opt-in --changed) to check-sorry-suppressions.sh, make pre-pr-check.sh step 1 a scoped delegation to it, fix misleading wording and two stale comments, update docs, then verify pass/fail paths with baseline byte-identity."
     }
   ],
-  "report_path": "specs/584_scope_pre_pr_check_sorry_gate/reports/01_scope-pre-pr-check-sorry-gate.md",
-  "blockers": [],
-  "next_action_hint": "plan",
-  "partial_progress": {
-    "stage": "research_written",
-    "details": "Report and orchestrator handoff written. Recommendation: step 1 delegates to check-sorry-suppressions.sh via a new --scope filter; --changed opt-in. No blockers."
-  },
-  "metadata": {
-    "session_id": "sess_1785339483_6a7f21_584",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+  "phase_count": 5,
+  "estimated_hours": 5,
+  "dependency_waves": [[1], [2, 3], [4], [5]],
+  "memory_candidates": [],
+  "next_steps": "Run /implement 584 to execute the plan"
 }

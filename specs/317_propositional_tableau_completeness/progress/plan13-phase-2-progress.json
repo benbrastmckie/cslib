@@ -1,0 +1,13 @@
+{
+  "task_number": 317,
+  "plan": "plans/13_fuel-sufficiency-skeleton.md",
+  "phase": 2,
+  "session_id": "sess_1785275816_a84520_317",
+  "objectives": [
+    {"id": "2.1", "description": "Define intChainBound and WBound + WBound_pos", "status": "in_progress"},
+    {"id": "2.2", "description": "State intCreatedChain_le with final hypothesis set", "status": "pending"},
+    {"id": "2.3", "description": "Bounded proof attempt (DP-1, one-dispatch budget)", "status": "pending"},
+    {"id": "2.4", "description": "Scoped + full build green, conformance corpus green, handoff", "status": "pending"}
+  ],
+  "files_touched": []
+}

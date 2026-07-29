@@ -1726,6 +1726,141 @@ example {k : Nat} (f : Nat → Finset (Proposition Atom)) (U : Finset (Propositi
     (hchain : ∀ i, i < k → f i ⊂ f (i + 1)) (hU : f k ⊆ U) : k ≤ U.card :=
   strictChain_le_card f U hchain hU
 
+/-! ## Post-Blocking World Bound
+
+`WBound` is the post-blocking world bound directed by the divergence-witness record
+(`Expansion.lean`): finiteness of the created-world tree comes from the *blocking
+combinatorics* — the ψ-conditioned ancestor check `intFImpReuseWitnessAnc?` — never
+from `intUniverse`'s linear world range (refuted; see the warning on `intUniverse`).
+
+The chain bound counts `(posTypeAt, ψ)` pairs: along an edge chain of created worlds,
+each created world carries its positive type (a subset of the subformula universe of
+`φ`, the positive projection of the counting layer above) and its creation obligation
+ψ (a subformula), so an over-long chain repeats a pair, and the repeat contradicts
+unblockedness of the later creation site — the earlier created world is an ancestor
+with containment-equal forced set, an explicit `F(ψ)` entry, and ψ not yet forced,
+i.e. exactly a reuse witness the ancestor check would have returned. See
+[GargGenoveseNegri2012], §III, for the count of distinct forced sets and the chain
+argument, and [Fitting1983], Ch. 4, for the systematic-tableau construction. -/
+
+omit [Hashable Atom] in
+/-- Per-chain depth bound for created-world chains: the number of distinct
+`(positive type, creation obligation)` pairs available over the subformula universe
+of `φ` — `2 ^ |Sub φ|` positive types (subsets of the universe, the `posTypeAt`
+projection over `U : Finset F` of the counting layer) times `|Sub φ|` obligations.
+Derived from the blocking combinatorics only; `intUniverse`'s linear range plays no
+role. -/
+def intChainBound (φ : Proposition Atom) : Nat :=
+  2 ^ (intSubfmls φ).toFinset.card * (intSubfmls φ).toFinset.card
+
+omit [Hashable Atom] in
+/-- Total world bound for the post-blocking tableau: the created-world tree has
+branching factor at most the subformula count (one child per `F(· → ·)` subformula
+fired at a world) and chain depth at most `intChainBound φ`, giving at most
+`(|Sub φ| + 1) ^ (intChainBound φ + 1)` worlds. Exponential-in-exponential is
+acceptable — this is a proof-side bound, not an evaluation step count. -/
+def WBound (φ : Proposition Atom) : Nat :=
+  ((intSubfmls φ).toFinset.card + 1) ^ (intChainBound φ + 1)
+
+omit [Hashable Atom] in
+/-- The world bound is positive: the root world always fits. Discharges the `hNW`
+obligation at singleton call sites. -/
+lemma WBound_pos (φ : Proposition Atom) : 1 ≤ WBound φ :=
+  Nat.one_le_pow _ _ (Nat.succ_pos _)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The positive projection of a branch stays inside the subformula universe:
+`posFormulasAt` only reads formulas off branch entries. -/
+lemma mem_intSubfmls_of_mem_posFormulasAt {φ0 χ : Proposition Atom} {b : IBranch Atom}
+    {w : Nat} (hsub : ∀ sf ∈ b, sf.formula ∈ intSubfmls φ0)
+    (hχ : χ ∈ posFormulasAt b w) : χ ∈ intSubfmls φ0 := by
+  simp only [posFormulasAt, List.mem_filterMap, Option.ite_none_right_eq_some,
+    Option.some.injEq] at hχ
+  obtain ⟨sf, hmem, -, hform⟩ := hχ
+  exact hform ▸ hsub sf hmem
+
+omit [Hashable Atom] in
+/-- **Ancestor-chain bound**: along any edge chain `ws 0 → ws 1 → … → ws k` of worlds
+created by unblocked `intFImpRule` firings on a branch `b`, the chain length `k` is at
+most `intChainBound φ0`.
+
+The chain data is carried by the hypotheses, all stated against the final branch `b`:
+- `hobl`/`hnotpos`: each created world `ws (i + 1)` carries its creation obligation
+  `F(ψs i)` as an explicit entry, and (openness) `ψs i` is not positively forced there;
+- `hacc`/`hle`: the chain is monotone in accessibility and world labels
+  (`isAccessible` is reflexive, so both include the degenerate index case);
+- `hunb`: **unblockedness** — no world satisfies the five reuse conjuncts of
+  `intFImpReuseWitnessAnc?` (`Expansion.lean`) at any creation site, transcribed
+  against `b` (quantifying over all `x : Nat` is no stronger than over branch labels:
+  the fifth conjunct forces `x` to be a label of `b`; and the third conjunct reads the
+  created world's final positive content in place of its creation-time `Sfor`).
+  Suppliers of this hypothesis own the transfer from the runtime check — evaluated on
+  the branch state at firing time — to the final branch; that transfer belongs to the
+  invariant-threading development, not to this lemma.
+
+Proof: pigeonhole on `(posTypeAt, ψ)` pairs. More than `2 ^ |Sub φ0| * |Sub φ0|`
+chain steps repeat a pair `(positive type of the created world, obligation)`; at the
+later creation site the earlier created world is then a reuse witness satisfying all
+five conjuncts, contradicting `hunb`. See [GargGenoveseNegri2012], §III. -/
+lemma intCreatedChain_le (φ0 : Proposition Atom) (b : IBranch Atom) (edges : IEdges)
+    {k : Nat} (ws : Nat → Nat) (ψs : Nat → Proposition Atom)
+    (hsub : ∀ sf ∈ b, sf.formula ∈ intSubfmls φ0)
+    (hψ : ∀ i, i < k → ψs i ∈ intSubfmls φ0)
+    (hobl : ∀ i, i < k → (⟨.neg, ψs i, ws (i + 1)⟩ : ISF Atom) ∈ b)
+    (hnotpos : ∀ i, i < k → ψs i ∉ posFormulasAt b (ws (i + 1)))
+    (hacc : ∀ i j, i ≤ j → j ≤ k → isAccessible edges (ws i) (ws j) = true)
+    (hle : ∀ i j, i ≤ j → j ≤ k → ws i ≤ ws j)
+    (hunb : ∀ j, j < k → ∀ x : Nat,
+      ¬(isAccessible edges x (ws j) = true ∧ x ≤ ws j ∧
+        (∀ χ ∈ posFormulasAt b (ws (j + 1)), χ ∈ posFormulasAt b x) ∧
+        ψs j ∉ posFormulasAt b x ∧
+        (⟨.neg, ψs j, x⟩ : ISF Atom) ∈ b)) :
+    k ≤ intChainBound φ0 := by
+  by_contra hk
+  rw [Nat.not_le] at hk
+  -- Pigeonhole over `(positive type of created world, creation obligation)` pairs.
+  have hmaps : ∀ i ∈ Finset.range k,
+      (((posFormulasAt b (ws (i + 1))).toFinset, ψs i) :
+          Finset (Proposition Atom) × Proposition Atom) ∈
+        (intSubfmls φ0).toFinset.powerset ×ˢ (intSubfmls φ0).toFinset := by
+    intro i hi
+    rw [Finset.mem_range] at hi
+    rw [Finset.mem_product, Finset.mem_powerset]
+    refine ⟨fun χ hχ => ?_, List.mem_toFinset.mpr (hψ i hi)⟩
+    rw [List.mem_toFinset] at hχ ⊢
+    exact mem_intSubfmls_of_mem_posFormulasAt hsub hχ
+  have hcard : ((intSubfmls φ0).toFinset.powerset ×ˢ (intSubfmls φ0).toFinset).card <
+      (Finset.range k).card := by
+    rw [Finset.card_product, Finset.card_powerset, Finset.card_range]
+    simpa [intChainBound] using hk
+  obtain ⟨i, hi, j, hj, hne, heq⟩ :=
+    Finset.exists_ne_map_eq_of_card_lt_of_maps_to hcard hmaps
+  rw [Finset.mem_range] at hi hj
+  rw [Prod.mk.injEq] at heq
+  obtain ⟨heqT, heqψ⟩ := heq
+  -- A repeated pair at indices `i < j` makes `ws (i + 1)` a reuse witness at the
+  -- creation site of `ws (j + 1)`, contradicting `hunb`.
+  have key : ∀ i j, i < j → j < k →
+      (posFormulasAt b (ws (i + 1))).toFinset =
+        (posFormulasAt b (ws (j + 1))).toFinset →
+      ψs i = ψs j → False := by
+    intro i j hij hjk hT hψeq
+    refine hunb j hjk (ws (i + 1)) ⟨?_, ?_, ?_, ?_, ?_⟩
+    · exact hacc (i + 1) j hij (Nat.le_of_lt hjk)
+    · exact hle (i + 1) j hij (Nat.le_of_lt hjk)
+    · intro χ hχ
+      have hmem : χ ∈ (posFormulasAt b (ws (j + 1))).toFinset :=
+        List.mem_toFinset.mpr hχ
+      rw [← hT] at hmem
+      exact List.mem_toFinset.mp hmem
+    · rw [← hψeq]
+      exact hnotpos i (Nat.lt_trans hij hjk)
+    · rw [← hψeq]
+      exact hobl i (Nat.lt_trans hij hjk)
+  rcases Nat.lt_or_ge i j with h | h
+  · exact key i j h hj heqT heqψ
+  · exact key j i (Nat.lt_of_le_of_ne h fun e => hne e.symm) hi heqT.symm heqψ.symm
+
 /-! ## Branch-Universe Containment
 
 This section proves that every signed formula added to a branch by any intuitionistic

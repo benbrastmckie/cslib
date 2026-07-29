@@ -224,7 +224,7 @@ single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only
   `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`; zero new sorries;
   no change to any existing declaration.
 
-### Phase 2: `WBound` definition + ancestor-chain bound lemma (division point DP-1) [NOT STARTED]
+### Phase 2: `WBound` definition + ancestor-chain bound lemma (division point DP-1) [IN PROGRESS]
 - **Goal:** A concrete `WBound : Proposition Atom → Nat` and the chain lemma that makes it a
   bound: along any edge chain of created worlds on a branch, chain length is bounded via the
   pigeonhole/strict-chain layer, because an over-long chain forces two chain worlds with equal

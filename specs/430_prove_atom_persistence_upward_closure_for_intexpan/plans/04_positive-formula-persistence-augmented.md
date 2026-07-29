@@ -296,17 +296,31 @@ and a Gate B failure makes Phase 1's compute spend worthless.
   `.../Intuitionistic/Scheme.lean`, `.../Intuitionistic/Soundness.lean`. The three move together:
   intermediate per-file states are expected red and must not be committed.
 
-### Phase 4: Copy-completeness at a genuine `applyAllTImpRules` fixpoint [NOT STARTED]
+### Phase 4: Copy-completeness at a genuine `applyAllTImpRules` fixpoint [COMPLETED]
 
 - **Goal:** Prove that at a genuine `applyAllTImpRules` fixpoint, the copy channel has in fact
   delivered every positive formula it owes along the **raw** edges.
 - **Tasks:**
-  - [ ] Follow the `filterMap` / `countP` argument the STOP-gate note already sketches at
+  - [x] Follow the `filterMap` / `countP` argument the STOP-gate note already sketches at
         `Scheme.lean:508-513`, mirroring the landed `applyAllTImpRules_count_drop`.
-  - [ ] State the fixpoint-level copy-completeness lemma over raw edges and prove it sorry-free.
-  - [ ] Confirm the lemma composes with `applyPersistenceFixpoint_genuine_of_count_le_fuel`
+        *(altered: the case-split is on `b.any (fun y => y.sign==.pos && y.formula==χ &&
+        y.label==w')` — the same guard `genCopies` itself uses — rather than a `countP` drop
+        argument; this is more direct for a completeness statement than a strict-decrease
+        argument, which is what `count_drop` needed for termination but a completeness
+        statement does not)*
+  - [x] State the fixpoint-level copy-completeness lemma over raw edges and prove it sorry-free.
+        *(added `applyAllTImpRules_copy_complete_of_fixpoint`: given `applyAllTImpRules b edges
+        = b`, `T(χ)@w ∈ b`, `w'` accessible from `w`, and `w'` already carrying some entry on
+        `b` (the natural side-condition available at every consumption site — `sat_timp`/
+        `IFimpAccess`-style witnesses always come with a membership fact at `w'`), `T(χ)@w'` is
+        already on `b`. `lean_verify`: axiom-clean (`propext`, `Quot.sound`), no `sorryAx`)*
+  - [x] Confirm the lemma composes with `applyPersistenceFixpoint_genuine_of_count_le_fuel`
         (`Scheme.lean`, landed sorry-free) — this phase supplies the copy side of the pairing whose
-        fuel side is already retired.
+        fuel side is already retired. *(added `applyPersistenceFixpoint_copy_complete`,
+        pairing the two directly; `lean_verify`: axiom-clean (`propext`, `Classical.choice`,
+        `Quot.sound`), no `sorryAx`)*
+- **Verification results:** `lake build` (full project) green; `lake exe checkInitImports` and
+  `lake exe lint-style` clean; `lake lint` shows zero new warnings in `Scheme.lean`.
 - **Timing:** ~1 dispatch
 - **Depends on:** 3
 - **Verification Tier:** local

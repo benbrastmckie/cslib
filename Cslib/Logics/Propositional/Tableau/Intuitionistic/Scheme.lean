@@ -5076,6 +5076,67 @@ private lemma applyAllTImpRules_count_drop
   omega
 
 omit [Hashable Atom] in
+/-- **Copy-completeness at a genuine fixpoint** (Phase 4, generalizing the ψ-consequence
+observation in the `sat_timp` STOP-gate note above: "at a genuine fixpoint, `T(φ)@w' ∈ b →
+T(ψ)@w' ∈ b`"). If one round of `applyAllTImpRules` changes nothing
+(`applyAllTImpRules b edges = b`), the generalized copy channel has already delivered every
+positive formula it owes along the RAW `edges`: for `T(χ)@w ∈ b` and any `w'` accessible from
+`w` that already carries some entry on the branch, `T(χ)@w'` is on `b` too. Mirrors
+`applyAllTImpRules_count_drop`'s combinatorial style: if the copy were missing, `genCopies`'s
+`if b.any … then none else …` guard would have fired and produced a strictly longer branch,
+contradicting the fixpoint hypothesis. -/
+private lemma applyAllTImpRules_copy_complete_of_fixpoint
+    {b : IBranch Atom} {edges : IEdges}
+    (hfix : applyAllTImpRules b edges = b)
+    {χ : Proposition Atom} {w w' : Nat}
+    (hmem : (⟨.pos, χ, w⟩ : ISF Atom) ∈ b)
+    (hacc : isAccessible edges w w' = true)
+    (hw' : b.any (fun sf => sf.label == w') = true) :
+    (⟨.pos, χ, w'⟩ : ISF Atom) ∈ b := by
+  rw [← hfix]
+  by_cases halready : (b.any fun y => y.sign == .pos && y.formula == χ && y.label == w') = true
+  · -- Already present in `b`: lift the membership through the first append component.
+    rw [List.any_eq_true] at halready
+    obtain ⟨sf, hsfmem, hsfeq⟩ := halready
+    simp only [Bool.and_eq_true, beq_iff_eq] at hsfeq
+    obtain ⟨⟨hsign, hform⟩, hlabel⟩ := hsfeq
+    have hsfeq' : sf = (⟨.pos, χ, w'⟩ : ISF Atom) := by
+      obtain ⟨s, f, l⟩ := sf
+      simp only [SignedFormula.mk.injEq]
+      exact ⟨hsign, hform, hlabel⟩
+    rw [← hsfeq']
+    simp only [applyAllTImpRules, List.mem_append]
+    exact Or.inl (Or.inl hsfmem)
+  · -- Not yet present: `genCopies`'s guard fires from the source `⟨.pos, χ, w⟩` and delivers
+    -- the copy directly.
+    rw [Bool.not_eq_true] at halready
+    have hw'mem : w' ∈ (b.map (·.label)).eraseDups := by
+      simp only [List.mem_eraseDups, List.mem_map]
+      rw [List.any_eq_true] at hw'
+      obtain ⟨y, hymem, hyeq⟩ := hw'
+      simp only [beq_iff_eq] at hyeq
+      exact ⟨y, hymem, hyeq⟩
+    have hw'acc : w' ∈ (b.map (·.label)).eraseDups.filter (isAccessible edges w ·) := by
+      simp only [List.mem_filter]
+      exact ⟨hw'mem, hacc⟩
+    have hcopy_mem : (⟨.pos, χ, w'⟩ : ISF Atom) ∈
+        ((b.map (·.label)).eraseDups.filter (isAccessible edges w ·)).filterMap fun w'' =>
+          if b.any (fun y => y.sign == .pos && y.formula == χ && y.label == w'') then none
+          else some (⟨.pos, χ, w''⟩ : ISF Atom) := by
+      simp only [List.mem_filterMap]
+      exact ⟨w', hw'acc, by simp [halready]⟩
+    simp only [applyAllTImpRules, List.mem_append]
+    refine Or.inr ?_
+    simp only [List.mem_flatten, List.mem_filterMap]
+    refine ⟨_, ⟨(⟨.pos, χ, w⟩ : ISF Atom), hmem, ?_⟩, hcopy_mem⟩
+    have hne : (((b.map (·.label)).eraseDups.filter (isAccessible edges w ·)).filterMap
+        fun w'' =>
+          if b.any (fun y => y.sign == .pos && y.formula == χ && y.label == w'') then none
+          else some (⟨.pos, χ, w''⟩ : ISF Atom)).isEmpty = false :=
+      List.isEmpty_eq_false_iff_exists_mem.mpr ⟨_, hcopy_mem⟩
+    simp only [hne, Bool.false_eq_true, ite_false]
+
+omit [Hashable Atom] in
 /-- If one round of `applyAllTImpRules` does not change the branch length, it does not
 change the branch at all: both the ψ-consequence channel (`newForms`) and the generalized
 copy channel (`genCopies`) must be empty. -/
@@ -5160,6 +5221,27 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
         have := applyAllTImpRules_count_drop (φ0 := φ0) hb hlenb
         omega
       exact ih (applyAllTImpRules b edges) hb' hfuel'
+
+omit [Hashable Atom] in
+/-- **Phase 4 composition**: pairing `applyPersistenceFixpoint_genuine_of_count_le_fuel` (the
+fuel-sufficiency side, landed) with `applyAllTImpRules_copy_complete_of_fixpoint` (the
+copy-completeness side, above) gives copy-completeness directly at
+`applyPersistenceFixpoint b edges fuel`, for any fuel at least the count of
+`intUniverseExt φ0` cells not yet claimed by `b`. This is the pairing the fixpoint-level
+copy-completeness lemma was built to supply (`Scheme.lean`'s STOP-gate note, "What survives"
+paragraph, generalized here from the ψ-consequence-only observation to every positive
+formula). -/
+private lemma applyPersistenceFixpoint_copy_complete
+    {φ0 : Proposition Atom} {edges : IEdges} {b : IBranch Atom} {fuel : Nat}
+    (hb : ∀ x ∈ b, x ∈ intUniverseExt φ0)
+    (hfuel : (intUniverseExt φ0).countP (fun sf => !(b.any (· == sf))) ≤ fuel)
+    {χ : Proposition Atom} {w w' : Nat}
+    (hmem : (⟨.pos, χ, w⟩ : ISF Atom) ∈ applyPersistenceFixpoint b edges fuel)
+    (hacc : isAccessible edges w w' = true)
+    (hw' : (applyPersistenceFixpoint b edges fuel).any (fun sf => sf.label == w') = true) :
+    (⟨.pos, χ, w'⟩ : ISF Atom) ∈ applyPersistenceFixpoint b edges fuel :=
+  applyAllTImpRules_copy_complete_of_fixpoint
+    (applyPersistenceFixpoint_genuine_of_count_le_fuel b fuel hb hfuel) hmem hacc hw'
 
 /-! ## Engine-Quantifying Lemmas
 

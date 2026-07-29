@@ -309,7 +309,47 @@ requirement, which concerns discharge not yet-consumption).
 
 ---
 
-### Phase 4: Strict label bound as a parallel invariant [IN PROGRESS]
+### Phase 4: Strict label bound as a parallel invariant [COMPLETED]
+
+**Outcome.** Added `ILabelBoundStrict b nw := ∀ sf ∈ b, sf.label < nw` immediately after
+`ILabelBound`/`ILabelBound_extendMany`, plus its full plumbing: `ILabelBoundStrict_extendMany`,
+step-level companions `intStepBranch_linear_preserves_labelStrict` /
+`intStepBranch_branch_preserves_labelStrict` (mirroring `intStepBranch_linear_preserves` /
+`intStepBranch_branch_preserves`'s case split over `intApplyRuleFull`'s rule table),
+`ILabelBoundStrict_applyAllTImpRules` / `_applyPersistenceFixpoint`, and the 2-list-zip list
+companion `IAllLabelBoundStrict bs nws` (only `bs`/`nws` are needed -- `ILabelBoundStrict` has no
+expanded-set component, so the "3-list zip over bs, es, nws" template the plan named
+(`IAllConsistent`'s own shape) is narrowed by one list) with `_append`/`_map` plumbing mirroring
+`IAllConsistent_append`/`IAllConsistent_map`.
+
+Threaded a new hypothesis `(hLBS : IAllLabelBoundStrict branches nextWorlds)` onto
+`intExpandBranches_openBranch_sat`'s signature and two new `→`-hypotheses
+(`IAllLabelBoundStrict pending pendingNW`, `IAllLabelBoundStrict done doneNW`) onto the `suffices
+key` statement's chain, positioned last (immediately before the `intExpandBranches.go ... =
+.openBranch b →` clause) to keep the edit additive at every existing argument position. Threaded
+through all ten `intExpandBranches.go.induct` cases (`case1`-`case10`): extracted head/tail facts
+from `hLBSP` alongside the existing `hFuelP` extraction, derived `hLBS_bPers` via
+`ILabelBoundStrict_applyPersistenceFixpoint` alongside the existing `hLB_bPers`/`hFuel_bPers`
+derivations, and supplied the two new final arguments to every recursive `ih` call (or `(by simp
+[IAllLabelBoundStrict])` for terminal/empty cases) mirroring the exact append/map shape already
+used for `IAllNW`/`IAllFuel`. Entry discharged at the `openBranch_countermodel` call site via
+`(by simp [IAllLabelBoundStrict, ILabelBoundStrict])` (`branches = [[(neg, φ, 0)]]`,
+`nextWorlds = [1]`, so `0 < 1`).
+
+`lake build` green (both scoped and full-project, 3311 jobs). `git diff --stat` shows a single
+file changed (`Scheme.lean`, +309/-12); every one of the 12 "deletions" is a re-issued
+argument-list line (an `intro`/`ih`-call/`from`-call line gaining two trailing names), not a
+content removal -- verified by inspecting every `-` line in the diff. `IAllConsistent` and
+`ILabelBound` are byte-identical to their pre-phase bodies (only new, separate declarations were
+added near them). Sorry census unchanged: Tableau subtree 4, repo-wide 6 (expected -- this phase
+is additive only; Phase 11 is where the count drops). Actual added-line count (309) is above the
+plan's ~120-180 estimate but the phase's own scope-hypothesis escape hatch names the risk
+correctly ("~250 signals the invariant is being merged into `IAllConsistent`") -- confirmed NOT
+the case here: the excess is fully accounted for by threading two new positional arguments
+through the ten induction cases (proof-obligation threading, not invariant merging), each of
+which needed a new `have`, a new final-argument pair, and (for the linear/branching engine steps)
+two new sibling preservation lemmas with a full case split mirroring the existing
+`ILabelBound`-preservation lemmas' size.
 
 - **Goal:** Add the strict label-bound companion needed for `par c < c` (report section 5.4).
   The existing `ILabelBound b nw := forall sf in b, sf.label <= nw` (`Scheme.lean:953-954`) is too
@@ -356,7 +396,8 @@ depend only on 1-3, and are mutually independent), Phase 5 was executed BEFORE P
 Phase 5 is the single highest-value/highest-risk checkpoint and Phase 4 (strict label bound,
 threaded through all ten cases of the `key` induction) is large, self-contained, and not a
 prerequisite for Phase 5's standalone statement (all five inputs are supplied as explicit
-hypotheses, per the phase's own instruction). Phase 4 remains [NOT STARTED] and is next in queue.
+hypotheses, per the phase's own instruction). Phase 4 was completed in a later dispatch (see its
+own heading above for the outcome).
 
 **Outcome: GO.** Proved `intFImp_mint_residue` in `Scheme.lean` (private, additive, sorry-free,
 placed immediately before the DP-2 sorry it will eventually replace). All five conjunct

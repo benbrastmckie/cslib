@@ -4,6 +4,31 @@
 - **Status**: [PARTIAL] -- 5 of 11 phases complete; DP-2's sorry is NOT yet retired
 - **Plan**: `specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md`
 
+## Update (this dispatch: Phase 4)
+
+**Phase 4 is now COMPLETED** (previously deferred/NOT STARTED). Added `ILabelBoundStrict b nw :=
+∀ sf ∈ b, sf.label < nw` and its full plumbing (`_extendMany`, step-level companions
+`intStepBranch_linear_preserves_labelStrict` / `intStepBranch_branch_preserves_labelStrict`
+mirroring the existing `ILabelBound`-preservation case splits, `_applyAllTImpRules` /
+`_applyPersistenceFixpoint`), plus the 2-list-zip list companion `IAllLabelBoundStrict bs nws`
+(narrower than the plan's named 3-list template since `ILabelBoundStrict` has no expanded-set
+component) with `_append`/`_map` plumbing. Threaded a new `hLBS` hypothesis onto
+`intExpandBranches_openBranch_sat`'s signature and two new hypotheses onto the induction's
+`suffices key` chain (positioned last, so every existing argument position is untouched), then
+threaded through all ten `intExpandBranches.go.induct` cases, discharging entry at
+`openBranch_countermodel` (`0 < 1` for the singleton start state). `lake build` green (full
+project, 3311 jobs). Sorry census unchanged (Tableau subtree 4, repo-wide 6 -- correct, this
+phase is additive-only). `git diff --stat`: single file (`Scheme.lean`, +309/-12); every
+"deletion" is a re-issued argument-list line gaining two trailing names, verified by inspecting
+every `-` line in the diff -- no proof content was removed. `IAllConsistent`/`ILabelBound` remain
+byte-identical to their pre-phase bodies. Full detail and the added-line-count discussion (309
+vs. the plan's ~120-180 estimate, and why the excess is benign) is recorded in the plan file's
+Phase 4 section.
+
+**Phases remaining: 6, 7, 8, 9, 10, 11** (unchanged in scope from the original plan; Phase 6's
+`IWorldHist` design must incorporate the ancestor-accessibility incremental-threading finding
+recorded below and in the plan's Phase 1 section).
+
 ## What Was Completed
 
 **Phase 1 (COMPLETED, with a documented deviation)**: `isAccessible` one-hop extension. The
@@ -29,11 +54,10 @@ list. Reordered ahead of Phase 4 per the plan's own dependency-wave table (Phase
 mutually independent, both blocked only by 1-3) since Phase 5 is the highest-value checkpoint to
 de-risk before committing to Phase 4's large, self-contained invariant-threading work.
 
-**Phase 4 (NOT STARTED)**: Strict label bound (`ILabelBoundStrict`), its 2-list companion
-`IAllLabelBoundStrict`, and `_append`/`_map_const` plumbing, threaded through all ten cases of
-`intExpandBranches_openBranch_sat`'s `key` induction. This is large (report estimate ~150-180
-lines, likely higher once the induction threading is counted) and was deferred in favor of
-de-risking Phase 5 first; it is next in queue and has no blocking dependency on Phase 5's result.
+**Phase 4 (COMPLETED, in a later dispatch)**: Strict label bound (`ILabelBoundStrict`), its
+2-list companion `IAllLabelBoundStrict`, and `_append`/`_map_const` plumbing, threaded through
+all ten cases of `intExpandBranches_openBranch_sat`'s `key` induction. See the "Update (this
+dispatch: Phase 4)" section above for the outcome.
 
 **Phases 6-11 (NOT STARTED)**: `IWorldHist` definition and 4-list companion (Phase 6), mint-arm
 and non-mint-arm preservation (Phases 7-8), the pigeonhole depth bound (Phase 9), the
@@ -42,17 +66,15 @@ path-injection size bound (Phase 10), and the final sorry retirement + call-site
 
 ## Verification (as of this dispatch)
 
-- `lake build` (full project): green.
-- `lake build 2>&1 | grep -c "declaration uses 'sorry'"`: **6** (unchanged from the pre-task
-  baseline -- expected, since Phases 1-3 and 5 are purely additive and DP-2's sorry is not yet
-  retired; that is Phase 11's job).
+- `lake build` (full project): green (3311 jobs).
 - Tableau-subtree bare-sorry census: **4** (unchanged; target after Phase 11 is 3).
 - Repo-wide bare-sorry census: **6** (unchanged; target after Phase 11 is 5).
 - No `sorry`, `admit`, vacuous placeholder, or relocated obligation was introduced at any point.
 - `intFImpReuseWitnessAnc?` (`Expansion.lean`) byte-identical to its pre-task state.
 - `intCreatedChain_le` untouched (Phase 9 not yet started).
-- Only `Scheme.lean` and `Expansion.lean` were modified, matching the plan's file-scope
-  hypothesis.
+- `IAllConsistent`/`ILabelBound` byte-identical to their pre-Phase-4 bodies (new declarations only).
+- Only `Scheme.lean` and `Expansion.lean` were modified across the whole task so far, matching
+  the plan's file-scope hypothesis.
 - DP-3 (`Intuitionistic/Completeness.lean:129`), DP-4 (`Minimal/Completeness.lean:118`), DP-5
   (`Scheme.lean:669`) untouched.
 
@@ -76,12 +98,13 @@ it from scratch.
 
 ## Continuation Pointer
 
-Resume with Phase 4 (strict label bound), independent of Phase 5's result per the wave table.
-Then Phase 6, incorporating the ancestor-accessibility threading note above into `IWorldHist`'s
-design before committing to its exact clause list. Phases 7-8 consume Phase 5's
+Resume with Phase 6, incorporating the ancestor-accessibility threading note above into
+`IWorldHist`'s design before committing to its exact clause list. Phases 7-8 consume Phase 5's
 `intFImp_mint_residue` lemma directly at the mint arm (supplying `hacc` from the
 incrementally-threaded accessibility invariant, `hmem`/`hsub` from (H3), `hNC` from Phase 3's
-already-threaded hypothesis, `hψ`/`hnone`/`hle` from local mint-site facts).
+already-threaded hypothesis, `hψ`/`hnone`/`hle` from local mint-site facts), and now also have
+Phase 4's `ILabelBoundStrict`/`IAllLabelBoundStrict` available to supply `par c < c` (H1) directly
+from the threaded strict bound at the mint site, without re-deriving it.
 
 ## Plan Deviations
 
@@ -89,7 +112,12 @@ already-threaded hypothesis, `hψ`/`hnone`/`hle` from local mint-site facts).
   (`edges ++ [(c, p)]`), per the fuel-deficit finding above; documented inline in the plan's
   Phase 1 section.
 - Phase 5 executed before Phase 4 (both are Wave-2, mutually independent per the plan's own
-  dependency table); Phase 4 was not skipped, only reordered, and remains queued.
+  dependency table); Phase 4 was not skipped, only reordered, and was completed in this dispatch.
+- Phase 4: the plan's "companion... 3-list zip over `bs`, `es`, `nws`" template (`IAllConsistent`'s
+  own shape) was narrowed to a 2-list zip over `bs`, `nws` only, since `ILabelBoundStrict` has no
+  expanded-set component and a spurious third list would carry no information. Added-line count
+  (309) exceeds the ~120-180 estimate; see the plan's Phase 4 section for why this is benign
+  (argument threading across ten induction cases, not invariant merging).
 
 ## AI Tools Used
 

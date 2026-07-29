@@ -326,7 +326,7 @@ and a Gate B failure makes Phase 1's compute spend worthless.
 - **Verification Tier:** local
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
-### Phase 5: Thread and export the persistence invariant [NOT STARTED]
+### Phase 5: Thread and export the persistence invariant [PARTIAL]
 
 - **Goal:** Carry the containment/persistence fact through the forward induction and expose it in
   `intExpandBranches_openBranch_sat`'s conclusion, so `truthLemma` and both bridges can consume it.
@@ -334,23 +334,58 @@ and a Gate B failure makes Phase 1's compute spend worthless.
   - [ ] Define the invariant predicate (proposed name `IPosPersist edges b`; the implementer
         confirms or renames per CSLib conventions) capturing
         `∀ φ w w', isAccessible edges w w' = true → T(φ)@w ∈ b → T(φ)@w' ∈ b`.
+        *(deferred: not yet defined in `Cslib/` — see handoff below for why)*
   - [ ] Thread it alongside `IAllAccessConsistent` through `intExpandBranches_openBranch_sat`'s
         `key` induction (the parallel-list invariant pattern already in use — `Scheme.lean:1348`ff
         for `IAllAccessConsistent`, `:4863/4869/4905` for the `augSets` threading). Reuse that
         pattern; do not invent a parallel mechanism.
+        *(deviation: investigation found this is NOT needed for the raw-edge half of the goal —
+        `IAllUniv`/`IAllFuel`, already threaded, are sufficient there. The genuinely open part is
+        the augmented-edge loop-back transfer, which needs an `IWorldHist`-style origin-tracing
+        extension, not a bare parallel-list mirror of `IAllAccessConsistent`. See
+        `handoffs/03_phase5-investigation-and-partial-progress.md` Finding 1 and Finding 2.)*
   - [ ] Extend the conclusion from `∃ edges, IBranchSaturation Atom b ∧ IFimpAccess edges b`
         (`Scheme.lean:4875`) to also carry the persistence conjunct, and update the two call sites
         (`Scheme.lean:5598`ff and any other `obtain ⟨edges, hsat, hfimp⟩` destructuring).
+        *(deferred: not attempted — the augmented-edge conjunct this task needs is not yet
+        provable; see handoff)*
   - [ ] Provide the `Relation.ReflTransGen` lift from the one-step form to the
         `intAccessPreorder edges` order, reusing `intAccessPreorder_le_of_isAccessible`
         (`Scheme.lean:276`) rather than redefining it.
-- **Timing:** ~1-2 dispatches
+        *(deferred: the Phase 2 Scope Hypothesis question — whether a single-hop transfer lemma
+        composes under `ReflTransGen` when multiple loop-back edges are in play — was flagged as
+        needing re-confirmation but not yet checked; see handoff item 3)*
+- **BLOCKER** (Phase 5, partial):
+  - **What failed**: the augmented-edge export (the phase's actual goal) was not completed.
+  - **What was tried**: a full investigation of the induction structure, confirming (a) the
+    raw-edge half of the goal is cheaply derivable from already-threaded invariants
+    (`IAllUniv`/`IAllFuel`) plus the landed Phase 4 lemmas, requiring no new parallel-list
+    threading; (b) the augmented-edge half requires genuine new provenance-tracking machinery,
+    independently re-confirmed (not merely re-cited) from the live `genCopies`/reuse-site code —
+    `genCopies` only ever propagates along RAW edges, and the reuse site's `hcont` containment
+    fact only covers formulas known at the moment of the reuse decision, not formulas arriving
+    later.
+  - **Why it's stuck**: closing the augmented-edge case needs an `IWorldHist`-style
+    origin-tracing extension (tracking, for every positive formula's presence on the branch, a
+    traceable point of origin, then showing that origin is raw-accessible to any loop-back
+    edge's source). This is comparable in scope to building `IWorldHist` itself, which took
+    several dedicated phases — not safely completable as an extension of this dispatch without
+    risking an unsound or rushed argument.
+  - **What is needed**: a dedicated phase (or phases) to design and prove the origin-tracing
+    extension, following the concrete continuation plan in
+    `handoffs/03_phase5-investigation-and-partial-progress.md`.
+  - **Prohibited workarounds**: not used — no `sorry`, no vacuous placeholder, no weakened
+    statement was introduced. Zero `Cslib/`/`CslibTests/` writes this dispatch
+    (`git status --short Cslib/ CslibTests/` empty); the tree remains exactly as Phase 4 left it.
+- **Timing:** ~1-2 dispatches *(revised: at least 1 more dedicated dispatch for the origin-tracing
+  extension alone, per the investigation above)*
 - **Depends on:** 4
 - **Verification Tier:** interface
 - **Scope Hypothesis:** the conclusion change breaks exactly the destructuring call sites of
   `intExpandBranches_openBranch_sat`, which is `private` and has a small, enumerable consumer set.
   Confirm at implementation time with `grep -n "intExpandBranches_openBranch_sat" Scheme.lean` and
-  fix every hit; if the count exceeds the enumerated set, record it.
+  fix every hit; if the count exceeds the enumerated set, record it. *(not yet confirmed — the
+  conclusion was never changed this dispatch)*
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
 ### Phase 6: Discharge the T-implication case (DP-5) [NOT STARTED]

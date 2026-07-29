@@ -1,40 +1,41 @@
 {
   "status": "partial",
-  "summary": "Executed the two gating phases of plan 04 (Gate A variant selection, Gate B persistence prototype), in the order the plan itself specifies for a single-dispatch scenario (Gate B first, since it is the option-killer). Both gates returned PASS verdicts. Gate A: re-ran task 574's variant-selection methodology against the current (post-574, post-585) tree; both V1 (self-copy reinstated verbatim) and V4 (generalized to copy every positive formula) saturate identically to the control (len=219, maxLabel=21, matching 574's own recorded measurement) at fuel>=120, stable through fuel=200, with all 20 propositional conformance rows matching for both. V4 selected (higher-value target, and this empirically retires the plan's flagged 'V4 might diverge' risk). Gate B: prototyped the single loop-back hop persistence question in scratch/PersistPrototype.lean (lake env lean verified against real library types). Verdict PASS (conditional) -- not refuted, unlike the quotient route which has a concrete counterexample. The descendant sub-case closes cleanly; the ancestor sub-case needs origin-tracing, which is not a fresh problem -- it is a repurposing of Scheme.lean's already-landed private IWorldHist provenance machinery (par/obl/fire/sfor witness functions, built by task 585 for DP-2). Zero writes to Cslib/ or CslibTests/ (both gates are scratch-only per the plan's explicit constraint). Phases 3-8 (revert a70187dd in V4-generalized form, fixpoint completeness, invariant threading, and the three sorry discharges) remain and were not attempted in this dispatch -- the plan itself estimates the two gates alone at ~2 dispatches, and phases 3-8 are deliberately not given a firm budget.",
-  "blockers": [],
+  "summary": "Resumed task 430 at phase 3. Completed Phase 3 (reinstated the generalized V4 copy channel, an atomic-batch revert of a70187dd's removal) and Phase 4 (proved copy-completeness at a genuine applyAllTImpRules fixpoint over raw edges, two new sorry-free axiom-clean lemmas). Both phases fully CI-verified and committed. Phase 5 (thread and export the persistence invariant over augmented edges) was investigated in depth but not completed: found that the raw-edge half of the goal is cheaply derivable from already-threaded invariants (IAllUniv/IAllFuel) plus the new Phase 4 lemmas, but the augmented-edge loop-back transfer -- the phase's actual goal -- requires a genuine IWorldHist-style origin-tracing extension, independently confirmed by direct inspection of the live reuse-site code, comparable in scope to building IWorldHist itself. No Cslib/ writes were made for Phase 5; the tree is exactly as Phase 4 left it. Phases 6-8 remain NOT STARTED, blocked on Phase 5's export.",
+  "blockers": [
+    {
+      "phase": 5,
+      "description": "Augmented-edge persistence export requires an IWorldHist-style origin-tracing extension (tracking, for every positive formula's branch presence, a traceable point of origin, and showing that origin is raw-accessible to any loop-back edge's source). genCopies only propagates along raw edges (Expansion.lean), and the reuse site's Sfor-containment fact (Expansion.lean:321-339, consumed at the loop-back edge insertion in Scheme.lean's key induction) only covers formulas known at the moment of the reuse decision, not formulas arriving later. This is a genuine, sizeable engineering task, not a one-line corollary -- comparable to the multi-phase effort that built IWorldHist itself.",
+      "evidence": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/03_phase5-investigation-and-partial-progress.md (Findings 1 and 2, with exact file/line pointers)"
+    }
+  ],
   "artifacts": [
     {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/01_gate-a-variant-selection.md",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+      "type": "lean_source",
+      "summary": "applyAllTImpRules restructured with the generalized V4 genCopies channel (Phase 3)."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "lean_source",
+      "summary": "Repaired rfl-level pattern matches for the reinstated channel (Phase 3); added applyAllTImpRules_copy_complete_of_fixpoint and applyPersistenceFixpoint_copy_complete (Phase 4), both sorry-free and axiom-clean."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+      "type": "lean_source",
+      "summary": "applyAllTImpRules_sat and freshAbove_applyAllTImpRules restructured for the 3-way append and the generalized copy case (Phase 3)."
+    },
+    {
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/03_phase5-investigation-and-partial-progress.md",
       "type": "handoff",
-      "summary": "Gate A verdict and full measurement tables (control fidelity, V1/V4 fuel ladder, 20-row conformance check)."
-    },
-    {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/02_gate-b-verdict.md",
-      "type": "handoff",
-      "summary": "Gate B verdict, the descendant/ancestor sub-case analysis, and the concrete pointer to IWorldHist for Phase 5's continuation."
-    },
-    {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/VariantProbe.lean",
-      "type": "scratch",
-      "summary": "Gate A probe, lake env lean verified."
-    },
-    {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean",
-      "type": "scratch",
-      "summary": "Gate B prototype, lake env lean verified, one documented sorry."
-    },
-    {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/summaries/04_positive-formula-persistence-augmented-summary.md",
-      "type": "summary",
-      "summary": "Partial implementation summary covering this dispatch's scope and the remaining Phase 3-8 work."
+      "summary": "Phase 5 investigation findings and concrete continuation plan for the next dispatch."
     },
     {
       "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/04_positive-formula-persistence-augmented.md",
       "type": "plan",
-      "summary": "Phase 1 and Phase 2 headings updated to [COMPLETED]."
+      "summary": "Phases 3-4 marked COMPLETED with deviation annotations; Phase 5 marked PARTIAL with a documented blocker."
     }
   ],
-  "phases_completed": 2,
+  "phases_completed": 4,
   "phases_total": 8,
-  "continuation_path": "Phase 3: revert a70187dd's three hunks (Expansion.lean, Scheme.lean, Soundness.lean), reinstating the copy channel in V4's generalized form per the Gate A decision. Full CI verification required (atomic-batch commit mode). Then Phase 4 (fixpoint completeness), Phase 5 (thread/export the invariant -- see Gate B verdict's IWorldHist-extension guidance), Phases 6-7 (discharge DP-5, DP-3/DP-4), Phase 8 (final CI)."
+  "continuation_path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/03_phase5-investigation-and-partial-progress.md"
 }

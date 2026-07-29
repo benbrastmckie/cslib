@@ -1,0 +1,105 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "implemented",
+  "skeleton": false,
+  "task_number": 574,
+  "session_id": "sess_1785260108_081c2a",
+  "agent_type": "cslib-implementation-hard-agent",
+  "summary": "Phase 8 (final phase) of plan v02 complete. Regenerated CslibTests/TableauConformance.lean from real #eval output: confirmed lake build CslibTests.TableauConformance was green before any Phase 8 edit (a live re-run of all 19 existing propositional #guard_msgs in #eval assertions -- zero verdicts moved, matching Phase 1's Table 4 prediction that the proof-side Phases 6-7 cannot move a verdict); added a 20th propositional row asserting the divergence witness phi0 now terminates, with correct semantic verdict OPEN (phi0 is not IPC-valid, classically falsified by a=T,b=F,d=T,e=F,u1=T,v1=F,u2=T,v2=F) -- lake build confirmed this row green on first attempt (5.3s), real execution matching independent semantic derivation exactly, so the plan's binding divergence-handling branch was never triggered; rewrote the corpus provenance docstring (43 rows -> 44: 24 temporal unchanged + 20 propositional); left the 24 temporal rows byte-untouched. Ran the full CSLib CI pipeline: lake build full 3309/3309 green, lake exe checkInitImports exit 0, lake exe lint-style clean, lake test 9374/9374 green (includes the regenerated corpus), lake exe mk_all --module no update necessary. lake lint (exit 1) and lake shake (diffs present) are NOT repo-wide green, but both are entirely pre-existing, out-of-scope debt in files this task never touches -- 58 unusedArguments findings across Bimodal/, LTL/, Modal/Tableau/FrameSoundness.lean, Temporal/Metalogic/ (zero in Propositional/Tableau/ or CslibTests/), and 9 shake import-diffs in unrelated files (zero in this task's file set, confirming Risk R3 -- an import-minimisation shift from Phase 7's ~480-line deletion -- did not materialize). This exact unusedArguments category is independently attested as known pre-existing debt by a separate, already-archived repo-wide lint-hygiene task. Final gates all confirmed: repo-wide bare-sorry count 6/6 matching the baseline declaration set exactly; lean_verify on intExpandBranches_closed_unsat (scan_source: false) returned exactly {propext, Classical.choice, Quot.sound} with no warnings; Soundness.lean sorry-free (0) with zero IBranchSaturation references; git diff --stat since the Phase 7 completion commit touches only CslibTests/TableauConformance.lean plus specs/574_tableau_calculus_repair_ancestor_blocking/**. Deleted the Phase 1 scratch probe vehicles (DivergenceProbe.lean plus five companions -- the handoff's own artifact list records five, not the plan's estimated four -- ProbeControl/ProbeHighFuel/ProbeV3/ProbeConformance/ProbeSmoke.lean) after confirming their findings are recorded verbatim in handoffs/01_variant-selection.md; retained the three Phase 6 prototype/baseline evidence files. Wrote the full 8-phase implementation summary citing every phase commit. All 8 phases of plan v02 are now complete; the task's acceptance gate (intExpandBranches_closed_unsat sorry-free and axiom-clean) and Definition of Done are satisfied within this task's declared file scope.",
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md",
+      "summary": "Full 8-phase implementation summary: What Changed per phase citing every phase commit, Decisions (D3/D4/D7/D8/D9), Impacts (including the honest lake lint/shake pre-existing-debt caveat), and Follow-ups (Residual Risk R1, a minor docstring transcription discrepancy)."
+    },
+    {
+      "type": "code",
+      "path": "CslibTests/TableauConformance.lean",
+      "summary": "Regenerated conformance corpus: 44 rows total (24 temporal unchanged, 20 propositional -- 19 re-confirmed plus 1 new termination-regression row for the divergence witness phi0, verdict OPEN, confirmed by live #eval); corpus-provenance docstring rewritten."
+    },
+    {
+      "type": "plan",
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md",
+      "summary": "Phase 8 heading marked [COMPLETED]; all task-list items checked off with outcome notes including the CI-gate accounting; Testing & Validation checklist fully updated with final gate results and the lake lint/shake pre-existing-debt caveat recorded rather than silently claimed green."
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "complete",
+  "phases_completed": 8,
+  "phases_total": 8,
+  "plan_markers_verified": true,
+  "continuation_path": null,
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/TemporalConservativity.lean",
+      "line": 269,
+      "statement": "sorry",
+      "strategic": false,
+      "assumption": "baseline, unrelated to this task",
+      "why_deferred": "out of scope",
+      "follow_up_task": null
+    },
+    {
+      "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "line": 1276,
+      "statement": "sorry",
+      "strategic": false,
+      "assumption": "baseline, unrelated to this task",
+      "why_deferred": "out of scope",
+      "follow_up_task": null
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 617,
+      "statement": "sorry (truthLemma T-imp case)",
+      "strategic": false,
+      "assumption": "Gap 1 (persistence fuel-sufficiency)",
+      "why_deferred": "explicitly out of scope per plan Non-Goals; unchanged by Phase 8 (no Scheme.lean edits this phase)",
+      "follow_up_task": null
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 2551,
+      "statement": "sorry (intExpandBranches_openBranch_sat fuel-0 base case)",
+      "strategic": false,
+      "assumption": "refuted at current statement per in-proof note (sat_fand counter-instance)",
+      "why_deferred": "explicitly out of scope per plan Non-Goals; unchanged by Phase 8 (no Scheme.lean edits this phase)",
+      "follow_up_task": null
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 133,
+      "statement": "sorry",
+      "strategic": false,
+      "assumption": "intExtractValuation monotonicity bridge (residual risk R1 / GGN Lemma III.5)",
+      "why_deferred": "out of scope per plan Non-Goals; confirmed untouched by this dispatch",
+      "follow_up_task": null
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 125,
+      "statement": "sorry",
+      "strategic": false,
+      "assumption": "intExtractValuation monotonicity bridge (residual risk R1 / GGN Lemma III.5)",
+      "why_deferred": "out of scope per plan Non-Goals; confirmed untouched by this dispatch",
+      "follow_up_task": null
+    }
+  ],
+  "files_modified": [
+    "CslibTests/TableauConformance.lean",
+    "specs/574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md",
+    "specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md"
+  ],
+  "decisions_made": [
+    "Treated the plan's 'lake lint green'/'lake shake green' Definition-of-Done language as scoped to this task's own file set rather than literally repo-wide, because a literal repo-wide reading is unattainable without editing Bimodal/LTL/Modal/Temporal files that the plan's own Non-Goals and file-boundary list place explicitly out of scope. Verified zero findings from either tool within this task's file set and documented the pre-existing repo-wide findings honestly (with file lists and counts) in the plan, summary, and this handoff rather than either silently claiming full-repo green or blocking task completion for out-of-scope debt already tracked by a separate, already-archived repo-wide lint-hygiene task.",
+    "Deleted five Phase 1 probe companion files (ProbeControl/ProbeHighFuel/ProbeV3/ProbeConformance/ProbeSmoke.lean), not the plan's estimated four -- the Phase 1 handoff's own artifact list already recorded five (ProbeSmoke.lean was added mid-phase for an isolated re-confirmation), so deleting all five for consistency is not a scope deviation, just a correction of the plan bullet's undercount.",
+    "Named the dispatch-specified summary filename (01_implementation-summary.md) explicitly in the plan's own Artifacts & Outputs and Phase 8 task-list entries, which had named a different filename (01_tableau-repair-summary.md); the delegation context's explicit instruction takes precedence, and the plan text was corrected in place to avoid future confusion rather than silently diverging from the written record."
+  ],
+  "dead_ends": [],
+  "notes": [
+    "phi0's correct semantic verdict (OPEN, not IPC-valid) was derived independently by classical falsification before running #eval, then confirmed by real execution -- satisfying the plan's binding 'run it, not guess it' divergence-handling rule in the strongest available way (prediction and execution agreed).",
+    "Pre-existing unrelated dirty files in the working tree (.claude/scripts/literature-fidelity-audit.sh, .claude/scripts/literature-search.sh, specs/TODO.md, specs/state.json, specs/events.jsonl, .agent-logs/, .claude-extensions.json, other tasks' handoff/return-meta files, specs/archive/555.../ quarantine files) were left untouched and unstaged throughout -- every commit in this dispatch scoped its git add to exactly the files it modified.",
+    "This is the task's final phase -- all 8 phases of plan v02 are complete and the acceptance gate holds."
+  ]
+}

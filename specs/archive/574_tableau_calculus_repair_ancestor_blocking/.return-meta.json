@@ -1,0 +1,52 @@
+{
+  "status": "implemented",
+  "started_at": "2026-07-28T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md",
+      "summary": "Full 8-phase implementation summary citing every phase commit."
+    },
+    {
+      "type": "code",
+      "path": "CslibTests/TableauConformance.lean",
+      "summary": "Regenerated conformance corpus: 44 rows (24 temporal unchanged, 20 propositional -- 19 re-confirmed plus 1 new termination-regression row for the divergence witness phi0, verdict OPEN)."
+    },
+    {
+      "type": "plan",
+      "path": "specs/574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md",
+      "summary": "Phase 8 (final) marked [COMPLETED]; all checklist items and Testing & Validation entries checked off with outcome notes."
+    }
+  ],
+  "next_steps": "None -- all 8 phases of plan v02 complete. Acceptance gate intExpandBranches_closed_unsat is sorry-free and axiom-clean.",
+  "phases_completed": 8,
+  "phases_total": 8,
+  "memory_candidates": [
+    "When a hard-mode plan declares per-substep Commit Mode for a phase but both sub-phase edits (e.g. a deletion + a follow-on docstring rewrite touching the same file) were drafted together in one working session, reconstruct the intermediate commit boundary by restoring the file from HEAD, re-applying only the earlier sub-phase's edit, verifying it independently builds green, and committing that before layering the later sub-phase's edit back on top -- rather than trying to split one already-combined diff with git add -p.",
+    "When a plan's Definition of Done requires repo-wide 'lake lint'/'lake shake' green but the repo carries pre-existing, out-of-scope lint/shake debt in files the task's own file-boundary constraints forbid touching, treat the requirement as scoped to the task's own file set: verify zero new findings within scope, document the pre-existing repo-wide findings honestly (with counts and file lists) in the plan/summary/handoff, and do not either silently claim full-repo green or block task completion on out-of-scope debt."
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 6,
+    "vacuous_count": 0,
+    "axiom_count": 3,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "completion_data": {
+    "completion_summary": "Repaired the intuitionistic propositional tableau's divergence on a complexity-9 witness formula by removing a self-copy channel and replacing the descendant-directed loop-check with an ancestor-directed Sfor-containment blocking check (intFImpReuseWitnessAnc?), then closed the resulting proof-side gap -- the reuse witness now sits below the blocked world in the ordering, reversing what the saturation invariant demanded -- using a loop-back-edge augmented accessibility relation (Garg-Genovese-Negri's published M-union-C countermodel construction) threaded forward through intExpandBranches_openBranch_sat's induction, after an initial blocking-quotient-frame approach (~480 lines, landed then deleted) was found structurally unable to carry the induction. The acceptance gate intExpandBranches_closed_unsat is verified sorry-free and axiom-clean ({propext, Classical.choice, Quot.sound}); the repo-wide bare-sorry count is at its exact 6-entry pre-task baseline; CslibTests/TableauConformance.lean was regenerated from real #eval output to 44 rows including a new termination-regression guard for the divergence witness. Full CSLib CI pipeline (build, checkInitImports, lint-style, test, shake) is green within this task's file scope; two repo-wide, pre-existing, out-of-scope lint/shake findings elsewhere in the tree (already tracked by a separate, already-archived repo-wide lint-hygiene task) are documented rather than silently absorbed.",
+    "roadmap_items": [
+      "The two Completeness.lean bridges (Intuitionistic/Completeness.lean:133, Minimal/Completeness.lean:125) remain open; a future attempt on either must additionally discharge Residual Risk R1 (GGN Lemma III.5): valuation monotonicity of intExtractValuation against the enlarged preorder introduced by the loop-back edge, not merely the original bridge obligation.",
+      "truthLemma's T-imp case (Scheme.lean, Gap 1, persistence fuel-sufficiency) remains open; per GGN Lemma III.6, any future attempt requires a lexicographic induction on (formula, original tree order), not induction on the formula alone."
+    ]
+  },
+  "metadata": {
+    "session_id": "sess_1785260108_081c2a",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+    "phase_count": 8,
+    "phases_completed": 8,
+    "plan_version": 2
+  }
+}

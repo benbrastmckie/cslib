@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-27T06:33:41Z",
-  "entry_count": 4,
-  "total_tokens": 865,
+  "generated_at": "2026-07-29T15:11:40Z",
+  "entry_count": 8,
+  "total_tokens": 1619,
   "entries": [
     {
       "id": "cslib-tests-conformance-harness-imports-eval",
@@ -29,6 +29,35 @@
       ],
       "summary": "# Executing a Cslib decision procedure in CslibTests: dual imports, #eval, no decide To execute a Cslib decision procedu",
       "token_count": 182,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "eval-computable-definitions-before-assuming-invariants",
+      "path": ".memory/10-Memories/eval-computable-definitions-before-assuming-invariants.md",
+      "title": "#eval a computable Lean definition against a property before trying to prove it",
+      "created": "2026-07-29",
+      "modified": "2026-07-29",
+      "topic": "Executable definitions make their own invariants testable",
+      "source": "task-317: propositional_tableau_completeness",
+      "tags": [
+        "PATTERN",
+        "lean4",
+        "cslib",
+        "verification",
+        "anti-pattern",
+        "formalization-design"
+      ],
+      "keywords": [
+        "PATTERN",
+        "lean4",
+        "cslib",
+        "verification",
+        "anti-pattern",
+        "formalization-design"
+      ],
+      "summary": "# #eval a computable Lean definition against a property before trying to prove it Before proving anything about a **comp",
+      "token_count": 168,
       "retrieval_count": 0,
       "last_retrieved": null
     },
@@ -86,7 +115,7 @@
         "Lindenbaum"
       ],
       "summary": "# Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion When an intuitio",
-      "token_count": 150,
+      "token_count": 151,
       "retrieval_count": 0,
       "last_retrieved": null
     },
@@ -115,7 +144,94 @@
         "task-427"
       ],
       "summary": "# Tasks 426 & 427 share Completeness.lean \u2014 serialize, do not parallelize Tasks **426** (time-ordering / `ordConstraints",
-      "token_count": 380,
+      "token_count": 381,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "timp-sibling-copies-break-world-creation-injection",
+      "path": ".memory/10-Memories/timp-sibling-copies-break-world-creation-injection.md",
+      "title": "T-signed implications are copied to every sibling world, so world creation is not injective into subformula positions",
+      "created": "2026-07-29",
+      "modified": "2026-07-29",
+      "topic": "Intuitionistic tableau world-creation counting",
+      "source": "task-317: propositional_tableau_completeness",
+      "tags": [
+        "PATTERN",
+        "cslib",
+        "lean4",
+        "tableau",
+        "intuitionistic-logic",
+        "persistence",
+        "counterexample"
+      ],
+      "keywords": [
+        "PATTERN",
+        "cslib",
+        "lean4",
+        "tableau",
+        "intuitionistic-logic",
+        "persistence",
+        "counterexample"
+      ],
+      "summary": "# T-signed implications are copied to every sibling world, so world creation is not injective into subformula positions ",
+      "token_count": 229,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "two-design-fixes-must-be-checked-for-mutual-compatibility",
+      "path": ".memory/10-Memories/two-design-fixes-must-be-checked-for-mutual-compatibility.md",
+      "title": "When two obligations are each resolved by a different design change, test the conjunction",
+      "created": "2026-07-29",
+      "modified": "2026-07-29",
+      "topic": "Alternating plan versions as a symptom of incompatible design fixes",
+      "source": "task-317: propositional_tableau_completeness",
+      "tags": [
+        "PATTERN",
+        "formalization-design",
+        "orchestration",
+        "churn",
+        "cslib",
+        "root-cause"
+      ],
+      "keywords": [
+        "PATTERN",
+        "formalization-design",
+        "orchestration",
+        "churn",
+        "cslib",
+        "root-cause"
+      ],
+      "summary": "# When two obligations are each resolved by a different design change, test the conjunction When two proof obligations i",
+      "token_count": 181,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "validated-fast-language-reimplementation-as-search-instrument",
+      "path": ".memory/10-Memories/validated-fast-language-reimplementation-as-search-instrument.md",
+      "title": "A validated fast-language re-implementation is a legitimate search instrument for slow computable Lean definitions",
+      "created": "2026-07-29",
+      "modified": "2026-07-29",
+      "topic": "Searching the space of counterexamples outside Lean, confirming inside it",
+      "source": "task-317: propositional_tableau_completeness",
+      "tags": [
+        "TECHNIQUE",
+        "lean4",
+        "research-method",
+        "verification",
+        "tooling"
+      ],
+      "keywords": [
+        "TECHNIQUE",
+        "lean4",
+        "research-method",
+        "verification",
+        "tooling"
+      ],
+      "summary": "# A validated fast-language re-implementation is a legitimate search instrument for slow computable Lean definitions Whe",
+      "token_count": 174,
       "retrieval_count": 0,
       "last_retrieved": null
     }

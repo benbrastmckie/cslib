@@ -228,40 +228,6 @@ CONSTRAINT: preserve every landed sorry-free result; do not discharge, add, or r
 
 ---
 
-### 574. Tableau calculus repair ancestor blocking
-- **Effort**: 2500-4000 lines; multi-dispatch, recommend --hard with phase-sized dispatches
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 573
-- **Research**:
-  - [317_propositional_tableau_completeness/reports/14_blocker-analysis.md]
-  - [574_tableau_calculus_repair_ancestor_blocking/reports/01_phase6-blocker-resolution.md]
-- **Plan**: [574_tableau_calculus_repair_ancestor_blocking/plans/02_tableau-repair-loopback-edges.md]
-- **Summary**: [574_tableau_calculus_repair_ancestor_blocking/summaries/01_implementation-summary.md]
-
-**Description**: LARGE task (~2500-4000 lines estimated, comparable in scope to the modal-K analogue Cslib/Logics/Modal/Tableau/FmpMeasure.lean at 3388 lines). Depends on the predecessor spike task's decision record (its `handoffs/01_quotient-soundness-spike-decision.md`) -- READ IT FIRST; if it reports the quotient approach is NOT compatible with `intExpandBranches_closed_unsat`, STOP and re-scope this task via `/revise` before proceeding, per that spike's explicit instruction.
-
-Background (self-contained): the intuitionistic propositional tableau in Cslib/Logics/Propositional/Tableau/Intuitionistic/ has a Lean-verified divergence: `intExpandBranches` does not terminate on `phi0 = (((a->b)->c) /\ ((d->e)->f)) -> ((u1->v1) \/ (u2->v2))` (complexity 9) -- world count grows unboundedly with fuel (4/7/10/14/20/27/40/54/67/87 distinct labels at fuel 10/20/30/40/60/80/120/160/200/260), with exact period-2 structural repetition from world 3 on. Root cause: `applyAllTImpRules` (Expansion.lean:136-143) copies `T(phi->psi)` itself into every accessible world lacking a copy (added to make `sat_timp` provable), which conflicts with `intFImpRule`'s `propagatePersistence` (Rules.lean:154-159, copies ALL T-formulas parent->child): each fresh copy BETA-resolves to a fresh `F(antecedent)` at the fresh world, minting another world, which receives another copy, forever. `intFImpReuseWitness?` (Expansion.lean:283-311) cannot cut this because it searches descendants (`isAccessible edges w x`) while the blocking world in a Fitting-style loop-check is always an ancestor.
-
-Implement, in dependency order, built ADDITIVELY FIRST per repo convention (add new declarations alongside the old, bridge, then migrate -- so already-landed green theorems never go red mid-flight):
-
-STEP 1 -- Remove or bound the Deliverable-6 self-copy channel. Either drop the `T(phi->psi)` self-copy from `applyAllTImpRules` (Expansion.lean:136-143) and instead recover `sat_timp`-at-accessible-worlds by making the `.pos, .imp` rule (Rules.lean:274-275) range over EXISTING accessible labels (Fitting's actual rule shape per `Fitting1983` Ch. 4), rather than firing only reflexively at the label of the specific copy it is handed; or gate the copy so it structurally cannot re-trigger world creation. Either way, this removes the mechanism that makes world creation unbounded.
-
-STEP 2 -- Replace `intFImpReuseWitness?` (Expansion.lean:283-311) with an ancestor-directed `Sfor`-containment blocking check: search ANCESTORS of the creation site (not descendants) for one whose forced-set `Sfor` already contains what the new world would force, and DROP the current `F(psi)@x` conjunct (Expansion.lean:308) -- the conjunct that made the old check alternately fail on the F1 divergence witness.
-
-STEP 3 -- Restate `IBranchSaturation.sat_fimp` over the resulting BLOCKING QUOTIENT frame (the blocked world is identified with its blocking ancestor) and rewrite `truthLemma`'s F-imp case (Scheme.lean:600-607) to read its witness off the quotient rather than off `w <= w'` directly. Re-verify that `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) still holds under the restated frame -- this is the exact obligation the predecessor spike task was dispatched to de-risk; follow its documented approach if it reported GO, but DO re-verify the full proof (the spike was a bounded prototype, not a completed proof).
-
-Explicit acceptance gate: `intExpandBranches_closed_unsat` (Minimal/Soundness.lean) re-verified sorry-free under the new calculus.
-
-REQUIRED explicit statement for whoever picks up this task: the 43-row regression guard `CslibTests/TableauConformance.lean` WILL CHANGE as a direct consequence of this work, because the algorithm's OUTPUTS change (fewer/different worlds, different branch shapes) once the self-copy channel and loop-check are altered. Task 317's previously-standing constraint that this guard 'must stay green' unchanged is WRONG under this repair and must not be inherited or treated as a constraint here -- the guard's expected values must be regenerated against the repaired algorithm's actual output, and its row count/shapes may differ from 43 rows in their current form.
-
-Out of scope for this task (left for task 317 itself, downstream, blocked on task 456's exponential world bound landing after this task): re-deriving the numeric world bound (task 456, `shared_tableau_containment_blocking`, already scopes the correct EXPONENTIAL replacement `Tableau.distinctTypes_le_pow`, `(b.labels.map b.typeAt).eraseDups.length <= 2^U.length` for a subformula-closed universe U) and closing the four remaining assembly sorries in task 317 (Scheme.lean:599 truthLemma T-imp case, the fuel=0 base case of `intExpandBranches_openBranch_sat`, and the two Completeness.lean bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125) -- those depend on this task's calculus landing plus task 456's bound.
-
-Constraints: additive-first (new declarations alongside old, migrate only once bridged and re-verified); no new axioms; no `sorry` left as a permanent artifact at task completion (temporary sorries during in-progress phases are acceptable per the repo's phase-based workflow but must be closed before this task completes); `lake build`, `lake exe checkInitImports`, `lake exe lint-style`, and `lake shake` must be green at completion; `CslibTests/TableauConformance.lean` must be UPDATED (not merely left accidentally green) to reflect the repaired algorithm's actual output, with row count and shapes re-derived from real `#eval`/proof output, not guessed.
-
----
-
 ### 571. Fill the strict-Until/Since-gated Bimodal sorries (SuccRelation, UntilSinceCoherence)
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
@@ -491,19 +457,6 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 
 ---
 
-### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: None
-- **Research**: [530_consolidate_chronicle_construction_bimodal_temporal/reports/01_chronicle-dedup-research.md]
-- **Plan**: [530_consolidate_chronicle_construction_bimodal_temporal/plans/02_chronicle-consolidation-descoped.md]
-- **Summary**: [530_consolidate_chronicle_construction_bimodal_temporal/summaries/02_chronicle-consolidation-descoped-summary.md]
-
-**Description**: REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them. [USER SCOPING DECISION 2026-07-26 -- path (B), descope]: phases 3b, 3c, 4a and 4b are DESCOPED. Do not attempt further generic lifting of c5ForwardWalk / c5BackwardWalk, the Phase 3c elimination driver, or Phase 4a/4b ChronicleConstruction. Two deep investigations (Phase 1 and Phase 3b) independently confirmed that generically bridging types indexed by each tree's LOCAL Chronicle Atom structure breaks downstream rcases/simp proofs, and repairing that exceeds this task's own 'structural dedup, not a proof change' mandate. Keep every landed lift (ChronicleInterface skeleton, generic Types, RRelation shared core, CEE Structures + BurgessHelpers -- all sorry-free, committed, full lake test green), run Phase 5 cleanup, annotate the plan file's 3b-4b headings as [DESCOPED] with a pointer to this decision, and close as a partial consolidation. Run /revise first to produce the descoped plan version, then /implement. The deeper Chronicle-structure question -- what the highest-quality refactor actually is, given that the walk-result types are structurally the obstacle -- is carried by a dedicated follow-on research task and is NOT to be attempted here.
-
----
-
 ### 511. S4 loop checking termination
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
@@ -544,19 +497,6 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Dependencies**: Task 393, Task 425, Task 449, Task 535, Task 542
 
 **Description**: Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.
-
----
-
-### 456. Shared tableau containment blocking
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Tableau Infrastructure
-- **Dependencies**: Task 574
-- **Research**: [456_shared_tableau_containment_blocking/reports/01_blocking-module-research.md]
-- **Plan**: [456_shared_tableau_containment_blocking/plans/01_blocking-module-plan.md]
-- **Summary**: [456_shared_tableau_containment_blocking/summaries/01_blocking-module-summary.md]
-
-**Description**: Generalize the Sfor-containment / subset-blocking device recurring across tableau developments into a single label-generic module Cslib/Foundations/Logic/Tableau/Blocking.lean, built on the existing Branch.formulasAt (Foundations/Logic/Tableau/Branch.lean:81). Lift Temporal's timeType/isSubsetBlocked/isTemporallyBlocked (Temporal/Tableau/Branch.lean:101-174) and task 317's Sfor/containment check to: Branch.typeAt (deduplicated (Sign x F) forced-type at a label), Branch.containmentBlocked (containment test), and the once-proven core lemma Tableau.distinctTypes_le_pow ((b.labels.map b.typeAt).eraseDups.length <= 2^U.length for a subformula-closed universe U). Highest-value payoff: distinctTypes_le_pow is the shared core of BOTH task 317's intExpandBranches_world_bound_dedup (plan 04 Phase 5.1) AND the currently-[BLOCKED] Temporal soundness obligation (Temporal/Tableau/Soundness.lean:23-54, '<= 2^n time types' / loop-detection) - proving it once could unblock Temporal Phase 7. The definitional lift is cheap; the soundness lemma (blocking => bounded => countermodel) is the hard part, but hard exactly once instead of 2-3 times. DEPENDS ON task 317 landing first (so the (psi not in forced(x)) side-condition shape is settled); ideally co-scoped with the Temporal soundness unblock. Also add missing references.bib entries GargGenoveseNegri2012 and DershowitzManna1979 (ready in report 05 Q4). Source: task 317 reuse/abstraction research report 06 (R2). Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
 
 ---
 
@@ -670,33 +610,6 @@ DP-5 (`Scheme.lean:633`), DP-3 (`Intuitionistic/Completeness.lean:140`) and DP-4
 
 ---
 
-### 414. Simplify proofs normalization modal family
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
-- **Research**: [414_simplify_proofs_normalization_modal_family/reports/01_simplify-modal-family-proofs.md]
-- **Plan**: [414_simplify_proofs_normalization_modal_family/plans/02_modal-family-proof-golf.md]
-- **Summary**: [414_simplify_proofs_normalization_modal_family/summaries/02_modal-family-proof-golf-summary.md]
-
-**Description**: Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*] lists and long tactic chains) using the EXISTING normalization/embedding lemmas. RECONCILED: original premise cited task-268 'co-tags' which was abandoned - re-scoped to the lemmas that actually exist. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
-
----
-
-### 413. Simplify proofs normalization propositional
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Code Hygiene
-- **Dependencies**: Task 317, Task 375
-- **Baseline**: [413_simplify_proofs_normalization_propositional/baseline.md]
-- **Plan**: [413_simplify_proofs_normalization_propositional/plans/01_remove-redundant-normalization-rewrites.md]
-- **Research**: [413_simplify_proofs_normalization_propositional/reports/01_redundant-normalization-rewrites.md]
-- **Summary**: [413_simplify_proofs_normalization_propositional/summaries/01_remove-redundant-normalization-rewrites-summary.md]
-
-**Description**: Simplify verbose proofs using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in Foundations/Logic/Theorems/BigConj.lean) by deleting redundant simp only [listImp_*|bigconj_*] rewrites and unfold ListDeriv calls that a bare exact already discharges by defeq. RECONCILED (second reconciliation): a repo-wide grep found zero such sites under Propositional/ specifically; all 20 sites (8 files) live in Foundations/, Modal/, Temporal/, and Bimodal/, plus one file under Propositional/Metalogic/. Scope corrected from Propositional/-only to repo-wide. Completed: all 20 sites removed, full lake build green (3309 jobs), zero sorry/axiom regressions, CSLib 7-step CI green.
-
----
-
 ### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
@@ -733,64 +646,6 @@ DP-5 (`Scheme.lean:633`), DP-3 (`Intuitionistic/Completeness.lean:140`) and DP-4
 - **Dependencies**: Task 317
 
 **Description**: Fold the TABLEAU decision systems into the propositional proof-system TFAE. RECONCILED: the sequent edges are ALREADY done - Cslib/Logics/Propositional/ProofSystemEquivalence.lean has cplProofSystemsTfae (Hilbert/ND/LK) and iplProofSystemsTfae (Hilbert/ND/LJ). REMAINING: add the tableau nodes to both TFAEs, wiring Propositional/Tableau/{Classical,Intuitionistic,Minimal}/Completeness.lean into the equivalence. Depends on task 317 (propositional tableau completeness) landing its remaining sorries.
-
----
-
-### 317. Propositional tableau completeness
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 456, Task 552
-- **Handoff**:
-  - [317_propositional_tableau_completeness/handoffs/11_phase0-spike-decisions.md]
-  - [317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md]
-  - [317_propositional_tableau_completeness/handoffs/12_world-bound-decision.md]
-- **Research**:
-  - [317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md]
-  - [317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md]
-  - [317_propositional_tableau_completeness/reports/04_fuel-sufficiency-measure.md]
-  - [317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md]
-  - [317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md]
-  - [317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md]
-  - [317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md]
-  - [317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md]
-  - [317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md]
-  - [317_propositional_tableau_completeness/reports/11_team-research.md]
-  - [317_propositional_tableau_completeness/reports/13_blocker-root-cause-and-correct-approach.md]
-- **Summary**: [317_propositional_tableau_completeness/summaries/12_world-bound-prereq-threading-summary.md]
-- **Probe**:
-  - [317_propositional_tableau_completeness/probes/int_tableau.py]
-  - [317_propositional_tableau_completeness/probes/check_atom_persist.py]
-- **Plan**: [317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md]
-
-**Description**: Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.
-
----
-
-## CORRECTION (repo-wide lint/CI audit, upstream/main f36649cf): ITEM (3) AS WRITTEN IS IMPOSSIBLE
-
-Item (3) above instructs the implementer to "close the fuel=0 base case of `intExpandBranches_openBranch_sat`". THAT GOAL IS FALSE AT THE LEMMA'S CURRENT STATEMENT and cannot be closed by any proof. The refutation is recorded IN THE SOURCE, in-proof at the sorry site -- read it before touching this item.
-
-The counter-instance (Lean-verified, not conjectured): `branches = [[<.neg, p AND q, 0>]]`, `expandedSets = [[]]`, `nextWorlds = [1]`, `edgeSets = [[]]`. Every hypothesis holds -- `ILabelBound` trivially (the single formula sits at label 0 < 1), `IExpandedConsistent` and `IAllAccessConsistent` vacuously (empty expanded-set and empty edge list), and all length hypotheses are (1,1). With `fuel = 0`, `intExpandBranches` returns `.openBranch b` with `b` the branch unmodified -- never saturated. But `IBranchSaturation.sat_fand`'s premise (`F(p AND q)@0` present) is `true` while BOTH required disjuncts (`F(p)@0`, `F(q)@0`) are `false`. So the existential goal is unsatisfiable at an instance where every hypothesis holds.
-
-WHAT ITEM (3) ACTUALLY REQUIRES: RESTATING the lemma -- e.g. adding a saturation-establishing precondition on the initial worklist that rules out the counter-instance -- and only then proving it. Do not attempt to prove it as stated; do not force it via a weakened or vacuous statement (the sibling docstring at the truthLemma site issues the same prohibition for the same reason).
-
-## CORRECTED LINE NUMBERS (verified live; the numbers in the body above are stale)
-
-- truthLemma's T-imp case: `Intuitionistic/Scheme.lean:607` (the lemma itself begins at :570) -- body above says :592
-- `intExpandBranches_openBranch_sat` fuel-0 base case: `Intuitionistic/Scheme.lean:2583` -- body above says :1498
-- IValid bridge: `Intuitionistic/Completeness.lean:124` -- body above says :133
-- MValid bridge: `Minimal/Completeness.lean:118` -- body above says :125
-
-Re-derive live before use; these move on every edit.
-
-## DEPENDENCY NOTE
-
-Of this task's two declared dependencies, 552 (tableau_calculus_conformance_rule_completeness_repair) is COMPLETED and archived. The only live blocker is 456, itself behind 574 -> 573. The status marker should be re-evaluated against that single remaining edge rather than treated as blocked on two.
-
-## CI CONTEXT
-
-These four sorries are exactly the ones that keep `lake build --wfail --iofail` red, together with the fifth in Modal/Tableau/FrameSoundness.lean (separately owned). The Definition of Done's "CI green (... lake shake)" clause should be read against the shake-disposition task: shake currently exits 1 on 12 files, 10 of them byte-identical to upstream, and its CI step is being re-scoped.
 
 ---
 

@@ -3,8 +3,8 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": true,
-  "summary": "Phase 4C complete (plan v14): the B-engine IS the engine. Dispatch start found objectives 1-4 (and most of the private-lemma bodies underpinning objective 5) already landed UNCOMMITTED in the working tree from a prior interrupted 4C dispatch (git status showed Scheme.lean/Expansion.lean already modified, tree RED: intuitionisticTableau/minimalTableau had been removed from Expansion.lean and moved into Scheme.lean on the renamed intExpandBranches (ex-intExpandBranchesB) engine, but downstream consumers in Soundness.lean and Minimal/Soundness.lean still referenced the old global-fuel-typed intExpandBranches/intuitionisticTableau, producing type errors). This dispatch verified the pre-existing work was correct, then completed the flip: (1) retired the dead old-signature intExpandBranches_closed_unsat + intuitionisticTableau_sound from Soundness.lean and the dead old minimalTableau_sound from Minimal/Soundness.lean (objective 6) — these duplicated the already-ported/relocated Scheme.lean versions and were type-broken by the engine's fuel:Nat -> fuels:List Nat signature change; (2) fixed an omit-clause placement and refreshed stale module docstrings in both Soundness files to point at Scheme.lean; (3) repointed CslibTests/TableauConformance.lean's import from Intuitionistic.Expansion to Intuitionistic.Scheme (objective 7); (4) applied three lake-shake-flagged import fixes caused by the flip (dropped now-unused Subformula import from Expansion.lean, added it to Scheme.lean where the content moved, added Mathlib.Data.List.Basic to Soundness.lean); (5) ran the full CI gate and the 44-row corpus timing gate (objective 8). No 4A parity-probe section was found to remove (already clean). Results: full `lake build` green (3311/3311 jobs); `lake build CslibTests` green, CslibTests.TableauConformance fresh-compiled in 5.7s (all 44 corpus rows incl. divergence-witness row 20 execute at #eval-elaboration time); `lake test` wall time 3.4s total (TIMING GATE: <=3min or <=5x 4A baseline -- passes with large margin); `lake exe checkInitImports` exit 0; `lake lint` 0 findings in the touched subtree (pre-existing findings elsewhere in the repo, out of territory, untouched); `lake exe lint-style` exit 0; `lake shake` 0 remaining findings in territory after the three fixes above. Sorry census: exactly 4, unchanged from Phase 4B, all four in their expected locations. lean_verify: intuitionisticTableau_sound and minimalTableau_sound are sorry-free ({propext, Classical.choice, Quot.sound}); tableau_complete and openBranch_countermodel carry sorryAx as expected (transitively via the fuel-0 strategic sorry).",
-  "phases_completed": 6,
+  "summary": "Phase 5 complete (plan v14): hUniv/hNW threading invariants (division point DP-2). Added IAllUniv/IAllNW parallel-list invariants (private defs, threaded ALONGSIDE the existing IAllConsistent/IAllAccessConsistent pair, same companion-not-merged shape) with _append/_map combinator lemmas. Supplied per-arm step-preservation lemmas for hUniv (intStepBranch_linear_preserves_univ, intStepBranch_branch_preserves_univ -- direct corollaries of the already-proved intApplyRuleFull_outputs_subset_ext + applyPersistenceFixpoint_subset_ext) covering the ALPHA, BETA, and fresh-mint arms; the ancestor-reuse arm needs no lemma since the branch is literally unchanged. Supplied per-arm step-preservation lemmas for hNW: the ALPHA/BETA arms are sorry-free (intApplyRuleFull_linearResult_nextWorld/intApplyRuleFull_branchingResult_nextWorld establish nw' = nw by direct case analysis on intApplyRuleFull's constructor; intStepBranch_linear_preserves_nw_of_none/intStepBranch_branch_preserves_nw wrap these), the reuse arm is trivial by construction (go keeps nw unconsumed). The fresh-mint arm's hNW preservation (intFreshMint_preserves_nw) carries the ONE DP-2 strategic sorry explicitly authorized by the plan's STOPPING CONDITION: the bare hnwB : nw <= WBound phi0 hypothesis IAllNW threads is insufficient (consistent with nw = WBound phi0); the missing strict premise requires the 'labels minted so far <= tree size <= WBound phi0' creation-count invariant tied to intCreatedChain_le's pigeonhole bound (Phase 2) via the runtime-check-to-final-branch transfer that lemma's own docstring flags as owned by this development and not yet done -- genuinely open research, named explicitly in the sorry comment rather than papered over with a weakened statement. Scoped build green; full `lake build` green (3311/3311 jobs); `lake exe checkInitImports` exit 0. Bare-sorry census: 4 -> 5 (exactly the one authorized DP-2 addition).",
+  "phases_completed": 7,
   "phases_total": 10,
   "sorry_inventory": [
     {
@@ -13,56 +13,84 @@
       "statement": "truthLemma T-imp case",
       "strategic": true,
       "assumption": "persistence-fixpoint sufficiency threading",
+      "why_deferred": "requires the R1 hypothesis-threading restatement landing in Phase 7",
       "discharge_phase": "7",
-      "pre_existing": true
+      "pre_existing": true,
+      "follow_up_task": null
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "line": 4479,
-      "statement": "fuel-0 exhaustion arm of intExpandBranches_openBranch_sat (per-branch-fuel engine, post-flip). Moved 1-for-1 in the flip from the retired global-fuel lemma's fuel-0 case (previously Scheme.lean:3361); same Lean-verified counter-instance record carried forward verbatim in the in-proof comment.",
+      "line": 2515,
+      "statement": "intFreshMint_preserves_nw : nw <= WBound phi0 -> nw + 1 <= WBound phi0 (fresh-mint arm hNW preservation)",
+      "strategic": true,
+      "assumption": "the creation-count invariant 'labels minted so far <= tree size <= WBound phi0' (equivalently: this fresh-mint firing is licensed by the pigeonhole tree-size bound, not merely that the counter has not yet overflowed)",
+      "why_deferred": "the bare hnwB : nw <= WBound phi0 hypothesis is insufficient on its own (consistent with nw = WBound phi0); the missing strict premise (nw < WBound phi0) requires tying intCreatedChain_le's pigeonhole bound (Phase 2) to the runtime next-world counter via the runtime-check-to-final-branch transfer that lemma's docstring explicitly flags as owned by this development and not yet done -- genuinely open research work, exceeding Phase 5's STOPPING CONDITION budget",
+      "discharge_phase": null,
+      "pre_existing": false,
+      "follow_up_task": 585
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 4732,
+      "statement": "fuel-0 exhaustion arm of intExpandBranches_openBranch_sat (per-branch-fuel engine, post-flip)",
       "strategic": true,
       "assumption": "R1 restatement (hUniv/hNW/per-branch hFuel) discharges it: hFuel at this arm gives intWork ... < 0, absurd by omega",
+      "why_deferred": "requires the R1 hypothesis-threading restatement (Phase 5's hUniv/hNW plus Phase 6's per-branch hFuel) landing in Phase 6",
       "discharge_phase": "6",
-      "pre_existing": true
+      "pre_existing": true,
+      "follow_up_task": null
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
       "line": 133,
       "statement": "DP-3 intuitionistic validity bridge",
       "strategic": true,
-      "assumption": "IAtomPersist route (task 430's territory)",
-      "discharge_phase": "task 430",
-      "pre_existing": true
+      "assumption": "IAtomPersist route",
+      "why_deferred": "owned by a separate planned task, not this plan's scope",
+      "discharge_phase": null,
+      "pre_existing": true,
+      "follow_up_task": 430
     },
     {
       "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
       "line": 125,
       "statement": "DP-4 minimal validity bridge",
       "strategic": true,
-      "assumption": "IAtomPersist route (task 430's territory)",
-      "discharge_phase": "task 430",
-      "pre_existing": true
+      "assumption": "IAtomPersist route",
+      "why_deferred": "owned by a separate planned task, not this plan's scope",
+      "discharge_phase": null,
+      "pre_existing": true,
+      "follow_up_task": 430
     }
   ],
   "blockers": [],
   "continuation_context": null,
-  "next_phase": "5",
+  "continuation_path": null,
+  "next_phase": "6",
   "notes_for_next_dispatch": [
-    "Phase 5 (hUniv/hNW threading invariants, DP-2) is next. It is a fresh phase, not yet started -- a stray [IN PROGRESS] marker left on its heading by the same prior interrupted session was found and reverted to [NOT STARTED] in this dispatch (no Phase 5 content exists yet).",
-    "The engine is now permanently named intExpandBranches (no more intExpandBranchesB); intuitionisticTableau/minimalTableau/propExpandBranches/tableau_sound/tableau_complete/openBranch_countermodel all live in Scheme.lean now, not Expansion.lean/Soundness.lean.",
-    "Phase 6's fuel-0 discharge target is Scheme.lean:4479 (line drifted from the 4B handoff's cited :3361 due to the flip's net line-count change -- re-grep for the sorry before editing).",
-    "Phase 8's doc pass should also double check the two docstring refreshes made in this dispatch (Soundness.lean and Minimal/Soundness.lean module headers) for staleness once Phase 6/7 land."
+    "Phase 6 (R1 restatement of intExpandBranches_openBranch_sat + fuel-0 discharge + call-site repair) is next. It threads Phase 5's IAllUniv/IAllNW invariants (and step-preservation lemmas) through the existing intExpandBranches_openBranch_sat functional induction (Scheme.lean, cases case1..case10 via intExpandBranches.go.induct), the SAME induction that already threads IAllConsistent/IAllAccessConsistent -- add IAllUniv/IAllNW as a THIRD thread alongside them, following the exact append/extend pattern each case already uses for the first two.",
+    "At the fresh-mint arm (case5/case6-equivalent for hNW, matching case5 in the current induction which is the world-creating-with-no-reuse arm), Phase 6 will either need to discharge intFreshMint_preserves_nw's sorry itself (if it turns out tractable with Phase 6's additional per-branch hFuel machinery in scope) or simply propagate the DP-2 sorry forward -- both are legitimate; if propagated, keep follow_up_task: 585 and strategic: true in the next handoff's sorry_inventory.",
+    "Per-branch hFuel form (per plan v14 Phase 6 task list): IAllFuel-style invariant `forall i, intWork (intUniverseExt phi0) b_i e_i < fuels_i`, NOT the retired global intExpMeasure <= fuel form.",
+    "Fuel-0 discharge target: Scheme.lean:4732 (line drifted again after Phase 5's ~250-line insertion before it -- re-grep for the sorry before editing, do not trust this line number verbatim).",
+    "Call-site repair target: openBranch_countermodel, hFuel via intWork_init_lt_intFuelExt (Phase 4A), hUniv via singleton membership, hNW via WBound_pos (Scheme.lean)."
+  ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/317_propositional_tableau_completeness/plans/14_fuel-materialization-repair.md",
+    "specs/317_propositional_tableau_completeness/progress/phase-5-progress.json"
   ],
   "artifacts": [
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-4C-progress.json",
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-5-progress.json",
       "type": "progress",
-      "summary": "Phase 4C objectives (all 8 done) with verification results (build, lint, shake, sorry census, lean_verify, timing gate) and a resumed_from note explaining the pre-existing uncommitted state at dispatch start"
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/summaries/14_phase4c-engine-flip-summary.md",
-      "type": "summary",
-      "summary": "Phase 4C implementation summary: what was done, verification results, sorry inventory, plan deviations"
+      "summary": "Phase 5 objective-level progress record with verification results"
     }
-  ]
+  ],
+  "verification": {
+    "scoped_build": "green (lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme)",
+    "full_build": "green (3311/3311 jobs)",
+    "checkInitImports": "exit 0",
+    "bare_sorry_census_subtree": 5,
+    "bare_sorry_census_note": "4 pre-existing + 1 new DP-2 strategic sorry, exactly as authorized by plan v14 Phase 5's explicit STOPPING CONDITION and Planned Strategic Sorries table. Full CI pipeline (lake lint, lint-style, shake, mk_all, test) not run this dispatch -- Phase 5's declared Verification Tier is 'local', not 'full'; the full gate is Phase 8's job."
+  }
 }

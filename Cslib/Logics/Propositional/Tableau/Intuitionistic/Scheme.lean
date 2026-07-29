@@ -3724,6 +3724,201 @@ private lemma intExpandBranches_openBranch_initial_mem (fuel : Nat)
                 | notApplicable =>
                   simp only at hgo; injection hgo with heq; subst heq; exact hbPers_sf
 
+/-! ## B-Engine Ports of the Engine-Quantifying Lemmas
+
+Ports of the four lemmas whose induction skeleton is the engine recursion onto the
+per-branch-fuel B-engine (`intExpandBranchesB`, above). The old engine and its lemmas
+stay green and untouched until the flip; statements gain the `fuels` parallel list and
+proofs run by functional induction on `intExpandBranchesB.go` (one flat worklist
+induction replaces the old outer-fuel/inner-`go` nesting). -/
+
+omit [Hashable Atom] in
+/-- B-engine port of `intExpandBranches_openBranch_closed`: if the per-branch-fuel
+loop returns `.openBranch b`, then `closurePred b = false`.
+
+Every `.openBranch` return site of `intExpandBranchesB.go` (per-branch exhaustion at
+`f = 0`, saturation, and the defensive `notApplicable` arm) sits inside the `else`
+branch of `if closurePred bPers`, so the returned branch is open. -/
+private lemma intExpandBranchesB_openBranch_closed
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (fuels : List Nat)
+    (closurePred : IBranch Atom → Bool)
+    (b : IBranch Atom)
+    (h : intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+        = .openBranch b) :
+    closurePred b = false := by
+  rw [intExpandBranchesB] at h
+  suffices key : ∀ (pending : List (IBranch Atom))
+      (pendingExp : List (List (ISF Atom)))
+      (pendingNW : List Nat)
+      (pendingEdges : List IEdges)
+      (pendingFuels : List Nat)
+      (done : List (IBranch Atom))
+      (doneExp : List (List (ISF Atom)))
+      (doneNW : List Nat)
+      (doneEdges : List IEdges)
+      (doneFuels : List Nat),
+      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges pendingFuels
+          done doneExp doneNW doneEdges doneFuels = .openBranch b →
+      closurePred b = false from
+    key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] h
+  intro pending pendingExp pendingNW pendingEdges pendingFuels done doneExp doneNW doneEdges
+    doneFuels
+  induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp, doneNW,
+      doneEdges, doneFuels using intExpandBranchesB.go.induct (closurePred := closurePred) with
+  | case1 =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    exact absurd hgo (by simp)
+  | case2 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl ih =>
+    intro hgo
+    rw [intExpandBranchesB.go.eq_def] at hgo
+    simp only [] at hgo
+    rw [if_pos hcl] at hgo
+    exact ih hgo
+  | case3 _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    injection hgo with heq
+    subst heq
+    simpa using hcl
+  | case4 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · injection hgo with heq
+      subst heq
+      simpa using hcl
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case5 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep _ ih =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      exact ih hgo
+    · rename_i branches1 nw1 newExp1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i snd1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+  | case6 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep hwit _ ih =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      split at hgo
+      · rename_i heqE heqH
+        exact absurd heqE (by simp)
+      · rename_i newE1 hstep1 heqE heqH
+        injection heqE with heqE'
+        subst heqE'
+        split at hgo
+        · exact ih hgo
+        · rename_i hwit1
+          exact absurd (hwit.symm.trans hwit1) (by simp)
+    · rename_i branches1 nw1 newExp1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i snd1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+  | case7 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep hwit _ ih =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      split at hgo
+      · rename_i heqE heqH
+        exact absurd heqE (by simp)
+      · rename_i newE1 hstep1 heqE heqH
+        injection heqE with heqE'
+        subst heqE'
+        split at hgo
+        · rename_i x1 hwit1
+          exact absurd (hwit.symm.trans hwit1) (by simp)
+        · exact ih hgo
+    · rename_i branches1 nw1 newExp1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i snd1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+  | case8 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep ih =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i branches1 nw1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.branchingResult.injEq] at hsome
+      obtain ⟨⟨hB, hN⟩, hX⟩ := hsome
+      subst hB; subst hN; subst hX
+      exact ih hgo
+    · rename_i snd1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+  | case9 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ bPers hcl hstep =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i branches1 nw1 newExp1 heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · injection hgo with heq
+      subst heq
+      simpa using hcl
+  | case10 _ _ _ _ _ _ _ _ _ _ _ hmismatch ih =>
+    intro hgo
+    simp only [intExpandBranchesB.go] at hgo
+    exact ih hgo
+
 /-! ## Parametric Open Branch Countermodel -/
 
 /-- **Parametric Open Branch Countermodel**: An open branch returned by the parametric

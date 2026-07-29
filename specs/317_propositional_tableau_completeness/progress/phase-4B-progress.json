@@ -1,0 +1,36 @@
+{
+  "task_number": 317,
+  "phase": "4B",
+  "session_id": "sess_1785275816_a84520_317",
+  "objectives": [
+    {
+      "id": "4B.1",
+      "description": "Port intExpandBranches_openBranch_closed to the B-engine (intExpandBranchesB_openBranch_closed) — validates the functional-induction route (intExpandBranchesB.go.induct, 10 cases)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"],
+      "verification": "lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme green; only 2 pre-existing sorry warnings"
+    },
+    {
+      "id": "4B.2",
+      "description": "Port intExpandBranches_closed_unsat (Soundness.lean:1078, ~690 lines) to intExpandBranchesB_closed_unsat in Scheme.lean (import direction forces placement; needs de-privatized Soundness helpers). This objective is the plan's pre-authorized 4B.1 split boundary.",
+      "status": "pending",
+      "files_touched": []
+    },
+    {
+      "id": "4B.3",
+      "description": "Port intExpandBranches_openBranch_initial_mem to the B-engine",
+      "status": "pending",
+      "files_touched": []
+    },
+    {
+      "id": "4B.4",
+      "description": "Port intExpandBranches_openBranch_sat succ case to the B-engine; fuel-0 exhaustion case discharged by consuming the OLD sorried lemma at fuel := 0 (carries the sorry 1-for-1 via sorryAx, keeping the bare-sorry census at exactly 4)",
+      "status": "pending",
+      "files_touched": []
+    }
+  ],
+  "notes": [
+    "Proof recipe validated on 4B.1: induction ... using intExpandBranchesB.go.induct with 10 cases; the `have bPers` binder occupies a with-pattern slot; generic-fuel skip case needs rw [go.eq_def] + simp only [] instead of simp only [go]; dependent `match _hstep :` discriminants need split at hgo + Eq.trans reconciliation with the case's step equation (rw [hstep] fails on the dependent motive); iota-reduction lets `exact ih hgo` accept unreduced matcher applications after subst.",
+    "Engine-quantifying lemma set confirmed = the four planned lemmas (grep of intExpandBranches consumers; step_lt lemmas quantify over intStepBranch only)."
+  ]
+}

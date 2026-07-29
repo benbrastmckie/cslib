@@ -462,7 +462,7 @@ below are suggestions; the constraint set is binding, the naming is implementer 
   sorry-free (scoped build); parity probe passes on all 20 propositional rows; `lake test`
   baseline recorded; ZERO changes to existing declarations.
 
-### Phase 4B: Port the four engine-quantifying lemmas to the B-engine (old ones untouched) [NOT STARTED]
+### Phase 4B: Port the four engine-quantifying lemmas to the B-engine (old ones untouched) [IN PROGRESS]
 - **Goal:** Every theorem whose induction skeleton is the engine recursion exists in a
   B-engine form; the old lemmas and old engine remain green and untouched.
 - **Tasks:**

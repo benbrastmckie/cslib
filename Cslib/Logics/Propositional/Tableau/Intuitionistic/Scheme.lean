@@ -4565,6 +4565,250 @@ private lemma intExpandBranchesB_closed_unsat
               (hmismatch e restEs nw restNW edges restEdges f restFs hpE hpN hpEd hpF)
               id
 
+omit [Hashable Atom] in
+/-- B-engine port of `intExpandBranches_openBranch_initial_mem`: every formula in
+every initial branch appears in the open branch returned by `intExpandBranchesB`.
+
+Both `applyPersistenceFixpoint` and `Branch.extendMany` only prepend/append formulas,
+so membership is monotone throughout the expansion; the per-branch fuel-exhaustion arm
+returns the persistence-closed head branch, which inherits the head's membership. -/
+private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
+    ∀ (branches : List (IBranch Atom))
+      (expandedSets : List (List (ISF Atom)))
+      (nextWorlds : List Nat)
+      (edgeSets : List IEdges)
+      (fuels : List Nat)
+      (closurePred : IBranch Atom → Bool),
+      (∀ b₀ ∈ branches, sf ∈ b₀) →
+      ∀ b, intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+          = .openBranch b →
+        sf ∈ b := by
+  intro branches expandedSets nextWorlds edgeSets fuels closurePred hAll b h
+  rw [intExpandBranchesB] at h
+  suffices key : ∀ (pending : List (IBranch Atom))
+      (pendingExp : List (List (ISF Atom)))
+      (pendingNW : List Nat)
+      (pendingEdges : List IEdges)
+      (pendingFuels : List Nat)
+      (done : List (IBranch Atom))
+      (doneExp : List (List (ISF Atom)))
+      (doneNW : List Nat)
+      (doneEdges : List IEdges)
+      (doneFuels : List Nat),
+      (∀ bp ∈ pending, sf ∈ bp) →
+      (∀ bd ∈ done, sf ∈ bd) →
+      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges
+          pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
+      sf ∈ b from
+    key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] []
+        hAll (by simp) h
+  intro pending pendingExp pendingNW pendingEdges pendingFuels done doneExp doneNW
+    doneEdges doneFuels
+  induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp,
+      doneNW, doneEdges, doneFuels
+      using intExpandBranchesB.go.induct (closurePred := closurePred) with
+  | case1 =>
+    intro _ _ hgo
+    simp only [intExpandBranchesB.go] at hgo
+    exact absurd hgo (by simp)
+  | case2 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT f fT
+      bPers hcl ih =>
+    intro hPend hDone hgo
+    rw [intExpandBranchesB.go.eq_def] at hgo
+    simp only [] at hgo
+    rw [if_pos hcl] at hgo
+    have hbPers_sf : sf ∈ bPers :=
+      applyPersistenceFixpoint_mem_preserved bh edgesH f sf (hPend bh List.mem_cons_self)
+    refine ih (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) ?_ hgo
+    intro bd hbd
+    simp only [List.mem_append, List.mem_singleton] at hbd
+    rcases hbd with h1 | rfl
+    · exact hDone bd h1
+    · exact hbPers_sf
+  | case3 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT
+      bPers hcl =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    injection hgo with heq
+    subst heq
+    exact applyPersistenceFixpoint_mem_preserved bh edgesH 0 sf
+      (hPend bh List.mem_cons_self)
+  | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      bPers hcl hstep =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · injection hgo with heq
+      subst heq
+      exact applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
+        (hPend bh List.mem_cons_self)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case5 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      newForms nw' newExp bPers hcl hstep hstep2 ih =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    have hbPers_sf : sf ∈ bPers :=
+      applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
+        (hPend bh List.mem_cons_self)
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      refine ih ?_ (by simp) hgo
+      intro b₀ hb₀
+      simp only [List.mem_append, List.mem_singleton] at hb₀
+      rcases hb₀ with (hd | rfl) | hbt
+      · exact hDone b₀ hd
+      · simp only [Branch.extendMany, List.mem_append]
+        exact Or.inr hbPers_sf
+      · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case6 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      newForms nw' newExp newE _x bPers hcl hstep hwit hstep2 ih =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    have hbPers_sf : sf ∈ bPers :=
+      applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
+        (hPend bh List.mem_cons_self)
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      split at hgo
+      · rename_i heqE heqH
+        exact absurd heqE (by simp)
+      · rename_i newE1 hstep1 heqE heqH
+        injection heqE with heqE'
+        subst heqE'
+        split at hgo
+        · refine ih ?_ (by simp) hgo
+          intro b₀ hb₀
+          simp only [List.mem_append, List.mem_singleton] at hb₀
+          rcases hb₀ with (hd | rfl) | hbt
+          · exact hDone b₀ hd
+          · exact hbPers_sf
+          · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+        · rename_i hwit1
+          exact absurd (hwit.symm.trans hwit1) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case7 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    have hbPers_sf : sf ∈ bPers :=
+      applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
+        (hPend bh List.mem_cons_self)
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      split at hgo
+      · rename_i heqE heqH
+        exact absurd heqE (by simp)
+      · rename_i newE1 hstep1 heqE heqH
+        injection heqE with heqE'
+        subst heqE'
+        split at hgo
+        · rename_i x1 hwit1
+          exact absurd (hwit.symm.trans hwit1) (by simp)
+        · refine ih ?_ (by simp) hgo
+          intro b₀ hb₀
+          simp only [List.mem_append, List.mem_singleton] at hb₀
+          rcases hb₀ with (hd | rfl) | hbt
+          · exact hDone b₀ hd
+          · simp only [Branch.extendMany, List.mem_append]
+            exact Or.inr hbPers_sf
+          · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case8 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      branches' nw' newExp bPers hcl hstep ih =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    have hbPers_sf : sf ∈ bPers :=
+      applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
+        (hPend bh List.mem_cons_self)
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i branches1 nw1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.branchingResult.injEq] at hsome
+      obtain ⟨⟨hB, hN⟩, hX⟩ := hsome
+      subst hB; subst hN; subst hX
+      refine ih ?_ (by simp) hgo
+      intro b₀ hb₀
+      simp only [List.mem_append, List.mem_map] at hb₀
+      rcases hb₀ with (hd | ⟨x, _, rfl⟩) | hbt
+      · exact hDone b₀ hd
+      · simp only [Branch.extendMany, List.mem_append]
+        exact Or.inr hbPers_sf
+      · exact hPend b₀ (List.mem_cons_of_mem _ hbt)
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+  | case9 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      snd bPers hcl hstep =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · injection hgo with heq
+      subst heq
+      exact applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) sf
+        (hPend bh List.mem_cons_self)
+  | case10 done doneExp doneNW doneEdges doneFuels head restBs pExp pNW pEdges pFuels
+      hmismatch ih =>
+    intro hPend hDone hgo
+    simp only [intExpandBranchesB.go] at hgo
+    exact ih (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
+
 /-! ## Parametric Open Branch Countermodel -/
 
 /-- **Parametric Open Branch Countermodel**: An open branch returned by the parametric

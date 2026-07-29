@@ -12,10 +12,21 @@
   },
   "objectives": [
     {"id": "baseline", "desc": "Record pre-change lake test wall-time baseline", "status": "done"},
-    {"id": "intFuelExt", "desc": "Def intFuelExt in closed arithmetic form", "status": "pending"},
-    {"id": "engineB", "desc": "intExpandBranchesB + lifted go with unconditional lex WF", "status": "pending"},
-    {"id": "init-bound", "desc": "intWork_init_lt_intFuelExt", "status": "pending"},
-    {"id": "parity-probe", "desc": "#eval parity probe on 20 propositional corpus rows", "status": "pending"}
+    {"id": "intFuelExt", "desc": "Def intFuelExt in closed arithmetic form", "status": "done"},
+    {"id": "engineB", "desc": "intExpandBranchesB + lifted go with unconditional lex WF", "status": "done"},
+    {"id": "init-bound", "desc": "intWork_init_lt_intFuelExt", "status": "done"},
+    {"id": "parity-probe", "desc": "#eval parity probe on 20 propositional corpus rows", "status": "done", "result": "all 20 rows match (14 CLOSED, 6 OPEN incl. divergence-witness row); aggregate true; probe file kept out of the repo (scratchpad only)"}
   ],
-  "files_touched": []
+  "verification": {
+    "scoped_build": "green",
+    "full_build": "green (3311 jobs)",
+    "checkInitImports": "exit 0",
+    "lint_style": "exit 0",
+    "lake_test": "exit 0, zero errors, corpus untouched",
+    "lean_verify": "intFuelExt/intExpandBranchesB(.go)/intWork_init_lt_intFuelExt/intStepBranch_branchingResult_length: axioms subset of {propext, Classical.choice, Quot.sound}, no sorryAx",
+    "bare_sorry_census": "exactly 4 in subtree (Scheme.lean:619, Scheme.lean:3361, Intuitionistic/Completeness.lean:133, Minimal/Completeness.lean:125) — unchanged"
+  },
+  "files_touched": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+  ]
 }

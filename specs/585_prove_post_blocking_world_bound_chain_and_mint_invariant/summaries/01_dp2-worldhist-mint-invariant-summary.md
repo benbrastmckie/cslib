@@ -1,12 +1,92 @@
-# Implementation Summary: DP-2 World-History Invariant and Mint Residue (Partial)
+# Implementation Summary: DP-2 World-History Invariant and Mint Residue
 
 - **Task**: 585 - prove_post_blocking_world_bound_chain_and_mint_invariant
-- **Status**: [PARTIAL] -- 8 of 11 phases complete; DP-2's sorry is NOT yet retired
+- **Status**: [COMPLETED] -- all 11 phases complete; DP-2's sorry is retired
 - **Started**: TBD
-- **Completed**: TBD
-- **Artifacts**: TBD
-- **Standards**: TBD
+- **Completed**: 2026-07-29
+- **Artifacts**: `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (modified across
+  all 11 phases; `Expansion.lean` modified in Phase 2 only)
+- **Standards**: plan-format.md, status-markers.md, artifact-management.md, tasks.md
 - **Plan**: `specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md`
+
+## Update (this dispatch: Phases 9-11, task COMPLETED)
+
+**Phases 9, 10, and 11 are now COMPLETED.** This dispatch resumed from the 8-of-11 state below
+and carried the task to completion: DP-2's sorry is retired, the Tableau-subtree bare-sorry
+census reads 3 (was 4) and the repo-wide census reads 5 (was 6), and the full CSLib CI pipeline
+is green.
+
+**Phase 9 (pigeonhole depth bound)**: added `parIter` (iterated-`par` step function),
+`parAncestor_parIter`, `ws_eq_parIter`, and `intWorldHist_chain_le` -- the structural-invariant
+analogue of `intCreatedChain_le`'s pigeonhole, bounding any `par`-descent chain of created worlds
+by `intChainBound φ0`, derived from `IWorldHist`'s (H5) mint-time reuse residue rather than the
+refuted runtime-check-to-final-branch transfer. `intCreatedChain_le`'s proof body is
+byte-identical to its pre-phase state (docstring-only change, recording that it is correct but
+unconsumed by this route). **Deviation (disclosed, additive)**: `parIter` was defined in Phase 9
+rather than deferred to Phase 10, because the chain-length bound's own statement needs it;
+Phase 10 reuses it for the path injection.
+
+**Phase 10 (path-injection size bound and `intWorldHist_nw_le`)**: added `parIter_succ'`
+(apply-last unfolding), `parDepthFuel`/`parDepth` (fuel-bounded depth-to-root, structural
+recursion, no well-foundedness proof needed), `parDepthFuel_spec`/`parDepth_spec` (depth
+correctness, proved by induction on the fuel rather than the value, avoiding a separate
+fuel-invariance lemma), `parDepth_le_intChainBound` (instantiates Phase 9's abstract chain bound
+at the concrete root-to-`c` path), `pathOf` (root-to-world sequence of fired implications padded
+with `none` beyond depth), `pathOf_none`/`pathOf_some` (its characterization), `pathOf_injOn`
+(injectivity from (H4) sibling-uniqueness, reconstructed by downward induction from the root),
+and `intWorldHist_nw_le` itself (`nw ≤ WBound φ0`, purely from `IWorldHist`). **Deviation
+(disclosed)**: the target `Finset` for `Finset.card_le_card_of_injOn` is built via
+`Fintype.piFinset`/`Finset.attach`/`Finset.image` rather than `Finset.univ` on a
+globally-registered `Fintype (Fin (D+1) → Option S)` instance -- that specific combination (a
+Pi-type of a subtype of a `Finset`) does not resolve via typeclass search in this file's ambient
+context, confirmed empirically by testing each constituent piece (`Fintype S`, `Fintype (Option
+S)`, `Fintype (Fin (D+1))`, `DecidableEq (Fin (D+1))`) in isolation -- each resolves fine
+individually, but the combined instance does not. `piFinset` sidesteps the issue entirely since
+it consumes per-coordinate `Finset`s directly. Two Mathlib imports were added to `Scheme.lean`
+(`Mathlib.Data.Fintype.Pi`, `Mathlib.Data.Fintype.BigOperators`) for `Fintype.piFinset` /
+`Fintype.card_piFinset_const`, neither transitively available beforehand -- confirmed by a
+standalone `lake env lean` check against the file's pre-existing import set. This is a
+within-scope import addition to a file the plan already lists as modified.
+
+**Phase 11 (retire the sorry, rewire the call site)**: replaced `intFreshMint_preserves_nw`'s
+false numeric-premise statement with the correctly-premised form -- its hypothesis is now the
+structural post-mint `IWorldHist` invariant, and the conclusion `nw + 1 ≤ WBound φ0` is a direct
+corollary of `intWorldHist_nw_le` (option (b) of the plan's task list, kept the name). Rewired
+the sole call site (the fresh-mint arm of `intExpandBranches.go`'s functional induction) to
+discharge `hNW_ext` from the just-established `hWH_ext` (the mint-arm's `IWorldHist_mint`
+application), replacing the previous bare `hnwB : nw ≤ WBound φ0` premise that was consistent
+with `nw = WBound φ0` and hence insufficient. **Deviation (disclosed)**: the call site invokes
+`intWorldHist_nw_le hWH_ext` directly rather than routing through `intFreshMint_preserves_nw`
+(which would need `nw' = nwH + 1` unified against the lemma's "+1"-shaped premise, an extra
+rewrite); mathematically identical, simpler term. Updated the DP-2 docstring to record the
+resolution history and the two refuted routes (numeric strengthening; final-branch transfer) so
+neither is re-derived by a future task.
+
+**Verification (final)**: full CSLib CI pipeline green -- `lake exe cache get` (already warm),
+`lake build` (full project, 3311 jobs), `lake exe checkInitImports` (exit 0), `lake lint` (zero
+findings in `Scheme.lean`; pre-existing unrelated findings elsewhere in the repo, not touched by
+this task), `lake exe lint-style` (exit 0 on `Scheme.lean`), `lake shake --add-public
+--keep-implied --keep-prefix` (exit 0, no import-minimization findings for `Scheme.lean`),
+`lake exe mk_all --module` ("No update necessary"), `lake test` (exit 0, full suite including
+`CslibTests.TableauConformance`). Sorry census: Tableau subtree 4 → 3, repo-wide 6 → 5; the three
+survivors are exactly `Scheme.lean:727` (DP-5, owned by another task; line shifted from the
+pre-task `:633` by this task's own insertions, content verified identical via direct read),
+`Intuitionistic/Completeness.lean:140` (DP-3), `Minimal/Completeness.lean:128` (DP-4) -- both
+confirmed byte-identical to their pre-task state via `git diff`. `declaration uses` warning count
+in a full build: 4 (was 5 pre-task), a decrease of exactly 1. No new axioms (`git diff` shows no
+added `axiom` declarations); no vacuous placeholders introduced (the repo's one pre-existing
+`vacuous_count` match, `Computability/URM/Basic.lean:92`, predates this task and is unrelated).
+`git diff --stat` against the pre-Phase-9 commit (`63afe4fc`) touches only `Scheme.lean` across
+Phases 9-11 (528 lines changed net); `Expansion.lean`, `intFImpReuseWitnessAnc?`,
+`intCreatedChain_le`'s proof body, `IAllConsistent`, `ILabelBound`, and DP-3/DP-4/DP-5 are all
+confirmed untouched.
+
+**Dead ends recorded (not to be re-derived)**: a fuel-bounded counter route is circular (the
+fuel bound is itself derived FROM the world bound this task establishes); a flat pigeonhole
+without the creation tree does not work (siblings never block each other, so no bound on
+branching survives without the tree structure); the runtime-check-to-final-branch transfer
+(report §4.1) is refuted outright (conjunct 3 of the reuse check moves the wrong way under
+branch growth).
 
 ## Update (this dispatch: Phases 7-8, resumed from a broken build)
 
@@ -236,6 +316,28 @@ bound at the mint site, without re-deriving it. (H4) sibling uniqueness should c
   through the `key` induction's hypothesis list") was deferred to Phases 7-8, per this phase's
   own Exit Criteria, which explicitly forbids wiring the induction before the arms are proved;
   all pieces were instead delivered as complete, sorry-free, standalone declarations.
+- Phase 9: `parIter` (and its ancestor lemma `parAncestor_parIter`) was defined here rather than
+  deferred entirely to Phase 10, because the chain-length bound's own statement needs it to
+  express the abstract chain `ws`; the pigeonhole argument itself is stated over an abstract
+  `ws : Nat → Nat` satisfying a single-step law, so it never unfolds `parIter`'s recursion.
+  Phase 10 reuses `parIter` for the path injection, as anticipated.
+- Phase 10: the target `Finset` for the size-bound injection is built via
+  `Fintype.piFinset`/`Finset.attach`/`Finset.image` rather than `Finset.univ` on a
+  globally-registered `Fintype (Fin (D+1) → Option S)` instance, which does not resolve via
+  typeclass search in this file's ambient context (confirmed empirically: each constituent
+  Fintype/DecidableEq instance resolves individually, but the combined Pi-type-of-a-subtype
+  does not). Two Mathlib imports (`Mathlib.Data.Fintype.Pi`, `Mathlib.Data.Fintype.BigOperators`)
+  were added to `Scheme.lean` for `Fintype.piFinset`/`Fintype.card_piFinset_const`, neither
+  transitively available beforehand. The mathematical content (injection into the exact
+  `Fin (D+1) → Option S` shape, cardinality `(B+1)^(D+1) = WBound φ0`) matches the plan exactly;
+  only the Lean-level construction route for the target Finset differs from the
+  `Finset.univ`/`Fintype.card_pi_const` phrasing the task description anticipated.
+- Phase 11: the call site invokes `intWorldHist_nw_le hWH_ext` directly rather than routing
+  through `intFreshMint_preserves_nw`'s "+1"-shaped premise (which would need an extra rewrite
+  to unify `nw'` with `nwH + 1`); mathematically identical, simpler term. `intFreshMint_preserves_nw`
+  itself was kept (plan option (b)) with the strengthened structural premise, as a documented,
+  non-vacuous, sorry-free corollary of `intWorldHist_nw_le` -- available for continuity even
+  though this specific call site does not route through it.
 
 ## AI Tools Used
 

@@ -1,7 +1,7 @@
 # Implementation Plan: DP-2 World-History Invariant and Mint Residue
 
 - **Task**: 585 - prove_post_blocking_world_bound_chain_and_mint_invariant
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 17 hours
 - **Dependencies**: None (task 430 must not run concurrently -- see Serialization below)
 - **Research Inputs**: specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/reports/01_dp2-mint-invariant-transfer.md
@@ -744,7 +744,22 @@ proof body is unchanged (`git diff` shows zero changed lines in the proof).
 
 ---
 
-### Phase 10: Path-injection size bound and intWorldHist_nw_le [NOT STARTED]
+### Phase 10: Path-injection size bound and intWorldHist_nw_le [COMPLETED]
+
+**Deviation (disclosed)**: the target Finset for `Finset.card_le_card_of_injOn` is built via
+`Fintype.piFinset`/`Finset.attach`/`Finset.image` rather than `Finset.univ` on a globally-registered
+`Fintype (Fin (D+1) -> Option S)` instance -- that combination (Pi-type of a subtype of a Finset)
+does not resolve via typeclass search in this file's ambient context even though `Fintype S`,
+`Fintype (Option S)`, `Fintype (Fin (D+1))`, and `DecidableEq (Fin (D+1))` each resolve
+individually when requested directly. `piFinset` sidesteps the issue entirely since it consumes
+per-coordinate `Finset`s directly, never invoking the whole-type `Fintype` instance. Two Mathlib
+imports were added to `Scheme.lean` (`Mathlib.Data.Fintype.Pi`, `Mathlib.Data.Fintype.BigOperators`)
+for `Fintype.piFinset`/`Fintype.card_piFinset_const`, neither transitively available beforehand.
+This is a within-scope import addition to a file the plan already lists as modified, not a new
+file. The mathematical content (injection into the exact `Fin (D+1) -> Option S` shape, cardinality
+`(B+1)^(D+1) = WBound phi0`) matches the plan precisely; only the Lean-level construction route for
+the target Finset differs from the `Finset.univ`/`Fintype.card_pi_const` phrasing anticipated in
+the task description.
 
 - **Goal:** Convert depth (Phase 9) plus branching (H4) into `nw <= WBound phi0`, matching
   `WBound`'s exact shape (report section 4.5).
@@ -785,57 +800,67 @@ proof body is unchanged (`git diff` shows zero changed lines in the proof).
 
 ---
 
-### Phase 11: Retire the sorry, rewire the call site, final verification [NOT STARTED]
+### Phase 11: Retire the sorry, rewire the call site, final verification [COMPLETED]
 
 - **Goal:** Remove DP-2. Replace `intFreshMint_preserves_nw`'s false statement with the correctly
   premised form and discharge the new premise at the sole call site (report sections 3.3, 8 phase 9).
 - **Tasks:**
-  - [ ] Replace the body of `intFreshMint_preserves_nw` (`Scheme.lean:2602-2605`). Either:
-        (a) delete it in favour of `intWorldHist_nw_le` applied to the post-mint state, or
-        (b) keep the name with the strengthened premise of report section 3.3 -- the post-mint
-        history invariant `IWorldHist phi0 (Branch.extendMany bPers newForms) (e ++ [sf]) (nw + 1) (edges ++ [newE])`
-        concluding `nw + 1 <= WBound phi0` -- proved by `intWorldHist_nw_le`.
-        Prefer (b) for continuity unless (a) is materially simpler.
-  - [ ] Rewire the call site (`Scheme.lean:5362-5363`,
-        `have hNW_ext : nw' <= WBound phi0 := by rw [hnw'_eq]; exact intFreshMint_preserves_nw hNWP_head`)
-        to supply the post-mint `IWorldHist` established by Phase 7's mint-arm preservation, in
-        place of the bare `hNWP_head` (`Scheme.lean:5299`).
-  - [ ] **Anti-weakening check:** the new premise MUST be discharged at the call site from the
-        threaded invariant. If it can only be supplied by adding a further undischarged hypothesis
-        upstream, that is a weakening in disguise -- mark [BLOCKED] instead.
-  - [ ] Rewrite the DP-2 docstring (`Scheme.lean:2587-2596`) to record what actually happened:
-        the numeric-premise route is not inductive; the `intCreatedChain_le`-style final-branch
-        transfer is not derivable (report section 4.1); the route taken is the mint-time
-        snapshot-free residue (*).
-  - [ ] Remove every temporary `#print axioms` line added during Phases 1-10.
-  - [ ] Confirm the two refuted cheap routes are recorded as dead ends in the summary so they are
-        not re-derived: fuel-bounded counter (circular), flat pigeonhole without the tree
-        (siblings never block each other).
-  - [ ] Confirm DP-3, DP-4, and DP-5 are untouched.
-- **Timing:** 1 hour
+  - [x] Replace the body of `intFreshMint_preserves_nw`. Option (b) taken: kept the name with the
+        strengthened premise -- `IWorldHist phi0 b e (nw + 1) edges`, concluding
+        `nw + 1 <= WBound phi0` as a one-line corollary of `intWorldHist_nw_le`.
+  - [x] Rewire the call site (the fresh-mint arm of `intExpandBranches.go`'s functional
+        induction) *(deviation: altered -- invoked `intWorldHist_nw_le hWH_ext` directly rather
+        than routing through `intFreshMint_preserves_nw`'s "+1"-shaped premise, which would have
+        needed an extra rewrite to align `nw'` with `nwH + 1`; mathematically identical, simpler
+        term)*. `hNW_ext`'s computation was moved to immediately after `hWH_ext` is established
+        (previously computed earlier in the block from the bare `hNWP_head`), discharging it
+        from the just-built structural invariant instead.
+  - [x] **Anti-weakening check:** passed -- `hNW_ext` is discharged from `hWH_ext` alone, with no
+        new hypothesis threaded upstream; the call site's other hypotheses are unchanged.
+  - [x] Rewrite the DP-2 docstring to record what actually happened: the numeric-premise route is
+        not inductive; the final-branch transfer is not derivable (report section 4.1); the route
+        taken is the mint-time snapshot-free residue (*), now named as `intFImp_mint_residue`
+        feeding `IWorldHist`'s (H5) clause.
+  - [x] No temporary `#print axioms` lines were added during Phases 9-11 (none needed --
+        `lake build`'s `declaration uses 'sorry'` warning count was the verification signal used
+        throughout).
+  - [x] The two refuted cheap routes (fuel-bounded counter; flat pigeonhole without the tree) are
+        recorded in the DP-2 docstring as dead ends, not to be re-derived.
+  - [x] Confirmed DP-3 (`Intuitionistic/Completeness.lean:140`), DP-4
+        (`Minimal/Completeness.lean:128`), and DP-5 (`Scheme.lean:727`, shifted from the
+        pre-task `:633` by this task's own insertions) are byte-identical to their pre-task
+        state (`git diff 63afe4fc` on those three files is empty).
+- **Timing:** 1 hour (actual: comparable)
 - **Depends on:** 7, 8, 9, 10
 - **Verification Tier:** full
 - **Scope Hypothesis:** Asserted scope is ~30-60 changed lines in `Scheme.lean` only, plus
-  deletions of temporary diagnostics. Confirm at implementation time by `git diff --stat` over the
-  whole task: the only files changed across all eleven phases should be
-  `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` and
-  `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`. Any third file falsifies the
-  hypothesis and must be explained.
+  deletions of temporary diagnostics. **Confirmed**: `git diff --stat 63afe4fc` over the whole
+  task (Phases 9-11) touches only `Scheme.lean` (528 lines changed net across all three phases;
+  Phase 11 itself was 43+/29-). No third file was touched; `Expansion.lean` was modified only in
+  the earlier Phase 2 (already committed and unaffected by this dispatch).
 - **Files to modify:**
   - `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - DP-2 lemma, its docstring,
     the call site, diagnostic cleanup
 - **Verification:**
-  - `lake build` green
-  - `lake build 2>&1 | grep -c "declaration uses 'sorry'"` decreased by exactly 1 from its
-    pre-task value
+  - `lake build` green (confirmed: full project, 3311 jobs)
+  - `lake build 2>&1 | grep -c "declaration uses"` reads **4** (was 5 pre-task: FrameSoundness
+    (Modal, unrelated) + DP-3 + DP-4 + DP-5; DP-2's warning is gone -- decreased by exactly 1)
   - `grep -rn --include=*.lean -E "^[[:space:]]*sorry[[:space:]]*$" Cslib/Logics/Propositional/Tableau/ | wc -l`
-    reads exactly **3**
-  - `grep -rn --include=*.lean -E "^[[:space:]]*sorry[[:space:]]*$" Cslib/ | wc -l` reads exactly **5**
-  - The three surviving Tableau sorries are exactly `Scheme.lean:633` (DP-5),
+    reads exactly **3** (confirmed)
+  - `grep -rn --include=*.lean -E "^[[:space:]]*sorry[[:space:]]*$" Cslib/ | wc -l` reads exactly
+    **5** (confirmed)
+  - The three surviving Tableau sorries are exactly `Scheme.lean:727` (DP-5, line shifted from
+    pre-task `:633` by this task's own insertions -- content verified identical),
     `Intuitionistic/Completeness.lean:140` (DP-3), `Minimal/Completeness.lean:128` (DP-4)
-  - `grep -rn "#print axioms" Cslib/` returns nothing added by this task
+    (confirmed)
+  - `grep -rn "#print axioms" Cslib/` returns nothing added by this task (confirmed)
+  - Full CSLib CI pipeline run and green: `lake exe cache get` (already warm), `lake build`
+    (3311 jobs), `lake exe checkInitImports` (exit 0), `lake lint` (zero findings in
+    `Scheme.lean`; pre-existing unrelated findings elsewhere in the repo), `lake exe lint-style`
+    (exit 0 on `Scheme.lean`), `lake shake` (exit 0, no findings for `Scheme.lean`), `lake test`
+    (exit 0, full suite including `CslibTests.TableauConformance`)
 - **Exit criteria:** DP-2 discharged, no sorry relocated, no statement weakened, `lake build`
-  green, counts as above.
+  green, counts as above. **All met.**
 
 ---
 
@@ -843,20 +868,23 @@ proof body is unchanged (`git diff` shows zero changed lines in the proof).
 
 - [ ] `lake build` green at the end of every phase (module-local build permitted mid-phase per the
       phase's Verification Tier; the full gate still runs before each phase closes).
-- [ ] Tableau-subtree bare-sorry census reads 4 through Phase 10 and exactly 3 after Phase 11.
-- [ ] Repo-wide bare-sorry census reads 6 through Phase 10 and exactly 5 after Phase 11.
-- [ ] `lake build 2>&1 | grep -c "declaration uses 'sorry'"` decreases by exactly 1 across the task.
-- [ ] No `sorry`, `admit`, `native_decide`, `def X := True`, `theorem X := trivial`, or other
+- [x] Tableau-subtree bare-sorry census reads 4 through Phase 10 and exactly 3 after Phase 11.
+- [x] Repo-wide bare-sorry census reads 6 through Phase 10 and exactly 5 after Phase 11.
+- [x] `lake build 2>&1 | grep -c "declaration uses"` decreases by exactly 1 across the task
+      (5 -> 4).
+- [x] No `sorry`, `admit`, `native_decide`, `def X := True`, `theorem X := trivial`, or other
       vacuous placeholder introduced at any point.
-- [ ] `intFImpReuseWitnessAnc?` (`Expansion.lean`) byte-identical to its pre-task state.
-- [ ] `intCreatedChain_le`'s proof body byte-identical to its pre-task state (docstring change
-      permitted).
-- [ ] `IAllConsistent` and `ILabelBound` unchanged (new invariants are companions, not merges).
-- [ ] No `eraseDups` / `2 ^ U.length` bound form used in any bound derivation.
-- [ ] No appeal to `intUniverse`'s linear range in any bound derivation.
-- [ ] Every hypothesis added to an existing declaration is discharged at its call site within the
+- [x] `intFImpReuseWitnessAnc?` (`Expansion.lean`) byte-identical to its pre-task state
+      (file untouched by this dispatch's phases).
+- [x] `intCreatedChain_le`'s proof body byte-identical to its pre-task state (docstring change
+      permitted) -- confirmed via `git diff`.
+- [x] `IAllConsistent` and `ILabelBound` unchanged (new invariants are companions, not merges).
+- [x] No `eraseDups` / `2 ^ U.length` bound form used in any bound derivation.
+- [x] No appeal to `intUniverse`'s linear range in any bound derivation.
+- [x] Every hypothesis added to an existing declaration is discharged at its call site within the
       same phase that added it.
-- [ ] `Scheme.lean:633`, `Intuitionistic/Completeness.lean:140`, `Minimal/Completeness.lean:128`
+- [x] `Scheme.lean:727` (DP-5, shifted from `:633` by this task's own insertions -- content
+      verified identical), `Intuitionistic/Completeness.lean:140`, `Minimal/Completeness.lean:128`
       untouched.
 
 ## Artifacts & Outputs

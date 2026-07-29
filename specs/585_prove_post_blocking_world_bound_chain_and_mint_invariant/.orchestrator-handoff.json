@@ -1,14 +1,26 @@
 {
-  "status": "partial",
-  "summary": "Resumed from a broken build (25 errors, +349/-10 uncommitted from an interrupted Phase-7 dispatch). Chose route A (finish the IAllWorldHist/IAllWorldHistCounter wiring) and completed it fully rather than falling back to route B. Root-caused and fixed three error clusters: a `subst`-eliminated `nwH` naming bug in the new IWorldHist_mint lemma (not the constructor-arity mismatch the handoff had hypothesized), a beta-reduction/rw-vs-simp issue in a pre-existing helper, and the real Phase-7 gap -- completing IAllWorldHist/IAllWorldHistCounter threading across all 10 intExpandBranches.go.induct cases (including the actual mint arm via IWorldHist_mint) and the openBranch_countermodel entry point. Full CSLib CI pipeline is green (project-wide lake build, checkInitImports, lake lint, lint-style, lake shake, mk_all, lake test). Plan phases 7 and 8 are now genuinely [COMPLETED]. Sorry census unchanged at 4 (DP-2 at Scheme.lean:3493, this task's target, still open as expected for phases 9-11). No new axioms, no vacuous definitions.",
+  "status": "implemented",
+  "summary": "Task 585 complete. Phases 9-11 executed in this dispatch: (9) intWorldHist_chain_le, a pigeonhole depth bound for IWorldHist's structural witness data; (10) intWorldHist_nw_le, a path-injection deriving nw <= WBound phi0 purely from IWorldHist; (11) DP-2's sorry retired -- intFreshMint_preserves_nw restated with the correct structural premise and discharged at its sole call site. Sorry census: Tableau subtree 4 -> 3, repo-wide 6 -> 5. Full CSLib CI pipeline green (build, checkInitImports, lint, lint-style, shake, mk_all, test). No new axioms, no vacuous placeholders, no sorry relocated. Only Scheme.lean changed across Phases 9-11; Expansion.lean/intFImpReuseWitnessAnc?/intCreatedChain_le's proof body/DP-3/DP-4/DP-5 all confirmed untouched.",
   "blockers": [],
   "artifacts": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md",
-    "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/.return-meta.json"
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "lean-source",
+      "summary": "Phases 9-11: intWorldHist_chain_le, parDepth machinery, pathOf/pathOf_injOn, intWorldHist_nw_le, DP-2 retirement and call-site rewire"
+    },
+    {
+      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/plans/01_dp2-worldhist-mint-invariant.md",
+      "type": "plan",
+      "summary": "All 11 phases marked COMPLETED"
+    },
+    {
+      "path": "specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/summaries/01_dp2-worldhist-mint-invariant-summary.md",
+      "type": "summary",
+      "summary": "Final implementation summary, including Plan Deviations for Phases 9-11"
+    }
   ],
-  "phases_completed": 8,
+  "phases_completed": 11,
   "phases_total": 11,
   "plan_markers_verified": true,
-  "continuation_path": "Phase 9: Pigeonhole depth bound from (*); then Phase 10 (path-injection size bound / intWorldHist_nw_le); then Phase 11 (retire the sorry, rewire call site, final verification)"
+  "continuation_path": null
 }

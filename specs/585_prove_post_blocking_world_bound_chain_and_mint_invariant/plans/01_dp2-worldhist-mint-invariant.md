@@ -1,7 +1,7 @@
 # Implementation Plan: DP-2 World-History Invariant and Mint Residue
 
 - **Task**: 585 - prove_post_blocking_world_bound_chain_and_mint_invariant
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 17 hours
 - **Dependencies**: None (task 430 must not run concurrently -- see Serialization below)
 - **Research Inputs**: specs/585_prove_post_blocking_world_bound_chain_and_mint_invariant/reports/01_dp2-mint-invariant-transfer.md
@@ -156,7 +156,25 @@ placed in different waves; they must never be dispatched in parallel.
 
 ---
 
-### Phase 1: isAccessible one-hop extension [NOT STARTED]
+### Phase 1: isAccessible one-hop extension [COMPLETED]
+
+**Deviation note**: the literally-stated lemma shape `(c,p) ∈ edges -> isAccessible edges x p = true
+-> isAccessible edges x c = true` (for a FIXED, already-accumulated `edges`) is not fuel-sound in
+general: `isAccessible edges x y` always uses fuel EXACTLY `edges.length` for every pair, and
+composing a fresh hop costs one unit of fuel that a fixed-`edges` snapshot cannot supply
+(confirmed by hand-deriving the `go`-level fuel arithmetic). The mitigation anticipated by this
+risk in the plan ("this phase may assume `par c < c`...") is resolved differently: the lemma is
+specialized to the exact shape actually consumed at every mint site, where `edges` gains a BRAND
+NEW edge `(c, p)` via append (`edges ++ [(c, p)]`, matching `Scheme.lean:3272`'s mint-arm append
+exactly). In that shape the fuel arithmetic is exact (no deficit), since
+`(edges ++ [(c, p)]).length = edges.length + 1` matches the one extra hop precisely. Proved as
+`isAccessible_one_hop_ext` (plus its `go`-level building blocks `isAccessible_go_direct` and
+`isAccessible_go_one_hop_ext`), all sorry-free, `lake build` green. Downstream consequence for
+Phase 6/7 (recorded here for continuity): ancestor-accessibility (needed for (H5)'s `hacc` input)
+must be threaded as an INCREMENTAL invariant updated once per mint via
+`isAccessible_append_mono` + `isAccessible_one_hop_ext` in lockstep with `edges`'s real growth,
+not re-derived post-hoc from a fixed snapshot by induction on the ancestor chain (that direction
+reintroduces the same fuel deficit). Phase 6's `IWorldHist` definition should account for this.
 
 - **Goal:** Prove the absent one-hop ancestry extension lemma so that `par`-ancestry can be
   converted to `isAccessible` at the mint site (report section 5.1).

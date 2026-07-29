@@ -377,6 +377,98 @@ lemma intAccessPreorder_mono_append {edges : IEdges} (newEdge : Nat × Nat) {w w
     @LE.le Nat (intAccessPreorder (edges ++ [newEdge])).toLE w w' :=
   Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) _ _ h
 
+/-! ### One-hop ancestry extension (DP-2 support)
+
+`isAccessible edges · ·` does not need full transitivity for the mint-time argument used by
+`IWorldHist` (see the docstring above at line 250): only a ONE-HOP extension is needed, converting
+`par`-ancestry (a direct parent-child edge freshly appended) plus an existing accessibility fact
+into a new accessibility fact for the freshly-minted world. `isAccessible_go_one_hop_ext` is the
+raw fuel-indexed statement (any direct edge `(c, p)` extends a `go`-reachability witness to `p` by
+exactly one hop, using one more unit of fuel); `isAccessible_one_hop_ext` specializes it to the
+EXACT shape needed at a mint site, where `c` is fresh and `(c, p)` is the edge being appended: the
+fuel arithmetic then closes exactly, since `(edges ++ [(c, p)]).length = edges.length + 1` matches
+the one extra hop precisely. Full transitivity of `isAccessible` is deliberately NOT proved here
+(`Scheme.lean:250` explains why the weaker one-hop form suffices and is sound). -/
+
+/-- A direct edge `(c, p) ∈ edges` gives `go`-reachability of `c` from `p` at ANY positive fuel
+(the DFS finds `c` as an immediate child of `p` in a single unfold, regardless of how much fuel
+remains afterward). This is the `go`-level analogue of `isAccessible_one_step`. -/
+private lemma isAccessible_go_direct {edges : IEdges} {p c : Nat} (hmem : (c, p) ∈ edges)
+    (fuel : Nat) : isAccessible.go edges c p (fuel + 1) = true := by
+  rw [isAccessible.go, List.any_eq_true]
+  exact ⟨c, by simp only [List.mem_filterMap]; exact ⟨(c, p), hmem, by simp⟩, by simp⟩
+
+/-- Raw one-hop extension at the `isAccessible.go` level: if `go` can reach `p` from `current`
+within `fuel` steps, and `(c, p)` is a direct edge, then `go` can reach `c` from `current` within
+`fuel + 1` steps. Proved by induction on `fuel`: either the last step before reaching `p` was
+itself the direct edge into `p` (in which case `c` is reached via the extra hop through `p`, by
+`isAccessible_go_direct`), or the induction hypothesis applies one level down. -/
+private lemma isAccessible_go_one_hop_ext (edges : IEdges) {p c : Nat} (hmem : (c, p) ∈ edges) :
+    ∀ (current fuel : Nat), isAccessible.go edges p current fuel = true →
+      isAccessible.go edges c current (fuel + 1) = true := by
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro h
+    rw [List.any_eq_true] at h
+    obtain ⟨d, hd, hcond⟩ := h
+    simp only [List.mem_filterMap] at hd
+    obtain ⟨⟨d', parent⟩, hedges', hfilt⟩ := hd
+    by_cases hpar : parent == current
+    · simp only [hpar, ite_true, Option.some.injEq] at hfilt
+      rw [List.any_eq_true]
+      by_cases hdp : d == p
+      · -- d = p: (p, current) ∈ edges directly, so current →(1 hop)→ p →(1 hop, via hmem)→ c
+        have hdp' : d = p := by simpa using hdp
+        refine ⟨d, ?_, ?_⟩
+        · simp only [List.mem_filterMap]
+          exact ⟨(d', parent), hedges', by simp [hpar, hfilt]⟩
+        · by_cases hpc : d == c
+          · simp [hpc]
+          · simp only [hpc, Bool.false_eq_true, ite_false]
+            rw [hdp']
+            exact isAccessible_go_direct hmem k
+      · -- d ≠ p: recurse via the induction hypothesis
+        simp only [hdp, Bool.false_eq_true, ite_false] at hcond
+        refine ⟨d, ?_, ?_⟩
+        · simp only [List.mem_filterMap]
+          exact ⟨(d', parent), hedges', by simp [hpar, hfilt]⟩
+        · by_cases hdc : d == c
+          · simp [hdc]
+          · simp only [hdc, Bool.false_eq_true, ite_false]
+            exact ih d hcond
+    · simp only [Bool.not_eq_true] at hpar
+      simp [hpar] at hfilt
+
+/-- The specialized one-hop extension used at every mint site: if `x` accesses `p` under the
+CURRENT edge list, then after appending the fresh edge `(c, p)` (as the mint arm always does,
+`Scheme.lean:3272`), `x` accesses the newly-minted `c` under the extended edge list. This is the
+exact shape needed to discharge (H1)'s accessibility half of `IWorldHist` at a mint: the fuel
+arithmetic closes precisely because `(edges ++ [(c, p)]).length = edges.length + 1`, i.e. the one
+extra hop uses exactly the one unit of fuel gained by the append. -/
+private lemma isAccessible_one_hop_ext {edges : IEdges} {x p c : Nat}
+    (hacc : isAccessible edges x p = true) :
+    isAccessible (edges ++ [(c, p)]) x c = true := by
+  by_cases hxc : x == c
+  · simp [isAccessible, hxc]
+  · simp only [isAccessible, hxc, Bool.false_eq_true, ite_false]
+    rw [List.length_append, List.length_singleton]
+    by_cases hxp : x == p
+    · -- x = p: (c, p) ∈ edges ++ [(c,p)] gives the one direct hop, for any fuel ≥ 1
+      have hxp' : x = p := by simpa using hxp
+      have hmem : (c, p) ∈ edges ++ [(c, p)] :=
+        List.mem_append_right _ (List.mem_singleton_self _)
+      rw [hxp']
+      exact isAccessible_go_direct hmem edges.length
+    · simp only [isAccessible, hxp, Bool.false_eq_true, ite_false] at hacc
+      have h1 : isAccessible.go (edges ++ [(c, p)]) p x edges.length = true :=
+        isAccessible_go_append_mono edges (c, p) p x edges.length hacc
+      have hmem : (c, p) ∈ edges ++ [(c, p)] :=
+        List.mem_append_right _ (List.mem_singleton_self _)
+      exact isAccessible_go_one_hop_ext (edges ++ [(c, p)]) hmem x edges.length h1
+
 /-- The final edge-accessibility payoff: every `F(φ→ψ)@w` on the
 saturated branch `b` has a genuinely edge-accessible witness under `edges`, upgrading
 `sat_fimp`'s numeric proxy to the real `intAccessPreorder` frame. Declared early (ahead of

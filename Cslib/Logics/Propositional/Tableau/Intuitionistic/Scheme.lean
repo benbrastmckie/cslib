@@ -3015,7 +3015,9 @@ private lemma intFImp_mint_residue {bPers : IBranch Atom} {edges : IEdges}
 
 /-! ## `IWorldHist`: the Structural Creation-History Invariant (Phase 6, DP-2)
 
-Replaces the false numeric restatement `intFreshMint_preserves_nw` below with the structural
+Supplies the premise `intFreshMint_preserves_nw` below is now correctly stated in terms of
+(Phase 11 resolves DP-2 by restating that lemma's premise as this structural invariant, in
+place of the originally-attempted, and refuted, bare numeric strengthening) -- the structural
 invariant report `01_dp2-mint-invariant-transfer.md` section 3.2 identifies as the actually
 threadable quantity: for every created world `1 ≤ c < nw`, four witness functions record its
 parent (`par`), the obligation it was created to satisfy (`obl`), the propagated positive set
@@ -3926,32 +3928,41 @@ private lemma intWorldHist_nw_le {φ0 : Proposition Atom} {b : IBranch Atom}
   rwa [htargetcard] at hcard
 
 omit [Hashable Atom] in
-/-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
-arm -- when `intStepBranch` returns a world-creating `linearResult` (`newEdge = some
-_`) and `go`'s ancestor-directed loop-check (`intFImpReuseWitnessAnc?`) finds no
-reusable ancestor (a world IS actually minted, `nw' = nw + 1` by
-`intApplyRuleFull_linearResult_nextWorld`), the freshly incremented counter stays
-within the post-blocking world bound `WBound φ0`.
+/-- **DP-2 (RESOLVED)**: `hNW` preservation for the fresh-mint arm -- when `intStepBranch`
+returns a world-creating `linearResult` (`newEdge = some _`) and `go`'s ancestor-directed
+loop-check (`intFImpReuseWitnessAnc?`) finds no reusable ancestor (a world IS actually
+minted, `nw' = nw + 1` by `intApplyRuleFull_linearResult_nextWorld`), the freshly
+incremented counter stays within the post-blocking world bound `WBound φ0`.
 
-The bare hypothesis `hnwB : nw ≤ WBound φ0` (the form `IAllNW` threads and the only
-fact locally available at this call site) is NOT by itself sufficient: it is
-consistent with `nw = WBound φ0`, which would make the conclusion false. The missing
-premise is the STRICT form `nw < WBound φ0` at the point of firing, which requires the
-"labels minted so far ≤ tree size ≤ WBound φ0" creation-count invariant tied to
-`intCreatedChain_le`'s pigeonhole bound (Phase 2) -- including the runtime-check-to-
-final-branch transfer that lemma's docstring explicitly flags as owned by "the
-invariant-threading development" (this phase), not yet done. This is the remaining
-research-grade concentration plan v14 Phase 5 names explicitly.
+**History of the resolution.** The original numeric restatement took `hnwB : nw ≤ WBound φ0`
+(the form `IAllNW` threads) as its premise. That is NOT sufficient: it is consistent with
+`nw = WBound φ0`, which would make the conclusion false. Two routes for supplying the missing
+strict information were considered and REFUTED (report §4.1, §6): (1) restating with a bare
+numeric strict premise `nw < WBound φ0` is not inductive across the mint recursion -- after a
+mint the counter is `nw + 1`, and `nw < WBound φ0` yields only `nw + 1 ≤ WBound φ0`, not the
+strict form the NEXT mint on the same branch would need; (2) transferring the runtime
+unblockedness check (evaluated at firing time) forward to the FINAL branch is not derivable,
+since conjunct 3 of the reuse check moves the wrong way under branch growth (positive content
+at a world only grows, so the needed implication runs backwards).
 
-sorry: assumes the creation-count invariant above (equivalently, that this fresh-mint
-firing is licensed by the pigeonhole tree-size bound, not merely that the counter has
-not yet overflowed); deferred because establishing the runtime-check-to-final-branch
-transfer is genuinely unproven research work, exceeding this phase's STOPPING
-CONDITION budget; follow-up: DP-2, see the plan's Planned Strategic Sorries table. -/
-private lemma intFreshMint_preserves_nw {φ0 : Proposition Atom} {nw : Nat}
-    (hnwB : nw ≤ WBound φ0) :
-    nw + 1 ≤ WBound φ0 := by
-  sorry
+**The route actually taken**: consume the runtime `none` result of the reuse check AT MINT
+TIME, while the firing-time branch is still current -- this is `intFImp_mint_residue`'s
+snapshot-free residue (★), which becomes clause (H5) of the structural invariant
+`IWorldHist` (Phase 6). The premise is therefore the STRUCTURAL post-mint history invariant,
+not a numeric strengthening: `intWorldHist_nw_le` (Phase 10) re-derives the numeric bound
+purely from blocking combinatorics -- pigeonhole depth (Phase 9, `intWorldHist_chain_le`)
+times branching (H4 sibling-uniqueness, the path injection) -- exactly matching `WBound`'s
+`(B + 1) ^ (D + 1)` shape. This lemma is now a direct corollary of `intWorldHist_nw_le`.
+
+Two cheap alternative routes were also considered and refuted, and are NOT to be re-derived:
+a fuel-bounded counter (circular -- the fuel bound is itself derived FROM this bound) and a
+flat pigeonhole without the creation tree (siblings never block each other, so no bound on
+branching survives without the tree structure). -/
+private lemma intFreshMint_preserves_nw {φ0 : Proposition Atom} {b : IBranch Atom}
+    {e : List (ISF Atom)} {nw : Nat} {edges : IEdges}
+    (hWH : IWorldHist φ0 b e (nw + 1) edges) :
+    nw + 1 ≤ WBound φ0 :=
+  intWorldHist_nw_le hWH
 
 omit [Hashable Atom] in
 /-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
@@ -6800,8 +6811,6 @@ private lemma intExpandBranches_openBranch_sat
                 ⟨hc, -⟩ | ⟨ed, -, heqnw⟩
               · exact absurd hc (by simp)
               · exact heqnw
-            have hNW_ext : nw' ≤ WBound φ0 := by
-              rw [hnw'_eq]; exact intFreshMint_preserves_nw hNWP_head
             have hLBS_ext : ILabelBoundStrict (Branch.extendMany bPers newForms) nw' :=
               intStepBranch_linear_preserves_labelStrict hLBS_bPers hstep
             have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
@@ -6830,6 +6839,11 @@ private lemma intExpandBranches_openBranch_sat
               rw [hnw'_eq, hnfEq, hnewExp, hsfEq, hnewEEq]
               exact IWorldHist_mint hWH_bPers hnone (hsfEq ▸ hsfe) (hNC bPers hclFalse)
                 hUniv_bPers (hsfEq ▸ hsfb) hl_strict
+            -- DP-2 (RESOLVED, Phase 11): `hNW_ext` is now discharged from the just-established
+            -- structural invariant `hWH_ext` via `intFreshMint_preserves_nw`/`intWorldHist_nw_le`
+            -- (Phase 10), not from the bare `hnwB : nw ≤ WBound φ0` the false numeric restatement
+            -- used to (silently) assume.
+            have hNW_ext : nw' ≤ WBound φ0 := intWorldHist_nw_le hWH_ext
             have hWHC_ext : IWorldHistCounter nw' (edgesH ++ [newE]) := by
               simp only [IWorldHistCounter, List.length_append, List.length_cons,
                 List.length_nil] at hWHC_head ⊢

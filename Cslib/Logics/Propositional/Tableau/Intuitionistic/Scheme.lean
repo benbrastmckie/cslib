@@ -4809,6 +4809,517 @@ private lemma intExpandBranchesB_openBranch_initial_mem (sf : ISF Atom) :
     simp only [intExpandBranchesB.go] at hgo
     exact ih (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
 
+/-- B-engine port of `intExpandBranches_openBranch_sat` (succ-case content): if the
+per-branch-fuel engine returns `.openBranch b`, then `b` is Hintikka-saturated and
+carries an `IFimpAccess` edge witness. Statement gains `fuels` (with its length
+hypothesis); NO R1 hypotheses yet — those arrive with the restatement in a later
+phase.
+
+The per-branch fuel-exhaustion arm (`f = 0`) is EXACTLY the refuted fuel-0 goal of the
+old lemma (see the counter-instance note at the old lemma's `sorry`): it is discharged
+here by consuming the OLD `intExpandBranches_openBranch_sat` at `fuel := 0` on the
+singleton worklist `[bPers]` (whose fuel-0 `findSome?` arm returns `.openBranch bPers`
+for the open `bPers`). This carries the pre-existing fuel-0 sorry 1-for-1 through
+`sorryAx` — the bare-sorry census is unchanged, and the obligation is discharged when
+the restated lemma lands. All other arms transfer from the old succ-case proof. -/
+private lemma intExpandBranchesB_openBranch_sat
+    (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom)))
+    (nextWorlds : List Nat)
+    (edgeSets : List IEdges)
+    (fuels : List Nat)
+    (augSets : List IEdges)
+    (closurePred : IBranch Atom → Bool)
+    (b : IBranch Atom)
+    (hAC : IAllConsistent branches expandedSets nextWorlds)
+    (hLen0 : branches.length = edgeSets.length)
+    (hLenF0 : fuels.length = branches.length)
+    (hACC : IAllAccessConsistent branches expandedSets augSets)
+    (h : intExpandBranchesB branches expandedSets nextWorlds edgeSets fuels closurePred
+        = .openBranch b) :
+    ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
+  rw [intExpandBranchesB] at h
+  suffices key : ∀ (pending : List (IBranch Atom))
+      (pendingExp : List (List (ISF Atom)))
+      (pendingNW : List Nat)
+      (pendingEdges : List IEdges)
+      (pendingFuels : List Nat)
+      (done : List (IBranch Atom))
+      (doneExp : List (List (ISF Atom)))
+      (doneNW : List Nat)
+      (doneEdges : List IEdges)
+      (doneFuels : List Nat),
+      ∀ (pendingAug doneAug : List IEdges),
+      IAllConsistent pending pendingExp pendingNW →
+      pending.length = pendingEdges.length →
+      pendingFuels.length = pending.length →
+      IAllConsistent done doneExp doneNW →
+      done.length = doneEdges.length →
+      doneFuels.length = done.length →
+      IAllAccessConsistent pending pendingExp pendingAug →
+      IAllAccessConsistent done doneExp doneAug →
+      intExpandBranchesB.go closurePred pending pendingExp pendingNW pendingEdges
+          pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
+      ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b from
+    key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets []
+      hAC hLen0 hLenF0 trivial rfl rfl hACC trivial h
+  intro pending pendingExp pendingNW pendingEdges pendingFuels done doneExp doneNW
+    doneEdges doneFuels
+  induction pending, pendingExp, pendingNW, pendingEdges, pendingFuels, done, doneExp,
+      doneNW, doneEdges, doneFuels
+      using intExpandBranchesB.go.induct (closurePred := closurePred) with
+  | case1 =>
+    intro _ _ _ _ _ _ _ _ _ _ hgo
+    simp only [intExpandBranchesB.go] at hgo
+    exact absurd hgo (by simp)
+  | case2 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT f fT
+      bPers hcl ih =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    rw [intExpandBranchesB.go.eq_def] at hgo
+    simp only [] at hgo
+    rw [if_pos hcl] at hgo
+    simp only [IAllConsistent] at hPending
+    obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
+    cases hpAug : pendingAug with
+    | nil =>
+      rw [hpAug] at hPendingACC
+      simp only [IAllAccessConsistent] at hPendingACC
+    | cons augH augT =>
+      rw [hpAug] at hPendingACC
+      simp only [IAllAccessConsistent] at hPendingACC
+      obtain ⟨hACC_bh_eH, hACCTail⟩ := hPendingACC
+      have hmemP : ∀ x ∈ bh, x ∈ bPers :=
+        fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH f x hx
+      have hIC_bPers : IExpandedConsistent bPers eH :=
+        IExpandedConsistent_mono hmemP hIC_bh_eH
+      have hLB_bPers : ILabelBound bPers nwH :=
+        ILabelBound_applyPersistenceFixpoint f hLB_bh_nwH
+      have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+        IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+      refine ih augT (doneAug ++ [augH]) hPendingTail
+          (by simp only [List.length_cons] at hLenP; omega)
+          (by simp only [List.length_cons] at hLenPF; omega)
+          (IAllConsistent_append hDone ⟨hIC_bPers, hLB_bPers, trivial⟩)
+          (by simp [hLenD]) (by simp [hLenDF]) hACCTail
+          (IAllAccessConsistent_append hDoneACC ⟨hACC_bPers, trivial⟩) hgo
+  | case3 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT
+      bPers hcl =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    injection hgo with heq
+    subst heq
+    simp only [IAllConsistent] at hPending
+    obtain ⟨hIC_bh_eH, hLB_bh_nwH, -⟩ := hPending
+    cases hpAug : pendingAug with
+    | nil =>
+      rw [hpAug] at hPendingACC
+      simp only [IAllAccessConsistent] at hPendingACC
+    | cons augH augT =>
+      rw [hpAug] at hPendingACC
+      simp only [IAllAccessConsistent] at hPendingACC
+      obtain ⟨hACC_bh_eH, -⟩ := hPendingACC
+      simp only [Bool.not_eq_true] at hcl
+      have hmemP : ∀ x ∈ bh, x ∈ bPers :=
+        fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH 0 x hx
+      have hIC_bPers : IExpandedConsistent bPers eH :=
+        IExpandedConsistent_mono hmemP hIC_bh_eH
+      have hLB_bPers : ILabelBound bPers nwH :=
+        ILabelBound_applyPersistenceFixpoint 0 hLB_bh_nwH
+      have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+        IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+      exact intExpandBranches_openBranch_sat 0 [bPers] [eH] [nwH] [edgesH] [augH]
+        closurePred bPers ⟨hIC_bPers, hLB_bPers, trivial⟩ rfl
+        ⟨hACC_bPers, trivial⟩
+        (by simp [intExpandBranches, hcl])
+  | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      bPers hcl hstep =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · injection hgo with heq
+      subst heq
+      simp only [IAllConsistent] at hPending
+      obtain ⟨hIC_bh_eH, hLB_bh_nwH, -⟩ := hPending
+      cases hpAug : pendingAug with
+      | nil =>
+        rw [hpAug] at hPendingACC
+        simp only [IAllAccessConsistent] at hPendingACC
+      | cons augH augT =>
+        rw [hpAug] at hPendingACC
+        simp only [IAllAccessConsistent] at hPendingACC
+        obtain ⟨hACC_bh_eH, -⟩ := hPendingACC
+        have hmemP : ∀ x ∈ bh, x ∈ bPers :=
+          fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) x hx
+        have hIC_bPers : IExpandedConsistent bPers eH :=
+          IExpandedConsistent_mono hmemP hIC_bh_eH
+        have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+          IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+        exact ⟨augH, IExpandedConsistent_sat hstep hIC_bPers,
+          IExpandedAccessConsistent_sat hstep hACC_bPers⟩
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case5 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      newForms nw' newExp bPers hcl hstep hstep2 ih =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      simp only [IAllConsistent] at hPending
+      obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
+      cases hpAug : pendingAug with
+      | nil =>
+        rw [hpAug] at hPendingACC
+        simp only [IAllAccessConsistent] at hPendingACC
+      | cons augH augT =>
+        rw [hpAug] at hPendingACC
+        simp only [IAllAccessConsistent] at hPendingACC
+        obtain ⟨hACC_bh_eH, hACCTail⟩ := hPendingACC
+        simp only [List.length_cons] at hLenP hLenPF
+        have hLenPt : bt.length = edgesT.length := by omega
+        have hLenPFt : fT.length = bt.length := by omega
+        have hmemP : ∀ x ∈ bh, x ∈ bPers :=
+          fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) x hx
+        have hIC_bPers : IExpandedConsistent bPers eH :=
+          IExpandedConsistent_mono hmemP hIC_bh_eH
+        have hLB_bPers : ILabelBound bPers nwH :=
+          ILabelBound_applyPersistenceFixpoint (f' + 1) hLB_bh_nwH
+        have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+          IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+        obtain ⟨hIC_ext, hLB_ext, hACC_ext⟩ :=
+          intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers hstep
+        refine ih (doneAug ++ [augH] ++ augT) []
+            (IAllConsistent_append
+              (IAllConsistent_append hDone ⟨hIC_ext, hLB_ext, trivial⟩) hPendingTail)
+            (by simp only [List.length_append, List.length_cons, List.length_nil]
+                omega)
+            (by simp only [List.length_append, List.length_cons, List.length_nil]
+                omega)
+            trivial rfl rfl
+            (IAllAccessConsistent_append
+              (IAllAccessConsistent_append hDoneACC ⟨hACC_ext, trivial⟩) hACCTail)
+            trivial hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case6 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      newForms nw' newExp newE x bPers hcl hstep hwit hstep2 ih =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      split at hgo
+      · rename_i heqE heqH
+        exact absurd heqE (by simp)
+      · rename_i newE1 hstep1 heqE heqH
+        injection heqE with heqE'
+        subst heqE'
+        split at hgo
+        · -- Reuse witness found: the branch is literally `bPers` (unchanged)
+          simp only [IAllConsistent] at hPending
+          obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
+          cases hpAug : pendingAug with
+          | nil =>
+            rw [hpAug] at hPendingACC
+            simp only [IAllAccessConsistent] at hPendingACC
+          | cons augH augT =>
+            rw [hpAug] at hPendingACC
+            simp only [IAllAccessConsistent] at hPendingACC
+            obtain ⟨hACC_bh_eH, hACCTail⟩ := hPendingACC
+            simp only [List.length_cons] at hLenP hLenPF
+            have hLenPt : bt.length = edgesT.length := by omega
+            have hLenPFt : fT.length = bt.length := by omega
+            have hmemP : ∀ y ∈ bh, y ∈ bPers :=
+              fun y hy => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) y hy
+            have hIC_bPers : IExpandedConsistent bPers eH :=
+              IExpandedConsistent_mono hmemP hIC_bh_eH
+            have hLB_bPers : ILabelBound bPers nwH :=
+              ILabelBound_applyPersistenceFixpoint (f' + 1) hLB_bh_nwH
+            have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+              IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+            obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
+            obtain ⟨s, ff, l⟩ := sf
+            cases s with
+            | pos =>
+              cases ff with
+              | atom _ => simp [intApplyRuleFull] at hint
+              | bot => simp [intApplyRuleFull] at hint
+              | imp _ _ => simp [intApplyRuleFull] at hint
+              | or _ _ => simp [intApplyRuleFull] at hint
+              | and _ _ => simp [intApplyRuleFull] at hint
+            | neg =>
+              cases ff with
+              | atom _ => simp [intApplyRuleFull] at hint
+              | bot => simp [intApplyRuleFull] at hint
+              | and _ _ => simp [intApplyRuleFull] at hint
+              | or _ _ => simp [intApplyRuleFull] at hint
+              | imp φ ψ₀ =>
+                simp only [intApplyRuleFull, intFImpRule,
+                  IntRuleResult.linearResult.injEq, Option.some.injEq] at hint
+                obtain ⟨hnf, hnw', hed⟩ := hint
+                obtain rfl := hed.symm
+                have hψ : newForms.findSome?
+                    (fun sf => if sf.sign == .neg then some sf.formula else none)
+                    = some ψ₀ := by rw [← hnf]; simp [propagatePersistence]
+                obtain ⟨hacc, hle, hcont, hnotmem, hFpsi⟩ :=
+                  intFImpReuseWitnessAnc?_spec hψ hwit
+                have hmemsfor : φ ∈ (newForms.filterMap fun sf =>
+                    if sf.sign == .pos then some sf.formula else none) := by
+                  rw [← hnf]; simp [propagatePersistence]
+                have hphi : (posFormulasAt bPers x).contains φ = true :=
+                  List.all_eq_true.mp hcont φ hmemsfor
+                have houtPhi : bPers.any
+                    (fun y => y.sign == .pos && y.formula == φ && y.label == x)
+                    = true := by
+                  rw [List.contains_iff_mem] at hphi
+                  simp only [posFormulasAt, List.mem_filterMap] at hphi
+                  obtain ⟨y, hy_mem, hy_cond⟩ := hphi
+                  rw [List.any_eq_true]
+                  refine ⟨y, hy_mem, ?_⟩
+                  by_cases hs : y.sign == .pos && y.label == x
+                  · simp only [hs, if_true, Option.some.injEq] at hy_cond
+                    simp only [Bool.and_eq_true] at hs
+                    simp [hs.1, hs.2, hy_cond]
+                  · simp [hs] at hy_cond
+                have hreuse_sat : IExpandedConsistent bPers newExp ∧
+                    IExpandedAccessConsistent (augH ++ [(x, l)]) bPers newExp := by
+                  subst hnewExp
+                  constructor
+                  · intro sf' hsf'
+                    rcases List.mem_append.mp hsf' with h' | h'
+                    · exact hIC_bPers sf' h'
+                    · rw [List.mem_singleton] at h'
+                      subst h'
+                      show sfSatisfied bPers ⟨.neg, .imp φ ψ₀, l⟩
+                      simp only [sfSatisfied]
+                      exact ⟨x, houtPhi, hFpsi⟩
+                  · intro sf' hsf'
+                    rcases List.mem_append.mp hsf' with h' | h'
+                    · exact sfAccessSat_edges_mono (x, l) (hACC_bPers sf' h')
+                    · rw [List.mem_singleton] at h'
+                      subst h'
+                      show sfAccessSat (augH ++ [(x, l)]) bPers
+                        ⟨.neg, .imp φ ψ₀, l⟩
+                      simp only [sfAccessSat]
+                      exact ⟨x, isAccessible_one_step (by simp), houtPhi, hFpsi⟩
+                refine ih (doneAug ++ [augH ++ [(x, l)]] ++ augT) []
+                    (IAllConsistent_append
+                      (IAllConsistent_append hDone
+                        ⟨hreuse_sat.1, hLB_bPers, trivial⟩) hPendingTail)
+                    (by simp only [List.length_append, List.length_cons,
+                          List.length_nil]
+                        omega)
+                    (by simp only [List.length_append, List.length_cons,
+                          List.length_nil]
+                        omega)
+                    trivial rfl rfl
+                    (IAllAccessConsistent_append
+                      (IAllAccessConsistent_append hDoneACC
+                        ⟨hreuse_sat.2, trivial⟩) hACCTail)
+                    trivial hgo
+        · rename_i hwit1
+          exact absurd (hwit.symm.trans hwit1) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case7 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i newForms1 nw1 newEdge1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsome
+      obtain ⟨⟨hF, hN, hE⟩, hX⟩ := hsome
+      subst hF; subst hN; subst hX; subst hE
+      split at hgo
+      · rename_i heqE heqH
+        exact absurd heqE (by simp)
+      · rename_i newE1 hstep1 heqE heqH
+        injection heqE with heqE'
+        subst heqE'
+        split at hgo
+        · rename_i x1 hwit1
+          exact absurd (hwit.symm.trans hwit1) (by simp)
+        · -- No reusable ancestor: fresh world creation
+          simp only [IAllConsistent] at hPending
+          obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
+          cases hpAug : pendingAug with
+          | nil =>
+            rw [hpAug] at hPendingACC
+            simp only [IAllAccessConsistent] at hPendingACC
+          | cons augH augT =>
+            rw [hpAug] at hPendingACC
+            simp only [IAllAccessConsistent] at hPendingACC
+            obtain ⟨hACC_bh_eH, hACCTail⟩ := hPendingACC
+            simp only [List.length_cons] at hLenP hLenPF
+            have hLenPt : bt.length = edgesT.length := by omega
+            have hLenPFt : fT.length = bt.length := by omega
+            have hmemP : ∀ y ∈ bh, y ∈ bPers :=
+              fun y hy => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) y hy
+            have hIC_bPers : IExpandedConsistent bPers eH :=
+              IExpandedConsistent_mono hmemP hIC_bh_eH
+            have hLB_bPers : ILabelBound bPers nwH :=
+              ILabelBound_applyPersistenceFixpoint (f' + 1) hLB_bh_nwH
+            have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+              IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+            obtain ⟨hIC_ext, hLB_ext, hACC_ext⟩ :=
+              intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers hstep
+            refine ih (doneAug ++ [augH ++ [newE]] ++ augT) []
+                (IAllConsistent_append
+                  (IAllConsistent_append hDone ⟨hIC_ext, hLB_ext, trivial⟩)
+                  hPendingTail)
+                (by simp only [List.length_append, List.length_cons, List.length_nil]
+                    omega)
+                (by simp only [List.length_append, List.length_cons, List.length_nil]
+                    omega)
+                trivial rfl rfl
+                (IAllAccessConsistent_append
+                  (IAllAccessConsistent_append hDoneACC ⟨hACC_ext, trivial⟩) hACCTail)
+                trivial hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+  | case8 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      branches' nw' newExp bPers hcl hstep ih =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i branches1 nw1 newExp1 heq
+      have hsome := hstep.symm.trans heq
+      simp only [Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.branchingResult.injEq] at hsome
+      obtain ⟨⟨hB, hN⟩, hX⟩ := hsome
+      subst hB; subst hN; subst hX
+      simp only [IAllConsistent] at hPending
+      obtain ⟨hIC_bh_eH, hLB_bh_nwH, hPendingTail⟩ := hPending
+      cases hpAug : pendingAug with
+      | nil =>
+        rw [hpAug] at hPendingACC
+        simp only [IAllAccessConsistent] at hPendingACC
+      | cons augH augT =>
+        rw [hpAug] at hPendingACC
+        simp only [IAllAccessConsistent] at hPendingACC
+        obtain ⟨hACC_bh_eH, hACCTail⟩ := hPendingACC
+        simp only [List.length_cons] at hLenP hLenPF
+        have hLenPt : bt.length = edgesT.length := by omega
+        have hLenPFt : fT.length = bt.length := by omega
+        have hmemP : ∀ y ∈ bh, y ∈ bPers :=
+          fun y hy => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) y hy
+        have hIC_bPers : IExpandedConsistent bPers eH :=
+          IExpandedConsistent_mono hmemP hIC_bh_eH
+        have hLB_bPers : ILabelBound bPers nwH :=
+          ILabelBound_applyPersistenceFixpoint (f' + 1) hLB_bh_nwH
+        have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
+          IExpandedAccessConsistent_mono hmemP hACC_bh_eH
+        have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hACC_bPers hstep
+        refine ih (doneAug ++ branches'.map (fun _ => augH) ++ augT) []
+            (IAllConsistent_append
+              (IAllConsistent_append hDone
+                (IAllConsistent_map (Branch.extendMany bPers ·)
+                  (fun br hbr' => ⟨(hbr br hbr').1, (hbr br hbr').2.1⟩)))
+              hPendingTail)
+            (by simp only [List.length_append, List.length_map]
+                omega)
+            (by simp only [List.length_append, List.length_map]
+                omega)
+            trivial rfl rfl
+            (IAllAccessConsistent_append
+              (IAllAccessConsistent_append hDoneACC
+                (IAllAccessConsistent_map (Branch.extendMany bPers ·)
+                  (fun br hbr' => (hbr br hbr').2.2)))
+              hACCTail)
+            trivial hgo
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+  | case9 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
+      snd bPers hcl hstep =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    simp only [intExpandBranchesB.go] at hgo
+    rw [if_neg hcl] at hgo
+    split at hgo
+    · rename_i heq
+      exact absurd (hstep.symm.trans heq) (by simp)
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · rename_i heq
+      have hcon := hstep.symm.trans heq
+      simp at hcon
+    · exact absurd rfl (intStepBranch_result_ne_notApplicable hstep)
+  | case10 done doneExp doneNW doneEdges doneFuels head restBs pExp pNW pEdges pFuels
+      hmismatch ih =>
+    intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
+        hDoneACC hgo
+    cases hpE : pExp with
+    | nil =>
+      rw [hpE] at hPending
+      simp only [IAllConsistent] at hPending
+    | cons eH eT =>
+      cases hpN : pNW with
+      | nil =>
+        rw [hpE, hpN] at hPending
+        simp only [IAllConsistent] at hPending
+      | cons nwH nwT =>
+        cases hpEd : pEdges with
+        | nil =>
+          rw [hpEd] at hLenP
+          simp only [List.length_nil, List.length_cons] at hLenP
+          omega
+        | cons edgesH edgesT =>
+          cases hpF : pFuels with
+          | nil =>
+            rw [hpF] at hLenPF
+            simp only [List.length_nil, List.length_cons] at hLenPF
+            omega
+          | cons f restFs =>
+            exact absurd
+              (hmismatch eH eT nwH nwT edgesH edgesT f restFs hpE hpN hpEd hpF)
+              id
+
 /-! ## Parametric Open Branch Countermodel -/
 
 /-- **Parametric Open Branch Countermodel**: An open branch returned by the parametric

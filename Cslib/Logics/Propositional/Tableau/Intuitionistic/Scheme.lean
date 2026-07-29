@@ -3697,6 +3697,148 @@ private lemma parDepth_le_intChainBound {φ0 : Proposition Atom} {par : Nat → 
   exact Nat.lt_of_le_of_lt
     (parAncestor_le hpar0 hdesc hc (parAncestor_parIter par i c)) hc
 
+/-- Path encoding of a created world as its root-to-world sequence of fired implications,
+padded with `none` beyond the true depth. `D` is instantiated to `intChainBound φ0` at
+`intWorldHist_nw_le`'s call site; `parDepth_le_intChainBound` is what keeps the padding
+well-formed (every created world's depth is `≤ D`). Position `k = 0` is nearest the root,
+`k = parDepth par c - 1` is the last-fired step creating `c` itself. -/
+private def pathOf (φ0 : Proposition Atom) (par : Nat → Nat) (fire : Nat → Proposition Atom)
+    (D c : Nat) (k : Fin (D + 1)) : Option {χ // χ ∈ (intSubfmls φ0).toFinset} :=
+  if (k : Nat) < parDepth par c then
+    if hm : fire (parIter par (parDepth par c - 1 - (k : Nat)) c) ∈ (intSubfmls φ0).toFinset then
+      some ⟨fire (parIter par (parDepth par c - 1 - (k : Nat)) c), hm⟩
+    else none
+  else none
+
+omit [Hashable Atom] in
+/-- `pathOf` at a position past the depth is `none`. -/
+private lemma pathOf_none {φ0 : Proposition Atom} {par : Nat → Nat} {fire : Nat → Proposition Atom}
+    {D c : Nat} {k : Fin (D + 1)} (hk : parDepth par c ≤ (k : Nat)) :
+    pathOf φ0 par fire D c k = none := by
+  simp only [pathOf]
+  rw [if_neg (by omega)]
+
+omit [Hashable Atom] in
+/-- `pathOf` at a position below the depth records the fired implication at that step,
+GIVEN the universe-containment fact (H2) that supplies its membership witness. Stated via
+`Option.map Subtype.val` so the STATEMENT never needs to spell out the membership proof term
+(only the PROOF, where `dif_pos` naturally supplies it). -/
+private lemma pathOf_some {φ0 : Proposition Atom} {par : Nat → Nat} {fire : Nat → Proposition Atom}
+    {nw D c : Nat} (hfireSub : ∀ x, 1 ≤ x → x < nw → fire x ∈ intSubfmls φ0)
+    (hpar0 : par 0 = 0) (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x) (hc : c < nw)
+    {k : Fin (D + 1)} (hk : (k : Nat) < parDepth par c) :
+    (pathOf φ0 par fire D c k).map Subtype.val =
+      some (fire (parIter par (parDepth par c - 1 - (k : Nat)) c)) := by
+  simp only [pathOf]
+  rw [if_pos hk]
+  have hpos : 1 ≤ parIter par (parDepth par c - 1 - (k : Nat)) c :=
+    (parDepth_spec hdesc hc).2 _ (by omega)
+  have hlt : parIter par (parDepth par c - 1 - (k : Nat)) c < nw :=
+    Nat.lt_of_le_of_lt
+      (parAncestor_le hpar0 hdesc hc
+        (parAncestor_parIter par (parDepth par c - 1 - (k : Nat)) c)) hc
+  rw [dif_pos (List.mem_toFinset.mpr (hfireSub _ hpos hlt))]
+  simp
+
+omit [Hashable Atom] in
+/-- **Phase 10 injectivity**: `pathOf` is injective on any two worlds inside `IWorldHist`'s
+created range, given (H4) sibling-uniqueness. Equal paths force equal depths (the position of
+the last `some` entry, `hdeq` below), then equal `fire` values at each step force equal
+PARENTS at that step (by (H4)), reconstructed by downward induction from the root
+(`hstep` below: `∀ m ≤ d, parIter par (d - m) c = parIter par (d - m) c'`, `m = 0` at the root,
+`m = d` at `c`/`c'` themselves). -/
+private lemma pathOf_injOn {φ0 : Proposition Atom} {par : Nat → Nat} {fire : Nat → Proposition Atom}
+    {nw D : Nat}
+    (hpar0 : par 0 = 0) (hdesc : ∀ x, 1 ≤ x → x < nw → par x < x)
+    (hfireSub : ∀ x, 1 ≤ x → x < nw → fire x ∈ intSubfmls φ0)
+    (hH4 : ∀ c, 1 ≤ c → c < nw → ∀ c', 1 ≤ c' → c' < nw →
+        par c = par c' → fire c = fire c' → c = c')
+    {c c' : Nat} (hc : c < nw) (hc' : c' < nw)
+    (hDc : parDepth par c ≤ D) (hDc' : parDepth par c' ≤ D)
+    (heq : ∀ k : Fin (D + 1), pathOf φ0 par fire D c k = pathOf φ0 par fire D c' k) :
+    c = c' := by
+  -- Abbreviate `c`'s depth as `d`; `c'`'s facts are normalized to `d` via `hdeq` as soon as
+  -- they are produced, so `d` is the SOLE depth-index used from here on.
+  -- Step 1: equal depths (the position of the last `some` entry is determined by `pathOf`).
+  have hdeq : parDepth par c = parDepth par c' := by
+    by_contra hne
+    rcases Nat.lt_or_ge (parDepth par c) (parDepth par c') with hlt | hge
+    · have hkb : parDepth par c < D + 1 := by omega
+      have hL : pathOf φ0 par fire D c ⟨parDepth par c, hkb⟩ = none :=
+        pathOf_none (k := ⟨parDepth par c, hkb⟩) (le_refl _)
+      have hRmap := pathOf_some hfireSub hpar0 hdesc hc' (D := D) (k := ⟨parDepth par c, hkb⟩)
+        (by simpa using hlt)
+      have h1 := heq ⟨parDepth par c, hkb⟩
+      rw [hL] at h1
+      rw [← h1] at hRmap
+      simp at hRmap
+    · have hgt : parDepth par c' < parDepth par c := by omega
+      have hkb : parDepth par c' < D + 1 := by omega
+      have hR : pathOf φ0 par fire D c' ⟨parDepth par c', hkb⟩ = none :=
+        pathOf_none (k := ⟨parDepth par c', hkb⟩) (le_refl _)
+      have hLmap := pathOf_some hfireSub hpar0 hdesc hc (D := D) (k := ⟨parDepth par c', hkb⟩)
+        (by simpa using hgt)
+      have h1 := heq ⟨parDepth par c', hkb⟩
+      rw [hR] at h1
+      rw [h1] at hLmap
+      simp at hLmap
+  -- Step 2: equal fire values at every position below the common depth.
+  have hfireEq : ∀ j, j < parDepth par c →
+      fire (parIter par j c) = fire (parIter par j c') := by
+    intro j hj
+    have hkb : parDepth par c - 1 - j < D + 1 := by omega
+    have h1 := heq ⟨parDepth par c - 1 - j, hkb⟩
+    have hL := pathOf_some hfireSub hpar0 hdesc hc (D := D) (k := ⟨parDepth par c - 1 - j, hkb⟩)
+      (show parDepth par c - 1 - j < parDepth par c by omega)
+    have hR := pathOf_some hfireSub hpar0 hdesc hc' (D := D) (k := ⟨parDepth par c - 1 - j, hkb⟩)
+      (show parDepth par c - 1 - j < parDepth par c' by omega)
+    have hjeqL : parDepth par c - 1 - (parDepth par c - 1 - j) = j := by omega
+    have hjeqR : parDepth par c' - 1 - (parDepth par c - 1 - j) = j := by omega
+    rw [hjeqL] at hL
+    rw [hjeqR] at hR
+    have hc2 := congrArg (Option.map Subtype.val) h1
+    rw [hL, hR] at hc2
+    simpa using hc2
+  -- Step 3: downward induction from the root reconstructs
+  -- `parIter par (parDepth par c - m) c = parIter par (parDepth par c - m) c'`.
+  have hstep : ∀ m, m ≤ parDepth par c →
+      parIter par (parDepth par c - m) c = parIter par (parDepth par c - m) c' := by
+    intro m
+    induction m with
+    | zero =>
+      intro _
+      obtain ⟨hz, -⟩ := parDepth_spec (par := par) (nw := nw) hdesc hc
+      obtain ⟨hz', -⟩ := parDepth_spec (par := par) (nw := nw) hdesc hc'
+      simp only [Nat.sub_zero]
+      rw [hz, hdeq, hz']
+    | succ m ih =>
+      intro hm1
+      have hm : m ≤ parDepth par c := by omega
+      have ihm := ih hm
+      have hj : parDepth par c - (m + 1) < parDepth par c := by omega
+      have hjfire := hfireEq (parDepth par c - (m + 1)) hj
+      have hidx : parDepth par c - (m + 1) + 1 = parDepth par c - m := by omega
+      have hpar_eq : par (parIter par (parDepth par c - (m + 1)) c) =
+          par (parIter par (parDepth par c - (m + 1)) c') := by
+        have e1 : par (parIter par (parDepth par c - (m + 1)) c) =
+            parIter par (parDepth par c - m) c := by
+          rw [← parIter_succ' par (parDepth par c - (m + 1)) c, hidx]
+        have e2 : par (parIter par (parDepth par c - (m + 1)) c') =
+            parIter par (parDepth par c - m) c' := by
+          rw [← parIter_succ' par (parDepth par c - (m + 1)) c', hidx]
+        rw [e1, e2, ihm]
+      obtain ⟨-, hposC⟩ := parDepth_spec (par := par) (nw := nw) hdesc hc
+      obtain ⟨-, hposC'⟩ := parDepth_spec (par := par) (nw := nw) hdesc hc'
+      have hp1 : 1 ≤ parIter par (parDepth par c - (m + 1)) c := hposC _ hj
+      have hp2 : 1 ≤ parIter par (parDepth par c - (m + 1)) c' := hposC' _ (by omega)
+      have hlt1 : parIter par (parDepth par c - (m + 1)) c < nw :=
+        Nat.lt_of_le_of_lt (parAncestor_le hpar0 hdesc hc (parAncestor_parIter par _ c)) hc
+      have hlt2 : parIter par (parDepth par c - (m + 1)) c' < nw :=
+        Nat.lt_of_le_of_lt (parAncestor_le hpar0 hdesc hc' (parAncestor_parIter par _ c')) hc'
+      exact hH4 _ hp1 hlt1 _ hp2 hlt2 hpar_eq hjfire
+  have hfin := hstep (parDepth par c) (le_refl _)
+  simpa [parIter] using hfin
+
 omit [Hashable Atom] in
 /-- **DP-2 (division point, strategic sorry)**: `hNW` preservation for the fresh-mint
 arm -- when `intStepBranch` returns a world-creating `linearResult` (`newEdge = some

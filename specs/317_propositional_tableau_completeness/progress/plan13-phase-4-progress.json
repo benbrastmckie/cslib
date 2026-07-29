@@ -1,0 +1,40 @@
+{
+  "task_number": 317,
+  "plan": "plans/13_fuel-sufficiency-skeleton.md",
+  "phase": 4,
+  "phase_name": "intFuel resize + init_le_fuel analogue + corpus re-verify",
+  "status": "blocked",
+  "session_id": "sess_1785275816_a84520_317",
+  "objectives": [
+    {
+      "id": "4.0",
+      "description": "Pre-edit Scope Hypothesis verification: grep corpus for pinned intFuel values; verify fuel materialization feasibility against landed WBound",
+      "status": "done",
+      "verification": "grep: zero intFuel mentions in CslibTests/TableauConformance.lean (rows pin results, hypothesis half-confirmed). Feasibility probe via lake env lean against landed WBound/intSubfmls: row 2 (a -> (b -> a)) has WBound = 5^65 (46 digits), resized-fuel exponent ~5.4e46; materialization requires ~1e37 GB. Bounded attempt (4 GB / 90 s) aborts: lean::exception failed to create thread. 19 of 20 rows infeasible.",
+      "files_touched": []
+    },
+    {
+      "id": "4.1",
+      "description": "Resize intFuel (Expansion.lean:510) to dominate the enlarged initial measure",
+      "status": "blocked",
+      "verification": "NOT ATTEMPTED as an edit: any dominating fuel value is a >=1e46-bit numeral for s >= 4; landing the resize makes every implication-bearing corpus row un-evaluable, violating this phase's own done-criteria (lake test green, no flipped rows).",
+      "files_touched": []
+    },
+    {
+      "id": "4.2",
+      "description": "Prove intExpMeasureExt_init_le_fuel over the enlarged universe",
+      "status": "blocked",
+      "verification": "Statement requires the resized intFuel from 4.1; with the current intFuel the statement is false (ext initial measure exceeds current fuel). Blocked by 4.1.",
+      "files_touched": []
+    },
+    {
+      "id": "4.3",
+      "description": "Re-verify every conformance corpus row (lake test)",
+      "status": "blocked",
+      "verification": "Blocked by 4.1: with the resize landed, rows 2-20 cannot materialize their fuel numeral; lake test cannot pass.",
+      "files_touched": []
+    }
+  ],
+  "blocker_summary": "Phase 4 is unimplementable as specified: fuel-dominates-enlarged-measure (proof requirement) and intuitionisticTableau remains #eval-able (corpus requirement) are jointly unsatisfiable because WBound is doubly-exponential. See plan Phase 4 BLOCKER section for the full defect record and repair candidates.",
+  "lean_files_modified": []
+}

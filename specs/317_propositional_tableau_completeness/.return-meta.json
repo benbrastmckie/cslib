@@ -1,45 +1,50 @@
 {
-  "status": "implemented",
+  "status": "partial",
+  "requires_user_review": true,
   "started_at": "2026-07-28T00:00:00Z",
   "completed_at": "2026-07-28T00:00:00Z",
   "artifacts": [
     {
       "type": "handoff",
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
-      "summary": "Phase 3 handoff: implemented, 3/8 phases, zero new sorries, no blockers"
+      "summary": "Phase 4 handoff: blocked, 3/8 phases complete, no Lean edits landed, blocker with repair candidates"
     },
     {
-      "type": "lean-source",
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "summary": "Enlarged Universe (post-blocking) section: intUniverseExt, intUniverseExt_length_le, membership lemmas, Ext containment family incl. intApplyRuleFull_outputs_subset_ext (hnw : nextWorld <= WBound); four engine lemmas re-targeted over intUniverseExt (all sorry-free)"
+      "type": "summary",
+      "path": "specs/317_propositional_tableau_completeness/summaries/13_phase4-fuel-resize-blocked-summary.md",
+      "summary": "Blocked-dispatch summary: empirical defect record for the intFuel resize infeasibility"
+    },
+    {
+      "type": "plan",
+      "path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+      "summary": "Phase 4 marked [BLOCKED] with four-element defect record and planner-level repair candidates"
     }
   ],
   "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
-    "specs/317_propositional_tableau_completeness/progress/plan13-phase-3-progress.json",
-    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json"
+    "specs/317_propositional_tableau_completeness/progress/plan13-phase-4-progress.json",
+    "specs/317_propositional_tableau_completeness/summaries/13_phase4-fuel-resize-blocked-summary.md",
+    "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
+    "specs/317_propositional_tableau_completeness/.return-meta.json"
   ],
   "phases_completed": 3,
   "phases_total": 8,
-  "phase_number": 3,
+  "phase_number": 4,
+  "blocker": "Phase 4 unimplementable as specified: any intFuel dominating the enlarged initial measure is a >=~1e46-bit numeral for 19 of 20 corpus formulas, and every corpus row #evals intuitionisticTableau which strictly materializes the fuel numeral before expansion. Early exit bounds fuel consumption, not materialization. Empirically verified against landed WBound/intSubfmls; bounded materialization attempt aborted with allocation failure. Repair is planner-level (per-branch fuel / wf-recursion on measure / proof-vs-eval procedure split) and gates Phases 6-7.",
   "verification": {
-    "verification_passed": true,
+    "verification_passed": false,
+    "note": "No Lean source changes landed in this dispatch; build/test state is unchanged from the green Phase 3 exit (scoped + full lake build, lake test, checkInitImports all passed at Phase 3). Full CI pipeline not re-run because no Cslib/ or CslibTests/ file was modified.",
     "sorry_count_delta": 0,
     "pre_existing_subtree_sorries": 4,
     "vacuous_count": 0,
     "axiom_count": 0,
     "new_axioms": [],
     "build_passed": true,
-    "scoped_build_passed": true,
-    "check_init_imports_passed": true,
-    "lint_style_passed": true,
-    "lake_test_passed": true,
-    "lean_verify_axioms": ["propext", "Classical.choice", "Quot.sound"]
+    "lean_files_modified": []
   },
   "memory_candidates": [
     {
-      "content": "Re-targeting a measure engine onto an enlarged universe in Lean: when strict-decrease lemmas consume only a membership premise (hb : forall x in b, x in U) and never unfold the universe's construction, the re-target is a pure statement substitution -- proofs re-run verbatim. Only the membership constructor/extractor family (which does unfold the range) needs mirrored copies at the new universe.",
+      "content": "Fuel-based decision procedures in Lean: a fuel bound proved sufficient via measure domination must be MATERIALIZED as a Nat numeral by any #eval of the procedure (let fuel := f phi is strict), even when early exit means the fuel is never consumed. If the sufficiency bound is doubly-exponential (e.g., derived from a blocking/pigeonhole world bound), 3^bound-class fuels exceed physical memory and every #eval-based conformance row breaks — feasibility of the fuel NUMERAL, not just of the run, must be checked at plan time. Repair space: per-branch fuel budgets (linear-in-universe numerals), well-founded recursion on the measure, or splitting the proof-side procedure from the evaluable one.",
       "topic": "lean-tableau-termination",
       "type": "pattern"
     }

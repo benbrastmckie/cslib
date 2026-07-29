@@ -325,7 +325,7 @@ single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only
   statements); zero new sorries in this phase; the ORIGINAL `intUniverse` block is left intact
   (deprecation notes deferred to Phase 8).
 
-### Phase 4: `intFuel` resize + `init_le_fuel` analogue + corpus re-verify [NOT STARTED]
+### Phase 4: `intFuel` resize + `init_le_fuel` analogue + corpus re-verify [BLOCKED]
 - **Goal:** The pinned fuel at every call site is provably at least the initial enlarged
   measure.
 - **Tasks:**
@@ -348,6 +348,53 @@ single-owner and waves are strictly sequential. (Phase 3 depends on Phase 2 only
   unaffected because runs exit at saturation/closure before consuming fuel.
 - **Done when:** resize landed, `init_le_fuel` analogue sorry-free, `lake test` green,
   dependents build green.
+- **BLOCKER (empirically established, no Lean edits landed):** The phase's Scope
+  Hypothesis / risk mitigation — "`#eval` cost is unaffected because runs exit at
+  saturation/closure before consuming fuel" — is FALSE, and the resize as specified breaks
+  19 of 20 propositional corpus rows unconditionally. Defect record:
+  1. **Exact claim refuted**: early exit governs fuel *consumption*, but
+     `intuitionisticTableau` (Expansion.lean:522-525) strictly binds
+     `let fuel := intFuel φ` BEFORE `intExpandBranches` runs, so the resized fuel
+     *numeral* must be materialized as a GMP bignum for every `#eval` corpus row
+     regardless of early exit.
+  2. **Concrete counterexample**: corpus row 2,
+     `#eval intVerdict (intuitionisticTableau (ia → (ib → ia)))`
+     (CslibTests/TableauConformance.lean:251). For this φ:
+     `(intSubfmls φ).toFinset.card = 4`, `WBound φ = 5^65 ≈ 2.7e45` (46 digits), so the
+     specified resize target `3 ^ (4 * (2*complexity+1) * (WBound φ + 1))` has exponent
+     ≈ 5.4e46; its binary representation needs ≈ 8.6e46 bits ≈ 1e37 GB. Row 6's exponent
+     has 4,611 digits. Only row 1 (`ia → ia`, s=2, fuel = 3^236208, 112,700 digits)
+     is materializable. Probe values computed against the LANDED `WBound`/`intSubfmls`
+     definitions via `lake env lean` (s, complexity, WBound digits, exponent digits):
+     row 1 = (2,1,5,6); row 2 = (4,2,46,47); row 4 = (5,3,126,127);
+     row 6 = (9,6,4610,4611); `(a→b)∨(b→a)` class = (5,3,126,127).
+  3. **Empirical verification**: a bounded materialization attempt of row 2's resized
+     fuel (`(3 ^ (4*(2*c+1)*(WBound φ + 1))) % 7` under a 4 GB / 90 s cap) aborts with
+     `lean::exception: failed to create thread` (allocation failure). This is not
+     slowness; the required bits exceed physically available memory by ~27 orders of
+     magnitude, so `lake test` can never pass with the resize landed — the phase's own
+     declared consequence ("any flipped row is a hard failure of this phase") applies
+     a fortiori to rows that stop evaluating at all.
+  4. **Root cause (structural, not a Phase 2/3 artifact)**: `WBound` is necessarily
+     doubly-exponential in the subformula count (tree bound `(s+1)^(2^s·s+1)`), and the
+     Phase 3 measure architecture forces any sufficient fuel to satisfy
+     `fuel ≥ 3^(≈2·|intUniverseExt φ|)` with `|intUniverseExt φ| = Θ(WBound φ)`. ANY
+     fuel value meeting the domination requirement is a numeral of ≥ ~1e46 bits for
+     s ≥ 4. No choice of constant or exponent shape within the phase's declared design
+     latitude avoids this; the conflict is between (a) fuel dominating the enlarged
+     measure and (b) `intuitionisticTableau` remaining `#eval`-able. Both are phase
+     done-criteria. The phase is unimplementable as specified.
+  5. **Repair candidates (planner-level, out of implementer latitude per
+     plan-compliance)**: (a) restructure `intExpandBranches` to per-branch fuel so the
+     sufficiency argument needs only `fuel ≥ 2·|intUniverseExt φ|`-class values
+     (materializable: ≤ ~4,700-digit numerals for all corpus rows) — engine + R1
+     restatement change; (b) replace fuel-vs-measure domination with well-founded
+     recursion on the measure (fuel-free engine) — larger refactor, removes `intFuel`
+     from the computational path entirely; (c) split proof-side procedure from the
+     `#eval` corpus procedure — changes what the corpus certifies and what
+     `openBranch_countermodel` states; currently a plan non-goal. Phases 6-7 consume
+     this phase's `intExpMeasureExt_init_le_fuel` at the call-site repair, so the
+     choice gates the remaining skeleton.
 
 ### Phase 5: `hUniv`/`hNW` threading invariants (division point DP-2) [NOT STARTED]
 - **Goal:** Preservation lemmas for the two new R1 hypotheses through all four recursion arms

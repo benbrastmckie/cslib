@@ -1,24 +1,75 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
+  "status": "blocked",
   "skeleton": false,
-  "summary": "Plan v13 Phase 3 (intUniverseExt / intExpMeasureExt + engine re-target) complete. New 'Enlarged Universe (post-blocking)' section in Scheme.lean (after intApplyRuleFull_outputs_subset, before intWork): intUniverseExt phi (same cell structure as intUniverse, world range List.range (WBound phi + 1)), intUniverseExt_length_le (<= 2 * (2 * phi.complexity + 1) * (WBound phi + 1) — the bound the Phase 4 intFuel resize is sized against), membership lemmas mem_intUniverseExt_of/_of', intUniverseExt_mem_formula/_mem_label, and the Ext containment family: intTImpRule_outputs_subset_ext, applyAllTImpRules_subset_ext, applyPersistenceFixpoint_subset_ext, and the load-bearing intApplyRuleFull_outputs_subset_ext with hnw : nextWorld <= WBound phi0 THREADED AS A PREMISE (discharge owned by Phase 5's hNW invariant; firing-time-to-final-branch transfer remains DP-2 territory per the Phase 2 handoff note). All four engine lemmas re-targeted over intUniverseExt: intExpMeasure_step_lt, intExpMeasure_step_lt_branch, applyAllTImpRules_count_drop, applyPersistenceFixpoint_genuine_of_count_le_fuel. Scope Hypothesis CONFIRMED: every engine proof re-ran verbatim on first elaboration — none unfolds the world range; only membership-lemma names / set U changed. Implementer's choice within the plan's declared option: intExpMeasure stays parametric in U, no intExpMeasureExt def (Phase 6 spec text writes intExpMeasure (intUniverseExt phi0) directly). Original intUniverse block and its containment family left intact (deprecation notes deferred to Phase 8). lean_verify on intApplyRuleFull_outputs_subset_ext, intExpMeasure_step_lt, applyPersistenceFixpoint_genuine_of_count_le_fuel, intUniverseExt_length_le: axioms {propext, Classical.choice, Quot.sound}, no sorryAx. Scoped + full lake build green (3311 jobs), checkInitImports exit 0, lake test exit 0 (conformance corpus incl. row 20), lint-style exit 0. Subtree bare-sorry count unchanged at 4 (all pre-existing). lake lint / shake / mk_all not run (no new files, imports unchanged).",
+  "summary": "Plan v13 Phase 4 (intFuel resize + init_le_fuel analogue + corpus re-verify) is BLOCKED: unimplementable as specified. The resize target 3^(4*(2c+1)*(WBound phi + 1)) must be materialized as a Nat numeral by every #eval corpus row — intuitionisticTableau strictly binds `let fuel := intFuel phi` (Expansion.lean:522-525) BEFORE intExpandBranches runs, so early exit bounds fuel CONSUMPTION but not fuel MATERIALIZATION. WBound is doubly-exponential ((s+1)^(2^s*s+1), s = (intSubfmls phi).toFinset.card): for corpus row 2 (a -> (b -> a)), s=4, WBound = 5^65 (~2.7e45), resized-fuel exponent ~5.4e46, representation ~1e37 GB. Empirical probe against the LANDED definitions (s, complexity, WBound digits, exponent digits): row 1 (2,1,5,6) feasible at 112,700 digits; row 2 (4,2,46,47), row 4 (5,3,126,127), row 6 (9,6,4610,4611), (a->b)v(b->a) class (5,3,126,127) all infeasible — 19 of 20 rows. Bounded materialization attempt of row 2's fuel (4 GB / 90 s) aborts with lean allocation failure. Root cause is structural, not a Phase 2/3 artifact: fuel-dominates-enlarged-measure (proof requirement, forces fuel >= 3^(~2|intUniverseExt|) with |intUniverseExt| = Theta(WBound)) and #eval-ability of intuitionisticTableau (corpus requirement) are jointly unsatisfiable; both are Phase 4 done-criteria. NO Lean edits landed — build/test remain green at the Phase 3 state; subtree bare-sorry count unchanged at 4 (all pre-existing). Full four-element defect record + three repair candidates in the plan's Phase 4 BLOCKER section; repair choice is planner-level (per-branch fuel restructuring / well-founded recursion on measure / proof-side-vs-eval-side procedure split) and gates Phases 6-7, which consume intExpMeasureExt_init_le_fuel.",
   "phases_completed": 3,
   "phases_total": 8,
-  "sorry_inventory": [],
-  "blockers": [],
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 619,
+      "statement": "truthLemma T-imp case",
+      "strategic": true,
+      "assumption": "persistence-fixpoint sufficiency threading",
+      "why_deferred": "pre-existing before this dispatch; owned by Phase 7",
+      "follow_up_task": 317
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "line": 3055,
+      "statement": "intExpandBranches_openBranch_sat fuel-0 gap (pre-R1 statement)",
+      "strategic": true,
+      "assumption": "R1 hypotheses (hUniv, hNW, hFuel) added per Phase 6",
+      "why_deferred": "pre-existing before this dispatch; owned by Phase 6",
+      "follow_up_task": 317
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "line": 133,
+      "statement": "intuitionisticTableau_complete IValid bridge",
+      "strategic": true,
+      "assumption": "IAtomPersist bridge route",
+      "why_deferred": "explicit plan non-goal (Completeness bridge sorries)",
+      "follow_up_task": 430
+    },
+    {
+      "file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "line": 125,
+      "statement": "minimal tableau completeness IValid bridge",
+      "strategic": true,
+      "assumption": "IAtomPersist bridge route",
+      "why_deferred": "explicit plan non-goal (Completeness bridge sorries)",
+      "follow_up_task": 430
+    }
+  ],
+  "blockers": [
+    {
+      "phase": 4,
+      "title": "intFuel resize target cannot be materialized by #eval corpus rows",
+      "detail": "Joint unsatisfiability of two Phase 4 done-criteria: (a) intFuel must dominate intExpMeasure (intUniverseExt phi) [[(.neg, phi, 0)]] [[]], forcing fuel >= 3^(~2*|intUniverseExt phi|) with |intUniverseExt phi| = Theta(WBound phi), WBound doubly-exponential; (b) lake test must stay green, but every propositional corpus row #evals intuitionisticTableau, which strictly materializes the fuel numeral before any expansion step. For s >= 4 (19 of 20 rows) the numeral needs >= ~1e46 bits. The phase's Scope Hypothesis ('#eval cost is unaffected because runs exit at saturation/closure before consuming fuel') is refuted: early exit bounds consumption, not materialization.",
+      "verbatim_unmet_criteria": "Done when: resize landed, init_le_fuel analogue sorry-free, lake test green, dependents build green.",
+      "requires": "Planner decision among repair candidates: (a) per-branch fuel restructuring of intExpandBranches (sufficiency then needs only 2*|intUniverseExt|-class fuel values, <= ~4700-digit numerals, materializable for all corpus rows); (b) well-founded recursion on the measure, removing fuel from the computational path; (c) split proof-side procedure from #eval corpus procedure (currently a plan non-goal). Choice gates Phases 6-7.",
+      "no_lean_edits_landed": true
+    }
+  ],
   "continuation_path": null,
   "artifacts": [
     {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "lean-source",
-      "summary": "Enlarged Universe (post-blocking) section + four engine lemmas re-targeted over intUniverseExt, all sorry-free"
+      "path": "specs/317_propositional_tableau_completeness/plans/13_fuel-sufficiency-skeleton.md",
+      "type": "plan",
+      "summary": "Phase 4 marked [BLOCKED] with full four-element defect record and repair candidates in phase body"
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/progress/plan13-phase-3-progress.json",
+      "path": "specs/317_propositional_tableau_completeness/summaries/13_phase4-fuel-resize-blocked-summary.md",
+      "type": "summary",
+      "summary": "Phase 4 blocked-dispatch summary: defect record, empirical probe data, repair candidates"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/progress/plan13-phase-4-progress.json",
       "type": "progress",
-      "summary": "Phase 3 progress: all 4 objectives done"
+      "summary": "Phase 4 progress: objective 4.0 (feasibility verification) done; 4.1-4.3 blocked"
     }
   ]
 }

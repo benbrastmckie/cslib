@@ -1,0 +1,56 @@
+{
+  "status": "partial",
+  "started_at": "2026-07-29T22:15:00Z",
+  "completed_at": "2026-07-29T23:45:00Z",
+  "artifacts": [
+    {
+      "type": "handoff",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/01_gate-a-variant-selection.md",
+      "summary": "Gate A verdict: both V1 and V4 saturate identically to control (len=219, maxLabel=21) at fuel>=120, stable to fuel=200; all 20 conformance rows match both variants. V4 selected."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/02_gate-b-verdict.md",
+      "summary": "Gate B verdict: PASS (conditional). Sfor-containment survival not refuted; descendant sub-case closes cleanly, ancestor sub-case needs origin-tracing via IWorldHist's existing provenance machinery (task 585)."
+    },
+    {
+      "type": "scratch",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/VariantProbe.lean",
+      "summary": "Gate A probe harness, lake env lean verified, zero writes to Cslib/CslibTests."
+    },
+    {
+      "type": "scratch",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean",
+      "summary": "Gate B prototype, lake env lean verified (one documented sorry marking the precise remaining gap)."
+    },
+    {
+      "type": "summary",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/summaries/04_positive-formula-persistence-augmented-summary.md",
+      "summary": "Partial implementation summary: Phases 1-2 (gates) completed, Phases 3-8 remain."
+    }
+  ],
+  "modified_files": [],
+  "partial_progress": {
+    "stage": "gates_completed",
+    "details": "Phase 1 (Gate A) and Phase 2 (Gate B) both completed with PASS verdicts. Phase 3 (revert a70187dd, V4-generalized form) is the next step, not started.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 2,
+    "phases_total": 8,
+    "last_completed_phase": "Phase 2: Gate B -- persistence prototype (GATING, no algorithm change)"
+  },
+  "completion_data": {
+    "phases_completed": 2,
+    "phases_total": 8,
+    "sorry_count_in_scope_files": "unchanged (DP-3, DP-4, DP-5 all still bare sorry; DP-2 untouched)",
+    "cslib_writes": 0,
+    "gate_a_verdict": "PASS -- V4 selected",
+    "gate_b_verdict": "PASS (conditional)"
+  },
+  "metadata": {
+    "session_id": "sess_1785363007_d08249",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

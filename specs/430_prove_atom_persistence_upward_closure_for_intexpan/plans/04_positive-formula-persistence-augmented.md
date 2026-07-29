@@ -1,7 +1,7 @@
 # Implementation Plan: Task #430 — Positive-Formula Persistence Along the Augmented Relation
 
 - **Task**: 430 - prove_atom_persistence_upward_closure_for_intexpan
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: Gates (Phases 1-2): ~2 dispatches, gating. Phases 3-8: deliberately not given a firm
   budget — see "On cost estimates" in the Overview.
 - **Dependencies**: None blocking at dispatch time. Task 317's Route (a) frame plumbing has
@@ -177,7 +177,7 @@ there (Phase 1: `VariantProbe*.lean`; Phase 2: `PersistPrototype.lean`). Neither
 `CslibTests/`. **If only one dispatch is available, run Phase 2 first** — it is the option-killer,
 and a Gate B failure makes Phase 1's compute spend worthless.
 
-### Phase 1: Gate A — variant selection probe (V1 vs V4) [NOT STARTED]
+### Phase 1: Gate A — variant selection probe (V1 vs V4) [COMPLETED]
 
 - **Goal:** Determine, by measurement, which copy-channel form to reinstate: **V1** (the self-copy
   reinstated verbatim, as removed by `a70187dd`) or **V4** (generalize the channel to copy *every*
@@ -213,7 +213,7 @@ and a Gate B failure makes Phase 1's compute spend worthless.
 - **Files to modify:** `specs/.../430.../scratch/VariantProbe*.lean` (new). **Zero** writes to
   `Cslib/` or `CslibTests/` — confirm with `git status --short Cslib/ CslibTests/` (must be empty).
 
-### Phase 2: Gate B — persistence prototype (GATING, no algorithm change) [NOT STARTED]
+### Phase 2: Gate B — persistence prototype (GATING, no algorithm change) [COMPLETED]
 
 - **Goal:** Decide whether positive-formula persistence is provable along the augmented relation
   **at all**, before any calculus change is made. This is the option-killer.

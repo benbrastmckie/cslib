@@ -523,16 +523,34 @@ sidestep (a copy at `w'` lets `intApplyRuleFull`'s `.pos,.imp` arm supply the di
 directly, without needing prior membership of `φ'` itself) — removing the copy channel removed
 that sidestep, not the underlying need for it.
 
-**Recommendation for continuation.** Do not re-add the self-copy channel in this file — that
-would re-open the ancestor-blocking repair's settled, measured, tested design (`Expansion.lean`
-is also out of scope for a `Scheme.lean`-only dispatch in any case). Two live options, neither
-attempted here: (a) a *bounded* variant of the removed channel — copy `T(φ→ψ)` to accessible
-worlds only when doing so cannot itself trigger new world creation (e.g. gate on `φ` not being
-`.imp`-shaped, or on the target world already being terminal) — would need its own divergence
-probe before being trusted, mirroring the original repair's own methodology; (b) the
-quotient/blocking-frame reconstruction proposed elsewhere (restating `sat_fimp`/`sat_timp` over
-a blocking quotient rather than raw accessibility). Both are calculus-level changes outside a
-single `Scheme.lean`-scoped dispatch. Do NOT attempt to force either `sorry` via a
+**Recommendation for continuation (revised after dedicated continuation-options research).**
+Do not re-add the self-copy channel in this file — doing so is calculus-level work outside a
+`Scheme.lean`-only dispatch (`Expansion.lean` is out of scope here) and remains a decision for a
+dedicated follow-up, not a call to make unilaterally mid-dispatch. Two corrections to the
+options above, established by that research and recorded here so a future attempt does not
+re-derive them:
+
+(i) **Reinstating the self-copy channel does not reopen the divergence the calculus repair
+fixed — this is already measured, not merely plausible.** The repair's own variant-selection
+probe compared "ancestor blocking with the self-copy channel retained" against "ancestor
+blocking with it removed": both terminate and reach the *identical* saturated branch across
+every fuel value tested, and all conformance rows match under either. Option (a)'s "would need
+its own divergence probe before being trusted" is therefore over-cautious: the retained-channel
+variant of that very probe already stands as the trust evidence: only a re-confirmation against
+the current tree is outstanding, not a fresh probe from scratch.
+
+(ii) **But a bare reinstatement of the channel would NOT by itself close Gap 1 — a fact no
+earlier note here recorded.** `intExpandBranches_openBranch_sat`'s conclusion existentially
+quantifies over an edge list built from `augSets`, decoupled from the algorithm's own edge
+list and carrying the calculus repair's loop-back edges. `truthLemma`'s frame above installs
+`intAccessPreorder` over exactly that AUGMENTED list, so the T-imp goal ranges over strictly
+more worlds than any copy channel — which only ever copies along the algorithm's RAW edges —
+can reach. The gate is therefore a loop-back transfer lemma (`T(φ)@x ∈ b → T(φ)@l ∈ b` across a
+recorded loop-back edge `(x, l)`, using the `Sfor`-containment established at the blocking
+site), not the copy channel alone; a bounded self-copy variant is still one route to supplying
+`T(φ'→ψ')`'s own copy at directly-accessible worlds, but the augmented-frame gap must close
+first for either a bounded self-copy variant (a) or the quotient/blocking-frame reconstruction
+(b) to actually discharge this case. Do NOT attempt to force either `sorry` via a
 weakened/vacuous statement. -/
 
 /-! ## Parametric Truth Lemma -/
@@ -594,10 +612,23 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- ψ-consequence propagation gives branch-membership implication at accessible worlds
       -- (`T(φ)@w'∈b → T(ψ)@w'∈b`), but this goal needs `IForces` (semantic), not membership, and
       -- `ih_φ'`/`ih_ψ'` never supply `Force → T(_)@w'∈b`. See the STOP-gate note for the full
-      -- analysis and the two live-but-unattempted continuation options. This case stays `sorry`
-      -- because that copy-propagation (or an equivalent totality fact) is not establishable from
-      -- current library facts, not because `sat_timp` is missing or because a converse of the
-      -- induction hypothesis is needed.
+      -- analysis and the two live-but-unattempted continuation options.
+      --
+      -- sorry: assumes `∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'` follows
+      -- from `sat_timp`'s membership-level disjunction, which needs `w'` to carry its own
+      -- `T(φ'→ψ')` copy; deferred because that copy (or an equivalent totality/persistence fact
+      -- bridging `IForces → T(_)@w'∈b`) is not establishable from current library facts --
+      -- reintroducing the removed self-copy channel is termination-safe (the ancestor-blocking
+      -- calculus repair's own variant-selection probe already measured self-copy retention as
+      -- termination-orthogonal once ancestor blocking is active) but insufficient by itself:
+      -- `truthLemma`'s frame is `intAccessPreorder edges` over the AUGMENTED edge list
+      -- `intExpandBranches_openBranch_sat` returns (`augSets`, carrying the loop-back edges the
+      -- calculus repair's blocking-reuse route introduced), while any copy channel only ever
+      -- copies along the algorithm's RAW edges -- strictly fewer worlds than the goal quantifies
+      -- over. The real remaining obligation is a positive-formula persistence/transfer lemma
+      -- along the augmented accessibility relation (the same fact, atom-shaped, as the
+      -- monotonicity bridge the `Completeness.lean` files' `sorry`s below rest on); follow-up:
+      -- DP-5, see the plan's Planned Strategic Sorries table.
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.

@@ -98,11 +98,19 @@ Delegates to `openBranch_countermodel minScheme`. The structural sorries in
 `Intuitionistic.Completeness.intuitionisticOpenBranch_countermodel`'s existential exposure of
 `edges`.
 
+**Statement-shape fix**: the conclusion also carries the upward-closure of
+`intExtractValuation b` along `intAccessPreorder edges` (see `Scheme.lean`'s
+`openBranch_countermodel` docstring). This is only ONE of `MValid`'s two upward-closure
+premises -- `minimalTableau_complete` below still needs `minBranchBotForces b`'s upward-closure
+separately.
+
 If `minimalTableau φ = openBranch b`, then `intExtractValuation b` and `minBranchBotForces b`
 define a minimal Kripke model that falsifies `φ` at world 0 (over edge-accessibility). -/
 lemma minOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
     (h : minimalTableau φ = .openBranch b) :
     ∃ edges : IEdges,
+      (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intExtractValuation b w p → intExtractValuation b w' p) ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges)
         (intExtractValuation b) (minBranchBotForces b) 0 φ := by
   exact openBranch_countermodel minScheme φ b h
@@ -110,21 +118,26 @@ lemma minOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
 /-- **Minimal Tableau Completeness**: If `φ` is minimally valid, then the minimal
 tableau closes on `φ`.
 
-Delegates to `tableau_complete minScheme`. The remaining sorry bridges `MValid φ` to the
-per-`edges` forcing hypothesis `∀ edges b, @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (minBranchBotForces b) 0 φ` required by `tableau_complete`
-(Route (a), mirrors `intuitionisticTableau_complete`); this is the core deferred completeness
-obligation. -/
+Delegates to `tableau_complete minScheme`. **Statement-shape fix**: `tableau_complete`'s
+`hvalid` premise now accepts `intExtractValuation b`'s upward-closure as an explicit hypothesis
+(mirrors `intuitionisticTableau_complete`'s fix; see `Scheme.lean`'s `openBranch_countermodel`
+and `tableau_complete` docstrings for the machine-verified defect this replaces).
+
+`MValid φ` needs TWO upward-closure premises (val AND `botForces`); the supplied `_huc`
+discharges only the first. The remaining sorry is deliberately left deferred, re-annotated to
+point at the two ACTUAL remaining obligations: (1) `openBranch_countermodel`'s own
+upward-closure conjunct is itself still `sorry` in `Scheme.lean`, pending the plan's Phases
+7-11; (2) `minBranchBotForces b`'s own upward-closure (a SEPARATE fact, at the `⊥` formula
+shape) is not yet established either -- the plan's Phase 13 derives both as one-line
+specializations of a single generic persistence corollary once Phases 7-11 land. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme
-  intro edges _b
-  -- Bridge: MValid φ → IForces (intExtractValuation b) (minBranchBotForces b) 0 φ at the
-  -- intAccessPreorder edges frame. Requires: upward-closure of intExtractValuation b and
-  -- minBranchBotForces b ALONG THAT (augmented) FRAME -- NOT the fuel-sufficiency fixpoint
-  -- (landed sorry-free in `Scheme.lean`), but the same positive-formula persistence invariant
-  -- `Intuitionistic/Completeness.lean`'s `intuitionisticTableau_complete` and `Scheme.lean`'s
-  -- `truthLemma` T-imp `sorry` (DP-5) both need, here at the atom shape.
+  intro edges _b _huc
+  -- Once both (1) `openBranch_countermodel`'s upward-closure conjunct and (2)
+  -- `minBranchBotForces b`'s upward-closure are established (plan Phases 7-11, 13), this goal
+  -- closes via `exact h Nat (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0`
+  -- for the appropriate `hbotuc`. Left `sorry` deliberately for now -- see the docstring above.
   sorry
 
 end Cslib.Logic.PL

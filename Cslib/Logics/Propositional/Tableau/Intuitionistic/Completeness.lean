@@ -94,11 +94,18 @@ the `intAccessPreorder` countermodel frame is installed over (Postmortem-5 revis
 internal corollary has no live consumer beyond docstrings, so exposing `edges` here does not
 touch the stable public contract).
 
+**Statement-shape fix**: the conclusion also carries the upward-closure of
+`intExtractValuation b` along `intAccessPreorder edges` (see `openBranch_countermodel`'s
+docstring in `Scheme.lean` for why this replaces the old, machine-verified-defective
+`hvalid` premise shape).
+
 If `intuitionisticTableau φ = openBranch b`, then `intExtractValuation b` falsifies `φ`
 at world 0 in the intuitionistic Kripke model with worlds ordered by edge-accessibility. -/
 lemma intuitionisticOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
     (h : intuitionisticTableau φ = .openBranch b) :
     ∃ edges : IEdges,
+      (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intExtractValuation b w p → intExtractValuation b w' p) ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) intBotForces 0 φ
       := by
   exact openBranch_countermodel intScheme φ b h
@@ -108,35 +115,34 @@ lemma intuitionisticOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition
 /-- **Intuitionistic Tableau Completeness**: If `φ` is intuitionistically valid,
 then the intuitionistic tableau closes on `φ`.
 
-Delegates to `tableau_complete intScheme`. The remaining sorry bridges `IValid φ` to the
-per-`edges` forcing hypothesis `∀ edges b, @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (fun _ => False) 0 φ` required by `tableau_complete` (Route (a):
-`edges` is only discovered inside `tableau_complete`'s own proof, from the open-branch case, so
-the bridge must accept it as an argument rather than fix one ambient frame); this bridge is the
-core remaining completeness obligation.
+Delegates to `tableau_complete intScheme`. **Statement-shape fix**: `tableau_complete`'s
+`hvalid` premise now accepts the upward-closure of `intExtractValuation b` (along
+`intAccessPreorder edges`) as an explicit hypothesis, supplied by `openBranch_countermodel` --
+this replaces the OLD, machine-verified-defective shape (`hvalid` unconditionally quantified
+over an arbitrary, unconstrained `(edges, b)` pair, refuted by
+`scratch/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old premise's body
+is false at a non-upward-closed witness valuation). With the new shape, `IValid φ` instantiates
+DIRECTLY: `World := Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val := intExtractValuation
+b`, and the supplied upward-closure hypothesis is exactly `IValid`'s own upward-closure premise.
 
-Proof strategy: `tableau_complete intScheme φ` takes `∀ edges b, IForces (intExtractValuation
-b) (intScheme.modelBot b) 0 φ` at the `intAccessPreorder edges` frame. For the intuitionistic
-scheme, `modelBot b = fun _ => False`. This follows from `IValid φ` by instantiating at
-`World = Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val = intExtractValuation b`, with
-the upward-closure of `intExtractValuation b` ALONG THAT FRAME. The fuel-sufficiency fixpoint
-this bridge once waited on is now landed sorry-free (`Scheme.lean`,
-`applyPersistenceFixpoint_genuine_of_count_le_fuel`, modulo the unrelated fresh-mint
-`hNW`-preservation sorry); the actual remaining obligation is a positive-formula persistence
-(upward-closure) fact along the AUGMENTED accessibility relation `intAccessPreorder edges` —
-the same fact `truthLemma`'s T-imp `sorry` needs at the `φ = φ'→ψ'` shape, here needed at
-`φ = atom p`. -/
+The remaining sorry below is **not** the old unfillable shape -- it is deliberately left
+deferred, re-annotated to point at the ACTUAL remaining obligation:
+`openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is itself still `sorry`,
+pending the augmented-edge positive-formula persistence invariant the plan's Phases 7-11 export.
+Discharging `IValid φ Nat (intExtractValuation b) huc 0` here would type-check but would only
+launder that same undischarged obligation through this file without being any more honest about
+it; the obligation is left visibly deferred here until `openBranch_countermodel`'s conjunct is
+itself proved (see `Scheme.lean`'s `openBranch_countermodel` docstring and the plan's Phase 13,
+which discharges this sorry mechanically once that lands). -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
-  intro edges _b
-  -- Deferred-monotonicity bridge: `h` instantiated at `intAccessPreorder edges` needs
-  -- `intExtractValuation _b`'s upward-closure along that frame -- the augmented (loop-back-
-  -- edge-carrying) relation, not the algorithm's raw edges. This is NOT blocked on
-  -- fuel-sufficiency (that fixpoint is landed); it is blocked on the same persistence
-  -- invariant `Scheme.lean`'s `truthLemma` T-imp `sorry` (DP-5) needs at the implication
-  -- shape, here needed at the atom shape. The bridge SHAPE (accepting `edges`) is
-  -- Route (a)-correct; only this persistence premise remains deferred.
+  intro edges _b _huc
+  -- Once `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`) is proved
+  -- (plan Phases 7-11), this goal closes via `exact h Nat (intExtractValuation _b) _huc 0`
+  -- (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis, instantiated at the
+  -- augmented frame `intAccessPreorder edges`). Left `sorry` deliberately for now -- see the
+  -- docstring above.
   sorry
 
 end Cslib.Logic.PL

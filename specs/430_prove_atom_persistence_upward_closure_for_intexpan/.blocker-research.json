@@ -1,0 +1,53 @@
+{
+  "summary": "Verdict tractable_large, with two findings that change the plan. FIRST, machine-verified in scratch/HvalidShapeRefutation.lean (lake env lean clean, zero sorries): DP-3 and DP-4 are unprovable AS STATED, independently of all persistence work. tableau_complete's hvalid premise quantifies over arbitrary edges and arbitrary b with no tableau provenance, while IValid only covers upward-closed valuations; at edges=[(1,0)], b=[T(p)@0,T(q)@1], phi=p->(q->p) the theorem proves IValid phi yet refutes hvalid's body, so the sorry cannot be filled and a signature change to openBranch_countermodel/tableau_complete is mandatory (the theorem itself is not refuted, only the proof route). SECOND, a NEW refutation risk Gate B never considered: independent beta-split choices at the reused ancestor x versus the blocked world w (both carry the same disjunction, each split expanded separately) appear to break atom-level persistence across the recorded loop-back edge, and the reuse check is never re-run to invalidate that edge; if realizable this forces permanent deferral, so a Gate B2 probe must run BEFORE any build-out. THIRD, a genuine de-risking discovery: the reuse check at Expansion.lean:296-307 already enforces exactly the needed backward containment (posFormulasAt bPers w subset of posFormulasAt bPers x, since sfor IS {phi} union posFormulasAt bPers w), so the gap is purely temporal (post-reuse arrivals), and IWorldHist's par/(H0)/(H1)/(H1-acc) supply Gate B's assumed ForestComparable for free. Edge direction confirmed from source: edges are (child,parent), the reuse arm appends (x,l) with l=newEdge.2=w giving w<=x while raw x<=w, so x and w become preorder-equivalent and must AGREE on atoms.",
+  "verdict": "tractable_large",
+  "reusable_declarations": [
+    "IWorldHist (Scheme.lean:3213) — par witness with (H0) par 0 = 0 and (H1) (c, par c) in edges, par c < c: a total unique-parent function, so ancestor chains are linear; this IS Gate B's assumed ForestComparable, needing export not construction",
+    "IWorldHist (H1-acc) clause — parAncestor par c' c implies isAccessible edges c' c; the par-ancestry-to-raw-accessibility bridge, load-bearing for the ancestor sub-case",
+    "IWorldHist (H3) clause — every chi in sfor c lies in posFormulasAt b c: a monotone planted positive-content fact, the closest existing analogue to positive-formula tracing",
+    "IWorldHist_mono (Scheme.lean:3263) — branch/expanded-set monotonicity transfer used by every non-minting arm; the shape any new companion clause should copy",
+    "IWorldHist_entry (Scheme.lean:3251) — vacuous entry discharge",
+    "IAllWorldHist (Scheme.lean:3330) with IAllWorldHist_append and IAllWorldHist_map_const — list-level plumbing to mirror",
+    "IAllWorldHistCounter family (Scheme.lean:3280-3328)",
+    "IAllUniv (Scheme.lean:2834) with IAllUniv_append/_map — already threaded through the whole key induction",
+    "IAllFuel (Scheme.lean:4537) with IAllFuel_append/_map — supplies the hfuel premise and the fuel-0 discharge",
+    "applyAllTImpRules_copy_complete_of_fixpoint (Phase 4, landed sorry-free)",
+    "applyPersistenceFixpoint_copy_complete (Phase 4, landed sorry-free)",
+    "applyPersistenceFixpoint_genuine_of_count_le_fuel (landed sorry-free)",
+    "intFImpReuseWitnessAnc?_spec (Expansion.lean:321) — five-conjunct reuse fact including the load-bearing containment hcont",
+    "IBranchSaturation (sat_timp and siblings) — already exported in intExpandBranches_openBranch_sat's conclusion; supplies decomposition closure at x",
+    "intAccessPreorder_le_of_isAccessible (Scheme.lean:276), isAccessible_one_step, sfAccessSat_edges_mono",
+    "parAncestor and parAncestor_le",
+    "intWorldHist_chain_le (Scheme.lean:3618), pathOf (:3798), pathOf_some, pathOf_none, pathOf_injOn (:3843), intWorldHist_nw_le (:3944) — pigeonhole/world-bound machinery, relevant to bounding rather than persistence; do NOT budget these as reuse wins"
+  ],
+  "must_build_new": [
+    "A companion invariant clause recording positive-content containment across each RECORDED LOOP-BACK EDGE and surviving to the final branch. No existing clause covers the reuse pair (x, w) at all: sfor c records only a CREATED world's mint-time Sfor set, and the reuse arm (Scheme.lean:4705-4714) creates no world, leaving edges and nw unchanged.",
+    "The post-reuse closure lemma: no positive formula arrives at w after the reuse event without also being at x. This is the genuinely large piece; attempt the saturation + copy-completeness route before full origin tracing.",
+    "Multi-hop composition of the single-hop transfer lemma under Relation.ReflTransGen, for branches accumulating several reuse events (still unconfirmed; Gate B never re-checked it).",
+    "Signature change: strengthen openBranch_countermodel's conclusion with the upward-closure conjunct and weaken tableau_complete's hvalid to accept it as a hypothesis. Mandatory and independent of all persistence work."
+  ],
+  "weaker_sufficient_statement": "Yes — full per-formula origin tracing may be avoidable. Because the reuse check already gives posFormulasAt bPers w subset of posFormulasAt bPers x, and bPers is applyPersistenceFixpoint b edges f (so w has already received every raw-ancestor copy by Phase 4's copy-completeness), the residual obligation is only: no positive formula arrives at w after the reuse event without also being at x. Post-reuse arrivals have exactly two sources, each with a candidate cheap discharge. (a) Decomposition at w of a premise present at reuse time: that premise is at x by the containment, and the final branch is saturated (IBranchSaturation is already exported), so the same decomposition is available at x. (b) A copy from a raw ancestor y of w: par-linearity makes y and x comparable, and if y <= x the V4 copy channel delivers to x as well. UNVERIFIED, and the residual x <= y <= w case is where this could still collapse into full origin tracing — but it is materially cheaper to attempt first than re-building IWorldHist.",
+  "decomposition": [
+    "0. GATE B2 (GATING, run first): probe the beta-split refutation shape. Pick phi0 forcing a disjunction under nested implications so a blocked world and its reused ancestor both carry it; run intExpandBranches at fuel >= 120; take the open branch and the AUGMENTED edge list (augSets, not raw edgeSets); decide atom-level persistence computationally over intAccessPreorder augEdges (all three predicates are decidable, so a Bool harness or decide suffices, in Gate A's empirical style). A single failing instance is a refutation ⇒ permanent deferral of DP-3/DP-4/DP-5, quotient route still prohibited.",
+    "1. Statement-shape fix (independent of 0; can run in parallel): strengthen openBranch_countermodel's conclusion to carry the upward-closure of intExtractValuation b along intAccessPreorder edges, and weaken tableau_complete's hvalid to accept it. Keeps tableau_complete sorry-free and leaves Soundness.lean untouched.",
+    "2. Export raw-edge persistence (prior dispatch's Finding 1, cheap): add the raw-edge conjunct to intExpandBranches_openBranch_sat's conclusion from the already-threaded IAllUniv/IAllFuel plus Phase 4's two lemmas. A stepping stone, not sufficient alone.",
+    "3. Export reuse-time containment: thread posFormulasAt bPers w subset of posFormulasAt bPers x as a monotone planted fact per recorded loop-back edge, surviving to the final branch — a companion invariant beside IAllAccessConsistent, mirroring its companion-not-merged pattern and reusing IWorldHist_mono's shape plus the IAllWorldHist_append/_map_const plumbing.",
+    "4. Post-reuse closure lemma (the large piece): attempt the saturation + copy-completeness route first; fall back to full origin tracing only if the x <= y <= w recursion forces it.",
+    "5. Multi-hop composition under Relation.ReflTransGen for several reuse events per branch.",
+    "6. Discharge DP-5 (Scheme.lean:727) from the exported invariant.",
+    "7. Discharge DP-3/DP-4 at atom shape — mechanical once 1 and 6 land.",
+    "8. Final CI: lake build, checkInitImports, lint, lint-style, shake, test, TableauConformance; lean_verify for axiom cleanliness; confirm DP-2 untouched."
+  ],
+  "artifacts": [
+    {
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/05_phase5-blocker-research.md",
+      "type": "report",
+      "summary": "Full findings: the machine-verified hvalid statement-shape defect blocking DP-3/DP-4, the new beta-split refutation risk and its Gate B2 probe design, the reuse-check containment de-risking discovery, the IWorldHist reuse audit, the 9-step decomposition, and line-number corrections (DP-5 is at Scheme.lean:727, not :633)."
+    },
+    {
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/HvalidShapeRefutation.lean",
+      "type": "scratch",
+      "summary": "Machine-verified refutation that tableau_complete's hvalid premise is not a consequence of IValid: proves IValid (p -> (q -> p)) and simultaneously refutes hvalid's body at edges=[(1,0)], b=[T(p)@0,T(q)@1]. lake env lean clean, zero errors, zero sorries."
+    }
+  ]
+}

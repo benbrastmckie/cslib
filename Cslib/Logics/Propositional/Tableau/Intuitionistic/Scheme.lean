@@ -7351,10 +7351,24 @@ From `h : intExpandBranches ... S.closurePred = .openBranch b` we extract struct
 2. `hsat`/`hfimp`: the returned branch is saturated, together with the edge-accessibility
    upgrade of its F(φ→ψ) witnesses (Route (a)).
 3. `hFmem`: F(φ)@0 is on b (branch monotonicity: formulas are only added).
-Then `(truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem` closes the goal, existentially
-packaging the `edges` the countermodel frame (`intAccessPreorder edges`) is installed over
-(Postmortem-5 revision: this internal conclusion MAY expose `edges`; the stable public
-`tableau_complete`/`Decidable` contract, discharged elsewhere, does not).
+Then `(truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem` closes the `¬IForces` conjunct,
+existentially packaging the `edges` the countermodel frame (`intAccessPreorder edges`) is
+installed over (Postmortem-5 revision: this internal conclusion MAY expose `edges`; the stable
+public `tableau_complete`/`Decidable` contract, discharged elsewhere, does not).
+
+**Statement-shape fix (upward-closure conjunct).** The conclusion additionally carries
+`intExtractValuation b`'s upward-closure along `intAccessPreorder edges` — the AUGMENTED frame
+(`edges` here is the `augSets` witness `intExpandBranches_openBranch_sat` threads, not the
+algorithm's raw edge list; see that lemma's docstring). This replaces the machine-verified
+defective premise `tableau_complete` used to demand (`scratch/HvalidShapeRefutation.lean`,
+`lake env lean` clean, zero sorries: `hvalid`'s old unconstrained-`(edges, b)` shape is false at
+a concrete witness even though the formula it is applied to is valid). Moving the obligation
+here, where `b`'s real provenance (`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`)
+is in scope, is what makes it fillable at all -- but it is **not yet filled**: the augmented-edge
+positive-formula persistence invariant this needs is the subject of the plan's Phases 7-11 and has
+not landed, so the conjunct is proved by `sorry` for now (see the inline comment at the proof
+site). `tableau_complete` itself stays sorry-free; only this lemma gains the deferred obligation,
+relocated from the unfillable shape DP-3/DP-4 used to have.
 
 ## References
 
@@ -7364,6 +7378,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
         [intFuelExt φ] S.closurePred = .openBranch b) :
     ∃ edges : IEdges,
+      (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intExtractValuation b w p → intExtractValuation b w' p) ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
   -- Extract structural properties of b from the openBranch result.
@@ -7413,7 +7429,16 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
           exact absurd hif (by simp))
       h
   -- Apply the truth lemma's F-branch direction over the `intAccessPreorder edges` frame.
-  exact ⟨edges, (truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem⟩
+  refine ⟨edges, ?_, (truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem⟩
+  -- sorry: upward-closure of `intExtractValuation b` along the AUGMENTED frame
+  -- `intAccessPreorder edges` (Route (a): `edges` is the `augSets` witness, not the
+  -- algorithm's raw edge list). This is the statement-shape-corrected form of the DP-3/DP-4
+  -- obligation -- see the docstring above -- now stated where `b`'s provenance is in scope
+  -- instead of at an arbitrary, unconstrained `(edges, b)` pair. NOT fillable yet: it needs
+  -- the augmented-edge positive-formula persistence invariant the plan's Phases 7-11 export
+  -- through `intExpandBranches_openBranch_sat`'s conclusion, which has not landed. Follow-up:
+  -- DP-3/DP-4, see the plan's Planned Strategic Sorries table.
+  sorry
 
 /-! ## Parametric Tableau Completeness -/
 
@@ -7421,30 +7446,37 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
 branch-derived Kripke model, then the parametric expansion closes on `φ`.
 
 Proof: by contrapositive. If the expansion returns `.openBranch b`, then
-`openBranch_countermodel S` gives `∃ edges, ¬ @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (S.modelBot b) 0 φ` (Route (a)), contradicting
-`hvalid edges b`.
+`openBranch_countermodel S` gives `∃ edges, huc ∧ ¬ @IForces Atom Nat (intAccessPreorder edges)
+(intExtractValuation b) (S.modelBot b) 0 φ` (Route (a)), where `huc` is the upward-closure of
+`intExtractValuation b` along `intAccessPreorder edges`; feeding both to `hvalid edges b huc`
+contradicts the `¬IForces` conjunct.
 
-The hypothesis `hvalid` encodes the per-scheme validity notion, now quantified over the
-`edges`-parameterized `intAccessPreorder` frame rather than a single ambient instance (Route
-(a): `edges` is only discovered inside `openBranch_countermodel`'s own proof, so `hvalid` must
-accept it as an argument):
-- For `intScheme` (where `modelBot b = fun _ => False`): `hvalid edges b` follows from
+**Statement-shape fix.** `hvalid` now accepts the upward-closure fact as an explicit hypothesis
+rather than demanding `IForces` unconditionally at an arbitrary, unconstrained `(edges, b)` pair
+-- the old shape was machine-verified FALSE as a consequence of `IValid φ`
+(`scratch/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old `hvalid`'s body
+is false at `edges = [(1, 0)]`, `b = [T(p)@0, T(q)@1]`, a valuation that is not upward-closed).
+The hypothesis `hvalid` encodes the per-scheme validity notion, quantified over the
+`edges`-parameterized `intAccessPreorder` frame (Route (a): `edges` is only discovered inside
+`openBranch_countermodel`'s own proof, so `hvalid` must accept it as an argument), now WITH the
+upward-closure premise `openBranch_countermodel` supplies:
+- For `intScheme` (where `modelBot b = fun _ => False`): `hvalid edges b huc` follows from
   `IValid φ` applied at World `= ℕ` with the `intAccessPreorder edges` instance,
-  `val = intExtractValuation b`, with the upward-closure of `intExtractValuation b` along that
-  frame (the deferred-monotonicity bridge).
-- For `minScheme` (where `modelBot b = minBranchBotForces b`): `hvalid edges b` follows from
-  `MValid φ` applied analogously, with upward-closure of both `intExtractValuation b` and
-  `minBranchBotForces b` along `intAccessPreorder edges`.
+  `val = intExtractValuation b`, and `huc` directly as `IValid`'s upward-closure hypothesis.
+- For `minScheme` (where `modelBot b = minBranchBotForces b`): `hvalid edges b huc` follows from
+  `MValid φ` applied analogously, using `huc` for `MValid`'s first upward-closure hypothesis and
+  a separately-established upward-closure of `minBranchBotForces b` for its second.
 
-This theorem is sorry-free given `openBranch_countermodel S`; the deferred-monotonicity
-obligation lives entirely in `hvalid`'s callers.
+This theorem is sorry-free given `openBranch_countermodel S`; the deferred obligation (proving
+`huc` itself) now lives entirely inside `openBranch_countermodel`, not in `hvalid`'s callers.
 
 ## References
 
 * [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4 -/
 theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
     (hvalid : ∀ (edges : IEdges) (b : IBranch Atom),
+      (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intExtractValuation b w p → intExtractValuation b w' p) →
       @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ) :
     intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
         [intFuelExt φ] S.closurePred = .closed := by
@@ -7453,8 +7485,8 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
       [intFuelExt φ] S.closurePred with
   | closed => exact hne hresult
   | openBranch b =>
-    obtain ⟨edges, hcm⟩ := openBranch_countermodel S φ b hresult
-    exact absurd (hvalid edges b) hcm
+    obtain ⟨edges, huc, hcm⟩ := openBranch_countermodel S φ b hresult
+    exact absurd (hvalid edges b huc) hcm
 
 end Cslib.Logic.PL
 

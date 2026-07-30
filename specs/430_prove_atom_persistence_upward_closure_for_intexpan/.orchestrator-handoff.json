@@ -1,30 +1,25 @@
 {
   "status": "partial",
-  "summary": "Re-dispatch of plan 06 executed Phases 5-7 (of 14): Gate B2 beta-split refutation probe verdict PASS (residual risk carried forward, not exhaustively refuted); the machine-verified openBranch_countermodel/tableau_complete statement-shape defect fixed; the raw-edge persistence conjunct (IPosPersistRaw) exported via intExpandBranches_openBranch_sat. Full lake build (3311 jobs) green. Exactly 4 sorries remain in scope, all deliberately deferred and documented: DP-5, DP-3, DP-4, and a new, honestly-annotated conjunct in openBranch_countermodel awaiting Phases 8-11's augmented-edge persistence export. Phase 8 requires resolving a documented design subtlety (a naive companion-invariant shape would silently require Phase 9's full result) before threading a new invariant through the induction; this is recorded precisely in handoffs/05 so the next dispatch starts from a resolved design question rather than re-deriving it.",
+  "summary": "Re-dispatch of plan 06 executed Phase 9 (of 14): attempted the cheap route (saturation + copy-completeness) for the post-reuse closure lemma and recorded verdict COLLAPSED, per the plan's own sanctioned Rollback/Contingency outcome. Analysis: the 'y <= x' (descendant) sub-case closes cleanly using only already-landed exports (IPosPersistRaw from Phase 7 + IBranchSaturation.sat_timp + no_contradiction) -- nothing new needed there. The 'x <= y <= w' (ancestor) sub-case remains genuinely open: content flows forward-only (ancestor to descendant) via the copy channel, so presence at an intermediate world says nothing about presence at x; closing it needs full origin-tracing (Phase 10). This was independently confirmed against Gate B's own Phase 2 prototype finding the identical gap via a different route. Additionally found that even the case split itself needs a ForestComparable/par-linearity export that does not yet exist anywhere in Scheme.lean (grep-confirmed: only ever an assumed hypothesis in the Phase 2 scratch prototype) -- building it requires a further intExpandBranches_openBranch_sat conclusion-signature change, i.e. it is properly Phase 10's own first construction step, not a standalone Phase 9 export. Per the plan's explicit prohibition (no sorry, no vacuous placeholder, no weakened statement), zero Cslib/ writes were made this dispatch -- landing a partial lemma would have required one of those prohibited moves or duplicated work Phase 10 must do anyway. Regression check: full lake build (3311 jobs) green with the identical 4-sorry set as Phase 8; checkInitImports and lint-style clean; lean_verify on truthLemma/tableau_complete/openBranch_countermodel/intuitionisticTableau_complete/minimalTableau_complete all report only the expected standard axioms plus transitive sorryAx, unchanged from Phase 8. Phase 10 (full origin tracing) is the plan's own declared largest phase, pre-budgeted at 1-2 dispatches, and is now the active next phase with a detailed continuation handoff.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/04_gate-b2-verdict.md",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/07_post-reuse-closure-verdict.md",
       "type": "handoff",
-      "summary": "Gate B2 beta-split refutation probe verdict: PASS, residual risk carried forward"
+      "summary": "Phase 9 verdict: COLLAPSED, with full technical justification (ForestComparable non-existence, y<=x closing argument, x<=y<=w open gap)"
     },
     {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/05_phase7-complete-phase8-handoff.md",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/08_phase9-collapsed-phase10-handoff.md",
       "type": "handoff",
-      "summary": "Phases 5-7 complete/committed; Phase 8 design-subtlety continuation notes for the next dispatch"
+      "summary": "Continuation handoff for Phase 10 (full origin tracing) -- concrete next steps, what not to re-derive"
     },
     {
       "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
       "type": "plan",
-      "summary": "Phases 5-7 marked COMPLETED with outcomes recorded; Phase 8 annotated with a pointer to the continuation handoff"
-    },
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "source",
-      "summary": "Phase 6 statement-shape fix and Phase 7 raw-edge persistence export"
+      "summary": "Phase 9 marked COMPLETED with COLLAPSED outcome recorded; checklist ticked with deviation notes; Phase 10's entry criterion annotated as met"
     }
   ],
-  "phases_completed": 7,
+  "phases_completed": 9,
   "phases_total": 14,
-  "continuation_path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/05_phase7-complete-phase8-handoff.md"
+  "continuation_path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/08_phase9-collapsed-phase10-handoff.md"
 }

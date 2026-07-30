@@ -1,48 +1,40 @@
 {
   "status": "partial",
-  "started_at": "2026-07-29T23:36:08Z",
+  "started_at": "2026-07-30T01:03:04Z",
   "requires_user_review": false,
   "artifacts": [
     {
       "type": "handoff",
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/04_gate-b2-verdict.md",
-      "summary": "Gate B2 beta-split refutation probe verdict: PASS, residual risk carried forward"
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/07_post-reuse-closure-verdict.md",
+      "summary": "Phase 9 verdict: COLLAPSED, with full technical justification"
     },
     {
       "type": "handoff",
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/05_phase7-complete-phase8-handoff.md",
-      "summary": "Phases 5-7 complete/committed; Phase 8 design-subtlety continuation notes for the next dispatch"
-    },
-    {
-      "type": "source",
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "summary": "Phase 6 statement-shape fix (openBranch_countermodel/tableau_complete) and Phase 7 raw-edge persistence export (IPosPersistRaw)"
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/08_phase9-collapsed-phase10-handoff.md",
+      "summary": "Continuation handoff for Phase 10 (full origin tracing)"
     },
     {
       "type": "plan",
       "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
-      "summary": "Phases 5-7 marked COMPLETED with outcomes recorded; Phase 8 annotated with a pointer to the continuation handoff"
+      "summary": "Phase 9 marked COMPLETED with COLLAPSED outcome; Phase 10 entry criterion annotated as met"
     }
   ],
   "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
-    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/BetaSplitProbe.lean",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/04_gate-b2-verdict.md",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/05_phase7-complete-phase8-handoff.md",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md"
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/07_post-reuse-closure-verdict.md",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/08_phase9-collapsed-phase10-handoff.md",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/.orchestrator-handoff.json"
   ],
   "completion_data": {
-    "completion_summary": "Phases 5-7 of plan 06 landed: Gate B2 (beta-split refutation probe) verdict PASS with residual risk explicitly carried forward; the machine-verified openBranch_countermodel/hvalid statement-shape defect fixed; the raw-edge persistence conjunct (IPosPersistRaw) exported. Full lake build green, zero new sorries beyond the one deliberately-deferred new conjunct. Phases 8-14 remain (reuse-time containment export, post-reuse closure, multi-hop composition, the three sorry discharges, final CI) -- Phase 8 has a documented design subtlety to resolve first, recorded in handoffs/05.",
+    "completion_summary": "Phase 9 of plan 06 (post-reuse closure lemma, the cheap route) attempted and recorded verdict COLLAPSED: the 'y<=x' descendant sub-case closes cleanly with already-landed exports (IPosPersistRaw, IBranchSaturation.sat_timp, no_contradiction), but the 'x<=y<=w' ancestor sub-case genuinely requires full origin-tracing (Phase 10), independently confirmed against Gate B's own Phase 2 prototype finding the identical gap. Also found the case-split itself needs a not-yet-built ForestComparable/par-linearity export, properly Phase 10's own first construction step. Zero Cslib/ writes this dispatch (prohibited to land a sorry or a duplicated-effort partial signature change); full lake build (3311 jobs) reconfirmed green with the identical 4-sorry set as Phase 8, no regression. Phases 10-14 remain; Phase 10 is the plan's own declared largest phase (1-2 dispatches).",
     "roadmap_items": []
   },
   "blocked_phase": null,
   "blockers": [],
   "partial_progress": {
-    "stage": "phase_8_not_started",
-    "details": "Phases 5-7 complete and committed (a6b0d14b, 0ef99cd4). Phase 8 requires resolving a design subtlety before threading a new companion invariant through intExpandBranches_openBranch_sat's induction -- see handoffs/05.",
-    "phases_completed": 7,
+    "stage": "phase_10_not_started",
+    "details": "Phases 1-9 complete. Phase 9 verdict COLLAPSED (handoffs/07). Phase 10 (full origin tracing) is now active per handoffs/08 -- its own first step is building the ForestComparable/par-linearity export through a new intExpandBranches_openBranch_sat conclusion component, then extending IWorldHist's witness functions for general origin tracing.",
+    "phases_completed": 9,
     "phases_total": 14
   },
   "metadata": {
@@ -54,7 +46,7 @@
   },
   "verification": {
     "verification_passed": false,
-    "note": "Not run to final CI (Phase 14) since phases 8-13 remain; this is expected for a partial/multi-dispatch task, not a failure. lake build (full project) is green with exactly 4 sorries in scope, all deliberately deferred: DP-5 (Scheme.lean truthLemma), the Phase-6 openBranch_countermodel conjunct, DP-3 (Completeness.lean), DP-4 (Minimal/Completeness.lean).",
+    "note": "Not run to final CI (Phase 14) since phases 10-13 remain; expected for a partial/multi-dispatch task. No Lean file changed this dispatch, so verification here is a REGRESSION check, not new-work verification: full lake build (3311 jobs) green; identical 4 in-scope sorries as Phase 8 (DP-5 at Scheme.lean:671, the Phase-6 openBranch_countermodel conjunct at Scheme.lean:7617/7683, DP-3 at Intuitionistic/Completeness.lean:137/146, DP-4 at Minimal/Completeness.lean:133/141); checkInitImports and lint-style clean; lean_verify on truthLemma, tableau_complete, openBranch_countermodel, intuitionisticTableau_complete, minimalTableau_complete all report only the expected standard axioms plus transitive sorryAx, unchanged from Phase 8.",
     "sorry_count": 4,
     "vacuous_count": 0,
     "axiom_count": 0,

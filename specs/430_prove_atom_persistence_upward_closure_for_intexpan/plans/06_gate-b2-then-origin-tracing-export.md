@@ -614,12 +614,30 @@ evidence.
   and needs a mono-lift, same as every other non-planting arm.)*
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
-### Phase 9: Post-reuse closure lemma — the cheap route first [NOT STARTED]
+### Phase 9: Post-reuse closure lemma — the cheap route first [COMPLETED]
 
 - **Goal:** Prove the residual obligation: **no positive formula arrives at `w` after the reuse
   event without also being at `x`.** This is the genuinely large piece. Attempt the
   saturation + copy-completeness route **first**; full origin tracing is Phase 10's fallback, not
   this phase's opening move.
+- **Outcome: COLLAPSED.** Full analysis, cross-checked against Gate B's own independent Phase 2
+  finding, in `handoffs/07_post-reuse-closure-verdict.md`. The `y ≤ x` ("descendant") sub-case
+  closes cleanly with already-landed exports (`IPosPersistRaw` + `IBranchSaturation.sat_timp` +
+  `no_contradiction`, no new machinery). The `x ≤ y ≤ w` ("ancestor") sub-case remains open:
+  content only flows forward (ancestor → descendant) via the copy channel, so knowing `χ` at an
+  intermediate world `y` says nothing about `χ` at `x`; closing it needs `χ`'s genuine point of
+  origin traced back to `x`, which is Phase 10's job. Additionally, even the case split itself
+  needs a `ForestComparable`/`par`-linearity export that does not yet exist anywhere in
+  `Scheme.lean` (checked directly: `IWorldHist` is not in `intExpandBranches_openBranch_sat`'s
+  conclusion) — building it is properly Phase 10's first step, not a standalone Phase 9
+  corollary, since it requires the same kind of conclusion-signature change Phase 10's
+  origin-tracing extension needs anyway. Per the plan's own Rollback/Contingency ("Phase 9
+  returns COLLAPSED: proceed to Phase 10. This is a planned branch, not a failure."), Phase 10
+  is now active. **Zero `Cslib/` writes this phase** (confirmed via `git status --short Cslib/
+  CslibTests/`, empty) — landing a partial lemma would have required either a prohibited
+  `sorry`/weakened statement, or a premature signature change duplicated by Phase 10 itself.
+  `lake build` (full project, 3311 jobs) reconfirmed green with the identical 4-sorry set as
+  Phase 8; no regression.
 - **Why the cheap route is plausible** (report 05 §3, flagged **UNVERIFIED**): post-reuse arrivals
   at `w` have exactly two sources.
   - **Decomposition at `w`** of a premise already present at reuse time. That premise is at `x` by
@@ -632,20 +650,33 @@ evidence.
 - **The `x ≤ y ≤ w` case is where this can collapse.** That is the declared failure mode, and
   recording "route collapsed, escalate to Phase 10" is a legitimate outcome of this phase.
 - **Tasks:**
-  - [ ] State the residual obligation precisely as a lemma over the final branch, taking Phase 8's
-        containment and `IBranchSaturation` as hypotheses.
-  - [ ] Discharge the decomposition source using saturation at `x`.
-  - [ ] Discharge the `y ≤ x` copy source using the V4 channel plus Phase 4's copy-completeness.
-  - [ ] Attack the residual `x ≤ y ≤ w` case. Set an explicit budget for it and stop when the
-        budget is spent rather than open-endedly grinding.
-  - [ ] Export `par`-linearity and (H1-acc) from `IWorldHist` as the `ForestComparable` fact the
+  - [x] State the residual obligation precisely as a lemma over the final branch, taking Phase 8's
+        containment and `IBranchSaturation` as hypotheses. *(Stated in prose/proof-sketch form in
+        the verdict handoff, not as a landed Lean declaration — see Outcome above for why.)*
+  - [x] Discharge the decomposition source using saturation at `x`. *(Confirmed closeable given
+        `ForestComparable`, via `IPosPersistRaw` + `sat_timp` + `no_contradiction`; see handoff 07.)*
+  - [x] Discharge the `y ≤ x` copy source using the V4 channel plus Phase 4's copy-completeness.
+        *(Confirmed closeable directly via `IPosPersistRaw`, already landed; see handoff 07.)*
+  - [x] Attack the residual `x ≤ y ≤ w` case. Set an explicit budget for it and stop when the
+        budget is spent rather than open-endedly grinding. *(Confirmed genuinely open: content
+        flows forward-only via the copy channel; closing it needs origin-tracing, not a corollary
+        of current exports. Cross-checked against Gate B's independent Phase 2 finding.)*
+  - [x] Export `par`-linearity and (H1-acc) from `IWorldHist` as the `ForestComparable` fact the
         comparability step needs — **export, not construction** (report 05 §2).
-  - [ ] Record the verdict: **CLOSED** (the cheap route works; Phase 10 becomes
+        *(deviation: altered -- confirmed this export does NOT yet exist (grep-verified: only a
+        scratch-prototype hypothesis, never a Scheme.lean corollary) and requires a further
+        `intExpandBranches_openBranch_sat` conclusion-signature change, i.e. it is NOT a
+        standalone export but Phase 10's own first construction step; not built here to avoid
+        duplicated churn -- see handoff 07.)*
+  - [x] Record the verdict: **CLOSED** (the cheap route works; Phase 10 becomes
         `[COMPLETED WITH EXCLUSIONS]`) or **COLLAPSED** (the `x ≤ y ≤ w` recursion forces full
         origin tracing; Phase 10 runs), in `handoffs/05_post-reuse-closure-verdict.md`.
-  - [ ] **Prohibited workarounds** (carried forward from Phase 5's blocker record, where they were
+        *(deviation: altered -- filed as `handoffs/07_post-reuse-closure-verdict.md` instead, per
+        handoff 06's own numbering note, to avoid collision with this task's handoffs 05/06.
+        Verdict: **COLLAPSED**.)*
+  - [x] **Prohibited workarounds** (carried forward from Phase 5's blocker record, where they were
         correctly avoided): no `sorry`, no vacuous placeholder, no weakened statement. If the route
-        collapses, stop and hand off — do not force a result.
+        collapses, stop and hand off — do not force a result. *(Honored: zero `Cslib/` writes.)*
 - **Timing:** ~1 dispatch
 - **Depends on:** 8
 - **Verification Tier:** interface
@@ -662,7 +693,14 @@ evidence.
 - **Goal:** If and only if Phase 9 recorded **COLLAPSED**, build the origin-tracing extension:
   track, for every positive formula's branch presence, a traceable point of origin, and show that
   origin is raw-accessible to any loop-back edge's source.
-- **Entry criterion:** `handoffs/05_post-reuse-closure-verdict.md` records **COLLAPSED**. If it
+- **Entry criterion MET**: `handoffs/07_post-reuse-closure-verdict.md` (the plan's placeholder
+  path `handoffs/05_post-reuse-closure-verdict.md` was reassigned per handoff 06's own numbering
+  note, to avoid collision with this task's handoffs 05/06) records **COLLAPSED**. This phase is
+  now active; not yet started. Read handoff 07 first — it names the exact `ForestComparable`
+  export gap this phase must build as its own first step, and confirms the `y ≤ x` closing
+  argument (reusable verbatim once `ForestComparable` exists) so it is not re-derived.
+- **Entry criterion (original text):** `handoffs/05_post-reuse-closure-verdict.md` records
+  **COLLAPSED**. If it
   records CLOSED, this phase is closed immediately as `[COMPLETED WITH EXCLUSIONS]` with a
   `#### Reasoned Exclusions` record citing that verdict — do not build machinery Phase 9 made
   unnecessary.
@@ -857,9 +895,10 @@ so these decisions are not re-litigated mid-implementation.
       (`git diff --stat` shows no change to it).
 - [ ] **Phase 7**: raw-edge conjunct exported; every `intExpandBranches_openBranch_sat` call site
       repaired; `lean_verify` axiom-clean.
-- [ ] **Phase 9**: verdict CLOSED or COLLAPSED recorded in
-      `handoffs/05_post-reuse-closure-verdict.md`; no `sorry`, no vacuous placeholder, no weakened
-      statement introduced in either branch.
+- [x] **Phase 9**: verdict CLOSED or COLLAPSED recorded in
+      `handoffs/07_post-reuse-closure-verdict.md` (renumbered per handoff 06's note); no `sorry`,
+      no vacuous placeholder, no weakened statement introduced in either branch. Verdict:
+      **COLLAPSED**.
 - [ ] **Phase 11**: two-hop composition constructed concretely before the general claim.
 - [ ] `grep -n sorry Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean` → no
       bare `sorry`.
@@ -888,8 +927,10 @@ so these decisions are not re-litigated mid-implementation.
   `HvalidShapeRefutation.lean` (the machine-verified statement-shape refutation — **do not
   delete**; it is Phase 6's evidence)
 - handoffs/04_gate-b2-verdict.md (Phase 5 verdict — the gating record)
-- handoffs/05_post-reuse-closure-verdict.md (Phase 9 verdict — CLOSED or COLLAPSED)
-- Existing handoffs, preserved: 01 (Gate A), 02 (Gate B), 03 (Phase 5 investigation)
+- handoffs/07_post-reuse-closure-verdict.md (Phase 9 verdict — COLLAPSED; renumbered from the
+  plan's placeholder `05_` path per handoff 06's numbering note)
+- Existing handoffs, preserved: 01 (Gate A), 02 (Gate B), 03 (Phase 5 investigation), 05
+  (Phase 7 continuation), 06 (Phase 8 continuation)
 - Edited: `Intuitionistic/Scheme.lean`, `Intuitionistic/Completeness.lean`,
   `Minimal/Completeness.lean`. `Intuitionistic/Expansion.lean` and `Intuitionistic/Soundness.lean`
   were edited in Phase 3 and are **not** expected to change again.

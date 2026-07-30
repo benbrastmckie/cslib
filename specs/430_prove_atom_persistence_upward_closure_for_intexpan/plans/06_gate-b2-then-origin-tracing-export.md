@@ -529,7 +529,7 @@ evidence.
   inherited as established.
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
-### Phase 8: Export reuse-time containment as a companion invariant [NOT STARTED]
+### Phase 8: Export reuse-time containment as a companion invariant [COMPLETED]
 
 - **Continuation note (read before starting):** `handoffs/05_phase7-complete-phase8-handoff.md`
   records a design subtlety worth resolving before writing Lean: the naive "bare `(x, l) ∈ augH`
@@ -550,31 +550,68 @@ evidence.
   formula of `w` into `newForms`, `sfor` **is** `{φ} ∪ posFormulasAt bPers w`, so that conjunct
   states exactly the containment above. It is already exported as `hcont` by
   `intFImpReuseWitnessAnc?_spec` (`Expansion.lean:321`) and currently consumed locally.
+- **Outcome:** Landed. Adopted the handoff's **existential-snapshot** encoding (candidate 2):
+  `IReuseContain (lbH : IEdges) (b : IBranch Atom) : Prop := ∀ x l, (x, l) ∈ lbH → ∃ bSnap, (∀ y ∈
+  bSnap, y ∈ b) ∧ ∀ χ, T(χ)@l ∈ bSnap → T(χ)@x ∈ bSnap`, plus its list companion
+  `IAllReuseContain` (2-list zip over `(bs, lbSets)`) and `_append`/`_map_const` lemmas, all
+  mirroring `IAllAccessConsistent`'s shape but threaded through a genuinely **separate** parallel
+  list (`lbSets`/`pendingLB`/`doneLB`), NOT the existing `augSets`/`pendingAug`/`doneAug` --
+  `IReuseContain` only concerns recorded loop-back pairs, a strict subset of the full augmented
+  edge list `IAllAccessConsistent` already tracks, and folding it into the same list would have
+  required re-establishing the fact at the MINT arm too (redundant with, and weaker than, Phase
+  7's `IPosPersistRaw`). `intExpandBranches_openBranch_sat`'s conclusion gained a THIRD existential
+  (`lbEdges`, distinct from `edges` and `rawEdges`) plus `IReuseContain lbEdges b`. The reuse arm
+  (`case6`) plants the new fact via a new `hcontGen` lemma (the GENERALIZATION of the existing
+  `houtPhi`/`hphi` derivation from the single formula `φ` to every `χ` with `T(χ)@l ∈ bPers`,
+  since `hcont` already ranges over all of `sfor = {φ} ∪ posFormulasAt bPers l`) composed with a
+  new `IReuseContain_snoc` lemma (bSnap := the current `bPers`, reflexively contained in itself).
+  Every OTHER arm that touches `pendingLB`/`hPendingARC` (cases 2, 4, 5, 7, 8) performs only a
+  monotone lift via `IReuseContain_mono`, mirroring exactly how `hACC`/`hWH` are carried at those
+  same arms -- confirmed by locating every site that extends `augH`/`doneAug` (Scope Hypothesis
+  below): only the reuse arm (`case6`) appends a genuinely new loop-back pair; the mint arm
+  (`case7`) extends the (separate) RAW/augmented edge list with `newE` but the LB-only list
+  `lbH` is carried unchanged in value, requiring only the mono-lift, not a new plant. `lake
+  build` (full project, 3311 jobs) green; `lean_verify` on `openBranch_countermodel` reports only
+  the expected `["propext", "sorryAx", "Classical.choice", "Quot.sound"]` (the transitive
+  `sorryAx` from its own still-deferred upward-closure conjunct, unchanged from Phase 6/7);
+  `checkInitImports` and `lint-style` clean on the touched file; `TableauConformance` still green.
+  Exactly the same 4 sorries as after Phase 7 (Phase 8 added zero new sorries).
 - **Tasks:**
-  - [ ] Define a companion invariant (proposed `IAllReuseContain`, or a new clause on a sibling of
+  - [x] Define a companion invariant (proposed `IAllReuseContain`, or a new clause on a sibling of
         `IAllAccessConsistent`) recording, per recorded loop-back edge `(x, l)` in the augmented
-        list, the containment `posFormulasAt b l ⊆ posFormulasAt b x`.
-  - [ ] Mirror `IAllAccessConsistent`'s **companion-not-merged** pattern relative to
+        list, the containment `posFormulasAt b l ⊆ posFormulasAt b x`. *(deviation: altered --
+        the existential-snapshot shape `∃ bSnap` was used, not a bare current-branch containment
+        claim, per the handoff's own recommended candidate 2, since only that shape is preserved
+        automatically under branch growth.)*
+  - [x] Mirror `IAllAccessConsistent`'s **companion-not-merged** pattern relative to
         `IAllConsistent` — a parallel invariant threaded alongside, not new fields merged into an
-        existing structure.
-  - [ ] Reuse `IWorldHist_mono`'s shape for the monotonicity transfer and
+        existing structure. *(Threaded via its own parallel list `lbSets`, not reusing `augSets`
+        -- see Outcome for why.)*
+  - [x] Reuse `IWorldHist_mono`'s shape for the monotonicity transfer and
         `IAllWorldHist_append`/`_map_const` for the list-level plumbing. Do not invent a parallel
-        mechanism.
-  - [ ] Thread it through the `key` induction. The intermediate (non-terminal) cases delegate to
+        mechanism. *(`IReuseContain_mono`/`IAllReuseContain_append`/`IAllReuseContain_map_const`
+        are direct structural mirrors of `IWorldHist_mono`/`IAllWorldHist_append`/`_map_const`.)*
+  - [x] Thread it through the `key` induction. The intermediate (non-terminal) cases delegate to
         `ih` polymorphically; the reuse arm is the one arm that must plant the new fact, and the
         terminal sites are where it is read.
-  - [ ] Confirm branch-append monotonicity carries the planted fact to the final branch (handoff
+  - [x] Confirm branch-append monotonicity carries the planted fact to the final branch (handoff
         03 Finding 2 records this half as **not hard** — ordinary append monotonicity, the
         ubiquitous `hmemP`/`IWorldHist_mono` pattern). Do not conflate this with the general
-        persistence guarantee, which is Phase 9's job.
-  - [ ] `lean_verify`: axiom-clean, no `sorryAx`.
-- **Timing:** ~1 dispatch
+        persistence guarantee, which is Phase 9's job. *(Confirmed: `case4`, the terminal
+        saturated-branch return site, mono-lifts `pendingLB`'s head from `bh` to `bPers` and
+        exports it as the third existential.)*
+  - [x] `lean_verify`: axiom-clean, no `sorryAx` beyond the pre-existing transitive one from the
+        Phase-6 conjunct.
+- **Timing:** ~1 dispatch (spent)
 - **Depends on:** 7
 - **Verification Tier:** interface
 - **Scope Hypothesis:** the reuse arm is the only arm of `intExpandBranches.go` that appends to the
   augmented list beyond the raw edges, so exactly one arm must plant the new fact and the rest
   delegate to `ih`. Confirm at implementation time by locating every site that extends `augH` /
-  `doneAug`; if more than the reuse arm does so, record it before threading.
+  `doneAug`; if more than the reuse arm does so, record it before threading. *(Confirmed by
+  enumeration of all 10 cases of the `key` induction: only `case6` (reuse) appends a new
+  loop-back pair; `case7` (mint) appends only to the RAW/augmented list, not the LB-only list,
+  and needs a mono-lift, same as every other non-planting arm.)*
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
 ### Phase 9: Post-reuse closure lemma — the cheap route first [NOT STARTED]

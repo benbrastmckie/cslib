@@ -1,6 +1,13 @@
 # Blocker Research: Gap 1 Fixpoint-Completeness — and a Machine-Verified Refutation Downstream of It
 
 - **Task**: 430 - prove_atom_persistence_upward_closure_for_intexpan
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Type**: cslib, blocker-escalation research
 - **Session**: sess_1785374640_65c34b
 - **Plan**: `plans/06_gate-b2-then-origin-tracing-export.md` (Phase 10 `[BLOCKED]`, Phase 11 `[NOT STARTED]`)

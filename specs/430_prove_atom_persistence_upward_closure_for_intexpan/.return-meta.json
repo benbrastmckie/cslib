@@ -41,12 +41,38 @@
       "mk_all": "no update necessary"
     },
     "lean_verify_summary": {
-      "intuitionisticTableau_complete": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
-      "minimalTableau_complete": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
-      "truthLemma": ["sorryAx"],
-      "tableau_complete": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
-      "openBranch_countermodel": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
-      "intExpandBranches_closed_unsat": ["propext", "Classical.choice", "Quot.sound"],
+      "intuitionisticTableau_complete": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "minimalTableau_complete": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "truthLemma": [
+        "sorryAx"
+      ],
+      "tableau_complete": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "openBranch_countermodel": [
+        "propext",
+        "sorryAx",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "intExpandBranches_closed_unsat": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
       "note": "No new axioms anywhere; intExpandBranches_closed_unsat carries no sorryAx, confirming it remains sorry-free."
     }
   },
@@ -54,15 +80,23 @@
     "session_id": "sess_1785374640_65c34b",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
     "compliance_check": "passed",
     "requires_user_review": false,
     "plan_deviations": [
       "Task 6 (optional case6 composition) dropped without attempting compilation, per the plan's own authorized drop clause -- see plan Phase 15 task 6 annotation.",
       "One fix beyond the enumerated task list: a pre-existing 'task 574' citation on Expansion.lean's intFImpReuseWitnessAnc? docstring (untouched by tasks 4/5) rephrased to a durable anchor, required to satisfy the plan's own final grep-based verification bullet."
     ],
-    "open_decision_points": ["ODP-1"],
+    "open_decision_points": [
+      "ODP-1"
+    ],
     "state_json_updated": true,
-    "todo_md_regenerated": true
+    "todo_md_regenerated": true,
+    "cycles_used": 4,
+    "final_state": "completed"
   }
 }

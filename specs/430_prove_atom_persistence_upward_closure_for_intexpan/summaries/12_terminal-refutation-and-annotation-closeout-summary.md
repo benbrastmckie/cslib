@@ -4,8 +4,34 @@
 - **Plan**: `plans/12_terminal-refutation-and-annotation-closeout.md`
 - **Status**: [COMPLETED] (plan-level). This dispatch executed Phase 15 — the plan's only live
   phase — to completion. ODP-1 remains OPEN as a decision point, not a scheduled phase.
+- **Started**: 2026-07-30
+- **Completed**: 2026-07-30
+- **Artifacts**: `plans/12_terminal-refutation-and-annotation-closeout.md`,
+  `reports/11_gap1-fixpoint-completeness.md`, `scratch/BetaSplitRefutation.lean`,
+  `scratch/Gap1FixpointProbe.lean`, this summary
+- **Standards**: Lean 4 / CSLib contribution conventions; annotation-only change set (no
+  statement, signature, or proof-term modifications)
 
-## What this dispatch did
+## Overview
+
+The task set out to prove positive-formula persistence along the augmented accessibility
+relation and thereby discharge three sorries at once. That goal is **not achievable**: the
+statement is false. A machine-verified counterexample built by a closure-asymmetry recipe
+exhibits two augmented-preorder-equivalent worlds that disagree on an atom, joined by a
+loop-back edge the reuse witness never re-validates once recorded.
+
+Permanent deferral of all three obligations was pre-authorized by the prior plan's own risk
+analysis, which named this exact mechanism and specified terminal deferral (not escalation) if it
+proved realizable. This close-out therefore records the refutation in the source rather than
+continuing to build machinery against a false statement. No successor persistence route was
+proposed, and the quotient / blocking-frame route remains prohibited.
+
+One consequence is deliberately left unresolved rather than acted on: whether an already-landed
+upward-closure conjunct is itself false rests on an inference that is argued but not
+machine-checked, so it is recorded as an open decision point (ODP-1) and no landed code was
+changed on its basis.
+
+## What Changed
 
 Phase 15 ("Annotation and docstring close-out") is an annotation-only dispatch: it records, *in
 the source*, the terminal refutation established by `reports/11_gap1-fixpoint-completeness.md`
@@ -130,3 +156,72 @@ sign-off, not a scheduled phase, and its openness does not block this plan's com
 successor persistence route, no quotient/blocking-frame reconstruction, and no calculus-level
 repair of the loop-check were proposed or scheduled; all three remain explicitly out of scope
 per the plan's Reasoned Exclusions and Non-Goals.
+
+## Decisions
+
+1. **Permanent deferral is authorized by mechanism, not by discovering phase.** Plan 06's
+   line-218 risk row names the beta-split refutation shape and states that if realizable, the
+   statement is FALSE and all three sorries are permanently deferred ("Refutation ⇒ terminal
+   deferral, NOT escalation"). That authorization was read as scoped to the *mechanism*, so it
+   fires even though the gating probe itself recorded a PASS and the refutation arrived later
+   from a different candidate family (the closure-asymmetry recipe).
+
+2. **The upward-closure conjunct is annotated DISPOSITION UNDECIDED, never REFUTED.** The
+   inference from `fimpWitnesses = [1]` to "the whole `∃ edges` conjunct is false" is argued,
+   not machine-checked, and carries an `[UNVERIFIED]` marker. Report 11 §6 recommends
+   re-annotating the conjunct as REFUTED; that recommendation was deliberately declined, since
+   §3.3 of the same report concedes the inference is unverified. Landed code was therefore left
+   untouched on that point.
+
+3. **The stale STOP-gate note was corrected by appending, not by deleting.** The original text
+   claiming the fuel measure "has not been built" is retained in place with a correction
+   paragraph appended, preserving the historical record rather than silently rewriting it.
+
+4. **The optional `case6` composition was dropped without attempting compilation**, per its own
+   authorized drop clause, rather than forced into place.
+
+## Impacts
+
+- **Public theorems**: no signature, statement, or proof term changed anywhere. Comment-stripped
+  Lean source is byte-identical across all four touched files, so the annotation-only claim is
+  mechanically established rather than asserted.
+- **Sorry set**: unchanged in membership. `Soundness.lean` remains sorry-free.
+- **Superseded criterion**: the original bar (`grep -n sorry` returning no bare sorry in both
+  `Completeness.lean` files) is now unachievable, not merely unmet — the obligations are
+  unprovable as stated. It is formally retired.
+- **Preserved assets**: nothing sorry-free that landed earlier is false. The raw-edge
+  persistence export still holds, confirmed against the refuting witness itself.
+- **Downstream**: the defect is characterized as a frame construction issue — containment
+  validated at reuse time, the loop-back edge never re-validated once recorded. This is
+  calculus-level, not proof-route. Termination is unaffected.
+
+## Follow-ups
+
+Neither item below is scheduled work, and neither blocks this close-out. Both need a human
+decision before anything is acted on.
+
+1. **ODP-1 — disposition of the upward-closure conjunct.** Resolve whether it is genuinely
+   false by machine-checking the `fimpWitnesses` inference, or record explicit sign-off. If it
+   is false, a `sorry` currently stands for a false statement, which is worth removing. Until
+   then, revert / weaken / delete / restate of that conjunct are all explicitly unauthorized.
+
+2. **Frame-construction repair of the reuse witness.** Re-validating the loop-back edge after
+   it is recorded is a calculus-level change, outside this task's scope and not proposed here.
+   It would be a separate task. The quotient / blocking-frame reconstruction route remains
+   PROHIBITED and must not be revived as a substitute.
+
+## References
+
+- `reports/11_gap1-fixpoint-completeness.md` — two-part verdict: the fixpoint question is
+  provable and already landed; the residual beta arm is refuted.
+- `scratch/BetaSplitRefutation.lean` — the machine-verified counterexample. Independently
+  re-verified during orchestration: compiles exit 0 with zero errors and zero sorries,
+  `branchesAgree` and `minBranchesAgree` both `true` (the recreated loop returns exactly the
+  branch the real decision procedures return), violation `some (2, 1, 2)` at the real fuel,
+  `decisiveFacts = (true, false)`, 3 of 4 candidates refuting.
+- `scratch/Gap1FixpointProbe.lean` — empirical probe behind the provability half of the verdict.
+- `handoffs/10_origin-tracing-scoping-and-new-blocker.md` — the scoping pass that narrowed the
+  invariant and surfaced the blocker.
+- `handoffs/07_post-reuse-closure-verdict.md` — the earlier COLLAPSED verdict and the exact
+  shape of the residual sub-case.
+- `plans/12_terminal-refutation-and-annotation-closeout.md` — governing plan for this close-out.

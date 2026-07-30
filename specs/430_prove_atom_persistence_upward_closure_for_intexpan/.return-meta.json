@@ -41,8 +41,14 @@
     "session_id": "sess_1785363007_d08249",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
+    "compliance_check": "passed",
+    "cycles_used": 5,
+    "final_state": "implementing"
   },
   "verification": {
     "verification_passed": false,

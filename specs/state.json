@@ -475,7 +475,7 @@
     {
       "project_number": 430,
       "project_name": "prove_atom_persistence_upward_closure_for_intexpan",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prove **positive-formula persistence along the augmented accessibility relation** for open branches produced by `intExpandBranches`, and use it to discharge three sorries at once: `truthLemma`'s T-implication case and both validity bridges.\n\n## The statement\n\n```\n∀ φ w w', w ≤ w' → T(φ)@w ∈ b → T(φ)@w' ∈ b\n```\n\nwhere `≤` is `intAccessPreorder edges` over the **augmented** edge list returned by `intExpandBranches_openBranch_sat` (witness `augSets`, carrying task 574's loop-back edges) — NOT the algorithm's raw `edgeSets`.\n\n## Why this scope, not atom-persistence\n\n`propagatePersistence` (`Rules.lean:144-146`, called from `intFImpRule`) copies every positive formula from `w` to a fresh child `w'` **at creation time**. The structural hole is the opposite order: positive formulas arriving at `w` **after** `w'` was already minted are never re-propagated. That single hole surfaces at two formula shapes:\n\n| φ shape | Manifestation | Sorry |\n|---|---|---|\n| `φ = atom p` | late `T(atom p)@w` never reaches an older child → monotonicity bridge | DP-3 (`Intuitionistic/Completeness.lean:140`), DP-4 (`Minimal/Completeness.lean:128`) |\n| `φ = φ'→ψ'` | copy never arrives at `w'`, so reflexive `sat_timp` cannot fire → Gap 1 | DP-5 (`Scheme.lean:633`) |\n\nThree reasons this must be one task:\n- Closing either sorry alone has **zero public payoff** — both public completeness theorems carry independent sorries and both delegate to `truthLemma`. Only the union yields a sorry-free public theorem.\n- `truthLemma`'s frame is `intAccessPreorder` over the augmented list, deliberately decoupled from the raw edges. Any copy channel filters on raw edges and is strictly weaker, so no algorithm-level, shape-specific patch can close it. The fix is at the **invariant** level, where the general statement costs no more than the atom-only one.\n- The unification is pre-recorded in-source: `Scheme.lean:431-434` recommends stating monotonicity \"as a NEW field/hypothesis threaded alongside `sat_timp`\"; `:413-420` records the same co-inductive diagnosis.\n\nTask 317's Route (a) frame plumbing has landed: `truthLemma` installs `intAccessPreorder edges`, and both `Completeness.lean` bridges already accept `edges` as an argument. The prior coordination gate is discharged.\n\n## Structure: two hard gates, then build-out\n\n**Gate B comes before any calculus change** — it can kill the whole approach and is statable against the tree as it stands.\n\n- **Gate A (probe)**: re-run task 574's variant-selection methodology against the post-Phase-6 tree for V1 (self-copy reinstated verbatim) and V4 (generalize the channel to copy *every* positive formula). Success: saturation on `φ0` at `fuel ≥ 120` and all `TableauConformance.lean` propositional rows matching. V4 is higher-value but **not** assumed safe — positives feed `intApplyRuleFull`'s `.pos,.imp` BETA arm, which yields a world-minting `F(antecedent)@w'`, the original divergence feed. Fall back to V1.\n- **Gate B (Lean prototype, GATING, no algorithm change)**: prototype `∀ φ w w', isAccessible augEdges w w' = true → T(φ)@w ∈ b → T(φ)@w' ∈ b` restricted to a single loop-back hop `(x, l)`, using the `Sfor`-containment available at the blocking site. Known risk (flagged UNVERIFIED): the containment is established against `bPers` (the branch at blocking time), not the final branch `b`, and is consumed locally rather than exported. Whether it survives to the final branch is the largest unretired risk. **If Gate B fails, the approach collapses and permanent deferral is the terminal answer for all three sorries at once — escalation to the quotient/blocking-frame route is prohibited.**\n- **Then**: revert `a70187dd`'s three hunks (mechanical; `Expansion.lean`, `Scheme.lean`, `Soundness.lean`, all green at the parent commit); prove copy-completeness at a genuine `applyAllTImpRules` fixpoint over raw edges (`filterMap`/`countP`, sketched at `Scheme.lean:508-513`, mirroring `applyAllTImpRules_count_drop`); thread the containment invariant alongside `IAllAccessConsistent` and export it in `openBranch_sat`'s conclusion; discharge the T-imp case and instantiate at atoms for DP-3/DP-4.\n\n## Cross-task coordination\n\nReverting `a70187dd` touches task 574's settled work. It does not re-open 574's design: 574 settled *termination* (ancestor blocking) and *the reuse-witness route* (loop-back edges, not quotient), and its own D3 verdict records the copy channel as termination-orthogonal, with the removal described in its own commit message as \"hygiene\" explicitly not addressing Gap 1. Gate A is what makes the revert non-speculative.\n\n## Excluded\n\n- **Quotient / blocking-frame reconstruction**: NO-GO, with an in-repo refutation (`intBlockRep` is non-monotone under branch growth, so it cannot carry the forward induction) and a published one (a filtration relation in the interval may be nontransitive even when `R` is transitive).\n- **A T-imp-only or atom-only phase**: zero public payoff either way.\n- **Route C (containment preorder) and `≤`-on-ℕ upward closure**: both empirically refuted.\n- The pre-repair \"no world bound of any size exists\" finding is **superseded, not contradicted** — post-repair, `WBound φ0`/`intUniverseExt` exist and `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free.\n\n## Sorry ownership\n\nDP-5 (`Scheme.lean:633`), DP-3 (`Intuitionistic/Completeness.lean:140`) and DP-4 (`Minimal/Completeness.lean:128`) are owned by this task. DP-2 (`intFreshMint_preserves_nw`, `Scheme.lean:2605`) is owned by task 585 and must not be touched. Line numbers are current as of commit `8a36eba9`; re-locate by content if shifted.\n\n## Verification\n\n- `grep -n sorry` on both `Completeness.lean` files returns no bare `sorry`; `Scheme.lean:633` closed; `Scheme.lean:2605` (DP-2) unchanged.\n- `lean_verify` on `intuitionisticTableau_complete`, `minimalTableau_complete`, `truthLemma`, `intExpandBranches_closed_unsat`: no new axioms.\n- `Soundness.lean` remains sorry-free; full CI green (`lake build`, `checkInitImports`, `lint-style`, `shake`, `lake test`); `TableauConformance.lean` green.",
       "effort": "2-3 hours",
@@ -485,7 +485,7 @@
         317
       ],
       "created": "2026-06-30T11:02:39Z",
-      "last_updated": "2026-07-29T13:55:41Z",
+      "last_updated": "2026-07-29T23:33:53Z",
       "artifacts": [
         {
           "type": "report",
@@ -525,12 +525,27 @@
         {
           "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/04_positive-formula-persistence-augmented.md",
           "type": "plan"
+        },
+        {
+          "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+          "type": "lean_source",
+          "summary": "applyAllTImpRules restructured with the generalized V4 genCopies channel (Phase 3)."
+        },
+        {
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
+          "type": "plan",
+          "summary": "Revised plan (v3) integrating blocker research 05: Gate B2 beta-split refutation probe as a hard gate before any build-out, the machine-verified hvalid statement-shape fix as an independent parallel phase, then reuse-time containment export, post-reuse closure (cheap route first, origin-tracing fallback), multi-hop composition, and the three sorry discharges. Phases 1-4 carried forward as COMPLETED."
+        },
+        {
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/07_post-reuse-closure-verdict.md",
+          "type": "handoff",
+          "summary": "Phase 9 verdict: COLLAPSED, with full technical justification (ForestComparable non-existence, y<=x closing argument, x<=y<=w open gap)"
         }
       ],
-      "session_id": "sess_1783922075_911857_430",
+      "session_id": "sess_1785363007_d08249",
       "researched": "2026-06-30T11:25:59Z",
-      "next_artifact_number": 5,
-      "blockers": "Sequenced after task 317 (dependency inverted at plan time): 317 v6 Phase 10 already claims both validity-bridge sorries (Intuitionistic/Completeness.lean:113, Minimal/Completeness.lean:110) over the edge preorder; 430 cannot close them until 317 Wave A lands the frame plumbing. 430 re-runs after 317 as verify/re-gate (Phase 1). See plans/03 blockers B430-1..3.",
+      "next_artifact_number": 7,
+      "blockers": "Phase 5 of plan 04 returned PARTIAL: augmented-edge persistence export needs origin-tracing machinery. Blocker research (reports/05) verdict tractable_large, NOT refuted, but introduces a NEW unretired refutation risk (independent beta-split choices at a blocked world and its reused ancestor). Plan 06 gates all build-out behind Gate B2 (Phase 5, scratch-only probe). Separately, DP-3/DP-4 are machine-verified unprovable AS STATED (scratch/HvalidShapeRefutation.lean): tableau_complete's hvalid premise discards b's provenance, so a signature change to openBranch_countermodel/hvalid is mandatory (plan 06 Phase 6, independent of Gate B2). If Gate B2 refutes, permanent deferral of DP-3/DP-4/DP-5 is the sanctioned terminal answer; the quotient/blocking-frame route remains prohibited.",
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
@@ -538,7 +553,77 @@
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
         "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean"
-      ]
+      ],
+      "plan_metadata": {
+        "phases": 14,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 3,
+        "dependency_waves": [
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            7
+          ],
+          [
+            8
+          ],
+          [
+            9
+          ],
+          [
+            10
+          ],
+          [
+            11
+          ],
+          [
+            12
+          ],
+          [
+            13
+          ],
+          [
+            14
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/05_phase5-blocker-research.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-07-29"
+          },
+          {
+            "path": "reports/03_falsification-spike.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-07-01"
+          },
+          {
+            "path": "reports/02_team-research.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-07-01"
+          },
+          {
+            "path": "reports/01_atom-persistence-upward-closure.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-06-30"
+          }
+        ],
+        "skeleton": false,
+        "follow_up_tasks": []
+      }
     },
     {
       "project_number": 450,

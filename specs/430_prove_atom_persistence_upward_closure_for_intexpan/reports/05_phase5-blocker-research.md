@@ -1,6 +1,13 @@
 # Phase 5 Blocker Research: Origin-Tracing Necessity, Scope, and a New Refutation Risk
 
 - **Task**: 430 — prove_atom_persistence_upward_closure_for_intexpan
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Dispatch type**: research only (blocker escalation). Zero writes to `Cslib/` or `CslibTests/`.
 - **Verdict**: `tractable_large`, **but** with a newly-identified, unretired **refutation risk**
   that must be probed before any large build-out, plus a **machine-verified statement-shape

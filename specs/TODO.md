@@ -6,7 +6,7 @@ next_project_number: 586
 
 ## Task Order
 
-*Updated 2026-07-29. Generated from state.json dependency graph.*
+*Updated 2026-07-30. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
@@ -27,7 +27,7 @@ next_project_number: 586
 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-430 [PLANNED] — Prove **positive-formula persistence along the augmented accessib
+430 [IMPLEMENTING] — Prove **positive-formula persistence along the augmented accessib
 583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
@@ -521,7 +521,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 
 ### 430. Prove atom persistence upward closure for intexpan
 - **Effort**: 2-3 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 317
@@ -533,7 +533,11 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-b-findings.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-c-findings.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-d-findings.md]
-- **Plan**: [430_prove_atom_persistence_upward_closure_for_intexpan/plans/04_positive-formula-persistence-augmented.md]
+- **Plan**:
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/plans/04_positive-formula-persistence-augmented.md]
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md]
+- **Lean_source**: [Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean]
+- **Handoff**: [430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/07_post-reuse-closure-verdict.md]
 
 **Description**: Prove **positive-formula persistence along the augmented accessibility relation** for open branches produced by `intExpandBranches`, and use it to discharge three sorries at once: `truthLemma`'s T-implication case and both validity bridges.
 

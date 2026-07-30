@@ -1,6 +1,13 @@
 # Team Research Report: Task #430 — Atom Persistence / Upward-Closure
 
 **Task**: 430 (`prove_atom_persistence_upward_closure_for_intexpan`)
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Parent**: 317 · **Topic**: PL-Tableau · **Type**: cslib
 **Date**: 2026-06-30 · **Mode**: Team research (4 teammates: Primary, Alternatives, Critic, Horizons)
 **Session**: sess_1782818058_465873

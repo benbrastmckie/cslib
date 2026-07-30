@@ -1,6 +1,13 @@
 # Teammate C (Critic) Findings: Atom Persistence / Upward-Closure for `intExpandBranches`
 
 **Task**: 430 · **Parent**: 317 · **Role**: Critic (stress-test seed report `01_atom-persistence-upward-closure.md`)
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Session**: sess_1782818058_465873
 **Method**: targeted reads + grep; no full `lake build`. All claims grounded in file:line.
 

@@ -1,6 +1,13 @@
 # Seed Research Report: Atom Persistence / Upward-Closure for `intExpandBranches` Open Branches
 
 **Task**: 430 (`prove_atom_persistence_upward_closure_for_intexpan`)
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Parent**: 317 (`propositional_tableau_completeness`)
 **Topic**: PL-Tableau
 **Type**: cslib · **Status**: seed (researched — needs deeper investigation)

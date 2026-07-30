@@ -1,6 +1,11 @@
 # Implementation Summary (Partial): Task 430 — Positive-Formula Persistence Along the Augmented Relation
 
 - **Task**: 430 - prove_atom_persistence_upward_closure_for_intexpan
+- **Status**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Plan**: plans/04_positive-formula-persistence-augmented.md
 - **Status of this dispatch**: Phases 1-2 (the two gates) COMPLETED. Phases 3-8 NOT STARTED.
   No `Cslib/`/`CslibTests/` files modified; no sorries touched; DP-2 (`Scheme.lean:2605`)

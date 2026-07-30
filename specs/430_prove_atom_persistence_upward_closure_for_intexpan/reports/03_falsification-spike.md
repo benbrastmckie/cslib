@@ -1,6 +1,13 @@
 # Falsification Spike Report — Task #430 (Atom Persistence / Upward-Closure)
 
 **Task**: 430 (`prove_atom_persistence_upward_closure_for_intexpan`) · **Parent**: 317 · **Type**: cslib
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Session**: sess_1782818058_465873 · **Date**: 2026-06-30
 **Builds on**: `reports/02_team-research.md`, `02_teammate-a-findings.md`, `02_teammate-c-findings.md`
 **Method**: EMPIRICAL. One scratch module (`Cslib/Scratch430.lean`, since removed/restored to HEAD)

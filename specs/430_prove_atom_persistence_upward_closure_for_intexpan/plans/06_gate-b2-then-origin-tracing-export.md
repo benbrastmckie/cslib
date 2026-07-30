@@ -688,7 +688,7 @@ evidence.
   three-source reality is exactly the unsound shortcut this plan forbids.
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
-### Phase 10: Fallback — full origin tracing (CONDITIONAL) [NOT STARTED]
+### Phase 10: Fallback — full origin tracing (CONDITIONAL) [IN PROGRESS]
 
 - **Goal:** If and only if Phase 9 recorded **COLLAPSED**, build the origin-tracing extension:
   track, for every positive formula's branch presence, a traceable point of origin, and show that
@@ -696,9 +696,21 @@ evidence.
 - **Entry criterion MET**: `handoffs/07_post-reuse-closure-verdict.md` (the plan's placeholder
   path `handoffs/05_post-reuse-closure-verdict.md` was reassigned per handoff 06's own numbering
   note, to avoid collision with this task's handoffs 05/06) records **COLLAPSED**. This phase is
-  now active; not yet started. Read handoff 07 first — it names the exact `ForestComparable`
+  now active. Read handoff 07 first — it names the exact `ForestComparable`
   export gap this phase must build as its own first step, and confirms the `y ≤ x` closing
   argument (reusable verbatim once `ForestComparable` exists) so it is not re-derived.
+- **Prerequisite completed this dispatch (handoffs/09)**: the `ForestComparable` export named
+  above by handoff 08 as this phase's own first construction step is now landed, sorry-free,
+  `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`. Contrary to handoffs 07/08's
+  worry that it would require "another conclusion-signature change" comparable in scope to
+  Phases 7/8, it turned out to be a pure COROLLARY of the already-landed `IWorldHist`/
+  `IWorldHistCounter` invariants (a counting/pigeonhole argument plus a `parAncestor`-vs-
+  `isAccessible` DFS-unfolding argument plus a standard `par`-linearity fact) — **no new
+  invariant needed threading through the 10-case induction**; only the sole terminal
+  (`.openBranch`)-producing case needed a one-line change to surface already-available data.
+  See handoff 09 for the full technical account. The REMAINING Phase 10 tasks below (origin-
+  tracing witness extension, (H3) generalization, origin-raw-accessibility, Phase 9 retry) are
+  still open — this was the prerequisite, not the phase itself.
 - **Entry criterion (original text):** `handoffs/05_post-reuse-closure-verdict.md` records
   **COLLAPSED**. If it
   records CLOSED, this phase is closed immediately as `[COMPLETED WITH EXCLUSIONS]` with a
@@ -709,7 +721,9 @@ evidence.
   assessment stands. This phase is budgeted as its own dispatch (possibly more than one) precisely
   so it is not compressed into the tail of another.
 - **Tasks:**
-  - [ ] Extend `IWorldHist`'s witness functions — or thread a sibling invariant alongside them,
+  - [ ] *(prerequisite `ForestComparable` export done this dispatch, see above and handoff 09 —
+        this task itself, origin-tracing witness extension, is still open)* Extend `IWorldHist`'s
+        witness functions — or thread a sibling invariant alongside them,
         mirroring `IAllAccessConsistent`'s companion-not-merged pattern — to record a traceable
         origin world for every positive formula's presence on the branch.
   - [ ] Generalize (H3)'s planted-positive-content shape from "the mint-time `Sfor` set" to "every

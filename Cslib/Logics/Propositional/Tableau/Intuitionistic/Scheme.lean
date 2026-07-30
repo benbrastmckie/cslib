@@ -11,6 +11,10 @@ import Cslib.Foundations.Logic.Tableau.Measure
 import Mathlib.Tactic.Ring
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Fintype.BigOperators
+import Mathlib.Data.Finset.Card
+import Mathlib.Data.Finset.Image
+import Mathlib.Order.Interval.Finset.Nat
+import Mathlib.Logic.Function.Iterate
 public import Cslib.Foundations.Logic.Tableau.Blocking
 public import Mathlib.Data.Finset.Prod
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
@@ -3284,6 +3288,194 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- Entry discharge: `openBranch_countermodel`'s initial state has `nw = 1`, `edges = []`, so
 `1 = 0 + 1` holds by `rfl`. -/
 private lemma IWorldHistCounter_entry : IWorldHistCounter 1 ([] : IEdges) := rfl
+
+/-! ### `ForestComparable`: par-linearity export (Phase 10's first construction step)
+
+Handoffs 07/08 (`specs/430_.../handoffs/`) identified `ForestComparable`-style comparability --
+any two raw-accessible ancestors of a common world are themselves comparable -- as a load-bearing
+fact needed by the origin-tracing extension, not yet exported anywhere. This section derives it
+as a pure COROLLARY of the already-landed `IWorldHist`/`IWorldHistCounter` invariants: no new
+invariant needs threading through `intExpandBranches_openBranch_sat`'s 10-case induction. The
+argument has three independent steps:
+
+1. `edges_shape_of_worldHist`: a counting/pigeonhole corollary of (H1)'s membership clause plus
+   `IWorldHistCounter`'s length fact -- since `edges` has length exactly `nw - 1` and already
+   contains `nw - 1` pairwise-distinct required pairs `(c, par c)` (`1 ≤ c < nw`), it can contain
+   NOTHING else: every member of `edges` has that shape.
+2. `parAncestor_of_isAccessible`: given that shape fact, `isAccessible`'s DFS is shown to
+   coincide with `parAncestor` (this is the direction (H1-acc) does NOT supply on its own --
+   handoffs 07/08's identified gap -- closed here using only step 1, not the converse).
+3. `parAncestor_comparable`: pure `par`-linearity (`par` being a genuine function makes any two
+   ancestors of a common point comparable), via the standard `parAncestor`-as-iterate bridge.
+
+`IWorldHist_forestComparable` combines all three with the already-landed (H1-acc) clause. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Counting/pigeonhole step: `edges`'s length exactly matches the number of DISTINCT required
+`(c, par c)` pairs (`1 ≤ c < nw`), all of which are already members (H1); by
+`Finset.eq_of_subset_of_card_le`, `edges.toFinset` cannot exceed that required set, so `edges`
+contains nothing else. -/
+private lemma edges_shape_of_worldHist {par : Nat → Nat} {nw : Nat} {edges : IEdges}
+    (hlen : nw = edges.length + 1)
+    (hmem : ∀ c, 1 ≤ c → c < nw → (c, par c) ∈ edges) :
+    ∀ p ∈ edges, ∃ c, p = (c, par c) := by
+  classical
+  have hlen' : edges.length = nw - 1 := by omega
+  set S : Finset (Nat × Nat) := (Finset.Ico 1 nw).image (fun c => (c, par c)) with hS
+  have hSinj : Set.InjOn (fun c => (c, par c)) (Finset.Ico 1 nw) := by
+    intro a _ b _ hab
+    simpa using congrArg Prod.fst hab
+  have hScard : S.card = nw - 1 := by
+    rw [hS, Finset.card_image_of_injOn hSinj, Nat.card_Ico]
+  have hSsub : S ⊆ edges.toFinset := by
+    intro p hp
+    simp only [hS, Finset.mem_image, Finset.mem_Ico] at hp
+    obtain ⟨c, ⟨hc1, hc2⟩, hceq⟩ := hp
+    rw [List.mem_toFinset, ← hceq]
+    exact hmem c hc1 hc2
+  have htoFinsetCard_le : edges.toFinset.card ≤ S.card := by
+    calc edges.toFinset.card ≤ edges.length := List.toFinset_card_le (l := edges)
+      _ = nw - 1 := hlen'
+      _ = S.card := hScard.symm
+  have hSeq : S = edges.toFinset := Finset.eq_of_subset_of_card_le hSsub htoFinsetCard_le
+  intro p hp
+  have hpS : p ∈ S := by rw [hSeq]; exact List.mem_toFinset.mpr hp
+  simp only [hS, Finset.mem_image, Finset.mem_Ico] at hpS
+  obtain ⟨c, ⟨_hc1, _hc2⟩, hceq⟩ := hpS
+  exact ⟨c, hceq.symm⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The direction (H1-acc) does NOT supply: given `edges_shape_of_worldHist`'s shape fact,
+raw `isAccessible` reachability implies `parAncestor`. Proved by unfolding `isAccessible.go`'s
+DFS: each step it takes from `current` to a `child` with `(child, current) ∈ edges` is, by the
+shape fact, exactly a `par`-step (`current = par child`), so the whole DFS trace assembles into
+a `parAncestor` chain via `Relation.ReflTransGen.head`. -/
+private lemma parAncestor_of_isAccessible {par : Nat → Nat} {edges : IEdges}
+    (hshape : ∀ p ∈ edges, ∃ c, p = (c, par c))
+    (w w' : Nat) (h : isAccessible edges w w' = true) :
+    parAncestor par w w' := by
+  simp only [isAccessible] at h
+  by_cases heq : w == w'
+  · have : w = w' := by simpa using heq
+    subst this
+    exact Relation.ReflTransGen.refl
+  · simp only [heq, Bool.false_eq_true, ite_false] at h
+    suffices key : ∀ (current fuel : Nat), isAccessible.go edges w' current fuel = true →
+        current = w' ∨ parAncestor par current w' by
+      rcases key w edges.length h with heq2 | hpar
+      · subst heq2; exact Relation.ReflTransGen.refl
+      · exact hpar
+    intro current fuel
+    induction fuel generalizing current with
+    | zero => simp [isAccessible.go]
+    | succ k ih =>
+      simp only [isAccessible.go]
+      intro hstep
+      rw [List.any_eq_true] at hstep
+      obtain ⟨child, hchild, hcond⟩ := hstep
+      simp only [List.mem_filterMap] at hchild
+      obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hchild
+      by_cases hpc : p == current
+      · have hpeq : p = current := by simpa using hpc
+        subst hpeq
+        simp only [hpc, ite_true, Option.some.injEq] at hfilt
+        subst hfilt
+        obtain ⟨c', hc'⟩ := hshape (c, p) hedges
+        rw [Prod.mk.injEq] at hc'
+        obtain ⟨hcc, hpar_eq⟩ := hc'
+        subst hcc
+        by_cases hce : c == w'
+        · have hcw' : c = w' := by simpa using hce
+          right
+          rw [hcw'] at hpar_eq
+          exact Relation.ReflTransGen.single hpar_eq
+        · simp only [hce, Bool.false_eq_true, ite_false] at hcond
+          rcases ih c hcond with heq3 | hpar3
+          · right; rw [heq3] at hpar_eq; exact Relation.ReflTransGen.single hpar_eq
+          · right; exact Relation.ReflTransGen.head hpar_eq hpar3
+      · simp only [Bool.not_eq_true] at hpc
+        simp [hpc] at hfilt
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `parAncestor` unwinds to explicit `par`-iteration -- the standard bridge that makes
+`par`-linearity (`parAncestor_comparable` below) a direct consequence of `Nat`-comparability. -/
+private lemma parAncestor_iff_iterate {par : Nat → Nat} {x y : Nat} :
+    parAncestor par x y ↔ ∃ n, x = par^[n] y := by
+  constructor
+  · intro h
+    induction h using Relation.ReflTransGen.head_induction_on with
+    | refl => exact ⟨0, rfl⟩
+    | @head a b hab _hchain ih =>
+      obtain ⟨m, hm⟩ := ih
+      exact ⟨m + 1, by rw [Function.iterate_succ_apply', ← hm, hab]⟩
+  · rintro ⟨n, hn⟩
+    subst hn
+    induction n with
+    | zero => exact Relation.ReflTransGen.refl
+    | succ k ih =>
+      rw [Function.iterate_succ_apply']
+      exact Relation.ReflTransGen.head rfl ih
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Pure `par`-linearity: any two `parAncestor`-ancestors of a common world `c` are themselves
+comparable. Depends only on `par` being a genuine (single-valued) function -- via
+`parAncestor_iff_iterate`, both are `par`-iterates of `c`, and `Nat`-iterate-counts are always
+comparable. -/
+private lemma parAncestor_comparable {par : Nat → Nat} {x y c : Nat}
+    (hx : parAncestor par x c) (hy : parAncestor par y c) :
+    parAncestor par x y ∨ parAncestor par y x := by
+  obtain ⟨n, hn⟩ := parAncestor_iff_iterate.mp hx
+  obtain ⟨m, hm⟩ := parAncestor_iff_iterate.mp hy
+  rcases le_total n m with hle | hle
+  · right
+    apply parAncestor_iff_iterate.mpr
+    refine ⟨m - n, ?_⟩
+    rw [hm, hn, ← Function.iterate_add_apply]
+    congr 1
+    omega
+  · left
+    apply parAncestor_iff_iterate.mpr
+    refine ⟨n - m, ?_⟩
+    rw [hn, hm, ← Function.iterate_add_apply]
+    congr 1
+    omega
+
+/-- Forest/chain comparability along raw edges: any two worlds `isAccessible`-reachable to a
+common world `l` are themselves `isAccessible`-comparable. This is the `ForestComparable` shape
+`specs/430_.../scratch/PersistPrototype.lean` assumed as a hypothesis, before it was known to be
+derivable rather than needing fresh construction. -/
+private def ForestComparable (nw : Nat) (edges : IEdges) : Prop :=
+  ∀ w x l : Nat, w < nw → x < nw →
+    isAccessible edges w l = true → isAccessible edges x l = true →
+    isAccessible edges w x = true ∨ isAccessible edges x w = true
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **`ForestComparable` export**: derived entirely from the already-landed `IWorldHist`
+(supplying (H1)'s membership shape, (H0)'s root normalization, and (H1-acc)'s forward
+accessibility) plus `IWorldHistCounter` (supplying the length fact `edges_shape_of_worldHist`
+needs) -- no new invariant threading through `intExpandBranches_openBranch_sat`'s induction is
+required. -/
+private lemma IWorldHist_forestComparable {φ0 : Proposition Atom} {b : IBranch Atom}
+    {e : List (ISF Atom)} {nw : Nat} {edges : IEdges}
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges) :
+    ForestComparable nw edges := by
+  obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := hWH
+  have hshape : ∀ p ∈ edges, ∃ c, p = (c, par c) :=
+    edges_shape_of_worldHist hWHC (fun c hc1 hc2 => (hall c hc1 hc2).1)
+  have hacc' : ∀ c' c, c < nw → parAncestor par c' c → isAccessible edges c' c = true := by
+    intro c' c hcnw hpa
+    rcases Nat.eq_zero_or_pos c with hc0 | hcpos
+    · subst hc0
+      have hc'0 : c' = 0 := parAncestor_zero hpar0 hpa
+      subst hc'0
+      simp [isAccessible]
+    · exact (hall c hcpos hcnw).2.2.1 c' hpa
+  intro w x l hwnw hxnw hwl hxl
+  have hwl' : parAncestor par w l := parAncestor_of_isAccessible hshape w l hwl
+  have hxl' : parAncestor par x l := parAncestor_of_isAccessible hshape x l hxl
+  rcases parAncestor_comparable hwl' hxl' with hwx | hxw
+  · left; exact hacc' w x hxnw hwx
+  · right; exact hacc' x w hwnw hxw
 
 /-- List companion of `IWorldHistCounter`, a 2-list zip over `(nws, edgeSets)` mirroring
 `IAllLabelBoundStrict`'s shape (companion, not merged, of `IAllNW`). -/
@@ -6609,8 +6801,9 @@ private lemma intExpandBranches_openBranch_sat
           ψ ∉ posFormulasAt b' w)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
         = .openBranch b) :
-    ∃ (edges rawEdges lbEdges : IEdges), IBranchSaturation Atom b ∧ IFimpAccess edges b ∧
-      IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b := by
+    ∃ (edges rawEdges lbEdges : IEdges) (nwF : Nat), IBranchSaturation Atom b ∧
+      IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧
+      ForestComparable nwF rawEdges := by
   rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
@@ -6647,8 +6840,9 @@ private lemma intExpandBranches_openBranch_sat
       IAllWorldHistCounter doneNW doneEdges →
       intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
-      ∃ (edges rawEdges lbEdges : IEdges), IBranchSaturation Atom b ∧ IFimpAccess edges b ∧
-        IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b from
+      ∃ (edges rawEdges lbEdges : IEdges) (nwF : Nat), IBranchSaturation Atom b ∧
+        IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧
+        ForestComparable nwF rawEdges from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets [] lbSets []
       hAC hLen0 hLenF0 trivial rfl rfl hACC trivial hARC trivial
       hUniv hNW hFuel (by simp [IAllUniv]) (by simp [IAllNW]) trivial
@@ -6773,7 +6967,7 @@ private lemma intExpandBranches_openBranch_sat
       bPers hcl hstep =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
         hPendingACC hDoneACC hPendingARC hDoneARC hUnivP _hNWP hFuelP _hUnivD _hNWD
-        _hFuelD _hLBSP _hLBSD _hWHP _hWHD _hWHCP _hWHCD hgo
+        _hFuelD _hLBSP _hLBSD hWHP _hWHD hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
     split at hgo
@@ -6781,6 +6975,10 @@ private lemma intExpandBranches_openBranch_sat
       subst heq
       simp only [IAllConsistent] at hPending
       obtain ⟨hIC_bh_eH, hLB_bh_nwH, -⟩ := hPending
+      simp only [IAllWorldHist] at hWHP
+      obtain ⟨hWH_head, -⟩ := hWHP
+      simp only [IAllWorldHistCounter] at hWHCP
+      obtain ⟨hWHC_head, -⟩ := hWHCP
       cases hpAug : pendingAug with
       | nil =>
         rw [hpAug] at hPendingACC
@@ -6817,8 +7015,11 @@ private lemma intExpandBranches_openBranch_sat
             intro χ w w' hacc hmem hw'
             exact applyPersistenceFixpoint_copy_complete (φ0 := φ0) hUnivP_head hfuel_bh hmem
               hacc hw'
-          exact ⟨augH, edgesH, lbH, IExpandedConsistent_sat hstep hIC_bPers,
-            IExpandedAccessConsistent_sat hstep hACC_bPers, hpp, hARC_bPers⟩
+          -- Phase 10 (first construction step): the `ForestComparable` export, a pure
+          -- corollary of `IWorldHist`/`IWorldHistCounter` (no new invariant threading needed).
+          have hfc : ForestComparable nwH edgesH := IWorldHist_forestComparable hWH_head hWHC_head
+          exact ⟨augH, edgesH, lbH, nwH, IExpandedConsistent_sat hstep hIC_bPers,
+            IExpandedAccessConsistent_sat hstep hACC_bPers, hpp, hARC_bPers, hfc⟩
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
     · rename_i heq
@@ -7637,7 +7838,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Obtain the saturation witness and its accumulated edges, together
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
-  obtain ⟨edges, _rawEdges, _lbEdges, hsat, hfimp, _hpp, _hrc⟩ :=
+  obtain ⟨edges, _rawEdges, _lbEdges, _nwF, hsat, hfimp, _hpp, _hrc, _hfc⟩ :=
     intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
       [[]] [[]] _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl

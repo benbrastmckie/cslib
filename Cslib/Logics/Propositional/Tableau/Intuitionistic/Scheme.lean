@@ -6456,6 +6456,23 @@ private lemma intExpandBranches_openBranch_initial_mem (sf : ISF Atom) :
     simp only [intExpandBranches.go] at hgo
     exact ih (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
 
+/-- **Raw-edge positive-formula persistence** (plan Phase 7): a cheap stepping stone, NOT
+sufficient alone -- `truthLemma`'s frame is `intAccessPreorder edges` over the AUGMENTED edge
+list (`augSets`), strictly more worlds than any RAW-edge-only fact can reach (see the STOP-gate
+note above `truthLemma`, and report 05 §1/§4). Recorded so `intExpandBranches_openBranch_sat`'s
+conclusion carries at least the raw-edge half of the persistence invariant now, with the
+augmented-edge version (`IPosPersist`, Phase 11) exported once the reuse-time containment
+(Phase 8) and post-reuse closure lemma (Phase 9/10) land.
+
+The `hw'` side condition (some entry already present at `w'`) matches
+`applyPersistenceFixpoint_copy_complete`'s own hypothesis exactly (Phase 4, landed
+sorry-free): it is needed because the copy channel only plants a copy at worlds already
+present on the branch, not at hypothetically-accessible-but-nonexistent labels. -/
+private def IPosPersistRaw (edges : IEdges) (b : IBranch Atom) : Prop :=
+  ∀ (χ : Proposition Atom) (w w' : Nat), isAccessible edges w w' = true →
+    (⟨.pos, χ, w⟩ : ISF Atom) ∈ b → b.any (fun sf => sf.label == w') = true →
+    (⟨.pos, χ, w'⟩ : ISF Atom) ∈ b
+
 /-- **R1 restatement** (Phase 6: `hUniv`/`hNW`/per-branch `hFuel` hypothesis threading;
 subsumes the prior fuel-materialization report's F5 form). If the per-branch-fuel engine
 returns `.openBranch b`, then `b` is Hintikka-saturated and carries an `IFimpAccess`
@@ -6470,7 +6487,11 @@ below, kept as the durable record of why the R1 hypotheses exist) — but is dis
 here: `hFuel` at that arm gives `intWork (intUniverseExt φ0) bh eH < 0`, absurd by
 `omega` since `intWork` is a `Nat`. All other arms transferred from the retired proof's
 succ case, with `hUniv`/`hNW` re-established via Phase 5's preservation lemmas and
-`hFuel` re-established via `intWork_persistence_le` + `intWork_drop`. -/
+`hFuel` re-established via `intWork_persistence_le` + `intWork_drop`.
+
+**Phase 7 addition**: the conclusion also carries `IPosPersistRaw edges b`, the RAW-edge
+positive-formula persistence fact -- a cheap stepping stone (see `IPosPersistRaw`'s own
+docstring for why it is not sufficient alone). -/
 private lemma intExpandBranches_openBranch_sat
     (φ0 : Proposition Atom)
     (branches : List (IBranch Atom))
@@ -6496,7 +6517,8 @@ private lemma intExpandBranches_openBranch_sat
           ψ ∉ posFormulasAt b' w)
     (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuels closurePred
         = .openBranch b) :
-    ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b := by
+    ∃ (edges rawEdges : IEdges), IBranchSaturation Atom b ∧ IFimpAccess edges b ∧
+      IPosPersistRaw rawEdges b := by
   rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
@@ -6531,7 +6553,8 @@ private lemma intExpandBranches_openBranch_sat
       IAllWorldHistCounter doneNW doneEdges →
       intExpandBranches.go closurePred pending pendingExp pendingNW pendingEdges
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
-      ∃ edges : IEdges, IBranchSaturation Atom b ∧ IFimpAccess edges b from
+      ∃ (edges rawEdges : IEdges), IBranchSaturation Atom b ∧ IFimpAccess edges b ∧
+        IPosPersistRaw rawEdges b from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets []
       hAC hLen0 hLenF0 trivial rfl rfl hACC trivial
       hUniv hNW hFuel (by simp [IAllUniv]) (by simp [IAllNW]) trivial
@@ -6644,7 +6667,7 @@ private lemma intExpandBranches_openBranch_sat
   | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       bPers hcl hstep =>
     intro pendingAug doneAug hPending hLenP hLenPF hDone hLenD hLenDF hPendingACC
-        hDoneACC _hUnivP _hNWP _hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD
+        hDoneACC hUnivP _hNWP hFuelP _hUnivD _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD
         _hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
@@ -6667,8 +6690,21 @@ private lemma intExpandBranches_openBranch_sat
           IExpandedConsistent_mono hmemP hIC_bh_eH
         have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
           IExpandedAccessConsistent_mono hmemP hACC_bh_eH
-        exact ⟨augH, IExpandedConsistent_sat hstep hIC_bPers,
-          IExpandedAccessConsistent_sat hstep hACC_bPers⟩
+        -- Phase 7: the raw-edge persistence conjunct, composed from `IAllUniv`/`IAllFuel`
+        -- (already threaded through this induction) plus Phase 4's landed
+        -- `applyPersistenceFixpoint_copy_complete` -- see `IPosPersistRaw`'s docstring.
+        have hUnivP_head : ∀ x ∈ bh, x ∈ intUniverseExt φ0 := hUnivP bh List.mem_cons_self
+        simp only [IAllFuel] at hFuelP
+        obtain ⟨hFuel_bh_eH, -⟩ := hFuelP
+        have hfuel_bh : (intUniverseExt φ0).countP (fun sf => !(bh.any (· == sf))) ≤ f' + 1 := by
+          simp only [intWork] at hFuel_bh_eH
+          omega
+        have hpp : IPosPersistRaw edgesH bPers := by
+          intro χ w w' hacc hmem hw'
+          exact applyPersistenceFixpoint_copy_complete (φ0 := φ0) hUnivP_head hfuel_bh hmem
+            hacc hw'
+        exact ⟨augH, edgesH, IExpandedConsistent_sat hstep hIC_bPers,
+          IExpandedAccessConsistent_sat hstep hACC_bPers, hpp⟩
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
     · rename_i heq
@@ -7396,7 +7432,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Obtain the saturation witness and its accumulated edges, together
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
-  obtain ⟨edges, hsat, hfimp⟩ :=
+  obtain ⟨edges, _rawEdges, hsat, hfimp, _hpp⟩ :=
     intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
       [[]] _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl

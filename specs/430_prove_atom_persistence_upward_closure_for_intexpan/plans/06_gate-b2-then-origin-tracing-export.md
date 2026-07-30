@@ -470,7 +470,7 @@ evidence.
   `.../Intuitionistic/Completeness.lean`, `.../Minimal/Completeness.lean` (annotation only in the
   latter two at this phase; the sorries close in Phase 13).
 
-### Phase 7: Export the raw-edge persistence conjunct [NOT STARTED]
+### Phase 7: Export the raw-edge persistence conjunct [COMPLETED]
 
 - **Goal:** Add the **raw-edge** persistence conjunct to `intExpandBranches_openBranch_sat`'s
   conclusion. A cheap stepping stone that is explicitly **not sufficient alone** — the augmented
@@ -483,20 +483,41 @@ evidence.
   premise `applyPersistenceFixpoint_genuine_of_count_le_fuel` needs, at the *same* fuel `f` that
   `applyPersistenceFixpoint` is called with in `intExpandBranches.go`; `IAllUniv φ0 bs` supplies
   `hb`; both are already threaded through the whole `key` induction as `hUniv`/`hFuel`.
+- **Outcome:** Landed. `IPosPersistRaw edges b` defined exactly as proposed. The conclusion of
+  `intExpandBranches_openBranch_sat` is now `∃ (edges rawEdges : IEdges), IBranchSaturation Atom
+  b ∧ IFimpAccess edges b ∧ IPosPersistRaw rawEdges b` -- a SECOND existential (`rawEdges`),
+  distinct from the augmented `edges` witness `IFimpAccess` uses, since `IPosPersistRaw`'s
+  accessibility hypothesis is genuinely over the RAW edge list (`edgesH`, the same `edges`
+  argument `applyPersistenceFixpoint`/`applyAllTImpRules` were actually called with at this
+  step), not the augmented one -- these are different quantities and `applyPersistenceFixpoint_
+  copy_complete`'s `hacc` hypothesis only holds for the raw relation (this was not spelled out
+  in the plan's proposed shape and is recorded as a genuine, necessary refinement, not a
+  deviation from intent). Only the one substantive terminal case (`case4`, `intStepBranch bPers
+  eH nwH = none`) needed new work; the `f = 0` and `.notApplicable` arms remain discharged by
+  contradiction, unchanged. `lake build` (full project) green; exactly the same 4 sorries as
+  after Phase 6 (Phase 7 added zero new sorries).
 - **Tasks:**
-  - [ ] Define the raw-edge invariant predicate (proposed `IPosPersistRaw edges b`; implementer
+  - [x] Define the raw-edge invariant predicate (proposed `IPosPersistRaw edges b`; implementer
         confirms or renames per CSLib conventions) capturing
         `∀ χ w w', isAccessible edges w w' = true → T(χ)@w ∈ b → T(χ)@w' ∈ b`, carrying whatever
         side-condition at `w'` Phase 4's lemma requires.
-  - [ ] At the substantive terminal return site (`intStepBranch bPers e nw = none`), compose the
+  - [x] At the substantive terminal return site (`intStepBranch bPers e nw = none`), compose the
         already-in-scope specialized `hUnivP_head`/`hFuelP` facts with
         `applyPersistenceFixpoint_genuine_of_count_le_fuel` and then
-        `applyAllTImpRules_copy_complete_of_fixpoint`.
-  - [ ] Confirm the other return sites need no new work: `f = 0` and `intStepBranch`'s
+        `applyAllTImpRules_copy_complete_of_fixpoint`. *(deviation: altered -- composed via
+        `applyPersistenceFixpoint_copy_complete` directly, the Phase 4 lemma that already
+        pairs the two named lemmas; re-deriving the pairing by hand would have duplicated
+        already-landed work.)*
+  - [x] Confirm the other return sites need no new work: `f = 0` and `intStepBranch`'s
         `.notApplicable` result are already discharged by contradiction in the existing proof
         (`intWork < 0` absurd; `intStepBranch_result_ne_notApplicable`).
-  - [ ] Extend the conclusion and repair the destructuring call sites.
-  - [ ] `lean_verify`: axiom-clean, no `sorryAx`.
+  - [x] Extend the conclusion and repair the destructuring call sites. *(The single consumer,
+        `openBranch_countermodel`'s `obtain`, updated to bind and discard the two new
+        components: `⟨edges, _rawEdges, hsat, hfimp, _hpp⟩`.)*
+  - [x] `lean_verify`: `tableau_complete`/`openBranch_countermodel` report `sorryAx`
+        TRANSITIVELY (via the still-deferred Phase-6 conjunct), as expected at this phase --
+        see Phase 6's own note on this; no NEW axioms beyond the pre-existing
+        `propext`/`Classical.choice`/`Quot.sound`.
 - **Timing:** ~1 dispatch
 - **Depends on:** 5
 - **Verification Tier:** interface

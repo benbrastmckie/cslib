@@ -1,13 +1,22 @@
 {
   "status": "in_progress",
   "started_at": "2026-07-29T23:36:08Z",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "type": "handoff",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/04_gate-b2-verdict.md",
+      "summary": "Gate B2 beta-split refutation probe verdict: PASS, residual risk carried forward"
+    },
+    {
+      "type": "source",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "summary": "openBranch_countermodel/tableau_complete statement-shape fix (Phase 6)"
+    }
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, re-dispatch of plan 06 starting at Phase 5 (Gate B2)",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 4
+    "stage": "phase_7_in_progress",
+    "details": "Phases 5-6 complete and committed (a6b0d14b). Gate B2 verdict PASS. Statement-shape fix landed. Beginning Phase 7 (raw-edge persistence conjunct export).",
+    "phases_completed": 6
   },
   "metadata": {
     "session_id": "sess_1785363007_d08249",

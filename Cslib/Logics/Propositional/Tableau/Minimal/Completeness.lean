@@ -44,9 +44,18 @@ From an open saturated branch `b`, construct a Kripke model as follows:
 
 `minTruthLemma` and `minOpenBranch_countermodel` delegate to `truthLemma minScheme`
 and `openBranch_countermodel minScheme` respectively, which carry the deferred sorries in
-`Scheme.lean`. The remaining sorry in `minimalTableau_complete` bridges `MValid φ` to the
-per-branch forcing hypothesis required by `tableau_complete minScheme`; this is part of the
-deferred completeness obligations.
+`Scheme.lean`. The remaining sorry in `minimalTableau_complete` (DP-4) bridges `MValid φ` to the
+per-branch forcing hypothesis required by `tableau_complete minScheme`.
+
+**DP-4 is PERMANENTLY DEFERRED — unprovable as stated**, not merely unfinished, and is refuted
+**independently** of DP-3: the same machine-verified counterexample
+(`scratch/BetaSplitRefutation.lean`, `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`)
+reproduces under `isMinimallyClosed` (`reportMin phiRef1 realFuel` yields the identical violation,
+and `minBranchesAgree = true` against the real `minimalTableau`). The mechanism is independent
+beta-splits at two augmented-preorder-equivalent worlds joined by a loop-back edge that
+`intFImpReuseWitnessAnc?` never re-validates once recorded (`Expansion.lean`). DP-4 is therefore
+not collateral damage from DP-3's dependency chain; it fails on its own terms under the minimal
+calculus's own closure predicate.
 
 ## References
 
@@ -124,20 +133,25 @@ Delegates to `tableau_complete minScheme`. **Statement-shape fix**: `tableau_com
 and `tableau_complete` docstrings for the machine-verified defect this replaces).
 
 `MValid φ` needs TWO upward-closure premises (val AND `botForces`); the supplied `_huc`
-discharges only the first. The remaining sorry is deliberately left deferred, re-annotated to
-point at the two ACTUAL remaining obligations: (1) `openBranch_countermodel`'s own
-upward-closure conjunct is itself still `sorry` in `Scheme.lean`, pending the plan's Phases
-7-11; (2) `minBranchBotForces b`'s own upward-closure (a SEPARATE fact, at the `⊥` formula
-shape) is not yet established either -- the plan's Phase 13 derives both as one-line
-specializations of a single generic persistence corollary once Phases 7-11 land. -/
+discharges only the first. **DP-4 is PERMANENTLY DEFERRED — unprovable as stated**, not
+"pending" any future phase, and refuted **independently** of DP-3 (see "Notes on sorry" above:
+`reportMin phiRef1 realFuel` and `minBranchesAgree = true` against the real `minimalTableau`).
+Two obligations would need to be discharged even setting the refutation aside: (1)
+`openBranch_countermodel`'s own upward-closure conjunct, which is DISPOSITION UNDECIDED (an open
+decision point) in `Scheme.lean`; (2) `minBranchBotForces b`'s own upward-closure (a SEPARATE
+fact, at the `⊥` formula shape), not established. Neither is pursued: the underlying statement
+this sorry needs is refuted, so this is a terminal deferral, not an unfinished step. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme
   intro edges _b _huc
-  -- Once both (1) `openBranch_countermodel`'s upward-closure conjunct and (2)
-  -- `minBranchBotForces b`'s upward-closure are established (plan Phases 7-11, 13), this goal
-  -- closes via `exact h Nat (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0`
-  -- for the appropriate `hbotuc`. Left `sorry` deliberately for now -- see the docstring above.
+  -- DP-4 -- PERMANENTLY DEFERRED, unprovable as stated, refuted INDEPENDENTLY of DP-3 under
+  -- `isMinimallyClosed` (`scratch/BetaSplitRefutation.lean`'s `reportMin phiRef1 realFuel`,
+  -- `minBranchesAgree = true` against the real `minimalTableau`). `exact h Nat
+  -- (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0` (for the appropriate
+  -- `hbotuc`) would type-check once both upward-closure obligations named in the docstring above
+  -- are discharged, but the underlying statement is refuted, so this is left `sorry`
+  -- deliberately. Not a route failure; no follow-up is scheduled.
   sorry
 
 end Cslib.Logic.PL

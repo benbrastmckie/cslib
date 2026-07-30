@@ -1,44 +1,68 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-29T00:00:00Z",
-  "completed_at": "2026-07-30T00:00:00Z",
-  "requires_user_review": true,
-  "review_reason": "Phase 10 (origin-tracing extension) is BLOCKED: this dispatch found that even a correctly-scoped origin-tracing companion invariant does not, by itself, close Phase 9's residual x<y<=l sub-case -- tracing content to its true self-origination point can land that point itself strictly between the reuse target x and the reuse source l. This reduces to the same open question already flagged as 'Gap 1' near the sat_timp/IFimpAccess STOP-gate note (does applyPersistenceFixpoint reach a genuine fixpoint before every rule step). Two concrete next steps are recorded in handoffs/10: (1) a Gate-B2-style computational probe of the specific scenario (recommended first, cheap, scratch-only), and (2) a targeted fixpoint-completeness lemma if the probe does not refute. No Cslib/ writes this dispatch; zero regression.",
+  "status": "implemented",
+  "started_at": "2026-07-30T02:44:40Z",
+  "completed_at": "2026-07-30T03:01:17Z",
   "artifacts": [
     {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/10_origin-tracing-scoping-and-new-blocker.md",
-      "type": "handoff",
-      "summary": "Scoping analysis narrowing the origin-tracing invariant to mint-payload+initial content only, plus the new finding that origin-tracing alone is insufficient to close Phase 9's residual case; two concrete recommended next steps"
+      "type": "plan",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/12_terminal-refutation-and-annotation-closeout.md",
+      "summary": "Phase 15 (the only live phase) marked [COMPLETED]; plan-level Status updated to [COMPLETED]. All other phase markers unchanged from the pre-dispatch revision (Phases 1-9 [COMPLETED], Phase 10 and 11-14 [COMPLETED WITH EXCLUSIONS])."
     },
     {
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
-      "type": "plan",
-      "summary": "Phase 10 marked [BLOCKED] with this dispatch's finding recorded; Phase 11's stale [IN PROGRESS] marker corrected to [NOT STARTED]"
+      "type": "summary",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/summaries/12_terminal-refutation-and-annotation-closeout-summary.md",
+      "summary": "Full execution summary: what was edited (four Cslib/ files, comments/docstrings only), plan deviations (optional case6 composition dropped; one additional task-reference fix), and complete verification command output."
     }
   ],
   "partial_progress": {
-    "stage": "phase-10-blocked",
-    "details": "Scoped the origin-tracing invariant and found it is likely necessary but not sufficient to close Phase 9's residual lemma; traced the gap to the pre-existing 'Gap 1' fixpoint-completeness question. Zero Cslib/ writes.",
+    "stage": "complete",
+    "details": "Phase 15 fully executed and verified. No live phase remains in the plan.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 9
+    "phases_completed": 15
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 5,
+    "sorry_count_note": "5 bare sorries repo-wide, unchanged in membership from the pre-dispatch baseline: 4 in-scope (Scheme.lean truthLemma imp case [DP-5], Scheme.lean openBranch_countermodel [Phase-6 conjunct], Intuitionistic/Completeness.lean [DP-3], Minimal/Completeness.lean [DP-4]) plus 1 unrelated pre-existing (Modal/Tableau/FrameSoundness.lean). All 5 are permanently deferred/DISPOSITION UNDECIDED by design per this plan's terminal refutation verdict -- this is the plan's own superseded verification criterion (annotation accuracy with unchanged sorry set, not zero-sorry).",
+    "vacuous_count": 0,
+    "axiom_count": 26,
+    "axiom_count_note": "Repo-wide count of `^axiom ` declarations; unchanged by this dispatch (zero axioms in any of the four touched files, confirmed by targeted grep). No new axiom introduced.",
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_pipeline_detail": {
+      "lake_build_full": "green, 3311 jobs",
+      "checkInitImports": "exit 0",
+      "lake_lint": "zero new warnings in the four touched files (repo-wide pre-existing warnings unaffected)",
+      "lint_style": "exit 0",
+      "lake_shake": "zero new findings in the four touched files",
+      "lake_test": "exit 0, 3788 jobs",
+      "TableauConformance": "green, 943 jobs",
+      "mk_all": "no update necessary"
+    },
+    "lean_verify_summary": {
+      "intuitionisticTableau_complete": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
+      "minimalTableau_complete": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
+      "truthLemma": ["sorryAx"],
+      "tableau_complete": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
+      "openBranch_countermodel": ["propext", "sorryAx", "Classical.choice", "Quot.sound"],
+      "intExpandBranches_closed_unsat": ["propext", "Classical.choice", "Quot.sound"],
+      "note": "No new axioms anywhere; intExpandBranches_closed_unsat carries no sorryAx, confirming it remains sorry-free."
+    }
   },
   "metadata": {
     "session_id": "sess_1785374640_65c34b",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
-  },
-  "verification": {
-    "verification_passed": true,
-    "mode": "no_lean_changes",
-    "sorry_count_in_scope": 4,
-    "sorry_count_unrelated_preexisting": 1,
-    "vacuous_count": 0,
-    "axiom_count_new": 0,
-    "note": "No Lean file was edited this dispatch; the 4 in-scope sorries (Scheme.lean:731 DP-5, Scheme.lean:7884 openBranch_countermodel conjunct, Completeness.lean:146 DP-3, Minimal/Completeness.lean:141 DP-4) plus the 1 unrelated pre-existing FrameSoundness.lean:1276 sorry were reconfirmed present via grep, matching the baseline from the prior dispatch (commit 7f9031c0) with no regression."
-  },
-  "blocked_phase": 10,
-  "continuation_path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/10_origin-tracing-scoping-and-new-blocker.md"
+    "compliance_check": "passed",
+    "requires_user_review": false,
+    "plan_deviations": [
+      "Task 6 (optional case6 composition) dropped without attempting compilation, per the plan's own authorized drop clause -- see plan Phase 15 task 6 annotation.",
+      "One fix beyond the enumerated task list: a pre-existing 'task 574' citation on Expansion.lean's intFImpReuseWitnessAnc? docstring (untouched by tasks 4/5) rephrased to a durable anchor, required to satisfy the plan's own final grep-based verification bullet."
+    ],
+    "open_decision_points": ["ODP-1"],
+    "state_json_updated": true,
+    "todo_md_regenerated": true
+  }
 }

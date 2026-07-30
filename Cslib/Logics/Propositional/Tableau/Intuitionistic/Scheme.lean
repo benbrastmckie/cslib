@@ -565,12 +565,26 @@ fixpoint" needs a NEW step-lt-style measure lemma for `applyPersistenceFixpoint`
 (distinct from `intExpMeasure_step_lt`, which bounds the OUTER alpha/beta/world-creation loop and
 says nothing about inner persistence rounds) threaded through `intExpandBranches_openBranch_sat`'s
 own fuel-0 `sorry` (the SAME gap, one level up — see that lemma's docstring and in-proof note for
-the current status of that obligation). This measure has not been built. Note also that the
-world bound any such fuel-sufficiency measure would ultimately be sized against is itself
-refuted: see the *Divergence witness* note in `Expansion.lean` (this does NOT by itself refute
-Gap 1 — the witness bears on world-boundedness, not on persistence fuel-sufficiency directly —
-but any future attempt at this measure must not lean on `intUniverse`'s linear world range as a
-genuine invariant of produced branches).
+the current status of that obligation). Note also that the world bound any such fuel-sufficiency
+measure would ultimately be sized against is itself refuted: see the *Divergence witness* note in
+`Expansion.lean` (this does NOT by itself refute Gap 1 — the witness bears on world-boundedness,
+not on persistence fuel-sufficiency directly — but any future attempt at this measure must not
+lean on `intUniverse`'s linear world range as a genuine invariant of produced branches).
+
+**CORRECTION (annotation-and-docstring close-out): the "this measure has not been built" claim
+above is STALE.** The measure has been built, sorry-free: `applyAllTImpRules b edges =
+b ++ newForms.flatten ++ genCopies.flatten` (`Expansion.lean`) is purely additive, so the
+length-equality exit of `applyPersistenceFixpoint` genuinely IS fixpoint-ness
+(`applyAllTImpRules_eq_self_of_length_eq`, `Scheme.lean:5335`) — the only non-genuine exit is
+`fuel = 0` — and `applyPersistenceFixpoint_genuine_of_count_le_fuel` (`Scheme.lean:5386`)
+discharges exactly that remaining case, stated for arbitrary `b` and `fuel`, with both its
+hypotheses already in scope at every arm of the `key` induction below, including the reuse arm
+(`case6`). Gap 1's fuel-sufficiency side is therefore closed. This does **not** discharge the
+`sorry` immediately below, nor DP-3/DP-4/DP-5: those depend on the AUGMENTED-frame
+positive-formula persistence invariant, which is a strictly stronger statement that is separately
+REFUTED (see the `sorry`'s own annotation, and `scratch/BetaSplitRefutation.lean`). Retained here,
+uncorrected in place, as a historical record of the earlier (mistaken) blocker analysis; do not
+re-derive either the "not been built" claim or its correction.
 
 **`sat_timp` IS an `IBranchSaturation` field** (`:105-108`), realized by `intApplyRuleFull`'s
 `.pos, .imp` branching arm (`Rules.lean:245-268`, `:274-275`), which fires reflexively at the
@@ -725,8 +739,23 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- copies along the algorithm's RAW edges -- strictly fewer worlds than the goal quantifies
       -- over. The real remaining obligation is a positive-formula persistence/transfer lemma
       -- along the augmented accessibility relation (the same fact, atom-shaped, as the
-      -- monotonicity bridge the `Completeness.lean` files' `sorry`s below rest on); follow-up:
-      -- DP-5, see the plan's Planned Strategic Sorries table.
+      -- monotonicity bridge the `Completeness.lean` files' `sorry`s below rest on).
+      --
+      -- DP-5 -- PERMANENTLY DEFERRED, unprovable as stated (not "pending Phases 7-11", not
+      -- "deferred to future work"). The augmented-edge positive-formula persistence invariant
+      -- this goal needs is REFUTED by a machine-verified counterexample:
+      -- `scratch/BetaSplitRefutation.lean` (`lake env lean`, zero errors, zero sorries) exhibits
+      -- `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`, for which
+      -- `intExtractValuation b` is NOT upward-closed along the augmented `intAccessPreorder
+      -- edges` frame: worlds `1` and `2` are augmented-preorder-equivalent (joined by the
+      -- recorded loop-back edge `(1, 2)`) yet disagree on `pr` (`decisiveFacts = (true, false)`),
+      -- and `branchesAgree = true` confirms the recreated loop matches the REAL
+      -- `intuitionisticTableau`. The mechanism is independent beta-splits at two
+      -- augmented-preorder-equivalent worlds joined by a loop-back edge that
+      -- `intFImpReuseWitnessAnc?` never re-validates once recorded (see that declaration's
+      -- docstring in `Expansion.lean` for the frame-construction limitation this names). This is
+      -- a refutation of the STATEMENT, not a proof-route failure; see DP-5's row in the plan's
+      -- Planned Strategic Sorries table.
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
@@ -7806,11 +7835,26 @@ defective premise `tableau_complete` used to demand (`scratch/HvalidShapeRefutat
 `lake env lean` clean, zero sorries: `hvalid`'s old unconstrained-`(edges, b)` shape is false at
 a concrete witness even though the formula it is applied to is valid). Moving the obligation
 here, where `b`'s real provenance (`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`)
-is in scope, is what makes it fillable at all -- but it is **not yet filled**: the augmented-edge
-positive-formula persistence invariant this needs is the subject of the plan's Phases 7-11 and has
-not landed, so the conjunct is proved by `sorry` for now (see the inline comment at the proof
-site). `tableau_complete` itself stays sorry-free; only this lemma gains the deferred obligation,
-relocated from the unfillable shape DP-3/DP-4 used to have.
+is in scope, is what makes it fillable at all -- so the conjunct is proved by `sorry` for now (see
+the inline comment at the proof site). `tableau_complete` itself stays sorry-free; only this
+lemma gains the deferred obligation, relocated from the unfillable shape DP-3/DP-4 used to have.
+
+**DISPOSITION UNDECIDED (this conjunct's `sorry`, gated on an open decision point).** Do NOT read
+this conjunct as REFUTED. What is machine-verified: `intExtractValuation b`'s upward closure
+along the reconstructed augmented `intAccessPreorder edges` frame FAILS for `phiRef1 :=
+((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`scratch/BetaSplitRefutation.lean`, zero errors, zero
+sorries, `branchesAgree = true` against the real `intuitionisticTableau`). What is **argued but
+[UNVERIFIED]** (not machine-checked): the further step from that failure to "this `∃ edges`
+conjunct of `openBranch_countermodel` is false for this `b`" assumes `¬IForces` is obtainable only
+through `truthLemma`'s `IFimpAccess` route. Counter-consideration, hand-checked: over the RAW
+frame `[(1,0),(2,1)]` upward closure DOES hold for the same `b`, but
+`IForces (intExtractValuation b) 0 phiRef1` is then TRUE (the antecedent fails at every world), so
+the raw frame does not witness the existential either — the inference is not free of live
+alternatives. Resolving this requires either a machine-checked confirmation that no admissible
+`edges` witnesses the existential for `phiRef1`, or explicit human sign-off on the argued
+inference. **No change to this statement is authorized until one of those exists**: do not
+revert, weaken, delete, or restate this conjunct on the strength of the unverified inference
+alone.
 
 ## References
 
@@ -7877,10 +7921,19 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- `intAccessPreorder edges` (Route (a): `edges` is the `augSets` witness, not the
   -- algorithm's raw edge list). This is the statement-shape-corrected form of the DP-3/DP-4
   -- obligation -- see the docstring above -- now stated where `b`'s provenance is in scope
-  -- instead of at an arbitrary, unconstrained `(edges, b)` pair. NOT fillable yet: it needs
-  -- the augmented-edge positive-formula persistence invariant the plan's Phases 7-11 export
-  -- through `intExpandBranches_openBranch_sat`'s conclusion, which has not landed. Follow-up:
-  -- DP-3/DP-4, see the plan's Planned Strategic Sorries table.
+  -- instead of at an arbitrary, unconstrained `(edges, b)` pair.
+  --
+  -- DISPOSITION UNDECIDED, gated on an open decision point -- do NOT read as REFUTED. Upward
+  -- closure of `intExtractValuation b` along the reconstructed augmented frame is
+  -- machine-verified to FAIL at `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`
+  -- (`scratch/BetaSplitRefutation.lean`, zero errors, zero sorries). The further step from that
+  -- failure to "this `∃ edges` conjunct is false for this `b`" is an argued, [UNVERIFIED]
+  -- inference (it assumes `¬IForces` is obtainable only through `IFimpAccess`); a hand-checked
+  -- counter-consideration shows the raw frame `[(1,0),(2,1)]` satisfies upward closure but makes
+  -- `IForces (intExtractValuation b) 0 phiRef1` TRUE, so it does not witness the existential
+  -- either. See the docstring above for the full statement. Resolving this needs a
+  -- machine-checked confirmation or explicit human sign-off; no such change is authorized here,
+  -- so the conjunct stays `sorry` rather than being reverted, weakened, or restated.
   sorry
 
 /-! ## Parametric Tableau Completeness -/

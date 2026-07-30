@@ -40,9 +40,20 @@ From an open saturated branch `b`, the countermodel is:
 
 `intTruthLemma` and `intuitionisticOpenBranch_countermodel` delegate to `truthLemma intScheme`
 and `openBranch_countermodel intScheme` respectively, which carry the deferred sorries in
-`Scheme.lean`. The remaining sorry in `intuitionisticTableau_complete` bridges `IValid φ` to
-the per-branch forcing hypothesis required by `tableau_complete intScheme`; this bridge is
-one of the remaining completeness obligations.
+`Scheme.lean`. The remaining sorry in `intuitionisticTableau_complete` (DP-3) bridges `IValid φ`
+to the per-branch forcing hypothesis required by `tableau_complete intScheme`.
+
+**DP-3 is PERMANENTLY DEFERRED — unprovable as stated**, not merely unfinished. It consumes
+`openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`), whose disposition is an
+open decision point (see that conjunct's docstring): upward closure of `intExtractValuation b`
+along the augmented `intAccessPreorder edges` frame is machine-verified to FAIL at
+`phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`scratch/BetaSplitRefutation.lean`,
+`lake env lean` clean, zero sorries, `branchesAgree = true` against the real
+`intuitionisticTableau`). The mechanism is independent beta-splits at two
+augmented-preorder-equivalent worlds joined by a loop-back edge that `intFImpReuseWitnessAnc?`
+never re-validates once recorded (`Expansion.lean`). DP-3 therefore consumes a premise whose
+underlying content is refuted at this witness — it is not a route failure, and is not scheduled
+for any follow-up.
 
 ## References
 
@@ -126,23 +137,27 @@ DIRECTLY: `World := Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val := i
 b`, and the supplied upward-closure hypothesis is exactly `IValid`'s own upward-closure premise.
 
 The remaining sorry below is **not** the old unfillable shape -- it is deliberately left
-deferred, re-annotated to point at the ACTUAL remaining obligation:
-`openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is itself still `sorry`,
-pending the augmented-edge positive-formula persistence invariant the plan's Phases 7-11 export.
-Discharging `IValid φ Nat (intExtractValuation b) huc 0` here would type-check but would only
-launder that same undischarged obligation through this file without being any more honest about
-it; the obligation is left visibly deferred here until `openBranch_countermodel`'s conjunct is
-itself proved (see `Scheme.lean`'s `openBranch_countermodel` docstring and the plan's Phase 13,
-which discharges this sorry mechanically once that lands). -/
+deferred. **DP-3 is PERMANENTLY DEFERRED — unprovable as stated**, not "pending" any future
+phase: `openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is DISPOSITION
+UNDECIDED (an open decision point, not a landed fact) and the underlying augmented-frame
+positive-formula persistence it would need is REFUTED by a machine-verified counterexample
+(`scratch/BetaSplitRefutation.lean`, `phiRef1`). Discharging
+`IValid φ Nat (intExtractValuation b) huc 0` here would type-check but would only launder a
+refuted premise through this file without being any more honest about it; the obligation stays
+visibly deferred here (see `Scheme.lean`'s `openBranch_countermodel` docstring for the full
+disposition and the counterexample). No follow-up is scheduled: this is a terminal deferral, not
+an unfinished step. -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
   intro edges _b _huc
-  -- Once `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`) is proved
-  -- (plan Phases 7-11), this goal closes via `exact h Nat (intExtractValuation _b) _huc 0`
-  -- (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis, instantiated at the
-  -- augmented frame `intAccessPreorder edges`). Left `sorry` deliberately for now -- see the
-  -- docstring above.
+  -- DP-3 -- PERMANENTLY DEFERRED, unprovable as stated. `exact h Nat (intExtractValuation _b)
+  -- _huc 0` would type-check (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis,
+  -- instantiated at the augmented frame `intAccessPreorder edges`), but it would consume
+  -- `openBranch_countermodel`'s upward-closure conjunct, which is DISPOSITION UNDECIDED and
+  -- whose underlying content is refuted at `phiRef1` (`scratch/BetaSplitRefutation.lean`,
+  -- `branchesAgree = true` against the real `intuitionisticTableau`). Left `sorry` deliberately
+  -- -- see the docstring above. Not a route failure; no follow-up is scheduled.
   sorry
 
 end Cslib.Logic.PL

@@ -688,7 +688,27 @@ evidence.
   three-source reality is exactly the unsound shortcut this plan forbids.
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
-### Phase 10: Fallback — full origin tracing (CONDITIONAL) [IN PROGRESS]
+### Phase 10: Fallback — full origin tracing (CONDITIONAL) [BLOCKED]
+
+- **Dispatch note (this dispatch, see `handoffs/10_origin-tracing-scoping-and-new-blocker.md`
+  for the full record — do not re-derive)**: no `Cslib/` writes. Scoped the origin-tracing
+  invariant precisely (only mint-payload + initial content are genuine self-origination points;
+  alpha/beta/T-imp sources all inherit or are already covered by handoff 07's "case 1" without
+  origin tracking — a real narrowing of this phase's task list). Then found that even a
+  correctly-scoped origin-tracing invariant does **not**, by itself, close Phase 9's residual
+  `x < y ≤ l` sub-case: tracing content back to its true self-origination point can land that
+  point ITSELF strictly between `x` and `l`, recursing into the same open shape rather than
+  resolving it. A concrete scenario (a mint-payload world `y`, direct child of `x`, whose fresh
+  antecedent later propagates to a descendant `l` that reuses `x`) shows this is not vacuous,
+  and traces the gap to the **same open question already flagged as "Gap 1" in the STOP-gate
+  docstring above `IFimpAccess`** (whether `applyPersistenceFixpoint` reaches a genuine fixpoint
+  before every subsequent rule step) — previously undocumented as connected to this phase.
+  **`[BLOCKED]`** per the Escalation Protocol: the phase's own task-list item (build the
+  origin-tracing witness extension) is very likely necessary but not sufficient, and building it
+  now risks the exact "duplicated churn" this plan's own discipline forbids. See the handoff for
+  the two concrete, non-vague recommended next steps (a targeted fixpoint-completeness lemma,
+  and/or a Gate-B2-style computational probe of the concrete scenario, tried BEFORE the lemma to
+  decide whether it is worth the investment).
 
 - **Goal:** If and only if Phase 9 recorded **COLLAPSED**, build the origin-tracing extension:
   track, for every positive formula's branch presence, a traceable point of origin, and show that
@@ -753,6 +773,10 @@ evidence.
 - **Files to modify:** `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
 
 ### Phase 11: Multi-hop composition and augmented-edge export [NOT STARTED]
+
+- **Status correction (this dispatch)**: this heading was stale at `[IN PROGRESS]` carried over
+  from an earlier edit; corrected to `[NOT STARTED]` since Phase 11 depends on Phases 9 and 10,
+  and Phase 10 is `[BLOCKED]` — no work on Phase 11 has actually begun.
 
 - **Goal:** Confirm the single-hop transfer lemma composes under `Relation.ReflTransGen` when a
   branch accumulates **several** reuse events, then export the augmented-edge persistence conjunct

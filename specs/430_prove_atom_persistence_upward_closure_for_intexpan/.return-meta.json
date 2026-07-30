@@ -1,52 +1,27 @@
 {
   "status": "partial",
   "started_at": "2026-07-29T00:00:00Z",
-  "requires_user_review": false,
+  "completed_at": "2026-07-30T00:00:00Z",
+  "requires_user_review": true,
+  "review_reason": "Phase 10 (origin-tracing extension) is BLOCKED: this dispatch found that even a correctly-scoped origin-tracing companion invariant does not, by itself, close Phase 9's residual x<y<=l sub-case -- tracing content to its true self-origination point can land that point itself strictly between the reuse target x and the reuse source l. This reduces to the same open question already flagged as 'Gap 1' near the sat_timp/IFimpAccess STOP-gate note (does applyPersistenceFixpoint reach a genuine fixpoint before every rule step). Two concrete next steps are recorded in handoffs/10: (1) a Gate-B2-style computational probe of the specific scenario (recommended first, cheap, scratch-only), and (2) a targeted fixpoint-completeness lemma if the probe does not refute. No Cslib/ writes this dispatch; zero regression.",
   "artifacts": [
     {
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/10_origin-tracing-scoping-and-new-blocker.md",
       "type": "handoff",
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/09_forestcomparable-export-phase10-continuation.md",
-      "summary": "ForestComparable export landed (Phase 10's first construction step); remaining Phase 10 tasks (origin-tracing witness extension, H3 generalization, origin-raw-accessibility, Phase 9 retry) documented for continuation"
+      "summary": "Scoping analysis narrowing the origin-tracing invariant to mint-payload+initial content only, plus the new finding that origin-tracing alone is insufficient to close Phase 9's residual case; two concrete recommended next steps"
     },
     {
-      "type": "plan",
       "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
-      "summary": "Phase 10 annotated with prerequisite-completed note; checklist item 1 annotated (not checked, origin-tracing extension itself still open)"
-    },
-    {
-      "type": "code",
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "summary": "New sorry-free ForestComparable export: edges_shape_of_worldHist, parAncestor_of_isAccessible, parAncestor_iff_iterate, parAncestor_comparable, ForestComparable def, IWorldHist_forestComparable; threaded through intExpandBranches_openBranch_sat's conclusion (new 4th existential nwF, 5th conjunct) via case4 (the sole openBranch-producing case); openBranch_countermodel's destructuring updated"
-    },
-    {
-      "type": "scratch",
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/ForestComparableProbe.lean",
-      "summary": "De-risking probe: counting/pigeonhole lemma in isolation"
-    },
-    {
-      "type": "scratch",
-      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/ForestComparableProbe2.lean",
-      "summary": "De-risking probe: full 3-step ForestComparable derivation chain, verified before porting"
+      "type": "plan",
+      "summary": "Phase 10 marked [BLOCKED] with this dispatch's finding recorded; Phase 11's stale [IN PROGRESS] marker corrected to [NOT STARTED]"
     }
   ],
-  "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/09_forestcomparable-export-phase10-continuation.md",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/ForestComparableProbe.lean",
-    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/ForestComparableProbe2.lean"
-  ],
-  "completion_data": {
-    "completion_summary": "Landed Phase 10's first construction step (the ForestComparable/par-linearity export handoff 08 identified as needed before origin-tracing can begin). Found and verified a materially cheaper route than feared: ForestComparable is a pure corollary of the already-landed IWorldHist/IWorldHistCounter invariants (counting/pigeonhole argument + isAccessible-to-parAncestor DFS-unfolding argument + standard par-linearity via the iterate bridge) -- no new invariant needed threading through intExpandBranches_openBranch_sat's 10-case induction; only the sole openBranch-producing case (case4) needed a one-line change to surface already-threaded-but-discarded IWorldHist/IWorldHistCounter data. Threaded as a new 4th existential (nwF) and 5th conjunct (ForestComparable nwF rawEdges) on intExpandBranches_openBranch_sat's conclusion; openBranch_countermodel's destructuring updated to match (still unused pending the remaining origin-tracing work). Full lake build (3311 jobs) and lake test (9376 jobs) green, identical 4 in-scope sorries, zero new sorries/axioms/vacuous defs, checkInitImports/lint-style/mk_all/scoped-shake all clean, lean_verify unchanged. Phase 10's remaining tasks (origin-tracing witness extension -- comparable in scope to building IWorldHist itself -- H3 generalization, origin-raw-accessibility proof, Phase 9 residual-lemma retry) are still open and documented in handoff 09 for continuation.",
-    "roadmap_items": []
-  },
-  "blocked_phase": null,
-  "blockers": [],
   "partial_progress": {
-    "stage": "phase_10_prerequisite_complete",
-    "details": "Phases 1-9 complete. Phase 10's first construction step (ForestComparable export) landed sorry-free this dispatch. Phase 10's remaining tasks (origin-tracing witness extension, H3 generalization, origin-raw-accessibility, Phase 9 residual retry) remain open -- see handoffs/09.",
-    "phases_completed": 9,
-    "phases_total": 14
+    "stage": "phase-10-blocked",
+    "details": "Scoped the origin-tracing invariant and found it is likely necessary but not sufficient to close Phase 9's residual lemma; traced the gap to the pre-existing 'Gap 1' fixpoint-completeness question. Zero Cslib/ writes.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 9
   },
   "metadata": {
     "session_id": "sess_1785374640_65c34b",
@@ -57,11 +32,13 @@
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 4,
+    "mode": "no_lean_changes",
+    "sorry_count_in_scope": 4,
+    "sorry_count_unrelated_preexisting": 1,
     "vacuous_count": 0,
-    "axiom_count": 26,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "note": "sorry_count/axiom_count are the SAME in-scope/baseline counts as Phase 8/9 (repo-wide grep totals are much larger and include many unrelated pre-existing files outside this task's territory; the load-bearing check is that these counts are UNCHANGED from the Phase 8/9 baseline, confirmed via lean_verify on openBranch_countermodel/tableau_complete/intuitionisticTableau_complete/minimalTableau_complete all reporting only the standard axiom set). Full lake build (3311 jobs) and lake test (9376 jobs) green. checkInitImports and lint-style exit 0. mk_all: no update necessary. Scoped lake shake on the modified module: no complaints. lake lint: zero warnings attributable to Scheme.lean."
-  }
+    "axiom_count_new": 0,
+    "note": "No Lean file was edited this dispatch; the 4 in-scope sorries (Scheme.lean:731 DP-5, Scheme.lean:7884 openBranch_countermodel conjunct, Completeness.lean:146 DP-3, Minimal/Completeness.lean:141 DP-4) plus the 1 unrelated pre-existing FrameSoundness.lean:1276 sorry were reconfirmed present via grep, matching the baseline from the prior dispatch (commit 7f9031c0) with no regression."
+  },
+  "blocked_phase": 10,
+  "continuation_path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/10_origin-tracing-scoping-and-new-blocker.md"
 }

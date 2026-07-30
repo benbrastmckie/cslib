@@ -531,6 +531,13 @@ evidence.
 
 ### Phase 8: Export reuse-time containment as a companion invariant [NOT STARTED]
 
+- **Continuation note (read before starting):** `handoffs/05_phase7-complete-phase8-handoff.md`
+  records a design subtlety worth resolving before writing Lean: the naive "bare `(x, l) ∈ augH`
+  membership → containment on the CURRENT branch" invariant shape is NOT preserved by the
+  induction as an invariant (proving it would BE Phase 9). Two candidate encodings that avoid
+  this trap (a per-edge finite `Sfor` record, or a `∃ bSnap` existential-snapshot shape) are
+  proposed there, with a recommendation to compare both against the real reuse-arm proof
+  context before committing.
 - **Goal:** Thread `posFormulasAt bPers w ⊆ posFormulasAt bPers x` as a monotone planted fact per
   **recorded loop-back edge**, surviving to the final branch. This is the one thing no existing
   clause covers: `sfor c` records only a *created* world's mint-time set, and the reuse arm

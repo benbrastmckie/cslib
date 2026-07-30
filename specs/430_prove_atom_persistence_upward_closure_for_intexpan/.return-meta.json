@@ -1,6 +1,7 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-07-29T23:36:08Z",
+  "requires_user_review": false,
   "artifacts": [
     {
       "type": "handoff",
@@ -8,20 +9,56 @@
       "summary": "Gate B2 beta-split refutation probe verdict: PASS, residual risk carried forward"
     },
     {
+      "type": "handoff",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/05_phase7-complete-phase8-handoff.md",
+      "summary": "Phases 5-7 complete/committed; Phase 8 design-subtlety continuation notes for the next dispatch"
+    },
+    {
       "type": "source",
       "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "summary": "openBranch_countermodel/tableau_complete statement-shape fix (Phase 6)"
+      "summary": "Phase 6 statement-shape fix (openBranch_countermodel/tableau_complete) and Phase 7 raw-edge persistence export (IPosPersistRaw)"
+    },
+    {
+      "type": "plan",
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md",
+      "summary": "Phases 5-7 marked COMPLETED with outcomes recorded; Phase 8 annotated with a pointer to the continuation handoff"
     }
   ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/BetaSplitProbe.lean",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/04_gate-b2-verdict.md",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/handoffs/05_phase7-complete-phase8-handoff.md",
+    "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/06_gate-b2-then-origin-tracing-export.md"
+  ],
+  "completion_data": {
+    "completion_summary": "Phases 5-7 of plan 06 landed: Gate B2 (beta-split refutation probe) verdict PASS with residual risk explicitly carried forward; the machine-verified openBranch_countermodel/hvalid statement-shape defect fixed; the raw-edge persistence conjunct (IPosPersistRaw) exported. Full lake build green, zero new sorries beyond the one deliberately-deferred new conjunct. Phases 8-14 remain (reuse-time containment export, post-reuse closure, multi-hop composition, the three sorry discharges, final CI) -- Phase 8 has a documented design subtlety to resolve first, recorded in handoffs/05.",
+    "roadmap_items": []
+  },
+  "blocked_phase": null,
+  "blockers": [],
   "partial_progress": {
-    "stage": "phase_7_in_progress",
-    "details": "Phases 5-6 complete and committed (a6b0d14b). Gate B2 verdict PASS. Statement-shape fix landed. Beginning Phase 7 (raw-edge persistence conjunct export).",
-    "phases_completed": 6
+    "stage": "phase_8_not_started",
+    "details": "Phases 5-7 complete and committed (a6b0d14b, 0ef99cd4). Phase 8 requires resolving a design subtlety before threading a new companion invariant through intExpandBranches_openBranch_sat's induction -- see handoffs/05.",
+    "phases_completed": 7,
+    "phases_total": 14
   },
   "metadata": {
     "session_id": "sess_1785363007_d08249",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  },
+  "verification": {
+    "verification_passed": false,
+    "note": "Not run to final CI (Phase 14) since phases 8-13 remain; this is expected for a partial/multi-dispatch task, not a failure. lake build (full project) is green with exactly 4 sorries in scope, all deliberately deferred: DP-5 (Scheme.lean truthLemma), the Phase-6 openBranch_countermodel conjunct, DP-3 (Completeness.lean), DP-4 (Minimal/Completeness.lean).",
+    "sorry_count": 4,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": false
   }
 }

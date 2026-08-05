@@ -18,6 +18,7 @@ public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
 public import Cslib.Logics.Modal.Tableau.Support.Accessibility
+public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
 
 /-! # Modal K Tableau Finite-Model-Property Termination Measure
 
@@ -475,28 +476,6 @@ private lemma modalUniverse_mem_label {φ0 : Proposition Atom}
   simp only [modalUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
     List.not_mem_nil, or_false] at hx
   obtain ⟨w, hw, ψ, -, heq | heq⟩ := hx <;> (subst heq; exact Nat.lt_succ_iff.mp hw)
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Inversion for `boxPositivesOf`: every `(ψ, src)` pair it returns came from an actual
-`T(□ψ)@src` member of the branch (`Branch.lean:180-187`). -/
-private lemma mem_boxPositivesOf {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {ψ : Proposition Atom} {src : WorldIndex} (h : (ψ, src) ∈ boxPositivesOf b) :
-    (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  simp only [boxPositivesOf, List.mem_filterMap] at h
-  obtain ⟨sf, hsfmem, hsfeq⟩ := h
-  split at hsfeq
-  · rename_i hsign
-    split at hsfeq
-    · rename_i φ' hform
-      simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
-      obtain ⟨rfl, rfl⟩ := hsfeq
-      rw [beq_iff_eq] at hsign
-      obtain ⟨s, φ, l⟩ := sf
-      simp only at hsign hform
-      subst hsign; subst hform
-      exact hsfmem
-    · simp at hsfeq
-  · simp at hsfeq
 
 omit [Hashable Atom] in
 /-- Shared closure fact for the `boxProps` group propagated by both fresh-world rules
@@ -1702,62 +1681,6 @@ append, needed to show the potential `Φ` is exactly preserved (up to the single
 term) across a step. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalKnownWorlds_fold_spec
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
-    (hws0 : ws0.Nodup) :
-    (l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0).Nodup ∧
-    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
-      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
-  induction l generalizing ws0 with
-  | nil => exact ⟨hws0, by simp⟩
-  | cons sf rest ih =>
-    by_cases hc : ws0.any (· == sf.label)
-    · simp only [List.foldl_cons, if_pos hc]
-      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
-      obtain ⟨hnodup, hmem⟩ := ih ws0 hws0
-      refine ⟨hnodup, fun x => ?_⟩
-      rw [hmem]
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl h
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ hmemws0)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-    · simp only [List.foldl_cons, if_neg hc]
-      have hnotmem : sf.label ∉ ws0 := by simpa [List.any_eq_true] using hc
-      have hws0' : (sf.label :: ws0).Nodup := List.nodup_cons.mpr ⟨hnotmem, hws0⟩
-      obtain ⟨hnodup, hmem⟩ := ih (sf.label :: ws0) hws0'
-      refine ⟨hnodup, fun x => ?_⟩
-      rw [hmem]
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · rcases List.mem_cons.mp h with rfl | h
-          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
-          · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl (List.mem_cons_of_mem _ h)
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ List.mem_cons_self)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalKnownWorlds_nodup
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
-  (modalKnownWorlds_fold_spec l [] List.nodup_nil).1
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma mem_modalKnownWorlds
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
-    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
-  unfold modalKnownWorlds
-  have h := (modalKnownWorlds_fold_spec l [] List.nodup_nil).2 x
-  simpa using h
-
-omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_le_modalMaxWorld
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
     (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
@@ -1789,15 +1712,6 @@ private lemma modalKnownWorlds_toFinset_append
   · rintro (⟨sf, hsf, rfl⟩ | ⟨sf, hsf, rfl⟩)
     · exact ⟨sf, Or.inl hsf, rfl⟩
     · exact ⟨sf, Or.inr hsf, rfl⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalKnownWorlds_mono_append
-    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    modalKnownWorlds b ⊆ modalKnownWorlds (xs ++ b) := by
-  intro x hx
-  rw [mem_modalKnownWorlds] at hx ⊢
-  obtain ⟨sf, hsf, rfl⟩ := hx
-  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- If all labels of `xs` are already known worlds of `b`, appending `xs` doesn't change the

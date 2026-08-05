@@ -12,6 +12,7 @@ public import Cslib.Logics.Modal.Tableau.FrameSoundness
 public import Cslib.Logics.Modal.Tableau.TDriver
 public import Cslib.Logics.Modal.Tableau.BDriver
 public import Cslib.Logics.Modal.Tableau.Support.Accessibility
+public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
 public import Cslib.Foundations.Relation.Euclidean
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
@@ -3735,59 +3736,13 @@ only `modalApplyOneKb5''_fresh_local` (`FiveSimplification.lean`); those generic
 directly at the assembly site below and are NOT re-derived here. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalKnownWorlds_fold_spec_C
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
-    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
-      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
-  induction l generalizing ws0 with
-  | nil => simp
-  | cons sf rest ih =>
-    by_cases hc : ws0.any (· == sf.label)
-    · simp only [List.foldl_cons, if_pos hc]
-      intro x
-      rw [ih ws0]
-      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl h
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ hmemws0)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-    · simp only [List.foldl_cons, if_neg hc]
-      intro x
-      rw [ih (sf.label :: ws0)]
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · rcases List.mem_cons.mp h with rfl | h
-          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
-          · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl (List.mem_cons_of_mem _ h)
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (by simp [hfeq])
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds` (unavailable
-across files): membership in `modalKnownWorlds l` iff some formula of `l` carries that label. -/
-private lemma mem_modalKnownWorlds_C
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
-    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
-  unfold modalKnownWorlds
-  simpa using modalKnownWorlds_fold_spec_C l [] x
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`:
 appending formulas to the front of a branch only grows its known-worlds set. -/
 private lemma modalKnownWorlds_mono_append_C
     (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
   intro x hx
-  rw [mem_modalKnownWorlds_C] at hx ⊢
+  rw [mem_modalKnownWorlds] at hx ⊢
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 

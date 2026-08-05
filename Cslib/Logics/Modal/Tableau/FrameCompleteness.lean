@@ -4297,10 +4297,14 @@ existential witness conjuncts (box-negative, diamond-positive) are monotone in `
 `hasEdge_addEdge_mono_gate0` (GATE 0 section above) lifts an existing witness edge into the
 extended accessibility unchanged. The fourth conjunct, `modalS4Saturated` at the extended
 accessibility, is the genuinely hard content (it must additionally account for `src`'s new
-successor `wBlock`) and is taken here as an explicit hypothesis -- the single remaining
-obligation, per the plan's Phase 3 instruction not to `sorry` it. Re-scoped Phases 4-5 discharge
-it, consuming the `blockedRedirect_boxed_boxPos_mem`/`blockedRedirect_boxed_diaNeg_mem` free
-transfers (`LoopChecking.lean`) and Gate B's `_wrapped` bridges. -/
+successor `wBlock`); `modalHintikkaSetS4_addEdge_of_saturated` below takes it as an explicit
+hypothesis, and `modalHintikkaSetS4_addEdge_of_blocked` (also below) discharges that hypothesis
+in full via `modalS4Saturated_addEdge_of_blocked` (`LoopChecking.lean`) -- the hard saturation
+lemma consuming the `blockedRedirect_boxed_boxPos_mem`/`blockedRedirect_boxed_diaNeg_mem` free
+transfers together with the T-rule self-propagation bridges `hintikkaS4_box_pos_self`/
+`hintikkaS4_dia_neg_self`, closing re-scoped Phases 3-5 (per the Phase 1 Verdict) as a single
+unconditional result: `modalHintikkaSetS4` preservation under the keyed redirect, with no
+`modalS4Saturated` hypothesis left outstanding. -/
 
 /-- `modalHintikkaSetS4` preservation under the keyed redirect's `addEdge`, GIVEN the hard
 saturation conjunct at the extended accessibility (`hSatExt`, this task's single remaining
@@ -4320,6 +4324,65 @@ lemma modalHintikkaSetS4_addEdge_of_saturated (φ₀ : Proposition Atom)
   · intro φ w hmem
     obtain ⟨w', hedge, hwit⟩ := hdiaPos φ w hmem
     exact ⟨w', hasEdge_addEdge_mono_gate0 hedge, hwit⟩
+
+/-- **Full assembly, re-scoped Phases 3-5 complete** (per the plan's `#### Phase 1 Verdict`):
+`modalHintikkaSetS4` preservation under the keyed redirect's `addEdge`, UNCONDITIONALLY. Combines
+`modalHintikkaSetS4_addEdge_of_saturated` (the three mechanical conjuncts, above) with
+`modalS4Saturated_addEdge_of_blocked` (`LoopChecking.lean`, the hard saturation conjunct) applied
+to the saturation fact `modalHintikkaSetS4_saturated hH` already carried by `hH` itself. No
+`modalS4Saturated` hypothesis remains outstanding: `hUniv`/`hkL`/`hblock` are exactly
+`S4LoopInv.bClosure`/`S4LoopInv.keyLowerBd`/the keyed guard's own block decision, all available
+at any call site holding an `S4LoopInv`. -/
+lemma modalHintikkaSetS4_addEdge_of_blocked (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hH : modalHintikkaSetS4 φ₀ b acc)
+    (hUniv : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock) :
+    modalHintikkaSetS4 φ₀ b (acc.addEdge src wBlock) :=
+  modalHintikkaSetS4_addEdge_of_saturated φ₀ b acc src wBlock hH
+    (modalS4Saturated_addEdge_of_blocked φ₀ b acc keys s φ src wBlock
+      (modalHintikkaSetS4_saturated φ₀ b acc hH) hUniv hkL hblock)
+
+/-- **Redirect-preservation capstone** (re-scoped Phase 6, per the plan's `#### Phase 1
+Verdict`): `branchSatisfiableIn s4FC b acc'` at the keyed guard's redirect-extended
+accessibility `acc' := acc.addEdge src wBlock`, built directly from `modalHintikkaSetS4 φ₀ b
+acc` via `modalHintikkaSetS4_addEdge_of_blocked` and `modalTruthLemmaS4` applied at `acc'` with
+`extractModelS4 b acc'` (identity world-assignment) as the witness -- `s4FC` and the edge
+conjunct come free from `extractModelS4_refl`/`extractModelS4_trans`/
+`extractModelS4_hasEdge_imp_r`, regardless of `acc`, exactly as they already do for the
+unredirected case. This is the actual redirect-preservation result the S4 keyed loop guard's
+soundness argument needs; re-scoped Phase 7 wires it into the per-step preservation argument. -/
+lemma branchSatisfiableIn_s4FC_addEdge_of_blocked (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hH : modalHintikkaSetS4 φ₀ b acc)
+    (hUniv : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock) :
+    branchSatisfiableIn s4FC b (acc.addEdge src wBlock) := by
+  have hH' := modalHintikkaSetS4_addEdge_of_blocked φ₀ b acc keys s φ src wBlock hH hUniv hkL
+    hblock
+  have htruth := modalTruthLemmaS4 φ₀ b (acc.addEdge src wBlock) hH'
+  refine ⟨WorldIndex, extractModelS4 b (acc.addEdge src wBlock), id,
+    ⟨extractModelS4_refl b _, extractModelS4_trans b _⟩, ?_, ?_⟩
+  · intro w w' hedge
+    exact extractModelS4_hasEdge_imp_r b _ hedge
+  · intro sf hsfmem
+    refine ⟨fun hsign => ?_, fun hsign => ?_⟩
+    · have hsfeq : sf = (⟨.pos, sf.formula, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq] at hsfmem
+      exact (htruth sf.formula sf.label).1 hsfmem
+    · have hsfeq : sf = (⟨.neg, sf.formula, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq] at hsfmem
+      exact (htruth sf.formula sf.label).2 hsfmem
 
 end Cslib.Logic.Modal.Tableau
 

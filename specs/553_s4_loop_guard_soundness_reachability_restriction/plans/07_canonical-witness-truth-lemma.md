@@ -525,13 +525,13 @@ those phases still own.
 
 ---
 
-### Phase 3: Canonical witness instance and the three collapsing conjuncts [PARTIAL]
+### Phase 3: Canonical witness instance and the three collapsing conjuncts [COMPLETED]
 
 **Re-scoped per the Phase 1 Verdict (outcome (i)).** This phase now executes the re-scope
 recorded there, not the original canonical-witness task list below (which is superseded and left
 for provenance only).
 
-#### Phase 3 Progress Record (partial -- continuation needed)
+#### Phase 3 Progress Record (superseded by the Completion Record below -- kept for provenance)
 
 **Landed, sorry-free** (`FrameCompleteness.lean`, locate by
 `grep -n 'modalHintikkaSetS4_addEdge_of_saturated'`):
@@ -583,6 +583,81 @@ wBlock`) is re-scoped Phases 4-5's content. Investigation so far, recorded for t
   `wBlock`" (covered by `blockedRedirect_boxed_boxPos_mem`), mirroring
   `hasEdge_addEdge_cases`'s case split.
 
+#### Phase 3-6 Completion Record (continuation dispatch, folds re-scoped Phases 3-6 into one)
+
+**All four re-scoped phases (3-6) are now COMPLETE, sorry-free, standard-axioms-only
+(`propext`, `Classical.choice`, `Quot.sound`, verified both via `lean_verify` and directly via
+`lake env lean` + `#print axioms` to rule out the MCP tool's occasional `sorryAx` false
+positive).** The previously-open obligation -- `hSatExt : modalS4Saturated φ₀ b (acc.addEdge src
+wBlock)`, taken as an explicit hypothesis in the Progress Record above -- is now discharged in
+full. Landed declarations, in dependency order:
+
+1. **`successorsOf_addEdge_of_ne`/`successorsOf_addEdge_self`** (`LoopChecking.lean`): the two
+   `Accessibility.successorsOf`/`addEdge` case-split facts everything below is built on.
+2. **`modalApplyOneS4_boxPos_fst_eq`/`_diaNeg_fst_eq`** (`LoopChecking.lean`): closed forms for
+   `modalApplyOneS4`'s `.fst` at the two 4-rule-relevant shapes, isolating every acc-dependent
+   subterm as `boxPropagation`/`modalFourBoxProp` (resp. the inline diamond-negative K arm/
+   `modalFourDiaNegProp`) applied to that accessibility -- reused by both the congruence lemma
+   below and the hard saturation lemma, avoiding re-deriving the T/S4-layer unfolding twice.
+3. **`modalApplyOne_fst_eq_of_not_boxPos_diaNeg`/`modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg`/
+   `modalApplyOneS4_fst_congr_successorsOf`** (`LoopChecking.lean`): the acc-independence/
+   acc-congruence lemmas covering every OTHER shape (non-4-rule-relevant shapes are acc-free
+   absolutely; the two guard shapes reduce via the already-landed `modalApplyOneS4_boxNeg_*_eq`/
+   `_diaPos_*_eq` lemmas to `modalApplyOne`, which is itself acc-free at those shapes since K's
+   mint arms never consult `acc`).
+4. **`mem_signedSubfmls_of_formula_s4loop`** (`LoopChecking.lean`, private): the
+   `modalSubfmls`-to-`signedSubfmls` bridge needed to supply `blockedRedirect_boxed_boxPos_mem`/
+   `_diaNeg_mem`'s `hsf` hypothesis from `S4LoopInv.bClosure`.
+5. **`modalS4Saturated_addEdge_of_blocked`** (`LoopChecking.lean`) -- **the hard content**:
+   `modalS4Saturated φ₀ b acc → (S4LoopInv.bClosure) → (S4LoopInv.keyLowerBd) →
+   (blockingWorldS4Keyed ... = some wBlock) → modalS4Saturated φ₀ b (acc.addEdge src wBlock)`,
+   UNCONDITIONALLY (no remaining hypothesis). Proof route, per world/shape: `sf.label ≠ src` is
+   invariant via `modalApplyOneS4_fst_congr_successorsOf`; `sf.label = src` non-4-rule-relevant
+   shapes are acc-free via `modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg`; `sf.label = src`
+   box-positive/diamond-negative shapes are the genuine hard case, closed by combining
+   `blockedRedirect_boxed_boxPos_mem`/`_diaNeg_mem` (gives the BOXED fact `T(□χ)@wBlock ∈ b`/
+   `F(◇χ)@wBlock ∈ b`) with the already-landed T-self bridges `hintikkaS4_box_pos_self`/
+   `hintikkaS4_dia_neg_self` (re-applies `hSat` at the ORIGINAL `acc` to the newly-established
+   boxed fact, recovering the UNWRAPPED fact `T(χ)@wBlock ∈ b`/`F(χ)@wBlock ∈ b` -- the T-rule's
+   self-propagation arm never consults `acc`, so this works at any accessibility): with both
+   facts in hand, `boxPropagation`/`modalFourBoxProp` (resp. the diamond duals) at the extended
+   accessibility are shown LITERALLY equal (not just membership-preserving) to their values at
+   the original `acc`, since the new `wBlock` branch of each `filterMap` evaluates to `none`.
+6. **`modalHintikkaSetS4_addEdge_of_blocked`** (`FrameCompleteness.lean`) -- re-scoped Phases
+   3-5's assembly, folded into one: composes `modalHintikkaSetS4_addEdge_of_saturated` (the
+   three mechanical conjuncts, previously landed) with `modalS4Saturated_addEdge_of_blocked`
+   (item 5) applied to `modalHintikkaSetS4_saturated hH`. `modalHintikkaSetS4` preservation
+   under the keyed redirect, UNCONDITIONALLY -- no `modalS4Saturated` hypothesis remains.
+7. **`branchSatisfiableIn_s4FC_addEdge_of_blocked`** (`FrameCompleteness.lean`) -- **re-scoped
+   Phase 6's capstone**: `branchSatisfiableIn s4FC b (acc.addEdge src wBlock)`, built directly
+   from `modalHintikkaSetS4 φ₀ b acc` via item 6 and `modalTruthLemmaS4` applied at the extended
+   accessibility with `extractModelS4 b (acc.addEdge src wBlock)` (identity world-assignment) as
+   the witness. `s4FC` and the edge conjunct come free from `extractModelS4_refl`/
+   `extractModelS4_trans`/`extractModelS4_hasEdge_imp_r`, unconditionally on `acc`, exactly as
+   the Phase 1 Verdict predicted. **This is the actual redirect-preservation result** the S4
+   keyed loop guard's soundness argument needs -- Phase 7 wires it into the per-step argument.
+8. **Phase 6's probe-lemma removal, executed**: `canonicalWitnessRestrictionProbe_
+   agreementConditional` and its `/-! ### Canonical-Witness Restriction Conditional Agreement
+   Lemma -/` section header are removed from `FrameSoundness.lean` (it was the last declaration
+   in the file; `accPinnedBy`/`branchSatisfiablePinnedIn`/`branchSatisfiablePinnedIn_
+   redirect_mechanical` are preserved verbatim, per the standing constraint). Dependents
+   enumerated by `grep -rn 'canonicalWitnessRestrictionProbe' Cslib/ CslibTests/` before
+   removal: zero in actual code (one docstring cross-reference in `LoopChecking.lean`, updated
+   to point at the landed replacement instead of removed).
+
+**Verification**: scoped builds of `FrameCompleteness`, `FrameSoundness`, `LoopChecking` are all
+clean; `lake exe checkInitImports` and `lake exe lint-style` clean; a full `lake build` (3313
+jobs) and `lake test` (including `CslibTests.S4LoopGuardRegression`) both pass; bare-tactic
+sorry census over `Cslib/Logics/Modal/Tableau/` returns exactly one line
+(`FrameSoundness.lean:1251`, the standing, explicitly-retained sorry).
+
+**What remains**: Phase 7 (wiring item 7's capstone into the keyed ordered driver's actual
+per-step soundness argument, extending the regression corpus, and the final full-gate close-out)
+is genuinely substantial, separate work -- confirmed by inspecting `modalStepBranchS4KeyedOrdered`
+(`LoopChecking.lean`), whose primary-scan/fallback case split (`modalStepBranchS4KeyedOrdered_
+cases`) the bespoke step lemma must thread through. Not attempted this dispatch; see the
+continuation handoff.
+
 **Do not re-attempt the canonical-witness/pinned-witness apparatus** (original Phase 3's task
 list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 
@@ -633,7 +708,7 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 
 ---
 
-### Phase 4: Canonical truth lemma, box-positive direction [NOT STARTED]
+### Phase 4: Canonical truth lemma, box-positive direction [COMPLETED]
 
 - **Goal:** Prove the box-positive semantic-to-syntactic direction at the canonical model, at the
   price Phase 1 established, discharging the `htruthBoxPos` group the probe lemma assumes.
@@ -668,7 +743,7 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 
 ---
 
-### Phase 5: Canonical truth lemma, diamond-negative direction, and the initial-state branch conjunct [NOT STARTED]
+### Phase 5: Canonical truth lemma, diamond-negative direction, and the initial-state branch conjunct [COMPLETED]
 
 - **Goal:** Prove the diamond-negative dual, then assemble the full branch conjunct at the initial
   (pre-redirect) state, closing Phase 3's stated obligation.
@@ -700,7 +775,7 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 
 ---
 
-### Phase 6: Redirect-step re-assembly, and supersession of the probe lemma [NOT STARTED]
+### Phase 6: Redirect-step re-assembly, and supersession of the probe lemma [COMPLETED]
 
 - **Goal:** Discharge the redirect-preservation obligation at the canonical witness — the obligation
   five routes died on — and remove the now-superseded probe lemma.

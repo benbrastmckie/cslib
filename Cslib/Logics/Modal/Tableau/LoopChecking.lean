@@ -7594,11 +7594,13 @@ lemma hintikkaS4_dia_neg_reflTransGen
 `hintikkaS4_box_pos_reflTransGen`/`hintikkaS4_dia_neg_reflTransGen` above unwrap to `T(ψ)@w'`/
 `F(ψ)@w'` at the path's endpoint (consuming `hintikkaS4_box_pos_self`/`hintikkaS4_dia_neg_self`
 in their `refl` case). The two bridges below instead conclude `T(□ψ)@w'`/`F(◇ψ)@w'` -- the box
-or diamond formula *itself* survives the whole path, not just its body. This is exactly the
-`hpropBox`/`hpropDia` shape the canonical-witness redirect-preservation route needs (see
-`FrameSoundness.lean`'s `canonicalWitnessRestrictionProbe_agreementConditional`), and each is a
-short transcription of the corresponding unwrapped proof with the `_self` step dropped from the
-`refl` case: at `w = w'`, `hmem` already **is** the wrapped goal, needing no unwrapping. -/
+or diamond formula *itself* survives the whole path, not just its body. This was originally
+motivated by the now-superseded canonical-witness redirect-preservation route (see
+`modalS4Saturated_addEdge_of_blocked` below and `modalHintikkaSetS4_addEdge_of_blocked`/
+`branchSatisfiableIn_s4FC_addEdge_of_blocked` in `FrameCompleteness.lean` for the landed
+re-scoped route these two bridges remain genuinely useful for); each is a short transcription
+of the corresponding unwrapped proof with the `_self` step dropped from the `refl` case: at
+`w = w'`, `hmem` already **is** the wrapped goal, needing no unwrapping. -/
 
 /-- Wrapped-conclusion variant of `hintikkaS4_box_pos_reflTransGen`: `modalS4Saturated φ₀ b acc`,
 `T(□ψ)@w ∈ b`, and a `ReflTransGen`-path `w ⤳ w'` in `acc.hasEdge` together imply `T(□ψ)@w' ∈ b`.
@@ -9545,6 +9547,434 @@ lemma blockedRedirect_boxed_diaNeg_mem (φ₀ : Proposition Atom)
   obtain ⟨sf', hsf'mem, heq⟩ := hrel.2
   rw [heq] at hsf'mem
   exact hsf'mem
+
+/-! ## Saturation Preservation Under the Keyed Redirect (Plan v6, re-scoped Phases 3-5)
+
+Per the `#### Phase 1 Verdict` in `plans/07_canonical-witness-truth-lemma.md`
+(`specs/553_s4_loop_guard_soundness_reachability_restriction/`), the sole remaining obligation
+for the redirect-preservation argument is `modalS4Saturated` preservation under the specific
+`addEdge src wBlock` a keyed-guard block performs. `modalApplyOneS4`'s output at a signed formula
+`sf` depends on `acc` ONLY through `acc.successorsOf sf.label` (`blockingWorldS4`, the K rules,
+the T self-propagation arms, and the 4-rule arms are all either acc-independent or route through
+`successorsOf sf.label` alone), so the two `successorsOf`/`addEdge` lemmas below make that
+dependence explicit at the two points this obligation needs: invariance when `sf.label ≠ src`,
+and the extended-successor content when `sf.label = src`. -/
+
+omit [Hashable Atom] in
+/-- `Accessibility.successorsOf` is unaffected by `addEdge` at any world other than the
+redirect's source: the new edge only ever extends `src`'s own successor list. -/
+lemma successorsOf_addEdge_of_ne (acc : Accessibility) (src wBlock v : WorldIndex)
+    (hne : v ≠ src) : (acc.addEdge src wBlock).successorsOf v = acc.successorsOf v := by
+  unfold Accessibility.successorsOf Accessibility.addEdge
+  simp only [List.filterMap_cons, beq_iff_eq]
+  rw [if_neg (Ne.symm hne)]
+
+omit [Hashable Atom] in
+/-- `Accessibility.successorsOf` at the redirect's source, after `addEdge`, is `wBlock`
+prepended to the original successor list. -/
+lemma successorsOf_addEdge_self (acc : Accessibility) (src wBlock : WorldIndex) :
+    (acc.addEdge src wBlock).successorsOf src = wBlock :: acc.successorsOf src := by
+  unfold Accessibility.successorsOf Accessibility.addEdge
+  simp
+
+/-- Closed form for `modalApplyOneS4`'s `.fst` at the box-positive shape `T(□ψ)@w`: the T-rule
+(`modalTBoxSelf`) and 4-rule (`modalFourBoxProp`) propagation arms' merge on top of K's
+`boxPropagation`, spelled out explicitly rather than left behind a `let`. Reusable scaffolding
+for both `modalApplyOneS4_fst_congr_successorsOf` and `modalS4Saturated_addEdge_of_blocked`:
+both need to compare this expression at two different accessibilities, and it is far easier to
+compare the closed form (which isolates every acc-dependent subterm as `boxPropagation`/
+`modalFourBoxProp` applied to that accessibility) than to re-derive it twice. -/
+lemma modalApplyOneS4_boxPos_fst_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4 φ₀ (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+    (match (match (if (boxPropagation b acc ψ w).isEmpty then RuleResult.notApplicable
+              else RuleResult.persistent (boxPropagation b acc ψ w)) with
+          | RuleResult.persistent kForms =>
+            RuleResult.persistent
+              (kForms ++ (modalTBoxSelf b ψ w).filter (fun x => !(kForms.any (· == x))))
+          | RuleResult.notApplicable =>
+            if (modalTBoxSelf b ψ w).isEmpty then RuleResult.notApplicable
+            else RuleResult.persistent (modalTBoxSelf b ψ w)
+          | other => other) with
+      | RuleResult.persistent tForms =>
+        RuleResult.persistent
+          (tForms ++ (modalFourBoxProp b acc ψ w).filter (fun x => !(tForms.any (· == x))))
+      | RuleResult.notApplicable =>
+        if (modalFourBoxProp b acc ψ w).isEmpty then RuleResult.notApplicable
+        else RuleResult.persistent (modalFourBoxProp b acc ψ w)
+      | other => other) := by
+  have hk : (modalApplyOne (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      if (boxPropagation b acc ψ w).isEmpty then RuleResult.notApplicable
+      else RuleResult.persistent (boxPropagation b acc ψ w) := by
+    unfold modalApplyOne
+    simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?,
+      modalNegOf?, List.map, List.find?, RuleResult.isApplicable, Option.getD_none]
+    split_ifs <;> simp_all
+  have htR : (modalApplyOneT (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (match (modalApplyOne (⟨.pos, .box ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+        | RuleResult.persistent kForms =>
+          RuleResult.persistent
+            (kForms ++ (modalTBoxSelf b ψ w).filter (fun x => !(kForms.any (· == x))))
+        | RuleResult.notApplicable =>
+          if (modalTBoxSelf b ψ w).isEmpty then RuleResult.notApplicable
+          else RuleResult.persistent (modalTBoxSelf b ψ w)
+        | other => other) := by
+    unfold modalApplyOneT
+    obtain ⟨kResult, kAcc⟩ := modalApplyOne (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+    cases kResult <;> first | rfl | (simp only []; split <;> rfl)
+  have htS4 : (modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (match (modalApplyOneT (⟨.pos, .box ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+        | RuleResult.persistent tForms =>
+          RuleResult.persistent
+            (tForms ++ (modalFourBoxProp b acc ψ w).filter (fun x => !(tForms.any (· == x))))
+        | RuleResult.notApplicable =>
+          if (modalFourBoxProp b acc ψ w).isEmpty then RuleResult.notApplicable
+          else RuleResult.persistent (modalFourBoxProp b acc ψ w)
+        | other => other) := by
+    unfold modalApplyOneS4Rules
+    obtain ⟨tResult, tAcc⟩ := modalApplyOneT (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+    cases tResult <;> first | rfl | (simp only []; split <;> rfl)
+  have hshape : modalApplyOneS4 φ₀ (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc =
+      modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc :=
+    modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ _ b acc ⟨by simp, by simp⟩
+  rw [hshape, htS4, htR, hk]
+  rfl
+
+/-- Dual of `modalApplyOneS4_boxPos_fst_eq` for the diamond-negative shape `F(◇ψ)@w`, via
+`modalTDiaNegSelf`/`modalFourDiaNegProp` and the inline diamond-negative K rule arm (there is no
+separately named `def` for the K layer here, unlike `boxPropagation`, so its filterMap is
+spelled out directly). -/
+lemma modalApplyOneS4_diaNeg_fst_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4 φ₀ (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+    (match (match (if ((acc.successorsOf w).filterMap fun u =>
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+              if b.any (· == sf') then none else some sf').isEmpty then
+            RuleResult.notApplicable
+          else
+            RuleResult.persistent ((acc.successorsOf w).filterMap fun u =>
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+              if b.any (· == sf') then none else some sf')) with
+          | RuleResult.persistent kForms =>
+            RuleResult.persistent
+              (kForms ++ (modalTDiaNegSelf b ψ w).filter (fun x => !(kForms.any (· == x))))
+          | RuleResult.notApplicable =>
+            if (modalTDiaNegSelf b ψ w).isEmpty then RuleResult.notApplicable
+            else RuleResult.persistent (modalTDiaNegSelf b ψ w)
+          | other => other) with
+      | RuleResult.persistent tForms =>
+        RuleResult.persistent
+          (tForms ++ (modalFourDiaNegProp b acc ψ w).filter (fun x => !(tForms.any (· == x))))
+      | RuleResult.notApplicable =>
+        if (modalFourDiaNegProp b acc ψ w).isEmpty then RuleResult.notApplicable
+        else RuleResult.persistent (modalFourDiaNegProp b acc ψ w)
+      | other => other) := by
+  have hk : (modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      if ((acc.successorsOf w).filterMap fun u =>
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+            if b.any (· == sf') then none else some sf').isEmpty then
+        RuleResult.notApplicable
+      else
+        RuleResult.persistent ((acc.successorsOf w).filterMap fun u =>
+          let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+          if b.any (· == sf') then none else some sf') := by
+    unfold modalApplyOne
+    simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?,
+      modalNegOf?, List.map, List.find?, RuleResult.isApplicable, Option.getD_none]
+    split_ifs <;> simp_all
+  have htR : (modalApplyOneT (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (match (modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+        | RuleResult.persistent kForms =>
+          RuleResult.persistent
+            (kForms ++ (modalTDiaNegSelf b ψ w).filter (fun x => !(kForms.any (· == x))))
+        | RuleResult.notApplicable =>
+          if (modalTDiaNegSelf b ψ w).isEmpty then RuleResult.notApplicable
+          else RuleResult.persistent (modalTDiaNegSelf b ψ w)
+        | other => other) := by
+    unfold modalApplyOneT
+    obtain ⟨kResult, kAcc⟩ := modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+    cases kResult <;> first | rfl | (simp only []; split <;> rfl)
+  have htS4 : (modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (match (modalApplyOneT (⟨.neg, .diamond ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+        | RuleResult.persistent tForms =>
+          RuleResult.persistent
+            (tForms ++ (modalFourDiaNegProp b acc ψ w).filter (fun x => !(tForms.any (· == x))))
+        | RuleResult.notApplicable =>
+          if (modalFourDiaNegProp b acc ψ w).isEmpty then RuleResult.notApplicable
+          else RuleResult.persistent (modalFourDiaNegProp b acc ψ w)
+        | other => other) := by
+    unfold modalApplyOneS4Rules
+    obtain ⟨tResult, tAcc⟩ := modalApplyOneT (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+    cases tResult <;> first | rfl | (simp only []; split <;> rfl)
+  have hshape : modalApplyOneS4 φ₀ (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc =
+      modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc :=
+    modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ _ b acc ⟨by simp, by simp⟩
+  rw [hshape, htS4, htR, hk]
+  rfl
+
+omit [Hashable Atom] in
+/-- `modalApplyOne`'s (the underlying K-rule dispatch, no S4 guard) `.fst` component is
+**entirely independent of `acc`** outside its own two acc-consulting shapes (`T(□φ)@w`, whose
+`boxPropagation` reads `acc.successorsOf w`, and `F(◇φ)@w`, whose inline dual does the same):
+the propositional rules and both minting arms (`F(□φ)`, `T(◇φ)`) never consult `acc` for their
+`.fst` content, only for the accessibility they hand back as `.snd`. -/
+lemma modalApplyOne_fst_eq_of_not_boxPos_diaNeg
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc1 acc2 : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ ψ, sf.formula = .box ψ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ ψ, sf.formula = .diamond ψ)) :
+    (modalApplyOne sf b acc1).fst = (modalApplyOne sf b acc2).fst := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOne
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp_all [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?,
+      List.map, List.find?, RuleResult.isApplicable, Option.getD_none] <;>
+    split_ifs <;> rfl
+
+/-- `modalApplyOneS4`'s `.fst` component is **entirely independent of `acc`** outside the two
+4-rule/T-rule-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`): the guard's own minting/blocking decision
+(`blockingWorldS4`) never consults `acc`, and every other rule arm (K's mint rules, the
+propositional rules, the T self-propagation arms) is likewise acc-free at these shapes.
+Companion to `modalApplyOneS4_eq_of_not_boxNeg_diaPos` (which handles the *guard*-relevant
+shapes `F(□φ)`/`T(◇φ)`), but for the complementary shape set and for the `.fst` projection
+against two arbitrary accessibilities rather than one fixed reduction target. -/
+lemma modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg (φ₀ : Proposition Atom)
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc1 acc2 : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ ψ, sf.formula = .box ψ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ ψ, sf.formula = .diamond ψ)) :
+    (modalApplyOneS4 φ₀ sf b acc1).fst = (modalApplyOneS4 φ₀ sf b acc2).fst := by
+  obtain ⟨h1, h2⟩ := h
+  by_cases hg1 : sf.sign = .neg ∧ ∃ ψ, sf.formula = .box ψ
+  · obtain ⟨hs, ψ, hf⟩ := hg1
+    have hsfeq : sf = (⟨.neg, .box ψ, sf.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+      rcases sf with ⟨s', f', w'⟩; simp_all
+    rw [hsfeq]
+    rcases hblk : blockingWorldS4 φ₀ b .neg ψ sf.label with _ | wBlock
+    · rw [modalApplyOneS4_boxNeg_unblocked_eq φ₀ b acc1 ψ sf.label hblk,
+        modalApplyOneS4_boxNeg_unblocked_eq φ₀ b acc2 ψ sf.label hblk]
+      exact modalApplyOne_fst_eq_of_not_boxPos_diaNeg _ b acc1 acc2 ⟨by simp, by simp⟩
+    · rw [modalApplyOneS4_boxNeg_blocked_eq φ₀ b acc1 ψ sf.label wBlock hblk,
+        modalApplyOneS4_boxNeg_blocked_eq φ₀ b acc2 ψ sf.label wBlock hblk]
+  · by_cases hg2 : sf.sign = .pos ∧ ∃ ψ, sf.formula = .diamond ψ
+    · obtain ⟨hs, ψ, hf⟩ := hg2
+      have hsfeq : sf = (⟨.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq]
+      rcases hblk : blockingWorldS4 φ₀ b .pos ψ sf.label with _ | wBlock
+      · rw [modalApplyOneS4_diaPos_unblocked_eq φ₀ b acc1 ψ sf.label hblk,
+          modalApplyOneS4_diaPos_unblocked_eq φ₀ b acc2 ψ sf.label hblk]
+        exact modalApplyOne_fst_eq_of_not_boxPos_diaNeg _ b acc1 acc2 ⟨by simp, by simp⟩
+      · rw [modalApplyOneS4_diaPos_blocked_eq φ₀ b acc1 ψ sf.label wBlock hblk,
+          modalApplyOneS4_diaPos_blocked_eq φ₀ b acc2 ψ sf.label wBlock hblk]
+    · -- Neither guard shape (`F(□φ)`, `T(◇φ)`) nor either 4-rule shape (`T(□φ)`, `F(◇φ)`):
+      -- `modalApplyOneS4` reduces all the way to `modalApplyOne`, whose `.fst` at the five
+      -- remaining (non-modal) shapes never mentions `acc` at all.
+      have hshape1 : modalApplyOneS4 φ₀ sf b acc1 = modalApplyOneS4Rules sf b acc1 :=
+        modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc1 ⟨hg1, hg2⟩
+      have hshape2 : modalApplyOneS4 φ₀ sf b acc2 = modalApplyOneS4Rules sf b acc2 :=
+        modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc2 ⟨hg1, hg2⟩
+      rw [hshape1, hshape2, modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc1 ⟨h1, h2⟩,
+        modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc2 ⟨h1, h2⟩,
+        modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc1 ⟨h1, h2⟩,
+        modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc2 ⟨h1, h2⟩]
+      exact modalApplyOne_fst_eq_of_not_boxPos_diaNeg sf b acc1 acc2 ⟨h1, h2⟩
+
+/-- `modalApplyOneS4`'s `.fst` component depends on `acc` ONLY through `acc.successorsOf
+sf.label`: whenever two accessibilities agree there, the whole rule output agrees. Companion to
+`modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg`, covering the two shapes that lemma excludes
+(`T(□φ)@w`, `F(◇φ)@w`) via `modalApplyOneS4_boxPos_fst_eq`/`_diaNeg_fst_eq`'s closed forms,
+whose only `acc`-dependent subterms (`boxPropagation`/`modalFourBoxProp`/the inline
+diamond-negative filterMap/`modalFourDiaNegProp`) all route through `acc.successorsOf sf.label`
+alone and so rewrite directly under `hsucc`. -/
+lemma modalApplyOneS4_fst_congr_successorsOf (φ₀ : Proposition Atom)
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc1 acc2 : Accessibility)
+    (hsucc : acc1.successorsOf sf.label = acc2.successorsOf sf.label) :
+    (modalApplyOneS4 φ₀ sf b acc1).fst = (modalApplyOneS4 φ₀ sf b acc2).fst := by
+  by_cases hhard :
+      (sf.sign = .pos ∧ ∃ ψ, sf.formula = .box ψ) ∨
+      (sf.sign = .neg ∧ ∃ ψ, sf.formula = .diamond ψ)
+  · rcases hhard with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨.pos, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq, modalApplyOneS4_boxPos_fst_eq φ₀ b acc1 ψ sf.label,
+        modalApplyOneS4_boxPos_fst_eq φ₀ b acc2 ψ sf.label]
+      unfold boxPropagation modalFourBoxProp
+      rw [hsucc]
+    · have hsfeq : sf = (⟨.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq, modalApplyOneS4_diaNeg_fst_eq φ₀ b acc1 ψ sf.label,
+        modalApplyOneS4_diaNeg_fst_eq φ₀ b acc2 ψ sf.label]
+      unfold modalFourDiaNegProp
+      rw [hsucc]
+  · exact modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg φ₀ sf b acc1 acc2 (not_or.mp hhard)
+
+omit [Hashable Atom] in
+/-- Bridge: a formula's membership in `modalSubfmls φ₀` extends to `signedSubfmls φ₀`
+membership at either sign, since `signedSubfmls` is the full `{pos, neg} × modalSubfmls φ₀`
+product. Local restatement of `S5Simplification.lean`'s file-private
+`mem_signedSubfmls_of_formula_S5w`, needed here because `signedSubfmls` (unlike
+`modalUniverseS4`) carries no world-label component to case on. -/
+private lemma mem_signedSubfmls_of_formula_s4loop {φ₀ : Proposition Atom} (s : Sign)
+    {ψ : Proposition Atom} (h : ψ ∈ modalSubfmls φ₀) : (s, ψ) ∈ signedSubfmls φ₀ := by
+  unfold signedSubfmls
+  rw [Finset.mem_product]
+  refine ⟨?_, List.mem_toFinset.mpr h⟩
+  cases s <;> simp
+
+/-- **The hard content** (re-scoped Phase 3's remaining obligation, per the plan's
+`#### Phase 3 Progress Record`): `modalS4Saturated` preservation under the specific `addEdge
+src wBlock` the keyed minting guard's block performs. Combines `modalApplyOneS4_fst_congr_
+successorsOf`/`modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg` (acc-dependence is confined to
+`acc.successorsOf sf.label`, and only at the two 4-rule-relevant shapes) with the box-plus free
+transfers `blockedRedirect_boxed_boxPos_mem`/`_diaNeg_mem` and the landed T-self bridges
+`hintikkaS4_box_pos_self`/`hintikkaS4_dia_neg_self` (recovering the UNWRAPPED fact at `wBlock`
+from the BOXED one, at the *original*, unextended `acc`, since the T self-propagation arm never
+consults `acc` at all). Once both the boxed and unwrapped facts land at `wBlock`, the extended
+accessibility's box-positive/diamond-negative persistent output at `src` is LITERALLY the same
+list as the original's (the new `wBlock` entry in `acc.successorsOf src` is filtered out of
+every propagation arm by those two facts), so the extended-acc saturation goal reduces exactly
+to `hSat` applied at the unextended `acc`. -/
+lemma modalS4Saturated_addEdge_of_blocked (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (hUniv : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock) :
+    modalS4Saturated φ₀ b (acc.addEdge src wBlock) := by
+  intro sf hsfmem
+  have hcond := hSat sf hsfmem
+  by_cases hhard :
+      (sf.sign = .pos ∧ ∃ ψ, sf.formula = .box ψ) ∨
+      (sf.sign = .neg ∧ ∃ ψ, sf.formula = .diamond ψ)
+  · by_cases hlabel : sf.label = src
+    · -- The hard case: `sf` sits at the redirect's source and is one of the two
+      -- 4-rule-relevant shapes. Establish literal `.fst` equality via the two free-transfer
+      -- facts, then reduce to `hcond`.
+      have hfst : (modalApplyOneS4 φ₀ sf b (acc.addEdge src wBlock)).fst =
+          (modalApplyOneS4 φ₀ sf b acc).fst := by
+        rcases hhard with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+        · -- box-positive at src: T(□ψ)@src ∈ b
+          have hmemBox : (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+              b := by
+            have : sf = (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+              rcases sf with ⟨s', f', w'⟩
+              simp_all
+            rwa [this] at hsfmem
+          have hsigsub : (Sign.pos, .box ψ) ∈ signedSubfmls φ₀ :=
+            mem_signedSubfmls_of_formula_s4loop .pos (modalUniverseS4_mem_formula (hUniv _ hmemBox))
+          have hboxedWB : (⟨.pos, .box ψ, wBlock⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            blockedRedirect_boxed_boxPos_mem φ₀ b keys s φ src wBlock hkL hblock ψ hsigsub hmemBox
+          have hunwrappedWB : (⟨.pos, ψ, wBlock⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hintikkaS4_box_pos_self φ₀ b acc hSat ψ wBlock hboxedWB
+          have hsfeq : sf = (⟨.pos, .box ψ, src⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := by
+            rcases sf with ⟨s', f', w'⟩; simp_all
+          have hAddEq : boxPropagation b (acc.addEdge src wBlock) ψ src =
+              boxPropagation b acc ψ src := by
+            unfold boxPropagation
+            rw [successorsOf_addEdge_self, List.filterMap_cons]
+            have hin : (b.any fun x => x ==
+                (⟨.pos, ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true := by
+              simp only [List.any_eq_true, beq_iff_eq]
+              exact ⟨_, hunwrappedWB, rfl⟩
+            simp [hin]
+          have hFourEq : modalFourBoxProp b (acc.addEdge src wBlock) ψ src =
+              modalFourBoxProp b acc ψ src := by
+            unfold modalFourBoxProp
+            rw [successorsOf_addEdge_self, List.filterMap_cons]
+            have hin : (b.any fun x => x ==
+                (⟨.pos, .box ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true := by
+              simp only [List.any_eq_true, beq_iff_eq]
+              exact ⟨_, hboxedWB, rfl⟩
+            simp [hin]
+          rw [hsfeq, modalApplyOneS4_boxPos_fst_eq φ₀ b (acc.addEdge src wBlock) ψ src,
+            modalApplyOneS4_boxPos_fst_eq φ₀ b acc ψ src, hAddEq, hFourEq]
+        · -- diamond-negative at src: F(◇ψ)@src ∈ b
+          have hmemDia : (⟨.neg, .diamond ψ, src⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+            have : sf = (⟨.neg, .diamond ψ, src⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) := by
+              rcases sf with ⟨s', f', w'⟩
+              simp_all
+            rwa [this] at hsfmem
+          have hsigsub : (Sign.neg, .diamond ψ) ∈ signedSubfmls φ₀ :=
+            mem_signedSubfmls_of_formula_s4loop .neg
+              (modalUniverseS4_mem_formula (hUniv _ hmemDia))
+          have hboxedWB : (⟨.neg, .diamond ψ, wBlock⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            blockedRedirect_boxed_diaNeg_mem φ₀ b keys s φ src wBlock hkL hblock ψ hsigsub
+              hmemDia
+          have hunwrappedWB : (⟨.neg, ψ, wBlock⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hintikkaS4_dia_neg_self φ₀ b acc hSat ψ wBlock hboxedWB
+          have hsfeq : sf = (⟨.neg, .diamond ψ, src⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := by
+            rcases sf with ⟨s', f', w'⟩; simp_all
+          have hAddEq : ((acc.addEdge src wBlock).successorsOf src).filterMap
+              (fun u => let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+                if b.any (· == sf') then none else some sf') =
+              (acc.successorsOf src).filterMap
+              (fun u => let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+                if b.any (· == sf') then none else some sf') := by
+            rw [successorsOf_addEdge_self, List.filterMap_cons]
+            have hin : (b.any fun x => x ==
+                (⟨.neg, ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex)) = true := by
+              simp only [List.any_eq_true, beq_iff_eq]
+              exact ⟨_, hunwrappedWB, rfl⟩
+            simp [hin]
+          have hFourEq : modalFourDiaNegProp b (acc.addEdge src wBlock) ψ src =
+              modalFourDiaNegProp b acc ψ src := by
+            unfold modalFourDiaNegProp
+            rw [successorsOf_addEdge_self, List.filterMap_cons]
+            have hin : (b.any fun x => x ==
+                (⟨.neg, .diamond ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex)) =
+                true := by
+              simp only [List.any_eq_true, beq_iff_eq]
+              exact ⟨_, hboxedWB, rfl⟩
+            simp [hin]
+          rw [hsfeq, modalApplyOneS4_diaNeg_fst_eq φ₀ b (acc.addEdge src wBlock) ψ src,
+            modalApplyOneS4_diaNeg_fst_eq φ₀ b acc ψ src, hAddEq, hFourEq]
+      simpa only [hfst] using hcond
+    · -- `sf.label ≠ src`: acc-dependence is confined to `acc.successorsOf sf.label`, invariant.
+      have hsucc := successorsOf_addEdge_of_ne acc src wBlock sf.label hlabel
+      have hfst := modalApplyOneS4_fst_congr_successorsOf φ₀ sf b (acc.addEdge src wBlock) acc
+        hsucc
+      simpa only [hfst] using hcond
+  · -- Not one of the two 4-rule-relevant shapes: `.fst` is acc-independent absolutely.
+    have hfst := modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg φ₀ sf b (acc.addEdge src wBlock) acc
+      (not_or.mp hhard)
+    simpa only [hfst] using hcond
 
 /-! ## Single-Step Invariant Preservation -/
 

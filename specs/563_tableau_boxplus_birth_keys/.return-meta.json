@@ -1,26 +1,33 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-05T03:20:00Z",
-  "completed_at": "2026-08-05T04:35:00Z",
+  "status": "planned",
   "artifacts": [
-    "specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md",
-    "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus.lean",
-    "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus_live.lean",
-    "specs/563_tableau_boxplus_birth_keys/artifacts/live-probe-full-output.txt",
-    "specs/563_tableau_boxplus_birth_keys/.orchestrator-handoff.json"
+    {
+      "type": "plan",
+      "path": "specs/563_tableau_boxplus_birth_keys/plans/01_boxplus-birth-keys.md",
+      "summary": "Six-phase implementation plan: additive box-plus mint payload lands before the birth-key enrichment, with a dedicated mandatory completeness gate phase carrying a stated blocked-exit"
+    },
+    {
+      "type": "report",
+      "path": "specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md",
+      "summary": "Research report establishing the mint-payload correction, the BoxPlusClosed scoping trap, and the confirmed world-bound freeness"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/563_tableau_boxplus_birth_keys/.orchestrator-handoff.json",
+      "summary": "Orchestrator handoff with hard constraints, scope note, mandatory gate contract, and three scope hypotheses"
+    }
   ],
-  "partial_progress": {
-    "stage": "research complete",
-    "details": "Report, handoff, and three executable probes written. Both corpus sweeps completed. Keyed track (8532 formulas, both orderings): verdict-neutral, 0 fuel exhaustion. Live track (8532 formulas): 0 verdict changes, fuel exhaustion 893 -> 412 (strictly better). The none-cell soundness audit (none->closed = 0, 0 unsound candidates after a fuel-600 recheck) was run on the 1416-formula corpus. Risk R2 is closed.",
-    "outstanding": [
-      "optional: re-run the none-cell audit at size <= 6 / fuel 100 to match the larger sweep -- strengthens evidence, not a blocker"
-    ]
-  },
+  "next_steps": "Run /implement 563 to execute the plan",
+  "started_at": "2026-08-05T03:20:00Z",
   "metadata": {
     "session_id": "sess_1785926778_90c7a6_563",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "delegation_path": [
+      "orchestrator",
+      "plan",
+      "planner-agent"
+    ],
     "task_number": 563,
     "task_type": "cslib",
     "mandatory_gate_status": "DEMONSTRATED_STRUCTURALLY",
@@ -36,7 +43,46 @@
       "sorry_warnings": 1,
       "sorry_location": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1227"
     },
-    "recommended_next_action": "dispatch /plan 563",
-    "estimated_phases": 5
-  }
+    "recommended_next_action": "dispatch /implement 563",
+    "estimated_phases": 5,
+    "phase_count": 6,
+    "estimated_hours": 10.5,
+    "dependency_waves": [
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        6
+      ]
+    ],
+    "complexity": "complex"
+  },
+  "memory_candidates": [
+    {
+      "content": "In Lean tableau/loop-guard work, a key-enrichment change and the mint-payload change that makes it provable are one atomic landing, not two independent edits. When a key invariant is a subset relation into a LITERAL-BRANCH-MEMBERSHIP predicate (relevantSetFinset here), adding a member to the key silently makes the invariant FALSE rather than harder unless the branch payload emits that member too. Check the invariant codomain semantics before scoping a key change. Corollary on shape: make the payload change ADDITIVE (oldPayload ++ extra) rather than an interleaved rewrite -- every existing membership proof is a List.mem_append_left / List.mem_cons_of_mem chain into the original list and survives with one extra wrapper, whereas a rewrite forces each to be re-derived (measured here at ~20 proof bodies). Corollary on invariants: a new derived property should be threaded as an extra hypothesis, never added as a structure FIELD, when downstream construction sites use positional refine.",
+      "category": "PATTERN",
+      "source_artifact": "specs/563_tableau_boxplus_birth_keys/plans/01_boxplus-birth-keys.md",
+      "confidence": 0.82,
+      "suggested_keywords": [
+        "lean4",
+        "invariant-codomain",
+        "additive-payload",
+        "positional-refine",
+        "tableau-loop-guard",
+        "phase-ordering"
+      ]
+    }
+  ]
 }

@@ -364,76 +364,6 @@ private lemma modalApplyOneT_outputsSubsetUniverse
     exact modalApplyOne_outputs_subset φ0 sf b acc hb hsf hInv hW
 
 omit [Hashable Atom] in
-/-- **Field 3 (`persistentFresh`)**: whenever `modalApplyOneT sf b acc` produces a `.persistent`
-result, the emitted formulas are nonempty and fresh. Outside the two T-relevant shapes this is
-exactly K's own `modalApplyOne_persistent_props`; at the two T-relevant shapes, the emitted list
-is K's persistent output (fresh by K's field, when present) merged with at most one
-self-propagated formula that is fresh by construction (`modalTBoxSelf`/`modalTDiaNegSelf`'s own
-`if`-guard, `modalTBoxSelf_not_mem`/`modalTDiaNegSelf_not_mem`). -/
-private lemma modalApplyOneT_persistentFresh
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
-    (hpers : (modalApplyOneT sf b acc).fst = .persistent nf) :
-    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
-  by_cases hshape : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-  · rcases hshape with ⟨hsign, φ, hform⟩ | ⟨hsign, φ, hform⟩
-    · obtain ⟨s, form, w⟩ := sf
-      simp only at hsign hform
-      subst hsign; subst hform
-      rw [modalApplyOneT_boxPos_fst] at hpers
-      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
-      · simp only [hk] at hpers
-        split_ifs at hpers with hemp
-        simp only [RuleResult.persistent.injEq] at hpers
-        refine ⟨?_, fun x hx => ?_⟩
-        · rw [← hpers]; intro hcontra; exact hemp (by simp [hcontra])
-        · rw [← hpers] at hx; exact modalTBoxSelf_not_mem b φ w x hx
-      · rw [hk] at hpers
-        simp only [RuleResult.persistent.injEq] at hpers
-        obtain ⟨hkne, hkall⟩ := modalApplyOne_persistent_props
-          (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc kForms hk
-        refine ⟨?_, ?_⟩
-        · intro hcontra
-          rw [← hpers] at hcontra
-          exact hkne (List.append_eq_nil_iff.mp hcontra).1
-        · intro x hx
-          rw [← hpers] at hx
-          simp only [List.mem_append, List.mem_filter] at hx
-          rcases hx with hx | ⟨hx, -⟩
-          · exact hkall x hx
-          · exact modalTBoxSelf_not_mem b φ w x hx
-    · obtain ⟨s, form, w⟩ := sf
-      simp only at hsign hform
-      subst hsign; subst hform
-      rw [modalApplyOneT_diamondNeg_fst] at hpers
-      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
-          hk | ⟨kForms, hk⟩
-      · simp only [hk] at hpers
-        split_ifs at hpers with hemp
-        simp only [RuleResult.persistent.injEq] at hpers
-        refine ⟨?_, fun x hx => ?_⟩
-        · rw [← hpers]; intro hcontra; exact hemp (by simp [hcontra])
-        · rw [← hpers] at hx; exact modalTDiaNegSelf_not_mem b φ w x hx
-      · rw [hk] at hpers
-        simp only [RuleResult.persistent.injEq] at hpers
-        obtain ⟨hkne, hkall⟩ := modalApplyOne_persistent_props
-          (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc kForms hk
-        refine ⟨?_, ?_⟩
-        · intro hcontra
-          rw [← hpers] at hcontra
-          exact hkne (List.append_eq_nil_iff.mp hcontra).1
-        · intro x hx
-          rw [← hpers] at hx
-          simp only [List.mem_append, List.mem_filter] at hx
-          rcases hx with hx | ⟨hx, -⟩
-          · exact hkall x hx
-          · exact modalTDiaNegSelf_not_mem b φ w x hx
-  · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)] at hpers
-    exact modalApplyOne_persistent_props sf b acc nf hpers
-
-omit [Hashable Atom] in
 /-- **Field 4 (`rankStep`)**: given `rank` satisfying the depth-bound/edge invariants pre-call,
 `modalApplyOneT sf b acc` yields a `rank'` (agreeing with `rank` off `modalNextWorld b`)
 satisfying the edge invariant on the (unchanged, at the two T-relevant shapes) accessibility
@@ -687,44 +617,6 @@ private lemma modalApplyOneT_knownWorldsStep
           · rw [hk] at hfalse; exact hfalse.elim
   · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
     exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
-
-omit [Hashable Atom] in
-/-- **Field 7 (`branchingLength`)**: every `.branching` result `modalApplyOneT sf b acc` can
-produce has exactly two sub-branches. Outside the two T-relevant shapes this is exactly K's own
-`modalApplyOne_branching_length`; at the two T-relevant shapes, `modalApplyOneT` never produces a
-`.branching` result at all (always `.persistent`/`.notApplicable`), so the hypothesis is
-vacuous. -/
-private lemma modalApplyOneT_branchingLength
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (hbr : (modalApplyOneT sf b acc).fst = .branching brs) :
-    brs.length = 2 := by
-  by_cases hshape : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-  · exfalso
-    rcases hshape with ⟨hsign, φ, hform⟩ | ⟨hsign, φ, hform⟩
-    · obtain ⟨s, form, w⟩ := sf
-      simp only at hsign hform
-      subst hsign; subst hform
-      rw [modalApplyOneT_boxPos_fst] at hbr
-      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
-      · simp only [hk] at hbr
-        split_ifs at hbr
-      · simp only [hk] at hbr
-        simp at hbr
-    · obtain ⟨s, form, w⟩ := sf
-      simp only at hsign hform
-      subst hsign; subst hform
-      rw [modalApplyOneT_diamondNeg_fst] at hbr
-      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
-          hk | ⟨kForms, hk⟩
-      · simp only [hk] at hbr
-        split_ifs at hbr
-      · simp only [hk] at hbr
-        simp at hbr
-  · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)] at hbr
-    exact modalApplyOne_branching_length sf b acc brs hbr
 
 /-! ## Discharging F8-F12 (the Hintikka/Saturation Chain Fields) -/
 

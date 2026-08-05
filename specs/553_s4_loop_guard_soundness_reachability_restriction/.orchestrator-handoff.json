@@ -1,18 +1,19 @@
 {
-  "status": "researched",
+  "status": "partial",
   "task_number": 553,
-  "session_id": "sess_1785956924_4d73af",
-  "timestamp": "2026-08-05T19:35:20Z",
-  "summary": "Mint-blocked (redirect) verdict: NO-GO on the step lemma as stated (full-acc edge realization cannot be supplied by any initializable invariant; both catalogued routes exhausted for structural reasons); CONDITIONAL GO on a reformulated conserved predicate S4RedirectSoundInv that quarantines redirect edges from the semantic edge-realization conjunct and justifies them syntactically via the already-landed free-transfer lemmas (blockedRedirect_{boxed,unwrapped}_{boxPos,diaNeg}_mem + blocked_witness_mem). Under it the mint-blocked arm closes with no model construction; the four landed arms survive via mechanical restatement; termination impact is zero (proof-side change only, no definition touched). Conditions: P1 (blocked-arm restatement, near-certain), P2 (antitone-applicability lemma family, the kill criterion), P3 (mint-seed-covers-payload, expected free). Fallback if P2 fails: Reds/accWithReds driver-level provenance split, already packaged in LoopChecking.lean. Grounded in Massacci2000 (Technique 8.2: blocking is subtractive, soundness never sees it) and ChagrovZakharyaschev1997 (Lemmon box-plus; Thm 5.51 containment pattern).",
+  "session_id": "sess_1785958880_8ab261",
+  "timestamp": "2026-08-05T21:15:00Z",
+  "summary": "P1+P2 probe dispatch (not a full Phase 7 implementation) for the reformulated mint-blocked redirect architecture from report 06. Both probes PASS. P1 went beyond a probe: S4RedirectSoundInv (the reformulated conserved predicate, report Section 3.2) is now defined in FrameCompleteness.lean, and the mint-blocked box-negative arm is FULLY PROVEN sorry-free (theorem S4RedirectSoundInv_boxNeg_blocked), using two new small lemmas (modalApplyOneS4Rules_{boxPos,diaNeg}_notApplicable_of_saturated -- the report's predicted 'one new lemma') composed with already-landed machinery (modalS4Saturated_addEdge_of_blocked, blockedRedirect_boxed_{boxPos,diaNeg}_mem, hintikkaS4_{box_pos,dia_neg}_self). #print axioms cross-check: standard axioms only (propext, Classical.choice, Quot.sound), zero sorryAx. P2 (the kill criterion) does NOT trigger: direct reading of FrameRules.lean/Rules.lean confirms every persistent rule shape (K boxPropagation, K diamondNeg inline filterMap, T self-propagation, S4 4-rule) filters its own output against the branch b by construction, and propositional shapes never consult b or acc at all -- no rule re-fires on data it already produced. Recommendation: PROCEED WITH REFORMULATED PHASE 7. Known gaps left for the next dispatch: the diamond-positive-blocked dual arm (mirror image, not written), the mint-unblocked and 4-rule arms restated under S4RedirectSoundInv (currently only proven against the old unweakened statement), P3 (mint-seed-covers-payload, not attempted), and the fuel-induction wrapper assembling all five arms into a genuine step-preservation theorem.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/06_mint-blocked-redirect-verdict.md",
-      "type": "report",
-      "summary": "Targeted verdict on the mint-blocked case: impossibility analysis for the current statement, reformulated S4RedirectSoundInv route with per-arm preservation walkthrough, lemma skeletons, termination cross-check, literature grounding (Massacci2000, ChagrovZakharyaschev1997), cheap-to-test preconditions P1-P3, and fallback architecture"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/07_p1-p2-mint-blocked-probe-verdict.md",
+      "type": "summary",
+      "summary": "Full P1/P2 probe verdict with per-conjunct proof evidence, axiom cross-check output, sorry census, lint verification, and an explicit punch list for the remaining reformulated-Phase-7 work."
     }
   ],
   "phases_completed": 6,
   "phases_total": 7,
-  "orchestrator_mode": true
+  "orchestrator_mode": true,
+  "continuation_path": "Dispatch a full Phase 7 implementation using the reformulated S4RedirectSoundInv architecture (report 06 Section 3, now landed as a definition in FrameCompleteness.lean): (1) write S4RedirectSoundInv_diaPos_blocked as the mirror-image companion to the theorem landed here; (2) restate the mint-unblocked arms (modalApplyOneS4Keyed_{boxNeg,diaPos}_mint_sat) and the 4-rule arms (modalApplyOneS4Keyed_{boxPos,diaNeg}_sat) under S4RedirectSoundInv's (w,w') in Er disjunction instead of the current unweakened branchSatisfiableIn-style statement; (3) discharge P3 (mint seed covers the 4-payload) if it turns out to be needed for (2); (4) assemble the five arms into a fuel-induction step-preservation theorem over modalStepBranchS4KeyedOrdered and the terminal closed-branch payoff."
 }

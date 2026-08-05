@@ -1913,8 +1913,12 @@ Equality Closure" section below. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Extraction: the formula-component of any `modalUniverseS4 φ₀` member is a subformula of
-`φ₀`. S4-local restatement of `FmpMeasure.lean`'s file-private `modalUniverse_mem_formula`. -/
-private lemma modalUniverseS4_mem_formula {φ₀ : Proposition Atom}
+`φ₀`. S4-local restatement of `FmpMeasure.lean`'s file-private `modalUniverse_mem_formula`.
+Made non-`private` (probe P1, `specs/553_s4_loop_guard_soundness_reachability_restriction/`) so
+`FrameCompleteness.lean`'s reformulated redirect-sound invariant can re-derive the same
+`signedSubfmls` relevance side condition `modalS4Saturated_addEdge_of_blocked` already
+establishes locally in this file -- a pure visibility widening, no proof content changed. -/
+lemma modalUniverseS4_mem_formula {φ₀ : Proposition Atom}
     {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverseS4 φ₀) :
     x.formula ∈ modalSubfmls φ₀ := by
   simp only [modalUniverseS4, List.mem_flatMap, List.mem_range, List.mem_cons,
@@ -9841,7 +9845,7 @@ membership at either sign, since `signedSubfmls` is the full `{pos, neg} × moda
 product. Local restatement of `S5Simplification.lean`'s file-private
 `mem_signedSubfmls_of_formula_S5w`, needed here because `signedSubfmls` (unlike
 `modalUniverseS4`) carries no world-label component to case on. -/
-private lemma mem_signedSubfmls_of_formula_s4loop {φ₀ : Proposition Atom} (s : Sign)
+lemma mem_signedSubfmls_of_formula_s4loop {φ₀ : Proposition Atom} (s : Sign)
     {ψ : Proposition Atom} (h : ψ ∈ modalSubfmls φ₀) : (s, ψ) ∈ signedSubfmls φ₀ := by
   unfold signedSubfmls
   rw [Finset.mem_product]

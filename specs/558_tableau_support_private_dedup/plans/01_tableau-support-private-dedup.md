@@ -290,6 +290,22 @@ every later phase.
 - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` — relocate `hasEdge_mem_successorsOf`; delete
   `hasEdge_mem_successorsOf_origin`
 
+**Post-close census methodology addendum** (discovered auditing Phase 2's Accessibility family,
+recorded here rather than silently rewriting the number above): the census script was refined
+twice after this phase closed. (1) A same-file false-positive class was found and fixed --
+suffix/prime-stripped names sharing a base were only genuine re-derivation duplicates when they
+spanned 2+ distinct files (same-file "prime" siblings like `mem_modalUniverseS4_of` /
+`mem_modalUniverseS4_of'` are legitimate distinct lemmas, not duplicates; confirmed by reading
+both). (2) A trailing-prime suffix pass was trialled, found to catch real cross-file duplicates
+(`mem_successorsOf_hasEdge'`, `modalApplyOneT_boxPos_fst'`/`_diamondNeg_fst'`) but ALSO
+over-merged unrelated same-base declarations across suffix flavors, and was reverted as a known
+gap -- primed duplicates must be found by manual per-family grep, not trusted to `census.py`'s
+count. **Re-measured on the current (post-Phase-1) tree with the final script: 71 duplicate
+declarations across 41 families** -- almost exactly the plan's original 72/41 estimate (family
+count matches exactly). This is the run to record here since it reflects the census logic
+follow-on phases will actually reuse; it applies to the tree as of Phase 1's close, not to an
+earlier baseline. Used as the working denominator from Phase 2 onward.
+
 **Verification**:
 - Full Invariants table passes.
 - Census count drops by the number of declarations deleted (expected 3-4).
@@ -297,34 +313,47 @@ every later phase.
 
 ---
 
-### Phase 2: Create `Support/Accessibility.lean` [NOT STARTED]
+### Phase 2: Create `Support/Accessibility.lean` [COMPLETED]
 
 **Goal**: Publish the Accessibility-level facts once, in a module importing only `Branch`, and
 register it. No consumer is changed yet, so the phase is additive and cannot break anything.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/Support/Accessibility.lean` with
+- [x] Create `Cslib/Logics/Modal/Tableau/Support/Accessibility.lean` with
       `public import Cslib.Logics.Modal.Tableau.Branch` as its **only** Tableau import.
-- [ ] Publish `hasEdge_addEdge_cases` with the exact signature of the `Soundness.lean` original
+- [x] Publish `hasEdge_addEdge_cases` with the exact signature of the `Soundness.lean` original
       (all 7 copies are byte-identical; `hasEdge_addEdge_cases_anc` renames `a a'` to `u u'`,
       which is alpha-equivalent and harmless).
-- [ ] Publish `mem_successorsOf_hasEdge` and its converse `hasEdge_mem_successorsOf`. These are
+- [x] Publish `mem_successorsOf_hasEdge` and its converse `hasEdge_mem_successorsOf`. These are
       two distinct facts forming a converse pair, not one family with a direction mismatch — do
-      not attempt to unify them.
-- [ ] Write a module docstring stating: (i) these facts are lowered to `Branch` level because
+      not attempt to unify them. *(Published both, verbatim from FmpMeasure.lean's and the
+      Phase-1-relocated LoopChecking.lean copies respectively.)*
+- [x] Write a module docstring stating: (i) these facts are lowered to `Branch` level because
       `FiveSimplification`, `LoopChecking`, and `S5Simplification` do **not** reach
       `Soundness.lean`, so de-privatization alone cannot reach them; (ii) `Branch.lean` is the
       architecturally natural home and is under a do-not-edit constraint — that constraint is why
       this separate module exists, and folding these lemmas back into `Branch.lean` is not a
       simplification.
-- [ ] Give every published declaration its own docstring (required once public — `docBlame`).
-- [ ] Use `lemma` for Prop-valued results (`defLemma`); preserve existing snake_case lemma names
+- [x] Give every published declaration its own docstring (required once public — `docBlame`).
+- [x] Use `lemma` for Prop-valued results (`defLemma`); preserve existing snake_case lemma names
       (conventional in this subsystem and consistent with Mathlib practice); wrap in an explicit
       namespace (`topNamespace`); keep section variables minimal, applying `omit` where needed
       (`unusedSectionVars`) — see the existing `omit [DecidableEq Atom] [Hashable Atom] in`
-      pattern in `BDriver.lean`.
-- [ ] Register `public import Cslib.Logics.Modal.Tableau.Support.Accessibility` in `Cslib.lean`,
-      alphabetically within the Tableau block (currently lines 492-511).
+      pattern in `BDriver.lean`. *(No `variable {Atom...}` block declared at all in the new
+      module — all three published facts are `Atom`-independent (they only mention
+      `Accessibility`/`WorldIndex`), so the minimal choice is to omit the section variable
+      entirely rather than declare-then-`omit` per lemma.)*
+- [x] Register `public import Cslib.Logics.Modal.Tableau.Support.Accessibility` in `Cslib.lean`,
+      alphabetically within the Tableau block (currently lines 492-511). *(Inserted between
+      `SoundnessStep` and `TDriver`.)*
+
+**Deviation note**: the plan's own comparison audit for `mem_successorsOf_hasEdge` during this
+phase surfaced a **fourth** copy not named anywhere in the plan text:
+`FrameSoundness.lean`'s `mem_successorsOf_hasEdge'` (trailing-prime name, not an underscore
+suffix — `census.py`'s suffix-only matching does not catch this naming convention; see the
+Phase 1 addendum). Confirmed genuine by its docstring ("restated here since that lemma is
+private to its own file"). Deferred to Phase 3, which is the phase that actually deletes
+Accessibility-family duplicates — flagged here so Phase 3 does not miss it.
 
 **Timing**: 1.5 hours
 

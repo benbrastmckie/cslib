@@ -51,6 +51,21 @@ if not SUBSYS.exists():
 DECL_RE = re.compile(r"^(?P<priv>private\s+)?(?P<kind>lemma|theorem)\s+(?P<name>[A-Za-z_][A-Za-z0-9_'?!]*)")
 
 SUFFIXES = ["_S5w", "_S4Keyed", "_origin", "_local", "_anc", "_S4", "_S5", "_Five", "_FS", "_B", "_C"]
+# NOTE on trailing-prime variants (e.g. `mem_successorsOf_hasEdge'`): a prime-stripping pass
+# was trialled and reverted. It correctly caught genuine cross-file duplicates (e.g.
+# FrameSoundness.lean's `mem_successorsOf_hasEdge'` vs FmpMeasure.lean's
+# `mem_successorsOf_hasEdge`; FrameCompleteness.lean's `modalApplyOneT_boxPos_fst'` /
+# `modalApplyOneT_diamondNeg_fst'` vs TDriver.lean's now-public unprimed originals) but ALSO
+# pulled unrelated same-base declarations into a shared family purely because they stripped to
+# the same base string, even when the primed member itself has no cross-file duplicate at all
+# (e.g. FmpMeasure.lean's `mem_modalUniverse_of'` has no copy anywhere, but got merged into the
+# unrelated `mem_modalUniverse_of` family because both share the stripped base
+# "mem_modalUniverse_of"). Fixing this properly needs per-suffix-flavor grouping (not just a
+# cross-file guard), which was judged not worth the complexity here. Primed duplicates are
+# instead caught by manual, phase-scoped grep (see phase handoffs) and reported as an explicit
+# known gap of this script -- do not assume `census.py`'s count includes prime-named
+# duplicates. Cross-check `grep -rn "NAME'" *.lean` for any family with published/reachable
+# consequences (Accessibility, KnownWorlds) before declaring a phase's family count final.
 
 
 def strip_suffix(name: str):
@@ -133,17 +148,28 @@ def census(files=None, family_filter=None):
             for (fname, line, priv, kind) in occs:
                 families[name].append((fname, line, priv, kind, name))
 
-    # from signal B: suffix families get merged under the base key
+    # from signal B: suffix families get merged under the base key -- but ONLY when the
+    # family spans 2+ DISTINCT FILES. Re-derivation-across-a-privacy-boundary is inherently
+    # a cross-file phenomenon (you re-derive BECAUSE you cannot reach the original file); a
+    # same-file pair sharing a stripped base (observed for e.g. `mem_modalUniverse_of` /
+    # `mem_modalUniverse_of'` both in FmpMeasure.lean, or `mem_modalUniverseS4_of` /
+    # `mem_modalUniverseS4_of'` both in LoopChecking.lean) is reliably a legitimate same-file
+    # sibling pair (an anonymous-constructor form vs. a generic form, observed by manual
+    # audit), not a re-derivation duplicate. Requiring cross-file spread eliminates this
+    # false-positive class without losing any genuine cross-file suffix/prime family.
     for base, names in by_base.items():
-        if len(names) >= 2:
-            for name in names:
-                for (fname, line, priv, kind) in by_name.get(name, []):
-                    entry = (fname, line, priv, kind, name)
-                    if entry not in families[base]:
-                        families[base].append(entry)
-            # if base was already its own signal-A family under a different key, merge
-            if base in families and base not in by_base[base]:
-                pass
+        if len(names) < 2:
+            continue
+        candidate_entries = []
+        files_seen = set()
+        for name in names:
+            for (fname, line, priv, kind) in by_name.get(name, []):
+                candidate_entries.append((fname, line, priv, kind, name))
+                files_seen.add(fname)
+        if len(files_seen) >= 2:
+            for entry in candidate_entries:
+                if entry not in families[base]:
+                    families[base].append(entry)
 
     # De-duplicate: an exact-name family that is ALSO absorbed by a suffix-family
     # (shouldn't normally happen since suffix families use the stripped base as key,

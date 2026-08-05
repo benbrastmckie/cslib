@@ -6171,6 +6171,547 @@ lemma modalApplyOneS4Rules_diaNeg_fst_addEdge_of_ne (φ₀ : Proposition Atom)
     successorsOf_addEdge_of_ne acc src wBlock w'' hne
   rw [h1, h2, hsucc, modalFourDiaNegProp_addEdge_of_ne b acc ψ'' src wBlock w'' hne]
 
+/-! ## Phase 7.6 continued: the two mint-unblocked arm theorems
+
+The remaining Phase 7.6 assembly (per the plan's Progress Record): the same-world sub-case of
+conjunct (d) (P3 proper, items 1/3 of the record), the mint-payload compensation facts feeding
+it, the weakened conjunct (b) re-derivation (item 4), and the two arm theorems themselves
+(items 4-6). -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Forward direction of `mem_boxPositivesOf` (`Support/KnownWorlds.lean`, which only supplies
+the inverse direction): a box-positive branch member yields a `boxPositivesOf` pair. -/
+lemma mem_boxPositivesOf_of_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {ψ : Proposition Atom} {w : WorldIndex}
+    (h : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (ψ, w) ∈ boxPositivesOf b := by
+  unfold boxPositivesOf
+  rw [List.mem_filterMap]
+  exact ⟨⟨.pos, .box ψ, w⟩, h, by simp⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `outDeg` at the freshly-minted target world, after recording the one mint edge into it, is
+still zero: by freshness (`accFreshInv`), no OLD edge is sourced at `w' := modalNextWorld b`
+(else `hInv` would give `w' < w'`, absurd), and `outDeg_addEdge_ne` rules out the new edge
+contributing to `w'`'s own out-successors (its source is `w ≠ w'`). Needed for conjunct (d)'s
+`sf' ∈ nf` case of the mint-unblocked arms: the freshly-minted world is a graph sink, so no
+ghost edge can ever be sourced there. -/
+lemma outDeg_addEdge_freshTarget_eq_zero
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (w : WorldIndex) (hInv : accFreshInv b acc) (hne : w ≠ modalNextWorld b) :
+    outDeg (acc.addEdge w (modalNextWorld b)) (modalNextWorld b) = 0 := by
+  rw [outDeg_addEdge_ne acc w (modalNextWorld b) (modalNextWorld b) (Ne.symm hne)]
+  have h0 : outDeg acc (modalNextWorld b) = 0 := by
+    by_contra hne0
+    have hlenne : acc.successorsOf (modalNextWorld b) ≠ [] := by
+      intro hnil
+      apply hne0
+      unfold outDeg
+      simp [hnil]
+    obtain ⟨v, hv⟩ := List.exists_mem_of_ne_nil _ hlenne
+    have hedge := mem_successorsOf_hasEdge hv
+    exact Nat.lt_irrefl _ (hInv _ _ hedge).1
+  exact h0
+
+omit [Hashable Atom] in
+/-- **Mint-payload compensation, box-positive half.** A box-positive persistent formula
+`T(□χ)@w` co-located with a firing mint (any `χ`, possibly unrelated to the mint's own
+witness) has BOTH its K-layer transmission (`T(χ)@w'`) and its box-plus 4-layer transmission
+(`T(□χ)@w'`) already present in the mint payload's own construction, at the fresh successor
+`w' := modalNextWorld b` -- unconditionally, since `w'` is fresh and neither compensating
+formula could already have been filtered out as "already on the branch". Stated against the
+literal filterMap shape shared verbatim by `modalApplyOneS4KeyedMint_boxNeg_eq_S4`/
+`_diaPos_eq_S4` (the K-layer piece) and `boxPlusExtraS4`'s own definition (the box-plus piece),
+so this lemma applies to either mint arm's payload unchanged. -/
+lemma mem_mintPayload_boxPos_compensation
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (χ : Proposition Atom)
+    (w : WorldIndex)
+    (hmem : (⟨.pos, .box χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.pos, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none) ∧
+    (⟨.pos, .box χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      boxPlusExtraS4 b w := by
+  have hpair : (χ, w) ∈ boxPositivesOf b := mem_boxPositivesOf_of_mem hmem
+  have hnotmemK : (⟨.pos, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      ∉ b := fun hc => Nat.lt_irrefl _ (modalNextWorld_gt b _ hc)
+  have hnotmemBoxed : (⟨.pos, .box χ, modalNextWorld b⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∉ b := fun hc =>
+    Nat.lt_irrefl _ (modalNextWorld_gt b _ hc)
+  refine ⟨?_, ?_⟩
+  · rw [List.mem_filterMap]
+    exact ⟨(χ, w), hpair, by simp [hnotmemK]⟩
+  · unfold boxPlusExtraS4
+    rw [List.mem_append]
+    left
+    rw [List.mem_filterMap]
+    exact ⟨(χ, w), hpair, by simp [hnotmemBoxed]⟩
+
+omit [Hashable Atom] in
+/-- **Mint-payload compensation, diamond-negative half.** Dual of
+`mem_mintPayload_boxPos_compensation` for a diamond-negative persistent formula `F(◇χ)@w`
+co-located with a firing mint. -/
+lemma mem_mintPayload_diaNeg_compensation
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (χ : Proposition Atom)
+    (w : WorldIndex)
+    (hmem : (⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.neg, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .diamond ψ =>
+            let pr : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
+            if b.any (· == pr) then none else some pr
+          | _ => none
+        else none) ∧
+    (⟨.neg, .diamond χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      boxPlusExtraS4 b w := by
+  have hnotmemK : (⟨.neg, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      ∉ b := fun hc => Nat.lt_irrefl _ (modalNextWorld_gt b _ hc)
+  have hnotmemBoxed : (⟨.neg, .diamond χ, modalNextWorld b⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∉ b := fun hc =>
+    Nat.lt_irrefl _ (modalNextWorld_gt b _ hc)
+  refine ⟨?_, ?_⟩
+  · rw [List.mem_filterMap]
+    exact ⟨(⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem,
+      by simp [hnotmemK]⟩
+  · unfold boxPlusExtraS4
+    rw [List.mem_append]
+    right
+    rw [List.mem_filterMap]
+    exact ⟨(⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem,
+      by simp [hnotmemBoxed]⟩
+
+/-- **Conjunct (d), same-world sub-case, box-positive persistent formula (P3 proper, item 1 of
+the Phase 7.6 Progress Record).** After a mint step fires at `w` creating a fresh successor
+`w' := modalNextWorld b`, a co-located box-positive persistent formula `T(□χ)@w` (any `χ`,
+possibly unrelated to the minting formula) is `.notApplicable` at the extended state
+`(nf ++ b, acc.addEdge w w')` for ANY payload `nf` containing both compensation members: P3
+(`modalApplyOneS4Rules_boxPos_layers_eq_nil_of_saturated`) empties every OLD-successor
+candidate, and `hunwrapped`/`hboxed` empty the one NEW-successor (`w'`) candidate. -/
+lemma modalApplyOneS4Rules_boxPos_fst_notApplicable_of_mint (φ₀ : Proposition Atom)
+    (b nf : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (χ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.pos, .box χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (hunwrapped : (⟨.pos, χ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ nf)
+    (hboxed : (⟨.pos, .box χ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ nf) :
+    (modalApplyOneS4Rules (⟨.pos, .box χ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) (nf ++ b) (acc.addEdge w w')).fst =
+      RuleResult.notApplicable := by
+  obtain ⟨hK, hT, hFour⟩ :=
+    modalApplyOneS4Rules_boxPos_layers_eq_nil_of_saturated φ₀ b acc hSat χ w hmem
+  have hsucc : (acc.addEdge w w').successorsOf w = w' :: acc.successorsOf w :=
+    successorsOf_addEdge_self acc w w'
+  have hshape := modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀
+    (⟨.pos, .box χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) (nf ++ b)
+    (acc.addEdge w w') ⟨by simp, by simp⟩
+  have hbig := modalApplyOneS4_boxPos_fst_eq φ₀ (nf ++ b) (acc.addEdge w w') χ w
+  rw [hshape] at hbig
+  have hKnew : boxPropagation (nf ++ b) (acc.addEdge w w') χ w = [] := by
+    unfold boxPropagation
+    rw [hsucc, List.filterMap_eq_nil_iff]
+    intro v hv
+    simp only [List.mem_cons] at hv
+    rcases hv with rfl | hv
+    · simp [show ((nf ++ b).any fun x => x == (⟨Sign.pos, χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inl hunwrapped), by simp⟩]
+    · have hvb : (⟨.pos, χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        by_contra hnot
+        have hcontra : (⟨.pos, χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+            boxPropagation b acc χ w := by
+          unfold boxPropagation
+          rw [List.mem_filterMap]
+          exact ⟨v, hv, by simp [hnot]⟩
+        rw [hK] at hcontra
+        simp at hcontra
+      simp [show ((nf ++ b).any fun x => x == (⟨Sign.pos, χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inr hvb), by simp⟩]
+  have hTnew : modalTBoxSelf (nf ++ b) χ w = [] := by
+    unfold modalTBoxSelf at hT ⊢
+    by_cases hbin : (b.any (· == (⟨.pos, χ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex))) = true
+    · have hmemb : (⟨.pos, χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        rw [List.any_eq_true] at hbin
+        obtain ⟨x, hx, hxeq⟩ := hbin
+        rw [beq_iff_eq] at hxeq
+        rwa [hxeq] at hx
+      have hbin' : ((nf ++ b).any (· == (⟨.pos, χ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex))) = true := by
+        rw [List.any_eq_true]
+        exact ⟨_, List.mem_append.mpr (Or.inr hmemb), by simp⟩
+      rw [if_pos hbin']
+    · rw [if_neg hbin] at hT
+      simp at hT
+  have hFournew : modalFourBoxProp (nf ++ b) (acc.addEdge w w') χ w = [] := by
+    unfold modalFourBoxProp
+    rw [hsucc, List.filterMap_eq_nil_iff]
+    intro v hv
+    simp only [List.mem_cons] at hv
+    rcases hv with rfl | hv
+    · simp [show ((nf ++ b).any fun x => x == (⟨Sign.pos, .box χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inl hboxed), by simp⟩]
+    · have hvb : (⟨.pos, .box χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        by_contra hnot
+        have hcontra : (⟨.pos, .box χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+            modalFourBoxProp b acc χ w := by
+          unfold modalFourBoxProp
+          rw [List.mem_filterMap]
+          exact ⟨v, hv, by simp [hnot]⟩
+        rw [hFour] at hcontra
+        simp at hcontra
+      simp [show ((nf ++ b).any fun x => x == (⟨Sign.pos, .box χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inr hvb), by simp⟩]
+  rw [hbig, hKnew, hTnew, hFournew]
+  simp
+
+/-- **Conjunct (d), same-world sub-case, diamond-negative persistent formula.** Dual of
+`modalApplyOneS4Rules_boxPos_fst_notApplicable_of_mint`. -/
+lemma modalApplyOneS4Rules_diaNeg_fst_notApplicable_of_mint (φ₀ : Proposition Atom)
+    (b nf : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (χ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (hunwrapped : (⟨.neg, χ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ nf)
+    (hboxed : (⟨.neg, .diamond χ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ nf) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond χ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) (nf ++ b) (acc.addEdge w w')).fst =
+      RuleResult.notApplicable := by
+  obtain ⟨hK, hT, hFour⟩ :=
+    modalApplyOneS4Rules_diaNeg_layers_eq_nil_of_saturated φ₀ b acc hSat χ w hmem
+  have hsucc : (acc.addEdge w w').successorsOf w = w' :: acc.successorsOf w :=
+    successorsOf_addEdge_self acc w w'
+  have hshape := modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀
+    (⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) (nf ++ b)
+    (acc.addEdge w w') ⟨by simp, by simp⟩
+  have hbig := modalApplyOneS4_diaNeg_fst_eq φ₀ (nf ++ b) (acc.addEdge w w') χ w
+  rw [hshape] at hbig
+  have hKnew : ((acc.addEdge w w').successorsOf w).filterMap (fun u =>
+      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, χ, u⟩
+      if (nf ++ b).any (· == sf') then none else some sf') = [] := by
+    rw [hsucc, List.filterMap_eq_nil_iff]
+    intro v hv
+    simp only [List.mem_cons] at hv
+    rcases hv with rfl | hv
+    · simp [show ((nf ++ b).any fun x => x == (⟨Sign.neg, χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inl hunwrapped), by simp⟩]
+    · have hvb : (⟨.neg, χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        by_contra hnot
+        have hcontra : (⟨.neg, χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+            (acc.successorsOf w).filterMap (fun u =>
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, χ, u⟩
+              if b.any (· == sf') then none else some sf') := by
+          rw [List.mem_filterMap]
+          exact ⟨v, hv, by simp [hnot]⟩
+        rw [hK] at hcontra
+        simp at hcontra
+      simp [show ((nf ++ b).any fun x => x == (⟨Sign.neg, χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inr hvb), by simp⟩]
+  have hTnew : modalTDiaNegSelf (nf ++ b) χ w = [] := by
+    unfold modalTDiaNegSelf at hT ⊢
+    by_cases hbin : (b.any (· == (⟨.neg, χ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex))) = true
+    · have hmemb : (⟨.neg, χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        rw [List.any_eq_true] at hbin
+        obtain ⟨x, hx, hxeq⟩ := hbin
+        rw [beq_iff_eq] at hxeq
+        rwa [hxeq] at hx
+      have hbin' : ((nf ++ b).any (· == (⟨.neg, χ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex))) = true := by
+        rw [List.any_eq_true]
+        exact ⟨_, List.mem_append.mpr (Or.inr hmemb), by simp⟩
+      rw [if_pos hbin']
+    · rw [if_neg hbin] at hT
+      simp at hT
+  have hFournew : modalFourDiaNegProp (nf ++ b) (acc.addEdge w w') χ w = [] := by
+    unfold modalFourDiaNegProp
+    rw [hsucc, List.filterMap_eq_nil_iff]
+    intro v hv
+    simp only [List.mem_cons] at hv
+    rcases hv with rfl | hv
+    · simp [show ((nf ++ b).any fun x => x == (⟨Sign.neg, .diamond χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inl hboxed), by simp⟩]
+    · have hvb : (⟨.neg, .diamond χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        by_contra hnot
+        have hcontra : (⟨.neg, .diamond χ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+            modalFourDiaNegProp b acc χ w := by
+          unfold modalFourDiaNegProp
+          rw [List.mem_filterMap]
+          exact ⟨v, hv, by simp [hnot]⟩
+        rw [hFour] at hcontra
+        simp at hcontra
+      simp [show ((nf ++ b).any fun x => x == (⟨Sign.neg, .diamond χ, v⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = true from
+        List.any_eq_true.mpr ⟨_, List.mem_append.mpr (Or.inr hvb), by simp⟩]
+  rw [hbig, hKnew, hTnew, hFournew]
+  simp
+
+/-- **Mint-unblocked, box-negative arm: `S4RedirectSoundInv` preservation (Phase 7.6).**
+Re-wraps `modalApplyOneS4Keyed_boxNeg_mint_sat` against the weakened invariant. `Er` and `e` are
+UNCHANGED (the new mint edge is realized directly by the extended witness `f'`, not recorded as
+a ghost edge; a mint-shaped formula is exempt from `e`-tracking by conjunct (d)'s own
+`modalMintShape sf = false` guard). Conjunct (a) is mechanical; (b) reuses the landed
+pointwise-extension construction verbatim, generalizing only the one `hacc u v hedge` call site
+to case on the weakened disjunction; (c) transfers via `mintGroup_label_eq_freshWorld`/
+`boxPlusExtraS4_label_eq_freshWorld` plus `accFreshInv`; (d) splits into the vacuous new-formula
+case (`outDeg_addEdge_freshTarget_eq_zero`), the same-world box/diamond case (P3, the two
+`_fst_notApplicable_of_mint` lemmas above), the other-world box/diamond case (the acc-independence
+lemmas landed earlier this phase plus Phase 7.4's branch-growth family), and the
+propositional/atomic case (acc- and branch-independence, mirroring Phase 7.5). -/
+theorem S4RedirectSoundInv_boxNeg_mint (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (Er : List (WorldIndex × WorldIndex))
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (hmint : modalNonMintCandidates φ₀ keys b e acc = [])
+    (hInv : accFreshInv b acc)
+    (hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ w = none)
+    (hsfmem : (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∃ nf, modalApplyOneS4Keyed φ₀ keys (⟨.neg, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+        = (RuleResult.linear nf, acc.addEdge w (modalNextWorld b)) ∧
+      S4RedirectSoundInv φ₀ (nf ++ b) e (acc.addEdge w (modalNextWorld b)) keys Er := by
+  obtain ⟨hEr, hbSem, hAbs, -⟩ := hinv
+  have hAOeq := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ w hblock
+  rw [hAOeq, modalApplyOneS4KeyedMint_boxNeg_eq_S4]
+  set w' := modalNextWorld b with hw'def
+  set nf : List (SignedFormula (Proposition Atom) WorldIndex) :=
+    (((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ', src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ', w'⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ' =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ', w'⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)) ++ boxPlusExtraS4 b w) with hnfdef
+  have hw_ne : w ≠ w' := Nat.ne_of_lt (modalNextWorld_gt b _ hsfmem)
+  have hnflabel : ∀ x ∈ nf, x.label = w' := by
+    rw [hnfdef]
+    intro x hx
+    rcases List.mem_append.mp hx with hx1 | hx2
+    · exact mintGroup_label_eq_freshWorld b w .neg ψ x hx1
+    · exact boxPlusExtraS4_label_eq_freshWorld b w x hx2
+  refine ⟨nf, rfl, ?_, ?_, ?_, ?_⟩
+  · -- (a) every ghost edge is a recorded edge in the extended `acc`; `Er` unchanged.
+    intro p hp
+    exact hasEdge_addEdge_mono_gate0 (hEr p hp)
+  · -- (b) semantic conjunct: the SAME pointwise-extension construction, weakened edge clause.
+    obtain ⟨W, m, f, hFC, hrel, hb⟩ := hbSem
+    have htrans := hFC.2
+    have hnegbox : ¬ Satisfies m (f w) (Proposition.box ψ) := (hb _ hsfmem).2 rfl
+    simp only [Satisfies] at hnegbox
+    push Not at hnegbox
+    obtain ⟨ww, hwwr, hwwψ⟩ := hnegbox
+    let f' : WorldIndex → W := fun n => if n = w' then ww else f n
+    refine ⟨W, m, f', hFC, ?_, ?_⟩
+    · intro u v hedge
+      simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons,
+        Bool.or_eq_true] at hedge
+      rcases hedge with hedge | hedge
+      · simp only [Bool.and_eq_true, beq_iff_eq] at hedge
+        obtain ⟨rfl, rfl⟩ := hedge
+        right
+        rw [show f' w = f w from if_neg hw_ne, show f' w' = ww from if_pos rfl]
+        exact hwwr
+      · have huw' : u ≠ w' := by
+          intro heq'
+          have hfresh := (hInv u v hedge).1
+          rw [heq'] at hfresh
+          exact Nat.lt_irrefl _ hfresh
+        have hvw' : v ≠ w' := by
+          intro heq'
+          have hfresh := (hInv u v hedge).2
+          rw [heq'] at hfresh
+          exact Nat.lt_irrefl _ hfresh
+        rcases hrel u v hedge with hErmem | hr
+        · exact Or.inl hErmem
+        · right
+          simp only [f', if_neg huw', if_neg hvw']
+          exact hr
+    · intro sf' hmem'
+      rw [hnfdef] at hmem'
+      simp only [List.mem_append, List.mem_cons] at hmem'
+      rcases hmem' with (((rfl | hmem_bp) | hmem_dn) | hmem_bpe) | hmem_old
+      · refine ⟨fun h => by simp at h, fun _ => ?_⟩
+        simp only [f', if_pos rfl]
+        exact hwwψ
+      · simp only [List.mem_filterMap] at hmem_bp
+        obtain ⟨⟨ψ'', src⟩, hpairMem, hsf'_from⟩ := hmem_bp
+        split_ifs at hsf'_from with hsrceq hinb
+        simp only [Option.some.injEq] at hsf'_from
+        subst hsf'_from
+        simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
+        obtain ⟨bsf, hbsfMem, hbsfeq⟩ := hpairMem
+        split_ifs at hbsfeq with hbsfpos
+        cases hbf : bsf.formula with
+        | box ψ''' =>
+          rw [hbf] at hbsfeq
+          simp only [Option.some.injEq, Prod.mk.injEq] at hbsfeq
+          obtain ⟨hψeq, hsrc⟩ := hbsfeq
+          have hsrc_w : bsf.label = w := by rw [hsrc]; simpa using hsrceq
+          have hbox_sat := (hb bsf hbsfMem).1 (by simpa using hbsfpos)
+          rw [hbf, hsrc_w] at hbox_sat
+          simp only [Satisfies] at hbox_sat
+          refine ⟨fun _ => ?_, fun h => by simp at h⟩
+          simp only [f', if_pos rfl]
+          rw [← hψeq]
+          exact hbox_sat ww hwwr
+        | _ => simp [hbf] at hbsfeq
+      · simp only [List.mem_filterMap] at hmem_dn
+        obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hmem_dn
+        by_cases hbsfsign : (bsf.sign == Sign.neg && bsf.label == w) = true
+        · rw [if_pos hbsfsign] at hbsfprop
+          cases hbf : bsf.formula with
+          | diamond ψ''' =>
+            simp only [hbf] at hbsfprop
+            by_cases hinb :
+                (b.any (· == (⟨.neg, ψ''', w'⟩ : SignedFormula (Proposition Atom) WorldIndex)))
+                  = true
+            · rw [if_pos hinb] at hbsfprop; simp at hbsfprop
+            · rw [if_neg hinb] at hbsfprop
+              simp only [Option.some.injEq] at hbsfprop
+              subst hbsfprop
+              have hsign : bsf.sign = .neg ∧ bsf.label = w := by
+                simp only [Bool.and_eq_true, beq_iff_eq] at hbsfsign
+                exact hbsfsign
+              have hdiaNeg := (hb bsf hbsfMem).2 hsign.1
+              rw [hbf, hsign.2] at hdiaNeg
+              simp only [Satisfies] at hdiaNeg
+              push Not at hdiaNeg
+              refine ⟨fun h => by simp at h, fun _ => ?_⟩
+              simp only [f', if_pos rfl]
+              exact hdiaNeg ww hwwr
+          | _ => simp [hbf] at hbsfprop
+        · rw [if_neg hbsfsign] at hbsfprop; simp at hbsfprop
+      · exact boxPlusExtraS4_sat m f htrans b w hb ww hwwr sf' hmem_bpe
+      · have hlabel_ne : sf'.label ≠ w' := Nat.ne_of_lt (modalNextWorld_gt b sf' hmem_old)
+        have hf'_eq : f' sf'.label = f sf'.label := by simp only [f', if_neg hlabel_ne]
+        constructor
+        · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).1 hsign
+        · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).2 hsign
+  · -- (c) syntactic absorption: old ghost edges (`Er` unchanged) inherit from `hAbs`, since every
+    -- ghost-edge endpoint is `< w'` (freshness) while every `nf`-formula's label is exactly `w'`.
+    intro p hp χ
+    have hne1 : p.1 ≠ w' := Nat.ne_of_lt (hInv p.1 p.2 (hEr p hp)).1
+    have hAbs' := hAbs p hp χ
+    refine ⟨fun hmem1 => ?_, fun hmem2 => ?_⟩
+    · have hin : (⟨.pos, .box χ, p.1⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        rcases List.mem_append.mp hmem1 with hin' | hin'
+        · exact absurd (hnflabel _ hin') hne1
+        · exact hin'
+      obtain ⟨h1, h2⟩ := hAbs'.1 hin
+      exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+    · have hin : (⟨.neg, .diamond χ, p.1⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+        rcases List.mem_append.mp hmem2 with hin' | hin'
+        · exact absurd (hnflabel _ hin') hne1
+        · exact hin'
+      obtain ⟨h1, h2⟩ := hAbs'.2 hin
+      exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+  · -- (d) frozenness/exhaustion at the extended state.
+    intro sf' hsfmem' hshape' houtdeg'
+    rcases List.mem_append.mp hsfmem' with hnew | hold
+    · exfalso
+      have hlbl := hnflabel sf' hnew
+      have hzero : outDeg (acc.addEdge w w') w' = 0 :=
+        outDeg_addEdge_freshTarget_eq_zero b acc w hInv hw_ne
+      rw [hlbl, hzero] at houtdeg'
+      exact houtdeg' rfl
+    · have hOld := (modalNonMintCandidates_eq_nil_iff φ₀ keys b e acc).mp hmint sf' hold
+      rcases hOld with hms' | he' | hna'
+      · exact absurd hms' (by simp [hshape'])
+      · exact Or.inl he'
+      · right
+        by_cases hbd : (sf'.sign = .pos ∧ ∃ χ, sf'.formula = .box χ) ∨
+            (sf'.sign = .neg ∧ ∃ χ, sf'.formula = .diamond χ)
+        · rcases hbd with ⟨hs, χ, hf⟩ | ⟨hs, χ, hf⟩
+          · have hsfeq : sf' = (⟨.pos, .box χ, sf'.label⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) := by
+              rcases sf' with ⟨s', f', l'⟩; simp_all
+            by_cases hlw : sf'.label = w
+            · rw [hsfeq, modalApplyOneS4Keyed_boxPos_eq_S4Rules, hlw]
+              have hmemb : (⟨.pos, .box χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+                  ∈ b := by rw [← hlw, ← hsfeq]; exact hold
+              obtain ⟨hcompK, hcompFour⟩ := mem_mintPayload_boxPos_compensation b χ w hmemb
+              refine modalApplyOneS4Rules_boxPos_fst_notApplicable_of_mint φ₀ b nf acc χ w w'
+                hmemb hSat ?_ ?_
+              · rw [hnfdef]; simp only [List.mem_append, List.mem_cons]
+                exact Or.inl (Or.inl (Or.inr hcompK))
+              · rw [hnfdef]; simp only [List.mem_append, List.mem_cons]
+                exact Or.inr hcompFour
+            · rw [hsfeq, modalApplyOneS4Keyed_boxPos_eq_S4Rules]
+              rw [hsfeq, modalApplyOneS4Keyed_boxPos_eq_S4Rules] at hna'
+              rw [modalApplyOneS4Rules_boxPos_fst_addEdge_of_ne φ₀ (nf ++ b) acc χ w w'
+                sf'.label hlw]
+              exact modalApplyOneS4Rules_boxPos_notApplicable_growth b nf acc χ sf'.label hna'
+          · have hsfeq : sf' = (⟨.neg, .diamond χ, sf'.label⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) := by
+              rcases sf' with ⟨s', f', l'⟩; simp_all
+            by_cases hlw : sf'.label = w
+            · rw [hsfeq, modalApplyOneS4Keyed_diaNeg_eq_S4Rules, hlw]
+              have hmemb : (⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+                  ∈ b := by rw [← hlw, ← hsfeq]; exact hold
+              obtain ⟨hcompK, hcompFour⟩ := mem_mintPayload_diaNeg_compensation b χ w hmemb
+              refine modalApplyOneS4Rules_diaNeg_fst_notApplicable_of_mint φ₀ b nf acc χ w w'
+                hmemb hSat ?_ ?_
+              · rw [hnfdef]; simp only [List.mem_append, List.mem_cons]
+                exact Or.inl (Or.inr hcompK)
+              · rw [hnfdef]; simp only [List.mem_append, List.mem_cons]
+                exact Or.inr hcompFour
+            · rw [hsfeq, modalApplyOneS4Keyed_diaNeg_eq_S4Rules]
+              rw [hsfeq, modalApplyOneS4Keyed_diaNeg_eq_S4Rules] at hna'
+              rw [modalApplyOneS4Rules_diaNeg_fst_addEdge_of_ne φ₀ (nf ++ b) acc χ w w'
+                sf'.label hlw]
+              exact modalApplyOneS4Rules_diaNeg_notApplicable_growth b nf acc χ sf'.label hna'
+        · have hnb : ∀ χ, sf'.formula ≠ .box χ := by
+            intro χ hfeq
+            apply hbd
+            rcases hs : sf'.sign with _ | _
+            · exact Or.inl ⟨rfl, χ, hfeq⟩
+            · exact absurd hshape' (by
+                rcases sf' with ⟨s', f', l'⟩
+                simp_all [modalMintShape])
+          have hnd : ∀ χ, sf'.formula ≠ .diamond χ := by
+            intro χ hfeq
+            apply hbd
+            rcases hs : sf'.sign with _ | _
+            · exact absurd hshape' (by
+                rcases sf' with ⟨s', f', l'⟩
+                simp_all [modalMintShape])
+            · exact Or.inr ⟨rfl, χ, hfeq⟩
+          have hna'' : (modalApplyOne sf' b acc).1 = .notApplicable := by
+            rwa [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf'.sign sf'.formula
+              sf'.label hnb hnd b acc, show (⟨sf'.sign, sf'.formula, sf'.label⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) = sf' from rfl] at hna'
+          have hbranch : (modalApplyOne sf' (nf ++ b) acc).fst = (modalApplyOne sf' b acc).fst :=
+            modalApplyOne_fst_eq_of_not_box_diamond sf' (nf ++ b) b acc hnb hnd
+          have haccindep : (modalApplyOne sf' (nf ++ b) (acc.addEdge w w')).fst =
+              (modalApplyOne sf' (nf ++ b) acc).fst :=
+            modalApplyOne_fst_eq_of_not_boxPos_diaNeg sf' (nf ++ b) (acc.addEdge w w') acc
+              (not_or.mp hbd)
+          rw [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf'.sign sf'.formula
+            sf'.label hnb hnd (nf ++ b) (acc.addEdge w w'), show (⟨sf'.sign, sf'.formula,
+              sf'.label⟩ : SignedFormula (Proposition Atom) WorldIndex) = sf' from rfl,
+            haccindep, hbranch]
+          exact hna''
+
 /-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
 
 A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)

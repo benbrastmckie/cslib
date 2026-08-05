@@ -4737,6 +4737,196 @@ lemma modalApplyOneS4Keyed_diaPos_mint_sat (φ₀ : Proposition Atom)
       · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).1 hsign
       · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).2 hsign
 
+omit [Hashable Atom] in
+/-- `modalApplyOneT`'s own `.fst` at the box-positive shape is always `.notApplicable` or
+`.persistent`, never `.linear`/`.branching` -- one layer up from `modalApplyOne_boxPos_eq`
+(`Rules.lean`), needed as the outer case-split for `modalApplyOneS4Rules_boxPos_soundIn`'s K+T+4
+merge. Lives here (not `LoopChecking.lean`) because it needs `modalApplyOneT_boxPos_fst`
+(`TDriver.lean`), which `LoopChecking.lean` does not import. -/
+lemma modalApplyOneT_boxPos_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneT (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .notApplicable ∨
+    ∃ out, (modalApplyOneT (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .persistent out := by
+  rw [modalApplyOneT_boxPos_fst]
+  rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
+  · rw [hk]
+    dsimp only
+    split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · rw [hk]
+    exact Or.inr ⟨_, rfl⟩
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneT_boxPos_eq` for the diamond-negative shape. -/
+lemma modalApplyOneT_diaNeg_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .notApplicable ∨
+    ∃ out, (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .persistent out := by
+  rw [modalApplyOneT_diamondNeg_fst]
+  rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
+  · rw [hk]
+    dsimp only
+    split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · rw [hk]
+    exact Or.inr ⟨_, rfl⟩
+
+omit [Hashable Atom] in
+/-- **S-boxPos for the S4-keyed guard's 4-rule case, K+T+4 merge.** Frame-relativized semantic
+soundness of `modalApplyOneS4Rules`'s box-positive output at `FC := s4FC`. Reuses
+`modalApplyOneT_boxPos_soundIn` (above) as a black box for the K+T layers (`hFC.1 : reflFC m.r`
+from `s4FC`'s reflexivity conjunct), then splits `RuleResultSat` over the 4-rule's own
+`tForms ++ fourNew.filter …` append (`modalApplyOneS4Rules_boxPos_fst`, `LoopChecking.lean`) the
+same way `modalApplyOneT_boxPos_soundIn` splits over the T layer's own append: `fourNew`'s
+elements (`T(□φ)@w'` for each recorded successor `w'` of `lbl`) are justified by one hop of
+`IsTrans` (`hFC.2`) off the recorded edge, mirroring
+`branchSatisfiableIn_s4FC_boxPos_trans_mem`/`modalFourBoxProp_sound` (`FrameSoundness.lean`)
+inline (those existentially quantify their own witnessing model). -/
+theorem modalApplyOneS4Rules_boxPos_soundIn
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hFC : s4FC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneS4Rules
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneS4Rules
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  obtain ⟨-, hRRST⟩ := modalApplyOneT_boxPos_soundIn m f φ lbl b acc hFC.1 hacc hb hmem
+  have hFourSat : ∀ x ∈ modalFourBoxProp b acc φ lbl, sfSat m f x := by
+    intro x hx
+    unfold modalFourBoxProp at hx
+    simp only [List.mem_filterMap] at hx
+    obtain ⟨w', hw', hxeq⟩ := hx
+    by_cases hcase :
+        b.any (· == (⟨.pos, .box φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+    · simp [hcase] at hxeq
+    · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hxeq
+      subst hxeq
+      have hbox : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
+      simp only [Satisfies] at hbox
+      refine sfSat_pos m f (.box φ) w' ?_
+      simp only [Satisfies]
+      intro v hv
+      exact hbox v (hFC.2.trans (f lbl) (f w') v (hacc lbl w' (mem_successorsOf_hasEdge hw')) hv)
+  refine ⟨modalApplyOneS4Rules_boxPos_snd_eq_acc b acc φ lbl, ?_⟩
+  rw [modalApplyOneS4Rules_boxPos_fst]
+  rcases modalApplyOneT_boxPos_eq b acc φ lbl with ht | ⟨tForms, ht⟩
+  · rw [ht] at hRRST ⊢
+    dsimp only
+    split_ifs with hemp
+    · trivial
+    · exact hFourSat
+  · rw [ht] at hRRST ⊢
+    dsimp only
+    intro x hx
+    simp only [List.mem_append, List.mem_filter] at hx
+    rcases hx with hx | ⟨hx, -⟩
+    · exact hRRST x hx
+    · exact hFourSat x hx
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4Rules_boxPos_soundIn` for the diamond-negative shape. -/
+theorem modalApplyOneS4Rules_diaNeg_soundIn
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hFC : s4FC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem : (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneS4Rules
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOneS4Rules
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  obtain ⟨-, hRRST⟩ := modalApplyOneT_diaNeg_soundIn m f φ lbl b acc hFC.1 hacc hb hmem
+  have hFourSat : ∀ x ∈ modalFourDiaNegProp b acc φ lbl, sfSat m f x := by
+    intro x hx
+    unfold modalFourDiaNegProp at hx
+    simp only [List.mem_filterMap] at hx
+    obtain ⟨w', hw', hxeq⟩ := hx
+    by_cases hcase :
+        b.any (· == (⟨.neg, .diamond φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+    · simp [hcase] at hxeq
+    · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hxeq
+      subst hxeq
+      have hdianeg : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
+      refine sfSat_neg m f (.diamond φ) w' ?_
+      intro hdia'
+      apply hdianeg
+      obtain ⟨u, hu, hφu⟩ := Satisfies.diamond_iff.mp hdia'
+      exact Satisfies.diamond_iff.mpr
+        ⟨u, hFC.2.trans (f lbl) (f w') u (hacc lbl w' (mem_successorsOf_hasEdge hw')) hu, hφu⟩
+  refine ⟨modalApplyOneS4Rules_diaNeg_snd_eq_acc b acc φ lbl, ?_⟩
+  rw [modalApplyOneS4Rules_diaNeg_fst]
+  rcases modalApplyOneT_diaNeg_eq b acc φ lbl with ht | ⟨tForms, ht⟩
+  · rw [ht] at hRRST ⊢
+    dsimp only
+    split_ifs with hemp
+    · trivial
+    · exact hFourSat
+  · rw [ht] at hRRST ⊢
+    dsimp only
+    intro x hx
+    simp only [List.mem_append, List.mem_filter] at hx
+    rcases hx with hx | ⟨hx, -⟩
+    · exact hRRST x hx
+    · exact hFourSat x hx
+
+/-- **4-rule, box-positive shape: step soundness for the S4-keyed guard.** `T(□ψ)@w` never mints
+and never touches `acc` (`modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding`, `LoopChecking.lean`).
+Bridges `modalApplyOneS4Keyed` down to `modalApplyOneS4Rules` at this shape
+(`modalApplyOneS4Keyed_boxPos_eq_S4Rules`, `LoopChecking.lean`, a direct `rfl` since both
+`modalApplyOneS4Keyed`'s and `modalApplyOneS4`'s own guard-consulting match arms fail to fire at
+`.pos, .box`) and discharges the resulting obligation with `modalApplyOneS4Rules_boxPos_soundIn`
+above. The single largest remaining case-split arm of the bespoke S4-keyed step-preservation
+lemma. -/
+lemma modalApplyOneS4Keyed_boxPos_sat (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (hFC : s4FC m.r)
+    (hacc : ∀ u v, acc.hasEdge u v → m.r (f u) (f v))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneS4Keyed φ₀ keys (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneS4Keyed φ₀ keys (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  rw [modalApplyOneS4Keyed_boxPos_eq_S4Rules]
+  exact modalApplyOneS4Rules_boxPos_soundIn m f ψ w b acc hFC hacc hb hmem
+
+/-- Dual of `modalApplyOneS4Keyed_boxPos_sat` for the diamond-negative shape (`F(◇ψ)@w`). -/
+lemma modalApplyOneS4Keyed_diaNeg_sat (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (hFC : s4FC m.r)
+    (hacc : ∀ u v, acc.hasEdge u v → m.r (f u) (f v))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneS4Keyed φ₀ keys (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneS4Keyed φ₀ keys (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  rw [modalApplyOneS4Keyed_diaNeg_eq_S4Rules]
+  exact modalApplyOneS4Rules_diaNeg_soundIn m f ψ w b acc hFC hacc hb hmem
+
 end Cslib.Logic.Modal.Tableau
 
 end

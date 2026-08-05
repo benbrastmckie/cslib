@@ -4384,6 +4384,102 @@ lemma branchSatisfiableIn_s4FC_addEdge_of_blocked (φ₀ : Proposition Atom)
       rw [hsfeq] at hsfmem
       exact (htruth sf.formula sf.label).2 hsfmem
 
+/-! ## Re-scoped Phase 7 (Plan v6) -- Wiring the Redirect-Preservation Capstone Into the Keyed
+Ordered Driver's Per-Step Soundness Argument
+
+**Layering note.** Soundness content for `modalStepBranchS4KeyedOrdered`
+(`LoopChecking.lean`) necessarily lives here rather than in `FrameSoundness.lean` or
+`LoopChecking.lean` directly: it needs both `LoopChecking.lean`'s keyed driver definitions
+(`modalApplyOneS4Keyed`, `modalStepBranchS4KeyedOrdered`, `S4LoopInv`, `blockingWorldS4Keyed`,
+`boxPlusExtraS4`) and `FrameSoundness.lean`'s frame-relativized semantic apparatus (`s4FC`,
+`branchSatisfiableIn`, `sfSat`, `modalFourBoxProp_sound`/`modalFourDiaNegProp_sound`); this file
+is the only one importing both.
+
+`modalStepBranchS4KeyedOrdered` is **not** an instance of the generic
+`modalStepBranchGen_preserves_satIn` (`FrameSoundness.lean`): that generic lemma's `hAgree`
+hypothesis requires `apply` to agree with `modalApplyOne` off the two T/4-rule-relevant shapes,
+but the keyed guard's BLOCKED arm departs from `modalApplyOne` precisely at the two MINTING
+shapes (`F(□φ)@w`, `T(◇φ)@w`), which `hAgree`'s domain does not exclude. A bespoke step lemma is
+needed, case-splitting on `modalStepBranchS4KeyedOrdered_cases`'s two branches and, within the
+per-formula body, on the same four-way shape split `modalStepBranchS4Keyed_preserves_
+S4KeyedHintikkaInv` already uses: propositional/non-modal, the two 4-rule shapes
+(`T(□φ)@w`/`F(◇φ)@w`), and the two minting shapes (`F(□φ)@w`/`T(◇φ)@w`, sub-split on
+`blockingWorldS4Keyed`'s blocked/unblocked decision). -/
+
+omit [Hashable Atom] in
+/-- **Box-plus transitivity bridge.** Every element of `boxPlusExtraS4 b w`
+(`LoopChecking.lean`) -- the S4-keyed mint's additional BOXED transmission (`T(□ψ)@w'`/
+`F(◇ψ)@w'` for every `T(□ψ)@w`/`F(◇ψ)@w` already on the branch, retargeted to the fresh witness
+`w' := modalNextWorld b`) -- is satisfied at the pointwise-extended world-assignment (`f`
+everywhere except `w'`, where it takes the fresh witness value `ww`), given `IsTrans W m.r` and
+the mint edge `m.r (f w) ww`. Both halves reduce to a single hop of transitivity: a `T(□ψ)@w`
+fact gives `∀ v, m.r (f w) v → Satisfies m v ψ`; any `m.r`-successor `v` of `ww` is also an
+`m.r`-successor of `f w` (`IsTrans.trans (f w) ww v`), so the same universal fact transfers
+unchanged to `w'` -- literally `T(□ψ)@w'`, not merely the unwrapped `T(ψ)@w'` K's own minting
+already transmits. The diamond-negative half is the direct contrapositive dual. This is the one
+piece of genuinely new semantic content Phase 7's mint-unblocked case needs beyond what
+`modalApplyOneS4KeyedMint_boxNeg_witness`/`_diaPos_witness` (`LoopChecking.lean`, structural
+only) already supply. -/
+lemma boxPlusExtraS4_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (htrans : IsTrans W m.r)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (ww : W) (hwwr : m.r (f w) ww) :
+    ∀ sf ∈ boxPlusExtraS4 b w,
+      sfSat m (fun n => if n = modalNextWorld b then ww else f n) sf := by
+  intro sf hsf
+  simp only [boxPlusExtraS4, List.mem_append, List.mem_filterMap] at hsf
+  rcases hsf with hsf | hsf
+  · obtain ⟨⟨ψ, src⟩, hpairMem, heq⟩ := hsf
+    split_ifs at heq with hsrceq hinb
+    · simp only [Option.some.injEq] at heq
+      subst heq
+      simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
+      obtain ⟨bsf, hbsfMem, hbsfeq⟩ := hpairMem
+      split_ifs at hbsfeq with hbsfpos
+      cases hbf : bsf.formula with
+      | box ψ' =>
+        rw [hbf] at hbsfeq
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbsfeq
+        obtain ⟨hψ, hsrc⟩ := hbsfeq
+        have hsrc_w : bsf.label = w := by rw [hsrc]; simpa using hsrceq
+        have hbox_sat := (hb bsf hbsfMem).1 (by simpa using hbsfpos)
+        rw [hbf, hsrc_w] at hbox_sat
+        simp only [Satisfies] at hbox_sat
+        refine sfSat_pos m _ (.box ψ) (modalNextWorld b) ?_
+        simp only [Satisfies, ite_true]
+        intro v hv
+        rw [← hψ]
+        exact hbox_sat v (htrans.trans (f w) ww v hwwr hv)
+      | _ => simp [hbf] at hbsfeq
+  · obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hsf
+    by_cases hbsfsign : (bsf.sign == Sign.neg && bsf.label == w) = true
+    · rw [if_pos hbsfsign] at hbsfprop
+      cases hbf : bsf.formula with
+      | diamond ψ' =>
+        simp only [hbf] at hbsfprop
+        by_cases hinb :
+            (b.any (· == (⟨.neg, .diamond ψ', modalNextWorld b⟩ :
+              SignedFormula (Proposition Atom) WorldIndex))) = true
+        · rw [if_pos hinb] at hbsfprop; simp at hbsfprop
+        · rw [if_neg hinb] at hbsfprop
+          simp only [Option.some.injEq] at hbsfprop
+          subst hbsfprop
+          have hsign : bsf.sign = .neg ∧ bsf.label = w := by
+            simp only [Bool.and_eq_true, beq_iff_eq] at hbsfsign
+            exact hbsfsign
+          have hdianeg := (hb bsf hbsfMem).2 hsign.1
+          rw [hbf, hsign.2] at hdianeg
+          simp only [Satisfies] at hdianeg
+          refine sfSat_neg m _ (.diamond ψ') (modalNextWorld b) ?_
+          simp only [Satisfies, ite_true]
+          intro hdia'
+          apply hdianeg
+          obtain ⟨u, hu, hφu⟩ := Satisfies.diamond_iff.mp hdia'
+          exact Satisfies.diamond_iff.mpr ⟨u, htrans.trans (f w) ww u hwwr hu, hφu⟩
+      | _ => simp [hbf] at hbsfprop
+    · rw [if_neg hbsfsign] at hbsfprop; simp at hbsfprop
+
 end Cslib.Logic.Modal.Tableau
 
 end

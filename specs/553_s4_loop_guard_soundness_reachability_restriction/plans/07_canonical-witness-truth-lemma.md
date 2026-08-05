@@ -820,7 +820,7 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 
 ---
 
-### Phase 7: Wire into the soundness argument, regression, and CI [NOT STARTED]
+### Phase 7: Wire into the soundness argument, regression, and CI [IN PROGRESS]
 
 - **Goal:** Connect the redirect-preservation result to the keyed ordered driver's soundness argument,
   extend the regression corpus, and close out with a full gate run.

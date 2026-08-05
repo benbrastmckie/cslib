@@ -199,9 +199,11 @@ sorry (see Non-Goals) and does not write to `ROADMAP.md`.
 | 11 | 9 | 7.8, 8 |
 | 12 | 10 | 9 |
 
-Phases within the same wave can execute in parallel. Waves 1-7 are already complete. **The live
-frontier is wave 8.** Phases 7.5-7.7 must not be dispatched until Phase 7.4 returns a passing
-outcome — every one of them consumes the antitone family for conjunct (d).
+Phases within the same wave can execute in parallel. Waves 1-7 are already complete. **Wave 8
+(Phases 7.3, 7.4, 8) is now complete** — all three closed sorry-free and committed; Phase 7.4's
+kill gate returned outcome (i), a clean PASS. **The live frontier is now wave 9** (Phases 7.5,
+7.6, 7.7), which may now dispatch since Phase 7.4 has returned a passing outcome. Wave 10 (Phase
+7.8) remains blocked on wave 9 completing in full.
 
 ---
 

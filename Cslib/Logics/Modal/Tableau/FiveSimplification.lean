@@ -734,15 +734,6 @@ theorem modalTableauFive_eq (φ : Proposition Atom) :
 re-derivation, mirroring `S5Simplification.lean`'s own `_S5`/`_S5w`-suffixed pattern, renamed for
 Five. -/
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_le_modalMaxWorld`:
-any known-world label is bounded by `modalMaxWorld b`. -/
-private lemma known_label_le_modalMaxWorld_Five
-    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
-    (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
-  obtain ⟨y, hy, hyeq⟩ := (mem_modalKnownWorlds b w).mp h
-  rw [← hyeq]; exact label_le_modalMaxWorld hy
-
 /-! ## `RuleApplicationSpecCore` for `modalApplyOneFive`
 
 Discharges `RuleApplicationSpecCore modalApplyOneFive` (`GenericDriver.lean`): the nine
@@ -984,7 +975,7 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
         have hwknown : w' ∈ modalKnownWorlds b :=
           label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
         have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
+          le_trans (modalKnownWorlds_le_modalMaxWorld hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
             modalUniverse_mem_formula (hb _ hsf)
@@ -1005,7 +996,7 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
         have hwknown : w' ∈ modalKnownWorlds b :=
           label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
         have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
+          le_trans (modalKnownWorlds_le_modalMaxWorld hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
             modalUniverse_mem_formula (hb _ hsf)
@@ -1041,7 +1032,7 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
           intro x hx
           obtain ⟨hxeq, hxknown, -, -⟩ := modalFiveBoxAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
-            le_trans (known_label_le_modalMaxWorld_Five hxknown) (le_of_lt hW)
+            le_trans (modalKnownWorlds_le_modalMaxWorld hxknown) (le_of_lt hW)
           rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
         · -- kResult = .notApplicable
@@ -1078,7 +1069,7 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
           intro x hx
           obtain ⟨hxeq, hxknown, -, -⟩ := modalFiveDiaNegAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
-            le_trans (known_label_le_modalMaxWorld_Five hxknown) (le_of_lt hW)
+            le_trans (modalKnownWorlds_le_modalMaxWorld hxknown) (le_of_lt hW)
           rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
         · -- kResult = .notApplicable
@@ -2439,7 +2430,7 @@ private lemma modalApplyOneKb5''_outputsSubsetUniverse
         have hwknown : w' ∈ modalKnownWorlds b :=
           label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
         have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
+          le_trans (modalKnownWorlds_le_modalMaxWorld hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
             modalUniverse_mem_formula (hb _ hsf)
@@ -2460,7 +2451,7 @@ private lemma modalApplyOneKb5''_outputsSubsetUniverse
         have hwknown : w' ∈ modalKnownWorlds b :=
           label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
         have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
+          le_trans (modalKnownWorlds_le_modalMaxWorld hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
             modalUniverse_mem_formula (hb _ hsf)
@@ -2496,7 +2487,7 @@ private lemma modalApplyOneKb5''_outputsSubsetUniverse
           intro x hx
           rcases (modalKb5BoxAllUniv_mem hx).2 with ⟨hxeq, hxkn, -⟩ | ⟨hxeq, -⟩
           · have hxle : x.label ≤ modalWorldBound φ0 :=
-              le_trans (known_label_le_modalMaxWorld_Five hxkn) (le_of_lt hW)
+              le_trans (modalKnownWorlds_le_modalMaxWorld hxkn) (le_of_lt hW)
             rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
           · rw [hxeq]; exact mem_modalUniverse_of (Nat.zero_le _) hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
@@ -2534,7 +2525,7 @@ private lemma modalApplyOneKb5''_outputsSubsetUniverse
           intro x hx
           rcases (modalKb5DiaNegAllUniv_mem hx).2 with ⟨hxeq, hxkn, -⟩ | ⟨hxeq, -⟩
           · have hxle : x.label ≤ modalWorldBound φ0 :=
-              le_trans (known_label_le_modalMaxWorld_Five hxkn) (le_of_lt hW)
+              le_trans (modalKnownWorlds_le_modalMaxWorld hxkn) (le_of_lt hW)
             rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
           · rw [hxeq]; exact mem_modalUniverse_of (Nat.zero_le _) hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
@@ -3187,7 +3178,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
           intro z hz
           simp only [List.mem_append] at hz
           rcases hz with hz | hz
-          · exact known_label_le_modalMaxWorld_Five (hknownall z hz)
+          · exact modalKnownWorlds_le_modalMaxWorld (hknownall z hz)
           · exact label_le_modalMaxWorld hz
         have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
           Finset.card_le_card
@@ -3324,7 +3315,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
-        · exact known_label_le_modalMaxWorld_Five (hgrowth z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
+        · exact modalKnownWorlds_le_modalMaxWorld (hgrowth z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
         · exact label_le_modalMaxWorld hz
       have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (br ++ b)).card :=
         Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
@@ -3356,7 +3347,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
-        · exact known_label_le_modalMaxWorld_Five (hgrowth z hz)
+        · exact modalKnownWorlds_le_modalMaxWorld (hgrowth z hz)
         · exact label_le_modalMaxWorld hz
       have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
         Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
@@ -3630,7 +3621,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
           intro z hz
           simp only [List.mem_append] at hz
           rcases hz with hz | hz
-          · exact known_label_le_modalMaxWorld_Five (hknownall z hz)
+          · exact modalKnownWorlds_le_modalMaxWorld (hknownall z hz)
           · exact label_le_modalMaxWorld hz
         have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
           Finset.card_le_card
@@ -3767,7 +3758,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
-        · exact known_label_le_modalMaxWorld_Five (hgrowth z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
+        · exact modalKnownWorlds_le_modalMaxWorld (hgrowth z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
         · exact label_le_modalMaxWorld hz
       have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (br ++ b)).card :=
         Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
@@ -3799,7 +3790,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
-        · exact known_label_le_modalMaxWorld_Five (hgrowth z hz)
+        · exact modalKnownWorlds_le_modalMaxWorld (hgrowth z hz)
         · exact label_le_modalMaxWorld hz
       have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
         Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))

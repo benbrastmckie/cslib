@@ -85,12 +85,14 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## `modalSubfmls` Structural Re-Derivations
 
-Local re-derivations of `FmpMeasure.lean`'s private `modalSubfmls` structural facts (unavailable
-across files, system-agnostic). Consumed by the witness-rule counting crux below
-(`modalApplyOneS5w_step` and `modalApplyOneS5w_outputsSubsetUniverse`). The
+`modalSubfmls_self_mem_S5` below (the sole surviving local re-derivation of `FmpMeasure.lean`'s
+`private` `modalSubfmls` structural facts -- `modalSubfmls_trans_S5` was consolidated to the
+now-public `FmpMeasure.lean` original) is consumed by the witness-rule counting crux
+(`modalApplyOneS5w_step` and `modalApplyOneS5w_outputsSubsetUniverse`). Retained rather than
+consolidated because its origin is already public and it exists specifically to dodge an ambient
+`[Hashable Atom]` instance that callers here cannot `omit`. The
 `modalUniverseS5`/`modalWorldBoundS5` membership lemmas that once shared this section have been
-archived (superseded by the linear budget argument below); these two structural facts
-are rule-independent and remain live. -/
+archived (superseded by the linear budget argument below). -/
 
 /-! ## S5-Specific (Universal-Cluster) Propagation Helpers -/
 
@@ -971,15 +973,6 @@ theorem modalMaxWorld_lt_worldBound_of_S5w {φ₀ : Proposition Atom}
     _ ≤ modalOps φ₀ := mintTags_card_le_modalOps φ₀
     _ < modalWorldBound φ₀ := modalOps_lt_worldBound φ₀
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Any known-world label is bounded by `modalMaxWorld b`: unwinds `modalKnownWorlds` membership
-to a genuine branch member (`mem_modalKnownWorlds`), then applies `label_le_modalMaxWorld`. -/
-private lemma known_label_le_modalMaxWorld_S5w
-    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
-    (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
-  obtain ⟨y, hy, hyeq⟩ := (mem_modalKnownWorlds b w).mp h
-  rw [← hyeq]; exact label_le_modalMaxWorld hy
-
 omit [Hashable Atom] in
 /-- Local re-derivation of `FrameSoundness.lean`'s `lemma modalApplyOneS5_fresh_local`
 (unavailable across files, since `FrameSoundness.lean` imports `S5Simplification.lean`, not the
@@ -1541,7 +1534,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
-        · exact known_label_le_modalMaxWorld_S5w (hknownall z hz)
+        · exact modalKnownWorlds_le_modalMaxWorld (hknownall z hz)
         · exact label_le_modalMaxWorld hz
       have husedge : (usedTags φ₀ b).card ≤ (usedTags φ₀ (nf ++ b)).card :=
         Finset.card_le_card (usedTags_mono (fun x hx => List.mem_append_right _ hx))
@@ -1589,7 +1582,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
       intro z hz
       simp only [List.mem_append] at hz
       rcases hz with hz | hz
-      · exact known_label_le_modalMaxWorld_S5w
+      · exact modalKnownWorlds_le_modalMaxWorld
           (hknownall z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
       · exact label_le_modalMaxWorld hz
     have husedge : (usedTags φ₀ b).card ≤ (usedTags φ₀ (br ++ b)).card :=
@@ -1616,7 +1609,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
       intro z hz
       simp only [List.mem_append] at hz
       rcases hz with hz | hz
-      · exact known_label_le_modalMaxWorld_S5w (hknownall z hz)
+      · exact modalKnownWorlds_le_modalMaxWorld (hknownall z hz)
       · exact label_le_modalMaxWorld hz
     have husedge : (usedTags φ₀ b).card ≤ (usedTags φ₀ (nf ++ b)).card :=
       Finset.card_le_card (usedTags_mono (fun x hx => List.mem_append_right _ hx))
@@ -2134,7 +2127,7 @@ private lemma modalApplyOneS5w_persistentFresh
 /-- **F2 discharge for `modalApplyOneS5w`**: at the two S5-propagation shapes, K's own
 membership fact (`modalApplyOne_outputs_subset`, specialized to `sf`'s own shape) covers the
 K-forms component; the merged universal content is covered by `modalS5BoxAll_mem`/
-`modalS5DiaNegAll_mem`'s known-world label together with `known_label_le_modalMaxWorld_S5w`
+`modalS5DiaNegAll_mem`'s known-world label together with `modalKnownWorlds_le_modalMaxWorld`
 (bounding the label by `modalMaxWorld b`, hence by `modalWorldBound φ0` via `hW`) and
 `sf.formula`'s own subformula membership. At the two S5w witness-reuse shapes, the reuse arm's
 witness world is a known world of `b` by `witnessWorldS5_mem`/`label_mem_modalKnownWorlds`, and
@@ -2163,7 +2156,7 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
         have hwknown : w' ∈ modalKnownWorlds b :=
           label_mem_modalKnownWorlds (witnessWorldS5_mem hw)
         have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_S5w hwknown) (le_of_lt hW)
+          le_trans (modalKnownWorlds_le_modalMaxWorld hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
             modalUniverse_mem_formula (hb _ hsf)
@@ -2188,7 +2181,7 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
         have hwknown : w' ∈ modalKnownWorlds b :=
           label_mem_modalKnownWorlds (witnessWorldS5_mem hw)
         have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_S5w hwknown) (le_of_lt hW)
+          le_trans (modalKnownWorlds_le_modalMaxWorld hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
             modalUniverse_mem_formula (hb _ hsf)
@@ -2228,7 +2221,7 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
           intro x hx
           obtain ⟨hxeq, hxknown, -⟩ := modalS5BoxAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
-            le_trans (known_label_le_modalMaxWorld_S5w hxknown) (le_of_lt hW)
+            le_trans (modalKnownWorlds_le_modalMaxWorld hxknown) (le_of_lt hW)
           rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
         · -- kResult = .notApplicable
@@ -2265,7 +2258,7 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
           intro x hx
           obtain ⟨hxeq, hxknown, -⟩ := modalS5DiaNegAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
-            le_trans (known_label_le_modalMaxWorld_S5w hxknown) (le_of_lt hW)
+            le_trans (modalKnownWorlds_le_modalMaxWorld hxknown) (le_of_lt hW)
           rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
         · -- kResult = .notApplicable

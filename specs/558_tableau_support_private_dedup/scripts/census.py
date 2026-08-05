@@ -106,6 +106,32 @@ def strip_comment_state(text_lines):
         yield i, "".join(out)
 
 
+def scan_published_names():
+    """Names published under Support/*.lean. Used ONLY to keep signal B's "does the base exist
+    somewhere" check accurate after an origin has been deleted from the flat driver-file surface
+    and relocated to Support/ (e.g. modalKnownWorlds_mono_append's FmpMeasure.lean origin was
+    deleted in Phase 5's forced-collision cleanup; the 5 remaining suffixed copies elsewhere are
+    STILL a real pending-migration family, but without this check the family would silently
+    disappear from the census the moment the origin moved to Support/, since Support/ is not on
+    the flat glob(...) driver-file surface scan() reads from -- discovered when Phase 5's
+    post-phase census showed an implausibly large drop and cross-checking against a manual grep
+    of the known Phase 6 target families revealed the gap.
+    Support/ names are NEVER added to `decls` / never appear as family members themselves --
+    only used to seed the base-existence check.
+    """
+    published = set()
+    support_dir = SUBSYS / "Support"
+    if not support_dir.exists():
+        return published
+    for f in sorted(support_dir.glob("*.lean")):
+        text = f.read_text(encoding="utf-8", errors="replace").splitlines()
+        for _, code_line in strip_comment_state(text):
+            m = DECL_RE.match(code_line)
+            if m:
+                published.add(m.group("name"))
+    return published
+
+
 def scan(files=None):
     """Returns list of (file, line, private:bool, kind, name)."""
     decls = []
@@ -132,12 +158,19 @@ def census(files=None, family_filter=None):
 
     # Signal B: suffix-family duplicates (base name declared anywhere, incl. same name w/o suffix)
     all_names = set(by_name.keys())
+    # Published Support/ names count as "the base exists" too -- see scan_published_names()'s
+    # docstring for why this is load-bearing once an origin has been relocated to Support/.
+    published_names = scan_published_names()
+    lookup_names = all_names | published_names
     by_base = defaultdict(set)  # base -> set of names (base itself + suffixed variants) present
+    base_is_support_only = set()  # bases whose ONLY existence is in Support/, not in all_names
     for name in all_names:
         base, suf = strip_suffix(name)
-        if base and base in all_names:
+        if base and base in lookup_names:
             by_base[base].add(name)
             by_base[base].add(base)
+            if base in published_names and base not in all_names:
+                base_is_support_only.add(base)
 
     # Union: family key -> set of (fname, line, priv, kind, name)
     families = defaultdict(list)
@@ -166,7 +199,14 @@ def census(files=None, family_filter=None):
             for (fname, line, priv, kind) in by_name.get(name, []):
                 candidate_entries.append((fname, line, priv, kind, name))
                 files_seen.add(fname)
-        if len(files_seen) >= 2:
+        # The cross-file requirement guards against same-file prime-sibling false positives
+        # (two DIFFERENT facts sharing a stripped base in one file -- see the module docstring
+        # note above). That risk does not apply when the base's ONLY existence is the published
+        # Support/ module: Support/ is a distinct file by construction, so even a single
+        # remaining driver-file copy is a genuine, real duplicate needing consolidation, not a
+        # same-file sibling ambiguity. Require >=2 files only when the base is NOT Support-only.
+        needs_two_files = base not in base_is_support_only
+        if not needs_two_files or len(files_seen) >= 2:
             for entry in candidate_entries:
                 if entry not in families[base]:
                     families[base].append(entry)

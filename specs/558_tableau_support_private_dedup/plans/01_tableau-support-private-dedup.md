@@ -373,25 +373,57 @@ Accessibility-family duplicates — flagged here so Phase 3 does not miss it.
 
 ---
 
-### Phase 3: Migrate Accessibility consumers — delete ~10 duplicates [NOT STARTED]
+### Phase 3: Migrate Accessibility consumers — delete ~10 duplicates [COMPLETED]
 
 **Goal**: Import `Support/Accessibility` where needed, delete every duplicate of the three
 published facts, and remove the now-unused private original from `Soundness.lean`.
 
 **Tasks**:
-- [ ] Add `public import Cslib.Logics.Modal.Tableau.Support.Accessibility` to each file that
-      needs it.
-- [ ] Delete all `hasEdge_addEdge_cases` duplicates. Known sites span `BDriver.lean`,
+- [x] Add `public import Cslib.Logics.Modal.Tableau.Support.Accessibility` to each file that
+      needs it. *(Added to BDriver.lean, FmpMeasure.lean, FrameCompleteness.lean,
+      FrameSoundness.lean, LoopChecking.lean, Soundness.lean — the 6 files that used any of the
+      three published facts. S5Simplification.lean needed no import since its sole family member
+      was dead code, deleted outright.)*
+- [x] Delete all `hasEdge_addEdge_cases` duplicates. Known sites span `BDriver.lean`,
       `FrameCompleteness.lean` (×2), `FrameSoundness.lean` (×2, one of them
       `hasEdge_addEdge_cases_anc`), `LoopChecking.lean`, `S5Simplification.lean`, and
       `FmpMeasure.lean` (~1080, `hasEdge_addEdge_cases_local` — `FmpMeasure` does not import
-      `Soundness` either, so it drops a duplicate too).
-- [ ] Remove `private lemma hasEdge_addEdge_cases` from `Soundness.lean` and redirect its 1
-      internal use to the published form.
-- [ ] Delete the `mem_successorsOf_hasEdge` duplicates (2) and route uses to the published form.
-- [ ] Delete any `Local re-derivation` comment left orphaned by these deletions.
-- [ ] Confirm the six landed `Decidable` instances and `modalTableauS4Keyed_complete` still
+      `Soundness` either, so it drops a duplicate too). *(Deviation: no `S5Simplification.lean`
+      copy of `hasEdge_addEdge_cases` actually exists — confirmed by direct grep before editing;
+      the plan's own family-site list here was one file short of what's on disk, 7 real copies
+      not 8. Deleted the 7 that do exist: BDriver_B, FmpMeasure_local, FrameCompleteness_Five,
+      FrameCompleteness_C, FrameSoundness_anc, FrameSoundness_FS, LoopChecking_S4, plus removed
+      the Soundness.lean original itself and redirected its 1 internal use.)*
+- [x] Remove `private lemma hasEdge_addEdge_cases` from `Soundness.lean` and redirect its 1
+      internal use to the published form. *(Since the published name is identical to the
+      original's name, the internal call site needed no text edit — only the private declaration
+      was removed and the import added.)*
+- [x] Delete the `mem_successorsOf_hasEdge` duplicates (2) and route uses to the published form.
+      *(Deviation: actual count is 3, not 2 — `LoopChecking.lean`'s `_S4` copy,
+      `S5Simplification.lean`'s `_S5` copy (found to be genuinely DEAD, zero call sites anywhere,
+      deleted outright with no redirect needed), and a fourth-flavor copy the plan's text did not
+      name at all: `FrameSoundness.lean`'s `mem_successorsOf_hasEdge'` (trailing-prime naming,
+      not an underscore suffix — flagged in the Phase 2 handoff, resolved here). Also removed the
+      `FmpMeasure.lean` original itself, same identical-name situation as `hasEdge_addEdge_cases`
+      above — no call-site text edit needed there, only the private declaration removed.)*
+- [x] Delete any `Local re-derivation` comment left orphaned by these deletions. *(Deleted along
+      with each declaration block, since the comment was always the declaration's own docstring.
+      One additional stale prose reference was found and fixed: `FrameSoundness.lean`'s
+      sorry-carrying `branchSatisfiableIn_s4FC_ancestor_redirect` docstring cited the
+      Phase-1-deleted name `hasEdge_mem_successorsOf_origin` by name in an unrelated explanatory
+      paragraph; reworded to cite the current `Support.Accessibility`-published name instead. The
+      sorry itself and its surrounding proof term were not touched.)*
+- [x] Confirm the six landed `Decidable` instances and `modalTableauS4Keyed_complete` still
       elaborate (five of the seven live in `FrameCompleteness.lean`, which is edited here).
+      *(Confirmed via full `lake build Cslib` success, 3312 jobs — unchanged from Phase 2 since
+      this phase adds no new module.)*
+
+**Additional deviation**: Phase 3 also deleted `hasEdge_mem_successorsOf` (LoopChecking.lean's
+private copy, relocated in Phase 1) and routed its 4 call sites to the `Support.Accessibility`
+published copy of the same name — this consolidation was implicit in the plan's Phase 2 "publish
+the converse pair" step but not spelled out as an explicit Phase 3 task; recorded here for
+completeness since it required its own declaration-block deletion, matching the same
+identical-name-no-call-site-edit pattern as the other two origin removals.
 
 **Timing**: 1.5 hours
 

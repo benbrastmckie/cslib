@@ -525,7 +525,66 @@ those phases still own.
 
 ---
 
-### Phase 3: Canonical witness instance and the three collapsing conjuncts [NOT STARTED]
+### Phase 3: Canonical witness instance and the three collapsing conjuncts [PARTIAL]
+
+**Re-scoped per the Phase 1 Verdict (outcome (i)).** This phase now executes the re-scope
+recorded there, not the original canonical-witness task list below (which is superseded and left
+for provenance only).
+
+#### Phase 3 Progress Record (partial -- continuation needed)
+
+**Landed, sorry-free** (`FrameCompleteness.lean`, locate by
+`grep -n 'modalHintikkaSetS4_addEdge_of_saturated'`):
+
+```lean
+lemma modalHintikkaSetS4_addEdge_of_saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (src wBlock : WorldIndex)
+    (hH : modalHintikkaSetS4 φ₀ b acc)
+    (hSatExt : modalS4Saturated φ₀ b (acc.addEdge src wBlock)) :
+    modalHintikkaSetS4 φ₀ b (acc.addEdge src wBlock)
+```
+
+This discharges 3 of `modalHintikkaSetS4`'s 4 conjuncts unconditionally (branch-openness
+transfers as-is; the box-negative/diamond-positive existential-witness conjuncts transfer via
+`hasEdge_addEdge_mono_gate0`, GATE 0's mono helper, reused directly since this lemma lives in the
+same file). `lean_verify` reports axioms exactly `{propext, Classical.choice, Quot.sound}`.
+
+**NOT yet discharged -- the single remaining obligation, per the plan's own instruction not to
+`sorry` it**: `hSatExt : modalS4Saturated φ₀ b (acc.addEdge src wBlock)` is taken as an assumed
+hypothesis above, not derived. Establishing it (for the specific `acc.addEdge src wBlock` the
+keyed guard's redirect performs, i.e. under `blockingWorldS4Keyed φ₀ b keys s φ src = some
+wBlock`) is re-scoped Phases 4-5's content. Investigation so far, recorded for the next dispatch:
+
+- For `sf` with `sf.label ≠ src`: `(acc.addEdge src wBlock).successorsOf w = acc.successorsOf w`
+  for `w ≠ src` (confirmed by unfolding `Accessibility.successorsOf`/`addEdge`: the new edge only
+  ever contributes to `src`'s successor list). A "local shape invariance" lemma establishing
+  `modalApplyOneS4 φ₀ sf b (acc.addEdge src wBlock) = modalApplyOneS4 φ₀ sf b acc` for
+  `sf.label ≠ src` is not yet written but should be a short transcription of
+  `modalApplyOneS4Keyed_fst_eq_of_not_box`'s style, keyed off `successorsOf`-invariance rather
+  than `b`-invariance.
+- For `sf.label = src` and `sf` box-positive/diamond-negative shaped: this is where the new
+  successor `wBlock` genuinely adds an obligation. `blockedRedirect_boxed_boxPos_mem`/
+  `blockedRedirect_boxed_diaNeg_mem` (`LoopChecking.lean`, already landed, sorry-free) supply
+  `T(□χ)@wBlock ∈ b` from `T(□χ)@src ∈ b`, `blockingWorldS4Keyed φ₀ b keys s φ src = some
+  wBlock`, `hkL : ∀ w k, (w,k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w` (this is
+  `S4LoopInv.keyLowerBd`), and `(Sign.pos, .box χ) ∈ signedSubfmls φ₀`. The last hypothesis is
+  available from `S4LoopInv.bClosure` (`∀ x ∈ b, x ∈ modalUniverseS4 φ₀`) via a Finset-membership
+  bridge from `modalUniverseS4` to `signedSubfmls` that was not yet located/derived this
+  dispatch -- confirm one exists (search `mem_modalUniverseS4`) or derive it directly from
+  `modalUniverseS4`'s definition (`LoopChecking.lean:366`).
+- Assembling these into a full `modalS4Saturated φ₀ b (acc.addEdge src wBlock)` proof needs one
+  more step beyond the per-`χ` transfer: `modalApplyOneS4 φ₀ ⟨.pos,.box ψ,src⟩ b (acc.addEdge src
+  wBlock)`'s RESULT is a `.persistent` list merging ALL of `modalTBoxSelf`/`modalFourBoxProp`'s
+  content across the (now-extended) successor set, not a single-`χ` fact -- the per-`χ` transfer
+  lemmas need to be applied inside a `∀ sf' ∈ newForms, sf' ∈ b`-shaped goal, most likely by
+  showing the extended `modalFourBoxProp b (acc.addEdge src wBlock) ψ src`'s membership predicate
+  decomposes into "old target" (already covered by `hH`'s saturation at `acc`) or "new target
+  `wBlock`" (covered by `blockedRedirect_boxed_boxPos_mem`), mirroring
+  `hasEdge_addEdge_cases`'s case split.
+
+**Do not re-attempt the canonical-witness/pinned-witness apparatus** (original Phase 3's task
+list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 
 - **Goal:** Instantiate `branchSatisfiablePinnedIn`'s existential at the canonical choice and
   discharge the three conjuncts the probe classified as collapsing, leaving only the branch conjunct

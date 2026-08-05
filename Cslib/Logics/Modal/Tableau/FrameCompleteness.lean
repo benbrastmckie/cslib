@@ -4282,6 +4282,45 @@ lemma reflTransGen_addEdge_iff (acc : Accessibility) (src wBlock x y : WorldInde
         (hasEdge_addEdge_self_gate0 acc src wBlock)).trans
         (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_gate0) wBlock y hwBy)
 
+/-! ## Re-scoped Phase 3 (Plan v6) -- `modalHintikkaSetS4` Preservation Under the Keyed Redirect
+
+Per the `#### Phase 1 Verdict` in `plans/07_canonical-witness-truth-lemma.md`
+(`specs/553_s4_loop_guard_soundness_reachability_restriction/`), outcome (i) collapses the
+canonical-witness/pinned-witness apparatus entirely: `extractModelS4 b acc` is the witness at
+EVERY accessibility state, original and redirected alike, and the sole remaining obligation for
+the S4 keyed loop guard's redirect-preservation argument is `modalHintikkaSetS4` preservation
+under the specific `addEdge src wBlock` the guard's redirect performs.
+
+Three of `modalHintikkaSetS4`'s four conjuncts collapse mechanically and are discharged below:
+the branch-openness conjunct (`isModalClosed`) does not mention `acc` at all, and the two
+existential witness conjuncts (box-negative, diamond-positive) are monotone in `acc` --
+`hasEdge_addEdge_mono_gate0` (GATE 0 section above) lifts an existing witness edge into the
+extended accessibility unchanged. The fourth conjunct, `modalS4Saturated` at the extended
+accessibility, is the genuinely hard content (it must additionally account for `src`'s new
+successor `wBlock`) and is taken here as an explicit hypothesis -- the single remaining
+obligation, per the plan's Phase 3 instruction not to `sorry` it. Re-scoped Phases 4-5 discharge
+it, consuming the `blockedRedirect_boxed_boxPos_mem`/`blockedRedirect_boxed_diaNeg_mem` free
+transfers (`LoopChecking.lean`) and Gate B's `_wrapped` bridges. -/
+
+/-- `modalHintikkaSetS4` preservation under the keyed redirect's `addEdge`, GIVEN the hard
+saturation conjunct at the extended accessibility (`hSatExt`, this task's single remaining
+obligation -- see the module note above). The other three conjuncts are discharged here
+unconditionally. -/
+lemma modalHintikkaSetS4_addEdge_of_saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (src wBlock : WorldIndex)
+    (hH : modalHintikkaSetS4 φ₀ b acc)
+    (hSatExt : modalS4Saturated φ₀ b (acc.addEdge src wBlock)) :
+    modalHintikkaSetS4 φ₀ b (acc.addEdge src wBlock) := by
+  obtain ⟨hclosed, -, hboxNeg, hdiaPos⟩ := hH
+  refine ⟨hclosed, hSatExt, ?_, ?_⟩
+  · intro φ w hmem
+    obtain ⟨w', hedge, hwit⟩ := hboxNeg φ w hmem
+    exact ⟨w', hasEdge_addEdge_mono_gate0 hedge, hwit⟩
+  · intro φ w hmem
+    obtain ⟨w', hedge, hwit⟩ := hdiaPos φ w hmem
+    exact ⟨w', hasEdge_addEdge_mono_gate0 hedge, hwit⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

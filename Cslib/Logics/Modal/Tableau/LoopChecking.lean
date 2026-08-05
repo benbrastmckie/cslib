@@ -16,6 +16,7 @@ public import Mathlib.Data.Finset.Filter
 public import Mathlib.Data.Finset.Dedup
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.FrameRules
+public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 
 /-! # S4 Loop-Checking Machinery
 
@@ -1341,18 +1342,6 @@ lemma modalStepBranchS4KeyedOrdered_mintReady (φ₀ : Proposition Atom)
       simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
       simp [hpred.1.1])
   · exact hcandidates
-
-omit [Hashable Atom] in
-/-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership. Relocated to this
-point in the file (this subsystem's sole copy) so it precedes its uses in this section,
-without needing a second forward-declared copy. -/
-private lemma hasEdge_mem_successorsOf {acc : Accessibility} {w w' : WorldIndex}
-    (hr : acc.hasEdge w w' = true) : w' ∈ acc.successorsOf w := by
-  simp only [Accessibility.successorsOf, List.mem_filterMap]
-  simp only [Accessibility.hasEdge, List.any_eq_true] at hr
-  obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hr
-  simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
-  exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
 
 /-! ## Origin-Edge Invariant
 
@@ -2884,24 +2873,6 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysInUniverse (φ₀ : Propositio
 /-! ## Assembling `keysTotal`'s Preservation -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_successorsOf_hasEdge`
-(unavailable across files): if `w'` is returned by `acc.successorsOf w`, the edge `w → w'` is
-recorded in `acc`. Mirrors `FrameSoundness.lean`'s `mem_successorsOf_hasEdge'`/
-`S5Simplification.lean`'s `mem_successorsOf_hasEdge_S5`. Needed to lift the 4-rule's
-propagation-target labels (drawn from `acc.successorsOf w`) to `accTargetsKnown`'s edge-indexed
-known-worlds form. -/
-private lemma mem_successorsOf_hasEdge_S4 {acc : Accessibility} {w w' : WorldIndex}
-    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
-  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
-  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
-  split at heq
-  · rename_i hsrc
-    simp only [Option.some.injEq] at heq
-    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
-    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
-  · simp at heq
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
 (unavailable across files), dropping the `Nodup` conjunct this development does not need.
 Mirrors `S5Simplification.lean`'s `modalKnownWorlds_fold_spec_S5`. -/
@@ -3119,7 +3090,7 @@ omit [Hashable Atom] in
 /-- The S4-augmented rule `modalApplyOneS4Rules` never mints at its two T/4-relevant shapes
 (`T(□φ)@w`, `F(◇φ)@w`): composes `modalApplyOneT_boxPos_diaNeg_known_S4` (K+T layer) with the
 4-rule propagation (`modalFourBoxProp`/`modalFourDiaNegProp`), whose targets are recorded
-successors of `w` -- known via `accTargetsKnown` composed with `mem_successorsOf_hasEdge_S4`. -/
+successors of `w` -- known via `accTargetsKnown` composed with `mem_successorsOf_hasEdge`. -/
 private lemma modalApplyOneS4Rules_boxPos_diaNeg_known_S4
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -3145,7 +3116,7 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_known_S4
       · simp at hxeq
       · simp only [Option.some.injEq] at hxeq
         subst hxeq
-        exact hknown w w' (mem_successorsOf_hasEdge_S4 hw')
+        exact hknown w w' (mem_successorsOf_hasEdge hw')
     rcases htr : modalApplyOneT (⟨.pos, .box φ, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨tResult, tAcc⟩
     rw [htr] at hTacc hT
@@ -3182,7 +3153,7 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_known_S4
       · simp at hxeq
       · simp only [Option.some.injEq] at hxeq
         subst hxeq
-        exact hknown w w' (mem_successorsOf_hasEdge_S4 hw')
+        exact hknown w w' (mem_successorsOf_hasEdge hw')
     rcases htr : modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨tResult, tAcc⟩
     rw [htr] at hTacc hT
@@ -3421,7 +3392,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
       intro x hx
       obtain ⟨hxf, hxl⟩ := modalApplyOne_boxPos_outputs_subset b acc φ w x hx
       have hxlk : x.label ∈ modalKnownWorlds b :=
-        hknown w x.label (mem_successorsOf_hasEdge_S4 hxl)
+        hknown w x.label (mem_successorsOf_hasEdge hxl)
       obtain ⟨sf', hsf'mem, hsf'lab⟩ := (mem_modalKnownWorlds_S4 b x.label).mp hxlk
       have hbound : sf'.label ≤ modalWorldBoundS4 φ₀ := modalUniverseS4_mem_label (hb sf' hsf'mem)
       rw [hsf'lab] at hbound
@@ -3476,7 +3447,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
       intro x hx
       obtain ⟨hxf, hxl⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ w x hx
       have hxlk : x.label ∈ modalKnownWorlds b :=
-        hknown w x.label (mem_successorsOf_hasEdge_S4 hxl)
+        hknown w x.label (mem_successorsOf_hasEdge hxl)
       obtain ⟨sf', hsf'mem, hsf'lab⟩ := (mem_modalKnownWorlds_S4 b x.label).mp hxlk
       have hbound : sf'.label ≤ modalWorldBoundS4 φ₀ := modalUniverseS4_mem_label (hb sf' hsf'mem)
       rw [hsf'lab] at hbound
@@ -3563,7 +3534,7 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_universe_S4
       · simp at hxeq
       · simp only [Option.some.injEq] at hxeq
         subst hxeq
-        have hxlk : w' ∈ modalKnownWorlds b := hknown w w' (mem_successorsOf_hasEdge_S4 hw')
+        have hxlk : w' ∈ modalKnownWorlds b := hknown w w' (mem_successorsOf_hasEdge hw')
         obtain ⟨sf', hsf'mem, hsf'lab⟩ := (mem_modalKnownWorlds_S4 b w').mp hxlk
         have hbound : sf'.label ≤ modalWorldBoundS4 φ₀ :=
           modalUniverseS4_mem_label (hb sf' hsf'mem)
@@ -3607,7 +3578,7 @@ private lemma modalApplyOneS4Rules_boxPos_diaNeg_universe_S4
       · simp at hxeq
       · simp only [Option.some.injEq] at hxeq
         subst hxeq
-        have hxlk : w' ∈ modalKnownWorlds b := hknown w w' (mem_successorsOf_hasEdge_S4 hw')
+        have hxlk : w' ∈ modalKnownWorlds b := hknown w w' (mem_successorsOf_hasEdge hw')
         obtain ⟨sf', hsf'mem, hsf'lab⟩ := (mem_modalKnownWorlds_S4 b w').mp hxlk
         have hbound : sf'.label ≤ modalWorldBoundS4 φ₀ :=
           modalUniverseS4_mem_label (hb sf' hsf'mem)
@@ -5475,18 +5446,6 @@ private lemma accFreshInv_append_S4
   exact ⟨Nat.lt_of_lt_of_le hw (modalNextWorld_le_append xs b),
          Nat.lt_of_lt_of_le hw' (modalNextWorld_le_append xs b)⟩
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
-across files): decompose membership of an edge in `acc.addEdge w w'`. -/
-private lemma hasEdge_addEdge_cases_S4 {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  rcases h with ⟨hw, hw'⟩ | h
-  · exact Or.inl ⟨hw.symm, hw'.symm⟩
-  · exact Or.inr h
-
 /-- **`accFresh`'s driver-level preservation**: the per-branch freshness invariant `accFreshInv`
 survives an S4Keyed step. At the 12 non-minting shapes, `acc` is unchanged
 (`modalApplyOneS4Keyed_nonMint_snd_eq_acc`) and every produced branch is a prepend of `b`, so
@@ -5543,7 +5502,7 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.neg, ψ, modalNextWorld b⟩ :
@@ -5568,7 +5527,7 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · refine ⟨modalNextWorld_gt b sf hsfmem, ?_⟩
           obtain ⟨sf'', hsf''mem, hsf''lab⟩ := (mem_modalKnownWorlds_S4 b w').mp
             (hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .neg ψ sf.label w'
@@ -5602,7 +5561,7 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.pos, ψ, modalNextWorld b⟩ :
@@ -5627,7 +5586,7 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · refine ⟨modalNextWorld_gt b sf hsfmem, ?_⟩
           obtain ⟨sf'', hsf''mem, hsf''lab⟩ := (mem_modalKnownWorlds_S4 b w').mp
             (hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .pos ψ sf.label w'
@@ -5724,7 +5683,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.neg, ψ, modalNextWorld b⟩ :
@@ -5749,7 +5708,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · refine ⟨modalNextWorld_gt b sf hsfmem, ?_⟩
           obtain ⟨sf'', hsf''mem, hsf''lab⟩ := (mem_modalKnownWorlds_S4 b w').mp
             (hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .neg ψ sf.label w'
@@ -5783,7 +5742,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.pos, ψ, modalNextWorld b⟩ :
@@ -5808,7 +5767,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · refine ⟨modalNextWorld_gt b sf hsfmem, ?_⟩
           obtain ⟨sf'', hsf''mem, hsf''lab⟩ := (mem_modalKnownWorlds_S4 b w').mp
             (hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .pos ψ sf.label w'
@@ -5897,7 +5856,7 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds_S4]
           exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
         · exact modalKnownWorlds_mono_append_S4 _ b _ (hknown w w' hold)
@@ -5917,7 +5876,7 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .neg ψ sf.label w'
             hblock)
         · exact hknown w w' hold
@@ -5948,7 +5907,7 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds_S4]
           exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
         · exact modalKnownWorlds_mono_append_S4 _ b _ (hknown w w' hold)
@@ -5968,7 +5927,7 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .pos ψ sf.label w'
             hblock)
         · exact hknown w w' hold
@@ -6063,7 +6022,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds_S4]
           exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
         · exact modalKnownWorlds_mono_append_S4 _ b _ (hknown w w' hold)
@@ -6083,7 +6042,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .neg ψ sf.label w'
             hblock)
         · exact hknown w w' hold
@@ -6114,7 +6073,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
         subst hb'
         rw [← hacceq3, hsndeq]
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds_S4]
           exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
         · exact modalKnownWorlds_mono_append_S4 _ b _ (hknown w w' hold)
@@ -6134,7 +6093,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
         simp only [List.mem_singleton] at hb'
         subst b'
         intro w w' hedge
-        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · exact hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .pos ψ sf.label w'
             hblock)
         · exact hknown w w' hold

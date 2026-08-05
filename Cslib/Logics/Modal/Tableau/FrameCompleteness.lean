@@ -5902,6 +5902,199 @@ theorem S4RedirectSoundInv_notBoxDia_step (φ₀ : Proposition Atom)
     rw [hres] at happ
     simp [RuleResult.isApplicable] at happ
 
+/-! ## Phase 7.6: Mint-Unblocked Arms Restated, and P3
+
+P3 ("mint seed covers the 4-payload"): tested directly rather than assumed. The claim is
+load-bearing, not moot -- a same-world persistent formula (e.g. `T(□ψ)@w` sitting on the branch
+next to the minting formula) picks up a genuinely NEW candidate from the 4-rule/K-rule once the
+fresh successor `w'` is recorded (`modalFourBoxProp`/`boxPropagation` scan `acc.successorsOf w`,
+which now includes `w'`), and nothing makes that candidate vanish except the mint step's OWN
+`boxProps`/`diaNegProps` payload landing in `nf` at exactly that fresh label. The two lemmas
+below extract, from `modalS4Saturated`, that every one of the three per-layer candidate lists
+(K/T/4) is *individually* empty at the OLD successors -- not just that the packaged `.fst` value
+is `.notApplicable` -- which is exactly what P3 needs to transfer this fact across the new edge:
+combined with the mint payload's own construction (`boxProps`/`diaNegProps`, which duplicates
+the fresh-successor case of K's rule verbatim), the K/4-rule scans against the NEW state
+(`nf ++ b`, `acc.addEdge w w'`) are empty at every successor, old and new alike. -/
+
+/-- **P3, box-positive layer.** Under saturation, EVERY per-layer candidate list for a
+box-positive persistent formula `T(□ψ)@w ∈ b` is individually empty -- not merely that their
+combination is `.notApplicable`. Reuses the exact internal decomposition
+`modalApplyOneS4Rules_boxPos_notApplicable_of_saturated` already performs, stopping one step
+earlier to expose each layer rather than only the packaged conclusion. -/
+lemma modalApplyOneS4Rules_boxPos_layers_eq_nil_of_saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    boxPropagation b acc ψ w = [] ∧ modalTBoxSelf b ψ w = [] ∧
+      modalFourBoxProp b acc ψ w = [] := by
+  have hcond := hSat _ hmem
+  have hshape : modalApplyOneS4 φ₀ (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc =
+      modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc :=
+    modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ _ b acc ⟨by simp, by simp⟩
+  rw [hshape] at hcond
+  unfold modalApplyOneS4Rules at hcond
+  simp only at hcond
+  have hK : (modalApplyOne (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      if (boxPropagation b acc ψ w).isEmpty then RuleResult.notApplicable
+      else RuleResult.persistent (boxPropagation b acc ψ w) := by
+    unfold modalApplyOne
+    simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?,
+      modalNegOf?, List.map, List.find?, RuleResult.isApplicable, Option.getD_none]
+    split_ifs <;> simp_all
+  have htR : (modalApplyOneT (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (match (modalApplyOne (⟨.pos, .box ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+        | .persistent kForms =>
+          RuleResult.persistent
+            (kForms ++ (modalTBoxSelf b ψ w).filter (fun x => !(kForms.any (· == x))))
+        | .notApplicable =>
+          if (modalTBoxSelf b ψ w).isEmpty then RuleResult.notApplicable
+          else RuleResult.persistent (modalTBoxSelf b ψ w)
+        | other => other) := by
+    unfold modalApplyOneT
+    obtain ⟨kResult, kAcc⟩ := modalApplyOne (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+    cases kResult <;> first | rfl | (simp only []; split <;> rfl)
+  rw [htR, hK] at hcond
+  have hBoxNotMem : ∀ x ∈ boxPropagation b acc ψ w, x ∉ b := by
+    intro x hx
+    unfold boxPropagation at hx
+    simp only [List.mem_filterMap] at hx
+    obtain ⟨w', -, heq⟩ := hx
+    split_ifs at heq with hin
+    simp only [Option.some.injEq] at heq
+    subst heq
+    simpa using hin
+  have hSelfNotMem : ∀ x ∈ modalTBoxSelf b ψ w, x ∉ b := by
+    intro x hx
+    by_cases hin : ((b.any fun y => y == (⟨.pos, ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex)) = true)
+    · rw [modalTBoxSelf, if_pos hin] at hx
+      simp at hx
+    · rw [modalTBoxSelf, if_neg hin] at hx
+      simp only [List.mem_singleton] at hx
+      subst hx
+      simpa using hin
+  have hFourNotMem : ∀ x ∈ modalFourBoxProp b acc ψ w, x ∉ b := by
+    intro x hx
+    unfold modalFourBoxProp at hx
+    simp only [List.mem_filterMap] at hx
+    obtain ⟨w', -, heq⟩ := hx
+    split_ifs at heq with hin
+    simp only [Option.some.injEq] at heq
+    subst heq
+    simpa using hin
+  split_ifs at hcond with h1 h2 h3 <;> simp only [] at hcond <;>
+    first
+    | exact ⟨List.isEmpty_iff.mp (by simpa using h1), List.isEmpty_iff.mp (by simpa using h2),
+        List.isEmpty_iff.mp (by simpa using h3)⟩
+    | (exfalso
+       obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h1)
+       exact hBoxNotMem x hx (hcond x (by simp [hx])))
+    | (exfalso
+       obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h2)
+       exact hSelfNotMem x hx (hcond x (by simp [hx])))
+    | (exfalso
+       obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h3)
+       exact hFourNotMem x hx (hcond x (by simp [hx])))
+
+/-- **P3, diamond-negative layer.** Dual of
+`modalApplyOneS4Rules_boxPos_layers_eq_nil_of_saturated`. -/
+lemma modalApplyOneS4Rules_diaNeg_layers_eq_nil_of_saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ((acc.successorsOf w).filterMap (fun w' =>
+        let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
+        if b.any (· == sf') then none else some sf')) = [] ∧
+      modalTDiaNegSelf b ψ w = [] ∧ modalFourDiaNegProp b acc ψ w = [] := by
+  have hcond := hSat _ hmem
+  have hshape : modalApplyOneS4 φ₀ (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc =
+      modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc :=
+    modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ _ b acc ⟨by simp, by simp⟩
+  rw [hshape] at hcond
+  unfold modalApplyOneS4Rules at hcond
+  simp only at hcond
+  set diaPropagation : List (SignedFormula (Proposition Atom) WorldIndex) :=
+    (acc.successorsOf w).filterMap (fun w' =>
+      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
+      if b.any (· == sf') then none else some sf') with hDiaPropDef
+  have hK : (modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      if diaPropagation.isEmpty
+      then RuleResult.notApplicable
+      else RuleResult.persistent diaPropagation := by
+    unfold modalApplyOne
+    simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?,
+      modalNegOf?, List.map, List.find?, RuleResult.isApplicable, Option.getD_none, hDiaPropDef]
+    split_ifs <;> simp_all
+  have htR : (modalApplyOneT (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (match (modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+        | .persistent kForms =>
+          RuleResult.persistent
+            (kForms ++ (modalTDiaNegSelf b ψ w).filter (fun x => !(kForms.any (· == x))))
+        | .notApplicable =>
+          if (modalTDiaNegSelf b ψ w).isEmpty then RuleResult.notApplicable
+          else RuleResult.persistent (modalTDiaNegSelf b ψ w)
+        | other => other) := by
+    unfold modalApplyOneT
+    obtain ⟨kResult, kAcc⟩ := modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+    cases kResult <;> first | rfl | (simp only []; split <;> rfl)
+  rw [htR, hK] at hcond
+  have hDiaNotMem : ∀ x ∈ diaPropagation, x ∉ b := by
+    intro x hx
+    rw [hDiaPropDef] at hx
+    simp only [List.mem_filterMap] at hx
+    obtain ⟨w', -, heq⟩ := hx
+    split_ifs at heq with hin
+    simp only [Option.some.injEq] at heq
+    subst heq
+    simpa using hin
+  have hSelfNotMem : ∀ x ∈ modalTDiaNegSelf b ψ w, x ∉ b := by
+    intro x hx
+    by_cases hin : ((b.any fun y => y == (⟨.neg, ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex)) = true)
+    · rw [modalTDiaNegSelf, if_pos hin] at hx
+      simp at hx
+    · rw [modalTDiaNegSelf, if_neg hin] at hx
+      simp only [List.mem_singleton] at hx
+      subst hx
+      simpa using hin
+  have hFourNotMem : ∀ x ∈ modalFourDiaNegProp b acc ψ w, x ∉ b := by
+    intro x hx
+    unfold modalFourDiaNegProp at hx
+    simp only [List.mem_filterMap] at hx
+    obtain ⟨w', -, heq⟩ := hx
+    split_ifs at heq with hin
+    simp only [Option.some.injEq] at heq
+    subst heq
+    simpa using hin
+  split_ifs at hcond with h1 h2 h3 <;> simp only [] at hcond <;>
+    first
+    | exact ⟨List.isEmpty_iff.mp (by simpa using h1), List.isEmpty_iff.mp (by simpa using h2),
+        List.isEmpty_iff.mp (by simpa using h3)⟩
+    | (exfalso
+       obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h1)
+       exact hDiaNotMem x hx (hcond x (by simp [hx])))
+    | (exfalso
+       obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h2)
+       exact hSelfNotMem x hx (hcond x (by simp [hx])))
+    | (exfalso
+       obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h3)
+       exact hFourNotMem x hx (hcond x (by simp [hx])))
+
 /-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
 
 A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)

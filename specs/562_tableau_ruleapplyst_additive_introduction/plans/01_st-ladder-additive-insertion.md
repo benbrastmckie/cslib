@@ -1,7 +1,7 @@
 # Implementation Plan: Introduce `RuleApplySt` Additively and Bridge `modalExpandBranchesGen`
 
 - **Task**: 562 - Introduce RuleApplySt additively and bridge modalExpandBranchesGen
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md`
@@ -102,29 +102,29 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Insert the Verified St Ladder [NOT STARTED]
+### Phase 1: Insert the Verified St Ladder [COMPLETED]
 
 **Goal**: Land the nine machine-verified declarations in `Saturation.lean` verbatim, with the
 build green.
 
 **Tasks**:
-- [ ] Read `specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st-ladder-verified.lean`
+- [x] Read `specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st-ladder-verified.lean`
       in full.
-- [ ] Locate the insertion point by name: the line `end Cslib.Logic.Modal.Tableau` at the end of
+- [x] Locate the insertion point by name: the line `end Cslib.Logic.Modal.Tableau` at the end of
       `Cslib/Logics/Modal/Tableau/Saturation.lean`. Do not use a line number.
-- [ ] Insert the artifact's body (everything from the `/-! ## State-Threading Ladder ... -/`
+- [x] Insert the artifact's body (everything from the `/-! ## State-Threading Ladder ... -/`
       section marker onward, excluding the four leading `--` provenance comment lines) immediately
       before that `end`, keeping the existing blank-line spacing convention of the file.
-- [ ] Rename the section marker from `/-! ## State-Threading Ladder (ADDITIVE PROBE) -/` to
+- [x] Rename the section marker from `/-! ## State-Threading Ladder (ADDITIVE PROBE) -/` to
       `/-! ## State-Threading Ladder -/` — "ADDITIVE PROBE" was scaffolding language for the
       research prototype and must not land.
-- [ ] Confirm the nine declarations are present and in dependency order: `RuleApplySt`,
+- [x] Confirm the nine declarations are present and in dependency order: `RuleApplySt`,
       `liftRuleApply`, `modalStepBranchGenSt`, `findSome?_map_comm`, `modalStepBranchGen_eq_St`,
       `modalExpandBranchesGenSt`, `modalExpandBranchesGen_eq_St`, `modalTableauGenSt`,
       `modalTableauGen_eq_St`.
-- [ ] Confirm by `git diff` that no existing declaration body was touched and no `import` line was
+- [x] Confirm by `git diff` that no existing declaration body was touched and no `import` line was
       added or changed.
-- [ ] Run `lake build Cslib` and confirm green at 3313 jobs.
+- [x] Run `lake build Cslib` and confirm green at 3313 jobs.
 
 **Timing**: 0.5 hours
 

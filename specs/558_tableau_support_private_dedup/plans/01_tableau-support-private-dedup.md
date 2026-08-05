@@ -781,25 +781,52 @@ exactly the measured set — neither the description's "50" nor a hand-copied na
 
 ---
 
-### Phase 8: Delete Tier-2 duplicates — `LoopChecking.lean` and `S5Simplification.lean` [NOT STARTED]
+### Phase 8: Delete Tier-2 duplicates — `LoopChecking.lean` and `S5Simplification.lean` [COMPLETED]
 
 **Goal**: First half of the Tier-2 deletion sweep, scoped to the two largest consumer files (14
 comment sites each, plus uncommented duplicates the census will surface).
 
 **Tasks**:
-- [ ] Confirm each file already reaches `FmpMeasure` transitively — both do, so **no import
+- [x] Confirm each file already reaches `FmpMeasure` transitively — both do, so **no import
       addition should be needed**. If one appears necessary, that contradicts the reachability
-      finding and must be recorded before proceeding.
-- [ ] Delete the `_S4` / `_S5` Tier-2 duplicates in these two files and route uses to the
+      finding and must be recorded before proceeding. *(Confirmed: both files already
+      `public import Cslib.Logics.Modal.Tableau.FmpMeasure`; no import addition needed.)*
+- [x] Delete the `_S4` / `_S5` Tier-2 duplicates in these two files and route uses to the
       now-public `FmpMeasure` declarations. Families expected here include `modalSubfmls_trans`,
       `mem_modalUniverse_of`, `modalUniverse_mem_formula`, `modalExpMeasure_split/_append/
       _const_exp` (all three in `LoopChecking.lean` ~9804-9836), `modalCount_notMem_append_drop`,
       `modalCount_notMem_mono`, `modalWork_drop_linear`, `modalWork_drop_persistent`,
-      `outDeg_addEdge_self/_ne`.
-- [ ] Treat the stale `mem_modalUniverse_of` comment ("swapped to plain
+      `outDeg_addEdge_self/_ne`. *(Done, all named families deleted from both files, 14
+      declarations net. `LoopChecking.lean`: `modalSubfmls_trans_S4`, `mintGroup_label_eq_freshWorld_S4`,
+      `outDeg_addEdge_self_S4`, `outDeg_addEdge_ne_S4`, `modalCount_notMem_append_drop_S4`,
+      `modalCount_notMem_mono_S4`, `modalWork_drop_linear_S4`, `modalWork_drop_persistent_S4`,
+      `modalExpMeasure_split_S4`, `modalExpMeasure_append_S4`, `modalExpMeasure_const_exp_S4` (11).
+      `S5Simplification.lean`: `mem_modalUniverse_of_S5w`, `modalUniverse_mem_formula_S5w`,
+      `modalSubfmls_trans_S5` (3).)*
+
+**Critical false-positive caught and reverted**: `boxProps_outputs_subset_S4` and
+`diaNegProps_outputs_subset_S4` (`LoopChecking.lean`) were initially deleted per the census's
+family match, then the build immediately failed with a type mismatch: `∀ x ∈ b, x ∈
+modalUniverseS4 φ₀` vs. the published `∀ x ∈ b, x ∈ modalUniverse φ₀`. These are genuinely
+S4-specific facts — parallel in structure to the generic `FmpMeasure` originals but stated over
+the S4-only `modalUniverseS4`/`modalWorldBoundS4` types, not the generic `modalUniverse`/
+`modalWorldBound` — exactly the same trap as the earlier `mem_modalUniverseS4_of` discovery
+(Phase 2 handoff). The section header immediately preceding them in the source even says so
+explicitly ("retargeted from `modalUniverse`/`modalWorldBound` to
+`modalUniverseS4`/`modalWorldBoundS4`"), which a build-error-driven catch surfaced faster than
+reading it would have. Restored both declarations verbatim (recovered from the last commit) and
+reverted their 4 call sites back to the `_S4` suffix. **Lesson for Phases 9-10**: before deleting
+ANY `_S4`/`_S5`/`_Five` census match whose base name resembles a KnownWorlds/universe-bound fact,
+grep the declaration body for a `*S4`/`*S5`/`*Five`-suffixed TYPE (not just the lemma name suffix)
+— a type-level suffix means the fact is genuinely frame-specific, not a re-derivation duplicate,
+regardless of what the lemma-name suffix alone suggests.
+
+- [x] Treat the stale `mem_modalUniverse_of` comment ("swapped to plain
       `modalUniverse`/`modalWorldBound`") as **stale prose**, not a hazard signal — the three
-      copies are byte-identical to the original.
-- [ ] Remove orphaned `Local re-derivation` comments in these two files only.
+      copies are byte-identical to the original. *(Confirmed: all three deleted cleanly with no
+      type mismatch, unlike the boxProps/diaNegProps case above.)*
+- [x] Remove orphaned `Local re-derivation` comments in these two files only. *(Removed along
+      with each deleted block.)*
 
 **Timing**: 1.5 hours
 

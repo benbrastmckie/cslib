@@ -839,9 +839,12 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
 - **Tasks:**
   - [x] Wire the redirect-preservation lemma into the per-step preservation argument for the keyed
         ordered driver. *(deviation: partial — see Phase 7 Progress Record below. The bespoke
-        step-preservation lemma is not yet fully assembled; one supporting semantic building
-        block (`boxPlusExtraS4_sat`) has landed sorry-free, and the exact remaining case-split
-        and reusable ingredients are catalogued in the Progress Record.)*
+        step-preservation lemma is not yet fully assembled; three of its case-split arms are now
+        landed sorry-free as standalone case-scoped lemmas (propositional/non-modal, and both
+        mint-unblocked shapes), and the exact remaining case-split and reusable ingredients are
+        catalogued in the Progress Record, including a correction to the mint-blocked case's
+        previously-catalogued "cheapest" route, which does not actually work as a per-step
+        argument.)*
   - [x] Record the **layering note** the import graph forces: soundness content for the keyed ordered
         driver now necessarily lives in `FrameCompleteness.lean`, because that is the only file seeing
         both `LoopChecking` and `FrameSoundness`. Write this as a module-comment note naming the
@@ -857,7 +860,103 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
         for the one landed lemma and are clean.)*
   - [ ] Final census check and summary. *(deviation: deferred — phase not yet closed.)*
 
-#### Phase 7 Progress Record (continuation dispatch; phase remains `[IN PROGRESS]`)
+#### Phase 7 Progress Record (third continuation dispatch; phase remains `[IN PROGRESS]`)
+
+**Landed this dispatch (sorry-free, `{propext, Classical.choice, Quot.sound}` only, confirmed by
+direct `#print axioms` since `lean_verify`'s source-scan heuristic reports a known spurious
+`sorryAx` on these declarations)**, all in `FrameCompleteness.lean`:
+
+- `modalApplyOneS4Keyed_notBoxDia_sat` — closes the **propositional/non-modal** case. At any
+  signed formula whose top-level connective is neither `box` nor `diamond`,
+  `modalApplyOneS4Keyed` reduces to plain K's `modalApplyOne`
+  (`modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box`, un-privatized in `LoopChecking.lean` to
+  make the reduction visible across the file boundary the layering note requires), and
+  `tryAllPropRules_sat` discharges `RuleResultSat` preservation in one call.
+- `modalApplyOneS4Keyed_boxNeg_mint_sat` — closes the **mint-unblocked, box-negative** case
+  (`F(□ψ)@w`, `blockingWorldS4Keyed = none`). Mirrors the plain-K box-negative mint arm's
+  fresh-witness pointwise extension `f'` verbatim (`FrameSoundness.lean`'s `neg`/`box φ` case,
+  ~lines 606-720), with `boxPlusExtraS4_sat` closing the extra chunk.
+  `modalApplyOneS4KeyedMint_boxNeg_eq_S4` (already-landed closed form) supplied the exact literal
+  payload, avoiding any need to re-derive the K witness-group structure.
+- `modalApplyOneS4Keyed_diaPos_mint_sat` — direct dual, closes the **mint-unblocked,
+  diamond-positive** case (`T(◇ψ)@w`).
+
+Each is stated as a case-scoped, standalone lemma (not yet wired into a single dispatcher
+theorem) — same pattern `boxPlusExtraS4_sat` established: `∃ nf, modalApplyOneS4Keyed φ₀ keys sf
+b acc = (RuleResult.linear nf, newAcc) ∧ branchSatisfiableIn s4FC (nf ++ b) newAcc`. Three of the
+five-ish case-split arms are now done. Sorry census over `Cslib/Logics/Modal/Tableau/` unchanged
+at exactly 1 (the standing, retained `FrameSoundness.lean:1251`). Scoped build and
+`lake exe lint-style` clean after each landed lemma; whole-project `lake build` also re-confirmed
+clean this dispatch (not run at the end of the prior two dispatches).
+
+**Correction to the previously-catalogued mint-blocked route (discovered this dispatch, not a
+speculation)**: the prior Progress Record catalogued mint-blocked (redirect) as the **cheapest**
+remaining case, "via `branchSatisfiableIn_s4FC_addEdge_of_blocked` (the Phase 6 capstone)
+directly". This does **not** work as a per-step lemma. `branchSatisfiableIn_s4FC_addEdge_of_
+blocked` takes `hH : modalHintikkaSetS4 φ₀ b acc` as a hypothesis — the FULL saturated-branch
+Hintikka set, whose conjuncts 3/4 require **every** box-negative/diamond-positive-shaped formula
+on the ENTIRE branch `b` to already have a witness successor, not just the one currently firing.
+It builds an entirely fresh canonical model via `extractModelS4`, discarding whatever ambient
+`(W, m, f)` `hsat` supplied — it is a *terminal, fully-saturated-branch* construction (matching
+the open-branch countermodel step at the end of a completeness argument), not a per-step
+invariant. At an arbitrary settled ordered-stepper state (`modalNonMintCandidates = []`, the
+precondition under which a mint-blocked step can fire per `modalStepBranchS4KeyedOrdered_
+mintReady`), settledness only guarantees every *non-minting* rule has already fired — it says
+nothing about whether *other* mint-shaped formulas on `b` already have witnesses (only the one
+formula `modalStepBranchS4KeyedBody` selects is being processed this step; siblings are
+processed one at a time by later steps). So `modalHintikkaSetS4 φ₀ b acc` genuinely does not hold
+at this point, and the capstone's hypotheses cannot be discharged from `S4LoopInv`/
+`S4KeyedHintikkaInv` alone.
+
+A genuine per-step argument (extending the SAME ambient `(W, m, f)`, the way the three landed
+cases above do) needs `m.r (f w) (f wBlock)` to hold in that arbitrary model — but `wBlock` is
+chosen by `blockingWorldS4Keyed` via a purely **syntactic** comparison (`key(wBlock) ⊆
+relevantSetFinset φ₀ b w`, `S4LoopInv.keyLowerBd`), which has no a priori semantic connection to
+an arbitrary model that happens to satisfy `b`. Neither route (rebuild-canonical-model,
+extend-ambient-model) closes with the invariants currently available to a per-step lemma. This
+looks like a genuine open architectural question, not a proof-engineering gap closable by more
+lemma-chaining within a dispatch: either (a) the induction needs a STRONGER invariant than plain
+`branchSatisfiableIn s4FC b acc` threaded through every step (e.g. carrying enough of
+`modalHintikkaSetS4`-style saturation, or a dedicated "redirect edges are already realized"
+witness, incrementally), or (b) the mint-blocked case is not provable as a literal per-step
+preservation lemma at all and the soundness architecture for the keyed ordered driver needs to be
+rethought at the phase-design level (flagged to the user, not silently worked around). **Do not
+re-attempt the `branchSatisfiableIn_s4FC_addEdge_of_blocked`-direct route in a future dispatch
+without first resolving this** — it is a dead end as stated, confirmed by inspection of both
+`modalHintikkaSetS4`'s conjunct 3/4 and `modalNonMintCandidates`'s definition (`LoopChecking.lean`).
+
+**Remaining case-split (updated)**:
+
+| Case | Status |
+|------|----|
+| Propositional/non-modal | **Landed** (`modalApplyOneS4Keyed_notBoxDia_sat`) |
+| Mint, unblocked (box-negative) | **Landed** (`modalApplyOneS4Keyed_boxNeg_mint_sat`) |
+| Mint, unblocked (diamond-positive) | **Landed** (`modalApplyOneS4Keyed_diaPos_mint_sat`) |
+| Mint, blocked (redirect) | **Open, and harder than previously catalogued** — see correction above. Needs either a stronger threaded invariant or a rethought architecture; not closable by direct reuse of `branchSatisfiableIn_s4FC_addEdge_of_blocked`. |
+| 4-rule, box-positive (`T(□φ)@w`) | Open, unchanged from prior catalogue (see below) — still the single largest remaining piece. |
+| 4-rule, diamond-negative (`F(◇φ)@w`) | Open, dual of the above. |
+
+**4-rule cases, unchanged from the prior Progress Record (not yet attempted this dispatch)**:
+box-positive via `modalApplyOneS4_boxPos_fst_eq` (`LoopChecking.lean:9587`, the exact
+three-layer closed form: K's `boxPropagation`, THEN `modalTBoxSelf` dedup-appended, THEN
+`modalFourBoxProp` dedup-appended) — needs a not-yet-built merge lemma composing
+`modalApplyOne_boxPos_sound` (`SoundnessStep.lean:447`) + `modalTBoxSelf_sound`
+(`FrameSoundness.lean:1019`) + `modalFourBoxProp_sound` (`FrameSoundness.lean:1123`), plus a
+Keyed→S4 `.fst`-equality bridge at this shape (`modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding`
++ `modalApplyOneS4Rules_boxPos_diaNeg_known_S4`, both un-privatized if consumed from
+`FrameCompleteness.lean` the same way this dispatch un-privatized the propositional bridge).
+Diamond-negative is the dual via `modalApplyOneS4_diaNeg_fst_eq` (`LoopChecking.lean:9658`),
+`modalTDiaNegSelf_sound` (`FrameSoundness.lean:1037`), `modalFourDiaNegProp_sound`
+(`FrameSoundness.lean:1143`).
+
+**Suggested order for the next dispatch**: resolve the mint-blocked architectural question first
+(it blocks assembling ANY complete dispatcher theorem, since every case must close for the
+top-level step lemma to typecheck) — likely needs user/planning input on whether to strengthen
+the induction invariant or restructure, rather than pure proof engineering — then, in parallel or
+afterward, build the 4-rule box-positive merge lemma (dual gives diamond-negative faster).
+
+#### Phase 7 Progress Record (second continuation dispatch — superseded by the record above,
+retained for history)
 
 **Confirmed scope, not anticipated at planning time**: `modalStepBranchS4KeyedOrdered` has
 **no existing soundness theory at all** to build on — not even for the *plain* (unkeyed) S4

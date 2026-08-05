@@ -11,6 +11,7 @@ public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.S5Simplification
 public import Cslib.Logics.Modal.Tableau.FiveSimplification
 public import Cslib.Logics.Modal.Tableau.Support.Accessibility
+public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
 import Cslib.Foundations.Relation.Euclidean
 import Mathlib.Data.List.Forall2
 
@@ -2032,56 +2033,6 @@ lemma accReachableInv_kb5_root_refl
   exact Relation.RightEuclidean.rightEuclidean hv0 hv0
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
-(unavailable across files), dropping the `Nodup` conjunct this development does not need.
-Mirrors `S5Simplification.lean`'s `modalKnownWorlds_fold_spec_S5`. -/
-private lemma modalKnownWorlds_fold_spec_FS
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
-    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
-      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
-  induction l generalizing ws0 with
-  | nil => simp
-  | cons sf rest ih =>
-    by_cases hc : ws0.any (· == sf.label)
-    · simp only [List.foldl_cons, if_pos hc]
-      intro x
-      rw [ih ws0]
-      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl h
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ hmemws0)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-    · simp only [List.foldl_cons, if_neg hc]
-      intro x
-      rw [ih (sf.label :: ws0)]
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · rcases List.mem_cons.mp h with rfl | h
-          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
-          · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl (List.mem_cons_of_mem _ h)
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ List.mem_cons_self)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds` (unavailable
-across files): membership in `modalKnownWorlds` is exactly "some formula on the branch has this
-label". Mirrors `S5Simplification.lean`'s `mem_modalKnownWorlds_S5`. -/
-private lemma mem_modalKnownWorlds_FS
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
-    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
-  unfold modalKnownWorlds
-  simpa using modalKnownWorlds_fold_spec_FS l [] x
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
 (unavailable across files): appending formulas to the front of a branch only grows its
 known-worlds set. Mirrors `S5Simplification.lean`'s `modalKnownWorlds_mono_append_S5`. -/
@@ -2089,7 +2040,7 @@ private lemma modalKnownWorlds_mono_append_FS
     (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
   intro x hx
-  rw [mem_modalKnownWorlds_FS] at hx ⊢
+  rw [mem_modalKnownWorlds] at hx ⊢
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
@@ -2103,11 +2054,11 @@ private lemma modalKnownWorlds_append_subset_of_labels_known
     (hxs : ∀ x ∈ xs, x.label ∈ modalKnownWorlds b) :
     ∀ w ∈ modalKnownWorlds (xs ++ b), w ∈ modalKnownWorlds b := by
   intro w hw
-  rw [mem_modalKnownWorlds_FS] at hw
+  rw [mem_modalKnownWorlds] at hw
   obtain ⟨sf, hsf, rfl⟩ := hw
   rcases List.mem_append.mp hsf with hxsf | hbsf
   · exact hxs sf hxsf
-  · rw [mem_modalKnownWorlds_FS]; exact ⟨sf, hbsf, rfl⟩
+  · rw [mem_modalKnownWorlds]; exact ⟨sf, hbsf, rfl⟩
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `acc.addEdge w w'` only ever grows the edge set: every edge already recorded in `acc`
@@ -2152,7 +2103,7 @@ lemma modalStepBranchFive_preserves_accReachableInv
   simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds_FS b sf.label).mpr
+  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds b sf.label).mpr
     ⟨sf, hsfmem, rfl⟩
   rcases modalApplyOneFive_agree_or_reuse sf b acc with heq | ⟨sf', hsf'mem, heq⟩
   swap
@@ -2166,7 +2117,7 @@ lemma modalStepBranchFive_preserves_accReachableInv
     subst hb'
     intro w hw
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
-      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+      (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
     have hknown' : ∀ x ∈ [sf'], x.label ∈ modalKnownWorlds b := by
       intro x hx
       simp only [List.mem_singleton] at hx
@@ -2213,7 +2164,7 @@ lemma modalStepBranchFive_preserves_accReachableInv
       obtain ⟨-, hlabels⟩ := hdich
       intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
       intro w hw
-      rw [mem_modalKnownWorlds_FS] at hw
+      rw [mem_modalKnownWorlds] at hw
       obtain ⟨sf', hsf', rfl⟩ := hw
       rcases List.mem_append.mp hsf' with hnew | hold
       · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
@@ -2221,7 +2172,7 @@ lemma modalStepBranchFive_preserves_accReachableInv
         exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _ (hInv sf.label
           hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
       · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
-          (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
+          (hInv sf'.label ((mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hold, rfl⟩))
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hsf; simp at hsf
@@ -2303,7 +2254,7 @@ lemma modalStepBranchS5Gen_preserves_accReachableInv
   simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds_FS b sf.label).mpr
+  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds b sf.label).mpr
     ⟨sf, hsfmem, rfl⟩
   rcases hspec sf b acc with heq | ⟨sf', hsf'mem, heq⟩
   swap
@@ -2317,7 +2268,7 @@ lemma modalStepBranchS5Gen_preserves_accReachableInv
     subst hb'
     intro w hw
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
-      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+      (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
     have hknown' : ∀ x ∈ [sf'], x.label ∈ modalKnownWorlds b := by
       intro x hx
       simp only [List.mem_singleton] at hx
@@ -2364,7 +2315,7 @@ lemma modalStepBranchS5Gen_preserves_accReachableInv
       obtain ⟨-, hlabels⟩ := hdich
       intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
       intro w hw
-      rw [mem_modalKnownWorlds_FS] at hw
+      rw [mem_modalKnownWorlds] at hw
       obtain ⟨sf', hsf', rfl⟩ := hw
       rcases List.mem_append.mp hsf' with hnew | hold
       · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
@@ -2372,7 +2323,7 @@ lemma modalStepBranchS5Gen_preserves_accReachableInv
         exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _ (hInv sf.label
           hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
       · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
-          (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
+          (hInv sf'.label ((mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hold, rfl⟩))
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hsf; simp at hsf
@@ -2429,7 +2380,7 @@ lemma modalS5BoxAll_soundIn
     (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
   have hKsound := modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem
   have hlblknown : lbl ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b lbl).mpr
+    (mem_modalKnownWorlds b lbl).mpr
       ⟨(⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
   have hallSat : ∀ x ∈ modalS5BoxAll b φ lbl, sfSat m f x := by
     intro x hx
@@ -2478,7 +2429,7 @@ lemma modalS5DiaNegAll_soundIn
     (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
   have hKsound := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
   have hlblknown : lbl ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b lbl).mpr
+    (mem_modalKnownWorlds b lbl).mpr
       ⟨(⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
   have hallSat : ∀ x ∈ modalS5DiaNegAll b φ lbl, sfSat m f x := by
     intro x hx
@@ -2564,13 +2515,13 @@ theorem modalStepBranchS5Gen_preserves_satIn
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
   have hsflabel_known : sf.label ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+    (mem_modalKnownWorlds b sf.label).mpr ⟨sf, hsfmem, rfl⟩
   rcases hspec sf b acc with heq | ⟨sf', hsf'mem, heq⟩
   swap
   · -- Witness reuse: re-assert a formula already on `b` and record one edge between two
     -- already-known worlds. The model is unchanged; `f` is not extended.
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
-      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+      (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
     rw [heq] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     obtain ⟨rfl, -, rfl⟩ := hsf
@@ -3411,7 +3362,7 @@ lemma modalFiveBoxAll_soundIn
     (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
   have hKsound := modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem
   have hlblknown : lbl ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b lbl).mpr
+    (mem_modalKnownWorlds b lbl).mpr
       ⟨(⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
   have hboxsat : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
   simp only [Satisfies] at hboxsat
@@ -3466,7 +3417,7 @@ lemma modalFiveDiaNegAll_soundIn
     (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
   have hKsound := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
   have hlblknown : lbl ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b lbl).mpr
+    (mem_modalKnownWorlds b lbl).mpr
       ⟨(⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
   have hdiasat : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
   simp only [Satisfies] at hdiasat
@@ -3551,7 +3502,7 @@ lemma modalKb5BoxAllUniv_soundIn
     (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
   have hKsound := modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem
   have hlblknown : lbl ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b lbl).mpr
+    (mem_modalKnownWorlds b lbl).mpr
       ⟨(⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
   have hboxsat : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
   simp only [Satisfies] at hboxsat
@@ -3619,7 +3570,7 @@ lemma modalKb5DiaNegAllUniv_soundIn
     (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
   have hKsound := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
   have hlblknown : lbl ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b lbl).mpr
+    (mem_modalKnownWorlds b lbl).mpr
       ⟨(⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
   have hdiasat : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
   simp only [Satisfies] at hdiasat
@@ -3700,7 +3651,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
   simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds_FS b sf.label).mpr
+  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds b sf.label).mpr
     ⟨sf, hsfmem, rfl⟩
   rcases modalApplyOneKb5''_agree_or_reuse sf b acc with heq | ⟨sf', hsf'mem, heq⟩
   swap
@@ -3715,7 +3666,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
     refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
     intro w hw
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
-      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+      (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
     have hknown' : ∀ x ∈ [sf'], x.label ∈ modalKnownWorlds b := by
       intro x hx
       simp only [List.mem_singleton] at hx
@@ -3766,7 +3717,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
       refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
       intro w hw
-      rw [mem_modalKnownWorlds_FS] at hw
+      rw [mem_modalKnownWorlds] at hw
       obtain ⟨sf', hsf', rfl⟩ := hw
       rcases List.mem_append.mp hsf' with hnew | hold
       · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
@@ -3774,7 +3725,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
         exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _ (hInv sf.label
           hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
       · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) _ _
-          (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
+          (hInv sf'.label ((mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hold, rfl⟩))
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hsf; simp at hsf
@@ -3817,14 +3768,14 @@ theorem modalStepBranchFive_preserves_satIn
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
   have hsflabel_known : sf.label ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+    (mem_modalKnownWorlds b sf.label).mpr ⟨sf, hsfmem, rfl⟩
   rcases modalApplyOneFive_agree_or_reuse_ne_root sf b acc with
     heq | ⟨sf', hsf'mem, hsflabelne, hsf'labelne, heq⟩
   swap
   · -- Witness reuse away from the root: re-assert a formula already on `b` and record one edge
     -- between two already-known, non-root worlds. The model is unchanged; `f` is not extended.
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
-      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+      (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
     rw [heq] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     obtain ⟨rfl, -, rfl⟩ := hsf
@@ -4560,14 +4511,14 @@ theorem modalStepBranchKb5''_preserves_satIn
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
   have hsflabel_known : sf.label ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_FS b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+    (mem_modalKnownWorlds b sf.label).mpr ⟨sf, hsfmem, rfl⟩
   rcases modalApplyOneKb5''_agree_or_reuse_ne_root sf b acc with
     heq | ⟨sf', hsf'mem, hsflabelne, hsf'labelne, heq⟩
   swap
   · -- Witness reuse away from the root: re-assert a formula already on `b` and record one edge
     -- between two already-known, non-root worlds. The model is unchanged; `f` is not extended.
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
-      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+      (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
     rw [heq] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     obtain ⟨rfl, -, rfl⟩ := hsf
@@ -5287,7 +5238,7 @@ theorem modalTableauKb5''_sound (φ : Proposition Atom) (h : modalTableauKb5'' �
         exact ⟨fun h => by simp at h, fun _ => hnotsat⟩⟩
   have h0 : (0 : WorldIndex) ∈ modalKnownWorlds
       [(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] :=
-    (mem_modalKnownWorlds_FS _ 0).mpr
+    (mem_modalKnownWorlds _ 0).mpr
       ⟨(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex), List.mem_cons_self, rfl⟩
   have hInv0 : Kb5''SoundInv
       [(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] Accessibility.empty :=

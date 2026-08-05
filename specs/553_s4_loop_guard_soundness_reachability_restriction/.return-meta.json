@@ -1,54 +1,34 @@
 {
-  "status": "implemented",
-  "started_at": "2026-08-05T20:58:18Z",
-  "completed_at": "2026-08-05T21:45:00Z",
-  "artifacts": [
-    {
-      "path": "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-      "type": "lean_source",
-      "summary": "Phase 7.3: S4RedirectSoundInv_diaPos_blocked. Phase 7.4: filterMap_any_guard_isEmpty_growth, modalTSelf_isEmpty_growth, modalApplyOneS4Rules_boxPos_notApplicable_growth, modalApplyOneS4Rules_diaNeg_notApplicable_growth, modalApplyOne_fst_eq_of_not_box_diamond, modalApplyOneS4Keyed_notApplicable_growth. Phase 8: S4RedirectSoundInv_not_isModalClosed. All sorry-free, all additive."
-    },
-    {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
-      "type": "plan",
-      "summary": "Phases 7.3, 7.4, 8 marked [COMPLETED] with Verdict subsections and inline task-checklist updates; dependency-wave note updated (wave 8 closed, wave 9 now live)."
-    },
-    {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave8-handoff-20260805.md",
-      "type": "handoff",
-      "summary": "Continuation handoff for the next dispatch (wave 9: Phases 7.5-7.7)."
-    },
-    {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff for this dispatch, superseding the prior (pre-plan-08) stale handoff."
-    }
-  ],
+  "status": "partial",
+  "started_at": "2026-08-05T21:32:18Z",
+  "requires_user_review": false,
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-handoff-20260805.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+  ],
+  "artifacts": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-handoff-20260805.md"
   ],
   "partial_progress": {
-    "stage": "wave_8_complete",
-    "details": "Phases 7.3, 7.4 (kill gate, PASSED outcome i), and 8 all landed sorry-free and committed. Wave 9 (7.5-7.7) is now unblocked but out of this dispatch's assigned scope.",
+    "stage": "phase_7.6_in_progress",
+    "details": "Phase 7.5 (propositional/non-mint arm) landed sorry-free and committed -- COMPLETE. Phase 7.6 (mint-unblocked arms + P3): P3 proven (genuinely load-bearing, contrary to plan's 'expected free' framing) plus acc-independence helpers landed and committed; the two mint-arm theorems themselves not yet written -- their full design is recorded in the plan file's Phase 7.6 Progress Record. Phase 7.7 not started.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 11,
-    "last_completed_phase": "Phase 8: Terminal payoff -- closed-branch contradiction under the weakened predicate"
+    "phases_completed": 1,
+    "last_completed_phase": "Phase 7.5: Propositional / non-mint arm restated against S4RedirectSoundInv"
   },
   "verification": {
     "verification_passed": true,
     "sorry_count": 1,
-    "sorry_count_note": "The single standing sorry at FrameSoundness.lean:1251 (branchSatisfiableIn_s4FC_ancestor_redirect), retained by explicit user decision per the plan's Non-Goals. Zero new sorries introduced.",
+    "sorry_count_note": "The single standing sorry at FrameSoundness.lean:1251 (branchSatisfiableIn_s4FC_ancestor_redirect), retained by explicit user decision per the plan's Non-Goals -- not introduced or touched this dispatch. Zero new sorries.",
     "vacuous_count": 0,
     "axiom_count_new": 0,
-    "axiom_check": "Every new declaration's #print axioms (via lake env lean) is a subset of {propext, Classical.choice, Quot.sound}; no new axioms introduced.",
+    "axiom_count_note": "All new declarations verified via lake env lean #print axioms: exactly a subset of {propext, Classical.choice, Quot.sound}. No new axiom declarations.",
     "build_passed": true,
-    "scoped_build": "lake build Cslib.Logics.Modal.Tableau.FrameCompleteness green at every sub-step; downstream consumer CslibTests.ModalFrameSeparation also verified green.",
-    "lint_style_passed": true,
-    "check_init_imports_passed": true,
-    "ci_pipeline_passed": null,
-    "ci_pipeline_note": "Full CSLib CI pipeline (lake lint, lake test, lake shake, mk_all) is Phase 10's responsibility per the plan; not run this dispatch, consistent with each phase's own declared Verification Tier (local for 7.3/7.4/8)."
+    "ci_pipeline_passed": "partial: scoped build, checkInitImports, lint-style all clean at every commit; downstream consumer CslibTests/ModalFrameSeparation.lean builds green; full lake lint/lake test/lake shake/mk_all not run this dispatch (status is partial, not implemented, per agent contract's CI-pipeline requirement being scoped to implemented-status returns)"
   },
   "metadata": {
     "session_id": "sess_1785963390_67974b",
@@ -56,6 +36,6 @@
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed",
-    "dispatch_scope": "wave 8 only (Phases 7.3, 7.4, 8), per delegation instructions; wave 9 (7.5-7.7) intentionally not attempted"
+    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-handoff-20260805.md"
   }
 }

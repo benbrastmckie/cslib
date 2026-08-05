@@ -1,30 +1,30 @@
 {
-  "status": "implemented",
+  "status": "partial",
   "task_number": 553,
   "session_id": "sess_1785963390_67974b",
-  "timestamp": "2026-08-05T21:45:00Z",
-  "summary": "Wave 8 of plan 08 (Phases 7.3, 7.4, 8) landed sorry-free and committed. Phase 7.3 (S4RedirectSoundInv_diaPos_blocked, the diamond-positive mint-blocked mirror) closed with no box/diamond asymmetry -- 118 lines. Phase 7.4 -- the plan's single kill gate -- returned outcome (i), a clean PASS: the branch-growth antitone lemma family (six declarations: filterMap_any_guard_isEmpty_growth, modalTSelf_isEmpty_growth, modalApplyOneS4Rules_boxPos_notApplicable_growth, modalApplyOneS4Rules_diaNeg_notApplicable_growth, modalApplyOne_fst_eq_of_not_box_diamond, modalApplyOneS4Keyed_notApplicable_growth) formalizes P2, with the edge-growth half fully covered by existing Phase 7.2 lemmas -- no new code needed there, confirmed by inspection. Phase 8 (terminal payoff, S4RedirectSoundInv_not_isModalClosed) closed via a vacuous-edge-witness reuse of modalClosed_unsat at Accessibility.empty. Sorry census held at exactly 1 (FrameSoundness.lean:1251) throughout; #print axioms exactly {propext, Classical.choice, Quot.sound} on every new declaration (checked via lake env lean, not lean_verify); scoped build, lint-style, and checkInitImports all clean at every checkpoint; every phase's diff purely additive to FrameCompleteness.lean (confirmed via git diff --stat and git diff | grep '^-[^-]'); the sole downstream consumer CslibTests/ModalFrameSeparation.lean still builds green. Wave 9 (Phases 7.5-7.7) is now unblocked by Phase 7.4's PASS but was out of this dispatch's assigned scope (wave 8 only, per delegation instructions) and was not attempted.",
+  "timestamp": "2026-08-05T23:15:00Z",
+  "summary": "Wave 9 of plan 08 (Phases 7.5, 7.6, 7.7) partially landed. Phase 7.5 (propositional/non-mint arm restated against S4RedirectSoundInv) CLOSED sorry-free and committed: outDeg_ne_zero_of_hasEdge, tryAllPropRules_output_label_eq, and S4RedirectSoundInv_notBoxDia_step, the last stated existentially over the produced nf to cover .linear/.branching/.persistent uniformly since propositional rules do branch (andNeg/orPos/impPos). Phase 7.6 (mint-unblocked arms + P3) is IN PROGRESS, not closed: P3 (\"mint seed covers the 4-payload\") was tested directly and found TRUE and genuinely load-bearing (contrary to the plan's \"expected free\" framing) -- landed as modalApplyOneS4Rules_{boxPos,diaNeg}_layers_eq_nil_of_saturated, extracting individual per-layer (K/T/4-rule) emptiness from modalS4Saturated rather than only the packaged .fst=.notApplicable conclusion. Also landed the acc-independence helpers (boxPropagation_addEdge_of_ne, modalFourBoxProp_addEdge_of_ne, modalFourDiaNegProp_addEdge_of_ne, modalApplyOneS4Rules_{boxPos,diaNeg}_fst_addEdge_of_ne) covering conjunct (d)'s 'other-world' case for the mint arms. The two mint-arm theorems themselves (S4RedirectSoundInv_boxNeg_mint / _diaPos_mint) are NOT yet written; their full six-item design (same-world P3-consuming case, propositional case, outDeg-freshness fact, weakened conjunct-(b) edge clause re-derivation, conjuncts a/c, diamond-positive mirror) is recorded in the plan file's Phase 7.6 Progress Record and in the wave-9 handoff. Phase 7.7 is entirely untouched. Sorry census held at exactly 1 (FrameSoundness.lean:1251) throughout; #print axioms exactly {propext, Classical.choice, Quot.sound} on every new declaration (via lake env lean, not lean_verify); scoped build, lint-style, and checkInitImports all clean at every checkpoint; every commit's diff purely additive to FrameCompleteness.lean; the downstream consumer CslibTests/ModalFrameSeparation.lean still builds green. This dispatch stopped at a clean sub-phase boundary rather than rush the remaining assembly plus Phase 7.7 -- per this task's standing discipline, never commit a sorry and never rush an unverified proof.",
   "blockers": [],
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
       "type": "lean_source",
-      "summary": "Added S4RedirectSoundInv_diaPos_blocked (Phase 7.3); the antitone-applicability lemma family of six declarations (Phase 7.4); and S4RedirectSoundInv_not_isModalClosed (Phase 8). All sorry-free, all additive, no existing declaration touched."
+      "summary": "Added S4RedirectSoundInv_notBoxDia_step and its two supporting lemmas (Phase 7.5, complete); the P3 layers lemmas and the acc-independence helper family (Phase 7.6, partial -- the two mint-arm theorems themselves not yet written). All sorry-free, all additive, no existing declaration touched."
     },
     {
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
       "type": "plan",
-      "summary": "Phases 7.3, 7.4, 8 marked [COMPLETED] with Verdict subsections; task checklists updated inline; dependency-wave note updated to reflect wave 8 closed and wave 9 now the live frontier."
+      "summary": "Phase 7.5 marked [COMPLETED] with a Verdict subsection. Phase 7.6 marked [IN PROGRESS] with a detailed Progress Record subsection recording P3's landed status and the full six-item design for the remaining mint-arm assembly, so the next dispatch does not re-derive the analysis."
     },
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave8-handoff-20260805.md",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-handoff-20260805.md",
       "type": "handoff",
-      "summary": "Continuation handoff documenting wave 8's landed content, verification performed, and the wave 9 next-step (dispatch Phases 7.5, 7.6, 7.7)."
+      "summary": "Continuation handoff documenting wave 9's landed content, the exact remaining Phase 7.6 design, verification performed, and the next-step ordering (finish 7.6's two mint arms, then dispatch 7.7 independently -- both block 7.8)."
     }
   ],
-  "phases_completed": 11,
+  "phases_completed": 12,
   "phases_total": 17,
   "orchestrator_mode": true,
   "plan_markers_verified": true,
-  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave8-handoff-20260805.md"
+  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-handoff-20260805.md"
 }

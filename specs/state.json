@@ -1445,7 +1445,7 @@
     {
       "project_number": 562,
       "project_name": "tableau_ruleapplyst_additive_introduction",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Introduce RuleApplySt additively and bridge modalExpandBranchesGen",
       "topic": "Modal Logic",
@@ -1460,11 +1460,16 @@
           "path": "specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md",
           "type": "report",
           "summary": "Consumer audit of Saturation.lean (mandatory gate, complete); verified RuleApplySt/St-ladder design with full CI gate green"
+        },
+        {
+          "path": "specs/562_tableau_ruleapplyst_additive_introduction/plans/01_st-ladder-additive-insertion.md",
+          "type": "plan",
+          "summary": "Additive insertion of the nine verified St-ladder declarations into Saturation.lean"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T11:07:36Z",
+      "last_updated": "2026-08-05T11:12:14Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785926778_90c7a6_562",
       "parent_task": null

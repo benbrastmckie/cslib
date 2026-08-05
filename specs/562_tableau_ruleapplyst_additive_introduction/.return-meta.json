@@ -1,7 +1,7 @@
 {
-  "status": "researched",
+  "status": "planned",
   "started_at": "2026-08-05T03:47:54-07:00",
-  "completed_at": "2026-08-05T04:32:00-07:00",
+  "completed_at": "2026-08-05T11:30:00-07:00",
   "artifacts": [
     {
       "type": "report",
@@ -17,11 +17,16 @@
       "type": "lean_source",
       "path": "specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st_probe.lean",
       "summary": "Standalone-module variant showing the separate-module form of the fuel = 0 case plus #print axioms checks"
+    },
+    {
+      "type": "plan",
+      "path": "specs/562_tableau_ruleapplyst_additive_introduction/plans/01_st-ladder-additive-insertion.md",
+      "summary": "Three-phase additive-insertion plan: verbatim paste of the nine verified declarations (atomic-batch, full tier), docstring expansion to Saturation.lean depth (local tier), full CI gate against measured baselines (full tier)"
     }
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Consumer audit complete; design verified end-to-end; report, handoff and metadata written"
+    "details": "Plan written, handoff and metadata updated"
   },
   "verification": {
     "consumer_audit_complete": true,
@@ -43,10 +48,52 @@
   },
   "metadata": {
     "session_id": "sess_1785926778_90c7a6_562",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "search_tools_used": ["lean_loogle", "lean_local_search"],
+    "delegation_path": [
+      "orchestrator",
+      "plan",
+      "planner-agent"
+    ],
+    "search_tools_used": [
+      "lean_loogle",
+      "lean_local_search"
+    ],
     "search_failures": []
-  }
+  },
+  "plan_metadata": {
+    "phases": 3,
+    "total_effort_hours": 2,
+    "complexity": "simple",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ]
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
+  },
+  "phase_count": 3,
+  "estimated_hours": 2,
+  "dependency_waves": [
+    [
+      1
+    ],
+    [
+      2
+    ],
+    [
+      3
+    ]
+  ],
+  "memory_candidates": [],
+  "next_steps": "Run /implement 562 to execute the plan"
 }

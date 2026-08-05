@@ -1836,6 +1836,127 @@ lemma modalApplyOne_diamondPos_mint_snd_S4
   simp only [modalApplyOne]
   rw [if_neg (by simp [htry])]
 
+/-! ## Box-Plus Birth-Key Enrichment: Additive Definitions (no behaviour change yet)
+
+The four definitions and two shape lemmas below are unreferenced by any existing declaration in
+this file -- purely additive groundwork for enriching `successorBirthContent` with box-plus
+members (report §5). `lake build` stays green by construction: nothing existing
+changes shape or behaviour until a later landing switches `modalApplyOneS4Keyed`'s two
+`| none => modalApplyOne sf b acc` fallthroughs to consume `modalApplyOneS4KeyedMint` below. -/
+
+/-- The box-plus partner of a signed pair: `(pos, ψ) ↦ (pos, □ψ)`, `(neg, ψ) ↦ (neg, ◇ψ)`. The
+**existing** `successorBirthContent` filter is already exactly "`boxPlusPair p` instantiated at
+`w` is on `b`" -- this definition names that relationship. The box-plus enrichment of
+`successorBirthContent` additionally records `p` itself whenever `p` is already a box-plus
+IMAGE present on the branch (i.e. whenever `boxPlusPair`'s own output, instantiated at `w`, is
+on `b` -- the case `p` itself is `.box _`/`.diamond _`-shaped). -/
+def boxPlusPair (p : Sign × Proposition Atom) : Sign × Proposition Atom :=
+  match p.1 with
+  | .pos => (.pos, .box p.2)
+  | .neg => (.neg, .diamond p.2)
+
+/-- The additive box-plus mint extra: the BOXED members `T(□ψ)@w'`/`F(◇ψ)@w'` for every
+`T(□ψ)@w`/`F(◇ψ)@w` on the branch, retargeted to the freshly-minted successor
+`w' = modalNextWorld b` -- alongside (never in place of) the UNWRAPPED members `modalApplyOne`'s
+own payload already transmits. The two halves mirror `modalApplyOne`'s own `boxProps`/
+`diaNegProps` halves verbatim, boxing the transmitted formula instead of leaving it unwrapped.
+Keeps the same per-formula dedup guard (`if b.any (· == sf') then none else some sf'`) as
+`modalApplyOne`'s own halves -- the freshness half of `modalApplyOneS4Keyed_persistentFresh_S4`
+and the measure argument both key off this guard. -/
+def boxPlusExtraS4 (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  let w' := modalNextWorld b
+  (boxPositivesOf b).filterMap (fun (ψ, src) =>
+    if src == w then
+      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, .box ψ, w'⟩
+      if b.any (· == sf') then none else some sf'
+    else none) ++
+  b.filterMap (fun sf' =>
+    if sf'.sign == .neg && sf'.label == w then
+      match sf'.formula with
+      | .diamond ψ =>
+        let pr : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, .diamond ψ, w'⟩
+        if b.any (· == pr) then none else some pr
+      | _ => none
+    else none)
+
+/-- The additive boxed mint rule: `modalApplyOne`'s own result, with `boxPlusExtraS4` appended
+to the payload whenever the result is `.linear` (the shape both minting arms of `modalApplyOne`
+actually produce at the two shapes this is ever called at). The accessibility component is
+preserved VERBATIM from `modalApplyOne`'s own result. A later landing switches
+`modalApplyOneS4Keyed`'s two `| none => modalApplyOne sf b acc` fallthroughs to this definition
+instead, never editing `Rules.lean` (shared by the K/T/B/S5 drivers and `FmpMeasure.lean`'s
+`_gen` lemmas, where boxed transmission is not K-sound). -/
+def modalApplyOneS4KeyedMint
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
+  let result := modalApplyOne sf b acc
+  match result.1 with
+  | .linear forms => (.linear (forms ++ boxPlusExtraS4 b sf.label), result.2)
+  | other => (other, result.2)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4KeyedMint`'s box-negative minting shape, unfolded directly to the full
+result pair: `modalApplyOne`'s own payload (`modalApplyOne_boxNeg_mint_fst_S4`) with
+`boxPlusExtraS4` appended, and the accessibility component unchanged from `modalApplyOne`'s own
+edge (`modalApplyOne_boxNeg_mint_snd_S4`). Drop-in replacement shape for
+`modalApplyOne_boxNeg_mint_fst_S4`, extended to the full pair since callers need both
+components. -/
+lemma modalApplyOneS4KeyedMint_boxNeg_eq_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    modalApplyOneS4KeyedMint (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc
+      = (RuleResult.linear (((⟨.neg, φ, modalNextWorld b⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ::
+          (boxPositivesOf b).filterMap (fun (ψ, src) =>
+            if src == w then
+              let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+                ⟨.pos, ψ, modalNextWorld b⟩
+              if b.any (· == sf') then none else some sf'
+            else none) ++
+          b.filterMap (fun sf' =>
+            if sf'.sign == .neg && sf'.label == w then
+              match sf'.formula with
+              | .diamond ψ =>
+                let prop : SignedFormula (Proposition Atom) WorldIndex :=
+                  ⟨.neg, ψ, modalNextWorld b⟩
+                if b.any (· == prop) then none else some prop
+              | _ => none
+            else none)) ++ boxPlusExtraS4 b w),
+        acc.addEdge w (modalNextWorld b)) := by
+  simp only [modalApplyOneS4KeyedMint, modalApplyOne_boxNeg_mint_fst_S4,
+    modalApplyOne_boxNeg_mint_snd_S4]
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4KeyedMint_boxNeg_eq_S4`, diamond-positive shape. -/
+lemma modalApplyOneS4KeyedMint_diaPos_eq_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    modalApplyOneS4KeyedMint (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc
+      = (RuleResult.linear (((⟨.pos, φ, modalNextWorld b⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ::
+          (boxPositivesOf b).filterMap (fun (ψ, src) =>
+            if src == w then
+              let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+                ⟨.pos, ψ, modalNextWorld b⟩
+              if b.any (· == sf') then none else some sf'
+            else none) ++
+          b.filterMap (fun sf' =>
+            if sf'.sign == .neg && sf'.label == w then
+              match sf'.formula with
+              | .diamond ψ =>
+                let prop : SignedFormula (Proposition Atom) WorldIndex :=
+                  ⟨.neg, ψ, modalNextWorld b⟩
+                if b.any (· == prop) then none else some prop
+              | _ => none
+            else none)) ++ boxPlusExtraS4 b w),
+        acc.addEdge w (modalNextWorld b)) := by
+  simp only [modalApplyOneS4KeyedMint, modalApplyOne_diamondPos_mint_fst_S4,
+    modalApplyOne_diamondPos_mint_snd_S4]
+
 /-! ## Minting-Content Universe-Membership (groundwork for `bClosure`)
 
 S4-local restatements of `FmpMeasure.lean`'s file-private subformula-closure facts for the

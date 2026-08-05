@@ -1,7 +1,7 @@
 # Implementation Plan: Box-Plus Birth Keys for the Keyed S4 Loop Guard
 
 - **Task**: 563 - Adopt Lemmon box-plus pairing at the birth-key level
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 10.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md`
@@ -137,28 +137,30 @@ convenience.
 
 ---
 
-### Phase 1: Additive Definitions, No Behaviour Change [NOT STARTED]
+### Phase 1: Additive Definitions, No Behaviour Change [COMPLETED]
 
 **Goal**: Land `boxPlusPair`, `boxPlusExtraS4`, `modalApplyOneS4KeyedMint` and its two
 unblocked-shape lemmas, all unreferenced by any existing declaration. Build stays green by
 construction because nothing existing changes.
 
 **Tasks**:
-- [ ] Add `def boxPlusPair (p : Sign × Proposition Atom) : Sign × Proposition Atom` —
+- [x] Add `def boxPlusPair (p : Sign × Proposition Atom) : Sign × Proposition Atom` —
       `(pos, ψ) ↦ (pos, □ψ)`, `(neg, ψ) ↦ (neg, ◇ψ)` — per report §5.1, with a docstring noting
       that the *existing* `successorBirthContent` filter is already exactly
       "`boxPlusPair p` instantiated at `w` is on `b`".
-- [ ] Add `def boxPlusExtraS4 (b) (w : WorldIndex) : List (SignedFormula ...)` per report §5.3:
+- [x] Add `def boxPlusExtraS4 (b) (w : WorldIndex) : List (SignedFormula ...)` per report §5.3:
       boxed positives from `boxPositivesOf b` filtered to source `w`, plus diamond-negatives at
       `w`, each retargeted to `modalNextWorld b`.
-- [ ] Retain the per-formula dedup guard `if b.any (· == sf') then none else some sf'` in both
+- [x] Retain the per-formula dedup guard `if b.any (· == sf') then none else some sf'` in both
       halves — the freshness half of `modalApplyOneS4Keyed_persistentFresh_S4` and the measure
       argument both key off it.
-- [ ] Add `def modalApplyOneS4KeyedMint` emitting `modalApplyOne sf b acc`'s own payload
+- [x] Add `def modalApplyOneS4KeyedMint` emitting `modalApplyOne sf b acc`'s own payload
       `++ boxPlusExtraS4 b sf.label`, preserving the accessibility component verbatim.
-- [ ] Add the two unblocked-shape lemmas for `modalApplyOneS4KeyedMint`, shaped as drop-in
-      replacements for `modalApplyOne_boxNeg_mint_fst_S4` and its diamond dual.
-- [ ] Do NOT reference any of the above from existing code yet.
+- [x] Add the two unblocked-shape lemmas for `modalApplyOneS4KeyedMint`, shaped as drop-in
+      replacements for `modalApplyOne_boxNeg_mint_fst_S4` and its diamond dual
+      *(altered: emits the full result pair, not just `.fst`, since Class A/B callers in
+      later phases need both components)*.
+- [x] Do NOT reference any of the above from existing code yet.
 
 **Timing**: 1.5 hours
 

@@ -1,134 +1,80 @@
 {
   "task_number": 558,
   "session_id": "sess_1785908335_1f3c58",
-  "agent_type": "planner-agent",
+  "agent_type": "cslib-implementation-agent",
   "orchestrator_mode": true,
-  "phase": "plan",
-  "status": "planned",
-  "next_phase": "implement",
-  "next_action": "Widen state.json file_scope to the 15-entry list in file_scope_correction.required_file_scope, THEN dispatch /implement 558. Implementation is blocked until file_scope is widened.",
+  "status": "implemented",
+  "phases_completed": 11,
   "phases_total": 11,
-  "phases_completed": 0,
+  "phase_status": {
+    "1": {"status": "COMPLETED", "scope_hypothesis_held": false, "measured": "74 duplicates / 43 families at Phase 1 close (later corrected to 71/41 after census-script fixes)", "expected": "72 duplicates / 41 families"},
+    "2": {"status": "COMPLETED", "scope_hypothesis_held": true, "notes": "Additive, created Support/Accessibility.lean"},
+    "3": {"status": "COMPLETED", "scope_hypothesis_held": false, "measured": "11 declarations deleted (incl. a 4th mem_successorsOf_hasEdge copy not named in the plan, trailing-prime naming)", "expected": "~10 duplicates"},
+    "4": {"status": "COMPLETED", "scope_hypothesis_held": false, "notes": "modalMaxWorld_le_of_forall_label_le's true origin uses all-explicit binders, opposite of what the plan asked to publish; built from the two Five/S5w copies instead"},
+    "5": {"status": "COMPLETED", "scope_hypothesis_held": false, "notes": "Forced cross-phase collision resolution consolidated 4 more facts (modalKnownWorlds_nodup, modalKnownWorlds_mono_append, mem_boxPositivesOf in FmpMeasure; modalMaxWorld_le_of_forall_label_le in LoopChecking) ahead of their nominal Phase 6/7 scope"},
+    "6": {"status": "COMPLETED", "scope_hypothesis_held": false, "notes": "All anticipated arity/binder-mode call-site rewrites turned out unnecessary -- exact/apply unify both forms via defeq"},
+    "7": {"status": "COMPLETED", "scope_hypothesis_held": false, "measured": "43 privates at phase start (not 50, since Phase 5 already consolidated 7), 16 de-privatized (not ~14)"},
+    "8": {"status": "COMPLETED", "scope_hypothesis_held": false, "notes": "Caught and reverted a false positive: boxProps_outputs_subset_S4/diaNegProps_outputs_subset_S4 are genuinely distinct S4-specific facts, not duplicates -- caught by build-time type error"},
+    "9": {"status": "COMPLETED", "scope_hypothesis_held": false, "notes": "Only BDriver.lean and FiveSimplification.lean had remaining Tier-2 duplicates (6, not the plan's implied ~23 remainder); FrameSoundness.lean and FrameCompleteness.lean had zero"},
+    "10": {"status": "COMPLETED WITH EXCLUSIONS", "scope_hypothesis_held": false, "measured": "20 residue families at phase start (not ~16); 6 resolved as class (a), 14 classified as Reasoned Exclusions"},
+    "11": {"status": "COMPLETED", "scope_hypothesis_held": true, "notes": "Comment sweep found 2 additional duplicate declarations (known_label_le_modalMaxWorld_Five/S5w) never caught by any census version; resolved"}
+  },
+  "sorry_census": {
+    "modal_tableau_count": 1,
+    "declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
+    "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "declaration_line": 1227,
+    "sorry_token_line": 1251,
+    "confirmed_unchanged_from_baseline": true
+  },
+  "axiom_count_modal_tableau": 0,
+  "build_status": {
+    "lake_build_cslib": "success",
+    "jobs": 3313,
+    "baseline_jobs": 3311
+  },
+  "shake_status": {
+    "modal_tableau_findings": 0,
+    "total_findings": 9,
+    "baseline_total_findings": 9,
+    "exit_code": 1,
+    "note": "exit 1 with 9 findings is the documented baseline, not a regression; none of the 9 are in Modal/Tableau"
+  },
+  "checkInitImports_exit": 0,
+  "lint_style_exit": 0,
+  "lake_test_status": "passed",
+  "final_census": {
+    "duplicate_declarations": 14,
+    "families": 14,
+    "all_documented_as_reasoned_exclusions": true
+  },
+  "do_not_edit_files_confirmed_unmodified": [
+    "Cslib/Logics/Modal/Tableau/Rules.lean",
+    "Cslib/Logics/Modal/Tableau/Saturation.lean",
+    "Cslib/Logics/Modal/Tableau/Branch.lean"
+  ],
+  "continuation_pointer": {
+    "next_action": "none -- all 11 phases complete, task ready for PR/completion workflow",
+    "follow_up_tasks_recommended": [
+      "8 genuinely public-origin duplicate families need a separate judgement call on unification vs genuine specialization (hintikka_congr, modalApplyOne_fresh, modalExpMeasure_step_lt, modalSubfmls_self_mem, modalApplyOneS5_fresh_local, and related)",
+      "5 confirmed-unreachable duplicate families are privacy-caused and resolvable but need new architectural work out of this task's scope (accFreshInv_append, hasEdge_addEdge_mono, modalApplyOne_boxPos_acc_eq, modalApplyOne_diamondNeg_acc_eq, not_shape_of_not_or)"
+    ]
+  },
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md",
-      "summary": "11-phase plan: two Support modules plus in-place de-privatization, graded deletion batches, each phase ending at a green lake build"
-    }
-  ],
-  "modified_files": [
-    "specs/558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md",
-    "specs/558_tableau_support_private_dedup/.orchestrator-handoff.json",
-    "specs/558_tableau_support_private_dedup/.return-meta.json"
-  ],
-  "blockers": [
-    {
-      "type": "state_precondition",
-      "description": "state.json file_scope for this task lists only 5 entries and omits all six files where the 72 duplicates are deleted, plus Cslib.lean and the two new Support modules. Nine files missing.",
-      "resolution": "Replace file_scope with file_scope_correction.required_file_scope below. None of the additions collide with the do-not-edit list (Rules.lean, Saturation.lean, Branch.lean).",
-      "blocking": true
-    }
-  ],
-  "file_scope_correction": {
-    "current_entry_count": 5,
-    "required_entry_count": 15,
-    "missing_count": 9,
-    "collides_with_do_not_edit": false,
-    "required_file_scope": [
-      "Cslib.lean",
-      "Cslib/Logics/Modal/Tableau/Support/Accessibility.lean",
-      "Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean",
-      "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
-      "Cslib/Logics/Modal/Tableau/Soundness.lean",
-      "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
-      "Cslib/Logics/Modal/Tableau/Completeness.lean",
-      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
-      "Cslib/Logics/Modal/Tableau/TDriver.lean",
-      "Cslib/Logics/Modal/Tableau/BDriver.lean",
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
-      "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
-      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
-    ],
-    "new_files": [
-      "Cslib/Logics/Modal/Tableau/Support/Accessibility.lean",
-      "Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean"
-    ]
-  },
-  "plan_metadata": {
-    "phases": 11,
-    "total_effort_hours": 14,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_tableau-support-private-dedup.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-08-04"
-      }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
-  },
-  "phase_summary": [
-    { "phase": 1,  "name": "Free deletions - dead code with zero call sites", "tier": "local", "depends_on": [] },
-    { "phase": 2,  "name": "Create Support/Accessibility.lean", "tier": "full", "depends_on": [1] },
-    { "phase": 3,  "name": "Migrate Accessibility consumers - delete ~10 duplicates", "tier": "full", "depends_on": [2] },
-    { "phase": 4,  "name": "Create Support/KnownWorlds.lean (publishes mem_modalKnownWorlds FIRST)", "tier": "full", "depends_on": [3] },
-    { "phase": 5,  "name": "Migrate mem_modalKnownWorlds; six weak fold_spec copies die as dead code", "tier": "full", "depends_on": [4] },
-    { "phase": 6,  "name": "Migrate judgment-needing KnownWorlds families (mono_append arity, modalMaxWorld binders)", "tier": "full", "depends_on": [5] },
-    { "phase": 7,  "name": "De-privatize Tier-2 facts in place in FmpMeasure.lean", "tier": "full", "depends_on": [6] },
-    { "phase": 8,  "name": "Delete Tier-2 duplicates - LoopChecking + S5Simplification", "tier": "full", "depends_on": [7] },
-    { "phase": 9,  "name": "Delete Tier-2 duplicates - FiveSimplification, BDriver, FrameSoundness, FrameCompleteness", "tier": "full", "depends_on": [8] },
-    { "phase": 10, "name": "Tier-3 triage and residue accounting (expected COMPLETED WITH EXCLUSIONS)", "tier": "full", "depends_on": [9] },
-    { "phase": 11, "name": "Final census, comment cleanup, and full gate", "tier": "full", "depends_on": [10] }
-  ],
-  "encoded_corrections": {
-    "false_premise_not_restated": "The task description's claim that this work is 'mechanical and behaviour-preserving by construction, requires no abstraction decision' is contradicted in the plan Overview and repeated nowhere.",
-    "nodup_hazard_resolution": "Encoded as the phase dependency 4 -> 5, not as a note. Publishing mem_modalKnownWorlds first strands all six weak modalKnownWorlds_fold_spec_* copies with zero call sites; they are then deleted outright with no Nodup obligation and no call-site edits.",
-    "binder_conflict_resolution": "26 of 30 modalMaxWorld call sites use apply and are binder-mode insensitive. The 4 term-mode sites are named individually in Phase 6 (FmpMeasure ~1884, S5Simplification ~1167, FiveSimplification ~3328, LoopChecking ~6201) and are not assumed to be a clean sweep.",
-    "census_basis": "Every deletion phase drives off a declaration-level suffix-family census, never the 'Local re-derivation' comment string. 17 duplicates carry no such comment; the comments are also unreliable in the other direction, falsely flagging byte-identical mem_modalUniverse_of.",
-    "partition": "Two Support modules, not three. Support/Subfmls.lean explicitly dropped as a Non-Goal, since modalSubfmls/modalUniverse are defined in FmpMeasure itself and such a module would sit above it. Those 23 duplicates get in-place de-privatization (Phases 7-9). The 16 Tier-3 duplicates originating above FmpMeasure are accounted for in Phase 10, not left unmentioned.",
-    "justification_is_reachability": "Recorded in both new modules' docstrings (Phase 2 and Phase 4 task lists): FiveSimplification, LoopChecking, and S5Simplification do not reach Soundness.lean, so de-privatization cannot fix hasEdge_addEdge_cases (7 copies). Also recorded that privacy is not the sole root cause - modalSubfmls_self_mem's copy dodges an ambient Hashable Atom instance callers cannot omit, and survives de-privatization (pre-declared Phase 10 exclusion).",
-    "shake_gate": "Post-condition is 'no Modal/Tableau findings AND global count stays at 9', explicitly NOT 'exit 0'. Baseline is exit 1 with 9 pre-existing out-of-scope findings.",
-    "sorry_anchor": "branchSatisfiableIn_s4FC_ancestor_redirect in FrameSoundness.lean, located by declaration NAME. The task description's line 1244 is stale - the declaration moved (~1252, token ~1276). The plan states this and forbids line-number anchoring.",
-    "do_not_edit_rationale": "Zero duplicates live in Rules.lean, Saturation.lean, or Branch.lean. Branch.lean being the natural home for the 33 Tier-1 facts, and being do-not-edit, is exactly what makes a separate Support/ directory correct rather than arbitrary. Recorded in both new modules' docstrings so a later reader does not fold them back into Branch.lean.",
-    "free_wins": "Phase 1 is the zero-risk phase: confirmed zero-call-site declarations (modalKnownWorlds_nodup_S5 and its helper modalKnownWorlds_fold_nodup_S5) plus the LoopChecking intra-file reorder that removes hasEdge_mem_successorsOf_origin.",
-    "phase_sizing": "No phase deletes all 72 duplicates. Deletion is split into six batches (Phases 1, 3, 5, 6, 8, 9) grouped by family and file, each bounded to roughly one agent run and each ending at a green lake build with per-substep commits."
-  },
-  "invariants_per_commit": {
-    "build": "lake build Cslib exits 0 (baseline 3311 jobs)",
-    "check_init_imports": "lake exe checkInitImports exits 0, no output",
-    "lint_style": "lake exe lint-style exits 0, no output",
-    "shake_subsystem": "lake shake --add-public --keep-implied --keep-prefix 2>&1 | grep 'Modal/Tableau' returns EMPTY",
-    "shake_global_count": "9 findings; overall exit 1 is baseline and must NOT be gated on exit 0",
-    "sorry_census": "exactly 1 in Modal/Tableau, belonging to branchSatisfiableIn_s4FC_ancestor_redirect (locate by name)",
-    "axiom_count": 0,
-    "must_stay_green": [
-      "modalTableauS4Keyed_complete",
-      "instDecidableKValid",
-      "instDecidableTValid",
-      "instDecidableBValid",
-      "instDecidableS5Valid",
-      "instDecidableFiveValid",
-      "instDecidableKb5Valid"
-    ],
-    "must_stay_unmodified": [
-      "Cslib/Logics/Modal/Tableau/Rules.lean",
-      "Cslib/Logics/Modal/Tableau/Saturation.lean",
-      "Cslib/Logics/Modal/Tableau/Branch.lean"
-    ]
-  },
-  "open_questions_resolved": {
-    "outDeg_relocation": "DECLINED - recorded as a Non-Goal and a Phase 10 reasoned exclusion. Moving a def is behaviour-relevant; outDeg_addEdge_self/_ne are handled as Tier-2 de-privatization instead.",
-    "mono_append_canonical_form": "RESOLVED - adopt the forall-x-in form, matching all five external call-site populations. The FmpMeasure original is the only subset-form user, with 2 internal sites.",
-    "modalMaxWorld_canonical_form": "RESOLVED - implicit-binder wrapper form with l and M implicit, matching 24 of the 26 apply sites; the foldl helper is published as internal scaffolding.",
-    "public_origin_families": "OUT OF SCOPE - 8 families whose duplication is not caused by privacy. Pre-declared as a Phase 10 reasoned exclusion with a follow-up task recommended. Explicitly NOT silently deleted."
-  },
-  "follow_up_recommended": [
-    "Separate task to adjudicate the 8 public-origin duplicate families (modalApplyOne_fresh, modalSubfmls_self_mem, modalExpMeasure_step_lt, modalApplyOne_diamondPos_outputs_subset, modalApplyOne_boxNeg_outputs_subset, hintikka_congr, modalStepHintikka_preserves_inv, modalApplyOneS5_fresh_local): genuine specialisation vs gratuitous duplication."
+    "Cslib/Logics/Modal/Tableau/Support/Accessibility.lean",
+    "Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean",
+    "specs/558_tableau_support_private_dedup/scripts/census.py",
+    "specs/558_tableau_support_private_dedup/scripts/shake_check.sh",
+    "specs/558_tableau_support_private_dedup/summaries/01_tableau-support-private-dedup-summary.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase1-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase2-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase3-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase4-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase5-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase6-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase7-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase8-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase9-handoff.md",
+    "specs/558_tableau_support_private_dedup/handoffs/phase10-handoff.md"
   ]
 }

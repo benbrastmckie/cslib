@@ -1,38 +1,70 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-08-04T00:00:00Z",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "build_jobs": 3313,
+    "shake_modal_tableau_findings": 0,
+    "shake_total_findings": 9,
+    "sorry_census_modal_tableau_count": 1,
+    "sorry_census_modal_tableau_declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
+    "census_final_duplicates": 14,
+    "census_final_families": 14,
+    "do_not_edit_files_untouched": true,
+    "lake_test_passed": true
+  },
   "artifacts": [
+    {
+      "type": "lean_module",
+      "path": "Cslib/Logics/Modal/Tableau/Support/Accessibility.lean",
+      "summary": "New module: publishes hasEdge_addEdge_cases, mem_successorsOf_hasEdge, hasEdge_mem_successorsOf"
+    },
+    {
+      "type": "lean_module",
+      "path": "Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean",
+      "summary": "New module: publishes mem_modalKnownWorlds, modalKnownWorlds_fold_spec, modalKnownWorlds_nodup, modalKnownWorlds_mono_append, mem_boxPositivesOf, modalMaxWorld_le_of_forall_label_le"
+    },
+    {
+      "type": "script",
+      "path": "specs/558_tableau_support_private_dedup/scripts/census.py",
+      "summary": "Reusable declaration-level duplicate census tool, preserved for future maintenance"
+    },
+    {
+      "type": "script",
+      "path": "specs/558_tableau_support_private_dedup/scripts/shake_check.sh",
+      "summary": "Filters lake shake build-replay noise for reliable Modal/Tableau invariant checks"
+    },
     {
       "type": "plan",
       "path": "specs/558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md",
-      "summary": "11-phase implementation plan: two Support modules plus in-place de-privatization, with graded deletion batches each ending at a green lake build"
+      "summary": "All 11 phases marked [COMPLETED] or [COMPLETED WITH EXCLUSIONS] (Phase 10), with deviations and Reasoned Exclusions documented inline"
     },
     {
-      "type": "handoff",
-      "path": "specs/558_tableau_support_private_dedup/.orchestrator-handoff.json",
-      "summary": "Plan-phase orchestrator handoff carrying the blocking file_scope widening and the encoded orchestrator corrections"
+      "type": "summary",
+      "path": "specs/558_tableau_support_private_dedup/summaries/01_tableau-support-private-dedup-summary.md",
+      "summary": "Full implementation summary with phase-by-phase results, deviations, and follow-up recommendations"
     }
   ],
-  "next_steps": "Widen state.json file_scope to the 15-entry list in the handoff, then run /implement 558 to execute the plan",
+  "partial_progress": {
+    "stage": "all_phases_complete",
+    "phases_completed": 11,
+    "phases_total": 11,
+    "last_completed_phase": "Phase 11: Final census, comment cleanup, and full gate"
+  },
+  "follow_up_recommendations": [
+    "8 genuinely public-origin duplicate families (hintikka_congr, modalApplyOne_fresh, modalExpMeasure_step_lt, modalSubfmls_self_mem, modalApplyOneS5_fresh_local, and related) need a separate judgement call on unification vs genuine specialization",
+    "5 confirmed-unreachable duplicate families (accFreshInv_append, hasEdge_addEdge_mono, modalApplyOne_boxPos_acc_eq, modalApplyOne_diamondNeg_acc_eq, not_shape_of_not_or) are privacy-caused and resolvable but need new architectural work (a further Support/-style module or a considered new import) out of this task's scope"
+  ],
   "metadata": {
     "session_id": "sess_1785908335_1f3c58",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 11,
-    "estimated_hours": 14,
-    "dependency_waves": [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11]]
-  },
-  "memory_candidates": [
-    {
-      "content": "When de-duplicating re-derived lemmas in a Lean subsystem, publication ORDER can dissolve an apparent signature-mismatch hazard rather than requiring per-site proof work. A weaker duplicate whose sole call site sits inside a sibling duplicate's own proof becomes dead code the moment that sibling is published from a shared module. Sequence publications so the highest-leverage byte-identical fact goes first, then re-check call-site counts before attempting any substitution against a stronger-but-incompatible original. Encode this as a plan phase dependency, not an advisory note: done in the other order it forces callers to manufacture hypotheses they never needed.",
-      "category": "PATTERN",
-      "source_artifact": "specs/558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["lean4", "deduplication", "publication-order", "dead-code", "phase-dependency", "refactor"]
-    }
-  ],
-  "modified_files": [
-    "specs/558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md",
-    "specs/558_tableau_support_private_dedup/.orchestrator-handoff.json"
-  ]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

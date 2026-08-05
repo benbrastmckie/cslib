@@ -1,6 +1,11 @@
 # Probe Verdict: P1/P2 for the Reformulated Mint-Blocked Redirect Arm
 
 - **Task**: 553 (`s4_loop_guard_soundness_reachability_restriction`)
+- **Status**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Dispatch type**: P1+P2 probe (per `reports/06_mint-blocked-redirect-verdict.md` §6), NOT a
   full Phase 7 implementation
 - **Date**: 2026-08-05

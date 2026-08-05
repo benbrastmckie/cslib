@@ -2,21 +2,17 @@
   "status": "partial",
   "started_at": "2026-08-05T22:52:07Z",
   "artifacts": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-phase77-route1-negative-handoff-20260805.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md"
   ],
   "modified_files": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-phase77-route1-negative-handoff-20260805.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md"
   ],
   "partial_progress": {
-    "stage": "phase-boundary-stop",
-    "details": "Route-1-only bounded search dispatch for Phase 7.7's blocker (conjunct (d) discharge for the 4-rule box-positive/diamond-negative arms). Examined seven invariants/mechanisms in LoopChecking.lean (S4LoopInv.outDegEq, accTargetsKnown, modalNonMintCandidates settled-context scheduling, successorBirthContent, modalS4Saturated, the reachability-restriction machinery, S4KeyedHintikkaInv) -- none bound outDeg at a recorded-successor world or rule out outDeg acc w' != 0 there. No Lean was written (read-only investigation, per assigned scope). Phase 7.7 marked [BLOCKED] in the plan file with the full search record. Route 2 (weakening conjunct (d)) was explicitly out of scope and not attempted.",
-    "phases_completed": 13,
-    "last_completed_phase": "Phase 8 (Phase 7.7 remains BLOCKED; this dispatch added no newly-completed phase)"
+    "stage": "phase-complete",
+    "details": "Phase 7.7 resolved via a third route neither prior dispatch considered: old conjunct (d), applied directly to the firing box-positive/diamond-negative candidate (the same houtdeg0 argument Phase 7.5 already uses via hFroz), forces outDeg acc lbl = 0 at the moment either 4-rule genuinely fires. Zero out-degree collapses the K-layer (boxPropagation) and 4-layer (modalFourBoxProp/modalFourDiaNegProp) to vacuously empty (both filterMap over acc.successorsOf lbl), leaving only the T-self layer (modalTBoxSelf/modalTDiaNegSelf), which lands new content at lbl itself -- exactly Phase 7.5's shape. Neither route (i) (new per-world saturation invariant) nor route (ii) (weakening conjunct (d)) from the prior negative-result Progress Record was needed; S4RedirectSoundInv's definition is untouched (purely additive diff), so Phases 7.2/7.3/7.5/7.6 need no re-verification by construction. Landed sorry-free: successorsOf_eq_nil_of_outDeg_eq_zero, modalApplyOneS4Rules_{boxPos,diaNeg}_eq_of_outDeg_zero, S4RedirectSoundInv_boxPos_step, S4RedirectSoundInv_diaNeg_step. Phase 7.8 (the dispatcher theorem, atomic-batch, ~250 lines estimated) is the next phase in wave order; not attempted this dispatch given remaining budget after the investigation + implementation + full CI verification already performed.",
+    "phases_completed": 14,
+    "last_completed_phase": "Phase 7.7: 4-rule arms restated with the ghost-edge disjunction"
   },
   "verification": {
     "verification_passed": true,
@@ -25,12 +21,11 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "No .lean files were modified this dispatch (plan-file-only investigation dispatch), so no build was required. Sorry census (repo's canonical two-grep code-position form, restricted to Modal/Tableau/) confirmed unchanged at exactly 1 (FrameSoundness.lean:1251)."
+    "note": "Full 7-step CI pipeline run: scoped build (Cslib.Logics.Modal.Tableau.FrameCompleteness) clean; lake exe checkInitImports clean; lake lint clean for FrameCompleteness.lean (145 pre-existing repo-wide findings, none in this file); lake exe lint-style clean; lake shake --add-public --keep-implied --keep-prefix clean for FrameCompleteness.lean; lake exe mk_all --module reports no update necessary; lake test passed all 9378 jobs including CslibTests.S4LoopGuardRegression. lean_verify/#print axioms on both new arm theorems: exactly {propext, Classical.choice, Quot.sound}. Sorry census (repo's canonical two-grep code-position form, restricted to Cslib/Logics/Modal/Tableau/) held at exactly 1 (FrameSoundness.lean:1251, standing user-decision sorry, unchanged). git diff purely additive (0 deletion lines) for FrameCompleteness.lean."
   },
-  "requires_user_review": true,
-  "review_reason": "Phase 7.7 is blocked on a genuine open technical/design question: no already-existing invariant discharges S4RedirectSoundInv's conjunct (d) for the 4-rule arms' newly-propagated content at a recorded-successor world. Route 1 (search) is exhausted and returned negative, evidenced in the plan's Phase 7.7 Progress Record. The two remaining options -- (i) prove a new per-world successor-saturation invariant, or (ii) weaken conjunct (d) with full re-verification cost against Phases 7.2/7.3/7.5/7.6 -- both require a user decision before further Lean can be written for this phase.",
+  "requires_user_review": false,
   "metadata": {
-    "session_id": "sess_1785963390_67974b",
+    "session_id": "sess_1785971654_e8268c",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": [
@@ -39,7 +34,7 @@
       "skill-cslib-implementation"
     ],
     "compliance_check": "passed",
-    "cycles_used": 4,
+    "cycles_used": 5,
     "final_state": "implementing"
   }
 }

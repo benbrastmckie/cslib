@@ -1,0 +1,67 @@
+{
+  "status": "implemented",
+  "started_at": "2026-08-05T08:20:00Z",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md"
+    },
+    {
+      "type": "report",
+      "path": "specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/587_canonical_witness_restriction_probe/summaries/01_canonical-witness-restriction-probe-summary.md"
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md",
+    "specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md",
+    "specs/587_canonical_witness_restriction_probe/summaries/01_canonical-witness-restriction-probe-summary.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "sorry_count_note": "0 new sorries introduced. Cslib/Logics/Modal/Tableau/ sorry census remains exactly 1 (the standing, explicitly-retained FrameSoundness.lean:1251 sorry, pre-existing and untouched per task instructions).",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "axiom_count_note": "Repo-wide axiom count unchanged at 26 (baseline). New retained lemma verified via lean_verify: axioms propext, Classical.choice, Quot.sound only.",
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_steps": {
+      "lake_build_full": "clean (Cslib and CslibTests both build)",
+      "checkInitImports": "clean",
+      "lake_lint": "clean for modified files (pre-existing repo-wide warnings unrelated to this task)",
+      "lint_style": "clean",
+      "lake_shake": "no import change suggested for FrameSoundness.lean",
+      "mk_all": "no update necessary",
+      "lake_test": "full CslibTests/ suite passes"
+    }
+  },
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All 5 plan phases completed; Phase 4 closed [COMPLETED WITH EXCLUSIONS] per its own gate outcome (never entered -- Phase 1/2 both returned GO-branch-compatible outcomes).",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 5,
+    "last_completed_phase": "Phase 5: Write the verdict report"
+  },
+  "metadata": {
+    "session_id": "sess_1785942659_8c4471",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
+    "compliance_check": "passed",
+    "cycles_used": 2,
+    "final_state": "completed"
+  },
+  "summary": "Verdict: CONDITIONAL GO. Restriction A (W:=WorldIndex, f:=id) stays machine-checked stuck at box.mp.inr and diamond.mpr. Restriction B1 (known-worlds subtype carrier) closes both cases sorry-free, but only modulo an assumed truth-lemma commitment (not free from an arbitrary pinned witness -- requires a canonical/term model). Retained one sorry-free Lean lemma; priced a task-553 v6 plan at 5-7 phases / 13.5-17.5 hours.",
+  "next_steps": "Resume task 553 with /plan 553 to produce a v6 plan against this task's Phase 3 pricing, then /implement 553."
+}

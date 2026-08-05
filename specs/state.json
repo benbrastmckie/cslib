@@ -1820,7 +1820,7 @@
     {
       "project_number": 587,
       "project_name": "canonical_witness_restriction_probe",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Task 553 (s4_loop_guard_soundness_reachability_restriction) is blocked: plan v5's Gate A (Phase 1, 'DECISION GATE A -- the pinned redirect-preservation lemma') died at a machine-checked stuck goal, recorded in that plan's `#### Phase 1 Verdict` (specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md). The stuck goal: the structural-induction agreement lemma `Satisfies m x chi <-> Satisfies m' x chi` (needed to show the redirect edge preserves `branchSatisfiablePinnedIn s4FC`) escapes to model points outside `modalKnownWorlds b` when the induction unwinds a `.box`/`.diamond` subformula, and neither `accPinnedBy` nor `hbox`/`hdia` (both deliberately restricted to known branch labels) supply any fact there. The Phase 1 Verdict names, but explicitly declines to price, the fix: a canonicity assumption on the witness model (WLOG `W := WorldIndex`, `f := id`, so every model point is trivially a known label). This task's job is to answer that priced-viability question, not to redo work already completed: (1) do NOT re-run or re-propose the FrameCompleteness refactor programme -- it already landed (its box-plus birth content is now inline in the mainline `successorBirthContent`/`blockingWorldS4Keyed` in Cslib/Logics/Modal/Tableau/LoopChecking.lean, not as the separate parallel `...Boxed` family plan v5's Phases 5-7 anticipated -- that framing is stale); (2) do NOT touch the pre-existing, standing `sorry` at Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1251 (`branchSatisfiableIn_s4FC_ancestor_redirect`), retained by explicit user decision; (3) DO preserve and reuse, do not re-derive, the already-landed, sorry-free, standard-axioms-only sub-step 1.1 declarations `accPinnedBy`, `branchSatisfiablePinnedIn`, and `branchSatisfiablePinnedIn_redirect_mechanical` (Cslib/Logics/Modal/Tableau/FrameSoundness.lean, currently at :5323-5390 -- re-locate by `grep -n '^def\\|^lemma\\|^theorem'` rather than trusting these line numbers, since the file continues to drift). Concretely: (a) attempt a machine-checked micro-probe of the box-positive and diamond-negative agreement-lemma cases under the added hypothesis that `x`/the witness carrier is restricted to `WorldIndex` via `f := id` (mirroring the existing precedent `extractModelS4`/`extractModelWith` in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:85-148, which already builds `Model WorldIndex Atom` directly with no existential `W`/`f` -- this is the same canonical-model shape Massacci2000 Thm 10.6 uses on the completeness side); determine whether restricting the carrier actually closes the exact stuck goal recorded in the Phase 1 Verdict, or dies at a new, different obstruction; (b) if the probe succeeds (even partially, i.e. one of box-positive/diamond-negative closes and the other's failure mode is well understood), price the consequences: which existential fields of `branchSatisfiablePinnedIn` must be re-shaped or collapse under the restriction, whether sub-step 1.1's three mechanical conjuncts (the `IsTrans`/`Std.Refl`/edge-conjunct/`accPinnedBy`-preservation cluster) survive verbatim against a fixed carrier or need re-derivation, and a phase-count/effort estimate for a resulting v6 plan; (c) if the probe fails, record the exact machine-checked stuck goal (in the same style as the plan's existing `#### Phase 1 Verdict`) and state plainly that no route is currently known, rather than proposing a further ad hoc route. Follow the plan's own front-loaded kill-gate discipline: do not scaffold any large construction before the micro-probe's own verdict is in. Write findings as a research report under specs/553_s4_loop_guard_soundness_reachability_restriction/reports/ (or this new task's own specs/ directory per the standard artifact convention) with a clear go/no-go verdict and, if go, a priced next-step recommendation for a task-553 v6 plan.",
       "effort": "6-9 hours",
@@ -1832,14 +1832,26 @@
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
       "created": "2026-08-05T14:09:39Z",
-      "last_updated": "2026-08-05T14:09:39Z",
+      "last_updated": "2026-08-05T15:44:01Z",
       "artifacts": [
         {
+          "path": "specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md",
+          "type": "plan",
+          "summary": "Five-phase micro-probe plan with front-loaded kill gates: Phase 1 probes Restriction A (W := WorldIndex, f := id), Phase 2 conditionally probes Restriction B (every carrier point a known label), Phases 3/4 are mutually exclusive GO/NO-GO branches, Phase 5 writes the verdict report."
+        },
+        {
+          "path": "specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md",
           "type": "report",
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md",
-          "summary": "Spawn blocker analysis from parent task"
+          "summary": "Micro-probed the canonical-witness carrier restriction for task 553's redirect-preservation agreement lemma. Restriction A (W:=WorldIndex, f:=id) stays machine-checked stuck. Restriction B1 (known-worlds subtype carrier) closes both stuck cases sorry-free but only conditional on a truth-lemma commitment -- the central finding. Priced a task-553 v6 plan at 5-7 phases / 13.5-17.5 hours. Verdict: CONDITIONAL GO."
+        },
+        {
+          "path": "specs/587_canonical_witness_restriction_probe/summaries/01_canonical-witness-restriction-probe-summary.md",
+          "type": "summary",
+          "summary": "Micro-probed the canonical-witness carrier restriction for task 553's redirect-preservation agreement lemma. Restriction A (W:=WorldIndex, f:=id) stays machine-checked stuck. Restriction B1 (known-worlds subtype carrier) closes both stuck cases sorry-free but only conditional on a truth-lemma commitment -- the central finding. Priced a task-553 v6 plan at 5-7 phases / 13.5-17.5 hours. Verdict: CONDITIONAL GO."
         }
-      ]
+      ],
+      "session_id": "sess_1785942659_8c4471",
+      "completion_summary": "Micro-probed the canonical-witness carrier restriction for task 553's redirect-preservation agreement lemma. Restriction A (W:=WorldIndex, f:=id) stays machine-checked stuck. Restriction B1 (known-worlds subtype carrier) closes both stuck cases sorry-free but only conditional on a truth-lemma commitment -- the central finding. Priced a task-553 v6 plan at 5-7 phases / 13.5-17.5 hours. Verdict: CONDITIONAL GO."
     }
   ],
   "repository_health": {

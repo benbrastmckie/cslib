@@ -1,0 +1,28 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Micro-probed the canonical-witness carrier restriction for task 553's redirect-preservation agreement lemma. Restriction A (W:=WorldIndex, f:=id) stays machine-checked stuck. Restriction B1 (known-worlds subtype carrier) closes both stuck cases sorry-free but only conditional on a truth-lemma commitment -- the central finding. Priced a task-553 v6 plan at 5-7 phases / 13.5-17.5 hours. Verdict: CONDITIONAL GO.",
+  "artifacts": [
+    {"type": "plan", "path": "specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md"},
+    {"type": "report", "path": "specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md"},
+    {"type": "summary", "path": "specs/587_canonical_witness_restriction_probe/summaries/01_canonical-witness-restriction-probe-summary.md"}
+  ],
+  "blockers": [],
+  "next_action_hint": "none",
+  "files_modified": [
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md",
+    "specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md",
+    "specs/587_canonical_witness_restriction_probe/summaries/01_canonical-witness-restriction-probe-summary.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md"
+  ],
+  "decisions_made": [
+    "Restriction B1 (subtype carrier) chosen over B2 (closure side condition): makes the induction variable a known label by its type, discharging accPinnedBy definitionally",
+    "Truth-lemma direction and Gate-B persistence facts left as explicit assumed hypotheses in the retained probe lemma rather than re-derived (out of this task's scope)",
+    "Retained canonicalWitnessRestrictionProbe_agreementConditional as the one sorry-free Lean artifact per the plan's append-then-revert-unless-passing contract"
+  ],
+  "dead_ends": [
+    "Restriction A alone (literal WLOG W:=WorldIndex, f:=id reading of the prior blocker analysis) does not close the redirect-preservation obligation -- confirmed machine-checked stuck at both box.mp.inr and diamond.mpr"
+  ]
+}

@@ -1,6 +1,17 @@
 # Research Report: canonical_witness_restriction_probe
 
-## Verdict: CONDITIONAL GO
+**Task**: 587
+**Started**: 2026-08-05
+**Completed**: 2026-08-05
+**Effort**: 6-9 hours estimated; ~7 hours realized (Phase 4 excluded by gate outcome)
+**Dependencies**: Parent task 553 (s4_loop_guard_soundness_reachability_restriction)
+**Sources/Inputs**: `specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md` (`#### Phase 1 Verdict`); `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md`; `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`; `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (`extractModelS4`/`extractModelWith`, :85-148); Massacci2000 Thm 10.6
+**Artifacts**: `specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md`; `specs/587_canonical_witness_restriction_probe/summaries/01_canonical-witness-restriction-probe-summary.md`
+**Standards**: `.claude/rules/artifact-formats.md`; `.claude/rules/lean4.md`; CSLib CONTRIBUTING.md
+
+## Executive Summary
+
+**Verdict: CONDITIONAL GO.**
 
 Restricting the redirect-preservation agreement lemma's witness carrier closes the two
 machine-checked stuck cases (`box.mp.inr`, `diamond.mpr`) recorded in the
@@ -13,7 +24,16 @@ merely removes one obstruction (the escape to non-label points) and exposes a se
 machine-checked in this task, in that order, and the second is priced in Phase 3 below at
 5-7 phases / 13.5-17.5 hours for a task-553 v6 plan.
 
-## Probe Method
+## Context & Scope
+
+This task answers the priced-viability question the pinned-witness-truth-lemma plan's
+`#### Phase 1 Verdict` named but declined to price: whether a canonicity assumption on the
+witness model closes the redirect-preservation agreement lemma's stuck goal. Its scope is a
+machine-checked micro-probe plus a written verdict — not a large Lean construction. Out of scope
+by explicit constraint: re-running the FrameCompleteness refactor programme, touching the standing
+`sorry` at `FrameSoundness.lean:1251`, and re-deriving the sub-step 1.1 declarations.
+
+### Probe Method
 
 Two restrictions were attempted in sequence, front-loaded before any large construction, using
 CSLib's append-then-revert probe pattern (a probe section delimited by
@@ -31,7 +51,9 @@ A third phase (pricing) then classified the consequences of adopting Restriction
 choice against the existing `branchSatisfiablePinnedIn` vocabulary, including one further
 reverted confirmatory Lean check.
 
-## Phase 1: Restriction A -- Machine-Checked Stuck (Outcome (ii): ESCALATE)
+## Findings
+
+### Phase 1: Restriction A -- Machine-Checked Stuck (Outcome (ii): ESCALATE)
 
 The Restriction-A agreement lemma was stated as a standalone probe over `m : Model WorldIndex
 Atom` (carrier fixed to `WorldIndex`, `f` eliminated as `id`), carrying `hsrc`, `hwB`, `hbox`,
@@ -105,7 +127,7 @@ up to the carrier/embedding substitution (`f src` becomes `src`, `f wBlock` beco
 imply `x` is a known label of `b`. **Outcome (ii): ESCALATE to Restriction B**, exactly as this
 plan's own "Planning-run correction to the fix's own framing" section anticipated.
 
-## Phase 2: Restriction B1 -- Conditional Pass (Outcome (ii): GATE A'' PASSES, conditional)
+### Phase 2: Restriction B1 -- Conditional Pass (Outcome (ii): GATE A'' PASSES, conditional)
 
 **Chosen encoding: B1** (carrier `{w : WorldIndex // w ∈ modalKnownWorlds b}`, `f` the coercion),
 over B2 (a `WorldIndex`-plus-closure-side-condition encoding), because B1 makes the induction
@@ -160,7 +182,9 @@ risk identified.
 explicit parameters, not `sorry`), so per this task's own Rollback/Contingency contract it is
 kept as the task's one retained Lean artifact rather than reverted.
 
-## Phase 3: Pricing (GO branch)
+## Recommendations
+
+### Phase 3: Pricing (GO branch)
 
 **Field-by-field classification of `branchSatisfiablePinnedIn`'s four conjuncts**, under the fully
 canonical choice (`W := WorldIndex`, `m.r := Relation.ReflTransGen (acc.hasEdge)`, `f := id`):
@@ -210,7 +234,18 @@ Gate 0: a standalone micro-probe of the truth lemma's box-positive case, under t
 one-dispatch kill-gate discipline this task used, before committing to the full 5-7 phase
 programme.
 
-## What Was Not Done, and Why
+## Decisions
+
+Recorded decisions taken during the probe:
+
+- **Restriction B1 (subtype carrier) chosen over B2 (closure side condition)**: making the
+  induction variable a known label *by its type* discharges `accPinnedBy` definitionally.
+- **Truth-lemma direction and Gate-B persistence facts left as explicit assumed hypotheses**
+  in the retained probe lemma rather than re-derived — out of this task's scope.
+- **`canonicalWitnessRestrictionProbe_agreementConditional` retained** as the one sorry-free Lean
+  artifact, per the plan's append-then-revert-unless-passing contract.
+
+### What Was Not Done, and Why
 
 - **The FrameCompleteness refactor programme was not re-run.** It already landed: its box-plus
   birth content is inline in mainline `successorBirthContent`/`blockingWorldS4Keyed` in

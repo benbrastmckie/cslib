@@ -1,12 +1,28 @@
 # Implementation Summary: canonical_witness_restriction_probe
 
-## Outcome
+**Task**: 587
+**Status**: COMPLETED
+**Started**: 2026-08-05
+**Completed**: 2026-08-05
+**Artifacts**: `specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md`; `specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md`
+**Standards**: `.claude/rules/artifact-formats.md`; `.claude/rules/lean4.md`; CSLib CONTRIBUTING.md
+
+## Overview
+
+A machine-checked micro-probe of the canonical-witness carrier restriction for the parent task's
+redirect-preservation agreement lemma, plus a priced verdict for a follow-on plan. No large Lean
+construction was scaffolded ahead of the probe verdict, per the plan's front-loaded kill-gate
+discipline.
+
+### Outcome
 
 **CONDITIONAL GO.** All 5 plan phases completed (Phase 4 excluded by its own gate outcome, closed
 `[COMPLETED WITH EXCLUSIONS]`). Full verdict, method, and pricing are in
 `specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md`.
 
-## What Happened, Phase by Phase
+## What Changed
+
+### What Happened, Phase by Phase
 
 - **Phase 1** (Restriction A, `W := WorldIndex`, `f := id`): machine-checked stuck at both
   `box.mp.inr` and `diamond.mpr` -- the escape to non-known-label points persists even after
@@ -30,12 +46,7 @@
   (`specs/553_.../reports/05_gate-a-canonical-witness-blocker-analysis.md`) updated with a
   cross-reference and next-step pointer (`/plan 553` to produce a v6 plan against this pricing).
 
-## Plan Deviations
-
-None. All phases executed per the plan's own task lists and kill-criteria tables; Phase 4's
-exclusion was the plan's own pre-declared outcome, not a deviation.
-
-## Files Touched
+### Files Touched
 
 - `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` -- one retained lemma
   (`canonicalWitnessRestrictionProbe_agreementConditional`) appended below the existing
@@ -50,7 +61,16 @@ exclusion was the plan's own pre-declared outcome, not a deviation.
 - `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md`
   -- cross-reference addendum (new section, no existing content altered).
 
-## Verification
+## Decisions
+
+### Plan Deviations
+
+None. All phases executed per the plan's own task lists and kill-criteria tables; Phase 4's
+exclusion was the plan's own pre-declared outcome, not a deviation.
+
+## Impacts
+
+### Verification
 
 - Sorry census over `Cslib/Logics/Modal/Tableau/` (authoritative command): exactly 1 (the standing
   `:1251` sorry only) -- confirmed at every phase boundary.
@@ -70,7 +90,16 @@ exclusion was the plan's own pre-declared outcome, not a deviation.
 - New sorries introduced by this task: 0. New axioms introduced: 0 (repo-wide axiom count
   unchanged at 26). Vacuous definitions introduced: 0.
 
-## Next Steps
+## Follow-ups
+
+### Next Steps
 
 Resume task 553 with `/plan 553` to produce a v6 plan against this task's Phase 3 pricing
 (5-7 phases / 13.5-17.5 hours), then `/implement 553`.
+
+## References
+
+- Verdict report: `specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md`
+- Plan: `specs/587_canonical_witness_restriction_probe/plans/01_canonical-witness-restriction-probe.md`
+- Parent blocker record: `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md`
+- Prior verdict this task prices: `specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md` (`#### Phase 1 Verdict`)

@@ -7589,6 +7589,52 @@ lemma hintikkaS4_dia_neg_reflTransGen
     intro hmem
     exact ih (hintikkaS4_dia_neg_step φ₀ b acc hH ψ _ _ hmem hedge)
 
+/-! ## Wrapped-Conclusion `ReflTransGen` Path Bridges
+
+`hintikkaS4_box_pos_reflTransGen`/`hintikkaS4_dia_neg_reflTransGen` above unwrap to `T(ψ)@w'`/
+`F(ψ)@w'` at the path's endpoint (consuming `hintikkaS4_box_pos_self`/`hintikkaS4_dia_neg_self`
+in their `refl` case). The two bridges below instead conclude `T(□ψ)@w'`/`F(◇ψ)@w'` -- the box
+or diamond formula *itself* survives the whole path, not just its body. This is exactly the
+`hpropBox`/`hpropDia` shape the canonical-witness redirect-preservation route needs (see
+`FrameSoundness.lean`'s `canonicalWitnessRestrictionProbe_agreementConditional`), and each is a
+short transcription of the corresponding unwrapped proof with the `_self` step dropped from the
+`refl` case: at `w = w'`, `hmem` already **is** the wrapped goal, needing no unwrapping. -/
+
+/-- Wrapped-conclusion variant of `hintikkaS4_box_pos_reflTransGen`: `modalS4Saturated φ₀ b acc`,
+`T(□ψ)@w ∈ b`, and a `ReflTransGen`-path `w ⤳ w'` in `acc.hasEdge` together imply `T(□ψ)@w' ∈ b`.
+Lands unconditionally, regardless of Gate B's verdict below -- it stands on its own, using only
+`modalS4Saturated` and `hintikkaS4_box_pos_step`. -/
+lemma hintikkaS4_box_pos_reflTransGen_wrapped
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
+    (ψ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
+    (⟨.pos, .box ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  revert hmem
+  induction hpath using Relation.ReflTransGen.head_induction_on with
+  | refl => intro hmem; exact hmem
+  | head hedge _ ih =>
+    intro hmem
+    exact ih (hintikkaS4_box_pos_step φ₀ b acc hH ψ _ _ hmem hedge)
+
+/-- Dual of `hintikkaS4_box_pos_reflTransGen_wrapped` for the diamond-negative shape:
+`modalS4Saturated φ₀ b acc`, `F(◇ψ)@w ∈ b`, and a `ReflTransGen`-path `w ⤳ w'` in `acc.hasEdge`
+together imply `F(◇ψ)@w' ∈ b`. Lands unconditionally, regardless of Gate B's verdict below. -/
+lemma hintikkaS4_dia_neg_reflTransGen_wrapped
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
+    (ψ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
+    (⟨.neg, .diamond ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  revert hmem
+  induction hpath using Relation.ReflTransGen.head_induction_on with
+  | refl => intro hmem; exact hmem
+  | head hedge _ ih =>
+    intro hmem
+    exact ih (hintikkaS4_dia_neg_step φ₀ b acc hH ψ _ _ hmem hedge)
+
 /-! ## Sanity Checks
 
 `modalTableauS4` was confirmed to evaluate and close exactly on the T and 4 components via
@@ -9174,6 +9220,78 @@ lemma S4KeyedHintikkaInv_weaken (φ₀ : Proposition Atom)
   · intro sf hsf ψ w hsfeq
     obtain ⟨w', hedge, hwit⟩ := hinv.eDiamondPosWitness sf hsf ψ w hsfeq
     exact ⟨w', haccsub w w' hedge, hbsub hwit⟩
+
+/-! ## GATE B -- `modalS4Saturated` at a Settled Ordered-Stepper State
+
+Determines whether `modalS4Saturated φ₀ b acc` is available at an INTERMEDIATE ordered-stepper
+state -- specifically a settled state (`modalNonMintCandidates φ₀ keys b e acc = []`) where a
+blocked step is about to fire. Gate B **PASSES at its cheapest**: the gate lemma closes
+sorry-free from `hsettled` + `hHI` + a per-shape keyed/unkeyed congruence argument alone (in the
+same spirit as `hintikka_congr_S4`), with no additional invariant field needed. See
+`#### Phase 2 Verdict` in `plans/07_canonical-witness-truth-lemma.md`
+(`specs/553_s4_loop_guard_soundness_reachability_restriction/`) for the full write-up.
+
+The apparent gap the plan flagged -- `S4KeyedHintikkaInv.hintikkaInv`'s use of
+`modalHintikkaClauseGen`, which is vacuous at EVERY box/diamond-shaped formula regardless of
+sign, seemingly supplies nothing for the box-positive/diamond-negative (T-self/4-rule) shapes a
+member of `e` might have -- turns out not to arise: `S4KeyedHintikkaInv.eBoxOnlyNeg`/
+`eDiamondOnlyPos` already force any box/diamond-shaped member of `e` to be exactly one of the two
+MINTING shapes (`.neg,.box`/`.pos,.diamond`), which the non-mint-shape hypothesis in scope here
+already excludes. So a non-mint-shaped `sf ∈ e` is never box/diamond-shaped at all, and
+`hintikkaInv`'s clause gives genuine (non-vacuous) content there, matching `modalS4Saturated`'s
+own requirement exactly once the keyed/unkeyed congruence is applied. -/
+
+lemma modalS4Saturated_of_ordered_settled (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hsettled : modalNonMintCandidates φ₀ keys b e acc = [])
+    (hHI : S4KeyedHintikkaInv φ₀ b e acc keys) :
+    modalS4Saturated φ₀ b acc := by
+  intro sf hsfmem
+  by_cases hms : modalMintShape sf = true
+  · unfold modalMintShape at hms
+    rcases hsg : sf.sign with _ | _ <;> rcases hfm : sf.formula with _|_|_|_|_|φ|φ <;> simp_all
+  · have hnb : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) := by
+      simp only [Bool.not_eq_true] at hms
+      rcases hsg : sf.sign with _ | _ <;> rcases hfm : sf.formula with _|_|_|_|_|φ|φ <;>
+        simp_all [modalMintShape]
+    by_cases he : sf ∈ e
+    · -- `sf ∈ e`: `eBoxOnlyNeg`/`eDiamondOnlyPos` rule out `sf` being box/diamond-shaped at
+      -- all, once the two mint shapes are already excluded by `hnb` -- a box-shaped member of
+      -- `e` is forced `.neg` (mint-shaped), a diamond-shaped member is forced `.pos`
+      -- (mint-shaped), and `hnb` excludes both. So `sf` is a genuinely non-modal shape here,
+      -- where `modalHintikkaClauseGen`'s vacuity at box/diamond formulas does not apply and
+      -- `hHI.hintikkaInv` supplies real content.
+      have heq1 : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4 φ₀ sf b acc := by
+        unfold modalApplyOneS4Keyed
+        rcases hsg : sf.sign with _ | _ <;> rcases hfm : sf.formula with _|_|_|_|_|φ|φ <;>
+          simp_all
+      have hclause := hHI.hintikkaInv sf he
+      unfold modalHintikkaClauseGen at hclause
+      rw [heq1] at hclause
+      simp only
+      rcases hsg : sf.sign with _ | _ <;> rcases hfm : sf.formula with _|_|_|_|_|φ|φ <;>
+        simp only [hfm] at hclause ⊢ <;>
+        first
+          | trivial
+          | exact hclause
+          | (exact absurd (hHI.eBoxOnlyNeg sf he _ hfm) (by simp [hsg]))
+          | (exact absurd (hHI.eDiamondOnlyPos sf he _ hfm) (by simp [hsg]))
+    · have hdisj := (modalNonMintCandidates_eq_nil_iff φ₀ keys b e acc).mp hsettled sf hsfmem
+      have hnotapp : (modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable := by
+        rcases hdisj with hms' | hex | hnotapp'
+        · exact absurd hms' hms
+        · exact absurd hex he
+        · exact hnotapp'
+      have heq1 : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4 φ₀ sf b acc := by
+        unfold modalApplyOneS4Keyed
+        rcases hsg : sf.sign with _ | _ <;> rcases hfm : sf.formula with _|_|_|_|_|φ|φ <;>
+          simp_all
+      rw [heq1] at hnotapp
+      simp only
+      rcases hsg : sf.sign with _ | _ <;> rcases hfm : sf.formula with _|_|_|_|_|φ|φ <;>
+        simp_all
 
 /-! ## The `red` Channel: General Infrastructure Retained Post-Gate-B
 

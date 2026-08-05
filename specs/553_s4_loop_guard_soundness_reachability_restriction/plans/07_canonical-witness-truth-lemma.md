@@ -417,7 +417,7 @@ canonical-witness task list, which outcome (i) has superseded).
 
 ---
 
-### Phase 2: GATE B — `modalS4Saturated` at a settled ordered-stepper state [NOT STARTED]
+### Phase 2: GATE B — `modalS4Saturated` at a settled ordered-stepper state [COMPLETED]
 
 - **Goal:** Determine whether `modalS4Saturated φ₀ b acc` is available at an **intermediate** state —
   specifically at a settled ordered-stepper state where `modalNonMintCandidates φ₀ keys b e acc = []`
@@ -484,6 +484,44 @@ this phase's entire content. This analysis is carried from v5 and is not re-argu
 - **Done when:** the two `_wrapped` bridges are sorry-free and committed; the gate lemma is either
   sorry-free and committed or reverted with a recorded verdict; bare-tactic sorry census exactly 1;
   scoped `lake build Cslib.Logics.Modal.Tableau.LoopChecking` and `lake exe lint-style` clean.
+
+#### Phase 2 Verdict
+
+**Outcome (i): Gate B PASSES at its cheapest.** Both `_wrapped` bridges
+(`hintikkaS4_box_pos_reflTransGen_wrapped`, `hintikkaS4_dia_neg_reflTransGen_wrapped`) landed
+sorry-free as short transcriptions of the existing unwrapped proofs, with the `_self` step
+dropped from the `refl` case. The gate lemma `modalS4Saturated_of_ordered_settled` **also closed
+sorry-free**, in the same dispatch, from `hsettled` + `hHI` alone (plus a per-shape keyed/unkeyed
+congruence argument in the spirit of `hintikka_congr_S4`) -- **no additional invariant field was
+needed**, contrary to this phase's own honest prior expectation that outcome (ii) was likely.
+
+**Why the apparent `sf ∈ e` gap does not arise.** `S4KeyedHintikkaInv.hintikkaInv` states its
+obligation via `modalHintikkaClauseGen`, which is vacuous (`True`) at **every** box/diamond-shaped
+formula regardless of sign -- seemingly supplying nothing for the box-positive/diamond-negative
+(T-self/4-rule) shapes a member of `e` might have, which is exactly what `modalS4Saturated`
+demands real content for. The resolution: `S4KeyedHintikkaInv.eBoxOnlyNeg`/`eDiamondOnlyPos`
+(both already-landed fields) force any box/diamond-shaped member of `e` to be **exactly one of
+the two minting shapes** (`.neg,.box`/`.pos,.diamond`) -- a box-shaped `e`-member's sign is forced
+`.neg`, a diamond-shaped one's sign is forced `.pos`. Once the two minting shapes are excluded
+(the gate lemma's outer case split, mirroring `hnb` in `modalApplyOneS4_eq_of_not_boxNeg_diaPos`'s
+style), a member of `e` can therefore **never** be box/diamond-shaped at all, so
+`modalHintikkaClauseGen`'s vacuity never actually applies to the cases that matter, and
+`hintikkaInv` supplies genuine content there -- exactly matching `modalS4Saturated`'s own
+requirement once the keyed/unkeyed apply congruence (`modalApplyOneS4Keyed φ₀ keys sf b acc =
+modalApplyOneS4 φ₀ sf b acc` for non-mint-shaped `sf`, the same fact `hintikka_congr_S4` and
+`S4KeyedHintikkaInv_weaken` already lean on) is applied.
+
+**Verification**: `lean_verify` on `hintikkaS4_box_pos_reflTransGen_wrapped`,
+`hintikkaS4_dia_neg_reflTransGen_wrapped`, and `modalS4Saturated_of_ordered_settled` all report
+axioms exactly `{propext, Classical.choice, Quot.sound}`. Scoped `lake build
+Cslib.Logics.Modal.Tableau.LoopChecking` is clean (no warnings); `lake exe lint-style` is clean;
+the bare-tactic sorry census over `Cslib/Logics/Modal/Tableau/` returns exactly one line,
+`FrameSoundness.lean:1251`.
+
+**Reading constraint honored**: this pass licenses the re-scoped Phases 3-6 (per the Phase 1
+Verdict) to consume `modalS4Saturated_of_ordered_settled` and the two `_wrapped` bridges as
+landed facts. It does not itself discharge any part of the `addEdge`-preservation obligation
+those phases still own.
 
 ---
 

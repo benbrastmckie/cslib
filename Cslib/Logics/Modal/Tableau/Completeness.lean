@@ -728,7 +728,7 @@ bundled `spec` argument: `RuleApplicationSpec` is defined in `GenericDriver.lean
 upstream and take F8 raw. `GenericDriver.lean` supplies the bundled wrapper. Body is
 `modalHintikkaClause_lift`'s exact proof with `modalApplyOne ↦ apply` and
 `modalApplyOne_fst_eq_of_not_box ↦ hLocalShapeInvariance`. -/
-private lemma modalHintikkaClauseGen_lift
+lemma modalHintikkaClauseGen_lift
     (apply : RuleApply Atom)
     (hLocalShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
       (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →

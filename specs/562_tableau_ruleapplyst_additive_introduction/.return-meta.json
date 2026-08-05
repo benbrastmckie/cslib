@@ -1,99 +1,64 @@
 {
-  "status": "planned",
-  "started_at": "2026-08-05T03:47:54-07:00",
-  "completed_at": "2026-08-05T11:30:00-07:00",
+  "status": "implemented",
+  "started_at": "2026-08-05T11:13:13Z",
+  "completed_at": "2026-08-05T12:30:00Z",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md",
-      "summary": "Consumer audit of Saturation.lean (mandatory gate, complete), verified RuleApplySt/St-ladder design, correction to the RuleApply = RuleApplySt Unit claim, full CI verification table"
-    },
-    {
       "type": "lean_source",
-      "path": "specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st-ladder-verified.lean",
-      "summary": "The nine new declarations, verified in-file against Saturation.lean with full lake build Cslib green at 3313 jobs; paste-ready modulo docstring expansion"
+      "path": "Cslib/Logics/Modal/Tableau/Saturation.lean",
+      "summary": "Nine new declarations (RuleApplySt, liftRuleApply, modalStepBranchGenSt, findSome?_map_comm, modalStepBranchGen_eq_St, modalExpandBranchesGenSt, modalExpandBranchesGen_eq_St, modalTableauGenSt, modalTableauGen_eq_St) inserted purely additively before end Cslib.Logic.Modal.Tableau, with production-quality docstrings and an updated module-docstring Main Definitions list"
     },
     {
-      "type": "lean_source",
-      "path": "specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st_probe.lean",
-      "summary": "Standalone-module variant showing the separate-module form of the fuel = 0 case plus #print axioms checks"
+      "type": "summary",
+      "path": "specs/562_tableau_ruleapplyst_additive_introduction/summaries/01_st-ladder-additive-insertion-summary.md",
+      "summary": "Implementation summary with phase-by-phase account and full verification gate table"
     },
     {
-      "type": "plan",
-      "path": "specs/562_tableau_ruleapplyst_additive_introduction/plans/01_st-ladder-additive-insertion.md",
-      "summary": "Three-phase additive-insertion plan: verbatim paste of the nine verified declarations (atomic-batch, full tier), docstring expansion to Saturation.lean depth (local tier), full CI gate against measured baselines (full tier)"
+      "type": "handoff",
+      "path": "specs/562_tableau_ruleapplyst_additive_introduction/.orchestrator-handoff.json",
+      "summary": "Orchestrator handoff recording all 3 phases COMPLETED and full verification gate results"
     }
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Plan written, handoff and metadata updated"
+    "details": "All three phases completed and committed. Phase 1: verbatim insertion of the nine verified declarations, lake build Cslib green at 3313 jobs. Phase 2: docstrings expanded to house style, module docstring updated. Phase 3: full CI gate re-measured and matches every baseline exactly.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 3,
+    "last_completed_phase": "Phase 3: Full Verification Gate"
   },
   "verification": {
-    "consumer_audit_complete": true,
-    "prototype_compiled": true,
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
     "build_passed": true,
+    "ci_pipeline_passed": true,
     "build_jobs": 3313,
     "baseline_build_jobs": 3313,
-    "sorry_count_introduced": 0,
-    "axiom_count_introduced": 0,
-    "vacuous_count": 0,
     "sorry_census_modal_tableau": 1,
+    "sorry_census_declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
     "checkInitImports_exit": 0,
     "lint_style_exit": 0,
+    "lake_lint_findings": 145,
+    "lake_lint_baseline": 145,
     "lake_lint_delta": 0,
+    "lake_lint_saturation_findings": 0,
     "shake_total_findings": 9,
+    "shake_baseline": 9,
     "shake_modal_tableau_findings": 0,
     "lake_test_exit": 0,
-    "working_tree_restored": true
+    "lake_test_jobs": 9378,
+    "bridge_axiom_dependencies": ["propext", "Quot.sound"]
   },
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/Saturation.lean"
+  ],
   "metadata": {
     "session_id": "sess_1785926778_90c7a6_562",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "plan",
-      "planner-agent"
-    ],
-    "search_tools_used": [
-      "lean_loogle",
-      "lean_local_search"
-    ],
-    "search_failures": []
-  },
-  "plan_metadata": {
-    "phases": 3,
-    "total_effort_hours": 2,
-    "complexity": "simple",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [
-      [
-        1
-      ],
-      [
-        2
-      ],
-      [
-        3
-      ]
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
-  },
-  "phase_count": 3,
-  "estimated_hours": 2,
-  "dependency_waves": [
-    [
-      1
-    ],
-    [
-      2
-    ],
-    [
-      3
-    ]
-  ],
-  "memory_candidates": [],
-  "next_steps": "Run /implement 562 to execute the plan"
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

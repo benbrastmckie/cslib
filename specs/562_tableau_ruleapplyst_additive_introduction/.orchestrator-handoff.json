@@ -1,103 +1,85 @@
 {
   "task_number": 562,
   "session_id": "sess_1785926778_90c7a6_562",
-  "agent_type": "planner-agent",
+  "agent_type": "cslib-implementation-agent",
   "orchestrator_mode": true,
-  "phase": "plan",
-  "status": "planned",
+  "phase": "implement",
+  "status": "implemented",
   "plan_path": "specs/562_tableau_ruleapplyst_additive_introduction/plans/01_st-ladder-additive-insertion.md",
-  "report_path": "specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md",
-  "plan_metadata": {
-    "phases": 3,
-    "total_effort_hours": 2,
-    "complexity": "simple",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1], [2], [3]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_ruleapplyst-additive-ladder.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-08-05"
-      }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
-  },
+  "summary_path": "specs/562_tableau_ruleapplyst_additive_introduction/summaries/01_st-ladder-additive-insertion-summary.md",
+  "phases_completed": 3,
+  "phases_total": 3,
   "phases": [
     {
       "number": 1,
       "name": "Insert the Verified St Ladder",
-      "status": "NOT STARTED",
-      "depends_on": [],
-      "verification_tier": "full",
-      "commit_mode": "atomic-batch",
-      "batch_file_set": ["Cslib/Logics/Modal/Tableau/Saturation.lean"],
-      "effort_hours": 0.5,
-      "goal": "Land the nine machine-verified declarations verbatim from artifacts/st-ladder-verified.lean, immediately before `end Cslib.Logic.Modal.Tableau`, renaming the section marker to drop the ADDITIVE PROBE scaffolding language. Build green at 3313 jobs."
+      "status": "COMPLETED",
+      "commit": "task 562 phase 1: insert verified St ladder"
     },
     {
       "number": 2,
       "name": "Expand Docstrings and Module Docstring",
-      "status": "NOT STARTED",
-      "depends_on": [1],
-      "verification_tier": "local",
-      "commit_mode": "per-substep",
-      "effort_hours": 1,
-      "goal": "Raise the nine placeholder docstrings to Saturation.lean's existing explanatory depth and add a `## Main Definitions` entry for the St ladder. Docstrings must state that RuleApply is BRIDGED INTO RuleApplySt Unit, never equal to it."
+      "status": "COMPLETED",
+      "commit": "task 562 phase 2: expand docstrings and module docstring"
     },
     {
       "number": 3,
       "name": "Full Verification Gate",
-      "status": "NOT STARTED",
-      "depends_on": [2],
-      "verification_tier": "full",
-      "commit_mode": "per-substep",
-      "effort_hours": 0.5,
-      "goal": "Confirm every CI gate matches its measured baseline, gating lake lint and lake shake on DELTA rather than exit code."
+      "status": "COMPLETED",
+      "commit": "verification-only, no file changes"
     }
   ],
-  "verification_gate_for_final_phase": {
+  "verification_gate_results": {
     "lake_build_cslib_jobs": 3313,
     "baseline_jobs": 3313,
+    "build_matches_baseline": true,
     "sorry_census_modal_tableau_count": 1,
     "sorry_census_modal_tableau_declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
-    "sorry_census_anchor_note": "anchor on the declaration name; the recorded FrameSoundness.lean:1227 line number may drift",
+    "sorry_census_site": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1251",
     "new_axiom_declarations": 0,
-    "bridge_axiom_dependencies": ["propext", "Quot.sound"],
+    "bridge_axiom_dependencies": {
+      "modalStepBranchGen_eq_St": ["propext", "Quot.sound"],
+      "modalExpandBranchesGen_eq_St": ["propext", "Quot.sound"],
+      "modalTableauGen_eq_St": ["propext", "Quot.sound"]
+    },
     "checkInitImports_exit": 0,
     "lint_style_exit": 0,
-    "lake_lint_gate": "DELTA only -- exits 1 at baseline with 145 pre-existing unusedArguments findings repo-wide; require 145 -> 145 and 0 findings in Saturation.lean",
-    "lake_shake_gate": "no Modal/Tableau findings AND total count stays 9 -- do NOT gate on exit 0 (exits 1 at baseline)",
-    "lake_test_exit": 0
+    "lake_lint_findings": 145,
+    "lake_lint_baseline": 145,
+    "lake_lint_delta": 0,
+    "lake_lint_saturation_findings": 0,
+    "lake_shake_findings": 9,
+    "lake_shake_baseline": 9,
+    "lake_shake_modal_tableau_findings": 0,
+    "lake_test_exit": 0,
+    "lake_test_jobs": 9378,
+    "vacuous_definitions": 0,
+    "purely_additive_confirmed": true,
+    "existing_declarations_edited": 0,
+    "imports_added": 0
   },
-  "task_description_correction_carried_forward": "RuleApply = RuleApplySt Unit is NOT a definitional equality and must not be attempted. RuleApplySt Atom Unit has an extra `Unit ->` argument and an extra `x Unit` result component; neither `Unit -> X = X` nor `X x Unit = X` holds definitionally, and forcing it would require editing RuleApply, which the purely-additive constraint forbids. The relationship is an explicit liftRuleApply embedding plus three proved bridges. Plan Phase 2 requires docstrings to say `bridged`, never `definitional`.",
-  "implementer_pitfalls_carried_forward": [
-    "The fuel = 0 case of modalExpandBranchesGen_eq_St is `simp only [modalExpandBranchesGen, modalExpandBranchesGenSt]` ONLY when the declarations live inside Saturation.lean (Lean shares the auxiliary matcher within a module). In a separate module the same simp only leaves an apparently-reflexive `X = X` goal that rfl refuses, and an explicit `cases hf : (branches.zip accs).findSome? ...` is needed. Paste artifacts/st-ladder-verified.lean directly into Saturation.lean; do NOT develop in a scratch module. artifacts/st_probe.lean is the separate-module variant and is NOT what lands.",
-    "Do not prove modalStepBranchGen_eq_St by induction on the branch b: `apply sf b acc` closes over the whole branch, not the tail, so the IH is about the wrong function. Factor Option.map out of findSome? first via findSome?_map_comm.",
-    "Do not reformulate the state list as List.replicate accs.length (). The `accs.map fun _ => ()` form is what makes the induction close with no side hypothesis, because it commutes through the loop's ++ appends and List.replicate.",
-    "Do not use StateM/StateT. The subsystem is deliberately monad-free and computable; a monadic formulation would change the elaborated term shape every downstream unfold depends on.",
-    "Anchor every edit on declaration names, never line numbers.",
-    "The consumer audit of Saturation.lean is COMPLETE (report section 1). Do not re-run it."
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/Saturation.lean"
   ],
-  "out_of_scope_confirmed": [
-    "modalExpandBranchesS4Keyed re-expression (migration step 4)",
-    "retiring the keys' double derivation (migration step 5)",
-    "retiring modalStepBranchS4Keyed for the ordered stepper (migration step 6)",
+  "zero_debt": {
+    "sorry_introduced": 0,
+    "axioms_introduced": 0,
+    "vacuous_definitions_introduced": 0,
+    "blocked": false
+  },
+  "task_description_correction_honored": "RuleApply = RuleApplySt Unit was never attempted as a definitional equality. liftRuleApply plus three proved bridges landed instead, and all docstrings state the relationship is bridged, never definitional.",
+  "out_of_scope_respected": [
+    "modalExpandBranchesS4Keyed re-expression",
+    "retiring the keys' double derivation",
+    "retiring modalStepBranchS4Keyed",
     "S4LoopInv.outDegEq removal",
-    "modalHintikkaSetGenSt (zero consumers today)",
+    "modalHintikkaSetGenSt",
     "box-plus key enrichment",
     "any edit to Rules.lean or Branch.lean",
     "re-running the consumer audit"
   ],
-  "zero_debt": {
-    "sorry_planned": 0,
-    "axioms_planned": 0,
-    "vacuous_definitions_planned": 0,
-    "blocked": false
-  },
   "continuation_pointer": {
-    "next_action": "dispatch /implement 562",
-    "gating_facts_for_implementer": "The code deliverable is already machine-verified end to end. Phase 1 is a verbatim paste of artifacts/st-ladder-verified.lean into Saturation.lean plus one section-marker rename; the real work is Phase 2's docstring quality. Do not re-derive the design, do not re-run the consumer audit, and do not develop the proofs in a scratch module."
+    "next_action": "task complete; ready for postflight status transition to [COMPLETED]",
+    "follow_up_task_suggestion": "modalExpandBranchesS4Keyed migration onto modalExpandBranchesGenSt (threading keyss as the abstract state) is a separate, later task per the plan's non-goals"
   }
 }

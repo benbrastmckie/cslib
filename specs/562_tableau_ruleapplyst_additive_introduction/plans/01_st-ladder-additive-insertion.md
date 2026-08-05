@@ -232,28 +232,38 @@ matches the placeholder one-liners from `artifacts/st-ladder-verified.lean` (e.g
 
 ---
 
-### Phase 3: Full Verification Gate [NOT STARTED]
+### Phase 3: Full Verification Gate [COMPLETED]
 
 **Goal**: Confirm every CI gate matches its measured baseline, with zero debt introduced.
 
 **Tasks**:
-- [ ] `lake build Cslib` — confirm green at **3313 jobs** (baseline 3313).
-- [ ] Sorry census over `Cslib/Logics/Modal/Tableau/` — confirm **exactly 1**, and that the single
+- [x] `lake build Cslib` — confirm green at **3313 jobs** (baseline 3313). Confirmed: green at
+      3313 jobs.
+- [x] Sorry census over `Cslib/Logics/Modal/Tableau/` — confirm **exactly 1**, and that the single
       site is `branchSatisfiableIn_s4FC_ancestor_redirect` in
       `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (anchor on the declaration name; the line
-      number recorded during research was 1227 but line numbers drift).
-- [ ] Confirm **zero** new `axiom` declarations. Run `#print axioms` (or `lean_verify`) on
+      number recorded during research was 1227 but line numbers drift). Confirmed: exactly one
+      `sorry` in `Cslib/Logics/Modal/Tableau/` (`FrameSoundness.lean:1251`, the
+      `branchSatisfiableIn_s4FC_ancestor_redirect` blocked case; the build-warning line number
+      1227 points at the enclosing declaration's signature, not the `sorry` token itself).
+- [x] Confirm **zero** new `axiom` declarations. Run `#print axioms` (or `lean_verify`) on
       `modalStepBranchGen_eq_St`, `modalExpandBranchesGen_eq_St`, and `modalTableauGen_eq_St`;
       each must depend on `propext` and `Quot.sound` only — no `Classical.choice`, no `sorryAx`.
-- [ ] `lake exe checkInitImports` — exit **0**.
-- [ ] `lake exe lint-style` — exit **0**.
-- [ ] `lake lint` — gate on **delta**, not exit code. It exits 1 at baseline with 145 pre-existing
+      Confirmed via `lean_verify` on all three: `{"axioms":["propext","Quot.sound"],"warnings":[]}`
+      for each. `git diff` against pre-task HEAD shows zero new `axiom` lines anywhere.
+- [x] `lake exe checkInitImports` — exit **0**. Confirmed.
+- [x] `lake exe lint-style` — exit **0**. Confirmed.
+- [x] `lake lint` — gate on **delta**, not exit code. It exits 1 at baseline with 145 pre-existing
       `unusedArguments` findings repo-wide. Capture the findings and confirm the count is 145 and
-      that `Saturation.lean` contributes 0.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — gate on "**no Modal/Tableau findings
-      AND count stays 9**", not on exit 0 (it exits 1 at baseline).
-- [ ] `lake test` — exit **0**, including `S4LoopGuardRegression` and `ModalFrameSeparation`.
-- [ ] Confirm no vacuous definitions were introduced (`:= True`, `:= Unit`, `:= trivial`).
+      that `Saturation.lean` contributes 0. Confirmed: "Found 145 errors" (delta 0), zero findings
+      mentioning `Saturation.lean`.
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — gate on "**no Modal/Tableau findings
+      AND count stays 9**", not on exit 0 (it exits 1 at baseline). Confirmed: 9 file entries,
+      none in `Modal/Tableau`.
+- [x] `lake test` — exit **0**, including `S4LoopGuardRegression` and `ModalFrameSeparation`.
+      Confirmed: exit 0, both tests built successfully (9378 jobs).
+- [x] Confirm no vacuous definitions were introduced (`:= True`, `:= Unit`, `:= trivial`).
+      Confirmed: zero matches in `Saturation.lean`.
 
 **Timing**: 0.5 hours
 
@@ -280,15 +290,15 @@ the tree, so a mismatch means the insertion diverged from the verified artifact.
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib` green at 3313 jobs.
-- [ ] `lake test` exit 0 (9378 jobs at research time), `S4LoopGuardRegression` and
+- [x] `lake build Cslib` green at 3313 jobs.
+- [x] `lake test` exit 0 (9378 jobs at research time), `S4LoopGuardRegression` and
       `ModalFrameSeparation` both passing.
-- [ ] Modal/Tableau sorry census exactly 1, at `branchSatisfiableIn_s4FC_ancestor_redirect`.
-- [ ] Zero new axioms; the three bridges depend on `propext` and `Quot.sound` only.
-- [ ] `lake exe checkInitImports` exit 0; `lake exe lint-style` exit 0.
-- [ ] `lake lint` delta zero (145 -> 145); zero findings in `Saturation.lean`.
-- [ ] `lake shake` count stays 9 with none in Modal/Tableau.
-- [ ] `git diff` confirms zero existing declarations edited and zero imports added.
+- [x] Modal/Tableau sorry census exactly 1, at `branchSatisfiableIn_s4FC_ancestor_redirect`.
+- [x] Zero new axioms; the three bridges depend on `propext` and `Quot.sound` only.
+- [x] `lake exe checkInitImports` exit 0; `lake exe lint-style` exit 0.
+- [x] `lake lint` delta zero (145 -> 145); zero findings in `Saturation.lean`.
+- [x] `lake shake` count stays 9 with none in Modal/Tableau.
+- [x] `git diff` confirms zero existing declarations edited and zero imports added.
 
 ## Artifacts & Outputs
 

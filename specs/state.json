@@ -1445,7 +1445,7 @@
     {
       "project_number": 562,
       "project_name": "tableau_ruleapplyst_additive_introduction",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Introduce RuleApplySt additively and bridge modalExpandBranchesGen",
       "topic": "Modal Logic",
@@ -1469,7 +1469,7 @@
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T11:12:14Z",
+      "last_updated": "2026-08-05T11:12:39Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785926778_90c7a6_562",
       "parent_task": null
@@ -1477,7 +1477,7 @@
     {
       "project_number": 563,
       "project_name": "tableau_boxplus_birth_keys",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Adopt Lemmon box-plus pairing at the birth-key level",
       "topic": "Modal Logic",
@@ -1488,10 +1488,16 @@
         "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md",
+          "type": "report",
+          "summary": "Box-plus birth-key enrichment: mint-payload correction, BoxPlusClosed scoping trap, world-bound freeness confirmed"
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T10:47:27Z",
+      "last_updated": "2026-08-05T11:17:37Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785926778_90c7a6_563",
       "parent_task": null

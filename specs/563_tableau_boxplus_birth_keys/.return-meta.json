@@ -1,0 +1,42 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-05T03:20:00Z",
+  "completed_at": "2026-08-05T04:35:00Z",
+  "artifacts": [
+    "specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md",
+    "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus.lean",
+    "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus_live.lean",
+    "specs/563_tableau_boxplus_birth_keys/artifacts/live-probe-full-output.txt",
+    "specs/563_tableau_boxplus_birth_keys/.orchestrator-handoff.json"
+  ],
+  "partial_progress": {
+    "stage": "research complete",
+    "details": "Report, handoff, and three executable probes written. Both corpus sweeps completed. Keyed track (8532 formulas, both orderings): verdict-neutral, 0 fuel exhaustion. Live track (8532 formulas): 0 verdict changes, fuel exhaustion 893 -> 412 (strictly better). The none-cell soundness audit (none->closed = 0, 0 unsound candidates after a fuel-600 recheck) was run on the 1416-formula corpus. Risk R2 is closed.",
+    "outstanding": [
+      "optional: re-run the none-cell audit at size <= 6 / fuel 100 to match the larger sweep -- strengthens evidence, not a blocker"
+    ]
+  },
+  "metadata": {
+    "session_id": "sess_1785926778_90c7a6_563",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "task_number": 563,
+    "task_type": "cslib",
+    "mandatory_gate_status": "DEMONSTRATED_STRUCTURALLY",
+    "zero_debt": {
+      "sorry_introduced": 0,
+      "axioms_introduced": 0,
+      "vacuous_definitions": 0,
+      "blocked": false
+    },
+    "verification_baseline_measured": {
+      "lake_build_frame_completeness_exit": 0,
+      "jobs": 900,
+      "sorry_warnings": 1,
+      "sorry_location": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1227"
+    },
+    "recommended_next_action": "dispatch /plan 563",
+    "estimated_phases": 5
+  }
+}

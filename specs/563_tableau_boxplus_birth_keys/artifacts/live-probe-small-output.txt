@@ -1,0 +1,12 @@
+cex (regression row asserts OPEN for the live driver):
+  live reference = (some false)
+  live BOXPLUS   = (some false)
+T: liveRef=(some true) livePlus=(some true)
+4: liveRef=(some true) livePlus=(some true)
+K: liveRef=(some true) livePlus=(some true)
+B: liveRef=(some false) livePlus=(some false)
+-- LIVE driver, 2 atoms, size<=5, fuel 60 (total=1416)
+   reference: closed=252 fuelExhausted=144
+   BOXPLUS  : closed=252 fuelExhausted=60
+   ref-OPEN -> PLUS-CLOSED = 0
+   ref-CLOSED -> PLUS-OPEN = 0

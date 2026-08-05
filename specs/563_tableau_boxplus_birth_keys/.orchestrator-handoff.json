@@ -1,0 +1,140 @@
+{
+  "task_number": 563,
+  "session_id": "sess_1785926778_90c7a6_563",
+  "agent_type": "cslib-research-agent",
+  "orchestrator_mode": true,
+  "phase": "research",
+  "status": "researched",
+  "report_path": "specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md",
+  "mandatory_gate": {
+    "name": "demonstrate that modalTableauS4Keyed_complete transports (not assume)",
+    "status": "DEMONSTRATED_STRUCTURALLY",
+    "location": "report section 3",
+    "argument": "modalHintikkaSetS4's conjunct 2 has literal arms `| .neg, .box _ => True` and `| .pos, .diamond _ => True`, so neither the guard nor the mint payload is visible to Hintikka-set-hood at the two minting shapes. This is the SAME fact hintikka_congr_S4's own docstring already relies on to prove keyed/live agreement unconditionally. modalTableauS4Keyed_complete consumes modalExpandBranchesS4Keyed_hintikka, modalExpandBranchesS4Keyed_openBranch_initial_mem and modalOpenBranchS4_countermodel as black boxes and never unfolds the guard.",
+    "residual_exposure": "field-count churn in S4LoopInv/S4KeyedHintikkaInv would break modalTableauS4Keyed_initial's positional refine; mitigated by recommending BoxPlusClosed be a derived lemma threaded as a hypothesis, NOT an invariant field (see risk R3)"
+  },
+  "key_findings": {
+    "critical_correction_to_task_description": "Enriching successorBirthContent ALONE makes keyLowerBd's minting case FALSE, not merely hard. The obligation is `successorBirthContent ⊆ relevantSetFinset (newForms ++ b) (modalNextWorld b)`, and relevantSetFinset is literal branch membership. Adding (pos, box psi) to the key requires T(box psi)@w' to be ON the branch at mint time. modalApplyOne's boxNeg/diamondPos arms emit only the UNWRAPPED forms. The mint payload must change in the same landing; the task description's 'keys and mint payload both change here' is correct and is a hard requirement, not a convenience.",
+    "rules_lean_must_not_be_edited": "modalApplyOne is shared by K/T/B/S5 drivers and by FmpMeasure.lean's _gen lemmas; boxed transmission is not K-sound. The boxed arm belongs in modalApplyOneS4Keyed, replacing its two `| none => modalApplyOne sf b acc` fallthroughs.",
+    "both_members_beats_boxed_only": "The prior-art variant in specs/553_.../artifacts/s4boxed.lean REPLACES (pos, psi) with (pos, box psi). That would falsify blockedRedirect_unwrapped_boxPos_mem and blockedRedirect_unwrapped_diaNeg_mem, two landed sorry-free lemmas explicitly retained for the route (1) successor plan. Task E's both-members reading is a strict superset and preserves them. Prefer the task's reading over the 553 report's sbcBoxed.",
+    "box_plus_is_free_in_the_world_bound_CONFIRMED": "modalSubfmls (.box a) = .box a :: modalSubfmls a (FmpMeasure.lean, def modalSubfmls) means box psi is in modalSubfmls phi0 whenever T(box psi)@w is on b (subset of modalUniverseS4 phi0). The enriched key stays inside signedSubfmls phi0, so signedSubfmls_card_le, signedSubfmls_powerset_card_le, modalWorldBoundS4 and the pigeonhole chain are untouched.",
+    "boxPlusClosed_naming_trap": "A universally quantified `forall p in k, boxPlusPair p in k` is FALSE. The witness pair (s, phi) enters by `insert` and neither closure direction holds for it (mint from F(box(box chi))@w has witness (neg, box chi) with neither (neg, chi) nor (neg, dia box chi) on the branch at birth). BoxPlusClosed MUST be scoped to the transmitted box-context filter. Report section 5.2 gives a provable shape.",
+    "additive_mint_shape_is_worth_20_proof_bodies": "Emit modalApplyOne's own payload `++ boxPlusExtraS4`, not an interleaved rewrite. Every existing membership proof into the payload is a List.mem_append_left / List.mem_cons_of_mem chain into the original list; under `old ++ extra` each survives with one extra wrapper, under a rewrite each must be re-derived.",
+    "prior_art_in_tree": [
+      "modalFourBoxProp / modalFourDiaNegProp (FrameRules.lean) -- box-plus at the RULE level, over acc.successorsOf, fires one step AFTER the mint edge exists",
+      "boxDiamondPersistence (Cslib/Logics/Bimodal/Metalogic/Decidability/Tableau.lean:343) -- transmits the box formula itself to the fresh time index; directly analogous payload shape"
+    ]
+  },
+  "blast_radius_measured": {
+    "files_with_executable_dependency": ["Cslib/Logics/Modal/Tableau/LoopChecking.lean"],
+    "files_with_prose_only_references": [
+      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean (1 hit, docstring)",
+      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (2 hits, docstrings)",
+      "CslibTests/S4LoopGuardRegression.lean (3 hits, docstrings)"
+    ],
+    "unblocked_eq_call_sites": 50,
+    "unblocked_eq_enclosing_declarations": 23,
+    "class_a_name_swap_only_families": 9,
+    "class_b_genuine_proof_work_families": 6,
+    "new_declarations_to_add": [
+      "boxPlusPair", "BoxPlusClosed", "boxPlusExtraS4", "modalApplyOneS4KeyedMint",
+      "modalApplyOneS4KeyedMint boxNeg/diaPos shape lemmas",
+      "blockedRedirect_boxed_boxPos_mem", "blockedRedirect_diaNeg_boxed_mem"
+    ],
+    "explicitly_untouched": [
+      "signedSubfmls_card_le", "signedSubfmls_powerset_card_le", "modalWorldBoundS4",
+      "modalUniverseS4", "relevantSetFinset", "keysUpdate_preserves_keysDistinct",
+      "blockingWorldS4Keyed_none_fresh", "Rules.lean", "the pigeonhole chain"
+    ]
+  },
+  "empirical_measurement": {
+    "artifact_keyed": "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus.lean",
+    "artifact_live": "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus_live.lean",
+    "variant_measured": "BOTH-members keys + additive mint payload (modalApplyOne payload ++ boxPlusExtra) -- distinct from the boxed-only sbcBoxed variant measured in specs/553",
+    "corpus": "2 atoms, size <= 6, 8532 formulas, fuel 100, both orderings",
+    "keyed_reference_closed": 1650,
+    "keyed_boxplus_closed": 1650,
+    "keyed_fuel_exhausted_reference": 0,
+    "keyed_fuel_exhausted_boxplus": 0,
+    "open_to_closed_soundness_regressions": 0,
+    "closed_to_open_completeness_changes": 0,
+    "cex_ordered": "OPEN under both (correct: cex is not s4Valid)",
+    "cex_unordered": "CLOSED under both (documented-unsound line unchanged; regression test row preserved)",
+    "T_4_K_axioms": "CLOSED under both, ordered and unordered",
+    "redirect_removed": "phiW acc at saturation: reference [2->1 0->2 0->1] (redirect) vs boxplus [2->3 0->2 0->1] (fresh world, no redirect)",
+    "live_guard_spot_checks": "cex OPEN under both; T/4/K CLOSED under both; B OPEN under both",
+    "live_guard_corpus_sweep": {
+      "artifact": "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus_live_small.lean",
+      "output": "specs/563_tableau_boxplus_birth_keys/artifacts/live-probe-small-output.txt",
+      "corpus": "2 atoms, size <= 5, fuel 60, 1416 formulas",
+      "closed_reference": 252,
+      "closed_boxplus": 252,
+      "fuel_exhausted_reference": 144,
+      "fuel_exhausted_boxplus": 60,
+      "open_to_closed": 0,
+      "closed_to_open": 0,
+      "none_to_closed": 0,
+      "none_to_open": 84,
+      "some_to_none": 0,
+      "unsound_candidates_after_refuel_600_recheck": 0,
+      "verdict": "R2 CLOSED, and favourably. Box-plus decides 84 MORE formulas within the same fuel and regresses none. Mechanism: blockingWorldS4 requires relevantSetFinset = successorBirthContent as an EQUALITY; an unwrapped-only birth content can never equal a matured world's live relevant set, because the 4-rule has by then added the boxed pairs there. Enriching the key makes the equality reachable, so blocking fires more reliably and fewer worlds are minted.",
+      "audit_note": "The open_to_closed / closed_to_open counters ignore fuel-exhausted rows by construction, so a none->closed row would slip past them -- that is exactly where an unsound closure would hide. It was audited separately and is 0.",
+      "larger_sweep_completed": {
+        "artifact": "specs/563_tableau_boxplus_birth_keys/artifacts/s4boxplus_live.lean",
+        "output": "specs/563_tableau_boxplus_birth_keys/artifacts/live-probe-full-output.txt",
+        "corpus": "2 atoms, size <= 6, fuel 100, 8532 formulas",
+        "closed_reference": 1650,
+        "closed_boxplus": 1650,
+        "fuel_exhausted_reference": 893,
+        "fuel_exhausted_boxplus": 412,
+        "open_to_closed": 0,
+        "closed_to_open": 0,
+        "caveat": "the none-cell audit (none->closed, the soundness-relevant check) was run at size <= 5 / fuel 60 only, not at this size. Re-running it larger would strengthen the evidence and is cheap; not a blocker."
+      }
+    }
+  },
+  "verification_baseline_measured_this_session": {
+    "lake_build_frame_completeness_exit": 0,
+    "jobs": 900,
+    "sorry_warnings": 1,
+    "sorry_location": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1227"
+  },
+  "recommended_scope_for_plan": {
+    "estimated_phases": 5,
+    "phase_sequence": [
+      "P1: purely additive definitions (boxPlusPair, boxPlusExtraS4, modalApplyOneS4KeyedMint + shape lemmas), unreferenced; green by construction",
+      "P2: switch modalApplyOneS4Keyed's two unblocked arms; restate the two _unblocked_eq lemmas; migrate the 18 Class-A sites. Key still unenriched, so keyLowerBd stays provable. GREEN CHECKPOINT.",
+      "P3: re-prove the Class-B payload lemmas (_outputs_subset_S4 pair, _outputsSubsetUniverse_S4, _preserves_bClosure, _preserves_worldsContiguousS4, _preserves_S4KeyedHintikkaInv). GREEN CHECKPOINT.",
+      "P4: enrich successorBirthContent + BoxPlusClosed + the three successorBirthContent_* lemmas + both _preserves_keyLowerBd. GATE: lake build Cslib.Logics.Modal.Tableau.FrameCompleteness",
+      "P5: land the payoff (blockedRedirect_boxed_*), re-check hintikka_congr_S4, lake test, sorry census still exactly 1, shake findings still 9 with none in Modal/Tableau"
+    ],
+    "ordering_constraint_is_load_bearing": "The payload change (P2) MUST precede the key change (P4). Reversed, P4's keyLowerBd goal is unprovable and an implementer will be tempted to sorry it.",
+    "risk": "medium -- corpus-neutral and world-bound-safe (both measured), but 23 declarations must be migrated and one live-track measurement is still outstanding"
+  },
+  "implementer_pitfalls": [
+    "Do NOT rewrite the existing two filter disjuncts into boxPlusPair form. The Or.inl <rfl, _> / Or.inr <rfl, _> steps in blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem and both successorBirthContent_*_subset_relevantSetFinset match the current syntactic shape. Append two disjuncts; note the reformulation in the docstring only.",
+    "Do NOT convert the whole filter predicate to Bool form -- it breaks the same four proofs. Keep the Prop-valued disjunction and make the new disjuncts decidable by matching on p.2 rather than by an existential.",
+    "Do NOT add BoxPlusClosed as an S4LoopInv or S4KeyedHintikkaInv field. modalTableauS4Keyed_initial (FrameCompleteness.lean) uses a positional refine with 10 + 5 holes and will break. Thread it as an extra hypothesis, the same treatment keysOriginS4 and keysRootEmpty already receive.",
+    "Do NOT edit Cslib/Logics/Modal/Tableau/Rules.lean. modalApplyOne is shared with K/T/B/S5.",
+    "Keep the per-formula `if b.any (. == sf') then none else some sf'` dedup guard in boxPlusExtraS4 -- modalApplyOneS4Keyed_persistentFresh_S4 and the measure argument both key off it.",
+    "modalApplyOneS4Keyed_persistentFresh_S4 looks like Class B but is Class A: it constrains only .persistent results and the mint is .linear, so its mint arms merely derive .linear != .persistent.",
+    "successorBirthContent's `insert (s, phi)` head must be preserved verbatim -- modalStepBranchS4Keyed_blocked_witness_mem is a one-line Finset.mem_insert_self consequence and is what keeps eBoxNegWitness/eDiamondPosWitness alive through the blocked case.",
+    "The 553 audit's corpus measurement was of the BOXED-ONLY variant and does not transfer to the both-members variant. This session re-measured; do not cite the 553 numbers for this design."
+  ],
+  "zero_debt": {
+    "sorry_introduced": 0,
+    "axioms_introduced": 0,
+    "vacuous_definitions": 0,
+    "blocked": false,
+    "escalation_condition": "If P4's FrameCompleteness gate cannot be repaired sorry-free, mark [BLOCKED] with the goal state reached. The sanctioned fallback if the LIVE track is the obstruction is a separate successorBirthContentPlus consumed only by blockingWorldS4Keyed (purely additive, zero live-track risk); that is not a narrowing of P4's own obligation."
+  },
+  "scope_boundary": {
+    "must_not_lift_into_foundations": true,
+    "reason": "box-plus is S4-scoped; the Lemmon filtration and Chagrov-Zakharyaschev Proposition 3.6 are stated for TRANSITIVE models only",
+    "attribution_status": "UNVERIFIED -- neither source is in the local literature corpus; carried forward from the task description and the 553 audit, not checked against the texts. The in-tree justification (modalFourBoxProp derives exactly these formulas one step later; s4FC supplies transitivity) is self-contained and sufficient."
+  },
+  "continuation_pointer": {
+    "next_action": "dispatch /plan 563",
+    "gating_facts_for_planner": "Read specs/563_tableau_boxplus_birth_keys/artifacts/live-probe-output.txt before fixing the enrichment site. If it shows any verdict drift on the live driver, take the successorBirthContentPlus fallback (risk R2) instead of in-place enrichment. The phase ordering (payload before key) is not negotiable."
+  }
+}

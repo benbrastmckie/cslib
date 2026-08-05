@@ -632,32 +632,61 @@ worked around.
 
 ---
 
-### Phase 6: Migrate the judgment-needing KnownWorlds families [NOT STARTED]
+### Phase 6: Migrate the judgment-needing KnownWorlds families [COMPLETED]
 
 **Goal**: The per-site-judgment phase. Migrate the two families whose call sites genuinely change
 — `modalKnownWorlds_mono_append` (arity change) and the `modalMaxWorld` family (binder variance) —
 plus the remaining straightforward KnownWorlds duplicates.
 
 **Tasks**:
-- [ ] Delete the 5 `modalKnownWorlds_mono_append_*` copies and rewrite every call site to the
+- [x] Delete the 5 `modalKnownWorlds_mono_append_*` copies and rewrite every call site to the
       published `∀ x ∈` form. Call sites written `h xs b x hx` become `h xs b hx`. **Every call
-      site must be touched** — this is not a pure delete-and-import.
-- [ ] Update the 2 internal `⊆`-form call sites in `FmpMeasure.lean` to the `∀ x ∈` form, or
-      retain a thin local `⊆` bridge if that is cleaner; state which was chosen.
-- [ ] Migrate the `modalMaxWorld` family. 26 of 30 call sites use `apply` and are binder-mode
+      site must be touched** — this is not a pure delete-and-import. *(Deviation: only 5 remained
+      at phase start, not 6 — `FmpMeasure`'s copy was already consolidated in Phase 5's forced
+      collision cleanup. Deviation: no call site needed rewriting at all. All 5 remaining copies
+      (`BDriver_B`, `FrameCompleteness_C`, `FrameSoundness_FS`, `LoopChecking_S4`,
+      `S5Simplification_S5`) were ALREADY stated in the exact `∀ x ∈` form byte-identical to the
+      published one — confirmed by reading each before editing. `S5Simplification_S5` had zero
+      call sites (dead code), deleted outright; the other 4 had straightforward
+      `exact NAME args` call sites, name-substituted with no arity change.)*
+- [x] Update the 2 internal `⊆`-form call sites in `FmpMeasure.lean` to the `∀ x ∈` form, or
+      retain a thin local `⊆` bridge if that is cleaner; state which was chosen. *(Not applicable
+      here: `FmpMeasure.lean`'s own `⊆`-form copy and its 3 internal call sites were already
+      resolved in Phase 5's forced collision cleanup, where empirical testing showed `exact`
+      unifies the `⊆` goal against the published `∀ x ∈` term via defeq with no rewrite needed —
+      no bridge lemma required.)*
+- [x] Migrate the `modalMaxWorld` family. 26 of 30 call sites use `apply` and are binder-mode
       insensitive — they typecheck unchanged. **The 4 remaining sites are term-mode and require
-      manual adjustment**; each is a single line inside a wrapper proof this phase deletes:
-      - `FmpMeasure.lean` ~1884: `modalMaxWorld_foldl_le l 0 M (Nat.zero_le _) h`
-      - `S5Simplification.lean` ~1167: `modalMaxWorld_foldl_le_of_forall_S5w (Nat.zero_le M) h`
-      - `FiveSimplification.lean` ~3328: `modalMaxWorld_foldl_le_of_forall_Five (Nat.zero_le M) h`
-      - `LoopChecking.lean` ~6201: `foldl_max_le_of_forall_le l K 0 (Nat.zero_le _) h`
-      Locate each by surrounding declaration name, not line number.
-- [ ] Delete the 2 `modalKnownWorlds_nodup_*` duplicates that remain after Phase 1 and route to
+      manual adjustment**; each is a single line inside a wrapper proof this phase deletes.
+      *(Deviation: these 4 "term-mode sites" turned out to be exactly what the plan's own
+      parenthetical says — "each a single line inside a wrapper proof being deleted anyway" —
+      i.e. each is the WRAPPER's OWN internal call to its private `foldl` helper, not a separate
+      external call site needing adjustment. Once each wrapper (`modalMaxWorld_le_of_forall_label_le_Five`/
+      `_S5w`) was deleted, its helper (`modalMaxWorld_foldl_le_of_forall_Five`/`_S5w`) had zero
+      remaining call sites and was deleted too, with no manual line-by-line adjustment ever
+      needed. `LoopChecking.lean`'s `modalMaxWorld_le_of_forall_label_le` (all-explicit-binder
+      form, the plan's nominal "origin") was already migrated in Phase 5's forced cleanup — its
+      9 internal `apply` call sites needed no edit; its `foldl_max_le_of_forall_le` helper was
+      left in place, unique name, no collision, not touched here. Remaining 2 copies
+      (`FiveSimplification.lean` `_Five`, `S5Simplification.lean` `_S5w`) deleted along with their
+      respective helpers; all `apply` call sites (10 + 5 respectively) name-substituted with no
+      arity change.)*
+- [x] Delete the 2 `modalKnownWorlds_nodup_*` duplicates that remain after Phase 1 and route to
       the published `modalKnownWorlds_nodup`. `modalKnownWorlds_nodup_S4` is public and live — it
       is a consumer of the published fact, not a deletion target, unless it is itself a pure
-      duplicate wrapper.
-- [ ] Delete the 2 `mem_boxPositivesOf` duplicates.
-- [ ] Remove orphaned `Local re-derivation` comments.
+      duplicate wrapper. *(Deviation: only 1 remained, not 2 — `FmpMeasure`'s origin was already
+      consolidated in Phase 5. Classified `LoopChecking.lean`'s public, live
+      `modalKnownWorlds_nodup_S4`: its statement is byte-identical to the published
+      `modalKnownWorlds_nodup` (same signature, independently re-proved) — a pure duplicate
+      wrapper, not a genuine differently-shaped consumer. Confirmed no repo-wide use outside
+      `LoopChecking.lean` itself before deleting. Deleted; its 2 call sites redirected.)*
+- [x] Delete the 2 `mem_boxPositivesOf` duplicates. *(Done: `LoopChecking.lean` `_S4`,
+      `S5Simplification.lean` `_S5`, both byte-identical to the published form. `FmpMeasure`'s
+      origin was already consolidated in Phase 5.)*
+- [x] Remove orphaned `Local re-derivation` comments. *(Removed along with each deleted block;
+      also removed a now-fully-stale section header in `S5Simplification.lean`
+      ("`modalKnownWorlds` Local Re-Derivations") that no longer preceded any declaration once
+      both facts it described were gone.)*
 
 **Timing**: 2 hours
 

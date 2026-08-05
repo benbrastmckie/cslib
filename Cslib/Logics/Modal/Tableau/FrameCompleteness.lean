@@ -4626,6 +4626,117 @@ lemma modalApplyOneS4Keyed_boxNeg_mint_sat (φ₀ : Proposition Atom)
       · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).1 hsign
       · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).2 hsign
 
+/-- **Mint-unblocked, diamond-positive shape: step soundness.** Dual of
+`modalApplyOneS4Keyed_boxNeg_mint_sat` -- mirrors the plain-K diamond-positive mint arm inline
+in the historical monolith's ported body (`FrameSoundness.lean`, the `pos`/`diamond φ` case),
+with the same `boxPlusExtraS4_sat` addition. -/
+lemma modalApplyOneS4Keyed_diaPos_mint_sat (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ w = none)
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (hFC : s4FC m.r)
+    (hInv : accFreshInv b acc)
+    (hsfmem : (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hacc : ∀ u v, acc.hasEdge u v → m.r (f u) (f v))
+    (hb : ∀ sf ∈ b, sfSat m f sf) :
+    ∃ nf, modalApplyOneS4Keyed φ₀ keys (⟨.pos, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+        = (RuleResult.linear nf, acc.addEdge w (modalNextWorld b)) ∧
+      branchSatisfiableIn s4FC (nf ++ b) (acc.addEdge w (modalNextWorld b)) := by
+  have hAOeq := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ w hblock
+  rw [hAOeq, modalApplyOneS4KeyedMint_diaPos_eq_S4]
+  refine ⟨_, rfl, ?_⟩
+  have htrans := hFC.2
+  have hposdia : Satisfies m (f w) (Proposition.diamond ψ) := (hb _ hsfmem).1 rfl
+  simp only [Satisfies] at hposdia
+  obtain ⟨ww, hwwr, hwwψ⟩ := hposdia
+  set w' := modalNextWorld b with hw'def
+  let f' : WorldIndex → W := fun n => if n = w' then ww else f n
+  refine ⟨W, m, f', hFC, ?_, ?_⟩
+  · intro u v hedge
+    simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons,
+      Bool.or_eq_true] at hedge
+    rcases hedge with hedge | hedge
+    · simp only [Bool.and_eq_true, beq_iff_eq] at hedge
+      obtain ⟨rfl, rfl⟩ := hedge
+      have hw_ne : w ≠ w' := Nat.ne_of_lt (modalNextWorld_gt b _ hsfmem)
+      rw [show f' w = f w from if_neg hw_ne, show f' w' = ww from if_pos rfl]
+      exact hwwr
+    · have huw' : u ≠ w' := by
+        intro heq'
+        have hfresh := (hInv u v hedge).1
+        rw [heq'] at hfresh
+        exact Nat.lt_irrefl _ hfresh
+      have hvw' : v ≠ w' := by
+        intro heq'
+        have hfresh := (hInv u v hedge).2
+        rw [heq'] at hfresh
+        exact Nat.lt_irrefl _ hfresh
+      simp only [f', if_neg huw', if_neg hvw']
+      exact hacc u v hedge
+  · intro sf' hmem'
+    simp only [List.mem_append, List.mem_cons] at hmem'
+    rcases hmem' with (((rfl | hmem_bp) | hmem_dn) | hmem_bpe) | hmem_old
+    · refine ⟨fun _ => ?_, fun h => by simp at h⟩
+      simp only [f', if_pos rfl]
+      exact hwwψ
+    · simp only [List.mem_filterMap] at hmem_bp
+      obtain ⟨⟨ψ', src⟩, hpairMem, hsf'_from⟩ := hmem_bp
+      split_ifs at hsf'_from with hsrceq hinb
+      simp only [Option.some.injEq] at hsf'_from
+      subst hsf'_from
+      simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
+      obtain ⟨bsf, hbsfMem, hbsfeq⟩ := hpairMem
+      split_ifs at hbsfeq with hbsfpos
+      cases hbf : bsf.formula with
+      | box ψ'' =>
+        rw [hbf] at hbsfeq
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbsfeq
+        obtain ⟨hψeq, hsrc⟩ := hbsfeq
+        have hsrc_w : bsf.label = w := by rw [hsrc]; simpa using hsrceq
+        have hbox_sat := (hb bsf hbsfMem).1 (by simpa using hbsfpos)
+        rw [hbf, hsrc_w] at hbox_sat
+        simp only [Satisfies] at hbox_sat
+        refine ⟨fun _ => ?_, fun h => by simp at h⟩
+        simp only [f', if_pos rfl]
+        rw [← hψeq]
+        exact hbox_sat ww hwwr
+      | _ => simp [hbf] at hbsfeq
+    · simp only [List.mem_filterMap] at hmem_dn
+      obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hmem_dn
+      by_cases hbsfsign : (bsf.sign == Sign.neg && bsf.label == w) = true
+      · rw [if_pos hbsfsign] at hbsfprop
+        cases hbf : bsf.formula with
+        | diamond ψ'' =>
+          simp only [hbf] at hbsfprop
+          by_cases hinb :
+              (b.any (· == (⟨.neg, ψ'', w'⟩ : SignedFormula (Proposition Atom) WorldIndex)))
+                = true
+          · rw [if_pos hinb] at hbsfprop; simp at hbsfprop
+          · rw [if_neg hinb] at hbsfprop
+            simp only [Option.some.injEq] at hbsfprop
+            subst hbsfprop
+            have hsign : bsf.sign = .neg ∧ bsf.label = w := by
+              simp only [Bool.and_eq_true, beq_iff_eq] at hbsfsign
+              exact hbsfsign
+            have hdiaNeg := (hb bsf hbsfMem).2 hsign.1
+            rw [hbf, hsign.2] at hdiaNeg
+            simp only [Satisfies] at hdiaNeg
+            push Not at hdiaNeg
+            refine ⟨fun h => by simp at h, fun _ => ?_⟩
+            simp only [f', if_pos rfl]
+            exact hdiaNeg ww hwwr
+        | _ => simp [hbf] at hbsfprop
+      · rw [if_neg hbsfsign] at hbsfprop; simp at hbsfprop
+    · exact boxPlusExtraS4_sat m f htrans b w hb ww hwwr sf' hmem_bpe
+    · have hlabel_ne : sf'.label ≠ w' := Nat.ne_of_lt (modalNextWorld_gt b sf' hmem_old)
+      have hf'_eq : f' sf'.label = f sf'.label := by simp only [f', if_neg hlabel_ne]
+      constructor
+      · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).1 hsign
+      · intro hsign; rw [hf'_eq]; exact (hb sf' hmem_old).2 hsign
+
 end Cslib.Logic.Modal.Tableau
 
 end

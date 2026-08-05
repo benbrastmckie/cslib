@@ -1676,48 +1676,6 @@ proof-engineering matter, not a further structural gap) is closed in the "Mintin
 Equality Closure" section below. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Transitivity of `modalSubfmls`: a subformula of a subformula is a subformula.
-`FmpMeasure.lean`'s `modalSubfmls_trans` is file-private (as are its siblings `_B`/`_S5`/`_Five`
-in their own files); this is the S4-local copy, needed to derive `φ ∈ modalSubfmls φ₀` (hence
-`signedSubfmls` membership) for the box/diamond witness in the minting-content equality this
-groundwork supports. -/
-private lemma modalSubfmls_trans_S4 {a b c : Proposition Atom}
-    (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
-  induction c with
-  | atom p =>
-    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
-  | bot =>
-    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
-  | imp x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | and x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | or x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | box x ihx =>
-    simp only [modalSubfmls, List.mem_cons] at hbc
-    rcases hbc with rfl | hx
-    · exact hab
-    · exact List.mem_cons_of_mem _ (ihx hx)
-  | diamond x ihx =>
-    simp only [modalSubfmls, List.mem_cons] at hbc
-    rcases hbc with rfl | hx
-    · exact hab
-    · exact List.mem_cons_of_mem _ (ihx hx)
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Extraction: the formula-component of any `modalUniverseS4 φ₀` member is a subformula of
 `φ₀`. S4-local restatement of `FmpMeasure.lean`'s file-private `modalUniverse_mem_formula`. -/
 private lemma modalUniverseS4_mem_formula {φ₀ : Proposition Atom}
@@ -1899,7 +1857,7 @@ private lemma boxProps_outputs_subset_S4 (φ₀ : Proposition Atom)
       have hψsub : (Proposition.box ψ) ∈ modalSubfmls φ₀ :=
         modalUniverseS4_mem_formula (hb _ hψbox)
       have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) := by simp [modalSubfmls]
-      exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans_S4 hψmem hψsub)
+      exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans hψmem hψsub)
   · simp at heq
 
 omit [Hashable Atom] in
@@ -1933,7 +1891,7 @@ private lemma diaNegProps_outputs_subset_S4 (φ₀ : Proposition Atom)
           have hmem := modalUniverseS4_mem_formula (hb sf' hsf'mem)
           rwa [hform] at hmem
         have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) := by simp [modalSubfmls]
-        exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans_S4 hψmem hψsub)
+        exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans hψmem hψsub)
     · simp at heq
   · simp at heq
 
@@ -1976,7 +1934,7 @@ lemma modalApplyOne_diamondPos_outputs_subset_S4
   intro x hx
   simp only [List.mem_cons, List.mem_append] at hx
   rcases hx with (rfl | hbox) | hdia
-  · exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans_S4 hφmem hsrc)
+  · exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans hφmem hsrc)
   · exact boxProps_outputs_subset_S4 φ₀ b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset_S4 φ₀ b w hb hwbound x hdia
 
@@ -2018,7 +1976,7 @@ lemma modalApplyOne_boxNeg_outputs_subset_S4
   intro x hx
   simp only [List.mem_cons, List.mem_append] at hx
   rcases hx with (rfl | hbox) | hdia
-  · exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans_S4 hφmem hsrc)
+  · exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans hφmem hsrc)
   · exact boxProps_outputs_subset_S4 φ₀ b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset_S4 φ₀ b w hb hwbound x hdia
 
@@ -2159,7 +2117,7 @@ literal box-neg minting payload (`modalApplyOne_boxNeg_mint_fst_S4`) via the `hn
 hypothesis (stated in terms of `modalApplyOne` rather than the raw payload literal, so the
 caller only needs `modalApplyOne`'s actual output, not to hand-reconstruct its list shape) plus
 the branch-closure witness fact (`hb`/`hsf`, via `modalUniverseS4_mem_formula`/
-`modalSubfmls_trans_S4`) that the witness formula `φ` itself lies in `signedSubfmls φ₀`. -/
+`modalSubfmls_trans`) that the witness formula `φ` itself lies in `signedSubfmls φ₀`. -/
 private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (w : WorldIndex) (φ : Proposition Atom)
@@ -2177,7 +2135,7 @@ private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
     have h1 : (Proposition.box φ) ∈ modalSubfmls φ₀ := modalUniverseS4_mem_formula (hb _ hsf)
     have h2 : φ ∈ modalSubfmls (Proposition.box φ) :=
       List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
-    exact modalSubfmls_trans_S4 h2 h1
+    exact modalSubfmls_trans h2 h1
   have hwit : ((Sign.neg, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀ :=
     mem_signedSubfmls_of_formula_S4 .neg hφsub
   intro p hp
@@ -2249,7 +2207,7 @@ private lemma successorBirthContent_diamondPos_subset_relevantSetFinset
     have h1 : (Proposition.diamond φ) ∈ modalSubfmls φ₀ := modalUniverseS4_mem_formula (hb _ hsf)
     have h2 : φ ∈ modalSubfmls (Proposition.diamond φ) :=
       List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
-    exact modalSubfmls_trans_S4 h2 h1
+    exact modalSubfmls_trans h2 h1
   have hwit : ((Sign.pos, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀ :=
     mem_signedSubfmls_of_formula_S4 .pos hφsub
   intro p hp
@@ -2738,7 +2696,7 @@ lemma modalStepBranchS4_preserves_keysInUniverse (φ₀ : Proposition Atom)
             modalUniverseS4_mem_formula (hb _ hsfmem')
           have h2 : ψ ∈ modalSubfmls (Proposition.box ψ) :=
             List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
-          exact modalSubfmls_trans_S4 h2 h1
+          exact modalSubfmls_trans h2 h1
         rw [Prod.mk.injEq] at hwk
         obtain ⟨-, hkeq2⟩ := hwk
         subst hkeq2
@@ -2760,7 +2718,7 @@ lemma modalStepBranchS4_preserves_keysInUniverse (φ₀ : Proposition Atom)
             modalUniverseS4_mem_formula (hb _ hsfmem')
           have h2 : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
             List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
-          exact modalSubfmls_trans_S4 h2 h1
+          exact modalSubfmls_trans h2 h1
         rw [Prod.mk.injEq] at hwk
         obtain ⟨-, hkeq2⟩ := hwk
         subst hkeq2
@@ -2818,7 +2776,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysInUniverse (φ₀ : Propositio
             modalUniverseS4_mem_formula (hb _ hsfmem')
           have h2 : ψ ∈ modalSubfmls (Proposition.box ψ) :=
             List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
-          exact modalSubfmls_trans_S4 h2 h1
+          exact modalSubfmls_trans h2 h1
         rw [Prod.mk.injEq] at hwk
         obtain ⟨-, hkeq2⟩ := hwk
         subst hkeq2
@@ -2840,7 +2798,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysInUniverse (φ₀ : Propositio
             modalUniverseS4_mem_formula (hb _ hsfmem')
           have h2 : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
             List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
-          exact modalSubfmls_trans_S4 h2 h1
+          exact modalSubfmls_trans h2 h1
         rw [Prod.mk.injEq] at hwk
         obtain ⟨-, hkeq2⟩ := hwk
         subst hkeq2
@@ -2849,54 +2807,6 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysInUniverse (φ₀ : Propositio
       exact hIU w k hwk
 
 /-! ## Assembling `keysTotal`'s Preservation -/
-
-omit [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mintGroup_label_eq_freshWorld`
-(unavailable across files): the K minting groups (`boxNeg`'s and `diamondPos`'s live shape)
-always emit formulas entirely labeled at the fresh witness `modalNextWorld b`, since the
-witness, `boxProps`, and `diaNegProps` are all constructed at that one fresh label. -/
-private lemma mintGroup_label_eq_freshWorld_S4
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
-    (s0 : Sign) (ψ0 : Proposition Atom) :
-    ∀ x ∈ ((⟨s0, ψ0, modalNextWorld b⟩ :
-        SignedFormula (Proposition Atom) WorldIndex) ::
-      (boxPositivesOf b).filterMap (fun (ψ, src) =>
-        if src == w then
-          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
-            ⟨.pos, ψ, modalNextWorld b⟩
-          if b.any (· == sf') then none else some sf'
-        else none) ++
-      b.filterMap (fun sf' =>
-        if sf'.sign == .neg && sf'.label == w then
-          match sf'.formula with
-          | .diamond ψ =>
-            let prop : SignedFormula (Proposition Atom) WorldIndex :=
-              ⟨.neg, ψ, modalNextWorld b⟩
-            if b.any (· == prop) then none else some prop
-          | _ => none
-        else none)),
-    x.label = modalNextWorld b := by
-  intro x hx
-  simp only [List.mem_cons, List.mem_append] at hx
-  rcases hx with (rfl | hbox) | hdia
-  · rfl
-  · simp only [List.mem_filterMap] at hbox
-    obtain ⟨⟨ψ, src⟩, -, heq⟩ := hbox
-    split at heq
-    · split at heq
-      · simp at heq
-      · simp only [Option.some.injEq] at heq; subst heq; rfl
-    · simp at heq
-  · simp only [List.mem_filterMap] at hdia
-    obtain ⟨sf', -, heq⟩ := hdia
-    split at heq
-    · split at heq
-      · rename_i ψ hform
-        split at heq
-        · simp at heq
-        · simp only [Option.some.injEq] at heq; subst heq; rfl
-      · simp at heq
-    · simp at heq
 
 omit [Hashable Atom] in
 /-- The T-augmented rule `modalApplyOneT` never mints at its own two relevant shapes
@@ -3313,7 +3223,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
       obtain ⟨sf', hsf'mem, hsf'lab⟩ := (mem_modalKnownWorlds b x.label).mp hxlk
       have hbound : sf'.label ≤ modalWorldBoundS4 φ₀ := modalUniverseS4_mem_label (hb sf' hsf'mem)
       rw [hsf'lab] at hbound
-      exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans_S4 hxf hsrc)
+      exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans hxf hsrc)
     have hself : ∀ x ∈ modalTBoxSelf b φ w, x ∈ modalUniverseS4 φ₀ := by
       intro x hx
       simp only [modalTBoxSelf] at hx
@@ -3324,7 +3234,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
         have hbound : w ≤ modalWorldBoundS4 φ₀ := by
           have := modalUniverseS4_mem_label (hb _ hsfmem)
           simpa using this
-        exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans_S4 (by simp [modalSubfmls]) hsrc)
+        exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans (by simp [modalSubfmls]) hsrc)
     rcases hkeq : modalApplyOne (⟨.pos, .box φ, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨kResult, kAcc⟩
     have hkResult : kResult =
@@ -3368,7 +3278,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
       obtain ⟨sf', hsf'mem, hsf'lab⟩ := (mem_modalKnownWorlds b x.label).mp hxlk
       have hbound : sf'.label ≤ modalWorldBoundS4 φ₀ := modalUniverseS4_mem_label (hb sf' hsf'mem)
       rw [hsf'lab] at hbound
-      exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans_S4 hxf hsrc)
+      exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans hxf hsrc)
     have hself : ∀ x ∈ modalTDiaNegSelf b φ w, x ∈ modalUniverseS4 φ₀ := by
       intro x hx
       simp only [modalTDiaNegSelf] at hx
@@ -3379,7 +3289,7 @@ private lemma modalApplyOneT_boxPos_diaNeg_universe_S4
         have hbound : w ≤ modalWorldBoundS4 φ₀ := by
           have := modalUniverseS4_mem_label (hb _ hsfmem)
           simpa using this
-        exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans_S4 (by simp [modalSubfmls]) hsrc)
+        exact mem_modalUniverseS4_of' hbound (modalSubfmls_trans (by simp [modalSubfmls]) hsrc)
     rcases hkeq : modalApplyOne (⟨.neg, .diamond φ, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨kResult, kAcc⟩
     have hkResult : kResult =
@@ -3530,7 +3440,7 @@ omit [Hashable Atom] in
 /-- Outside the two K-minting shapes, and with `sf.formula` non-modal, every emitted formula
 lands in `modalUniverseS4 φ₀`: `modalApplyOne_prop_outputs_subset` gives formula ∈
 `modalSubfmls sf.formula` at the unchanged label `sf.label`, composed with `hb`'s own bound on
-`sf` via `modalSubfmls_trans_S4`. Universe-membership analog of
+`sf` via `modalSubfmls_trans`. Universe-membership analog of
 `modalApplyOne_nonModal_known_S4`. -/
 private lemma modalApplyOne_nonModal_universe_S4
     (φ₀ : Proposition Atom)
@@ -3558,17 +3468,17 @@ private lemma modalApplyOne_nonModal_universe_S4
       intro z hz
       obtain ⟨hzf, hzlabel⟩ := hprop z hz
       exact mem_modalUniverseS4_of' (hzlabel ▸ modalUniverseS4_mem_label hsfbound)
-        (modalSubfmls_trans_S4 hzf (modalUniverseS4_mem_formula hsfbound))
+        (modalSubfmls_trans hzf (modalUniverseS4_mem_formula hsfbound))
     · rw [hpr] at hprop
       intro z hz
       obtain ⟨hzf, hzlabel⟩ := hprop z hz
       exact mem_modalUniverseS4_of' (hzlabel ▸ modalUniverseS4_mem_label hsfbound)
-        (modalSubfmls_trans_S4 hzf (modalUniverseS4_mem_formula hsfbound))
+        (modalSubfmls_trans hzf (modalUniverseS4_mem_formula hsfbound))
     · rw [hpr] at hprop
       intro z hz
       obtain ⟨hzf, hzlabel⟩ := hprop z hz
       exact mem_modalUniverseS4_of' (hzlabel ▸ modalUniverseS4_mem_label hsfbound)
-        (modalSubfmls_trans_S4 hzf (modalUniverseS4_mem_formula hsfbound))
+        (modalSubfmls_trans hzf (modalUniverseS4_mem_formula hsfbound))
     · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
   · rw [if_neg hpa]
     rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
@@ -3704,7 +3614,7 @@ private lemma modalStepBranchS4KeyedOrdered_keys_subset
 /-- **`keysTotal`'s driver-level preservation** (the crux): every
 known world after an S4Keyed step has a recorded key. Assembled by a top-level split on whether
 `sf` is one of the two minting shapes: at the 2 minting shapes, the newly-minted world's label
-is exactly `modalNextWorld b` (`mintGroup_label_eq_freshWorld_S4`), which `keys'` gains an entry
+is exactly `modalNextWorld b` (`mintGroup_label_eq_freshWorld`), which `keys'` gains an entry
 for by construction; at the other 12 shapes, `modalApplyOneS4Keyed_nonMint_known_S4` shows no
 label beyond `modalKnownWorlds b` is ever introduced, so the new-known-world case never
 actually arises there and old keys (`keys ⊆ keys'`, `modalStepBranchS4Keyed_keys_subset`)
@@ -3748,7 +3658,7 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hmintfst := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
         have hresulteq2 := hresulteq.trans hmintfst
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .neg ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .neg ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -3797,7 +3707,7 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hmintfst := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
         have hresulteq2 := hresulteq.trans hmintfst
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .pos ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .pos ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -3875,7 +3785,7 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
 
 /-- **`keysTotal`'s ordered-driver preservation.** Verbatim transcription of
 `modalStepBranchS4_preserves_keysTotal` against the ordered stepper: the top-level
-minting/non-minting split, the `mintGroup_label_eq_freshWorld_S4` argument at the two minting
+minting/non-minting split, the `mintGroup_label_eq_freshWorld` argument at the two minting
 shapes, and `modalApplyOneS4Keyed_nonMint_known_S4` at the other twelve all consume only
 "`sf ∈ b`, this rule application produced `keys'`" -- never "`sf` is the first applicable
 formula" -- so the argument transfers unchanged once fed
@@ -3926,7 +3836,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysTotal (φ₀ : Proposition Ato
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hmintfst := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
         have hresulteq2 := hresulteq.trans hmintfst
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .neg ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .neg ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -3975,7 +3885,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysTotal (φ₀ : Proposition Ato
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hmintfst := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
         have hresulteq2 := hresulteq.trans hmintfst
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .pos ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .pos ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -4270,23 +4180,6 @@ lemma modalStepBranchS4KeyedOrdered_preserves_eNodup (φ₀ : Proposition Atom)
     subst he'
     exact hnodup
   · rw [hres] at hsf; simp at hsf
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- `outDeg` under `addEdge` at the matching source: local re-derivation of `FmpMeasure.lean`'s
-`private lemma outDeg_addEdge_self` (unavailable across files). -/
-private lemma outDeg_addEdge_self_S4 (acc : Accessibility) (w wf : WorldIndex) :
-    outDeg (acc.addEdge w wf) w = outDeg acc w + 1 := by
-  simp [outDeg, Accessibility.successorsOf, Accessibility.addEdge]
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- `outDeg` under `addEdge` is unchanged at any world other than the edge's source: local
-re-derivation of `FmpMeasure.lean`'s `private lemma outDeg_addEdge_ne` (unavailable across
-files). -/
-private lemma outDeg_addEdge_ne_S4 (acc : Accessibility) (w wf w' : WorldIndex) (h : w' ≠ w) :
-    outDeg (acc.addEdge w wf) w' = outDeg acc w' := by
-  simp only [outDeg, Accessibility.successorsOf, Accessibility.addEdge, List.filterMap_cons]
-  have : (w == w') = false := by simp only [beq_eq_false_iff_ne]; exact fun heq => h heq.symm
-  simp [this]
 
 /-- **`keysWorldsKnown`, a proof-internal auxiliary invariant** (not an `S4LoopInv` field: adding
 one would reopen the already-finalized struct design): every RECORDED key's world is
@@ -4957,7 +4850,7 @@ count. At the 2 minting shapes' UNBLOCKED sub-case, `modalApplyOneS4Keyed` reduc
 `modalApplyOne`, so K's own per-call obligation `modalApplyOne_outDeg_step` (`FmpMeasure.lean`,
 public) applies directly. At the BLOCKED sub-case, `newAcc = acc.addEdge sf.label wBlock` --
 `outDeg`'s bookkeeping is insensitive to whether the edge's target `wBlock` is a genuinely fresh
-witness or a recorded-key world, so the identical `outDeg_addEdge_self_S4`/`_ne_S4` argument K's
+witness or a recorded-key world, so the identical `outDeg_addEdge_self`/`_ne_S4` argument K's
 own minting case uses applies verbatim (no `keysWorldsKnown` dependency here, unlike
 `accFresh`/`accKnown`). -/
 lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
@@ -5039,10 +4932,10 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at he'
         subst he'
         rcases eq_or_ne w sf.label with hw | hw
-        · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
+        · rw [hw, outDeg_addEdge_self, houtdeg sf.label, List.filter_append,
             List.length_append]
           simp [hmshape]
-        · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
+        · rw [outDeg_addEdge_ne acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
           simp [hne]
@@ -5105,10 +4998,10 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at he'
         subst he'
         rcases eq_or_ne w sf.label with hw | hw
-        · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
+        · rw [hw, outDeg_addEdge_self, houtdeg sf.label, List.filter_append,
             List.length_append]
           simp [hmshape]
-        · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
+        · rw [outDeg_addEdge_ne acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
           simp [hne]
@@ -5240,10 +5133,10 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
         simp only [List.mem_singleton] at he'
         subst he'
         rcases eq_or_ne w sf.label with hw | hw
-        · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
+        · rw [hw, outDeg_addEdge_self, houtdeg sf.label, List.filter_append,
             List.length_append]
           simp [hmshape]
-        · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
+        · rw [outDeg_addEdge_ne acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
           simp [hne]
@@ -5306,10 +5199,10 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
         simp only [List.mem_singleton] at he'
         subst he'
         rcases eq_or_ne w sf.label with hw | hw
-        · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
+        · rw [hw, outDeg_addEdge_self, houtdeg sf.label, List.filter_append,
             List.length_append]
           simp [hmshape]
-        · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
+        · rw [outDeg_addEdge_ne acc sf.label wBlock w hw, houtdeg w,
             List.filter_append, List.length_append]
           have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
           simp [hne]
@@ -6080,7 +5973,7 @@ def worldsContiguousS4 (b : List (SignedFormula (Proposition Atom) WorldIndex)) 
 "old worlds carry over" half). At the 12 non-minting shapes, every emitted formula's label is
 already a known world of `b` (`modalApplyOneS4Keyed_nonMint_known_S4`), so `modalMaxWorld`
 cannot grow. At the 2 minting UNBLOCKED shapes, every emitted formula's label is exactly
-`modalNextWorld b` (`mintGroup_label_eq_freshWorld_S4`), so `modalMaxWorld` grows by exactly the
+`modalNextWorld b` (`mintGroup_label_eq_freshWorld`), so `modalMaxWorld` grows by exactly the
 one new label, which is directly known via the witness formula's own membership. At the BLOCKED
 sub-case, `result = .linear []` so the branch is unchanged. -/
 lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
@@ -6120,7 +6013,7 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .neg ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6173,7 +6066,7 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .pos ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6313,7 +6206,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .neg ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6366,7 +6259,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
         have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
-        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .pos ψ
+        have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -7855,141 +7748,6 @@ underpinning the per-step measure decrease (`FmpMeasure.lean:2788-2922`). Those 
 `private` and hence unreachable from this file; since the keyed S4 driver's territory is
 additive-only within `LoopChecking.lean` (not an edit to `FmpMeasure.lean`), the four lemmas are
 re-derived here verbatim (same proofs, `_S4`-suffixed names) rather than exposed upstream. -/
-
-/-- **Combinatorial core** (generic over any `BEq`/`LawfulBEq` type, mirroring
-`modalCount_notMem_append_drop`, `FmpMeasure.lean:2788`): appending `x` (a member of `U`, not yet
-in `l`) to the exclusion list `l` strictly drops, by at least one, the count of `U`-members
-excluded by `l`. -/
-private lemma modalCount_notMem_append_drop_S4
-    {α : Type*} [BEq α] [LawfulBEq α]
-    (U l : List α) (x : α)
-    (hxU : x ∈ U) (hxl : l.any (· == x) = false) :
-    U.countP (fun y => !((l ++ [x]).any (· == y))) + 1 ≤
-      U.countP (fun y => !(l.any (· == y))) := by
-  induction U with
-  | nil => simp at hxU
-  | cons u us ih =>
-    rcases List.mem_cons.mp hxU with rfl | hxU'
-    · have h1 : (x :: us).countP (fun y => !(l.any (· == y))) =
-          us.countP (fun y => !(l.any (· == y))) + 1 := by
-        rw [List.countP_cons]; simp [hxl]
-      have h2 : (x :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
-          us.countP (fun y => !((l ++ [x]).any (· == y))) := by
-        rw [List.countP_cons]; simp [List.any_append]
-      have hmono : us.countP (fun y => !((l ++ [x]).any (· == y))) ≤
-          us.countP (fun y => !(l.any (· == y))) := by
-        have hsub : List.Sublist (us.filter (fun y => !((l ++ [x]).any (· == y))))
-            (us.filter (fun y => !(l.any (· == y)))) := by
-          apply List.monotone_filter_right
-          intro y hy
-          simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
-            Bool.not_or, Bool.and_eq_true] at hy
-          exact hy.1
-        simpa [List.countP_eq_length_filter] using hsub.length_le
-      omega
-    · by_cases hlu : l.any (· == u)
-      · have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
-            us.countP (fun y => !(l.any (· == y))) := by
-          rw [List.countP_cons]; simp [hlu]
-        have hlu' : (l ++ [x]).any (· == u) = true := by
-          rw [List.any_append, hlu, Bool.true_or]
-        have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
-            us.countP (fun y => !((l ++ [x]).any (· == y))) := by
-          rw [List.countP_cons, hlu']; simp
-        have := ih hxU'
-        omega
-      · by_cases hux : u == x
-        · have hux' : u = x := LawfulBEq.eq_of_beq hux
-          subst hux'
-          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
-              us.countP (fun y => !(l.any (· == y))) + 1 := by
-            rw [List.countP_cons]; simp [hlu]
-          have h2 : (u :: us).countP (fun y => !((l ++ [u]).any (· == y))) =
-              us.countP (fun y => !((l ++ [u]).any (· == y))) := by
-            rw [List.countP_cons]; simp [List.any_append]
-          have hmono : us.countP (fun y => !((l ++ [u]).any (· == y))) ≤
-              us.countP (fun y => !(l.any (· == y))) := by
-            have hsub : List.Sublist (us.filter (fun y => !((l ++ [u]).any (· == y))))
-                (us.filter (fun y => !(l.any (· == y)))) := by
-              apply List.monotone_filter_right
-              intro y hy
-              simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
-                Bool.not_or, Bool.and_eq_true] at hy
-              exact hy.1
-            simpa [List.countP_eq_length_filter] using hsub.length_le
-          omega
-        · simp only [Bool.not_eq_true] at hlu
-          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
-              us.countP (fun y => !(l.any (· == y))) + 1 := by
-            rw [List.countP_cons]; simp [hlu]
-          have hlux' : (l ++ [x]).any (· == u) = false := by
-            rw [List.any_append, hlu, Bool.false_or, List.any_cons, List.any_nil,
-              Bool.or_false, beq_eq_false_iff_ne]
-            simp only [beq_iff_eq] at hux
-            exact fun h => hux h.symm
-          have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
-              us.countP (fun y => !((l ++ [x]).any (· == y))) + 1 := by
-            rw [List.countP_cons]; simp [hlux']
-          have := ih hxU'
-          omega
-
-/-- **Weak monotonicity** (mirroring `modalCount_notMem_mono`, `FmpMeasure.lean:2865`): growing
-the exclusion list's underlying membership set (`b ⊆ b'`) can only decrease (never increase) the
-count of `U`-members excluded by it. -/
-private lemma modalCount_notMem_mono_S4
-    {α : Type*} [BEq α] [LawfulBEq α]
-    (U b b' : List α)
-    (hsub : ∀ z ∈ b, z ∈ b') :
-    U.countP (fun y => !(b'.any (· == y))) ≤ U.countP (fun y => !(b.any (· == y))) := by
-  have hsubf : List.Sublist (U.filter (fun y => !(b'.any (· == y))))
-      (U.filter (fun y => !(b.any (· == y)))) := by
-    apply List.monotone_filter_right
-    intro y hy
-    rw [Bool.not_eq_true'] at hy ⊢
-    rw [List.any_eq_false] at hy ⊢
-    intro z hz
-    exact hy z (hsub z hz)
-  simpa [List.countP_eq_length_filter] using hsubf.length_le
-
-omit [Hashable Atom] in
-/-- **`R`-drop, linear/branching case** (mirroring `modalWork_drop_linear`,
-`FmpMeasure.lean:2887`): when the fired formula `sf` is added to the expanded set
-(`e' = e ++ [sf]`) and the child branch `b'` weakly extends `b`, the counting measure strictly
-drops by at least one. -/
-private lemma modalWork_drop_linear_S4
-    (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (hsfU : sf ∈ U) (hsfe : e.any (· == sf) = false) (hsub : ∀ z ∈ b, z ∈ b') :
-    modalWork U b' (e ++ [sf]) + 1 ≤ modalWork U b e := by
-  unfold modalWork
-  have hb := modalCount_notMem_mono_S4 U b b' hsub
-  have he := modalCount_notMem_append_drop_S4 U e sf hsfU hsfe
-  omega
-
-omit [Hashable Atom] in
-/-- **`R`-drop, persistent case** (mirroring `modalWork_drop_persistent`,
-`FmpMeasure.lean:2904`): when the expanded set is unchanged (`boxPos`/`diamondNeg`) but the child
-branch `b'` contains a fresh `U`-member `x0` not on `b`, the counting measure strictly drops by
-at least one. -/
-private lemma modalWork_drop_persistent_S4
-    (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
-    (x0 : SignedFormula (Proposition Atom) WorldIndex)
-    (hx0U : x0 ∈ U) (hx0b : x0 ∉ b) (hx0b' : x0 ∈ b') (hsub : ∀ z ∈ b, z ∈ b') :
-    modalWork U b' e + 1 ≤ modalWork U b e := by
-  unfold modalWork
-  have hstep : ∀ z ∈ b ++ [x0], z ∈ b' := by
-    intro z hz
-    rcases List.mem_append.mp hz with hz | hz
-    · exact hsub z hz
-    · rwa [List.mem_singleton.mp hz]
-  have hmono := modalCount_notMem_mono_S4 U (b ++ [x0]) b' hstep
-  have hx0notin : b.any (· == x0) = false := by
-    rw [Bool.eq_false_iff]
-    intro hcon
-    obtain ⟨z, hz, heq⟩ := List.any_eq_true.mp hcon
-    exact hx0b ((LawfulBEq.eq_of_beq heq) ▸ hz)
-  have hdrop := modalCount_notMem_append_drop_S4 U b x0 hx0U hx0notin
-  omega
 
 /-! ## Keyed-Driver Termination Measure: Per-Call Obligations for `modalApplyOneS4Keyed`
 
@@ -9632,56 +9390,6 @@ lemma modalStepBranchS4Keyed_proj_stepBranchGen (φ₀ : Proposition Atom)
       · rw [hres] at h; simp at h
       · rfl
 
-omit [Hashable Atom] in
-/-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_split`
-(`:3174`), territory-local per this file's own convention (`_S4` suffix) since the upstream
-lemma is `private` and out of territory. Identical proof, universe-generic in `U`. -/
-private lemma modalExpMeasure_split_S4
-    (U : List (SignedFormula (Proposition Atom) WorldIndex))
-    (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
-    (rest : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (restEs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (hlen : done.length = doneExp.length) :
-    modalExpMeasure U (done ++ bh :: rest) (doneExp ++ e :: restEs)
-      = modalExpMeasure U done doneExp + 3 ^ modalWork U bh e
-        + modalExpMeasure U rest restEs := by
-  simp only [modalExpMeasure, List.zip_append hlen, List.zip_cons_cons,
-             List.map_append, List.map_cons, List.sum_append, List.sum_cons]
-  omega
-
-omit [Hashable Atom] in
-/-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_append`
-(`:3191`), territory-local per this file's own convention. Identical proof, universe-generic
-in `U`. -/
-private lemma modalExpMeasure_append_S4
-    (U : List (SignedFormula (Proposition Atom) WorldIndex))
-    (l1 l2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (e1 e2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (h : l1.length = e1.length) :
-    modalExpMeasure U (l1 ++ l2) (e1 ++ e2)
-      = modalExpMeasure U l1 e1 + modalExpMeasure U l2 e2 := by
-  simp only [modalExpMeasure, List.zip_append h, List.map_append, List.sum_append]
-
-omit [Hashable Atom] in
-/-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_const_exp`
-(`:3204`), territory-local per this file's own convention (`_S4` suffix) since the upstream
-lemma is `private` and out of territory. Identical proof, universe-generic in `U`.
-
-**Plan deviation note**: the original task list for this section named only `modalExpMeasure_split`/
-`modalExpMeasure_append` as the private helpers needing re-derivation; `modalExpMeasure_const_exp`
-is a third private helper the generic engine (`modalExpMeasure_step_lt_gen`) also relies on
-(`FmpMeasure.lean:3276`), overlooked in that enumeration. Re-derived here, by the same mechanical
-pattern, since the section below needs it. -/
-private lemma modalExpMeasure_const_exp_S4
-    (U : List (SignedFormula (Proposition Atom) WorldIndex))
-    (newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (newExp : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    modalExpMeasure U newBs (newBs.map (fun _ => newExp))
-      = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
-  simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
-
 /-! ## Keyed Per-Step Measure Decrease over `modalUniverseS4`
 
 Transcription of `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean:3227`, public but hardwired to
@@ -9691,7 +9399,7 @@ below is a line-by-line transcription consuming: four universe-generic combinato
 primitives (`_S4`-suffixed above), three landed per-call obligations
 (`modalApplyOneS4Keyed_branchingLength_S4`/`_persistentFresh_S4`/`_outputsSubsetUniverse_S4`),
 and the projection bridge (`modalStepBranchS4Keyed_proj_stepBranchGen`) plus its local
-`modalExpMeasure_split_S4`/`_append_S4` helpers (and the `_const_exp_S4` helper just above).
+`modalExpMeasure_split`/`_append_S4` helpers (and the `_const_exp_S4` helper just above).
 `hstep` is phrased directly against the keyed 4-tuple stepper `modalStepBranchS4Keyed` (dropping
 `keys'` via the projection bridge inside the proof), matching what the top-loop induction below
 will have in hand at each call site. The `hOutputsSubsetUniverse` obligation's extra hypotheses
@@ -9726,7 +9434,7 @@ lemma modalExpMeasure_step_lt_S4Keyed
   set U := modalUniverseS4 φ₀ with hUdef
   have hrhs : modalExpMeasure U (done ++ bh :: bt) (doneExp ++ e :: es) =
       modalExpMeasure U done doneExp + 3 ^ modalWork U bh e + modalExpMeasure U bt es :=
-    modalExpMeasure_split_S4 U done doneExp bh e bt es hdlen
+    modalExpMeasure_split U done doneExp bh e bt es hdlen
   have hlhs : modalExpMeasure U (done ++ newBs ++ bt)
         (doneExp ++ newBs.map (fun _ => newExp) ++ es) =
       modalExpMeasure U done doneExp +
@@ -9734,10 +9442,10 @@ lemma modalExpMeasure_step_lt_S4Keyed
         modalExpMeasure U bt es := by
     have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
       simp [List.length_append, hdlen]
-    rw [modalExpMeasure_append_S4 U (done ++ newBs) bt
+    rw [modalExpMeasure_append U (done ++ newBs) bt
           (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
-        modalExpMeasure_append_S4 U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
-        modalExpMeasure_const_exp_S4 U newBs newExp]
+        modalExpMeasure_append U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
+        modalExpMeasure_const_exp U newBs newExp]
   rw [hrhs, hlhs]
   suffices h : (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum + 1 ≤
       3 ^ modalWork U bh e by omega
@@ -9751,7 +9459,7 @@ lemma modalExpMeasure_step_lt_S4Keyed
     rw [hca] at hfound
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
     have hdrop : modalWork U (nf ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
-      modalWork_drop_linear_S4 U bh (nf ++ bh) e sf hsfU hany
+      modalWork_drop_linear U bh (nf ++ bh) e sf hsfU hany
         (fun z hz => List.mem_append_right nf hz)
     have hC : 1 ≤ modalWork U bh e := by omega
     have h0 : modalWork U (nf ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
@@ -9768,10 +9476,10 @@ lemma modalExpMeasure_step_lt_S4Keyed
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
     simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
     have hdrop0 : modalWork U (b0 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
-      modalWork_drop_linear_S4 U bh (b0 ++ bh) e sf hsfU hany
+      modalWork_drop_linear U bh (b0 ++ bh) e sf hsfU hany
         (fun z hz => List.mem_append_right b0 hz)
     have hdrop1 : modalWork U (b1 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
-      modalWork_drop_linear_S4 U bh (b1 ++ bh) e sf hsfU hany
+      modalWork_drop_linear U bh (b1 ++ bh) e sf hsfU hany
         (fun z hz => List.mem_append_right b1 hz)
     have hC : 1 ≤ modalWork U bh e := by omega
     have h0 : modalWork U (b0 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
@@ -9790,7 +9498,7 @@ lemma modalExpMeasure_step_lt_S4Keyed
     have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
     have hx0b' : x0 ∈ nf ++ bh := List.mem_append_left bh hx0mem
     have hdrop : modalWork U (nf ++ bh) newExp + 1 ≤ modalWork U bh newExp :=
-      modalWork_drop_persistent_S4 U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
+      modalWork_drop_persistent U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
         (fun z hz => List.mem_append_right nf hz)
     have hC : 1 ≤ modalWork U bh newExp := by omega
     have h0 : modalWork U (nf ++ bh) newExp ≤ modalWork U bh newExp - 1 := by omega
@@ -9862,7 +9570,7 @@ lemma modalExpMeasure_step_lt_S4KeyedOrdered
   set U := modalUniverseS4 φ₀ with hUdef
   have hrhs : modalExpMeasure U (done ++ bh :: bt) (doneExp ++ e :: es) =
       modalExpMeasure U done doneExp + 3 ^ modalWork U bh e + modalExpMeasure U bt es :=
-    modalExpMeasure_split_S4 U done doneExp bh e bt es hdlen
+    modalExpMeasure_split U done doneExp bh e bt es hdlen
   have hlhs : modalExpMeasure U (done ++ newBs ++ bt)
         (doneExp ++ newBs.map (fun _ => newExp) ++ es) =
       modalExpMeasure U done doneExp +
@@ -9870,10 +9578,10 @@ lemma modalExpMeasure_step_lt_S4KeyedOrdered
         modalExpMeasure U bt es := by
     have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
       simp [List.length_append, hdlen]
-    rw [modalExpMeasure_append_S4 U (done ++ newBs) bt
+    rw [modalExpMeasure_append U (done ++ newBs) bt
           (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
-        modalExpMeasure_append_S4 U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
-        modalExpMeasure_const_exp_S4 U newBs newExp]
+        modalExpMeasure_append U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
+        modalExpMeasure_const_exp U newBs newExp]
   rw [hrhs, hlhs]
   suffices h : (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum + 1 ≤
       3 ^ modalWork U bh e by omega
@@ -9894,7 +9602,7 @@ lemma modalExpMeasure_step_lt_S4KeyedOrdered
     simp only [Option.map_some] at hfound
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
     have hdrop : modalWork U (nf ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
-      modalWork_drop_linear_S4 U bh (nf ++ bh) e sf hsfU hany
+      modalWork_drop_linear U bh (nf ++ bh) e sf hsfU hany
         (fun z hz => List.mem_append_right nf hz)
     have hC : 1 ≤ modalWork U bh e := by omega
     have h0 : modalWork U (nf ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
@@ -9914,10 +9622,10 @@ lemma modalExpMeasure_step_lt_S4KeyedOrdered
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
     simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
     have hdrop0 : modalWork U (b0 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
-      modalWork_drop_linear_S4 U bh (b0 ++ bh) e sf hsfU hany
+      modalWork_drop_linear U bh (b0 ++ bh) e sf hsfU hany
         (fun z hz => List.mem_append_right b0 hz)
     have hdrop1 : modalWork U (b1 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
-      modalWork_drop_linear_S4 U bh (b1 ++ bh) e sf hsfU hany
+      modalWork_drop_linear U bh (b1 ++ bh) e sf hsfU hany
         (fun z hz => List.mem_append_right b1 hz)
     have hC : 1 ≤ modalWork U bh e := by omega
     have h0 : modalWork U (b0 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
@@ -9939,7 +9647,7 @@ lemma modalExpMeasure_step_lt_S4KeyedOrdered
     have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
     have hx0b' : x0 ∈ nf ++ bh := List.mem_append_left bh hx0mem
     have hdrop : modalWork U (nf ++ bh) newExp + 1 ≤ modalWork U bh newExp :=
-      modalWork_drop_persistent_S4 U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
+      modalWork_drop_persistent U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
         (fun z hz => List.mem_append_right nf hz)
     have hC : 1 ≤ modalWork U bh newExp := by omega
     have h0 : modalWork U (nf ++ bh) newExp ≤ modalWork U bh newExp - 1 := by omega

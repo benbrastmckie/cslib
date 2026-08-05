@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Tableau.GenericDriver
 public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.CompletenessLoop
+public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 
 /-! # B-System Tableau Driver
 
@@ -903,16 +904,6 @@ lemma accSourcesKnown_empty
   exact absurd hedge (by decide)
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases`
-(unavailable across files): decompose membership of an edge in `acc.addEdge w w'`. -/
-private lemma hasEdge_addEdge_cases_B {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  tauto
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
 (unavailable across files, and there additionally bundled with a `Nodup` conjunct this
 development does not need): the membership characterization of the `List.foldl`
@@ -1031,7 +1022,7 @@ theorem modalStepBranchGen_preserves_accSourcesKnown
   · rw [hsame] at hedge
     exact hbsub b' hb' w (hknown w w' hedge)
   · rw [hsnd] at hedge
-    rcases hasEdge_addEdge_cases_B hedge with ⟨rfl, rfl⟩ | hold
+    rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
     · exact hbsub b' hb' sf.label (label_mem_modalKnownWorlds hsfmem)
     · exact hbsub b' hb' w (hknown w w' hold)
 

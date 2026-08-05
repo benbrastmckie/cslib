@@ -1445,7 +1445,7 @@
     {
       "project_number": 562,
       "project_name": "tableau_ruleapplyst_additive_introduction",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Introduce RuleApplySt additively and bridge modalExpandBranchesGen",
       "topic": "Modal Logic",
@@ -1465,14 +1465,20 @@
           "path": "specs/562_tableau_ruleapplyst_additive_introduction/plans/01_st-ladder-additive-insertion.md",
           "type": "plan",
           "summary": "Additive insertion of the nine verified St-ladder declarations into Saturation.lean"
+        },
+        {
+          "path": "specs/562_tableau_ruleapplyst_additive_introduction/summaries/01_st-ladder-additive-insertion-summary.md",
+          "type": "summary",
+          "summary": "St-ladder additive insertion: 3/3 phases, full gate matched baseline"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T11:12:39Z",
+      "last_updated": "2026-08-05T11:25:28Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785926778_90c7a6_562",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Added the RuleApplySt state-threaded ladder to Saturation.lean purely additively: nine new declarations (RuleApplySt, liftRuleApply, modalStepBranchGenSt, findSome?_map_comm, modalStepBranchGen_eq_St, modalExpandBranchesGenSt, modalExpandBranchesGen_eq_St, modalTableauGenSt, modalTableauGen_eq_St), zero existing declarations edited, zero imports added, verified by an empty deletion set across the whole task. RuleApply = RuleApplySt Unit was shown NOT to be a definitional equality; an explicit liftRuleApply embedding plus three proved bridges is used instead. findSome?_map_comm is new -- no List.findSome?/Option.map commutation existed in Mathlib or the project. Full gate matched baseline exactly: lake build Cslib green at 3313 jobs, Modal/Tableau sorry census 1, zero new axioms (bridges depend only on propext/Quot.sound), lake lint delta 0, shake 9 findings none in Modal/Tableau, lake test exit 0. Migration onto the ladder and retirement of the double derivation remain a separate, later task."
     },
     {
       "project_number": 563,

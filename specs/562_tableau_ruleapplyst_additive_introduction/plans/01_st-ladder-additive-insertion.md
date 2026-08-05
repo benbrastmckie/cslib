@@ -1,7 +1,7 @@
 # Implementation Plan: Introduce `RuleApplySt` Additively and Bridge `modalExpandBranchesGen`
 
 - **Task**: 562 - Introduce RuleApplySt additively and bridge modalExpandBranchesGen
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md`

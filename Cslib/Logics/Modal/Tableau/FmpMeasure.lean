@@ -400,7 +400,7 @@ omit [DecidableEq Atom] [Hashable Atom] in
 because the fresh-world rules' propagated groups (`boxProps`, `diaNegProps`) derive their
 subformula bound from *other* branch members via the branch invariant, not from the source
 formula directly, so a two-step subformula chain must be composed. -/
-private lemma modalSubfmls_trans {a b c : Proposition Atom}
+lemma modalSubfmls_trans {a b c : Proposition Atom}
     (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
   induction c with
   | atom p =>
@@ -439,7 +439,7 @@ private lemma modalSubfmls_trans {a b c : Proposition Atom}
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Constructor direction for `modalUniverse` membership: a signed formula with any sign,
 a subformula of `φ0`, at a world label within the bound, is in `U(φ0)`. -/
-private lemma mem_modalUniverse_of {φ0 : Proposition Atom} {s : Sign} {φ : Proposition Atom}
+lemma mem_modalUniverse_of {φ0 : Proposition Atom} {s : Sign} {φ : Proposition Atom}
     {w : WorldIndex} (hw : w ≤ modalWorldBound φ0) (hφ : φ ∈ modalSubfmls φ0) :
     (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 := by
   have hlt : w < modalWorldBound φ0 + 1 := Nat.lt_succ_of_le hw
@@ -460,7 +460,7 @@ private lemma mem_modalUniverse_of' {φ0 : Proposition Atom}
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Extraction: the formula-component of any `modalUniverse φ0` member is a subformula of
 `φ0`. -/
-private lemma modalUniverse_mem_formula {φ0 : Proposition Atom}
+lemma modalUniverse_mem_formula {φ0 : Proposition Atom}
     {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverse φ0) :
     x.formula ∈ modalSubfmls φ0 := by
   simp only [modalUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
@@ -482,7 +482,7 @@ omit [Hashable Atom] in
 (`diamondPos`, `Rules.lean:97-102`; `boxNeg`, `Rules.lean:123-128`): each propagated
 `T(ψ)@w'` comes from a `T(□ψ)@w ∈ b`, hence `ψ` is a subformula of `φ0`. Factored out since
 the `boxProps` construction is byte-identical between the two rules. -/
-private lemma boxProps_outputs_subset (φ0 : Proposition Atom)
+lemma boxProps_outputs_subset (φ0 : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
     (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
     (hwbound : modalNextWorld b ≤ modalWorldBound φ0) :
@@ -515,7 +515,7 @@ omit [Hashable Atom] in
 `F(ψ)@w'` comes from an `F(◇ψ)@w) ∈ b` (native `diamond` constructor), hence `ψ`
 is a subformula of `φ0`. Factored out since the `diaNegProps` construction is byte-identical
 between the two rules. -/
-private lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
+lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
     (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
     (hwbound : modalNextWorld b ≤ modalWorldBound φ0) :
@@ -1387,13 +1387,13 @@ private lemma filter_minting_append_of_minting_ne
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `outDeg` under `addEdge` at the matching source: extends the successor list by exactly the
 new target, incrementing `outDeg` by 1. -/
-private lemma outDeg_addEdge_self (acc : Accessibility) (w wf : WorldIndex) :
+lemma outDeg_addEdge_self (acc : Accessibility) (w wf : WorldIndex) :
     outDeg (acc.addEdge w wf) w = outDeg acc w + 1 := by
   simp [outDeg, Accessibility.successorsOf, Accessibility.addEdge]
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `outDeg` under `addEdge` is unchanged at any world other than the edge's source. -/
-private lemma outDeg_addEdge_ne (acc : Accessibility) (w wf w' : WorldIndex) (h : w' ≠ w) :
+lemma outDeg_addEdge_ne (acc : Accessibility) (w wf w' : WorldIndex) (h : w' ≠ w) :
     outDeg (acc.addEdge w wf) w' = outDeg acc w' := by
   simp only [outDeg, Accessibility.successorsOf, Accessibility.addEdge, List.filterMap_cons]
   have : (w == w') = false := by simp only [beq_eq_false_iff_ne]; exact fun heq => h heq.symm
@@ -1681,7 +1681,7 @@ append, needed to show the potential `Φ` is exactly preserved (up to the single
 term) across a step. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalKnownWorlds_le_modalMaxWorld
+lemma modalKnownWorlds_le_modalMaxWorld
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
     (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
   rw [mem_modalKnownWorlds] at h
@@ -1905,7 +1905,7 @@ mints): every emitted formula's label is exactly `modalNextWorld b`, since the w
 `boxProps`, and `diaNegProps` are all constructed at that one fresh label. Parametrized over
 the witness's sign/formula so both rule shapes share one proof (mirrors
 `boxProps_outputs_subset`/`diaNegProps_outputs_subset`'s factoring). -/
-private lemma mintGroup_label_eq_freshWorld
+lemma mintGroup_label_eq_freshWorld
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
     (s0 : Sign) (ψ0 : Proposition Atom) :
     ∀ x ∈ ((⟨s0, ψ0, modalNextWorld b⟩ :
@@ -2710,7 +2710,7 @@ one, the count of `U`-members excluded by `l`. Proved by induction on `U`, track
 head element is `x` itself (drops by exactly one), already excluded by `l` (unaffected by the
 extra exclusion), or distinct from `x` and not yet excluded (passes both filters, deferred to
 the tail via the induction hypothesis). -/
-private lemma modalCount_notMem_append_drop
+lemma modalCount_notMem_append_drop
     {α : Type*} [BEq α] [LawfulBEq α]
     (U l : List α) (x : α)
     (hxU : x ∈ U) (hxl : l.any (· == x) = false) :
@@ -2787,7 +2787,7 @@ private lemma modalCount_notMem_append_drop
 can only decrease (never increase) the count of `U`-members excluded by it. Used for the
 `|U \ b|` term, which the linear/branching/persistent rules can only ever help (branch formulas
 are only ever prepended, never removed). -/
-private lemma modalCount_notMem_mono
+lemma modalCount_notMem_mono
     {α : Type*} [BEq α] [LawfulBEq α]
     (U b b' : List α)
     (hsub : ∀ z ∈ b, z ∈ b') :
@@ -2809,7 +2809,7 @@ child is `newForms ++ b` for some `newForms`, `Saturation.lean:104-123`), the co
 strictly drops by at least one. No `U`-membership of `newForms` is required: growing `b` to `b'`
 can only help the `|U \ b|` term (`modalCount_notMem_mono`), and `sf ∈ U`, `sf ∉ e` gives the
 exact unit drop in `|U \ e|` (`modalCount_notMem_append_drop`). -/
-private lemma modalWork_drop_linear
+lemma modalWork_drop_linear
     (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (hsfU : sf ∈ U) (hsfe : e.any (· == sf) = false) (hsub : ∀ z ∈ b, z ∈ b') :
@@ -2826,7 +2826,7 @@ omit [Hashable Atom] in
 nonempty output whose formulas are `∉ b`), the counting measure strictly drops by at least one:
 the `|U \ e|` term is unchanged, and the `|U \ b|` term strictly drops via the same
 `modalCount_notMem_append_drop` core applied to the single witness `x0`. -/
-private lemma modalWork_drop_persistent
+lemma modalWork_drop_persistent
     (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
     (x0 : SignedFormula (Proposition Atom) WorldIndex)
     (hx0U : x0 ∈ U) (hx0b : x0 ∉ b) (hx0b' : x0 ∈ b') (hsub : ∀ z ∈ b, z ∈ b') :
@@ -3099,7 +3099,7 @@ omit [Hashable Atom] in
 /-- `classicalExpMeasure_split`-style additivity (`Classical/Completeness.lean:641`), adapted
 to `modalExpMeasure`/`modalWork`: the measure splits over a single distinguished position,
 given length-aligned prefixes. -/
-private lemma modalExpMeasure_split
+lemma modalExpMeasure_split
     (U : List (SignedFormula (Proposition Atom) WorldIndex))
     (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -3116,7 +3116,7 @@ private lemma modalExpMeasure_split
 
 omit [Hashable Atom] in
 /-- `classicalExpMeasure_append`-style additivity (`:656`), adapted to `modalExpMeasure`. -/
-private lemma modalExpMeasure_append
+lemma modalExpMeasure_append
     (U : List (SignedFormula (Proposition Atom) WorldIndex))
     (l1 l2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (e1 e2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -3129,7 +3129,7 @@ omit [Hashable Atom] in
 /-- `classicalExpMeasure_const_exp`-style identity (`:666`), adapted to `modalExpMeasure`: when
 every new branch shares the same expanded set `newExp`, the measure is the sum of
 `3 ^ modalWork U child newExp` over the new branches. -/
-private lemma modalExpMeasure_const_exp
+lemma modalExpMeasure_const_exp
     (U : List (SignedFormula (Proposition Atom) WorldIndex))
     (newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newExp : List (SignedFormula (Proposition Atom) WorldIndex)) :

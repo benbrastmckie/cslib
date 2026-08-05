@@ -717,13 +717,13 @@ assume a clean sweep.
 
 ---
 
-### Phase 7: De-privatize Tier-2 facts in place in `FmpMeasure.lean` [NOT STARTED]
+### Phase 7: De-privatize Tier-2 facts in place in `FmpMeasure.lean` [COMPLETED]
 
 **Goal**: Make the re-derived `FmpMeasure` declarations public in place — no new module — with
 docstrings. Additive: no consumer is edited, so nothing can break downstream.
 
 **Tasks**:
-- [ ] Identify the re-derived subset by census, not by eyeball. `FmpMeasure.lean` has exactly 50
+- [x] Identify the re-derived subset by census, not by eyeball. `FmpMeasure.lean` has exactly 50
       `private` declarations; only ~14 are re-derived elsewhere. Research names:
       `modalSubfmls_trans`, `mem_modalUniverse_of`, `modalUniverse_mem_formula`,
       `mem_boxPositivesOf`, `mem_successorsOf_hasEdge`, `modalKnownWorlds_fold_spec`,
@@ -732,15 +732,32 @@ docstrings. Additive: no consumer is edited, so nothing can break downstream.
       `modalExpMeasure_append`, `modalExpMeasure_const_exp`; plus census-only finds
       `outDeg_addEdge_self`, `outDeg_addEdge_ne`, `boxProps_outputs_subset`,
       `diaNegProps_outputs_subset`, `modalCount_notMem_append_drop`, `modalCount_notMem_mono`,
-      `modalWork_drop_linear`, `modalWork_drop_persistent`.
-- [ ] Exclude any name already published from a `Support/` module in Phases 2 or 4 — those must
-      not be duplicated into a second public home.
-- [ ] Remove `private` from each remaining re-derived declaration and add a docstring in the same
-      edit (`docBlame` requires it once public).
-- [ ] **Leave the ~30 non-re-derived privates private.** Publicising them grows public API surface
-      for no benefit and would be flagged in `lake shake`/lint review.
-- [ ] Apply the lint checklist: `lemma`/`theorem` not `def` for Prop-valued results; preserve
+      `modalWork_drop_linear`, `modalWork_drop_persistent`. *(Deviation: only **43** privates
+      remained at phase start (not 50) — 7 were already deleted from `FmpMeasure.lean` in Phases
+      3/5/6, moved to `Support/` instead of de-privatized in place
+      (`mem_boxPositivesOf`, `mem_successorsOf_hasEdge`, `modalKnownWorlds_fold_spec`,
+      `modalKnownWorlds_nodup`, `mem_modalKnownWorlds`, `modalKnownWorlds_mono_append`, plus
+      `hasEdge_addEdge_cases_local` from Phase 3). Of the plan's named list, 8 remained to
+      de-privatize (`modalSubfmls_trans`, `mem_modalUniverse_of`, `modalUniverse_mem_formula`,
+      `modalKnownWorlds_le_modalMaxWorld`, `mintGroup_label_eq_freshWorld`, `modalExpMeasure_split`,
+      `modalExpMeasure_append`, `modalExpMeasure_const_exp`), plus all 8 census-only finds — 16
+      total.)*
+- [x] Exclude any name already published from a `Support/` module in Phases 2 or 4 — those must
+      not be duplicated into a second public home. *(Confirmed: none of the 16 de-privatized names
+      overlap with anything published in `Support/Accessibility.lean` or `Support/KnownWorlds.lean`.)*
+- [x] Remove `private` from each remaining re-derived declaration and add a docstring in the same
+      edit (`docBlame` requires it once public). *(All 16 already carried a docstring from their
+      original private form — no new docstrings needed, only the `private` keyword removed.)*
+- [x] **Leave the ~30 non-re-derived privates private.** Publicising them grows public API surface
+      for no benefit and would be flagged in `lake shake`/lint review. *(27 remain private,
+      untouched, including `mem_modalUniverse_of'` — confirmed by grep to have zero cross-file
+      duplicates, correctly excluded from de-privatization despite superficially resembling the
+      `mem_modalUniverse_of` family.)*
+- [x] Apply the lint checklist: `lemma`/`theorem` not `def` for Prop-valued results; preserve
       existing snake_case lemma names; explicit namespace; minimal section variables with `omit`.
+      *(All 16 were already `lemma`, already namespaced via the file's existing
+      `namespace Cslib.Logic.Modal.Tableau` wrapper, already carrying appropriate `omit` clauses
+      from their private form — nothing further needed.)*
 
 **Timing**: 1.5 hours
 

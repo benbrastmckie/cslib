@@ -860,6 +860,86 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
         for the one landed lemma and are clean.)*
   - [ ] Final census check and summary. *(deviation: deferred — phase not yet closed.)*
 
+#### Phase 7 Progress Record (fourth continuation dispatch; phase remains `[IN PROGRESS]`)
+
+**Landed this dispatch (sorry-free, `{propext, Classical.choice, Quot.sound}` only, confirmed by
+direct `#print axioms` since `lean_verify`'s source-scan heuristic reports a known spurious
+`sorryAx` on these declarations)** — both remaining 4-rule cases catalogued as the single
+largest remaining piece by the prior dispatch:
+
+- `modalApplyOneS4Keyed_boxPos_sat` (`FrameCompleteness.lean`) — closes the **4-rule,
+  box-positive** case (`T(□φ)@w`). Bridges `modalApplyOneS4Keyed` down to `modalApplyOneS4Rules`
+  at this shape via `LoopChecking.lean`'s already-landed (de-privatized this dispatch)
+  `modalApplyOneS4Keyed_boxPos_eq_S4Rules` (a direct `rfl`), then discharges the resulting
+  obligation with a new `modalApplyOneS4Rules_boxPos_soundIn`. That lemma composes three sound
+  layers: K's own `boxPos` arm (`modalApplyOne_boxPos_sound`, pre-existing), the T self-
+  propagation layer reused as a **black box** via the already-landed
+  `modalApplyOneT_boxPos_soundIn` (feeding it `hFC.1 : reflFC m.r` extracted from `s4FC`'s
+  reflexivity conjunct — no need to re-derive the K+T composition), and the 4-rule propagation
+  layer (`modalFourBoxProp`) proved directly inline via one hop of `IsTrans` (`hFC.2`) off the
+  recorded successor edge, mirroring `branchSatisfiableIn_s4FC_boxPos_trans_mem`'s semantic core
+  but re-derived for a FIXED `(m, f)` rather than an existentially-quantified model (the
+  `branchSatisfiableIn`-flavored lemmas in `FrameSoundness.lean` cannot be applied as black boxes
+  to a caller's specific model, same reasoning the pre-existing `modalApplyOneT_boxPos_soundIn`'s
+  own doc comment already states for the T-self layer).
+- `modalApplyOneS4Keyed_diaNeg_sat` — direct dual, closes the **4-rule, diamond-negative** case
+  (`F(◇φ)@w`), via `modalApplyOneS4Rules_diaNeg_soundIn`.
+
+**Discovery: most of the `.fst`/bridge infrastructure this case needed already existed,
+privately, un-connected to `FrameCompleteness.lean`.** The prior Progress Record catalogued this
+case as needing new merge-lemma infrastructure from scratch. On inspection, `LoopChecking.lean`
+already contained (private, apparently authored in anticipation during an earlier phase but never
+wired to `FrameCompleteness.lean`): `modalApplyOneS4Rules_boxPos_fst`/`_diaNeg_fst` (the exact
+`.fst` closed form in terms of `modalApplyOneT`'s own result) and
+`modalApplyOneS4Keyed_boxPos_eq_S4Rules`/`_diaNeg_eq_S4Rules` (the Keyed→S4Rules bridge, `rfl`).
+This dispatch de-privatized exactly these four (plus two small transitively-needed private `.snd`
+facts, `modalApplyOneS4Rules_snd_eq` and `modalApplyOne_boxPos_snd_S4`/`_diamondNeg_snd_S4`) and
+added two new small companion lemmas (`modalApplyOneS4Rules_boxPos_snd_eq_acc`/
+`_diaNeg_snd_eq_acc`) rather than re-deriving the `.fst` closed forms from scratch as the catalogue
+suggested. An earlier attempt this dispatch to build fresh, differently-named driver lemmas
+directly in `LoopChecking.lean` hit two real obstacles worth recording: (1) name collisions with
+this already-existing private infrastructure, and (2) `LoopChecking.lean` does not import
+`TDriver.lean`, so a `modalApplyOneT`-level case-split lemma
+(`modalApplyOneT_boxPos_eq`/`_diaNeg_eq`, needed as the outer case-split for the K+T+4 merge)
+cannot live there — it was placed in `FrameCompleteness.lean` instead, which already imports
+`TDriver.lean` per the file's own layering note.
+
+Verification per lemma: scoped `lake build Cslib.Logics.Modal.Tableau.LoopChecking` and
+`lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` both clean; `lake exe lint-style` clean
+on both files; sorry-free confirmed via direct `#print axioms` on all four new
+`FrameCompleteness.lean` declarations (`modalApplyOneS4Rules_boxPos_soundIn`,
+`modalApplyOneS4Rules_diaNeg_soundIn`, `modalApplyOneS4Keyed_boxPos_sat`,
+`modalApplyOneS4Keyed_diaNeg_sat`). Bare-tactic sorry census over `Cslib/Logics/Modal/Tableau/`
+stayed at exactly 1 (`FrameSoundness.lean:1251`, standing, retained) after each commit. A
+whole-project `lake build` was re-run this dispatch and is clean. `lake exe checkInitImports` is
+clean. Two separate green commits, one per file, per the phase-substep commit convention.
+
+**Updated case-split table**:
+
+| Case | Status |
+|------|----|
+| Propositional/non-modal | **Landed** (`modalApplyOneS4Keyed_notBoxDia_sat`) |
+| Mint, unblocked (box-negative) | **Landed** (`modalApplyOneS4Keyed_boxNeg_mint_sat`) |
+| Mint, unblocked (diamond-positive) | **Landed** (`modalApplyOneS4Keyed_diaPos_mint_sat`) |
+| 4-rule, box-positive (`T(□φ)@w`) | **Landed this dispatch** (`modalApplyOneS4Keyed_boxPos_sat`) |
+| 4-rule, diamond-negative (`F(◇φ)@w`) | **Landed this dispatch** (`modalApplyOneS4Keyed_diaNeg_sat`) |
+| Mint, blocked (redirect) | **Still open** — the sole remaining case. Not attempted this dispatch, per explicit out-of-scope instruction; see the third-dispatch Progress Record's "Correction to the previously-catalogued mint-blocked route" below for the full technical dead-end analysis. That analysis is unchanged and still stands. |
+
+**Four of the five case-split arms are now landed sorry-free.** Mint-blocked (redirect) is the
+ONLY remaining case, and it blocks assembling a complete dispatcher theorem regardless of how
+cheap the other four are — the architectural question raised in the third-dispatch record (does
+the induction need a stronger threaded invariant, or does the per-step decomposition need
+rethinking at the phase-design level) is unresolved and still needs planning-level or user
+attention before further implementation on that specific case. Phase 7 stays `[IN PROGRESS]`, not
+`[COMPLETED]` — do not mark it complete while any case is open, regardless of how small the
+remainder looks.
+
+**Not yet done, deferred to phase close**: assembling the single dispatcher theorem (blocked on
+mint-blocked), extending the regression corpus with an `"OPEN"` counterexample row (also blocked
+on the step lemma it would witness), and the full 8-step CI gate (`lake lint` full repo,
+`lake test`, `lake shake`, `lake exe mk_all --module`) beyond what this dispatch already ran
+(`checkInitImports`, scoped builds, `lint-style`, whole-project `lake build`).
+
 #### Phase 7 Progress Record (third continuation dispatch; phase remains `[IN PROGRESS]`)
 
 **Landed this dispatch (sorry-free, `{propext, Classical.choice, Quot.sound}` only, confirmed by

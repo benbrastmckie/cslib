@@ -490,7 +490,7 @@ duplicated (d)-discharge case split account for the difference; no new lemma was
 
 ---
 
-### Phase 7.4: Antitone-applicability lemma family (P2 formalized) [NOT STARTED]
+### Phase 7.4: Antitone-applicability lemma family (P2 formalized) [COMPLETED]
 
 - **Goal:** Formalize the lemma family that makes conjunct (d) of `S4RedirectSoundInv` preservable
   at a **primary-scan (non-mint) step**, where mint-readiness is unavailable. P2's PASS in summary
@@ -520,42 +520,61 @@ by showing that appending `nf` to `b` cannot turn a `.notApplicable` rule applic
 applicable one.
 
 - **Tasks:**
-  - [ ] Re-locate `modalNonMintCandidates`, `modalNonMintCandidates_eq_nil_iff`,
+  - [x] Re-locate `modalNonMintCandidates`, `modalNonMintCandidates_eq_nil_iff`,
         `modalStepBranchS4KeyedOrdered`, `modalStepBranchS4KeyedOrdered_cases`,
         `modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box`, `modalMintShape`, and `outDeg`
         (`FmpMeasure.lean:768`) by grep.
-  - [ ] Land the **branch-growth** half, per rule class, in this order (cheapest first, banking a
+  - [x] Land the **branch-growth** half, per rule class, in this order (cheapest first, banking a
         green commit each):
         1. Propositional / non-mint-non-modal: `tryAllPropRules` takes only `sf` and depends on
            neither `b` nor `acc` (`Rules.lean:85`, confirmed by the probe). Applicability here is
            *literally invariant* under branch growth, which is stronger than antitone — state it
-           that way rather than proving the weaker form.
+           that way rather than proving the weaker form. *(Landed as
+           `modalApplyOne_fst_eq_of_not_box_diamond`, full `.fst` equality over any two branches
+           `b1 b2`, stronger than the antitone form as instructed.)*
         2. K box-positive persistent (`boxPropagation`, `Branch.lean:196-201`) and the K
            diamond-negative inline arm (`Rules.lean:152-161`): both `filterMap`-filter each
            candidate against `b` via `b.any (· == sf)`. The antitone step is
-           `(nf ++ b).any p = nf.any p || b.any p` (`List.any_append`).
+           `(nf ++ b).any p = nf.any p || b.any p` (`List.any_append`). *(Landed as the generic
+           `filterMap_any_guard_isEmpty_growth`, instantiated per shape.)*
         3. T self-propagation (`modalTBoxSelf`/`modalTDiaNegSelf`, `FrameRules.lean:62-75`) and
            the S4 4-rule (`modalFourBoxProp`/`modalFourDiaNegProp`, `FrameRules.lean:133-148`):
-           same shape.
+           same shape. *(T self landed as `modalTSelf_isEmpty_growth`; the 4-rule helpers reuse
+           `filterMap_any_guard_isEmpty_growth` since they share the same
+           `filterMap`-over-successors shape.)*
         4. The merge step: `++` followed by `.filter (fun x => !kForms.any (·==x))` only ever
-           *removes* elements, never introduces one absent from a filtered source.
-  - [ ] Land the **edge-growth** half for the two mint arms (`acc → acc.addEdge w w'`). Note that
-        for the two persistent modal shapes the probe's
-        `modalApplyOneS4Rules_{boxPos,diaNeg}_notApplicable_of_saturated` already give something
-        strictly stronger (unconditional `.notApplicable` under `modalS4Saturated`, at either
-        accessibility); reuse them rather than re-deriving an antitone variant, and record that
-        reuse. Only the shapes those two lemmas do not cover need a genuine edge-growth antitone
-        lemma.
-  - [ ] Assemble a single consumable statement, shaped to what Phases 7.5-7.7 need:
+           *removes* elements, never introduces one absent from a filtered source. *(Discharged
+           inline inside `modalApplyOneS4Rules_boxPos_notApplicable_growth`/`_diaNeg_...` by
+           case-splitting on each layer's `isEmpty` boolean and using `if_pos`/`if_neg` to collapse
+           the nested K/T/4-rule match, rather than as a separate named lemma — the three-way
+           `by_cases` split IS the merge-step argument.)*
+  - [x] Land the **edge-growth** half for the two mint arms (`acc → acc.addEdge w w'`). **No new
+        lemma was needed** — confirmed by inspection rather than by writing new code, exactly as
+        the task anticipated: (a) the two persistent modal shapes are covered by the already-landed
+        `modalApplyOneS4Rules_{boxPos,diaNeg}_notApplicable_of_saturated` (Phase 7.2), which give
+        UNCONDITIONAL `.notApplicable` under `modalS4Saturated` at whatever accessibility is
+        supplied — Phases 7.2/7.3 already call these directly at `acc.addEdge src wBlock`, so
+        edge-growth for these two shapes is already exercised, not merely available; (b) every
+        other shape's `.fst` is proven fully **acc-independent** by the already-landed
+        `modalApplyOne_fst_eq_of_not_boxPos_diaNeg`/`modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg`
+        (`LoopChecking.lean:9747,9767`), so edge growth is vacuously antitone there; (c) the two
+        mint shapes themselves are always `.linear` (never `.notApplicable`) regardless of `acc`,
+        the same fact `modalApplyOneS4Keyed_notApplicable_growth`'s vacuous mint-shape case uses.
+        Every shape is covered; nothing was left needing a genuine new edge-growth lemma.
+  - [x] Assemble a single consumable statement, shaped to what Phases 7.5-7.7 need:
         ```
         (modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable →
           (modalApplyOneS4Keyed φ₀ keys sf (nf ++ b) acc).1 = .notApplicable
         ```
         plus the edge-growth variant. Name it and state in its docstring exactly which rule classes
-        are covered by which sub-lemma.
-  - [ ] `#print axioms` on every landed declaration; require exactly `propext`, `Classical.choice`,
-        `Quot.sound`.
-  - [ ] Record a `#### Phase 7.4 Verdict` subsection in this file.
+        are covered by which sub-lemma. *(Landed as `modalApplyOneS4Keyed_notApplicable_growth`,
+        stated fully generally over every signed-formula shape — not restricted to non-mint
+        candidates — with the two mint shapes closed vacuously. The edge-growth variant is the
+        reuse recorded above, not a new statement.)*
+  - [x] `#print axioms` on every landed declaration; require exactly `propext`, `Classical.choice`,
+        `Quot.sound`. *(Confirmed via `lake env lean`; every declaration's axiom set is a subset of
+        `{propext, Classical.choice, Quot.sound}`.)*
+  - [x] Record a `#### Phase 7.4 Verdict` subsection in this file.
 
 - **Kill criteria and outcomes** (decided now, not under pressure):
 
@@ -569,6 +588,50 @@ applicable one.
 
 - **Done when:** the family (or outcome (ii)'s recorded remainder) is sorry-free and committed; a
   `#### Phase 7.4 Verdict` subsection exists; census exactly 1; scoped build and `lint-style` clean.
+
+#### Phase 7.4 Verdict
+
+**Outcome (i): the whole family closes sorry-free within the dispatch. Gate PASSES.** Six new
+declarations landed in `FrameCompleteness.lean`, all in the new `## Phase 7.4:
+Antitone-Applicability Lemma Family (P2 Formalized)` section appended after the Probe P1
+material:
+
+| Declaration | Role |
+|---|---|
+| `filterMap_any_guard_isEmpty_growth` | Generic branch-growth antitone fact for the `filterMap`-over-successors shape shared by `boxPropagation`, the inline diamond-negative K arm, and the two 4-rule helpers `modalFourBoxProp`/`modalFourDiaNegProp` |
+| `modalTSelf_isEmpty_growth` | Same fact for the single-element T self-propagation guard (`modalTBoxSelf`/`modalTDiaNegSelf`) |
+| `modalApplyOneS4Rules_boxPos_notApplicable_growth` | Assembles the K/T/4-rule three-layer argument for the box-positive shape, via the already-landed nested-match unfolding `modalApplyOneS4_boxPos_fst_eq` |
+| `modalApplyOneS4Rules_diaNeg_notApplicable_growth` | Dual, via `modalApplyOneS4_diaNeg_fst_eq` |
+| `modalApplyOne_fst_eq_of_not_box_diamond` | Full `.fst`-equality (strictly stronger than antitone) for every non-box/non-diamond formula shape, independent of `b` entirely |
+| `modalApplyOneS4Keyed_notApplicable_growth` | **The assembled target.** Fully general over every signed-formula shape (not restricted to non-mint candidates); the two mint shapes close vacuously since `modalApplyOneS4Keyed` never returns `.notApplicable` there |
+
+**Six lemmas, not the estimated ten** — under the Scope Hypothesis's 15-lemma split trigger, and
+fewer than estimated because the file already carried strong reusable infrastructure: the
+nested-match unfoldings `modalApplyOneS4_boxPos_fst_eq`/`_diaNeg_fst_eq` (which would otherwise
+have needed re-deriving), the direct reduction lemmas
+`modalApplyOneS4Keyed_boxPos_eq_S4Rules`/`_diaNeg_eq_S4Rules`, and
+`modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box`. File count matches the Scope Hypothesis: only
+`FrameCompleteness.lean` touched (`git diff --stat`: 243 lines added, against a ~250-line
+estimate).
+
+**Edge-growth half: no new lemma needed**, confirmed by inspection rather than authored — see the
+task-level note above for the three-part covering argument (persistent shapes via the Phase 7.2
+saturated-implies-`.notApplicable` lemmas already exercised at `acc.addEdge`; every other shape
+via the already-landed acc-independence lemmas; mint shapes vacuously). This is itself informative
+for P2: it confirms the reformulation's conjunct (d) needs no additional edge-side machinery
+beyond what Phase 7.2 already landed.
+
+`#print axioms` on all six: every one reports a subset of `{propext, Classical.choice,
+Quot.sound}` (checked via `lake env lean`, not `lean_verify`, per this task's standing note about
+`lean_verify`'s spurious `sorryAx` on this file cluster). Scoped `lake build
+Cslib.Logics.Modal.Tableau.FrameCompleteness` and `lake exe lint-style` both clean, no warnings.
+`lake exe checkInitImports` clean. Sorry census over `Cslib/Logics/Modal/Tableau/` unchanged at
+exactly 1 (`FrameSoundness.lean:1251`).
+
+**Reading constraint (outcome (v), honored):** this pass licenses Phases 7.5-7.7 to *consume*
+`modalApplyOneS4Keyed_notApplicable_growth` for conjunct (d) at primary-scan steps. It does
+**not** license assuming P3 (Phase 7.6's own first task), does not license dispatching Phase 7.8
+before 7.3/7.5-7.7 return, and does not touch the Phase 9 capstone scope question.
 
 ---
 

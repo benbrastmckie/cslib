@@ -5398,6 +5398,249 @@ theorem S4RedirectSoundInv_diaPos_blocked (φ₀ : Proposition Atom)
             SignedFormula (Proposition Atom) WorldIndex) = sf from rfl, hfsteq]
         exact hna'
 
+/-! ## Phase 7.4: Antitone-Applicability Lemma Family (P2 Formalized)
+
+Conjunct (d) of `S4RedirectSoundInv` needs `(modalApplyOneS4Keyed φ₀ keys sf b acc).1 =
+.notApplicable` to survive a primary-scan step's branch growth (`b ↦ nf ++ b`), where
+`hmint`/mint-readiness (the hypothesis `S4RedirectSoundInv_boxNeg_blocked`/`_diaPos_blocked`
+use) is unavailable. Every rule layer (propositional, K, T-self, S4 4-rule) filters its own
+output against the CURRENT branch `b` before emitting anything, so growing `b` can only filter
+out MORE candidates, never fewer -- this is the antitone-applicability property, formalized
+below as a small family culminating in `modalApplyOneS4Keyed_notApplicable_growth`. -/
+
+omit [Hashable Atom] in
+/-- **Generic branch-growth antitone fact** for the `filterMap`-over-successors shape shared by
+`boxPropagation`, the diamond-negative K rule's inline propagation, and the two S4 4-rule
+helpers `modalFourBoxProp`/`modalFourDiaNegProp`: if every element of `l` is filtered out
+against the guard list `b` (producing `[]`), it stays filtered out against any branch
+extension `nf ++ b`. `List.any_append` is the load-bearing fact: the guard can only become MORE
+true as the branch grows, never less. -/
+lemma filterMap_any_guard_isEmpty_growth
+    (l : List WorldIndex) (g : WorldIndex → SignedFormula (Proposition Atom) WorldIndex)
+    (nf b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : l.filterMap (fun w' => if b.any (· == g w') then none else some (g w')) = []) :
+    l.filterMap (fun w' => if (nf ++ b).any (· == g w') then none else some (g w')) = [] := by
+  rw [List.filterMap_eq_nil_iff] at h ⊢
+  intro w' hw'
+  have hguard := h w' hw'
+  by_cases hcond : b.any (· == g w') = true
+  · rw [List.any_append, hcond]; simp
+  · rw [if_neg hcond] at hguard
+    exact absurd hguard (by simp)
+
+omit [Hashable Atom] in
+/-- Branch-growth antitone fact for the T self-propagation helpers `modalTBoxSelf`/
+`modalTDiaNegSelf`: a single-element `if b.any (· == sf) then [] else [sf]` guard, which shares
+the same monotone-guard argument as `filterMap_any_guard_isEmpty_growth` but does not need
+`filterMap` at all. -/
+lemma modalTSelf_isEmpty_growth
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (nf b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : (if b.any (· == sf) then ([] : List (SignedFormula (Proposition Atom) WorldIndex))
+          else [sf]) = []) :
+    (if (nf ++ b).any (· == sf) then ([] : List (SignedFormula (Proposition Atom) WorldIndex))
+     else [sf]) = [] := by
+  by_cases hcond : b.any (· == sf) = true
+  · rw [List.any_append, hcond]; simp
+  · rw [if_neg hcond] at h
+    exact absurd h (by simp)
+
+/-- **Branch-growth antitone, box-positive shape.** If `modalApplyOneS4Rules` is
+`.notApplicable` at `⟨.pos, .box ψ, w⟩` given `(b, acc)`, it stays `.notApplicable` at any
+branch extension `nf ++ b` (same `acc`): all three layers' candidate lists
+(`boxPropagation`/`modalTBoxSelf`/`modalFourBoxProp`) can only shrink as `b` grows. Any
+`φ₀`-witness works in the intermediate `modalApplyOneS4` bridge -- box-positive never consults
+the guard, so the choice is immaterial; `ψ` itself is reused for convenience. -/
+lemma modalApplyOneS4Rules_boxPos_notApplicable_growth
+    (b nf : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (h : (modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).1 = .notApplicable) :
+    (modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) (nf ++ b) acc).1 = .notApplicable := by
+  have hshape : ∀ β : List (SignedFormula (Proposition Atom) WorldIndex),
+      modalApplyOneS4 ψ (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) β acc =
+      modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) β acc := fun β =>
+    modalApplyOneS4_eq_of_not_boxNeg_diaPos ψ _ β acc ⟨by simp, by simp⟩
+  have hbig_b := modalApplyOneS4_boxPos_fst_eq ψ b acc ψ w
+  have hbig_nf := modalApplyOneS4_boxPos_fst_eq ψ (nf ++ b) acc ψ w
+  rw [hshape b] at hbig_b
+  rw [hshape (nf ++ b)] at hbig_nf
+  rw [hbig_b] at h
+  rw [hbig_nf]
+  by_cases h1 : (boxPropagation b acc ψ w).isEmpty = true
+  · by_cases h2 : (modalTBoxSelf b ψ w).isEmpty = true
+    · by_cases h3 : (modalFourBoxProp b acc ψ w).isEmpty = true
+      · have hnil1 : boxPropagation (nf ++ b) acc ψ w = [] :=
+          filterMap_any_guard_isEmpty_growth (acc.successorsOf w)
+            (fun w' => (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) nf b
+            (List.isEmpty_iff.mp h1)
+        have hnil2 : modalTBoxSelf (nf ++ b) ψ w = [] :=
+          modalTSelf_isEmpty_growth (⟨.pos, ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) nf b (List.isEmpty_iff.mp h2)
+        have hnil3 : modalFourBoxProp (nf ++ b) acc ψ w = [] :=
+          filterMap_any_guard_isEmpty_growth (acc.successorsOf w)
+            (fun w' => (⟨.pos, .box ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)) nf b
+            (List.isEmpty_iff.mp h3)
+        simp [hnil1, hnil2, hnil3]
+      · simp [h1, h2, h3] at h
+    · simp [h1, h2] at h
+  · simp [h1] at h
+
+/-- Dual of `modalApplyOneS4Rules_boxPos_notApplicable_growth` for the diamond-negative shape
+`F(◇ψ)@w`. The K layer's candidate list has no separately-named `def` (unlike `boxPropagation`,
+matching `modalApplyOneS4_diaNeg_fst_eq`'s own inline spelling), so it is written out directly
+here rather than via a helper `def`. -/
+lemma modalApplyOneS4Rules_diaNeg_notApplicable_growth
+    (b nf : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (h : (modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).1 = .notApplicable) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) (nf ++ b) acc).1 = .notApplicable := by
+  have hshape : ∀ β : List (SignedFormula (Proposition Atom) WorldIndex),
+      modalApplyOneS4 ψ (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) β acc =
+      modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) β acc := fun β =>
+    modalApplyOneS4_eq_of_not_boxNeg_diaPos ψ _ β acc ⟨by simp, by simp⟩
+  have hbig_b := modalApplyOneS4_diaNeg_fst_eq ψ b acc ψ w
+  have hbig_nf := modalApplyOneS4_diaNeg_fst_eq ψ (nf ++ b) acc ψ w
+  rw [hshape b] at hbig_b
+  rw [hshape (nf ++ b)] at hbig_nf
+  rw [hbig_b] at h
+  rw [hbig_nf]
+  by_cases h1 : ((acc.successorsOf w).filterMap fun u =>
+      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+      if b.any (· == sf') then none else some sf').isEmpty = true
+  · by_cases h2 : (modalTDiaNegSelf b ψ w).isEmpty = true
+    · by_cases h3 : (modalFourDiaNegProp b acc ψ w).isEmpty = true
+      · have hnil1e : ((acc.successorsOf w).filterMap fun u =>
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, u⟩
+            if (nf ++ b).any (· == sf') then none else some sf').isEmpty = true :=
+          List.isEmpty_iff.mpr (filterMap_any_guard_isEmpty_growth (acc.successorsOf w)
+            (fun u => (⟨.neg, ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex)) nf b
+            (List.isEmpty_iff.mp h1))
+        have hnil2e : (modalTDiaNegSelf (nf ++ b) ψ w).isEmpty = true :=
+          List.isEmpty_iff.mpr (modalTSelf_isEmpty_growth (⟨.neg, ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) nf b (List.isEmpty_iff.mp h2))
+        have hnil3e : (modalFourDiaNegProp (nf ++ b) acc ψ w).isEmpty = true :=
+          List.isEmpty_iff.mpr (filterMap_any_guard_isEmpty_growth (acc.successorsOf w)
+            (fun w' => (⟨.neg, .diamond ψ, w'⟩ :
+              SignedFormula (Proposition Atom) WorldIndex)) nf b (List.isEmpty_iff.mp h3))
+        simp only [hnil1e, hnil2e, hnil3e, if_true]
+      · rw [if_pos h1, if_pos h2, if_neg h3] at h; simp at h
+    · rw [if_pos h1, if_neg h2] at h; simp at h
+  · rw [if_neg h1] at h; simp at h
+
+omit [Hashable Atom] in
+/-- **Branch-independence for non-box/non-diamond formulas.** `modalApplyOne`'s `.fst` is
+entirely independent of `b` when `sf`'s formula is neither `.box` nor `.diamond`: the
+propositional-rule branch depends only on `sf`, and the K modal match's catch-all arm
+(`| _, _ => .notApplicable`) is a literal constant. Companion to
+`modalApplyOne_fst_eq_of_not_boxPos_diaNeg` (which varies `acc` at the two 4-rule/T-relevant
+shapes); this one varies `b` at every shape except the four box/diamond arms (mint and
+persistent alike), since the two MINT shapes' `.fst` payload (fresh-world witness content) does
+genuinely depend on `b`. -/
+lemma modalApplyOne_fst_eq_of_not_box_diamond
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b1 b2 : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hnb : ∀ ψ, sf.formula ≠ .box ψ) (hnd : ∀ ψ, sf.formula ≠ .diamond ψ) :
+    (modalApplyOne sf b1 acc).fst = (modalApplyOne sf b2 acc).fst := by
+  unfold modalApplyOne
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp_all [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?,
+      List.map, List.find?, RuleResult.isApplicable, Option.getD_none]
+
+/-- **The assembled branch-growth antitone statement (Phase 7.4's target, report §6/P2).**
+`(modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable` survives any branch extension
+`b ↦ nf ++ b` (same `acc`), for EVERY signed-formula shape `sf`, not only the non-mint
+candidates `S4RedirectSoundInv`'s conjunct (d) actually needs. The two mint shapes
+(`F(□χ)@w`, `T(◇χ)@w`) are closed vacuously -- `modalApplyOneS4Keyed` always returns `.linear`
+there (blocked: `.linear []`; unblocked:
+`modalApplyOneS4KeyedMint`, whose `.fst` is `modalApplyOne`'s own `.linear` result with
+`boxPlusExtraS4` appended, per `modalApplyOneS4KeyedMint_fst_eq_or_linear`), so the hypothesis
+`.1 = .notApplicable` never holds there in the first place. The two persistent modal shapes
+(box-positive, diamond-negative) route through `modalApplyOneS4Rules_boxPos_notApplicable_growth`
+/`_diaNeg_notApplicable_growth`; every other shape (propositional/atomic) routes through
+`modalApplyOne_fst_eq_of_not_box_diamond`, which is branch-INDEPENDENT there, a fortiori
+antitone. -/
+lemma modalApplyOneS4Keyed_notApplicable_growth (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b nf : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : (modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable) :
+    (modalApplyOneS4Keyed φ₀ keys sf (nf ++ b) acc).1 = .notApplicable := by
+  by_cases hbd : (sf.sign = .pos ∧ ∃ χ, sf.formula = .box χ) ∨
+      (sf.sign = .neg ∧ ∃ χ, sf.formula = .diamond χ)
+  · rcases hbd with ⟨hs, χ, hf⟩ | ⟨hs, χ, hf⟩
+    · have hsfeq : sf = (⟨.pos, .box χ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq, modalApplyOneS4Keyed_boxPos_eq_S4Rules] at h ⊢
+      exact modalApplyOneS4Rules_boxPos_notApplicable_growth b nf acc χ sf.label h
+    · have hsfeq : sf = (⟨.neg, .diamond χ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        rcases sf with ⟨s', f', w'⟩; simp_all
+      rw [hsfeq, modalApplyOneS4Keyed_diaNeg_eq_S4Rules] at h ⊢
+      exact modalApplyOneS4Rules_diaNeg_notApplicable_growth b nf acc χ sf.label h
+  · by_cases hmintshape : (sf.sign = .neg ∧ ∃ χ, sf.formula = .box χ) ∨
+        (sf.sign = .pos ∧ ∃ χ, sf.formula = .diamond χ)
+    · exfalso
+      rcases hmintshape with ⟨hs, χ, hf⟩ | ⟨hs, χ, hf⟩
+      · have hsfeq : sf = (⟨.neg, .box χ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) := by
+          rcases sf with ⟨s', f', w'⟩; simp_all
+        rw [hsfeq] at h
+        simp only [modalApplyOneS4Keyed] at h
+        rcases hblk : blockingWorldS4Keyed φ₀ b keys .neg χ sf.label with _ | wBlock
+        · rw [hblk] at h
+          have hklin : (modalApplyOne (⟨.neg, .box χ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+              RuleResult.linear _ := rfl
+          rcases modalApplyOneS4KeyedMint_fst_eq_or_linear (⟨.neg, .box χ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc with heq | ⟨forms, hraw, hkeyed⟩
+          · rw [heq, hklin] at h; simp at h
+          · rw [hkeyed] at h; simp at h
+        · rw [hblk] at h; simp at h
+      · have hsfeq : sf = (⟨.pos, .diamond χ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) := by
+          rcases sf with ⟨s', f', w'⟩; simp_all
+        rw [hsfeq] at h
+        simp only [modalApplyOneS4Keyed] at h
+        rcases hblk : blockingWorldS4Keyed φ₀ b keys .pos χ sf.label with _ | wBlock
+        · rw [hblk] at h
+          have hklin : (modalApplyOne (⟨.pos, .diamond χ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+              RuleResult.linear _ := rfl
+          rcases modalApplyOneS4KeyedMint_fst_eq_or_linear (⟨.pos, .diamond χ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc with heq | ⟨forms, hraw, hkeyed⟩
+          · rw [heq, hklin] at h; simp at h
+          · rw [hkeyed] at h; simp at h
+        · rw [hblk] at h; simp at h
+    · have hbd' := not_or.mp hbd
+      have hms' := not_or.mp hmintshape
+      have hnb : ∀ χ, sf.formula ≠ .box χ := by
+        intro χ hfeq
+        rcases hs : sf.sign with _ | _
+        · exact hbd'.1 ⟨hs, χ, hfeq⟩
+        · exact hms'.1 ⟨hs, χ, hfeq⟩
+      have hnd : ∀ χ, sf.formula ≠ .diamond χ := by
+        intro χ hfeq
+        rcases hs : sf.sign with _ | _
+        · exact hms'.2 ⟨hs, χ, hfeq⟩
+        · exact hbd'.2 ⟨hs, χ, hfeq⟩
+      rw [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf.sign sf.formula sf.label
+        hnb hnd b acc, show (⟨sf.sign, sf.formula, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) = sf from rfl] at h
+      rw [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf.sign sf.formula sf.label
+        hnb hnd (nf ++ b) acc, show (⟨sf.sign, sf.formula, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) = sf from rfl]
+      rw [modalApplyOne_fst_eq_of_not_box_diamond sf (nf ++ b) b acc hnb hnd]
+      exact h
+
 end Cslib.Logic.Modal.Tableau
 
 end

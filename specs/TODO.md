@@ -11,10 +11,10 @@ next_project_number: 586
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,534,554,558,562,563,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,534,554,562,563,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,511,537,551,553,564,571,576 | 36,37,181,425,554,562,563,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,506,548,565,566,582 | 39,40,511,553,564 | foundations, modal logic |
-| 4 | 300,567 | 506,558,565,566 | modal logic |
+| 4 | 300,567 | 506,565,566 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,12 +36,10 @@ next_project_number: 586
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-558 [PLANNED] — [Task A of the modal-tableau refactor programme; P0, highest valu
-  └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
 562 [NOT STARTED] — [Task D of the modal-tableau refactor programme; P2. Gated on the
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
     └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
-      └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
+      └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
     └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
       └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
 563 [NOT STARTED] — [Task E of the modal-tableau refactor programme; P2. Gated on the
@@ -327,7 +325,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 558. Extract re-derived private Tableau facts into public Support modules
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

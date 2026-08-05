@@ -1381,7 +1381,7 @@
     {
       "project_number": 558,
       "project_name": "tableau_support_private_dedup",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Extract re-derived private Tableau facts into public Support modules",
       "topic": "Modal Logic",
@@ -1418,10 +1418,15 @@
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T06:03:45Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785908335_1f3c58",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Extracted re-derived private Tableau facts into two public Support modules (Support/Accessibility.lean, Support/KnownWorlds.lean, both importing only Branch) plus in-place de-privatization in FmpMeasure.lean, deleting the duplicate re-derivations across the six consumer files. All 11 plan phases closed (Phase 10 as COMPLETED WITH EXCLUSIONS, pre-declared). Orchestrator-verified end state: lake build Cslib green at 3313 jobs (baseline 3311, +2 for the new modules); Modal/Tableau sorry census exactly 1, confirmed by declaration name as branchSatisfiableIn_s4FC_ancestor_redirect in FrameSoundness.lean; zero axiom declarations in the subsystem, and modalTableauS4Keyed_complete plus all six Decidable instances (K/T/B/S5/Five/KB5) carry only [propext, Classical.choice, Quot.sound] with no sorryAx; lake shake at 9 findings matching baseline exactly with zero in Modal/Tableau; checkInitImports and lint-style both exit 0; Rules.lean, Saturation.lean and Branch.lean confirmed untouched. Three premises in the original task description were corrected during the work: the inventory is 72-74 duplicate declarations found by signature matching rather than 77 comment strings (17 duplicates carry no re-derivation comment at all); two Support modules are correct rather than three, since modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself and a Support/Subfmls.lean would sit above it; and the real driver is import reachability rather than privacy, since three consumers cannot reach Soundness.lean where the largest family was private. Several per-phase Scope Hypotheses measured higher than planned (Phase 1: 74/43 vs 72/41; Phase 10 residue: 20 families vs ~16) and were reported and reconciled rather than forced to hit the planned numbers.",
+      "roadmap_items": [
+        "Adjudicate the 8 public-origin duplicate families in Cslib/Logics/Modal/Tableau/ left unresolved by the Support-module extraction",
+        "Architectural work for the 5 confirmed-unreachable privacy-caused duplicate families that de-privatization alone cannot resolve"
+      ]
     },
     {
       "project_number": 562,

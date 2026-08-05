@@ -912,7 +912,7 @@ additive changes to `FrameCompleteness.lean` for both commits.
 
 ---
 
-### Phase 7.7: 4-rule arms restated with the ghost-edge disjunction [NOT STARTED]
+### Phase 7.7: 4-rule arms restated with the ghost-edge disjunction [IN PROGRESS]
 
 - **Goal:** Re-wrap `modalApplyOneS4Keyed_boxPos_sat` and `modalApplyOneS4Keyed_diaNeg_sat` against
   the weakened conjunct (b), replacing the blanket edge-realization hypothesis with the
@@ -957,10 +957,98 @@ additive changes to `FrameCompleteness.lean` for both commits.
         `.snd = acc`), `Er' = Er`, new formulas land at successors — for a ghost successor already
         present (so no new formula at any redirect source), for a non-ghost successor covered by
         the same `outDeg` argument as Phase 7.5. (d) consumes Phase 7.4's branch-growth half.
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+        *(deviation: blocked, see Progress Record below — the "same outDeg argument as Phase 7.5"
+        does not transfer as stated; a genuinely open sub-question remains)*
+  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1. *(deviation: deferred — not
+        reached, conjunct (d)'s discharge for this phase is not yet designed)*
 
 - **Done when:** both 4-rule arms are sorry-free and committed under `S4RedirectSoundInv`; census
   exactly 1; scoped build and `lint-style` clean.
+
+#### Phase 7.7 Progress Record (first dispatch, incomplete — continuation required)
+
+**Tasks 1-3 completed; task 4's (d) discharge hit a genuine open technical question, not yet
+resolved — recorded here rather than forced through.**
+
+**Confirmed (tasks 1-3):**
+
+1. `modalApplyOneS4Rules_boxPos_soundIn`/`_diaNeg_soundIn` (`FrameCompleteness.lean:4795`,
+   `:4842`) consume `hacc` at exactly ONE call site each, inside their internal `hFourSat` proof:
+   `hacc lbl w' (mem_successorsOf_hasEdge hw')`, fed into `hFC.2.trans` (one hop of transitivity)
+   to derive `m.r (f lbl) (f v)` from `m.r (f lbl) (f w')` and the successor's own relational
+   witness. This confirms the plan's Scope Hypothesis: exactly one hypothesis, exactly one call
+   site, per arm.
+2. The **ghost-successor case is genuinely vacuous via the dedup route**, confirming the plan's
+   "prefer the dedup route if it closes" guidance: `hFourSat`'s proof already `by_cases hcase :
+   b.any (· == ⟨.pos, .box φ, w'⟩)` before ever consulting `hacc`; if `(lbl, w') ∈ Er`, conjunct
+   (c) of `S4RedirectSoundInv` (applied at `hmem : ⟨.pos, .box φ, lbl⟩ ∈ b`, the SAME formula this
+   arm is about) gives `⟨.pos, .box φ, w'⟩ ∈ b` directly, which is exactly `hcase = true` --
+   `modalFourBoxProp`'s own filterMap guard means `w'` was NEVER a candidate output-producer to
+   begin with (`hxeq` closes via `simp [hcase] at hxeq`, no `hacc` call ever reached). So the
+   ghost-successor case needs no case-split ON `hacc` at all -- it is excluded one layer
+   earlier, by conjunct (c) ruling out `hcase = false` when `(lbl, w') ∈ Er`. The restated
+   `_soundIn` lemma therefore only needs ONE new hypothesis beyond the landed signature: a
+   targeted form of conjunct (c), `hcAbs : ∀ w', (lbl, w') ∈ Er → ⟨.pos, .box φ, w'⟩ ∈ b ∧
+   ⟨.pos, φ, w'⟩ ∈ b` (dual for diamond-negative), NOT the full `S4RedirectSoundInv` bundle.
+3. Both landed `_soundIn` arms conclude `.snd = acc` unconditionally
+   (`modalApplyOneS4Rules_{boxPos,diaNeg}_snd_eq_acc`) -- confirmed, `acc' = acc` for this whole
+   phase, matching the Scope Hypothesis.
+
+**Where task 4 stalled -- a genuine open question, not a false start:**
+
+Phase 7.5's own (d) discharge (`S4RedirectSoundInv_notBoxDia_step`) works because EVERY new
+formula in its `nf` lands at `sf.label` (`tryAllPropRules_output_label_eq`) -- the SAME world as
+the firing candidate `sf` itself, whose `outDeg acc sf.label = 0` is forced by OLD conjunct (d)
+(since `sf` is itself a candidate, contrapositive of `hFroz`). This makes every NEW formula's own
+`outDeg` provably zero too, vacuously discharging (d) for all of them at once.
+
+**This mechanism does NOT transfer to the 4-rule shapes.** A 4-rule box-positive/diamond-negative
+formula `⟨.pos, .box φ, lbl⟩`'s 4-rule output (`modalFourBoxProp`) lands its new content at
+`w'` -- a RECORDED SUCCESSOR of `lbl`, NOT at `lbl` itself. So the "new formula's world has
+`outDeg = 0`" argument that made Phase 7.5's (d) vacuous does NOT establish `outDeg acc w' = 0`
+for the SUCCESSOR world `w'` -- `w'` is an ordinary, already-existing world in the graph and may
+well have its OWN outgoing edges (e.g. if `w'` was itself minted earlier via a diamond-positive
+step and has since branched further). If `outDeg acc w' ≠ 0` for some non-ghost successor `w'`
+receiving a genuinely NEW `⟨.pos, .box φ, w'⟩` this step, conjunct (d) requires `⟨.pos, .box φ,
+w'⟩ ∈ e ∨ (modalApplyOneS4Keyed φ₀ keys ⟨.pos, .box φ, w'⟩ (nf ++ b) acc).1 = .notApplicable` --
+the LEFT disjunct fails (the formula was just created this step, so trivially `∉ e`), and the
+RIGHT disjunct needs an actual semantic argument this Progress Record does NOT yet have: nothing
+established so far shows a freshly-propagated box-positive/diamond-negative formula at an
+arbitrary already-existing successor world is unconditionally `.notApplicable`. `modalS4Saturated`
+is not generally available at this call site (the phase's own docstring already notes 4-rule
+shapes can fire at a primary-scan step where saturation does not hold), and no growth-lemma
+route applies either, since growth lemmas (Phase 7.4) only transport an EXISTING `.notApplicable`
+fact across a state change -- there is no PRIOR state at which `⟨.pos, .box φ, w'⟩` was even a
+member of the branch to have such a fact about.
+
+The plan's own task-list note ("covered by the same `outDeg` argument as Phase 7.5") is, on this
+evidence, **not correct as stated** -- it conflates "new formula's own world has zero outDeg"
+(true in Phase 7.5, where new formulas share the firing candidate's world) with the 4-rule
+shapes' actual situation (new formulas land at a DIFFERENT, pre-existing world whose outDeg is
+unconstrained by anything established in Phases 7.1-7.6). This is recorded as a genuine
+plan-vs-Lean mismatch, not a deviation invented by this dispatch: the plan's Scope Hypothesis
+explicitly asked to "confirm which one actually applies rather than assuming," and this dispatch
+did exactly that, finding the assumed route does not close.
+
+**What would resolve this** (not attempted, out of the remaining budget this dispatch):
+- Search `S4LoopInv`/`S4KeyedHintikkaInv`/`accTargetsKnown`-adjacent invariants
+  (`LoopChecking.lean`) for anything bounding `outDeg` at a RECORDED SUCCESSOR world, or ruling
+  out `outDeg acc w' ≠ 0` for a successor reached this way under the driver's actual processing
+  order (a per-world settledness argument, distinct from the whole-branch `modalNonMintCandidates`
+  settledness this task already uses elsewhere).
+- Alternatively, investigate whether `S4RedirectSoundInv`'s conjunct (d) as currently stated is
+  simply too strong for the 4-rule arms, and whether the DOWNSTREAM consumer (Phase 7.8's
+  dispatcher, ultimately Phase 8's terminal payoff) actually needs (d) to hold at every
+  `outDeg ≠ 0` world, or only at worlds reachable via a ghost edge specifically -- which would
+  motivate weakening (d) itself, a definition-level change requiring re-verification against
+  every already-landed arm (Phases 7.2, 7.3, 7.5, 7.6), not merely a Phase 7.7-local fix.
+- If neither route closes, escalate to the user: this may indicate `S4RedirectSoundInv`'s
+  reformulation (Phase 7's whole point) needs a further design iteration for the 4-rule case
+  specifically, distinct from the mint/blocked cases Phases 7.2-7.6 already closed.
+
+**No Lean was written for this phase.** Per this task's standing discipline, no `sorry` or
+vacuous placeholder was introduced; the phase is left `[IN PROGRESS]` with this open question
+recorded rather than forced closed.
 
 ---
 

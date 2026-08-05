@@ -208,59 +208,6 @@ constructor/extractor lemmas needed for a cross-world catalog-membership argumen
 `accFreshInv`'s numeric bound instead of a known-worlds membership fact. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalSubfmls_trans_B {a c : Proposition Atom} {b : Proposition Atom}
-    (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
-  induction c with
-  | atom p =>
-    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
-  | bot =>
-    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
-  | imp x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | and x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | or x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | box x ihx =>
-    simp only [modalSubfmls, List.mem_cons] at hbc
-    rcases hbc with rfl | hx
-    · exact hab
-    · exact List.mem_cons_of_mem _ (ihx hx)
-  | diamond x ihx =>
-    simp only [modalSubfmls, List.mem_cons] at hbc
-    rcases hbc with rfl | hx
-    · exact hab
-    · exact List.mem_cons_of_mem _ (ihx hx)
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalUniverse_mem_formula_B {φ0 : Proposition Atom}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverse φ0) :
-    x.formula ∈ modalSubfmls φ0 := by
-  simp only [modalUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
-    List.not_mem_nil, or_false] at hx
-  obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
-
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma mem_modalUniverse_of_B {φ0 : Proposition Atom} {s : Sign} {φ : Proposition Atom}
-    {w : WorldIndex} (hw : w ≤ modalWorldBound φ0) (hφ : φ ∈ modalSubfmls φ0) :
-    (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 := by
-  have hlt : w < modalWorldBound φ0 + 1 := Nat.lt_succ_of_le hw
-  simp only [modalUniverse, List.mem_flatMap, List.mem_range]
-  exact ⟨w, hlt, φ, hφ, by cases s <;> simp⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Cross-world catalog membership: a signed formula `⟨s, ψ, v⟩` is in `U(φ0)` provided `ψ` is a
 subformula of some `sf.formula` with `sf ∈ b ⊆ U(φ0)`, and `v` is bounded by `modalWorldBound
 φ0` -- independent of `v` being `sf.label` (unlike `modalUniverse_mem_of_sameWorld_subfml`). -/
@@ -271,7 +218,7 @@ private lemma modalUniverse_mem_of_predWorld_subfml {φ0 : Proposition Atom}
     {ψ : Proposition Atom} (hψ : ψ ∈ modalSubfmls sf.formula) (s : Sign)
     {v : WorldIndex} (hv : v ≤ modalWorldBound φ0) :
     (⟨s, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 :=
-  mem_modalUniverse_of_B hv (modalSubfmls_trans_B hψ (modalUniverse_mem_formula_B (hb sf hsf)))
+  mem_modalUniverse_of hv (modalSubfmls_trans hψ (modalUniverse_mem_formula (hb sf hsf)))
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every `modalBPredecessorsOf`/`modalBBoxBack`/`modalBDiaNegBack`-relevant predecessor `v` of

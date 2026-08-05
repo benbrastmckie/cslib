@@ -2033,20 +2033,8 @@ lemma accReachableInv_kb5_root_refl
   exact Relation.RightEuclidean.rightEuclidean hv0 hv0
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
-(unavailable across files): appending formulas to the front of a branch only grows its
-known-worlds set. Mirrors `S5Simplification.lean`'s `modalKnownWorlds_mono_append_S5`. -/
-private lemma modalKnownWorlds_mono_append_FS
-    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
-  intro x hx
-  rw [mem_modalKnownWorlds] at hx ⊢
-  obtain ⟨sf, hsf, rfl⟩ := hx
-  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every emitted label of `xs` known in `b` puts every known world of `xs ++ b` back inside
-`modalKnownWorlds b`: the converse direction to `modalKnownWorlds_mono_append_FS`, needed when
+`modalKnownWorlds b`: the converse direction to `modalKnownWorlds_mono_append`, needed when
 the appended formulas' labels are already known (the S5 universal-propagation and K
 propositional/propagation arms). -/
 private lemma modalKnownWorlds_append_subset_of_labels_known
@@ -3634,7 +3622,7 @@ Direct analogue of the retired frozen-rule's `accReachableInv` preservation lemm
 addition: since the corrected rule's self-target arm needs `(0 : WorldIndex) ∈ modalKnownWorlds
 b` threaded in (`modalApplyOneKb5''Prop_knownWorlds_step`'s `h0`), the conclusion is strengthened
 to also propagate `0 ∈ modalKnownWorlds b'` to every child branch `b'` -- trivial by
-`modalKnownWorlds_mono_append_FS` at each case, since every child branch is `b` with formulas
+`modalKnownWorlds_mono_append` at each case, since every child branch is `b` with formulas
 prepended (never removed). -/
 
 /-- A `modalStepBranchGen modalApplyOneKb5''` step preserves `accReachableInv` and the "root
@@ -3663,7 +3651,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
     intro b' hb'
     simp only [List.mem_singleton] at hb'
     subst hb'
-    refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+    refine ⟨?_, modalKnownWorlds_mono_append _ b 0 h0⟩
     intro w hw
     have hsf'known : sf'.label ∈ modalKnownWorlds b :=
       (mem_modalKnownWorlds b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
@@ -3684,7 +3672,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       obtain ⟨rfl, -, rfl⟩ := hsf
       rw [hfstc] at hdich
       intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
-      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      refine ⟨?_, modalKnownWorlds_mono_append _ b 0 h0⟩
       intro w hw
       exact hInv w (modalKnownWorlds_append_subset_of_labels_known hdich w hw)
     · rw [hfstc, hsndeq] at hsf
@@ -3695,7 +3683,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       obtain ⟨br, hbrmem, rfl⟩ := List.mem_map.mp hb'
       have hbr_known : ∀ x ∈ br, x.label ∈ modalKnownWorlds b :=
         fun x hx => hdich x (List.mem_flatten.mpr ⟨br, hbrmem, hx⟩)
-      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      refine ⟨?_, modalKnownWorlds_mono_append _ b 0 h0⟩
       intro w hw
       exact hInv w (modalKnownWorlds_append_subset_of_labels_known hbr_known w hw)
     · rw [hfstc, hsndeq] at hsf
@@ -3703,7 +3691,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       obtain ⟨rfl, -, rfl⟩ := hsf
       rw [hfstc] at hdich
       intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
-      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      refine ⟨?_, modalKnownWorlds_mono_append _ b 0 h0⟩
       intro w hw
       exact hInv w (modalKnownWorlds_append_subset_of_labels_known hdich w hw)
     · rw [hfstc] at hsf; simp at hsf
@@ -3715,7 +3703,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
       rw [hfstc] at hdich
       obtain ⟨-, hlabels⟩ := hdich
       intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
-      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      refine ⟨?_, modalKnownWorlds_mono_append _ b 0 h0⟩
       intro w hw
       rw [mem_modalKnownWorlds] at hw
       obtain ⟨sf', hsf', rfl⟩ := hw

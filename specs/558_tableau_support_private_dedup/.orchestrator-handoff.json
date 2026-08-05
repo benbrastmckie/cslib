@@ -1,0 +1,221 @@
+{
+  "task_number": 558,
+  "session_id": "sess_1785908335_1f3c58",
+  "phase": "research",
+  "agent_type": "cslib-research-agent",
+  "status": "researched",
+  "orchestrator_mode": true,
+  "artifacts": [
+    "specs/558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md"
+  ],
+  "modified_files": [
+    "specs/558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md",
+    "specs/558_tableau_support_private_dedup/.orchestrator-handoff.json",
+    "specs/558_tableau_support_private_dedup/.return-meta.json"
+  ],
+  "measured_inventory": {
+    "comment_sites_total_grep": 57,
+    "comment_sites_real": 55,
+    "comment_sites_prose_selfreference": 2,
+    "comment_site_drift_since_20260726": 0,
+    "duplicate_declarations": 72,
+    "duplicate_families": 41,
+    "fmpmeasure_private_declarations": 50,
+    "fmpmeasure_privates_actually_rederived": 14,
+    "note": "The 77 figure in the task description is closer to correct than the tree's own 'corrected 55'. 55 counts comment strings; 72 counts actual duplicate declarations. Plan MUST drive off the declaration-level census."
+  },
+  "tier_classification": {
+    "tier1_branch_level": {
+      "families": 9,
+      "duplicate_declarations": 33,
+      "resolution": "Support/Accessibility.lean + Support/KnownWorlds.lean, importing only Tableau.Branch"
+    },
+    "tier2_fmpmeasure_level": {
+      "families": 16,
+      "duplicate_declarations": 23,
+      "resolution": "de-privatize in place in FmpMeasure.lean; NO new module needed - all 6 consumers already reach FmpMeasure transitively"
+    },
+    "tier3_above_fmpmeasure": {
+      "families": 16,
+      "duplicate_declarations": 16,
+      "resolution": "per-case triage; 8 have an already-PUBLIC origin so duplication is not privacy-caused and is out of scope"
+    }
+  },
+  "partition_verdict": {
+    "three_modules_sufficient": false,
+    "recommended_modules": [
+      "Cslib/Logics/Modal/Tableau/Support/Accessibility.lean",
+      "Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean"
+    ],
+    "subfmls_module_recommended": false,
+    "subfmls_rationale": "modalSubfmls and modalUniverse are DEFINED in FmpMeasure.lean:73 and :151. A Support/Subfmls.lean would have to sit ABOVE FmpMeasure and buys nothing. De-privatize in place instead.",
+    "facts_fitting_none_of_three": [
+      "modalExpMeasure_split/_append/_const_exp (MEASURE group, depends on FmpMeasure.lean:200)",
+      "modalCount_notMem_*, modalWork_drop_* (work/measure group)",
+      "16 Tier-3 families originating above FmpMeasure"
+    ]
+  },
+  "import_graph": {
+    "cycle_risk": "none",
+    "key_finding": "Accessibility, addEdge, successorsOf, hasEdge, modalKnownWorlds, modalMaxWorld, modalNextWorld, boxPositivesOf are ALL defined in Branch.lean, which imports only SignedFormula + Defs. Support modules importing Branch sit below every consumer.",
+    "transitive_reachability": {
+      "all_6_consumers_reach_Branch": true,
+      "all_6_consumers_reach_FmpMeasure": true,
+      "consumers_NOT_reaching_Soundness": ["FiveSimplification", "LoopChecking", "S5Simplification"]
+    },
+    "why_support_modules_are_required": "hasEdge_addEdge_cases (7 copies, largest family) is private in Soundness.lean, which 3 of 6 consumers do NOT reach. De-privatization alone cannot fix it; the fact must be LOWERED to Branch level. FmpMeasure.lean:1080 re-derives it for the same reason.",
+    "cslib_lean_registration_required": true,
+    "cslib_lean_note": "Cslib.lean lines 492-511 list Tableau modules alphabetically; new Support modules MUST be added or lake exe checkInitImports fails."
+  },
+  "behaviour_preserving_verdict": {
+    "premise_holds_as_stated": false,
+    "genuinely_different_propositions": 0,
+    "identical_families": [
+      "hasEdge_addEdge_cases (7 copies, byte-identical)",
+      "mem_modalKnownWorlds (6 copies, byte-identical)",
+      "mem_modalUniverse_of (3 copies, byte-identical - 'swapped to' comment is STALE PROSE)",
+      "hasEdge_mem_successorsOf_origin (identical to its true base LoopChecking.lean:6764)"
+    ],
+    "weaker_family": {
+      "name": "modalKnownWorlds_fold_spec",
+      "copies": 6,
+      "deviation": "original carries hws0 : ws0.Nodup hypothesis and a .Nodup conjunct; all 6 copies drop both",
+      "downstream_nodup_used": false,
+      "resolution": "DISSOLVES. Each of the 6 copies has exactly ONE call site (simpa using ..._X l [] x) inside the proof of mem_modalKnownWorlds_X. Publishing mem_modalKnownWorlds from Support/KnownWorlds.lean makes all 6 copies DEAD CODE - delete outright, no substitution, no Nodup obligation. ws0 is always [] anyway."
+    },
+    "binder_variant_families": [
+      {
+        "name": "modalMaxWorld_foldl_le / modalMaxWorld_le_of_forall_le",
+        "variants": 4,
+        "deviation": "FmpMeasure:1869 and LoopChecking:6182 use explicit binders; S5Simplification:1148 and FiveSimplification:3311 use implicit {l}{M}{init}",
+        "call_site_impact": "26 of 30 call sites use `apply`, which is binder-mode INSENSITIVE and typechecks unchanged. Only 4 term-mode sites, each a single line inside a wrapper proof being deleted anyway.",
+        "recommendation": "adopt the implicit-binder wrapper form {l} {M} (h) : modalMaxWorld l <= M as canonical; 24 of 26 apply sites already expect it"
+      },
+      {
+        "name": "modalKnownWorlds_mono_append",
+        "copies": 5,
+        "deviation": "original uses subset notation; all 5 copies use forall x in ... form",
+        "call_site_impact": "definitionally equal but application arity differs; every call site needs a one-token edit",
+        "recommendation": "adopt the forall-x-in form; FmpMeasure is the only subset user with 2 internal sites vs 5 external populations"
+      }
+    ],
+    "free_deletions_found": [
+      "modalKnownWorlds_nodup_S5 (S5Simplification.lean:1079) - ZERO call sites, dead code",
+      "modalKnownWorlds_fold_nodup_S5 (S5Simplification.lean:1061) - only used to prove the above",
+      "hasEdge_mem_successorsOf_origin (LoopChecking.lean:1350) - intra-file duplicate; fix by reordering within LoopChecking.lean, no module needed"
+    ],
+    "audit_conflicts_reconciled": {
+      "conflict_1_modalMaxWorld": "BOTH auditors partly right. Signatures genuinely NOT alpha-equivalent (binder mode differs) as auditor 1 said; content genuinely preserved as auditor 2 said. Neither drew the operative conclusion: 26/30 call sites use `apply` and are unaffected. Verdict: CONTENT-EQUIVALENT / BINDER-VARIANT, migration is safe.",
+      "conflict_2_different_counts": "Reconciled to ZERO genuinely-different propositions. Auditor 1's 3 DIFFERENT are the modalMaxWorld binder variants (reclassified). Auditor 2's sole DIFFERENT (hasEdge_mem_successorsOf_origin as 'converse of mem_successorsOf_hasEdge') MISATTRIBUTED THE BASE - it is a byte-identical duplicate of hasEdge_mem_successorsOf at LoopChecking.lean:6764, same file. The converse pair are two separate facts each with its own duplicate.",
+      "warning": "Tree comments are unreliable in BOTH directions: they falsely flag mem_modalUniverse_of as deviant, and are absent where 17 real duplicates exist. Drive off signatures, never docstrings."
+    },
+    "audit_coverage_gap": {
+      "pairs_audited": 45,
+      "total_duplicate_declarations": 72,
+      "gap": 27,
+      "accounted_for": "~23 are Tier-3 singletons never dispatched (out of scope for the 3 proposed modules); ~4 are Tier-2 singletons found only by the suffix census and absent from the comment-seeded audit list. EVERY family with 2+ copies was audited."
+    }
+  },
+  "do_not_edit_constraint": {
+    "files": ["Rules.lean", "Saturation.lean", "Branch.lean"],
+    "scope_conflict": false,
+    "detail": "Zero of the 55 comment sites AND zero of the 72 duplicate declarations live in these three files. No conflict on the deletion side.",
+    "important_interaction": "Branch.lean OWNS the definitions (Accessibility, hasEdge, modalKnownWorlds, boxPositivesOf) and already hosts 4 public lemmas about them. The architecturally natural home for the 33 Tier-1 facts IS Branch.lean. The do-not-edit constraint is exactly WHY a separate Support/ directory is correct rather than arbitrary. State this in the new modules' docstrings so a future reader does not fold them back into Branch.lean."
+  },
+  "file_scope_correction": {
+    "declared_in_state_json": [
+      "Cslib/Logics/Modal/Tableau/Support/",
+      "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+      "Cslib/Logics/Modal/Tableau/Soundness.lean",
+      "Cslib/Logics/Modal/Tableau/TDriver.lean",
+      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
+    ],
+    "missing_and_required": [
+      "Cslib/Logics/Modal/Tableau/BDriver.lean",
+      "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
+      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+      "Cslib.lean"
+    ],
+    "note": "Declared scope covers only the modules OWNING private originals, omitting every module where the 72 duplicates must be DELETED. Plan must widen file_scope or implementation is blocked. None of the additions collide with the do-not-edit list."
+  },
+  "verification_baseline": {
+    "lake_build_Cslib": {"exit": 0, "detail": "Build completed successfully (3311 jobs)"},
+    "lake_exe_checkInitImports": {"exit": 0, "detail": "no output"},
+    "lake_exe_lint_style": {"exit": 0, "detail": "no output"},
+    "lake_shake": {
+      "command": "lake shake --add-public --keep-implied --keep-prefix",
+      "exit": 1,
+      "findings_total": 9,
+      "findings_in_modal_tableau": 0,
+      "critical_note": "shake is NOT clean at baseline and never has been. The correct post-condition is 'no Modal/Tableau findings and count stays at 9', NOT 'exit 0'. A plan demanding a clean shake exit will fail on pre-existing out-of-scope noise."
+    },
+    "sorry_census_modal_tableau": {
+      "count": 1,
+      "declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
+      "declaration_line": "FrameSoundness.lean:1252",
+      "sorry_token_line": "FrameSoundness.lean:1276",
+      "note": "Task description says 1244 - STALE. Build warning reports declaration position 1252; grep census reports token position 1276. Same single sorry. Re-locate by declaration NAME, never line number."
+    },
+    "sorry_census_repo_wide": {
+      "count": 29,
+      "note": "Orchestrator's 'exactly 5' counts incremental-build `declaration uses sorry` warnings, which UNDERCOUNTS - cached modules never re-emit warnings. The grep census is authoritative."
+    },
+    "axiom_census_modal_tableau": 0,
+    "must_stay_green": {
+      "modalTableauS4Keyed_complete": "FrameCompleteness.lean:4271",
+      "instDecidableKValid": "CompletenessLoop.lean:2295",
+      "instDecidableTValid": "FrameCompleteness.lean:1315",
+      "instDecidableBValid": "FrameCompleteness.lean:1931",
+      "instDecidableS5Valid": "FrameCompleteness.lean:2424",
+      "instDecidableFiveValid": "FrameCompleteness.lean:3214",
+      "instDecidableKb5Valid": "FrameCompleteness.lean:4160",
+      "note": "5 of 7 live in FrameCompleteness.lean, which also loses duplicates. Use a per-commit lake build gate, not a final-only check."
+    }
+  },
+  "recommended_phases": [
+    {"phase": "A", "name": "Support/Accessibility.lean", "imports": ["Cslib.Logics.Modal.Tableau.Branch"], "publishes": ["hasEdge_addEdge_cases", "mem_successorsOf_hasEdge", "hasEdge_mem_successorsOf"], "deletes_approx": 10},
+    {"phase": "B", "name": "Support/KnownWorlds.lean", "imports": ["Cslib.Logics.Modal.Tableau.Branch"], "publishes": ["mem_modalKnownWorlds", "modalKnownWorlds_mono_append", "modalKnownWorlds_nodup", "modalKnownWorlds_fold_spec", "mem_boxPositivesOf", "modalMaxWorld_le_of_forall_label_le"], "deletes_approx": 23, "ordering_note": "publish mem_modalKnownWorlds FIRST - it strands all 6 weak fold_spec copies as dead code"},
+    {"phase": "C", "name": "de-privatize Tier-2 in place in FmpMeasure.lean", "new_modules": 0, "deletes_approx": 23},
+    {"phase": "D", "name": "Tier-3 triage", "note": "do NOT process mechanically; document the 16 families and record the 8 public-origin ones as out of scope"}
+  ],
+  "risk_stratification": {
+    "safe_bulk_declarations": 56,
+    "needs_per_site_judgment": 16,
+    "judgment_items": [
+      "modalKnownWorlds_mono_append (5) - every call site changes arity",
+      "modalMaxWorld family (3) - 4 term-mode sites need a one-line touch",
+      "8 public-origin families - duplication not privacy-caused, likely out of scope"
+    ]
+  },
+  "structurally_impossible": [
+    {
+      "declaration": "modalApplyOneS5_fresh_local_local",
+      "location": "S5Simplification.lean:1179",
+      "mirrors": "FrameSoundness.lean:1824 modalApplyOneS5_fresh_local",
+      "reason": "FrameSoundness IMPORTS S5Simplification - the dependency runs the wrong way. Can never be resolved by importing."
+    }
+  ],
+  "zero_debt_compliance": {
+    "sorry_required": false,
+    "axioms_required": false,
+    "rationale": "Every phase is a delete-and-redirect over already-proven facts. No phase introduces a proof obligation lacking an existing proof in the tree. The one retained sorry (branchSatisfiableIn_s4FC_ancestor_redirect) is untouched by all four phases."
+  },
+  "lint_prevention": [
+    "docBlame: all newly-public declarations need docstrings",
+    "defLemma: Prop-valued must use lemma/theorem not def",
+    "unusedSectionVars: note the existing `omit [DecidableEq Atom] [Hashable Atom] in` pattern (e.g. BDriver.lean:208)",
+    "topNamespace: instance declarations need explicit namespace wrapping",
+    "existing snake_case lemma names are conventional in this subsystem and match Mathlib practice - preserve them"
+  ],
+  "open_questions": [
+    "Should outDeg (FmpMeasure.lean:804, a one-liner over successorsOf) move down to Support/Accessibility.lean so outDeg_addEdge_self/_ne join Tier 1?",
+    "Confirm the implicit-binder form as canonical for the modalMaxWorld wrapper",
+    "Adopt forall-x-in over subset for modalKnownWorlds_mono_append (recommended)",
+    "Split the 8 public-origin duplicate families into a follow-up task?"
+  ],
+  "next_phase": "plan",
+  "blockers": []
+}

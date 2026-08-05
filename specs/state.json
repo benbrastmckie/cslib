@@ -1381,7 +1381,7 @@
     {
       "project_number": 558,
       "project_name": "tableau_support_private_dedup",
-      "status": "not_started",
+      "status": "planning",
       "task_type": "cslib",
       "title": "Extract re-derived private Tableau facts into public Support modules",
       "topic": "Modal Logic",
@@ -1394,12 +1394,18 @@
         "Cslib/Logics/Modal/Tableau/TDriver.lean",
         "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md",
+          "type": "report",
+          "summary": "Re-measured dedup inventory; two-module partition; audit-conflict resolution"
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T05:55:11Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1785908335_1f3c58",
       "parent_task": null
     },
     {

@@ -33,13 +33,15 @@
       "task_type": "cslib",
       "topic": "Modal Logic",
       "created": "2026-07-28T13:29:56Z",
-      "last_updated": "2026-07-28T13:29:56Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "session_id": "sess_1785201767_9dbb98",
       "next_artifact_number": 1,
       "artifacts": [],
       "blockers": [],
       "dependencies": [
-        553
+        553,
+        566,
+        567
       ],
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
@@ -54,7 +56,11 @@
       "title": "Pure K5/5 Euclidean tableau completeness without the equivalence route",
       "description": "COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree (instDecidableFiveValid/instDecidableKb5Valid, FrameCompleteness.lean) is delivered via the KB5/S5 equivalence route, which leans on a full-equivalence closure. This task delivers genuine pure-K5 / pure-5 (Euclidean without full equivalence, no Mathlib closure operator) tableau soundness + completeness + decidability - the one modal-cube corner explicitly deferred out of the completed KB5/Euclidean task. Mirror the existing Five/KB5 development but over the bare Euclidean frame condition. Zero sorry, zero new axioms; keep the frozen equivalence-route deliverables untouched.",
       "dependencies": [
-        531
+        531,
+        563,
+        564,
+        566,
+        567
       ],
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
@@ -62,7 +68,7 @@
         "Cslib/Logics/Modal/Tableau/FiveSimplification.lean"
       ],
       "created": "2026-07-18T19:24:35Z",
-      "last_updated": "2026-07-18T19:24:35Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "topic": "Modal Logic"
@@ -75,11 +81,14 @@
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [
         535,
-        561,
-        563
+        563,
+        564,
+        565,
+        566,
+        567
       ],
       "parent_task": 506,
-      "last_updated": "2026-07-26T23:30:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "session_id": "sess_1784204000_p7block",
       "artifacts": [
         {
@@ -705,10 +714,15 @@
       "parent_task": 300,
       "topic": "Modal Logic",
       "dependencies": [
-        511
+        511,
+        563,
+        564,
+        565,
+        566,
+        567
       ],
       "created": "2026-07-14T17:57:00Z",
-      "last_updated": "2026-07-26T23:30:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "artifacts": [
         {
           "path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/01_frame-specific-tableau-extensions.md",
@@ -1435,10 +1449,8 @@
       "task_type": "cslib",
       "title": "Introduce RuleApplySt additively and bridge modalExpandBranchesGen",
       "topic": "Modal Logic",
-      "dependencies": [
-        561
-      ],
-      "description": "[Task D of the modal-tableau refactor programme; P2. Gated on the review gate.] MANDATORY FIRST STEP, non-negotiable per the programme constraint: a consumer audit of Saturation.lean before any edit. Then generalise RuleApply (Saturation.lean:107-111) to RuleApplySt sigma, with RuleApply = RuleApplySt Unit, added PURELY ADDITIVELY as new declarations -- modalExpandBranchesGen is never edited -- and prove modalExpandBranchesGen_eq_St. Zero risk to landed theorems by construction: because nothing existing is edited, none of the six true-rfl driver bridges (modalTableauB_eq, modalTableauS5_eq, modalTableauFive_eq, modalTableauKb5_eq, modalTableauKb5''_eq, modalExpandBranchesB_eq) can break. Migration onto the ladder and retirement of the double derivation are a SEPARATE, later task -- do not start them here.",
+      "dependencies": [],
+      "description": "[Task D of the modal-tableau refactor programme; P2. Gated on the review gate.] MANDATORY FIRST STEP, non-negotiable per the programme constraint: a consumer audit of Saturation.lean before any edit. Then generalise RuleApply (Saturation.lean:107-111) to RuleApplySt sigma, with RuleApply = RuleApplySt Unit, added PURELY ADDITIVELY as new declarations -- modalExpandBranchesGen is never edited -- and prove modalExpandBranchesGen_eq_St. Zero risk to landed theorems by construction: because nothing existing is edited, none of the six true-rfl driver bridges (modalTableauB_eq, modalTableauS5_eq, modalTableauFive_eq, modalTableauKb5_eq, modalTableauKb5''_eq, modalExpandBranchesB_eq) can break. Migration onto the ladder and retirement of the double derivation are a SEPARATE, later task -- do not start them here.\n--- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---\n- Cslib/Logics/Modal/Tableau/Support/Accessibility.lean and Support/KnownWorlds.lean NOW EXIST as public modules importing only Branch. Facts formerly re-derived per-file (hasEdge_addEdge_cases, mem_modalKnownWorlds, modalKnownWorlds_mono_append and relatives) are imported, not restated. Do not reintroduce a local copy.\n- A third Support/Subfmls.lean was evaluated and REJECTED: modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself, so such a module would sit ABOVE it and buy nothing; those facts were de-privatized in place. Two Support modules is the final shape, not three.\n- The duplicate inventory was re-measured by SIGNATURE matching, not by counting 'Local re-derivation' comments: 72-74 duplicate declarations across 41-43 families. 17 duplicates carried NO such comment, and the comments also mislead in the other direction (they falsely flagged a byte-identical lemma as deviant). If this task counts, deletes, or audits duplicates, drive off signatures; a comment-string grep silently under-counts.\n- Root cause is import REACHABILITY, not privacy: three consumers cannot reach Soundness.lean, so de-privatization alone cannot fix that class. At least one duplicate exists for an unrelated reason (an ambient [Hashable Atom] instance callers cannot omit).\n- VERIFICATION BASELINE: lake build Cslib green at 3313 jobs; Modal/Tableau sorry census exactly 1; zero axioms in the subsystem; lake shake exit 1 with 9 findings, NONE in Modal/Tableau -- do NOT gate on shake exit 0, gate on \"no Modal/Tableau findings AND count stays 9\"; checkInitImports and lint-style both exit 0.\n- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The extraction deleted code and moved declarations; any line number in this description may already be stale.",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/Saturation.lean",
         "Cslib/Logics/Modal/Tableau/GenericDriver.lean"
@@ -1446,7 +1458,7 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785110000_blockrev",
       "parent_task": null
@@ -1458,10 +1470,8 @@
       "task_type": "cslib",
       "title": "Adopt Lemmon box-plus pairing at the birth-key level",
       "topic": "Modal Logic",
-      "dependencies": [
-        561
-      ],
-      "description": "[Task E of the modal-tableau refactor programme; P2. Gated on the review gate. This task is the live gate for BOTH the S4 termination follow-on and the S4 keyed soundness task -- keys and mint payload both change here, so land it before either resumes.] Add boxPlusPair and BoxPlusClosed; enrich successorBirthContent (LoopChecking.lean:384-393) to emit BOTH members of each pair -- {(pos, psi), (pos, box psi)} where it currently emits only the unwrapped (pos, psi) for T(box psi)@w -- and extend the two _preserves_keyLowerBd proofs accordingly. The enriched key stays inside the existing codomain signedSubfmls phi0 (modalSubfmls (.box a) = .box a :: modalSubfmls a, FmpMeasure.lean:79), so signedSubfmls_card_le, signedSubfmls_powerset_card_le, modalWorldBoundS4 and the pigeonhole argument are UNCHANGED -- box-plus is free in the world bound. The source never iterates box-plus beyond depth 1; where more discriminating power is needed it enlarges the filter Sigma instead, which WOULD change the codomain and is therefore expensive -- enrich with box-plus, not with the filter. Prior art to reuse: modalFourBoxProp (FrameRules.lean:133-138) and boxDiamondPersistence (Bimodal Tableau.lean:344) are already box-plus at the RULE level; only the key level is missing. THE ONE REAL RISK, and the mandatory gate: enriching keys changes which steps block, so modalTableauS4Keyed_complete may break. Gate on lake build Cslib.Logics.Modal.Tableau.FrameCompleteness. If it breaks, the completeness proof is quantified over driver behaviour (modalExpandBranchesS4Keyed_hintikka) and should transport -- but that must be DEMONSTRATED, not assumed. If it cannot be repaired sorry-free, mark [BLOCKED]; do NOT add a sorry. Box-plus is S4-scoped (the Lemmon filtration and ChagrovZakharyaschev Proposition 3.6 are stated for TRANSITIVE models only, satisfied by s4FC) and MUST NOT be lifted into Foundations/.",
+      "dependencies": [],
+      "description": "[Task E of the modal-tableau refactor programme; P2. Gated on the review gate. This task is the live gate for BOTH the S4 termination follow-on and the S4 keyed soundness task -- keys and mint payload both change here, so land it before either resumes.] Add boxPlusPair and BoxPlusClosed; enrich successorBirthContent (LoopChecking.lean:384-393) to emit BOTH members of each pair -- {(pos, psi), (pos, box psi)} where it currently emits only the unwrapped (pos, psi) for T(box psi)@w -- and extend the two _preserves_keyLowerBd proofs accordingly. The enriched key stays inside the existing codomain signedSubfmls phi0 (modalSubfmls (.box a) = .box a :: modalSubfmls a, FmpMeasure.lean, def modalSubfmls -- locate by name, ~line 81 post-extraction), so signedSubfmls_card_le, signedSubfmls_powerset_card_le, modalWorldBoundS4 and the pigeonhole argument are UNCHANGED -- box-plus is free in the world bound. The source never iterates box-plus beyond depth 1; where more discriminating power is needed it enlarges the filter Sigma instead, which WOULD change the codomain and is therefore expensive -- enrich with box-plus, not with the filter. Prior art to reuse: modalFourBoxProp (FrameRules.lean:133-138) and boxDiamondPersistence (Bimodal Tableau.lean:344) are already box-plus at the RULE level; only the key level is missing. THE ONE REAL RISK, and the mandatory gate: enriching keys changes which steps block, so modalTableauS4Keyed_complete may break. Gate on lake build Cslib.Logics.Modal.Tableau.FrameCompleteness. If it breaks, the completeness proof is quantified over driver behaviour (modalExpandBranchesS4Keyed_hintikka) and should transport -- but that must be DEMONSTRATED, not assumed. If it cannot be repaired sorry-free, mark [BLOCKED]; do NOT add a sorry. Box-plus is S4-scoped (the Lemmon filtration and ChagrovZakharyaschev Proposition 3.6 are stated for TRANSITIVE models only, satisfied by s4FC) and MUST NOT be lifted into Foundations/.\n--- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---\n- Cslib/Logics/Modal/Tableau/Support/Accessibility.lean and Support/KnownWorlds.lean NOW EXIST as public modules importing only Branch. Facts formerly re-derived per-file (hasEdge_addEdge_cases, mem_modalKnownWorlds, modalKnownWorlds_mono_append and relatives) are imported, not restated. Do not reintroduce a local copy.\n- A third Support/Subfmls.lean was evaluated and REJECTED: modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself, so such a module would sit ABOVE it and buy nothing; those facts were de-privatized in place. Two Support modules is the final shape, not three.\n- The duplicate inventory was re-measured by SIGNATURE matching, not by counting 'Local re-derivation' comments: 72-74 duplicate declarations across 41-43 families. 17 duplicates carried NO such comment, and the comments also mislead in the other direction (they falsely flagged a byte-identical lemma as deviant). If this task counts, deletes, or audits duplicates, drive off signatures; a comment-string grep silently under-counts.\n- Root cause is import REACHABILITY, not privacy: three consumers cannot reach Soundness.lean, so de-privatization alone cannot fix that class. At least one duplicate exists for an unrelated reason (an ambient [Hashable Atom] instance callers cannot omit).\n- VERIFICATION BASELINE: lake build Cslib green at 3313 jobs; Modal/Tableau sorry census exactly 1; zero axioms in the subsystem; lake shake exit 1 with 9 findings, NONE in Modal/Tableau -- do NOT gate on shake exit 0, gate on \"no Modal/Tableau findings AND count stays 9\"; checkInitImports and lint-style both exit 0.\n- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The extraction deleted code and moved declarations; any line number in this description may already be stale.",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
         "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
@@ -1470,7 +1480,7 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785110000_blockrev",
       "parent_task": null
@@ -1486,7 +1496,7 @@
         562,
         563
       ],
-      "description": "[Task F of the modal-tableau refactor programme; P3.] Migrate the S4 Keyed and KeyedOrdered drivers onto the RuleApplySt / St ladder and retire the duplicated keys' re-derivation -- the stepper currently re-derives the blockingWorldS4Keyed decision that modalApplyOneS4Keyed already made internally (LoopChecking.lean:951-953). Retiring that double derivation is where the unquantified line-count reduction actually lives. This task, NOT the Boneyard task, owns any removal of the S4LoopInv.outDegEq field. That removal is NOT a pure deletion: outDegEq has zero code consumers but its preservation proof is 386 lines across two variants (LoopChecking.lean:4917-5105 and an undocumented second ordered variant at :5111-5307), and it has THREE provision sites -- LoopChecking.lean:7569, :7633, and a POSITIONAL anonymous-constructor site inside modalTableauS4Keyed_initial at FrameCompleteness.lean:4217-4218, i.e. inside the landed completeness capstone. Run lake build before and after; if the cascade into the four other invariant proofs that destructure the structure is large, KEEP the field -- 386 lines are not worth a regression.",
+      "description": "[Task F of the modal-tableau refactor programme; P3.] Migrate the S4 Keyed and KeyedOrdered drivers onto the RuleApplySt / St ladder and retire the duplicated keys' re-derivation -- the stepper currently re-derives the blockingWorldS4Keyed decision that modalApplyOneS4Keyed already made internally (LoopChecking.lean:951-953). Retiring that double derivation is where the unquantified line-count reduction actually lives. This task, NOT the Boneyard task, owns any removal of the S4LoopInv.outDegEq field. That removal is NOT a pure deletion: outDegEq has zero code consumers but its preservation proof is 386 lines across two variants (LoopChecking.lean:4917-5105 and an undocumented second ordered variant at :5111-5307), and it has THREE provision sites -- LoopChecking.lean:7569, :7633, and a POSITIONAL anonymous-constructor site inside modalTableauS4Keyed_initial at FrameCompleteness.lean:4217-4218, i.e. inside the landed completeness capstone. Run lake build before and after; if the cascade into the four other invariant proofs that destructure the structure is large, KEEP the field -- 386 lines are not worth a regression.\n--- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---\n- Cslib/Logics/Modal/Tableau/Support/Accessibility.lean and Support/KnownWorlds.lean NOW EXIST as public modules importing only Branch. Facts formerly re-derived per-file (hasEdge_addEdge_cases, mem_modalKnownWorlds, modalKnownWorlds_mono_append and relatives) are imported, not restated. Do not reintroduce a local copy.\n- A third Support/Subfmls.lean was evaluated and REJECTED: modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself, so such a module would sit ABOVE it and buy nothing; those facts were de-privatized in place. Two Support modules is the final shape, not three.\n- The duplicate inventory was re-measured by SIGNATURE matching, not by counting 'Local re-derivation' comments: 72-74 duplicate declarations across 41-43 families. 17 duplicates carried NO such comment, and the comments also mislead in the other direction (they falsely flagged a byte-identical lemma as deviant). If this task counts, deletes, or audits duplicates, drive off signatures; a comment-string grep silently under-counts.\n- Root cause is import REACHABILITY, not privacy: three consumers cannot reach Soundness.lean, so de-privatization alone cannot fix that class. At least one duplicate exists for an unrelated reason (an ambient [Hashable Atom] instance callers cannot omit).\n- VERIFICATION BASELINE: lake build Cslib green at 3313 jobs; Modal/Tableau sorry census exactly 1; zero axioms in the subsystem; lake shake exit 1 with 9 findings, NONE in Modal/Tableau -- do NOT gate on shake exit 0, gate on \"no Modal/Tableau findings AND count stays 9\"; checkInitImports and lint-style both exit 0.\n- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The extraction deleted code and moved declarations; any line number in this description may already be stale.",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
@@ -1495,7 +1505,7 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785110000_blockrev",
       "parent_task": null
@@ -1508,11 +1518,11 @@
       "title": "Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md",
       "topic": "Modal Logic",
       "dependencies": [
-        561,
         563,
-        564
+        564,
+        566
       ],
-      "description": "[Task G of the modal-tableau refactor programme; P3. Depends on the review gate, box-plus and the migration, because the seams MOVE if box-plus is adopted.] Split LoopChecking.lean (10,540 lines / 230 declarations, measured) into an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules. Note that these clusters' current source ranges are DISCONTIGUOUS -- itself the evidence that a line-count split would be wrong. DO NOT split mechanically by line count. Conform to ORGANISATION.md and NOTATION.md, preserve import acyclicity, and UPDATE ORGANISATION.md, which currently gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. The Support-module dedup task should land first: it shrinks the files before the seams are cut.",
+      "description": "[Task G of the modal-tableau refactor programme; P3. Depends on the review gate, box-plus and the migration, because the seams MOVE if box-plus is adopted.] Split LoopChecking.lean (10,540 lines / 230 declarations, measured) into an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules. Note that these clusters' current source ranges are DISCONTIGUOUS -- itself the evidence that a line-count split would be wrong. DO NOT split mechanically by line count. Conform to ORGANISATION.md and NOTATION.md, preserve import acyclicity, and UPDATE ORGANISATION.md, which currently gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. The Support-module dedup task should land first: it shrinks the files before the seams are cut.\n--- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---\n- Cslib/Logics/Modal/Tableau/Support/Accessibility.lean and Support/KnownWorlds.lean NOW EXIST as public modules importing only Branch. Facts formerly re-derived per-file (hasEdge_addEdge_cases, mem_modalKnownWorlds, modalKnownWorlds_mono_append and relatives) are imported, not restated. Do not reintroduce a local copy.\n- A third Support/Subfmls.lean was evaluated and REJECTED: modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself, so such a module would sit ABOVE it and buy nothing; those facts were de-privatized in place. Two Support modules is the final shape, not three.\n- The duplicate inventory was re-measured by SIGNATURE matching, not by counting 'Local re-derivation' comments: 72-74 duplicate declarations across 41-43 families. 17 duplicates carried NO such comment, and the comments also mislead in the other direction (they falsely flagged a byte-identical lemma as deviant). If this task counts, deletes, or audits duplicates, drive off signatures; a comment-string grep silently under-counts.\n- Root cause is import REACHABILITY, not privacy: three consumers cannot reach Soundness.lean, so de-privatization alone cannot fix that class. At least one duplicate exists for an unrelated reason (an ambient [Hashable Atom] instance callers cannot omit).\n- VERIFICATION BASELINE: lake build Cslib green at 3313 jobs; Modal/Tableau sorry census exactly 1; zero axioms in the subsystem; lake shake exit 1 with 9 findings, NONE in Modal/Tableau -- do NOT gate on shake exit 0, gate on \"no Modal/Tableau findings AND count stays 9\"; checkInitImports and lint-style both exit 0.\n- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The extraction deleted code and moved declarations; any line number in this description may already be stale.",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
         "Cslib/Logics/Modal/Tableau/S4/",
@@ -1521,7 +1531,7 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785110000_blockrev",
       "parent_task": null
@@ -1534,9 +1544,10 @@
       "title": "Create Boneyard/ with its convention and move only re-verified zero-consumer declarations",
       "topic": "Modal Logic",
       "dependencies": [
+        563,
         564
       ],
-      "description": "[Task H of the modal-tableau refactor programme; P3.] Create Boneyard/ at the repository root (it does not currently exist here; the convention is borrowed from the upstream repository, where it holds roughly 27k lines and 29 sorries excluded from porting, censuses and the build). Document the convention in Boneyard/README.md: quarantined, never imported by Cslib/, excluded from lake build, mk_all, lint-style, shake and all sorry/axiom censuses, retained for provenance rather than use. MOVE, never delete. RE-RUN THE CONSUMER AUDIT AT EXECUTION TIME -- the recorded audit is dated and this is a multi-task programme. Eligible subject to that re-check: blockedRedirect_diaNeg_mem_of_diaOrigin, blockedRedirect_boxctx_mem_of_boxOrigin, the keysRootEmpty / keysRootEmpty_entry pair, and the two outDegEq preservation lemmas ONLY if the migration task actually landed the field removal. TWO CARVE-OUTS ARE MANDATORY. (1) FrameSoundness.lean:1220-1244 (branchSatisfiableIn_s4FC_ancestor_redirect) is IMMOVABLE despite being zero-consumer: it carries the retained sorry that is an explicit user decision, and the rule protecting proven-and-consumed code does not by itself protect it. (2) keysOriginS4 is NOT eligible -- it has 22 code consumers, and the comment at LoopChecking.lean:2001-2002 claiming it was removed is FALSE. Nothing whose deletion cannot be justified by a re-verified zero-consumer check may be moved, and nothing proven and consumed may be moved at all. Also NOT eligible, these are route-independent assets to be PLACED by the abstraction decision rather than quarantined: modalS4Saturated (7 consumers), the strictly-weakened hintikkaS4 bridges (the set is 8, measured, not 10), hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_{boxPos,diaNeg}_mem transfers with their Reds / accWithReds packaging.",
+      "description": "[Task H of the modal-tableau refactor programme; P3.] Create Boneyard/ at the repository root (it does not currently exist here; the convention is borrowed from the upstream repository, where it holds roughly 27k lines and 29 sorries excluded from porting, censuses and the build). Document the convention in Boneyard/README.md: quarantined, never imported by Cslib/, excluded from lake build, mk_all, lint-style, shake and all sorry/axiom censuses, retained for provenance rather than use. MOVE, never delete. RE-RUN THE CONSUMER AUDIT AT EXECUTION TIME -- the recorded audit is dated and this is a multi-task programme. Eligible subject to that re-check: blockedRedirect_diaNeg_mem_of_diaOrigin, blockedRedirect_boxctx_mem_of_boxOrigin, the keysRootEmpty / keysRootEmpty_entry pair, and the two outDegEq preservation lemmas ONLY if the migration task actually landed the field removal. TWO CARVE-OUTS ARE MANDATORY. (1) FrameSoundness.lean, lemma branchSatisfiableIn_s4FC_ancestor_redirect -- locate BY NAME; post-extraction the declaration is ~1227 and its sorry ~1251, not 1220-1244 (branchSatisfiableIn_s4FC_ancestor_redirect) is IMMOVABLE despite being zero-consumer: it carries the retained sorry that is an explicit user decision, and the rule protecting proven-and-consumed code does not by itself protect it. (2) keysOriginS4 is NOT eligible -- it has 22 code consumers, and the comment at LoopChecking.lean:2001-2002 claiming it was removed is FALSE. Nothing whose deletion cannot be justified by a re-verified zero-consumer check may be moved, and nothing proven and consumed may be moved at all. Also NOT eligible, these are route-independent assets to be PLACED by the abstraction decision rather than quarantined: modalS4Saturated (7 consumers), the strictly-weakened hintikkaS4 bridges (the set is 8, measured, not 10), hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_{boxPos,diaNeg}_mem transfers with their Reds / accWithReds packaging.\n--- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---\n- Cslib/Logics/Modal/Tableau/Support/Accessibility.lean and Support/KnownWorlds.lean NOW EXIST as public modules importing only Branch. Facts formerly re-derived per-file (hasEdge_addEdge_cases, mem_modalKnownWorlds, modalKnownWorlds_mono_append and relatives) are imported, not restated. Do not reintroduce a local copy.\n- A third Support/Subfmls.lean was evaluated and REJECTED: modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself, so such a module would sit ABOVE it and buy nothing; those facts were de-privatized in place. Two Support modules is the final shape, not three.\n- The duplicate inventory was re-measured by SIGNATURE matching, not by counting 'Local re-derivation' comments: 72-74 duplicate declarations across 41-43 families. 17 duplicates carried NO such comment, and the comments also mislead in the other direction (they falsely flagged a byte-identical lemma as deviant). If this task counts, deletes, or audits duplicates, drive off signatures; a comment-string grep silently under-counts.\n- Root cause is import REACHABILITY, not privacy: three consumers cannot reach Soundness.lean, so de-privatization alone cannot fix that class. At least one duplicate exists for an unrelated reason (an ambient [Hashable Atom] instance callers cannot omit).\n- VERIFICATION BASELINE: lake build Cslib green at 3313 jobs; Modal/Tableau sorry census exactly 1; zero axioms in the subsystem; lake shake exit 1 with 9 findings, NONE in Modal/Tableau -- do NOT gate on shake exit 0, gate on \"no Modal/Tableau findings AND count stays 9\"; checkInitImports and lint-style both exit 0.\n- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The extraction deleted code and moved declarations; any line number in this description may already be stale.",
       "file_scope": [
         "Boneyard/",
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
@@ -1545,7 +1556,7 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785110000_blockrev",
       "parent_task": null
@@ -1559,15 +1570,13 @@
       "topic": "Modal Logic",
       "dependencies": [
         558,
-        559,
-        561,
         562,
         563,
         564,
         565,
         566
       ],
-      "description": "[Task I of the modal-tableau refactor programme; P4, final acceptance gate. Depends on every other task in the programme.] Run the seven-step CI order from .claude/rules/cslib.md against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md and CODE_OF_CONDUCT.md. It has never been run on this subsystem. PREREQUISITE, budget for it: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear that before verification against the stated gate is meaningful. ACCEPTANCE CRITERIA: behaviour preservation demonstrated by modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) remaining green; the Tableau sorry census not rising above its measured baseline of exactly 1; no new axioms above the measured subsystem baseline of zero; checkInitImports and lint-style clean; and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean, 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts EXACTLY.",
+      "description": "[Task I of the modal-tableau refactor programme; P4, final acceptance gate. Depends on every other task in the programme.] Run the seven-step CI order from .claude/rules/cslib.md against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md and CODE_OF_CONDUCT.md. It has never been run on this subsystem. PREREQUISITE, budget for it: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear that before verification against the stated gate is meaningful. ACCEPTANCE CRITERIA: behaviour preservation demonstrated by modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) remaining green; the Tableau sorry census not rising above its measured baseline of exactly 1; no new axioms above the measured subsystem baseline of zero; checkInitImports and lint-style clean; and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean, 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts EXACTLY.\n--- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---\n- Cslib/Logics/Modal/Tableau/Support/Accessibility.lean and Support/KnownWorlds.lean NOW EXIST as public modules importing only Branch. Facts formerly re-derived per-file (hasEdge_addEdge_cases, mem_modalKnownWorlds, modalKnownWorlds_mono_append and relatives) are imported, not restated. Do not reintroduce a local copy.\n- A third Support/Subfmls.lean was evaluated and REJECTED: modalSubfmls/modalUniverse are defined in FmpMeasure.lean itself, so such a module would sit ABOVE it and buy nothing; those facts were de-privatized in place. Two Support modules is the final shape, not three.\n- The duplicate inventory was re-measured by SIGNATURE matching, not by counting 'Local re-derivation' comments: 72-74 duplicate declarations across 41-43 families. 17 duplicates carried NO such comment, and the comments also mislead in the other direction (they falsely flagged a byte-identical lemma as deviant). If this task counts, deletes, or audits duplicates, drive off signatures; a comment-string grep silently under-counts.\n- Root cause is import REACHABILITY, not privacy: three consumers cannot reach Soundness.lean, so de-privatization alone cannot fix that class. At least one duplicate exists for an unrelated reason (an ambient [Hashable Atom] instance callers cannot omit).\n- VERIFICATION BASELINE: lake build Cslib green at 3313 jobs; Modal/Tableau sorry census exactly 1; zero axioms in the subsystem; lake shake exit 1 with 9 findings, NONE in Modal/Tableau -- do NOT gate on shake exit 0, gate on \"no Modal/Tableau findings AND count stays 9\"; checkInitImports and lint-style both exit 0.\n- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The extraction deleted code and moved declarations; any line number in this description may already be stale.",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/",
         "CslibTests/S4LoopGuardRegression.lean"
@@ -1575,7 +1584,7 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-04T00:00:00Z",
+      "last_updated": "2026-08-05T00:00:00Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785110000_blockrev",
       "parent_task": null

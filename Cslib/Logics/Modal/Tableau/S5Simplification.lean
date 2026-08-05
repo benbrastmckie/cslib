@@ -386,22 +386,6 @@ lemma modalApplyOneS5_eshape_eq
     simp_all only [List.isEmpty_iff] <;>
     rcases kResult with _ | _ | _ | _ <;> simp <;> split_ifs <;> simp
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_successorsOf_hasEdge`
-(unavailable across files): if `w'` is returned by `acc.successorsOf w`, the edge `w → w'` is
-recorded in `acc`. Needed to lift the `boxPos`/`diamondNeg` closure facts (labels drawn from
-`acc.successorsOf w`) to `accTargetsKnown`'s edge-indexed form. -/
-private lemma mem_successorsOf_hasEdge_S5 {acc : Accessibility} {w w' : WorldIndex}
-    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
-  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
-  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
-  split at heq
-  · rename_i hsrc
-    simp only [Option.some.injEq] at heq
-    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
-    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
-  · simp at heq
-
 omit [Hashable Atom] in
 /-- At the two S5-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), `modalApplyOneS5` never mints: its
 accessibility output is unchanged (`= acc`), the `RuleResult` is always `.notApplicable` or

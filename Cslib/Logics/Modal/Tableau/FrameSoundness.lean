@@ -5275,6 +5275,122 @@ theorem modalTableauKb5_sound (φ : Proposition Atom) (h : modalTableauKb5 φ = 
     kb5Valid φ :=
   fiveValid_imp_kb5Valid φ (modalTableauFive_sound φ h)
 
+/-! ## Pinned-Witness Truth Lemma (Route (1), Decision Gate A)
+
+**Route (1)** repairs the S4-keyed loop guard's soundness obligation (the redirect edge
+`blockingWorldS4Keyed` licenses, `LoopChecking.lean`) by *pinning* the witness model:
+strengthening `branchSatisfiableIn`'s existential witness with an extra conjunct,
+`accPinnedBy`, that upper-bounds the witness relation `m.r` over the branch's own label
+images by the reflexive-transitive closure of the recorded `acc` edges. This is the
+containment `ChagrovZakharyaschev1997` Theorem 5.51 states for its filtration model,
+`chunk_0267.md`: *"It should be clear that `S_{n+1} ⊆ R_Grz`"* -- an upper bound on the
+generated relation that does **not** claim equality with the ambient relation restricted to
+the carrier (the parenthetical immediately following, `chunk_0267.md`-`chunk_0268.md`). It is
+also exactly the upper half of the interval theorem `S_min ⊆ S ⊆ S_max` (`chunk_0246.md`
+L43-65), whose explicit warning -- *"a relation `S` between `S` and `S̄` may be nontransitive
+even if the original `R` is transitive"* -- is why an upper bound on `m.r`, not merely the
+edge conjunct's lower bound, is needed at all: three prior soundness routes for this guard
+died precisely because the witness model's ambient predecessors of the redirect's source
+label were uncontrolled (`branchSatisfiableIn_s4FC_ancestor_redirect` above; ancestor-only
+blocking; the origin-edge revision).
+
+`accPinnedBy` quantifies only over `modalKnownWorlds b` -- **not** every `WorldIndex` --
+because `f : WorldIndex → W` is total: an unrestricted upper bound would force every UNUSED
+label to map to a point with no `m.r`-relations at all beyond what `ReflTransGen acc` already
+proves between them, which is false in general (nothing prevents the witness model from
+relating two unused labels' images however it likes). Restricting to labels that actually
+occur on the branch is the same restriction `branchSatisfiableIn`'s own edge conjunct is
+silent about, stated the other way around.
+
+A **box-condition** form of the pinning invariant --
+`m.r (f w) (f w') → ∀ ψ, T(□ψ)@w ∈ b → (T(□ψ)@w' ∈ b ∧ T(ψ)@w' ∈ b)` -- was considered and
+**rejected** as the primitive invariant: it is not monotone in `b`, since the 4-rule only ever
+adds `T(□ψ)@w` at *direct* `acc`-edge targets, while `m.r` may relate `f w` to strictly more
+label images than `acc`'s recorded edges reach in one step. `accPinnedBy` avoids this by
+bounding `m.r` itself (a purely structural fact about the witness relation), leaving the
+Hintikka-side box-content transfer to Gate B's saturation hypothesis and the boxed birth
+content mechanism, applied separately. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Mechanism 1 of Route (1) (Decision Gate A).** On labels that occur on the branch `b`,
+the witness relation `m.r` is no LARGER than the reflexive-transitive closure of the recorded
+`acc` edges. Together with `branchSatisfiableIn`'s existing edge conjunct (`acc.hasEdge w w' →
+m.r (f w) (f w')`, the matching LOWER bound), this PINS `m.r` on the label image: an "ambient
+predecessor of `f src`" among known labels is thereby forced to be an `acc`-ancestor of `src`,
+a set the tableau's own 4-rule has already propagated box-positive content to. See the module
+comment above for why the quantification is restricted to `modalKnownWorlds b` and why the
+box-condition alternative was rejected. -/
+def accPinnedBy (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W) : Prop :=
+  ∀ w ∈ modalKnownWorlds b, ∀ w' ∈ modalKnownWorlds b,
+    m.r (f w) (f w') → Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w'
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **`branchSatisfiableIn`, additionally PINNED** by `accPinnedBy`: the witness model is
+constrained by an extra conjunct inside the existential, rather than left existentially
+arbitrary. Route (1)'s central definitional device -- see the module comment above. -/
+def branchSatisfiablePinnedIn (FC : FrameCondition)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  ∃ (W : Type) (m : Model W Atom) (f : WorldIndex → W),
+    FC m.r ∧
+    (∀ w w', acc.hasEdge w w' → m.r (f w) (f w')) ∧
+    accPinnedBy b acc m f ∧
+    ∀ sf ∈ b,
+      (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+      (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Sub-step 1.1 of Decision Gate A** (lands sorry-free regardless of the gate's overall
+verdict): the redirect edge `src → wBlock` extends a pinned witness model's relation, via
+`r' := m.r ∨ (m.r · (f src) ∧ m.r (f wBlock) ·)`, preserving the frame condition, the edge
+conjunct, and `accPinnedBy` -- the three MECHANICAL conjuncts of `branchSatisfiablePinnedIn`.
+`r'` is exactly "add the edge `f src → f wBlock`, then close transitively", the only extension
+an `IsTrans`-constrained relation admits; the four-case split on `IsTrans` (old/old, old/new,
+new/old, new/new) is the standard closure-preserves-transitivity argument. The `accPinnedBy`
+case for a NEW-disjunct pair composes three `ReflTransGen` legs -- `w ⇝ src` (old, lifted by
+monotonicity), the single new edge `src → wBlock`, and `wBlock ⇝ w'` (old, lifted) -- using
+`hsrc`/`hwB` to invoke the ORIGINAL `accPinnedBy` at `src`/`wBlock` themselves (both already
+known worlds). The BRANCH conjunct is deliberately absent from this lemma's conclusion: it is
+Gate A's verdict, attempted separately below. -/
+lemma branchSatisfiablePinnedIn_redirect_mechanical
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {src wBlock : WorldIndex}
+    (h : branchSatisfiablePinnedIn s4FC b acc)
+    (hsrc : src ∈ modalKnownWorlds b) (hwB : wBlock ∈ modalKnownWorlds b) :
+    ∃ (W : Type) (m : Model W Atom) (f : WorldIndex → W), s4FC m.r ∧
+      (∀ w w', (acc.addEdge src wBlock).hasEdge w w' → m.r (f w) (f w')) ∧
+      accPinnedBy b (acc.addEdge src wBlock) m f := by
+  obtain ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, hpinned, -⟩ := h
+  have hmono : ∀ {u v : WorldIndex},
+      Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) u v →
+      Relation.ReflTransGen (fun a c => (acc.addEdge src wBlock).hasEdge a c = true) u v := by
+    intro u v huv
+    induction huv with
+    | refl => exact Relation.ReflTransGen.refl
+    | tail _ hlast ih => exact ih.tail (hasEdge_addEdge_mono_FS hlast)
+  refine ⟨W, ⟨fun x y => m.r x y ∨ (m.r x (f src) ∧ m.r (f wBlock) y), m.v⟩, f, ⟨?_, ?_⟩, ?_, ?_⟩
+  · exact ⟨fun a => Or.inl (hrefl.refl a)⟩
+  · refine ⟨?_⟩
+    rintro a b c (hab | ⟨ha, hb⟩) (hbc | ⟨hb', hc⟩)
+    · exact Or.inl (htrans.trans a b c hab hbc)
+    · exact Or.inr ⟨htrans.trans a b (f src) hab hb', hc⟩
+    · exact Or.inr ⟨ha, htrans.trans (f wBlock) b c hb hbc⟩
+    · exact Or.inr ⟨ha, hc⟩
+  · intro w w' hedge
+    rcases hasEdge_addEdge_cases hedge with ⟨hw, hw'⟩ | hold
+    · rw [hw, hw']
+      exact Or.inr ⟨hrefl.refl (f src), hrefl.refl (f wBlock)⟩
+    · exact Or.inl (hedges w w' hold)
+  · intro w hw w' hw' hmr
+    rcases hmr with hold | ⟨ha, hc⟩
+    · exact hmono (hpinned w hw w' hw' hold)
+    · have hstep : Relation.ReflTransGen
+          (fun a c => (acc.addEdge src wBlock).hasEdge a c = true) src wBlock :=
+        Relation.ReflTransGen.single (hasEdge_addEdge_self_FS acc src wBlock)
+      exact (hmono (hpinned w hw src hsrc ha)).trans
+        (hstep.trans (hmono (hpinned wBlock hwB w' hw' hc)))
+
 end Cslib.Logic.Modal.Tableau
 
 end

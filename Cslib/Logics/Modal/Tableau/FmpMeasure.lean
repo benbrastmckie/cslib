@@ -17,6 +17,7 @@ public import Cslib.Foundations.Logic.Tableau.Measure
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
+public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 
 /-! # Modal K Tableau Finite-Model-Property Termination Measure
 
@@ -654,22 +655,6 @@ lemma modalApplyOne_boxNeg_outputs_subset
   · exact boxProps_outputs_subset φ0 b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset φ0 b w hb hwbound x hdia
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Bridge from `Accessibility.successorsOf` membership to `hasEdge`: if `w'` is returned by
-`successorsOf acc w`, the edge `w → w'` is recorded in `acc`. Needed to connect the
-`boxPos`/`diamondNeg` closure lemmas (P1a, which only give `x.label ∈ acc.successorsOf w`)
-to `accFreshInv`'s edge-indexed bound. -/
-private lemma mem_successorsOf_hasEdge {acc : Accessibility} {w w' : WorldIndex}
-    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
-  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
-  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
-  split at heq
-  · rename_i hsrc
-    simp only [Option.some.injEq] at heq
-    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
-    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
-  · simp at heq
-
 omit [Hashable Atom] in
 /-- **Top-level dispatch**: every signed formula emitted by `modalApplyOne sf b acc` stays
 inside `U(φ0)`, given: the branch invariant `hb`, the source membership `hsf`, the
@@ -1073,19 +1058,6 @@ private lemma diamondNeg_rank_bound
     simp only [modalDepth] at hdep ⊢
     omega
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Decompose membership of an edge in `acc.addEdge w w'`: it is either the new edge or old.
-Restated locally (mirrors the private `hasEdge_addEdge_cases` in `Soundness.lean:75`, which
-cannot be imported across files). -/
-private lemma hasEdge_addEdge_cases_local {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  rcases h with ⟨hw, hw'⟩ | h
-  · exact Or.inl ⟨hw.symm, hw'.symm⟩
-  · exact Or.inr h
-
 omit [Hashable Atom] in
 /-- **Generic per-call rank-step obligation**: the single-call rank-preservation fact
 `modalStepBranch_exists_rank'`'s proof needs about `modalApplyOne` at each firing, extracted as
@@ -1162,7 +1134,7 @@ lemma modalApplyOne_rank_step
         refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
           fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
         · intro w w' hw'
-          rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
+          rcases hasEdge_addEdge_cases hw' with ⟨rfl, rfl⟩ | hold
           · rw [Function.update_self, Function.update_of_ne hllt.ne]
             omega
           · rw [Function.update_of_ne (hInv w w' hold).1.ne,
@@ -1198,7 +1170,7 @@ lemma modalApplyOne_rank_step
         refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
           fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
         · intro w w' hw'
-          rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
+          rcases hasEdge_addEdge_cases hw' with ⟨rfl, rfl⟩ | hold
           · rw [Function.update_self, Function.update_of_ne hllt.ne]
             omega
           · rw [Function.update_of_ne (hInv w w' hold).1.ne,
@@ -1986,7 +1958,7 @@ lemma modalStepBranch_preserves_accTargetsKnown_gen
   · rw [hsame] at hedge
     exact hbsub b' hb' (hknown w w' hedge)
   · rw [hsnd] at hedge
-    rcases hasEdge_addEdge_cases_local hedge with ⟨rfl, rfl⟩ | hold
+    rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
     · have hwsfmem : wsf ∈ b' := by
         rw [hfst] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf

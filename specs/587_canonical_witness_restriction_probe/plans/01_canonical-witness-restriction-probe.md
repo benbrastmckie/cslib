@@ -464,7 +464,7 @@ touched, entirely below the probe delimiter; sorry census re-confirmed at exactl
 
 ---
 
-### Phase 3: GO branch -- price the consequences [NOT STARTED]
+### Phase 3: GO branch -- price the consequences [COMPLETED]
 
 - **Goal:** Entered only when Phase 1 or Phase 2 passed (including a conditional pass). Price what
   adopting the restriction costs, in enough detail that a task-553 v6 plan can be written against
@@ -516,6 +516,114 @@ touched, entirely below the probe delimiter; sorry census re-confirmed at exactl
     unclassified.
   - The effort estimate is decomposed by workstream, not given as a single lump number.
   - Any confirmatory Lean written is reverted; sorry census still exactly 1.
+
+#### Phase 3 Pricing Analysis
+
+**Framing.** Phase 2's conditional pass means the redirect-preservation obligation is only closed
+by committing to a **canonical** witness -- fixing `W`, `m`, `f` to specific, non-arbitrary
+choices, rather than leaving them existentially arbitrary as `branchSatisfiablePinnedIn` currently
+does. The natural canonical choice, per report 05's own precedent, is the S4 extraction shape
+already built on the completeness side: `W := WorldIndex`, `m.r := Relation.ReflTransGen
+(fun w w' => acc.hasEdge w w' = true)` (i.e. `extractModelS4`'s relation, re-derivable without
+importing `FrameCompleteness.lean` since it is just `Relation.ReflTransGen` applied to
+`acc.hasEdge`), `f := id`. This subsection prices what adopting that choice costs against
+`branchSatisfiablePinnedIn` and its mechanical lemma.
+
+**Field-by-field classification of `branchSatisfiablePinnedIn`'s four conjuncts.**
+
+| Field | Classification | Reasoning |
+|---|---|---|
+| `FC m.r` (i.e. `s4FC m.r = Std.Refl m.r ∧ IsTrans _ m.r`) | **Collapses** | For `m.r := ReflTransGen (acc.hasEdge)`, both instances come free from `Relation.reflexive_reflTransGen`/`Relation.transitive_reflTransGen` (the exact route `extractModelS4_refl`/`extractModelS4_trans`, `FrameCompleteness.lean`, already take) -- no per-redirect-step proof obligation survives. |
+| Edge conjunct (`∀ w w', acc.hasEdge w w' → m.r (f w) (f w')`) | **Collapses** | With `f := id` and `m.r := ReflTransGen(acc.hasEdge)`, this is exactly `Relation.ReflTransGen.single`, a one-line closing tactic, not a per-witness proof obligation. |
+| `accPinnedBy` conjunct | **Collapses** | Machine-checked in this phase (confirmatory check, reverted): with `f := id` and `m.r := ReflTransGen(acc.hasEdge)`, the conjunct's hypothesis `m.r (f w) (f w')` is *definitionally* `ReflTransGen(acc.hasEdge) w w'`, i.e. exactly the desired conclusion -- the whole conjunct is discharged by `id`. This is a stronger collapse than Restriction B1 alone gave (B1 needed a real, if short, `hpinned` hypothesis; the fully canonical choice needs none at all). |
+| Branch conjunct (`∀ sf ∈ b, sf.sign = .pos → Satisfies m (f sf.label) sf.formula, ...`) | **Re-shapes (does not collapse)** | This is Phase 2's central finding: it is NOT free for an arbitrary witness, and remains the one conjunct requiring genuinely new proof content -- a truth lemma tying `m`'s (now-canonical) valuation to branch membership. See "Canonical/term-model construction, priced" below. |
+| Existential `W` | **Collapses to a fixed type** | `W := WorldIndex`, no longer existentially bound. |
+| Existential `m` | **Collapses to a fixed definition** | `m := ⟨Relation.ReflTransGen (acc.hasEdge), v⟩` for a *specific* `v` reading branch content (see below) -- no longer an arbitrary existential witness. |
+| Existential `f` | **Collapses to `id`** | No longer existentially bound; every world index is trivially its own known-label witness once the branch conjunct's truth lemma is established. |
+
+**Net effect:** three of the four conjuncts and all three existential binders collapse to
+near-free or fully-free consequences of fixing the canonical choice; exactly one conjunct (the
+branch conjunct) re-shapes into a materially larger obligation (a genuine truth lemma). This
+matches -- and sharpens -- report 05's framing: the "canonicity" fix is not merely a carrier
+restriction, it is a commitment whose *cost is concentrated entirely in the branch conjunct*.
+
+**Per-bullet survival of `branchSatisfiablePinnedIn_redirect_mechanical`'s proof.** This lemma's
+proof (four bullets: `Std.Refl` via `hrefl.refl`; `IsTrans` via the four-case split on
+`htrans.trans`; the edge conjunct via `hasEdge_addEdge_cases`; the `accPinnedBy`-preservation
+composing three `ReflTransGen` legs) is stated **parametrically** over an arbitrary `m :
+Model W Atom` satisfying `Std.Refl`/`IsTrans`/the edge conjunct/`accPinnedBy` -- it does not
+inspect what `W`/`m`/`f` *are*, only that they satisfy those properties. Consequence, confirmed
+by re-reading the proof body (not merely by inspection of the type signature): **all four bullets
+survive verbatim, unconditionally, against the canonical choice.** Nothing about fixing `W :=
+WorldIndex`, `m.r := ReflTransGen(acc.hasEdge)`, `f := id` requires touching this lemma's proof;
+it is invoked exactly as-is, supplying the (now much cheaper to establish, per the classification
+table above) three mechanical conjuncts as its premises. A v6 plan does **not** need a phase to
+re-derive `branchSatisfiablePinnedIn_redirect_mechanical` -- it is reused unchanged, exactly as
+the Non-Goals section of this plan requires ("PRESERVE byte-identical, do not re-derive").
+
+**Canonical/term-model construction, priced.** What a v6 plan's canonical-witness construction
+must define and prove, decomposed:
+
+1. **The valuation.** `v w p := b.any (fun sf => sf.sign == .pos && sf.formula == .atom p &&
+   sf.label == w) = true` -- literally `extractModelWith`'s existing valuation clause
+   (`FrameCompleteness.lean:90`), reusable verbatim by cross-reference (not by re-import into
+   `FrameSoundness.lean`, since that file's role is the *soundness*-side vocabulary and does not
+   currently import the completeness-side extraction file; a v6 plan phase should assess whether
+   to (a) import `FrameCompleteness.lean`'s definitions into the soundness side, or (b)
+   re-state the same three-line valuation locally in `FrameSoundness.lean` to avoid a
+   soundness-depends-on-completeness import direction that may be architecturally undesirable --
+   this is a real open design choice for v6, not resolved here).
+2. **The truth lemma.** `∀ w ∈ modalKnownWorlds b, ∀ χ, Satisfies m w χ ↔` (`χ`'s *saturated*
+   branch membership at `w`, roughly: `T(χ)@w ∈ b` when `χ` is positive-signed content, `¬(T(χ)@w
+   ∈ b)`/`F(χ)@w ∈ b` for negative, closed under the Hintikka conditions `modalS4Saturated`
+   supplies). This is a structural induction on `χ` mirroring the *completeness*-side truth lemma
+   argument (the standard Hintikka-model argument used to prove tableau completeness), not
+   something `extractModelWith`/`extractModelS4` currently state or prove on the
+   `FrameCompleteness.lean` side either -- **this is new proof content, not a reuse**. Its
+   box/diamond cases will need exactly the `modalS4Saturated`/`hintikkaS4_box_pos_step`-family
+   facts that this task's own Phase 2 had to abstract away (Decision Gate B's territory).
+3. **Re-deriving the four `branchSatisfiablePinnedIn` conjuncts for the canonical base case**
+   (before any redirect): `FC`/edge-conjunct/`accPinnedBy` per the collapse analysis above (cheap,
+   a few lines each, confirmed for `accPinnedBy` in this phase's own reverted check); the branch
+   conjunct **from** the truth lemma (item 2) plus `modalS4Saturated`'s own saturation guarantee
+   applied at the *initial* (pre-redirect) accessibility state -- i.e. the base case needs Gate
+   B's conclusion (`modalS4Saturated` availability) to even start, independent of the redirect
+   step this task examined.
+4. **The redirect-preservation step itself**: reuses `branchSatisfiablePinnedIn_redirect_mechanical`
+   verbatim (item above) for three of the four conjuncts; the branch conjunct at the *new*
+   accessibility state needs the truth lemma (item 2) applied again, now propagated through
+   `hbox`/`hdia` exactly as this task's Phase 2 probe demonstrated (the `htruthBoxPos`/
+   `htruthDiaNeg` + `hpropBox`/`hpropDia` chain, now with `hpropBox`/`hpropDia` supplied for real
+   by Gate B rather than assumed).
+
+**Effort estimate for a task-553 v6 plan, decomposed by workstream** (bounded to one agent run per
+phase, per this plan's own sizing discipline):
+
+| Workstream | Phase(s) | Estimate | Depends on |
+|---|---|---|---|
+| Decision Gate B (`modalS4Saturated` availability at a settled ordered-stepper state) | 1 phase | 3 hours | none -- this is v5's own already-designed Phase 2, unchanged, still owed |
+| Truth lemma (structural induction, `Satisfies m w χ ↔` saturated branch membership) | 1-2 phases (box/diamond cases are the hard cases; propositional cases are free) | 4-6 hours | Gate B (needs `hintikkaS4_box_pos_step`-family facts inside the induction) |
+| Canonical base-case assembly (four conjuncts at the initial `acc`, reusing the valuation and truth lemma) | 1 phase | 1.5 hours | truth lemma |
+| Redirect-preservation re-assembly (reuse `branchSatisfiablePinnedIn_redirect_mechanical` verbatim + truth-lemma-mediated branch conjunct, mirroring this task's Phase 2 probe) | 1 phase | 2 hours | canonical base-case, truth lemma |
+| Wire into the S4-keyed loop-guard soundness argument (task 553's actual goal, beyond Gate A alone) | 1-2 phases | 3-5 hours | redirect-preservation re-assembly |
+| **Total** | **5-7 phases** | **13.5-17.5 hours** | -- |
+
+This is larger than route (1)'s original estimate (plan v5 priced Gate A alone at a handful of
+hours) precisely because the truth lemma is new proof content, not a reshaping of existing work --
+matching Phase 2's own finding that this is "a materially larger commitment than fixing the
+carrier."
+
+**Residual risk and early-detection gate for v6.** The single largest risk is that the truth
+lemma's box/diamond cases turn out to need more from `modalS4Saturated` than Gate B (v5's own
+Phase 2, still unexecuted) actually supplies -- i.e. a *seventh* obstruction, one level deeper
+than this task's sixth. A v6 plan should front-load exactly this risk as its own Gate 0: attempt
+the truth lemma's box-positive case specifically (the same case this task's Phase 2 probe
+`htruthBoxPos` assumed) as a standalone micro-probe, *before* committing to the full 5-7 phase
+programme above, using the same one-dispatch kill-gate discipline this task and plan v5 both used.
+If that micro-probe also gets stuck, the truth lemma itself -- not merely the carrier -- is the
+obstruction, and no version of route (1) is viable without importing a materially different
+construction (e.g. a full canonical-model completeness-style term model, built from scratch rather
+than reusing `extractModelWith`'s shape).
 
 ---
 

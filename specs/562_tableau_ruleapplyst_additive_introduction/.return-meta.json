@@ -1,0 +1,52 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-05T03:47:54-07:00",
+  "completed_at": "2026-08-05T04:32:00-07:00",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md",
+      "summary": "Consumer audit of Saturation.lean (mandatory gate, complete), verified RuleApplySt/St-ladder design, correction to the RuleApply = RuleApplySt Unit claim, full CI verification table"
+    },
+    {
+      "type": "lean_source",
+      "path": "specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st-ladder-verified.lean",
+      "summary": "The nine new declarations, verified in-file against Saturation.lean with full lake build Cslib green at 3313 jobs; paste-ready modulo docstring expansion"
+    },
+    {
+      "type": "lean_source",
+      "path": "specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st_probe.lean",
+      "summary": "Standalone-module variant showing the separate-module form of the fuel = 0 case plus #print axioms checks"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Consumer audit complete; design verified end-to-end; report, handoff and metadata written"
+  },
+  "verification": {
+    "consumer_audit_complete": true,
+    "prototype_compiled": true,
+    "build_passed": true,
+    "build_jobs": 3313,
+    "baseline_build_jobs": 3313,
+    "sorry_count_introduced": 0,
+    "axiom_count_introduced": 0,
+    "vacuous_count": 0,
+    "sorry_census_modal_tableau": 1,
+    "checkInitImports_exit": 0,
+    "lint_style_exit": 0,
+    "lake_lint_delta": 0,
+    "shake_total_findings": 9,
+    "shake_modal_tableau_findings": 0,
+    "lake_test_exit": 0,
+    "working_tree_restored": true
+  },
+  "metadata": {
+    "session_id": "sess_1785926778_90c7a6_562",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "search_tools_used": ["lean_loogle", "lean_local_search"],
+    "search_failures": []
+  }
+}

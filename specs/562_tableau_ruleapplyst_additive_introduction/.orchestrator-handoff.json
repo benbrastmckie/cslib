@@ -1,0 +1,110 @@
+{
+  "task_number": 562,
+  "session_id": "sess_1785926778_90c7a6_562",
+  "agent_type": "cslib-research-agent",
+  "orchestrator_mode": true,
+  "phase": "research",
+  "status": "researched",
+  "report_path": "specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md",
+  "mandatory_gate": {
+    "name": "consumer audit of Saturation.lean",
+    "status": "COMPLETE",
+    "location": "report section 1",
+    "method": "grep -rn over Cslib/**/*.lean and CslibTests/**/*.lean per exported symbol, plus rfl/proved classification of every bridge theorem"
+  },
+  "key_findings": {
+    "rfl_bridge_count_measured": 19,
+    "rfl_driver_bridge_count_measured": 16,
+    "rfl_bridge_count_in_task_description": 6,
+    "extra_rfl_bridges_not_named_in_description": [
+      "modalStepBranchT_eq", "modalExpandBranchesT_eq", "modalTableauT_eq",
+      "modalStepBranchB_eq", "modalStepBranchS5_eq", "modalExpandBranchesS5_eq",
+      "modalStepBranchFive_eq", "modalExpandBranchesFive_eq",
+      "modalStepBranchKb5_eq", "modalExpandBranchesKb5_eq",
+      "modalStepBranchKb5''_eq", "modalExpandBranchesKb5''_eq",
+      "modalTableauKb5_eq_modalTableauFive",
+      "modalStepBranch_eq", "modalHintikkaSet_eq"
+    ],
+    "proved_not_rfl_bridges": [
+      "modalExpandBranches_eq", "modalTableau_eq", "hintikka_congr", "hintikka_congr_S4"
+    ],
+    "direct_importers_of_saturation": [
+      "Cslib/Logics/Modal/Tableau/Soundness.lean",
+      "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+      "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+      "Cslib/Logics/Modal/Tableau/Completeness.lean"
+    ],
+    "task_description_correction": "RuleApply = RuleApplySt Unit is NOT achievable as a definitional equality (Unit -> X is not X; X x Unit is not X) and would require editing RuleApply, which the additive constraint forbids. The relationship must be an explicit liftRuleApply : RuleApply Atom -> RuleApplySt Atom Unit embedding plus proved bridges. See report section 3.",
+    "new_mathlib_gap": "No List.findSome? / Option.map commutation lemma exists in Mathlib (Loogle, 0 hits) or the project (lean_local_search, 0 hits). findSome?_map_comm must be added; it is a 4-line induction."
+  },
+  "prototype_verified": {
+    "verified_in_file": true,
+    "artifact": "specs/562_tableau_ruleapplyst_additive_introduction/artifacts/st-ladder-verified.lean",
+    "declarations_added": [
+      "RuleApplySt", "liftRuleApply", "modalStepBranchGenSt", "findSome?_map_comm",
+      "modalStepBranchGen_eq_St", "modalExpandBranchesGenSt",
+      "modalExpandBranchesGen_eq_St", "modalTableauGenSt", "modalTableauGen_eq_St"
+    ],
+    "existing_declarations_edited": 0,
+    "imports_added": 0,
+    "saturation_restored_to_head": true,
+    "git_diff_after_restore": "empty"
+  },
+  "verification_measured": {
+    "lake_build_cslib": "success",
+    "jobs": 3313,
+    "baseline_jobs": 3313,
+    "sorry_census_modal_tableau_count": 1,
+    "sorry_census_modal_tableau_declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
+    "sorry_census_modal_tableau_file_line": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1227",
+    "new_axiom_declarations": 0,
+    "bridge_axiom_dependencies": ["propext", "Quot.sound"],
+    "checkInitImports_exit": 0,
+    "lint_style_exit": 0,
+    "lake_lint_findings_baseline": 145,
+    "lake_lint_findings_with_ladder": 145,
+    "lake_lint_delta": "none (diff of error lines is empty)",
+    "lake_lint_findings_in_saturation": 0,
+    "shake_exit_code": 1,
+    "shake_total_findings": 9,
+    "shake_modal_tableau_findings": 0,
+    "lake_test_exit": 0,
+    "full_downstream_rebuild_seconds": 52
+  },
+  "recommended_scope_for_plan": {
+    "in_scope": [
+      "Insert the nine verified declarations into Saturation.lean before `end Cslib.Logic.Modal.Tableau`",
+      "Expand the placeholder docstrings to Saturation.lean's existing depth (report section 7)",
+      "Add an entry for the St ladder to Saturation.lean's module-docstring `## Main Definitions` list",
+      "Run the full gate: lake build Cslib, lake test, checkInitImports, lint-style, lake lint delta, shake"
+    ],
+    "out_of_scope_confirmed_not_started": [
+      "modalExpandBranchesS4Keyed re-expression (migration step 4)",
+      "retiring the keys' double derivation (migration step 5)",
+      "retiring modalStepBranchS4Keyed for the ordered stepper (migration step 6)",
+      "S4LoopInv.outDegEq removal",
+      "modalHintikkaSetGenSt (zero consumers today; recommended against until the migration task needs it)",
+      "box-plus key enrichment",
+      "any edit to Rules.lean or Branch.lean"
+    ],
+    "estimated_phases": 2,
+    "risk": "low -- the entire change was compiled and gated end-to-end before this report was written"
+  },
+  "implementer_pitfalls": [
+    "The fuel = 0 case of modalExpandBranchesGen_eq_St is `simp only [modalExpandBranchesGen, modalExpandBranchesGenSt]` ONLY when the declarations live inside Saturation.lean (Lean shares the auxiliary matcher within a module). In a separate module the same simp only leaves an apparently-reflexive `X = X` goal that rfl refuses, and an explicit `cases hf : (branches.zip accs).findSome? ...` is needed. Both variants are in the artifacts directory.",
+    "Do not prove modalStepBranchGen_eq_St by induction on the branch b: `apply sf b acc` closes over the whole branch, not the tail, so the IH is about the wrong function. Factor Option.map out of findSome? first.",
+    "Do not reformulate the state list as List.replicate accs.length (). The `accs.map fun _ => ()` form is what makes the induction close with no side hypothesis, because it commutes through the loop's ++ and List.replicate.",
+    "Do not use StateM/StateT. The subsystem is deliberately monad-free and computable; a monadic formulation would change the elaborated term shape every downstream unfold depends on.",
+    "gate on `lake lint` DELTA, not exit 0: it exits 1 at baseline with 145 pre-existing unusedArguments findings repo-wide."
+  ],
+  "zero_debt": {
+    "sorry_introduced": 0,
+    "axioms_introduced": 0,
+    "vacuous_definitions": 0,
+    "blocked": false
+  },
+  "continuation_pointer": {
+    "next_action": "dispatch /plan 562",
+    "gating_facts_for_planner": "The implementation is already machine-verified; the plan's job is sequencing plus docstring quality, not design discovery."
+  }
+}

@@ -1445,7 +1445,7 @@
     {
       "project_number": 562,
       "project_name": "tableau_ruleapplyst_additive_introduction",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Introduce RuleApplySt additively and bridge modalExpandBranchesGen",
       "topic": "Modal Logic",
@@ -1455,18 +1455,24 @@
         "Cslib/Logics/Modal/Tableau/Saturation.lean",
         "Cslib/Logics/Modal/Tableau/GenericDriver.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/562_tableau_ruleapplyst_additive_introduction/reports/01_ruleapplyst-additive-ladder.md",
+          "type": "report",
+          "summary": "Consumer audit of Saturation.lean (mandatory gate, complete); verified RuleApplySt/St-ladder design with full CI gate green"
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T00:00:00Z",
+      "last_updated": "2026-08-05T11:07:36Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1785926778_90c7a6_562",
       "parent_task": null
     },
     {
       "project_number": 563,
       "project_name": "tableau_boxplus_birth_keys",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "title": "Adopt Lemmon box-plus pairing at the birth-key level",
       "topic": "Modal Logic",
@@ -1480,9 +1486,9 @@
       "artifacts": [],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T00:00:00Z",
+      "last_updated": "2026-08-05T10:47:27Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1785926778_90c7a6_563",
       "parent_task": null
     },
     {

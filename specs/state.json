@@ -1012,7 +1012,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [
         535,
@@ -1027,9 +1027,9 @@
         "CslibTests/S4LoopGuardRegression.lean"
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
-      "blockers": "Route (1) (pinned witness model) failed at Gate A (Phase 1): the branch-conjunct structural-induction agreement argument escapes to model points neither accPinnedBy nor hbox/hdia constrain. New failure mechanism, distinct from the four routes plan v5 catalogued. The original escalation target (the FrameCompleteness refactor programme) already completed before this dispatch, so this is a fresh blocker. Needs a user decision: (a) new research/planning task on a canonical-model-restricted witness construction, or (b) accept that keyed S4 soundness needs further apparatus restructuring.",
-      "last_updated": "2026-08-05T14:05:29Z",
-      "session_id": "sess_1785938729_89d32e",
+      "blockers": null,
+      "last_updated": "2026-08-05T16:02:57Z",
+      "session_id": "sess_1785945192_a13629",
       "topic": "Modal Logic",
       "artifacts": [
         {
@@ -1047,9 +1047,9 @@
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md"
         },
         {
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/07_canonical-witness-truth-lemma.md",
           "type": "plan",
-          "summary": "Phase 1 marked [BLOCKED]; Phase 1 Verdict subsection records the machine-checked stuck goals and the outcome (iii) determination."
+          "summary": "Plan version 6 for the S4 keyed loop-guard soundness obligation, executing the canonical-witness route the completed restriction probe returned a CONDITIONAL GO on. Seven phases, 18 hours, with a front-loaded 2.5-hour Gate 0 micro-probe of the truth lemma's box-positive semantic-to-syntactic direction (the probe's named residual risk) and a second kill gate carrying v5's never-executed modalS4Saturated availability question. Records the forced architectural finding that the canonical construction must live in FrameCompleteness.lean, since FrameSoundness.lean cannot see LoopChecking and importing FrameCompleteness into it is a cycle. Terminal condition on gate failure is a return to the blocker record, not a seventh route."
         }
       ],
       "mandate_change": {

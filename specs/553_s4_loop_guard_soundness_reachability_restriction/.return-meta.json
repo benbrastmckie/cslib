@@ -1,0 +1,44 @@
+{
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "session_id": "sess_1785945192_a13629",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "delegation_depth": 1,
+  "task_number": 553,
+  "task_name": "s4_loop_guard_soundness_reachability_restriction",
+  "task_type": "cslib",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/07_canonical-witness-truth-lemma.md",
+      "summary": "Plan version 6 for the S4 keyed loop-guard soundness obligation, executing the canonical-witness route the completed restriction probe returned a CONDITIONAL GO on. Seven phases, 18 hours, with a front-loaded 2.5-hour Gate 0 micro-probe of the truth lemma's box-positive semantic-to-syntactic direction (the probe's named residual risk) and a second kill gate carrying v5's never-executed modalS4Saturated availability question. Records the forced architectural finding that the canonical construction must live in FrameCompleteness.lean, since FrameSoundness.lean cannot see LoopChecking and importing FrameCompleteness into it is a cycle. Terminal condition on gate failure is a return to the blocker record, not a seventh route."
+    }
+  ],
+  "plan_metadata": {
+    "phases": 7,
+    "total_effort_hours": 18,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 6,
+    "dependency_waves": [[1], [2, 3], [4], [5], [6], [7]],
+    "reports_integrated": [
+      {
+        "path": "specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md",
+        "integrated_in_plan_version": 6,
+        "integrated_date": "2026-08-05"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
+  },
+  "memory_candidates": [
+    {
+      "content": "In a Lean formalization split across soundness/completeness modules, the file that must host a construction is forced by the import DAG, not by naming convention. In Cslib's modal tableau line, FrameSoundness.lean does not import LoopChecking.lean, and FrameCompleteness.lean imports BOTH LoopChecking and FrameSoundness. Any construction needing saturation predicates (LoopChecking) together with model-extraction machinery (FrameCompleteness) therefore has exactly one legal home: FrameCompleteness.lean. A research report that frames this as an open choice between 'import the completeness file into the soundness side' and 'restate the definition locally' has posed a false dilemma -- the first is an import cycle and the second still cannot reach the third module. Planning heuristic: before pricing a cross-module formalization, derive the import DAG of the candidate files with grep on the import block; the confluence node is the answer, and it may sit in a file whose name misdescribes the content it will host. Record that misdescription as an explicit layering note rather than attempting an in-scope file split.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/07_canonical-witness-truth-lemma.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["import-graph", "module-layering", "lean4", "cross-module-construction", "planning-heuristic", "false-dilemma"]
+    }
+  ],
+  "next_steps": "Run /implement 553 to execute the plan (Phase 1 / Gate 0 first; do not dispatch Phases 3-7 before its verdict)"
+}

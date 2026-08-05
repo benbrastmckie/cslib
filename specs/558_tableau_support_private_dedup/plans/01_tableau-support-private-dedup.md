@@ -851,22 +851,37 @@ undercount.
 
 ---
 
-### Phase 9: Delete Tier-2 duplicates — `FiveSimplification`, `BDriver`, `FrameSoundness`, `FrameCompleteness` [NOT STARTED]
+### Phase 9: Delete Tier-2 duplicates — `FiveSimplification`, `BDriver`, `FrameSoundness`, `FrameCompleteness` [COMPLETED]
 
 **Goal**: Second half of the Tier-2 deletion sweep. Kept separate from Phase 8 purely for run
 sizing; the mechanics are identical.
 
 **Tasks**:
-- [ ] Delete the remaining Tier-2 duplicates in these four files and route uses to the now-public
-      `FmpMeasure` declarations.
-- [ ] Handle `modalSubfmls_trans_B` (`BDriver.lean` ~209) noting its reordered implicit binders
+- [x] Delete the remaining Tier-2 duplicates in these four files and route uses to the now-public
+      `FmpMeasure` declarations. *(Deviation: only `FiveSimplification.lean` and `BDriver.lean`
+      had any FmpMeasure-origin Tier-2 duplicates remaining — confirmed by census before editing.
+      `FrameSoundness.lean` and `FrameCompleteness.lean` had zero (their census entries this phase
+      are all Tier-3, e.g. `hasEdge_addEdge_mono_FS`, `modalApplyOneS5_fresh_local`, correctly
+      left for Phase 10). Deleted 6 declarations across 3 families:
+      `mem_modalUniverse_of_B`/`_Five`, `modalUniverse_mem_formula_B`/`_Five`,
+      `modalSubfmls_trans_B`/`_Five` — all confirmed to use the generic `modalUniverse`/
+      `modalWorldBound` (not a frame-specific type), applying Phase 8's lesson before deleting.)*
+- [x] Handle `modalSubfmls_trans_B` (`BDriver.lean` ~209) noting its reordered implicit binders
       (`{a c} {b}` vs `{a b c}`) — harmless, since all uses are term-mode with hypotheses supplied
-      positionally, which implicit-binder order does not affect.
-- [ ] Note the existing `omit [DecidableEq Atom] [Hashable Atom] in` pattern at `BDriver.lean`
-      ~208 — preserve or reproduce it as needed when routing to the public form.
-- [ ] Confirm `modalTableauS4Keyed_complete` and the five `Decidable` instances in
-      `FrameCompleteness.lean` still elaborate after each sub-step.
-- [ ] Remove orphaned `Local re-derivation` comments in these four files.
+      positionally, which implicit-binder order does not affect. *(Confirmed: deleted and
+      redirected with no call-site issue.)*
+- [x] Note the existing `omit [DecidableEq Atom] [Hashable Atom] in` pattern at `BDriver.lean`
+      ~208 — preserve or reproduce it as needed when routing to the public form. *(N/A here: no
+      import addition or new declaration was needed at the call sites, since `FmpMeasure.lean`
+      was already imported by `BDriver.lean` transitively via `CompletenessLoop.lean` and directly
+      reachable; the `omit` pattern belongs to the deleted private declarations themselves, not
+      to anything that survives.)*
+- [x] Confirm `modalTableauS4Keyed_complete` and the five `Decidable` instances in
+      `FrameCompleteness.lean` still elaborate after each sub-step. *(Confirmed via full-project
+      build success; `FrameCompleteness.lean` was not edited this phase.)*
+- [x] Remove orphaned `Local re-derivation` comments in these four files. *(Removed along with
+      each deleted block in `BDriver.lean`/`FiveSimplification.lean`; no comments to remove in
+      the other two since nothing was deleted there.)*
 
 **Timing**: 1.5 hours
 

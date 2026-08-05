@@ -6095,6 +6095,82 @@ lemma modalApplyOneS4Rules_diaNeg_layers_eq_nil_of_saturated (φ₀ : Propositio
        obtain ⟨x, hx⟩ := List.isEmpty_eq_false_iff_exists_mem.mp (by simpa using h3)
        exact hFourNotMem x hx (hcond x (by simp [hx])))
 
+omit [Hashable Atom] in
+/-- `boxPropagation` at a world other than the redirect source is unaffected by `addEdge`:
+immediate from `successorsOf_addEdge_of_ne`. -/
+lemma boxPropagation_addEdge_of_ne
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (src wBlock w'' : WorldIndex) (hne : w'' ≠ src) :
+    boxPropagation b (acc.addEdge src wBlock) ψ w'' = boxPropagation b acc ψ w'' := by
+  unfold boxPropagation
+  rw [successorsOf_addEdge_of_ne acc src wBlock w'' hne]
+
+omit [Hashable Atom] in
+/-- `modalFourBoxProp` at a world other than the redirect source is unaffected by `addEdge`. -/
+lemma modalFourBoxProp_addEdge_of_ne
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (src wBlock w'' : WorldIndex) (hne : w'' ≠ src) :
+    modalFourBoxProp b (acc.addEdge src wBlock) ψ w'' = modalFourBoxProp b acc ψ w'' := by
+  unfold modalFourBoxProp
+  rw [successorsOf_addEdge_of_ne acc src wBlock w'' hne]
+
+omit [Hashable Atom] in
+/-- `modalFourDiaNegProp` at a world other than the redirect source is unaffected by
+`addEdge`. -/
+lemma modalFourDiaNegProp_addEdge_of_ne
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (src wBlock w'' : WorldIndex) (hne : w'' ≠ src) :
+    modalFourDiaNegProp b (acc.addEdge src wBlock) ψ w'' = modalFourDiaNegProp b acc ψ w'' := by
+  unfold modalFourDiaNegProp
+  rw [successorsOf_addEdge_of_ne acc src wBlock w'' hne]
+
+/-- **Box-positive, acc-independence off the redirect source.** At any world other than `src`,
+`modalApplyOneS4Rules`'s box-positive `.fst` is unaffected by `addEdge src wBlock`: both the
+K-layer (`boxPropagation`) and the 4-rule layer (`modalFourBoxProp`) only consult
+`acc.successorsOf w''`, unaffected off `src`; the T-layer (`modalTBoxSelf`) never consults `acc`
+at all. -/
+lemma modalApplyOneS4Rules_boxPos_fst_addEdge_of_ne (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ'' : Proposition Atom) (src wBlock w'' : WorldIndex) (hne : w'' ≠ src) :
+    (modalApplyOneS4Rules (⟨.pos, .box ψ'', w''⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b (acc.addEdge src wBlock)).fst =
+      (modalApplyOneS4Rules (⟨.pos, .box ψ'', w''⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have h1 := modalApplyOneS4_boxPos_fst_eq φ₀ b acc ψ'' w''
+  have h2 := modalApplyOneS4_boxPos_fst_eq φ₀ b (acc.addEdge src wBlock) ψ'' w''
+  have hshape1 := modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀
+    (⟨.pos, .box ψ'', w''⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc ⟨by simp, by simp⟩
+  have hshape2 := modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀
+    (⟨.pos, .box ψ'', w''⟩ : SignedFormula (Proposition Atom) WorldIndex) b
+    (acc.addEdge src wBlock) ⟨by simp, by simp⟩
+  rw [hshape1] at h1
+  rw [hshape2] at h2
+  rw [h1, h2, boxPropagation_addEdge_of_ne b acc ψ'' src wBlock w'' hne,
+    modalFourBoxProp_addEdge_of_ne b acc ψ'' src wBlock w'' hne]
+
+/-- **Diamond-negative, acc-independence off the redirect source.** Dual of
+`modalApplyOneS4Rules_boxPos_fst_addEdge_of_ne`. -/
+lemma modalApplyOneS4Rules_diaNeg_fst_addEdge_of_ne (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ'' : Proposition Atom) (src wBlock w'' : WorldIndex) (hne : w'' ≠ src) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond ψ'', w''⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b (acc.addEdge src wBlock)).fst =
+      (modalApplyOneS4Rules (⟨.neg, .diamond ψ'', w''⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have h1 := modalApplyOneS4_diaNeg_fst_eq φ₀ b acc ψ'' w''
+  have h2 := modalApplyOneS4_diaNeg_fst_eq φ₀ b (acc.addEdge src wBlock) ψ'' w''
+  have hshape1 := modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀
+    (⟨.neg, .diamond ψ'', w''⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+    ⟨by simp, by simp⟩
+  have hshape2 := modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀
+    (⟨.neg, .diamond ψ'', w''⟩ : SignedFormula (Proposition Atom) WorldIndex) b
+    (acc.addEdge src wBlock) ⟨by simp, by simp⟩
+  rw [hshape1] at h1
+  rw [hshape2] at h2
+  have hsucc : (acc.addEdge src wBlock).successorsOf w'' = acc.successorsOf w'' :=
+    successorsOf_addEdge_of_ne acc src wBlock w'' hne
+  rw [h1, h2, hsucc, modalFourDiaNegProp_addEdge_of_ne b acc ψ'' src wBlock w'' hne]
+
 /-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
 
 A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)

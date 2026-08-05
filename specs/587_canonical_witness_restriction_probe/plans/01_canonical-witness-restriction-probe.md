@@ -320,7 +320,7 @@ is empty at this phase's close; sorry census re-confirmed at 1 (the standing `:1
 
 ---
 
-### Phase 2: GATE A'' -- micro-probe under Restriction B (every carrier point a known label) [NOT STARTED]
+### Phase 2: GATE A'' -- micro-probe under Restriction B (every carrier point a known label) [COMPLETED]
 
 - **Goal:** Entered **only** on Phase 1 outcome (ii), or outcome (iv) whose failing half matches
   (ii). Determine whether restricting the carrier so every point is a *known* label closes the
@@ -385,6 +385,83 @@ is empty at this phase's close; sorry census re-confirmed at 1 (the standing `:1
     `lake build Cslib.Logics.Modal.Tableau.FrameSoundness` clean.
   - The truth-lemma question has a recorded answer (yes/no plus reasoning), not silence.
 
+#### Phase 2 Verdict
+
+**Outcome (ii): GATE A'' PASSES (conditional).** Both `box.mp.inr` and `diamond.mpr` close
+sorry-free under Restriction B1, but only modulo two genuinely-assumed hypothesis groups. Go to
+Phase 3, which must price the canonical/term-model construction those groups presuppose.
+
+**Chosen encoding: B1** (carrier `{w : WorldIndex // w ∈ modalKnownWorlds b}`, `f` the coercion),
+over B2 (a closure side condition on `WorldIndex`). Rationale (one paragraph, per the task list):
+B1 makes the induction variable `x` a known label *by its type* -- `x.2 : x.1 ∈ modalKnownWorlds b`
+is available for free at every use site -- so `accPinnedBy`'s two membership hypotheses
+(`w ∈ modalKnownWorlds b`, `w' ∈ modalKnownWorlds b`) are discharged definitionally rather than as
+side proof obligations threaded through every case of the induction. B2 would have required
+carrying a separate closure invariant (`∀ x y, m.r x y → x ∈ modalKnownWorlds b ∧ y ∈
+modalKnownWorlds b`) through the whole induction and re-deriving membership at every step from that
+invariant instead of from the type -- strictly more bookkeeping for the same result. Only B1 was
+attempted, per the phase's own one-encoding budget.
+
+**The probe.** Appended below the same delimiter (Phase 1's probe having already been reverted),
+a lemma `canonicalWitnessRestrictionProbe_agreementConditional`
+(`Cslib/Logics/Modal/Tableau/FrameSoundness.lean:5422`) restates the agreement claim over
+`m : Model {w : WorldIndex // w ∈ modalKnownWorlds b} Atom`, carrying:
+- `hpinned` -- `accPinnedBy` adapted to the B1 carrier (real content, no import needed): `∀ w w' :
+  Known, m.r w w' → ReflTransGen acc w.1 w'.1`.
+- `hbSat`/`hbUnsat` -- `branchSatisfiablePinnedIn`'s branch conjunct specialized at `wBlock`, both
+  signs (real content, a direct instantiation of the existential witness's own defining property).
+- `hbox`/`hdia` -- unchanged from Phase 1 (real content, `List` membership facts about `b`).
+- `hpropBox`/`hpropDia` -- the S4 box/diamond-content forward-persistence-along-`acc`-reachability
+  facts. **Genuinely assumed**, out of this task's scope: this is Decision Gate B's territory in
+  the pinned-witness-truth-lemma plan (its own Phase 2, `modalS4Saturated` +
+  `hintikkaS4_box_pos_reflTransGen`-style bridges), not this task's Gate A'/A''. Re-deriving it
+  would need `LoopChecking.lean`, which `FrameSoundness.lean` does not import and which this
+  phase's declared edit region (append-only) does not permit importing.
+- `htruthBoxPos`/`htruthDiaNeg` -- **the truth-lemma direction**: `Satisfies m w (□ψ) →
+  T(□ψ)@w.1∈b`, and the diamond-negative dual. **Genuinely assumed.** This is the answer to the
+  phase's central named question.
+
+With all of the above in scope, both stuck cases close by direct forward chaining (no `sorry`,
+no `aesop`/hammer): `box.mp.inr` via `htruthBoxPos → hpinned → hpropBox → hbox → hbSat →` unfold
+box; `diamond.mpr` via `by_contra → htruthDiaNeg → hpinned → hpropDia → hdia → hbUnsat →`
+contradiction against the `ih`-transported witness. `lean_verify` on the landed lemma reports
+axioms `propext`, `Classical.choice`, `Quot.sound` only (`lean_build`/`lake build
+Cslib.Logics.Modal.Tableau.FrameSoundness` clean; `lake exe lint-style` clean; `lake lint`
+reports zero warnings referencing this declaration or its line range).
+
+**The truth-lemma question, answered explicitly (the phase's central deliverable).** No hypothesis
+already in scope -- not `hpinned`, not `hbSat`/`hbUnsat`, not `hbox`/`hdia`, not the carrier
+restriction itself -- supplies `htruthBoxPos`/`htruthDiaNeg` for an *arbitrary* pinned witness `m`.
+The pinned invariant (`branchSatisfiablePinnedIn`'s existential) only constrains `m` in the
+branch-to-model direction (`T(□ψ)@w∈b → Satisfies m (f w) (□ψ)`, i.e. `hbSat`'s own shape); the
+converse (model-to-branch) direction is a genuine **soundness-of-negation-avoidance / completeness**
+fact about `m`'s valuation, true only when `m`'s valuation is built to *read* branch membership
+directly (`extractModelWith`'s `v w p := b.any (... sf.label == w) = true` shape) combined with a
+Hintikka/saturation argument (a full truth lemma: `Satisfies m w χ ↔` (`χ`'s signed membership in
+`b`, roughly, for `w` known and `b` saturated)). An arbitrary pinned witness has no such
+constraint on its valuation at all -- `branchSatisfiablePinnedIn`'s existential quantifies over
+*any* `m` satisfying the four conjuncts, and infinitely many such `m` do not read `b`. **Answer:
+the truth-lemma direction is NOT available for free; it requires committing to a canonical/term
+model (mirroring `extractModelS4`/`extractModelWith`,
+`Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:85-148`, re-confirmed read-only in this
+dispatch) rather than an arbitrary pinned witness.**
+
+**`accPinnedBy` degeneration check.** Under B1, `accPinnedBy`'s hypothesis is `∀ w w' : Known, m.r w
+w' → ReflTransGen acc w.1 w'.1` -- this is *not* a degeneration to a total bound `m.r ≤
+ReflTransGen acc`, because `m.r` at the restricted carrier only ever relates known-world pairs
+(the carrier itself excludes unknown points), so the hypothesis is exactly as strong as the
+original `accPinnedBy` restricted to its own domain of application -- no strengthening or
+weakening relative to the un-restricted statement, checked against the reflexive case (`w = w'`,
+where `ReflTransGen.refl` trivially supplies the conclusion regardless of `m.r w w`). No
+unsatisfiability risk identified.
+
+**Revert decision: RETAINED, not reverted.** Per the Rollback/Contingency section ("Zero or one
+retained Lean declaration ... retained only on a sorry-free passing probe, reverted in every
+other case"), `canonicalWitnessRestrictionProbe_agreementConditional` lands sorry-free and is kept
+in the file as the task's one retained Lean artifact. `git diff --stat` confirms exactly one file
+touched, entirely below the probe delimiter; sorry census re-confirmed at exactly 1 (the standing
+`:1251` sorry only) since this lemma introduces zero new sorries.
+
 ---
 
 ### Phase 3: GO branch -- price the consequences [NOT STARTED]
@@ -442,7 +519,17 @@ is empty at this phase's close; sorry census re-confirmed at 1 (the standing `:1
 
 ---
 
-### Phase 4: NO-GO branch -- record the machine-checked stuck goal [NOT STARTED]
+### Phase 4: NO-GO branch -- record the machine-checked stuck goal [COMPLETED WITH EXCLUSIONS]
+
+#### Reasoned Exclusions
+
+This phase's hard entry condition is "Phase 1 outcome (iii) or (v), or Phase 2 outcome (iii),
+(iv), or (v)". Phase 1 returned outcome (ii) (ESCALATE) and Phase 2 returned outcome (ii) (GATE
+A'' PASSES, conditional) -- neither matches this phase's entry condition. Per Phases 3 and 4 being
+mutually exclusive GO/NO-GO branches sharing a wave (not a "run both" pair), and per the plan's
+own instruction that a phase skipped by its entry condition closes as `[COMPLETED WITH
+EXCLUSIONS]` rather than `[NOT STARTED]` or an incomplete phase, this phase is excluded. Phase 3
+(the GO branch) executes instead.
 
 - **Goal:** Entered only when the gates failed. Record the exact stuck goal in the style of plan
   v5's `#### Phase 1 Verdict`, and state plainly that no route is currently known.

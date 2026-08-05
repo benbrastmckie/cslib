@@ -5391,6 +5391,117 @@ lemma branchSatisfiablePinnedIn_redirect_mechanical
       exact (hmono (hpinned w hw src hsrc ha)).trans
         (hstep.trans (hmono (hpinned wBlock hwB w' hw' hc)))
 
+/-! ### CANONICAL-WITNESS RESTRICTION PROBE -- REVERT UNLESS SORRY-FREE -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Canonical-witness restriction micro-probe (Restriction B1: carrier restricted to the subtype
+of known-branch-labels `{w : WorldIndex // w ∈ modalKnownWorlds b}`, `f` the coercion). Chosen
+over Restriction B2 (a closure side condition on `WorldIndex`) because B1 makes the induction
+variable `x` a known label *by its type*, discharging `accPinnedBy`'s two membership hypotheses
+definitionally rather than as a side proof obligation. `hpinned` below is `accPinnedBy` adapted
+to this carrier (real content, no import needed). `hbSat`/`hbUnsat` are
+`branchSatisfiablePinnedIn`'s branch conjunct specialized at `wBlock`, both signs (real content).
+`hpropBox`/`hpropDia` are the S4 box/diamond-content forward-persistence-along-`acc`-reachability
+facts -- genuinely assumed here, out of this probe's scope (this is Decision Gate B's territory in
+the pinned-witness-truth-lemma plan, not Gate A's, and re-deriving it would need
+`modalS4Saturated`/`LoopChecking.lean`, which `FrameSoundness.lean` does not import).
+`htruthBoxPos`/`htruthDiaNeg` are the **truth-lemma** direction (`Satisfies m x (□ψ) → T(□ψ)@x∈b`,
+and its diamond-negative dual) -- also genuinely assumed; whether *this* direction is available
+for free from a non-canonical, arbitrary pinned witness (rather than needing a canonical/term-model
+valuation) is the single question this probe exists to answer.
+
+**Finding (GATE A'' PASSES, conditional): both `box.mp.inr` and `diamond.mpr` close sorry-free**
+under Restriction B1, but only modulo the two genuinely-assumed hypothesis groups
+(`hpropBox`/`hpropDia`, and `htruthBoxPos`/`htruthDiaNeg`). Neither group is discharged by carrier
+restriction alone or by any other hypothesis in scope: restricting the carrier makes `x`/`y` known
+labels (closing Restriction A's escape), but does not by itself supply the semantic-to-syntactic
+truth-lemma direction. The truth-lemma hypotheses require the witness to be a canonical/term model
+whose valuation reads branch membership (e.g. `extractModelWith`'s shape), not an arbitrary pinned
+witness -- this is a materially larger commitment than fixing the carrier, exactly as flagged by
+the pinned-witness-truth-lemma plan's own Phase 1 Verdict discussion. -/
+lemma canonicalWitnessRestrictionProbe_agreementConditional
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {src wBlock : WorldIndex}
+    (hsrc : src ∈ modalKnownWorlds b) (hwB : wBlock ∈ modalKnownWorlds b)
+    (m : Model {w : WorldIndex // w ∈ modalKnownWorlds b} Atom)
+    (hpinned : ∀ w w' : {w : WorldIndex // w ∈ modalKnownWorlds b}, m.r w w' →
+        Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w.1 w'.1)
+    (hbSat : ∀ ψ, (⟨.pos, .box ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        Satisfies m ⟨wBlock, hwB⟩ (.box ψ))
+    (hbUnsat : ∀ ψ, (⟨.neg, .diamond ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        ¬ Satisfies m ⟨wBlock, hwB⟩ (.diamond ψ))
+    (hpropBox : ∀ ψ w, (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w src →
+        (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hpropDia : ∀ ψ w, (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w src →
+        (⟨.neg, .diamond ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (htruthBoxPos : ∀ ψ (w : {w : WorldIndex // w ∈ modalKnownWorlds b}),
+        Satisfies m w (.box ψ) →
+        (⟨.pos, .box ψ, w.1⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (htruthDiaNeg : ∀ ψ (w : {w : WorldIndex // w ∈ modalKnownWorlds b}),
+        ¬ Satisfies m w (.diamond ψ) →
+        (⟨.neg, .diamond ψ, w.1⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hbox : ∀ ψ, (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+              (⟨.pos, .box ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hdia : ∀ ψ, (⟨.neg, .diamond ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+              (⟨.neg, .diamond ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ χ : Proposition Atom, ∀ x : {w : WorldIndex // w ∈ modalKnownWorlds b},
+      Satisfies m x χ ↔
+      Satisfies (⟨fun x y => m.r x y ∨ (m.r x ⟨src, hsrc⟩ ∧ m.r ⟨wBlock, hwB⟩ y), m.v⟩ :
+        Model {w : WorldIndex // w ∈ modalKnownWorlds b} Atom) x χ := by
+  intro χ
+  induction χ with
+  | atom p => intro x; simp [Satisfies]
+  | bot => intro x; simp [Satisfies]
+  | imp φ₁ φ₂ ih₁ ih₂ => intro x; simp only [Satisfies]; rw [ih₁ x, ih₂ x]
+  | and φ₁ φ₂ ih₁ ih₂ => intro x; simp only [Satisfies]; rw [ih₁ x, ih₂ x]
+  | or φ₁ φ₂ ih₁ ih₂ => intro x; simp only [Satisfies]; rw [ih₁ x, ih₂ x]
+  | box φ ih =>
+    intro x
+    constructor
+    · intro hbx y hry
+      rcases hry with hry | ⟨hxsrc, hwy⟩
+      · exact (ih y).mp (hbx y hry)
+      · -- case box.mp.inr
+        have hTx : (⟨.pos, .box φ, x.1⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          htruthBoxPos φ x hbx
+        have hRTG : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) x.1 src :=
+          hpinned x ⟨src, hsrc⟩ hxsrc
+        have hTsrc : (⟨.pos, .box φ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          hpropBox φ x.1 hTx hRTG
+        have hTwBlock :
+            (⟨.pos, .box φ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          hbox φ hTsrc
+        have hSatBox : Satisfies m ⟨wBlock, hwB⟩ (.box φ) := hbSat φ hTwBlock
+        exact (ih y).mp (hSatBox y hwy)
+    · intro hbx' y hry
+      exact (ih y).mpr (hbx' y (Or.inl hry))
+  | diamond φ ih =>
+    intro x
+    constructor
+    · intro hxφ
+      obtain ⟨y, hry, hsy⟩ := hxφ
+      exact ⟨y, Or.inl hry, (ih y).mp hsy⟩
+    · intro hxφ
+      obtain ⟨y, hry, hsy⟩ := hxφ
+      rcases hry with hry | ⟨hxsrc, hwy⟩
+      · exact ⟨y, hry, (ih y).mpr hsy⟩
+      · -- case diamond.mpr
+        by_contra hcon
+        have hFx : (⟨.neg, .diamond φ, x.1⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          htruthDiaNeg φ x hcon
+        have hRTG : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) x.1 src :=
+          hpinned x ⟨src, hsrc⟩ hxsrc
+        have hFsrc : (⟨.neg, .diamond φ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          hpropDia φ x.1 hFx hRTG
+        have hFwBlock :
+            (⟨.neg, .diamond φ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          hdia φ hFsrc
+        have hUnsatDia : ¬ Satisfies m ⟨wBlock, hwB⟩ (.diamond φ) := hbUnsat φ hFwBlock
+        have hSatY : Satisfies m y φ := (ih y).mpr hsy
+        exact hUnsatDia ⟨y, hwy, hSatY⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

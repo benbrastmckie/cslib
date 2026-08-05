@@ -1,5 +1,5 @@
 ---
-next_project_number: 586
+next_project_number: 587
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 586
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,553,554,564,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,566,571,576 | 36,37,181,425,554,564,568 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,553,554,564,568,569,583,586 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,566,571,576 | 36,37,181,425,554,564,568,586 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,565 | 39,40,566 | foundations, modal logic |
 | 4 | 567 | 565 | modal logic |
 | 5 | 511,534,582 | 553,567 | modal logic |
@@ -50,6 +50,8 @@ next_project_number: 586
           └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
         └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
         └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic (see above)
+586 [NOT STARTED] — [Continuation of Task A of the modal-tableau refactor programme; 
+  └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone (see above)
 
 ### Temporal Logic
 
@@ -74,6 +76,31 @@ next_project_number: 586
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
 ## Tasks
+
+### 586. Adjudicate and delete the audited duplicate re-derivation families
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: [Continuation of Task A of the modal-tableau refactor programme; adjudicates the duplicate families the Support-module extraction left unresolved.] The statement-equivalence audit is DONE and is the input to this task -- do not re-run it: specs/558_tableau_support_private_dedup/reports/02_statement-equivalence-audit.md classifies 45 surviving re-derivation rows across four families (KNOWNWORLDS, SUBFMLS/UNIVERSE, ACCESSIBILITY, MEASURE) as 38 IDENTICAL, 6 WEAKER, 1 DIFFERENT, 0 NOT_FOUND. Delete the adjudicated duplicates and replace them with imports of the public origins.
+--- THE THREE VERDICT CLASSES AND WHAT EACH REQUIRES ---
+- 38 IDENTICAL rows: byte-for-byte or alpha-equivalent to their origins (notational spellings of the same proposition, e.g. list subset written as a forall-membership, and explicit-vs-implicit binder mode, both count as identical). Safe to delete and replace with an import mechanically.
+- 6 WEAKER rows, ALL one family: every non-FmpMeasure copy of modalKnownWorlds_fold_spec drops BOTH the hws0 : ws0.Nodup hypothesis AND the .Nodup conjunct, keeping only the forall-iff half. MANDATORY PRE-DELETION CHECK: confirm no call site consumes the .1 (Nodup) component of the origin conjunction before deleting whole-cloth. S5Simplification.lean additionally carries _fold_nodup_S5, a separate lemma proving only the missing Nodup half; the other four files obtain it from modalKnownWorlds_nodup_S4/_S5 instead. Nothing is lost project-wide, but the recovery route differs per file -- verify per file, not once.
+- 1 DIFFERENT row, and the one genuine trap: LoopChecking.lean hasEdge_mem_successorsOf_origin is the CONVERSE of a different lemma (hasEdge_mem_successorsOf, still private in the same file), NOT a copy of FmpMeasure.lean mem_successorsOf_hasEdge. Its own docstring says so. It belongs to a separate origin/converse chain and MUST NOT be deleted as a duplicate.
+--- SCOPE BOUNDARY, EXPLICIT ---
+This task owns statement-equivalence duplicates ONLY. It does NOT own the second roadmap item recorded on the Support-module extraction: the 5 confirmed-unreachable, privacy-caused duplicate families whose root cause is import REACHABILITY (three consumers cannot reach Soundness.lean), which de-privatization alone cannot fix. The audit supplies no verdict bearing on those; they need an architectural change and belong in their own task. Do not silently absorb them here.
+--- CITATION-GRAPH AND NAMING NOTES FROM THE AUDIT (avoid rediscovering these) ---
+- FiveSimplification modalMaxWorld_foldl_le_of_forall_Five / modalMaxWorld_le_of_forall_label_le_Five cite S5Simplification _S5w pair, NOT FmpMeasure directly. The chain FmpMeasure -> S5w -> Five is content-preserving, but the direct citation runs through S5Simplification.lean. Import the true origin, not the intermediate, unless the intermediate is itself public and closer.
+- hasEdge_addEdge_cases_Five lives in FrameCompleteness.lean, not FiveSimplification.lean. Locate by declaration name.
+- known_label_le_modalMaxWorld_Five is a renamed copy of modalKnownWorlds_le_modalMaxWorld -- identical statement, divergent name. Name divergence is not statement divergence; do not treat it as a separate fact.
+- modalSubfmls_self_mem and modalKnownWorlds_nodup_S4 are already PUBLIC, not private, despite sitting in the re-derivation inventory.
+- modalExpMeasure_const_exp_S4 was not in the original re-derivation enumeration (only _split and _append were); it was added because the generic engine depends on it. Provenance gap, not a statement deviation.
+--- VERIFICATION ---
+Behaviour-preserving by construction: every deletion must be replaced by an import of a statement-identical public origin. Gate on lake build Cslib green with the job count matching the pre-task baseline (re-measure it; the St-ladder and box-plus landings have moved it), Modal/Tableau sorry census exactly 1 (branchSatisfiableIn_s4FC_ancestor_redirect, FrameSoundness.lean -- count actual sorry terms, since naive grep over-counts on docstring prose such as sorry-free and on LoopChecking.lean own census-script text), zero new axioms, lake shake unchanged at 9 findings with NONE in Modal/Tableau (do NOT gate on shake exit 0), lake lint gated on DELTA not exit 0 (145 pre-existing findings repo-wide), checkInitImports and lint-style exit 0, lake test green.
+--- ANCHOR ON DECLARATION NAMES, NEVER LINE NUMBERS. The audit records no line numbers for exactly this reason; the Support extraction, the St ladder and the box-plus landing have all moved code.
+
+---
 
 ### 585. Prove post blocking world bound chain and mint invariant
 - **Status**: [COMPLETED]
@@ -268,7 +295,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 558, Task 562, Task 563, Task 564, Task 565, Task 566
+- **Dependencies**: Task 558, Task 562, Task 563, Task 564, Task 565, Task 566, Task 586
 
 **Description**: [Task I of the modal-tableau refactor programme; P4, final acceptance gate. Depends on every other task in the programme.] Run the seven-step CI order from .claude/rules/cslib.md against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md and CODE_OF_CONDUCT.md. It has never been run on this subsystem. PREREQUISITE, budget for it: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear that before verification against the stated gate is meaningful. ACCEPTANCE CRITERIA: behaviour preservation demonstrated by modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) remaining green; the Tableau sorry census not rising above its measured baseline of exactly 1; no new axioms above the measured subsystem baseline of zero; checkInitImports and lint-style clean; and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean, 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts EXACTLY.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---
@@ -285,7 +312,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 563, Task 564
+- **Dependencies**: Task 563, Task 564, Task 586
 
 **Description**: [Task H of the modal-tableau refactor programme; P3.] Create Boneyard/ at the repository root (it does not currently exist here; the convention is borrowed from the upstream repository, where it holds roughly 27k lines and 29 sorries excluded from porting, censuses and the build). Document the convention in Boneyard/README.md: quarantined, never imported by Cslib/, excluded from lake build, mk_all, lint-style, shake and all sorry/axiom censuses, retained for provenance rather than use. MOVE, never delete. RE-RUN THE CONSUMER AUDIT AT EXECUTION TIME -- the recorded audit is dated and this is a multi-task programme. Eligible subject to that re-check: blockedRedirect_diaNeg_mem_of_diaOrigin, blockedRedirect_boxctx_mem_of_boxOrigin, the keysRootEmpty / keysRootEmpty_entry pair, and the two outDegEq preservation lemmas ONLY if the migration task actually landed the field removal. TWO CARVE-OUTS ARE MANDATORY. (1) FrameSoundness.lean, lemma branchSatisfiableIn_s4FC_ancestor_redirect -- locate BY NAME; post-extraction the declaration is ~1227 and its sorry ~1251, not 1220-1244 (branchSatisfiableIn_s4FC_ancestor_redirect) is IMMOVABLE despite being zero-consumer: it carries the retained sorry that is an explicit user decision, and the rule protecting proven-and-consumed code does not by itself protect it. (2) keysOriginS4 is NOT eligible -- it has 22 code consumers, and the comment at LoopChecking.lean:2001-2002 claiming it was removed is FALSE. Nothing whose deletion cannot be justified by a re-verified zero-consumer check may be moved, and nothing proven and consumed may be moved at all. Also NOT eligible, these are route-independent assets to be PLACED by the abstraction decision rather than quarantined: modalS4Saturated (7 consumers), the strictly-weakened hintikkaS4 bridges (the set is 8, measured, not 10), hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_{boxPos,diaNeg}_mem transfers with their Reds / accWithReds packaging.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---
@@ -302,7 +329,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 563, Task 564, Task 566
+- **Dependencies**: Task 563, Task 564, Task 566, Task 586
 
 **Description**: [Task G of the modal-tableau refactor programme; P3. Depends on the review gate, box-plus and the migration, because the seams MOVE if box-plus is adopted.] Split LoopChecking.lean (10,540 lines / 230 declarations, measured) into an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules. Note that these clusters' current source ranges are DISCONTIGUOUS -- itself the evidence that a line-count split would be wrong. DO NOT split mechanically by line count. Conform to ORGANISATION.md and NOTATION.md, preserve import acyclicity, and UPDATE ORGANISATION.md, which currently gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. The Support-module dedup task should land first: it shrinks the files before the seams are cut.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

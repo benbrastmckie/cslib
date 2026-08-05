@@ -3257,30 +3257,6 @@ lemma modalApplyOneFive_worldGrowth {φ₀ : Proposition Atom}
         rcases hs : sf.sign with _ | _ <;>
           rcases hf : sf.formula with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ <;> simp_all
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `S5Simplification.lean`'s `private lemma
-modalMaxWorld_foldl_le_of_forall_S5w` (unavailable across files): threads an accumulator bound
-through `List.foldl` to support induction. -/
-private lemma modalMaxWorld_foldl_le_of_forall_Five
-    {l : List (SignedFormula (Proposition Atom) WorldIndex)} {M init : WorldIndex}
-    (hinit : init ≤ M) (h : ∀ z ∈ l, z.label ≤ M) :
-    l.foldl (fun mx sf => max mx sf.label) init ≤ M := by
-  induction l generalizing init with
-  | nil => simpa using hinit
-  | cons hd tl ih =>
-    simp only [List.foldl_cons]
-    exact ih (max_le hinit (h hd List.mem_cons_self))
-      (fun z hz => h z (List.mem_cons_of_mem _ hz))
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `S5Simplification.lean`'s `private lemma
-modalMaxWorld_le_of_forall_label_le_S5w`: `modalMaxWorld l` is bounded by `M` whenever every label
-in `l` is bounded by `M`. -/
-private lemma modalMaxWorld_le_of_forall_label_le_Five
-    {l : List (SignedFormula (Proposition Atom) WorldIndex)} {M : WorldIndex}
-    (h : ∀ z ∈ l, z.label ≤ M) : modalMaxWorld l ≤ M :=
-  modalMaxWorld_foldl_le_of_forall_Five (Nat.zero_le M) h
-
 /-- **Combined `e`-aware step-preservation for `ModalLoopAuxFive`'s two conjuncts**: one
 `modalStepBranchGen modalApplyOneFive` step preserves both `∀x∈b,x∈modalUniverse φ₀` and
 `FiveWorldInvE φ₀ b e` on every `(b', e')` child pair. Mirrors
@@ -3324,7 +3300,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
       rcases hgrowth with hknownall | ⟨s, ψ, hnotused, htagmem, hmemnf, hlabelall⟩ |
           ⟨hroot, ψ, hshape, htagmem, hmemnf, hlabelall⟩
       · have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
-          apply modalMaxWorld_le_of_forall_label_le_Five
+          apply modalMaxWorld_le_of_forall_label_le
           intro z hz
           simp only [List.mem_append] at hz
           rcases hz with hz | hz
@@ -3343,7 +3319,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
               (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hN hE
       · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
           apply le_antisymm
-          · apply modalMaxWorld_le_of_forall_label_le_Five
+          · apply modalMaxWorld_le_of_forall_label_le
             intro z hz
             simp only [List.mem_append] at hz
             rcases hz with hz | hz
@@ -3376,7 +3352,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
               (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hNcard hE
       · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
           apply le_antisymm
-          · apply modalMaxWorld_le_of_forall_label_le_Five
+          · apply modalMaxWorld_le_of_forall_label_le
             intro z hz
             simp only [List.mem_append] at hz
             rcases hz with hz | hz
@@ -3461,7 +3437,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
       refine ⟨hbClosure, ?_⟩
       unfold FiveWorldInvE
       have hmaxle : modalMaxWorld (br ++ b) ≤ modalMaxWorld b := by
-        apply modalMaxWorld_le_of_forall_label_le_Five
+        apply modalMaxWorld_le_of_forall_label_le
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
@@ -3493,7 +3469,7 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
       refine ⟨hbClosure, ?_⟩
       unfold FiveWorldInvE
       have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
-        apply modalMaxWorld_le_of_forall_label_le_Five
+        apply modalMaxWorld_le_of_forall_label_le
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
@@ -3767,7 +3743,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
       rcases hgrowth with hknownall | ⟨s, ψ, hnotused, htagmem, hmemnf, hlabelall⟩ |
           ⟨hroot, ψ, hshape, htagmem, hmemnf, hlabelall⟩
       · have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
-          apply modalMaxWorld_le_of_forall_label_le_Five
+          apply modalMaxWorld_le_of_forall_label_le
           intro z hz
           simp only [List.mem_append] at hz
           rcases hz with hz | hz
@@ -3786,7 +3762,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
               (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hN hE
       · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
           apply le_antisymm
-          · apply modalMaxWorld_le_of_forall_label_le_Five
+          · apply modalMaxWorld_le_of_forall_label_le
             intro z hz
             simp only [List.mem_append] at hz
             rcases hz with hz | hz
@@ -3819,7 +3795,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
               (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hNcard hE
       · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
           apply le_antisymm
-          · apply modalMaxWorld_le_of_forall_label_le_Five
+          · apply modalMaxWorld_le_of_forall_label_le
             intro z hz
             simp only [List.mem_append] at hz
             rcases hz with hz | hz
@@ -3904,7 +3880,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
       refine ⟨hbClosure, ?_⟩
       unfold FiveWorldInvE
       have hmaxle : modalMaxWorld (br ++ b) ≤ modalMaxWorld b := by
-        apply modalMaxWorld_le_of_forall_label_le_Five
+        apply modalMaxWorld_le_of_forall_label_le
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
@@ -3936,7 +3912,7 @@ theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
       refine ⟨hbClosure, ?_⟩
       unfold FiveWorldInvE
       have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
-        apply modalMaxWorld_le_of_forall_label_le_Five
+        apply modalMaxWorld_le_of_forall_label_le
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz

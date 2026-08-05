@@ -150,13 +150,30 @@ grep -n 'structure S4LoopInv' Cslib/Logics/Modal/Tableau/LoopChecking.lean
 wc -l CslibTests/S4LoopGuardRegression.lean                                       # 197
 ```
 
-* **Local re-derivation sites: 55**, not the 77 previously carried. 77 is not reproducible by
-  any obvious command (`-i 're-derivation'` gives 80, `-i 're-deriv'` gives 106) and is retired.
-  **The smaller headline does not mean less work.** Every per-lemma spot-check behind the old
-  figure was an undercount (`modalSubfmls_trans` 4 sites not 3, `modalKnownWorlds_fold_spec` 6
-  not 4, `hasEdge_addEdge_cases` 7 not 4), and the old per-file distribution omitted
-  `LoopChecking.lean`'s **14** sites entirely -- the largest file in the subsystem. The
-  de-duplication work is larger, not smaller.
+* **Local re-derivation sites: 55**, not the 77 previously carried (figure as it stood before the
+  de-duplication effort below; retained here as a historical baseline, not a live count). 77 is
+  not reproducible by any obvious command (`-i 're-derivation'` gives 80, `-i 're-deriv'` gives
+  106) and is retired. **The smaller headline does not mean less work.** Every per-lemma
+  spot-check behind the old figure was an undercount (`modalSubfmls_trans` 4 sites not 3,
+  `modalKnownWorlds_fold_spec` 6 not 4, `hasEdge_addEdge_cases` 7 not 4), and the old per-file
+  distribution omitted `LoopChecking.lean`'s **14** sites entirely -- the largest file in the
+  subsystem. The de-duplication work is larger, not smaller.
+* **Post-de-duplication update**: the comment-string count is now **11** (`grep -rho 'Local
+  re-derivation' Cslib/ | wc -l`), down from 55 -- but this number was NEVER the authoritative
+  measure of duplication and should not be read as "duplication resolved: 55 minus 11". The
+  actual tracking mechanism throughout the de-duplication effort was a declaration-level census
+  (base-name/suffix-family matching across the subsystem, driven by a reusable script kept
+  alongside the project's task-management artifacts), which is systematically more accurate: the
+  comment census both undercounts (several genuine duplicates carried no `Local re-derivation`
+  comment at all -- comment-driven deletion would have missed them silently) and overcounts in
+  the other direction (some `Local re-derivation`-labelled facts are genuinely distinct
+  propositions over frame-specific types like `modalUniverseS4`, not re-derivations of the same
+  fact, discovered only by a build-time type mismatch when treated as a duplicate). The remaining
+  11 comment sites correspond to the residue documented as Reasoned Exclusions (either the origin
+  is already public, the copy dodges an ambient instance, or the dependency graph does not reach
+  the origin) plus a handful of genuine specializations (frame-specific restatements,
+  keyed-driver variants) that were never duplicates. The declaration-level census, not this
+  comment count, is the authoritative figure for future maintenance.
 * **`ModalTableauResult` spans 8 modules here, 9 repo-wide** (the ninth is
   `CslibTests/S4LoopGuardRegression.lean`). A previously reported span of 11 is drift.
 * **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns

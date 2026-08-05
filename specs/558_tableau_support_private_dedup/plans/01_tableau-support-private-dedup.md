@@ -523,25 +523,84 @@ diamond and reach for the `Nat`-specific lemma rather than the general order-the
 
 ---
 
-### Phase 5: Migrate `mem_modalKnownWorlds`; the 6 weak `fold_spec` copies die as dead code [NOT STARTED]
+### Phase 5: Migrate `mem_modalKnownWorlds`; the 6 weak `fold_spec` copies die as dead code [COMPLETED]
 
 **Goal**: The ordering-critical phase. Route consumers to the published `mem_modalKnownWorlds`,
 which strands all six `modalKnownWorlds_fold_spec_*` copies with zero call sites, at which point
 they delete outright — no substitution, no call-site edit, no `Nodup` obligation.
 
 **Tasks**:
-- [ ] Add `public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds` where needed.
-- [ ] Delete the 6 `mem_modalKnownWorlds_*` duplicates and route their uses to the published form.
-- [ ] **Then**, and only then, confirm each of the six `modalKnownWorlds_fold_spec_*` copies has
-      zero remaining call sites. Known sole call sites, each inside the corresponding
-      `mem_modalKnownWorlds_X` proof: `BDriver.lean` ~963, `FrameCompleteness.lean` ~3792,
-      `FrameSoundness.lean` ~2108, `FiveSimplification.lean` ~820, `LoopChecking.lean` ~2952,
-      `S5Simplification.lean` ~1042 — all of shape `simpa using modalKnownWorlds_fold_spec_X l [] x`.
-- [ ] Delete all six weak `modalKnownWorlds_fold_spec_*` copies.
-- [ ] Do **not** attempt to route any consumer through the strong `fold_spec`. If a copy still has
+- [x] Add `public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds` where needed.
+      *(Added to BDriver.lean, FiveSimplification.lean, FmpMeasure.lean, FrameCompleteness.lean,
+      FrameSoundness.lean, LoopChecking.lean, S5Simplification.lean — every file that used either
+      of the two published families, including `FmpMeasure.lean` itself, whose own `_fold_spec`
+      and `mem_modalKnownWorlds` are the ORIGINS and needed the import once their private copies
+      were removed.)*
+- [x] Delete the 6 `mem_modalKnownWorlds_*` duplicates and route their uses to the published form.
+      *(Deleted from BDriver/FiveSimplification/FrameCompleteness/FrameSoundness/LoopChecking/
+      S5Simplification; also deleted the `FmpMeasure.lean` origin itself — same identical-name
+      pattern as Phase 3, no call-site text edit needed there.)*
+- [x] **Then**, and only then, confirm each of the six `modalKnownWorlds_fold_spec_*` copies has
+      zero remaining call sites. *(Confirmed structurally rather than by a separate pre-deletion
+      grep pass: each weak `fold_spec_X`'s sole call site, verified by direct reading, was inside
+      its file's own `mem_modalKnownWorlds_X` proof body — nowhere else. Deleted both blocks
+      together per file in one edit; the full-project build succeeding, plus a post-edit
+      repo-wide grep confirming zero remaining references to any of the six names, is the
+      after-the-fact confirmation that no other call site existed.)*
+- [x] Delete all six weak `modalKnownWorlds_fold_spec_*` copies. *(Done, per above.)*
+- [x] Do **not** attempt to route any consumer through the strong `fold_spec`. If a copy still has
       a call site after the migration, stop and record it rather than manufacturing a `Nodup`
       proof — that would signal the ordering assumption failed and needs re-examination.
-- [ ] Remove orphaned `Local re-derivation` comments.
+      *(Not needed: no copy retained a call site.)*
+- [x] Remove orphaned `Local re-derivation` comments. *(Removed along with each deleted block.)*
+
+**Forced deviation, discovered mid-phase**: adding the `Support.KnownWorlds` import to
+`FmpMeasure.lean` and `LoopChecking.lean` (needed to resolve their OWN `mem_modalKnownWorlds`/
+`modalKnownWorlds_fold_spec` origins) exposed a Lean name-collision error: both files still held
+OTHER private declarations with names EXACTLY matching other Support.KnownWorlds publications --
+`FmpMeasure.lean`'s `modalKnownWorlds_nodup`, `modalKnownWorlds_mono_append`, and
+`mem_boxPositivesOf` (nominally Phase 6/7 territory), and `LoopChecking.lean`'s
+`modalMaxWorld_le_of_forall_label_le` (nominally Phase 6 territory, one of the plan's own
+"4 term-mode sites needing manual adjustment"). Lean forbids a private declaration and an
+imported public declaration sharing the same fully-qualified name, so these could not be
+deferred to their nominal phase without also deferring this phase's own import. Resolved by
+deleting all four now:
+- `mem_boxPositivesOf`, `modalKnownWorlds_nodup` (`FmpMeasure.lean`): byte-identical statements,
+  zero risk, no call-site edits needed (identical published name).
+- `modalKnownWorlds_mono_append` (`FmpMeasure.lean`, `⊆` form vs. Support's `∀ x ∈` form): its 3
+  internal call sites (`exact modalKnownWorlds_mono_append nf b` / `br b`) needed **no edit** --
+  `exact` unifies `List.Subset`'s strict-implicit-binder unfolding against the `∀ x ∈` explicit
+  form via defeq without complaint. This is a useful empirical finding for the REST of Phase 6:
+  the plan's "changes application arity, touch every call site" warning may be narrower in
+  practice than stated, at least for plain `exact`-style application (as opposed to `rw` or
+  partial application) — worth re-verifying per remaining call-site population in Phase 6 rather
+  than assuming every site needs editing.
+- `modalMaxWorld_le_of_forall_label_le` (`LoopChecking.lean`, all-explicit-binder form): its 9
+  internal call sites all use `apply`, confirmed binder-mode insensitive as the plan predicted;
+  no edit needed. Its private `foldl_max_le_of_forall_le` helper was left in place (unique name,
+  no collision, still used internally by nothing else problematic).
+
+This means Phase 6's remaining scope for these four families is now narrower than originally
+described: `modalKnownWorlds_mono_append` has 5 duplicate copies left (not 6, `FmpMeasure`'s is
+gone) and `modalMaxWorld_le_of_forall_label_le` has 2 left in `FiveSimplification.lean`/
+`S5Simplification.lean` (not the `LoopChecking.lean`-centric picture the plan described — its
+"origin" is now gone too, migrated here instead of there). `modalKnownWorlds_nodup` and
+`mem_boxPositivesOf` are correspondingly lighter — see the Phase 5 handoff for the exact updated
+remaining scope.
+
+**Census script fix, discovered mid-phase**: after this phase's deletions, `census.py`'s reported
+duplicate count implausibly cratered (62/39 -> 40/33, a drop of 22/6 when only ~10-12 declarations
+were actually deleted). Root cause: `census.py`'s signal B ("does the stripped base exist
+somewhere") only scanned the flat `Cslib/Logics/Modal/Tableau/*.lean` surface, never
+`Support/*.lean` -- once an origin is deleted and relocated to `Support/`, the remaining
+suffixed siblings silently stopped forming a family at all, hiding real pending-migration
+duplicates (`modalKnownWorlds_mono_append`'s 5 remaining copies, `mem_boxPositivesOf`'s 2,
+`modalMaxWorld_le_of_forall_label_le`'s 2, `modalKnownWorlds_nodup_S4`'s 1) from the count
+entirely. Fixed by adding `scan_published_names()` (reads `Support/*.lean`, used only to seed
+the base-existence check, never to add Support's own declarations as family members) and a
+Support-only exemption from the cross-file-spread guard (a single remaining driver-file copy
+against an already-published Support origin is unambiguously a real duplicate, not a same-file
+sibling risk). Corrected running total: **47 duplicates / 38 families**.
 
 **Timing**: 1.5 hours
 

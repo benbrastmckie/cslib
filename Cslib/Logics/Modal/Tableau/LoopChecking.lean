@@ -10047,8 +10047,12 @@ K's `modalApplyOne sf b acc`, for ANY `keys` -- the dispatch chain `modalApplyOn
 modalApplyOneS4 → modalApplyOneS4Rules → modalApplyOneT → modalApplyOne` fires its catch-all arm
 at every layer (mirrors the internal `hred` fact inside `modalApplyOneS4Keyed_fst_eq_of_not_box`,
 extracted standalone since that lemma only exposes the branch/`acc`-invariance corollary, not the
-underlying `keys`-independence). -/
-private lemma modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box (φ₀ : Proposition Atom)
+underlying `keys`-independence).
+
+Not `private`: consumed by `FrameCompleteness.lean`'s propositional-case ingredient for the
+S4-keyed ordered driver's bespoke step-preservation lemma (Phase 7 of the S4 loop-guard
+soundness task). -/
+lemma modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box (φ₀ : Proposition Atom)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)

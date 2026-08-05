@@ -4480,6 +4480,38 @@ lemma boxPlusExtraS4_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
       | _ => simp [hbf] at hbsfprop
     · rw [if_neg hbsfsign] at hbsfprop; simp at hbsfprop
 
+/-- **Propositional/non-modal step soundness for the S4-keyed guard.** At a signed formula whose
+top-level connective is neither `box` nor `diamond`, `modalApplyOneS4Keyed` coincides with plain
+K's `modalApplyOne` (`modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box`, `LoopChecking.lean`),
+and `modalApplyOne` itself never touches `acc` at this shape either -- all four `box`/`diamond`
+match arms of its own internal K-rule fallback are excluded by `hnb`/`hnd`, so that match always
+falls through to `_, _ => (.notApplicable, acc)`, and the propositional branch it tries first
+(`tryAllPropRules`) never inspects `acc` at all. This makes the propositional/non-modal case the
+cheapest of the whole bespoke case-split: `tryAllPropRules_sat` (`SoundnessStep.lean`) already
+discharges satisfiability preservation for every propositional shape (`and`/`or`/`imp`, and
+`atom`/`bot`/`box`/`diamond` vacuously via `notApplicable`) in one call, in place of the
+~350-line inline case-by-case duplication `modalStepBranchGen_preserves_satIn`
+(`FrameSoundness.lean`) uses for the analogous plain-K arm. -/
+lemma modalApplyOneS4Keyed_notBoxDia_sat (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (hsf : sfSat m f (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) :
+    (modalApplyOneS4Keyed φ₀ keys ⟨s, φ, w⟩ b acc).snd = acc ∧
+      RuleResultSat m f (modalApplyOneS4Keyed φ₀ keys ⟨s, φ, w⟩ b acc).fst := by
+  rw [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys s φ w hnb hnd b acc]
+  unfold modalApplyOne
+  simp only
+  split_ifs with hpa
+  · exact ⟨rfl, tryAllPropRules_sat m f ⟨s, φ, w⟩ hsf⟩
+  · rcases s with _ | _ <;> rcases φ with _ | _ | _ | _ | _ | ψ | ψ <;>
+      first
+        | exact ⟨rfl, trivial⟩
+        | exact absurd rfl (hnb ψ)
+        | exact absurd rfl (hnd ψ)
+
 end Cslib.Logic.Modal.Tableau
 
 end

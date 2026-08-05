@@ -92,45 +92,6 @@ across files, system-agnostic). Consumed by the witness-rule counting crux below
 archived (superseded by the linear budget argument below); these two structural facts
 are rule-independent and remain live. -/
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalSubfmls_trans`
-(unavailable across files, system-agnostic): a subformula of a subformula is a subformula. -/
-private lemma modalSubfmls_trans_S5 {a b c : Proposition Atom}
-    (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
-  induction c with
-  | atom p =>
-    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
-  | bot =>
-    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
-  | imp x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | and x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | or x y ihx ihy =>
-    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
-    rcases hbc with (rfl | hx) | hy
-    · exact hab
-    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
-    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
-  | box x ihx =>
-    simp only [modalSubfmls, List.mem_cons] at hbc
-    rcases hbc with rfl | hx
-    · exact hab
-    · exact List.mem_cons_of_mem _ (ihx hx)
-  | diamond x ihx =>
-    simp only [modalSubfmls, List.mem_cons] at hbc
-    rcases hbc with rfl | hx
-    · exact hab
-    · exact List.mem_cons_of_mem _ (ihx hx)
-
 /-! ## S5-Specific (Universal-Cluster) Propagation Helpers -/
 
 /-- The S5 universal propagation for box-positives: from `T(□φ)@w`, generate `T(φ)@w'` for
@@ -1189,7 +1150,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
       unfold modalApplyOneS5w
       have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
         List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
-      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsfform
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans hφmem hsfform
       have htagmem : (Sign.pos, φ) ∈ mintTags φ₀ := mem_mintTags_of_diamond_mem hsfform
       cases hw : witnessWorldS5 b Sign.pos φ with
       | none =>
@@ -1240,7 +1201,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                 have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
                   List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
                 have hψsub : ψ ∈ modalSubfmls φ₀ :=
-                  modalSubfmls_trans_S5 hψmem (S5wTagInv_formula_mem hT hbmem)
+                  modalSubfmls_trans hψmem (S5wTagInv_formula_mem hT hbmem)
                 exact mem_signedSubfmls_of_formula_S5w _ hψsub
             · simp at heq
           · simp only [List.mem_filterMap] at hdia
@@ -1256,7 +1217,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                   rw [hform] at hsf'sub
                   have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
                     List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
-                  have hψsub : ψ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hψmem hsf'sub
+                  have hψsub : ψ ∈ modalSubfmls φ₀ := modalSubfmls_trans hψmem hsf'sub
                   exact mem_signedSubfmls_of_formula_S5w _ hψsub
               · simp at heq
             · simp at heq
@@ -1295,7 +1256,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
       unfold modalApplyOneS5w
       have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
         List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
-      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsfform
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans hφmem hsfform
       have htagmem : (Sign.neg, φ) ∈ mintTags φ₀ := mem_mintTags_of_box_mem hsfform
       cases hw : witnessWorldS5 b Sign.neg φ with
       | none =>
@@ -1346,7 +1307,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                 have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
                   List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
                 have hψsub : ψ ∈ modalSubfmls φ₀ :=
-                  modalSubfmls_trans_S5 hψmem (S5wTagInv_formula_mem hT hbmem)
+                  modalSubfmls_trans hψmem (S5wTagInv_formula_mem hT hbmem)
                 exact mem_signedSubfmls_of_formula_S5w _ hψsub
             · simp at heq
           · simp only [List.mem_filterMap] at hdia
@@ -1362,7 +1323,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                   rw [hform] at hsf'sub
                   have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
                     List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
-                  have hψsub : ψ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hψmem hsf'sub
+                  have hψsub : ψ ∈ modalSubfmls φ₀ := modalSubfmls_trans hψmem hsf'sub
                   exact mem_signedSubfmls_of_formula_S5w _ hψsub
               · simp at heq
             · simp at heq
@@ -1409,7 +1370,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
         have hφsub : φ ∈ modalSubfmls φ₀ := by
           have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
             List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
-          exact modalSubfmls_trans_S5 hφmem hsfform
+          exact modalSubfmls_trans hφmem hsfform
         have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
             (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
               = false := by
@@ -1443,7 +1404,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
           · simp only [List.mem_append, List.mem_filter] at hx
             rcases hx with hx | ⟨hx, -⟩
             · exact mem_signedSubfmls_of_formula_S5w _
-                (modalSubfmls_trans_S5 (hKform x hx).1 hsfform)
+                (modalSubfmls_trans (hKform x hx).1 hsfform)
             · have hxeq := (modalS5BoxAll_mem hx).1
               have hxform : x.formula = φ := by rw [hxeq]
               rw [hxform]; exact mem_signedSubfmls_of_formula_S5w _ hφsub
@@ -1459,7 +1420,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
         have hφsub : φ ∈ modalSubfmls φ₀ := by
           have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
             List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
-          exact modalSubfmls_trans_S5 hφmem hsfform
+          exact modalSubfmls_trans hφmem hsfform
         have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
             (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
               = false := by
@@ -1500,7 +1461,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
           · simp only [List.mem_append, List.mem_filter] at hx
             rcases hx with hx | ⟨hx, -⟩
             · exact mem_signedSubfmls_of_formula_S5w _
-                (modalSubfmls_trans_S5 (hKform x hx).1 hsfform)
+                (modalSubfmls_trans (hKform x hx).1 hsfform)
             · have hxeq := (modalS5DiaNegAll_mem hx).1
               have hxform : x.formula = φ := by rw [hxeq]
               rw [hxform]; exact mem_signedSubfmls_of_formula_S5w _ hφsub
@@ -1519,15 +1480,15 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
           formulas | branches | formulas | -
         · rw [hpr] at hprop
           refine ⟨fun z hz => ?_, Or.inl fun z hz => ?_⟩ <;> obtain ⟨hzform, hzlabel⟩ := hprop z hz
-          · exact mem_signedSubfmls_of_formula_S5w _ (modalSubfmls_trans_S5 hzform hsfform)
+          · exact mem_signedSubfmls_of_formula_S5w _ (modalSubfmls_trans hzform hsfform)
           · rw [hzlabel]; exact hsflabel
         · rw [hpr] at hprop
           refine ⟨fun z hz => ?_, fun z hz => ?_⟩ <;> obtain ⟨hzform, hzlabel⟩ := hprop z hz
-          · exact mem_signedSubfmls_of_formula_S5w _ (modalSubfmls_trans_S5 hzform hsfform)
+          · exact mem_signedSubfmls_of_formula_S5w _ (modalSubfmls_trans hzform hsfform)
           · rw [hzlabel]; exact hsflabel
         · rw [hpr] at hprop
           refine ⟨fun z hz => ?_, fun z hz => ?_⟩ <;> obtain ⟨hzform, hzlabel⟩ := hprop z hz
-          · exact mem_signedSubfmls_of_formula_S5w _ (modalSubfmls_trans_S5 hzform hsfform)
+          · exact mem_signedSubfmls_of_formula_S5w _ (modalSubfmls_trans hzform hsfform)
           · rw [hzlabel]; exact hsflabel
         · rw [hpr] at hpa
           simp [RuleResult.isApplicable] at hpa
@@ -1937,28 +1898,6 @@ content is bounded by `modalKnownWorlds b` (never larger than `modalMaxWorld b`,
 At the two witness-reuse shapes, the reuse arm's witness world is drawn from `modalKnownWorlds b`
 by construction (`witnessWorldS5`), and the mint arm falls through to K's own mint witness. -/
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalUniverse_of`, swapped to
-plain `modalUniverse`/`modalWorldBound` (unavailable across files): a signed formula with any
-sign, a subformula of `φ0`, at a world label within the `modalWorldBound` bound, is in
-`U(φ0)`. -/
-private lemma mem_modalUniverse_of_S5w {φ0 : Proposition Atom} {s : Sign} {φ : Proposition Atom}
-    {w : WorldIndex} (hw : w ≤ modalWorldBound φ0) (hφ : φ ∈ modalSubfmls φ0) :
-    (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 := by
-  have hlt : w < modalWorldBound φ0 + 1 := Nat.lt_succ_of_le hw
-  simp only [modalUniverse, List.mem_flatMap, List.mem_range]
-  exact ⟨w, hlt, φ, hφ, by cases s <;> simp⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalUniverse_mem_formula`
-(unavailable across files): extraction of the formula-component bound. -/
-private lemma modalUniverse_mem_formula_S5w {φ0 : Proposition Atom}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverse φ0) :
-    x.formula ∈ modalSubfmls φ0 := by
-  simp only [modalUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
-    List.not_mem_nil, or_false] at hx
-  obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
-
 omit [Hashable Atom] in
 /-- **Combined F9/F10 shape fact for S5** (hypothesis-free): at `modalApplyOneS5`'s two
 S5-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), the result is always `.notApplicable` or
@@ -2227,13 +2166,13 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
           le_trans (known_label_le_modalMaxWorld_S5w hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_S5w (hb _ hsf)
-          exact modalSubfmls_trans_S5 (b := Proposition.diamond φ)
+            modalUniverse_mem_formula (hb _ hsf)
+          exact modalSubfmls_trans (b := Proposition.diamond φ)
             (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
         intro x hx
         simp only [List.mem_singleton] at hx
         rw [hx]
-        exact mem_modalUniverse_of_S5w hwle hφsub
+        exact mem_modalUniverse_of hwle hφsub
       | none =>
         simp only [hw]
         rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
@@ -2252,13 +2191,13 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
           le_trans (known_label_le_modalMaxWorld_S5w hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_S5w (hb _ hsf)
-          exact modalSubfmls_trans_S5 (b := Proposition.box φ)
+            modalUniverse_mem_formula (hb _ hsf)
+          exact modalSubfmls_trans (b := Proposition.box φ)
             (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
         intro x hx
         simp only [List.mem_singleton] at hx
         rw [hx]
-        exact mem_modalUniverse_of_S5w hwle hφsub
+        exact mem_modalUniverse_of hwle hφsub
       | none =>
         simp only [hw]
         rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
@@ -2282,15 +2221,15 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
         simp only at hK
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_S5w (hb _ hsf)
-          exact modalSubfmls_trans_S5 (b := Proposition.box φ)
+            modalUniverse_mem_formula (hb _ hsf)
+          exact modalSubfmls_trans (b := Proposition.box φ)
             (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
         have hallNew : ∀ x ∈ modalS5BoxAll b φ l, x ∈ modalUniverse φ0 := by
           intro x hx
           obtain ⟨hxeq, hxknown, -⟩ := modalS5BoxAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
             le_trans (known_label_le_modalMaxWorld_S5w hxknown) (le_of_lt hW)
-          rw [hxeq]; exact mem_modalUniverse_of_S5w hxle hφsub
+          rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
         · -- kResult = .notApplicable
           simp only
@@ -2319,15 +2258,15 @@ private lemma modalApplyOneS5w_outputsSubsetUniverse
         simp only at hK
         have hφsub : φ ∈ modalSubfmls φ0 := by
           have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_S5w (hb _ hsf)
-          exact modalSubfmls_trans_S5 (b := Proposition.diamond φ)
+            modalUniverse_mem_formula (hb _ hsf)
+          exact modalSubfmls_trans (b := Proposition.diamond φ)
             (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
         have hallNew : ∀ x ∈ modalS5DiaNegAll b φ l, x ∈ modalUniverse φ0 := by
           intro x hx
           obtain ⟨hxeq, hxknown, -⟩ := modalS5DiaNegAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
             le_trans (known_label_le_modalMaxWorld_S5w hxknown) (le_of_lt hW)
-          rw [hxeq]; exact mem_modalUniverse_of_S5w hxle hφsub
+          rw [hxeq]; exact mem_modalUniverse_of hxle hφsub
         rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
         · -- kResult = .notApplicable
           simp only

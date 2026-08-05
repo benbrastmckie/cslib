@@ -3735,17 +3735,6 @@ individually remain free via the fully generic
 only `modalApplyOneKb5''_fresh_local` (`FiveSimplification.lean`); those generic bridges are used
 directly at the assembly site below and are NOT re-derived here. -/
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`:
-appending formulas to the front of a branch only grows its known-worlds set. -/
-private lemma modalKnownWorlds_mono_append_C
-    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
-  intro x hx
-  rw [mem_modalKnownWorlds] at hx ⊢
-  obtain ⟨sf, hsf, rfl⟩ := hx
-  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
-
 /-- **Every new branch a step produces is the old branch with formulas prepended**, hence
 `modalKnownWorlds`-monotone over it. Rule-generic (any `apply`); mirrors the `hbsub` fact inside
 `FmpMeasure.lean`'s `modalStepBranch_preserves_accTargetsKnown_gen` proof, exposed here as its own
@@ -3767,20 +3756,20 @@ private lemma modalStepBranchGen_knownWorlds_mono_C
     rw [← hsf.1] at hb'
     simp only [List.mem_singleton] at hb'
     subst hb'
-    exact modalKnownWorlds_mono_append_C nf b
+    exact modalKnownWorlds_mono_append nf b
   · rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     intro b' hb'
     rw [← hsf.1] at hb'
     obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
-    exact modalKnownWorlds_mono_append_C br b
+    exact modalKnownWorlds_mono_append br b
   · rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     intro b' hb'
     rw [← hsf.1] at hb'
     simp only [List.mem_singleton] at hb'
     subst hb'
-    exact modalKnownWorlds_mono_append_C nf b
+    exact modalKnownWorlds_mono_append nf b
   · rw [hfstc] at hsf; simp at hsf
 
 omit [DecidableEq Atom] [Hashable Atom] in

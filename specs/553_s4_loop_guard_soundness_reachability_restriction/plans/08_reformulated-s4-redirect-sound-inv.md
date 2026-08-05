@@ -637,7 +637,7 @@ before 7.3/7.5-7.7 return, and does not touch the Phase 9 capstone scope questio
 
 ---
 
-### Phase 7.5: Propositional / non-mint arm restated against `S4RedirectSoundInv` [NOT STARTED]
+### Phase 7.5: Propositional / non-mint arm restated against `S4RedirectSoundInv` [COMPLETED]
 
 - **Goal:** Re-wrap `modalApplyOneS4Keyed_notBoxDia_sat` into an `S4RedirectSoundInv`-preservation
   arm, discharging conjuncts (a)-(d) at a primary-scan step.
@@ -656,30 +656,61 @@ before 7.3/7.5-7.7 return, and does not touch the Phase 9 capstone scope questio
 - **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
 
 - **Tasks:**
-  - [ ] Land the small bridging fact `acc.hasEdge u v = true → outDeg acc u ≠ 0` (locate `outDeg`
+  - [x] Land the small bridging fact `acc.hasEdge u v = true → outDeg acc u ≠ 0` (locate `outDeg`
         in `FmpMeasure.lean:768`; it is `(acc.successorsOf u).length`). Conjunct (a) plus this fact
         is what shows a world with `outDeg acc u₀ = 0` is not the source of any ghost edge.
-  - [ ] State the arm: from `S4RedirectSoundInv φ₀ b e acc keys Er` and a primary-scan step firing
+        *(Landed as `outDeg_ne_zero_of_hasEdge`.)*
+  - [x] State the arm: from `S4RedirectSoundInv φ₀ b e acc keys Er` and a primary-scan step firing
         a non-mint-shaped `sf` at label `u₀`, conclude
         `S4RedirectSoundInv φ₀ (nf ++ b) (sf :: e) acc keys Er` (`Er` unchanged — a non-mint step
         creates no edge, so `acc' = acc`; confirm this against `modalApplyOneS4Keyed_notBoxDia_sat`'s
-        own `.snd = acc` conclusion, which is already part of that lemma's statement).
-  - [ ] Discharge (a): unchanged (`acc' = acc`, `Er' = Er`).
-  - [ ] Discharge (b): reuse `modalApplyOneS4Keyed_notBoxDia_sat` verbatim on the same `(m, f)` from
+        own `.snd = acc` conclusion, which is already part of that lemma's statement). *(Landed as
+        `S4RedirectSoundInv_notBoxDia_step`, stated existentially over `nf` with an explicit
+        match-shaped selector against `(modalApplyOneS4Keyed φ₀ keys sf b acc).1` — covers
+        `.linear`/`.persistent`/`.branching` uniformly, since `tryAllPropRules` (the only rule
+        family reachable once box/diamond are excluded) can return any of the three; `acc`/`Er`
+        held fixed as the plan specifies.)*
+  - [x] Discharge (a): unchanged (`acc' = acc`, `Er' = Er`).
+  - [x] Discharge (b): reuse `modalApplyOneS4Keyed_notBoxDia_sat` verbatim on the same `(m, f)` from
         the old (b); the disjunction is untouched because `acc' = acc`.
-  - [ ] Discharge (c): the only new formulas are in `nf`, all at label `u₀`. By the candidate
+  - [x] Discharge (c): the only new formulas are in `nf`, all at label `u₀`. By the candidate
         predicate, `sf` is non-mint, not expanded, and applicable at `(b, acc)`; by (d) at the old
         state, an applicable non-mint non-expanded formula forces `outDeg acc u₀ = 0`; by the
         bridging fact plus (a), `u₀` is therefore not `p.1` for any `p ∈ Er`. Hence no ghost edge's
         source gains a formula and (c) is inherited. **This is the load-bearing step of the whole
         reformulation's (c)-stability argument (report §3.4 row 1, §3.5); write it out explicitly
-        rather than letting a tactic close it opaquely.**
-  - [ ] Discharge (d): consume Phase 7.4's branch-growth antitone lemma. Every formula that was
+        rather than letting a tactic close it opaquely.** *(Landed exactly this way; the label-
+        preservation half needed a new supporting lemma `tryAllPropRules_output_label_eq`, not
+        anticipated by name in the plan but consistent with its "load-bearing step" description.)*
+  - [x] Discharge (d): consume Phase 7.4's branch-growth antitone lemma. Every formula that was
         `.notApplicable` at `b` stays `.notApplicable` at `nf ++ b`; the fired `sf` moves into `e`.
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+  - [x] `#print axioms`; scoped build; `lint-style`; census exactly 1.
 
 - **Done when:** the arm is sorry-free and committed, or the phase is `[BLOCKED]` with the exact
   `lean_goal`; census exactly 1; scoped build and `lint-style` clean.
+
+#### Phase 7.5 Verdict
+
+Landed sorry-free in `FrameCompleteness.lean`: `outDeg_ne_zero_of_hasEdge` (bridging fact),
+`tryAllPropRules_output_label_eq` (new supporting lemma — every `tryAllPropRules` output shares
+its input's label, needed to make the (c)/(d) load-bearing argument generic over which of
+`.linear`/`.branching`/`.persistent` the propositional rule actually returns), and
+`S4RedirectSoundInv_notBoxDia_step` (the arm). The arm is stated existentially over the produced
+`nf` with a match-shaped selector against `(modalApplyOneS4Keyed φ₀ keys sf b acc).1`, covering
+all three non-`.notApplicable` result shapes uniformly — the plan's own prose named only `nf`
+without settling whether propositional rules ever branch; they do (`andNeg`/`orPos`/`impPos`),
+so the existential/selector shape is the honest generalization, not a deviation from the plan's
+intent. Delta from the ~80-line estimate: 261 lines including two module docstrings and the new
+supporting lemma (`git diff --stat`: `FrameCompleteness.lean` only, purely additive, no existing
+declaration touched). `#print axioms` via `lake env lean` on all three new declarations: subsets
+of `{propext, Classical.choice, Quot.sound}`. Scoped `lake build
+Cslib.Logics.Modal.Tableau.FrameCompleteness`, `lake exe checkInitImports`, and `lake exe
+lint-style` all clean. Sorry census over `Cslib/Logics/Modal/Tableau/` unchanged at exactly 1
+(`FrameSoundness.lean:1251`). One cosmetic note: `tryAllPropRules_output_label_eq`'s proof
+triggers the Lean core `linter.flexible` info/warning (a `simp_all`-then-`rcases` sequence on the
+same goal) — not an error, not one of the seven `lake lint` prevention categories this task
+tracks, and does not block the build; left as-is rather than spending further budget chasing a
+cosmetic linter note.
 
 ---
 

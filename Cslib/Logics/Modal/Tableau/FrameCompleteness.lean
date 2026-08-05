@@ -5641,6 +5641,267 @@ lemma modalApplyOneS4Keyed_notApplicable_growth (φ₀ : Proposition Atom)
       rw [modalApplyOne_fst_eq_of_not_box_diamond sf (nf ++ b) b acc hnb hnd]
       exact h
 
+/-! ## Phase 7.5: Propositional / Non-Mint Arm Restated Against `S4RedirectSoundInv`
+
+Re-wraps `modalApplyOneS4Keyed_notBoxDia_sat` (above) into an `S4RedirectSoundInv`-preservation
+step, discharging conjuncts (a)-(d) at a primary-scan step. `acc`/`Er` are unchanged (a
+non-mint step creates no edge); the load-bearing argument is shared by (c) and (d): the fired
+candidate `sf` has `outDeg acc sf.label = 0` (forced by conjunct (d) at the OLD state, since
+`sf` is applicable and unexpanded), so every newly-produced formula -- all at label `sf.label`
+-- lands at a world with no out-edge, hence cannot be a ghost-edge source. -/
+
+omit [Hashable Atom] in
+/-- **Bridging fact.** A world with a recorded out-edge has nonzero `outDeg`; contrapositive of
+the fact Phase 7.5's (c)/(d) discharge actually consumes (`outDeg = 0 → no out-edge`). -/
+lemma outDeg_ne_zero_of_hasEdge (acc : Accessibility) (w w' : WorldIndex)
+    (h : acc.hasEdge w w' = true) : outDeg acc w ≠ 0 := by
+  unfold outDeg
+  unfold Accessibility.hasEdge at h
+  rw [List.any_eq_true] at h
+  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
+  simp only [Bool.and_eq_true, beq_iff_eq] at heq
+  obtain ⟨hs, ht⟩ := heq
+  have hmemSucc : w' ∈ acc.successorsOf w := by
+    unfold Accessibility.successorsOf
+    rw [List.mem_filterMap]
+    refine ⟨(src, tgt), hmem, ?_⟩
+    simp [hs, ht]
+  intro hlen
+  rw [List.length_eq_zero_iff] at hlen
+  rw [hlen] at hmemSucc
+  simp at hmemSucc
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Output-label preservation for `tryAllPropRules`.** Every signed formula produced by any
+propositional rule shares the label of the input formula: immediate from
+`tryAllPropRules_pos`/`_neg`'s explicit `l` binding in every match arm. Stated over the
+match-shaped membership predicate (`.linear`/`.persistent` list membership, or membership in
+SOME `.branching` branch) so it covers whichever result shape the caller's rule actually
+produces. -/
+lemma tryAllPropRules_output_label_eq
+    (s : Sign) (φ : Proposition Atom) (l : WorldIndex)
+    (sf' : SignedFormula (Proposition Atom) WorldIndex)
+    (hmem : match tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+        (⟨s, φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) with
+      | .linear fs => sf' ∈ fs
+      | .branching brs => ∃ br ∈ brs, sf' ∈ br
+      | .persistent fs => sf' ∈ fs
+      | .notApplicable => False) :
+    sf'.label = l := by
+  rcases s with _ | _
+  · rw [tryAllPropRules_pos] at hmem
+    rcases hA : modalAndOf? φ with _ | ⟨x, y⟩ <;> rcases hO : modalOrOf? φ with _ | ⟨x, y⟩ <;>
+      rcases hI : modalImpOf? φ with _ | ⟨x, y⟩ <;> rcases hN : modalNegOf? φ with _ | x <;>
+      simp_all
+    all_goals (rcases hmem with rfl | rfl <;> rfl)
+  · rw [tryAllPropRules_neg] at hmem
+    rcases hA : modalAndOf? φ with _ | ⟨x, y⟩ <;> rcases hO : modalOrOf? φ with _ | ⟨x, y⟩ <;>
+      rcases hI : modalImpOf? φ with _ | ⟨x, y⟩ <;> rcases hN : modalNegOf? φ with _ | x <;>
+      simp_all
+    all_goals (rcases hmem with rfl | rfl <;> rfl)
+
+/-- **Propositional/non-mint arm restated against `S4RedirectSoundInv` (Phase 7.5).** At a
+primary-scan step firing a non-mint-shaped candidate `sf` (neither box nor diamond), some
+output `nf` of `modalApplyOneS4Keyed`'s result (the list itself for `.linear`/`.persistent`, or
+a satisfied branch for `.branching`) extends `S4RedirectSoundInv`: appending `nf` to `b` and
+marking `sf` expanded preserves all four conjuncts, with `acc`/`Er` unchanged.
+
+- (a): unchanged (`acc' = acc`, `Er' = Er`).
+- (b): `modalApplyOneS4Keyed_notBoxDia_sat` reused verbatim on the SAME model witness `(m, f)`
+  hypotheses (b) already supplies -- the disjunction in (b)'s edge clause is untouched since
+  `acc' = acc`.
+- (c)/(d): the shared load-bearing fact -- `sf` is applicable and unexpanded (candidate), so
+  (d) at the OLD state forces `outDeg acc sf.label = 0`; every formula in `nf` is at label
+  `sf.label` (`tryAllPropRules_output_label_eq`), so no ghost edge (whose source has nonzero
+  `outDeg` by `outDeg_ne_zero_of_hasEdge` plus conjunct (a)) can be sourced at `sf.label`. Hence
+  (c) inherits from the old state (the new formulas never trigger a ghost-source obligation),
+  and (d) at the new state holds either because the formula is old (old (d) plus
+  `modalApplyOneS4Keyed_notApplicable_growth`, Phase 7.4) or because it is new (vacuous, by the
+  same zero-outDeg fact). -/
+theorem S4RedirectSoundInv_notBoxDia_step (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (Er : List (WorldIndex × WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (hnb : ∀ ψ, sf.formula ≠ .box ψ) (hnd : ∀ ψ, sf.formula ≠ .diamond ψ)
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er)
+    (hcand : sf ∈ modalNonMintCandidates φ₀ keys b e acc) :
+    ∃ nf : List (SignedFormula (Proposition Atom) WorldIndex),
+      (match (modalApplyOneS4Keyed φ₀ keys sf b acc).1 with
+        | .linear fs => nf = fs
+        | .branching brs => nf ∈ brs
+        | .persistent fs => nf = fs
+        | .notApplicable => False) ∧
+      S4RedirectSoundInv φ₀ (nf ++ b) (sf :: e) acc keys Er := by
+  obtain ⟨hEr, hSat, hAbs, hFroz⟩ := hinv
+  obtain ⟨W, m, f, hFC, hacc, hbsat⟩ := hSat
+  have hmemb : sf ∈ b := modalNonMintCandidates_subset φ₀ keys b e acc hcand
+  have hnotexp : sf ∉ e := modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf hcand
+  have hsfe : (⟨sf.sign, sf.formula, sf.label⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) = sf := rfl
+  have hmintapp : modalMintShape sf = false ∧
+      (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable = true := by
+    unfold modalNonMintCandidates at hcand
+    have hpred := (List.mem_filter.mp hcand).2
+    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+    exact ⟨hpred.1.1, hpred.2⟩
+  obtain ⟨hmshape, happ⟩ := hmintapp
+  -- Old conjunct (d), instantiated at the fired candidate `sf`: forces `outDeg acc sf.label = 0`.
+  have houtdeg0 : outDeg acc sf.label = 0 := by
+    by_contra hne
+    rcases hFroz sf hmemb hmshape hne with h1 | h2
+    · exact hnotexp h1
+    · rw [h2] at happ
+      simp [RuleResult.isApplicable] at happ
+  -- No ghost edge is sourced at `sf.label` (bridging fact plus the zero-outDeg fact).
+  have hnoghost : ∀ p ∈ Er, p.1 ≠ sf.label := by
+    intro p hp heq
+    exact outDeg_ne_zero_of_hasEdge acc p.1 p.2 (hEr p hp) (heq ▸ houtdeg0)
+  -- The candidate's own semantic soundness, verbatim -- reused on the SAME model witness.
+  have hsfsat : sfSat m f sf := hbsat sf hmemb
+  obtain ⟨-, hRRS⟩ := modalApplyOneS4Keyed_notBoxDia_sat φ₀ keys b acc sf.sign sf.formula
+    sf.label hnb hnd m f (hsfe ▸ hsfsat)
+  -- Reduce the candidate's rule result to `tryAllPropRules`, so the label-preservation fact
+  -- (`tryAllPropRules_output_label_eq`) applies to whatever branch is actually produced.
+  have heqTry : (modalApplyOneS4Keyed φ₀ keys sf b acc).1 =
+      tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf := by
+    have hred := modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf.sign sf.formula
+      sf.label hnb hnd b acc
+    rw [hsfe] at hred
+    rw [hred] at happ ⊢
+    unfold modalApplyOne at happ ⊢
+    simp only at happ ⊢
+    split_ifs at happ ⊢ with hpa
+    · rfl
+    · exfalso
+      rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+        simp_all [RuleResult.isApplicable]
+  -- The load-bearing label fact: every new formula lands at `sf.label`, which (c)/(d) need.
+  have hnflabel : ∀ nf' : List (SignedFormula (Proposition Atom) WorldIndex),
+      (match (modalApplyOneS4Keyed φ₀ keys sf b acc).1 with
+        | .linear fs => nf' = fs
+        | .branching brs => nf' ∈ brs
+        | .persistent fs => nf' = fs
+        | .notApplicable => False) →
+      ∀ sf' ∈ nf', sf'.label = sf.label := by
+    intro nf' hnf' sf' hsf'mem
+    apply tryAllPropRules_output_label_eq sf.sign sf.formula sf.label sf'
+    rw [← heqTry]
+    rcases hshape : (modalApplyOneS4Keyed φ₀ keys sf b acc).1 with fs | brs | fs | -
+    · rw [hshape] at hnf'; exact hnf' ▸ hsf'mem
+    · rw [hshape] at hnf'; exact ⟨nf', hnf', hsf'mem⟩
+    · rw [hshape] at hnf'; exact hnf' ▸ hsf'mem
+    · rw [hshape] at hnf'; exact hnf'.elim
+  -- Assemble the arm, per output shape.
+  rcases hres : (modalApplyOneS4Keyed φ₀ keys sf b acc).1 with nf | brs | nf | -
+  · -- `.linear nf`
+    rw [hres] at hRRS
+    refine ⟨nf, rfl, hEr, ⟨W, m, f, hFC, hacc, ?_⟩, ?_, ?_⟩
+    · intro sf' hmem'
+      rcases List.mem_append.mp hmem' with hnew | hold
+      · exact hRRS sf' hnew
+      · exact hbsat sf' hold
+    · intro p hp χ
+      have hne := hnoghost p hp
+      have hsub : ∀ sf' ∈ (nf ++ b), sf' ∈ b ∨ sf'.label = sf.label := fun sf' hmem' =>
+        (List.mem_append.mp hmem').elim
+          (fun h => Or.inr (hnflabel nf (by rw [hres]) sf' h))
+          Or.inl
+      have hAbs' := hAbs p hp χ
+      refine ⟨fun hmem1 => ?_, fun hmem2 => ?_⟩
+      · rcases hsub _ hmem1 with hin | hlbl
+        · obtain ⟨h1, h2⟩ := hAbs'.1 hin
+          exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+        · exact absurd hlbl hne
+      · rcases hsub _ hmem2 with hin | hlbl
+        · obtain ⟨h1, h2⟩ := hAbs'.2 hin
+          exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+        · exact absurd hlbl hne
+    · intro sf' hmem' hmshape' houtdeg'
+      rcases List.mem_append.mp hmem' with hnew | hold
+      · exfalso
+        have hlbl := hnflabel nf (by rw [hres]) sf' hnew
+        rw [hlbl, houtdeg0] at houtdeg'
+        exact houtdeg' rfl
+      · rcases eq_or_ne sf' sf with rfl | hne'
+        · exact Or.inl List.mem_cons_self
+        · rcases hFroz sf' hold hmshape' houtdeg' with h1 | h2
+          · exact Or.inl (List.mem_cons_of_mem _ h1)
+          · exact Or.inr (modalApplyOneS4Keyed_notApplicable_growth φ₀ keys sf' b nf acc h2)
+  · -- `.branching brs`
+    rw [hres] at hRRS
+    obtain ⟨br, hbrmem, hbrsat⟩ := hRRS
+    refine ⟨br, hbrmem, hEr, ⟨W, m, f, hFC, hacc, ?_⟩, ?_, ?_⟩
+    · intro sf' hmem'
+      rcases List.mem_append.mp hmem' with hnew | hold
+      · exact hbrsat sf' hnew
+      · exact hbsat sf' hold
+    · intro p hp χ
+      have hne := hnoghost p hp
+      have hsub : ∀ sf' ∈ (br ++ b), sf' ∈ b ∨ sf'.label = sf.label := fun sf' hmem' =>
+        (List.mem_append.mp hmem').elim
+          (fun h => Or.inr (hnflabel br (by rw [hres]; exact hbrmem) sf' h))
+          Or.inl
+      have hAbs' := hAbs p hp χ
+      refine ⟨fun hmem1 => ?_, fun hmem2 => ?_⟩
+      · rcases hsub _ hmem1 with hin | hlbl
+        · obtain ⟨h1, h2⟩ := hAbs'.1 hin
+          exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+        · exact absurd hlbl hne
+      · rcases hsub _ hmem2 with hin | hlbl
+        · obtain ⟨h1, h2⟩ := hAbs'.2 hin
+          exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+        · exact absurd hlbl hne
+    · intro sf' hmem' hmshape' houtdeg'
+      rcases List.mem_append.mp hmem' with hnew | hold
+      · exfalso
+        have hlbl := hnflabel br (by rw [hres]; exact hbrmem) sf' hnew
+        rw [hlbl, houtdeg0] at houtdeg'
+        exact houtdeg' rfl
+      · rcases eq_or_ne sf' sf with rfl | hne'
+        · exact Or.inl List.mem_cons_self
+        · rcases hFroz sf' hold hmshape' houtdeg' with h1 | h2
+          · exact Or.inl (List.mem_cons_of_mem _ h1)
+          · exact Or.inr (modalApplyOneS4Keyed_notApplicable_growth φ₀ keys sf' b br acc h2)
+  · -- `.persistent nf`
+    rw [hres] at hRRS
+    refine ⟨nf, rfl, hEr, ⟨W, m, f, hFC, hacc, ?_⟩, ?_, ?_⟩
+    · intro sf' hmem'
+      rcases List.mem_append.mp hmem' with hnew | hold
+      · exact hRRS sf' hnew
+      · exact hbsat sf' hold
+    · intro p hp χ
+      have hne := hnoghost p hp
+      have hsub : ∀ sf' ∈ (nf ++ b), sf' ∈ b ∨ sf'.label = sf.label := fun sf' hmem' =>
+        (List.mem_append.mp hmem').elim
+          (fun h => Or.inr (hnflabel nf (by rw [hres]) sf' h))
+          Or.inl
+      have hAbs' := hAbs p hp χ
+      refine ⟨fun hmem1 => ?_, fun hmem2 => ?_⟩
+      · rcases hsub _ hmem1 with hin | hlbl
+        · obtain ⟨h1, h2⟩ := hAbs'.1 hin
+          exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+        · exact absurd hlbl hne
+      · rcases hsub _ hmem2 with hin | hlbl
+        · obtain ⟨h1, h2⟩ := hAbs'.2 hin
+          exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+        · exact absurd hlbl hne
+    · intro sf' hmem' hmshape' houtdeg'
+      rcases List.mem_append.mp hmem' with hnew | hold
+      · exfalso
+        have hlbl := hnflabel nf (by rw [hres]) sf' hnew
+        rw [hlbl, houtdeg0] at houtdeg'
+        exact houtdeg' rfl
+      · rcases eq_or_ne sf' sf with rfl | hne'
+        · exact Or.inl List.mem_cons_self
+        · rcases hFroz sf' hold hmshape' houtdeg' with h1 | h2
+          · exact Or.inl (List.mem_cons_of_mem _ h1)
+          · exact Or.inr (modalApplyOneS4Keyed_notApplicable_growth φ₀ keys sf' b nf acc h2)
+  · -- `.notApplicable`: contradicts `happ`.
+    exfalso
+    rw [hres] at happ
+    simp [RuleResult.isApplicable] at happ
+
 /-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
 
 A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)

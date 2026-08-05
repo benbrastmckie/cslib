@@ -1,7 +1,7 @@
 # Implementation Plan: Extract re-derived private Tableau facts into public Support modules
 
 - **Task**: 558 - Extract re-derived private Tableau facts into public Support modules
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 14 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md`
@@ -222,30 +222,52 @@ incremental commits possible. Execute sequentially.
 
 ---
 
-### Phase 1: Free deletions — dead code with zero call sites [NOT STARTED]
+### Phase 1: Free deletions — dead code with zero call sites [COMPLETED]
 
 **Goal**: Remove declarations that have no call sites at all, plus the one intra-file duplicate
 that needs no module, no import, and no publication. Establishes the census tooling and confirms
 the baseline gate values before any structural change.
 
 **Tasks**:
-- [ ] Record the baseline: run every command in the Invariants table and capture actual values
+- [x] Record the baseline: run every command in the Invariants table and capture actual values
       (build job count, shake finding count, sorry census line, axiom count). Confirm shake exits
-      1 with 9 findings and none in `Modal/Tableau`.
-- [ ] Build the declaration-level census script: enumerate `private lemma <base>_<SUFFIX>`
+      1 with 9 findings and none in `Modal/Tableau`. *(Confirmed exactly: build 3311 jobs green;
+      shake exit 1, 9 findings, 0 in Modal/Tableau; sorry census 1 line, decl
+      `branchSatisfiableIn_s4FC_ancestor_redirect` at FrameSoundness.lean:1252 (sorry token at
+      :1276); axiom count 0.)*
+- [x] Build the declaration-level census script: enumerate `private lemma <base>_<SUFFIX>`
       declarations (suffixes `_B _C _S4 _S5 _S5w _Five _FS _anc _local _origin _S4Keyed`) whose
       `<base>` also exists elsewhere in the subsystem. Record the baseline count. Save the script
-      under the task directory so later phases re-run the identical query.
-- [ ] Confirm by call-site search which declarations have **zero** call sites. Research names
+      under the task directory so later phases re-run the identical query. *(Saved to
+      `specs/558_tableau_support_private_dedup/scripts/census.py`, a two-signal Python census:
+      exact-name duplicates plus suffix-family duplicates, with block-comment stripping to avoid
+      docstring-prose false positives. **Scope Hypothesis discrepancy**: measured baseline is
+      **74 duplicate declarations across 43 families**, not the plan's estimated 72/41. Verified
+      by hand-auditing every family against the plan's own named-family lists across all phases;
+      the only two families not named anywhere in the plan text are `modalApplyOneT_branchingLength`
+      (LoopChecking.lean:8325 vs TDriver.lean:697, both private) and
+      `modalApplyOneT_persistentFresh` (LoopChecking.lean:8248 vs TDriver.lean:373, both private) —
+      genuine private/private duplicate pairs the plan's research did not individually enumerate.
+      Recorded here per the Scope Hypothesis rule: using the measured 74/43 as the denominator for
+      all later phases; these two extra families are flagged for Phase 10 residue triage since they
+      fit the Tier-3 "origin private and reachable" shape.)*
+- [x] Confirm by call-site search which declarations have **zero** call sites. Research names
       `modalKnownWorlds_nodup_S5` (S5Simplification.lean ~1079) and its helper
       `modalKnownWorlds_fold_nodup_S5` (~1061). Confirm whether a third exists before deleting.
-- [ ] Delete the confirmed zero-call-site declarations.
-- [ ] Move `hasEdge_mem_successorsOf` (LoopChecking.lean ~6764) earlier within
+      *(Confirmed via repo-wide grep: `modalKnownWorlds_nodup_S5` has zero call sites outside its
+      own declaration line; its sole use of the helper is internal. No third zero-call-site
+      declaration found.)*
+- [x] Delete the confirmed zero-call-site declarations. *(Deleted both from S5Simplification.lean.)*
+- [x] Move `hasEdge_mem_successorsOf` (LoopChecking.lean ~6764) earlier within
       `LoopChecking.lean`, above its first use, and delete the forward-reference workaround
       duplicate `hasEdge_mem_successorsOf_origin` (~1350). Both are private and file-local, so no
-      downstream module can observe the change.
-- [ ] Confirm `modalKnownWorlds_nodup_S4` (LoopChecking.lean ~6598) is **public** and **live**
-      (2 uses) — it is NOT dead and must not be deleted here.
+      downstream module can observe the change. *(Done: relocated to line ~1349, both former call
+      sites of `_origin` (lines 1606, 1646) redirected to the relocated name; the two original
+      call sites at ~6800/~6886 needed no edit since the name is unchanged, only its declaration
+      site moved earlier.)*
+- [x] Confirm `modalKnownWorlds_nodup_S4` (LoopChecking.lean ~6598) is **public** and **live**
+      (2 uses) — it is NOT dead and must not be deleted here. *(Confirmed public, 2 live call
+      sites at LoopChecking.lean:6648,6676 (post-edit line numbers). Not touched.)*
 
 **Timing**: 1.5 hours
 

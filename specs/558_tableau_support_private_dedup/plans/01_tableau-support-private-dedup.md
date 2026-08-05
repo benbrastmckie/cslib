@@ -454,35 +454,57 @@ measured number and record the discrepancy; do not delete to hit a target.
 
 ---
 
-### Phase 4: Create `Support/KnownWorlds.lean` [NOT STARTED]
+### Phase 4: Create `Support/KnownWorlds.lean` [COMPLETED]
 
 **Goal**: Publish the KnownWorlds family once, in a module importing only `Branch`. Additive —
 no consumer changes, no deletions.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean` with
+- [x] Create `Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean` with
       `public import Cslib.Logics.Modal.Tableau.Branch` as its **only** Tableau import.
-- [ ] Publish `mem_modalKnownWorlds` — byte-identical across all 7 occurrences, and the
+- [x] Publish `mem_modalKnownWorlds` — byte-identical across all 7 occurrences, and the
       highest-leverage single declaration in the whole task. **Publish this one; the ordering
-      matters and Phase 5 depends on it.**
-- [ ] Publish `modalKnownWorlds_fold_spec` in the **strong** form (carrying `hws0 : ws0.Nodup` and
+      matters and Phase 5 depends on it.** *(Declared after `modalKnownWorlds_fold_spec` in the
+      FILE, since its proof calls `fold_spec` — the plan's "publish this first" is a phase-level
+      dependency ordering (must exist before Phase 5 migrates consumers), not an in-file
+      declaration-order requirement; the two are independent and both are satisfied.)*
+- [x] Publish `modalKnownWorlds_fold_spec` in the **strong** form (carrying `hws0 : ws0.Nodup` and
       the `Nodup` conjunct), matching the `FmpMeasure` original. It is published because
       `modalKnownWorlds_nodup` needs it — **not** as a migration target for the six weak copies.
-- [ ] Publish `modalKnownWorlds_nodup`.
-- [ ] Publish `modalKnownWorlds_mono_append` in the **`∀ x ∈ …` form**, not the `⊆` form. Decision
+- [x] Publish `modalKnownWorlds_nodup`.
+- [x] Publish `modalKnownWorlds_mono_append` in the **`∀ x ∈ …` form**, not the `⊆` form. Decision
       rationale to record in its docstring: `List.Subset` unfolds to a strict-implicit binder
       `⦃a⦄` while all five external call-site populations bind `x` explicitly; the `⊆` original is
       the only `⊆` user, with 2 internal call sites. The `∀ x ∈` form minimises churn.
-- [ ] Publish `mem_boxPositivesOf`.
-- [ ] Publish `modalMaxWorld_le_of_forall_label_le` in the **implicit-binder wrapper form**
+- [x] Publish `mem_boxPositivesOf`.
+- [x] Publish `modalMaxWorld_le_of_forall_label_le` in the **implicit-binder wrapper form**
       (`{l} {M} (h) : modalMaxWorld l ≤ M`) — 24 of the 26 `apply` call sites already expect it —
-      together with its `foldl` helper as internal scaffolding.
-- [ ] Module docstring: same two-part rationale as Phase 2 (reachability, and the do-not-edit
+      together with its `foldl` helper as internal scaffolding. *(Deviation: the plan's
+      description implied this declaration's true origin was `FmpMeasure.lean`; the actual origin
+      (unsuffixed, matching the plan's exact target name) is `LoopChecking.lean:6155`, and it uses
+      ALL-EXPLICIT binders `(l : ...) (K : ...)` there — the opposite of what the plan asks to
+      publish. The two OTHER copies, `_Five` (FiveSimplification.lean) and `_S5w`
+      (S5Simplification.lean), already use the implicit-binder form the plan wants, so the
+      published form was built from those two, not from the nominal "origin". `FmpMeasure.lean`
+      separately has an unrelated differently-named wrapper, `modalMaxWorld_le_of_forall_le`, not
+      touched by this phase.)*
+- [x] Module docstring: same two-part rationale as Phase 2 (reachability, and the do-not-edit
       `Branch.lean` constraint as the reason this module exists separately).
-- [ ] Per-declaration docstrings; `lemma` not `def` for Prop-valued; explicit namespace; minimal
-      section variables with `omit` where needed.
-- [ ] Register `public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds` in `Cslib.lean`,
-      alphabetically.
+- [x] Per-declaration docstrings; `lemma` not `def` for Prop-valued; explicit namespace; minimal
+      section variables with `omit` where needed. *(No typeclass instances declared at all —
+      none of these six facts need `DecidableEq Atom`/`Hashable Atom`, so the minimal choice is
+      to omit the instances entirely rather than declare-then-`omit` per lemma, matching Phase 2's
+      Accessibility module.)*
+- [x] Register `public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds` in `Cslib.lean`,
+      alphabetically. *(Inserted immediately after `Support.Accessibility`.)*
+
+**Build note**: the `foldl` helper's proof initially failed with an instance-diamond mismatch
+(`max_le`, a generic Mathlib `LinearOrder` lemma, elaborated against `LinearOrder.toMax` while
+`modalMaxWorld`'s own `max` — defined in the minimally-importing `Branch.lean` — resolves to core
+`Nat.instMax`). Fixed by using `Nat.max_le.mpr` instead of the generic `max_le`, matching the
+pattern `Branch.lean` itself already uses in `modalMaxWorld_le_append`. Recorded since a future
+Support module built on `Branch.lean`'s minimal import surface should expect the same class of
+diamond and reach for the `Nat`-specific lemma rather than the general order-theoretic one.
 
 **Timing**: 2 hours
 

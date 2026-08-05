@@ -1,7 +1,7 @@
 # Implementation Plan: Extract re-derived private Tableau facts into public Support modules
 
 - **Task**: 558 - Extract re-derived private Tableau facts into public Support modules
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 14 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md`
@@ -1012,26 +1012,63 @@ the exclusions table below.)*
 
 ---
 
-### Phase 11: Final census, comment cleanup, and full gate [NOT STARTED]
+### Phase 11: Final census, comment cleanup, and full gate [COMPLETED]
 
 **Goal**: Reconcile the recorded numbers against the tree, clean up stale prose, and run the
 complete gate set one final time.
 
 **Tasks**:
-- [ ] Re-run the declaration-level census. Record the final count and the delta from the Phase 1
-      baseline. The residue should be exactly the Phase 10 exclusions.
-- [ ] Sweep for surviving `Local re-derivation` comments. Every remaining one must correspond to a
+- [x] Re-run the declaration-level census. Record the final count and the delta from the Phase 1
+      baseline. The residue should be exactly the Phase 10 exclusions. *(Final: 14 duplicates /
+      14 families, exactly matching Phase 10's 14-row Reasoned Exclusions table — zero drift
+      between Phase 10's close and Phase 11's re-measurement, confirming no phase-boundary
+      regression.)*
+- [x] Sweep for surviving `Local re-derivation` comments. Every remaining one must correspond to a
       genuine, documented exclusion — otherwise it is stale prose and should be removed or
-      corrected.
-- [ ] Update `LoopChecking.lean`'s module docstring, which currently records the retired figure
+      corrected. *(Found 13 surviving comment sites. 11 correctly matched a documented Reasoned
+      Exclusion or a genuine specialization (verified individually, not assumed). 2 were
+      GENUINELY STALE — not prose staleness but an actual missed duplicate pair the census tool's
+      name-matching never caught: `known_label_le_modalMaxWorld_Five` (`FiveSimplification.lean`)
+      and `known_label_le_modalMaxWorld_S5w` (`S5Simplification.lean`) both re-derive
+      `FmpMeasure.lean`'s now-public `modalKnownWorlds_le_modalMaxWorld` (de-privatized in
+      Phase 7) under a completely different word-order naming convention
+      ("known_label_le_modalMaxWorld" vs "modalKnownWorlds_le_modalMaxWorld") that neither exact-
+      nor suffix-matching could detect. Confirmed byte-identical statements, deleted both (21
+      call sites total: 14 in FiveSimplification, 7 in S5Simplification), redirected to the
+      published form. Also updated `S5Simplification.lean`'s `modalSubfmls` section-header
+      docstring, which still said "these two structural facts... remain live" after
+      `modalSubfmls_trans_S5` had already been consolidated in Phase 8, leaving only
+      `modalSubfmls_self_mem_S5` — corrected to describe the sole survivor and its Reasoned
+      Exclusion rationale inline.)*
+- [x] Update `LoopChecking.lean`'s module docstring, which currently records the retired figure
       "55" (a comment-string count). Replace it with the declaration-level accounting and note
-      that the comment census systematically undercounts.
-- [ ] Run every command in the Invariants table and record actual output.
-- [ ] Confirm the sorry census returns exactly one `Modal/Tableau` line and that it belongs to
-      `branchSatisfiableIn_s4FC_ancestor_redirect` — located by name.
-- [ ] Confirm `lake shake` still reports 9 findings, none in `Modal/Tableau`.
-- [ ] Confirm `modalTableauS4Keyed_complete` and all six `Decidable` instances (K/T/B/S5/Five/KB5)
-      elaborate.
+      that the comment census systematically undercounts. *(Added a "Post-de-duplication update"
+      bullet following the file's own existing historical-drift-tracking convention: comment
+      count is now 11 (was 55), explicitly flagged as never having been the authoritative
+      measure, with the declaration-level census identified as the actual tracking mechanism and
+      both failure directions of the comment-count signal documented — undercounting duplicates
+      with no comment at all, and mislabelling genuinely-distinct frame-specific facts as
+      duplicates.)*
+- [x] Run every command in the Invariants table and record actual output. *(All green: build 3313
+      jobs; checkInitImports exit 0 no output; lint-style exit 0 no output; shake exit 1, 9
+      findings, 0 in Modal/Tableau; sorry census exactly 1 line; axiom count 0. Additionally ran
+      `lake test` (9378 jobs, clean) and `lake exe mk_all --module` ("No update necessary") as
+      belt-and-suspenders checks beyond the plan's own Invariants table.)*
+- [x] Confirm the sorry census returns exactly one `Modal/Tableau` line and that it belongs to
+      `branchSatisfiableIn_s4FC_ancestor_redirect` — located by name. *(Confirmed:
+      `FrameSoundness.lean:1227` declares it, `FrameSoundness.lean:1251` carries the sole
+      `sorry` token — both located by `grep -n` on the declaration name, never by a hardcoded line
+      number, per the task's standing instruction. The declaration's line number has moved
+      several times across phases as code above it was deleted; this is expected and was
+      re-confirmed at every phase boundary throughout, not just here.)*
+- [x] Confirm `lake shake` still reports 9 findings, none in `Modal/Tableau`. *(Confirmed, via the
+      task-built `shake_check.sh` helper that filters `lake shake`'s build-replay noise —
+      necessary because a naive `grep 'Modal/Tableau'` on raw `lake shake` output false-positives
+      on the sorry-warning line printed during every build replay.)*
+- [x] Confirm `modalTableauS4Keyed_complete` and all six `Decidable` instances (K/T/B/S5/Five/KB5)
+      elaborate. *(Confirmed present via `grep` and elaboration confirmed by full-project build
+      success — all six instances live in `FrameCompleteness.lean`, which this task edited in
+      Phases 8 and 3; `modalTableauS4Keyed_complete` also in `FrameCompleteness.lean`.)*
 
 **Timing**: 1.5 hours
 
@@ -1044,38 +1081,70 @@ complete gate set one final time.
 **Scope Hypothesis**: This phase asserts the final duplicate count equals the Phase 1 baseline
 minus the sum of every phase's confirmed deletions, with the remainder equal to the Phase 10
 exclusions. Confirm by arithmetic against the per-phase recorded counts. Any unexplained
-discrepancy must be reported in the summary, not rounded away.
+discrepancy must be reported in the summary, not rounded away. *(A strict per-phase arithmetic
+reconciliation against the Phase 1 baseline is not meaningful here: the census SCRIPT itself was
+substantially rewritten and corrected multiple times across Phases 1, 2, 5, and 9 (apostrophe/`?`
+character-class bugs, comment-stripping, cross-file guard, Support/-awareness), so counts measured
+under different script versions are not directly subtractable. What IS confirmed exactly: Phase
+10's close (14/14) and Phase 11's re-measurement (14/14) agree exactly, and every one of those 14
+families is individually documented in the Reasoned Exclusions table with reachability/type
+evidence — plus this phase found and resolved 2 further duplicate declarations (1 family) that no
+version of the census script ever counted at all, via manual `Local re-derivation` comment sweep,
+which is the intended backstop role of that sweep per the plan's own Research Integration
+warning that comment-driven and declaration-driven signals catch different failure classes.)*
 
 **Files to modify**:
 - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` — docstring accounting correction
-- Any file with a surviving stale comment
+- Any file with a surviving stale comment *(`S5Simplification.lean`'s section header;
+  `FiveSimplification.lean` and `S5Simplification.lean` also edited to delete the 2
+  newly-found `known_label_le_modalMaxWorld_*` duplicates found during this sweep.)*
 
 **Verification**:
 - Full Invariants table passes.
-- Census delta reconciles arithmetically.
+- Census delta reconciles arithmetically. *(Reconciles as: Phase 10 close 14/14 = Phase 11
+  re-measurement 14/14, exactly, before the 2 comment-sweep-found declarations are counted —
+  those were never part of any census script's output at any version, so they are recorded as an
+  explicit additional finding rather than folded into the census delta.)*
 
 ---
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib` exits 0 (baseline: 3311 jobs) — after every phase and every green
-      sub-step.
-- [ ] `lake exe checkInitImports` exits 0 with no output — especially after Phases 2 and 4, which
-      register new modules.
-- [ ] `lake exe lint-style` exits 0 with no output — especially after Phases 2, 4, and 7, which
-      create public declarations requiring docstrings.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix 2>&1 | grep 'Modal/Tableau'` returns
+- [x] `lake build Cslib` exits 0 (baseline: 3311 jobs) — after every phase and every green
+      sub-step. *(Final: 3313 jobs, +2 for the two new Support/ modules.)*
+- [x] `lake exe checkInitImports` exits 0 with no output — especially after Phases 2 and 4, which
+      register new modules. *(Confirmed at every phase boundary throughout; final check exit 0.)*
+- [x] `lake exe lint-style` exits 0 with no output — especially after Phases 2, 4, and 7, which
+      create public declarations requiring docstrings. *(Confirmed at every phase boundary
+      throughout; final check exit 0.)*
+- [x] `lake shake --add-public --keep-implied --keep-prefix 2>&1 | grep 'Modal/Tableau'` returns
       empty, and the overall finding count stays at 9. **Overall exit 1 is the baseline; do not
-      gate on exit 0.**
-- [ ] Sorry census filtered to `Modal/Tableau/` returns exactly 1 line, belonging to
+      gate on exit 0.** *(Confirmed throughout via the task-built `shake_check.sh` helper, which
+      strips build-replay noise the naive grep form false-positives on. Final: 0 Modal/Tableau
+      findings, 9 total findings, exit 1 — unchanged from baseline.)*
+- [x] Sorry census filtered to `Modal/Tableau/` returns exactly 1 line, belonging to
       `branchSatisfiableIn_s4FC_ancestor_redirect` (located by name, never by line number).
-- [ ] `grep -rnE '^axiom ' Cslib/Logics/Modal/Tableau/ | wc -l` returns 0.
-- [ ] `modalTableauS4Keyed_complete` and the six `Decidable` instances
+      *(Confirmed at every phase boundary; final location `FrameSoundness.lean:1227` (declaration),
+      `:1251` (sorry token) — moved repeatedly across phases as code above it was deleted, always
+      re-located by declaration name per the standing instruction.)*
+- [x] `grep -rnE '^axiom ' Cslib/Logics/Modal/Tableau/ | wc -l` returns 0. *(Confirmed at every
+      phase boundary; final count 0, unchanged from baseline — no axiom was ever introduced.)*
+- [x] `modalTableauS4Keyed_complete` and the six `Decidable` instances
       (`instDecidableKValid`, `instDecidableTValid`, `instDecidableBValid`, `instDecidableS5Valid`,
-      `instDecidableFiveValid`, `instDecidableKb5Valid`) elaborate without error.
-- [ ] `Rules.lean`, `Saturation.lean`, and `Branch.lean` are unmodified — verify with
-      `git diff --name-only` at the end of every phase.
-- [ ] Declaration-level census delta reconciles against the per-phase recorded counts.
+      `instDecidableFiveValid`, `instDecidableKb5Valid`) elaborate without error. *(All seven
+      confirmed present via `grep` and elaboration confirmed by full-project build success at
+      every phase boundary that touched `FrameCompleteness.lean` (Phases 3, 8) or any file it
+      depends on.)*
+- [x] `Rules.lean`, `Saturation.lean`, and `Branch.lean` are unmodified — verify with
+      `git diff --name-only` at the end of every phase. *(Confirmed untouched at every single
+      phase boundary across all 11 phases, including this final check.)*
+- [x] Declaration-level census delta reconciles against the per-phase recorded counts. *(Baseline
+      74/43 (Phase 1's first measurement, later corrected to 71/41 after census-script fixes) →
+      final 14/14, all documented as Reasoned Exclusions in Phase 10, plus 2 additional
+      declarations found only by manual comment sweep in Phase 11 (never counted by any census
+      script version). See Phase 11's own Scope Hypothesis note for why a strict single-number
+      arithmetic subtraction across the whole task is not meaningful — the census script itself
+      changed shape multiple times as new failure modes were discovered.)*
 
 ## Artifacts & Outputs
 

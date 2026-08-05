@@ -714,7 +714,7 @@ cosmetic linter note.
 
 ---
 
-### Phase 7.6: Mint-unblocked arms restated, and P3 [IN PROGRESS]
+### Phase 7.6: Mint-unblocked arms restated, and P3 [COMPLETED]
 
 - **Goal:** Re-wrap `modalApplyOneS4Keyed_boxNeg_mint_sat` and `modalApplyOneS4Keyed_diaPos_mint_sat`
   against `S4RedirectSoundInv`, and settle P3 ("mint seed covers the 4-payload"), which summary 07
@@ -749,29 +749,43 @@ cosmetic linter note.
         change, out of scope). *(P3 is TRUE and is genuinely load-bearing, contrary to the "expected
         free" framing — see the Progress Record below for the full mechanism and the two landed
         lemmas `modalApplyOneS4Rules_{boxPos,diaNeg}_layers_eq_nil_of_saturated`.)*
-  - [ ] Restate the box-negative mint arm. Reuse the landed pointwise-extension construction
+  - [x] Restate the box-negative mint arm. Reuse the landed pointwise-extension construction
         `f' := fun n => if n = w' then ww else f n` and `boxPlusExtraS4_sat` **verbatim** — report
         §3.4 row 2 is explicit that the new mint edge is realized by construction, so (b) is
         *strictly easier* under the weakened conjunct, and old ghost edges are now exempt.
-  - [ ] Discharge (a): `Er' = Er`; the old ghost edges remain recorded under `acc.addEdge` via
+        *(Landed as `S4RedirectSoundInv_boxNeg_mint`.)*
+  - [x] Discharge (a): `Er' = Er`; the old ghost edges remain recorded under `acc.addEdge` via
         `hasEdge_addEdge_mono_gate0`.
-  - [ ] Discharge (c): new formulas land only at the fresh label `modalNextWorld b`. By
+  - [x] Discharge (c): new formulas land only at the fresh label `modalNextWorld b`. By
         `accFreshInv` (`SoundnessStep.lean:392`) every recorded edge's endpoints are `< modalNextWorld b`,
         so the fresh label is neither a source nor a target of any ghost edge, and (c) is inherited.
         Confirm `accFreshInv` is available as a hypothesis at this call site — the landed arms
         already take it (`hInv : accFreshInv b acc`), so it is threaded, but confirm rather than
-        assume it survives to the invariant level.
-  - [ ] Discharge (d): consume Phase 7.4's edge-growth half plus mint-readiness (a mint arm *does*
+        assume it survives to the invariant level. *(Confirmed: threaded as an explicit hypothesis
+        on both arm theorems.)*
+  - [x] Discharge (d): consume Phase 7.4's edge-growth half plus mint-readiness (a mint arm *does*
         have `hmint` available, unlike Phase 7.5 — use it, exactly as
-        `S4RedirectSoundInv_boxNeg_blocked` does).
-  - [ ] Restate the diamond-positive mint arm as the direct dual. **If the box half closes and the
+        `S4RedirectSoundInv_boxNeg_blocked` does). *(Deviation from the plan's own framing: `hmint`
+        alone -- via `modalNonMintCandidates_eq_nil_iff` -- discharges the propositional/other-world
+        case exactly as the blocked arm does, but the same-world box-positive/diamond-negative
+        case needed the genuinely new P3-assembly lemmas
+        `modalApplyOneS4Rules_{boxPos,diaNeg}_fst_notApplicable_of_mint`, not a reuse of the
+        blocked arm's `notApplicable_of_saturated` lemmas -- those apply only at the OLD,
+        unextended `acc` and do not survive the new mint edge without P3's compensation
+        argument.)*
+  - [x] Restate the diamond-positive mint arm as the direct dual. **If the box half closes and the
         diamond half does not (or vice versa)**, do not proceed on one half alone: record the
-        asymmetry as a route-relevant finding.
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+        asymmetry as a route-relevant finding. *(No asymmetry found: landed as
+        `S4RedirectSoundInv_diaPos_mint`, reusing the SAME `mem_mintPayload_{boxPos,diaNeg}_
+        compensation` and `modalApplyOneS4Rules_{boxPos,diaNeg}_fst_notApplicable_of_mint` lemmas
+        as the box-negative arm, since a co-located persistent formula's compensation does not
+        depend on which mint shape triggered the fresh successor.)*
+  - [x] `#print axioms`; scoped build; `lint-style`; census exactly 1. *(All four checks clean for
+        both arms; see the closing Progress Record note below.)*
 
 - **Done when:** both mint-unblocked arms are sorry-free and committed under `S4RedirectSoundInv`,
   P3 is either proven or recorded as failed with a concrete counterexample; census exactly 1;
-  scoped build and `lint-style` clean.
+  scoped build and `lint-style` clean. **All conditions met.**
 
 #### Phase 7.6 Progress Record (first dispatch, incomplete — continuation required)
 
@@ -867,6 +881,34 @@ diamond-positive mirror, plus all of Phase 7.7 — was judged to exceed what cou
 soundly in the turns remaining. Per this task's own standing discipline (never commit a
 `sorry`, stop at a clean boundary rather than rush), this is recorded as an honest partial
 rather than a rushed or unsound landing.
+
+#### Phase 7.6 closure (continuation dispatch)
+
+Both mint-unblocked arms are landed: `S4RedirectSoundInv_boxNeg_mint` and
+`S4RedirectSoundInv_diaPos_mint` (`FrameCompleteness.lean`), following the six-item design above
+essentially as planned, with one correction to item 4's framing recorded in the task checklist
+above -- `hmint` (via `modalNonMintCandidates_eq_nil_iff`) discharges the propositional/other-world
+case exactly as the blocked arm's `hmint` usage does, but the same-world box-positive/
+diamond-negative case cannot reuse the blocked arm's `notApplicable_of_saturated` lemmas (those
+hold only at the OLD, unextended `acc`); it genuinely needs the new P3-assembly lemmas
+`modalApplyOneS4Rules_{boxPos,diaNeg}_fst_notApplicable_of_mint` built in this dispatch. No
+box/diamond asymmetry was found -- the diamond-positive arm reuses the SAME compensation and
+same-world lemmas as the box-negative arm verbatim (P3's two lemmas were already proven as a
+symmetric pair in the prior dispatch).
+
+New lemmas landed this dispatch, all sorry-free, axioms exactly `{propext, Classical.choice,
+Quot.sound}`: `mem_boxPositivesOf_of_mem` (forward direction of `mem_boxPositivesOf`),
+`outDeg_addEdge_freshTarget_eq_zero` (item 3), `mem_mintPayload_{boxPos,diaNeg}_compensation`
+(the mint payload's own construction compensates for a co-located persistent formula's new
+K-rule/4-rule candidate), `modalApplyOneS4Rules_{boxPos,diaNeg}_fst_notApplicable_of_mint` (P3
+assembled with the compensation facts, item 1), and the two arm theorems themselves.
+
+Verification: scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` clean for both
+arms; `lake exe checkInitImports` and `lake exe lint-style` clean; `#print axioms` via
+`lake env lean` on both arm theorems gives exactly `{propext, Classical.choice, Quot.sound}`;
+sorry census (the repo's canonical two-grep code-position form) held at exactly 1
+(`FrameSoundness.lean:1251`); `git diff --stat` / `git diff | grep '^-[^-]'` confirm purely
+additive changes to `FrameCompleteness.lean` for both commits.
 
 ---
 

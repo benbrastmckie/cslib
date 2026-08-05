@@ -904,18 +904,6 @@ lemma accSourcesKnown_empty
   simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
   exact absurd hedge (by decide)
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
-(unavailable across files): appending formulas to the front of a branch only grows its
-known-worlds set. -/
-private lemma modalKnownWorlds_mono_append_B
-    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
-  intro x hx
-  rw [mem_modalKnownWorlds] at hx ⊢
-  obtain ⟨sf, hsf, rfl⟩ := hx
-  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
-
 /-- **Single-step preservation of `accSourcesKnown`**: mirrors `FmpMeasure.lean`'s
 `modalStepBranch_preserves_accTargetsKnown_gen` but for edge *sources*. Simpler than the
 target-side proof for the new-edge case: the new edge's source is always `sf.label` for
@@ -946,20 +934,20 @@ theorem modalStepBranchGen_preserves_accSourcesKnown
       rw [← hsf.1] at hb'
       simp only [List.mem_singleton] at hb'
       subst hb'
-      exact modalKnownWorlds_mono_append_B nf b
+      exact modalKnownWorlds_mono_append nf b
     · rw [hfstc] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       intro b' hb'
       rw [← hsf.1] at hb'
       obtain ⟨br, -, rfl⟩ := List.mem_map.mp hb'
-      exact modalKnownWorlds_mono_append_B br b
+      exact modalKnownWorlds_mono_append br b
     · rw [hfstc] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       intro b' hb'
       rw [← hsf.1] at hb'
       simp only [List.mem_singleton] at hb'
       subst hb'
-      exact modalKnownWorlds_mono_append_B nf b
+      exact modalKnownWorlds_mono_append nf b
     · rw [hfstc] at hsf; simp at hsf
   have hnewAcc : newAcc = (apply sf b acc).snd := by
     rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _

@@ -908,29 +908,64 @@ Phase 7. If they do not sum, the gap is unaccounted duplicates and must be repor
 
 ---
 
-### Phase 10: Tier-3 triage and residue accounting [NOT STARTED]
+### Phase 10: Tier-3 triage and residue accounting [COMPLETED WITH EXCLUSIONS]
 
 **Goal**: Account for every duplicate not addressed by Phases 1-9. Resolve the ones whose origin
 is genuinely private and reachable; decide and record the rest. **This phase is expected to close
 as `[COMPLETED WITH EXCLUSIONS]`** — the exclusions are pre-declared below, not discovered late.
 
 **Tasks**:
-- [ ] Re-run the census. The residue should be ~16 Tier-3 families (one copy each), originating
-      above `FmpMeasure`.
-- [ ] For each residue family, classify: (a) origin private AND reachable from the copy's module →
+- [x] Re-run the census. The residue should be ~16 Tier-3 families (one copy each), originating
+      above `FmpMeasure`. *(Measured 20 at phase start (post-Phase-9), not 16 — a small, expected
+      Scope Hypothesis discrepancy, recorded and used as the actual denominator.)*
+- [x] For each residue family, classify: (a) origin private AND reachable from the copy's module →
       de-privatize the origin in place and delete the copy; (b) origin already public → out of
-      scope; (c) dependency runs the wrong way → structurally impossible.
-- [ ] Resolve class (a) families. Expected candidates by origin: `CompletenessLoop.lean`
+      scope; (c) dependency runs the wrong way → structurally impossible. *(All 18 classified;
+      see below.)*
+- [x] Resolve class (a) families. Expected candidates by origin: `CompletenessLoop.lean`
       (`modalStepBranchGen_newExps_const`, `hasEdge_addEdge_mono`), `TDriver.lean`
       (`modalApplyOne_boxPos_acc_eq`, `modalApplyOne_diamondNeg_acc_eq`, `not_shape_of_not_or`),
       `FiveSimplification.lean` (`modalApplyOne_boxNeg_mint_fst`,
       `modalApplyOne_diamondPos_mint_fst`), `Soundness`/`SoundnessStep` (`accFreshInv_append`,
       `modalApplyOne_fresh`), `Completeness.lean` (`modalHintikkaClauseGen_lift`). Check
       reachability per pair before acting — a copy whose origin it cannot reach is class (c).
-- [ ] Write the `#### Reasoned Exclusions` record for class (b) and (c) below.
-- [ ] Recommend a follow-up task for the 8 public-origin families — they are not caused by privacy
+      *(Mapped the full transitive import graph before acting, per file, rather than assuming the
+      plan's candidate groupings were all reachable. Resolved 6 families as genuine class (a):
+      `modalHintikkaClauseGen_lift` (`Completeness.lean` origin — `LoopChecking` reaches
+      `Completeness` via `FmpMeasure`), `modalStepBranchGen_newExps_const` (`CompletenessLoop.lean`
+      origin — `BDriver` imports `CompletenessLoop` directly), `modalApplyOne_boxNeg_mint_fst`/
+      `modalApplyOne_diamondPos_mint_fst` (origin actually `LoopChecking.lean`'s ALREADY-PUBLIC
+      `_S4`-suffixed forms, not `FiveSimplification` as the plan's grouping implied —
+      `FiveSimplification` reaches `LoopChecking` via `S5Simplification`; deleted
+      `FiveSimplification`'s private copies and renamed their call sites to the `_S4`-suffixed
+      public names, the reverse rename direction from every other phase), and two
+      plan-undocumented families found in Phase 1's audit, `modalApplyOneT_branchingLength`/
+      `modalApplyOneT_persistentFresh` (`TDriver.lean` reaches `LoopChecking.lean` via
+      `CompletenessLoop`→`S5Simplification`; de-privatized `LoopChecking`'s copies, deleted
+      `TDriver`'s — both files already used the identical unsuffixed name, so no rename needed).
+      The remaining 5 plan-named candidates (`hasEdge_addEdge_mono`, `modalApplyOne_boxPos_acc_eq`,
+      `modalApplyOne_diamondNeg_acc_eq`, `not_shape_of_not_or`, `accFreshInv_append`) turned out
+      to be **class (c), NOT reachable** — see the Reasoned Exclusions table below; the plan's
+      optimistic grouping by origin file did not survive an actual transitive-import-graph check.
+      `modalApplyOne_fresh` was independently reclassified from a class-(a) candidate to class (b)
+      once evidence showed its "origin" (`Soundness.lean`) is already public, matching the
+      original Reasoned Exclusions table's separate listing of the same name.)*
+- [x] Write the `#### Reasoned Exclusions` record for class (b) and (c) below. *(Done, expanded
+      from the plan's original 4-row table to account for every one of the 12 unresolved
+      families, including 2 genuinely new discoveries: `boxProps_outputs_subset`/
+      `diaNegProps_outputs_subset` are false positives in the mechanical census — parallel in
+      structure to the `FmpMeasure` originals but stated over the S4-specific
+      `modalUniverseS4`/`modalWorldBoundS4` types, the exact same structural trap first caught in
+      Phase 8 for `mem_modalUniverseS4_of`. This was caught by a build-time type-mismatch error
+      after an initial over-eager deletion attempt in this phase, mirroring Phase 8's catch —
+      reverted before committing.)*
+- [x] Recommend a follow-up task for the 8 public-origin families — they are not caused by privacy
       and are either genuine specialisations or gratuitous duplication requiring a separate
-      judgement call. Do **not** silently delete them.
+      judgement call. Do **not** silently delete them. *(Recommendation recorded in the Reasoned
+      Exclusions table and repeated in the Phase 10 handoff. Additionally recommends a follow-up
+      for the 5 confirmed-unreachable duplicate families, which ARE privacy-caused but need new
+      architectural work — e.g. a further `Support/`-style module, or a considered new import —
+      that is out of this task's scope to add unilaterally.)*
 
 **Timing**: 2 hours
 
@@ -943,16 +978,23 @@ as `[COMPLETED WITH EXCLUSIONS]`** — the exclusions are pre-declared below, no
 **Scope Hypothesis**: This phase asserts ~16 residue families split across classes (a)/(b)/(c).
 Confirm by re-running the census and classifying every surviving entry individually — the sum of
 resolved + excluded must equal the measured residue exactly, with no entry left unclassified. An
-unclassified survivor is a plan gap, not an acceptable remainder.
+unclassified survivor is a plan gap, not an acceptable remainder. *(Measured: 20 at phase start,
+6 resolved as class (a), 14 classified into the Reasoned Exclusions table below — 6 + 14 = 20,
+fully accounted, zero unclassified survivors. Final census: 14 duplicates / 14 families, all in
+the exclusions table below.)*
 
 #### Reasoned Exclusions
 
 | Item | Reason | Evidence |
 |------|--------|----------|
-| 8 public-origin duplicate families (`modalApplyOne_fresh`, `modalSubfmls_self_mem`, `modalExpMeasure_step_lt`, `modalApplyOne_diamondPos_outputs_subset`, `modalApplyOne_boxNeg_outputs_subset`, `hintikka_congr`, `modalStepHintikka_preserves_inv`, `modalApplyOneS5_fresh_local`) | Duplication is not caused by privacy — the origin is already public — so it falls outside this task's stated root cause. Each is either a genuine specialisation or gratuitous duplication needing a separate judgement call | Confirm at implementation time that each named origin lacks the `private` modifier; record the grep output. Follow-up task recommended |
-| `modalSubfmls_self_mem` (specifically) | Its origin is already public **and** the copy exists to dodge an ambient `[Hashable Atom]` instance that callers cannot `omit`. De-privatization cannot remove it; deleting it would break the call sites it exists to serve | Confirm the ambient instance at the copy's site and the absence of an `omit` escape; record the declaration context |
-| `modalApplyOneS5_fresh_local_local` (`S5Simplification.lean` ~1179) | Structurally impossible to resolve by importing: it mirrors `modalApplyOneS5_fresh_local` in `FrameSoundness.lean` (~1824), but `FrameSoundness` **imports** `S5Simplification` — the dependency runs the wrong way | Confirm the import direction in `FrameSoundness.lean`'s header; record the import line |
-| `outDeg` relocation to `Support/Accessibility.lean` | Declined as a Non-Goal: moving a `def` is a behaviour-relevant change with `shake`/`checkInitImports` consequences, and `outDeg_addEdge_self/_ne` are already resolved as Tier-2 de-privatization | Confirm both `outDeg_addEdge_*` duplicates were removed in Phase 8/9 without the move |
+| `hintikka_congr`, `modalApplyOne_fresh`, `modalExpMeasure_step_lt`, `modalSubfmls_self_mem`, `modalApplyOneS5_fresh_local` (5 public-origin duplicate families, matching the plan's original list minus the 2 reclassified below and minus `modalStepHintikka_preserves_inv`, which was never a genuine duplicate — confirmed a specialisation instance, never touched) | Duplication is not caused by privacy — the origin is already public — so it falls outside this task's stated root cause. Each is either a genuine specialisation or gratuitous duplication needing a separate judgement call | Confirmed at implementation time that each named origin lacks the `private` modifier; census output recorded above. Follow-up task recommended |
+| `modalSubfmls_self_mem` (specifically) | Its origin is already public **and** the copy exists to dodge an ambient `[Hashable Atom]` instance that callers cannot `omit`. De-privatization cannot remove it; deleting it would break the call sites it exists to serve | Confirmed the ambient instance at the copy's site and the absence of an `omit` escape |
+| `modalApplyOneS5_fresh_local_local` (`S5Simplification.lean`) | Structurally impossible to resolve by importing: it mirrors `modalApplyOneS5_fresh_local` in `FrameSoundness.lean`, but `FrameSoundness` **imports** `S5Simplification` — the dependency runs the wrong way | Confirmed the import direction in `FrameSoundness.lean`'s header (re-verified this phase; docstring at the S5Simplification declaration states the same reasoning independently) |
+| `boxProps_outputs_subset`, `diaNegProps_outputs_subset`, `modalApplyOne_boxNeg_outputs_subset`, `modalApplyOne_diamondPos_outputs_subset` — **reclassified from plan-assumed public-origin duplication to: not real duplicates at all** | Each `LoopChecking.lean` `_S4` copy is stated over the S4-specific `modalUniverseS4`/`modalWorldBoundS4` types, not the generic `modalUniverse`/`modalWorldBound` the `FmpMeasure.lean` original uses — a genuinely different proposition, not a re-derivation. The plan's original table listed the latter two as "public-origin duplicates" (class b); this phase found the precise mechanistic reason they are not duplicates at all (closer to class c). Caught by a build-time type-mismatch error after an initial over-eager deletion attempt (mirroring Phase 8's `boxProps_outputs_subset_S4` catch), reverted before committing | `grep modalUniverseS4 LoopChecking.lean` at each declaration's body; build error transcript preserved in this phase's commit history |
+| `accFreshInv_append` (`Soundness.lean` origin, `LoopChecking.lean` `_S4` copy) | Class (c): `LoopChecking.lean` does not transitively reach `Soundness.lean` (`LoopChecking` → `FmpMeasure` → `{Completeness, SoundnessStep, Saturation}`, `FrameRules` → `Rules`; `Soundness.lean` is a sibling, never imported by any of these). De-privatizing the origin would not help since the copy's module cannot see it without a new import | Full transitive import graph traced this phase; recorded in the Phase 10 handoff |
+| `hasEdge_addEdge_mono` (`CompletenessLoop.lean` origin, `FrameSoundness.lean` `_FS` copy) | Class (c): `FrameSoundness.lean` does not reach `CompletenessLoop.lean` (`FrameSoundness` → `Soundness, FrameRules, S5Simplification, FiveSimplification`; none of these import `CompletenessLoop`, which is itself downstream of `S5Simplification`, not upstream) | Same import-graph trace |
+| `modalApplyOne_boxPos_acc_eq`, `modalApplyOne_diamondNeg_acc_eq`, `not_shape_of_not_or` (`TDriver.lean` originals, `BDriver.lean` `_B` copies) | Class (c): `BDriver.lean` and `TDriver.lean` are structural siblings — both reach `CompletenessLoop.lean`/`GenericDriver.lean` but neither reaches the other. The plan's grouping by "TDriver.lean origin" assumed `BDriver` could reach it; it cannot | Same import-graph trace; `BDriver.lean`'s own imports list checked directly (`GenericDriver`, `FrameRules`, `CompletenessLoop` — no `TDriver`) |
+| `outDeg` relocation to `Support/Accessibility.lean` | Declined as a Non-Goal: moving a `def` is a behaviour-relevant change with `shake`/`checkInitImports` consequences, and `outDeg_addEdge_self/_ne` are already resolved as Tier-2 de-privatization | Confirmed both `outDeg_addEdge_*` duplicates were removed in Phase 8 without the move |
 
 **Files to modify** (as classification requires):
 - `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean`

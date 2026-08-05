@@ -2902,35 +2902,6 @@ can share the same two small proofs. Mirrors the inline unfold `modalApplyOneS5w
 (`S5Simplification.lean`) performs at its own "none" branches. -/
 
 omit [Hashable Atom] in
-private lemma modalApplyOne_diamondPos_mint_fst
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOne (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
-      = RuleResult.linear ((⟨.pos, φ, modalNextWorld b⟩ :
-          SignedFormula (Proposition Atom) WorldIndex) ::
-        (boxPositivesOf b).filterMap (fun (ψ, src) =>
-          if src == w then
-            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
-            if b.any (· == sf') then none else some sf'
-          else none) ++
-        b.filterMap (fun sf' =>
-          if sf'.sign == .neg && sf'.label == w then
-            match sf'.formula with
-            | .diamond ψ =>
-              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
-              if b.any (· == prop) then none else some prop
-            | _ => none
-          else none)) := by
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
-        = false := by
-    rw [tryAllPropRules_pos]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  simp only [modalApplyOne]
-  rw [if_neg (by simp [htry])]
-  rfl
-
-omit [Hashable Atom] in
 private lemma modalApplyOne_diamondPos_mint_label
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
     (w : WorldIndex) :
@@ -2970,35 +2941,6 @@ private lemma modalApplyOne_diamondPos_mint_label
         · simp only [Option.some.injEq] at heq; rw [← heq]
       · simp at heq
     · simp at heq
-
-omit [Hashable Atom] in
-private lemma modalApplyOne_boxNeg_mint_fst
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOne (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
-      = RuleResult.linear ((⟨.neg, φ, modalNextWorld b⟩ :
-          SignedFormula (Proposition Atom) WorldIndex) ::
-        (boxPositivesOf b).filterMap (fun (ψ, src) =>
-          if src == w then
-            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
-            if b.any (· == sf') then none else some sf'
-          else none) ++
-        b.filterMap (fun sf' =>
-          if sf'.sign == .neg && sf'.label == w then
-            match sf'.formula with
-            | .diamond ψ =>
-              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
-              if b.any (· == prop) then none else some prop
-            | _ => none
-          else none)) := by
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
-        = false := by
-    rw [tryAllPropRules_neg]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  simp only [modalApplyOne]
-  rw [if_neg (by simp [htry])]
-  rfl
 
 omit [Hashable Atom] in
 private lemma modalApplyOne_boxNeg_mint_label
@@ -3091,7 +3033,7 @@ lemma modalApplyOneFive_worldGrowth {φ₀ : Proposition Atom}
                 SignedFormula (Proposition Atom) WorldIndex) b acc := by
           unfold modalApplyOneFive; simp
         rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-          modalApplyOne_diamondPos_mint_fst]
+          modalApplyOne_diamondPos_mint_fst_S4]
         exact Or.inr (Or.inr ⟨rfl, φ, Or.inl ⟨rfl, rfl⟩, htagmem, List.mem_cons_self,
           modalApplyOne_diamondPos_mint_label b φ (0 : WorldIndex)⟩)
       · cases hw : witnessWorldFive b Sign.pos φ with
@@ -3104,7 +3046,7 @@ lemma modalApplyOneFive_worldGrowth {φ₀ : Proposition Atom}
             dsimp only
             rw [if_neg (by simpa using hz), hw]
           rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-            modalApplyOne_diamondPos_mint_fst]
+            modalApplyOne_diamondPos_mint_fst_S4]
           exact Or.inr (Or.inl ⟨Sign.pos, φ,
             witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
             modalApplyOne_diamondPos_mint_label b φ w⟩)
@@ -3136,7 +3078,7 @@ lemma modalApplyOneFive_worldGrowth {φ₀ : Proposition Atom}
                 SignedFormula (Proposition Atom) WorldIndex) b acc := by
           unfold modalApplyOneFive; simp
         rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-          modalApplyOne_boxNeg_mint_fst]
+          modalApplyOne_boxNeg_mint_fst_S4]
         exact Or.inr (Or.inr ⟨rfl, φ, Or.inr ⟨rfl, rfl⟩, htagmem, List.mem_cons_self,
           modalApplyOne_boxNeg_mint_label b φ (0 : WorldIndex)⟩)
       · cases hw : witnessWorldFive b Sign.neg φ with
@@ -3149,7 +3091,7 @@ lemma modalApplyOneFive_worldGrowth {φ₀ : Proposition Atom}
             dsimp only
             rw [if_neg (by simpa using hz), hw]
           rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-            modalApplyOne_boxNeg_mint_fst]
+            modalApplyOne_boxNeg_mint_fst_S4]
           exact Or.inr (Or.inl ⟨Sign.neg, φ,
             witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
             modalApplyOne_boxNeg_mint_label b φ w⟩)
@@ -3531,7 +3473,7 @@ lemma modalApplyOneKb5''_worldGrowth {φ₀ : Proposition Atom}
                 SignedFormula (Proposition Atom) WorldIndex) b acc := by
           unfold modalApplyOneKb5''; simp
         rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-          modalApplyOne_diamondPos_mint_fst]
+          modalApplyOne_diamondPos_mint_fst_S4]
         exact Or.inr (Or.inr ⟨rfl, φ, Or.inl ⟨rfl, rfl⟩, htagmem, List.mem_cons_self,
           modalApplyOne_diamondPos_mint_label b φ (0 : WorldIndex)⟩)
       · cases hw : witnessWorldFive b Sign.pos φ with
@@ -3544,7 +3486,7 @@ lemma modalApplyOneKb5''_worldGrowth {φ₀ : Proposition Atom}
             dsimp only
             rw [if_neg (by simpa using hz), hw]
           rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-            modalApplyOne_diamondPos_mint_fst]
+            modalApplyOne_diamondPos_mint_fst_S4]
           exact Or.inr (Or.inl ⟨Sign.pos, φ,
             witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
             modalApplyOne_diamondPos_mint_label b φ w⟩)
@@ -3576,7 +3518,7 @@ lemma modalApplyOneKb5''_worldGrowth {φ₀ : Proposition Atom}
                 SignedFormula (Proposition Atom) WorldIndex) b acc := by
           unfold modalApplyOneKb5''; simp
         rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-          modalApplyOne_boxNeg_mint_fst]
+          modalApplyOne_boxNeg_mint_fst_S4]
         exact Or.inr (Or.inr ⟨rfl, φ, Or.inr ⟨rfl, rfl⟩, htagmem, List.mem_cons_self,
           modalApplyOne_boxNeg_mint_label b φ (0 : WorldIndex)⟩)
       · cases hw : witnessWorldFive b Sign.neg φ with
@@ -3589,7 +3531,7 @@ lemma modalApplyOneKb5''_worldGrowth {φ₀ : Proposition Atom}
             dsimp only
             rw [if_neg (by simpa using hz), hw]
           rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
-            modalApplyOne_boxNeg_mint_fst]
+            modalApplyOne_boxNeg_mint_fst_S4]
           exact Or.inr (Or.inl ⟨Sign.neg, φ,
             witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
             modalApplyOne_boxNeg_mint_label b φ w⟩)

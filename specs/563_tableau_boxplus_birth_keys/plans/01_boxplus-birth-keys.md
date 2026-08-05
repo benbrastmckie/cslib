@@ -183,7 +183,26 @@ construction because nothing existing changes.
 
 ---
 
-### Phase 2: Switch the Mint Payload [NOT STARTED]
+### Phase 2: Switch the Mint Payload [COMPLETED]
+
+**Deviation note**: measured actual call-site counts diverged from the plan's Scope Hypothesis:
+50 sites was close (48 measured), but the declaration count was 25 (not 23), and the Class-A
+family count was 17 declarations / 32 sites (not "9 families / 18 sites") once the deferred
+`keyLowerBd` pair (2 declarations, Phase 4's own job) and the 6 genuine Phase-3 Class-B families
+(12 sites: `outputsSubsetUniverse_S4`, `preserves_bClosure` ×2, `preserves_worldsContiguousS4`
+×2, `preserves_S4KeyedHintikkaInv`) were excluded. Recorded here per the Scope Hypothesis
+protocol rather than carrying the estimate forward as fact.
+
+**Combined-commit note**: Phases 2 and 3 were implemented and committed together. The plan's own
+Phase 2 verification bullet ("Class-B failures must NOT remain at the end of this phase") is in
+tension with its own Tasks bullet ("Leave every Class-B declaration failing for now — Phase 3
+owns them") — after Phase 2's edits alone, the file does NOT build (the 6 Phase-3 Class-B
+declarations are genuinely broken by the payload-shape change, as expected), and
+`.claude/rules/git-workflow.md` prohibits committing a broken/red build outside a declared
+`atomic-batch` phase's own internal (pre-commit) intermediate states. Rather than leave an
+uncommitted, undocumented gap, Phase 3's repairs were completed in the same working session and
+the two phases share one commit, keeping the repository at a green checkpoint at every commit
+boundary. See Phase 3's own section below for its (also-adjusted) verification record.
 
 **Goal**: Point `modalApplyOneS4Keyed`'s two `| none =>` fallthroughs at
 `modalApplyOneS4KeyedMint`, restate the two `_unblocked_eq` equation lemmas accordingly, and
@@ -191,26 +210,30 @@ migrate the name-swap-only call sites. The key stays unenriched, so `keyLowerBd`
 provable — the key is now a subset of a strictly larger relevant set.
 
 **Tasks**:
-- [ ] Replace both `| none => modalApplyOne sf b acc` arms in `def modalApplyOneS4Keyed` with
+- [x] Replace both `| none => modalApplyOne sf b acc` arms in `def modalApplyOneS4Keyed` with
       the `modalApplyOneS4KeyedMint` call. `Rules.lean` is not touched.
-- [ ] Restate `modalApplyOneS4Keyed_boxNeg_unblocked_eq` and
+- [x] Restate `modalApplyOneS4Keyed_boxNeg_unblocked_eq` and
       `modalApplyOneS4Keyed_diaPos_unblocked_eq` to conclude equality with
       `modalApplyOneS4KeyedMint ...` rather than `modalApplyOne ...`. Both proof bodies are
       `unfold modalApplyOneS4Keyed; simp [hblock]` today and are expected to survive.
-- [ ] Migrate the Class-A (name-swap-only) call sites. These need the equation only to pin
+- [x] Migrate the Class-A (name-swap-only) call sites. These need the equation only to pin
       `result` and `.snd`; the accessibility component `acc.addEdge w (modalNextWorld b)` is
       unchanged and they never inspect the payload list. The families, for both the
       `modalStepBranchS4_*` and `modalStepBranchS4KeyedOrdered_*` variants:
       `_preserves_accFresh`, `_preserves_accKnown`, `_preserves_outDegEq`,
       `modalApplyOneS4Keyed_hasEdge_mono`, `_branchingLength_S4`, `_boxNeg_ne_notApplicable`,
       `_diaPos_ne_notApplicable`, `_preserves_keysTotal`, `_preserves_keysWorldsKnown`,
-      `_preserves_keysOriginS4`.
-- [ ] Confirm `modalApplyOneS4Keyed_persistentFresh_S4` is Class A despite its name: it
+      `_preserves_keysOriginS4` *(also included `modalStepBranchS4Keyed_preserves_
+      S4KeyedHintikkaInv`, mis-predicted as Class B — see Phase 3's deviation note)*.
+- [x] Confirm `modalApplyOneS4Keyed_persistentFresh_S4` is Class A despite its name: it
       constrains only `.persistent` results and the mint is `.linear`, so its mint arms merely
-      derive `.linear ≠ .persistent`. If it turns out to inspect the payload, reclassify it into
-      Phase 3 and say so rather than forcing it here.
-- [ ] Leave every Class-B declaration failing for now — Phase 3 owns them. Do not partially
-      repair them.
+      derive `.linear ≠ .persistent`. Confirmed — fixed via a direct contradiction
+      (`RuleResult.linear ... = RuleResult.persistent nf` closed by `simp`), no reclassification
+      needed.
+- [x] Leave every Class-B declaration failing for now — Phase 3 owns them. Do not partially
+      repair them. *(Confirmed empirically: after this phase's edits alone, exactly the 6
+      predicted Class-B families plus `keyLowerBd`'s 2 declarations remained broken — see Phase 3
+      deviation note for the corrected classification.)*
 
 **Timing**: 2 hours
 
@@ -243,31 +266,51 @@ re-derive the A/B split from the actual list — do not carry the hypothesis for
 
 ---
 
-### Phase 3: Re-Prove the Class-B Payload Lemmas [NOT STARTED]
+### Phase 3: Re-Prove the Class-B Payload Lemmas [COMPLETED]
+
+**Deviation note**: `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv` (S4KeyedHintikkaInv),
+predicted as genuine Class-B work, turned out to need only the same mechanical witness-lemma
+swap as the Class-A `keysOriginS4` family (`modalApplyOne_boxNeg_witness` ->
+`modalApplyOneS4KeyedMint_boxNeg_witness`, and dual) — its own consuming proof only inspects the
+witness's head position via `eBoxNegWitness`/`eDiamondPosWitness`, never the payload content, so
+`hintikkaInv`'s `True` at the mint shapes carried through unchanged. Recorded as a positive
+scope correction (less work than estimated), not a shortfall.
+
+Two small NEW general-purpose lemmas were added to make the Class-B repairs (and several
+Class-A ones) tractable, both immediately before `def modalApplyOneS4Keyed`:
+`modalApplyOneS4KeyedMint_snd_eq` (accessibility component is verbatim `modalApplyOne`'s own,
+for any `sf`) and `modalApplyOneS4KeyedMint_fst_eq_or_linear` (the `RuleResult` constructor
+either coincides with `modalApplyOne`'s own or is its `.linear` shape with `boxPlusExtraS4`
+appended) plus a derived `modalApplyOneS4KeyedMint_outDeg_step`. A `boxPlusExtraS4_label_eq_
+freshWorld` fact and a `relevantSetFinset_boxPlus_mono` payload-growth bridge were also added,
+consumed by the keys-bookkeeping (Class-A) and `keyLowerBd` proofs respectively -- outside the
+plan's own enumerated new-asset list, but load-bearing for the mechanical migration and reused
+across many call sites rather than one-off.
 
 **Goal**: Repair every proof that genuinely inspects the mint payload, so the enlarged payload is
 fully justified before any key changes. Each repair is a `List.mem_append` split whose left half
 is the verbatim old proof.
 
 **Tasks**:
-- [ ] `modalApplyOne_boxNeg_outputs_subset_S4` and `modalApplyOne_diamondPos_outputs_subset_S4`:
+- [x] `modalApplyOne_boxNeg_outputs_subset_S4` and `modalApplyOne_diamondPos_outputs_subset_S4`:
       `List.mem_append` split; left half is the old proof unchanged, right half handles
       `boxPlusExtraS4`.
-- [ ] `modalApplyOneS4Keyed_outputsSubsetUniverse_S4`: new `.linear` case for `boxPlusExtraS4`.
+- [x] `modalApplyOneS4Keyed_outputsSubsetUniverse_S4`: new `.linear` case for `boxPlusExtraS4`.
       Needs `.box ψ ∈ modalSubfmls φ₀` — immediate from the branch hypothesis plus
       `mem_boxPositivesOf` — and the `w' ≤ modalWorldBoundS4 φ₀` bound the existing proof already
       carries.
-- [ ] `modalStepBranchS4_preserves_bClosure` and
+- [x] `modalStepBranchS4_preserves_bClosure` and
       `modalStepBranchS4KeyedOrdered_preserves_bClosure`: consume the two `_outputs_subset_S4`
       lemmas above.
-- [ ] `modalStepBranchS4_preserves_worldsContiguousS4` and
+- [x] `modalStepBranchS4_preserves_worldsContiguousS4` and
       `modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4`: the new formulas all sit at
       `modalNextWorld b`, already introduced by the witness, so no new world label appears and the
       extra case closes the same way.
-- [ ] `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`: `eBoxNegWitness`/`eDiamondPosWitness`
-      still need the witness `⟨.neg, ψ, w'⟩`, which remains the payload head under the additive
-      shape; `hintikkaInv` is literal `True` at the mint shapes.
-- [ ] Do not touch `successorBirthContent` in this phase.
+- [x] `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv` *(deviation: turned out to be Class A
+      — fixed by the same witness-lemma swap as `keysOriginS4` in Phase 2, not genuine new proof
+      content; moved there in spirit, recorded here since it was Phase 3's item)*.
+- [x] Do not touch `successorBirthContent` in this phase. Confirmed — zero edits to that
+      definition in this phase.
 
 **Timing**: 2 hours
 

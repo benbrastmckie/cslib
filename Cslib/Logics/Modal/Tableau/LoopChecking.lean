@@ -862,6 +862,168 @@ place S4 stops reusing `modalStepBranchGen` definitionally for **stepping** (it 
 loop below needs an S4-specific driver regardless, so this cost is not incurred
 twice. -/
 
+/-! ## Box-Plus Birth-Key Enrichment: Additive Mint Definitions
+
+`boxPlusPair`, `boxPlusExtraS4`, and `modalApplyOneS4KeyedMint` below must precede
+`modalApplyOneS4Keyed`, which consumes the last of the three at its two unblocked mint arms.
+The two shape lemmas for `modalApplyOneS4KeyedMint` live further down this file instead (after
+`modalApplyOne_boxNeg_mint_fst_S4`/`_snd_S4` and their diamond duals, which they need). -/
+
+/-- The box-plus partner of a signed pair: `(pos, ψ) ↦ (pos, □ψ)`, `(neg, ψ) ↦ (neg, ◇ψ)`. The
+**existing** `successorBirthContent` filter is already exactly "`boxPlusPair p` instantiated at
+`w` is on `b`" -- this definition names that relationship. The box-plus enrichment of
+`successorBirthContent` additionally records `p` itself whenever `p` is already a box-plus
+IMAGE present on the branch (i.e. whenever `boxPlusPair`'s own output, instantiated at `w`, is
+on `b` -- the case `p` itself is `.box _`/`.diamond _`-shaped). -/
+def boxPlusPair (p : Sign × Proposition Atom) : Sign × Proposition Atom :=
+  match p.1 with
+  | .pos => (.pos, .box p.2)
+  | .neg => (.neg, .diamond p.2)
+
+/-- The additive box-plus mint extra: the BOXED members `T(□ψ)@w'`/`F(◇ψ)@w'` for every
+`T(□ψ)@w`/`F(◇ψ)@w` on the branch, retargeted to the freshly-minted successor
+`w' = modalNextWorld b` -- alongside (never in place of) the UNWRAPPED members `modalApplyOne`'s
+own payload already transmits. The two halves mirror `modalApplyOne`'s own `boxProps`/
+`diaNegProps` halves verbatim, boxing the transmitted formula instead of leaving it unwrapped.
+Keeps the same per-formula dedup guard (`if b.any (· == sf') then none else some sf'`) as
+`modalApplyOne`'s own halves -- the freshness half of `modalApplyOneS4Keyed_persistentFresh_S4`
+and the measure argument both key off this guard. -/
+def boxPlusExtraS4 (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  let w' := modalNextWorld b
+  (boxPositivesOf b).filterMap (fun (ψ, src) =>
+    if src == w then
+      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, .box ψ, w'⟩
+      if b.any (· == sf') then none else some sf'
+    else none) ++
+  b.filterMap (fun sf' =>
+    if sf'.sign == .neg && sf'.label == w then
+      match sf'.formula with
+      | .diamond ψ =>
+        let pr : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, .diamond ψ, w'⟩
+        if b.any (· == pr) then none else some pr
+      | _ => none
+    else none)
+
+omit [Hashable Atom] in
+/-- Every `boxPlusExtraS4` element's label is exactly `modalNextWorld b`, by construction --
+both halves are built entirely at the one fresh label `w'`. Dual of
+`FmpMeasure.lean`'s `mintGroup_label_eq_freshWorld` for the box-plus extra alone; combined with
+that lemma at each mint call site via `List.mem_append`, since the actual keyed payload is
+`modalApplyOne`'s own group ++ `boxPlusExtraS4`. -/
+lemma boxPlusExtraS4_label_eq_freshWorld
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    ∀ x ∈ boxPlusExtraS4 b w, x.label = modalNextWorld b := by
+  intro x hx
+  simp only [boxPlusExtraS4, List.mem_append, List.mem_filterMap] at hx
+  rcases hx with hx | hx
+  · obtain ⟨⟨ψ, src⟩, -, heq⟩ := hx
+    split at heq
+    · split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq; subst heq; rfl
+    · simp at heq
+  · obtain ⟨sf', -, heq⟩ := hx
+    split at heq
+    · split at heq
+      · rename_i ψ hform
+        split at heq
+        · simp at heq
+        · simp only [Option.some.injEq] at heq; subst heq; rfl
+      · simp at heq
+    · simp at heq
+
+/-- The additive boxed mint rule: `modalApplyOne`'s own result, with `boxPlusExtraS4` appended
+to the payload whenever the result is `.linear` (the shape both minting arms of `modalApplyOne`
+actually produce at the two shapes this is ever called at). The accessibility component is
+preserved VERBATIM from `modalApplyOne`'s own result. Consumed below by `modalApplyOneS4Keyed`'s
+two unblocked mint arms, replacing the raw `modalApplyOne sf b acc` fallthrough; `Rules.lean`
+itself is never edited (shared by the K/T/B/S5 drivers and `FmpMeasure.lean`'s `_gen` lemmas,
+where boxed transmission is not K-sound). -/
+def modalApplyOneS4KeyedMint
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
+  let result := modalApplyOne sf b acc
+  match result.1 with
+  | .linear forms => (.linear (forms ++ boxPlusExtraS4 b sf.label), result.2)
+  | other => (other, result.2)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4KeyedMint`'s accessibility component is VERBATIM `modalApplyOne`'s own,
+for every `sf`, not just the two minting shapes: the `match` on `result.1` in the definition
+above never rewrites `result.2`. Bridge fact letting every proof that only inspects the
+accessibility component (never the payload list) swap the raw `modalApplyOne_*_mint_snd_S4`
+lemmas straight through, unaffected by the mint payload's enrichment. -/
+lemma modalApplyOneS4KeyedMint_snd_eq (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneS4KeyedMint sf b acc).snd = (modalApplyOne sf b acc).snd := by
+  unfold modalApplyOneS4KeyedMint
+  cases h : (modalApplyOne sf b acc).1 <;> simp [h]
+
+omit [Hashable Atom] in
+/-- Every result of `modalApplyOneS4KeyedMint` either coincides exactly with `modalApplyOne`'s
+own result (every non-minting shape, where the match's `other` branch fires unchanged), or is
+`modalApplyOne`'s `.linear` result with `boxPlusExtraS4` appended to the payload (the two
+minting shapes, where the match's `.linear` branch fires). Generic bridge for every proof that
+case-splits on `modalApplyOne`'s `RuleResult` shape and only needs the CONSTRUCTOR identity
+(not the payload content) at each branch. -/
+lemma modalApplyOneS4KeyedMint_fst_eq_or_linear
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneS4KeyedMint sf b acc).fst = (modalApplyOne sf b acc).fst ∨
+    ∃ forms, (modalApplyOne sf b acc).fst = RuleResult.linear forms ∧
+      (modalApplyOneS4KeyedMint sf b acc).fst =
+        RuleResult.linear (forms ++ boxPlusExtraS4 b sf.label) := by
+  cases h : (modalApplyOne sf b acc).1 with
+  | linear forms => exact Or.inr ⟨forms, rfl, by simp only [modalApplyOneS4KeyedMint, h]⟩
+  | branching brs => exact Or.inl (by simp only [modalApplyOneS4KeyedMint, h])
+  | persistent forms => exact Or.inl (by simp only [modalApplyOneS4KeyedMint, h])
+  | notApplicable => exact Or.inl (by simp only [modalApplyOneS4KeyedMint, h])
+
+omit [Hashable Atom] in
+/-- Keyed-mint analogue of `FmpMeasure.lean`'s `modalApplyOne_outDeg_step`: the `outDeg`
+bookkeeping obligation only ever inspects the `RuleResult` CONSTRUCTOR shape (every match arm
+below is payload-blind, `_`), so `modalApplyOneS4KeyedMint_fst_eq_or_linear` transports the raw
+fact through unchanged. -/
+lemma modalApplyOneS4KeyedMint_outDeg_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (houtdeg : ∀ w, outDeg acc w =
+      (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    ∀ w, outDeg (modalApplyOneS4KeyedMint sf b acc).snd w =
+      (List.filter (fun x => x.label == w && isMintingShaped x)
+        (match (modalApplyOneS4KeyedMint sf b acc).fst with
+          | .linear _ => e ++ [sf]
+          | .branching _ => e ++ [sf]
+          | .persistent _ => e
+          | .notApplicable =>
+              (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length := by
+  intro w
+  have hbase := modalApplyOne_outDeg_step sf b e acc houtdeg w
+  rw [modalApplyOneS4KeyedMint_snd_eq]
+  rcases modalApplyOneS4KeyedMint_fst_eq_or_linear sf b acc with heq | ⟨forms, hraw, hkeyed⟩
+  · rwa [heq]
+  · rw [hraw] at hbase
+    rw [hkeyed]
+    exact hbase
+
+omit [Hashable Atom] in
+/-- **Payload-growth bridge for `relevantSetFinset`.** Whatever `successorBirthContent_boxNeg_
+subset_relevantSetFinset`/`_diamondPos_subset_relevantSetFinset` prove against `modalApplyOne`'s
+own (unwrapped-only, smaller) payload continues to hold against the additive keyed mint's
+(box-plus-enriched, larger) payload: `relevantSetFinset` is monotone in the branch
+(`relevantSetFinset_mono`), and every element of `oldForms ++ b` is trivially an element of
+`(oldForms ++ boxPlusExtraS4 b w) ++ b`. -/
+lemma relevantSetFinset_boxPlus_mono (φ₀ : Proposition Atom)
+    (b oldForms : List (SignedFormula (Proposition Atom) WorldIndex)) (w w' : WorldIndex) :
+    relevantSetFinset φ₀ (oldForms ++ b) w' ⊆
+      relevantSetFinset φ₀ ((oldForms ++ boxPlusExtraS4 b w) ++ b) w' := by
+  apply relevantSetFinset_mono
+  intro x hx
+  simp only [List.mem_append] at hx ⊢
+  tauto
+
 /-- The keys-aware S4 rule-application function, closing the
 guard-vs-keys gap. Identical in shape to `modalApplyOneS4 φ₀` (same non-minting fallthrough to
 `modalApplyOneS4Rules`/`modalApplyOneS4`), but at the two minting shapes consults
@@ -872,9 +1034,10 @@ consistent with `S4LoopInv.keysDistinct`: if the two bookkeeping streams
 used different guards, a world could be recorded in `keys` without ever actually being minted
 onto the branch, breaking `keyLowerBd` (`k ⊆ relevantSetFinset φ₀ b w` fails when `w` was never
 minted, since then `relevantSetFinset φ₀ b w = ∅ ⊉ k` for nonempty `k`). Reduces to
-`modalApplyOne` (raw K) at an unblocked minting shape -- same underlying rule as
-`modalApplyOneS4`'s own unblocked reduction (`modalApplyOneS4_boxNeg_unblocked_eq`/dual), just
-gated by a different guard. `modalApplyOneS4`/`blockingWorldS4` are NOT modified or removed:
+`modalApplyOneS4KeyedMint` (the additive box-plus mint, `modalApplyOne`'s own payload plus the
+boxed members) at an unblocked minting shape -- same underlying K rule as `modalApplyOneS4`'s
+own unblocked reduction (`modalApplyOneS4_boxNeg_unblocked_eq`/dual), just gated by a different
+guard and additively enriched. `modalApplyOneS4`/`blockingWorldS4` are NOT modified or removed:
 they remain the live-set-guarded artifact the Hintikka/truth-lemma bridges consume. -/
 def modalApplyOneS4Keyed (φ₀ : Proposition Atom)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : RuleApply Atom :=
@@ -883,11 +1046,11 @@ def modalApplyOneS4Keyed (φ₀ : Proposition Atom)
     | .neg, .box φ =>
       match blockingWorldS4Keyed φ₀ b keys .neg φ sf.label with
       | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
-      | none => modalApplyOne sf b acc
+      | none => modalApplyOneS4KeyedMint sf b acc
     | .pos, .diamond φ =>
       match blockingWorldS4Keyed φ₀ b keys .pos φ sf.label with
       | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
-      | none => modalApplyOne sf b acc
+      | none => modalApplyOneS4KeyedMint sf b acc
     | _, _ => modalApplyOneS4 φ₀ sf b acc
 
 /-- Guard spec, box-negative shape, blocked case (mirrors `modalApplyOneS4_boxNeg_blocked_eq`
@@ -901,15 +1064,15 @@ lemma modalApplyOneS4Keyed_boxNeg_blocked_eq (φ₀ : Proposition Atom)
   unfold modalApplyOneS4Keyed
   simp [hblock]
 
-/-- Guard spec, box-negative shape, unblocked case: reduces to the raw K rule
-(`modalApplyOne`). -/
+/-- Guard spec, box-negative shape, unblocked case: reduces to the additive boxed mint
+(`modalApplyOneS4KeyedMint`) -- `modalApplyOne`'s own K-rule payload plus the box-plus extra. -/
 lemma modalApplyOneS4Keyed_boxNeg_unblocked_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (φ : Proposition Atom) (w : WorldIndex)
     (hblock : blockingWorldS4Keyed φ₀ b keys .neg φ w = none) :
     modalApplyOneS4Keyed φ₀ keys ⟨.neg, .box φ, w⟩ b acc
-      = modalApplyOne ⟨.neg, .box φ, w⟩ b acc := by
+      = modalApplyOneS4KeyedMint ⟨.neg, .box φ, w⟩ b acc := by
   unfold modalApplyOneS4Keyed
   simp [hblock]
 
@@ -924,14 +1087,15 @@ lemma modalApplyOneS4Keyed_diaPos_blocked_eq (φ₀ : Proposition Atom)
   unfold modalApplyOneS4Keyed
   simp [hblock]
 
-/-- Guard spec, diamond-positive shape, unblocked case: reduces to the raw K rule. -/
+/-- Guard spec, diamond-positive shape, unblocked case: reduces to the additive boxed mint
+(dual of `modalApplyOneS4Keyed_boxNeg_unblocked_eq`). -/
 lemma modalApplyOneS4Keyed_diaPos_unblocked_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (φ : Proposition Atom) (w : WorldIndex)
     (hblock : blockingWorldS4Keyed φ₀ b keys .pos φ w = none) :
     modalApplyOneS4Keyed φ₀ keys ⟨.pos, .diamond φ, w⟩ b acc
-      = modalApplyOne ⟨.pos, .diamond φ, w⟩ b acc := by
+      = modalApplyOneS4KeyedMint ⟨.pos, .diamond φ, w⟩ b acc := by
   unfold modalApplyOneS4Keyed
   simp [hblock]
 
@@ -1836,65 +2000,13 @@ lemma modalApplyOne_diamondPos_mint_snd_S4
   simp only [modalApplyOne]
   rw [if_neg (by simp [htry])]
 
-/-! ## Box-Plus Birth-Key Enrichment: Additive Definitions (no behaviour change yet)
+/-! ## Box-Plus Birth-Key Enrichment: Mint Shape Lemmas
 
-The four definitions and two shape lemmas below are unreferenced by any existing declaration in
-this file -- purely additive groundwork for enriching `successorBirthContent` with box-plus
-members (report §5). `lake build` stays green by construction: nothing existing
-changes shape or behaviour until a later landing switches `modalApplyOneS4Keyed`'s two
-`| none => modalApplyOne sf b acc` fallthroughs to consume `modalApplyOneS4KeyedMint` below. -/
-
-/-- The box-plus partner of a signed pair: `(pos, ψ) ↦ (pos, □ψ)`, `(neg, ψ) ↦ (neg, ◇ψ)`. The
-**existing** `successorBirthContent` filter is already exactly "`boxPlusPair p` instantiated at
-`w` is on `b`" -- this definition names that relationship. The box-plus enrichment of
-`successorBirthContent` additionally records `p` itself whenever `p` is already a box-plus
-IMAGE present on the branch (i.e. whenever `boxPlusPair`'s own output, instantiated at `w`, is
-on `b` -- the case `p` itself is `.box _`/`.diamond _`-shaped). -/
-def boxPlusPair (p : Sign × Proposition Atom) : Sign × Proposition Atom :=
-  match p.1 with
-  | .pos => (.pos, .box p.2)
-  | .neg => (.neg, .diamond p.2)
-
-/-- The additive box-plus mint extra: the BOXED members `T(□ψ)@w'`/`F(◇ψ)@w'` for every
-`T(□ψ)@w`/`F(◇ψ)@w` on the branch, retargeted to the freshly-minted successor
-`w' = modalNextWorld b` -- alongside (never in place of) the UNWRAPPED members `modalApplyOne`'s
-own payload already transmits. The two halves mirror `modalApplyOne`'s own `boxProps`/
-`diaNegProps` halves verbatim, boxing the transmitted formula instead of leaving it unwrapped.
-Keeps the same per-formula dedup guard (`if b.any (· == sf') then none else some sf'`) as
-`modalApplyOne`'s own halves -- the freshness half of `modalApplyOneS4Keyed_persistentFresh_S4`
-and the measure argument both key off this guard. -/
-def boxPlusExtraS4 (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
-    List (SignedFormula (Proposition Atom) WorldIndex) :=
-  let w' := modalNextWorld b
-  (boxPositivesOf b).filterMap (fun (ψ, src) =>
-    if src == w then
-      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, .box ψ, w'⟩
-      if b.any (· == sf') then none else some sf'
-    else none) ++
-  b.filterMap (fun sf' =>
-    if sf'.sign == .neg && sf'.label == w then
-      match sf'.formula with
-      | .diamond ψ =>
-        let pr : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, .diamond ψ, w'⟩
-        if b.any (· == pr) then none else some pr
-      | _ => none
-    else none)
-
-/-- The additive boxed mint rule: `modalApplyOne`'s own result, with `boxPlusExtraS4` appended
-to the payload whenever the result is `.linear` (the shape both minting arms of `modalApplyOne`
-actually produce at the two shapes this is ever called at). The accessibility component is
-preserved VERBATIM from `modalApplyOne`'s own result. A later landing switches
-`modalApplyOneS4Keyed`'s two `| none => modalApplyOne sf b acc` fallthroughs to this definition
-instead, never editing `Rules.lean` (shared by the K/T/B/S5 drivers and `FmpMeasure.lean`'s
-`_gen` lemmas, where boxed transmission is not K-sound). -/
-def modalApplyOneS4KeyedMint
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
-  let result := modalApplyOne sf b acc
-  match result.1 with
-  | .linear forms => (.linear (forms ++ boxPlusExtraS4 b sf.label), result.2)
-  | other => (other, result.2)
+`boxPlusPair`, `boxPlusExtraS4`, and `modalApplyOneS4KeyedMint` live earlier in this file
+(immediately before `def modalApplyOneS4Keyed`, which now consumes `modalApplyOneS4KeyedMint`
+at its two unblocked mint arms). The two shape lemmas below live here instead, since they need
+`modalApplyOne_boxNeg_mint_fst_S4`/`_snd_S4` and their diamond duals, which are declared above
+this point. -/
 
 omit [Hashable Atom] in
 /-- `modalApplyOneS4KeyedMint`'s box-negative minting shape, unfolded directly to the full
@@ -1956,6 +2068,47 @@ lemma modalApplyOneS4KeyedMint_diaPos_eq_S4
         acc.addEdge w (modalNextWorld b)) := by
   simp only [modalApplyOneS4KeyedMint, modalApplyOne_diamondPos_mint_fst_S4,
     modalApplyOne_diamondPos_mint_snd_S4]
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4KeyedMint`'s box-negative minting shape, existential form: the additive
+boxed mint's payload still HEADS with the raw witness `F(ψ)@w'`, for SOME (opaque) remainder --
+mirrors `modalApplyOne_boxNeg_witness`, extended with `boxPlusExtraS4` folded into the opaque
+`rest`. Used by proofs that only need the witness's head position, not the full literal payload
+(`Rules.lean`'s `modalApplyOne_boxNeg_witness` is the raw-K analogue). -/
+lemma modalApplyOneS4KeyedMint_boxNeg_witness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4KeyedMint (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOneS4KeyedMint (⟨.neg, .box ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+  refine ⟨?_, rest ++ boxPlusExtraS4 b w, ?_⟩
+  · simp only [modalApplyOneS4KeyedMint, hfst, hsnd]
+  · simp only [modalApplyOneS4KeyedMint, hfst, List.cons_append]
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4KeyedMint_boxNeg_witness`, diamond-positive shape. -/
+lemma modalApplyOneS4KeyedMint_diaPos_witness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4KeyedMint (⟨.pos, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+      = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOneS4KeyedMint (⟨.pos, .diamond ψ, w⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+  refine ⟨?_, rest ++ boxPlusExtraS4 b w, ?_⟩
+  · simp only [modalApplyOneS4KeyedMint, hfst, hsnd]
+  · simp only [modalApplyOneS4KeyedMint, hfst, List.cons_append]
 
 /-! ## Minting-Content Universe-Membership (groundwork for `bClosure`)
 
@@ -2034,6 +2187,85 @@ private lemma diaNegProps_outputs_subset_S4 (φ₀ : Proposition Atom)
   · simp at heq
 
 omit [Hashable Atom] in
+/-- Closure fact for `boxPlusExtraS4`'s box-positive half: unlike `boxProps_outputs_subset_S4`,
+the transmitted formula is `.box ψ` ITSELF, already a member of `modalSubfmls φ₀` by the
+membership hypothesis directly -- no `modalSubfmls_trans` needed, since `.box ψ` is not being
+further unwrapped. -/
+private lemma boxPlusExtraS4_boxHalf_outputs_subset_S4 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hwbound : modalNextWorld b ≤ modalWorldBoundS4 φ₀) :
+    ∀ x ∈ (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+            ⟨.pos, .box ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none),
+    x ∈ modalUniverseS4 φ₀ := by
+  intro x hx
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨⟨ψ, src⟩, hψsrc, heq⟩ := hx
+  split at heq
+  · split at heq
+    · simp at heq
+    · simp only [Option.some.injEq] at heq
+      subst heq
+      have hψbox : (⟨.pos, .box ψ, src⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ∈ b := mem_boxPositivesOf hψsrc
+      have hψsub : (Proposition.box ψ) ∈ modalSubfmls φ₀ :=
+        modalUniverseS4_mem_formula (hb _ hψbox)
+      exact mem_modalUniverseS4_of hwbound hψsub
+  · simp at heq
+
+omit [Hashable Atom] in
+/-- Dual of `boxPlusExtraS4_boxHalf_outputs_subset_S4` for `boxPlusExtraS4`'s diamond-negative
+half. -/
+private lemma boxPlusExtraS4_diaHalf_outputs_subset_S4 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hwbound : modalNextWorld b ≤ modalWorldBoundS4 φ₀) :
+    ∀ x ∈ b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .diamond ψ =>
+            let pr : SignedFormula (Proposition Atom) WorldIndex :=
+              ⟨.neg, .diamond ψ, modalNextWorld b⟩
+            if b.any (· == pr) then none else some pr
+          | _ => none
+        else none),
+    x ∈ modalUniverseS4 φ₀ := by
+  intro x hx
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨sf', hsf'mem, heq⟩ := hx
+  split at heq
+  · split at heq
+    · rename_i ψ hform
+      split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq
+        subst heq
+        have hψsub : (Proposition.diamond ψ) ∈ modalSubfmls φ₀ := by
+          have hmem := modalUniverseS4_mem_formula (hb sf' hsf'mem)
+          rwa [hform] at hmem
+        exact mem_modalUniverseS4_of hwbound hψsub
+    · simp at heq
+  · simp at heq
+
+omit [Hashable Atom] in
+/-- `boxPlusExtraS4`'s output stays inside `U_{S4}(φ₀)`, combining both halves above. Consumed
+by the extended `modalApplyOne_boxNeg_outputs_subset_S4`/`_diamondPos_outputs_subset_S4` below. -/
+private lemma boxPlusExtraS4_outputs_subset_S4 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hwbound : modalNextWorld b ≤ modalWorldBoundS4 φ₀) :
+    ∀ x ∈ boxPlusExtraS4 b w, x ∈ modalUniverseS4 φ₀ := by
+  intro x hx
+  simp only [boxPlusExtraS4, List.mem_append] at hx
+  rcases hx with hx | hx
+  · exact boxPlusExtraS4_boxHalf_outputs_subset_S4 φ₀ b w hb hwbound x hx
+  · exact boxPlusExtraS4_diaHalf_outputs_subset_S4 φ₀ b w hb hwbound x hx
+
+omit [Hashable Atom] in
 /-- `diamondPos`: `T(◇φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
 groups at `w'`: the witness, propagated box-positives, and propagated diamond-negatives. All
 three groups stay inside `U_{S4}(φ₀)` given the branch invariant `hb`, the source membership
@@ -2046,7 +2278,7 @@ lemma modalApplyOne_diamondPos_outputs_subset_S4
     (hsf : (⟨.pos, .diamond φ, w⟩ :
       SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hW : modalMaxWorld b < modalWorldBoundS4 φ₀) :
-    ∀ x ∈ ((⟨.pos, φ, modalNextWorld b⟩ :
+    ∀ x ∈ (((⟨.pos, φ, modalNextWorld b⟩ :
         SignedFormula (Proposition Atom) WorldIndex) ::
       (boxPositivesOf b).filterMap (fun (ψ, src) =>
         if src == w then
@@ -2062,7 +2294,7 @@ lemma modalApplyOne_diamondPos_outputs_subset_S4
               ⟨.neg, ψ, modalNextWorld b⟩
             if b.any (· == prop) then none else some prop
           | _ => none
-        else none)),
+        else none)) ++ boxPlusExtraS4 b w),
     x ∈ modalUniverseS4 φ₀ := by
   have hwbound : modalNextWorld b ≤ modalWorldBoundS4 φ₀ := by
     unfold modalNextWorld; exact hW
@@ -2070,11 +2302,12 @@ lemma modalApplyOne_diamondPos_outputs_subset_S4
     modalUniverseS4_mem_formula (hb _ hsf)
   have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) := by simp [modalSubfmls]
   intro x hx
-  simp only [List.mem_cons, List.mem_append] at hx
-  rcases hx with (rfl | hbox) | hdia
+  simp only [List.mem_append, List.mem_cons] at hx
+  rcases hx with ((rfl | hbox) | hdia) | hextra
   · exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans hφmem hsrc)
   · exact boxProps_outputs_subset_S4 φ₀ b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset_S4 φ₀ b w hb hwbound x hdia
+  · exact boxPlusExtraS4_outputs_subset_S4 φ₀ b w hb hwbound x hextra
 
 omit [Hashable Atom] in
 /-- `boxNeg`: `F(□φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three groups at
@@ -2089,7 +2322,7 @@ lemma modalApplyOne_boxNeg_outputs_subset_S4
     (hsf : (⟨.neg, .box φ, w⟩ :
       SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hW : modalMaxWorld b < modalWorldBoundS4 φ₀) :
-    ∀ x ∈ ((⟨.neg, φ, modalNextWorld b⟩ :
+    ∀ x ∈ (((⟨.neg, φ, modalNextWorld b⟩ :
         SignedFormula (Proposition Atom) WorldIndex) ::
       (boxPositivesOf b).filterMap (fun (ψ, src) =>
         if src == w then
@@ -2105,18 +2338,19 @@ lemma modalApplyOne_boxNeg_outputs_subset_S4
               ⟨.neg, ψ, modalNextWorld b⟩
             if b.any (· == prop) then none else some prop
           | _ => none
-        else none)),
+        else none)) ++ boxPlusExtraS4 b w),
     x ∈ modalUniverseS4 φ₀ := by
   have hwbound : modalNextWorld b ≤ modalWorldBoundS4 φ₀ := by
     unfold modalNextWorld; exact hW
   have hsrc : (Proposition.box φ) ∈ modalSubfmls φ₀ := modalUniverseS4_mem_formula (hb _ hsf)
   have hφmem : φ ∈ modalSubfmls (Proposition.box φ) := by simp [modalSubfmls]
   intro x hx
-  simp only [List.mem_cons, List.mem_append] at hx
-  rcases hx with (rfl | hbox) | hdia
+  simp only [List.mem_append, List.mem_cons] at hx
+  rcases hx with ((rfl | hbox) | hdia) | hextra
   · exact mem_modalUniverseS4_of hwbound (modalSubfmls_trans hφmem hsrc)
   · exact boxProps_outputs_subset_S4 φ₀ b w hb hwbound x hbox
   · exact diaNegProps_outputs_subset_S4 φ₀ b w hb hwbound x hdia
+  · exact boxPlusExtraS4_outputs_subset_S4 φ₀ b w hb hwbound x hextra
 
 /-! ## Minting-Content Equality Closure
 
@@ -2592,20 +2826,21 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
       · exact hold b' hb' w k hwk
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
-        rw [hresulteq.trans hmint] at hsf
+        have hmintKeyed := modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label
+        rw [hresulteq.trans (congrArg Prod.fst hmintKeyed)] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_boxNeg_subset_relevantSetFinset φ₀ b acc sf.label ψ
           hb hsfmem' _ hmint
         rw [Prod.mk.injEq] at hwk
@@ -2613,7 +2848,7 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub
+        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -2628,20 +2863,21 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
       · exact hold b' hb' w k hwk
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
-        rw [hresulteq.trans hmint] at hsf
+        have hmintKeyed := modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label
+        rw [hresulteq.trans (congrArg Prod.fst hmintKeyed)] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_diamondPos_subset_relevantSetFinset φ₀ b acc sf.label ψ
           hb hsfmem' _ hmint
         rw [Prod.mk.injEq] at hwk
@@ -2649,7 +2885,7 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub
+        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -2707,20 +2943,21 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition At
       · exact hold b' hb' w k hwk
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
-        rw [hresulteq.trans hmint] at hsf
+        have hmintKeyed := modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label
+        rw [hresulteq.trans (congrArg Prod.fst hmintKeyed)] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_boxNeg_subset_relevantSetFinset φ₀ b acc sf.label ψ
           hb hsfmem' _ hmint
         rw [Prod.mk.injEq] at hwk
@@ -2728,7 +2965,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition At
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub
+        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -2743,20 +2980,21 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition At
       · exact hold b' hb' w k hwk
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
-        rw [hresulteq.trans hmint] at hsf
+        have hmintKeyed := modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label
+        rw [hresulteq.trans (congrArg Prod.fst hmintKeyed)] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_diamondPos_subset_relevantSetFinset φ₀ b acc sf.label ψ
           hb hsfmem' _ hmint
         rw [Prod.mk.injEq] at hwk
@@ -2764,7 +3002,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition At
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub
+        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -3787,16 +4025,17 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmintfst := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
-        have hresulteq2 := hresulteq.trans hmintfst
+        have hmintKeyed := modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label
+        have hresulteq2 := hresulteq.trans (congrArg Prod.fst hmintKeyed)
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .neg ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -3809,10 +4048,15 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
         rw [mem_modalKnownWorlds] at hw
         obtain ⟨sf', hsf', rfl⟩ := hw
         rcases List.mem_append.mp hsf' with hsf'new | hsf'old
-        · have hlabeleq := hlabel sf' hsf'new
-          rw [hlabeleq, hkeq2]
-          exact ⟨successorBirthContent φ₀ b .neg ψ sf.label,
-            List.mem_append_right _ (List.mem_singleton_self _)⟩
+        · rcases List.mem_append.mp hsf'new with hsf'raw | hsf'extra
+          · have hlabeleq := hlabel sf' hsf'raw
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .neg ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
+          · have hlabeleq := hlabelExtra sf' hsf'extra
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .neg ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
         · have hwk : sf'.label ∈ modalKnownWorlds b := by
             rw [mem_modalKnownWorlds]; exact ⟨sf', hsf'old, rfl⟩
           exact hold sf'.label hwk
@@ -3836,16 +4080,17 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmintfst := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
-        have hresulteq2 := hresulteq.trans hmintfst
+        have hmintKeyed := modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label
+        have hresulteq2 := hresulteq.trans (congrArg Prod.fst hmintKeyed)
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .pos ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -3858,10 +4103,15 @@ lemma modalStepBranchS4_preserves_keysTotal (φ₀ : Proposition Atom)
         rw [mem_modalKnownWorlds] at hw
         obtain ⟨sf', hsf', rfl⟩ := hw
         rcases List.mem_append.mp hsf' with hsf'new | hsf'old
-        · have hlabeleq := hlabel sf' hsf'new
-          rw [hlabeleq, hkeq2]
-          exact ⟨successorBirthContent φ₀ b .pos ψ sf.label,
-            List.mem_append_right _ (List.mem_singleton_self _)⟩
+        · rcases List.mem_append.mp hsf'new with hsf'raw | hsf'extra
+          · have hlabeleq := hlabel sf' hsf'raw
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .pos ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
+          · have hlabeleq := hlabelExtra sf' hsf'extra
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .pos ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
         · have hwk : sf'.label ∈ modalKnownWorlds b := by
             rw [mem_modalKnownWorlds]; exact ⟨sf', hsf'old, rfl⟩
           exact hold sf'.label hwk
@@ -3965,16 +4215,17 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysTotal (φ₀ : Proposition Ato
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmintfst := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
-        have hresulteq2 := hresulteq.trans hmintfst
+        have hmintKeyed := modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label
+        have hresulteq2 := hresulteq.trans (congrArg Prod.fst hmintKeyed)
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .neg ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -3987,10 +4238,15 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysTotal (φ₀ : Proposition Ato
         rw [mem_modalKnownWorlds] at hw
         obtain ⟨sf', hsf', rfl⟩ := hw
         rcases List.mem_append.mp hsf' with hsf'new | hsf'old
-        · have hlabeleq := hlabel sf' hsf'new
-          rw [hlabeleq, hkeq2]
-          exact ⟨successorBirthContent φ₀ b .neg ψ sf.label,
-            List.mem_append_right _ (List.mem_singleton_self _)⟩
+        · rcases List.mem_append.mp hsf'new with hsf'raw | hsf'extra
+          · have hlabeleq := hlabel sf' hsf'raw
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .neg ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
+          · have hlabeleq := hlabelExtra sf' hsf'extra
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .neg ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
         · have hwk : sf'.label ∈ modalKnownWorlds b := by
             rw [mem_modalKnownWorlds]; exact ⟨sf', hsf'old, rfl⟩
           exact hold sf'.label hwk
@@ -4014,16 +4270,17 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysTotal (φ₀ : Proposition Ato
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hmintfst := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
-        have hresulteq2 := hresulteq.trans hmintfst
+        have hmintKeyed := modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label
+        have hresulteq2 := hresulteq.trans (congrArg Prod.fst hmintKeyed)
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         have hkeq2 : keys' = keys ++
             [(modalNextWorld b, successorBirthContent φ₀ b .pos ψ sf.label)] := by
           rw [hkeq]; simp only [hs, hf, hblock]
@@ -4036,10 +4293,15 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysTotal (φ₀ : Proposition Ato
         rw [mem_modalKnownWorlds] at hw
         obtain ⟨sf', hsf', rfl⟩ := hw
         rcases List.mem_append.mp hsf' with hsf'new | hsf'old
-        · have hlabeleq := hlabel sf' hsf'new
-          rw [hlabeleq, hkeq2]
-          exact ⟨successorBirthContent φ₀ b .pos ψ sf.label,
-            List.mem_append_right _ (List.mem_singleton_self _)⟩
+        · rcases List.mem_append.mp hsf'new with hsf'raw | hsf'extra
+          · have hlabeleq := hlabel sf' hsf'raw
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .pos ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
+          · have hlabeleq := hlabelExtra sf' hsf'extra
+            rw [hlabeleq, hkeq2]
+            exact ⟨successorBirthContent φ₀ b .pos ψ sf.label,
+              List.mem_append_right _ (List.mem_singleton_self _)⟩
         · have hwk : sf'.label ∈ modalKnownWorlds b := by
             rw [mem_modalKnownWorlds]; exact ⟨sf', hsf'old, rfl⟩
           exact hold sf'.label hwk
@@ -4375,21 +4637,23 @@ lemma modalStepBranchS4_preserves_keysWorldsKnown (φ₀ : Proposition Atom)
         subst hweq
         have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         subst hb'
         rw [mem_modalKnownWorlds]
-        exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+        exact ⟨⟨.neg, ψ, modalNextWorld b⟩,
+          List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
   case neg.pos.diamond =>
@@ -4405,21 +4669,23 @@ lemma modalStepBranchS4_preserves_keysWorldsKnown (φ₀ : Proposition Atom)
         subst hweq
         have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         subst hb'
         rw [mem_modalKnownWorlds]
-        exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+        exact ⟨⟨.pos, ψ, modalNextWorld b⟩,
+          List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
 
@@ -4477,21 +4743,23 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysWorldsKnown (φ₀ : Propositi
         subst hweq
         have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         subst hb'
         rw [mem_modalKnownWorlds]
-        exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+        exact ⟨⟨.neg, ψ, modalNextWorld b⟩,
+          List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
   case pos.diamond =>
@@ -4507,21 +4775,23 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysWorldsKnown (φ₀ : Propositi
         subst hweq
         have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         rw [← hsf.1] at hb'
         simp only [List.mem_singleton] at hb'
         subst hb'
         rw [mem_modalKnownWorlds]
-        exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+        exact ⟨⟨.pos, ψ, modalNextWorld b⟩,
+          List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
 
@@ -4568,7 +4838,7 @@ lemma modalStepBranchS4Keyed_preserves_keysOriginS4 (φ₀ : Proposition Atom)
       dsimp only at hsf
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · -- unblocked: establishes the new key
-        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_boxNeg_witness b acc ψ sf.label
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOneS4KeyedMint_boxNeg_witness b acc ψ sf.label
         have hAOeq := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hblock] at hsf
         have hresulteq : result = RuleResult.linear
@@ -4651,7 +4921,7 @@ lemma modalStepBranchS4Keyed_preserves_keysOriginS4 (φ₀ : Proposition Atom)
       dsimp only at hsf
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · -- unblocked: establishes the new key
-        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_diamondPos_witness b acc ψ sf.label
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOneS4KeyedMint_diaPos_witness b acc ψ sf.label
         have hAOeq := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hblock] at hsf
         have hresulteq : result = RuleResult.linear
@@ -4793,7 +5063,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 (φ₀ : Proposition 
       rw [hsfeq] at hsfmem
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · -- unblocked: establishes the new key
-        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_boxNeg_witness b acc ψ sf.label
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOneS4KeyedMint_boxNeg_witness b acc ψ sf.label
         have hAOeq := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hblock] at hsf
         have hresulteq : result = RuleResult.linear
@@ -4877,7 +5147,7 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 (φ₀ : Proposition 
       rw [hsfeq] at hsfmem
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · -- unblocked: establishes the new key
-        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_diamondPos_witness b acc ψ sf.label
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOneS4KeyedMint_diaPos_witness b acc ψ sf.label
         have hAOeq := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hblock] at hsf
         have hresulteq : result = RuleResult.linear
@@ -5017,13 +5287,13 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hstep2 := modalApplyOne_outDeg_step (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hstep2 := modalApplyOneS4KeyedMint_outDeg_step (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b e acc houtdeg
         rw [← hpaireq] at hstep2
         dsimp only at hstep2
@@ -5083,13 +5353,14 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
-            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hstep2 := modalApplyOne_outDeg_step (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) =
+            modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hstep2 := modalApplyOneS4KeyedMint_outDeg_step (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b e acc houtdeg
         rw [← hpaireq] at hstep2
         dsimp only at hstep2
@@ -5218,13 +5489,13 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hstep2 := modalApplyOne_outDeg_step (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hstep2 := modalApplyOneS4KeyedMint_outDeg_step (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b e acc houtdeg
         rw [← hpaireq] at hstep2
         dsimp only at hstep2
@@ -5284,13 +5555,14 @@ lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
-            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hstep2 := modalApplyOne_outDeg_step (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) =
+            modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hstep2 := modalApplyOneS4KeyedMint_outDeg_step (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b e acc houtdeg
         rw [← hpaireq] at hstep2
         dsimp only at hstep2
@@ -5428,20 +5700,22 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_boxNeg_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5454,8 +5728,8 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.neg, ψ, modalNextWorld b⟩ :
-                SignedFormula (Proposition Atom) WorldIndex) (List.mem_append_left _
-              List.mem_cons_self)⟩
+                SignedFormula (Proposition Atom) WorldIndex)
+              (List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self))⟩
         · obtain ⟨ha, ha'⟩ := hFresh w w' hold
           exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append _ b),
             Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append _ b)⟩
@@ -5487,20 +5761,23 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
-            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) =
+            modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_diamondPos_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5513,8 +5790,8 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.pos, ψ, modalNextWorld b⟩ :
-                SignedFormula (Proposition Atom) WorldIndex) (List.mem_append_left _
-              List.mem_cons_self)⟩
+                SignedFormula (Proposition Atom) WorldIndex)
+              (List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self))⟩
         · obtain ⟨ha, ha'⟩ := hFresh w w' hold
           exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append _ b),
             Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append _ b)⟩
@@ -5609,20 +5886,22 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_boxNeg_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5635,8 +5914,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.neg, ψ, modalNextWorld b⟩ :
-                SignedFormula (Proposition Atom) WorldIndex) (List.mem_append_left _
-              List.mem_cons_self)⟩
+                SignedFormula (Proposition Atom) WorldIndex)
+              (List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self))⟩
         · obtain ⟨ha, ha'⟩ := hFresh w w' hold
           exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append _ b),
             Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append _ b)⟩
@@ -5668,20 +5947,23 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
-            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) =
+            modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_diamondPos_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5694,8 +5976,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom
         · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
               (modalNextWorld_le_append _ b),
             modalNextWorld_gt _ (⟨.pos, ψ, modalNextWorld b⟩ :
-                SignedFormula (Proposition Atom) WorldIndex) (List.mem_append_left _
-              List.mem_cons_self)⟩
+                SignedFormula (Proposition Atom) WorldIndex)
+              (List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self))⟩
         · obtain ⟨ha, ha'⟩ := hFresh w w' hold
           exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append _ b),
             Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append _ b)⟩
@@ -5782,20 +6064,22 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_boxNeg_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5806,7 +6090,8 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
         intro w w' hedge
         rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.neg, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
         · exact modalKnownWorlds_mono_append _ b _ (hknown w w' hold)
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
@@ -5833,20 +6118,23 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
-            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) =
+            modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_diamondPos_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5857,7 +6145,8 @@ lemma modalStepBranchS4_preserves_accKnown (φ₀ : Proposition Atom)
         intro w w' hedge
         rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.pos, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
         · exact modalKnownWorlds_mono_append _ b _ (hknown w w' hold)
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
@@ -5948,20 +6237,22 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_boxNeg_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -5972,7 +6263,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
         intro w w' hedge
         rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.neg, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
         · exact modalKnownWorlds_mono_append _ b _ (hknown w w' hold)
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
@@ -5999,20 +6291,23 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
-            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hpaireq : (result, newAcc0) =
+            modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst hpaireq
-        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have haccnew0 : newAcc0 = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
           congrArg Prod.snd hpaireq
-        have hmintfst2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
-        have hsndeq := haccnew0.trans (modalApplyOne_diamondPos_mint_snd_S4 b acc ψ sf.label)
+        have hmintfst2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
+        have hsndeq := haccnew0.trans
+          (congrArg Prod.snd (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         rw [hmintfst2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         obtain ⟨rfl, -, hacceq3, -⟩ := hsf
@@ -6023,7 +6318,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_accKnown (φ₀ : Proposition Atom
         intro w w' hedge
         rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.pos, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
         · exact modalKnownWorlds_mono_append _ b _ (hknown w w' hold)
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
@@ -6143,15 +6439,17 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6163,7 +6461,9 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
           apply modalMaxWorld_le_of_forall_label_le
           intro sf'' hsf''
           rcases List.mem_append.mp hsf'' with hnew | holdmem
-          · rw [hlabel sf'' hnew]
+          · rcases List.mem_append.mp hnew with hraw | hextra
+            · rw [hlabel sf'' hraw]
+            · rw [hlabelExtra sf'' hextra]
           · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld holdmem)
               (Nat.lt_succ_self _)))
         have hwle : w ≤ modalMaxWorld b ∨ w = modalNextWorld b := by
@@ -6175,7 +6475,8 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
         rcases hwle with hwle | rfl
         · exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hwle
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.neg, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
             = (.linear [], acc.addEdge sf.label wBlock) :=
@@ -6196,15 +6497,17 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6216,7 +6519,9 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
           apply modalMaxWorld_le_of_forall_label_le
           intro sf'' hsf''
           rcases List.mem_append.mp hsf'' with hnew | holdmem
-          · rw [hlabel sf'' hnew]
+          · rcases List.mem_append.mp hnew with hraw | hextra
+            · rw [hlabel sf'' hraw]
+            · rw [hlabelExtra sf'' hextra]
           · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld holdmem)
               (Nat.lt_succ_self _)))
         have hwle : w ≤ modalMaxWorld b ∨ w = modalNextWorld b := by
@@ -6228,7 +6533,8 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
         rcases hwle with hwle | rfl
         · exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hwle
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.pos, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
             = (.linear [], acc.addEdge sf.label wBlock) :=
@@ -6336,15 +6642,17 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .neg ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6356,7 +6664,9 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
           apply modalMaxWorld_le_of_forall_label_le
           intro sf'' hsf''
           rcases List.mem_append.mp hsf'' with hnew | holdmem
-          · rw [hlabel sf'' hnew]
+          · rcases List.mem_append.mp hnew with hraw | hextra
+            · rw [hlabel sf'' hraw]
+            · rw [hlabelExtra sf'' hextra]
           · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld holdmem)
               (Nat.lt_succ_self _)))
         have hwle : w ≤ modalMaxWorld b ∨ w = modalNextWorld b := by
@@ -6368,7 +6678,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
         rcases hwle with hwle | rfl
         · exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hwle
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.neg, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
             = (.linear [], acc.addEdge sf.label wBlock) :=
@@ -6389,15 +6700,17 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         have hlabel := mintGroup_label_eq_freshWorld b sf.label .pos ψ
+        have hlabelExtra := boxPlusExtraS4_label_eq_freshWorld b sf.label
         rw [hresulteq2] at hsf
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -6409,7 +6722,9 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
           apply modalMaxWorld_le_of_forall_label_le
           intro sf'' hsf''
           rcases List.mem_append.mp hsf'' with hnew | holdmem
-          · rw [hlabel sf'' hnew]
+          · rcases List.mem_append.mp hnew with hraw | hextra
+            · rw [hlabel sf'' hraw]
+            · rw [hlabelExtra sf'' hextra]
           · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld holdmem)
               (Nat.lt_succ_self _)))
         have hwle : w ≤ modalMaxWorld b ∨ w = modalNextWorld b := by
@@ -6421,7 +6736,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Propos
         rcases hwle with hwle | rfl
         · exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hwle
         · rw [mem_modalKnownWorlds]
-          exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+          exact ⟨⟨.pos, ψ, modalNextWorld b⟩,
+            List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self), rfl⟩
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
             = (.linear [], acc.addEdge sf.label wBlock) :=
@@ -7283,14 +7599,15 @@ lemma modalStepBranchS4_preserves_bClosure (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
         have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
@@ -7323,14 +7640,15 @@ lemma modalStepBranchS4_preserves_bClosure (φ₀ : Proposition Atom)
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
         have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
@@ -7433,14 +7751,15 @@ lemma modalStepBranchS4KeyedOrdered_preserves_bClosure (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label))
         have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
         have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
@@ -7473,14 +7792,15 @@ lemma modalStepBranchS4KeyedOrdered_preserves_bClosure (φ₀ : Proposition Atom
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc
-            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            = modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
               SignedFormula (Proposition Atom) WorldIndex) b acc :=
           modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hsfeq] at hpair
-        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        have hresulteq : result = (modalApplyOneS4KeyedMint (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
           congrArg Prod.fst (hpair.symm.trans heq2)
-        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hresulteq2 := hresulteq.trans
+          (congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label))
         have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
         have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
@@ -8248,8 +8568,9 @@ private lemma modalApplyOneS4Keyed_persistentFresh_S4
       rw [hsfeq] at hca
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
-        rw [heq2] at hca
-        exact modalApplyOne_persistent_props _ b acc nf hca
+        rw [heq2, congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label)]
+          at hca
+        simp at hca
       · have heq2 := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
         rw [heq2] at hca; simp at hca
     · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
@@ -8257,8 +8578,9 @@ private lemma modalApplyOneS4Keyed_persistentFresh_S4
       rw [hsfeq] at hca
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
-        rw [heq2] at hca
-        exact modalApplyOne_persistent_props _ b acc nf hca
+        rw [heq2, congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label)]
+          at hca
+        simp at hca
       · have heq2 := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
         rw [heq2] at hca; simp at hca
   · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
@@ -8296,8 +8618,9 @@ private lemma modalApplyOneS4Keyed_branchingLength_S4
       rw [hsfeq] at hca
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
-        rw [heq2] at hca
-        exact modalApplyOne_branching_length _ b acc brs hca
+        rw [heq2, congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label)]
+          at hca
+        simp at hca
       · have heq2 := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
         rw [heq2] at hca; simp at hca
     · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
@@ -8305,8 +8628,9 @@ private lemma modalApplyOneS4Keyed_branchingLength_S4
       rw [hsfeq] at hca
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
-        rw [heq2] at hca
-        exact modalApplyOne_branching_length _ b acc brs hca
+        rw [heq2, congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label)]
+          at hca
+        simp at hca
       · have heq2 := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
         rw [heq2] at hca; simp at hca
   · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
@@ -8360,7 +8684,7 @@ private lemma modalApplyOneS4Keyed_outputsSubsetUniverse_S4
       rw [hsfeq]
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · have heq2 := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
-        rw [heq2, modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label]
+        rw [heq2, congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc ψ sf.label)]
         exact modalApplyOne_boxNeg_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem' hW
       · have heq2 := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
         rw [heq2]; simp
@@ -8371,7 +8695,7 @@ private lemma modalApplyOneS4Keyed_outputsSubsetUniverse_S4
       rw [hsfeq]
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · have heq2 := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
-        rw [heq2, modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label]
+        rw [heq2, congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc ψ sf.label)]
         exact modalApplyOne_diamondPos_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem' hW
       · have heq2 := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
         rw [heq2]; simp
@@ -8544,7 +8868,8 @@ lemma modalApplyOneS4Keyed_hasEdge_mono (φ₀ : Proposition Atom)
           SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
       rw [hsfeq]
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
-      · rw [modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock]
+      · rw [modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock,
+            modalApplyOneS4KeyedMint_snd_eq]
         rcases modalApplyOne_fresh_local (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc with hsame | ⟨wsf, rest, -, hsnd⟩
         · rw [hsame]; exact h
@@ -8555,7 +8880,8 @@ lemma modalApplyOneS4Keyed_hasEdge_mono (φ₀ : Proposition Atom)
           SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
       rw [hsfeq]
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
-      · rw [modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock]
+      · rw [modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock,
+            modalApplyOneS4KeyedMint_snd_eq]
         rcases modalApplyOne_fresh_local (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) b acc with hsame | ⟨wsf, rest, -, hsnd⟩
         · rw [hsame]; exact h
@@ -9057,7 +9383,7 @@ theorem modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv (φ₀ : Proposition
       rw [hsfeq] at hsfmem
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
       · -- unblocked: fresh witness world, standard K minting facts transfer.
-        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_boxNeg_witness b acc ψ sf.label
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOneS4KeyedMint_boxNeg_witness b acc ψ sf.label
         have hAOeq := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hblock] at hsf
         have hresulteq : result = RuleResult.linear
@@ -9140,7 +9466,7 @@ theorem modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv (φ₀ : Proposition
       rw [hsfeq] at hsfmem
       rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
       · -- unblocked: fresh witness world.
-        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOne_diamondPos_witness b acc ψ sf.label
+        obtain ⟨hwsnd, rest, hwfst⟩ := modalApplyOneS4KeyedMint_diaPos_witness b acc ψ sf.label
         have hAOeq := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
         rw [hblock] at hsf
         have hresulteq : result = RuleResult.linear
@@ -9803,7 +10129,7 @@ private lemma modalApplyOneS4Keyed_boxNeg_ne_notApplicable (φ₀ : Proposition 
       ≠ .notApplicable := by
   rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ w with _ | wBlock
   · rw [modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ w hblock]
-    obtain ⟨-, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+    obtain ⟨-, rest, hfst⟩ := modalApplyOneS4KeyedMint_boxNeg_witness b acc ψ w
     rw [hfst]; simp
   · rw [modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ w wBlock hblock]
     simp
@@ -9818,7 +10144,7 @@ private lemma modalApplyOneS4Keyed_diaPos_ne_notApplicable (φ₀ : Proposition 
       ≠ .notApplicable := by
   rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ w with _ | wBlock
   · rw [modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ w hblock]
-    obtain ⟨-, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+    obtain ⟨-, rest, hfst⟩ := modalApplyOneS4KeyedMint_diaPos_witness b acc ψ w
     rw [hfst]; simp
   · rw [modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ w wBlock hblock]
     simp

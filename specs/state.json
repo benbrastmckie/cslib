@@ -1012,7 +1012,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "dependencies": [
         535,
@@ -1028,15 +1028,10 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-08-05T19:41:20Z",
-      "session_id": "sess_1785958880_8ab261",
+      "last_updated": "2026-08-05T20:42:52Z",
+      "session_id": "sess_1785961846_9b90ea",
       "topic": "Modal Logic",
       "artifacts": [
-        {
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/07_canonical-witness-truth-lemma.md",
-          "type": "plan",
-          "summary": "Phase 7 remains [IN PROGRESS]. Progress Record updated (fourth-dispatch version) recording the two landed 4-rule case-scoped lemmas, the discovery of pre-existing un-wired infrastructure, and the unchanged mint-blocked case-split status. Prior Progress Records retained below, marked superseded, for history."
-        },
         {
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/06_mint-blocked-redirect-verdict.md",
           "type": "report",
@@ -1046,6 +1041,10 @@
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/07_p1-p2-mint-blocked-probe-verdict.md",
           "type": "summary",
           "summary": "Full P1/P2 probe verdict with per-conjunct proof evidence, axiom cross-check output, sorry census, lint verification, and an explicit punch list for the remaining reformulated-Phase-7 work."
+        },
+        {
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
+          "type": "plan"
         }
       ],
       "mandate_change": {
@@ -1059,14 +1058,16 @@
         "supersedes_plan_version": 4
       },
       "plan_metadata": {
-        "phases": 12,
-        "total_effort_hours": 42,
+        "phases": 17,
+        "total_effort_hours": 40,
         "complexity": "complex",
         "research_integrated": true,
-        "plan_version": 5,
+        "plan_version": 7,
         "dependency_waves": [
           [
-            1,
+            1
+          ],
+          [
             2,
             3
           ],
@@ -1080,18 +1081,29 @@
             6
           ],
           [
-            7,
+            7.1
+          ],
+          [
+            7.2
+          ],
+          [
+            7.3,
+            7.4,
             8
+          ],
+          [
+            7.5,
+            7.6,
+            7.7
+          ],
+          [
+            7.8
           ],
           [
             9
           ],
           [
             10
-          ],
-          [
-            11,
-            12
           ]
         ],
         "reports_integrated": [
@@ -1114,6 +1126,16 @@
             "path": "reports/04_massacci-subtractive-blocking-priced.md",
             "integrated_in_plan_version": 5,
             "integrated_date": "2026-07-26"
+          },
+          {
+            "path": "reports/06_mint-blocked-redirect-verdict.md",
+            "integrated_in_plan_version": 7,
+            "integrated_date": "2026-08-05"
+          },
+          {
+            "path": "summaries/07_p1-p2-mint-blocked-probe-verdict.md",
+            "integrated_in_plan_version": 7,
+            "integrated_date": "2026-08-05"
           }
         ],
         "skeleton": false,
@@ -1156,7 +1178,8 @@
         }
       ],
       "ordering_note": "Blocked on the modal Tableau refactor by explicit user decision (2026-07-26). Plan v5 (route 1, pinned-witness truth lemma) was authored against the PRE-refactor factoring; its line anchors and mechanism analysis (modalHintikkaClauseGen shape, the ten-bridge adapter cluster, accPinnedBy placement) will likely need /revise 553 once the refactor lands.",
-      "previous_status": "implementing"
+      "previous_status": "implementing",
+      "next_artifact_number": 9
     },
     {
       "project_number": 554,

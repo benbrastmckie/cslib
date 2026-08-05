@@ -25,6 +25,11 @@ It defines the main `modalTableau` entry point and the `ModalTableauResult` type
   Spec-free (no `RuleApplicationSpec` obligation) -- lives here, upstream of
   `GenericDriver.lean`, precisely so any system (including S4, which discharges no spec) can
   consume the generic Hintikka-set *statement shape*.
+- `RuleApplySt`, `modalStepBranchGenSt`, `modalExpandBranchesGenSt`, `modalTableauGenSt`: the
+  State-Threading Ladder -- `RuleApply`/`modalStepBranchGen`/`modalExpandBranchesGen`/
+  `modalTableauGen`, each generalized with an extra threaded state parameter `σ`, bridged back to
+  the stateless driver at `σ := Unit` by `modalStepBranchGen_eq_St`,
+  `modalExpandBranchesGen_eq_St`, and `modalTableauGen_eq_St`.
 
 ## Design
 
@@ -485,20 +490,65 @@ by `rfl`, confirming the substitution in `modalHintikkaSetGen` is faithful. Lets
 theorem modalHintikkaSet_eq (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) : modalHintikkaSet b acc = modalHintikkaSetGen modalApplyOne b acc := rfl
 
-/-! ## State-Threading Ladder -/
+/-! ## State-Threading Ladder
 
-/-- State-threading rule-application shape. -/
+A purely additive generalization of the `RuleApply`/`modalStepBranchGen`/`modalExpandBranchesGen`/
+`modalTableauGen` driver above, threading an extra abstract state value `σ` through every step
+(`RuleApplySt`/`modalStepBranchGenSt`/`modalExpandBranchesGenSt`/`modalTableauGenSt`), together
+with the three bridge theorems establishing that the state-threaded driver at `σ := Unit`,
+lifted via `liftRuleApply`, computes the same result as the stateless driver
+(`modalStepBranchGen_eq_St`/`modalExpandBranchesGen_eq_St`/`modalTableauGen_eq_St`).
+
+Nothing in the repository consumes this ladder yet. The intended first consumer is
+`modalExpandBranchesS4Keyed`, which today derives its own `keys'` bookkeeping twice; migrating it
+onto `modalExpandBranchesGenSt` (threading `keyss : List σ` as the abstract state) is a separate,
+later task, out of scope here. -/
+
+/-- The shape of a state-threading rule-application function: `RuleApply Atom`, generalized
+with an extra state parameter `σ` that is read and written on every step alongside the
+`Accessibility` relation. The argument order `RuleApplySt (Atom) [insts] (σ)` is deliberate:
+fixing `Atom` and its instances first and abstracting only over `σ` makes `RuleApplySt Atom Unit`
+read as "`RuleApply Atom`, state-threaded" rather than as an unrelated two-parameter family.
+`σ` is left fully abstract here; the intended first instantiation is a `keyss`-style list carried
+alongside `accs` by `modalExpandBranchesS4Keyed` (see `modalStepBranchGenSt`'s docstring), but
+nothing in this ladder commits to that shape.
+
+Carries `@[nolint unusedArguments]` for the same reason as `RuleApply`: `abbrev` unfolds to a
+function type mentioning none of `Atom`, `DecidableEq Atom`, or `Hashable Atom` in its body
+(they appear only inside `SignedFormula (Proposition Atom) WorldIndex`, which the linter does
+not trace through), so the environment linter would otherwise flag them as unused. -/
 @[nolint unusedArguments]
 abbrev RuleApplySt (Atom : Type*) [DecidableEq Atom] [Hashable Atom] (σ : Type*) : Type _ :=
   SignedFormula (Proposition Atom) WorldIndex →
   List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → σ →
   RuleResult (Proposition Atom) WorldIndex × Accessibility × σ
 
-/-- Lift a stateless rule into the trivial state-threading rule at `σ := Unit`. -/
+/-- Lift a stateless rule into the trivial state-threading rule at `σ := Unit`, discarding the
+threaded `Unit` value on every call and returning `()` unconditionally.
+
+`RuleApply Atom` is **bridged into** `RuleApplySt Atom Unit` by this function, not equal to it:
+`RuleApplySt Atom Unit` has an extra `Unit →` argument and an extra `× Unit` component in its
+result, and neither `Unit → X = X` nor `X × Unit = X` holds definitionally, so
+`RuleApply Atom = RuleApplySt Atom Unit` is not available as a `rfl`. Forcing that equality
+would require editing `RuleApply` itself, which the purely-additive constraint on this ladder
+forbids and which would risk breaking the driver `rfl` bridges downstream of it. `liftRuleApply`
+plus the three theorems below (`modalStepBranchGen_eq_St`, `modalExpandBranchesGen_eq_St`,
+`modalTableauGen_eq_St`) is the actual relationship: an explicit embedding, proved compatible at
+each level of the driver. -/
 def liftRuleApply (apply : RuleApply Atom) : RuleApplySt Atom Unit :=
   fun sf b acc _ => ((apply sf b acc).1, (apply sf b acc).2, ())
 
-/-- State-threading one-step branch expansion. -/
+/-- State-threading one-step branch expansion: `modalStepBranchGen`, generalized to thread a
+state value `st : σ` through the single call to `apply`, returning the (possibly updated) state
+alongside the new branches/expanded sets/accessibility relation.
+
+The state is threaded **per-step**, matching how `modalExpandBranchesGenSt` below threads it
+**per-branch** (as `sts : List σ` parallel to `accs`): this shape is forced by the intended first
+consumer `modalExpandBranchesS4Keyed`, which carries a `keyss : List σ` list parallel to `accs`
+and propagates one updated `keys'` to every child branch produced by a split, exactly as `newAcc`
+is propagated to every child today. When the probed formula is `.notApplicable`, the state `st`
+is discarded exactly as `.notApplicable`'s `newAcc` is discarded today (the whole call returns
+`none` and neither is ever consulted) — no behavioural divergence from the stateless driver. -/
 def modalStepBranchGenSt {σ : Type*} (apply : RuleApplySt Atom σ)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (expanded : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -519,14 +569,29 @@ def modalStepBranchGenSt {σ : Type*} (apply : RuleApplySt Atom σ)
         some ([newForms ++ b], [expanded], newAcc, newSt)
       | .notApplicable => none
 
-/-- `Option.map` commutes out of `List.findSome?`. -/
+/-- `Option.map` commutes out of `List.findSome?`: mapping `g` over the result of a search with
+`f` is the same as searching with `f` post-composed with `some ∘ g`. A local helper for the
+step-level bridge `modalStepBranchGen_eq_St` below — absent from Mathlib (`lean_loogle`, 0 hits)
+and from the rest of the project (local search, 0 hits). It exists because
+`modalStepBranchGen_eq_St` cannot be proved by induction on the branch `b`: the searched function
+`fun sf => apply sf b acc st` closes over the *whole* branch `b` in its own definition, not just
+the tail being recursed on, so an inductive hypothesis obtained that way would be about a
+different (and useless) function. Factoring the `Option.map` that turns
+`modalStepBranchGen`'s result into `modalStepBranchGenSt`'s result out of the `findSome?` via this
+lemma, and closing the resulting per-element equality with a single `funext` instead, is the
+working route. -/
 theorem findSome?_map_comm {α β γ : Type*} (f : α → Option β) (g : β → γ) (l : List α) :
     l.findSome? (fun x => (f x).map g) = (l.findSome? f).map g := by
   induction l with
   | nil => simp
   | cons a t ih => cases h : f a <;> simp [h, ih]
 
-/-- Step-level bridge. -/
+/-- Step-level bridge: `modalStepBranchGenSt` at the lifted rule `liftRuleApply apply` and the
+trivial state `()` computes the same result as `modalStepBranchGen apply`, up to appending a
+final `()` component to the returned tuple (the projection-at-`σ := Unit` reading — the
+state-threaded driver, instantiated at the trivial state type, is the stateless driver plus an
+inert `Unit` tag). Proved via `findSome?_map_comm`, since `modalStepBranchGenSt`'s search closure
+is exactly `modalStepBranchGen`'s search closure post-composed with the tuple-tagging map. -/
 theorem modalStepBranchGen_eq_St (apply : RuleApply Atom)
     (b expanded : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     modalStepBranchGenSt (liftRuleApply apply) b expanded acc () =
@@ -541,7 +606,19 @@ theorem modalStepBranchGen_eq_St (apply : RuleApply Atom)
     cases hr : apply sf b acc with
     | mk result newAcc => cases result <;> simp
 
-/-- State-threading fuel-based expansion. -/
+/-- State-threading fuel-based expansion of a list of modal branches: `modalExpandBranchesGen`,
+generalized to carry a state list `sts : List σ` parallel to `branches`/`expandedSets`/`accs`
+(with `sts.length = accs.length`, mirroring the existing `accs.length = branches.length`
+invariant), threading each branch's own state value through `modalStepBranchGenSt` and
+propagating the updated state to every child produced by a split via `List.replicate`, exactly as
+`newAcc` is propagated today.
+
+The inner `processNext` loop replicates `modalExpandBranchesGen.processNext`'s worklist shape
+declaration-for-declaration — same `pending`/`done` split, same `isModalClosed` skip branch, same
+`done ++ newBs ++ restBs` reassembly on expansion — with only `pendingSts`/`doneSts` added
+alongside the existing accessibility lists. This shape match is what makes
+`modalExpandBranchesGen_eq_St` provable by a direct induction mirroring `processNext`'s own
+recursion, the same technique `modalExpandBranches_eq` already uses one level up. -/
 def modalExpandBranchesGenSt {σ : Type*} (apply : RuleApplySt Atom σ)
     (branches : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -584,7 +661,19 @@ def modalExpandBranchesGenSt {σ : Type*} (apply : RuleApplySt Atom σ)
       | _, _, _, _ => .closed
     processNext branches expandedSets accs sts [] [] [] []
 
-/-- Loop-level bridge. -/
+/-- Loop-level bridge: `modalExpandBranchesGen apply` computes the same result as
+`modalExpandBranchesGenSt` at the lifted rule `liftRuleApply apply`, with the state list
+instantiated as `accs.map fun _ => ()` rather than `List.replicate accs.length ()`.
+
+The `.map` form is chosen over `List.replicate` because it is what makes the induction close
+with **no side hypothesis**: `accs.map fun _ => ()` commutes definitionally through the loop's
+three `++` appends and its `List.replicate newBs.length newAcc` (via `List.map_append` and
+`List.map_replicate`), so at every recursive call the state list carried by the induction
+hypothesis is *literally* `(the current accs list).map fun _ => ()` again, closed by `simpa`. A
+`List.replicate accs.length ()`-based statement would instead need the auxiliary invariant
+`sts.length = accs.length` threaded and re-established through both the pending and done lists
+at every step, since `List.replicate` does not commute through `++` for free the way `.map` does
+over already-paired lists — extra bookkeeping this proof does not need. -/
 theorem modalExpandBranchesGen_eq_St (apply : RuleApply Atom)
     (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (accs : List Accessibility) (fuel : Nat) :
@@ -637,13 +726,25 @@ theorem modalExpandBranchesGen_eq_St (apply : RuleApply Atom)
                 (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
               simpa using this
 
-/-- State-threading entry point. -/
+/-- State-threading entry point: `modalTableauGen`, generalized to take an explicit initial state
+`st0 : σ` alongside the rule-application function, seeding the single initial branch's state
+before handing off to `modalExpandBranchesGenSt`.
+
+The initial state is a required explicit argument, not defaulted, because the intended first
+consumer needs a non-trivial seed: `modalExpandBranchesS4Keyed`'s entry point seeds
+`keys := [(0, ∅)]`, not `[]` (world `0` starts with an empty key set, not no key-set entry at
+all). At `σ := Unit` the only possible value is `st0 = ()`, which is exactly what
+`modalTableauGen_eq_St` below supplies. -/
 def modalTableauGenSt {σ : Type*} (apply : RuleApplySt Atom σ) (st0 : σ)
     (φ : Proposition Atom) : ModalTableauResult Atom :=
   let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) := [⟨.neg, φ, 0⟩]
   modalExpandBranchesGenSt apply [initialBranch] [[]] [Accessibility.empty] [st0] (modalFuel φ)
 
-/-- Entry-point bridge. -/
+/-- Entry-point bridge: `modalTableauGen apply φ` computes the same result as
+`modalTableauGenSt (liftRuleApply apply) () φ`. The two-line corollary of the loop bridge
+`modalExpandBranchesGen_eq_St`: both sides unfold to `modalExpandBranchesGen`/
+`modalExpandBranchesGenSt` applied to the identical initial worklist, and
+`(([Accessibility.empty]).map fun _ => ()) = [()]` closes the state-list mismatch. -/
 theorem modalTableauGen_eq_St (apply : RuleApply Atom) (φ : Proposition Atom) :
     modalTableauGen apply φ = modalTableauGenSt (liftRuleApply apply) () φ := by
   simp only [modalTableauGen, modalTableauGenSt]

@@ -159,53 +159,53 @@ declaration, stop: the additive constraint has been violated.
 
 ---
 
-### Phase 2: Expand Docstrings and Module Docstring [NOT STARTED]
+### Phase 2: Expand Docstrings and Module Docstring [COMPLETED]
 
 **Goal**: Raise the nine placeholder docstrings to the explanatory depth `Saturation.lean`'s
 existing declarations carry, and list the ladder in the module docstring.
 
 **Tasks**:
-- [ ] Read the existing docstrings on `RuleApply`, `modalStepBranchGen`, `modalExpandBranchesGen`,
+- [x] Read the existing docstrings on `RuleApply`, `modalStepBranchGen`, `modalExpandBranchesGen`,
       `modalTableauGen`, and `modalHintikkaSetGen` in `Saturation.lean` to calibrate depth and
       house style (they explain *why* a definition has its shape, not just what it does).
-- [ ] `RuleApplySt`: document what `σ` is for, that the argument order
+- [x] `RuleApplySt`: document what `σ` is for, that the argument order
       `RuleApplySt (Atom) [insts] (σ)` makes `RuleApplySt Atom Unit` read as "`RuleApply Atom`,
       state-threaded", and why `@[nolint unusedArguments]` is required (same reason as on
       `RuleApply`).
-- [ ] `liftRuleApply`: state explicitly that `RuleApply Atom` is **bridged into**
+- [x] `liftRuleApply`: state explicitly that `RuleApply Atom` is **bridged into**
       `RuleApplySt Atom Unit`, not equal to it — `RuleApplySt Atom Unit` has an extra `Unit →`
       argument and an extra `× Unit` result component, and neither `Unit → X = X` nor
       `X × Unit = X` holds definitionally. Note that making them defeq would require editing
       `RuleApply`, which the additive constraint forbids and which would break the driver `rfl`
       bridges.
-- [ ] `modalStepBranchGenSt`: document that the state is threaded **per-branch** (as `sts : List σ`
+- [x] `modalStepBranchGenSt`: document that the state is threaded **per-branch** (as `sts : List σ`
       parallel to `accs`), that this shape is forced by the intended first consumer
       `modalExpandBranchesS4Keyed` (which carries a `keyss` list parallel to `accs` and propagates
       one `keys'` to every child of a split), and that the state from a `.notApplicable` probe is
       discarded exactly as that probe's `newAcc` is discarded today — no behavioural divergence.
-- [ ] `findSome?_map_comm`: document it as a local helper for the step-level bridge, note it is
+- [x] `findSome?_map_comm`: document it as a local helper for the step-level bridge, note it is
       absent from Mathlib and from the project, and state why it is needed (the step bridge cannot
       be proved by induction on the branch, because `apply sf b acc` closes over the whole branch
       rather than the tail; factoring `Option.map` out of `findSome?` is the working route).
-- [ ] `modalStepBranchGen_eq_St`: document the projection-at-`σ := Unit` reading.
-- [ ] `modalExpandBranchesGenSt`: document the per-branch state list and that the loop replicates
+- [x] `modalStepBranchGen_eq_St`: document the projection-at-`σ := Unit` reading.
+- [x] `modalExpandBranchesGenSt`: document the per-branch state list and that the loop replicates
       `modalExpandBranchesGen`'s worklist shape declaration-for-declaration.
-- [ ] `modalExpandBranchesGen_eq_St`: document why the state list is instantiated as
+- [x] `modalExpandBranchesGen_eq_St`: document why the state list is instantiated as
       `accs.map fun _ => ()` rather than `List.replicate accs.length ()` — the `.map` form commutes
       through the loop's three `++` appends and its `List.replicate`, so the invariant is preserved
       definitionally by `simpa` with **no side hypothesis**; a `List.replicate` statement would need
       `sts.length = accs.length` threaded through both the pending and done lists.
-- [ ] `modalTableauGenSt`: document why the entry point takes an explicit `st0 : σ` (the S4 Keyed
+- [x] `modalTableauGenSt`: document why the entry point takes an explicit `st0 : σ` (the S4 Keyed
       entry point seeds `keys := [(0, ∅)]`, not `[]`; at `σ := Unit`, `st0 = ()`).
-- [ ] `modalTableauGen_eq_St`: document it as the two-line corollary of the loop bridge.
-- [ ] Add a `## Main Definitions` entry to `Saturation.lean`'s module docstring for the St ladder,
+- [x] `modalTableauGen_eq_St`: document it as the two-line corollary of the loop bridge.
+- [x] Add a `## Main Definitions` entry to `Saturation.lean`'s module docstring for the St ladder,
       in the same style as the existing `modalHintikkaSetGen` entry, naming `RuleApplySt`,
       `modalStepBranchGenSt`, `modalExpandBranchesGenSt`, `modalTableauGenSt` and pointing at the
       three bridges.
-- [ ] Add a forward pointer, in the `modalExpandBranchesGenSt` docstring or the section marker,
+- [x] Add a forward pointer, in the `modalExpandBranchesGenSt` docstring or the section marker,
       that `modalExpandBranchesS4Keyed` is the intended first consumer and that migrating it is a
       separate, later task.
-- [ ] Run `lake build Cslib.Logics.Modal.Tableau.Saturation` and confirm green.
+- [x] Run `lake build Cslib.Logics.Modal.Tableau.Saturation` and confirm green.
 
 **Timing**: 1 hour
 

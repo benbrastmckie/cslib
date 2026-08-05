@@ -1,6 +1,13 @@
 # Divergence Audit: Redirect-Inertness and the Witness-Collision Obligation
 
 - **Task**: 553 — `s4_loop_guard_soundness_reachability_restriction`
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Type**: Divergence audit (H5), dispatched after a second block on the same target
 - **Date**: 2026-07-26
 - **Session**: `sess_1785046950_33beb4_553`

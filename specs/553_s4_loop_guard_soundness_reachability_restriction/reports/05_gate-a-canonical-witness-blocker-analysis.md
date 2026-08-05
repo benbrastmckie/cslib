@@ -74,6 +74,13 @@ question a new task should answer before any large construction is scaffolded.
 
 ### New Item 1: Probe and price a canonical/term-model-restricted witness for the S4 keyed redirect obligation
 - **Effort**: 6-9 hours
+- **Task**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Task Type**: cslib
 - **Rationale**: This is the single open, unpriced question left by Gate A's failure. It follows
   the same front-loaded-kill-gate discipline plan v5 itself used (Gates A-D before any of Phases

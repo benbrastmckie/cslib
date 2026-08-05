@@ -36,7 +36,7 @@ next_project_number: 588
 
 ### Modal Logic
 
-553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+553 [IMPLEMENTING] — Determine whether the S4 keyed loop-check guard can be made sound
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
     └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
       └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
@@ -463,7 +463,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 561, Task 563, Task 587

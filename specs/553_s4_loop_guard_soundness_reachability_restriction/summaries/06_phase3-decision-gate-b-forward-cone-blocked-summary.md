@@ -1,6 +1,11 @@
 # Phase 3 Summary: DECISION GATE B — the Redirect Forward-Cone Transfer (BLOCKED)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
+- **Status**: TBD
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Plan**: `plans/04_subtractive-blocking-red-channel.md` (v4), Phase 3
 - **Phase status**: `[BLOCKED]`
 - **Verdict**: **FAIL** — route (3) does not survive Decision Gate B

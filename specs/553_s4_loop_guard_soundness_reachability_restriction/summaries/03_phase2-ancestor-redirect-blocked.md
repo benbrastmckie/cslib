@@ -3,6 +3,10 @@
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
 - **Plan**: `plans/03_ancestor-only-blocking.md` (v3), Phase 2 only
 - **Status**: BLOCKED (route does not close; escalation to user required)
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 - **Session**: sess_1785084826_a33d36
 
 ## What Was Done

@@ -4226,6 +4226,62 @@ theorem modalTableauS4Keyed_complete (φ₀ : Proposition Atom) (h : s4Valid φ�
     obtain ⟨hnsat, hFC⟩ := modalOpenBranchS4_countermodel φ₀ b a hH hmemInit
     exact hnsat (h WorldIndex (extractModelS4 b a) hFC 0)
 
+/-! ### GATE 0 -- Canonical-Witness Truth-Lemma Micro-Probe
+
+Front-loaded kill gate for the canonical-witness redirect-preservation programme: decides,
+before any construction, whether the truth lemma's box-positive semantic-to-syntactic direction
+is obtainable at the canonical model, and at what price. Two sub-probes:
+
+- `reflTransGen_addEdge_iff` (Sub-probe 0.A): a mechanical `addEdge`/`ReflTransGen`
+  decomposition identity. If this closes, `extractModelS4 b (acc.addEdge src wBlock)` IS
+  definitionally the redirect-extended `extractModelS4 b acc`, and the entire agreement-lemma
+  workstream collapses into an `rfl`-adjacent identity plus `modalTruthLemmaS4` applied at the
+  extended accessibility.
+- Sub-probe 0.B (the named residual risk, the converse truth-lemma direction from
+  `modalHintikkaSetS4` alone) is not needed once 0.A closes -- see the Phase 1 Verdict below. -/
+
+/-- Local mono step for the probe: every recorded edge of `acc` survives into
+`acc.addEdge w w'` (adding an edge only prepends, never removes, list entries). -/
+private lemma hasEdge_addEdge_mono_gate0 {acc : Accessibility} {w w' a c : WorldIndex}
+    (h : acc.hasEdge a c = true) : (acc.addEdge w w').hasEdge a c = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true]
+  exact Or.inr h
+
+/-- Local self-edge fact for the probe: the newly added edge `w → w'` is recorded in
+`acc.addEdge w w'`. -/
+private lemma hasEdge_addEdge_self_gate0 (acc : Accessibility) (w w' : WorldIndex) :
+    (acc.addEdge w w').hasEdge w w' = true := by
+  simp [Accessibility.addEdge, Accessibility.hasEdge]
+
+/-- **Sub-probe 0.A.** The `addEdge`/`ReflTransGen` decomposition identity: a path in the
+redirect-extended accessibility relation is either a path in the original relation, or a path
+that routes through the new edge `src → wBlock` (an original path into `src`, the new edge, then
+an original path out of `wBlock`). Forward direction is tail-induction on the `ReflTransGen`
+witness, splitting each edge via `hasEdge_addEdge_cases`; backward direction is `.mono` lifting
+plus one `.tail`/`.trans` assembly through the new edge. -/
+lemma reflTransGen_addEdge_iff (acc : Accessibility) (src wBlock x y : WorldIndex) :
+    Relation.ReflTransGen (fun a c => (acc.addEdge src wBlock).hasEdge a c = true) x y ↔
+      Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) x y ∨
+      (Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) x src ∧
+       Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) wBlock y) := by
+  constructor
+  · intro h
+    induction h with
+    | refl => exact Or.inl Relation.ReflTransGen.refl
+    | tail _ hbc ih =>
+      rcases hasEdge_addEdge_cases hbc with ⟨rfl, rfl⟩ | hbc'
+      · rcases ih with ih | ⟨ihsrc, -⟩
+        · exact Or.inr ⟨ih, Relation.ReflTransGen.refl⟩
+        · exact Or.inr ⟨ihsrc, Relation.ReflTransGen.refl⟩
+      · rcases ih with ih | ⟨ihsrc, ihwB⟩
+        · exact Or.inl (ih.tail hbc')
+        · exact Or.inr ⟨ihsrc, ihwB.tail hbc'⟩
+  · rintro (h | ⟨hxsrc, hwBy⟩)
+    · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_gate0) x y h
+    · exact ((Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_gate0) x src hxsrc).tail
+        (hasEdge_addEdge_self_gate0 acc src wBlock)).trans
+        (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_gate0) wBlock y hwBy)
+
 end Cslib.Logic.Modal.Tableau
 
 end

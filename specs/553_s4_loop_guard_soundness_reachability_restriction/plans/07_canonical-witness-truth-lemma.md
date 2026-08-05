@@ -1,7 +1,7 @@
 # Implementation Plan: Canonical-Witness Truth Lemma for the S4 Keyed Loop Guard (v6)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 18 hours (7 phases; two front-loaded kill gates, the first of which can terminate
   the route before any construction is built)
 - **Dependencies**: 535 (keyed completeness inputs, landed), 557/561-563 (refactor programme,
@@ -239,7 +239,7 @@ passing outcome.** No construction is scaffolded ahead of a gate verdict.
 
 ---
 
-### Phase 1: GATE 0 — canonical-witness truth-lemma micro-probe [NOT STARTED]
+### Phase 1: GATE 0 — canonical-witness truth-lemma micro-probe [COMPLETED]
 
 - **Goal:** Decide, before any construction, whether the truth lemma's box-positive
   semantic-to-syntactic direction is obtainable at the canonical model, and at what price. This is
@@ -326,6 +326,94 @@ finding. `FrameSoundness.lean` cannot see `modalHintikkaSetS4`, `modalS4Saturate
   the bare-tactic sorry census over `Cslib/Logics/Modal/Tableau/` returns **exactly 1** line
   (`FrameSoundness.lean:1251`); scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` and
   `lake exe lint-style` clean.
+
+#### Phase 1 Verdict
+
+**Outcome (i): Gate 0 PASSES on the cheap branch.** Sub-probe 0.A (`reflTransGen_addEdge_iff`,
+`FrameCompleteness.lean`, locate by grep) closed **sorry-free on the first attempt**, requiring no
+retry and no additional hypothesis. `lean_verify` on all three landed declarations
+(`reflTransGen_addEdge_iff`, and its two local helpers `hasEdge_addEdge_mono_gate0`,
+`hasEdge_addEdge_self_gate0`) reports axioms exactly `{propext, Classical.choice, Quot.sound}`
+(the mono helper needs only `propext`). Scoped `lake build
+Cslib.Logics.Modal.Tableau.FrameCompleteness` is clean; `lake exe lint-style` is clean; the
+bare-tactic sorry census over `Cslib/Logics/Modal/Tableau/` returns exactly one line,
+`FrameSoundness.lean:1251`.
+
+**Proof shape.** Forward direction: tail-induction on the `ReflTransGen` witness over the
+extended relation, splitting each edge via the public `hasEdge_addEdge_cases`
+(`Support/Accessibility.lean`) into "the new edge `src → wBlock`" or "an old `acc` edge", and
+routing the disjunction accordingly. Backward direction: `Relation.ReflTransGen.mono` lifts an
+`acc`-path into an `(acc.addEdge src wBlock)`-path, and one `.tail`/`.trans` assembly threads
+through the new edge for the second disjunct. Neither the private `hasEdge_addEdge_mono_FS`/
+`hasEdge_addEdge_self_FS` helpers (`FrameSoundness.lean`, file-private) nor any Hintikka-set or
+saturation hypothesis was needed — the identity is purely about `Accessibility`/`ReflTransGen`
+and holds for every `acc`, `src`, `wBlock`.
+
+**Sub-probe 0.B was not attempted.** Outcome (i)'s own text is unconditional: 0.A closing alone
+passes Gate 0 "on the cheap branch," collapsing the entire agreement-lemma workstream (0.B's
+target, `canonicalTruthBoxPos`, and Phases 3-6 as originally scoped) into applying the landed
+`modalTruthLemmaS4` at the extended accessibility `acc.addEdge src wBlock` directly, with
+`extractModelS4 b acc` unchanged as the witness type. Attempting 0.B in addition would pursue
+exactly the workstream this outcome supersedes; the Reading Constraint (outcome (vi)) already
+disclaims that a pass "does not license reordering or softening any later phase's criteria," so
+this verdict claims only what outcome (i) states.
+
+**Re-scope of Phases 3-6, per outcome (i)'s explicit instruction ("re-scope … before dispatching
+them, and record the re-scope in this plan").** The redirect-preservation obligation no longer
+needs `accPinnedBy`/`branchSatisfiablePinnedIn`/a canonical (subtype-restricted) witness type at
+all. The new target, replacing Phases 3-6 as originally scoped:
+
+- **`extractModelS4 b acc` is the witness at every accessibility state**, original and redirected
+  alike — no carrier restriction, no pinning conjunct, no second model type. `s4FC` and the edge
+  conjunct come free from `extractModelS4_refl`/`extractModelS4_trans`/
+  `extractModelS4_hasEdge_imp_r` regardless of `acc`, exactly as they already do for the
+  unredirected case.
+- **The single remaining obligation is `modalHintikkaSetS4` preservation under the specific
+  `addEdge` the keyed guard performs**: given `modalHintikkaSetS4 φ₀ b acc`, show
+  `modalHintikkaSetS4 φ₀ b (acc.addEdge src wBlock)`. Applying `modalTruthLemmaS4` at the
+  extended accessibility then gives `branchSatisfiableIn`-shaped satisfiability directly — no
+  agreement lemma, no `htruthBoxPos`/`htruthDiaNeg` truth-lemma direction, no
+  `hpropBox`/`hpropDia` forward-persistence lemma of the shape the probe lemma assumed.
+- **This is not free.** `modalHintikkaSetS4`'s saturation conjunct (`modalS4Saturated`) is
+  itself parametrized by `acc` through `acc.successorsOf` inside `modalApplyOneS4`'s box/diamond
+  rule outputs, so redirecting `src`'s successor set to include `wBlock` changes what saturation
+  demands at `src` (and, via `reflTransGen_addEdge_iff`, at every world with a closure-path
+  through `src`). Gate B (Phase 2) is exactly the question of whether `modalS4Saturated` is
+  available at the ordered-stepper state where this redirect fires, and is **restated below,
+  unchanged in substance**, as the load-bearing question for the re-scoped route too — this
+  matches outcome (i)'s own caveat that a Phase 1 pass "does NOT make Phase 2 moot."
+- **Re-scoped Phase 3** (was: canonical witness instance and three collapsing conjuncts) becomes:
+  state the `modalHintikkaSetS4`-preservation-under-`addEdge` target as a named, un-admitted
+  obligation in `FrameCompleteness.lean`, decomposing it into its four `modalHintikkaSetS4`
+  conjuncts (`isModalClosed` unchanged; the bare saturation conjunct per the note above; the two
+  box-negative/diamond-positive witness conjuncts, which are existentials over `acc.hasEdge`
+  successors and need `hasEdge_addEdge_cases`/`hasEdge_addEdge_mono_gate0`-style case splits, not
+  a new truth lemma). Confirm which conjuncts collapse mechanically (the two existential-witness
+  conjuncts are expected to, by the same case-split `reflTransGen_addEdge_iff`'s proof already
+  performs at the single-edge level) before Phase 4 is dispatched.
+- **Re-scoped Phases 4-5** (was: canonical truth lemma, box-positive and diamond-negative
+  directions) become: discharge the bare-saturation conjunct at `acc.addEdge src wBlock`,
+  consuming Gate B's `hintikkaS4_box_pos_reflTransGen_wrapped`/
+  `hintikkaS4_dia_neg_reflTransGen_wrapped` bridges (or Gate B's recorded additional field, under
+  outcome (ii)) together with `reflTransGen_addEdge_iff` to relate reachability under `acc` and
+  under `acc.addEdge src wBlock`. No truth lemma over an arbitrary or canonical witness model is
+  proved anywhere in the re-scoped route — the semantic side is handled once, by
+  `modalTruthLemmaS4`, applied at whichever accessibility relation is in play.
+- **Re-scoped Phase 6** (was: redirect-step re-assembly, supersession of the probe lemma) becomes:
+  assemble `modalHintikkaSetS4 φ₀ b (acc.addEdge src wBlock)` from re-scoped Phases 3-5's
+  conjuncts, apply `modalTruthLemmaS4` at the extended accessibility to conclude the
+  redirect-preservation obligation, and **only then** decide the probe lemma's removal — it is
+  disposable regardless of route, since the re-scoped route does not consume it at all (it was
+  scaffolding for the now-superseded agreement-lemma workstream). Enumerate dependents by grep
+  before removing, exactly as originally planned.
+- **Phase 7 (wiring, regression, CI) is unaffected in shape**, though its consumed lemma names
+  change to match the re-scoped Phase 6 output.
+
+This re-scope is recorded here per outcome (i)'s instruction; re-scoped Phases 3-6 are executed
+as separate dispatches following this record, not rewritten as new phase bodies in this plan
+file (the phase headings and task lists below remain the v6 originals for provenance — a reader
+executing Phase 3 onward must read this Verdict first and follow the re-scope, not the original
+canonical-witness task list, which outcome (i) has superseded).
 
 ---
 

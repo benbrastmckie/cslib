@@ -912,7 +912,7 @@ additive changes to `FrameCompleteness.lean` for both commits.
 
 ---
 
-### Phase 7.7: 4-rule arms restated with the ghost-edge disjunction [IN PROGRESS]
+### Phase 7.7: 4-rule arms restated with the ghost-edge disjunction [BLOCKED]
 
 - **Goal:** Re-wrap `modalApplyOneS4Keyed_boxPos_sat` and `modalApplyOneS4Keyed_diaNeg_sat` against
   the weakened conjunct (b), replacing the blanket edge-realization hypothesis with the
@@ -1049,6 +1049,100 @@ did exactly that, finding the assumed route does not close.
 **No Lean was written for this phase.** Per this task's standing discipline, no `sorry` or
 vacuous placeholder was introduced; the phase is left `[IN PROGRESS]` with this open question
 recorded rather than forced closed.
+
+#### Phase 7.7 Progress Record (second dispatch — route 1 search, NEGATIVE RESULT)
+
+**Scope of this dispatch**: search ONLY for an already-existing invariant that bounds `outDeg`
+at a recorded-successor world, or otherwise rules out `outDeg acc w' ≠ 0` for a successor
+reached via a later 4-rule propagation. Weakening conjunct (d) (route 2) was explicitly out of
+scope and was not touched. No Lean was written; this dispatch is read-only investigation,
+recorded here per the escalation protocol so the user's design decision rests on evidence.
+
+**Invariants examined, and what each one actually says:**
+
+1. **`S4LoopInv.outDegEq`** (`LoopChecking.lean:7690`): `∀ w, outDeg acc w =
+   (e.filter (fun x => x.label == w && isMintingShaped x)).length`. This is a purely NUMERICAL
+   characterisation: `outDeg acc w' ≠ 0` is equivalent to "some minting-shaped formula
+   (box-negative or diamond-positive) already sits at `w'` in `e`". It says nothing about the
+   status of non-mint-shaped formulas (box-positive/diamond-negative) at `w'` — in particular it
+   gives no saturation guarantee for the box-positive re-assertion `⟨.pos, .box φ, w'⟩` that
+   Phase 7.7 needs to discharge. **Does not apply.**
+
+2. **`S4LoopInv.accKnown` / `accTargetsKnown`** (`LoopChecking.lean:7688`, def used
+   pervasively): every `acc`-edge target is a label already appearing on the branch. This is a
+   membership/freshness fact (targets are known worlds), not an outDeg bound and not a
+   saturation fact. **Does not apply.**
+
+3. **`modalNonMintCandidates` / "settled-context scheduling"**
+   (`LoopChecking.lean:1197-1274`, `modalStepBranchS4KeyedOrdered` at `:1439`): the ordered
+   driver only fires a MINTING shape once `modalNonMintCandidates φ₀ keys b e acc = []`, i.e.
+   once EVERY non-minting rule (including box-positive/diamond-negative 4-rules) is globally
+   exhausted. This is exactly the mechanism `modalS4Saturated_of_ordered_settled` consumes for
+   the BLOCKED arms (Phase 7.2/7.3) and is explicitly NOT available at a primary-scan call
+   site — confirmed directly: the box-positive/diamond-negative formula whose 4-rule is firing
+   THIS step is itself drawn from `modalNonMintCandidates` (it is a non-mint, applicable,
+   not-yet-expanded formula), so by construction `modalNonMintCandidates ≠ []` at the state this
+   step fires from. Global settledness cannot hold at the very moment a non-mint rule is
+   firing. **Does not apply, confirmed by definition, not merely by the phase's docstring
+   caveat.**
+
+4. **`successorBirthContent`** (`LoopChecking.lean:525`): computed ONLY at mint time, as a
+   SNAPSHOT of the parent world's current box-positive/diamond-negative content. It does not
+   update afterward. This confirms the actual failure mode precisely: if world `lbl` gains NEW
+   box-positive content (via later propagation, exactly the case Phase 7.7 is proving sound)
+   *after* some child `w'` was already minted from `lbl`, `w'`'s birth content snapshot from
+   `successorBirthContent` predates that new content and gives no help — the 4-rule step at hand
+   is precisely what must re-propagate the new content to `w'` post-birth, and nothing in
+   `successorBirthContent`'s definition constrains `w'`'s `outDeg` at that later point.
+   **Does not apply — and explains structurally why no snapshot-based invariant can apply.**
+
+5. **`modalS4Saturated`** (`LoopChecking.lean:7150`): whole-branch, non-mint-shape saturation.
+   Same objection as item 3 — the branch is not saturated at a primary-scan firing step by
+   construction (the very formula firing is a live counterexample to saturation at that
+   instant). **Does not apply**, consistent with the Phase 7.7 docstring's own caveat and with
+   the first dispatch's finding.
+
+6. **Reachability-restriction machinery** (this task's own namesake): grep for "reachab"
+   confirms the only reachability-restriction content in `LoopChecking.lean` is the
+   settled-context-scheduling prerequisite for Phases 9-11's redirect-edge reachability
+   argument (comment at `:1322`, "the reachability-restriction prerequisite the S4-keyed guard's
+   soundness argument needs (Phases 9-11)") — future work, not yet landed, and not usable here.
+   `S4RedirectSoundInv` itself has **"No reachability restriction"** noted explicitly at
+   `LoopChecking.lean:640` for the redirect edge it licenses. **Does not apply — the
+   reachability-restriction work this invariant's discharge would need is future work, not an
+   already-existing invariant.**
+
+7. **`S4KeyedHintikkaInv`** (`LoopChecking.lean:9181`): `hintikkaInv` is
+   `modalHintikkaClauseGen`-based and is vacuous at every box/diamond-shaped formula per the
+   comment at `:9240` (`modalHintikkaClauseGen` is vacuous at box/diamond shapes regardless of
+   witness status) — this field carries no content for box-positive saturation.
+   `eBoxNegWitness`/`eDiamondPosWitness` concern box-NEGATIVE/diamond-POSITIVE (mint-shaped)
+   witness existence, the opposite sign/shape pair from what Phase 7.7 needs. **Does not
+   apply.**
+
+**No per-world settledness notion distinct from the whole-branch `modalNonMintCandidates`
+notion exists in the codebase** — a targeted search for `worldSettled`/`perWorldSettled`/
+"settled at"/"world ... settled" returned zero hits in `LoopChecking.lean`.
+
+**Verdict: route 1 does NOT close.** No already-existing invariant bounds `outDeg` at a recorded
+successor world or rules out `outDeg acc w' ≠ 0` for a successor receiving new box-positive/
+diamond-negative content via a later 4-rule step. The structural reason (item 4 above) is that
+`successorBirthContent` is a birth-time snapshot with no update mechanism, so a child world's
+saturation status for its parent's box-positive content is never re-certified after birth — the
+4-rule IS the re-certification mechanism, and nothing else in the invariant suite tracks whether
+it has already "caught up" a given successor. Closing this gap with an already-existing fact
+would require either (a) a per-world invariant that does not currently exist (a genuinely new
+invariant, not a search result — out of this dispatch's scope), or (b) route 2 (weakening
+conjunct (d)), which remains a user design decision per the standing prohibition on weakening
+invariants inside a dispatch.
+
+**Recommendation for the user**: the evidence above supports escalating Phase 7.7 as a design
+question rather than continuing to search for a closing invariant. The two live options are (i)
+design and prove a genuinely new per-world invariant tracking box-positive/diamond-negative
+saturation at successor worlds under the driver's actual processing order (substantial new
+semantic content, not attempted here), or (ii) weaken conjunct (d) of `S4RedirectSoundInv`
+specifically for non-mint-shaped formulas at already-minted successor worlds, accepting the
+re-verification cost against Phases 7.2, 7.3, 7.5, 7.6.
 
 ---
 

@@ -1,16 +1,15 @@
 {
   "status": "partial",
-  "summary": "Phase 7.6 completed and fully verified (S4RedirectSoundInv_boxNeg_mint, S4RedirectSoundInv_diaPos_mint landed sorry-free). Phase 7.7 investigated (3 of 4 tasks confirmed) but blocked on a genuine open technical question in conjunct (d)'s discharge for the 4-rule arms' new successor-world formulas -- the plan's stated 'same outDeg argument as Phase 7.5' does not transfer, since Phase 7.5's new formulas land at the firing candidate's own (zero-outDeg) world while the 4-rule arms' new formulas land at an unconstrained recorded-successor world. No sorry or vacuous placeholder introduced; phase left [IN PROGRESS] with the finding and three candidate resolution routes recorded in the plan's Phase 7.7 Progress Record.",
+  "summary": "Route-1-only dispatch for Phase 7.7's blocker. Searched exclusively for an already-existing invariant bounding outDeg at a recorded-successor world (S4LoopInv.outDegEq, accTargetsKnown, modalNonMintCandidates settled-context scheduling, successorBirthContent, modalS4Saturated, the task's own reachability-restriction machinery, S4KeyedHintikkaInv) -- none apply, each with a recorded structural reason. No Lean was written (this was a read-only investigation dispatch); no sorry or vacuous placeholder introduced. Phase 7.7 is now marked [BLOCKED] in the plan file pending a user design decision between (i) proving a genuinely new per-world successor-saturation invariant, or (ii) weakening S4RedirectSoundInv's conjunct (d) for non-mint-shaped formulas at already-minted successor worlds (route 2, explicitly out of this dispatch's scope, requiring re-verification against Phases 7.2/7.3/7.5/7.6). Sorry census confirmed unchanged at exactly 1 (FrameSoundness.lean:1251).",
   "blockers": [
-    "Phase 7.7 conjunct (d) discharge: no established fact bounds outDeg at a 4-rule shape's recorded-successor world; the plan's Scope Hypothesis note does not close as stated. See plan file's '#### Phase 7.7 Progress Record' for three candidate resolution routes (search adjacent invariants for a successor-outDeg bound; consider weakening conjunct (d) itself with full re-verification cost; or escalate to user for a further Phase 7 design iteration)."
+    "Phase 7.7 conjunct (d) discharge for the 4-rule (box-positive/diamond-negative) arms: no already-existing invariant bounds outDeg at a recorded-successor world or rules out outDeg acc w' != 0 for a successor receiving new content via a later 4-rule step. This is a genuine open technical/design question, not a search failure -- see plan file's '#### Phase 7.7 Progress Record (second dispatch -- route 1 search, NEGATIVE RESULT)' for the full seven-item search record and the two live resolution options requiring a user decision."
   ],
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-phase76-complete-phase77-blocked-handoff-20260805.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-phase77-route1-negative-handoff-20260805.md"
   ],
-  "phases_completed": 1,
-  "phases_total": 2,
+  "phases_completed": 13,
+  "phases_total": 17,
   "plan_markers_verified": true,
-  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-phase76-complete-phase77-blocked-handoff-20260805.md"
+  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-phase77-route1-negative-handoff-20260805.md"
 }

@@ -1,23 +1,22 @@
 {
   "status": "partial",
-  "started_at": "2026-08-05T22:14:49Z",
+  "started_at": "2026-08-05T22:52:07Z",
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-phase76-complete-phase77-blocked-handoff-20260805.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-phase77-route1-negative-handoff-20260805.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
   ],
   "modified_files": [
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave9-phase76-complete-phase77-blocked-handoff-20260805.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-phase77-route1-negative-handoff-20260805.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "partial_progress": {
     "stage": "phase-boundary-stop",
-    "details": "Phase 7.6 fully completed and verified (both mint arms landed, sorry-free, axioms clean, census held at 1). Phase 7.7 investigated but not landed -- a genuine open technical question in conjunct (d)'s discharge was found and recorded rather than forced through with an unsound argument or sorry.",
-    "phases_completed": 1,
-    "last_completed_phase": "Phase 7.6: Mint-unblocked arms restated, and P3"
+    "details": "Route-1-only bounded search dispatch for Phase 7.7's blocker (conjunct (d) discharge for the 4-rule box-positive/diamond-negative arms). Examined seven invariants/mechanisms in LoopChecking.lean (S4LoopInv.outDegEq, accTargetsKnown, modalNonMintCandidates settled-context scheduling, successorBirthContent, modalS4Saturated, the reachability-restriction machinery, S4KeyedHintikkaInv) -- none bound outDeg at a recorded-successor world or rule out outDeg acc w' != 0 there. No Lean was written (read-only investigation, per assigned scope). Phase 7.7 marked [BLOCKED] in the plan file with the full search record. Route 2 (weakening conjunct (d)) was explicitly out of scope and not attempted.",
+    "phases_completed": 13,
+    "last_completed_phase": "Phase 8 (Phase 7.7 remains BLOCKED; this dispatch added no newly-completed phase)"
   },
   "verification": {
     "verification_passed": true,
@@ -26,9 +25,10 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "sorry_count/vacuous_count/axiom_count are deltas introduced by this dispatch (all zero); the pre-existing repo-wide sorry census remains exactly 1 (FrameSoundness.lean:1251), unchanged."
+    "note": "No .lean files were modified this dispatch (plan-file-only investigation dispatch), so no build was required. Sorry census (repo's canonical two-grep code-position form, restricted to Modal/Tableau/) confirmed unchanged at exactly 1 (FrameSoundness.lean:1251)."
   },
-  "requires_user_review": false,
+  "requires_user_review": true,
+  "review_reason": "Phase 7.7 is blocked on a genuine open technical/design question: no already-existing invariant discharges S4RedirectSoundInv's conjunct (d) for the 4-rule arms' newly-propagated content at a recorded-successor world. Route 1 (search) is exhausted and returned negative, evidenced in the plan's Phase 7.7 Progress Record. The two remaining options -- (i) prove a new per-world successor-saturation invariant, or (ii) weaken conjunct (d) with full re-verification cost against Phases 7.2/7.3/7.5/7.6 -- both require a user decision before further Lean can be written for this phase.",
   "metadata": {
     "session_id": "sess_1785963390_67974b",
     "agent_type": "cslib-implementation-agent",

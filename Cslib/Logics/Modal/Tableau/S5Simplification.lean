@@ -1053,33 +1053,6 @@ private lemma modalKnownWorlds_mono_append_S5
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`'s
-`Nodup` conjunct (unavailable across files): the dedup-guarded `foldl` accumulator stays
-`Nodup`. Relocated ahead of the tag invariant (its original site) since the linear-budget
-argument's `worldsContiguous` preservation (below) also needs it. -/
-private lemma modalKnownWorlds_fold_nodup_S5
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
-    (hws0 : ws0.Nodup) :
-    (l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0).Nodup := by
-  induction l generalizing ws0 with
-  | nil => simpa using hws0
-  | cons sf rest ih =>
-    by_cases hc : ws0.any (· == sf.label)
-    · simp only [List.foldl_cons, if_pos hc]
-      exact ih ws0 hws0
-    · simp only [List.foldl_cons, if_neg hc]
-      have hnotmem : sf.label ∉ ws0 := by simpa [List.any_eq_true] using hc
-      exact ih (sf.label :: ws0) (List.nodup_cons.mpr ⟨hnotmem, hws0⟩)
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_nodup`
-(unavailable across files): `modalKnownWorlds`'s dedup-guarded `foldl` never produces
-duplicates. -/
-private lemma modalKnownWorlds_nodup_S5
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
-  modalKnownWorlds_fold_nodup_S5 l [] List.nodup_nil
-
 /-! ## The Counting Crux
 
 The load-bearing new proof: replaces the birth-key pigeonhole with a linear a-priori world

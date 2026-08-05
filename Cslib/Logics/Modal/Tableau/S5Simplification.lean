@@ -856,28 +856,6 @@ structural subformula list. -/
 private lemma modalSubfmls_self_mem_S5 (φ : Proposition Atom) : φ ∈ modalSubfmls φ := by
   cases φ <;> simp [modalSubfmls]
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_boxPositivesOf` (unavailable
-across files): inversion for `boxPositivesOf`. -/
-private lemma mem_boxPositivesOf_S5 {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {ψ : Proposition Atom} {src : WorldIndex} (h : (ψ, src) ∈ boxPositivesOf b) :
-    (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  simp only [boxPositivesOf, List.mem_filterMap] at h
-  obtain ⟨sf, hsfmem, hsfeq⟩ := h
-  split at hsfeq
-  · rename_i hsign
-    split at hsfeq
-    · rename_i φ' hform
-      simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
-      obtain ⟨rfl, rfl⟩ := hsfeq
-      rw [beq_iff_eq] at hsign
-      obtain ⟨s, φ, l⟩ := sf
-      simp only at hsign hform
-      subst hsign; subst hform
-      exact hsfmem
-    · simp at hsfeq
-  · simp at hsfeq
-
 omit [Hashable Atom] in
 /-- The S5 analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
 `modalApplyOneS5` rather than `modalApplyOne`: either `modalApplyOneS5` leaves `acc` unchanged
@@ -971,24 +949,6 @@ theorem modalExpandBranchesS5_eq
 theorem modalTableauS5_eq (φ : Proposition Atom) :
     modalTableauS5 φ = modalTableauGen modalApplyOneS5w φ := rfl
 
-/-! ## `modalKnownWorlds` Local Re-Derivations
-
-`FmpMeasure.lean`'s `mem_modalKnownWorlds`/`modalKnownWorlds_mono_append` are `private` (hence
-unavailable across files). Local re-derivation, mirroring `BDriver.lean`'s established pattern
-(`mem_modalKnownWorlds_B`/`modalKnownWorlds_mono_append_B`), renamed for S5. -/
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
-(unavailable across files): appending formulas to the front of a branch only grows its
-known-worlds set. Mirrors `BDriver.lean`'s `modalKnownWorlds_mono_append_B`. -/
-private lemma modalKnownWorlds_mono_append_S5
-    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
-  intro x hx
-  rw [mem_modalKnownWorlds] at hx ⊢
-  obtain ⟨sf, hsf, rfl⟩ := hx
-  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
-
 /-! ## The Counting Crux
 
 The load-bearing new proof: replaces the birth-key pigeonhole with a linear a-priori world
@@ -1049,31 +1009,6 @@ theorem modalMaxWorld_lt_worldBound_of_S5w {φ₀ : Proposition Atom}
     _ ≤ (mintTags φ₀).card := Finset.card_le_card (Finset.filter_subset _ _)
     _ ≤ modalOps φ₀ := mintTags_card_le_modalOps φ₀
     _ < modalWorldBound φ₀ := modalOps_lt_worldBound φ₀
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Generalizes `modalMaxWorld_le_of_forall_label_le` over an arbitrary `foldl` accumulator, to
-support induction. Mirrors `modalNextWorld_gt`'s own internal generalized-accumulator style
-(`Branch.lean`). -/
-private lemma modalMaxWorld_foldl_le_of_forall_S5w
-    {l : List (SignedFormula (Proposition Atom) WorldIndex)} {M init : WorldIndex}
-    (hinit : init ≤ M) (h : ∀ z ∈ l, z.label ≤ M) :
-    l.foldl (fun mx sf => max mx sf.label) init ≤ M := by
-  induction l generalizing init with
-  | nil => simpa using hinit
-  | cons hd tl ih =>
-    simp only [List.foldl_cons]
-    exact ih (max_le hinit (h hd List.mem_cons_self))
-      (fun z hz => h z (List.mem_cons_of_mem _ hz))
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- `modalMaxWorld l` is bounded by `M` whenever every label in `l` is bounded by `M` -- the
-converse direction to `label_le_modalMaxWorld`. Needed to bound `modalMaxWorld (nf ++ b)` in the
-non-mint branches of `modalStepBranchS5w_preserves_worldInv`, where every emitted label is
-already known to `b` (hence `≤ modalMaxWorld b`). -/
-private lemma modalMaxWorld_le_of_forall_label_le_S5w
-    {l : List (SignedFormula (Proposition Atom) WorldIndex)} {M : WorldIndex}
-    (h : ∀ z ∈ l, z.label ≤ M) : modalMaxWorld l ≤ M :=
-  modalMaxWorld_foldl_le_of_forall_S5w (Nat.zero_le M) h
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Any known-world label is bounded by `modalMaxWorld b`: unwinds `modalKnownWorlds` membership
@@ -1301,7 +1236,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
               · simp at heq
               · simp only [Option.some.injEq] at heq
                 subst heq
-                have hbmem := mem_boxPositivesOf_S5 hψsrc
+                have hbmem := mem_boxPositivesOf hψsrc
                 have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
                   List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
                 have hψsub : ψ ∈ modalSubfmls φ₀ :=
@@ -1407,7 +1342,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
               · simp at heq
               · simp only [Option.some.injEq] at heq
                 subst heq
-                have hbmem := mem_boxPositivesOf_S5 hψsrc
+                have hbmem := mem_boxPositivesOf hψsrc
                 have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
                   List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
                 have hψsub : ψ ∈ modalSubfmls φ₀ :=
@@ -1609,7 +1544,7 @@ propagation shapes emit at `acc.successorsOf w`, which is unbounded by `modalMax
 it (see the module docstring above `S5wTagInv`). Combines `modalApplyOneS5w_step`'s per-call
 dichotomy with the tag-cardinality counting argument: a mint consumes a fresh tag (`usedTags`
 strictly grows), so `modalMaxWorld`'s +1 growth is always matched by `usedTags.card`'s growth;
-every other shape leaves `modalMaxWorld` unchanged (`modalMaxWorld_le_of_forall_label_le_S5w`)
+every other shape leaves `modalMaxWorld` unchanged (`modalMaxWorld_le_of_forall_label_le`)
 while `usedTags` only grows (`usedTags_mono`). -/
 theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
     {b e : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
@@ -1641,7 +1576,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
     unfold S5wWorldInv
     rcases hlab with hknownall | ⟨s, ψ, hnotused, htagmem, hmemnf, hlabelall⟩
     · have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
-        apply modalMaxWorld_le_of_forall_label_le_S5w
+        apply modalMaxWorld_le_of_forall_label_le
         intro z hz
         simp only [List.mem_append] at hz
         rcases hz with hz | hz
@@ -1652,7 +1587,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
       exact le_trans hmaxle (le_trans hW husedge)
     · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
         apply le_antisymm
-        · apply modalMaxWorld_le_of_forall_label_le_S5w
+        · apply modalMaxWorld_le_of_forall_label_le
           intro z hz
           simp only [List.mem_append] at hz
           rcases hz with hz | hz
@@ -1689,7 +1624,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
     refine ⟨htagpres, ?_⟩
     unfold S5wWorldInv
     have hmaxle : modalMaxWorld (br ++ b) ≤ modalMaxWorld b := by
-      apply modalMaxWorld_le_of_forall_label_le_S5w
+      apply modalMaxWorld_le_of_forall_label_le
       intro z hz
       simp only [List.mem_append] at hz
       rcases hz with hz | hz
@@ -1716,7 +1651,7 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
     refine ⟨htagpres, ?_⟩
     unfold S5wWorldInv
     have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
-      apply modalMaxWorld_le_of_forall_label_le_S5w
+      apply modalMaxWorld_le_of_forall_label_le
       intro z hz
       simp only [List.mem_append] at hz
       rcases hz with hz | hz

@@ -1,41 +1,18 @@
 {
-  "status": "partial",
-  "summary": "Plan v6 (07_canonical-witness-truth-lemma.md) Phases 1-6 remain COMPLETED sorry-free. This dispatch was scoped to the two 4-rule cases only (box-positive T(box phi)@w, diamond-negative F(diamond phi)@w) of Phase 7's bespoke S4-keyed step-preservation lemma, per explicit dispatch instructions excluding the mint-blocked case. Both landed sorry-free as standalone case-scoped lemmas in FrameCompleteness.lean: modalApplyOneS4Keyed_boxPos_sat and modalApplyOneS4Keyed_diaNeg_sat, backed by new modalApplyOneS4Rules_boxPos_soundIn/_diaNeg_soundIn (K+T+4 RuleResultSat merge, reusing the already-landed modalApplyOneT_boxPos_soundIn/_diaNeg_soundIn as a black box for K+T and adding the 4-rule propagation layer via one hop of IsTrans). Discovered that most of the .fst/bridge infrastructure this case needed already existed PRIVATELY in LoopChecking.lean (modalApplyOneS4Rules_boxPos_fst/_diaNeg_fst, modalApplyOneS4Keyed_boxPos_eq_S4Rules/_diaNeg_eq_S4Rules), apparently authored in an earlier phase but never wired to FrameCompleteness.lean; de-privatized exactly those (plus two small transitively-needed .snd facts) rather than re-deriving from scratch as the prior dispatch's catalogue suggested, substantially cheaper than expected. All four new declarations verified sorry-free via direct #print axioms ({propext, Classical.choice, Quot.sound} only, no sorryAx). Sorry census over Cslib/Logics/Modal/Tableau/ unchanged at exactly 1 (the standing, explicitly-retained FrameSoundness.lean:1251). Whole-project lake build clean; lake exe checkInitImports clean; lake lint clean on both touched files (verified against a full-repo run, filtered); lake exe lint-style clean. Four of the five case-split arms are now landed. Phase 7 stays IN PROGRESS -- it is NOT marked COMPLETED, because the fifth case (mint-blocked/redirect) remains open and single-handedly blocks assembling the complete dispatcher theorem: the step lemma cannot typecheck as a total function over all cases until that one closes or the architecture changes. That case was explicitly out of scope for this dispatch and was not re-attempted; the architectural dead-end analysis from the prior dispatch (branchSatisfiableIn_s4FC_addEdge_of_blocked requires full-branch modalHintikkaSetS4 saturation not available at an arbitrary settled step; the extend-ambient-model alternative also fails since blockingWorldS4Keyed's redirect target has no a priori semantic tie to an arbitrary model) is carried forward unchanged and still stands. Dispatcher-theorem assembly, regression corpus extension, and the remaining CI steps (lake test, lake shake, lake exe mk_all --module) are all deferred to phase close, once mint-blocked resolves.",
-  "blockers": [
-    "Mint-blocked (redirect) case of the bespoke S4-keyed step-preservation lemma has no known closing route with currently-available invariants (S4LoopInv, S4KeyedHintikkaInv, plain branchSatisfiableIn s4FC). The previously-catalogued route via branchSatisfiableIn_s4FC_addEdge_of_blocked requires full-branch modalHintikkaSetS4 saturation not available at an arbitrary settled step. The alternative extend-ambient-model route also fails since blockingWorldS4Keyed's redirect target is chosen by a purely syntactic key-subset comparison with no a priori semantic tie to an arbitrary model satisfying the branch. Needs either a stronger per-step invariant threaded through the whole induction, or a rethought decomposition -- recommend raising this at planning level (a plan revision or targeted research dispatch) rather than another blind implementation attempt. This is now the SOLE remaining blocker on Phase 7's completion: four of five case-split arms are landed sorry-free."
-  ],
+  "status": "researched",
+  "task_number": 553,
+  "session_id": "sess_1785956924_4d73af",
+  "timestamp": "2026-08-05T19:35:20Z",
+  "summary": "Mint-blocked (redirect) verdict: NO-GO on the step lemma as stated (full-acc edge realization cannot be supplied by any initializable invariant; both catalogued routes exhausted for structural reasons); CONDITIONAL GO on a reformulated conserved predicate S4RedirectSoundInv that quarantines redirect edges from the semantic edge-realization conjunct and justifies them syntactically via the already-landed free-transfer lemmas (blockedRedirect_{boxed,unwrapped}_{boxPos,diaNeg}_mem + blocked_witness_mem). Under it the mint-blocked arm closes with no model construction; the four landed arms survive via mechanical restatement; termination impact is zero (proof-side change only, no definition touched). Conditions: P1 (blocked-arm restatement, near-certain), P2 (antitone-applicability lemma family, the kill criterion), P3 (mint-seed-covers-payload, expected free). Fallback if P2 fails: Reds/accWithReds driver-level provenance split, already packaged in LoopChecking.lean. Grounded in Massacci2000 (Technique 8.2: blocking is subtractive, soundness never sees it) and ChagrovZakharyaschev1997 (Lemmon box-plus; Thm 5.51 containment pattern).",
+  "blockers": [],
   "artifacts": [
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/07_canonical-witness-truth-lemma.md",
-      "type": "plan",
-      "summary": "Phase 7 remains [IN PROGRESS]. Progress Record updated (fourth-dispatch version) recording the two landed 4-rule case-scoped lemmas, the discovery of pre-existing un-wired infrastructure, and the unchanged mint-blocked case-split status. Prior Progress Records retained below, marked superseded, for history."
-    },
-    {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan07-phase7-handoff-20260805d.md",
-      "type": "handoff",
-      "summary": "Fourth Phase 7 continuation handoff: what landed, the pre-existing-infrastructure discovery, the mint-blocked blocker carried forward, and the continuation entry point."
-    },
-    {
-      "path": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "type": "lean_source",
-      "summary": "De-privatized six pre-existing lemmas (modalApplyOneS4Rules_boxPos_fst/_diaNeg_fst, modalApplyOneS4Keyed_boxPos_eq_S4Rules/_diaNeg_eq_S4Rules, modalApplyOneS4Rules_snd_eq, modalApplyOne_boxPos_snd_S4/_diamondNeg_snd_S4) and added two new small companion lemmas (modalApplyOneS4Rules_boxPos_snd_eq_acc/_diaNeg_snd_eq_acc). No existing proof content changed."
-    },
-    {
-      "path": "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-      "type": "lean_source",
-      "summary": "Six new sorry-free declarations: modalApplyOneT_boxPos_eq/_diaNeg_eq (K+T outer case-split), modalApplyOneS4Rules_boxPos_soundIn/_diaNeg_soundIn (the K+T+4 RuleResultSat merge), modalApplyOneS4Keyed_boxPos_sat/_diaNeg_sat (the two 4-rule case-scoped step lemmas closing this dispatch's scope). No existing declaration modified."
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/06_mint-blocked-redirect-verdict.md",
+      "type": "report",
+      "summary": "Targeted verdict on the mint-blocked case: impossibility analysis for the current statement, reformulated S4RedirectSoundInv route with per-arm preservation walkthrough, lemma skeletons, termination cross-check, literature grounding (Massacci2000, ChagrovZakharyaschev1997), cheap-to-test preconditions P1-P3, and fallback architecture"
     }
   ],
   "phases_completed": 6,
   "phases_total": 7,
-  "continuation_context": {
-    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan07-phase7-handoff-20260805d.md"
-  },
-  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan07-phase7-handoff-20260805d.md",
-  "state_updates_pending": [
-    {
-      "field": "status",
-      "note": "Task should remain in [IMPLEMENTING] (or move to [PARTIAL] per state-management.md's exception states), not [COMPLETED] -- Phase 7 (mint-blocked case, dispatcher theorem assembly, regression extension, remaining CI steps) is not yet done, and mint-blocked has an open architectural question that needs planning-level attention before further implementation."
-    }
-  ]
+  "orchestrator_mode": true
 }

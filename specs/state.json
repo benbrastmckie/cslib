@@ -1012,7 +1012,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "implementing",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [
         535,
@@ -1028,28 +1028,19 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-08-05T16:25:20Z",
-      "session_id": "sess_1785947077_74defa",
+      "last_updated": "2026-08-05T19:35:41Z",
+      "session_id": "sess_1785956924_4d73af",
       "topic": "Modal Logic",
       "artifacts": [
-        {
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md",
-          "type": "report",
-          "summary": "Keyed S4 soundness theorem is FALSE: machine-checked counterexample (node-size 19 formula closed by modalTableauS4Keyed with explicit 3-world refl-trans countermodel). Reachability restriction rejected — 96.7% of blocking decisions target non-reachable worlds, so the world bound fails. Driver re-architecture required."
-        },
-        {
-          "type": "report",
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md",
-          "summary": "Divergence audit: redirect-inertness lemmas are FALSE at a reachable state; Route P survives via bounded modification (R-new); central prediction retired"
-        },
-        {
-          "type": "report",
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md"
-        },
         {
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/07_canonical-witness-truth-lemma.md",
           "type": "plan",
           "summary": "Phase 7 remains [IN PROGRESS]. Progress Record updated (fourth-dispatch version) recording the two landed 4-rule case-scoped lemmas, the discovery of pre-existing un-wired infrastructure, and the unchanged mint-blocked case-split status. Prior Progress Records retained below, marked superseded, for history."
+        },
+        {
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/06_mint-blocked-redirect-verdict.md",
+          "type": "report",
+          "summary": "Targeted verdict on the mint-blocked case: impossibility analysis for the current statement, reformulated S4RedirectSoundInv route with per-arm preservation walkthrough, lemma skeletons, termination cross-check, literature grounding (Massacci2000, ChagrovZakharyaschev1997), cheap-to-test preconditions P1-P3, and fallback architecture"
         }
       ],
       "mandate_change": {

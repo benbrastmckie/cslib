@@ -1483,7 +1483,7 @@
     {
       "project_number": 563,
       "project_name": "tableau_boxplus_birth_keys",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Adopt Lemmon box-plus pairing at the birth-key level",
       "topic": "Modal Logic",
@@ -1504,14 +1504,20 @@
           "path": "specs/563_tableau_boxplus_birth_keys/plans/01_boxplus-birth-keys.md",
           "type": "plan",
           "summary": "Box-plus birth keys: additive defs, mint-payload switch, key enrichment, mandatory completeness gate"
+        },
+        {
+          "path": "specs/563_tableau_boxplus_birth_keys/summaries/01_boxplus-birth-keys-summary.md",
+          "type": "summary",
+          "summary": "Box-plus birth keys: 6/6 phases, completeness gate passed with zero FrameCompleteness edits"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T11:23:39Z",
+      "last_updated": "2026-08-05T12:51:12Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785926778_90c7a6_563",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Enriched the keyed S4 loop guard's birth keys to record both the unwrapped and boxed box-context members (Lemmon box-plus pairing), landing the mint-payload switch (modalApplyOneS4KeyedMint), the successorBirthContent key enrichment, and the two box-plus payoff lemmas (blockedRedirect_boxed_boxPos_mem/_diaNeg_mem). All six plan phases completed; the mandatory FrameCompleteness gate passed with no repair needed; full repo verification baseline (build, test, shake, lint, axioms, sorry census) unchanged from the pre-implementation measurement."
     },
     {
       "project_number": 564,

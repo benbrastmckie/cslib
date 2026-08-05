@@ -11,14 +11,13 @@ next_project_number: 586
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,554,563,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,553,564,571,576 | 36,37,181,425,554,563,568 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,566 | 39,40,564 | foundations, modal logic |
-| 4 | 565 | 566 | modal logic |
-| 5 | 567 | 565 | modal logic |
-| 6 | 511,534,582 | 553,567 | modal logic |
-| 7 | 506,548 | 511 | modal logic |
-| 8 | 300 | 506 | modal logic |
+| 1 | 36,37,181,375,400,409,425,553,554,564,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,566,571,576 | 36,37,181,425,554,564,568 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,565 | 39,40,566 | foundations, modal logic |
+| 4 | 567 | 565 | modal logic |
+| 5 | 511,534,582 | 553,567 | modal logic |
+| 6 | 506,548 | 511 | modal logic |
+| 7 | 300 | 506 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,22 +35,21 @@ next_project_number: 586
 
 ### Modal Logic
 
+553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+  └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-563 [PLANNED] — [Task E of the modal-tableau refactor programme; P2. Gated on the
-  └─ 553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
-    └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
-  └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
-    └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
-      └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
-        └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
-          └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-            └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-              └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-            └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-          └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-          └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic (see above)
+564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
+  └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
+    └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
+      └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
+        └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+          └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+            └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+          └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+        └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+        └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic (see above)
 
 ### Temporal Logic
 
@@ -335,12 +333,13 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 563. Adopt Lemmon box-plus pairing at the birth-key level
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md]
 - **Plan**: [563_tableau_boxplus_birth_keys/plans/01_boxplus-birth-keys.md]
+- **Summary**: [563_tableau_boxplus_birth_keys/summaries/01_boxplus-birth-keys-summary.md]
 
 **Description**: [Task E of the modal-tableau refactor programme; P2. Gated on the review gate. This task is the live gate for BOTH the S4 termination follow-on and the S4 keyed soundness task -- keys and mint payload both change here, so land it before either resumes.] Add boxPlusPair and BoxPlusClosed; enrich successorBirthContent (LoopChecking.lean:384-393) to emit BOTH members of each pair -- {(pos, psi), (pos, box psi)} where it currently emits only the unwrapped (pos, psi) for T(box psi)@w -- and extend the two _preserves_keyLowerBd proofs accordingly. The enriched key stays inside the existing codomain signedSubfmls phi0 (modalSubfmls (.box a) = .box a :: modalSubfmls a, FmpMeasure.lean, def modalSubfmls -- locate by name, ~line 81 post-extraction), so signedSubfmls_card_le, signedSubfmls_powerset_card_le, modalWorldBoundS4 and the pigeonhole argument are UNCHANGED -- box-plus is free in the world bound. The source never iterates box-plus beyond depth 1; where more discriminating power is needed it enlarges the filter Sigma instead, which WOULD change the codomain and is therefore expensive -- enrich with box-plus, not with the filter. Prior art to reuse: modalFourBoxProp (FrameRules.lean:133-138) and boxDiamondPersistence (Bimodal Tableau.lean:344) are already box-plus at the RULE level; only the key level is missing. THE ONE REAL RISK, and the mandatory gate: enriching keys changes which steps block, so modalTableauS4Keyed_complete may break. Gate on lake build Cslib.Logics.Modal.Tableau.FrameCompleteness. If it breaks, the completeness proof is quantified over driver behaviour (modalExpandBranchesS4Keyed_hintikka) and should transport -- but that must be DEMONSTRATED, not assumed. If it cannot be repaired sorry-free, mark [BLOCKED]; do NOT add a sorry. Box-plus is S4-scoped (the Lemmon filtration and ChagrovZakharyaschev Proposition 3.6 are stated for TRANSITIVE models only, satisfied by s4FC) and MUST NOT be lifted into Foundations/.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

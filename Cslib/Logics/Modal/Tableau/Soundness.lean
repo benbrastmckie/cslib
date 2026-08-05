@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Tableau.Saturation
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.LoopInduction
+public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 import Mathlib.Data.List.Forall2
 
 /-! # Modal K Tableau Soundness
@@ -69,17 +70,6 @@ private lemma accFreshInv_append
   obtain ⟨hw, hw'⟩ := hInv w w' hedge
   exact ⟨Nat.lt_of_lt_of_le hw (modalNextWorld_le_append xs b),
          Nat.lt_of_lt_of_le hw' (modalNextWorld_le_append xs b)⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Decompose membership of an edge in `acc.addEdge w w'`: it is either the new edge or old. -/
-private lemma hasEdge_addEdge_cases {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  rcases h with ⟨hw, hw'⟩ | h
-  · exact Or.inl ⟨hw.symm, hw'.symm⟩
-  · exact Or.inr h
 
 omit [Hashable Atom] in
 /-- The accessibility relation returned by `modalApplyOne` is either unchanged, or it adds a single

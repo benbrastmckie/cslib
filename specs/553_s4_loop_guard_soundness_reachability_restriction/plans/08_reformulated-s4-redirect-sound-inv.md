@@ -428,7 +428,7 @@ exactly 1.
 
 ---
 
-### Phase 7.3: `S4RedirectSoundInv_diaPos_blocked` — the mirror-image mint-blocked companion [NOT STARTED]
+### Phase 7.3: `S4RedirectSoundInv_diaPos_blocked` — the mirror-image mint-blocked companion [COMPLETED]
 
 - **Goal:** Close the diamond-positive mint-blocked arm (`T(◇φ)@src` blocked, guard call
   `blockingWorldS4Keyed φ₀ b keys .pos φ src`), completing the mint-blocked case under
@@ -451,26 +451,42 @@ exactly 1.
   `S4RedirectSoundInv_boxNeg_blocked`).
 
 - **Tasks:**
-  - [ ] Re-locate `S4RedirectSoundInv_boxNeg_blocked`, `modalS4Saturated_addEdge_of_blocked`,
+  - [x] Re-locate `S4RedirectSoundInv_boxNeg_blocked`, `modalS4Saturated_addEdge_of_blocked`,
         `blockedRedirect_boxed_boxPos_mem`/`_diaNeg_mem`, `hintikkaS4_box_pos_self`/
         `hintikkaS4_dia_neg_self`, `modalApplyOneS4Rules_{boxPos,diaNeg}_notApplicable_of_saturated`
         by grep. Do not trust the line numbers in this plan.
-  - [ ] Transcribe `S4RedirectSoundInv_boxNeg_blocked` to the diamond-positive shape as
+  - [x] Transcribe `S4RedirectSoundInv_boxNeg_blocked` to the diamond-positive shape as
         `S4RedirectSoundInv_diaPos_blocked`, with `hblock : blockingWorldS4Keyed φ₀ b keys .pos φ
         src = some wBlock`. The (c) discharge is unchanged — conjunct (c) quantifies over *both*
         payload shapes at the new edge regardless of which mint shape triggered the block, so the
         same two `blockedRedirect_boxed_*_mem` calls appear in both theorems.
-  - [ ] Confirm `modalS4Saturated_addEdge_of_blocked` accepts `s := .pos` with no additional
-        hypothesis. If it does not, stop and record why.
-  - [ ] `#print axioms` (direct, not `lean_verify` — the fourth dispatch and the probe both
+  - [x] Confirm `modalS4Saturated_addEdge_of_blocked` accepts `s := .pos` with no additional
+        hypothesis. If it does not, stop and record why. *(Confirmed: the lemma is stated over a
+        general `s : Sign` parameter; `.pos` requires nothing extra.)*
+  - [x] `#print axioms` (direct, not `lean_verify` — the fourth dispatch and the probe both
         recorded a spurious `sorryAx` from `lean_verify`'s source scan on these declarations);
-        require exactly `propext`, `Classical.choice`, `Quot.sound`.
-  - [ ] Scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`; `lake exe lint-style`;
-        sorry census exactly 1.
+        require exactly `propext`, `Classical.choice`, `Quot.sound`. *(Confirmed via `lake env
+        lean` on a standalone `#print axioms` snippet.)*
+  - [x] Scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`; `lake exe lint-style`;
+        sorry census exactly 1. *(All green.)*
 
 - **Done when:** `S4RedirectSoundInv_diaPos_blocked` is sorry-free and committed, or the phase is
   `[BLOCKED]` with the exact `lean_goal` and no `sorry` committed; census exactly 1; scoped build
   and `lint-style` clean.
+
+#### Phase 7.3 Verdict
+
+The mirror held literally, with no box/diamond asymmetry: `S4RedirectSoundInv_diaPos_blocked` is
+`S4RedirectSoundInv_boxNeg_blocked`'s transcription at `hblock : blockingWorldS4Keyed φ₀ b keys
+.pos φ src = some wBlock`, same four-conjunct discharge, same lemma calls (including the (c)
+discharge, which correctly stays symmetric — conjunct (c) quantifies over both payload shapes
+regardless of which mint shape triggered the block). Landed in `FrameCompleteness.lean` (grep for
+the declaration name; no line anchor kept here per plan convention). Delta from the Scope
+Hypothesis's ~60-line estimate: 118 lines including the docstring (the docstring plus the full
+duplicated (d)-discharge case split account for the difference; no new lemma was needed).
+`#print axioms`: exactly `propext`, `Classical.choice`, `Quot.sound`. Scoped build and
+`lake exe lint-style` both clean. Sorry census unchanged at exactly 1
+(`FrameSoundness.lean:1251`).
 
 ---
 

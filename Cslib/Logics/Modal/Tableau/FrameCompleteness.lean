@@ -5280,6 +5280,124 @@ theorem S4RedirectSoundInv_boxNeg_blocked (φ₀ : Proposition Atom)
             SignedFormula (Proposition Atom) WorldIndex) = sf from rfl, hfsteq]
         exact hna'
 
+/-- **Phase 7.3: the diamond-positive mint-blocked arm.** Literal mirror of
+`S4RedirectSoundInv_boxNeg_blocked`, for a keyed-guard block decision triggered by a
+diamond-positive mint attempt (`T(◇φ)@src` blocked, guard call
+`blockingWorldS4Keyed φ₀ b keys .pos φ src`). Every discharge is the same argument as the
+box-negative theorem: (a) mechanical; (b) the SAME model witness, no surgery; (c) via the
+identical free transfers `blockedRedirect_boxed_{boxPos,diaNeg}_mem` plus the T-self bridges
+`hintikkaS4_{box_pos,dia_neg}_self` -- conjunct (c) quantifies over BOTH payload shapes
+regardless of which mint shape triggered the block, so the same two calls appear here as in the
+box-negative theorem; (d) via `modalS4Saturated_addEdge_of_blocked` (already stated for a
+general guard sign `s`, confirmed by inspection: it accepts `s := .pos` with no additional
+hypothesis) composed with the same two `notApplicable_of_saturated` lemmas. The only textual
+delta from `S4RedirectSoundInv_boxNeg_blocked` is `hblock`'s sign argument and the sign passed to
+`modalS4Saturated_addEdge_of_blocked`. -/
+theorem S4RedirectSoundInv_diaPos_blocked (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (Er : List (WorldIndex × WorldIndex))
+    (src wBlock : WorldIndex) (φ : Proposition Atom)
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er)
+    (hUniv : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hSat : modalS4Saturated φ₀ b acc)
+    (hmint : modalNonMintCandidates φ₀ keys b e acc = [])
+    (hblock : blockingWorldS4Keyed φ₀ b keys .pos φ src = some wBlock) :
+    S4RedirectSoundInv φ₀ b e (acc.addEdge src wBlock) keys ((src, wBlock) :: Er) := by
+  obtain ⟨ha, hbSem, hc, -⟩ := hinv
+  have hSat' : modalS4Saturated φ₀ b (acc.addEdge src wBlock) :=
+    modalS4Saturated_addEdge_of_blocked φ₀ b acc keys .pos φ src wBlock hSat hUniv hkL hblock
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · -- (a) every ghost edge is a recorded edge in the extended `acc`.
+    intro p hp
+    simp only [List.mem_cons] at hp
+    rcases hp with rfl | hp
+    · exact hasEdge_addEdge_self_gate0 acc src wBlock
+    · exact hasEdge_addEdge_mono_gate0 (ha p hp)
+  · -- (b) semantic conjunct: the SAME model witnesses it, no extension needed.
+    obtain ⟨W, m, f, hFC, hrel, hb⟩ := hbSem
+    refine ⟨W, m, f, hFC, ?_, hb⟩
+    intro w w' hedge
+    rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
+    · exact Or.inl (by simp)
+    · rcases hrel w w' hold with hmem | hr
+      · exact Or.inl (by simp [hmem])
+      · exact Or.inr hr
+  · -- (c) syntactic absorption at the new ghost edge, plus inherited old edges.
+    intro p hp χ
+    simp only [List.mem_cons] at hp
+    rcases hp with rfl | hp
+    · refine ⟨?_, ?_⟩
+      · intro hmemBox
+        have hsigsub : (Sign.pos, .box χ) ∈ signedSubfmls φ₀ :=
+          mem_signedSubfmls_of_formula_s4loop .pos (modalUniverseS4_mem_formula (hUniv _ hmemBox))
+        have hboxedWB : (⟨.pos, .box χ, wBlock⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          blockedRedirect_boxed_boxPos_mem φ₀ b keys .pos φ src wBlock hkL hblock χ hsigsub
+            hmemBox
+        exact ⟨hintikkaS4_box_pos_self φ₀ b acc hSat χ wBlock hboxedWB, hboxedWB⟩
+      · intro hmemDia
+        have hsigsub : (Sign.neg, .diamond χ) ∈ signedSubfmls φ₀ :=
+          mem_signedSubfmls_of_formula_s4loop .neg
+            (modalUniverseS4_mem_formula (hUniv _ hmemDia))
+        have hboxedWB : (⟨.neg, .diamond χ, wBlock⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          blockedRedirect_boxed_diaNeg_mem φ₀ b keys .pos φ src wBlock hkL hblock χ hsigsub
+            hmemDia
+        exact ⟨hintikkaS4_dia_neg_self φ₀ b acc hSat χ wBlock hboxedWB, hboxedWB⟩
+    · exact hc p hp χ
+  · -- (d) frozenness/exhaustion, at the extended `acc`.
+    intro sf hsfmem hshape _houtdeg
+    have hOld := (modalNonMintCandidates_eq_nil_iff φ₀ keys b e acc).mp hmint sf hsfmem
+    rcases hOld with hms | he | hna
+    · exact absurd hms (by simp [hshape])
+    · exact Or.inl he
+    · right
+      by_cases hbd : (sf.sign = .pos ∧ ∃ χ, sf.formula = .box χ) ∨
+          (sf.sign = .neg ∧ ∃ χ, sf.formula = .diamond χ)
+      · rcases hbd with ⟨hs, χ, hf⟩ | ⟨hs, χ, hf⟩
+        · have hsfeq : sf = (⟨.pos, .box χ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := by
+            rcases sf with ⟨s', f', w'⟩; simp_all
+          rw [hsfeq, modalApplyOneS4Keyed_boxPos_eq_S4Rules]
+          exact modalApplyOneS4Rules_boxPos_notApplicable_of_saturated φ₀ b
+            (acc.addEdge src wBlock) hSat' χ sf.label (hsfeq ▸ hsfmem)
+        · have hsfeq : sf = (⟨.neg, .diamond χ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := by
+            rcases sf with ⟨s', f', w'⟩; simp_all
+          rw [hsfeq, modalApplyOneS4Keyed_diaNeg_eq_S4Rules]
+          exact modalApplyOneS4Rules_diaNeg_notApplicable_of_saturated φ₀ b
+            (acc.addEdge src wBlock) hSat' χ sf.label (hsfeq ▸ hsfmem)
+      · have hnb : ∀ χ, sf.formula ≠ .box χ := by
+          intro χ hfeq
+          apply hbd
+          rcases hs : sf.sign with _ | _
+          · exact Or.inl ⟨rfl, χ, hfeq⟩
+          · exact absurd hshape (by
+              rcases sf with ⟨s', f', w'⟩
+              simp_all [modalMintShape])
+        have hnd : ∀ χ, sf.formula ≠ .diamond χ := by
+          intro χ hfeq
+          apply hbd
+          rcases hs : sf.sign with _ | _
+          · exact absurd hshape (by
+              rcases sf with ⟨s', f', w'⟩
+              simp_all [modalMintShape])
+          · exact Or.inr ⟨rfl, χ, hfeq⟩
+        have hna' : (modalApplyOne sf b acc).1 = .notApplicable := by
+          rwa [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf.sign sf.formula
+            sf.label hnb hnd b acc, show (⟨sf.sign, sf.formula, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) = sf from rfl] at hna
+        have hfsteq : (modalApplyOne sf b (acc.addEdge src wBlock)).fst =
+            (modalApplyOne sf b acc).fst :=
+          modalApplyOne_fst_eq_of_not_boxPos_diaNeg sf b (acc.addEdge src wBlock) acc
+            (not_or.mp hbd)
+        rw [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf.sign sf.formula sf.label
+          hnb hnd b (acc.addEdge src wBlock), show (⟨sf.sign, sf.formula, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) = sf from rfl, hfsteq]
+        exact hna'
+
 end Cslib.Logic.Modal.Tableau
 
 end

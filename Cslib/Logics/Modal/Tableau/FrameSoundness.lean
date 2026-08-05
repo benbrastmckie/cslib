@@ -10,6 +10,7 @@ public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.S5Simplification
 public import Cslib.Logics.Modal.Tableau.FiveSimplification
+public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 import Cslib.Foundations.Relation.Euclidean
 import Mathlib.Data.List.Forall2
 
@@ -1069,21 +1070,6 @@ dual): given `Satisfies m (f w) (□φ)` and `m.r (f w) (f w')` (from the record
 `Satisfies m (f w') (□φ)` -- this mirrors the T arms' direct appeal to `Std.Refl` above,
 generalized to `IsTrans`. -/
 
-/-- Bridge from `Accessibility.successorsOf` membership to `hasEdge`: if `w'` is returned by
-`successorsOf acc w`, the edge `w → w'` is recorded in `acc`. Local mirror of
-`FmpMeasure.lean`'s private `mem_successorsOf_hasEdge`, restated here since that lemma is
-private to its own file. -/
-private lemma mem_successorsOf_hasEdge' {acc : Accessibility} {w w' : WorldIndex}
-    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
-  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
-  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
-  split at heq
-  · rename_i hsrc
-    simp only [Option.some.injEq] at heq
-    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
-    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
-  · simp at heq
-
 /-- Adding `T(□φ)@w'` to a branch witnessing `branchSatisfiableIn s4FC` preserves
 `branchSatisfiableIn s4FC`, given `T(□φ)@w` is already on the branch and `w → w'` is a
 recorded edge: the semantic core of the 4-rule box-positive propagation arm
@@ -1147,7 +1133,7 @@ lemma modalFourBoxProp_sound [DecidableEq Atom] [Hashable Atom]
   · simp [hcase] at hsf
   · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
     subst hsf
-    exact branchSatisfiableIn_s4FC_boxPos_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
+    exact branchSatisfiableIn_s4FC_boxPos_trans_mem h hmem (mem_successorsOf_hasEdge hw')
 
 /-- Rule-level 4-soundness for the diamond-negative arm: every formula produced by
 `modalFourDiaNegProp` (given `F(◇φ)@w` already on the branch) preserves `branchSatisfiableIn
@@ -1167,7 +1153,7 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
   · simp [hcase] at hsf
   · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
     subst hsf
-    exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
+    exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge hw')
 
 /-! ### Ancestor-Redirect Decision Gate (ancestor-only blocking)
 
@@ -1180,9 +1166,9 @@ dependence on any driver definition (`blockingWorldS4Anc`, `keys`, `spine`, etc.
 named; the two abstract hypotheses `hboxback`/`hdianeg` below are exactly what
 `S4LoopInv.keyLowerBd` composed with the guard's key-equality check would hand a caller).
 
-**Attempt and verdict.** Local re-derivation of `Soundness.lean`'s private
-`hasEdge_addEdge_cases` (unavailable across files, same pattern as this file's
-`hasEdge_mem_successorsOf_origin`) lets the added edge be case-split against the old one. The
+**Attempt and verdict.** `hasEdge_addEdge_cases` (published from `Support/Accessibility.lean`,
+formerly a local re-derivation of `Soundness.lean`'s private original) lets the added edge be
+case-split against the old one. The
 "reuse the ambient witness model unchanged" case is fine when `m.r (f src) (f a)` already
 holds. The general case forces extending `m.r` (S4's `IsTrans` field is a genuine structural
 property of the *concrete* relation, not a derivable notion, so `acc.hasEdge` growth cannot be
@@ -1199,18 +1185,6 @@ file's own `branchPropAdequateIn` module comment (two sections below) already do
 Route P's identical redirect-to-an-existing-world shape ("breaks `branchSatisfiableIn`'s edge
 conjunct ... outright for such an edge"). The sorry below marks precisely this point; it is
 recorded as [BLOCKED] (see the lemma's own docstring below for the exact obstruction). -/
-
-/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases`
-(unavailable across files) -- same proof, same pattern as `hasEdge_mem_successorsOf_origin`
-above. -/
-private lemma hasEdge_addEdge_cases_anc {acc : Accessibility} {w w' u u' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge u u' = true) :
-    (u = w ∧ u' = w') ∨ acc.hasEdge u u' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  rcases h with ⟨hw, hw'⟩ | h
-  · exact Or.inl ⟨hw.symm, hw'.symm⟩
-  · exact Or.inr h
 
 /-- **Ancestor-redirect decision-gate lemma.** `a` an already-recorded ancestor of
 `src` (`acc.hasEdge a src`), with `a`'s current content already containing, UNWRAPPED, every
@@ -1264,7 +1238,7 @@ lemma branchSatisfiableIn_s4FC_ancestor_redirect
   · -- The ambient witness already relates the two points: no model change needed.
     refine ⟨W, m, f, ⟨hrefl, htrans⟩, ?_, hb⟩
     intro u u' hedge
-    rcases hasEdge_addEdge_cases_anc hedge with ⟨rfl, rfl⟩ | hold
+    rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
     · exact hdirect
     · exact hedges u u' hold
   · -- General case: `m.r` must be extended to relate `f src`, `f a`. Since `IsTrans` binds the
@@ -1436,7 +1410,7 @@ lemma modalFourBoxProp_sound_adequate [DecidableEq Atom] [Hashable Atom]
   · simp [hcase] at hsf
   · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
     subst hsf
-    have hedge := mem_successorsOf_hasEdge' hw'
+    have hedge := mem_successorsOf_hasEdge hw'
     exact branchPropAdequateIn_s4FC_boxPos_trans_mem h hmem hedge
       (fun v hv => hready w' v hedge hv)
 
@@ -1458,7 +1432,7 @@ lemma modalFourDiaNegProp_sound_adequate [DecidableEq Atom] [Hashable Atom]
   · simp [hcase] at hsf
   · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
     subst hsf
-    have hedge := mem_successorsOf_hasEdge' hw'
+    have hedge := mem_successorsOf_hasEdge hw'
     exact branchPropAdequateIn_s4FC_diaNeg_trans_mem h hmem hedge
       (fun v hv => hready w' v hedge hv)
 
@@ -2135,19 +2109,9 @@ private lemma modalKnownWorlds_append_subset_of_labels_known
   · exact hxs sf hxsf
   · rw [mem_modalKnownWorlds_FS]; exact ⟨sf, hbsf, rfl⟩
 
-/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
-across files): decompose membership of an edge in `acc.addEdge w w'`. Mirrors
-`S5Simplification.lean`'s `hasEdge_addEdge_cases_S5`. -/
-private lemma hasEdge_addEdge_cases_FS {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  tauto
-
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `acc.addEdge w w'` only ever grows the edge set: every edge already recorded in `acc`
-survives. Converse direction to `hasEdge_addEdge_cases_FS`; needed to lift `accReachableInv`'s
+survives. Converse direction to `hasEdge_addEdge_cases`; needed to lift `accReachableInv`'s
 reachability witnesses forward under `Relation.ReflTransGen.mono` when an edge is added. -/
 private lemma hasEdge_addEdge_mono_FS {acc : Accessibility} {w w' a a' : WorldIndex}
     (h : acc.hasEdge a a' = true) :
@@ -2613,7 +2577,7 @@ theorem modalStepBranchS5Gen_preserves_satIn
     refine ⟨[sf'] ++ b, List.mem_cons_self, W, m, f, hFC, ?_, ?_⟩
     · -- The one new edge relates two known worlds; every old edge survives via `hacc`.
       intro w1 w2 hedge
-      rcases hasEdge_addEdge_cases_FS hedge with ⟨rfl, rfl⟩ | hold
+      rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
       · exact accReachableInv_related_s5 hFC hacc hreach hsflabel_known hsf'known
       · exact hacc w1 w2 hold
     · -- The re-asserted formula is already satisfied, being already on `b`.
@@ -3867,7 +3831,7 @@ theorem modalStepBranchFive_preserves_satIn
     refine ⟨[sf'] ++ b, List.mem_cons_self, W, m, f, hFC, ?_, ?_⟩
     · -- The one new edge relates two known, non-root worlds; every old edge survives via `hacc`.
       intro w1 w2 hedge
-      rcases hasEdge_addEdge_cases_FS hedge with ⟨rfl, rfl⟩ | hold
+      rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
       · exact accReachableInv_related_five hFC hacc hreach hsflabel_known hsf'known
           hsflabelne hsf'labelne
       · exact hacc w1 w2 hold
@@ -4610,7 +4574,7 @@ theorem modalStepBranchKb5''_preserves_satIn
     refine ⟨[sf'] ++ b, List.mem_cons_self, W, m, f, hFC, ?_, ?_⟩
     · -- The one new edge relates two known, non-root worlds; every old edge survives via `hacc`.
       intro w1 w2 hedge
-      rcases hasEdge_addEdge_cases_FS hedge with ⟨rfl, rfl⟩ | hold
+      rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
       · exact accReachableInv_related_kb5 hFC hacc hreach hsflabel_known hsf'known
           hsflabelne hsf'labelne
       · exact hacc w1 w2 hold

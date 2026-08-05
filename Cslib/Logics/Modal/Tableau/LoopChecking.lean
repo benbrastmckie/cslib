@@ -1343,11 +1343,10 @@ lemma modalStepBranchS4KeyedOrdered_mintReady (φ₀ : Proposition Atom)
   · exact hcandidates
 
 omit [Hashable Atom] in
-/-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership. Local re-derivation of
-`hasEdge_mem_successorsOf` (below, `private` and defined later in this file, past this section)
--- same proof, mirroring the codebase's existing pattern of per-section local re-derivations of
-this exact fact (`FmpMeasure.lean`, `S5Simplification.lean`, `Completeness.lean`). -/
-private lemma hasEdge_mem_successorsOf_origin {acc : Accessibility} {w w' : WorldIndex}
+/-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership. Relocated to this
+point in the file (this subsystem's sole copy) so it precedes its uses in this section,
+without needing a second forward-declared copy. -/
+private lemma hasEdge_mem_successorsOf {acc : Accessibility} {w w' : WorldIndex}
     (hr : acc.hasEdge w w' = true) : w' ∈ acc.successorsOf w := by
   simp only [Accessibility.successorsOf, List.mem_filterMap]
   simp only [Accessibility.hasEdge, List.any_eq_true] at hr
@@ -1603,7 +1602,7 @@ lemma blockedRedirect_boxctx_mem_of_boxOrigin (φ₀ : Proposition Atom)
       modalFourBoxProp b acc ψ u := by
     unfold modalFourBoxProp
     rw [List.mem_filterMap]
-    refine ⟨wBlock, hasEdge_mem_successorsOf_origin hedge, ?_⟩
+    refine ⟨wBlock, hasEdge_mem_successorsOf hedge, ?_⟩
     rw [if_neg (by simp [hne_any])]
   have hfourne : modalFourBoxProp b acc ψ u ≠ [] := List.ne_nil_of_mem hfourmem
   have hnotapp : (modalApplyOneS4Keyed φ₀ keys
@@ -1643,7 +1642,7 @@ lemma blockedRedirect_diaNeg_mem_of_diaOrigin (φ₀ : Proposition Atom)
       modalFourDiaNegProp b acc ψ u := by
     unfold modalFourDiaNegProp
     rw [List.mem_filterMap]
-    refine ⟨wBlock, hasEdge_mem_successorsOf_origin hedge, ?_⟩
+    refine ⟨wBlock, hasEdge_mem_successorsOf hedge, ?_⟩
     rw [if_neg (by simp [hne_any])]
   have hfourne : modalFourDiaNegProp b acc ψ u ≠ [] := List.ne_nil_of_mem hfourmem
   have hnotapp : (modalApplyOneS4Keyed φ₀ keys
@@ -6757,17 +6756,6 @@ theorem modalHintikkaSetS4_saturated (φ₀ : Proposition Atom)
     (hH : modalHintikkaSetS4 φ₀ b acc) : modalS4Saturated φ₀ b acc := hH.2.1
 
 /-! ## S4 Hintikka Bridges -/
-
-/-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership: the converse of
-`FrameSoundness.lean`'s `mem_successorsOf_hasEdge'`. Local mirror of the same fact proved
-(privately) in `FmpMeasure.lean` and `Completeness.lean`'s bridge lemmas' inline proofs. -/
-private lemma hasEdge_mem_successorsOf {acc : Accessibility} {w w' : WorldIndex}
-    (hr : acc.hasEdge w w' = true) : w' ∈ acc.successorsOf w := by
-  simp only [Accessibility.successorsOf, List.mem_filterMap]
-  simp only [Accessibility.hasEdge, List.any_eq_true] at hr
-  obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hr
-  simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
-  exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
 
 /-- The single-edge 4-rule bridge: `modalHintikkaSetS4 φ₀ b acc`, `T(□ψ)@w ∈ b`,
 `acc.hasEdge w w' = true` imply `T(□ψ)@w' ∈ b` -- the box formula *itself* survives across

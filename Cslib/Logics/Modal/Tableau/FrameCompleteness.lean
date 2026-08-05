@@ -6962,6 +6962,310 @@ theorem S4RedirectSoundInv_diaPos_mint (φ₀ : Proposition Atom)
             haccindep, hbranch]
           exact hna''
 
+/-! ## Phase 7.7: 4-Rule Arms Restated Against `S4RedirectSoundInv`
+
+Closes the "genuine open question" left by the Phase 7.7 first/second dispatches (see the plan
+file's `#### Phase 7.7 Progress Record` subsections): neither route considered there (a new
+per-world saturation invariant tracking `outDeg` at a recorded successor, or weakening conjunct
+(d)) is needed. Old conjunct (d), applied directly to the firing box-positive/diamond-negative
+candidate itself -- exactly the way `S4RedirectSoundInv_notBoxDia_step` (Phase 7.5) already uses
+it via `hFroz`, and unaffected by the candidate's shape -- forces `outDeg acc lbl = 0`: `lbl`
+(the candidate's own world) has NO recorded successor at the moment the candidate fires. Since
+both the K-layer (`boxPropagation`/its diamond-negative dual) and the 4-layer
+(`modalFourBoxProp`/`modalFourDiaNegProp`) range over `acc.successorsOf lbl`, zero out-degree
+makes both vacuously empty, so `modalApplyOneS4Rules` at these two shapes reduces to *exactly*
+the T-self layer (`modalTBoxSelf`/`modalTDiaNegSelf`) -- unconditional on `acc`, landing its (at
+most one) output formula at `lbl` itself, the SAME world as the firing candidate. This is
+exactly the shape Phase 7.5 already discharges (c)/(d) for. `S4RedirectSoundInv` itself is
+untouched by this argument, so Phases 7.2, 7.3, 7.5, 7.6 need no re-verification. -/
+
+omit [Hashable Atom] in
+/-- Zero out-degree collapses the successor list to `[]` (restates `outDeg`'s own definition,
+`FmpMeasure.lean:768`, `(acc.successorsOf w).length`). -/
+lemma successorsOf_eq_nil_of_outDeg_eq_zero (acc : Accessibility) (w : WorldIndex)
+    (h : outDeg acc w = 0) : acc.successorsOf w = [] :=
+  List.length_eq_zero_iff.mp h
+
+omit [Hashable Atom] in
+/-- At zero out-degree, `modalApplyOneS4Rules` at a box-positive shape collapses to exactly the
+T-self layer: the K-layer (`boxPropagation`) and the 4-layer (`modalFourBoxProp`) both range
+over `acc.successorsOf lbl`, forced empty by `h`. -/
+lemma modalApplyOneS4Rules_boxPos_eq_of_outDeg_zero
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (lbl : WorldIndex) (h : outDeg acc lbl = 0) :
+    (modalApplyOneS4Rules (⟨.pos, .box φ, lbl⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (if (modalTBoxSelf b φ lbl).isEmpty then .notApplicable
+        else .persistent (modalTBoxSelf b φ lbl)) := by
+  have hsucc : acc.successorsOf lbl = [] := successorsOf_eq_nil_of_outDeg_eq_zero acc lbl h
+  have hbp : boxPropagation b acc φ lbl = [] := by unfold boxPropagation; rw [hsucc]; rfl
+  have hfour : modalFourBoxProp b acc φ lbl = [] := by unfold modalFourBoxProp; rw [hsucc]; rfl
+  have hK : (modalApplyOne (⟨.pos, .box φ, lbl⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .notApplicable := by
+    have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+      rw [tryAllPropRules_pos]
+      simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+    simp only [modalApplyOne, htry, Bool.false_eq_true, if_false, hbp, List.isEmpty_nil, if_true]
+  rw [modalApplyOneS4Rules_boxPos_fst, modalApplyOneT_boxPos_fst, hK]
+  split_ifs with hemp <;> simp_all
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4Rules_boxPos_eq_of_outDeg_zero` for the diamond-negative shape. -/
+lemma modalApplyOneS4Rules_diaNeg_eq_of_outDeg_zero
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (lbl : WorldIndex) (h : outDeg acc lbl = 0) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond φ, lbl⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+      (if (modalTDiaNegSelf b φ lbl).isEmpty then .notApplicable
+        else .persistent (modalTDiaNegSelf b φ lbl)) := by
+  have hsucc : acc.successorsOf lbl = [] := successorsOf_eq_nil_of_outDeg_eq_zero acc lbl h
+  have hdp : (acc.successorsOf lbl).filterMap (fun w' =>
+      let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
+      if b.any (· == sf') then none else some sf') = [] := by rw [hsucc]; rfl
+  have hfour : modalFourDiaNegProp b acc φ lbl = [] := by
+    unfold modalFourDiaNegProp; rw [hsucc]; rfl
+  have hK : (modalApplyOne (⟨.neg, .diamond φ, lbl⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .notApplicable := by
+    have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+      rw [tryAllPropRules_neg]
+      simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+    simp only [modalApplyOne, htry, Bool.false_eq_true, if_false, hdp, List.isEmpty_nil, if_true]
+  rw [modalApplyOneS4Rules_diaNeg_fst, modalApplyOneT_diamondNeg_fst, hK]
+  split_ifs with hemp <;> simp_all
+
+/-- **4-rule, box-positive arm restated against `S4RedirectSoundInv` (Phase 7.7).** At a
+primary-scan step firing a box-positive candidate `⟨.pos, .box φ, lbl⟩ ∈
+modalNonMintCandidates`, old conjunct (d) applied directly to the candidate forces
+`outDeg acc lbl = 0` (`houtdeg0`, the identical argument to `S4RedirectSoundInv_notBoxDia_step`'s
+own, Phase 7.5). Zero out-degree collapses the K-layer and 4-layer
+(`modalApplyOneS4Rules_boxPos_eq_of_outDeg_zero`), so the only possible output is the T-self
+content `modalTBoxSelf b φ lbl`, landing at `lbl` itself -- the SAME world as the firing
+candidate. This arm needs no ghost-edge reasoning at all: `acc`/`Er` are untouched, and the
+semantic witness needs only reflexivity (`hFC.1.refl`), not `hacc`. -/
+theorem S4RedirectSoundInv_boxPos_step (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (Er : List (WorldIndex × WorldIndex))
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er)
+    (hcand : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalNonMintCandidates φ₀ keys b e acc) :
+    ∃ nf : List (SignedFormula (Proposition Atom) WorldIndex),
+      (match (modalApplyOneS4Keyed φ₀ keys
+          (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).1 with
+        | .linear fs => nf = fs
+        | .branching brs => nf ∈ brs
+        | .persistent fs => nf = fs
+        | .notApplicable => False) ∧
+      S4RedirectSoundInv φ₀ (nf ++ b)
+        ((⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) :: e) acc keys Er
+    := by
+  obtain ⟨hEr, hSat, hAbs, hFroz⟩ := hinv
+  obtain ⟨W, m, f, hFC, hacc, hbsat⟩ := hSat
+  have hmemb : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    modalNonMintCandidates_subset φ₀ keys b e acc hcand
+  have hnotexp : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ e :=
+    modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc _ hcand
+  have hmintapp : modalMintShape (⟨.pos, .box φ, lbl⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) = false ∧
+      (modalApplyOneS4Keyed φ₀ keys (⟨.pos, .box φ, lbl⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).1.isApplicable = true := by
+    unfold modalNonMintCandidates at hcand
+    have hpred := (List.mem_filter.mp hcand).2
+    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+    exact ⟨hpred.1.1, hpred.2⟩
+  obtain ⟨hmshape, happ⟩ := hmintapp
+  -- Old conjunct (d), instantiated at the fired candidate: forces `outDeg acc lbl = 0`.
+  have houtdeg0 : outDeg acc lbl = 0 := by
+    by_contra hne
+    rcases hFroz (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        hmemb hmshape hne with h1 | h2
+    · exact hnotexp h1
+    · rw [h2] at happ
+      simp [RuleResult.isApplicable] at happ
+  -- No ghost edge is sourced at `lbl`.
+  have hnoghostsrc : ∀ p ∈ Er, p.1 ≠ lbl := by
+    intro p hp heq
+    exact outDeg_ne_zero_of_hasEdge acc p.1 p.2 (hEr p hp) (heq ▸ houtdeg0)
+  -- The rule's own output, at zero out-degree, is exactly the T-self layer.
+  have hred : (modalApplyOneS4Keyed φ₀ keys (⟨.pos, .box φ, lbl⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).1 =
+      (if (modalTBoxSelf b φ lbl).isEmpty then .notApplicable
+        else .persistent (modalTBoxSelf b φ lbl)) := by
+    rw [modalApplyOneS4Keyed_boxPos_eq_S4Rules]
+    exact modalApplyOneS4Rules_boxPos_eq_of_outDeg_zero b acc φ lbl houtdeg0
+  -- `modalTBoxSelf b φ lbl` is nonempty (else the candidate is not applicable).
+  have hnonempty : ¬ (modalTBoxSelf b φ lbl).isEmpty := by
+    intro hemp
+    rw [hred, if_pos hemp] at happ
+    simp [RuleResult.isApplicable] at happ
+  have hres : (modalApplyOneS4Keyed φ₀ keys (⟨.pos, .box φ, lbl⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).1 =
+      .persistent (modalTBoxSelf b φ lbl) := by rw [hred, if_neg hnonempty]
+  -- Every element of the new content lands at `lbl`, the SAME world as the firing candidate.
+  have hnflabel : ∀ sf' ∈ modalTBoxSelf b φ lbl, sf'.label = lbl := by
+    intro sf' hsf'
+    simp only [modalTBoxSelf] at hsf'
+    split_ifs at hsf' with hcase
+    · simp at hsf'
+    · simp only [List.mem_singleton] at hsf'; subst hsf'; rfl
+  -- The T-self content's own semantic soundness: reflexivity, no `hacc` needed.
+  have hnfsat : ∀ sf' ∈ modalTBoxSelf b φ lbl, sfSat m f sf' := by
+    intro sf' hsf'
+    simp only [modalTBoxSelf] at hsf'
+    split_ifs at hsf' with hcase
+    · simp at hsf'
+    · simp only [List.mem_singleton] at hsf'
+      subst hsf'
+      have hbox : Satisfies m (f lbl) (.box φ) := (hbsat _ hmemb).1 rfl
+      simp only [Satisfies] at hbox
+      exact sfSat_pos m f φ lbl (hbox (f lbl) (hFC.1.refl (f lbl)))
+  refine ⟨modalTBoxSelf b φ lbl, by rw [hres], hEr, ⟨W, m, f, hFC, hacc, ?_⟩, ?_, ?_⟩
+  · intro sf' hmem'
+    rcases List.mem_append.mp hmem' with hnew | hold
+    · exact hnfsat sf' hnew
+    · exact hbsat sf' hold
+  · intro p hp χ
+    have hnesrc := hnoghostsrc p hp
+    have hsub : ∀ sf' ∈ (modalTBoxSelf b φ lbl ++ b), sf' ∈ b ∨ sf'.label = lbl :=
+      fun sf' hmem' => (List.mem_append.mp hmem').elim (fun h => Or.inr (hnflabel sf' h)) Or.inl
+    have hAbs' := hAbs p hp χ
+    refine ⟨fun hmem1 => ?_, fun hmem2 => ?_⟩
+    · rcases hsub _ hmem1 with hin | hlbl
+      · obtain ⟨h1, h2⟩ := hAbs'.1 hin
+        exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+      · exact absurd hlbl hnesrc
+    · rcases hsub _ hmem2 with hin | hlbl
+      · obtain ⟨h1, h2⟩ := hAbs'.2 hin
+        exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+      · exact absurd hlbl hnesrc
+  · intro sf' hmem' hmshape' houtdeg'
+    rcases List.mem_append.mp hmem' with hnew | hold
+    · exfalso
+      have hlbl' := hnflabel sf' hnew
+      rw [hlbl', houtdeg0] at houtdeg'
+      exact houtdeg' rfl
+    · rcases eq_or_ne sf' (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          with rfl | hne'
+      · exact Or.inl List.mem_cons_self
+      · rcases hFroz sf' hold hmshape' houtdeg' with h1 | h2
+        · exact Or.inl (List.mem_cons_of_mem _ h1)
+        · exact Or.inr
+            (modalApplyOneS4Keyed_notApplicable_growth φ₀ keys sf' b (modalTBoxSelf b φ lbl) acc
+              h2)
+
+/-- Dual of `S4RedirectSoundInv_boxPos_step` for the diamond-negative shape. -/
+theorem S4RedirectSoundInv_diaNeg_step (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (Er : List (WorldIndex × WorldIndex))
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er)
+    (hcand : (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalNonMintCandidates φ₀ keys b e acc) :
+    ∃ nf : List (SignedFormula (Proposition Atom) WorldIndex),
+      (match (modalApplyOneS4Keyed φ₀ keys
+          (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).1 with
+        | .linear fs => nf = fs
+        | .branching brs => nf ∈ brs
+        | .persistent fs => nf = fs
+        | .notApplicable => False) ∧
+      S4RedirectSoundInv φ₀ (nf ++ b)
+        ((⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) :: e) acc keys Er
+    := by
+  obtain ⟨hEr, hSat, hAbs, hFroz⟩ := hinv
+  obtain ⟨W, m, f, hFC, hacc, hbsat⟩ := hSat
+  have hmemb : (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    modalNonMintCandidates_subset φ₀ keys b e acc hcand
+  have hnotexp : (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ e :=
+    modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc _ hcand
+  have hmintapp : modalMintShape (⟨.neg, .diamond φ, lbl⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) = false ∧
+      (modalApplyOneS4Keyed φ₀ keys (⟨.neg, .diamond φ, lbl⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).1.isApplicable = true := by
+    unfold modalNonMintCandidates at hcand
+    have hpred := (List.mem_filter.mp hcand).2
+    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+    exact ⟨hpred.1.1, hpred.2⟩
+  obtain ⟨hmshape, happ⟩ := hmintapp
+  have houtdeg0 : outDeg acc lbl = 0 := by
+    by_contra hne
+    rcases hFroz (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        hmemb hmshape hne with h1 | h2
+    · exact hnotexp h1
+    · rw [h2] at happ
+      simp [RuleResult.isApplicable] at happ
+  have hnoghostsrc : ∀ p ∈ Er, p.1 ≠ lbl := by
+    intro p hp heq
+    exact outDeg_ne_zero_of_hasEdge acc p.1 p.2 (hEr p hp) (heq ▸ houtdeg0)
+  have hred : (modalApplyOneS4Keyed φ₀ keys (⟨.neg, .diamond φ, lbl⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).1 =
+      (if (modalTDiaNegSelf b φ lbl).isEmpty then .notApplicable
+        else .persistent (modalTDiaNegSelf b φ lbl)) := by
+    rw [modalApplyOneS4Keyed_diaNeg_eq_S4Rules]
+    exact modalApplyOneS4Rules_diaNeg_eq_of_outDeg_zero b acc φ lbl houtdeg0
+  have hnonempty : ¬ (modalTDiaNegSelf b φ lbl).isEmpty := by
+    intro hemp
+    rw [hred, if_pos hemp] at happ
+    simp [RuleResult.isApplicable] at happ
+  have hres : (modalApplyOneS4Keyed φ₀ keys (⟨.neg, .diamond φ, lbl⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).1 =
+      .persistent (modalTDiaNegSelf b φ lbl) := by rw [hred, if_neg hnonempty]
+  have hnflabel : ∀ sf' ∈ modalTDiaNegSelf b φ lbl, sf'.label = lbl := by
+    intro sf' hsf'
+    simp only [modalTDiaNegSelf] at hsf'
+    split_ifs at hsf' with hcase
+    · simp at hsf'
+    · simp only [List.mem_singleton] at hsf'; subst hsf'; rfl
+  have hnfsat : ∀ sf' ∈ modalTDiaNegSelf b φ lbl, sfSat m f sf' := by
+    intro sf' hsf'
+    simp only [modalTDiaNegSelf] at hsf'
+    split_ifs at hsf' with hcase
+    · simp at hsf'
+    · simp only [List.mem_singleton] at hsf'
+      subst hsf'
+      have hdia : ¬ Satisfies m (f lbl) (.diamond φ) := (hbsat _ hmemb).2 rfl
+      rw [Satisfies.diamond_iff] at hdia
+      push Not at hdia
+      exact sfSat_neg m f φ lbl (hdia (f lbl) (hFC.1.refl (f lbl)))
+  refine ⟨modalTDiaNegSelf b φ lbl, by rw [hres], hEr, ⟨W, m, f, hFC, hacc, ?_⟩, ?_, ?_⟩
+  · intro sf' hmem'
+    rcases List.mem_append.mp hmem' with hnew | hold
+    · exact hnfsat sf' hnew
+    · exact hbsat sf' hold
+  · intro p hp χ
+    have hnesrc := hnoghostsrc p hp
+    have hsub : ∀ sf' ∈ (modalTDiaNegSelf b φ lbl ++ b), sf' ∈ b ∨ sf'.label = lbl :=
+      fun sf' hmem' => (List.mem_append.mp hmem').elim (fun h => Or.inr (hnflabel sf' h)) Or.inl
+    have hAbs' := hAbs p hp χ
+    refine ⟨fun hmem1 => ?_, fun hmem2 => ?_⟩
+    · rcases hsub _ hmem1 with hin | hlbl
+      · obtain ⟨h1, h2⟩ := hAbs'.1 hin
+        exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+      · exact absurd hlbl hnesrc
+    · rcases hsub _ hmem2 with hin | hlbl
+      · obtain ⟨h1, h2⟩ := hAbs'.2 hin
+        exact ⟨List.mem_append.mpr (Or.inr h1), List.mem_append.mpr (Or.inr h2)⟩
+      · exact absurd hlbl hnesrc
+  · intro sf' hmem' hmshape' houtdeg'
+    rcases List.mem_append.mp hmem' with hnew | hold
+    · exfalso
+      have hlbl' := hnflabel sf' hnew
+      rw [hlbl', houtdeg0] at houtdeg'
+      exact houtdeg' rfl
+    · rcases eq_or_ne sf' (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          with rfl | hne'
+      · exact Or.inl List.mem_cons_self
+      · rcases hFroz sf' hold hmshape' houtdeg' with h1 | h2
+        · exact Or.inl (List.mem_cons_of_mem _ h1)
+        · exact Or.inr
+            (modalApplyOneS4Keyed_notApplicable_growth φ₀ keys sf' b (modalTDiaNegSelf b φ lbl)
+              acc h2)
+
 /-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
 
 A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)

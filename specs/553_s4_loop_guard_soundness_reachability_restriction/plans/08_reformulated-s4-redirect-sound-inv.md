@@ -912,7 +912,7 @@ additive changes to `FrameCompleteness.lean` for both commits.
 
 ---
 
-### Phase 7.7: 4-rule arms restated with the ghost-edge disjunction [BLOCKED]
+### Phase 7.7: 4-rule arms restated with the ghost-edge disjunction [COMPLETED]
 
 - **Goal:** Re-wrap `modalApplyOneS4Keyed_boxPos_sat` and `modalApplyOneS4Keyed_diaNeg_sat` against
   the weakened conjunct (b), replacing the blanket edge-realization hypothesis with the
@@ -933,10 +933,10 @@ additive changes to `FrameCompleteness.lean` for both commits.
 - **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
 
 - **Tasks:**
-  - [ ] Re-locate `modalApplyOneS4Rules_boxPos_soundIn`/`_diaNeg_soundIn` and read how each
+  - [x] Re-locate `modalApplyOneS4Rules_boxPos_soundIn`/`_diaNeg_soundIn` and read how each
         consumes `hacc` (both go through one hop of `hFC.2 : IsTrans` off a recorded successor
         edge). Identify the exact use sites.
-  - [ ] Restate each `_soundIn` with the disjunctive edge hypothesis. Per report §3.4 row 4, split
+  - [x] Restate each `_soundIn` with the disjunctive edge hypothesis. Per report §3.4 row 4, split
         per successor:
         - successor reached by a **non-ghost** edge → the landed one-hop `IsTrans` proof applies
           unchanged;
@@ -946,21 +946,35 @@ additive changes to `FrameCompleteness.lean` for both commits.
           appears in the output list. **Prefer the dedup route if it closes** — it avoids needing
           the satisfaction argument at all — but confirm which one actually applies rather than
           assuming.
-  - [ ] Note and confirm the simplification the probe's two `notApplicable_of_saturated` lemmas may
+        *(deviation: altered — neither successor case is ever reached. The third-dispatch
+        discharge (see Verdict below) shows old conjunct (d), applied directly to the firing
+        candidate, forces `outDeg acc lbl = 0` at the moment either 4-rule genuinely fires, which
+        means the candidate's own world has NO recorded successor at all (ghost or non-ghost) to
+        split on. `modalApplyOneS4Rules_{boxPos,diaNeg}_soundIn` and their `hacc` consumption are
+        never invoked by the new arms; a bespoke, hacc-free reduction is used instead.)*
+  - [x] Note and confirm the simplification the probe's two `notApplicable_of_saturated` lemmas may
         offer: at a state where `modalS4Saturated` holds, these two shapes are unconditionally
         `.notApplicable` and the arm is vacuous. **Do not rely on this as the whole argument** —
         `modalS4Saturated` is available at settled/mint states via
         `modalS4Saturated_of_ordered_settled`, but a 4-rule shape can also fire at a *primary-scan*
         step where it is not available. Record explicitly which of the two routes each restated arm
         actually takes.
-  - [ ] Discharge (a), (c), (d) for these arms: `acc' = acc` (both landed arms conclude
+        *(deviation: altered — `modalS4Saturated` is not used at all. The actual route is
+        narrower and unconditional: zero out-degree at the firing world, established directly
+        from old conjunct (d) rather than from branch-wide saturation, and it holds even at a
+        primary-scan step where `modalS4Saturated` is unavailable.)*
+  - [x] Discharge (a), (c), (d) for these arms: `acc' = acc` (both landed arms conclude
         `.snd = acc`), `Er' = Er`, new formulas land at successors — for a ghost successor already
         present (so no new formula at any redirect source), for a non-ghost successor covered by
         the same `outDeg` argument as Phase 7.5. (d) consumes Phase 7.4's branch-growth half.
-        *(deviation: blocked, see Progress Record below — the "same outDeg argument as Phase 7.5"
-        does not transfer as stated; a genuinely open sub-question remains)*
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1. *(deviation: deferred — not
-        reached, conjunct (d)'s discharge for this phase is not yet designed)*
+        *(deviation: altered — see Verdict below. New formulas do NOT land at a successor at all;
+        they land at the firing candidate's own world `lbl` (T-self content only), exactly Phase
+        7.5's shape, since old (d) forces `outDeg acc lbl = 0` and the K-layer/4-layer are
+        therefore vacuously empty at zero out-degree. (a)/(c)/(d) are discharged by the same
+        argument Phase 7.5 uses, not by a ghost/non-ghost successor split, and Phase 7.4's
+        branch-growth lemma is not needed since `acc` and `b`'s pre-existing members are
+        untouched by this arm.)*
+  - [x] `#print axioms`; scoped build; `lint-style`; census exactly 1.
 
 - **Done when:** both 4-rule arms are sorry-free and committed under `S4RedirectSoundInv`; census
   exactly 1; scoped build and `lint-style` clean.
@@ -1144,9 +1158,74 @@ semantic content, not attempted here), or (ii) weaken conjunct (d) of `S4Redirec
 specifically for non-mint-shaped formulas at already-minted successor worlds, accepting the
 re-verification cost against Phases 7.2, 7.3, 7.5, 7.6.
 
+#### Phase 7.7 Verdict (third dispatch — resolved, neither route (i) nor route (ii) was needed)
+
+**Neither of the two recommended options above was taken. A third route closes the phase using
+old conjunct (d) alone, applied more sharply than either prior dispatch considered.**
+
+Both prior dispatches' searches were scoped to bounding `outDeg` at the *successor* world `w'`
+that a genuinely-firing 4-rule step propagates content to. Neither dispatch checked whether the
+4-rule can be genuinely firing (K-layer or 4-layer non-vacuous) at all, at a state where old
+conjunct (d) already holds. It cannot:
+
+- `modalNonMintCandidates` (`LoopChecking.lean:1205`) characterises a firing candidate `sf`
+  exactly as `¬modalMintShape sf ∧ sf ∉ e ∧ (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable`
+  — the precise negation of old conjunct (d)'s consequent for that `sf`
+  (`modalNonMintCandidates_eq_nil_iff`).
+- So for a genuinely firing, non-mint, unexpanded candidate `sf = ⟨.pos, .box φ, lbl⟩` (or the
+  diamond-negative dual), old conjunct (d) — held before this step, exactly as
+  `S4RedirectSoundInv_notBoxDia_step` (Phase 7.5) already uses it via `hFroz` — forces
+  `outDeg acc lbl = 0` by contrapositive: this is the SAME `houtdeg0` argument Phase 7.5 uses on
+  the firing candidate, and it does not care what shape `sf` has.
+- `outDeg acc lbl = 0` means `acc.successorsOf lbl = []` (`List.length_eq_zero_iff`). Both the
+  K-layer (`boxPropagation`/its diamond-negative dual, `Branch.lean:196`) and the 4-layer
+  (`modalFourBoxProp`/`modalFourDiaNegProp`, `FrameRules.lean:133`/`:143`) are `filterMap`s over
+  `acc.successorsOf lbl` — an empty successor list makes BOTH vacuously empty
+  (`modalApplyOneS4Rules_{boxPos,diaNeg}_eq_of_outDeg_zero`, new lemmas). So the "new content
+  lands at a recorded successor `w'`" scenario the first/second dispatch Progress Records worried
+  about **cannot arise** when old (d) already holds — `lbl` has no successor at all at the moment
+  either 4-rule genuinely fires.
+- The only layer that survives zero out-degree is T-self (`modalTBoxSelf`/`modalTDiaNegSelf`,
+  `FrameRules.lean:62`/`:71`) — unconditional on `acc`, landing its (at most one) output formula
+  at `lbl` itself, the SAME world as the firing candidate. This is *exactly* Phase 7.5's shape
+  (new content at the firing candidate's own zero-outDeg world), not a new case: (c) and (d) are
+  discharged by the identical argument Phase 7.5 already uses, and the semantic witness needs
+  only frame reflexivity (`hFC.1.refl`), never `hacc`/`Er` — so the arms need no ghost-edge case
+  split at all, and `modalApplyOneS4Rules_{boxPos,diaNeg}_soundIn` (the pre-Phase-7 lemmas the
+  plan's Scope Hypothesis targeted) are never invoked; they take an unconditional `hacc` that
+  `S4RedirectSoundInv`'s weakened conjunct (b) does not supply, and are unnecessary once the
+  K/4-layer vacuity is established.
+
+**This resolves the Progress Record's "genuine open question" without either recommended option**:
+route (i) (a new per-world successor-saturation invariant) is not needed because the relevant
+successor never exists in the first place under a properly-maintained (d); route (ii) (weakening
+conjunct (d)) is not needed because (d) as currently stated is exactly what supplies the
+zero-outDeg fact that closes the arm. `S4RedirectSoundInv`'s definition is untouched by this
+dispatch.
+
+**Landed, sorry-free, in `FrameCompleteness.lean`** (purely additive, `git diff | grep '^-[^-]'`
+empty for this file): `successorsOf_eq_nil_of_outDeg_eq_zero`,
+`modalApplyOneS4Rules_{boxPos,diaNeg}_eq_of_outDeg_zero` (the K/4-layer-vacuity closed forms),
+and the two arm theorems `S4RedirectSoundInv_boxPos_step` / `S4RedirectSoundInv_diaNeg_step`,
+stated in the same `∃ nf, (match (modalApplyOneS4Keyed …).1 with …) ∧ S4RedirectSoundInv …` shape
+Phase 7.5 uses, for uniformity with the other four arms ahead of Phase 7.8's dispatcher.
+
+**Verification**: scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` clean;
+`lake exe checkInitImports` and `lake exe lint-style` both clean; `lean_verify`/`#print axioms`
+on both new arm theorems gives exactly `{propext, Classical.choice, Quot.sound}` (no new axioms);
+sorry census (the repo's canonical two-grep code-position form, restricted to
+`Cslib/Logics/Modal/Tableau/`) held at exactly 1 (`FrameSoundness.lean:1251`).
+
+**Re-verification of Phases 7.2, 7.3, 7.5, 7.6 — not required and confirmed**: this dispatch does
+not touch `S4RedirectSoundInv`'s definition (no conjunct is weakened or strengthened), does not
+edit any previously-landed declaration (purely additive diff), and does not change the signature
+or statement of any lemma those four phases depend on. The four phases' own landed proofs are
+therefore unaffected by construction, not merely by inspection; no re-run of their proofs was
+needed or performed.
+
 ---
 
-### Phase 7.8: The dispatcher theorem over `modalStepBranchS4KeyedOrdered` [NOT STARTED]
+### Phase 7.8: The dispatcher theorem over `modalStepBranchS4KeyedOrdered` [IN PROGRESS]
 
 - **Goal:** Assemble the five arms into a single step-preservation theorem: if
   `S4RedirectSoundInv φ₀ b e acc keys Er` and `modalStepBranchS4KeyedOrdered` fires producing

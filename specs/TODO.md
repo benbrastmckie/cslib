@@ -377,8 +377,8 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md]
 - **Plan**: [558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md]
+- **Research**: [558_tableau_support_private_dedup/reports/02_statement-equivalence-audit.md]
 
 **Description**: [Task A of the modal-tableau refactor programme; P0, highest value/risk ratio in the whole programme, NO dependency on any other task.] Cslib/Logics/Modal/Tableau/ contains 77 comment-attested 'Local re-derivation of X (unavailable across files)' sites, root-caused by FmpMeasure.lean marking 50 declarations private: modalSubfmls_trans is re-derived in three files (S5Simplification.lean:97, FiveSimplification.lean:736, BDriver.lean:211), modalKnownWorlds_fold_spec in four, hasEdge_addEdge_cases in four. Extract those facts as PUBLIC declarations into Cslib/Logics/Modal/Tableau/Support/{Subfmls,KnownWorlds,Accessibility}.lean and DELETE the 77 re-derivations. This is mechanical and behaviour-preserving by construction, requires no abstraction decision, and it shrinks the oversized files BEFORE any split seams are chosen -- so it must precede the module split. Verify with lake build, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix. Constraint: do not edit Rules.lean, Saturation.lean or Branch.lean. Preserve every proven, consumed result; modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) must be green at every commit. Subsystem sorry census must stay at exactly 1 (FrameSoundness.lean:1244, retained by explicit user decision) and axiom count at 0.
 

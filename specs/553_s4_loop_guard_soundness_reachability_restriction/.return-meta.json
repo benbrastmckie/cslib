@@ -1,36 +1,45 @@
 {
-  "status": "planned",
-  "agent_type": "planner-hard-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
-  "task_number": 553,
-  "task_type": "cslib",
-  "session_id": "sess_1785084826_a33d36",
-  "effort_flag": "hard",
-  "lit_flag": true,
-  "orchestrator_mode": true,
-  "plan_version": 5,
-  "supersedes": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-  "started_at": "2026-07-26T20:45:00Z",
-  "completed_at": "2026-07-26T21:35:00Z",
-  "operation": "create plan v5 -- route (1) pinned-witness truth lemma",
-  "phase_count": 12,
-  "estimated_hours": 42,
-  "postmortem_rules_count": 17,
+  "status": "partial",
+  "started_at": "2026-08-05T13:15:00Z",
+  "completed_at": "2026-08-05T14:05:00Z",
+  "requires_user_review": true,
+  "review_reason": "Phase 1 (Decision Gate A) of plan v5 is BLOCKED: the pinned-witness redirect-preservation lemma's branch conjunct does not close (Kill Criteria outcome (iii)). A machine-checked stuck goal was reached in both the box-positive and diamond-negative cases of the intended structural-induction agreement argument -- the recursion escapes to arbitrary (non-label) model points that neither accPinnedBy nor hbox/hdia constrain. Per plan v5's Terminal Condition, route (1) is dead as planned and no fifth route is proposed by this dispatch. The plan's original escalation target (task 557's refactor) has ALREADY completed (tasks 561-563 landed before this dispatch), so this is a fresh blocker, not a repeat of the original terminal-condition handoff.",
+  "blocked_phase": "Phase 1: DECISION GATE A -- the pinned redirect-preservation lemma",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
-      "summary": "v5 route (1): driver-dependent Hintikka/canonical-model truth lemma with a PINNED witness model, at full branchSatisfiableIn s4FC strength. 12 phases, 8 waves, FOUR kill gates (three in wave 1, disjoint files, fully parallel). Two mechanisms: accPinnedBy (an upper bound on m.r over branch labels, closing the backward/ambient-predecessor direction that killed routes P/origin-edge/ancestor-only) and boxed birth content + boxed mint payload (report 02's R-new, closing the forward/unwrapped-persistence direction that killed route (3)). Explicit terminal condition: if any gate fails, do NOT propose a fifth route -- hand off to task 557 with a dependency inversion recorded in state_updates_pending."
-    },
-    {
-      "type": "plan",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "summary": "[ABANDONED] v4 subtractive blocking + red channel; stamped with Superseded-by pointer to v5. Phases 1-2 [COMPLETED], Phase 3 Verdict and Post-Gate-B Triage preserved verbatim; Phase 4's stale [IN PROGRESS] corrected to [NOT STARTED] with a record-correction note (it was never dispatched)."
+      "summary": "Phase 1 marked [BLOCKED]; plan-level Status set to [BLOCKED]; #### Phase 1 Verdict subsection added recording the machine-checked stuck goals and the outcome (iii) determination."
     }
   ],
   "modified_files": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md"
   ],
-  "requires_user_review": false
+  "partial_progress": {
+    "stage": "phase1_blocked",
+    "details": "Sub-step 1.1 (accPinnedBy, branchSatisfiablePinnedIn, branchSatisfiablePinnedIn_redirect_mechanical) landed sorry-free, standard-axioms-only, committed at 6773d32b. Sub-step 1.2 (the gate lemma's branch conjunct) attempted and reverted per Kill Criteria outcome (iii); not present in the file.",
+    "phases_completed": 0,
+    "lint_count_start": null,
+    "lint_count_current": null
+  },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 1,
+    "sorry_count_note": "Exactly 1, matching the pre-existing, standing sorry at FrameSoundness.lean:1251 (branchSatisfiableIn_s4FC_ancestor_redirect), retained by explicit user decision and untouched by this dispatch. No new sorry introduced or committed.",
+    "vacuous_count": 0,
+    "axiom_count": 45,
+    "axiom_count_note": "Unchanged from the pre-dispatch baseline (45, via grep -rn '^axiom' Cslib/ | wc -l).",
+    "build_passed": true,
+    "build_note": "lake build Cslib.Logics.Modal.Tableau.FrameSoundness clean (896/896 jobs); lake exe lint-style clean on the touched file; lake exe checkInitImports clean.",
+    "ci_pipeline_passed": false,
+    "ci_pipeline_note": "Full CI pipeline not run to completion -- this is a partial/blocked result, not an implemented status. The touched file's scoped build, style-lint, and Init-import checks are clean; full lake lint / lake test / lake shake were not run since no declaration is being submitted as complete beyond the already-verified sub-step 1.1."
+  },
+  "metadata": {
+    "session_id": "sess_1785935392_0e674b_553",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

@@ -1,7 +1,8 @@
 # Implementation Plan: Pinned-Witness Truth Lemma for the S4 Keyed Loop Guard (v5)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED] (Gate A / Phase 1 failed, outcome (iii) -- see Phase 1's `#### Phase 1
+  Verdict`; route (1) is dead as planned, no fifth route proposed by this dispatch)
 - **Effort**: 36-44 hours (12 phases; **four** of them are front-loaded kill gates, three in wave 1,
   any one of which terminates the route)
 - **Dependencies**: 535 (completeness-line task; its landed keyed completeness results are inputs)
@@ -640,7 +641,7 @@ this task has suffered twice. `plan_metadata.skeleton` is `false` and there is n
 
 ---
 
-### Phase 1: DECISION GATE A — the pinned redirect-preservation lemma [NOT STARTED]
+### Phase 1: DECISION GATE A — the pinned redirect-preservation lemma [BLOCKED]
 
 - **Goal:** Define `accPinnedBy` and `branchSatisfiablePinnedIn`, and determine whether adding the
   redirect edge preserves the latter under the strongest hypotheses any pinned construction could
@@ -652,17 +653,19 @@ this task has suffered twice. `plan_metadata.skeleton` is `false` and there is n
 - **Timing:** 3 hours.
 
 - **Tasks:**
-  - [ ] Append a section-level module comment stating the two mechanisms, citing
+  - [x] Append a section-level module comment stating the two mechanisms, citing
         `ChagrovZakharyaschev1997` Thm 5.51 (`chunk_0267.md`) for the containment
         `S_{n+1} ⊆ R_ambient` and the interval theorem (`chunk_0246.md` L43-65) for why an upper
         bound on the model relation is the literature-standard device. Cite declaration names and
         source labels; **no task numbers**.
-  - [ ] `def accPinnedBy` and `def branchSatisfiablePinnedIn` exactly as written in the Overview.
+  - [x] `def accPinnedBy` and `def branchSatisfiablePinnedIn` exactly as written in the Overview.
         Record in the docstring why the quantification is over `modalKnownWorlds b` and not over all
         `WorldIndex` (`f` is total, so an unrestricted upper bound would force unused labels equal),
         and why the box-condition form was rejected as primitive (not `b`-monotone; see Postmortem
         Constraints).
-  - [ ] State the gate lemma. Hypotheses, in this exact shape:
+  - [x] State the gate lemma *(deviation: stated and attempted, then REVERTED per Kill Criteria
+        outcome (iii) below — the statement no longer appears in `FrameSoundness.lean`; see
+        `#### Phase 1 Verdict`)*. Hypotheses, in this exact shape:
         ```lean
         lemma branchSatisfiablePinnedIn_s4FC_redirect
             {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
@@ -678,7 +681,7 @@ this task has suffered twice. `plan_metadata.skeleton` is `false` and there is n
         ```
         `hbox`/`hdia` are the **wrapped** transfers Phase 6 discharges from boxed birth content;
         `hsat` is Gate B's conclusion. Nothing stronger is admissible, so a failure here is final.
-  - [ ] **Sub-step 1.1 (must land sorry-free and be committed on its own).** The extension relation
+  - [x] **Sub-step 1.1 (must land sorry-free and be committed on its own).** The extension relation
         and the three mechanical conjuncts:
         - `r' := fun x y => m.r x y ∨ (m.r x (f src) ∧ m.r (f wBlock) y)`; `m' := { r := r', v := m.v }`.
         - `Std.Refl r'` from the left disjunct.
@@ -694,10 +697,13 @@ this task has suffered twice. `plan_metadata.skeleton` is `false` and there is n
           `ReflTransGen acc w src`, the new edge `src → wBlock`, and `ReflTransGen acc wBlock w'`.
           `reflTransGen_accWithReds_first_red` (`LoopChecking.lean:8882`) may be reusable for the
           decomposition; if it is, say so in the docstring, and if it is not, say why.
-  - [ ] **Sub-step 1.2 (the verdict).** The branch conjunct: `∀ sf ∈ b`, satisfaction with respect to
-        `m'`. Because `m.r ⊆ r'`, box-positive and diamond-negative satisfaction is **not**
-        automatically preserved. The intended route is an agreement lemma restricted to
-        `modalSubfmls φ₀` (every branch formula lies there by `S4LoopInv.bClosure`, and
+  - [x] **Sub-step 1.2 (the verdict)** *(deviation: attempted via the exact route this task
+        describes — an agreement lemma over `modalSubfmls φ₀`/`Proposition Atom` by structural
+        induction — and the attempt is BLOCKED; reverted per outcome (iii); see
+        `#### Phase 1 Verdict` for the machine-checked stuck goals)*. The branch conjunct: `∀ sf ∈ b`,
+        satisfaction with respect to `m'`. Because `m.r ⊆ r'`, box-positive and diamond-negative
+        satisfaction is **not** automatically preserved. The intended route is an agreement lemma
+        restricted to `modalSubfmls φ₀` (every branch formula lies there by `S4LoopInv.bClosure`, and
         `modalSubfmls` is subformula-closed): prove `Satisfies m x χ ↔ Satisfies m' x χ` by induction
         on `χ`, where the only non-mechanical case is `.box ψ` forward, at a point `x = f w` for a
         known `w` carrying `T(□ψ)@w ∈ b`. There the chain is: `accPinnedBy` gives
@@ -705,9 +711,10 @@ this task has suffered twice. `plan_metadata.skeleton` is `false` and there is n
         `T(□ψ)@src ∈ b`; `hbox` gives `T(□ψ)@wBlock ∈ b`; the branch conjunct gives
         `Satisfies m (f wBlock) (.box ψ)`, which covers every `y` with `m.r (f wBlock) y` including
         points outside the label image. `.diamond ψ` negative is the exact dual through `hdia`.
-  - [ ] Run `lean_verify` on every landed declaration; require only `propext`, `Classical.choice`,
-        `Quot.sound`.
-  - [ ] Record the verdict in a `#### Phase 1 Verdict` subsection in this file, with the exact
+  - [x] Run `lean_verify` on every landed declaration; require only `propext`, `Classical.choice`,
+        `Quot.sound` *(the surviving landed declaration is `branchSatisfiablePinnedIn_redirect_mechanical`;
+        verified clean)*.
+  - [x] Record the verdict in a `#### Phase 1 Verdict` subsection in this file, with the exact
         `lean_goal` state at any stuck point.
 
 - **Kill criteria and outcomes** (decide before dispatch, not under pressure):
@@ -724,6 +731,128 @@ this task has suffered twice. `plan_metadata.skeleton` is `false` and there is n
   `#### Phase 1 Verdict` recording the exact goal state; sub-step 1.1 is sorry-free and committed in
   either case; sorry census in `Cslib/Logics/Modal/Tableau/` is exactly 1; scoped
   `lake build Cslib.Logics.Modal.Tableau.FrameSoundness` and `lake exe lint-style` clean.
+
+#### Phase 1 Verdict
+
+**Outcome (iii): the branch conjunct does not close within this dispatch. Route (1) is dead as
+planned.** Sub-step 1.1 (`accPinnedBy`, `branchSatisfiablePinnedIn`,
+`branchSatisfiablePinnedIn_redirect_mechanical` — the three mechanical conjuncts) is sorry-free,
+standard-axioms-only (`propext`, `Classical.choice`, `Quot.sound`), and committed
+(`Cslib/Logics/Modal/Tableau/FrameSoundness.lean`, appended at end of file). Sub-step 1.2 (the gate
+lemma `branchSatisfiablePinnedIn_s4FC_redirect`, stated exactly as this phase's task list specifies)
+was attempted via the intended route — an agreement lemma over `Proposition Atom` by structural
+induction, `Satisfies m x χ ↔ Satisfies m' x χ` — and reverted; it does **not** currently appear in
+`FrameSoundness.lean`.
+
+**Re-validation of the pre-refactor line anchors (per this plan's own RECORD CORRECTION note)**:
+before dispatching, the Preserved Assets table's declarations were re-located by
+`grep -n '^lemma\|^def\|^theorem\|^structure'` rather than by line number, since tasks 561-563
+(the refactor programme) landed between this plan's authoring and this dispatch. Every declaration
+this phase depends on was found present and structurally intact, merely shifted (e.g.
+`branchSatisfiableIn_s4FC_ancestor_redirect`'s sorry moved from the plan's stated `:1244` to
+`:1251`; `modalS4Saturated` moved from `:6581-6593` to `:7146-7160`). One load-bearing discovery:
+`successorBirthContent` (`LoopChecking.lean:507-540`) now records box-plus content **inline** in
+the mainline (non-parallel) definition — task 563 landed Mechanism 2 (boxed birth content) directly
+into `blockingWorldS4Keyed`'s existing birth-content computation, not as a separate `…Boxed`
+parallel family as this plan's Phase 5-7 anticipated. This phase's own obligation (Gate A, purely
+about `FrameSoundness.lean`) is unaffected by that shift, but it means Phases 5-7's "land a parallel
+Boxed driver family" framing needs re-assessment once/if a later route is pursued — recorded here,
+not acted on (out of this phase's scope).
+
+**The exact obstruction, machine-confirmed.** The intended agreement lemma was attempted as:
+
+```lean
+have hagree : ∀ χ : Proposition Atom, ∀ x : W,
+    Satisfies m x χ ↔
+    Satisfies (⟨fun x y => m.r x y ∨ (m.r x (f src) ∧ m.r (f wBlock) y), m.v⟩ : Model W Atom) x χ
+```
+
+by induction on `χ`. The propositional cases (`atom`, `bot`, `imp`, `and`, `or`) close immediately
+(same valuation `m.v`, unaffected by the relation change). The `.box`/`.diamond` cases split on
+which disjunct of `r'` licenses the successor `y`; the "old" disjunct (`m.r x y`) closes for free
+from the inductive hypothesis (`ih y`), which is exactly what the plan's text anticipated. The
+"new" disjunct (`m.r x (f src) ∧ m.r (f wBlock) y`) is where it is stuck, and this is where the
+gate lemma's `x` is **not** assumed to be a known label — it is the bound variable of the
+universally-quantified agreement claim, ranging over the entire model type `W`. The exact captured
+`lean_goal` state at the box-positive (`m`→`m'`) case:
+
+```
+case box.mp.inr
+...
+ih : ∀ (x : W), Satisfies m x φ ↔ Satisfies { r := fun x y => m.r x y ∨ m.r x (f src) ∧ m.r (f wBlock) y, v := m.v } x φ
+x : W
+hbx : Satisfies m x (□φ)
+y : W
+hxsrc : m.r x (f src)
+hwy : m.r (f wBlock) y
+⊢ Satisfies { r := fun x y => m.r x y ∨ m.r x (f src) ∧ m.r (f wBlock) y, v := m.v } y φ
+```
+
+`hbx` only supplies `Satisfies m z φ` for `z` with `m.r x z` — it says nothing about `y`, since
+`m.r x y` does **not** hold in general (only `m.r x (f src)` and `m.r (f wBlock) y` separately,
+which compose only if `m.r (f src) (f wBlock)` already held — the very fact under dispute). The
+only other route to `Satisfies m y φ` is via `hbox`/`hdia` + `hb` (the *original*, unmodified
+branch conjunct) at a KNOWN LABEL: if `x = f w` for a known `w` with `T(□φ)@w ∈ b`, then
+`accPinnedBy` + `hsat`'s propagation gives `T(□φ)@src ∈ b`, `hbox` gives `T(□φ)@wBlock ∈ b`, and
+`hb` gives `Satisfies m (f wBlock) (□φ)`, from which `Satisfies m y φ` follows (since
+`m.r (f wBlock) y`), and `(ih y).mp` finishes it. **But `x` here is universally quantified over
+all of `W`, not restricted to known labels** — the agreement claim must hold at every `x`, and for
+an `x` that is not `f w` for any known `w` (or is `f w` for a `w` with no recorded `T(□φ)@w ∈ b`,
+even though `Satisfies m x (□φ)` holds semantically "by accident" of the arbitrary witness), there
+is no branch fact to invoke `hbox` from, and `accPinnedBy` is silent (it only relates known-label
+pairs). The dual case (`diamond.mpr`, needing `∃z, m.r x z ∧ Satisfies m z φ` from a witness `y`
+reached only via the new disjunct) hits the identical wall, confirmed at:
+
+```
+case diamond.mpr
+...
+x y : W
+hry : { r := fun x y => m.r x y ∨ m.r x (f src) ∧ m.r (f wBlock) y, v := m.v }.r x y
+hsy : Satisfies { r := ... } y φ
+⊢ Satisfies m x (◇φ)
+```
+
+**Why this is not merely "ran out of time," and why it is a new failure mechanism, not a repeat of
+routes P/ancestor-only/subtractive.** The three prior routes died on an "ambient predecessor of
+`f src`" that `accPinnedBy` (Mechanism 1) was built precisely to close, by converting "predecessor
+among known labels" into an `acc`-ancestor relationship. It succeeds at exactly that: sub-step 1.1
+(committed) shows the three mechanical conjuncts — including `accPinnedBy`'s own preservation —
+close cleanly using only known-label reasoning. The **new** obstruction found here is one
+recursion level deeper: proving the branch conjunct by structural induction on formula complexity
+necessarily unwinds `.box`/`.diamond` into their arbitrary model-theoretic successors (`Satisfies`
+quantifies over the entire type `W`, per `Basic.lean`'s definition), and those successors are, in
+general, **not** known-label images at all. `accPinnedBy` and `hbox`/`hdia` are both stated
+*only* over `modalKnownWorlds b` (deliberately, per this phase's own module comment on why an
+unrestricted quantification would be false), so neither supplies any leverage at a point outside
+the label image. This is the same *shape* of problem (an uncontrolled point the invariants cannot
+see) recurring **one syntactic layer inside the branch-conjunct induction**, rather than at the
+top-level witness-model extension itself — a fifth failure mode, not a fourth repeated.
+
+**Was a strictly stronger, nameable hypothesis considered (outcome (iv))?** Yes, and rejected as
+not assessable within this dispatch's budget: the natural strengthening is a *canonicity*
+assumption on the witness model (e.g. "WLOG `W = WorldIndex` and `f = id`," so every model point
+is trivially a known label and the escape above cannot occur). This is nameable, but establishing
+it is not a one-phase addition — it would require replacing "an arbitrary `branchSatisfiablePinnedIn`
+witness" with a term-model/canonical-model construction throughout, which is a materially different
+proof strategy from the one this plan commits to (an arbitrary, pinned-but-otherwise-unconstrained
+witness), is not owned by any later phase in this plan (Phases 5-7 build the boxed driver and boxed
+invariant, not a canonicity argument), and was not priced by any prior report. Per the Kill Criteria
+table's own instruction ("If it is not nameable, this is outcome (iii)"), and since no phase in this
+plan is positioned to discharge it, this is recorded as outcome (iii), not (iv).
+
+**Escalation.** Per the Terminal Condition, a gate failure means route (1) is dead and no fifth
+route is proposed by this dispatch. The plan's original Terminal Condition text names
+`specs/557_modal_tableau_refactor_abstractions_boneyard` as the handoff target with a dependency
+inversion — but per the plan's own RECORD CORRECTION note, that inversion was **already applied**
+and task 557's programme (tasks 561-563, the box-plus/RuleApplySt/Boneyard decision record and
+implementation) has **already completed** before this dispatch. This gate's failure is therefore
+**not** resolved by re-proposing the same handoff (557 already ran, and Gate A still fails after
+its landing) — it is a fresh finding that the pinned-witness-model approach itself, independent of
+the birth-content/keys factoring 557 addressed, cannot close the redirect-edge soundness obligation
+at full `branchSatisfiableIn s4FC` strength via a structural-induction agreement argument. This is
+recorded as a blocker requiring user/orchestrator review rather than a new task-557-style handoff,
+since no currently-known task in `specs/state.json` targets the specific gap identified above (a
+canonical-model or otherwise-restricted-witness construction for the S4 keyed redirect obligation).
 
 ---
 

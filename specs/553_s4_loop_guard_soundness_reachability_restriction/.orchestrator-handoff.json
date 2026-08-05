@@ -1,118 +1,71 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
+  "phase": "implement",
+  "status": "blocked",
   "skeleton": false,
-  "summary": "Created plan v5 for route (1): a driver-dependent Hintikka/canonical-model truth lemma with a PINNED witness model, at full branchSatisfiableIn s4FC strength. v4 stamped [ABANDONED] with a Superseded-by pointer, preserving its Phase 1/2 [COMPLETED] status, its Phase 3 Verdict, and its Post-Gate-B Triage note (Phase 4's stale [IN PROGRESS] marker corrected to [NOT STARTED] with a record-correction note, since it was never dispatched). Route (1) rests on two mechanisms, neither of which any prior route had: (1) accPinnedBy, an upper bound on the witness relation over branch labels, which turns 'ambient predecessor of f src' -- the uncontrollable set that killed Route P, the origin-edge revision, and ancestor-only blocking -- into 'acc-ancestor of src'; and (2) boxed birth content plus a boxed mint payload (report 02 section 4's R-new, never yet tested against this obligation), which makes the transfer at the redirect target WRAPPED rather than unwrapped, dissolving the exact defect that killed route (3). Grounded in ChagrovZakharyaschev1997: the interval theorem S_min subset S subset S_max (chunk_0246), whose explicit warning that a relation in the interval may be nontransitive even when R is transitive PREDICTS route (3)'s failure; the Lemmon filtration's box-plus (chunk_0248), which is exactly wrapped-plus-unwrapped; and Theorem 5.51 (chunk_0267/0268), whose model relation IS the reflexive-transitive closure of generated edges with the containment S_{n+1} subset R_ambient -- the literature form of accPinnedBy. Risk is front-loaded into FOUR kill gates: three in wave 1 with fully disjoint territory (Phase 1 owns FrameSoundness.lean, Phase 2 owns LoopChecking.lean, Phase 3 owns specs artifacts), Gate D in wave 2. Each has a written kill table, a one-dispatch attempt budget, and a no-sorry-at-a-gate rule. Phases 5-12 are explicitly NOT scaffolded on a positive verdict. Honest terminal condition stated in the plan: if any gate fails, do NOT propose a fifth route -- conclude the apparatus needs restructuring and hand off to task 557, which requires inverting 557's dependency on 553.",
+  "summary": "Dispatched plan v5's Phase 1 (Decision Gate A -- the pinned redirect-preservation lemma). Landed sub-step 1.1 sorry-free and standard-axioms-only: accPinnedBy, branchSatisfiablePinnedIn, and branchSatisfiablePinnedIn_redirect_mechanical (the three mechanical conjuncts -- frame condition, edge conjunct, accPinnedBy preservation -- for the redirect-extended witness model), committed at 6773d32b. Attempted sub-step 1.2 (the gate lemma's branch conjunct) via the plan's own specified route -- a structural-induction agreement lemma over Proposition Atom -- and it is BLOCKED: a machine-checked stuck goal was reached in both the box-positive (m-to-m') and diamond-negative (m'-to-m) cases. The recursion, when it unwinds a .box/.diamond subformula, escapes to model points that are not known-label images; neither accPinnedBy nor hbox/hdia (both stated only over modalKnownWorlds b) supply any leverage there. Per Kill Criteria outcome (iii), this is recorded as route (1) being dead as planned -- not outcome (ii) (no full countermodel was constructed) and not outcome (iv) (the natural strengthening, a canonicity/term-model assumption on the witness, is nameable but not owned by any later phase in this plan and was not priced by any prior report). Reverted the gate lemma attempt per the no-sorry-at-a-gate rule; kept sub-step 1.1. Full verdict, including the exact captured lean_goal states, is recorded in plans/05_pinned-witness-truth-lemma.md's new #### Phase 1 Verdict subsection. Also recorded (re-validation finding, not acted on): the refactor programme (tasks 561-563) landed inline box-plus birth content directly into the mainline successorBirthContent/blockingWorldS4Keyed rather than as the parallel Boxed driver family plan v5's Phases 5-7 anticipated -- this does not affect Phase 1's own obligation but means Phases 5-7's framing needs re-assessment if any future route is pursued.",
   "phases_completed": 0,
   "phases_total": 12,
   "next_phase": 1,
-  "next_action_hint": "Dispatch wave 1 -- Phases 1, 2 and 3 in parallel; their territory is fully disjoint (FrameSoundness.lean / LoopChecking.lean / specs artifacts respectively) so no same-file serialisation is needed. Running all three maximises the probability of an EARLY KILL, which is the goal given four prior route failures. All three must return positive verdicts before Phase 4, and all four gates must pass before any of Phases 5-12 is dispatched. Gate B (Phase 2) is the likeliest to fail: modalHintikkaClauseGen returns True for every box/diamond-shaped formula regardless of sign, so the landed S4KeyedHintikkaInv.hintikkaInv supplies nothing for T(box psi) / F(dia psi) -- precisely the shapes Gate A consumes. Do not let Phase 3's measurements, however clean, license a reordering or a softened kill criterion: v3 measured 1374/1374 and died at its gate, and route (3) measured 0/24314 and died at its gate.",
+  "next_action_hint": "Do NOT re-dispatch Phase 1 with the same construction -- the one-dispatch attempt budget is exhausted and the stuck goal is recorded. Per plan v5's Terminal Condition, the honest conclusion is that route (1) (a pinned-but-otherwise-arbitrary witness model) cannot discharge the redirect-edge soundness obligation via a structural-induction agreement argument, because that argument necessarily escapes to model points accPinnedBy/hbox/hdia cannot see. This is NOT resolved by re-proposing the plan's original escalation (task 557's refactor already ran, tasks 561-563 completed, before this dispatch) -- it is a fresh finding. The nameable but unpriced strengthening is a canonicity/term-model restriction on the witness (e.g. WLOG W = WorldIndex, f = id), which is a materially different proof strategy than this plan commits to and is not owned by any of its remaining phases. Recommend: escalate to the user/orchestrator for a decision between (a) spawning a new research/planning task to assess whether a canonical-model-restricted witness construction is viable and how large it would be, or (b) accepting that the keyed S4 soundness theorem may require the apparatus restructuring this plan's Terminal Condition anticipated, now that the specific gap is a different one (recursive escape during the truth-lemma induction, not the top-level witness extension) than what 557's refactor addressed.",
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "line": 1244,
+      "line": 1251,
       "statement": "branchSatisfiableIn_s4FC_ancestor_redirect (sorry body)",
       "strategic": false,
-      "assumption": "N/A -- pre-existing, retained by standing user decision, untouched by this planning dispatch and forbidden to every phase of plan v5",
-      "why_deferred": "Retained by explicit standing user decision. Plan v5's Postmortem Constraints forbid any phase from touching it, and require the sorry census in Cslib/Logics/Modal/Tableau/ to be exactly 1 at every phase boundary. Gate A's lemma is a NEW declaration, not a retargeting of this one.",
+      "assumption": "N/A -- pre-existing, retained by standing user decision, untouched by this dispatch",
+      "why_deferred": "Retained by explicit standing user decision; plan v5 forbids every phase from touching it.",
       "follow_up_task": null
     }
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "phase": 1,
+      "description": "Gate A's branch-conjunct agreement lemma does not close: the structural induction on formula complexity necessarily unwinds .box/.diamond into arbitrary (non-known-label) model successors, and neither accPinnedBy nor hbox/hdia (both deliberately restricted to modalKnownWorlds b) supply any fact at such points. Exact machine-checked stuck goals recorded in plans/05_pinned-witness-truth-lemma.md's #### Phase 1 Verdict.",
+      "requires": "A user/orchestrator decision on whether to pursue a canonical-model-restricted witness construction (unpriced, not owned by any remaining phase of plan v5) or to treat the keyed S4 soundness theorem as requiring further apparatus restructuring beyond what tasks 561-563 already delivered."
+    }
+  ],
   "state_updates_pending": [
     {
       "field": "active_projects[project_number=553].status",
-      "current": "planning",
-      "proposed": "planned",
-      "reason": "Plan v5 written. Postflight status transition; the planning agent does not edit state.json."
+      "current": "implementing",
+      "proposed": "blocked",
+      "reason": "Phase 1 (Gate A) failed at outcome (iii); route (1) is dead as planned per the plan's own Terminal Condition. Task 553 should go BLOCKED pending a user/orchestrator decision on next steps (see blockers above), not silently re-attempted."
     },
     {
-      "field": "active_projects[project_number=553].plan_metadata",
-      "proposed": {
-        "phases": 12,
-        "total_effort_hours": 42,
-        "complexity": "complex",
-        "research_integrated": true,
-        "plan_version": 5,
-        "dependency_waves": [[1, 2, 3], [4], [5], [6], [7, 8], [9], [10], [11, 12]],
-        "reports_integrated": [
-          {
-            "path": "reports/01_s4-keyed-guard-soundness-falsified.md",
-            "integrated_in_plan_version": 5,
-            "integrated_date": "2026-07-26"
-          },
-          {
-            "path": "reports/02_redirect-inertness-divergence-audit.md",
-            "integrated_in_plan_version": 5,
-            "integrated_date": "2026-07-26"
-          },
-          {
-            "path": "reports/03_soundness-strength-necessity.md",
-            "integrated_in_plan_version": 5,
-            "integrated_date": "2026-07-26"
-          },
-          {
-            "path": "reports/04_massacci-subtractive-blocking-priced.md",
-            "integrated_in_plan_version": 5,
-            "integrated_date": "2026-07-26"
-          }
-        ],
-        "skeleton": false,
-        "follow_up_tasks": []
-      },
-      "reason": "Records v5's 12 phases and 8 dependency waves, superseding the v4 plan_metadata block."
-    },
-    {
-      "field": "active_projects[project_number=553].artifacts",
-      "proposed": "append {type: plan, path: specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md, summary: v5 route (1) pinned-witness truth lemma, 12 phases, 4 kill gates, full branchSatisfiableIn s4FC strength}; and update the existing v4 artifact entry's summary to record [ABANDONED] and the Superseded-by pointer to v5",
-      "reason": "Artifact linking; v4's entry should mirror the pattern already used for the v2 and v3 entries."
-    },
-    {
-      "field": "CONTINGENT -- apply ONLY if a kill gate fails",
-      "proposed": {
-        "active_projects[project_number=553].status": "blocked",
-        "active_projects[project_number=553].blockers": "Route (1) (pinned witness model) failed at gate {A|B|C|D}, the same obligation on which four prior routes died. Per plan v5's Terminal Condition, no fifth route is proposed: the tableau apparatus must be restructured before this soundness obligation can be discharged. Blocked on specs/557_modal_tableau_refactor_abstractions_boneyard.",
-        "active_projects[project_number=557].dependencies": "REMOVE 553 -- the dependency must be INVERTED so 557 can run first. 557 currently declares dependencies: [553]; leaving that in place while 553 blocks on 557 creates a cycle."
-      },
-      "reason": "Plan v5 states this handoff explicitly rather than leaving a failing dispatch to improvise it. Requires user confirmation of the dependency inversion; the orchestrator must not apply it silently."
+      "field": "active_projects[project_number=553].blockers",
+      "proposed": "Route (1) (pinned witness model) failed at Gate A (Phase 1), a NEW failure mechanism distinct from the four routes plan v5's own postmortem already catalogued: the branch-conjunct's structural-induction agreement argument escapes to model points neither accPinnedBy nor hbox/hdia constrain. The plan's original escalation target (task 557's refactor, tasks 561-563) already completed before this dispatch, so this is not resolved by that handoff. Needs a fresh research/planning decision.",
+      "reason": "Records the blocker for state.json per state-management.md's permissive status model (\"Any status -> [BLOCKED] (with reason)\")."
     }
   ],
   "continuation_path": null,
   "modified_files": [
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
-      "summary": "Plan v5, route (1): pinned-witness truth lemma at full branchSatisfiableIn s4FC strength. 12 phases / 8 waves / 4 kill gates. Includes a Postmortem Constraints section with 17 explicit do-not rules, a 16-row Preserved Assets table with re-derived line numbers, a source-to-implementation mapping table citing verbatim ChagrovZakharyaschev1997, Massacci2000 and Simpson1994 chunk paths, per-phase territory contracts with zero same-file parallelism, a declared H8 deviation justified per phase group, and an explicit no-fifth-route terminal condition."
-    },
-    {
-      "type": "plan",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "summary": "Stamped [ABANDONED] with a Superseded-by pointer to v5. Phases 1-2 [COMPLETED], Phase 3 Verdict and Post-Gate-B Triage preserved verbatim."
+      "summary": "Phase 1 marked [BLOCKED], plan-level Status set to [BLOCKED], #### Phase 1 Verdict subsection added with the exact machine-checked stuck goals and the outcome (iii) determination."
     }
   ],
   "verification": {
-    "plan_format": "Metadata block (Task, Status, Effort, Dependencies, Research Inputs, Artifacts, Standards, Type) plus all seven required sections present; every phase heading carries a [NOT STARTED] marker; Dependency Analysis wave table precedes the first phase heading.",
-    "hard_mode_additions": "Postmortem Constraints section present immediately after the Overview; Preserved Assets subsection present with 16 rows; source-to-implementation mapping present (Tier 1 literature + Tier 3 implementation); explicit wave map plus a per-wave territory table; every phase states estimated output lines and a Done-when criterion.",
-    "h8_sizing": "12 phases, each one bounded unit; the two phases approaching or exceeding ~400 lines (10, 11) carry declared sub-phase split rules (10.1/10.2, 11.1/11.2), and Phase 6 carries a conditional 6.1/6.2 split rule; each gate phase carries a one-dispatch attempt budget as its stopping condition, so no phase has an open-ended attempt surface.",
-    "h8_deviation_declared": "Yes -- 12 exceeds the 8-phase ceiling for 'complex'; justified per phase group in a dedicated note, cross-checked against two independent pricings (report 02 section 4's 4-6 phases for R-new, report 04 section 7.2's 9 phases for the analogous line).",
-    "no_sorry_at_gates": "Explicit Do NOT rule; each of Phases 1, 2 and 4 has a revert-rather-than-commit clause and a recorded-verdict requirement.",
-    "skeleton_rejected": "Yes, with a stated reason: the four riskiest obligations are Phases 1-4, so there is no long green prefix to skeletonise, and a strategic sorry at a gate would stand in for a possibly-false statement -- the exact failure this task has suffered twice.",
-    "literature_grounding": "BibKeys verified in this planning run: ChagrovZakharyaschev1997 at references.bib:75, Simpson1994 at :86, Massacci2000 at :1010, Gore1999 at :1023. Chunks read and quoted verbatim with paths. Recorded gap: Massacci chunk_0054 defers the blocked-branch model construction to Gore1999, which has no corpus; per the dispatch this is settled and NOT a blocker, and ChagrovZakharyaschev1997 Theorem 5.51 supplies the same content in full. No literature-acquisition phase planned. Also recorded: literature-search.sh returns zero hits on the Chagrov-Zakharyaschev corpus because its index.json entry lacks provenance_fidelity -- noted for the refactoring task, reachable by direct grep/Read.",
-    "scope_boundary": "No refactoring planned. A dedicated Notes for the Refactoring Task section records six findings for specs/557 (including that the wrapped-vs-unwrapped distinction is the literature's box-plus / Lemmon filtration, and that the S5/S4 relatedness asymmetry is the real abstraction seam) rather than acting on any of them.",
-    "no_task_references_in_deliverables": "No Cslib/ or CslibTests/ file was written by this dispatch. Plan phase text instructs docstrings to cite declaration names and source labels, never task numbers.",
-    "builds_run": "None -- this was a planning dispatch and no Lean file was modified. The plan mandates scoped builds throughout and records that a full-project lake build currently fails on Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean (concurrent work, unrelated and untouched)."
+    "sorry_count": 1,
+    "axiom_count": 45,
+    "build_passed": true,
+    "lint_style_passed": true,
+    "check_init_imports_passed": true,
+    "full_ci_run": false,
+    "full_ci_note": "Not run to completion -- this is a partial/blocked result, not an implemented status."
   },
   "territory_respected": [
-    "Only specs/553_s4_loop_guard_soundness_reachability_restriction/ was written: plans/05_pinned-witness-truth-lemma.md (new), plans/04_subtractive-blocking-red-channel.md (metadata stamp + one stale phase marker corrected), .return-meta.json, .orchestrator-handoff.json.",
-    "No Cslib/** or CslibTests/** file touched.",
-    "specs/state.json NOT edited -- all proposed changes are in state_updates_pending.",
-    "plans/01, plans/02, plans/03 untouched.",
-    "v4's Phase 1/2 [COMPLETED] headings, its #### Phase 3 Verdict, and its #### Post-Gate-B Triage note preserved verbatim."
+    "Only Cslib/Logics/Modal/Tableau/FrameSoundness.lean was edited (Phase 1's owned file, new section appended at end of file).",
+    "No other Cslib/** or CslibTests/** file touched.",
+    "specs/state.json NOT edited -- proposed changes are in state_updates_pending.",
+    "specs/553_.../plans/01-04 untouched."
   ],
-  "requires_user_review": false
+  "requires_user_review": true
 }

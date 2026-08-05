@@ -9359,6 +9359,75 @@ lemma blockedRedirect_unwrapped_diaNeg_mem (φ₀ : Proposition Atom)
   rw [heq] at hsf'mem
   exact hsf'mem
 
+omit [Hashable Atom] in
+/-- **Free transfer, BOXED box-context half -- the box-plus payoff.** Dual of
+`blockedRedirect_unwrapped_boxPos_mem`, using the box-plus filter arm instead of the unwrapped
+one: when a minting attempt at `src` is blocked to `wBlock`, every box-positive formula
+`T(□χ)@src` already on the branch (with `□χ` itself `φ₀`-relevant) transfers in its own BOXED
+form to `wBlock`: `T(□χ)@wBlock ∈ b`, not merely the unwrapped `T(χ)@wBlock ∈ b` the unenriched
+key could only ever give. This is the box-plus enrichment's payoff: `successorBirthContent`'s
+third disjunct records `(pos, □χ)` directly, so `keyLowerBd` lower-bounds it into
+`relevantSetFinset`'s BOXED slot at `wBlock`, giving the boxed membership as a three-line
+consequence -- exactly the "Redirect-Inertness Assembly -- REMOVED" section's recommended
+repair route, landed. -/
+lemma blockedRedirect_boxed_boxPos_mem (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock)
+    (χ : Proposition Atom) (hsf : (Sign.pos, .box χ) ∈ signedSubfmls φ₀)
+    (hmem : (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.pos, .box χ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ src wBlock hblock
+  have hsub := hkL wBlock (successorBirthContent φ₀ b s φ src) hkey
+  have hmemSet : (Sign.pos, .box χ) ∈ successorBirthContent φ₀ b s φ src := by
+    unfold successorBirthContent
+    refine Finset.mem_insert_of_mem ?_
+    rw [Finset.mem_filter]
+    refine ⟨hsf, Or.inr (Or.inr (Or.inl ⟨rfl, ?_⟩))⟩
+    simp only [List.any_eq_true, beq_iff_eq]
+    exact ⟨_, hmem, rfl⟩
+  have hrel := hsub hmemSet
+  unfold relevantSetFinset at hrel
+  rw [Finset.mem_filter] at hrel
+  simp only [List.any_eq_true, beq_iff_eq] at hrel
+  obtain ⟨sf', hsf'mem, heq⟩ := hrel.2
+  rw [heq] at hsf'mem
+  exact hsf'mem
+
+omit [Hashable Atom] in
+/-- **Free transfer, BOXED diamond-context half -- the box-plus payoff.** Dual of
+`blockedRedirect_boxed_boxPos_mem`, using the box-plus filter's fourth disjunct: when a minting
+attempt at `src` is blocked to `wBlock`, every diamond-negative formula `F(◇χ)@src` already on
+the branch (with `◇χ` itself `φ₀`-relevant) transfers in its own BOXED (diamond) form to
+`wBlock`: `F(◇χ)@wBlock ∈ b`. -/
+lemma blockedRedirect_boxed_diaNeg_mem (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock)
+    (χ : Proposition Atom) (hsf : (Sign.neg, .diamond χ) ∈ signedSubfmls φ₀)
+    (hmem : (⟨.neg, .diamond χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.neg, .diamond χ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ src wBlock hblock
+  have hsub := hkL wBlock (successorBirthContent φ₀ b s φ src) hkey
+  have hmemSet : (Sign.neg, .diamond χ) ∈ successorBirthContent φ₀ b s φ src := by
+    unfold successorBirthContent
+    refine Finset.mem_insert_of_mem ?_
+    rw [Finset.mem_filter]
+    refine ⟨hsf, Or.inr (Or.inr (Or.inr ⟨rfl, ?_⟩))⟩
+    simp only [List.any_eq_true, beq_iff_eq]
+    exact ⟨_, hmem, rfl⟩
+  have hrel := hsub hmemSet
+  unfold relevantSetFinset at hrel
+  rw [Finset.mem_filter] at hrel
+  simp only [List.any_eq_true, beq_iff_eq] at hrel
+  obtain ⟨sf', hsf'mem, heq⟩ := hrel.2
+  rw [heq] at hsf'mem
+  exact hsf'mem
+
 /-! ## Single-Step Invariant Preservation -/
 
 omit [Hashable Atom] in

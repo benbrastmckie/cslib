@@ -1,7 +1,7 @@
 # Implementation Plan: Box-Plus Birth Keys for the Keyed S4 Loop Guard
 
 - **Task**: 563 - Adopt Lemmon box-plus pairing at the birth-key level
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 10.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/563_tableau_boxplus_birth_keys/reports/01_boxplus-birth-keys.md`
@@ -493,21 +493,23 @@ empty — zero edits, confirming risk R3 never materialized.
 
 ---
 
-### Phase 6: Payoff Lemmas and Full Gate Suite [NOT STARTED]
+### Phase 6: Payoff Lemmas and Full Gate Suite [COMPLETED]
 
 **Goal**: Land the two box-plus transfer lemmas the enrichment exists to enable, re-check
 `hintikka_congr_S4`, and run the complete verification baseline.
 
 **Tasks**:
-- [ ] Add `blockedRedirect_boxed_boxPos_mem` and `blockedRedirect_boxed_diaNeg_mem` — each a
+- [x] Add `blockedRedirect_boxed_boxPos_mem` and `blockedRedirect_boxed_diaNeg_mem` — each a
       short consequence of `keyLowerBd` plus the guard match, mirroring the derivation the
-      existing `blockedRedirect_unwrapped_*` pair uses.
-- [ ] Re-check `hintikka_congr_S4`: its body is `simp_all [modalApplyOneS4Keyed]` and the
-      argument does not change shape, but the proof may need re-checking under the new mint arm.
-- [ ] Run the full gate suite (below) and record every measurement against the baseline.
-- [ ] Confirm no file outside `{LoopChecking.lean}` was modified; if
-      `CslibTests/S4LoopGuardRegression.lean` needed an edit, report it as a scope escalation
-      per the Scope Note rather than absorbing it.
+      existing `blockedRedirect_unwrapped_*` pair uses. Both landed sorry-free, standard-axioms-
+      only (`propext`, `Classical.choice`, `Quot.sound`, verified via `lean_verify`), using the
+      third/fourth (box-plus) filter disjuncts in place of the first/second (unwrapped) ones.
+- [x] Re-check `hintikka_congr_S4`: confirmed unchanged — zero diff — and builds green as part
+      of the full-file build. The argument did not change shape, as predicted.
+- [x] Run the full gate suite (below) and record every measurement against the baseline.
+- [x] Confirm no file outside `{LoopChecking.lean}` was modified — `git diff --stat` across every
+      commit this task made touches only `Cslib/Logics/Modal/Tableau/LoopChecking.lean`.
+      `CslibTests/S4LoopGuardRegression.lean` needed no edit.
 
 **Timing**: 1.5 hours
 
@@ -521,16 +523,20 @@ empty — zero edits, confirming risk R3 never materialized.
 - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - two new payoff lemmas, `hintikka_congr_S4`
   proof body if needed.
 
-**Verification**:
-- `lake build Cslib` exit 0 at ~3313 jobs.
-- Modal/Tableau sorry census exactly 1.
-- Zero axioms in the subsystem (`lean_verify` / `#print axioms` on the touched theorems shows
-  standard axioms only).
-- `lake test` passes; all six `#guard_msgs in #eval` rows in
-  `CslibTests/S4LoopGuardRegression.lean` hold unedited.
-- `lake shake`: exit 1 with 9 findings, **none in Modal/Tableau**. Gate on "no Modal/Tableau
-  findings AND count stays 9", never on shake exit 0.
-- `checkInitImports` exit 0; `lint-style` exit 0.
+**Verification (all measured, this landing)**:
+- `lake build Cslib` exit 0 at **3313 jobs** — exactly matches the pre-implementation baseline.
+- Modal/Tableau sorry census exactly **1**, at `FrameSoundness.lean:1227`, unchanged.
+- Zero new axioms: `grep -rn "^axiom " Cslib/ | wc -l` = **26**, matching the pre-implementation
+  baseline exactly. `lean_verify` on both new payoff theorems shows only `propext`,
+  `Classical.choice`, `Quot.sound`.
+- `lake test` passes (**9378/9378** jobs); `CslibTests.S4LoopGuardRegression` built green, all
+  six `#guard_msgs in #eval` rows hold unedited (file itself carries zero diff).
+- `lake shake` exit 0 (task's own gate criterion is delta-based, not the raw exit code) with
+  **9 findings**, **none in Modal/Tableau** — the identical 9 files as the pre-implementation
+  baseline.
+- `checkInitImports` exit 0; `lake exe lint-style` exit 0.
+- `awk 'length($0) > 100'` over the whole file: zero long lines. `lake lint`-relevant `omit`
+  annotations added for every new declaration flagged by `linter.unusedSectionVars`.
 
 ---
 

@@ -1,19 +1,30 @@
 {
-  "status": "partial",
+  "status": "implemented",
   "task_number": 553,
-  "session_id": "sess_1785958880_8ab261",
-  "timestamp": "2026-08-05T21:15:00Z",
-  "summary": "P1+P2 probe dispatch (not a full Phase 7 implementation) for the reformulated mint-blocked redirect architecture from report 06. Both probes PASS. P1 went beyond a probe: S4RedirectSoundInv (the reformulated conserved predicate, report Section 3.2) is now defined in FrameCompleteness.lean, and the mint-blocked box-negative arm is FULLY PROVEN sorry-free (theorem S4RedirectSoundInv_boxNeg_blocked), using two new small lemmas (modalApplyOneS4Rules_{boxPos,diaNeg}_notApplicable_of_saturated -- the report's predicted 'one new lemma') composed with already-landed machinery (modalS4Saturated_addEdge_of_blocked, blockedRedirect_boxed_{boxPos,diaNeg}_mem, hintikkaS4_{box_pos,dia_neg}_self). #print axioms cross-check: standard axioms only (propext, Classical.choice, Quot.sound), zero sorryAx. P2 (the kill criterion) does NOT trigger: direct reading of FrameRules.lean/Rules.lean confirms every persistent rule shape (K boxPropagation, K diamondNeg inline filterMap, T self-propagation, S4 4-rule) filters its own output against the branch b by construction, and propositional shapes never consult b or acc at all -- no rule re-fires on data it already produced. Recommendation: PROCEED WITH REFORMULATED PHASE 7. Known gaps left for the next dispatch: the diamond-positive-blocked dual arm (mirror image, not written), the mint-unblocked and 4-rule arms restated under S4RedirectSoundInv (currently only proven against the old unweakened statement), P3 (mint-seed-covers-payload, not attempted), and the fuel-induction wrapper assembling all five arms into a genuine step-preservation theorem.",
+  "session_id": "sess_1785963390_67974b",
+  "timestamp": "2026-08-05T21:45:00Z",
+  "summary": "Wave 8 of plan 08 (Phases 7.3, 7.4, 8) landed sorry-free and committed. Phase 7.3 (S4RedirectSoundInv_diaPos_blocked, the diamond-positive mint-blocked mirror) closed with no box/diamond asymmetry -- 118 lines. Phase 7.4 -- the plan's single kill gate -- returned outcome (i), a clean PASS: the branch-growth antitone lemma family (six declarations: filterMap_any_guard_isEmpty_growth, modalTSelf_isEmpty_growth, modalApplyOneS4Rules_boxPos_notApplicable_growth, modalApplyOneS4Rules_diaNeg_notApplicable_growth, modalApplyOne_fst_eq_of_not_box_diamond, modalApplyOneS4Keyed_notApplicable_growth) formalizes P2, with the edge-growth half fully covered by existing Phase 7.2 lemmas -- no new code needed there, confirmed by inspection. Phase 8 (terminal payoff, S4RedirectSoundInv_not_isModalClosed) closed via a vacuous-edge-witness reuse of modalClosed_unsat at Accessibility.empty. Sorry census held at exactly 1 (FrameSoundness.lean:1251) throughout; #print axioms exactly {propext, Classical.choice, Quot.sound} on every new declaration (checked via lake env lean, not lean_verify); scoped build, lint-style, and checkInitImports all clean at every checkpoint; every phase's diff purely additive to FrameCompleteness.lean (confirmed via git diff --stat and git diff | grep '^-[^-]'); the sole downstream consumer CslibTests/ModalFrameSeparation.lean still builds green. Wave 9 (Phases 7.5-7.7) is now unblocked by Phase 7.4's PASS but was out of this dispatch's assigned scope (wave 8 only, per delegation instructions) and was not attempted.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/07_p1-p2-mint-blocked-probe-verdict.md",
-      "type": "summary",
-      "summary": "Full P1/P2 probe verdict with per-conjunct proof evidence, axiom cross-check output, sorry census, lint verification, and an explicit punch list for the remaining reformulated-Phase-7 work."
+      "path": "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+      "type": "lean_source",
+      "summary": "Added S4RedirectSoundInv_diaPos_blocked (Phase 7.3); the antitone-applicability lemma family of six declarations (Phase 7.4); and S4RedirectSoundInv_not_isModalClosed (Phase 8). All sorry-free, all additive, no existing declaration touched."
+    },
+    {
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
+      "type": "plan",
+      "summary": "Phases 7.3, 7.4, 8 marked [COMPLETED] with Verdict subsections; task checklists updated inline; dependency-wave note updated to reflect wave 8 closed and wave 9 now the live frontier."
+    },
+    {
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave8-handoff-20260805.md",
+      "type": "handoff",
+      "summary": "Continuation handoff documenting wave 8's landed content, verification performed, and the wave 9 next-step (dispatch Phases 7.5, 7.6, 7.7)."
     }
   ],
-  "phases_completed": 6,
-  "phases_total": 7,
+  "phases_completed": 11,
+  "phases_total": 17,
   "orchestrator_mode": true,
-  "continuation_path": "Dispatch a full Phase 7 implementation using the reformulated S4RedirectSoundInv architecture (report 06 Section 3, now landed as a definition in FrameCompleteness.lean): (1) write S4RedirectSoundInv_diaPos_blocked as the mirror-image companion to the theorem landed here; (2) restate the mint-unblocked arms (modalApplyOneS4Keyed_{boxNeg,diaPos}_mint_sat) and the 4-rule arms (modalApplyOneS4Keyed_{boxPos,diaNeg}_sat) under S4RedirectSoundInv's (w,w') in Er disjunction instead of the current unweakened branchSatisfiableIn-style statement; (3) discharge P3 (mint seed covers the 4-payload) if it turns out to be needed for (2); (4) assemble the five arms into a fuel-induction step-preservation theorem over modalStepBranchS4KeyedOrdered and the terminal closed-branch payoff."
+  "plan_markers_verified": true,
+  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/plan08-wave8-handoff-20260805.md"
 }

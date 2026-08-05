@@ -1,7 +1,7 @@
 # Implementation Plan: Task #587
 
 - **Task**: 587 - canonical_witness_restriction_probe
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8.5 hours (7 hours realized -- Phases 3 and 4 are mutually exclusive branches)
 - **Dependencies**: None
 - **Research Inputs**: `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md`
@@ -673,7 +673,7 @@ EXCLUSIONS]` rather than `[NOT STARTED]` or an incomplete phase, this phase is e
 
 ---
 
-### Phase 5: Write the verdict report [NOT STARTED]
+### Phase 5: Write the verdict report [COMPLETED]
 
 - **Goal:** Produce the task's actual deliverable: a research report with an unambiguous go/no-go
   verdict and, on GO, a priced next-step recommendation for a task-553 v6 plan.

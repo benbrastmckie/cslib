@@ -116,3 +116,18 @@ Phase 1 Verdict identified but declined to price. The new task closes exactly th
 positive, priced verdict gives 553 a concrete route (1-prime) to plan against; a negative verdict
 gives 553 a sixth, precisely-named obstruction to escalate on, rather than the current
 open-ended "assess viability" state.
+
+## Update: Spawned Task Complete
+
+The spawned task's report is at
+`specs/587_canonical_witness_restriction_probe/reports/01_canonical-witness-restriction-probe.md`.
+**Verdict: CONDITIONAL GO.** Restriction A (`W := WorldIndex`, `f := id` alone) does not close the
+stuck cases -- it removes the escape-to-non-label-points obstruction but exposes a second,
+distinct one: a semantic-to-syntactic truth-lemma gap. Restriction B1 (carrier restricted to the
+known-branch-labels subtype) closes both stuck cases sorry-free, but only modulo two assumed
+hypothesis groups: Decision Gate B's own conclusion (`modalS4Saturated`-family persistence facts,
+this plan's own separate Phase 2, still unexecuted) and the truth lemma itself (new proof content,
+not previously priced). The spawned task's Phase 3 prices a resulting v6 plan at 5-7 phases /
+13.5-17.5 hours, decomposed by workstream, with a recommended front-loaded Gate 0 to de-risk the
+truth lemma's box-positive case before committing to the full programme. Resume with `/plan 553`
+to produce a v6 plan against this pricing, then `/implement 553`.

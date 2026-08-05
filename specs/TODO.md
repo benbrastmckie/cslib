@@ -36,7 +36,7 @@ next_project_number: 587
 
 ### Modal Logic
 
-553 [PLANNED] — Determine whether the S4 keyed loop-check guard can be made sound
+553 [BLOCKED] — Determine whether the S4 keyed loop-check guard can be made sound
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
     └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
       └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
@@ -449,20 +449,15 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 561, Task 563
-- **Plan**:
-  - [553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md]
-  - [553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md]
-  - [553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md]
-  - [553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md]
-  - [553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md]
 - **Research**:
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md]
+- **Plan**: [553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md]
 
 **Description**: Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.
 

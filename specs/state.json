@@ -1012,7 +1012,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "dependencies": [
         535,
@@ -1026,26 +1026,11 @@
         "CslibTests/S4LoopGuardRegression.lean"
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
-      "blockers": null,
-      "last_updated": "2026-07-26T23:30:00Z",
-      "session_id": "sess_1785084826_a33d36",
+      "blockers": "Route (1) (pinned witness model) failed at Gate A (Phase 1): the branch-conjunct structural-induction agreement argument escapes to model points neither accPinnedBy nor hbox/hdia constrain. New failure mechanism, distinct from the four routes plan v5 catalogued. The original escalation target (the FrameCompleteness refactor programme) already completed before this dispatch, so this is a fresh blocker. Needs a user decision: (a) new research/planning task on a canonical-model-restricted witness construction, or (b) accept that keyed S4 soundness needs further apparatus restructuring.",
+      "last_updated": "2026-08-05T13:41:33Z",
+      "session_id": "sess_1785935392_0e674b_553",
       "topic": "Modal Logic",
       "artifacts": [
-        {
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-          "type": "plan",
-          "summary": "Route P settled-context scheduling, 15 phases: global non-recursive settledness predicate (discharges risk c), parallel ordered stepper keeps landed completeness green at every checkpoint"
-        },
-        {
-          "type": "plan",
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-          "summary": "[ABANDONED] v2 origin-edge invariant revision; Phase 12 redirect-inertness lemmas machine-checked FALSE and removed. Superseded by plans/03_ancestor-only-blocking.md."
-        },
-        {
-          "type": "plan",
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-          "summary": "[ABANDONED] v3 ancestor-only blocking; Phase 1 probe COMPLETED (four measurements stand and are inherited by v4). Phase 2 decision gate BLOCKED: branchSatisfiableIn witness model is existentially arbitrary. Superseded by plans/04_subtractive-blocking-red-channel.md."
-        },
         {
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md",
           "type": "report",
@@ -1061,14 +1046,9 @@
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md"
         },
         {
-          "type": "plan",
-          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-          "summary": "[ABANDONED] v4 subtractive blocking + red channel; Phases 1-2 COMPLETED (bifurcated predicate, modalTruthLemmaS4Sub). Phase 3 Decision Gate B BLOCKED: the free transfer yields only an UNWRAPPED fact at the redirect target and unwrapped facts have no persistence mechanism in the Hintikka apparatus. Post-Gate-B triage kept route-independent assets, reverted red-channel-only machinery. Superseded by plans/05_pinned-witness-truth-lemma.md."
-        },
-        {
-          "type": "plan",
           "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
-          "summary": "v5 pinned-witness truth lemma (route 1): 12 phases, full branchSatisfiableIn s4FC strength. Two new mechanisms — accPinnedBy (upper bound on the witness relation, converting ambient predecessors into acc-ancestors) and boxed birth content (making the redirect-target transfer wrapped). Four kill gates, three parallel in wave 1. Terminal condition hands off to the refactoring task rather than proposing a fifth route."
+          "type": "plan",
+          "summary": "Phase 1 marked [BLOCKED]; Phase 1 Verdict subsection records the machine-checked stuck goals and the outcome (iii) determination."
         }
       ],
       "mandate_change": {

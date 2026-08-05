@@ -1381,29 +1381,44 @@
     {
       "project_number": 558,
       "project_name": "tableau_support_private_dedup",
-      "status": "planning",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Extract re-derived private Tableau facts into public Support modules",
       "topic": "Modal Logic",
       "dependencies": [],
       "description": "[Task A of the modal-tableau refactor programme; P0, highest value/risk ratio in the whole programme, NO dependency on any other task.] Cslib/Logics/Modal/Tableau/ contains 77 comment-attested 'Local re-derivation of X (unavailable across files)' sites, root-caused by FmpMeasure.lean marking 50 declarations private: modalSubfmls_trans is re-derived in three files (S5Simplification.lean:97, FiveSimplification.lean:736, BDriver.lean:211), modalKnownWorlds_fold_spec in four, hasEdge_addEdge_cases in four. Extract those facts as PUBLIC declarations into Cslib/Logics/Modal/Tableau/Support/{Subfmls,KnownWorlds,Accessibility}.lean and DELETE the 77 re-derivations. This is mechanical and behaviour-preserving by construction, requires no abstraction decision, and it shrinks the oversized files BEFORE any split seams are chosen -- so it must precede the module split. Verify with lake build, lake exe checkInitImports, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix. Constraint: do not edit Rules.lean, Saturation.lean or Branch.lean. Preserve every proven, consumed result; modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) must be green at every commit. Subsystem sorry census must stay at exactly 1 (FrameSoundness.lean:1244, retained by explicit user decision) and axiom count at 0.",
       "file_scope": [
-        "Cslib/Logics/Modal/Tableau/Support/",
+        "Cslib.lean",
+        "Cslib/Logics/Modal/Tableau/Support/Accessibility.lean",
+        "Cslib/Logics/Modal/Tableau/Support/KnownWorlds.lean",
         "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
         "Cslib/Logics/Modal/Tableau/Soundness.lean",
+        "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+        "Cslib/Logics/Modal/Tableau/Completeness.lean",
+        "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
         "Cslib/Logics/Modal/Tableau/TDriver.lean",
-        "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
+        "Cslib/Logics/Modal/Tableau/BDriver.lean",
+        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+        "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+        "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
       "artifacts": [
         {
           "path": "specs/558_tableau_support_private_dedup/reports/01_tableau-support-private-dedup.md",
           "type": "report",
           "summary": "Re-measured dedup inventory; two-module partition; audit-conflict resolution"
+        },
+        {
+          "path": "specs/558_tableau_support_private_dedup/plans/01_tableau-support-private-dedup.md",
+          "type": "plan",
+          "summary": "11-phase plan: two Support modules plus in-place de-privatization, graded deletion batches, each phase ending at a green lake build"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T05:55:11Z",
+      "last_updated": "2026-08-05T06:03:45Z",
       "next_artifact_number": 1,
       "session_id": "sess_1785908335_1f3c58",
       "parent_task": null

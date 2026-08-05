@@ -11,6 +11,7 @@ public import Cslib.Logics.Modal.Tableau.LoopChecking
 public import Cslib.Logics.Modal.Tableau.FrameSoundness
 public import Cslib.Logics.Modal.Tableau.TDriver
 public import Cslib.Logics.Modal.Tableau.BDriver
+public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 public import Cslib.Foundations.Relation.Euclidean
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
@@ -2918,18 +2919,6 @@ therefore re-derives `accTargetsKnown` and `accTargetsNeRoot` together, in one i
 than assuming the former has already been established by a separate run. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
-across files): decompose membership of an edge in `acc.addEdge w w'`. -/
-private lemma hasEdge_addEdge_cases_Five {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  rcases h with ⟨hw, hw'⟩ | h
-  · exact Or.inl ⟨hw.symm, hw'.symm⟩
-  · exact Or.inr h
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- A fresh world is never the root: `modalNextWorld b = modalMaxWorld b + 1 ≥ 1`
 unconditionally, since `WorldIndex := Nat`. -/
 private lemma modalNextWorld_ne_zero_Five
@@ -2986,7 +2975,7 @@ theorem modalStepBranchFive_preserves_accTargetsNeRoot
   · rw [hsame]; exact hroot
   · rw [hsnd]
     intro w1 w1' hedge
-    rcases hasEdge_addEdge_cases_Five hedge with ⟨-, rfl⟩ | hold
+    rcases hasEdge_addEdge_cases hedge with ⟨-, rfl⟩ | hold
     · exact hw'ne
     · exact hroot _ _ hold
 
@@ -3840,19 +3829,6 @@ private lemma modalStepBranchGen_knownWorlds_mono_C
   · rw [hfstc] at hsf; simp at hsf
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
-across files): decompose membership of an edge in `acc.addEdge w w'`. Mirrors
-`hasEdge_addEdge_cases_Five`. -/
-private lemma hasEdge_addEdge_cases_C {acc : Accessibility} {w w' a a' : WorldIndex}
-    (h : (acc.addEdge w w').hasEdge a a' = true) :
-    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
-  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
-    Bool.and_eq_true, beq_iff_eq] at h
-  rcases h with ⟨hw, hw'⟩ | h
-  · exact Or.inl ⟨hw.symm, hw'.symm⟩
-  · exact Or.inr h
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- A fresh world is never the root: `modalNextWorld b = modalMaxWorld b + 1 ≥ 1`
 unconditionally, since `WorldIndex := Nat`. Mirrors `modalNextWorld_ne_zero_Five`. -/
 private lemma modalNextWorld_ne_zero_C
@@ -3911,7 +3887,7 @@ theorem modalStepBranchKb5''_preserves_accTargetsNeRoot
   · rw [hsame]; exact hroot
   · rw [hsnd]
     intro w1 w1' hedge
-    rcases hasEdge_addEdge_cases_C hedge with ⟨-, rfl⟩ | hold
+    rcases hasEdge_addEdge_cases hedge with ⟨-, rfl⟩ | hold
     · exact hw'ne
     · exact hroot _ _ hold
 

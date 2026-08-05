@@ -41,7 +41,8 @@
       "dependencies": [
         553,
         566,
-        567
+        567,
+        586
       ],
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
@@ -57,10 +58,12 @@
       "description": "COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree (instDecidableFiveValid/instDecidableKb5Valid, FrameCompleteness.lean) is delivered via the KB5/S5 equivalence route, which leans on a full-equivalence closure. This task delivers genuine pure-K5 / pure-5 (Euclidean without full equivalence, no Mathlib closure operator) tableau soundness + completeness + decidability - the one modal-cube corner explicitly deferred out of the completed KB5/Euclidean task. Mirror the existing Five/KB5 development but over the bare Euclidean frame condition. Zero sorry, zero new axioms; keep the frozen equivalence-route deliverables untouched.",
       "dependencies": [
         531,
+        553,
         563,
         564,
         566,
-        567
+        567,
+        586
       ],
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
@@ -81,11 +84,13 @@
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [
         535,
+        553,
         563,
         564,
         565,
         566,
-        567
+        567,
+        586
       ],
       "parent_task": 506,
       "last_updated": "2026-08-05T00:00:00Z",
@@ -715,11 +720,13 @@
       "topic": "Modal Logic",
       "dependencies": [
         511,
+        553,
         563,
         564,
         565,
         566,
-        567
+        567,
+        586
       ],
       "created": "2026-07-14T17:57:00Z",
       "last_updated": "2026-08-05T00:00:00Z",
@@ -1527,6 +1534,7 @@
       "title": "Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated keys' derivation",
       "topic": "Modal Logic",
       "dependencies": [
+        553,
         562,
         563
       ],
@@ -1552,6 +1560,7 @@
       "title": "Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md",
       "topic": "Modal Logic",
       "dependencies": [
+        553,
         563,
         564,
         566,
@@ -1579,6 +1588,7 @@
       "title": "Create Boneyard/ with its convention and move only re-verified zero-consumer declarations",
       "topic": "Modal Logic",
       "dependencies": [
+        553,
         563,
         564,
         586
@@ -1605,6 +1615,7 @@
       "title": "Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate",
       "topic": "Modal Logic",
       "dependencies": [
+        553,
         558,
         562,
         563,
@@ -1800,7 +1811,9 @@
       "status": "not_started",
       "created": "2026-08-05T13:01:12Z",
       "last_updated": "2026-08-05T13:01:12Z",
-      "dependencies": [],
+      "dependencies": [
+        553
+      ],
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/BDriver.lean",
         "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",

@@ -507,20 +507,37 @@ against the **prospective successor's own birth content** instead, closing the g
 /-- The prospective birth content of the successor that would be minted for the modal-minting
 call at `⟨s, φ, w⟩` (the two K minting shapes `F(□φ)@w`/`T(◇φ)@w`, `s` the witness's sign) at
 branch `b`: the witness signed pair `(s, φ)` together with the S4 box-context transmitted from
-`w` -- `(Sign.pos, ψ)` for every `T(□ψ)@w ∈ b` and `(Sign.neg, ψ)` for every `F(◇ψ)@w ∈ b`.
-Matches the actual K-minting birth content (`modalApplyOne`'s `boxNeg`/`diamondPos` arms,
-`Rules.lean`), restricted to `signedSubfmls φ₀`-relevant pairs. Computed entirely from data
-already on `b` at mint time; stable (never recomputed once the world is born) -- this is
-exactly the property that makes `S4LoopInv.keyLowerBd` (below) a genuine loop invariant
-where the old `worldSetsDistinct` (over the live branch) was not (Gap 1). -/
+`w` -- `(Sign.pos, ψ)` for every `T(□ψ)@w ∈ b` and `(Sign.neg, ψ)` for every `F(◇ψ)@w ∈ b`,
+PLUS the box-plus members: `(Sign.pos, □ψ)` for every `T(□(□ψ))@w ∈ b` and `(Sign.neg, ◇ψ)` for
+every `F(◇(◇ψ))@w ∈ b` -- i.e. every `p ∈ signedSubfmls φ₀` that is ITSELF a box-plus image
+(`boxPlusPair`'s codomain shape, `.box _`/`.diamond _` on the appropriate sign) whose own
+box-plus partner is transmitted from `w`. The first two disjuncts are kept FIRST and
+syntactically VERBATIM (several proofs pattern-match their exact shape); the box-plus
+enrichment is appended as two new disjuncts, using a `match`-on-`p.2` form so the predicate
+stays decidable without an existential (`boxPlusPair` documents the same relationship the
+existing two disjuncts already express, reformulated). Matches the actual K-minting birth
+content (`modalApplyOne`'s `boxNeg`/`diamondPos` arms, `Rules.lean`, now additively enriched by
+`modalApplyOneS4KeyedMint`/`boxPlusExtraS4`), restricted to `signedSubfmls φ₀`-relevant pairs.
+Computed entirely from data already on `b` at mint time; stable (never recomputed once the
+world is born) -- this is exactly the property that makes `S4LoopInv.keyLowerBd` (below) a
+genuine loop invariant where the old `worldSetsDistinct` (over the live branch) was not
+(Gap 1). -/
 def successorBirthContent (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex) : Finset (Sign × Proposition Atom) :=
   insert (s, φ) ((signedSubfmls φ₀).filter (fun p =>
+    -- unchanged, kept first and verbatim:
     (p.1 = Sign.pos ∧
       b.any (· == (⟨.pos, .box p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))) ∨
     (p.1 = Sign.neg ∧
-      b.any (· == (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex)))))
+      b.any (· == (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))) ∨
+    -- box-plus members, appended:
+    (p.1 = Sign.pos ∧ (match p.2 with
+      | .box _ => b.any (· == (⟨.pos, p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+      | _ => false) = true) ∨
+    (p.1 = Sign.neg ∧ (match p.2 with
+      | .diamond _ => b.any (· == (⟨.neg, p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+      | _ => false) = true)))
 
 /-- The redesigned minting guard (fixes Gap 2): the least world `w' ∈ modalKnownWorlds b` whose
 CURRENT relevant set (`relevantSetFinset`) already equals the PROSPECTIVE successor's birth
@@ -879,6 +896,22 @@ def boxPlusPair (p : Sign × Proposition Atom) : Sign × Proposition Atom :=
   match p.1 with
   | .pos => (.pos, .box p.2)
   | .neg => (.neg, .diamond p.2)
+
+/-- **Box-plus closure, scoped to the transmitted box-context filter** (report §5.2) --
+NEVER a closure property of the whole key `k`: the witness pair enters `k` by `insert` and
+satisfies neither closure direction (a mint from `F(□(□χ))@w` has witness `(neg, □χ)`, and
+neither `(neg, χ)` nor `(neg, ◇□χ)` need be on the branch at birth). For every `p ∈ signedSubfmls
+φ₀` whose box-plus partner `boxPlusPair p` is transmitted from `w` (i.e. `boxPlusPair p`
+instantiated at `w` is on `b`), `k` records BOTH `p` itself and (when still within `Σ`) its own
+box-plus partner `boxPlusPair p`. `successorBirthContent_boxPlusClosed` below shows every birth
+key satisfies this by construction; threaded as a derived extra hypothesis where needed, never
+an `S4LoopInv`/`S4KeyedHintikkaInv` field (the same treatment `keysOriginS4`/`keysRootEmpty`
+already receive). -/
+def BoxPlusClosed (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (w : WorldIndex) (k : Finset (Sign × Proposition Atom)) : Prop :=
+  ∀ p ∈ signedSubfmls φ₀,
+    (⟨(boxPlusPair p).1, (boxPlusPair p).2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+      p ∈ k ∧ (boxPlusPair p ∈ signedSubfmls φ₀ → boxPlusPair p ∈ k)
 
 /-- The additive box-plus mint extra: the BOXED members `T(□ψ)@w'`/`F(◇ψ)@w'` for every
 `T(□ψ)@w`/`F(◇ψ)@w` on the branch, retargeted to the freshly-minted successor
@@ -1552,16 +1585,32 @@ persists as `b` grows, with no `b_birth` bookkeeping to carry. -/
 
 /-- **The origin-edge invariant.** Every non-root recorded key `(w, k) ∈ keys` has an origin
 mint source `u` with an edge `u → w` already in `acc`, and every signed pair in `k` is either
-that mint's own witness pair `(s', φ')` or is *currently* present at `u` in its box/diamond
-form. `(s', φ')` is existentially bound once per key (a key has exactly one witness pair, per
-`successorBirthContent`'s `insert (s, φ) (...)` shape). Stated over the current `b`/`acc` (see
-module docstring above for why), so `keysOriginS4_mono_branch`/`keysOriginS4_mono_acc` below are
-immediate.
+that mint's own witness pair `(s', φ')`, or is *currently* present at `u` in its box/diamond
+form, OR (box-plus enrichment) is itself box/diamond-shaped and its ONE-LESS-BOXED partner is
+*currently* present at `u` in box/diamond form -- the third disjunct is exactly
+`successorBirthContent`'s third/fourth filter disjunct (`boxPlus_pos_disjunct_elim`/
+`boxPlus_neg_disjunct_elim`'s conclusion), needed because a box-plus member `(pos, □χ) ∈ k`
+comes from `T(□χ)@u ∈ b` (one box), never from the doubly-boxed `T(□(□χ))@u ∈ b` the ORIGINAL
+two-disjunct form would demand. `(s', φ')` is existentially bound once per key (a key has
+exactly one witness pair, per `successorBirthContent`'s `insert (s, φ) (...)` shape). Stated
+over the current `b`/`acc` (see module docstring above for why), so
+`keysOriginS4_mono_branch`/`keysOriginS4_mono_acc` below are immediate -- the third disjunct is
+STILL a plain `∈ b` membership fact (just guarded by an existential decomposition of `ψ`), so it
+transports under branch growth exactly like the second.
 
 **No `φ₀` parameter** (deviation from the plan's proposed shape, forced by `lake lint`'s
 `unusedArguments` linter: unlike `S4LoopInv`'s fields, this invariant's statement never needs the
 fixed-formula universe `φ₀` at all). Mirrors `worldsContiguousS4` (above), the other
-proof-internal auxiliary that also takes no `φ₀`. -/
+proof-internal auxiliary that also takes no `φ₀`.
+
+**Not the abandoned `keysOriginS4`-strengthening route.** The "Redirect-Inertness Assembly --
+REMOVED" section below warns against strengthening `keysOriginS4` to try to rescue
+`blockedRedirect_boxctx_mem`, a DIFFERENT, since-removed lemma whose conclusion was machine-
+checked FALSE. This third disjunct is a different, narrower change: a permissive weakening of
+`keysOriginS4`'s own conclusion, needed only because the birth key itself now records box-plus
+members, not an attempt to force a false conclusion true. The box-plus payoff lemmas
+(`blockedRedirect_boxed_boxPos_mem`/`_diaNeg_mem`) are derived directly from `keyLowerBd`, per
+that section's own recommended repair, and do not consume `keysOriginS4` at all. -/
 def keysOriginS4
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop :=
@@ -1569,10 +1618,14 @@ def keysOriginS4
     ∃ u s' φ', acc.hasEdge u w = true ∧
       (∀ ψ, (Sign.pos, ψ) ∈ k →
          (s', φ') = ((Sign.pos, ψ) : Sign × Proposition Atom) ∨
-         (⟨.pos, .box ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) ∧
+         (⟨.pos, .box ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b ∨
+         (∃ χ, ψ = .box χ ∧
+           (⟨.pos, .box χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)) ∧
       (∀ ψ, (Sign.neg, ψ) ∈ k →
          (s', φ') = ((Sign.neg, ψ) : Sign × Proposition Atom) ∨
-         (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+         (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b ∨
+         (∃ χ, ψ = .diamond χ ∧
+           (⟨.neg, .diamond χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b))
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Entry establishment**: `keysOriginS4` holds at the ordered driver's seed state. The sole
@@ -1601,13 +1654,15 @@ lemma keysOriginS4_mono_branch
   · exact Or.inl hroot
   · refine Or.inr ⟨u, s', φ', hedge, ?_, ?_⟩
     · intro ψ hψ
-      rcases hpos ψ hψ with heq | hbox
+      rcases hpos ψ hψ with heq | hbox | ⟨χ, hχ, hbox⟩
       · exact Or.inl heq
-      · exact Or.inr (hsub _ hbox)
+      · exact Or.inr (Or.inl (hsub _ hbox))
+      · exact Or.inr (Or.inr ⟨χ, hχ, hsub _ hbox⟩)
     · intro ψ hψ
-      rcases hneg ψ hψ with heq | hdia
+      rcases hneg ψ hψ with heq | hdia | ⟨χ, hχ, hdia⟩
       · exact Or.inl heq
-      · exact Or.inr (hsub _ hdia)
+      · exact Or.inr (Or.inl (hsub _ hdia))
+      · exact Or.inr (Or.inr ⟨χ, hχ, hsub _ hdia⟩)
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Survives edge addition**: `keysOriginS4` transports across accessibility growth (every
@@ -2407,6 +2462,85 @@ private lemma mem_signedSubfmls_of_formula_S4 {φ₀ : Proposition Atom} (s : Si
   refine ⟨?_, h⟩
   cases s <;> simp
 
+omit [Hashable Atom] in
+/-- Elimination form for `successorBirthContent`'s third (box-plus positive) disjunct: if the
+`match`-guarded predicate holds for `p2`, then `p2` is necessarily `.box ψ` for some `ψ`, and
+the UNWRAPPED box-positive `T(□ψ)@w` is on the branch. The other six `Proposition` shapes make
+the match reduce to `false = true`, discharged by contradiction. -/
+private lemma boxPlus_pos_disjunct_elim {p2 : Proposition Atom} {w : WorldIndex}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hpb : (match p2 with
+        | .box _ => b.any (· == (⟨.pos, p2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+        | _ => false) = true) :
+    ∃ ψ, p2 = .box ψ ∧
+      (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  rcases p2 with _ | _ | _ | _ | _ | ψ | ψ
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · exact ⟨ψ, rfl, mem_of_any_beq_S4 hpb⟩
+  · simp at hpb
+
+omit [Hashable Atom] in
+/-- Dual of `boxPlus_pos_disjunct_elim` for `successorBirthContent`'s fourth (box-plus
+negative) disjunct. -/
+private lemma boxPlus_neg_disjunct_elim {p2 : Proposition Atom} {w : WorldIndex}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hpb : (match p2 with
+        | .diamond _ =>
+            b.any (· == (⟨.neg, p2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+        | _ => false) = true) :
+    ∃ ψ, p2 = .diamond ψ ∧
+      (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  rcases p2 with _ | _ | _ | _ | _ | ψ | ψ
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · simp at hpb
+  · exact ⟨ψ, rfl, mem_of_any_beq_S4 hpb⟩
+
+omit [Hashable Atom] in
+/-- **`successorBirthContent` satisfies `BoxPlusClosed`, by construction.** Both conjuncts land
+in the enriched filter's four disjuncts directly: `p ∈ k` via the ORIGINAL (unwrapped)
+disjunct 1/2 -- since `boxPlusPair p` transmitted at `w` IS literally disjunct 1/2's own
+condition on `p` -- and `boxPlusPair p ∈ k` (when in `Σ`) via the box-plus disjunct 3/4, whose
+match-guarded condition on `boxPlusPair p` reduces to the SAME branch fact. No new proof content
+beyond `successorBirthContent`'s own definition. -/
+lemma successorBirthContent_boxPlusClosed (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex) :
+    BoxPlusClosed φ₀ b w (successorBirthContent φ₀ b s φ w) := by
+  intro p hpmem hbp
+  rcases hp1 : p.1 with _ | _
+  · simp only [boxPlusPair, hp1] at hbp
+    refine ⟨?_, ?_⟩
+    · unfold successorBirthContent
+      refine Finset.mem_insert_of_mem ?_
+      rw [Finset.mem_filter]
+      exact ⟨hpmem, Or.inl ⟨hp1, any_beq_of_mem_S4 hbp⟩⟩
+    · intro hqmem
+      unfold successorBirthContent
+      refine Finset.mem_insert_of_mem ?_
+      rw [Finset.mem_filter]
+      simp only [boxPlusPair, hp1] at hqmem ⊢
+      exact ⟨hqmem, Or.inr (Or.inr (Or.inl ⟨trivial, any_beq_of_mem_S4 hbp⟩))⟩
+  · simp only [boxPlusPair, hp1] at hbp
+    refine ⟨?_, ?_⟩
+    · unfold successorBirthContent
+      refine Finset.mem_insert_of_mem ?_
+      rw [Finset.mem_filter]
+      exact ⟨hpmem, Or.inr (Or.inl ⟨hp1, any_beq_of_mem_S4 hbp⟩)⟩
+    · intro hqmem
+      unfold successorBirthContent
+      refine Finset.mem_insert_of_mem ?_
+      rw [Finset.mem_filter]
+      simp only [boxPlusPair, hp1] at hqmem ⊢
+      exact ⟨hqmem, Or.inr (Or.inr (Or.inr ⟨trivial, any_beq_of_mem_S4 hbp⟩))⟩
+
 /-! ### `keysRootEmpty` -- the Root World Never Re-Mints
 
 A small standalone bookkeeping fact that `keysOriginS4` itself does not supply: `keysOriginS4`'s
@@ -2484,23 +2618,27 @@ this argument outright with a three-line consequence of the already-landed
 omit [Hashable Atom] in
 /-- **`keyLowerBd`'s minting case, box-negative shape**: the prospective birth content computed
 PRE-step (`successorBirthContent`) is a subset of the freshly-minted world's relevant set
-computed POST-step (`relevantSetFinset` over `newForms ++ b`). Consumes `modalApplyOne`'s
-literal box-neg minting payload (`modalApplyOne_boxNeg_mint_fst_S4`) via the `hnewForms`
-hypothesis (stated in terms of `modalApplyOne` rather than the raw payload literal, so the
-caller only needs `modalApplyOne`'s actual output, not to hand-reconstruct its list shape) plus
-the branch-closure witness fact (`hb`/`hsf`, via `modalUniverseS4_mem_formula`/
-`modalSubfmls_trans`) that the witness formula `φ` itself lies in `signedSubfmls φ₀`. -/
+computed POST-step (`relevantSetFinset` over `newForms ++ b`). Consumes the additive keyed
+mint's literal box-neg minting payload (`modalApplyOneS4KeyedMint_boxNeg_eq_S4`) via the
+`hnewForms` hypothesis (stated in terms of `modalApplyOneS4KeyedMint` rather than the raw
+payload literal, so the caller only needs its actual output, not to hand-reconstruct its list
+shape) plus the branch-closure witness fact (`hb`/`hsf`, via `modalUniverseS4_mem_formula`/
+`modalSubfmls_trans`) that the witness formula `φ` itself lies in `signedSubfmls φ₀`. The two
+box-plus disjuncts (`successorBirthContent`'s third/fourth) land inside `boxPlusExtraS4`, which
+is why `newForms` must already be the ENRICHED keyed payload -- the raw `modalApplyOne` payload
+never contains the boxed transmission (report §4). -/
 private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (w : WorldIndex) (φ : Proposition Atom)
     (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
     (hsf : (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (newForms : List (SignedFormula (Proposition Atom) WorldIndex))
-    (hnewForms : (modalApplyOne (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+    (hnewForms : (modalApplyOneS4KeyedMint
+        (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
         b acc).fst = RuleResult.linear newForms) :
     successorBirthContent φ₀ b .neg φ w ⊆
       relevantSetFinset φ₀ (newForms ++ b) (modalNextWorld b) := by
-  rw [modalApplyOne_boxNeg_mint_fst_S4] at hnewForms
+  rw [congrArg Prod.fst (modalApplyOneS4KeyedMint_boxNeg_eq_S4 b acc φ w)] at hnewForms
   injection hnewForms with hnewForms
   subst hnewForms
   have hφsub : φ ∈ modalSubfmls φ₀ := by
@@ -2515,10 +2653,11 @@ private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
   rcases hp with rfl | ⟨hpmem, hdisj⟩
   · simp only [relevantSetFinset, Finset.mem_filter]
     refine ⟨hwit, any_beq_of_mem_S4 ?_⟩
-    exact List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self)
+    exact List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _
+      List.mem_cons_self))
   · simp only [relevantSetFinset, Finset.mem_filter]
     refine ⟨hpmem, any_beq_of_mem_S4 ?_⟩
-    rcases hdisj with ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩
+    rcases hdisj with ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩
     · -- box-positive transmission: p.1 = pos, T(□p.2)@w ∈ b
       have hbmem : (⟨.pos, .box p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
         mem_of_any_beq_S4 hpb
@@ -2536,7 +2675,8 @@ private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
             else none) := by
         rw [hp1, List.mem_filterMap]
         exact ⟨(p.2, w), hbp, by simp [hdedup]⟩
-      exact List.mem_append_left _ (List.mem_append_left _ (List.mem_cons_of_mem _ htarget))
+      exact List.mem_append_left _ (List.mem_append_left _
+        (List.mem_append_left _ (List.mem_cons_of_mem _ htarget)))
     · -- diamond-negative transmission: p.1 = neg, F(◇p.2)@w ∈ b
       have hbmem : (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
         mem_of_any_beq_S4 hpb
@@ -2555,6 +2695,33 @@ private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
             else none) := by
         rw [hp1, List.mem_filterMap]
         exact ⟨⟨.neg, .diamond p.2, w⟩, hbmem, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_left _ (List.mem_append_right _ htarget))
+    · -- box-plus positive: p.1 = pos, p.2 = box ψ, T(□ψ)@w ∈ b -- own box-positive, BOXED
+      obtain ⟨ψ, hp2, hbmem⟩ := boxPlus_pos_disjunct_elim hpb
+      have hbp : (ψ, w) ∈ boxPositivesOf b := by
+        simp only [boxPositivesOf, List.mem_filterMap]
+        exact ⟨⟨.pos, .box ψ, w⟩, hbmem, by simp⟩
+      have hdedup : b.any (· == (⟨.pos, .box ψ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          boxPlusExtraS4 b w := by
+        rw [hp1, hp2]
+        simp only [boxPlusExtraS4, List.mem_append, List.mem_filterMap]
+        exact Or.inl ⟨(ψ, w), hbp, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_right _ htarget)
+    · -- box-plus negative: p.1 = neg, p.2 = diamond ψ, F(◇ψ)@w ∈ b -- own diamond-negative, BOXED
+      obtain ⟨ψ, hp2, hbmem⟩ := boxPlus_neg_disjunct_elim hpb
+      have hdedup : b.any (· == (⟨.neg, .diamond ψ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          boxPlusExtraS4 b w := by
+        rw [hp1, hp2]
+        simp only [boxPlusExtraS4, List.mem_append]
+        refine Or.inr ?_
+        simp only [List.mem_filterMap]
+        exact ⟨⟨.neg, .diamond ψ, w⟩, hbmem, by simp [hdedup]⟩
       exact List.mem_append_left _ (List.mem_append_right _ htarget)
 
 omit [Hashable Atom] in
@@ -2567,12 +2734,12 @@ private lemma successorBirthContent_diamondPos_subset_relevantSetFinset
     (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
     (hsf : (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (newForms : List (SignedFormula (Proposition Atom) WorldIndex))
-    (hnewForms : (modalApplyOne
+    (hnewForms : (modalApplyOneS4KeyedMint
         (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
         = RuleResult.linear newForms) :
     successorBirthContent φ₀ b .pos φ w ⊆
       relevantSetFinset φ₀ (newForms ++ b) (modalNextWorld b) := by
-  rw [modalApplyOne_diamondPos_mint_fst_S4] at hnewForms
+  rw [congrArg Prod.fst (modalApplyOneS4KeyedMint_diaPos_eq_S4 b acc φ w)] at hnewForms
   injection hnewForms with hnewForms
   subst hnewForms
   have hφsub : φ ∈ modalSubfmls φ₀ := by
@@ -2587,10 +2754,11 @@ private lemma successorBirthContent_diamondPos_subset_relevantSetFinset
   rcases hp with rfl | ⟨hpmem, hdisj⟩
   · simp only [relevantSetFinset, Finset.mem_filter]
     refine ⟨hwit, any_beq_of_mem_S4 ?_⟩
-    exact List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self)
+    exact List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _
+      List.mem_cons_self))
   · simp only [relevantSetFinset, Finset.mem_filter]
     refine ⟨hpmem, any_beq_of_mem_S4 ?_⟩
-    rcases hdisj with ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩
+    rcases hdisj with ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩
     · -- box-positive transmission: p.1 = pos, T(□p.2)@w ∈ b
       have hbmem : (⟨.pos, .box p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
         mem_of_any_beq_S4 hpb
@@ -2608,7 +2776,8 @@ private lemma successorBirthContent_diamondPos_subset_relevantSetFinset
             else none) := by
         rw [hp1, List.mem_filterMap]
         exact ⟨(p.2, w), hbp, by simp [hdedup]⟩
-      exact List.mem_append_left _ (List.mem_append_left _ (List.mem_cons_of_mem _ htarget))
+      exact List.mem_append_left _ (List.mem_append_left _
+        (List.mem_append_left _ (List.mem_cons_of_mem _ htarget)))
     · -- diamond-negative transmission: p.1 = neg, F(◇p.2)@w ∈ b
       have hbmem : (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
         mem_of_any_beq_S4 hpb
@@ -2627,6 +2796,33 @@ private lemma successorBirthContent_diamondPos_subset_relevantSetFinset
             else none) := by
         rw [hp1, List.mem_filterMap]
         exact ⟨⟨.neg, .diamond p.2, w⟩, hbmem, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_left _ (List.mem_append_right _ htarget))
+    · -- box-plus positive: p.1 = pos, p.2 = box ψ, T(□ψ)@w ∈ b -- own box-positive, BOXED
+      obtain ⟨ψ, hp2, hbmem⟩ := boxPlus_pos_disjunct_elim hpb
+      have hbp : (ψ, w) ∈ boxPositivesOf b := by
+        simp only [boxPositivesOf, List.mem_filterMap]
+        exact ⟨⟨.pos, .box ψ, w⟩, hbmem, by simp⟩
+      have hdedup : b.any (· == (⟨.pos, .box ψ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          boxPlusExtraS4 b w := by
+        rw [hp1, hp2]
+        simp only [boxPlusExtraS4, List.mem_append, List.mem_filterMap]
+        exact Or.inl ⟨(ψ, w), hbp, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_right _ htarget)
+    · -- box-plus negative: p.1 = neg, p.2 = diamond ψ, F(◇ψ)@w ∈ b -- own diamond-negative, BOXED
+      obtain ⟨ψ, hp2, hbmem⟩ := boxPlus_neg_disjunct_elim hpb
+      have hdedup : b.any (· == (⟨.neg, .diamond ψ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          boxPlusExtraS4 b w := by
+        rw [hp1, hp2]
+        simp only [boxPlusExtraS4, List.mem_append]
+        refine Or.inr ?_
+        simp only [List.mem_filterMap]
+        exact ⟨⟨.neg, .diamond ψ, w⟩, hbmem, by simp [hdedup]⟩
       exact List.mem_append_left _ (List.mem_append_right _ htarget)
 
 /-! ## Assembling `keyLowerBd`'s Preservation -/
@@ -2840,15 +3036,14 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
-        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_boxNeg_subset_relevantSetFinset φ₀ b acc sf.label ψ
-          hb hsfmem' _ hmint
+          hb hsfmem' _ (congrArg Prod.fst hmintKeyed)
         rw [Prod.mk.injEq] at hwk
         obtain ⟨hweq, hkeq2⟩ := hwk
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
+        exact hsub
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -2877,15 +3072,14 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
-        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_diamondPos_subset_relevantSetFinset φ₀ b acc sf.label ψ
-          hb hsfmem' _ hmint
+          hb hsfmem' _ (congrArg Prod.fst hmintKeyed)
         rw [Prod.mk.injEq] at hwk
         obtain ⟨hweq, hkeq2⟩ := hwk
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
+        exact hsub
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -2957,15 +3151,14 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition At
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
-        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_boxNeg_subset_relevantSetFinset φ₀ b acc sf.label ψ
-          hb hsfmem' _ hmint
+          hb hsfmem' _ (congrArg Prod.fst hmintKeyed)
         rw [Prod.mk.injEq] at hwk
         obtain ⟨hweq, hkeq2⟩ := hwk
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
+        exact hsub
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -2994,15 +3187,14 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition At
         simp only [List.mem_singleton] at hb'
         have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
             SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
-        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
         have hsub := successorBirthContent_diamondPos_subset_relevantSetFinset φ₀ b acc sf.label ψ
-          hb hsfmem' _ hmint
+          hb hsfmem' _ (congrArg Prod.fst hmintKeyed)
         rw [Prod.mk.injEq] at hwk
         obtain ⟨hweq, hkeq2⟩ := hwk
         subst hweq
         subst hkeq2
         rw [hb']
-        exact hsub.trans (relevantSetFinset_boxPlus_mono φ₀ b _ sf.label (modalNextWorld b))
+        exact hsub
     · -- blocked: no new key, old-key argument suffices
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
@@ -4877,16 +5069,22 @@ lemma modalStepBranchS4Keyed_preserves_keysOriginS4 (φ₀ : Proposition Atom)
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact absurd heq (by simp)
-            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩ | ⟨hcon, -⟩
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hbmem⟩ := boxPlus_pos_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hbmem⟩)
               · exact absurd hcon (by simp)
           · intro ψ' hψ'
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact Or.inl heq.symm
-            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩
               · exact absurd hcon (by simp)
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hdmem⟩ := boxPlus_neg_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hdmem⟩)
       · -- blocked: keys unchanged, edge added
         have hAOeq := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock
           hblock
@@ -4960,16 +5158,22 @@ lemma modalStepBranchS4Keyed_preserves_keysOriginS4 (φ₀ : Proposition Atom)
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact Or.inl heq.symm
-            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩ | ⟨hcon, -⟩
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hbmem⟩ := boxPlus_pos_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hbmem⟩)
               · exact absurd hcon (by simp)
           · intro ψ' hψ'
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact absurd heq (by simp)
-            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩
               · exact absurd hcon (by simp)
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hdmem⟩ := boxPlus_neg_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hdmem⟩)
       · -- blocked: keys unchanged, edge added
         have hAOeq := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock
           hblock
@@ -5102,16 +5306,22 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 (φ₀ : Proposition 
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact absurd heq (by simp)
-            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩ | ⟨hcon, -⟩
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hbmem⟩ := boxPlus_pos_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hbmem⟩)
               · exact absurd hcon (by simp)
           · intro ψ' hψ'
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact Or.inl heq.symm
-            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩
               · exact absurd hcon (by simp)
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hdmem⟩ := boxPlus_neg_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hdmem⟩)
       · -- blocked: keys unchanged, edge added
         have hAOeq := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock
           hblock
@@ -5186,16 +5396,22 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 (φ₀ : Proposition 
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact Or.inl heq.symm
-            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+            · rcases hdisj with ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩ | ⟨hcon, -⟩
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hbmem⟩ := boxPlus_pos_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hbmem⟩)
               · exact absurd hcon (by simp)
           · intro ψ' hψ'
             simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hψ'
             rcases hψ' with heq | ⟨-, hdisj⟩
             · exact absurd heq (by simp)
-            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩
+            · rcases hdisj with ⟨hcon, -⟩ | ⟨-, hbany⟩ | ⟨hcon, -⟩ | ⟨-, hbpb⟩
               · exact absurd hcon (by simp)
-              · exact Or.inr (List.mem_append_right _ (mem_of_any_beq_S4 hbany))
+              · exact Or.inr (Or.inl (List.mem_append_right _ (mem_of_any_beq_S4 hbany)))
+              · exact absurd hcon (by simp)
+              · obtain ⟨χ, hχ, hdmem⟩ := boxPlus_neg_disjunct_elim hbpb
+                exact Or.inr (Or.inr ⟨χ, hχ, List.mem_append_right _ hdmem⟩)
       · -- blocked: keys unchanged, edge added
         have hAOeq := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock
           hblock
@@ -9132,7 +9348,7 @@ lemma blockedRedirect_unwrapped_diaNeg_mem (φ₀ : Proposition Atom)
     unfold successorBirthContent
     refine Finset.mem_insert_of_mem ?_
     rw [Finset.mem_filter]
-    refine ⟨hsf, Or.inr ⟨rfl, ?_⟩⟩
+    refine ⟨hsf, Or.inr (Or.inl ⟨rfl, ?_⟩)⟩
     simp only [List.any_eq_true, beq_iff_eq]
     exact ⟨_, hmem, rfl⟩
   have hrel := hsub hmemSet

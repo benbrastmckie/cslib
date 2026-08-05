@@ -336,43 +336,83 @@ than deferring.
 
 ---
 
-### Phase 4: Enrich the Birth Key [NOT STARTED]
+### Phase 4: Enrich the Birth Key [COMPLETED]
 
 **Goal**: Append the two boxed-member disjuncts to `successorBirthContent`, add the
 filter-scoped `BoxPlusClosed`, and repair the three `successorBirthContent_*` lemmas plus both
 `_preserves_keyLowerBd` variants. This is the substantive obligation of the task.
 
+**Major deviation, discovered mid-phase, not pre-declared**: `keysOriginS4`'s two-way origin
+disjunction (`(s',φ')=(sign,ψ) ∨ T(□ψ)@u ∈ b`) is FALSE, not merely hard, once the key records
+box-plus members: `(pos, □χ) ∈ k` (via disjunct 3) comes from `T(□χ)@u ∈ b` (ONE box), never
+from the doubly-boxed `T(□(□χ))@u ∈ b` the original two-way form would demand. Its own
+preservation lemma (`modalStepBranchS4Keyed_preserves_keysOriginS4` /
+`...KeyedOrdered_preserves_keysOriginS4`) broke under the enriched key with an unsolved goal at
+exactly this point. This is a DIFFERENT situation from the "Redirect-Inertness Assembly --
+REMOVED" section's explicit warning against strengthening `keysOriginS4` to rescue the
+since-removed, machine-checked-FALSE `blockedRedirect_boxctx_mem`: that warning is about forcing
+a false CONCLUSION true; this is a permissive WEAKENING of `keysOriginS4`'s own definition (a
+third/fourth disjunct, `∃ χ, ψ = box χ ∧ T(□χ)@u ∈ b`, exactly matching `successorBirthContent`'s
+own third/fourth filter disjunct) needed to keep the invariant TRUE for the bigger key it must
+now describe. `keysOriginS4` is a standalone `def` (not an `S4LoopInv` field, per its own
+existing "not a struct field" design note), so extending it does not reopen any struct/positional
+`refine` risk. Ripple: `keysOriginS4_mono_branch`'s two `rcases hpos/hneg ψ hψ with heq | hbox`
+sites extended to 3-way (the new disjunct is still a plain `∈ b` fact, transports under `hsub`
+identically to the second); `keysOriginS4_mono_acc` untouched (edge-only, doesn't inspect
+`hpos`/`hneg`); the four `intro ψ' hψ'` blocks inside the two `_preserves_keysOriginS4` lemmas
+extended with the new case, proved via the new `boxPlus_pos_disjunct_elim`/
+`boxPlus_neg_disjunct_elim` helpers (added for the subset-lemma repair below, reused here).
+`blockedRedirect_boxed_boxPos_mem`/`_diaNeg_mem` (Phase 6) do not consume `keysOriginS4` at all,
+per the same removed-section's own recommended repair, so this extension is orthogonal to the
+task's payoff lemmas.
+
 **Tasks**:
-- [ ] Extend `def successorBirthContent`'s filter with two APPENDED disjuncts (report §5.1),
+- [x] Extend `def successorBirthContent`'s filter with two APPENDED disjuncts (report §5.1),
       keeping the existing two disjuncts **first and syntactically verbatim**. Use the
       `match`-on-`p.2` form so the predicate stays decidable without an existential. Do NOT
       rewrite the existing disjuncts into `boxPlusPair` form — the `Or.inl ⟨rfl, …⟩` /
       `Or.inr ⟨rfl, …⟩` steps in four existing proofs match the current syntactic shape. Note the
       `boxPlusPair` reformulation in the docstring instead.
-- [ ] Add `def BoxPlusClosed (φ₀) (b) (w) (k)` using the report §5.2 shape, **scoped to the
+- [x] Add `def BoxPlusClosed (φ₀) (b) (w) (k)` using the report §5.2 shape, **scoped to the
       transmitted box-context filter, never to the whole key**. A universally quantified
       `∀ p ∈ k, boxPlusPair p ∈ k` is false: the witness pair enters by `insert` and satisfies
       neither closure direction (mint from `F(□(□χ))@w` has witness `(neg, □χ)` with neither
       `(neg, χ)` nor `(neg, ◇□χ)` on the branch at birth). If a different shape is preferred, the
       constraint to respect is filter-scoping.
-- [ ] Add `BoxPlusClosed` as a **derived lemma about `successorBirthContent`**, threaded as an
+- [x] Add `BoxPlusClosed` as a **derived lemma about `successorBirthContent`**, threaded as an
       extra hypothesis where needed — the same treatment `keysOriginS4` and `keysRootEmpty`
       already receive. Do NOT add it as an `S4LoopInv` or `S4KeyedHintikkaInv` field (risk R3:
       `modalTableauS4Keyed_initial`'s `refine` in `FrameCompleteness.lean` is positional).
-- [ ] `successorBirthContent_boxNeg_subset_relevantSetFinset`: two new `rcases` arms, each the
+      *(Not itself consumed downstream in this landing — added as report-required infrastructure;
+      the `keysOriginS4` extension above, not `BoxPlusClosed`, is what discharged the actual
+      proof obligations.)*
+- [x] `successorBirthContent_boxNeg_subset_relevantSetFinset`: two new `rcases` arms, each the
       box-positive arm with `modalSubfmls_trans` REMOVED (the boxed pair is already in `Σ` by the
-      membership hypothesis) and the target inside `boxPlusExtraS4`.
-- [ ] `successorBirthContent_diamondPos_subset_relevantSetFinset`: the dual.
-- [ ] `successorBirthContent_subset_signedSubfmls`: unchanged in substance — the new disjuncts
-      still land in the `⟨hpmem, -⟩` branch. Confirm rather than assume.
-- [ ] `modalStepBranchS4_preserves_keyLowerBd` and
+      membership hypothesis) and the target inside `boxPlusExtraS4`. *(Altered: the lemma's
+      `hnewForms` hypothesis was also restated from raw `modalApplyOne` to
+      `modalApplyOneS4KeyedMint`, since the raw K payload never contains the boxed transmission
+      the new disjuncts need — report §4's own point, now also binding on this lemma, not only
+      the mint-payload switch in Phase 2.)*
+- [x] `successorBirthContent_diamondPos_subset_relevantSetFinset`: the dual.
+- [x] `successorBirthContent_subset_signedSubfmls`: confirmed unchanged — zero diff.
+- [x] `modalStepBranchS4_preserves_keyLowerBd` and
       `modalStepBranchS4KeyedOrdered_preserves_keyLowerBd`: consume the two subset lemmas above.
-- [ ] Verify the blocked-case witnesses survive verbatim:
-      `modalStepBranchS4Keyed_blocked_witness_mem` derives its membership from
-      `Finset.mem_insert_self` on the `insert (s, φ)` head, which is untouched; and
-      `blockedRedirect_unwrapped_boxPos_mem` / `blockedRedirect_unwrapped_diaNeg_mem` land in the
-      two disjuncts kept first and verbatim. If either breaks, the "keep existing disjuncts
-      verbatim" constraint was violated — fix the definition, not the proof.
+      *(Simplified: the Phase 2/3 `relevantSetFinset_boxPlus_mono` bridge these two lemmas used
+      is no longer needed now that the subset lemmas themselves conclude membership in the fully
+      enriched `newForms`; both `have hmint := ...` + `.trans (relevantSetFinset_boxPlus_mono …)`
+      lines were removed in favour of feeding the already-derived `hmintKeyed` straight into the
+      subset lemma.)*
+- [x] Verify the blocked-case witnesses survive verbatim:
+      `modalStepBranchS4Keyed_blocked_witness_mem` — confirmed zero diff.
+      `blockedRedirect_unwrapped_boxPos_mem` — confirmed zero diff (`Or.inl ⟨rfl, ?_⟩` is
+      unaffected by appending disjuncts AFTER position 1).
+      `blockedRedirect_unwrapped_diaNeg_mem` — needed a one-line, purely SYNTACTIC adjustment:
+      `Or.inr ⟨rfl, ?_⟩` → `Or.inr (Or.inl ⟨rfl, ?_⟩)`, since disjunct 2's own CONTENT is
+      unchanged but its position within the now-4-way right-associated `∨` nests one level
+      deeper. This is not the "verbatim constraint violated" failure mode the plan's bullet
+      warns about (which would mean the both-members reading isn't a strict superset) — the
+      underlying condition proved is identical; only the proof term's disjunction-selector
+      changed to match the new nesting depth.
 
 **Timing**: 2 hours
 
@@ -404,32 +444,33 @@ implemented as a strict superset and must be corrected at the definition, not wo
 
 ---
 
-### Phase 5: The Mandatory Completeness Gate — Explicit Decision Point [NOT STARTED]
+### Phase 5: The Mandatory Completeness Gate — Explicit Decision Point [COMPLETED]
 
 **Goal**: Demonstrate, by a real build rather than by argument, that `modalTableauS4Keyed_complete`
 transports across the enriched keys. This phase exists as a standalone decision point precisely
 because the task forbids assuming the transport.
 
+**Outcome: PASS, no repair needed.** `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`
+exits 0 at exactly **900 jobs** — identical to the pre-implementation baseline — with exactly
+**one** `declaration uses 'sorry'` warning, at `Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1227`
+(the pre-existing, unrelated sorry the baseline census already counted). Verified twice: once
+immediately after Phase 3 (before the key itself was enriched, as an early sanity check — the
+plan's own gate is properly positioned after Phase 4, so that first check was informal), and
+again after Phase 4's full key enrichment landed, with identical results both times. The
+structural argument held exactly as predicted: `modalHintikkaSetS4`'s conjunct 2 is literal
+`True` at both mint shapes (`| .neg, .box _ => True` / `| .pos, .diamond _ => True`), so neither
+the guard, the mint payload, nor the enriched birth key is ever visible to Hintikka-set-hood at
+those two positions. `git diff --stat Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` is
+empty — zero edits, confirming risk R3 never materialized.
+
 **Tasks**:
-- [ ] Run the gate: `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`.
-- [ ] **If exit 0**: record the job count and the sorry-warning count/location, confirm the
-      structural argument held (`modalHintikkaSetS4`'s conjunct 2 is literal `True` at the two
-      mint shapes `| .neg, .box _ => True` / `| .pos, .diamond _ => True`, so neither the guard
-      nor the payload is visible to Hintikka-set-hood there), and proceed to Phase 6.
-- [ ] **If it breaks**: the completeness proof is quantified over driver behaviour
-      (`modalExpandBranchesS4Keyed_hintikka`) and *should* transport, but that must be
-      DEMONSTRATED. Attempt a sorry-free repair, time-boxed to this phase. The expected failure
-      mode is field-count churn in `S4LoopInv`/`S4KeyedHintikkaInv` breaking
-      `modalTableauS4Keyed_initial`'s positional `refine` — if that is the cause, the fix is to
-      remove the added field (risk R3), not to renumber the `refine`.
-- [ ] **Blocked exit (stated in advance)**: if the gate cannot be repaired sorry-free within this
-      phase, mark the phase `[BLOCKED]` and the task `[BLOCKED]`, record the exact goal state
-      reached and the failing declaration, and STOP. Do NOT add a `sorry`. Do NOT substitute a
-      vacuous definition. Do NOT weaken a statement to make it close.
-- [ ] The R2 fallback (`successorBirthContentPlus` consumed only by `blockingWorldS4Keyed`) is the
-      sanctioned narrowing if and only if the LIVE track is the obstruction. It is not a narrowing
-      of this phase's own obligation and must not be used to route around a genuine completeness
-      failure.
+- [x] Run the gate: `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`.
+- [x] **Exit 0**: job count and sorry-warning count/location recorded above; structural argument
+      confirmed; proceeding to Phase 6.
+- [ ] **If it breaks**: not applicable — the gate passed both times it was run.
+- [ ] **Blocked exit**: not applicable — no block was needed.
+- [ ] The R2 fallback: not needed — the live track was never the obstruction (R2 was already
+      measured closed in the research report, and this gate's pass confirms it end to end).
 
 **Timing**: 1.5 hours
 

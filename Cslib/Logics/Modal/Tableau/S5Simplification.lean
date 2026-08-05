@@ -10,6 +10,7 @@ import Mathlib.Tactic.Ring
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.LoopChecking
 public import Cslib.Logics.Modal.Tableau.GenericDriver
+public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
 
 /-! # S5 Universal-Cluster Tableau Simplification
 
@@ -977,55 +978,6 @@ unavailable across files). Local re-derivation, mirroring `BDriver.lean`'s estab
 (`mem_modalKnownWorlds_B`/`modalKnownWorlds_mono_append_B`), renamed for S5. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
-(unavailable across files), dropping the `Nodup` conjunct this development does not need.
-Mirrors `BDriver.lean`'s `modalKnownWorlds_fold_spec_B`. -/
-private lemma modalKnownWorlds_fold_spec_S5
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
-    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
-      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
-  induction l generalizing ws0 with
-  | nil => simp
-  | cons sf rest ih =>
-    by_cases hc : ws0.any (· == sf.label)
-    · simp only [List.foldl_cons, if_pos hc]
-      intro x
-      rw [ih ws0]
-      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl h
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ hmemws0)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-    · simp only [List.foldl_cons, if_neg hc]
-      intro x
-      rw [ih (sf.label :: ws0)]
-      constructor
-      · rintro (h | ⟨sf', hsf', rfl⟩)
-        · rcases List.mem_cons.mp h with rfl | h
-          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
-          · exact Or.inl h
-        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
-      · rintro (h | ⟨sf', hsf', hfeq⟩)
-        · exact Or.inl (List.mem_cons_of_mem _ h)
-        · rcases List.mem_cons.mp hsf' with rfl | hsf'
-          · exact Or.inl (hfeq ▸ List.mem_cons_self)
-          · exact Or.inr ⟨sf', hsf', hfeq⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds`
-(unavailable across files). Mirrors `BDriver.lean`'s `mem_modalKnownWorlds_B`. -/
-private lemma mem_modalKnownWorlds_S5
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
-    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
-  unfold modalKnownWorlds
-  simpa using modalKnownWorlds_fold_spec_S5 l [] x
-
-omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
 (unavailable across files): appending formulas to the front of a branch only grows its
 known-worlds set. Mirrors `BDriver.lean`'s `modalKnownWorlds_mono_append_B`. -/
@@ -1033,7 +985,7 @@ private lemma modalKnownWorlds_mono_append_S5
     (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
   intro x hx
-  rw [mem_modalKnownWorlds_S5] at hx ⊢
+  rw [mem_modalKnownWorlds] at hx ⊢
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
@@ -1075,7 +1027,7 @@ lemma witnessWorldS5_none_not_mem_usedTags {φ₀ : Proposition Atom}
   have hxsf : x = (⟨s, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
     cases x; simp_all
   have hknown : x.label ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_S5 b x.label).mpr ⟨x, hxmem, rfl⟩
+    (mem_modalKnownWorlds b x.label).mpr ⟨x, hxmem, rfl⟩
   unfold witnessWorldS5 at h
   have hcontra := List.find?_eq_none.mp h x.label hknown
   exact hcontra (List.any_eq_true.mpr ⟨x, hxmem, beq_iff_eq.mpr hxsf⟩)
@@ -1125,11 +1077,11 @@ private lemma modalMaxWorld_le_of_forall_label_le_S5w
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Any known-world label is bounded by `modalMaxWorld b`: unwinds `modalKnownWorlds` membership
-to a genuine branch member (`mem_modalKnownWorlds_S5`), then applies `label_le_modalMaxWorld`. -/
+to a genuine branch member (`mem_modalKnownWorlds`), then applies `label_le_modalMaxWorld`. -/
 private lemma known_label_le_modalMaxWorld_S5w
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
     (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
-  obtain ⟨y, hy, hyeq⟩ := (mem_modalKnownWorlds_S5 b w).mp h
+  obtain ⟨y, hy, hyeq⟩ := (mem_modalKnownWorlds b w).mp h
   rw [← hyeq]; exact label_le_modalMaxWorld hy
 
 omit [Hashable Atom] in
@@ -1289,7 +1241,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
           (∀ x ∈ formulas, x.label ∈ modalKnownWorlds b)
       | .notApplicable => True) := by
   have hsflabel : sf.label ∈ modalKnownWorlds b :=
-    (mem_modalKnownWorlds_S5 b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+    (mem_modalKnownWorlds b sf.label).mpr ⟨sf, hsfmem, rfl⟩
   have hsfform : sf.formula ∈ modalSubfmls φ₀ := S5wTagInv_formula_mem hT hsfmem
   have hprop := modalApplyOne_prop_outputs_subset sf
   by_cases hmintshape :
@@ -1397,7 +1349,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
       | some w' =>
         simp only [hw]
         have hwknown : w' ∈ modalKnownWorlds b :=
-          (mem_modalKnownWorlds_S5 b w').mpr ⟨_, witnessWorldS5_mem hw, rfl⟩
+          (mem_modalKnownWorlds b w').mpr ⟨_, witnessWorldS5_mem hw, rfl⟩
         refine ⟨fun z hz => ?_, Or.inl fun z hz => ?_⟩ <;>
           simp only [List.mem_singleton] at hz <;> subst hz
         · exact mem_signedSubfmls_of_formula_S5w _ hφsub
@@ -1503,7 +1455,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
       | some w' =>
         simp only [hw]
         have hwknown : w' ∈ modalKnownWorlds b :=
-          (mem_modalKnownWorlds_S5 b w').mpr ⟨_, witnessWorldS5_mem hw, rfl⟩
+          (mem_modalKnownWorlds b w').mpr ⟨_, witnessWorldS5_mem hw, rfl⟩
         refine ⟨fun z hz => ?_, Or.inl fun z hz => ?_⟩ <;>
           simp only [List.mem_singleton] at hz <;> subst hz
         · exact mem_signedSubfmls_of_formula_S5w _ hφsub

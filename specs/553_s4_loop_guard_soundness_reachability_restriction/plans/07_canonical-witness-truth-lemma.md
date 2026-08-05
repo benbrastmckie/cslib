@@ -837,25 +837,78 @@ list below) -- it is superseded by the Phase 1 Verdict and is not the target.
   `Cslib/Logics/Modal/Tableau/LoopChecking.lean`, `CslibTests/S4LoopGuardRegression.lean`.
 
 - **Tasks:**
-  - [ ] Wire the redirect-preservation lemma into the per-step preservation argument for the keyed
-        ordered driver. Use the landed S5 ladder (`S5SoundSpec` and
-        `modalStepBranchS5Gen_preserves_satIn`, re-located by grep) as the **structural template**, not
-        as something to instantiate: the generic `modalStepBranchGen_preserves_satIn` requires an
-        agreement condition the keyed blocked arm violates at the two minting shapes, so a bespoke step
-        lemma is needed. This was verified at v5 planning time and is not re-argued.
-  - [ ] Record the **layering note** the import graph forces: soundness content for the keyed ordered
+  - [x] Wire the redirect-preservation lemma into the per-step preservation argument for the keyed
+        ordered driver. *(deviation: partial — see Phase 7 Progress Record below. The bespoke
+        step-preservation lemma is not yet fully assembled; one supporting semantic building
+        block (`boxPlusExtraS4_sat`) has landed sorry-free, and the exact remaining case-split
+        and reusable ingredients are catalogued in the Progress Record.)*
+  - [x] Record the **layering note** the import graph forces: soundness content for the keyed ordered
         driver now necessarily lives in `FrameCompleteness.lean`, because that is the only file seeing
         both `LoopChecking` and `FrameSoundness`. Write this as a module-comment note naming the
         constraint and the files, with no task numbers. Do **not** attempt a file split — out of scope.
+        *(Landed as the "Re-scoped Phase 7" module comment, `FrameCompleteness.lean`.)*
   - [ ] Extend `CslibTests/S4LoopGuardRegression.lean` with a permanent witness row for the
         redirect-preservation result. Keep every existing row unchanged, including the ordered-driver
-        `"OPEN"` row on the counterexample formula.
+        `"OPEN"` row on the counterexample formula. *(deviation: deferred — blocked on the step lemma
+        this row would witness.)*
   - [ ] Run the full gate set: `lake build` (whole library), `lake exe lint-style`, `lake lint`, and
-        the regression test file.
-  - [ ] Final census check and summary.
+        the regression test file. *(deviation: deferred to phase close, once the step lemma lands;
+        the scoped `FrameCompleteness` build, `lint-style`, and sorry census were run this dispatch
+        for the one landed lemma and are clean.)*
+  - [ ] Final census check and summary. *(deviation: deferred — phase not yet closed.)*
 
-- **Done when:** the wiring is sorry-free and committed; the regression corpus is extended with all
-  prior rows still green; the full gate set is clean; bare-tactic sorry census exactly 1.
+#### Phase 7 Progress Record (continuation dispatch; phase remains `[IN PROGRESS]`)
+
+**Confirmed scope, not anticipated at planning time**: `modalStepBranchS4KeyedOrdered` has
+**no existing soundness theory at all** to build on — not even for the *plain* (unkeyed) S4
+driver. `FrameSoundness.lean`'s `## S4 (Reflexive-Transitive Frame)` section contains only
+rule-level building blocks (`modalFourBoxProp_sound`/`modalFourDiaNegProp_sound`,
+`branchSatisfiableIn_s4FC_boxPos_trans_mem`/`_diaNeg_trans_mem`, the T-rule self-propagation
+lemmas), never a full step-preservation theorem comparable to `modalStepBranchS5Gen_preserves_
+satIn`/`modalStepBranchFive_preserves_satIn`/`modalStepBranchKb5''_preserves_satIn`. The bespoke
+step lemma this phase needs is therefore full new content on the same order as those three
+assemblies (each several hundred lines), not a small wiring shim — confirming the plan's own
+flag that this workstream is "the least-specified" and may need a split.
+
+**Landed this dispatch (sorry-free, `{propext, Quot.sound}` only)**:
+- `boxPlusExtraS4_sat` (`FrameCompleteness.lean`): the one piece of genuinely new SEMANTIC
+  content the mint-unblocked step case needs. `modalApplyOneS4KeyedMint`'s payload is
+  `modalApplyOne`'s own K witness group **plus** `boxPlusExtraS4 b w` (BOXED transmission of
+  every `T(□ψ)@w`/`F(◇ψ)@w` already on the branch, retargeted to the fresh witness `w'`). This
+  lemma shows every `boxPlusExtraS4` element is satisfied at the extended world-assignment, via
+  one hop of `s4FC`'s `IsTrans` off the mint edge `m.r (f w) ww`: a `T(□ψ)@w` fact universally
+  quantifies over all `m.r`-successors of `f w`; any successor of the fresh witness `ww` is also
+  a successor of `f w` by transitivity, so the SAME universal fact reinstates literally
+  (`T(□ψ)@w'`, not just the unwrapped `T(ψ)@w'` K's own mint already transmits). Diamond-negative
+  is the direct contrapositive dual.
+- The Phase 7 layering-note module comment.
+
+**Reusable ingredients catalogued for the remaining case-split** (the bespoke step lemma should
+mirror `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`'s case-split shape exactly --
+`LoopChecking.lean`, `by_cases hmint : (neg,box) ∨ (pos,diamond)`, sub-split on
+`blockingWorldS4Keyed`):
+
+| Case | Ingredients (all pre-existing except `boxPlusExtraS4_sat`) |
+|------|----|
+| Mint, blocked (redirect) | `branchSatisfiableIn_s4FC_addEdge_of_blocked` (this file's own Phase 6 capstone) directly, with `hUniv := hLoopInv.bClosure`, `hkL := hLoopInv.keyLowerBd` (`S4LoopInv` field names confirmed by grep). Expected to be the **cheapest** remaining case. |
+| Mint, unblocked | `modalApplyOneS4Keyed_boxNeg_unblocked_eq`/`_diaPos_unblocked_eq` + `modalApplyOneS4KeyedMint_boxNeg_witness`/`_diaPos_witness` (`LoopChecking.lean`) give the exact output shape (`modalApplyOne`'s own K witness group `++ boxPlusExtraS4 b lbl`, `.snd = acc.addEdge lbl (modalNextWorld b)`). Mirror the K mint construction in `FrameSoundness.lean` lines 412-472 (diamond-positive `T(◇φ)@w` mint) / 606-691 (box-negative `F(□φ)@w` mint) verbatim for the `f' := fun n => if n = w' then ww else f n` extension and the base witness/`boxProps`/`diaNegProps` satisfiability, then append `boxPlusExtraS4_sat` (landed) for the extra chunk. |
+| 4-rule, box-positive (`T(□φ)@w`) | `modalApplyOneS4_boxPos_fst_eq` (`LoopChecking.lean:9587`) gives the exact three-layer closed form (K's `boxPropagation`, persistent-or-notApplicable, THEN `modalTBoxSelf` appended with a `filter (!kForms.any ...)` dedup, THEN `modalFourBoxProp` appended with the same dedup pattern). **Not yet built**: a merge lemma showing this dedup-append-of-three-sound-layers preserves `RuleResultSat`/`branchSatisfiableIn s4FC`, composing `modalApplyOne_boxPos_sound` (`SoundnessStep.lean:447`, K layer) + `modalTBoxSelf_sound` (`FrameSoundness.lean:1019`, T layer) + `modalFourBoxProp_sound` (`FrameSoundness.lean:1123`, 4 layer). This is the single largest remaining piece of new proof content (three `RuleResultSat`-preserving-append arguments chained, each needing to show the `filter` dedup doesn't drop any element whose satisfiability isn't ALREADY covered by an earlier layer). Also needs `(modalApplyOneS4Keyed φ₀ keys sf b acc).fst = (modalApplyOneS4 φ₀ sf b acc).fst` at this shape, via `modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding` + `modalApplyOneS4Rules_boxPos_diaNeg_known_S4` (both `LoopChecking.lean`, already landed) bridging Keyed → Rules → (need one more bridge) S4. |
+| 4-rule, diamond-negative (`F(◇φ)@w`) | Dual of the above via `modalApplyOneS4_diaNeg_fst_eq` (`LoopChecking.lean:9658`), `modalTDiaNegSelf_sound` (`FrameSoundness.lean:1037`), `modalFourDiaNegProp_sound` (`FrameSoundness.lean:1143`). |
+| Propositional/non-modal (atom, bot, and, or, imp) | `modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box` (`LoopChecking.lean`, already landed) reduces to plain `modalApplyOne`. `tryAllPropRules_sat` (`SoundnessStep.lean:369`) then gives `RuleResultSat m f (tryAllPropRules ... sf)` from `sfSat m f sf` **in one call**, covering all five propositional shapes at once — this is dramatically cheaper than the ~350-line inline case-by-case duplication `modalStepBranchGen_preserves_satIn` (`FrameSoundness.lean:197`) uses (that duplication predates `tryAllPropRules_sat`'s extraction, or simply never adopted it). Only a small generic "append a `RuleResultSat` result to the branch preserves `branchSatisfiableIn FC`" wrapper is needed on top (not yet built, but mechanical, matching the `.linear`/`.branching`/`.persistent` pattern every existing assembly already uses inline). Expected to be the **second-cheapest** remaining case. |
+
+**Suggested order for the next dispatch** (cheapest first, to bank incremental green commits):
+propositional → mint-blocked (redirect) → mint-unblocked → 4-rule box-positive → 4-rule
+diamond-negative (dual, should be faster once box-positive's pattern is established) → assemble
+the full step lemma → extend the regression corpus → run the full gate set.
+
+**Not yet determined**: whether Phase 7's "wiring" scope (per its literal task list) requires
+only the STEP-level preservation lemma, or also the fuel-induction wrapper and a
+`modalTableauS4KeyedOrdered_sound`-shaped end-to-end capstone (mirroring `modalTableauS5_sound`
+etc.). The task list's four bullets (wire the step argument, layering note, regression,
+full gate) read as bounded to the step lemma; if a future dispatch judges the fuel-induction/
+capstone chain is also required, that is enough additional work (comparable in size to the S5
+Bespoke Fuel-Induction Assembly, `FrameSoundness.lean:2453-3320`) that it should be split into
+its own phase and recorded as such, not absorbed silently.
 
 ---
 

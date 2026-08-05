@@ -912,34 +912,6 @@ theorem modalStepBranchGen_preserves_accSourcesKnown
     · exact hbsub b' hb' sf.label (label_mem_modalKnownWorlds hsfmem)
     · exact hbsub b' hb' w (hknown w w' hold)
 
-/-- Local re-derivation of `CompletenessLoop.lean`'s `private lemma
-modalStepBranchGen_newExps_const` (unavailable across files): every `modalStepBranchGen` step
-produces children that all share the same freshly-expanded set. -/
-private lemma modalStepBranchGen_newExps_const_B
-    (apply : RuleApply Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (newAcc : Accessibility)
-    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc)) :
-    ∃ newExp, newExps = newBs.map (fun _ => newExp) := by
-  simp only [modalStepBranchGen] at hstep
-  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
-  split_ifs at hsf with hexp
-  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
-  · rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    obtain ⟨rfl, rfl, -⟩ := hsf
-    exact ⟨e ++ [sf], rfl⟩
-  · rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    obtain ⟨rfl, rfl, -⟩ := hsf
-    exact ⟨e ++ [sf], by simp [List.map_map, Function.comp_def]⟩
-  · rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    obtain ⟨rfl, rfl, -⟩ := hsf
-    exact ⟨e, rfl⟩
-  · rw [hfstc] at hsf; simp at hsf
-
 /-! ## Generic Top-Loop Propagation
 
 Generalizes the double induction below over an arbitrary step-preserved per-`(branch, acc)`
@@ -1064,7 +1036,7 @@ theorem modalExpandBranchesGen_openBranch_gen
                 hPresP bh e a newBs newExps newAcc hstep hah
               have hLenNBE : newExps.length = newBs.length := by
                 obtain ⟨newExp, hEq⟩ :=
-                  modalStepBranchGen_newExps_const_B apply bh e a newBs newExps newAcc hstep
+                  modalStepBranchGen_newExps_const apply bh e a newBs newExps newAcc hstep
                 simp [hEq]
               have hAll_new : ∀ p ∈ (done ++ newBs ++ bt).zip
                   (doneAccs ++ List.replicate newBs.length newAcc ++ restAs),

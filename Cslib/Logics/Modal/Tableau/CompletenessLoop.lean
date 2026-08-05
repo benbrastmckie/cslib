@@ -514,7 +514,7 @@ private lemma modalLoop_bClosure
 
 /-- **Generic constant-expanded-set fact**: `modalStepBranchGen_newExps_const`, over
 an abstract `apply`. Takes **no** field -- driver-structural. -/
-private lemma modalStepBranchGen_newExps_const
+lemma modalStepBranchGen_newExps_const
     (apply : RuleApply Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))

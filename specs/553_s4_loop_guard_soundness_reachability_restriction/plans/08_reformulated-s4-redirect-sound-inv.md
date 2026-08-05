@@ -836,7 +836,7 @@ before 7.3/7.5-7.7 return, and does not touch the Phase 9 capstone scope questio
 
 ---
 
-### Phase 8: Terminal payoff — closed-branch contradiction under the weakened predicate [NOT STARTED]
+### Phase 8: Terminal payoff — closed-branch contradiction under the weakened predicate [COMPLETED]
 
 - **Goal:** Establish that a classically closed branch contradicts `S4RedirectSoundInv`, so the
   weakening of conjunct (b) costs nothing at the terminal step of the soundness argument.
@@ -853,16 +853,46 @@ before 7.3/7.5-7.7 return, and does not touch the Phase 9 capstone scope questio
 - **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
 
 - **Tasks:**
-  - [ ] State `S4RedirectSoundInv φ₀ b e acc keys Er → isModalClosed b = false` (or the
-        `¬ (isModalClosed b = true)` form matching `modalClosed_unsatIn`'s idiom).
-  - [ ] Prove it by extracting conjunct (b)'s satisfaction clause and feeding `modalClosed_unsat`
+  - [x] State `S4RedirectSoundInv φ₀ b e acc keys Er → isModalClosed b = false` (or the
+        `¬ (isModalClosed b = true)` form matching `modalClosed_unsatIn`'s idiom). *(Landed as
+        `S4RedirectSoundInv_not_isModalClosed`, the `isModalClosed b = false` form.)*
+  - [x] Prove it by extracting conjunct (b)'s satisfaction clause and feeding `modalClosed_unsat`
         directly — conjunct (b)'s existential already supplies `⟨W, m, f, hb⟩`; the edge component
         is not needed. Do **not** route through `branchSatisfiableIn`, which cannot be reconstructed
-        from the weakened conjunct.
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+        from the weakened conjunct. *(Landed via the `Accessibility.empty` vacuous-edge-witness
+        idiom already used elsewhere in this file cluster — see the module comment for the exact
+        mechanism: `modalClosed_unsat`'s own proof discards its edge-realization hypothesis, so a
+        vacuously-true one at the empty accessibility suffices, reusing conjunct (b)'s `(W,m,f,hb)`
+        untouched. No route through `branchSatisfiableIn` was attempted.)*
+  - [x] `#print axioms`; scoped build; `lint-style`; census exactly 1. *(All green — axioms exactly
+        `propext`, `Classical.choice`, `Quot.sound`; scoped build, `lint-style`, and
+        `checkInitImports` all clean; sorry census unchanged at exactly 1.)*
 
 - **Done when:** the terminal payoff lemma is sorry-free and committed; census exactly 1; scoped
   build and `lint-style` clean.
+
+#### Phase 8 Verdict
+
+Landed `S4RedirectSoundInv_not_isModalClosed` in `FrameCompleteness.lean` (34 lines, against the
+~25-line estimate — module comment plus docstring account for the difference; no other file
+touched, matching the Scope Hypothesis). The proof is exactly the Scope Hypothesis's predicted
+shape: mechanical, because `modalClosed_unsat`'s own proof body destructures its
+`branchSatisfiable` hypothesis as `⟨W, m, f, _, hb⟩`, discarding the edge-realization clause and
+never touching it again. Rather than reconstructing a genuine edge witness from
+`S4RedirectSoundInv`'s weakened conjunct (b) — which would reintroduce exactly the obligation
+this task's whole reformulation exists to avoid — the proof supplies the edge slot with an
+unconditionally vacuous witness at `Accessibility.empty` (no recorded edge, so the implication
+`acc'.hasEdge w w' → m.r (f w) (f w')` holds for free) and reuses conjunct (b)'s `(W, m, f, hb)`
+verbatim. `isModalClosed b` does not mention `acc` at all, so `hclosed` transfers to the
+`Accessibility.empty` call site with no adjustment. This is the same idiom already used at
+`Soundness.lean:363` and three call sites in `FrameSoundness.lean` (941, 3274, 4456/4464) — not a
+novel technique, a documented existing pattern applied here.
+
+`#print axioms`: exactly `propext`, `Classical.choice`, `Quot.sound`. Scoped build, `lake exe
+lint-style`, and `lake exe checkInitImports` all clean, no warnings. `git diff --stat` confirms
+purely additive (`git diff | grep '^-[^-]'` returns nothing — no existing declaration touched, in
+particular none of the preserved declarations in the Testing & Validation checklist). Sorry
+census over `Cslib/Logics/Modal/Tableau/` unchanged at exactly 1 (`FrameSoundness.lean:1251`).
 
 ---
 

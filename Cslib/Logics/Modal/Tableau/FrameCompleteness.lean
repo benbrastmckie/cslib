@@ -5641,6 +5641,40 @@ lemma modalApplyOneS4Keyed_notApplicable_growth (φ₀ : Proposition Atom)
       rw [modalApplyOne_fst_eq_of_not_box_diamond sf (nf ++ b) b acc hnb hnd]
       exact h
 
+/-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
+
+A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)
+costs nothing at the terminal step of the soundness argument. `modalClosed_unsat`
+(`SoundnessStep.lean:92`) needs a `branchSatisfiable b acc'` witness -- an existential model
+`(W, m, f)` with BOTH an edge-realization clause (`∀ w w', acc'.hasEdge w w' → m.r (f w) (f
+w')`) AND the per-formula `sfSat` clause -- but its own proof body destructures that witness as
+`⟨W, m, f, _, hb⟩`, discarding the edge clause immediately and never touching it again. Rather
+than reconstructing a *true* edge-realization witness from `S4RedirectSoundInv`'s WEAKENED
+conjunct (b) (which only covers non-ghost edges, exactly the obligation this task's whole
+reformulation exists to avoid), this phase supplies the edge slot with an unconditionally
+vacuous one at `Accessibility.empty` -- no edge, so the implication holds for free -- and reuses
+conjunct (b)'s `(W, m, f, hb)` untouched. `isModalClosed b` does not mention `acc` at all, so
+`hclosed` transfers to the `Accessibility.empty` call site without any adjustment. This is the
+same `Accessibility.empty`-witness idiom already used at several call sites in this file cluster
+(e.g. `Soundness.lean:363`, `FrameSoundness.lean:941,3274,4456,4464`). -/
+
+/-- **Phase 8: the terminal payoff.** A classically closed branch contradicts
+`S4RedirectSoundInv` at any `(e, acc, keys, Er)`: the weakened edge conjunct (b) still supplies
+enough model witness to invoke `modalClosed_unsat`, since that lemma's own proof never consumes
+its edge-realization hypothesis. -/
+theorem S4RedirectSoundInv_not_isModalClosed (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (Er : List (WorldIndex × WorldIndex))
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er) :
+    isModalClosed b = false := by
+  obtain ⟨-, ⟨W, m, f, -, -, hb⟩, -, -⟩ := hinv
+  by_contra hclosed
+  simp only [Bool.not_eq_false] at hclosed
+  exact modalClosed_unsat b hclosed Accessibility.empty
+    ⟨W, m, f, fun w w' hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
+      hb⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

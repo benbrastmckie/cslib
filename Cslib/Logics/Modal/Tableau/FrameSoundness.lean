@@ -5391,7 +5391,24 @@ lemma branchSatisfiablePinnedIn_redirect_mechanical
       exact (hmono (hpinned w hw src hsrc ha)).trans
         (hstep.trans (hmono (hpinned wBlock hwB w' hw' hc)))
 
-/-! ### CANONICAL-WITNESS RESTRICTION PROBE -- REVERT UNLESS SORRY-FREE -/
+/-! ### Canonical-Witness Restriction Conditional Agreement Lemma
+
+A landed, sorry-free conditional agreement lemma for the redirect-preservation obligation
+(the S4 keyed loop guard's soundness argument, `blockingWorldS4Keyed` in
+`LoopChecking.lean`). It closes under Restriction B1 (the carrier restricted to the subtype of
+known-branch-labels), but only modulo two assumed hypothesis groups that this comment names
+explicitly so no reader has to reconstruct them from the signature:
+
+1. `hpropBox` / `hpropDia` -- the S4 box/diamond-content forward-persistence-along-`acc`-
+   reachability facts.
+2. `htruthBoxPos` / `htruthDiaNeg` -- the semantic-to-syntactic **truth-lemma** direction
+   (`Satisfies m x (□ψ) → T(□ψ)@x ∈ b`, and its diamond-negative dual) at the (arbitrary, pinned)
+   witness `m`.
+
+This lemma is scaffolding: a compile-checked specification of the target shape, and the proof
+body a later, canonical-witness redirect-preservation lemma reuses as its forward-chaining
+skeleton. It is superseded once that lemma lands with both hypothesis groups discharged at a
+canonical/term-model witness, at which point it is removed together with this section. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Canonical-witness restriction micro-probe (Restriction B1: carrier restricted to the subtype

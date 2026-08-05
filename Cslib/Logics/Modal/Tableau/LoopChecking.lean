@@ -1691,7 +1691,7 @@ omit [Hashable Atom] in
 /-- `modalApplyOneS4Rules`'s `.fst` component at a box-positive shape, in terms of the
 underlying `modalApplyOneT` result and the 4-rule propagation `modalFourBoxProp` -- one layer
 above `modalApplyOneT_boxPos_fst` (`TDriver.lean`), same proof shape. -/
-private lemma modalApplyOneS4Rules_boxPos_fst
+lemma modalApplyOneS4Rules_boxPos_fst
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOneS4Rules (⟨.pos, .box φ, w⟩ :
@@ -1712,7 +1712,7 @@ private lemma modalApplyOneS4Rules_boxPos_fst
 
 omit [Hashable Atom] in
 /-- Dual of `modalApplyOneS4Rules_boxPos_fst` for the diamond-negative shape. -/
-private lemma modalApplyOneS4Rules_diaNeg_fst
+lemma modalApplyOneS4Rules_diaNeg_fst
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOneS4Rules (⟨.neg, .diamond φ, w⟩ :
@@ -1758,7 +1758,7 @@ private lemma modalApplyOneS4Rules_boxPos_not_notApplicable_of_fourBoxProp_ne_ni
 `modalApplyOneS4Keyed`'s own guard-consulting arms (`.neg, .box`/`.pos, .diamond`) and
 `modalApplyOneS4`'s (same two shapes) fail to match `.pos, .box`, so both catch-all arms fire
 in sequence, definitionally. -/
-private lemma modalApplyOneS4Keyed_boxPos_eq_S4Rules (φ₀ : Proposition Atom)
+lemma modalApplyOneS4Keyed_boxPos_eq_S4Rules (φ₀ : Proposition Atom)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (ψ : Proposition Atom) (w : WorldIndex) :
@@ -1768,7 +1768,7 @@ private lemma modalApplyOneS4Keyed_boxPos_eq_S4Rules (φ₀ : Proposition Atom)
           SignedFormula (Proposition Atom) WorldIndex) b acc := rfl
 
 /-- Dual of `modalApplyOneS4Keyed_boxPos_eq_S4Rules` for the diamond-negative shape. -/
-private lemma modalApplyOneS4Keyed_diaNeg_eq_S4Rules (φ₀ : Proposition Atom)
+lemma modalApplyOneS4Keyed_diaNeg_eq_S4Rules (φ₀ : Proposition Atom)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (ψ : Proposition Atom) (w : WorldIndex) :
@@ -3703,7 +3703,7 @@ private lemma modalApplyOne_boxPos_fst_S4
 
 omit [Hashable Atom] in
 /-- `modalApplyOne`'s box-positive shape never touches `acc`. -/
-private lemma modalApplyOne_boxPos_snd_S4
+lemma modalApplyOne_boxPos_snd_S4
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOne (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
@@ -3743,7 +3743,7 @@ private lemma modalApplyOne_diamondNeg_fst_S4
 
 omit [Hashable Atom] in
 /-- `modalApplyOne`'s diamond-negative shape never touches `acc`. -/
-private lemma modalApplyOne_diamondNeg_snd_S4
+lemma modalApplyOne_diamondNeg_snd_S4
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOne (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
@@ -9094,7 +9094,7 @@ private lemma modalApplyOneT_snd_eq (sf : SignedFormula (Proposition Atom) World
 omit [Hashable Atom] in
 /-- `modalApplyOneS4Rules`'s accessibility output is always exactly K's own, one layer up: the
 4-rule propagation arms only ever touch the `.fst` formula-output component. -/
-private lemma modalApplyOneS4Rules_snd_eq (sf : SignedFormula (Proposition Atom) WorldIndex)
+lemma modalApplyOneS4Rules_snd_eq (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     (modalApplyOneS4Rules sf b acc).snd = (modalApplyOne sf b acc).snd := by
   unfold modalApplyOneS4Rules
@@ -10041,6 +10041,39 @@ private lemma modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding (φ₀ : Proposit
   · rw [hres] at hmatch; exact absurd hmatch (by simp)
   · exact Or.inr ⟨nf, rfl⟩
   · exact Or.inl rfl
+
+/-! ### 4-Rule Case Ingredients (Phase 7 of the S4 loop-guard soundness task)
+
+The two 4-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`) never mint and never touch `acc`
+(`modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding` above already established the
+never-expanding half). The `.fst` closed forms and the Keyed→S4Rules bridge already exist above
+(`modalApplyOneS4Rules_boxPos_fst`/`_diaNeg_fst`, `modalApplyOneS4Keyed_boxPos_eq_S4Rules`/
+`_diaNeg_eq_S4Rules`, de-privatized for `FrameCompleteness.lean` to consume -- see their doc
+comments above). Only the `.snd = acc` companion facts are new here (structural, no semantic
+content); the actual K+T+4 `RuleResultSat` merge (semantic content, needs `FrameSoundness.lean`'s
+`s4FC`/`sfSat` apparatus) lives in `FrameCompleteness.lean` per the layering note. -/
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4Rules`'s `.snd` at the box-positive shape is always `acc`, unconditionally:
+chains the unconditional `modalApplyOneS4Rules_snd_eq` (same-file private, `.snd` always equals
+K's own regardless of shape) with K's own box-positive `.snd` fact
+(`modalApplyOne_boxPos_snd_S4`, same-file private). Not `private`: consumed by
+`FrameCompleteness.lean`'s `modalApplyOneS4Rules_boxPos_soundIn`. -/
+lemma modalApplyOneS4Rules_boxPos_snd_eq_acc
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4Rules (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc := by
+  rw [modalApplyOneS4Rules_snd_eq, modalApplyOne_boxPos_snd_S4]
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4Rules_boxPos_snd_eq_acc` for the diamond-negative shape. -/
+lemma modalApplyOneS4Rules_diaNeg_snd_eq_acc
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc := by
+  rw [modalApplyOneS4Rules_snd_eq, modalApplyOne_diamondNeg_snd_S4]
 
 /-- `modalApplyOneS4Keyed φ₀ keys sf b acc` at a non-box/diamond-shaped `sf` is exactly raw
 K's `modalApplyOne sf b acc`, for ANY `keys` -- the dispatch chain `modalApplyOneS4Keyed →

@@ -1,5 +1,5 @@
 ---
-next_project_number: 587
+next_project_number: 588
 ---
 
 # TODO
@@ -11,14 +11,15 @@ next_project_number: 587
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,553,554,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,564,571,576,586 | 36,37,181,425,553,554,568 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,566 | 39,40,564,586 | foundations, modal logic |
-| 4 | 565 | 566 | modal logic |
-| 5 | 567 | 565 | modal logic |
-| 6 | 511,534,582 | 567 | modal logic |
-| 7 | 506,548 | 511 | modal logic |
-| 8 | 300 | 506 | modal logic |
+| 1 | 36,37,181,375,400,409,425,554,568,569,583,587 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,553,571,576 | 36,37,181,425,554,568,587 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,564,586 | 39,40,553 | foundations, modal logic |
+| 4 | 566 | 564,586 | modal logic |
+| 5 | 565 | 566 | modal logic |
+| 6 | 567 | 565 | modal logic |
+| 7 | 511,534,582 | 567 | modal logic |
+| 8 | 506,548 | 511 | modal logic |
+| 9 | 300 | 506 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,22 +37,23 @@ next_project_number: 587
 
 ### Modal Logic
 
-553 [BLOCKED] — Determine whether the S4 keyed loop-check guard can be made sound
-  └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
-    └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
-      └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
-        └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
-          └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-            └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-              └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-            └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-          └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-          └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
-  └─ 586 [NOT STARTED] — [Continuation of Task A of the modal-tableau refactor programme; 
-    └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone (see above)
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
+587 [RESEARCHED] — Task 553 (s4_loop_guard_soundness_reachability_restriction) is bl
+  └─ 553 [BLOCKED] — Determine whether the S4 keyed loop-check guard can be made sound
+    └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
+      └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
+        └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
+          └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
+            └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+              └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+                └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+              └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+            └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+            └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
+    └─ 586 [NOT STARTED] — [Continuation of Task A of the modal-tableau refactor programme; 
+      └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone (see above)
 
 ### Temporal Logic
 
@@ -76,6 +78,18 @@ next_project_number: 587
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
 ## Tasks
+
+### 587. Canonical witness restriction probe
+- **Effort**: 6-9 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+- **Research**: [553_s4_loop_guard_soundness_reachability_restriction/reports/05_gate-a-canonical-witness-blocker-analysis.md]
+
+**Description**: Task 553 (s4_loop_guard_soundness_reachability_restriction) is blocked: plan v5's Gate A (Phase 1, 'DECISION GATE A -- the pinned redirect-preservation lemma') died at a machine-checked stuck goal, recorded in that plan's `#### Phase 1 Verdict` (specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md). The stuck goal: the structural-induction agreement lemma `Satisfies m x chi <-> Satisfies m' x chi` (needed to show the redirect edge preserves `branchSatisfiablePinnedIn s4FC`) escapes to model points outside `modalKnownWorlds b` when the induction unwinds a `.box`/`.diamond` subformula, and neither `accPinnedBy` nor `hbox`/`hdia` (both deliberately restricted to known branch labels) supply any fact there. The Phase 1 Verdict names, but explicitly declines to price, the fix: a canonicity assumption on the witness model (WLOG `W := WorldIndex`, `f := id`, so every model point is trivially a known label). This task's job is to answer that priced-viability question, not to redo work already completed: (1) do NOT re-run or re-propose the FrameCompleteness refactor programme -- it already landed (its box-plus birth content is now inline in the mainline `successorBirthContent`/`blockingWorldS4Keyed` in Cslib/Logics/Modal/Tableau/LoopChecking.lean, not as the separate parallel `...Boxed` family plan v5's Phases 5-7 anticipated -- that framing is stale); (2) do NOT touch the pre-existing, standing `sorry` at Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1251 (`branchSatisfiableIn_s4FC_ancestor_redirect`), retained by explicit user decision; (3) DO preserve and reuse, do not re-derive, the already-landed, sorry-free, standard-axioms-only sub-step 1.1 declarations `accPinnedBy`, `branchSatisfiablePinnedIn`, and `branchSatisfiablePinnedIn_redirect_mechanical` (Cslib/Logics/Modal/Tableau/FrameSoundness.lean, currently at :5323-5390 -- re-locate by `grep -n '^def\|^lemma\|^theorem'` rather than trusting these line numbers, since the file continues to drift). Concretely: (a) attempt a machine-checked micro-probe of the box-positive and diamond-negative agreement-lemma cases under the added hypothesis that `x`/the witness carrier is restricted to `WorldIndex` via `f := id` (mirroring the existing precedent `extractModelS4`/`extractModelWith` in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:85-148, which already builds `Model WorldIndex Atom` directly with no existential `W`/`f` -- this is the same canonical-model shape Massacci2000 Thm 10.6 uses on the completeness side); determine whether restricting the carrier actually closes the exact stuck goal recorded in the Phase 1 Verdict, or dies at a new, different obstruction; (b) if the probe succeeds (even partially, i.e. one of box-positive/diamond-negative closes and the other's failure mode is well understood), price the consequences: which existential fields of `branchSatisfiablePinnedIn` must be re-shaped or collapse under the restriction, whether sub-step 1.1's three mechanical conjuncts (the `IsTrans`/`Std.Refl`/edge-conjunct/`accPinnedBy`-preservation cluster) survive verbatim against a fixed carrier or need re-derivation, and a phase-count/effort estimate for a resulting v6 plan; (c) if the probe fails, record the exact machine-checked stuck goal (in the same style as the plan's existing `#### Phase 1 Verdict`) and state plainly that no route is currently known, rather than proposing a further ad hoc route. Follow the plan's own front-loaded kill-gate discipline: do not scaffold any large construction before the micro-probe's own verdict is in. Write findings as a research report under specs/553_s4_loop_guard_soundness_reachability_restriction/reports/ (or this new task's own specs/ directory per the standard artifact convention) with a clear go/no-go verdict and, if go, a priced next-step recommendation for a task-553 v6 plan.
+
+---
 
 ### 586. Adjudicate and delete the audited duplicate re-derivation families
 - **Status**: [NOT STARTED]
@@ -452,7 +466,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 535, Task 561, Task 563
+- **Dependencies**: Task 535, Task 561, Task 563, Task 587
 - **Research**:
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md]
   - [553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md]

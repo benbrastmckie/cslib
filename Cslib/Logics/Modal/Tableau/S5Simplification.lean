@@ -811,14 +811,6 @@ theorem modalApplyOneS5w_outputs_tags {φ₀ : Proposition Atom}
     subst hs; subst hf
     exact modalApplyOneS5w_boxNeg_tag_mem hb hsf
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- Local re-derivation of `FmpMeasure.lean`'s `@[simp] lemma modalSubfmls_self_mem`
-(available cross-file, but its own signature implicitly carries unused `[Hashable Atom]`, which
-these `omit [Hashable Atom]` lemmas cannot supply): every formula is a member of its own
-structural subformula list. -/
-private lemma modalSubfmls_self_mem_S5 (φ : Proposition Atom) : φ ∈ modalSubfmls φ := by
-  cases φ <;> simp [modalSubfmls]
-
 omit [Hashable Atom] in
 /-- The S5 analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
 `modalApplyOneS5` rather than `modalApplyOne`: either `modalApplyOneS5` leaves `acc` unchanged
@@ -1142,7 +1134,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
       subst hs; subst hf
       unfold modalApplyOneS5w
       have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
-        List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
       have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans hφmem hsfform
       have htagmem : (Sign.pos, φ) ∈ mintTags φ₀ := mem_mintTags_of_diamond_mem hsfform
       cases hw : witnessWorldS5 b Sign.pos φ with
@@ -1192,7 +1184,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                 subst heq
                 have hbmem := mem_boxPositivesOf hψsrc
                 have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
-                  List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
+                  List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
                 have hψsub : ψ ∈ modalSubfmls φ₀ :=
                   modalSubfmls_trans hψmem (S5wTagInv_formula_mem hT hbmem)
                 exact mem_signedSubfmls_of_formula_S5w _ hψsub
@@ -1209,7 +1201,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                   have hsf'sub : sf'.formula ∈ modalSubfmls φ₀ := S5wTagInv_formula_mem hT hsf'mem
                   rw [hform] at hsf'sub
                   have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
-                    List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
+                    List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
                   have hψsub : ψ ∈ modalSubfmls φ₀ := modalSubfmls_trans hψmem hsf'sub
                   exact mem_signedSubfmls_of_formula_S5w _ hψsub
               · simp at heq
@@ -1248,7 +1240,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
       subst hs; subst hf
       unfold modalApplyOneS5w
       have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
-        List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
       have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans hφmem hsfform
       have htagmem : (Sign.neg, φ) ∈ mintTags φ₀ := mem_mintTags_of_box_mem hsfform
       cases hw : witnessWorldS5 b Sign.neg φ with
@@ -1298,7 +1290,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                 subst heq
                 have hbmem := mem_boxPositivesOf hψsrc
                 have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
-                  List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
+                  List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
                 have hψsub : ψ ∈ modalSubfmls φ₀ :=
                   modalSubfmls_trans hψmem (S5wTagInv_formula_mem hT hbmem)
                 exact mem_signedSubfmls_of_formula_S5w _ hψsub
@@ -1315,7 +1307,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
                   have hsf'sub : sf'.formula ∈ modalSubfmls φ₀ := S5wTagInv_formula_mem hT hsf'mem
                   rw [hform] at hsf'sub
                   have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
-                    List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
+                    List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
                   have hψsub : ψ ∈ modalSubfmls φ₀ := modalSubfmls_trans hψmem hsf'sub
                   exact mem_signedSubfmls_of_formula_S5w _ hψsub
               · simp at heq
@@ -1362,7 +1354,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
         subst hs; subst hf
         have hφsub : φ ∈ modalSubfmls φ₀ := by
           have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
-            List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+            List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
           exact modalSubfmls_trans hφmem hsfform
         have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
             (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
@@ -1412,7 +1404,7 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
         subst hs; subst hf
         have hφsub : φ ∈ modalSubfmls φ₀ := by
           have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
-            List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+            List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
           exact modalSubfmls_trans hφmem hsfform
         have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
             (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable

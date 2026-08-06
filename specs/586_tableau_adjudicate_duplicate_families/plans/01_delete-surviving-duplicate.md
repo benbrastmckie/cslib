@@ -178,22 +178,30 @@ not a description: a mismatch blocks the task rather than being reconciled in pa
 
 ---
 
-### Phase 2: Delete the one in-scope duplicate [NOT STARTED]
+### Phase 2: Delete the one in-scope duplicate [COMPLETED]
 
 **Goal**: Remove `modalSubfmls_self_mem_S5` and route its call sites to the public origin.
 
 **Tasks**:
-- [ ] In `Cslib/Logics/Modal/Tableau/S5Simplification.lean`, rewrite each call site of
+- [x] In `Cslib/Logics/Modal/Tableau/S5Simplification.lean`, rewrite each call site of
       `modalSubfmls_self_mem_S5` to `modalSubfmls_self_mem`. Every site has the identical shape
       `List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 X)` with `X ∈ {φ, ψ}`; the change is a
-      pure name substitution. Locate by declaration name, never by line number.
-- [ ] Delete the `private lemma modalSubfmls_self_mem_S5` declaration, its `/-- Local
+      pure name substitution. Locate by declaration name, never by line number. **Observed**: all
+      8 sites rewritten (lines 1137, 1187, 1204, 1243, 1293, 1310, 1357, 1407 in the post-edit
+      file).
+- [x] Delete the `private lemma modalSubfmls_self_mem_S5` declaration, its `/-- Local
       re-derivation of ... -/` docstring, and the `omit [DecidableEq Atom] [Hashable Atom] in`
       line that immediately precedes that docstring. Take care not to remove the `omit
-      [Hashable Atom] in` line belonging to the *next* declaration.
-- [ ] Verify no reference to `modalSubfmls_self_mem_S5` remains anywhere under `Cslib/`.
+      [Hashable Atom] in` line belonging to the *next* declaration. **Observed**: deleted lines
+      814-821 of the pre-edit file (the `omit [DecidableEq Atom] [Hashable Atom] in` line,
+      3-line docstring, and 2-line declaration+proof); the following `omit [Hashable Atom] in`
+      line for `modalApplyOneS5_knownWorlds_step` is untouched.
+- [x] Verify no reference to `modalSubfmls_self_mem_S5` remains anywhere under `Cslib/`.
       Matches under `specs/archive/` are frozen historical artifacts and must be left untouched.
-- [ ] Build `lake build Cslib.Logics.Modal.Tableau.S5Simplification` and confirm exit 0.
+      **Observed**: one remaining match — the module-docstring mention at line 88, deliberately
+      deferred to Phase 3's prose reconciliation (not a declaration reference).
+- [x] Build `lake build Cslib.Logics.Modal.Tableau.S5Simplification` and confirm exit 0.
+      **Observed**: exit 0, 868 jobs, matching the research's measured figure exactly.
 
 **Timing**: 0.5 hours
 

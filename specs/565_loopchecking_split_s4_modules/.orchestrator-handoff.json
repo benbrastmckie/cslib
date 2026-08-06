@@ -1,0 +1,24 @@
+{
+  "status": "researched",
+  "summary": "Re-measured LoopChecking.lean at 11,393 lines / 241 declarations and derived an empirically verified zero-cycle 11-module S4/ layering, finding that a seventh 'Driver' module is structurally forced because the invariant material makes 248 references into the driver definitions.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
+      "type": "report",
+      "summary": "Full research report: re-measurement, discontiguity evidence (Universe spans 6 disjoint runs L229-L9499), verified acyclic 11-module layering with per-module decl/line counts and import edges, four non-obvious assignment corrections, 26 seam-crossing private declarations, @[expose] public section hazard, zero-downstream-churn barrel strategy, ORGANISATION.md edits, and an 11-phase decomposition."
+    },
+    {
+      "path": "specs/565_loopchecking_split_s4_modules/artifacts/module-assignment.md",
+      "type": "data",
+      "summary": "Complete 241-declaration mapping grouped by target module with private flag, kind, and current line number."
+    },
+    {
+      "path": "specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json",
+      "type": "data",
+      "summary": "Machine-readable reference graph: per-declaration name, visibility, kind, line span, local dependencies, and assigned target module."
+    }
+  ],
+  "phases_completed": 5,
+  "phases_total": 5
+}

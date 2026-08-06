@@ -1,0 +1,41 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-06T00:00:00Z",
+  "completed_at": "2026-08-06T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
+      "type": "report",
+      "summary": "Research report on splitting LoopChecking.lean into an import-acyclic S4/ module cluster."
+    },
+    {
+      "path": "specs/565_loopchecking_split_s4_modules/artifacts/module-assignment.md",
+      "type": "data",
+      "summary": "241-declaration to target-module assignment table."
+    },
+    {
+      "path": "specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json",
+      "type": "data",
+      "summary": "Declaration reference graph with module assignments."
+    }
+  ],
+  "partial_progress": {
+    "stage": "research complete",
+    "details": "All five research questions answered with measured evidence. Layering verified to have zero forward edges across 241 declarations."
+  },
+  "metadata": {
+    "session_id": "sess_1786030020_688c25_565",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "measured": {
+      "loopchecking_lines": 11393,
+      "loopchecking_declarations": 241,
+      "private_declarations": 58,
+      "private_crossing_seams": 26,
+      "zero_consumer_privates": 3,
+      "proposed_modules": 11,
+      "forward_edge_violations": 0
+    }
+  }
+}

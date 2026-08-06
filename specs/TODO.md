@@ -36,7 +36,7 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
+565 [RESEARCHED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
   └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
     └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
       └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -338,10 +338,11 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 565. Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 563, Task 564, Task 566, Task 586
+- **Research**: [565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md]
 
 **Description**: [Task G of the modal-tableau refactor programme; P3. Depends on the review gate, box-plus and the migration, because the seams MOVE if box-plus is adopted.] Split LoopChecking.lean (10,540 lines / 230 declarations, measured) into an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules. Note that these clusters' current source ranges are DISCONTIGUOUS -- itself the evidence that a line-count split would be wrong. DO NOT split mechanically by line count. Conform to ORGANISATION.md and NOTATION.md, preserve import acyclicity, and UPDATE ORGANISATION.md, which currently gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. The Support-module dedup task should land first: it shrinks the files before the seams are cut.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

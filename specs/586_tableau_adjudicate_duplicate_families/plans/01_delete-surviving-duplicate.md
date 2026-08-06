@@ -1,7 +1,7 @@
 # Implementation Plan: Adjudicate and delete the audited duplicate re-derivation families
 
 - **Task**: 586 - Adjudicate and delete the audited duplicate re-derivation families
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 2 hours
 - **Dependencies**: 553 (satisfied; parent task 558's phases 8-11 already landed)
 - **Research Inputs**: specs/586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md
@@ -120,31 +120,40 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 not write before the drift guard passes, and Phase 3's corrected figures are only true once
 Phase 2's deletion has landed.
 
-### Phase 1: Drift guard — re-run the declaration-level census [NOT STARTED]
+### Phase 1: Drift guard — re-run the declaration-level census [COMPLETED]
 
 **Goal**: Confirm the tree still matches the state the adjudication was derived against, before
 anything is written. This phase writes no code and no prose.
 
 **Tasks**:
-- [ ] Confirm `modalSubfmls_self_mem_S5` is still present as a `private lemma` in
+- [x] Confirm `modalSubfmls_self_mem_S5` is still present as a `private lemma` in
       `Cslib/Logics/Modal/Tableau/S5Simplification.lean`, and count its references
-      (expected: one declaration, one module-docstring mention, eight call sites).
-- [ ] Confirm the public origin `modalSubfmls_self_mem` is still present in
+      (expected: one declaration, one module-docstring mention, eight call sites). **Observed**:
+      exactly 10 matches — 1 `private lemma` declaration (line 819), 1 module-docstring mention
+      (line 88), 8 call sites (lines 1145, 1195, 1212, 1251, 1301, 1318, 1365, 1415). Matches
+      exactly.
+- [x] Confirm the public origin `modalSubfmls_self_mem` is still present in
       `Cslib/Logics/Modal/Tableau/FmpMeasure.lean`, still `@[simp]`, and still carries the
       `omit [DecidableEq Atom] [Hashable Atom] in` prefix. If the `omit` prefix is gone, the
-      deletion rationale is void — stop and mark `[BLOCKED]`.
-- [ ] Confirm `S5Simplification.lean` still carries
-      `public import Cslib.Logics.Modal.Tableau.FmpMeasure`.
-- [ ] Re-run the suffix-family census over `Cslib/Logics/Modal/Tableau/` (any suffixed
+      deletion rationale is void — stop and mark `[BLOCKED]`. **Observed**: present at line 273,
+      `@[simp]` on line 272, `omit [DecidableEq Atom] [Hashable Atom] in` on line 268. Rationale
+      intact.
+- [x] Confirm `S5Simplification.lean` still carries
+      `public import Cslib.Logics.Modal.Tableau.FmpMeasure`. **Observed**: present at line 10.
+- [x] Re-run the suffix-family census over `Cslib/Logics/Modal/Tableau/` (any suffixed
       declaration whose unsuffixed base name also exists as a declaration). Expected: 14 residue
-      families.
-- [ ] Spot-check that a representative sample of the 43 GONE names (e.g.
+      families. **Observed**: exactly 14 residue families over 1099 declarations, matching
+      exactly (including `modalSubfmls_self_mem` and `accFreshInv_append` among the 14).
+- [x] Spot-check that a representative sample of the 43 GONE names (e.g.
       `modalKnownWorlds_fold_spec_S5`, `mem_modalUniverse_of_Five`, `outDeg_addEdge_self_S4`)
-      still return zero declaration matches.
-- [ ] Confirm `accFreshInv_append_S4` is present in `LoopChecking.lean` and that
-      `LoopChecking.lean` still does not import `Soundness.lean`.
-- [ ] Record the observed figures. If any expectation fails, stop: mark the task `[BLOCKED]` with
-      the divergence recorded, and do not proceed to Phase 2.
+      still return zero declaration matches. **Observed**: zero matches for all three.
+- [x] Confirm `accFreshInv_append_S4` is present in `LoopChecking.lean` and that
+      `LoopChecking.lean` still does not import `Soundness.lean`. **Observed**: present (private
+      lemma at line 5449, 3 call sites). `LoopChecking.lean`'s import block (lines 9-20) has no
+      `Soundness` import.
+- [x] Record the observed figures. If any expectation fails, stop: mark the task `[BLOCKED]` with
+      the divergence recorded, and do not proceed to Phase 2. **All six confirmations passed with
+      zero divergence from the research's figures. Proceeding to Phase 2.**
 
 **Timing**: 0.3 hours
 

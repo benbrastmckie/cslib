@@ -1,49 +1,14 @@
 {
-  "status": "planned",
-  "summary": "Four-phase sequential plan scoped to the honest actionable set the research established, not the brief's stale 45-row premise: a mandatory drift-guard census (Phase 1, writes nothing, [BLOCKED] on divergence), one declaration deletion with 8 same-file call-site substitutions to the public FmpMeasure origin (Phase 2), reconciliation of three stale prose records plus the superseded-exclusion and out-of-scope-survivor records (Phase 3), and a full gate against the re-measured baselines (Phase 4). Estimated 2 hours. Strict plan validation passes with 0 warnings.",
+  "status": "implemented",
+  "summary": "Implemented task 586's plan in full (4/4 phases). The task brief's premise of 45 surviving duplicate re-derivation rows was stale: a drift-guard census (Phase 1) confirmed the research's finding that 43 of 45 audited rows were already deleted by a prior task before the audit was committed. Deleted the one actionable survivor, modalSubfmls_self_mem_S5, from S5Simplification.lean and routed its 8 same-file call sites to the public FmpMeasure.lean origin modalSubfmls_self_mem (Phase 2, build green at 868 jobs matching the research's pre-verified figure). Reconciled three stale prose records the deletion falsified: removed S5Simplification.lean's now-empty module-docstring section, removed FiveSimplification.lean's orphaned section header, and corrected LoopChecking.lean's comment-site count from 11 to the re-measured 12 (Phase 3). Ran the full 8-gate CI verification (Phase 4): lake build Cslib (exit 0, 3313 jobs), Modal/Tableau sorry census (1), axiom census (0), lake shake (9 findings none in Modal/Tableau), lake lint (145 findings, delta 0), checkInitImports (exit 0), lint-style (exit 0), lake test (exit 0). All gates held at baseline with zero divergence. accFreshInv_append_S4 was left untouched as a decided, evidenced exclusion (import reachability). Task 558's Phase 10 Reasoned Exclusions entry for modalSubfmls_self_mem is recorded as superseded in this task's summary, without editing task 558's historical plan files.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/586_tableau_adjudicate_duplicate_families/plans/01_delete-surviving-duplicate.md",
-      "type": "plan",
-      "summary": "Phased plan for deleting modalSubfmls_self_mem_S5 (S5Simplification.lean) and routing its 8 call sites to the public @[simp] origin modalSubfmls_self_mem (FmpMeasure.lean), reconciling three prose defects left by the already-landed deletions, and gating on build 3313 jobs / sorry census 1 / 0 axioms / shake 9 with none in Modal-Tableau / lint delta 0 against 145 / checkInitImports 0 / lint-style 0 / test green."
+      "path": "specs/586_tableau_adjudicate_duplicate_families/summaries/01_delete-surviving-duplicate-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: what was done per phase, the task 558 Phase 10 supersession record, the accFreshInv_append_S4 exclusion record, and the observed-vs-baseline gate table."
     }
   ],
-  "phases_completed": 0,
-  "phases_total": 4,
-  "notes_for_implementer": {
-    "anti_target_warning": "Do NOT treat 45 deletions as a target. Exactly one declaration is deleted by this plan. A dispatch producing more than one deletion is out of contract.",
-    "verification_tiers": {
-      "phase_1": "prose (read-only drift guard; writes nothing)",
-      "phase_2": "local (deleted symbol is private; all 8 call sites in one file)",
-      "phase_3": "prose (comment/docstring only; must confirm Lean delimiter balance)",
-      "phase_4": "full"
-    },
-    "hard_stop_condition": "If Phase 1's census does not return 14 residue families and exactly the two named survivors (modalSubfmls_self_mem_S5, accFreshInv_append_S4), or if the FmpMeasure origin has lost its 'omit [DecidableEq Atom] [Hashable Atom] in' prefix, mark [BLOCKED] and surface for user review. Do not re-derive the adjudication ad hoc.",
-    "scope_hypotheses_to_confirm": [
-      "14 residue families and exactly 2 surviving audit-row declarations (Phase 1)",
-      "8 call sites, all in S5Simplification.lean, all of shape List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 X) (Phase 2)",
-      "repo-wide 'Local re-derivation' comment-site count 13 pre-deletion; write the freshly-measured post-deletion figure rather than assuming 12 (Phase 3)",
-      "all eight Phase 4 gate baselines are re-measurement obligations, not assumptions"
-    ],
-    "do_not_do": [
-      "Do not touch accFreshInv_append_S4 (class (c) import reachability; LoopChecking.lean does not import Soundness.lean).",
-      "Do not touch the hasEdge_mem_successorsOf converse pair in Support/Accessibility.lean.",
-      "Do not rewrite historical plan files under specs/558_*; the supersession record belongs in this task's summary.",
-      "Do not edit frozen .lean artifacts under specs/archive/.",
-      "Do not rewrite LoopChecking.lean's 'Inventory figures that drifted' block (the 55 and 77 figures are deliberately-retained historical baselines); only the 'Post-de-duplication update' count is corrected.",
-      "Do not gate on lake shake or lake lint exit codes; both are non-zero at steady state.",
-      "Do not use naive grep for the sorry census; it over-counts 24 against a true figure of 1."
-    ],
-    "gate_baselines": {
-      "lake_build_Cslib": "exit 0, 3313 jobs",
-      "modal_tableau_sorry_census": 1,
-      "modal_tableau_axioms": 0,
-      "lake_shake": "9 findings, none in Modal/Tableau, exit 1 (do NOT gate on exit 0)",
-      "lake_lint": "145 findings, exit 1 (gate on delta 0, not exit code)",
-      "checkInitImports": "exit 0",
-      "lint_style": "exit 0",
-      "lake_test": "exit 0, 3676 jobs"
-    }
-  }
+  "phases_completed": 4,
+  "phases_total": 4
 }

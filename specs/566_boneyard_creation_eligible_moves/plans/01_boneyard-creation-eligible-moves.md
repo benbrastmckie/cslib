@@ -203,7 +203,7 @@ hypothesis and must be investigated before proceeding to Phase 2.
 
 ---
 
-### Phase 2: Move the two `blockedRedirect_*_of_*Origin` lemmas [IN PROGRESS]
+### Phase 2: Move the two `blockedRedirect_*_of_*Origin` lemmas [COMPLETED]
 
 **Goal**: `blockedRedirect_boxctx_mem_of_boxOrigin` and `blockedRedirect_diaNeg_mem_of_diaOrigin`
 live in `Boneyard/ModalTableauS4Keyed/RedirectOriginTransfer.lean` and no longer appear in
@@ -275,7 +275,7 @@ proceeding.
 
 ---
 
-### Phase 3: Move the `keysRootEmpty` pair, splitting the section comment [IN PROGRESS]
+### Phase 3: Move the `keysRootEmpty` pair, splitting the section comment [COMPLETED]
 
 **Goal**: `keysRootEmpty` and `keysRootEmpty_entry` live in
 `Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean`; the `keysOriginS4` retraction stays in

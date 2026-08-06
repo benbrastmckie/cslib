@@ -185,7 +185,17 @@ Modal/
 │   ├── Intuitionistic/         -- Intuitionistic modal systems IK/IT/IS4/IS5: canonical
 │   │                              model, prime theory, truth lemma, completeness
 │   └── Minimal/                -- Minimal modal systems MK/MT/MS4/MS5: completeness, extension
-└── Tableau/                   -- Tableau decision procedures (K/T/B/S4/S5 drivers, saturation, soundness/completeness)
+└── Tableau/                   -- Tableau decision procedures (K/T/B/S4/S5 drivers, saturation,
+    │                              soundness/completeness)
+    ├── Support/                -- Shared driver-file facts, de-duplicated across the subsystem
+    │   ├── Accessibility.lean  -- Accessibility/addEdge/hasEdge/successorsOf facts
+    │   └── KnownWorlds.lean    -- modalKnownWorlds/modalMaxWorld/boxPositivesOf facts
+    └── S4/                     -- S4 (reflexive-transitive) loop-checking module cluster,
+                                    bottom-up: Universe -> BirthKey -> Guard -> Driver ->
+                                    {Hintikka, InvariantKeys, InvariantAcc} -> {Redirect,
+                                    Invariant} -> HintikkaInvariant. LoopChecking.lean (one level
+                                    up) is the barrel: S4 entry points, termination measure, and
+                                    the two end-to-end capstones, re-exporting all eleven modules.
 ```
 
 ### Temporal Logic (`Logics/Temporal/`)
@@ -332,6 +342,14 @@ The `Cslib.Logic` namespace spans both `Foundations/Logic/` and `Logics/`:
 - `Cslib.Logic.Bimodal` -- from `Logics/Bimodal/`
 
 Infrastructure lives in `Foundations/`, specific logics live in `Logics/`, and both share the `Cslib.Logic` namespace prefix.
+
+## Module Size
+
+**Module size.** Prefer modules under ~1,500 lines. A module past ~3,000 lines should
+carry a docstring note justifying its size or a tracked plan to split it. Size alone is
+never a reason to split: split along the *dependency* structure, never by line count — the
+families inside a large module are typically discontiguous in the source, and a contiguous
+cut will not find them. Confirm any proposed seam is import-acyclic before writing files.
 
 ## Testing
 

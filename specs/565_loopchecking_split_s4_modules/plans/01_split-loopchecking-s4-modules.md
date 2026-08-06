@@ -964,25 +964,31 @@ set from live `check-shake-residue.sh` output and the block extent by reading th
 
 ---
 
-### Phase 14: Update `ORGANISATION.md` [NOT STARTED]
+### Phase 14: Update `ORGANISATION.md` [COMPLETED]
 
 **Goal**: Document the `Tableau/` subtree and add the module-size guidance whose absence is
 precisely how an 11,393-line file came to exist.
 
 **Tasks**:
-- [ ] **Edit 1**: Replace the single undifferentiated line
+- [x] **Edit 1**: Replace the single undifferentiated line
       `└── Tableau/  -- Tableau decision procedures (K/T/B/S4/S5 drivers, saturation,
       soundness/completeness)` in the `Modal/` tree with a subtree naming `Support/` (which
       already exists and is currently undocumented) and the new `S4/` cluster with its layering.
       Use the `Foundations/Logic/Tableau/` block in the same file as the formatting precedent.
-- [ ] **Edit 2**: Add module-size guidance near the "Namespace Convention" section, stated as
-      guidance with an explicit escape hatch rather than a hard gate:
-      > **Module size.** Prefer modules under ~1,500 lines. A module past ~3,000 lines should
-      > carry a docstring note justifying its size or a tracked plan to split it. Size alone is
-      > never a reason to split: split along the *dependency* structure, never by line count — the
-      > families inside a large module are typically discontiguous in the source, and a contiguous
-      > cut will not find them. Confirm any proposed seam is import-acyclic before writing files.
-- [ ] No `Boneyard/` change is needed (already documented; Boneyard archival is a non-goal here).
+      Done: `Support/` (`Accessibility.lean`, `KnownWorlds.lean`) and `S4/` (with its bottom-up
+      layering summary, and a note that `LoopChecking.lean` one level up is the barrel) added.
+- [x] **Edit 2**: Add module-size guidance near the "Namespace Convention" section, stated as
+      guidance with an explicit escape hatch rather than a hard gate. Added verbatim as its own
+      `## Module Size` section immediately after "Namespace Convention" and before "Testing".
+- [x] No `Boneyard/` change is needed (already documented; Boneyard archival is a non-goal here).
+      Confirmed no change needed.
+
+**Verification**: every module path named in the new subtree block
+(`Support/Accessibility.lean`, `Support/KnownWorlds.lean`, `S4/Universe.lean`, `S4/BirthKey.lean`,
+`S4/Guard.lean`, `S4/Driver.lean`, `S4/Hintikka.lean`, `S4/InvariantKeys.lean`,
+`S4/InvariantAcc.lean`, `S4/Redirect.lean`, `S4/Invariant.lean`, `S4/HintikkaInvariant.lean`)
+confirmed to exist on disk. `lake exe lint-style` exit 0 after the edit. Diff read-through
+confirms every changed hunk lies inside markdown prose (no compile surface).
 
 **Timing**: 0.5 hours
 

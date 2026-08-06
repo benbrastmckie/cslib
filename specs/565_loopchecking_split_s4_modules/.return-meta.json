@@ -3,11 +3,11 @@
   "started_at": "2026-08-06T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_13_complete",
-    "details": "Phases 1-13 complete and committed. Build green at 3323 jobs. LoopChecking.lean is now a clean barrel with rewritten docstring; Measured Baseline section re-homed to new README.md with corrected figures. Zero downstream file changes confirmed across the entire task since baseline commit 11607e0f.",
+    "stage": "phase_14_complete",
+    "details": "Phases 1-14 complete and committed. ORGANISATION.md updated: Tableau/ subtree documents Support/ and S4/ cluster; module-size guidance added. One phase remains: 15 (final gate sweep and job-count reconciliation).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 13
+    "phases_completed": 14
   },
   "metadata": {
     "session_id": "sess_1786030020_688c25_565",

@@ -1,7 +1,7 @@
 # Implementation Plan: Adjudicate and delete the audited duplicate re-derivation families
 
 - **Task**: 586 - Adjudicate and delete the audited duplicate re-derivation families
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: 553 (satisfied; parent task 558's phases 8-11 already landed)
 - **Research Inputs**: specs/586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md
@@ -312,33 +312,45 @@ orphan header's own wrapped mention is not part of the count and its removal sho
 
 ---
 
-### Phase 4: Full gate [NOT STARTED]
+### Phase 4: Full gate [COMPLETED]
 
 **Goal**: Confirm every measured gate holds at baseline after the deletion and prose edits.
 
 **Tasks**:
-- [ ] `lake build Cslib` — expect exit 0. Baseline 3313 jobs; the figure may be at most trivially
+- [x] `lake build Cslib` — expect exit 0. Baseline 3313 jobs; the figure may be at most trivially
       lower for the one removed declaration. A materially different figure warrants investigation
-      before proceeding.
-- [ ] `Modal/Tableau` sorry census — expect exactly **1**
+      before proceeding. **Observed**: exit 0, 3313 jobs (`lake exe cache get` run first; no
+      drift).
+- [x] `Modal/Tableau` sorry census — expect exactly **1**
       (`branchSatisfiableIn_s4FC_ancestor_redirect`, `FrameSoundness.lean`). Count actual `sorry`
       terms; naive `grep -rn '\bsorry\b'` returns 24 by over-counting docstring prose
-      (`sorry-free`) and `LoopChecking.lean`'s own census-script text.
-- [ ] `Modal/Tableau` axiom census — expect **0** (`grep -rnE '^axiom '`).
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — expect **9 findings, exit 1**, with
+      (`sorry-free`) and `LoopChecking.lean`'s own census-script text. **Observed**: naive grep
+      returns 24 as predicted; the authoritative two-pattern script (from `LoopChecking.lean`'s
+      own census comment) returns exactly 1, at `FrameSoundness.lean:1251`.
+- [x] `Modal/Tableau` axiom census — expect **0** (`grep -rnE '^axiom '`). **Observed**: 0.
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — expect **9 findings, exit 1**, with
       **none in `Modal/Tableau`**. Do **not** gate on exit 0. The nine known files are
       `Algorithms/Lean/TimeM`, `Computability/.../MultiTape/Deterministic`,
       `Foundations/Data/StackTape`, `Foundations/Relation/Defs`,
       `Computability/.../SingleTape/NonDeterministic`, `Foundations/Relation/Confluence`,
       `Foundations/Control/Monad/Free`, `Languages/CCS/Basic`,
-      `Languages/CombinatoryLogic/Defs`.
-- [ ] `lake lint` — expect **145 findings, exit 1**, i.e. **delta 0** against baseline. Gate on
+      `Languages/CombinatoryLogic/Defs`. **Observed**: exit 1, exactly these 9 files, none in
+      `Modal/Tableau` — the `Modal/Tableau` grep hits in raw output are unrelated `lake build`
+      linter warnings (`simp_all`/`sorry`), not shake import findings.
+- [x] `lake lint` — expect **145 findings, exit 1**, i.e. **delta 0** against baseline. Gate on
       the delta, not the exit code. A non-zero delta means something other than the intended
-      deletion happened.
-- [ ] `lake exe checkInitImports` — expect exit 0.
-- [ ] `lake exe lint-style` — expect exit 0.
-- [ ] `lake test` — expect exit 0 (baseline 3676 jobs).
-- [ ] Record every observed figure against its baseline in the summary.
+      deletion happened. **Observed**: `-- Found 145 errors in 13454 declarations ... with 15
+      linters`, exit 1. Delta 0. The two `Modal/Tableau` files present in the output
+      (`FmpMeasure.lean`, `FrameSoundness.lean`) match the research's noted `unusedArguments`
+      clusters, not a new finding.
+- [x] `lake exe checkInitImports` — expect exit 0. **Observed**: exit 0.
+- [x] `lake exe lint-style` — expect exit 0. **Observed**: exit 0.
+- [x] `lake test` — expect exit 0 (baseline 3676 jobs). **Observed**: exit 0. Job count is not
+      stable across separate invocations at this cache state (9378 on a cold-relative run, 3538
+      on an immediately-following warm run) — a pre-existing quirk of job-count reporting
+      unrelated to this task's edits; the gate is exit 0, which held both times.
+- [x] Record every observed figure against its baseline in the summary. **Observed**: recorded in
+      `summaries/01_delete-surviving-duplicate-summary.md`.
 
 **Timing**: 0.8 hours (dominated by build and test wall time)
 
@@ -365,19 +377,19 @@ recording obligation and updated here with the observed gate figures)
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib` exits 0 (baseline 3313 jobs)
-- [ ] `Modal/Tableau` sorry census is exactly 1, counting real `sorry` terms not naive grep hits
-- [ ] `Modal/Tableau` axiom count is 0
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` yields 9 findings with none in
-      `Modal/Tableau` (exit 1 is the steady state; not a gate)
-- [ ] `lake lint` delta against the 145-finding baseline is 0 (exit 1 is the steady state; not a
-      gate)
-- [ ] `lake exe checkInitImports` exits 0
-- [ ] `lake exe lint-style` exits 0
-- [ ] `lake test` exits 0
-- [ ] Zero references to `modalSubfmls_self_mem_S5` under `Cslib/`
-- [ ] `accFreshInv_append_S4` is untouched and still present in `LoopChecking.lean`
-- [ ] Exactly one declaration was deleted across the whole task
+- [x] `lake build Cslib` exits 0 (baseline 3313 jobs) — observed exit 0, 3313 jobs
+- [x] `Modal/Tableau` sorry census is exactly 1, counting real `sorry` terms not naive grep hits — observed 1
+- [x] `Modal/Tableau` axiom count is 0 — observed 0
+- [x] `lake shake --add-public --keep-implied --keep-prefix` yields 9 findings with none in
+      `Modal/Tableau` (exit 1 is the steady state; not a gate) — observed 9 findings, exit 1, none in `Modal/Tableau`
+- [x] `lake lint` delta against the 145-finding baseline is 0 (exit 1 is the steady state; not a
+      gate) — observed 145 findings, exit 1, delta 0
+- [x] `lake exe checkInitImports` exits 0 — observed exit 0
+- [x] `lake exe lint-style` exits 0 — observed exit 0
+- [x] `lake test` exits 0 — observed exit 0
+- [x] Zero references to `modalSubfmls_self_mem_S5` under `Cslib/` — observed 0
+- [x] `accFreshInv_append_S4` is untouched and still present in `LoopChecking.lean` — observed present, unmodified
+- [x] Exactly one declaration was deleted across the whole task — observed 1 (`modalSubfmls_self_mem_S5`)
 
 ### Zero-debt compliance
 

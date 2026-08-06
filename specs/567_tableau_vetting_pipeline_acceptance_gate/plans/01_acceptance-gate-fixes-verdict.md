@@ -217,22 +217,22 @@ cap.
 
 ---
 
-### Phase 3: Correct the drifted README numeric figures [NOT STARTED]
+### Phase 3: Correct the drifted README numeric figures [COMPLETED]
 
 **Goal**: Bring every drifted measurement row in the subsystem README back into agreement with the
 command printed beside it, and stop the one command that is structurally guaranteed to keep
 drifting.
 
 **Tasks**:
-- [ ] `LoopChecking.lean` size: `1,723 lines` -> `1,626 lines`, at both the "Provenance of this section" sentence (`and again after the split completed (1,723 lines / 20 declarations`) and the "Corrected `LoopChecking.lean` figures" paragraph (`is **1,723 lines / 20 top-level declarations**`). The `20 declarations` figure is CORRECT and must not change.
-- [ ] Pre-split declaration count: `241` -> `243` at both the provenance sentence (`11,393 lines / 241 declarations`) and the corrected-figures paragraph (`241 top-level declarations / 58 \`private\``). The `11,393 lines` figure is CORRECT and must not change.
-- [ ] Derived residue count: `The other 221 declarations` -> `223`. This makes the split's arithmetic close exactly (20 + 223 = 243) against the live `S4/*.lean` total; note in the prose that the arithmetic was always right and only the input was off by two.
-- [ ] Repo-wide code-position sorry count: `gives **29** code-position sorries repo-wide` -> `**28**`, and the follow-on sentence `The 29 above counts sorries in *code position*` -> `28`.
-- [ ] Regression-corpus size: the `wc -l CslibTests/S4LoopGuardRegression.lean   # 197` comment -> `# 214`.
-- [ ] `hintikkaS4_*` bridge set: the command comment `# 8` -> `# 10`, and the prose bullet `**\`hintikkaS4_*\` bridge set: 8 declarations.**` -> `10 declarations`. Re-check the adjacent "counting distinct identifiers instead returns 11" claim against the live tree and correct or drop it if it no longer holds.
-- [ ] `ModalTableauResult` span: subsystem `# 8` -> `# 9`, and the prose bullet `spans 8 modules here, 9 repo-wide` updated to the live subsystem figure. **Rescope the repo-wide command**: replace `grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake` with a form scoped to `Cslib CslibTests` so it no longer scans `specs/` and drift-bumps on every task artifact added; record the rescoped command's live value as the new stored figure and state in the prose that the command was rescoped and why.
-- [ ] Refresh the two self-flagged stale figures: `FrameSoundness.lean 5,317 lines` -> `5,396 lines`, `FrameCompleteness.lean 4,307 lines` -> `8,264 lines`. Update the accompanying caveat sentence — these are now measured at the current tree, not carried over from the `7eb51f69` capture, so the "neither re-measured by the `S4/` split" clause must be replaced with the new provenance rather than left contradicting the refreshed numbers.
-- [ ] Re-run every command in the README's `## Measured Baseline` region and confirm each stored number now matches its command's output. This is the README's stated contract with itself.
+- [x] `LoopChecking.lean` size: `1,723 lines` -> `1,626 lines`, at both the "Provenance of this section" sentence (`and again after the split completed (1,723 lines / 20 declarations`) and the "Corrected `LoopChecking.lean` figures" paragraph (`is **1,723 lines / 20 top-level declarations**`). The `20 declarations` figure is CORRECT and must not change.
+- [x] Pre-split declaration count: `241` -> `243` at both the provenance sentence (`11,393 lines / 241 declarations`) and the corrected-figures paragraph (`241 top-level declarations / 58 \`private\``). The `11,393 lines` figure is CORRECT and must not change.
+- [x] Derived residue count: `The other 221 declarations` -> `223`. This makes the split's arithmetic close exactly (20 + 223 = 243) against the live `S4/*.lean` total; note in the prose that the arithmetic was always right and only the input was off by two.
+- [x] Repo-wide code-position sorry count: `gives **29** code-position sorries repo-wide` -> `**28**`, and the follow-on sentence `The 29 above counts sorries in *code position*` -> `28`.
+- [x] Regression-corpus size: the `wc -l CslibTests/S4LoopGuardRegression.lean   # 197` comment -> `# 214`.
+- [x] `hintikkaS4_*` bridge set: the command comment `# 8` -> `# 10`, and the prose bullet `**\`hintikkaS4_*\` bridge set: 8 declarations.**` -> `10 declarations`. Re-check the adjacent "counting distinct identifiers instead returns 11" claim against the live tree and correct or drop it if it no longer holds. *(deviation: no reproducible command existed for the "distinct identifiers" secondary claim; dropped rather than asserting an unverified number)*
+- [x] `ModalTableauResult` span: subsystem `# 8` -> `# 9`, and the prose bullet `spans 8 modules here, 9 repo-wide` updated to the live subsystem figure. **Rescope the repo-wide command**: replace `grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake` with a form scoped to `Cslib CslibTests` so it no longer scans `specs/` and drift-bumps on every task artifact added; record the rescoped command's live value as the new stored figure and state in the prose that the command was rescoped and why. *(rescoped value: 10)*
+- [x] Refresh the two self-flagged stale figures: `FrameSoundness.lean 5,317 lines` -> `5,396 lines`, `FrameCompleteness.lean 4,307 lines` -> `8,264 lines`. Update the accompanying caveat sentence — these are now measured at the current tree, not carried over from the `7eb51f69` capture, so the "neither re-measured by the `S4/` split" clause must be replaced with the new provenance rather than left contradicting the refreshed numbers.
+- [x] Re-run every command in the README's `## Measured Baseline` region and confirm each stored number now matches its command's output. This is the README's stated contract with itself. *(deviation: this final sweep surfaced two additional drifted figures not in the Phase 1 partition or the research report — the axiom-census raw word-occurrence counts, 3->11 and 1,701->1,704 — corrected per Phase 3's own escape clause; see ledger's "Phase 3 discovery" section)*
 
 **Timing**: 1 hour
 

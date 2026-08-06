@@ -18,8 +18,8 @@ stored number.
 **Provenance of this section**: originally captured at commit `7eb51f69` (Lake 5.0.0-src+68218e8,
 Lean 4.31.0) inside `LoopChecking.lean`'s header. The `LoopChecking.lean` size/declaration-count
 row below was corrected and re-verified twice since: once against tree state `11607e0f` (the
-`LoopChecking.lean` -> `S4/` module split's research baseline, 11,393 lines / 241 declarations),
-and again after the split completed (1,723 lines / 20 declarations, with the remaining content
+`LoopChecking.lean` -> `S4/` module split's research baseline, 11,393 lines / 243 declarations),
+and again after the split completed (1,626 lines / 20 declarations, with the remaining content
 distributed across the ten `S4/*.lean` modules -- see `LoopChecking.lean`'s own header for the
 module map). Every other row (`FrameSoundness.lean`/`FrameCompleteness.lean` sizes, the
 sorry/axiom censuses, the inventory tallies) is carried over from the original capture unchanged
@@ -40,17 +40,20 @@ grep -cE "$PAT" Cslib/Logics/Modal/Tableau/LoopChecking.lean
 **Corrected `LoopChecking.lean` figures** (the stale `10,540` lines / `230` declarations quoted
 in earlier revisions of this section were themselves already drift by the time the `S4/` split
 began -- the split's own Phase 1 baseline re-measured the pre-split file at **11,393 lines /
-241 top-level declarations / 58 `private`** using the corrected attribute-aware count pattern
+243 top-level declarations / 58 `private`** using the corrected attribute-aware count pattern
 above, which the file's own naive in-header grep undercounts). Post-split,
-`LoopChecking.lean` is **1,723 lines / 20 top-level declarations** (the S4 driver's entry
+`LoopChecking.lean` is **1,626 lines / 20 top-level declarations** (the S4 driver's entry
 points, its termination measure, and its two end-to-end capstone theorems -- see its module
-docstring for the full residue rationale and the ten-module map). The other 221
+docstring for the full residue rationale and the ten-module map). The other 223
 declarations / ~9,670 lines live in the ten `S4/*.lean` modules (10,294 lines total there,
-the ~624-line difference from the pre-split figure being expected per-module header/import/
+the arithmetic closing exactly: 20 + 223 = 243 -- the split is fully declaration-preserving; the
+~624-line difference from the pre-split figure is the expected per-module header/import/
 docstring overhead across ten new files).
 
-`FrameSoundness.lean` 5,317 lines, `FrameCompleteness.lean` 4,307 lines, at the original `7eb51f69`
-capture -- neither re-measured by the `S4/` split (out of scope; re-run `wc -l` before citing).
+`FrameSoundness.lean` **5,396 lines**, `FrameCompleteness.lean` **8,264 lines** -- refreshed at
+tree state `3a11702e` (2026-08-06); the `7eb51f69`-capture figures (5,317 / 4,307) this row
+previously carried were stale, self-flagged as un-re-measured by the `S4/` split, and have now
+been re-run with `wc -l` per that flag's own instruction.
 
 ### Sorry census
 
@@ -62,12 +65,12 @@ capture -- neither re-measured by the `S4/` split (out of scope; re-run `wc -l` 
 
 **1** in this subsystem: `branchSatisfiableIn_s4FC_ancestor_redirect` in `FrameSoundness.lean`,
 the retained, user-decided, immovable obstruction (see that lemma's docstring). Dropping the
-final `grep` gives **29** code-position sorries repo-wide. Re-verified unchanged (still exactly
+final `grep` gives **28** code-position sorries repo-wide. Re-verified unchanged (still exactly
 1, still that same lemma) at every phase boundary of the `S4/` module split -- a move-only
 refactor cannot introduce or remove a sorry, and the gate enforced it at each step.
 
 Three different definitions of "sorry count" circulate and they do not agree, so state which one
-is meant. The 29 above counts sorries in *code position*. The CI-pipeline grep
+is meant. The 28 above counts sorries in *code position*. The CI-pipeline grep
 (`grep -rn "\bsorry\b" Cslib/`, minus comment-leading lines) returns 158 because it also matches
 docstring prose such as "sorry-free". The `declaration uses 'sorry'` warning count from an
 incremental `lake build` is an **undercount** and must never be used as a census: cached modules
@@ -78,13 +81,13 @@ do not re-elaborate and so never re-emit their warnings.
 ```
 grep -rnE '^axiom ' Cslib/Logics/Modal/Tableau/ | wc -l    # 0
 grep -rnE '^axiom ' Cslib/ | wc -l                         # 26
-grep -row 'axiom' Cslib/Logics/Modal/Tableau/ | wc -l      # 3
-grep -row 'axiom' Cslib/ | wc -l                           # 1701
+grep -row 'axiom' Cslib/Logics/Modal/Tableau/ | wc -l      # 11
+grep -row 'axiom' Cslib/ | wc -l                           # 1704
 ```
 
 These are **two scopes, not two candidate values for one quantity, and neither supersedes the
 other**: this subsystem declares **0** axioms; the repository declares **26**, none of them here.
-The 3 and 1,701 figures are raw word occurrences in prose and identifiers, not declarations, and
+The 11 and 1,704 figures are raw word occurrences in prose and identifiers, not declarations, and
 are recorded only to show why a naive word-count grep diverges. A previously-noted "26 vs 47"
 discrepancy was a scope confusion of exactly this kind, not a drift. Unaffected by the `S4/`
 module split (move-only; introduces no new axiom anywhere).
@@ -93,13 +96,21 @@ module split (move-only; introduces no new axiom anywhere).
 
 ```
 grep -rho 'Local re-derivation' Cslib/ | wc -l                                    # 55
-grep -rl 'ModalTableauResult' --include='*.lean' Cslib/Logics/Modal/Tableau/ | wc -l   # 8
-grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake | wc -l    # 9
+grep -rl 'ModalTableauResult' --include='*.lean' Cslib/Logics/Modal/Tableau/ | wc -l   # 9
+grep -rl 'ModalTableauResult' --include='*.lean' Cslib CslibTests | wc -l         # 10
 grep -nE '^(private )?(theorem|lemma) hintikkaS4_' \
-  Cslib/Logics/Modal/Tableau/S4/Hintikka.lean | wc -l   # 8
+  Cslib/Logics/Modal/Tableau/S4/Hintikka.lean | wc -l   # 10
 grep -rn 'structure S4LoopInv' Cslib/Logics/Modal/Tableau/S4/Invariant.lean
-wc -l CslibTests/S4LoopGuardRegression.lean                                       # 197
+wc -l CslibTests/S4LoopGuardRegression.lean                                       # 214
 ```
+
+**Rescoped command note**: the repo-wide `ModalTableauResult` span command was previously
+`grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake | wc -l`, which scans
+`specs/` and drifts every time a task artifact mentioning `ModalTableauResult` is added (it read
+9 at capture, 13 by the time of this correction). It is rescoped above to
+`Cslib CslibTests`, which is what the repo-wide figure is actually meant to track -- the
+declaration's reach through the shipped library and its test corpus, not the task-management
+tree.
 
 (The `hintikkaS4_*`/`S4LoopInv` commands above were updated to their post-split file locations,
 `S4/Hintikka.lean` and `S4/Invariant.lean` respectively; the counts they report are unchanged by
@@ -132,12 +143,15 @@ the move.)
   the origin) plus a handful of genuine specializations (frame-specific restatements,
   keyed-driver variants) that were never duplicates. The declaration-level census, not this
   comment count, is the authoritative figure for future maintenance.
-* **`ModalTableauResult` spans 8 modules here, 9 repo-wide** (the ninth is
-  `CslibTests/S4LoopGuardRegression.lean`). A previously reported span of 11 is drift.
-* **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns
-  11, because three further names occur only in call positions or prose. See the
-  "Redirect Forward-Cone Free Transfer" section (`S4/Redirect.lean`) for what was removed and
-  when.
+* **`ModalTableauResult` spans 9 modules here, 10 repo-wide** (repo-wide scoped to `Cslib
+  CslibTests`, the shipped library plus its test corpus -- the tenth is
+  `CslibTests/S4LoopGuardRegression.lean`; the command above was rescoped away from a bare `.`
+  scan, which drifts on every `specs/` task artifact that mentions the identifier).
+* **`hintikkaS4_*` bridge set: 10 declarations**, per the command above. (The previous "counting
+  distinct identifiers instead returns 11" secondary claim carried no reproducible command of its
+  own and is dropped here rather than re-asserted with an unverified number -- the declaration
+  count above is the one figure this row commits to.) See the "Redirect Forward-Cone Free
+  Transfer" section (`S4/Redirect.lean`) for what was removed and when.
 * **One root-level `Boneyard/` directory exists** (`find . -type d -name 'Boneyard' -not -path
   './.lake/*'` returns exactly `./Boneyard`), holding declarations archived from this subsystem
   as zero-consumer under the convention documented in `Boneyard/README.md`. It is excluded from

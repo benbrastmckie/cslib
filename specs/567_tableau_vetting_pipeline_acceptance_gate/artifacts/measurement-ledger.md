@@ -188,6 +188,26 @@ predates `c8fede26` (the referenced completion commit that anchors the current p
 range). The programme's own S4-module-extraction commits (task 565 phases) are dated 2026-08-06,
 one day later. **Confirmed: the box-plus enrichment predates the programme.**
 
+## Phase 3 discovery: two additional drifted figures not caught by the Phase 1 partition
+
+While executing Phase 3's closing task ("Re-run every command in the README's `## Measured
+Baseline` region and confirm each stored number now matches its command's output"), two more
+figures in the "Axiom census" section were found drifted, neither flagged by the research report
+nor by Phase 1's partition above (both are raw word-occurrence counts, explicitly documented as
+illustrative rather than authoritative — "recorded only to show why a naive word-count grep
+diverges" — but still inside the `## Measured Baseline` region's self-imposed contract):
+
+| Figure | Command | Live | Stored | Location |
+|---|---|---|---|---|
+| Raw `axiom` word occurrences, subsystem | `grep -row 'axiom' Cslib/Logics/Modal/Tableau/ \| wc -l` | **11** | 3 | `README.md` axiom-census code block |
+| Raw `axiom` word occurrences, repo-wide | `grep -row 'axiom' Cslib/ \| wc -l` | **1704** | 1,701 | `README.md` axiom-census code block |
+
+Corrected in Phase 3 alongside the pre-identified DRIFTED rows, per Phase 3's Scope Hypothesis
+escape clause ("If a figure in the DRIFTED partition has no corresponding task above, correct it
+too and record the addition"). Neither figure is a correctness claim (both scopes agree the
+subsystem declares 0 axioms and the repo declares 26 — unchanged), so this discovery does not
+affect the acceptance-gate verdict; it is documentation-accuracy only, same category as D1-D6.
+
 ## Phase 5 evidence table (appended after CI re-run)
 
 _(populated in Phase 5)_

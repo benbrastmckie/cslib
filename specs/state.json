@@ -1602,7 +1602,7 @@
     {
       "project_number": 566,
       "project_name": "boneyard_creation_eligible_moves",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Create Boneyard/ with its convention and move only re-verified zero-consumer declarations",
       "topic": "Modal Logic",
@@ -1628,14 +1628,20 @@
           "path": "specs/566_boneyard_creation_eligible_moves/plans/01_boneyard-creation-eligible-moves.md",
           "type": "plan",
           "summary": "Six-phase plan: quarantine skeleton with empirical exclusion proof; move blockedRedirect_*_of_*Origin pair; move keysRootEmpty pair with comment split preserving the keysOriginS4 retraction; prose reconciliation (falsified no-Boneyard assertion, ORGANISATION.md); B0-mirror quarantine self-test; full CI gate."
+        },
+        {
+          "path": "specs/566_boneyard_creation_eligible_moves/summaries/01_boneyard-creation-eligible-moves-summary.md",
+          "type": "summary",
+          "summary": "Full phase-by-phase implementation summary with gate-set results table, plan deviations (none), files changed, and commit list."
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-06T17:03:11Z",
+      "last_updated": "2026-08-06T17:27:14Z",
       "next_artifact_number": 1,
       "session_id": "sess_1786030020_688c25_566",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Created root-level Boneyard/ quarantine directory with a documented convention and moved three re-verified zero-consumer declaration units (142 lines) out of LoopChecking.lean into it: the blockedRedirect_boxctx_mem_of_boxOrigin/blockedRedirect_diaNeg_mem_of_diaOrigin pair and the keysRootEmpty/keysRootEmpty_entry pair. Nothing deleted; both carve-outs preserved; falsified prose corrected; a B0-style defensive quarantine self-test added. Full CI gate set unchanged from baseline across all 6 phases."
     },
     {
       "project_number": 567,

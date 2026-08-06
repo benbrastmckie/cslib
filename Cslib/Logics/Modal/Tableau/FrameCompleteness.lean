@@ -7925,7 +7925,7 @@ lemma modalStepBranchS4KeyedOrdered_newExps_eq_map (φ₀ : Proposition Atom)
 /-- Nested-pair nesting of `List.zip` across four parallel lists: `A × B × C × D` is already
 right-associated as `A × (B × (C × D))`, so no reshuffling is needed after the two nested
 `List.zip` calls. -/
-private def zip4 {A B C D : Type*} (as : List A) (bs : List B) (cs : List C) (ds : List D) :
+def zip4 {A B C D : Type*} (as : List A) (bs : List B) (cs : List C) (ds : List D) :
     List (A × B × C × D) :=
   as.zip (bs.zip (cs.zip ds))
 
@@ -7934,7 +7934,7 @@ parallel worklists carries an `S4KOFullInv` witness. Deliberately existential (n
 `List.Forall₂`-style relation an earlier dispatch attempted): `S4RedirectSoundInv_step`'s own
 conclusion only ever guarantees ONE child inherits the invariant, so a universal relation would
 be both harder to establish and stronger than what the argument actually needs. -/
-private def Ex4Inv (φ₀ : Proposition Atom)
+def Ex4Inv (φ₀ : Proposition Atom)
     (bs es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (accs : List Accessibility)
     (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))) : Prop :=
@@ -8066,6 +8066,163 @@ private lemma zip4_cons_mem_cases {A B C D : Type*}
   unfold zip4 at hq ⊢
   rw [List.zip_cons_cons, List.zip_cons_cons, List.zip_cons_cons] at hq
   exact List.mem_cons.mp hq
+
+/-- **Phase 9.1: the outer fuel induction.** Wraps Phase 7.8's step theorem
+(`S4RedirectSoundInv_step`) and Phase 8's terminal payoff
+(`S4RedirectSoundInv_not_isModalClosed`) in an induction over
+`modalExpandBranchesS4KeyedOrdered`'s fuel-bounded recursion, mirroring
+`modalExpandBranchesGen_closed_unsatIn` (`FrameSoundness.lean:740-909`). Concludes `False`
+directly (rather than a per-branch `¬branchSatisfiableIn`-style fact, as the generic proof
+does) because `Ex4Inv` already IS a satisfiability witness (via `S4RedirectSoundInv`'s conjunct
+(b)): once the driver closes, the ONE tracked witness branch is necessarily among the closed
+branches, and Phase 8 turns that into a direct contradiction -- no universal per-branch
+bookkeeping is needed. -/
+theorem modalExpandBranchesS4KeyedOrdered_closed_False (φ₀ : Proposition Atom) :
+    ∀ (fuel : Nat)
+      (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility)
+      (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))),
+      Ex4Inv φ₀ branches expandedSets accs keyss →
+      modalExpandBranchesS4KeyedOrdered φ₀ branches expandedSets accs keyss fuel = .closed →
+      False := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs keyss hEx h
+    unfold modalExpandBranchesS4KeyedOrdered at h
+    split at h
+    · simp at h
+    · rename_i hfind
+      obtain ⟨q, hq, hinv⟩ := hEx
+      have hzip13 := mem_zip4_proj13 branches expandedSets accs keyss q hq
+      have hfn := List.findSome?_eq_none_iff.mp hfind (q.1, q.2.2.1) hzip13
+      have hclosed : isModalClosed q.1 = true := by
+        rcases hc : isModalClosed q.1 with _ | _
+        · simp [hc] at hfn
+        · rfl
+      obtain ⟨Er, hRS⟩ := hinv.2
+      have hnc := S4RedirectSoundInv_not_isModalClosed φ₀ q.1 q.2.1 q.2.2.1 q.2.2.2 Er hRS
+      rw [hclosed] at hnc
+      simp at hnc
+  | succ fuel' ih =>
+    intro branches expandedSets accs keyss hEx h
+    suffices key : ∀ (pending
+        pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (pendingKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility)
+        (doneKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom)))),
+        doneExp.length = done.length → doneAccs.length = done.length →
+        doneKeys.length = done.length →
+        Ex4Inv φ₀ pending pendingExp pendingAccs pendingKeys →
+        modalExpandBranchesS4KeyedOrdered.processNext φ₀
+          fuel' pending pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys =
+          .closed →
+        False from
+      key branches expandedSets accs keyss [] [] [] [] rfl rfl rfl hEx
+        (by simpa [modalExpandBranchesS4KeyedOrdered] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys _ _ _ hEx _
+      obtain ⟨q, hq, -⟩ := hEx
+      simp [zip4] at hq
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys
+        hdoneExpLen hdoneAccsLen hdoneKeysLen hEx hinner
+      cases pendingExp with
+      | nil => obtain ⟨q, hq, -⟩ := hEx; simp [zip4] at hq
+      | cons eh et =>
+        cases pendingAccs with
+        | nil => obtain ⟨q, hq, -⟩ := hEx; simp [zip4] at hq
+        | cons ah at' =>
+          cases pendingKeys with
+          | nil => obtain ⟨q, hq, -⟩ := hEx; simp [zip4] at hq
+          | cons kh kt =>
+            obtain ⟨q, hq, hinvq⟩ := hEx
+            unfold modalExpandBranchesS4KeyedOrdered.processNext at hinner
+            by_cases hcl : isModalClosed bh = true
+            · rw [if_pos hcl] at hinner
+              rcases zip4_cons_mem_cases bh bt eh et ah at' kh kt hq with heq | htail
+              · exfalso
+                rw [heq] at hinvq
+                obtain ⟨Er, hRS⟩ := hinvq.2
+                have hnc := S4RedirectSoundInv_not_isModalClosed φ₀ bh eh ah kh Er hRS
+                rw [hcl] at hnc
+                simp at hnc
+              · refine ih_inner et at' kt (done ++ [bh]) (doneExp ++ [eh]) (doneAccs ++ [ah])
+                  (doneKeys ++ [kh]) ?_ ?_ ?_ ⟨q, htail, hinvq⟩ hinner
+                · simp only [List.length_append, List.length_singleton]; omega
+                · simp only [List.length_append, List.length_singleton]; omega
+                · simp only [List.length_append, List.length_singleton]; omega
+            · rw [if_neg hcl] at hinner
+              cases hstep : modalStepBranchS4KeyedOrdered φ₀ bh eh ah kh with
+              | none => rw [hstep] at hinner; simp at hinner
+              | some val =>
+                obtain ⟨newBs, newExps, newAcc, keys'⟩ := val
+                rw [hstep] at hinner
+                obtain ⟨e'0, he'0⟩ :=
+                  modalStepBranchS4KeyedOrdered_newExps_eq_map φ₀ bh eh ah kh newBs newExps
+                    newAcc keys' hstep
+                have hlenNB : newExps.length = newBs.length := by
+                  rw [he'0, List.length_map]
+                have haccs_eq : List.replicate newBs.length newAcc = newBs.map (fun _ => newAcc) :=
+                  (List.map_const' (l := newBs) (b := newAcc)).symm
+                have hkeyss_eq : List.replicate newBs.length keys' = newBs.map (fun _ => keys') :=
+                  (List.map_const' (l := newBs) (b := keys')).symm
+                rcases zip4_cons_mem_cases bh bt eh et ah at' kh kt hq with heq | htail
+                · -- our witness is `bh` itself: expand it, land the child witness in `newBs`.
+                  rw [heq] at hinvq
+                  obtain ⟨hOF, Er, hRS⟩ := hinvq
+                  obtain ⟨b', hb', e', he', Er', -, hRS'⟩ :=
+                    S4RedirectSoundInv_step φ₀ bh eh ah kh Er newBs newExps newAcc keys' hRS
+                      hOF.1.bClosure hOF.1.keyLowerBd hOF.2.1 hOF.1.accFresh hstep
+                  have hOF' := modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv φ₀ bh eh
+                    ah kh newBs newExps newAcc keys' hOF hstep b' hb' e' he'
+                  have he'eq : e' = e'0 := by
+                    rw [he'0] at he'
+                    obtain ⟨x, -, hx⟩ := List.mem_map.mp he'
+                    exact hx.symm
+                  have hFull' : S4KOFullInv φ₀ b' e'0 newAcc keys' := by
+                    rw [← he'eq]; exact ⟨hOF', Er', hRS'⟩
+                  have hExNB : Ex4Inv φ₀ newBs newExps
+                      (List.replicate newBs.length newAcc) (List.replicate newBs.length keys') :=
+                    Ex4Inv_of_mem_const φ₀ hb' he'0 haccs_eq hkeyss_eq hFull'
+                  refine ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ et)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ at')
+                    (doneKeys ++ List.replicate newBs.length keys' ++ kt) ?_ hinner
+                  refine Ex4Inv_embedRight φ₀
+                    (Ex4Inv_embedLeft φ₀ hExNB done doneExp doneAccs doneKeys
+                      hdoneExpLen hdoneAccsLen hdoneKeysLen)
+                    ?_ ?_ ?_ bt et at' kt
+                  · simp only [List.length_append]; omega
+                  · simp only [List.length_append, List.length_replicate]; omega
+                  · simp only [List.length_append, List.length_replicate]; omega
+                · -- our witness is in the tail `bt`: `bh`'s fate does not matter, embed forward.
+                  have hEx_tail : Ex4Inv φ₀ bt et at' kt := ⟨q, htail, hinvq⟩
+                  refine ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ et)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ at')
+                    (doneKeys ++ List.replicate newBs.length keys' ++ kt) ?_ hinner
+                  refine Ex4Inv_embedLeft φ₀ hEx_tail (done ++ newBs) (doneExp ++ newExps)
+                    (doneAccs ++ List.replicate newBs.length newAcc)
+                    (doneKeys ++ List.replicate newBs.length keys') ?_ ?_ ?_
+                  · simp only [List.length_append]; omega
+                  · simp only [List.length_append, List.length_replicate]; omega
+                  · simp only [List.length_append, List.length_replicate]; omega
+
+/-! ## Scope of `modalExpandBranchesS4KeyedOrdered_closed_False`
+
+This result establishes soundness of the KEYED ORDERED driver via `S4RedirectSoundInv`, a
+predicate that quarantines redirect (loop-guard-blocked) edges from the semantic
+edge-realization obligation rather than discharging that obligation directly. At the seed state
+(`Er = []`, `acc = Accessibility.empty`) this weakening is definitionally absent -- conjunct (b)
+reduces to the plain, undiluted edge-realization clause -- which is what licenses Phase 9.2's
+capstone to conclude genuine, unweakened `s4Valid`. This result does **not** remove or discharge
+the standing `sorry` in `FrameSoundness.lean`, whose statement is the *unweakened* per-step form
+this task established is not provable for the keyed S4 guard in general (see the Phase 7.4
+Verdict above): that sorry documents a standing, deliberate scope decision and is left untouched.
+-/
 
 end Cslib.Logic.Modal.Tableau
 

@@ -1458,7 +1458,7 @@ naming exactly what landed sorry-free and what remains, never a committed `sorry
 
 ---
 
-### Phase 9.1: Fuel-induction wrapper and initialization [IN PROGRESS]
+### Phase 9.1: Fuel-induction wrapper and initialization [COMPLETED]
 
 - **Goal:** Land the missing `S4KeyedHintikkaInv` ordered-driver step-preservation prerequisite,
   establish initialization at the seed state, and wrap Phase 7.8's step theorem plus Phase 8's
@@ -1509,25 +1509,47 @@ naming exactly what landed sorry-free and what remains, never a committed `sorry
         construction. The `S4LoopInv`/`S4KeyedHintikkaInv`/`worldsContiguousS4` reuse of
         `modalTableauS4Keyed_initial` is deferred to whichever dispatch writes the outer
         induction's entry call, since it is only needed there, not as a standalone fact.)*
-  - [ ] *(deviation: not completed this dispatch — see the Phase 9.1 Progress Record below)*
-        Thread the outer fuel induction over `modalExpandBranchesS4KeyedOrdered`
-        (`LoopChecking.lean:8380-8422`), mirroring `modalExpandBranchesGen_closed_unsatIn`'s
-        structure (`FrameSoundness.lean:740-909`) adapted to the bespoke recursive
-        `processNext`/`modalExpandBranchesS4KeyedOrdered` shape (not a `RuleApply`-generic
-        instance), consuming Phase 7.8's step theorem, Phase 8's terminal payoff, and this phase's
-        own `S4KeyedHintikkaInv` port plus the already-landed
-        `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` (`LoopChecking.lean:8210`). The ghost
-        list `Er` grows monotonically across steps; carry the `∃ Er' ⊇ Er` existential through the
-        induction.
-  - [ ] Record a module comment naming what the result does and does **not** say: it establishes
+  - [x] Thread the outer fuel induction over `modalExpandBranchesS4KeyedOrdered`
+        (`LoopChecking.lean:8380-8422`), consuming Phase 7.8's step theorem, Phase 8's terminal
+        payoff, and this phase's own `S4KeyedHintikkaInv` port.
+        *(deviation: altered -- landed as `modalExpandBranchesS4KeyedOrdered_closed_False`
+        (`FrameCompleteness.lean`), concluding `False` directly rather than a per-branch
+        `¬branchSatisfiableIn`-style `List.Forall₂` fact the way
+        `modalExpandBranchesGen_closed_unsatIn` does. The Phase 9.1 Progress Record's zip-triple
+        design (bundling `(e,acc,keys)` into one `List.Forall₂`-threaded state and hitting a
+        base-case membership-transport blocker) was NOT completed as drafted; instead this
+        dispatch designed a lighter existential-witness relation `Ex4Inv` (four parallel lists,
+        `∃` one position carries an `S4KOFullInv` witness, built from `zip4`) that avoids the
+        universal per-position bookkeeping entirely -- licensed by `S4RedirectSoundInv_step`'s own
+        conclusion already being existential (only ONE child branch is guaranteed to inherit the
+        invariant, never all of them), so a universal relation would have been both harder to
+        establish and strictly stronger than the argument needs. Supporting infrastructure:
+        `S4KOFullInv`, `modalStepBranchS4KeyedOrdered_newExps_eq_map` (structural fact: a step's
+        `newExps`/replicated `newAcc`/`keys'` columns are constant across `newBs`, licensing
+        witness transport without pinning down an index), `zip4`, `mem_zip_of_mem_map_const`,
+        `Ex4Inv_of_mem_const`, `zip4_append`, `Ex4Inv_embedLeft`/`Ex4Inv_embedRight`,
+        `mem_zip4_proj13`, `zip4_cons_mem_cases` (`FrameCompleteness.lean`, ~285 lines combined).
+        The ghost list `Er` is NOT threaded as a persistent existential across the whole
+        induction -- each step re-derives its own `Er'` from `S4RedirectSoundInv_step` locally,
+        which suffices since the induction's goal is a single `False`, not a preserved per-branch
+        fact.)*
+  - [x] Record a module comment naming what the result does and does **not** say: it establishes
         soundness of the keyed ordered driver via a predicate that quarantines redirect edges from
         semantic edge-realization. It does **not** remove or discharge the standing sorry at
         `FrameSoundness.lean:1251`, whose statement is the *unweakened* per-step form this task
-        established is not provable. No task numbers in the comment.
-  - [ ] `#print axioms`; scoped builds of every touched module; `lint-style`; census exactly 1.
+        established is not provable.
+        *(Landed as the `## Scope of modalExpandBranchesS4KeyedOrdered_closed_False` module
+        comment, `FrameCompleteness.lean`, immediately after the theorem.)*
+  - [x] `#print axioms`; scoped builds of every touched module; `lint-style`; census exactly 1.
+        *(`#print axioms Cslib.Logic.Modal.Tableau.modalExpandBranchesS4KeyedOrdered_closed_False`
+        via `lake env lean`: exactly `propext, Classical.choice, Quot.sound`. Scoped
+        `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`: clean.
+        `lake exe lint-style Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`: clean.
+        `lake exe checkInitImports`: clean. Bare-tactic sorry census: exactly 1
+        (`FrameSoundness.lean:1251`).)*
 
 - **Done when:** the Hintikka prerequisite, initialization, and fuel wrapper are sorry-free and
-  committed; census exactly 1; scoped builds and `lint-style` clean.
+  committed; census exactly 1; scoped builds and `lint-style` clean. **All met.**
 
 #### Phase 9.1 Progress Record (first dispatch, incomplete — continuation required)
 
@@ -1607,7 +1629,7 @@ unbuilt Lean was left in any tracked file.
 
 ---
 
-### Phase 9.2: End-to-end soundness capstone [NOT STARTED]
+### Phase 9.2: End-to-end soundness capstone [IN PROGRESS]
 
 - **Goal:** State and prove `modalTableauS4KeyedOrdered_sound`: if the ordered keyed driver closes
   on `F(φ₀)@0`, then `φ₀` is `s4Valid`. A thin corollary of Phase 9.1's fuel wrapper, mirroring

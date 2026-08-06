@@ -11,10 +11,9 @@ next_project_number: 588
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,554,567,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,511,534,537,551,571,576,582 | 36,37,181,425,554,567,568 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,506,548 | 39,40,511 | foundations, modal logic |
-| 4 | 300 | 506 | modal logic |
+| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,582,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,506,537,548,551,571,576 | 36,37,181,425,511,554,568 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300 | 39,40,506 | foundations, modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -32,16 +31,15 @@ next_project_number: 588
 
 ### Modal Logic
 
+511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+  └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+    └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+  └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-567 [PLANNED] — [Task I of the modal-tableau refactor programme; P4, final accept
-  └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-    └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-      └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-    └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-  └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-  └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
+582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
 
 ### Temporal Logic
 
@@ -299,12 +297,13 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 567. Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 558, Task 562, Task 563, Task 564, Task 565, Task 566, Task 586
 - **Research**: [567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md]
 - **Plan**: [567_tableau_vetting_pipeline_acceptance_gate/plans/01_acceptance-gate-fixes-verdict.md]
+- **Summary**: [567_tableau_vetting_pipeline_acceptance_gate/summaries/01_acceptance-gate-fixes-verdict-summary.md]
 
 **Description**: [Task I of the modal-tableau refactor programme; P4, final acceptance gate. Depends on every other task in the programme.] Run the seven-step CI order from .claude/rules/cslib.md against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md and CODE_OF_CONDUCT.md. It has never been run on this subsystem. PREREQUISITE, budget for it: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear that before verification against the stated gate is meaningful. ACCEPTANCE CRITERIA: behaviour preservation demonstrated by modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) remaining green; the Tableau sorry census not rising above its measured baseline of exactly 1; no new axioms above the measured subsystem baseline of zero; checkInitImports and lint-style clean; and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean, 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts EXACTLY.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

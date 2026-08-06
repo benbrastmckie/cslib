@@ -29,13 +29,54 @@ public import Cslib.Logics.Modal.Tableau.S4.Universe
 public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
 
-/-! # S4 Loop-Checking Machinery
+/-! # S4 Loop-Checking: Driver Entry Points, Termination Measure, and Barrel
 
-This module builds the equality-blocking loop-checking machinery for the S4
-(reflexive-transitive) modal tableau: per-world relevant-formula-set extraction, a
-decidable equality test over `modalSubfmls φ₀`, the minting guard that consults this test
-before creating a fresh world, the S4 rule-application function, and the S4 Hintikka-set
-characterization.
+This module is now a **`public import` barrel plus a 20-declaration residue**: the S4
+(reflexive-transitive) modal tableau's driver entry points, its termination argument, and its
+two end-to-end capstone theorems. The equality-blocking loop-checking machinery this file used
+to hold directly -- universe/fuel bookkeeping, the birth-key guard, the rule-application driver,
+the Hintikka-set construction, the blocked-redirect machinery, and the four-way `S4LoopInv`
+invariant split -- was extracted into eleven `S4/*.lean` modules (below), each along the
+research-verified acyclic dependency layering. Every declaration that used to live here directly
+is still reachable through this file's `public import`s: **no downstream file needed to change
+its own imports** as a result of the split.
+
+## The `S4/` module cluster, bottom-up
+
+```
+                       Universe
+                          │
+                      BirthKey
+                          │
+                        Guard
+                          │
+                        Driver
+                     ╱    │    ╲
+              Hintikka  InvariantKeys  InvariantAcc
+                 │              ╲       ╱
+              Redirect         Invariant
+                 │                  │
+                 │             HintikkaInvariant
+                 ╲                 ╱
+                  LoopChecking (this file: barrel + entry points)
+```
+
+- `S4/Universe.lean`: per-world relevant-formula-set extraction, the world-bound/fuel measures,
+  and the signed-subformula universe.
+- `S4/BirthKey.lean`: birth-content computation and the box-plus enrichment.
+- `S4/Guard.lean`: the blocking-guard functions and the mint-shape predicate.
+- `S4/Driver.lean`: the S4 rule-application and step-branch definitions -- the structurally
+  forced seventh module (a deviation from the six-family split the task description proposed;
+  the invariant material makes ~248 references into these definitions, so leaving them here
+  would create an import cycle).
+- `S4/Hintikka.lean`: the Hintikka-set construction and its saturation step lemmas.
+- `S4/Redirect.lean`: the blocked-redirect / `accWithReds` machinery, including
+  `modalS4Saturated_addEdge_of_blocked` (sits above `Hintikka` despite its name prefix).
+- `S4/InvariantKeys.lean`, `S4/InvariantAcc.lean`, `S4/Invariant.lean`,
+  `S4/HintikkaInvariant.lean`: the four-way split of the `S4LoopInv` invariant material (a
+  single `Invariant.lean` would have been ~4,445 lines) -- keys-facing fields, accessibility/
+  expansion fields, the `S4LoopInv` structure and its assembling capstones, and the top-level
+  keyed-Hintikka/ordered-fuel invariants respectively.
 
 S4 is deliberately **not** an instantiation of `RuleApplicationSpec` (`GenericDriver.lean`):
 its transitively-propagating 4-rule places `T(□φ)` (unchanged modal depth) at successor
@@ -45,32 +86,20 @@ worlds, which falsifies the exact-decrement edge invariant (`rankStep`) that
 sibling termination argument (`S4LoopInv`, a pigeonhole bound on `2 ^ (2 * |modalSubfmls φ₀|)`
 possible signed-relevant-formula sets) instead of the K/T rank-decrease argument.
 
-**Redesign note**: an earlier `blockingWorld` guard and `worldSetsDistinct` invariant were
-both found to be structurally unsound -- distinctness
-over the *live* branch is not a loop invariant (relevant sets grow monotonically), and the
-guard compared the *source* world's set rather than the *prospective successor's* birth
-content. This module now uses `blockingWorldS4`/`successorBirthContent` (stable birth-content
-guard) and `S4LoopInv`'s `keysTotal`/`keyLowerBd`/`keysDistinct`/`keysInUniverse` fields
-(stable per-world birth keys) in their place.
+## What remains in this file
 
-## Main Definitions
+Twenty declarations, ~1,700 lines:
 
-- `formulasAtWorld`: the sub-list of a branch's signed formulas at a given world.
-- `sameRelevantSet`: the decidable equality-of-relevant-formula-set test over
-  `modalSubfmls φ₀`, used for comparison (retained as the comparison primitive).
-- `signedSubfmls`/`relevantSetFinset`: the finite `Finset (Sign × Proposition Atom)` codomain
-  and the live relevant set restated as a `Finset`.
-- `successorBirthContent`/`blockingWorldS4`: the redesigned minting guard:
-  blocks iff an existing known world's CURRENT relevant set equals the PROSPECTIVE successor's
-  birth content, fixing Gap 2 (the old guard compared the source world's set instead).
-- `modalApplyOneS4`: the `φ₀`-parameterized S4 rule-application function (Decision D1):
-  at the two minting shapes, consult `blockingWorldS4` before falling through to the
-  underlying rule's fresh-world minting.
-- `modalStepBranchS4`/`modalExpandBranchesS4`/`modalTableauS4`: the S4 driver, reusing
-  `Saturation.lean`'s generic driver **definitionally only** (no `RuleApplicationSpec`
-  instance -- Correction 3).
-- `modalHintikkaSetS4`: the S4 Hintikka-set characterization, a small delta over
-  `modalHintikkaSet` (Decision D3).
+- **Entry points**: `modalTableauS4Keyed`, `modalTableauS4KeyedOrdered`,
+  `modalTableauS4Keyed_eq_modalExpandBranchesGenSt`.
+- **Termination measure**: the `persistentFresh`/`branchingLength`/`outputsSubsetUniverse`
+  per-call obligations, the `modalExpMeasure_*` bridges, the `stepBranch` projection lemmas, and
+  the 4-tuple-to-3-tuple `findSome?` projection helpers this measure needs.
+- **Capstones**: `modalExpandBranchesS4Keyed_hintikka`,
+  `modalExpandBranchesS4Keyed_openBranch_initial_mem`.
+
+This is a coherent residue -- "the S4 driver's entry points, its termination argument, and its
+two end-to-end theorems" -- not a leftover bucket.
 
 ## Strategy
 
@@ -79,146 +108,20 @@ Blocking is **equality-of-relevant-formula-set**, not subset-blocking: two world
 every `ψ ∈ modalSubfmls φ₀` and every sign `s`, on whether `⟨s, ψ, w⟩` (`⟨s, ψ, w'⟩`
 respectively) is on the branch. This is simpler than subset blocking and still yields a
 `2 ^ (2 * |modalSubfmls φ₀|)` bound on the number of distinct worlds a saturating S4 tableau
-can create (below), since each world's *birth key* is a distinct element of the powerset of
+can create, since each world's *birth key* is a distinct element of the powerset of
 `modalSubfmls φ₀ × Sign` -- the *birth key*, not the live relevant set, is what the
-pigeonhole argument now injects (see `S4LoopInv`).
+pigeonhole argument now injects (see `S4/Invariant.lean`'s `S4LoopInv`).
 
 Do **not** import `LoopInduction.lean`: despite the name, it is a `Forall2` list lemma
 about the *fuel* loop in the generic driver, unrelated to modal loop-checking.
 
-## Measured Baseline (modal Tableau subsystem)
+## Measured Baseline
 
-Recorded here because several size and inventory figures for this subsystem drifted between
-prose descriptions and the tree. **Every row below carries the command that reproduces it.**
-The rule this section exists to enforce: if a figure is quoted anywhere in this subsystem's
-documentation, quote the command with it, and re-run the command rather than trusting the
-stored number.
-
-Captured at commit `7eb51f69`, toolchain Lake 5.0.0-src+68218e8 (Lean 4.31.0), and re-confirmed
-against the working tree when this section landed.
-
-### Size and declaration density
-
-```
-wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean
-wc -l Cslib/Logics/Modal/Tableau/FrameSoundness.lean
-wc -l Cslib/Logics/Modal/Tableau/FrameCompleteness.lean
-PAT='^(private )?(protected )?(noncomputable )?'
-PAT="$PAT(theorem|lemma|def|abbrev|instance|structure|inductive) "
-grep -cE "$PAT" Cslib/Logics/Modal/Tableau/LoopChecking.lean
-```
-
-At `7eb51f69`: `LoopChecking.lean` 10,540 lines, `FrameSoundness.lean` 5,317,
-`FrameCompleteness.lean` 4,307 -- 20,164 across the three. `LoopChecking.lean` declares 230
-top-level items. The three line-count rows are pinned to that commit and are the one part of
-this table that moves under ordinary documentation edits (landing this very section moved two of
-them); the declaration count does not. Re-run `wc -l` rather than citing the stored figure.
-
-### Sorry census
-
-```
-{ grep -rnE '^[[:space:]]*sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/; \
-  grep -rnE '(:=|\bby)[[:space:]]+sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/; } \
-  | sort -u | grep 'Modal/Tableau/'
-```
-
-**1** in this subsystem: `branchSatisfiableIn_s4FC_ancestor_redirect` in `FrameSoundness.lean`,
-the retained, user-decided, immovable obstruction (see that lemma's docstring). Dropping the
-final `grep` gives **29** code-position sorries repo-wide.
-
-Three different definitions of "sorry count" circulate and they do not agree, so state which one
-is meant. The 29 above counts sorries in *code position*. The CI-pipeline grep
-(`grep -rn "\bsorry\b" Cslib/`, minus comment-leading lines) returns 158 because it also matches
-docstring prose such as "sorry-free". The `declaration uses 'sorry'` warning count from an
-incremental `lake build` is an **undercount** and must never be used as a census: cached modules
-do not re-elaborate and so never re-emit their warnings.
-
-### Axiom census -- a scope distinction, not a corrected number
-
-```
-grep -rnE '^axiom ' Cslib/Logics/Modal/Tableau/ | wc -l    # 0
-grep -rnE '^axiom ' Cslib/ | wc -l                         # 26
-grep -row 'axiom' Cslib/Logics/Modal/Tableau/ | wc -l      # 3
-grep -row 'axiom' Cslib/ | wc -l                           # 1701
-```
-
-These are **two scopes, not two candidate values for one quantity, and neither supersedes the
-other**: this subsystem declares **0** axioms; the repository declares **26**, none of them here.
-The 3 and 1,701 figures are raw word occurrences in prose and identifiers, not declarations, and
-are recorded only to show why a naive word-count grep diverges. A previously-noted "26 vs 47"
-discrepancy was a scope confusion of exactly this kind, not a drift.
-
-### Inventory figures that drifted
-
-```
-grep -rho 'Local re-derivation' Cslib/ | wc -l                                    # 55
-grep -rl 'ModalTableauResult' --include='*.lean' Cslib/Logics/Modal/Tableau/ | wc -l   # 8
-grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake | wc -l    # 9
-grep -nE '^(private )?(theorem|lemma) hintikkaS4_' \
-  Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l   # 8
-grep -n 'structure S4LoopInv' Cslib/Logics/Modal/Tableau/LoopChecking.lean
-wc -l CslibTests/S4LoopGuardRegression.lean                                       # 197
-```
-
-* **Local re-derivation sites: 55**, not the 77 previously carried (figure as it stood before the
-  de-duplication effort below; retained here as a historical baseline, not a live count). 77 is
-  not reproducible by any obvious command (`-i 're-derivation'` gives 80, `-i 're-deriv'` gives
-  106) and is retired. **The smaller headline does not mean less work.** Every per-lemma
-  spot-check behind the old figure was an undercount (`modalSubfmls_trans` 4 sites not 3,
-  `modalKnownWorlds_fold_spec` 6 not 4, `hasEdge_addEdge_cases` 7 not 4), and the old per-file
-  distribution omitted `LoopChecking.lean`'s **14** sites entirely -- the largest file in the
-  subsystem. The de-duplication work is larger, not smaller.
-* **Post-de-duplication update**: the comment-string count is now **12** (`grep -rho 'Local
-  re-derivation' Cslib/ | wc -l`, re-measured after `modalSubfmls_self_mem_S5` was deleted from
-  `S5Simplification.lean` and its call sites routed to the public `FmpMeasure.lean` origin),
-  down from 55 -- but this number was NEVER the authoritative
-  measure of duplication and should not be read as "duplication resolved: 55 minus 12". The
-  actual tracking mechanism throughout the de-duplication effort was a declaration-level census
-  (base-name/suffix-family matching across the subsystem, driven by a reusable script kept
-  alongside the project's task-management artifacts), which is systematically more accurate: the
-  comment census both undercounts (several genuine duplicates carried no `Local re-derivation`
-  comment at all -- comment-driven deletion would have missed them silently) and overcounts in
-  the other direction (some `Local re-derivation`-labelled facts are genuinely distinct
-  propositions over frame-specific types like `modalUniverseS4`, not re-derivations of the same
-  fact, discovered only by a build-time type mismatch when treated as a duplicate). The remaining
-  12 comment sites correspond to the residue documented as Reasoned Exclusions (either the origin
-  is already public, the copy dodges an ambient instance, or the dependency graph does not reach
-  the origin) plus a handful of genuine specializations (frame-specific restatements,
-  keyed-driver variants) that were never duplicates. The declaration-level census, not this
-  comment count, is the authoritative figure for future maintenance.
-* **`ModalTableauResult` spans 8 modules here, 9 repo-wide** (the ninth is
-  `CslibTests/S4LoopGuardRegression.lean`). A previously reported span of 11 is drift.
-* **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns
-  11, because three further names occur only in call positions or prose. See the
-  "Redirect Forward-Cone Free Transfer" section for what was removed and when.
-* **One root-level `Boneyard/` directory exists** (`find . -type d -name 'Boneyard' -not -path
-  './.lake/*'` returns exactly `./Boneyard`), holding declarations archived from this file as
-  zero-consumer under the convention documented in `Boneyard/README.md`. It is excluded from
-  `lake build`, every census, and every linter by import-reachability -- see that README's
-  "Why This Is Free" section for the mechanism.
-
-### Figures deliberately NOT re-measured
-
-Recorded as gaps rather than filled with substitutes. **No number has been fabricated for any of
-these, and none should be quoted as measured.**
-
-* The two amplification figures inherited from earlier analysis -- **4 declarations / 1,036
-  lines**, and **43 declarations / 1,983 lines reachable from `modalTableauS4Keyed_complete`** --
-  are unverified inheritances. Re-measuring them needs a transitive-dependency closure over the
-  elaborated environment, which needs built `.olean`s for these modules.
-* The redirect semantic surface (reported as 4 clauses / 14 code lines) is likewise an inherited
-  figure, not a row of this capture.
-
-Anything depending on these must re-measure them, or say plainly that it is relying on an
-unverified inheritance.
-
-### Build gate at capture
-
-`lake build` failed at capture, and the failure is **outside this subsystem**: a non-exhaustive
-match in `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean` (introduced by
-commit `88b198bf`, belonging to in-flight work on the constructive nested-sequent development).
-`lake exe checkInitImports` then fails downstream as a consequence, not as an independent defect.
-While that holds, `checkInitImports` verifies nothing and must not be reported as passing.
+The subsystem-wide census documentation (sorry/axiom counts, size figures, inventory tallies)
+that used to live in this section was re-homed to `Cslib/Logics/Modal/Tableau/README.md` --
+it was never specifically about loop-checking, and its `LoopChecking.lean` size/declaration
+figures were stale by the time the `S4/` split began. See that file for the current numbers,
+each with the command that reproduces it.
 
 ## References
 

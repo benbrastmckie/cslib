@@ -891,30 +891,49 @@ observed figures for use in Phase 13's header rewrite.
 
 ---
 
-### Phase 13: Finalize the `LoopChecking.lean` Barrel and Rewrite Its Header [NOT STARTED]
+### Phase 13: Finalize the `LoopChecking.lean` Barrel and Rewrite Its Header [COMPLETED]
 
 **Goal**: `LoopChecking.lean` becomes a clean barrel-plus-residue with an accurate header, and the
 misplaced subsystem-wide census block is re-homed.
 
 **Tasks**:
-- [ ] Ensure `LoopChecking.lean` `public import`s **all eleven** `S4/` modules, in alphabetical
-      order.
-- [ ] Add `-- shake: keep` to the re-exports `LoopChecking.lean`'s own body does not consume.
+- [x] Ensure `LoopChecking.lean` `public import`s **all eleven** `S4/` modules, in alphabetical
+      order. Confirmed: BirthKey, Driver, Guard, Hintikka, HintikkaInvariant, Invariant,
+      InvariantAcc, InvariantKeys, Redirect, Universe -- all eleven present, alphabetical.
+- [x] Add `-- shake: keep` to the re-exports `LoopChecking.lean`'s own body does not consume.
       Research identifies three: `S4.BirthKey`, `S4.Redirect`, `S4.InvariantKeys`. **Confirm the
       actual set from `check-shake-residue.sh` output rather than assuming these three** — the
       residue's consumption pattern may have shifted during the split.
-      Form: `public import Cslib.Logics.Modal.Tableau.S4.Redirect -- shake: keep`.
-      This is the established ratchet-free idiom (used in 14 places across `Cslib/`);
-      `check-lint-suppressions.sh` counts only blanket `set_option linter.X false` lines and does
-      **not** count `-- shake: keep`.
-- [ ] Rewrite `LoopChecking.lean`'s module docstring to describe what the file now is: the S4
+      *(deviation: altered -- the actual empirically-confirmed set is exactly **one** import,
+      `S4.Redirect`, not the three research hypothesized. It was already annotated in Phase 8,
+      when the finding first appeared; re-confirmed here via a fresh `check-shake-residue.sh`
+      run that `S4.BirthKey` and `S4.InvariantKeys` are NOT flagged -- `LoopChecking.lean`'s
+      residue apparently does consume something reachable only through those two re-exports
+      (or shake's minimization prefers this file as their attribution point for some other
+      reason), so no further annotation was needed. This is exactly the kind of hypothesis the
+      plan told this phase to verify rather than assume, and it did not hold in full.)*
+- [x] Rewrite `LoopChecking.lean`'s module docstring to describe what the file now is: the S4
       driver's entry points, its termination argument, its two end-to-end theorems, and the barrel
       re-exporting the `S4/` cluster. Include a short map of the eleven modules and the layering.
-- [ ] Re-home the `## Measured Baseline` block (~155 lines of subsystem-wide census documentation
+      Done -- includes the ASCII layering diagram and a one-line description of each module.
+- [x] Re-home the `## Measured Baseline` block (~155 lines of subsystem-wide census documentation
       — sorry counts, axiom counts, re-derivation tallies — that is not about loop-checking at
       all) to `Cslib/Logics/Modal/Tableau/README.md`. **Correct the stale figures** (`10,540`
       lines / `230` declarations) using the Phase 1 and Phase 12 measurements. This is a required
-      edit, not an optional tidy — the numbers are wrong today.
+      edit, not an optional tidy — the numbers are wrong today. Done: `README.md` created (new
+      file), carrying the full re-homed section with the `LoopChecking.lean` size/declaration
+      figures corrected to the Phase 1 baseline (11,393 lines / 241 declarations pre-split) and
+      the Phase 12 post-split residue (1,723 lines / 20 declarations), plus a provenance note
+      explaining the two corrections. Every other figure (`FrameSoundness`/`FrameCompleteness`
+      sizes, sorry/axiom censuses, inventory tallies) carried over unchanged, since re-auditing
+      the rest of the subsystem is out of this task's scope; the sorry census specifically was
+      re-verified unchanged (still exactly 1) since the split's own gates confirmed it at every
+      phase boundary.
+
+Zero downstream `.lean` file content changed across the **entire task** (confirmed via
+`git diff --stat 11607e0f -- <five files>`, empty). All gates green: build 3323 jobs (unchanged
+-- no new module registered this phase), sorry census 1, axiom census 43, lint-suppressions 19,
+checkInitImports, mk_all --check, lint-style, lake test, boneyard quarantine all pass.
 - [ ] Confirm no downstream file needed a change: `git status` must show no modification to
       `S5Simplification.lean`, `FrameCompleteness.lean`, `FrameSoundness.lean`,
       `FiveSimplification.lean`, or `CslibTests/S4LoopGuardRegression.lean` across the whole task.

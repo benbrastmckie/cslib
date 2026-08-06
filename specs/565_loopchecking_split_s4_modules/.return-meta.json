@@ -3,11 +3,11 @@
   "started_at": "2026-08-06T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_12_complete",
-    "details": "Phases 1-12 complete and committed. Build green at 3323 jobs. All eleven S4/*.lean modules now extracted. LoopChecking.lean residue confirmed at exactly 20 declarations / 1723 lines. Remaining phases: 13 (barrel finalization), 14 (ORGANISATION.md), 15 (final gate sweep).",
+    "stage": "phase_13_complete",
+    "details": "Phases 1-13 complete and committed. Build green at 3323 jobs. LoopChecking.lean is now a clean barrel with rewritten docstring; Measured Baseline section re-homed to new README.md with corrected figures. Zero downstream file changes confirmed across the entire task since baseline commit 11607e0f.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 12
+    "phases_completed": 13
   },
   "metadata": {
     "session_id": "sess_1786030020_688c25_565",

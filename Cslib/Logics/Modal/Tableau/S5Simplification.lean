@@ -83,17 +83,6 @@ open Cslib.Logic.Tableau Cslib.Logic.Modal
 
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
-/-! ## `modalSubfmls` Structural Re-Derivations
-
-`modalSubfmls_self_mem_S5` below (the sole surviving local re-derivation of `FmpMeasure.lean`'s
-`private` `modalSubfmls` structural facts -- `modalSubfmls_trans_S5` was consolidated to the
-now-public `FmpMeasure.lean` original) is consumed by the witness-rule counting crux
-(`modalApplyOneS5w_step` and `modalApplyOneS5w_outputsSubsetUniverse`). Retained rather than
-consolidated because its origin is already public and it exists specifically to dodge an ambient
-`[Hashable Atom]` instance that callers here cannot `omit`. The
-`modalUniverseS5`/`modalWorldBoundS5` membership lemmas that once shared this section have been
-archived (superseded by the linear budget argument below). -/
-
 /-! ## S5-Specific (Universal-Cluster) Propagation Helpers -/
 
 /-- The S5 universal propagation for box-positives: from `T(□φ)@w`, generate `T(φ)@w'` for

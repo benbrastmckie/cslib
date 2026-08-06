@@ -727,13 +727,6 @@ theorem modalExpandBranchesFive_eq
 theorem modalTableauFive_eq (φ : Proposition Atom) :
     modalTableauFive φ = modalTableauGen modalApplyOneFive φ := rfl
 
-/-! ## `modalKnownWorlds`/`modalUniverse` Local Re-Derivations
-
-`FmpMeasure.lean`'s `mem_modalKnownWorlds`/`modalKnownWorlds_le_modalMaxWorld`/
-`mem_modalUniverse_of`/`modalSubfmls_trans` are `private` (hence unavailable across files). Local
-re-derivation, mirroring `S5Simplification.lean`'s own `_S5`/`_S5w`-suffixed pattern, renamed for
-Five. -/
-
 /-! ## `RuleApplicationSpecCore` for `modalApplyOneFive`
 
 Discharges `RuleApplicationSpecCore modalApplyOneFive` (`GenericDriver.lean`): the nine

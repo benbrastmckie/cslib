@@ -233,39 +233,52 @@ match eight.
 
 ---
 
-### Phase 3: Reconcile the stale records [NOT STARTED]
+### Phase 3: Reconcile the stale records [COMPLETED]
 
 **Goal**: Correct the three prose defects the deletions falsified, and record the superseded
 exclusion rationale. Prose only — no declarations are added, removed, or renamed.
 
 **Tasks**:
-- [ ] `S5Simplification.lean` module docstring, section `## modalSubfmls Structural
+- [x] `S5Simplification.lean` module docstring, section `## modalSubfmls Structural
       Re-Derivations`: its body is now false on both counts — it names
       `modalSubfmls_self_mem_S5` as "the sole surviving local re-derivation" and justifies
       retaining it by the `[Hashable Atom]` argument. Rewrite the section to record that the copy
       was consolidated to the now-public `FmpMeasure.lean` origin, alongside the existing note
       about `modalSubfmls_trans_S5`. If no re-derivation content remains in the section, remove
-      the header rather than leaving it empty.
-- [ ] `FiveSimplification.lean`: remove the orphaned section header
+      the header rather than leaving it empty. **Observed**: no re-derivation content remained
+      (both `modalSubfmls_self_mem_S5` and the already-consolidated `modalSubfmls_trans_S5` were
+      gone), so the whole section was removed per the fallback instruction. Its one
+      non-redundant fact (the `modalUniverseS5`/`modalWorldBoundS5` archival note) is
+      independently recorded elsewhere in the same file near the `modalWorldBoundS5` definition.
+- [x] `FiveSimplification.lean`: remove the orphaned section header
       `/-! ## modalKnownWorlds/modalUniverse Local Re-Derivations` and its body. The body
       describes Five-suffixed re-derivations that no longer exist, and it is followed immediately
-      by the next `/-! ##` header with no declarations in between.
-- [ ] `LoopChecking.lean` inventory-census prose: the "Post-de-duplication update" bullet records
+      by the next `/-! ##` header with no declarations in between. **Observed**: header (actual
+      text: `` `modalKnownWorlds`/`modalUniverse` Local Re-Derivations``) removed; confirmed
+      orphaned (immediately followed by the next `/-! ##` header, no declarations between).
+- [x] `LoopChecking.lean` inventory-census prose: the "Post-de-duplication update" bullet records
       the comment-string count as **11**; the tree's true count before Phase 2 is 13. Correct it
       to the post-Phase-2 measurement. Leave the historical **55** and **77** figures in the
       "Inventory figures that drifted" block alone — that block explicitly retains them as
       superseded historical baselines, and rewriting them would destroy the record it exists to
-      keep.
-- [ ] Record in this task's summary artifact that task 558's Phase 10 Reasoned Exclusions entry
+      keep. **Observed**: post-Phase-2 `grep -rho 'Local re-derivation' Cslib/ | wc -l` returns
+      12; corrected all three occurrences of the stale figure within the bullet (headline count,
+      "55 minus N" comparison, "remaining N comment sites" cross-reference). The 55/77 historical
+      baselines in the separate block were left untouched.
+- [x] Record in this task's summary artifact that task 558's Phase 10 Reasoned Exclusions entry
       for `modalSubfmls_self_mem` is **superseded**: its evidence ("Confirmed the ambient instance
       at the copy's site and the absence of an `omit` escape") did not survive the origin's
       2026-07-27 addition of `omit [DecidableEq Atom] [Hashable Atom] in`, twelve days after the
-      copy was created on 2026-07-15. Do not edit task 558's plan files.
-- [ ] Record in this task's summary that `accFreshInv_append_S4` is a decided, evidenced
+      copy was created on 2026-07-15. Do not edit task 558's plan files. **Observed**: recorded in
+      `summaries/01_delete-surviving-duplicate-summary.md`; task 558's plan files untouched.
+- [x] Record in this task's summary that `accFreshInv_append_S4` is a decided, evidenced
       exclusion (class (c), import reachability — `LoopChecking.lean` does not import
-      `Soundness.lean`, and the origin is private to it), not unfinished work.
-- [ ] Read back each edited hunk and confirm every change lies inside a comment, docstring, or
-      module-docstring region.
+      `Soundness.lean`, and the origin is private to it), not unfinished work. **Observed**:
+      recorded in the summary.
+- [x] Read back each edited hunk and confirm every change lies inside a comment, docstring, or
+      module-docstring region. **Observed**: `git diff` confirms all three hunks are whole,
+      balanced `/-! ... -/` block removals or in-place figure edits inside an existing markdown
+      code-fence prose block; `lake build` on all three files (Phase 2 + this phase) passed.
 
 **Timing**: 0.4 hours
 

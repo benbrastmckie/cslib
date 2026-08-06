@@ -158,9 +158,11 @@ wc -l CslibTests/S4LoopGuardRegression.lean                                     
   `modalKnownWorlds_fold_spec` 6 not 4, `hasEdge_addEdge_cases` 7 not 4), and the old per-file
   distribution omitted `LoopChecking.lean`'s **14** sites entirely -- the largest file in the
   subsystem. The de-duplication work is larger, not smaller.
-* **Post-de-duplication update**: the comment-string count is now **11** (`grep -rho 'Local
-  re-derivation' Cslib/ | wc -l`), down from 55 -- but this number was NEVER the authoritative
-  measure of duplication and should not be read as "duplication resolved: 55 minus 11". The
+* **Post-de-duplication update**: the comment-string count is now **12** (`grep -rho 'Local
+  re-derivation' Cslib/ | wc -l`, re-measured after `modalSubfmls_self_mem_S5` was deleted from
+  `S5Simplification.lean` and its call sites routed to the public `FmpMeasure.lean` origin),
+  down from 55 -- but this number was NEVER the authoritative
+  measure of duplication and should not be read as "duplication resolved: 55 minus 12". The
   actual tracking mechanism throughout the de-duplication effort was a declaration-level census
   (base-name/suffix-family matching across the subsystem, driven by a reusable script kept
   alongside the project's task-management artifacts), which is systematically more accurate: the
@@ -169,7 +171,7 @@ wc -l CslibTests/S4LoopGuardRegression.lean                                     
   the other direction (some `Local re-derivation`-labelled facts are genuinely distinct
   propositions over frame-specific types like `modalUniverseS4`, not re-derivations of the same
   fact, discovered only by a build-time type mismatch when treated as a duplicate). The remaining
-  11 comment sites correspond to the residue documented as Reasoned Exclusions (either the origin
+  12 comment sites correspond to the residue documented as Reasoned Exclusions (either the origin
   is already public, the copy dodges an ambient instance, or the dependency graph does not reach
   the origin) plus a handful of genuine specializations (frame-specific restatements,
   keyed-driver variants) that were never duplicates. The declaration-level census, not this

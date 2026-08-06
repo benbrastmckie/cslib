@@ -350,30 +350,40 @@ Confirm against the regenerated assignment before moving.
 
 ---
 
-### Phase 4: Extract `S4/Guard.lean` [NOT STARTED]
+### Phase 4: Extract `S4/Guard.lean` [COMPLETED]
 
 **Goal**: The blocking-guard and mint-shape predicates become a module importing `Universe` and
 `BirthKey`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/Guard.lean` from the Appendix A template. **Confirm
-      `@[expose] public section`.**
-- [ ] Move the `Guard`-assigned declarations by name.
-- [ ] **Research correction 1 of 4**: `keysUpdate_preserves_keysDistinct` belongs **here**, not in
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/Guard.lean` from the Appendix A template. **Confirm
+      `@[expose] public section`.** Confirmed. 12 declarations, 241 lines (hypothesis ~261; close).
+- [x] Move the `Guard`-assigned declarations by name.
+- [x] **Research correction 1 of 4**: `keysUpdate_preserves_keysDistinct` belongs **here**, not in
       `BirthKey`, despite "keys" in its name — it references `blockingWorldS4Keyed` and
-      `blockingWorldS4Keyed_none_fresh`.
-- [ ] **Research correction 2 of 4**: `modalNonMintCandidates` and its lemmas belong in `Driver`,
+      `blockingWorldS4Keyed_none_fresh`. Confirmed placed here.
+- [x] **Research correction 2 of 4**: `modalNonMintCandidates` and its lemmas belong in `Driver`,
       **not** here, even though they sit under the same `## Mint-Readiness` doc section heading as
       `modalMintShape` and are adjacent in the source. `modalNonMintCandidates` is defined in terms
       of `modalApplyOneS4Keyed`. **The seam runs through that doc section** — split the heading's
-      prose accordingly rather than moving the whole block.
-- [ ] Carry the two `@[simp]` attributes on `modalMintShape_boxNeg` and `modalMintShape_diaPos`
+      prose accordingly rather than moving the whole block. Verified post-move: the heading was
+      never actually attached to `modalMintShape`'s span in the first place (it was trailing
+      content of the preceding, non-moved `modalApplyOneS4Keyed_diaPos_unblocked_eq`), so no manual
+      split was needed — after Guard's declarations were removed, the heading now directly and
+      correctly introduces `modalNonMintCandidates`, confirmed by direct inspection.
+- [x] Carry the two `@[simp]` attributes on `modalMintShape_boxNeg` and `modalMintShape_diaPos`
       with their declarations. Moving does not change the simp set's content, only the
-      contributing module.
-- [ ] No de-privatizations required in this phase (verify against the regenerated assignment).
-- [ ] Write the "Why a separate module" docstring paragraph.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      contributing module. Confirmed both `@[simp]` attributes travelled with their declarations.
+- [x] No de-privatizations required in this phase (verify against the regenerated assignment).
+      Confirmed: 0 de-privatizations.
+- [x] Write the "Why a separate module" docstring paragraph. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new `Modal/Tableau/` findings (shake-flagged set 12/12,
+      unchanged from the Phase 2 baseline update).
+
+Zero downstream `.lean` file content changed. All gates green: build 3316 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 1 hour
 

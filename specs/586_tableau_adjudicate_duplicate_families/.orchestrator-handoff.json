@@ -1,0 +1,40 @@
+{
+  "status": "researched",
+  "summary": "The audit's 45-row premise is stale: 43 rows were already deleted by task 558's own phases 8-11 (which ran 5.5 hours before the audit was committed), leaving exactly one actionable deletion (modalSubfmls_self_mem_S5, verified deletable by a reversible build experiment) plus one survivor that is explicitly out of scope on import-reachability grounds.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md",
+      "type": "report",
+      "summary": "Name-anchored census of all 45 audited rows against the current tree, scope adjudication of the two survivors, git-blame falsification of task 558's stale [Hashable Atom] exclusion rationale, a verified reversible deletion experiment, and re-measured gate baselines (build 3313 jobs, sorry census 1, shake 9/none-in-Tableau, lint 145, test green)."
+    }
+  ],
+  "phases_completed": 4,
+  "phases_total": 4,
+  "notes_for_planner": {
+    "actionable_scope": "One declaration deletion (modalSubfmls_self_mem_S5 in S5Simplification.lean), 8 call-site name substitutions to the public origin modalSubfmls_self_mem, and prose reconciliation in three places.",
+    "do_not_do": [
+      "Do not manufacture deletions to reach the brief's 45 figure - 43 rows no longer exist.",
+      "Do not absorb accFreshInv_append_S4; it is class (c) import reachability and explicitly out of scope.",
+      "Do not touch the hasEdge_mem_successorsOf converse pair; it is already correctly resolved in Support/Accessibility.lean.",
+      "Do not rewrite historical plan files under specs/558_*; record the correction in this task's summary instead.",
+      "Do not edit frozen .lean artifacts under specs/archive/."
+    ],
+    "recommended_phases": [
+      "Phase 1: drift-guard census (expect 14 residue families, 2 audit-row survivors); [BLOCKED] if it differs",
+      "Phase 2: delete modalSubfmls_self_mem_S5, rewrite 8 call sites, rewrite the now-false module docstring section",
+      "Phase 3: reconcile stale prose (FiveSimplification orphaned section header, LoopChecking comment-count drift 11 vs 13, superseded task 558 exclusion rationale)",
+      "Phase 4: full gate against the recorded baselines"
+    ],
+    "gate_baselines": {
+      "lake_build_Cslib": "exit 0, 3313 jobs",
+      "modal_tableau_sorry_census": 1,
+      "modal_tableau_axioms": 0,
+      "lake_shake": "9 findings, none in Modal/Tableau, exit 1 (do NOT gate on exit 0)",
+      "lake_lint": "145 findings, exit 1 (gate on delta 0, not exit code)",
+      "checkInitImports": "exit 0",
+      "lint_style": "exit 0",
+      "lake_test": "exit 0"
+    }
+  }
+}

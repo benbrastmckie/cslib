@@ -38,7 +38,7 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-586 [NOT STARTED] — [Continuation of Task A of the modal-tableau refactor programme; 
+586 [RESEARCHED] — [Continuation of Task A of the modal-tableau refactor programme; 
   └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
     └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
       └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
@@ -88,10 +88,11 @@ next_project_number: 588
 ---
 
 ### 586. Adjudicate and delete the audited duplicate re-derivation families
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553
+- **Research**: [586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md]
 
 **Description**: [Continuation of Task A of the modal-tableau refactor programme; adjudicates the duplicate families the Support-module extraction left unresolved.] The statement-equivalence audit is DONE and is the input to this task -- do not re-run it: specs/558_tableau_support_private_dedup/reports/02_statement-equivalence-audit.md classifies 45 surviving re-derivation rows across four families (KNOWNWORLDS, SUBFMLS/UNIVERSE, ACCESSIBILITY, MEASURE) as 38 IDENTICAL, 6 WEAKER, 1 DIFFERENT, 0 NOT_FOUND. Delete the adjudicated duplicates and replace them with imports of the public origins.
 --- THE THREE VERDICT CLASSES AND WHAT EACH REQUIRES ---

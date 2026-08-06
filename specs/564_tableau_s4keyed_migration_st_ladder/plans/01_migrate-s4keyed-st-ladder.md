@@ -1,7 +1,7 @@
 # Implementation Plan: Task #564
 
 - **Task**: 564 - Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated `keys'` derivation
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 4.6 hours
 - **Dependencies**: 553, 562, 563 (all landed)
 - **Research Inputs**: `specs/564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md`
@@ -118,22 +118,31 @@ run before Phase 2 without loss, but never concurrently with it.
 
 ---
 
-### Phase 1: Re-verify and record the gate baseline [NOT STARTED]
+### Phase 1: Re-verify and record the gate baseline [COMPLETED]
 
 **Goal**: Establish that the tree is green *now*, at this HEAD, so that any later gate movement is
 attributable to this task's edits rather than inherited.
 
 **Tasks**:
-- [ ] Record `git log --oneline -1` (expected `9a3b2370` or a descendant).
-- [ ] Run `lake exe cache get` to ensure the Mathlib olean cache is present.
-- [ ] Run `lake build Cslib`; record exit code and job count.
-- [ ] Run the sorry census and record the count:
+- [x] Record `git log --oneline -1` (expected `9a3b2370` or a descendant). Result: HEAD is
+      `789afa7a` (task 564 plan creation), confirmed descendant of `9a3b2370` via
+      `git merge-base --is-ancestor`.
+- [x] Run `lake exe cache get` to ensure the Mathlib olean cache is present. Result: cache
+      already warm ("No files to download", 8651 files already decompressed).
+- [x] Run `lake build Cslib`; record exit code and job count. Result: exit 0, "Build completed
+      successfully (3313 jobs)".
+- [x] Run the sorry census and record the count:
       `grep -rn "^\s*sorry\s*$\|:= sorry\|<;> sorry\|exact sorry" Cslib/Logics/Modal/Tableau/`
-- [ ] Run `lake exe checkInitImports`; record exit code.
-- [ ] Run `lake exe lint-style`; record exit code.
-- [ ] Run `lake shake --add-public --keep-implied --keep-prefix`; record the finding count and
-      confirm none are in `Modal/Tableau`.
-- [ ] Record `wc -l` for the three in-scope files.
+      Result: exactly 1 hit, `FrameSoundness.lean:1251`, matching hypothesis.
+- [x] Run `lake exe checkInitImports`; record exit code. Result: exit 0.
+- [x] Run `lake exe lint-style`; record exit code. Result: exit 0.
+- [x] Run `lake shake --add-public --keep-implied --keep-prefix`; record the finding count and
+      confirm none are in `Modal/Tableau`. Result: exit 1, 9 findings (TimeM.lean,
+      MultiTape/Deterministic.lean, StackTape.lean, Relation/Defs.lean,
+      SingleTape/NonDeterministic.lean, Relation/Confluence.lean, Control/Monad/Free.lean,
+      CCS/Basic.lean, CombinatoryLogic/Defs.lean), none in `Modal/Tableau`, matching hypothesis.
+- [x] Record `wc -l` for the three in-scope files. Result: `LoopChecking.lean` 11761,
+      `FrameCompleteness.lean` 8266, `Saturation.lean` 755 — exact match to Scope Hypothesis.
 
 **Timing**: 0.3 hours
 

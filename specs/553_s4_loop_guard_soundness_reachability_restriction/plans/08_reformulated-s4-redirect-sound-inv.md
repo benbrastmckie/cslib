@@ -199,11 +199,12 @@ sorry (see Non-Goals) and does not write to `ROADMAP.md`.
 | 11 | 9 | 7.8, 8 |
 | 12 | 10 | 9 |
 
-Phases within the same wave can execute in parallel. Waves 1-7 are already complete. **Wave 8
-(Phases 7.3, 7.4, 8) is now complete** — all three closed sorry-free and committed; Phase 7.4's
-kill gate returned outcome (i), a clean PASS. **The live frontier is now wave 9** (Phases 7.5,
-7.6, 7.7), which may now dispatch since Phase 7.4 has returned a passing outcome. Wave 10 (Phase
-7.8) remains blocked on wave 9 completing in full.
+Phases within the same wave can execute in parallel. Waves 1-9 are now complete: Wave 8 (Phases
+7.3, 7.4, 8) closed sorry-free with Phase 7.4's kill gate returning outcome (i), a clean PASS;
+Wave 9 (Phases 7.5, 7.6, 7.7) landed all three arm restatements sorry-free. **Wave 10 (Phase 7.8,
+the dispatcher theorem) is now complete** — sorry-free, committed as one atomic commit, full CI
+green. **The live frontier is now wave 11** (Phase 9, the fuel-induction wrapper), which may now
+dispatch since Phase 7.8 and Phase 8 have both returned.
 
 ---
 
@@ -1225,7 +1226,7 @@ needed or performed.
 
 ---
 
-### Phase 7.8: The dispatcher theorem over `modalStepBranchS4KeyedOrdered` [IN PROGRESS]
+### Phase 7.8: The dispatcher theorem over `modalStepBranchS4KeyedOrdered` [COMPLETED]
 
 - **Goal:** Assemble the five arms into a single step-preservation theorem: if
   `S4RedirectSoundInv φ₀ b e acc keys Er` and `modalStepBranchS4KeyedOrdered` fires producing
@@ -1246,26 +1247,78 @@ needed or performed.
 - **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
 
 - **Tasks:**
-  - [ ] Write the target theorem statement out **first**, before wiring any arm, and confirm each of
+  - [x] Write the target theorem statement out **first**, before wiring any arm, and confirm each of
         the five landed arms' conclusions is directly consumable by it. If any arm's shape does not
         fit, that is a Phase 7.5-7.7 defect to record and repair there, not to paper over here.
-  - [ ] Thread the branch of `modalStepBranchS4KeyedOrdered_cases`:
+        *(Landed as `S4RedirectSoundInv_step`. One real defect found and repaired here, not in
+        7.5-7.7: the initial `∀ b' ∈ newBs, ∀ e' ∈ newExps, ...` conclusion was wrong for the
+        `.branching` result shape — soundness only needs ONE surviving branch, not all of them,
+        matching the `∃ b' ∈ newBs, branchSatisfiableIn ... b' newAcc` shape already used by the
+        S5/Five/plain-K assemblies (`FrameSoundness.lean`/`SoundnessStep.lean`). Corrected to
+        `∃ b' ∈ newBs, ∃ e' ∈ newExps, ∃ Er' ⊇ Er, S4RedirectSoundInv φ₀ b' e' newAcc keys' Er'`
+        before any arm was wired, per this task's own instruction.)*
+  - [x] Thread the branch of `modalStepBranchS4KeyedOrdered_cases`:
         - **primary-scan hit**: the selected `sf` is non-mint by the candidate predicate → Phase
           7.5's arm, or a 4-rule shape → Phase 7.7's arm.
         - **settled fallback**: `modalNonMintCandidates = []` gives `hmint`; sub-split on
           `blockingWorldS4Keyed` into blocked (Phases 7.2/7.3) and unblocked (Phase 7.6).
-  - [ ] Discharge `modalS4Saturated φ₀ b acc` where the blocked arms require it, from `hmint` plus
+        *(Landed exactly this way. The non-mint case in the settled fallback — which cannot arise
+        given `hmintEmpty`, since an applicable, unexpanded, non-mint-shaped `sf` would itself be
+        a non-mint candidate — is discharged by deriving that contradiction directly, rather than
+        assumed away.)*
+  - [x] Discharge `modalS4Saturated φ₀ b acc` where the blocked arms require it, from `hmint` plus
         `S4KeyedHintikkaInv` via `modalS4Saturated_of_ordered_settled` (`LoopChecking.lean:9250`).
         Record which additional invariants (`S4LoopInv.bClosure`, `S4LoopInv.keyLowerBd`,
         `S4KeyedHintikkaInv`) the dispatcher must carry alongside `S4RedirectSoundInv` — the blocked
         arms take `hUniv`/`hkL` directly, so the dispatcher's hypothesis list is not just the
-        invariant.
-  - [ ] Handle the `.branching` result shape (multiple `newBs`): the conclusion must be
+        invariant. *(Landed. The dispatcher's final hypothesis list is `hinv`, `hUniv`, `hkL`,
+        `hHinv : S4KeyedHintikkaInv`, and `hFresh : accFreshInv b acc` (the last needed only by
+        the two mint-unblocked arms, Phase 7.6). `S4LoopInv.keyLowerBd` was NOT needed directly —
+        the blocked arms (`S4RedirectSoundInv_{boxNeg,diaPos}_blocked`) take `hUniv`/`hkL` alone,
+        not the full `S4LoopInv` bundle.)*
+  - [x] Handle the `.branching` result shape (multiple `newBs`): the conclusion must be
         per-selected-branch, matching how the existing S5/Five assemblies state theirs.
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+        *(See the first task's note — this is the correction that was made.)*
+  - [x] `#print axioms`; scoped build; `lint-style`; census exactly 1. *(All green: `#print axioms`
+        on `S4RedirectSoundInv_step` and all four new bridging lemmas reports exactly `propext`,
+        `Classical.choice`, `Quot.sound`; scoped build, `lake exe lint-style`, and
+        `lake exe checkInitImports` all clean; sorry census over `Cslib/Logics/Modal/Tableau/`
+        unchanged at exactly 1 (`FrameSoundness.lean:1251`). Full `lake build` (3313/3313),
+        `lake test`, `lake exe mk_all --module` (no-op), and `lake shake` also all clean/green
+        for this file.)*
 
 - **Done when:** the dispatcher theorem is sorry-free and committed as one atomic commit; census
   exactly 1; scoped build and `lint-style` clean.
+
+#### Phase 7.8 Verdict
+
+Landed sorry-free in `FrameCompleteness.lean`: the dispatcher theorem `S4RedirectSoundInv_step`,
+plus four small bridging lemmas discovered necessary while wiring the five arms —
+`S4RedirectSoundInv_weaken_e` (monotone `e`-growth; only conjunct (d) mentions `e`, and only via
+membership), `S4RedirectSoundInv_drop_e_of_outDeg_zero` (drops a zero-out-degree formula from `e`
+for free — needed because the two 4-rule arms' `.persistent` real driver output leaves `e`
+UNCHANGED, while their own stated conclusion is at the bigger `sf :: e`),
+`modalApplyOneS4Keyed_notApplicable_keys_indep` and its corollary
+`S4RedirectSoundInv_keys_transport` (conjunct (d) is fully independent of `keys` whenever
+quantified over a non-mint-shaped formula, since `modalApplyOneS4Keyed`'s only `keys`-consulting
+match arms are the two minting shapes — needed because the mint-unblocked arms are stated at the
+OLD `keys`, while the real driver extends it).
+
+None of the five arms needed re-proving; every one was consumed via its own stated hypotheses,
+confirming report 06 §3.4's "re-wrap, not re-prove" characterization held all the way through
+assembly. The one genuine correction made in this phase was in the dispatcher's OWN target
+statement (the `∀`-to-`∃` fix for the `.branching` shape), not in any arm.
+
+`git diff --stat`: `FrameCompleteness.lean` only, 501 lines added (against a ~250-line estimate —
+the delta is explained by the four bridging lemmas, which the Scope Hypothesis did not
+anticipate by name, plus the settled-fallback's non-mint contradiction branch). `git diff | grep
+'^-[^-]'` returns nothing — purely additive, no existing declaration touched, in particular none
+of the Testing & Validation checklist's preserved declarations. Sorry census over
+`Cslib/Logics/Modal/Tableau/` unchanged at exactly 1 (`FrameSoundness.lean:1251`). Full CI:
+`lake build` (3313/3313), `lake exe checkInitImports`, `lake lint` (zero warnings attributable to
+`FrameCompleteness.lean`), `lake exe lint-style`, `lake test`, `lake exe mk_all --module`
+(no-op), and `lake shake --add-public --keep-implied --keep-prefix` (suggestions exist only for
+unrelated pre-existing files) all green.
 
 ---
 

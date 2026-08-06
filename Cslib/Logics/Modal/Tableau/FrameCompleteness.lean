@@ -7266,6 +7266,507 @@ theorem S4RedirectSoundInv_diaNeg_step (φ₀ : Proposition Atom)
             (modalApplyOneS4Keyed_notApplicable_growth φ₀ keys sf' b (modalTDiaNegSelf b φ lbl)
               acc h2)
 
+/-! ## Phase 7.8: The Dispatcher Theorem Over `modalStepBranchS4KeyedOrdered`
+
+Assembles the five re-wrapped arms (Phases 7.2/7.3, 7.5, 7.6, 7.7) into a single
+step-preservation theorem for `S4RedirectSoundInv` against the real driver
+`modalStepBranchS4KeyedOrdered`. Three small bridging facts reconcile each arm's own
+convenient `(e, keys)` choice with what `modalStepBranchS4KeyedBody` actually threads through:
+`S4RedirectSoundInv` is monotone under `e`-growth (only conjunct (d) mentions `e`, and only via
+membership), a formula with zero out-degree can be DROPPED from `e` for free (its own (d)
+hypothesis is then vacuous), and conjunct (d) is fully independent of `keys` whenever quantified
+over a non-mint-shaped formula (`modalApplyOneS4Keyed`'s only `keys`-consulting arms are the two
+minting shapes). -/
+
+/-- `S4RedirectSoundInv` is monotone under `e`-growth: only conjunct (d) mentions `e`, and only
+via membership (`sf' ∈ e`), so widening `e` to any superset preserves the invariant. Reconciles
+a re-wrapped arm's own convenient `e'` (e.g. `sf :: e`) with whichever exact list
+`modalStepBranchS4KeyedBody` actually produces (`e ++ [sf]`) -- same elements, different order. -/
+lemma S4RedirectSoundInv_weaken_e (φ₀ : Proposition Atom)
+    (b e e' : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (Er : List (WorldIndex × WorldIndex))
+    (hsub : ∀ x ∈ e, x ∈ e')
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er) :
+    S4RedirectSoundInv φ₀ b e' acc keys Er := by
+  obtain ⟨ha, hb, hc, hd⟩ := hinv
+  refine ⟨ha, hb, hc, ?_⟩
+  intro sf hsf hshape houtdeg
+  rcases hd sf hsf hshape houtdeg with hin | hna
+  · exact Or.inl (hsub _ hin)
+  · exact Or.inr hna
+
+/-- `S4RedirectSoundInv`'s conjunct (d) drops a formula from `e` for free once its own
+out-degree is zero at the SAME accessibility: (d)'s hypothesis `outDeg acc sf.label ≠ 0` is then
+false for `sf` itself, so whether `sf ∈ e` holds is irrelevant to (d)'s conclusion at `sf`.
+Reconciles the two 4-rule arms (Phase 7.7), whose real driver output leaves `e` UNCHANGED
+(`.persistent` results never mark their firing formula expanded), against their own stated
+conclusion at the bigger `sf :: e`. -/
+lemma S4RedirectSoundInv_drop_e_of_outDeg_zero (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (Er : List (WorldIndex × WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (houtdeg0 : outDeg acc sf.label = 0)
+    (hinv : S4RedirectSoundInv φ₀ b (sf :: e) acc keys Er) :
+    S4RedirectSoundInv φ₀ b e acc keys Er := by
+  obtain ⟨ha, hb, hc, hd⟩ := hinv
+  refine ⟨ha, hb, hc, ?_⟩
+  intro sf' hsf' hshape houtdeg'
+  rcases hd sf' hsf' hshape houtdeg' with hin | hna
+  · rcases List.mem_cons.mp hin with heq | hin'
+    · exact absurd houtdeg' (by rw [heq, houtdeg0]; simp)
+    · exact Or.inl hin'
+  · exact Or.inr hna
+
+/-- `modalApplyOneS4Keyed` at a non-mint-shaped formula is independent of `keys`:
+`modalApplyOneS4Keyed`'s only `keys`-consulting match arms are the two MINT shapes
+(`.neg,.box`/`.pos,.diamond`), which `hmshape` already excludes, so both sides reduce to the
+SAME `keys`-independent call. -/
+lemma modalApplyOneS4Keyed_notApplicable_keys_indep (φ₀ : Proposition Atom)
+    (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hmshape : modalMintShape sf = false)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4Keyed φ₀ keys' sf b acc := by
+  rcases sf with ⟨s, φ, w⟩
+  unfold modalMintShape at hmshape
+  rcases s with _ | _ <;> rcases φ with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩ | ψ | ψ <;>
+    simp_all [modalApplyOneS4Keyed]
+
+/-- Corollary of `modalApplyOneS4Keyed_notApplicable_keys_indep`: `S4RedirectSoundInv`'s
+conjunct (d) transports across ANY two `keys` lists, since it only ever quantifies over
+non-mint-shaped formulas. Transports the mint-unblocked arms (Phase 7.6, stated at the OLD
+`keys`) to the real driver's extended `keys ++ [...]`. -/
+lemma S4RedirectSoundInv_keys_transport (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (Er : List (WorldIndex × WorldIndex))
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er) :
+    S4RedirectSoundInv φ₀ b e acc keys' Er := by
+  obtain ⟨ha, hb, hc, hd⟩ := hinv
+  refine ⟨ha, hb, hc, ?_⟩
+  intro sf hsf hshape houtdeg
+  rcases hd sf hsf hshape houtdeg with hin | hna
+  · exact Or.inl hin
+  · exact Or.inr (by
+      rw [← modalApplyOneS4Keyed_notApplicable_keys_indep φ₀ keys keys' sf hshape b acc]
+      exact hna)
+
+/-- **Phase 7.8: the dispatcher theorem.** Assembles the five re-wrapped arms into a single
+step-preservation theorem for `S4RedirectSoundInv` over the real driver
+`modalStepBranchS4KeyedOrdered`. Threads `modalStepBranchS4KeyedOrdered_cases`'s structural
+split: a primary-candidate-scan hit dispatches to the non-mint arms (Phase 7.5's
+`S4RedirectSoundInv_notBoxDia_step`, or Phase 7.7's `S4RedirectSoundInv_{boxPos,diaNeg}_step`);
+the settled fallback (`modalNonMintCandidates = []`) supplies `modalS4Saturated` via
+`modalS4Saturated_of_ordered_settled` and sub-splits on `blockingWorldS4Keyed` into the blocked
+mint arms (Phases 7.2/7.3) or the unblocked mint arms (Phase 7.6). `Er` grows only at a blocked
+mint step (the new redirect edge); every other arm leaves it untouched. -/
+theorem S4RedirectSoundInv_step (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (Er : List (WorldIndex × WorldIndex))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hinv : S4RedirectSoundInv φ₀ b e acc keys Er)
+    (hUniv : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hHinv : S4KeyedHintikkaInv φ₀ b e acc keys)
+    (hFresh : accFreshInv b acc)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∃ b' ∈ newBs, ∃ e' ∈ newExps, ∃ Er' ⊇ Er, S4RedirectSoundInv φ₀ b' e' newAcc keys' Er' := by
+  rcases modalStepBranchS4KeyedOrdered_cases φ₀ b e acc keys newBs newExps newAcc keys' hstep with
+    ⟨sf, hcand, hbody⟩ | ⟨hmintEmpty, hfallback⟩
+  · -- Primary-scan hit: `sf` is non-mint-shaped.
+    have hsfmemb := modalNonMintCandidates_subset φ₀ keys b e acc hcand
+    have hsfnote := modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf hcand
+    have hmintapp : modalMintShape sf = false ∧
+        (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable = true := by
+      unfold modalNonMintCandidates at hcand
+      have hpred := (List.mem_filter.mp hcand).2
+      simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+      exact ⟨hpred.1.1, hpred.2⟩
+    obtain ⟨hmshape, happ⟩ := hmintapp
+    have hany : e.any (· == sf) = false := by
+      rw [List.any_eq_false]
+      intro x hx heq
+      rw [beq_iff_eq] at heq
+      subst heq
+      exact hsfnote hx
+    unfold modalStepBranchS4KeyedBody at hbody
+    rw [if_neg (by simp [hany])] at hbody
+    rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+    rw [hpair] at hbody
+    dsimp only at hbody
+    by_cases hbx : ∃ ψ, sf.formula = .box ψ ∧ sf.sign = .pos
+    · obtain ⟨ψ, hfeq, hseq⟩ := hbx
+      rw [hfeq, hseq] at hbody
+      dsimp only at hbody
+      have hsfeq : sf = (⟨.pos, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by
+        have h : sf = (⟨sf.sign, sf.formula, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) := rfl
+        rw [h, hseq, hfeq]
+      have hcand' : (⟨.pos, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ∈
+          modalNonMintCandidates φ₀ keys b e acc := hsfeq ▸ hcand
+      obtain ⟨nf, hshape, hinv'⟩ := S4RedirectSoundInv_boxPos_step φ₀ keys b e acc Er ψ
+        sf.label hinv hcand'
+      rw [← hsfeq] at hinv'
+      rw [← hsfeq, hpair] at hshape
+      have hnewAcc0eq : newAcc0 = acc := by
+        have := congrArg Prod.snd hpair
+        rw [hsfeq, modalApplyOneS4Keyed_boxPos_eq_S4Rules,
+          modalApplyOneS4Rules_boxPos_snd_eq_acc] at this
+        exact this.symm
+      have hsube : ∀ x ∈ (sf :: e), x ∈ e ++ [sf] := by
+        intro x hx
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · simp
+        · simp [hx']
+      rcases hresult : result with fs | brs | fs | -
+      · rw [hresult] at hbody hshape
+        subst hshape
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+        · rw [← hnewBs]; exact List.mem_singleton_self _
+        · rw [← hnewExps]; exact List.mem_singleton_self _
+        · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+          exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) (sf :: e) (e ++ [sf]) acc keys Er hsube
+            hinv'
+      · rw [hresult] at hbody hshape
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+        · rw [← hnewBs]; exact List.mem_map.mpr ⟨nf, hshape, rfl⟩
+        · rw [← hnewExps]; exact List.mem_map.mpr ⟨nf, hshape, rfl⟩
+        · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+          exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) (sf :: e) (e ++ [sf]) acc keys Er hsube
+            hinv'
+      · rw [hresult] at hbody hshape
+        subst hshape
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        have houtdeg0 : outDeg acc sf.label = 0 := by
+          by_contra hne
+          obtain ⟨-, -, -, hFroz⟩ := hinv
+          rcases hFroz sf hsfmemb hmshape hne with h1 | h2
+          · exact hsfnote h1
+          · rw [h2] at happ
+            simp [RuleResult.isApplicable] at happ
+        refine ⟨nf ++ b, ?_, e, ?_, Er, List.Subset.refl Er, ?_⟩
+        · rw [← hnewBs]; exact List.mem_singleton_self _
+        · rw [← hnewExps]; exact List.mem_singleton_self _
+        · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+          exact S4RedirectSoundInv_drop_e_of_outDeg_zero φ₀ (nf ++ b) e acc keys Er sf houtdeg0
+            hinv'
+      · rw [hresult] at hshape
+        exact hshape.elim
+    · by_cases hdn : ∃ ψ, sf.formula = .diamond ψ ∧ sf.sign = .neg
+      · obtain ⟨ψ, hfeq, hseq⟩ := hdn
+        rw [hfeq, hseq] at hbody
+        dsimp only at hbody
+        have hsfeq : sf = (⟨.neg, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) := by
+          have h : sf = (⟨sf.sign, sf.formula, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := rfl
+          rw [h, hseq, hfeq]
+        have hcand' : (⟨.neg, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈
+            modalNonMintCandidates φ₀ keys b e acc := hsfeq ▸ hcand
+        obtain ⟨nf, hshape, hinv'⟩ := S4RedirectSoundInv_diaNeg_step φ₀ keys b e acc Er ψ
+          sf.label hinv hcand'
+        rw [← hsfeq] at hinv'
+        rw [← hsfeq, hpair] at hshape
+        have hnewAcc0eq : newAcc0 = acc := by
+          have := congrArg Prod.snd hpair
+          rw [hsfeq, modalApplyOneS4Keyed_diaNeg_eq_S4Rules,
+            modalApplyOneS4Rules_diaNeg_snd_eq_acc] at this
+          exact this.symm
+        have hsube : ∀ x ∈ (sf :: e), x ∈ e ++ [sf] := by
+          intro x hx
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · simp
+          · simp [hx']
+        rcases hresult : result with fs | brs | fs | -
+        · rw [hresult] at hbody hshape
+          subst hshape
+          simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+          refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+          · rw [← hnewBs]; exact List.mem_singleton_self _
+          · rw [← hnewExps]; exact List.mem_singleton_self _
+          · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+            exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) (sf :: e) (e ++ [sf]) acc keys Er
+              hsube hinv'
+        · rw [hresult] at hbody hshape
+          simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+          refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+          · rw [← hnewBs]; exact List.mem_map.mpr ⟨nf, hshape, rfl⟩
+          · rw [← hnewExps]; exact List.mem_map.mpr ⟨nf, hshape, rfl⟩
+          · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+            exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) (sf :: e) (e ++ [sf]) acc keys Er
+              hsube hinv'
+        · rw [hresult] at hbody hshape
+          subst hshape
+          simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+          have houtdeg0 : outDeg acc sf.label = 0 := by
+            by_contra hne
+            obtain ⟨-, -, -, hFroz⟩ := hinv
+            rcases hFroz sf hsfmemb hmshape hne with h1 | h2
+            · exact hsfnote h1
+            · rw [h2] at happ
+              simp [RuleResult.isApplicable] at happ
+          refine ⟨nf ++ b, ?_, e, ?_, Er, List.Subset.refl Er, ?_⟩
+          · rw [← hnewBs]; exact List.mem_singleton_self _
+          · rw [← hnewExps]; exact List.mem_singleton_self _
+          · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+            exact S4RedirectSoundInv_drop_e_of_outDeg_zero φ₀ (nf ++ b) e acc keys Er sf houtdeg0
+              hinv'
+        · rw [hresult] at hshape
+          exact hshape.elim
+      · -- Propositional / non-mint: `S4RedirectSoundInv_notBoxDia_step` (Phase 7.5).
+        have hnb : ∀ ψ, sf.formula ≠ .box ψ := by
+          intro ψ hfeq
+          by_cases hs : sf.sign = .pos
+          · exact hbx ⟨ψ, hfeq, hs⟩
+          · have hsn : sf.sign = .neg := by
+              cases h : sf.sign with
+              | pos => exact absurd h hs
+              | neg => rfl
+            exact absurd hmshape (by simp [modalMintShape, hsn, hfeq])
+        have hnd : ∀ ψ, sf.formula ≠ .diamond ψ := by
+          intro ψ hfeq
+          by_cases hs : sf.sign = .neg
+          · exact hdn ⟨ψ, hfeq, hs⟩
+          · have hsp : sf.sign = .pos := by
+              cases h : sf.sign with
+              | pos => rfl
+              | neg => exact absurd h hs
+            exact absurd hmshape (by simp [modalMintShape, hsp, hfeq])
+        obtain ⟨nf, hshape, hinv'⟩ := S4RedirectSoundInv_notBoxDia_step φ₀ keys b e acc Er sf
+          hnb hnd hinv hcand
+        rw [hpair] at hshape
+        have hnewAcc0eq : newAcc0 = acc := by
+          have heq : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOne sf b acc :=
+            modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys sf.sign sf.formula sf.label
+              hnb hnd b acc
+          have hndsnd : (modalApplyOne sf b acc).snd = acc := by
+            unfold modalApplyOne
+            simp only
+            split_ifs with hpa
+            · rfl
+            · rcases hsg : sf.sign with _ | _ <;>
+                rcases hff : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+                first
+                  | rfl
+                  | exact absurd hff (hnb ψ)
+                  | exact absurd hff (hnd ψ)
+          have hsnd := congrArg Prod.snd (heq.symm.trans hpair)
+          rw [hndsnd] at hsnd
+          exact hsnd.symm
+        have hsube : ∀ x ∈ (sf :: e), x ∈ e ++ [sf] := by
+          intro x hx
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · simp
+          · simp [hx']
+        -- Reduce `hbody`'s `keys'`-submatch by fixing `sf`'s concrete (formula, sign), then
+        -- finish identically in every one of the ten resulting non-mint shapes.
+        rcases hff : sf.formula with p | c | ⟨x, y⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ <;>
+          first
+          | exact absurd hff (hnb _)
+          | exact absurd hff (hnd _)
+          | (rcases hsg : sf.sign with _ | _ <;>
+             (rw [hff, hsg] at hbody
+              dsimp only at hbody
+              rcases hresult : result with fs | brs | fs | -
+              · rw [hresult] at hbody hshape
+                subst hshape
+                simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+                obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+                refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+                · rw [← hnewBs]; exact List.mem_singleton_self _
+                · rw [← hnewExps]; exact List.mem_singleton_self _
+                · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+                  exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) (sf :: e) (e ++ [sf]) acc keys
+                    Er hsube hinv'
+              · rw [hresult] at hbody hshape
+                simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+                obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+                refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+                · rw [← hnewBs]; exact List.mem_map.mpr ⟨nf, hshape, rfl⟩
+                · rw [← hnewExps]; exact List.mem_map.mpr ⟨nf, hshape, rfl⟩
+                · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+                  exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) (sf :: e) (e ++ [sf]) acc keys
+                    Er hsube hinv'
+              · rw [hresult] at hbody hshape
+                subst hshape
+                simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+                obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+                have houtdeg0 : outDeg acc sf.label = 0 := by
+                  by_contra hne
+                  obtain ⟨-, -, -, hFroz⟩ := hinv
+                  rcases hFroz sf hsfmemb hmshape hne with h1 | h2
+                  · exact hsfnote h1
+                  · rw [h2] at happ
+                    simp [RuleResult.isApplicable] at happ
+                refine ⟨nf ++ b, ?_, e, ?_, Er, List.Subset.refl Er, ?_⟩
+                · rw [← hnewBs]; exact List.mem_singleton_self _
+                · rw [← hnewExps]; exact List.mem_singleton_self _
+                · rw [← hnewAcc, ← hnewKeys, hnewAcc0eq]
+                  exact S4RedirectSoundInv_drop_e_of_outDeg_zero φ₀ (nf ++ b) e acc keys Er sf
+                    houtdeg0 hinv'
+              · rw [hresult] at hshape
+                exact hshape.elim))
+  · -- Settled fallback: `modalNonMintCandidates = []`, so the selected `sf` is mint-shaped.
+    have hSat := modalS4Saturated_of_ordered_settled φ₀ b e acc keys hmintEmpty hHinv
+    have hfallback0 := hfallback
+    unfold modalStepBranchS4Keyed at hfallback0
+    obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hfallback0
+    split_ifs at hsf with hexp
+    rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+    rw [hpair] at hsf
+    dsimp only at hsf
+    by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+    · rcases hmint with ⟨hseq, ψ, hfeq⟩ | ⟨hseq, ψ, hfeq⟩
+      · -- Mint box-negative shape: Phases 7.2 (blocked) / 7.6 (unblocked).
+        have hsfeq : sf = (⟨.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) := by
+          have h : sf = (⟨sf.sign, sf.formula, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := rfl
+          rw [h, hseq, hfeq]
+        have hsfmem' : (⟨.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        rw [hfeq, hseq] at hsf
+        dsimp only at hsf
+        rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+        · -- Unblocked mint (Phase 7.6).
+          rw [hblock] at hsf
+          dsimp only at hsf
+          obtain ⟨nf, hAOeq, hinv'⟩ := S4RedirectSoundInv_boxNeg_mint φ₀ keys b e acc Er ψ
+            sf.label hinv hSat hmintEmpty hFresh hblock hsfmem'
+          have heq2 : (result, newAcc0) =
+              (RuleResult.linear nf, acc.addEdge sf.label (modalNextWorld b)) :=
+            hpair.symm.trans (hsfeq ▸ hAOeq)
+          simp only [Prod.mk.injEq] at heq2
+          obtain ⟨hreq, hnaeq⟩ := heq2
+          rw [hreq] at hsf
+          dsimp only at hsf
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hsf
+          refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+          · rw [← hnewBs]; exact List.mem_singleton_self _
+          · rw [← hnewExps]; exact List.mem_singleton_self _
+          · rw [← hnewAcc, ← hnewKeys, hnaeq]
+            refine S4RedirectSoundInv_keys_transport φ₀ (nf ++ b) (e ++ [sf])
+              (acc.addEdge sf.label (modalNextWorld b)) keys
+              (keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .neg ψ sf.label)]) Er ?_
+            exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) e (e ++ [sf])
+              (acc.addEdge sf.label (modalNextWorld b)) keys Er
+              (fun x hx => List.mem_append_left _ hx) hinv'
+        · -- Blocked redirect (Phase 7.2).
+          rw [hblock] at hsf
+          dsimp only at hsf
+          have hAOeq := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock
+            hblock
+          have heq2 : (result, newAcc0) = (RuleResult.linear [], acc.addEdge sf.label wBlock) :=
+            hpair.symm.trans (hsfeq ▸ hAOeq)
+          simp only [Prod.mk.injEq] at heq2
+          obtain ⟨hreq, hnaeq⟩ := heq2
+          rw [hreq] at hsf
+          dsimp only at hsf
+          simp only [List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hsf
+          have hinv' := S4RedirectSoundInv_boxNeg_blocked φ₀ b e acc keys Er sf.label wBlock ψ
+            hinv hUniv hkL hSat hmintEmpty hblock
+          refine ⟨b, ?_, e ++ [sf], ?_, (sf.label, wBlock) :: Er, ?_, ?_⟩
+          · rw [← hnewBs]; exact List.mem_singleton_self _
+          · rw [← hnewExps]; exact List.mem_singleton_self _
+          · intro p hp; exact List.mem_cons_of_mem _ hp
+          · rw [← hnewAcc, ← hnewKeys, hnaeq]
+            exact S4RedirectSoundInv_weaken_e φ₀ b e (e ++ [sf]) (acc.addEdge sf.label wBlock)
+              keys ((sf.label, wBlock) :: Er) (fun x hx => List.mem_append_left _ hx) hinv'
+      · -- Mint diamond-positive shape: Phases 7.3 (blocked) / 7.6 (unblocked).
+        have hsfeq : sf = (⟨.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) := by
+          have h : sf = (⟨sf.sign, sf.formula, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) := rfl
+          rw [h, hseq, hfeq]
+        have hsfmem' : (⟨.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        rw [hfeq, hseq] at hsf
+        dsimp only at hsf
+        rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+        · -- Unblocked mint (Phase 7.6).
+          rw [hblock] at hsf
+          dsimp only at hsf
+          obtain ⟨nf, hAOeq, hinv'⟩ := S4RedirectSoundInv_diaPos_mint φ₀ keys b e acc Er ψ
+            sf.label hinv hSat hmintEmpty hFresh hblock hsfmem'
+          have heq2 : (result, newAcc0) =
+              (RuleResult.linear nf, acc.addEdge sf.label (modalNextWorld b)) :=
+            hpair.symm.trans (hsfeq ▸ hAOeq)
+          simp only [Prod.mk.injEq] at heq2
+          obtain ⟨hreq, hnaeq⟩ := heq2
+          rw [hreq] at hsf
+          dsimp only at hsf
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hsf
+          refine ⟨nf ++ b, ?_, e ++ [sf], ?_, Er, List.Subset.refl Er, ?_⟩
+          · rw [← hnewBs]; exact List.mem_singleton_self _
+          · rw [← hnewExps]; exact List.mem_singleton_self _
+          · rw [← hnewAcc, ← hnewKeys, hnaeq]
+            refine S4RedirectSoundInv_keys_transport φ₀ (nf ++ b) (e ++ [sf])
+              (acc.addEdge sf.label (modalNextWorld b)) keys
+              (keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .pos ψ sf.label)]) Er ?_
+            exact S4RedirectSoundInv_weaken_e φ₀ (nf ++ b) e (e ++ [sf])
+              (acc.addEdge sf.label (modalNextWorld b)) keys Er
+              (fun x hx => List.mem_append_left _ hx) hinv'
+        · -- Blocked redirect (Phase 7.3).
+          rw [hblock] at hsf
+          dsimp only at hsf
+          have hAOeq := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock
+            hblock
+          have heq2 : (result, newAcc0) = (RuleResult.linear [], acc.addEdge sf.label wBlock) :=
+            hpair.symm.trans (hsfeq ▸ hAOeq)
+          simp only [Prod.mk.injEq] at heq2
+          obtain ⟨hreq, hnaeq⟩ := heq2
+          rw [hreq] at hsf
+          dsimp only at hsf
+          simp only [List.nil_append, Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hsf
+          have hinv' := S4RedirectSoundInv_diaPos_blocked φ₀ b e acc keys Er sf.label wBlock ψ
+            hinv hUniv hkL hSat hmintEmpty hblock
+          refine ⟨b, ?_, e ++ [sf], ?_, (sf.label, wBlock) :: Er, ?_, ?_⟩
+          · rw [← hnewBs]; exact List.mem_singleton_self _
+          · rw [← hnewExps]; exact List.mem_singleton_self _
+          · intro p hp; exact List.mem_cons_of_mem _ hp
+          · rw [← hnewAcc, ← hnewKeys, hnaeq]
+            exact S4RedirectSoundInv_weaken_e φ₀ b e (e ++ [sf]) (acc.addEdge sf.label wBlock)
+              keys ((sf.label, wBlock) :: Er) (fun x hx => List.mem_append_left _ hx) hinv'
+    · -- Contradiction: settled fallback selected a non-mint `sf`, contradicting
+      -- `hmintEmpty` (a non-mint applicable, unexpanded formula would be a candidate).
+      exfalso
+      have hmshape : modalMintShape sf = false := by
+        unfold modalMintShape
+        rcases hsg : sf.sign with _ | _ <;>
+          rcases hff : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+          simp_all
+      have happ' : (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable = true := by
+        rw [hpair]
+        rcases hresult : result with fs | brs | fs | -
+        · simp [RuleResult.isApplicable]
+        · simp [RuleResult.isApplicable]
+        · simp [RuleResult.isApplicable]
+        · rw [hresult] at hsf; simp at hsf
+      have hmem : sf ∈ modalNonMintCandidates φ₀ keys b e acc :=
+        List.mem_filter.mpr ⟨hsfmem, by simp [hmshape, hexp, happ']⟩
+      rw [hmintEmpty] at hmem
+      simp at hmem
+
 /-! ## Phase 8: Terminal Payoff — Closed-Branch Contradiction Under the Weakened Predicate
 
 A classically closed branch contradicts `S4RedirectSoundInv`, so the weakening of conjunct (b)

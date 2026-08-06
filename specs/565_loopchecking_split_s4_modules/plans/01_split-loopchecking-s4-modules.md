@@ -478,12 +478,12 @@ green on its own — `LoopChecking.lean` still holds the Phase-6 half at this po
 
 ---
 
-### Phase 6: Extend `S4/Driver.lean`, Part 2 — Known-Worlds and Universe-Membership Composites [NOT STARTED]
+### Phase 6: Extend `S4/Driver.lean`, Part 2 — Known-Worlds and Universe-Membership Composites [COMPLETED]
 
 **Goal**: Move the remaining `Driver`-assigned declarations, completing `S4/Driver.lean`.
 
 **Tasks**:
-- [ ] Move the remaining `Driver`-assigned declarations: the
+- [x] Move the remaining `Driver`-assigned declarations: the
       `modalStepBranchS4Keyed*_branch_superset` pair, the `*_result_keys_eq` / `_result_acc_eq`
       pair, the `*_known_S4` group, the `modalApplyOne_{boxPos,diamondNeg}_{fst,snd}_S4` group,
       the `*_universe_S4` group, the `*_keys_subset` pair, `modalApplyOneS4Keyed_nonMint_snd_eq_acc`,
@@ -491,20 +491,30 @@ green on its own — `LoopChecking.lean` still holds the Phase-6 half at this po
       (`_proj`, `_eq`, `modalStepBranchGenSt_eq_S4Keyed`, `modalExpandBranchesGenSt_eq_S4Keyed`),
       `modalExpandBranchesS4KeyedOrdered`, and the trailing `_fst_eq_of_not_box` /
       `_snd_eq` / `_hasEdge_mono` / `_keys_indep` / `_ne_notApplicable` groups. Anchor on the
-      regenerated assignment.
-- [ ] Remove `private` from the 11 seam-crossing `Driver` declarations:
+      regenerated assignment. Exactly 39 declarations moved (49 + 39 = 88, reconciles against
+      Driver's total), 1619 lines. `Driver.lean` totals 2896 lines (hypothesis ~2820; close).
+- [x] Remove `private` from the 11 seam-crossing `Driver` declarations:
       `modalStepBranchS4Keyed_result_keys_eq`, `modalStepBranchS4Keyed_result_acc_eq`,
       `modalApplyOneS4Keyed_nonMint_known_S4`, `modalApplyOneS4Keyed_nonMint_universe_S4`,
       `modalApplyOneS4Keyed_nonMint_snd_eq_acc`, `modalStepBranchS4Keyed_keys_subset`,
       `modalStepBranchS4KeyedOrdered_keys_subset`, `modalHintikkaClauseGen_S4Keyed_keys_indep`,
       `modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding`,
       `modalApplyOneS4Keyed_boxNeg_ne_notApplicable`,
-      `modalApplyOneS4Keyed_diaPos_ne_notApplicable`. Verify each has a docstring.
-- [ ] Run `lean_local_search` on `boxProps_outputs_subset_S4` and any other generic-sounding
-      newly-public name.
-- [ ] Extend the module docstring's `## Main Definitions` / `## Main Results` sections to cover
-      the added material.
-- [ ] Re-run the shake-prune loop (the import set may now need additions relative to Phase 5).
+      `modalApplyOneS4Keyed_diaPos_ne_notApplicable`. Verify each has a docstring. All 11
+      confirmed docstringed.
+- [x] Run `lean_local_search` on `boxProps_outputs_subset_S4` and any other generic-sounding
+      newly-public name. Zero collisions found for `boxProps_outputs_subset_S4`,
+      `modalHintikkaClauseGen_S4Keyed_keys_indep`, `modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding`,
+      `modalApplyOneS4Keyed_nonMint_known_S4` (each unique in the tree).
+- [x] Extend the module docstring's `## Main Definitions` / `## Main Results` sections to cover
+      the added material. Done.
+- [x] Re-run the shake-prune loop (the import set may now need additions relative to Phase 5).
+      No new findings; shake-flagged set remained exactly 12/12.
+
+Zero downstream `.lean` file content changed. All gates green: build 3317 jobs (unchanged --
+extending an existing module registers no new job), sorry census 1, axiom census 43,
+lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test, boneyard
+quarantine all pass.
 
 **Timing**: 2 hours
 

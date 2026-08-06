@@ -181,8 +181,11 @@ wc -l CslibTests/S4LoopGuardRegression.lean                                     
 * **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns
   11, because three further names occur only in call positions or prose. See the
   "Redirect Forward-Cone Free Transfer" section for what was removed and when.
-* There is no `Boneyard/` directory (`find . -type d -name 'Boneyard' -not -path './.lake/*'`
-  returns nothing).
+* **One root-level `Boneyard/` directory exists** (`find . -type d -name 'Boneyard' -not -path
+  './.lake/*'` returns exactly `./Boneyard`), holding declarations archived from this file as
+  zero-consumer under the convention documented in `Boneyard/README.md`. It is excluded from
+  `lake build`, every census, and every linter by import-reachability -- see that README's
+  "Why This Is Free" section for the mechanism.
 
 ### Figures deliberately NOT re-measured
 

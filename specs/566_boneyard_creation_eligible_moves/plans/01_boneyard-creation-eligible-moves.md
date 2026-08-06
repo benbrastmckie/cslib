@@ -351,13 +351,13 @@ falsifies the hypothesis and must be fixed before the phase closes.
 
 ---
 
-### Phase 4: Reconcile falsified and incomplete prose [NOT STARTED]
+### Phase 4: Reconcile falsified and incomplete prose [COMPLETED]
 
 **Goal**: Every surviving statement about `Boneyard/` in the repository is true.
 
 **Tasks**:
 
-- [ ] Correct the now-falsified assertion in `LoopChecking.lean`'s measured-figures block. It
+- [x] Correct the now-falsified assertion in `LoopChecking.lean`'s measured-figures block. It
       currently states: *"There is no `Boneyard/` directory (`find . -type d -name 'Boneyard'
       -not -path './.lake/*'` returns nothing)."* Creating `Boneyard/` falsifies this in the same
       change set. Replace it with the true statement — one root-level `Boneyard/` exists, holding
@@ -365,12 +365,12 @@ falsifies the hypothesis and must be fixed before the phase closes.
       reproduction command so the claim stays checkable. This block is the file's authoritative
       census of measured figures; a stale claim here is the exact defect class this programme has
       already been burned by twice.
-- [ ] Add `Boneyard/` to `ORGANISATION.md`'s `## Top-Level Structure` section, which currently
+- [x] Add `Boneyard/` to `ORGANISATION.md`'s `## Top-Level Structure` section, which currently
       lists only `Cslib/` and its subdirectories. Describe it as: quarantined archive, never
       imported by `Cslib/`, excluded from `lake build`, `mk_all`, `lint-style`, `shake`, and all
       sorry/axiom censuses; retained for provenance rather than use. Point at
       `Boneyard/README.md` for the convention.
-- [ ] Re-read the redirected references introduced in Phases 2 and 3 and confirm each names a path
+- [x] Re-read the redirected references introduced in Phases 2 and 3 and confirm each names a path
       that actually exists.
 
 **Timing**: 0.75 hours

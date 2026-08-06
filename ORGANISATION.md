@@ -18,6 +18,12 @@ For more details about the high-level principles that govern these directories, 
   - `MachineLearning/` -- Machine learning formalizations.
   - `Probability/` -- Probability theory formalizations.
   - `Init.lean` -- Root initialization file.
+- `Boneyard/` -- Quarantined archive of declarations excised from `Cslib/` as zero-consumer.
+  Never imported by `Cslib/` and excluded from `lake build`, `mk_all`, `lint-style`, `shake`, and
+  every sorry/axiom census by import-reachability from `Cslib.lean` (root-level placement is
+  load-bearing, not cosmetic -- see `Boneyard/README.md`). Retained for provenance rather than
+  use. See `Boneyard/README.md` for the archival criterion, the `#exit`/`ARCHIVED` file
+  convention, and the standing invariants that keep it outside the build.
 
 ## Foundations
 

@@ -402,33 +402,33 @@ additional false or incomplete claim found is an in-scope addition to this phase
 
 ---
 
-### Phase 5: Add the defensive quarantine self-test [NOT STARTED]
+### Phase 5: Add the defensive quarantine self-test [COMPLETED]
 
 **Goal**: The exclusion stops being implicit and unasserted. A regression that sweeps archived
 lines into live counts is caught mechanically.
 
 **Tasks**:
 
-- [ ] Add a check (either a new `scripts/check-boneyard-quarantine.sh` or a step inside
+- [x] Add a check (either a new `scripts/check-boneyard-quarantine.sh` or a step inside
       `scripts/pre-pr-check.sh`) asserting:
-  - [ ] (a) `Boneyard/` exists at the repository root;
-  - [ ] (b) no `Boneyard` reference appears in `Cslib.lean` (`grep -c 'Boneyard' Cslib.lean` is 0),
+  - [x] (a) `Boneyard/` exists at the repository root;
+  - [x] (b) no `Boneyard` reference appears in `Cslib.lean` (`grep -c 'Boneyard' Cslib.lean` is 0),
         so nothing under `Boneyard/` is reachable from the aggregator;
-  - [ ] (c) no `Boneyard` path appears in `lakefile.toml`;
-  - [ ] (d) no `.lean` file under `Boneyard/` carries a live `TODO:`/`FIXME:` marker — this guards
+  - [x] (c) no `Boneyard` path appears in `lakefile.toml`;
+  - [x] (d) no `.lean` file under `Boneyard/` carries a live `TODO:`/`FIXME:` marker — this guards
         the `todo-issue.yml` exposure at the cheap end without editing a synced workflow file;
-  - [ ] (e) **the `B0` mirror**: the exclusion pattern matches the *expected number* of Boneyard
+  - [x] (e) **the `B0` mirror**: the exclusion pattern matches the *expected number* of Boneyard
         directories (currently 1), so adding a second Boneyard later cannot silently escape a
         filter. This is the single most valuable element to port from upstream, which documents
         having suffered exactly this failure.
-- [ ] Wire it into `scripts/pre-pr-check.sh` — a **local, non-synced** file — rather than into
+- [x] Wire it into `scripts/pre-pr-check.sh` — a **local, non-synced** file — rather than into
       `.github/workflows/lean_action_ci.yml`. This matches the established divergence-cost
       convention the repo already follows for `check-lint-suppressions.sh` and
       `check-shake-residue.sh`, and avoids adding a recurring upstream sync-conflict hunk.
-- [ ] If a new script is added under `scripts/`, add a corresponding entry to `scripts/README.md`
+- [x] If a new script is added under `scripts/`, add a corresponding entry to `scripts/README.md`
       (`linter.allScriptsDocumented` is currently disabled, but documenting is the low-cost
       choice).
-- [ ] Run the check and confirm it passes on the current tree; then confirm it *fails* when
+- [x] Run the check and confirm it passes on the current tree; then confirm it *fails* when
       deliberately fed a violating condition (e.g. a temporary expected-count mismatch), so the
       assertion is known to be live rather than vacuously green.
 

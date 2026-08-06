@@ -116,3 +116,25 @@ to learn about it as well!
   bash scripts/check-sorry-suppressions.sh --scope PATH...        # verify, restricted to PATH...
   bash scripts/check-sorry-suppressions.sh --changed [--base REF] # verify, restricted to changed .lean files (opt-in; default base origin/main)
   ```
+
+**`Boneyard/` quarantine self-test**
+- `check-boneyard-quarantine.sh` — a B0-style self-test (named after upstream `BimodalLogic`'s
+  own self-test of the same purpose) asserting that the root-level `Boneyard/` archive directory
+  stays outside the build. The exclusion is entirely implicit (every build/lint/census mechanism
+  is scoped by Lake `lean_lib`, import reachability from `Cslib.lean`, or a hardcoded `Cslib`
+  scan root — see `Boneyard/README.md`'s "Why This Is Free" section), so nothing else in this
+  repo would notice if it silently broke. Five checks, none derived at runtime: (a) `Boneyard/`
+  exists at the repository root; (b) `Cslib.lean` carries zero `Boneyard` references; (c)
+  `lakefile.toml` carries zero `Boneyard` references; (d) no `.lean` file under `Boneyard/`
+  carries a live `TODO:`/`FIXME:`-family marker (guards the repo-wide, diff-driven
+  `.github/workflows/todo-issue.yml` scanner without editing that synced file); (e) the exclusion
+  pattern matches the expected number of Boneyard directories, hard-coded in the script (currently
+  1) rather than computed, so a second Boneyard that escapes an ad hoc filter cannot pass
+  silently. Wired as step 10 of `pre-pr-check.sh`; not added to
+  `.github/workflows/lean_action_ci.yml` for the same synced-file sync-conflict-cost reason as
+  `check-shake-residue.sh` and `check-lint-suppressions.sh`.
+
+  **Usage:**
+  ```bash
+  bash scripts/check-boneyard-quarantine.sh   # run all five checks (exit 1 on any failure)
+  ```

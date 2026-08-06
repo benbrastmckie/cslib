@@ -116,6 +116,12 @@ if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-axiom-census.sh"; then
   failed=1
 fi
 
+echo "10. Boneyard quarantine self-test (B0-style, asserts the archive stays outside the build)..."
+if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-boneyard-quarantine.sh"; then
+  echo "  FAIL: Boneyard/ quarantine invariant violated"
+  failed=1
+fi
+
 echo "=== Pre-PR Verification Complete ==="
 if [ "$failed" -ne 0 ]; then
   echo "One or more checks FAILED."

@@ -1,7 +1,7 @@
 # Implementation Plan: Reformulated S4 Redirect-Sound Invariant for the Keyed Ordered Driver (v7)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 39.5 hours total — 18 hours already landed (Phases 1 through 7.2), 21.5 hours
   remaining (Phases 7.3 through 10)
 - **Dependencies**: 535 (keyed completeness inputs, landed), 557/561-563 (refactor programme,
@@ -1678,7 +1678,7 @@ unbuilt Lean was left in any tracked file.
 
 ---
 
-### Phase 10: Regression corpus, full CI gate, and close-out [IN PROGRESS]
+### Phase 10: Regression corpus, full CI gate, and close-out [COMPLETED]
 
 - **Goal:** Extend the regression corpus with a permanent witness row, run the full CSLib CI
   pipeline, and close the task out.
@@ -1695,19 +1695,41 @@ unbuilt Lean was left in any tracked file.
 - **Owns:** `CslibTests/S4LoopGuardRegression.lean`.
 
 - **Tasks:**
-  - [ ] Add one permanent witness row for the step-preservation result. Keep every existing row
+  - [x] Add one permanent witness row for the step-preservation result. Keep every existing row
         byte-identical.
-  - [ ] Run the full CSLib CI order (`.claude/rules/cslib.md`): `lake exe cache get`, `lake build`
+        *(Landed as the `## Soundness capstone, ordered driver` section,
+        `CslibTests/S4LoopGuardRegression.lean`: an `example (h : modalTableauS4KeyedOrdered
+        tAxiom = .closed) : s4Valid tAxiom := modalTableauS4KeyedOrdered_sound tAxiom h`. `h` is
+        an unproved parameter, not independently established, since
+        `decide`/`native_decide`/`rfl` all stall on the fuel driver's `WellFounded.fix`
+        (documented blocker, `CslibTests/TableauConformance.lean`) -- a compile-time API/shape
+        regression, not a computational one, confirmed non-vacuous by the adjacent `#eval`
+        control. `git diff` confirmed additive-only: every pre-existing `#guard_msgs` row stays
+        byte-identical.)*
+  - [x] Run the full CSLib CI order (`.claude/rules/cslib.md`): `lake exe cache get`, `lake build`
         (whole library), `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`,
         `lake test`, `lake exe mk_all --module` (expected no-op — no new files), and
         `lake shake --add-public --keep-implied --keep-prefix`. `lake test`, `lake shake`, and
         `mk_all` were deferred across every prior Phase 7 dispatch and have not been run since; run
         them here and record the result rather than assuming.
-  - [ ] Final sorry census: exactly 1 (`FrameSoundness.lean:1251`).
-  - [ ] Write `summaries/08_reformulated-s4-redirect-sound-inv-summary.md`.
+        *(All eight steps run and green: `cache get` (warm, no downloads), `lake build` (whole
+        library, 3313 jobs, 0 errors), `checkInitImports` (clean), `lake lint` (145 warnings, ALL
+        pre-existing and in unrelated files -- `Bimodal`, `LTL`, `FmpMeasure`, pre-existing
+        `FrameSoundness` unusedArguments rows, `Propositional`, `Temporal`; zero in
+        `FrameCompleteness.lean`/`LoopChecking.lean`/`S4LoopGuardRegression.lean`), `lint-style`
+        (clean, whole project), `lake test` (9378/9378 targets, 0 errors), `mk_all --module`
+        ("No update necessary"), `lake shake` (9 pre-existing import-minimization suggestions,
+        none touching this task's files). A SECOND `lake lint` attempt after Phase 9.1 landed
+        (before the capstone) did not complete, apparently starved by unrelated concurrent
+        `lean`/`lake` processes from another project on the same host; a THIRD attempt after
+        system load settled completed cleanly and is the result recorded here.)*
+  - [x] Final sorry census: exactly 1 (`FrameSoundness.lean:1251`).
+        *(Confirmed via the bare-tactic grep after every commit through this phase: exactly one
+        match, `FrameSoundness.lean:1251`, untouched throughout.)*
+  - [x] Write `summaries/08_reformulated-s4-redirect-sound-inv-summary.md`.
 
 - **Done when:** the regression file is green with one new row and no changed row; the full CI order
-  has been run and its results recorded; census exactly 1; the summary artifact exists.
+  has been run and its results recorded; census exactly 1; the summary artifact exists. **All met.**
 
 ---
 

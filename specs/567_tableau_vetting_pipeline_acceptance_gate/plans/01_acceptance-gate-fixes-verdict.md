@@ -299,21 +299,21 @@ is gate-critical, not cosmetic.
 
 ---
 
-### Phase 5: Post-fix full CI gate re-run [NOT STARTED]
+### Phase 5: Post-fix full CI gate re-run [COMPLETED]
 
 **Goal**: Establish that every blocking criterion is still green after the documentation edits,
 producing the evidence table the verdict document instantiates.
 
 **Tasks**:
-- [ ] Run the seven-step CI order from the repository root and capture each exit code immediately (never through a compound command ending in `echo` — the research report records mis-reading a result for exactly that reason): `lake build`, `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`, `lake exe mk_all --module`, and `bash scripts/check-shake-residue.sh` (the ratchet wrapper, not bare `lake shake`).
-- [ ] Confirm `lake build` job count is unchanged and `lake exe mk_all --module` reports no update necessary with `Cslib.lean` byte-identical after the run.
-- [ ] Run the ratchet scripts: `bash scripts/check-sorry-suppressions.sh`, `bash scripts/check-lint-suppressions.sh`, `bash scripts/check-axiom-census.sh`, `bash scripts/check-boneyard-quarantine.sh`.
-- [ ] Re-verify behaviour preservation at the axiom level: a standalone snippet importing `Cslib.Logics.Modal.Tableau.FrameCompleteness` and `...CompletenessLoop`, running `#print axioms` on `Cslib.Logic.Modal.Tableau.modalTableauS4Keyed_complete` and on the six `instDecidable{K,T,B,S5,Five,Kb5}Valid` instances; all seven must report only `[propext, Classical.choice, Quot.sound]`.
-- [ ] Re-run the two-grep sorry census filtered to `Modal/Tableau/` and confirm exactly one hit, in `FrameSoundness.lean`'s `branchSatisfiableIn_s4FC_ancestor_redirect`.
-- [ ] Re-run `lake env lean .../s4driver.lean` and confirm it still reproduces its four-line recorded block exactly.
-- [ ] Re-measure every figure Phase 3 wrote and confirm each still agrees; any disagreement fails this phase and sends the figure back to Phase 3.
-- [ ] Confirm the two known failures are unchanged in character: `lake lint` still fails with its pre-existing `unusedArguments` findings and **zero** in `S4/` or `LoopChecking.lean` (verified by grepping the lint log for those paths); `lake build --wfail --iofail` still fails on the same six modules with no new warning site.
-- [ ] Append the full evidence table (criterion, command, exit code, observed value) to `specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md`.
+- [x] Run the seven-step CI order from the repository root and capture each exit code immediately (never through a compound command ending in `echo` — the research report records mis-reading a result for exactly that reason): `lake build`, `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`, `lake exe mk_all --module`, and `bash scripts/check-shake-residue.sh` (the ratchet wrapper, not bare `lake shake`).
+- [x] Confirm `lake build` job count is unchanged and `lake exe mk_all --module` reports no update necessary with `Cslib.lean` byte-identical after the run.
+- [x] Run the ratchet scripts: `bash scripts/check-sorry-suppressions.sh`, `bash scripts/check-lint-suppressions.sh`, `bash scripts/check-axiom-census.sh`, `bash scripts/check-boneyard-quarantine.sh`.
+- [x] Re-verify behaviour preservation at the axiom level: a standalone snippet importing `Cslib.Logics.Modal.Tableau.FrameCompleteness` and `...CompletenessLoop`, running `#print axioms` on `Cslib.Logic.Modal.Tableau.modalTableauS4Keyed_complete` and on the six `instDecidable{K,T,B,S5,Five,Kb5}Valid` instances; all seven must report only `[propext, Classical.choice, Quot.sound]`.
+- [x] Re-run the two-grep sorry census filtered to `Modal/Tableau/` and confirm exactly one hit, in `FrameSoundness.lean`'s `branchSatisfiableIn_s4FC_ancestor_redirect`.
+- [x] Re-run `lake env lean .../s4driver.lean` and confirm it still reproduces its four-line recorded block exactly.
+- [x] Re-measure every figure Phase 3 wrote and confirm each still agrees; any disagreement fails this phase and sends the figure back to Phase 3. *(all 12 figures agree exactly, including the two Phase-3-discovered axiom word-count figures)*
+- [x] Confirm the two known failures are unchanged in character: `lake lint` still fails with its pre-existing `unusedArguments` findings and **zero** in `S4/` or `LoopChecking.lean` (verified by grepping the lint log for those paths); `lake build --wfail --iofail` still fails on the same six modules with no new warning site.
+- [x] Append the full evidence table (criterion, command, exit code, observed value) to `specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md`.
 
 **Timing**: 1.25 hours
 

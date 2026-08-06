@@ -208,6 +208,64 @@ too and record the addition"). Neither figure is a correctness claim (both scope
 subsystem declares 0 axioms and the repo declares 26 — unchanged), so this discovery does not
 affect the acceptance-gate verdict; it is documentation-accuracy only, same category as D1-D6.
 
-## Phase 5 evidence table (appended after CI re-run)
+## Phase 5 evidence table (post-fix full CI gate re-run)
 
-_(populated in Phase 5)_
+**Re-run at tree state**: `2311aeef` (post Phases 1-4, all committed), 2026-08-06.
+
+### Seven-step CI order (exit codes captured immediately, never through a compound `echo`)
+
+| # | Command | Exit | Observed |
+|---|---|---|---|
+| 1 | `lake build` | **0** | 3323 jobs (matches baseline) |
+| 2 | `lake exe checkInitImports` | **0** | no output |
+| 3 | `lake lint` | **1** (expected, non-blocking) | 145 errors, all `unusedArguments`; 0 in `S4/` or `LoopChecking.lean`; 10 in `Modal/Tableau/` (pre-existing) — exact match to research report |
+| 4 | `lake exe lint-style` | **0** | no output |
+| 5 | `lake test` | **0** | all `S4LoopGuardRegression.lean` rows reproduce |
+| 6 | `lake exe mk_all --module` | **0** | "No update necessary"; `Cslib.lean` byte-identical (md5 match); `git status --porcelain Cslib.lean` empty |
+| 7 | `bash scripts/check-shake-residue.sh` | **0** | 12/12 exact-set match |
+
+### pre-pr-check ratchets
+
+| Script | Exit | Observed |
+|---|---|---|
+| `check-sorry-suppressions.sh` | **0** | markers 18/18, sorries 28/28 |
+| `check-lint-suppressions.sh` | **0** | blanket suppressions 19/19 |
+| `check-axiom-census.sh` | **0** | 43/43 `sorryAx`-tainted, exact-set match |
+| `check-boneyard-quarantine.sh` | **0** | all five invariants (a)-(e) hold |
+| `lake build --wfail --iofail` | **1** (expected, documented Reasoned Exclusion) | six modules, exact match to research report §4.4: `S4/Driver.lean` 4 warnings (3 sites), `FrameSoundness.lean` 1 (`sorry`), `FrameCompleteness.lean` 28 (`simp_all` repeat), `Propositional/Tableau/Intuitionistic/Scheme.lean` 2, `.../Intuitionistic/Completeness.lean` 1, `.../Minimal/Completeness.lean` 1 — no new warning site |
+
+### Axiom-level behaviour preservation (standalone snippet, `#print axioms`)
+
+All seven declarations report **only** `[propext, Classical.choice, Quot.sound]`:
+`modalTableauS4Keyed_complete`, `instDecidableKValid`, `instDecidableTValid`,
+`instDecidableBValid`, `instDecidableS5Valid`, `instDecidableFiveValid`,
+`instDecidableKb5Valid`.
+
+### Regression probes and sorry census
+
+| Check | Result |
+|---|---|
+| Sorry census, `Modal/Tableau/` filtered | exactly 1 — `FrameSoundness.lean:1251` |
+| `lake env lean .../s4driver.lean` | reproduces its recorded 4-line block exactly |
+
+### Every figure Phase 3 wrote, re-measured
+
+| Figure | Expected (Phase 3) | Live (Phase 5) | Match |
+|---|---|---|---|
+| `LoopChecking.lean` lines | 1626 | 1626 | Y |
+| `FrameSoundness.lean` lines | 5396 | 5396 | Y |
+| `FrameCompleteness.lean` lines | 8264 | 8264 | Y |
+| `S4LoopGuardRegression.lean` lines | 214 | 214 | Y |
+| S4 module count | 10 | 10 | Y |
+| Repo-wide sorry census | 28 | 28 | Y |
+| `hintikkaS4_*` bridge set | 10 | 10 | Y |
+| `ModalTableauResult` subsystem span | 9 | 9 | Y |
+| `ModalTableauResult` rescoped repo-wide span | 10 | 10 | Y |
+| Axiom word-count, subsystem | 11 | 11 | Y |
+| Axiom word-count, repo-wide | 1704 | 1704 | Y |
+| `eleven`/`Eleven` remaining hits | 7 (all RuleApplicationSpec, unrelated) | 7 | Y |
+
+**All eleven blocking criteria (B1-B11) green. Both known non-blocking failures (`lake lint`,
+`lake build --wfail --iofail`) unchanged in character with zero new programme-territory
+findings. Every Phase-3-written figure re-measured and matching. Phase 5 verification
+complete.**

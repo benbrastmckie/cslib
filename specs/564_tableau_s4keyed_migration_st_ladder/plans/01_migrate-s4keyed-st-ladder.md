@@ -249,23 +249,36 @@ hypothesis; a materially different figure means a boundary was walked wrong.
 
 ---
 
-### Phase 3: Update the four field-list docstrings [NOT STARTED]
+### Phase 3: Update the four field-list docstrings [COMPLETED]
 
 **Goal**: Remove `outDegEq` from the four prose docstrings that enumerate `S4LoopInv`'s field
 list, so the documentation matches the structure.
 
 **Tasks**:
-- [ ] Update the field-run enumeration in the docstring at `LoopChecking.lean:4644` (pre-Phase-2
-      numbering) — the `accFresh`/`accKnown`/`outDegEq` run.
-- [ ] Update the field-run enumeration at `LoopChecking.lean:7667` (the `S4LoopInv` structure
-      docstring's `bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq` run).
-- [ ] Update the field-run enumeration at `LoopChecking.lean:8148`.
-- [ ] Update the field-list enumeration at `LoopChecking.lean:8196` (the explicit
+- [x] Update the field-run enumeration in the docstring at `LoopChecking.lean:4644` (pre-Phase-2
+      numbering) — the `accFresh`/`accKnown`/`outDegEq` run. Found post-Phase-2 at `:4617`
+      (`modalApplyOneS4Keyed_nonMint_snd_eq_acc` docstring); rewrote "accFresh/accKnown/outDegEq's
+      preservation" -> "accFresh/accKnown's preservation" and "those three invariants" ->
+      "those two invariants".
+- [x] Update the field-run enumeration at `LoopChecking.lean:7667` (the `S4LoopInv` structure
+      docstring's `bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq` run). Found
+      post-Phase-2 at `:7237` (the "Correction 1" docstring above `structure S4LoopInv`); dropped
+      `outDegEq` from the field-run list and corrected "six rule-independent fields" ->
+      "five rule-independent fields".
+- [x] Update the field-run enumeration at `LoopChecking.lean:8148`. Found post-Phase-2 at `:7716`
+      (`modalStepBranchS4_preserves_S4LoopInv` docstring); dropped `outDegEq` from the
+      parenthetical field list and corrected "All ten fields" -> "All nine fields".
+- [x] Update the field-list enumeration at `LoopChecking.lean:8196` (the explicit
       `{bClosure,eNodup,eClosure,accFresh,accKnown,outDegEq,keysTotal,keyLowerBd,keysDistinct,keysInUniverse}`
-      brace list).
-- [ ] Re-locate each by `grep -n "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` after
-      Phase 2 — the line numbers above are pre-deletion and will have shifted.
-- [ ] Confirm `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns nothing.
+      brace list). Found post-Phase-2 at `:7762`
+      (`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` docstring); dropped `outDegEq` from the
+      brace list — the "twelve calls" count directly above (`:7760`) already correctly reads 12
+      (9 remaining fields + 3 proof-internal auxiliaries) once `outDegEq` is removed, so no
+      further count edit was needed there.
+- [x] Re-located each by `grep -n "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` after
+      Phase 2 — confirmed the plan's pre-deletion line numbers had shifted (`:4644`->`:4617`,
+      `:7667`->`:7237`, `:8148`->`:7716`, `:8196`->`:7762`).
+- [x] Confirmed `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns nothing.
 
 **Timing**: 0.4 hours
 
@@ -281,11 +294,12 @@ is a doc defect, not a build break — but the phase does not close until the gr
 **Files to modify**:
 - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - four docstrings, prose only.
 
-**Verification**:
-- `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns no matches.
+**Verification** (all confirmed):
+- `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns no matches. Confirmed.
 - `lake build Cslib.Logics.Modal.Tableau.LoopChecking` still green (docstring edits cannot break
-  it, but confirm no accidental code-line damage).
-- `lake exe lint-style` exits 0 (guards against over-length docstring lines).
+  it, but confirm no accidental code-line damage). Confirmed: exit 0, "Build completed
+  successfully (866 jobs)".
+- `lake exe lint-style` exits 0 (guards against over-length docstring lines). Confirmed: exit 0.
 
 ---
 

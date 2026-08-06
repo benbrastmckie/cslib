@@ -4614,8 +4614,8 @@ lemma modalStepBranchS4KeyedOrdered_preserves_keysDistinct (φ₀ : Proposition 
 `modalApplyOneS4Keyed_nonMint_known_S4`'s exact case-split (same three underlying pieces --
 `modalApplyOneS4Rules_boxPos_diaNeg_known_S4`/`modalApplyOne_nonModal_known_S4`, both of which
 also supply `.snd = acc`), extracting the accessibility-unchanged half instead of the
-known-worlds half. Needed for `accFresh`/`accKnown`/`outDegEq`'s preservation at the 12
-non-minting shapes: `acc` is untouched there, so those three invariants (none of which depend on
+known-worlds half. Needed for `accFresh`/`accKnown`'s preservation at the 12
+non-minting shapes: `acc` is untouched there, so those two invariants (neither of which depends on
 `e`/`b` beyond `acc` itself, or trivially so) carry over for free. -/
 private lemma modalApplyOneS4Keyed_nonMint_snd_eq_acc
     (φ₀ : Proposition Atom) (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
@@ -7233,8 +7233,8 @@ Confirmed interactively:
 not an extension of it. `ModalPotentialInv` holds two rank fields (`rankBound`/`rankEdge`)
 encoding "modal depth strictly decreases along every edge", which the 4-rule (placing
 `T(□ψ)`, unchanged modal depth, at a successor) and loop-back edges (creating `w → w''`
-with `rank w'' + 2 = rank w`) both falsify. `S4LoopInv` reuses the six rule-independent
-fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`, over
+with `rank w'' + 2 = rank w`) both falsify. `S4LoopInv` reuses the five rule-independent
+fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`, over
 `modalUniverseS4` in place of `modalUniverse`), omits the two rank fields entirely, and adds
 the four **stable birth-key** fields (replacing the structurally-unsound
 `worldSetsDistinct`): `keysTotal`/`keyLowerBd`/`keysDistinct`/`keysInUniverse`, stated over
@@ -7711,9 +7711,9 @@ finalized struct design): `keysWorldsKnown` (needed by `accFresh`/`accKnown`) an
 `modalStepBranchS4_worldBound`), so repeated steps through this assembly can re-supply both at
 each call.
 
-**All ten fields are now fully closed, zero sorry** (`keysDistinct`/`keyLowerBd`/
+**All nine fields are now fully closed, zero sorry** (`keysDistinct`/`keyLowerBd`/
 `keysInUniverse`/`keysTotal`: the four "key" fields; `eNodup`/
-`outDegEq`/`accFresh`/`accKnown`; and `eClosure`/`bClosure`,
+`accFresh`/`accKnown`; and `eClosure`/`bClosure`,
 `eClosure` directly and `bClosure` via the pigeonhole world-bound
 (`modalStepBranchS4_worldBound`) as a genuine prerequisite for its minting-case obligation). -/
 theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
@@ -7759,7 +7759,7 @@ ordered driver, later extended with the origin-edge invariant's fourth conjunct)
 step preserves `S4LoopInv`, mirroring `modalStepBranchS4_preserves_S4LoopInv` exactly -- a
 `refine`+`exact` assembly with no independent proof content of its own, just twelve calls to this
 section's ordered per-field sub-lemmas (`modalStepBranchS4KeyedOrdered_preserves_{bClosure,
-eNodup,eClosure,accFresh,accKnown,outDegEq,keysTotal,keyLowerBd,keysDistinct,keysInUniverse}`
+eNodup,eClosure,accFresh,accKnown,keysTotal,keyLowerBd,keysDistinct,keysInUniverse}`
 plus the three proof-internal auxiliaries `modalStepBranchS4KeyedOrdered_preserves_{
 keysWorldsKnown,worldsContiguousS4,keysOriginS4}`), each of which was itself verified against the
 ordered stepper via `modalStepBranchS4KeyedOrdered_selected_mem` in place of the unordered

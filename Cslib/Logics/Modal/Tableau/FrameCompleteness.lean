@@ -8035,6 +8035,38 @@ private lemma Ex4Inv_embedRight (φ₀ : Proposition Atom)
   rw [zip4_append bs sbs es ses accs saccs keyss skeyss hlen1 hlen2 hlen3]
   exact List.mem_append_left _ hq
 
+/-- **Projection**: a `zip4` membership projects to a membership in the "1st/3rd column" 2-way
+zip, at the SAME underlying position -- unlike `List.of_mem_zip`, which only gives independent
+membership of each component in its own list, this preserves the positional correspondence
+`zip4` was built to carry. Needed for the outer induction's base case, which only inspects
+`branches.zip accs` (not `expandedSets`/`keyss` at all). -/
+private lemma mem_zip4_proj13 {A B C D : Type*} :
+    ∀ (as : List A) (bs : List B) (cs : List C) (ds : List D) (q : A × B × C × D),
+      q ∈ zip4 as bs cs ds → (q.1, q.2.2.1) ∈ as.zip cs
+  | a :: as, b :: bs, c :: cs, d :: ds, q, hq => by
+    unfold zip4 at hq
+    rw [List.zip_cons_cons, List.zip_cons_cons, List.zip_cons_cons] at hq
+    rcases List.mem_cons.mp hq with rfl | h
+    · simp [List.zip_cons_cons]
+    · exact List.mem_cons_of_mem _
+        (mem_zip4_proj13 as bs cs ds q (by unfold zip4; exact h))
+  | [], _, _, _, q, hq => absurd hq (by simp [zip4])
+  | _ :: _, [], _, _, q, hq => absurd hq (by simp [zip4])
+  | _ :: _, _ :: _, [], _, q, hq => absurd hq (by simp [zip4])
+  | _ :: _, _ :: _, _ :: _, [], q, hq => absurd hq (by simp [zip4])
+
+/-- **Cons case-split**: membership in a `zip4` of four cons-headed lists is either the head
+quadruple or a membership in the four tails -- mirrors the case split
+`modalExpandBranchesS4KeyedOrdered.processNext` itself performs when it pattern-matches
+`pending, pendingExp, pendingAccs, pendingKeys` simultaneously. -/
+private lemma zip4_cons_mem_cases {A B C D : Type*}
+    (a : A) (as : List A) (b : B) (bs : List B) (c : C) (cs : List C) (d : D) (ds : List D)
+    {q : A × B × C × D} (hq : q ∈ zip4 (a :: as) (b :: bs) (c :: cs) (d :: ds)) :
+    q = (a, b, c, d) ∨ q ∈ zip4 as bs cs ds := by
+  unfold zip4 at hq ⊢
+  rw [List.zip_cons_cons, List.zip_cons_cons, List.zip_cons_cons] at hq
+  exact List.mem_cons.mp hq
+
 end Cslib.Logic.Modal.Tableau
 
 end

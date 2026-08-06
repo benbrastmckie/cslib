@@ -7835,6 +7835,206 @@ theorem S4RedirectSoundInv_initial (φ₀ : Proposition Atom)
   · intro sf hsfmem hshape houtdeg
     exact absurd houtdeg (by simp [outDeg, Accessibility.successorsOf, Accessibility.empty])
 
+/-! ## Phase 9.1: The Outer Fuel Induction
+
+The final prerequisite for Phase 9.2's capstone: wrapping Phase 7.8's step theorem
+(`S4RedirectSoundInv_step`) and Phase 8's terminal payoff (`S4RedirectSoundInv_not_isModalClosed`)
+in an induction over `modalExpandBranchesS4KeyedOrdered`'s fuel-bounded recursion, mirroring
+`modalExpandBranchesGen_closed_unsatIn` (`FrameSoundness.lean:740-909`). The genuine new
+difficulty relative to that generic proof is that `e` (the expanded set) and `keys` (birth keys)
+are not bookkeeping-only here -- `S4RedirectSoundInv`/`S4OrderedFuelInv` both depend on them --
+so they must be threaded pointwise alongside `acc`, not just length-checked. Resolved via a
+4-column EXISTENTIAL witness (`Ex4Inv` below) rather than the zip-triple design an earlier
+dispatch found awkward: `Ex4Inv` tracks "some ONE position across the four parallel worklists
+carries an `S4KOFullInv` witness". This suffices because `S4RedirectSoundInv_step`'s own
+conclusion is already existential (only ONE child branch is guaranteed to inherit the witness,
+not all of them), so no universal per-position bookkeeping is needed; and because a witness's
+exact index never needs to be pinned down (only its existence), transporting it across a step is
+licensed by the structural fact (`_newExps_eq_map` below) that a stepper output's `newExps`
+column, and the replicated `newAcc`/`keys'` columns, are all CONSTANT across `newBs`. -/
+
+/-- **The per-branch invariant payload threaded by the outer fuel induction.** Bundles
+`S4OrderedFuelInv` (driver-level structural invariant) with an existential `S4RedirectSoundInv`
+witness, at one `(b, e, acc, keys)` quadruple. -/
+def S4KOFullInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop :=
+  S4OrderedFuelInv φ₀ b e acc keys ∧ ∃ Er, S4RedirectSoundInv φ₀ b e acc keys Er
+
+/-- **Structural fact**: whenever `modalStepBranchS4KeyedOrdered` steps, the returned `newExps`
+column is CONSTANT across `newBs` -- every one of the four `RuleResult` arms produces `newExps`
+as either a genuine singleton (matching `newBs`'s own singleton) or a `branches.map (fun _ => ...)`
+constant map post-composed with `newBs = branches.map (· ++ b)`, and `List.map_map` collapses the
+composition back to the same constant map over `branches`. This is what licenses transporting an
+existential `b' ∈ newBs` witness to a matching `newExps` entry without ever pinning down an
+index. -/
+lemma modalStepBranchS4KeyedOrdered_newExps_eq_map (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∃ e'0, newExps = newBs.map (fun _ => e'0) := by
+  rcases modalStepBranchS4KeyedOrdered_cases φ₀ b e acc keys newBs newExps newAcc keys' hstep with
+    ⟨sf, hcand, hbody⟩ | ⟨-, hfallback⟩
+  · have hsfnote := modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf hcand
+    have hany : e.any (· == sf) = false := by
+      rw [List.any_eq_false]
+      intro x hx heq
+      rw [beq_iff_eq] at heq
+      subst heq
+      exact hsfnote hx
+    unfold modalStepBranchS4KeyedBody at hbody
+    rw [if_neg (by simp [hany])] at hbody
+    rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+    rw [hpair] at hbody
+    dsimp only at hbody
+    rcases result with nf | brs | nf | -
+    · simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+      obtain ⟨rfl, rfl, -, -⟩ := hbody
+      exact ⟨e ++ [sf], rfl⟩
+    · simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+      obtain ⟨rfl, rfl, -, -⟩ := hbody
+      exact ⟨e ++ [sf], by rw [List.map_map]; rfl⟩
+    · simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+      obtain ⟨rfl, rfl, -, -⟩ := hbody
+      exact ⟨e, rfl⟩
+    · simp at hbody
+  · unfold modalStepBranchS4Keyed at hfallback
+    obtain ⟨sf, -, hsf⟩ := List.exists_of_findSome?_eq_some hfallback
+    by_cases hany : e.any (· == sf) = true
+    · rw [if_pos hany] at hsf
+      simp at hsf
+    · rw [if_neg hany] at hsf
+      rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+      rw [hpair] at hsf
+      dsimp only at hsf
+      rcases result with nf | brs | nf | -
+      · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, rfl, -, -⟩ := hsf
+        exact ⟨e ++ [sf], rfl⟩
+      · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, rfl, -, -⟩ := hsf
+        exact ⟨e ++ [sf], by rw [List.map_map]; rfl⟩
+      · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, rfl, -, -⟩ := hsf
+        exact ⟨e, rfl⟩
+      · simp at hsf
+
+/-- Nested-pair nesting of `List.zip` across four parallel lists: `A × B × C × D` is already
+right-associated as `A × (B × (C × D))`, so no reshuffling is needed after the two nested
+`List.zip` calls. -/
+private def zip4 {A B C D : Type*} (as : List A) (bs : List B) (cs : List C) (ds : List D) :
+    List (A × B × C × D) :=
+  as.zip (bs.zip (cs.zip ds))
+
+/-- **The 4-column existential threading relation.** Holds when SOME position across the four
+parallel worklists carries an `S4KOFullInv` witness. Deliberately existential (not the universal
+`List.Forall₂`-style relation an earlier dispatch attempted): `S4RedirectSoundInv_step`'s own
+conclusion only ever guarantees ONE child inherits the invariant, so a universal relation would
+be both harder to establish and stronger than what the argument actually needs. -/
+private def Ex4Inv (φ₀ : Proposition Atom)
+    (bs es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility)
+    (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))) : Prop :=
+  ∃ q ∈ zip4 bs es accs keyss, S4KOFullInv φ₀ q.1 q.2.1 q.2.2.1 q.2.2.2
+
+/-- If `a ∈ l` and `l'` is the constant map `l.map (fun _ => c)`, then `(a, c)` is a member of
+`l.zip l'` -- the index of `a` in `l` never needs to be pinned down, since `l'`'s value is the
+same at every position. -/
+private lemma mem_zip_of_mem_map_const {α β : Type*} (c : β) :
+    ∀ (l : List α) {a : α}, a ∈ l → (a, c) ∈ l.zip (l.map (fun _ => c))
+  | [], _, hmem => absurd hmem (List.not_mem_nil)
+  | x :: xs, a, hmem => by
+    rw [List.map_cons, List.zip_cons_cons]
+    rcases List.mem_cons.mp hmem with rfl | h
+    · exact List.mem_cons_self ..
+    · exact List.mem_cons_of_mem _ (mem_zip_of_mem_map_const c xs h)
+
+/-- **Construction**: a membership witness in `bs` plus three constant-map descriptions of
+`es`/`accs`/`keyss` (relative to `bs`) plus an `S4KOFullInv` fact at the constant values gives
+`Ex4Inv`. This is how a step's output (whose `newExps`/replicated `newAcc`/`keys'` columns are
+all constant across `newBs`, per `modalStepBranchS4KeyedOrdered_newExps_eq_map` and
+`List.map_const'`) inherits an `Ex4Inv` witness from `S4RedirectSoundInv_step`'s existential
+output without ever pinning down an index. -/
+private lemma Ex4Inv_of_mem_const (φ₀ : Proposition Atom)
+    {bs : List (List (SignedFormula (Proposition Atom) WorldIndex))}
+    {b' : List (SignedFormula (Proposition Atom) WorldIndex)} (hmem : b' ∈ bs)
+    {es : List (List (SignedFormula (Proposition Atom) WorldIndex))}
+    {e0 : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hes : es = bs.map (fun _ => e0))
+    {accs : List Accessibility} {a0 : Accessibility} (haccs : accs = bs.map (fun _ => a0))
+    {keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))}
+    {k0 : List (WorldIndex × Finset (Sign × Proposition Atom))}
+    (hkeyss : keyss = bs.map (fun _ => k0))
+    (hinv : S4KOFullInv φ₀ b' e0 a0 k0) :
+    Ex4Inv φ₀ bs es accs keyss := by
+  subst hes haccs hkeyss
+  refine ⟨(b', e0, a0, k0), ?_, hinv⟩
+  unfold zip4
+  rw [List.zip_map', List.zip_map']
+  exact mem_zip_of_mem_map_const (e0, a0, k0) bs hmem
+
+/-- **Length-preserving append.** `zip4` distributes over pointwise append, given the three
+non-first columns match the first column's length -- three applications of `List.zip_append`,
+innermost first. -/
+private lemma zip4_append {A B C D : Type*}
+    (as as' : List A) (bs bs' : List B) (cs cs' : List C) (ds ds' : List D)
+    (h1 : bs.length = as.length) (h2 : cs.length = as.length) (h3 : ds.length = as.length) :
+    zip4 (as ++ as') (bs ++ bs') (cs ++ cs') (ds ++ ds') =
+      zip4 as bs cs ds ++ zip4 as' bs' cs' ds' := by
+  unfold zip4
+  have hcd : (cs ++ cs').zip (ds ++ ds') = cs.zip ds ++ cs'.zip ds' :=
+    List.zip_append (h2.trans h3.symm)
+  have hbcd : (bs ++ bs').zip ((cs ++ cs').zip (ds ++ ds')) =
+      bs.zip (cs.zip ds) ++ bs'.zip (cs'.zip ds') := by
+    rw [hcd]
+    refine List.zip_append ?_
+    simp only [List.length_zip]
+    omega
+  rw [hbcd]
+  refine List.zip_append ?_
+  simp only [List.length_zip]
+  omega
+
+/-- Prepending a length-matched (against the FIRST/`bs`-shaped column) but otherwise arbitrary
+quadruple of lists preserves `Ex4Inv` membership -- the witness's position shifts into the
+suffix, its existence is untouched. -/
+private lemma Ex4Inv_embedLeft (φ₀ : Proposition Atom)
+    {bs es : List (List (SignedFormula (Proposition Atom) WorldIndex))}
+    {accs : List Accessibility}
+    {keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))}
+    (h : Ex4Inv φ₀ bs es accs keyss)
+    (pbs pes : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (paccs : List Accessibility)
+    (pkeyss : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+    (hlen1 : pes.length = pbs.length) (hlen2 : paccs.length = pbs.length)
+    (hlen3 : pkeyss.length = pbs.length) :
+    Ex4Inv φ₀ (pbs ++ bs) (pes ++ es) (paccs ++ accs) (pkeyss ++ keyss) := by
+  obtain ⟨q, hq, hinv⟩ := h
+  refine ⟨q, ?_, hinv⟩
+  rw [zip4_append pbs bs pes es paccs accs pkeyss keyss hlen1 hlen2 hlen3]
+  exact List.mem_append_right _ hq
+
+/-- Appending a length-matched (against the FIRST/`bs`-shaped column) but otherwise arbitrary
+quadruple of lists preserves `Ex4Inv` membership -- the witness stays in the prefix. -/
+private lemma Ex4Inv_embedRight (φ₀ : Proposition Atom)
+    {bs es : List (List (SignedFormula (Proposition Atom) WorldIndex))}
+    {accs : List Accessibility}
+    {keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))}
+    (h : Ex4Inv φ₀ bs es accs keyss)
+    (hlen1 : es.length = bs.length) (hlen2 : accs.length = bs.length)
+    (hlen3 : keyss.length = bs.length)
+    (sbs ses : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (saccs : List Accessibility)
+    (skeyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))) :
+    Ex4Inv φ₀ (bs ++ sbs) (es ++ ses) (accs ++ saccs) (keyss ++ skeyss) := by
+  obtain ⟨q, hq, hinv⟩ := h
+  refine ⟨q, ?_, hinv⟩
+  rw [zip4_append bs sbs es ses accs saccs keyss skeyss hlen1 hlen2 hlen3]
+  exact List.mem_append_left _ hq
+
 end Cslib.Logic.Modal.Tableau
 
 end

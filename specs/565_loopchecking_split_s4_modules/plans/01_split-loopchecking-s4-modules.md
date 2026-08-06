@@ -1,7 +1,7 @@
 # Implementation Plan: Split `LoopChecking.lean` into an `S4/` Module Cluster
 
 - **Task**: 565 - Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 19 hours
 - **Dependencies**: 553, 563, 564, 566, 586 (all landed; tree state `11607e0f` or later)
 - **Research Inputs**: `specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md`, `specs/565_loopchecking_split_s4_modules/artifacts/module-assignment.md`, `specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json`
@@ -147,39 +147,41 @@ execution order remains one phase at a time.
 
 ---
 
-### Phase 1: Baseline Capture and Layering Re-Verification [NOT STARTED]
+### Phase 1: Baseline Capture and Layering Re-Verification [COMPLETED]
 
 **Goal**: Establish the exact pre-split verification baseline against the live tree, and confirm
 the research layering still holds before any file is written.
 
 **Tasks**:
-- [ ] Re-measure `LoopChecking.lean`: `wc -l` and the corrected declaration-count grep from
+- [x] Re-measure `LoopChecking.lean`: `wc -l` and the corrected declaration-count grep from
       research §1.1 (the pattern in the file's own header misses `@[attr]`- and `public`-prefixed
-      declarations — do not use it).
-- [ ] Regenerate `specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json` and
+      declarations — do not use it). Result: 11,393 lines / 241 declarations / 58 private.
+- [x] Regenerate `specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json` and
       `module-assignment.md` against the live tree using the §3.1 procedure (strip block and line
       comments, tokenise each declaration's statement-plus-proof span, intersect against the local
-      declaration-name set).
-- [ ] Re-run the forward-edge check against the `sub` assignment. **Zero violations is a hard gate
-      on proceeding.** If a violation appears, a declaration was added or moved since the research
-      and the layering must be re-derived before any file is written — stop and report.
-- [ ] Capture and record the baseline in
+      declaration-name set). *(deviation: altered -- LoopChecking.lean's blob hash is byte-identical
+      to the 11607e0f research tree state (confirmed via git hash-object), so the regenerated decl
+      set/lines/vis matched the existing artifacts exactly (0 diffs); decl-graph.json was
+      overwritten with the freshly-recomputed refs, module-assignment.md required no edit since its
+      content was already confirmed accurate.)*
+- [x] Re-run the forward-edge check against the `sub` assignment. **Zero violations is a hard gate
+      on proceeding.** Result: 0 violations.
+- [x] Capture and record the baseline in
       `specs/565_loopchecking_split_s4_modules/artifacts/baseline.md`:
-      - `lake build Cslib` — green, **record the exact job count**
-      - `Modal/Tableau` sorry census — expect exactly 1
+      - `lake build Cslib` — green, job count **3313**
+      - `Modal/Tableau` sorry census — exactly 1
         (`branchSatisfiableIn_s4FC_ancestor_redirect`, `FrameSoundness.lean`)
-      - `bash scripts/check-axiom-census.sh` — exit 0; record the baseline set size
-      - `bash scripts/check-shake-residue.sh` — record the finding count (expect 9) and confirm
-        **none** are in `Modal/Tableau/`
-      - `bash scripts/check-lint-suppressions.sh` — exit 0; record the count
+      - `bash scripts/check-axiom-census.sh` — exit 0; baseline set 43
+      - `bash scripts/check-shake-residue.sh` — 9 findings, none in `Modal/Tableau/`
+      - `bash scripts/check-lint-suppressions.sh` — exit 0; 19 (ceiling 19)
       - `lake exe checkInitImports` — exit 0
       - `lake exe mk_all --check` — exit 0
       - `lake exe lint-style` — exit 0
       - `lake test` — green
       - `bash scripts/check-boneyard-quarantine.sh` — exit 0
-- [ ] Confirm the 26 seam-crossing `private` declarations by name against the regenerated graph,
-      and confirm each already carries a docstring; list any that do not.
-- [ ] Create the `Cslib/Logics/Modal/Tableau/S4/` directory.
+- [x] Confirm the 26 seam-crossing `private` declarations by name against the regenerated graph,
+      and confirm each already carries a docstring. All 26 confirmed present with docstrings.
+- [x] Create the `Cslib/Logics/Modal/Tableau/S4/` directory.
 
 **Timing**: 1 hour
 

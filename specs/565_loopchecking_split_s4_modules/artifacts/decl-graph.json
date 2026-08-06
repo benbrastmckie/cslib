@@ -612,7 +612,7 @@
    "vis": "public",
    "kind": "def",
    "name": "modalMintShape",
-   "end": 1151,
+   "end": 1150,
    "refs": [],
    "fam": "Guard",
    "sub": "Guard"
@@ -622,7 +622,7 @@
    "vis": "public",
    "kind": "lemma",
    "name": "modalMintShape_boxNeg",
-   "end": 1158,
+   "end": 1157,
    "refs": [
     "modalMintShape"
    ],
@@ -2905,7 +2905,7 @@
    "vis": "public",
    "kind": "lemma",
    "name": "modalS4Saturated_of_ordered_settled",
-   "end": 8965,
+   "end": 8964,
    "refs": [
     "S4KeyedHintikkaInv",
     "modalApplyOneS4",
@@ -3524,7 +3524,7 @@
    "vis": "public",
    "kind": "theorem",
    "name": "modalExpandBranchesS4Keyed_openBranch_initial_mem",
-   "end": 11394,
+   "end": 11393,
    "refs": [
     "modalExpandBranchesS4Keyed",
     "modalStepBranchS4Keyed",

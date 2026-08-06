@@ -907,8 +907,9 @@ neither `(neg, χ)` nor `(neg, ◇□χ)` need be on the branch at birth). For e
 instantiated at `w` is on `b`), `k` records BOTH `p` itself and (when still within `Σ`) its own
 box-plus partner `boxPlusPair p`. `successorBirthContent_boxPlusClosed` below shows every birth
 key satisfies this by construction; threaded as a derived extra hypothesis where needed, never
-an `S4LoopInv`/`S4KeyedHintikkaInv` field (the same treatment `keysOriginS4`/`keysRootEmpty`
-already receive). -/
+an `S4LoopInv`/`S4KeyedHintikkaInv` field (the same treatment `keysOriginS4` receives, and
+`keysRootEmpty` received before it was archived at
+`Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean`). -/
 def BoxPlusClosed (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (w : WorldIndex) (k : Finset (Sign × Proposition Atom)) : Prop :=
   ∀ p ∈ signedSubfmls φ₀,
@@ -2435,19 +2436,15 @@ lemma successorBirthContent_boxPlusClosed (φ₀ : Proposition Atom)
       simp only [boxPlusPair, hp1] at hqmem ⊢
       exact ⟨hqmem, Or.inr (Or.inr (Or.inr ⟨trivial, any_beq_of_mem_S4 hbp⟩))⟩
 
-/-! ### `keysRootEmpty` -- the Root World Never Re-Mints
-
-A small standalone bookkeeping fact that `keysOriginS4` itself does not supply: `keysOriginS4`'s
-root disjunct (`w = 0`) says nothing about the recorded key at `0`, but the driver's actual seed
-`keys := [(0, ∅)]` combined with the fact that world `0` is never freshly minted (new entries are
-always `(modalNextWorld b, ...)`, strictly greater than every existing label, hence never `0`)
-means `0`'s recorded key is *always* `∅`. Threaded the same way as `keysOriginS4` itself: an
-extra hypothesis, never an `S4LoopInv` field.
+/-! ### `keysOriginS4` Consumer Audit -- Retraction of an Earlier Hedge
 
 **Consumer audit (measured; supersedes an earlier hedge).** An earlier revision of this comment
-stated that this fact's sole consumer `blockedRedirect_boxctx_mem` was removed "along with
-`keysOriginS4` and its supporting lemmas", and marked `keysRootEmpty` itself "possibly orphaned".
-Both halves are corrected here against a measured consumer audit. Only
+(then filed under a now-archived `### keysRootEmpty` heading -- `keysRootEmpty` and
+`keysRootEmpty_entry` are archived at `Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean`, whose
+README carries the travelled consumer-audit paragraphs for that fact) stated that a since-removed
+lemma's sole consumer `blockedRedirect_boxctx_mem` was removed "along with `keysOriginS4` and its
+supporting lemmas", and marked the archived `keysRootEmpty` fact itself "possibly orphaned". Both
+halves are corrected here against a measured consumer audit. Only
 `blockedRedirect_boxctx_mem`/`blockedRedirect_diaNeg_mem` were in fact removed (they were false as
 stated -- see the "Redirect-Inertness Assembly" section below).
 
@@ -2463,32 +2460,7 @@ grep -rn 'keysOriginS4' --include='*.lean' Cslib/ \
 
 61 textual references, 55 of them on lines that do not begin with a comment marker, all inside
 this file. Any future claim that `keysOriginS4` was deleted is false and should not be
-reintroduced.
-
-`keysRootEmpty` **is** orphaned -- audited, no longer hedged:
-
-```
-grep -rn 'keysRootEmpty' --include='*.lean' Cslib/ CslibTests/ | wc -l
-```
-
-6 hits, all in this file: this section heading, the two declarations below (`keysRootEmpty` and
-`keysRootEmpty_entry`) with their docstrings, and one prose mention in the "Redirect-Inertness
-Assembly" section. Outside its own entry lemma the definition has **zero** consumers. It is
-retained deliberately rather than pending any re-plan: it is small, sorry-free, and a true
-statement about the driver's seed state that a route (1) successor may want. -/
-
-/-- **`keysRootEmpty`**: every key recorded for world `0` is empty. -/
-def keysRootEmpty
-    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop :=
-  ∀ k, (0, k) ∈ keys → k = ∅
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- **Entry establishment**: holds at the ordered driver's seed state `keys = [(0, ∅)]`. -/
-lemma keysRootEmpty_entry :
-    keysRootEmpty [(0, (∅ : Finset (Sign × Proposition Atom)))] := by
-  intro k hk
-  simp only [List.mem_singleton, Prod.mk.injEq] at hk
-  exact hk.2
+reintroduced. -/
 
 /-! ### Redirect-Inertness Assembly -- REMOVED
 
@@ -2498,7 +2470,8 @@ than a documented gap. Machine-checked in
 `reports/02_redirect-inertness-divergence-audit.md` (§2.2): driving
 `modalStepBranchS4KeyedOrdered` on `φ₀ = ¬(◇p ∧ ◇(□p ∧ ◇p))` from the seed state reaches a step
 at which every hypothesis of `blockedRedirect_boxctx_mem` holds -- including `keysOriginS4`,
-`keysRootEmpty`, mint-readiness, and the guard's `some` output
+`keysRootEmpty` (now archived at `Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean`),
+mint-readiness, and the guard's `some` output
 (`blockingWorldS4Keyed φ₀ b keys .pos p 2 = some 1`, redirecting `2 → 1`) -- while its conclusion
 `T(□p)@1 ∈ b` evaluates to `false`. `blockedRedirect_diaNeg_mem` fails by the symmetric
 construction (argued in the report, not independently machine-checked). Do not re-attempt either

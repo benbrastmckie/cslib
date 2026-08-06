@@ -275,7 +275,7 @@ proceeding.
 
 ---
 
-### Phase 3: Move the `keysRootEmpty` pair, splitting the section comment [NOT STARTED]
+### Phase 3: Move the `keysRootEmpty` pair, splitting the section comment [IN PROGRESS]
 
 **Goal**: `keysRootEmpty` and `keysRootEmpty_entry` live in
 `Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean`; the `keysOriginS4` retraction stays in
@@ -283,36 +283,36 @@ proceeding.
 
 **Tasks**:
 
-- [ ] **Re-verify zero-consumer status immediately before excising.** Grep both names by word
+- [x] **Re-verify zero-consumer status immediately before excising.** Grep both names by word
       boundary; confirm the only code consumer of `keysRootEmpty` is `keysRootEmpty_entry` itself,
       which travels with it — hence the pair is eligible as a unit and only as a unit.
-- [ ] Locate the `### keysRootEmpty` section by heading (navigational hints: section comment
+- [x] Locate the `### keysRootEmpty` section by heading (navigational hints: section comment
       `:2523`–`:2563`, `keysRootEmpty` `:2566`, `keysRootEmpty_entry` `:2572`; treat all as stale).
-- [ ] **Split the ~40-line section comment.** It is an audit record, not ordinary documentation,
+- [x] **Split the ~40-line section comment.** It is an audit record, not ordinary documentation,
       and it contains two separable things:
-  - [ ] The `keysRootEmpty`-specific paragraphs (the measured consumer audit for `keysRootEmpty`,
+  - [x] The `keysRootEmpty`-specific paragraphs (the measured consumer audit for `keysRootEmpty`,
         its reproduction commands, and the "audited, no longer hedged" conclusion) **travel** to
         `Boneyard/ModalTableauS4Keyed/README.md`.
-  - [ ] The **`keysOriginS4` retraction MUST STAY in `LoopChecking.lean`** — the "Consumer audit
+  - [x] The **`keysOriginS4` retraction MUST STAY in `LoopChecking.lean`** — the "Consumer audit
         (measured; supersedes an earlier hedge)" block stating that `keysOriginS4` was *not*
         removed and is *not* orphaned, and that any future claim it was deleted is false and should
         not be reintroduced. This is about a live, heavily consumed declaration. Carrying it out of
         the live tree would re-open exactly the defect carve-out 2 exists to close.
-  - [ ] Re-home the retained retraction under a heading that still makes sense once `keysRootEmpty`
+  - [x] Re-home the retained retraction under a heading that still makes sense once `keysRootEmpty`
         is gone (it can no longer live under a `### keysRootEmpty` heading).
-- [ ] Create `Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean` with the same structure as Phase 2:
+- [x] Create `Boneyard/ModalTableauS4Keyed/KeysRootEmpty.lean` with the same structure as Phase 2:
       import block, `ARCHIVED (Boneyard)` header docstring naming both declarations and ending
       `Do not import from live code.`, `#exit`, then the excised code verbatim.
-- [ ] Confirm no live `TODO:`/`FIXME:`-family markers travel into the Boneyard.
-- [ ] Delete `keysRootEmpty`, `keysRootEmpty_entry`, and the `keysRootEmpty`-specific comment
+- [x] Confirm no live `TODO:`/`FIXME:`-family markers travel into the Boneyard.
+- [x] Delete `keysRootEmpty`, `keysRootEmpty_entry`, and the `keysRootEmpty`-specific comment
       paragraphs from `LoopChecking.lean`.
-- [ ] Repair the two references that **stay behind**, redirecting rather than deleting:
-  - [ ] The `BoxPlusClosed` docstring (hint: near `:910`) — *"the same treatment
+- [x] Repair the two references that **stay behind**, redirecting rather than deleting:
+  - [x] The `BoxPlusClosed` docstring (hint: near `:910`) — *"the same treatment
         `keysOriginS4`/`keysRootEmpty` already receive"*.
-  - [ ] The "### Redirect-Inertness Assembly -- REMOVED" section (hint: near `:2586`), which lists
+  - [x] The "### Redirect-Inertness Assembly -- REMOVED" section (hint: near `:2586`), which lists
         `keysRootEmpty` among the hypotheses that held in a refutation. This sits inside a
         narrative explaining that refutation; deleting the name would damage the explanation.
-- [ ] Update the Directory Inventory table in `Boneyard/README.md`.
+- [x] Update the Directory Inventory table in `Boneyard/README.md`.
 
 **Timing**: 1.5 hours
 

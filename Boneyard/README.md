@@ -57,7 +57,7 @@ inertness explicit and structural, rather than an accident of nobody importing t
 
 | Subdirectory | Files | Lines | Archived From | Why Archived |
 |---|---:|---:|---|---|
-| [`ModalTableauS4Keyed/`](ModalTableauS4Keyed/README.md) | 1 | 106 | `Cslib/Logics/Modal/Tableau/LoopChecking.lean` | `blockedRedirect_boxctx_mem_of_boxOrigin` / `blockedRedirect_diaNeg_mem_of_diaOrigin` pair, re-verified zero-consumer by full-name grep (`RedirectOriginTransfer.lean`); the `keysRootEmpty` pair lands next as `KeysRootEmpty.lean` |
+| [`ModalTableauS4Keyed/`](ModalTableauS4Keyed/README.md) | 2 | 142 | `Cslib/Logics/Modal/Tableau/LoopChecking.lean` | Two zero-consumer, sorry-free declaration units from the S4-keyed loop-checking track, both re-verified zero-consumer by full-name grep: the `blockedRedirect_*_of_*Origin` pair (`RedirectOriginTransfer.lean`, 106 lines) and the `keysRootEmpty` pair (`KeysRootEmpty.lean`, 36 lines) |
 
 *(File and line counts above are measured, not estimated; they are updated as each unit lands.)*
 

@@ -779,21 +779,39 @@ boneyard quarantine all pass.
 
 ---
 
-### Phase 11: Extract `S4/Invariant.lean` [NOT STARTED]
+### Phase 11: Extract `S4/Invariant.lean` [COMPLETED]
 
 **Goal**: The `S4LoopInv` structure itself, closure preservation, and the two assembling capstone
 theorems become a module importing `InvariantKeys` and `InvariantAcc`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/Invariant.lean` from the Appendix A template,
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/Invariant.lean` from the Appendix A template,
       importing `Universe`, `BirthKey`, `Guard`, `Driver`, `InvariantKeys`, `InvariantAcc`.
-      **Confirm `@[expose] public section`.**
-- [ ] Move `S4LoopInv`, the `eClosure` and `bClosure` preservation pairs, and
-      `modalStepBranchS4{,KeyedOrdered}_preserves_S4LoopInv`.
-- [ ] Write the "Why a separate module" docstring paragraph, noting that this module is where the
-      ten `S4LoopInv` fields are assembled from `InvariantKeys` and `InvariantAcc`.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      **Confirm `@[expose] public section`.** Confirmed. 7 declarations, 600 lines (hypothesis
+      ~599; matches almost exactly).
+- [x] Move `S4LoopInv`, the `eClosure` and `bClosure` preservation pairs, and
+      `modalStepBranchS4{,KeyedOrdered}_preserves_S4LoopInv`. Confirmed.
+- [x] Write the "Why a separate module" docstring paragraph, noting that this module is where the
+      ten `S4LoopInv` fields are assembled from `InvariantKeys` and `InvariantAcc`. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new findings; shake-flagged set remained 12/12.
+
+**Heading-anchor resolution (closes the Phase 10 operational note)**: since `S4LoopInv` itself
+moved this phase, the pre-existing `"## Sanity Checks"` / `"## The S4 Loop Invariant"` heading
+pair needed to move with it -- but (as flagged in Phase 10) the Phase 7 `start_overrides` does
+not persist, so a fresh extraction run again left the pair behind in `LoopChecking.lean`
+(attached this time to `modalTableauS4Keyed`, the entry point that now immediately follows
+where `S4LoopInv` used to sit). Manually relocated the pair from `LoopChecking.lean` to
+`Invariant.lean`, positioned before `S4LoopInv`'s own docstring -- now a **stable** final
+position, since `S4LoopInv` will not move again. Also removed a second dangling heading,
+`"## Keyed S4 Driver (Bespoke, Path (b))"`, whose subject (`modalExpandBranchesS4Keyed`) already
+moved to `Driver.lean` in Phase 6; it had drifted onto `Invariant.lean`'s tail as trailing
+content of the last-moved capstone theorem, the same progressive-drift pattern seen in Phases 5
+and 8.
+
+Zero downstream `.lean` file content changed. All gates green: build 3322 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 1 hour
 

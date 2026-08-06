@@ -508,6 +508,7 @@ public import Cslib.Logics.Modal.Tableau.S4.BirthKey
 public import Cslib.Logics.Modal.Tableau.S4.Driver
 public import Cslib.Logics.Modal.Tableau.S4.Guard
 public import Cslib.Logics.Modal.Tableau.S4.Hintikka
+public import Cslib.Logics.Modal.Tableau.S4.Invariant
 public import Cslib.Logics.Modal.Tableau.S4.InvariantAcc
 public import Cslib.Logics.Modal.Tableau.S4.InvariantKeys
 public import Cslib.Logics.Modal.Tableau.S4.Redirect

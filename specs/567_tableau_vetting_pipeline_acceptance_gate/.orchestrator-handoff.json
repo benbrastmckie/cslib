@@ -1,14 +1,24 @@
 {
-  "status": "planned",
-  "summary": "Six-phase plan created for the programme's terminal acceptance gate. Verification is already complete (all 11 blocking criteria green), so the plan is remediation and record-keeping: Phase 1 re-derives every disputed figure and edit anchor live and captures the s4witness trace plus the box-plus attribution chain; Phase 2 corrects the eleven-vs-ten S4 module count across LoopChecking.lean, README.md, and ORGANISATION.md; Phase 3 corrects the six drifted README figures, refreshes the two self-flagged stale ones, and rescopes the volatile repo-wide ModalTableauResult command so it stops scanning specs/; Phase 4 additively re-records the s4witness verdict with its 2026-08-05 box-plus attribution without destroying the historical refutation; Phase 5 re-runs the full CI gate set plus #print axioms on all seven declarations; Phase 6 writes the PASS WITH FIX TASKS verdict document and hands three out-of-scope fix bundles forward as roadmap_items. Plan-time re-verification confirmed all seven spot-checkable research figures live and found the research report's README line citations drift 6-8 lines past line 65, so every edit is anchored on a quoted string rather than a line number.",
+  "status": "implemented",
+  "summary": "Ran the CSLib vetting pipeline against the refactored modal-tableau subsystem as the programme's terminal acceptance gate. Verdict: PASS WITH FIX TASKS. All eleven blocking criteria green (build 3323 jobs, checkInitImports, lint-style, test with all eight S4LoopGuardRegression rows, mk_all, shake residue, all four pre-pr-check ratchets, axiom-level behaviour preservation on the capstone and six Decidable instances). Corrected nine documentation-accuracy defects plus two additional axiom-census word-count drifts discovered during the mandatory closing re-run (S4 module count eleven->ten across LoopChecking.lean/README.md/ORGANISATION.md; six drifted README numeric figures; two self-flagged-stale FrameSoundness/FrameCompleteness sizes refreshed; the volatile repo-wide ModalTableauResult command rescoped away from scanning specs/). Re-recorded the s4witness.lean out-of-tree probe verdict additively with box-plus birth-key attribution (three commits dated 2026-08-05, confirmed by git merge-base to predate the programme), fully explaining the divergence with no unexplained residual. Emitted the formal acceptance-gate verdict document with blocking/non-blocking criteria tables, decision rule, remediation ledger, Reasoned Exclusions, and three roadmap items handed forward (not created as tasks). Zero .lean proof terms modified; every edit confined to docstrings, README prose, and one specs-tree report.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/plans/01_acceptance-gate-fixes-verdict.md",
-      "type": "plan",
-      "summary": "Six-phase acceptance-gate remediation plan with five dependency waves, per-phase verification tiers (prose/local/full), per-phase scope hypotheses, and an explicit non-goals list honoring the research do-nots (KNOWN-UNSOUND regression row stays CLOSED, no direct Cslib.Init imports, no touching the 145 pre-existing lint findings, no making --wfail green, no re-running the six expensive probes, no direct task creation)."
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md",
+      "type": "artifact",
+      "summary": "Live re-measurement partition (Phase 1), Phase 3 discovery of two additional drifted figures, Phase 5 post-fix full CI gate evidence table"
+    },
+    {
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/acceptance-gate-verdict.md",
+      "type": "artifact",
+      "summary": "Formal PASS WITH FIX TASKS verdict: four-level grammar, eleven-row blocking-criteria table, four-row non-blocking-criteria table, decision rule applied to D8, remediation ledger, Reasoned Exclusions, standing do-nots, three roadmap items"
+    },
+    {
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/summaries/01_acceptance-gate-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary covering all six phases and four plan deviations"
     }
   ],
-  "phases_completed": 0,
+  "phases_completed": 6,
   "phases_total": 6
 }

@@ -203,7 +203,7 @@ hypothesis and must be investigated before proceeding to Phase 2.
 
 ---
 
-### Phase 2: Move the two `blockedRedirect_*_of_*Origin` lemmas [NOT STARTED]
+### Phase 2: Move the two `blockedRedirect_*_of_*Origin` lemmas [IN PROGRESS]
 
 **Goal**: `blockedRedirect_boxctx_mem_of_boxOrigin` and `blockedRedirect_diaNeg_mem_of_diaOrigin`
 live in `Boneyard/ModalTableauS4Keyed/RedirectOriginTransfer.lean` and no longer appear in
@@ -211,33 +211,33 @@ live in `Boneyard/ModalTableauS4Keyed/RedirectOriginTransfer.lean` and no longer
 
 **Tasks**:
 
-- [ ] **Re-verify zero-consumer status immediately before excising.** Word-boundary grep both full
+- [x] **Re-verify zero-consumer status immediately before excising.** Word-boundary grep both full
       declaration names over `Cslib/`, `CslibTests/`, `scripts/`, and `Cslib.lean`; classify every
       hit as declaration site / code consumer / comment-only. Proceed only if code consumers is 0
       for both. Anchor on the full names — never on a substring.
-- [ ] Locate the contiguous block containing both lemmas by declaration name (navigational hint:
+- [x] Locate the contiguous block containing both lemmas by declaration name (navigational hint:
       `blockedRedirect_boxctx_mem_of_boxOrigin` near `LoopChecking.lean:1785`,
       `blockedRedirect_diaNeg_mem_of_diaOrigin` near `:1825`; treat both as stale).
-- [ ] Create `Boneyard/ModalTableauS4Keyed/RedirectOriginTransfer.lean` with, in order:
-  - [ ] the import block needed to state the lemmas (`import Cslib.Logics.Modal.Tableau.LoopChecking`
+- [x] Create `Boneyard/ModalTableauS4Keyed/RedirectOriginTransfer.lean` with, in order:
+  - [x] the import block needed to state the lemmas (`import Cslib.Logics.Modal.Tableau.LoopChecking`
         or the source file's own imports) — recorded as historical text, not a build edge;
-  - [ ] an `ARCHIVED (Boneyard)` header docstring naming both moved declarations, noting they are
+  - [x] an `ARCHIVED (Boneyard)` header docstring naming both moved declarations, noting they are
         sorry-free and were archived as zero-consumer, and ending `Do not import from live code.`;
-  - [ ] `#exit`;
-  - [ ] the excised code **verbatim**, including each lemma's own docstring. The docstring of
+  - [x] `#exit`;
+  - [x] the excised code **verbatim**, including each lemma's own docstring. The docstring of
         `blockedRedirect_diaNeg_mem_of_diaOrigin` cites
         `blockedRedirect_boxctx_mem_of_boxOrigin` — that reference travels with the block and is
         self-resolving; do not rewrite it.
-- [ ] Confirm the moved region carries **no** live `TODO:`/`FIXME:`/`BUG:`/`HACK:`/`NOTE:`/
+- [x] Confirm the moved region carries **no** live `TODO:`/`FIXME:`/`BUG:`/`HACK:`/`NOTE:`/
       `QUESTION:` markers (expected: none). Neutralize any that appear to `ARCHIVED-TODO:`.
-- [ ] Delete the block from `LoopChecking.lean`.
-- [ ] Repair the reference that **stays behind**: in the "The Witness Disjunct (Gate)" section
+- [x] Delete the block from `LoopChecking.lean`.
+- [x] Repair the reference that **stays behind**: in the "The Witness Disjunct (Gate)" section
       (navigational hint: near `:1865`), the phrase *"case (b) (closed above, via
       `blockedRedirect_boxctx_mem_of_boxOrigin`)"* sits inside a narrative explaining a refutation.
       Do **not** delete the name — that would damage the explanation. Redirect it, e.g. "…now
       archived at `Boneyard/ModalTableauS4Keyed/RedirectOriginTransfer.lean`".
-- [ ] Update the Directory Inventory table in `Boneyard/README.md` with the new file's line count.
-- [ ] Note that this is an **excise-and-create**, not a whole-file rename: `git mv` does not apply
+- [x] Update the Directory Inventory table in `Boneyard/README.md` with the new file's line count.
+- [x] Note that this is an **excise-and-create**, not a whole-file rename: `git mv` does not apply
       here, because no existing file moves. Stage the deletion and the new file together.
 
 **Timing**: 1.25 hours

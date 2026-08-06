@@ -721,24 +721,44 @@ added in Phase 14 rather than splitting further in this task.
 
 ---
 
-### Phase 10: Extract `S4/InvariantAcc.lean` [NOT STARTED]
+### Phase 10: Extract `S4/InvariantAcc.lean` [COMPLETED]
 
 **Goal**: The accessibility/expansion `S4LoopInv` fields, world contiguity, and the pigeonhole
 world bound become a module importing `Universe`, `BirthKey`, `Guard`, `Driver`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/InvariantAcc.lean` from the Appendix A template.
-      **Confirm `@[expose] public section`.**
-- [ ] Move the `eNodup`, `accFresh`, and `accKnown` preservation pairs, `accFreshInv_append_S4`,
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/InvariantAcc.lean` from the Appendix A template.
+      **Confirm `@[expose] public section`.** Confirmed. 12 declarations, 1317 lines (hypothesis
+      ~1320; matches almost exactly).
+- [x] Move the `eNodup`, `accFresh`, and `accKnown` preservation pairs, `accFreshInv_append_S4`,
       `worldsContiguousS4` and its two preservation lemmas,
-      `modalKnownWorlds_length_le_worldBoundS4`, and `modalStepBranchS4_worldBound`.
-- [ ] Note that `LoopChecking.lean`'s retained termination-measure block consumes
+      `modalKnownWorlds_length_le_worldBoundS4`, and `modalStepBranchS4_worldBound`. Confirmed.
+- [x] Note that `LoopChecking.lean`'s retained termination-measure block consumes
       `modalStepBranchS4_worldBound` and `worldsContiguousS4` — these must be public at module
       scope, not `private`. De-privatize `accFreshInv_append_S4` only if the regenerated graph
-      shows a cross-module consumer.
-- [ ] Write the "Why a separate module" docstring paragraph.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      shows a cross-module consumer. Both already public; `accFreshInv_append_S4` confirmed no
+      cross-module consumer, kept `private`.
+- [x] Write the "Why a separate module" docstring paragraph. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new findings; shake-flagged set remained 12/12.
+
+**Cross-phase heading-anchor finding, resolved (module-content correctness)**: Phase 7 had used
+a `start_overrides` entry to attach the pre-existing `"## Sanity Checks"` / `"## The S4 Loop
+Invariant"` heading pair to `S4LoopInv`'s own span, since `S4LoopInv` itself is not moved until
+Phase 11. That override lives only in the Phase 7 script invocation, not in `decl-graph.json`,
+so it does not automatically apply to later phases' independent `move()` calls. This phase's
+extraction (recomputing spans fresh, without that override) let the pair drift onto
+`modalStepBranchS4_worldBound` (this phase's last declaration) instead, dangling at
+`InvariantAcc.lean`'s tail. Caught by the standard post-move orphan check; fixed by moving the
+heading pair back to precede `S4LoopInv`'s docstring in `LoopChecking.lean` (its stable,
+correct anchor point until Phase 11). **Recorded as a standing operational note for the
+remaining phases**: any `start_overrides`-anchored heading pair targeting a not-yet-moved
+declaration must be re-verified (not just assumed stable) at every intervening phase's orphan
+check until that anchor declaration is itself moved.
+
+Zero downstream `.lean` file content changed. All gates green: build 3321 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 1.5 hours
 

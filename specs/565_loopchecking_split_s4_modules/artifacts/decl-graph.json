@@ -1,246 +1,99 @@
 {
  "decls": [
   {
-   "line": 239,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4_preserves_eNodup",
-   "end": 284,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 285,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4KeyedOrdered_preserves_eNodup",
-   "end": 334,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 335,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "accFreshInv_append_S4",
-   "end": 353,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 354,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4_preserves_accFresh",
-   "end": 532,
-   "refs": [
-    "accFreshInv_append_S4"
-   ],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 533,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4KeyedOrdered_preserves_accFresh",
-   "end": 718,
-   "refs": [
-    "accFreshInv_append_S4"
-   ],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 719,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4_preserves_accKnown",
-   "end": 884,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 885,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4KeyedOrdered_preserves_accKnown",
-   "end": 1062,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 1063,
-   "vis": "public",
-   "kind": "def",
-   "name": "worldsContiguousS4",
-   "end": 1073,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 1074,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4_preserves_worldsContiguousS4",
-   "end": 1269,
-   "refs": [
-    "worldsContiguousS4"
-   ],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 1270,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4",
-   "end": 1472,
-   "refs": [
-    "worldsContiguousS4"
-   ],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 1473,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalKnownWorlds_length_le_worldBoundS4",
-   "end": 1510,
-   "refs": [],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 1511,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4_worldBound",
-   "end": 1563,
-   "refs": [
-    "modalKnownWorlds_length_le_worldBoundS4",
-    "worldsContiguousS4"
-   ],
-   "fam": "Invariant",
-   "sub": "InvAcc"
-  },
-  {
-   "line": 1564,
+   "line": 266,
    "vis": "public",
    "kind": "structure",
    "name": "S4LoopInv",
-   "end": 1613,
+   "end": 315,
    "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 1614,
+   "line": 316,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_eClosure",
-   "end": 1664,
+   "end": 366,
    "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 1665,
+   "line": 367,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_eClosure",
-   "end": 1727,
+   "end": 429,
    "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 1728,
+   "line": 430,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_bClosure",
-   "end": 1872,
-   "refs": [
-    "modalStepBranchS4_worldBound",
-    "worldsContiguousS4"
-   ],
+   "end": 574,
+   "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 1873,
+   "line": 575,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_bClosure",
-   "end": 2036,
-   "refs": [
-    "modalStepBranchS4_worldBound",
-    "worldsContiguousS4"
-   ],
+   "end": 738,
+   "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 2037,
+   "line": 739,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4_preserves_S4LoopInv",
-   "end": 2093,
+   "end": 795,
    "refs": [
     "S4LoopInv",
-    "modalStepBranchS4_preserves_accFresh",
-    "modalStepBranchS4_preserves_accKnown",
     "modalStepBranchS4_preserves_bClosure",
-    "modalStepBranchS4_preserves_eClosure",
-    "modalStepBranchS4_preserves_eNodup",
-    "modalStepBranchS4_preserves_worldsContiguousS4",
-    "worldsContiguousS4"
+    "modalStepBranchS4_preserves_eClosure"
    ],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 2094,
+   "line": 796,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4KeyedOrdered_preserves_S4LoopInv",
-   "end": 2163,
+   "end": 865,
    "refs": [
     "S4LoopInv",
-    "modalStepBranchS4KeyedOrdered_preserves_accFresh",
-    "modalStepBranchS4KeyedOrdered_preserves_accKnown",
     "modalStepBranchS4KeyedOrdered_preserves_bClosure",
-    "modalStepBranchS4KeyedOrdered_preserves_eClosure",
-    "modalStepBranchS4KeyedOrdered_preserves_eNodup",
-    "modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4",
-    "worldsContiguousS4"
+    "modalStepBranchS4KeyedOrdered_preserves_eClosure"
    ],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 2164,
+   "line": 866,
    "vis": "public",
    "kind": "def",
    "name": "modalTableauS4Keyed",
-   "end": 2178,
+   "end": 880,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 2179,
+   "line": 881,
    "vis": "public",
    "kind": "theorem",
    "name": "modalTableauS4Keyed_eq_modalExpandBranchesGenSt",
-   "end": 2210,
+   "end": 912,
    "refs": [
     "modalTableauS4Keyed"
    ],
@@ -248,41 +101,41 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 2211,
+   "line": 913,
    "vis": "public",
    "kind": "def",
    "name": "modalTableauS4KeyedOrdered",
-   "end": 2243,
+   "end": 945,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 2244,
+   "line": 946,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneT_persistentFresh",
-   "end": 2320,
+   "end": 1022,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 2321,
+   "line": 1023,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneT_branchingLength",
-   "end": 2375,
+   "end": 1077,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 2376,
+   "line": 1078,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Rules_persistentFresh",
-   "end": 2450,
+   "end": 1152,
    "refs": [
     "modalApplyOneT_persistentFresh"
    ],
@@ -290,11 +143,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 2451,
+   "line": 1153,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Rules_branchingLength",
-   "end": 2503,
+   "end": 1205,
    "refs": [
     "modalApplyOneT_branchingLength"
    ],
@@ -302,11 +155,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 2504,
+   "line": 1206,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Keyed_persistentFresh_S4",
-   "end": 2553,
+   "end": 1255,
    "refs": [
     "modalApplyOneS4Rules_persistentFresh"
    ],
@@ -314,11 +167,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 2554,
+   "line": 1256,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Keyed_branchingLength_S4",
-   "end": 2608,
+   "end": 1310,
    "refs": [
     "modalApplyOneS4Rules_branchingLength"
    ],
@@ -326,44 +179,41 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 2609,
+   "line": 1311,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Keyed_outputsSubsetUniverse_S4",
-   "end": 2670,
-   "refs": [
-    "modalStepBranchS4_worldBound",
-    "worldsContiguousS4"
-   ],
+   "end": 1372,
+   "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 2671,
+   "line": 1373,
    "vis": "public",
    "kind": "lemma",
    "name": "modalExpMeasure_entry_le_fuelS4",
-   "end": 2726,
+   "end": 1428,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 2727,
+   "line": 1429,
    "vis": "public",
    "kind": "structure",
    "name": "S4KeyedHintikkaInv",
-   "end": 2756,
+   "end": 1458,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 2757,
+   "line": 1459,
    "vis": "public",
    "kind": "lemma",
    "name": "S4KeyedHintikkaInv_weaken",
-   "end": 2795,
+   "end": 1497,
    "refs": [
     "S4KeyedHintikkaInv"
    ],
@@ -371,11 +221,11 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 2796,
+   "line": 1498,
    "vis": "public",
    "kind": "lemma",
    "name": "modalS4Saturated_of_ordered_settled",
-   "end": 2879,
+   "end": 1581,
    "refs": [
     "S4KeyedHintikkaInv"
    ],
@@ -383,11 +233,11 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 2880,
+   "line": 1582,
    "vis": "private",
    "kind": "lemma",
    "name": "S4KeyedHintikkaInv_append",
-   "end": 2941,
+   "end": 1643,
    "refs": [
     "S4KeyedHintikkaInv"
    ],
@@ -395,11 +245,11 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 2942,
+   "line": 1644,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv",
-   "end": 3290,
+   "end": 1992,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4KeyedHintikkaInv_append",
@@ -410,11 +260,11 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 3291,
+   "line": 1993,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv",
-   "end": 3482,
+   "end": 2184,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4KeyedHintikkaInv_append",
@@ -426,25 +276,24 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 3483,
+   "line": 2185,
    "vis": "public",
    "kind": "def",
    "name": "S4OrderedFuelInv",
-   "end": 3494,
+   "end": 2196,
    "refs": [
     "S4KeyedHintikkaInv",
-    "S4LoopInv",
-    "worldsContiguousS4"
+    "S4LoopInv"
    ],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 3495,
+   "line": 2197,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv",
-   "end": 3527,
+   "end": 2229,
    "refs": [
     "S4OrderedFuelInv",
     "modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv",
@@ -454,21 +303,21 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 3528,
+   "line": 2230,
    "vis": "private",
    "kind": "lemma",
    "name": "stepBranch_findSome?_proj4to3",
-   "end": 3561,
+   "end": 2263,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 3562,
+   "line": 2264,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_proj_stepBranchGen",
-   "end": 3622,
+   "end": 2324,
    "refs": [
     "stepBranch_findSome?_proj4to3"
    ],
@@ -476,73 +325,71 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 3623,
+   "line": 2325,
    "vis": "public",
    "kind": "lemma",
    "name": "modalExpMeasure_step_lt_S4Keyed",
-   "end": 3739,
+   "end": 2441,
    "refs": [
     "modalApplyOneS4Keyed_branchingLength_S4",
     "modalApplyOneS4Keyed_outputsSubsetUniverse_S4",
     "modalApplyOneS4Keyed_persistentFresh_S4",
-    "modalStepBranchS4Keyed_proj_stepBranchGen",
-    "worldsContiguousS4"
+    "modalStepBranchS4Keyed_proj_stepBranchGen"
    ],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 3740,
+   "line": 2442,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_proj",
-   "end": 3757,
+   "end": 2459,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 3758,
+   "line": 2460,
    "vis": "public",
    "kind": "lemma",
    "name": "modalExpMeasure_step_lt_S4KeyedOrdered",
-   "end": 3879,
+   "end": 2581,
    "refs": [
     "modalApplyOneS4Keyed_branchingLength_S4",
     "modalApplyOneS4Keyed_outputsSubsetUniverse_S4",
     "modalApplyOneS4Keyed_persistentFresh_S4",
-    "modalStepBranchS4KeyedOrdered_proj",
-    "worldsContiguousS4"
+    "modalStepBranchS4KeyedOrdered_proj"
    ],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 3880,
+   "line": 2582,
    "vis": "private",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_newExps_const",
-   "end": 3911,
+   "end": 2613,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 3912,
+   "line": 2614,
    "vis": "private",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_none_saturated",
-   "end": 3946,
+   "end": 2648,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 3947,
+   "line": 2649,
    "vis": "public",
    "kind": "theorem",
    "name": "modalExpandBranchesS4Keyed_hintikka",
-   "end": 4307,
+   "end": 3009,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4LoopInv",
@@ -550,18 +397,17 @@
     "modalStepBranchS4Keyed_newExps_const",
     "modalStepBranchS4Keyed_none_saturated",
     "modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv",
-    "modalStepBranchS4_preserves_S4LoopInv",
-    "worldsContiguousS4"
+    "modalStepBranchS4_preserves_S4LoopInv"
    ],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 4308,
+   "line": 3010,
    "vis": "public",
    "kind": "theorem",
    "name": "modalExpandBranchesS4Keyed_openBranch_initial_mem",
-   "end": 4439,
+   "end": 3141,
    "refs": [
     "modalStepBranchS4Keyed_newExps_const"
    ],

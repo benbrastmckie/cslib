@@ -11,8 +11,8 @@ next_project_number: 588
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,554,564,568,569,583,586 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,566,571,576 | 36,37,181,425,554,564,568,586 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,554,568,569,583,586 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,566,571,576 | 36,37,181,425,554,568,586 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,565 | 39,40,566 | foundations, modal logic |
 | 4 | 567 | 565 | modal logic |
 | 5 | 511,534,582 | 567 | modal logic |
@@ -38,7 +38,7 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-564 [PLANNED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
+586 [NOT STARTED] — [Continuation of Task A of the modal-tableau refactor programme; 
   └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
     └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
       └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
@@ -48,8 +48,6 @@ next_project_number: 588
           └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
         └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
         └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
-586 [NOT STARTED] — [Continuation of Task A of the modal-tableau refactor programme; 
-  └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone (see above)
 
 ### Temporal Logic
 
@@ -355,12 +353,13 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 564. Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated keys' derivation
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 562, Task 563
 - **Research**: [564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md]
 - **Plan**: [564_tableau_s4keyed_migration_st_ladder/plans/01_migrate-s4keyed-st-ladder.md]
+- **Summary**: [564_tableau_s4keyed_migration_st_ladder/summaries/01_migrate-s4keyed-st-ladder-summary.md]
 
 **Description**: [Task F of the modal-tableau refactor programme; P3.] Migrate the S4 Keyed and KeyedOrdered drivers onto the RuleApplySt / St ladder and retire the duplicated keys' re-derivation -- the stepper currently re-derives the blockingWorldS4Keyed decision that modalApplyOneS4Keyed already made internally (LoopChecking.lean:951-953). Retiring that double derivation is where the unquantified line-count reduction actually lives. This task, NOT the Boneyard task, owns any removal of the S4LoopInv.outDegEq field. That removal is NOT a pure deletion: outDegEq has zero code consumers but its preservation proof is 386 lines across two variants (LoopChecking.lean:4917-5105 and an undocumented second ordered variant at :5111-5307), and it has THREE provision sites -- LoopChecking.lean:7569, :7633, and a POSITIONAL anonymous-constructor site inside modalTableauS4Keyed_initial at FrameCompleteness.lean:4217-4218, i.e. inside the landed completeness capstone. Run lake build before and after; if the cascade into the four other invariant proofs that destructure the structure is large, KEEP the field -- 386 lines are not worth a regression.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

@@ -1531,7 +1531,7 @@
     {
       "project_number": 564,
       "project_name": "tableau_s4keyed_migration_st_ladder",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated keys' derivation",
       "topic": "Modal Logic",
@@ -1556,14 +1556,20 @@
           "path": "specs/564_tableau_s4keyed_migration_st_ladder/plans/01_migrate-s4keyed-st-ladder.md",
           "type": "plan",
           "summary": "Six-phase linear plan (4.6h): gate baseline, atomic-batch outDegEq removal across LoopChecking.lean and FrameCompleteness.lean, docstring cleanup, additive bridge transcription from the compiled asset with three solved tactic hazards recorded, entry-point corollary plus Saturation note retirement, full CI gate with scope-exclusion record."
+        },
+        {
+          "path": "specs/564_tableau_s4keyed_migration_st_ladder/summaries/01_migrate-s4keyed-st-ladder-summary.md",
+          "type": "summary",
+          "summary": "Full implementation summary: phase-by-phase results, verification gate table against the Phase 1 baseline, net line-count delta, plan deviations, and both recorded scope exclusions."
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-06T15:46:09Z",
+      "last_updated": "2026-08-06T16:12:48Z",
       "next_artifact_number": 1,
       "session_id": "sess_1786030020_688c25_564",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Migrated the S4 Keyed drivers onto the RuleApplySt ladder and removed S4LoopInv.outDegEq plus its three orphaned preservation lemmas. Half 1 (Phases 2-3) deleted the outDegEq field and orphaned lemmas (438 lines). Half 2 (Phases 4-5) landed a state-threaded S4 Keyed bridge additively (modalApplyOneS4KeyedSt plus four bridge theorems, transcribed from a pre-verified asset) and closed the entry-point story with a corollary tying modalTableauS4Keyed to modalExpandBranchesGenSt, retiring the stale note in Saturation.lean. Net -256 lines across the three in-scope files. All verification gates held at or better than the Phase 1 baseline: lake build Cslib green, sorry census unchanged at 1, checkInitImports/lint-style/lake test all green, lake shake stayed at 9 findings none in Modal/Tableau, zero new docBlame findings, zero vacuous definitions, zero new axioms. Two scope exclusions recorded per the plan's Non-Goals: the KeyedOrdered driver migration (structurally impossible against the current ladder; recommend a follow-up task for a stepper-parameterised rung) and the destructive redefinition of the bespoke drivers (net +80 lines across 40 re-verified proof sites per research measurement; requires explicit user sign-off)."
     },
     {
       "project_number": 565,

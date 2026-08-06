@@ -1012,7 +1012,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "dependencies": [
         535,
@@ -1028,8 +1028,8 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-08-05T23:15:38Z",
-      "session_id": "sess_1785971654_e8268c",
+      "last_updated": "2026-08-06T05:41:41Z",
+      "session_id": "sess_1785985034_8d824d",
       "topic": "Modal Logic",
       "artifacts": [
         {
@@ -1179,7 +1179,8 @@
       ],
       "ordering_note": "Blocked on the modal Tableau refactor by explicit user decision (2026-07-26). Plan v5 (route 1, pinned-witness truth lemma) was authored against the PRE-refactor factoring; its line anchors and mechanism analysis (modalHintikkaClauseGen shape, the ten-bridge adapter cluster, accPinnedBy placement) will likely need /revise 553 once the refactor lands.",
       "previous_status": "implementing",
-      "next_artifact_number": 9
+      "next_artifact_number": 9,
+      "completion_summary": "Reformulated the S4 keyed redirect soundness invariant (S4RedirectSoundInv) and carried plan 08 to 18/18 phases. Landed sorry-free: the five-arm dispatcher S4RedirectSoundInv_step over modalStepBranchS4KeyedOrdered; the ordered-driver Hintikka-invariant preservation lemma; the S4OrderedFuelInv bundle and seed-state initialization; the Ex4Inv/zip4 four-column existential threading infrastructure; the outer fuel induction modalExpandBranchesS4KeyedOrdered_closed_False; and the end-to-end capstone modalTableauS4KeyedOrdered_sound establishing unweakened s4Valid. Capstone scope decision resolved in-scope after four prior deferrals. Regression witness row added to CslibTests/S4LoopGuardRegression.lean. Verified: 0 sorries introduced across file_scope (the single FrameSoundness.lean:1251 standing user-decision sorry untouched); axioms exactly {propext, Classical.choice, Quot.sound}; full CI pipeline green."
     },
     {
       "project_number": 554,

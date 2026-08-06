@@ -1,18 +1,25 @@
 {
-  "status": "partial",
-  "started_at": "2026-08-05T22:52:07Z",
+  "status": "implemented",
+  "started_at": "2026-08-05T21:09:24-07:00",
+  "completed_at": "2026-08-05T22:00:00-07:00",
   "artifacts": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md"
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "CslibTests/S4LoopGuardRegression.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/08_reformulated-s4-redirect-sound-inv-summary.md"
   ],
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md"
+    "CslibTests/S4LoopGuardRegression.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/08_reformulated-s4-redirect-sound-inv.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/08_reformulated-s4-redirect-sound-inv-summary.md"
   ],
   "partial_progress": {
-    "stage": "phase-complete",
-    "details": "Phase 7.7 resolved via a third route neither prior dispatch considered: old conjunct (d), applied directly to the firing box-positive/diamond-negative candidate (the same houtdeg0 argument Phase 7.5 already uses via hFroz), forces outDeg acc lbl = 0 at the moment either 4-rule genuinely fires. Zero out-degree collapses the K-layer (boxPropagation) and 4-layer (modalFourBoxProp/modalFourDiaNegProp) to vacuously empty (both filterMap over acc.successorsOf lbl), leaving only the T-self layer (modalTBoxSelf/modalTDiaNegSelf), which lands new content at lbl itself -- exactly Phase 7.5's shape. Neither route (i) (new per-world saturation invariant) nor route (ii) (weakening conjunct (d)) from the prior negative-result Progress Record was needed; S4RedirectSoundInv's definition is untouched (purely additive diff), so Phases 7.2/7.3/7.5/7.6 need no re-verification by construction. Landed sorry-free: successorsOf_eq_nil_of_outDeg_eq_zero, modalApplyOneS4Rules_{boxPos,diaNeg}_eq_of_outDeg_zero, S4RedirectSoundInv_boxPos_step, S4RedirectSoundInv_diaNeg_step. Phase 7.8 (the dispatcher theorem, atomic-batch, ~250 lines estimated) is the next phase in wave order; not attempted this dispatch given remaining budget after the investigation + implementation + full CI verification already performed.",
-    "phases_completed": 14,
-    "last_completed_phase": "Phase 7.7: 4-rule arms restated with the ghost-edge disjunction"
+    "stage": "complete",
+    "details": "Finished the remaining three phases of plan 08 (9.1, 9.2, 10), completing all 18 phases of the plan. Phase 9.1's outer fuel induction was the hard blocker carried from the prior dispatch: its Progress Record had drafted a List.Forall2-over-a-bundled-(e,acc,keys)-triple design and stalled on a base-case membership-transport argument. This dispatch instead designed a lighter existential 4-column threading relation (Ex4Inv, built from nested List.zip as zip4) licensed by the observation that S4RedirectSoundInv_step's own conclusion is already existential (guarantees only ONE child branch inherits the invariant per step, never all of them) -- so a universal relation was both harder to establish and strictly stronger than the argument needs. Landed sorry-free: S4KOFullInv, modalStepBranchS4KeyedOrdered_newExps_eq_map (structural fact: a step's newExps/replicated newAcc/keys' columns are constant across newBs), zip4, mem_zip_of_mem_map_const, Ex4Inv_of_mem_const, zip4_append, Ex4Inv_embedLeft/embedRight, mem_zip4_proj13, zip4_cons_mem_cases, and the outer induction theorem modalExpandBranchesS4KeyedOrdered_closed_False (~285 lines total, FrameCompleteness.lean). Phase 9.2's capstone modalTableauS4KeyedOrdered_sound (~35 lines) compiled on the FIRST attempt, confirming the Phase 9 Scope Decision's 'thin corollary' estimate. Phase 10 added a permanent type-level regression witness row to CslibTests/S4LoopGuardRegression.lean (additive only -- git diff confirmed every pre-existing #guard_msgs row byte-identical) and ran the full 8-step CSLib CI pipeline end to end.",
+    "phases_completed": 18,
+    "phases_total": 18,
+    "last_completed_phase": "Phase 10: Regression corpus, full CI gate, and close-out"
   },
   "verification": {
     "verification_passed": true,
@@ -21,11 +28,11 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "Full 7-step CI pipeline run: scoped build (Cslib.Logics.Modal.Tableau.FrameCompleteness) clean; lake exe checkInitImports clean; lake lint clean for FrameCompleteness.lean (145 pre-existing repo-wide findings, none in this file); lake exe lint-style clean; lake shake --add-public --keep-implied --keep-prefix clean for FrameCompleteness.lean; lake exe mk_all --module reports no update necessary; lake test passed all 9378 jobs including CslibTests.S4LoopGuardRegression. lean_verify/#print axioms on both new arm theorems: exactly {propext, Classical.choice, Quot.sound}. Sorry census (repo's canonical two-grep code-position form, restricted to Cslib/Logics/Modal/Tableau/) held at exactly 1 (FrameSoundness.lean:1251, standing user-decision sorry, unchanged). git diff purely additive (0 deletion lines) for FrameCompleteness.lean."
+    "note": "Full 8-step CSLib CI pipeline run and green: lake exe cache get (warm, no downloads), lake build (whole library, 3313 jobs, 0 errors), lake exe checkInitImports (clean), lake lint (145 warnings total, all pre-existing and in files this task never touched -- Bimodal, LTL, FmpMeasure, pre-existing FrameSoundness unusedArguments rows, Propositional, Temporal; zero warnings in FrameCompleteness.lean/LoopChecking.lean/S4LoopGuardRegression.lean), lake exe lint-style (clean, whole project), lake test (9378/9378 targets, 0 errors), lake exe mk_all --module ('No update necessary'), lake shake --add-public --keep-implied --keep-prefix (9 pre-existing import-minimization suggestions, none touching this task's files). #print axioms via lake env lean (standalone snippets, not lean_verify per this task's standing note about its spurious sorryAx heuristic on this file cluster) on both modalExpandBranchesS4KeyedOrdered_closed_False and modalTableauS4KeyedOrdered_sound: exactly {propext, Classical.choice, Quot.sound}. Sorry census (bare-tactic grep, restricted to Cslib/Logics/Modal/Tableau/) held at exactly 1 (FrameSoundness.lean:1251, the standing user-decision sorry, untouched) after every commit through this dispatch. axiom_count checked repo-wide: 26 pre-existing axiom declarations, unchanged (zero new axiom lines written this dispatch). One operational note recorded honestly: a second full-project lake lint attempt (between Phases 9.1 and 9.2) did not complete, apparently starved by unrelated concurrent lean/lake processes from another project observed on the same host; a third attempt after system load settled completed cleanly and is the result recorded above."
   },
   "requires_user_review": false,
   "metadata": {
-    "session_id": "sess_1785971654_e8268c",
+    "session_id": "sess_1785985034_8d824d",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": [
@@ -33,8 +40,6 @@
       "implement",
       "skill-cslib-implementation"
     ],
-    "compliance_check": "passed",
-    "cycles_used": 5,
-    "final_state": "implementing"
+    "compliance_check": "passed"
   }
 }

@@ -1663,7 +1663,7 @@
     {
       "project_number": 567,
       "project_name": "tableau_vetting_pipeline_acceptance_gate",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate",
       "topic": "Modal Logic",
@@ -1687,11 +1687,16 @@
           "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md",
           "type": "report",
           "summary": "Full seven-step CI run against the current tree with live measurements; checkInitImports prerequisite verified CLEARED; per-criterion verification of modalTableauS4Keyed_complete and the six K/T/B/S5/Five/KB5 Decidable instances via #print axioms; regression-corpus inventory and re-run results; standards survey of the ten new S4/ modules; nine-finding ledger; proposed four-level verdict grammar with blocking vs non-blocking criteria; three-task fix decomposition."
+        },
+        {
+          "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/plans/01_acceptance-gate-fixes-verdict.md",
+          "type": "plan",
+          "summary": "Six-phase acceptance-gate remediation plan with five dependency waves, per-phase verification tiers (prose/local/full), per-phase scope hypotheses, and an explicit non-goals list honoring the research do-nots (KNOWN-UNSOUND regression row stays CLOSED, no direct Cslib.Init imports, no touching the 145 pre-existing lint findings, no making --wfail green, no re-running the six expensive probes, no direct task creation)."
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-06T20:49:41Z",
+      "last_updated": "2026-08-06T20:56:24Z",
       "next_artifact_number": 1,
       "session_id": "sess_1786030020_688c25_567",
       "parent_task": null

@@ -1,20 +1,32 @@
 {
-  "status": "researched",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md",
-      "type": "report",
-      "summary": "Acceptance-gate CI verification research report with live measurements, findings ledger, and verdict structure."
+      "type": "plan",
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/plans/01_acceptance-gate-fixes-verdict.md",
+      "summary": "Six-phase acceptance-gate remediation plan: live re-measurement ledger, module-count and README figure corrections, s4witness verdict re-recording with attribution, full CI gate re-run, and the PASS WITH FIX TASKS verdict document with fix-task roadmap handoff."
     }
   ],
-  "partial_progress": {
-    "stage": "complete",
-    "details": "All five research questions answered against the current tree (1d824cfd). Seven-step CI order run in full; ten of the ratchet/gate scripts run; seven declarations axiom-verified; two of eight out-of-tree probes re-run."
-  },
+  "next_steps": "Run /implement 567 to execute the plan",
   "metadata": {
     "session_id": "sess_1786030020_688c25_567",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 6,
+    "estimated_hours": 5,
+    "dependency_waves": [[1], [2, 4], [3], [5], [6]]
+  },
+  "memory_candidates": [
+    {
+      "content": "Acceptance-gate verdict grammar for terminal programme gates: emit exactly one of PASS / PASS WITH FIX TASKS / CONDITIONAL / FAIL, and partition criteria into BLOCKING (correctness: capstone and instance axiom-purity via #print axioms, sorry census, axiom census, build/test/import/lint-style exit codes, ratchet exact-set matches) versus NON-BLOCKING (documentation-figure reproduction, pre-existing repo-wide lint debt, out-of-tree probe reproduction). The decision rule that makes this work: a finding is fix-task-needed rather than blocking only when all three of (1) no proof is weaker, (2) the defect is pre-existing or purely documentational, and (3) the fix is independently schedulable. Critically, an UNEXPLAINED regression-corpus divergence is a FAIL even when every build is green -- behaviour preservation is unproven -- whereas a divergence whose cause is identified and chronologically attributed (via git merge-base --is-ancestor showing the causing commit predates the programme) is merely a stale recorded verdict to be re-recorded additively, never deleted. This keeps a gate from either rubber-stamping green builds or blocking on pre-existing debt.",
+      "category": "PATTERN",
+      "source_artifact": "specs/567_tableau_vetting_pipeline_acceptance_gate/plans/01_acceptance-gate-fixes-verdict.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["acceptance-gate", "verdict-grammar", "blocking-criteria", "regression-attribution", "print-axioms", "ratchet"]
+    }
+  ],
+  "modified_files": [
+    "specs/567_tableau_vetting_pipeline_acceptance_gate/plans/01_acceptance-gate-fixes-verdict.md"
+  ]
 }

@@ -1,18 +1,64 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-06T00:00:00Z",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/565_loopchecking_split_s4_modules/summaries/01_split-loopchecking-s4-modules.md",
+      "summary": "Full implementation summary with gate reconciliation table and follow-ups"
+    },
+    {
+      "type": "plan",
+      "path": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
+      "summary": "15-phase plan, all phases annotated with actual outcomes"
+    }
+  ],
+  "modified_files": [
+    "Cslib.lean",
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/README.md",
+    "Cslib/Logics/Modal/Tableau/S4/Universe.lean",
+    "Cslib/Logics/Modal/Tableau/S4/BirthKey.lean",
+    "Cslib/Logics/Modal/Tableau/S4/Guard.lean",
+    "Cslib/Logics/Modal/Tableau/S4/Driver.lean",
+    "Cslib/Logics/Modal/Tableau/S4/Hintikka.lean",
+    "Cslib/Logics/Modal/Tableau/S4/Redirect.lean",
+    "Cslib/Logics/Modal/Tableau/S4/InvariantKeys.lean",
+    "Cslib/Logics/Modal/Tableau/S4/InvariantAcc.lean",
+    "Cslib/Logics/Modal/Tableau/S4/Invariant.lean",
+    "Cslib/Logics/Modal/Tableau/S4/HintikkaInvariant.lean",
+    "ORGANISATION.md",
+    "scripts/shake-residue-baseline.txt",
+    "specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json",
+    "specs/565_loopchecking_split_s4_modules/artifacts/baseline.md"
+  ],
   "partial_progress": {
-    "stage": "phase_14_complete",
-    "details": "Phases 1-14 complete and committed. ORGANISATION.md updated: Tableau/ subtree documents Support/ and S4/ cluster; module-size guidance added. One phase remains: 15 (final gate sweep and job-count reconciliation).",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 14
+    "stage": "all_phases_complete",
+    "phases_completed": 15
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "job_count": 3323,
+    "job_count_baseline": 3313,
+    "job_count_delta_explained": "10 new .olean-producing S4/*.lean modules",
+    "pre_pr_check": "9 of 10 steps green; step 5 (repo-wide --wfail build) fails on pre-existing, out-of-scope warnings, documented as a Reasoned Exclusion (see plan Phase 15 and summary)"
   },
   "metadata": {
     "session_id": "sess_1786030020_688c25_565",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  },
+  "phases_completed": 15,
+  "phases_total": 15,
+  "completion_data": {
+    "completion_summary": "Split Cslib/Logics/Modal/Tableau/LoopChecking.lean (11,393 lines / 241 declarations) into eleven S4/*.lean modules along the verified acyclic dependency layering, leaving LoopChecking.lean as a 20-declaration barrel (1,723 lines). Zero downstream .lean file changes. Updated Cslib.lean, ORGANISATION.md, and created Cslib/Logics/Modal/Tableau/README.md. Full gate sweep green (build, sorry/axiom census, shake residue, lint, tests, boneyard); pre-pr-check.sh 9/10 steps green with one documented, pre-existing, out-of-scope exclusion.",
+    "roadmap_items": []
   }
 }

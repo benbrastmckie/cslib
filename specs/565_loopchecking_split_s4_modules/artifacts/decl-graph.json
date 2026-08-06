@@ -1,74 +1,32 @@
 {
  "decls": [
   {
-   "line": 242,
+   "line": 243,
    "vis": "private",
    "kind": "lemma",
    "name": "successorBirthContent_boxNeg_subset_relevantSetFinset",
-   "end": 342,
+   "end": 343,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 343,
+   "line": 344,
    "vis": "private",
    "kind": "lemma",
    "name": "successorBirthContent_diamondPos_subset_relevantSetFinset",
-   "end": 446,
+   "end": 448,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 447,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4Keyed_branch_superset",
-   "end": 489,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 490,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4KeyedOrdered_branch_superset",
-   "end": 543,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 544,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalStepBranchS4Keyed_result_keys_eq",
-   "end": 570,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 571,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalStepBranchS4Keyed_result_acc_eq",
-   "end": 596,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 597,
+   "line": 449,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_keyLowerBd",
-   "end": 704,
+   "end": 556,
    "refs": [
-    "modalStepBranchS4Keyed_branch_superset",
-    "modalStepBranchS4Keyed_result_keys_eq",
     "successorBirthContent_boxNeg_subset_relevantSetFinset",
     "successorBirthContent_diamondPos_subset_relevantSetFinset"
    ],
@@ -76,14 +34,12 @@
    "sub": "InvKeys"
   },
   {
-   "line": 705,
+   "line": 557,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_keyLowerBd",
-   "end": 821,
+   "end": 673,
    "refs": [
-    "modalStepBranchS4KeyedOrdered_branch_superset",
-    "modalStepBranchS4Keyed_result_keys_eq",
     "successorBirthContent_boxNeg_subset_relevantSetFinset",
     "successorBirthContent_diamondPos_subset_relevantSetFinset"
    ],
@@ -91,443 +47,229 @@
    "sub": "InvKeys"
   },
   {
-   "line": 822,
+   "line": 674,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_keysInUniverse",
-   "end": 894,
-   "refs": [
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 746,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 895,
+   "line": 747,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_keysInUniverse",
-   "end": 981,
-   "refs": [
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 833,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 982,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneT_boxPos_diaNeg_known_S4",
-   "end": 1083,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1084,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Rules_boxPos_diaNeg_known_S4",
-   "end": 1177,
-   "refs": [
-    "modalApplyOneT_boxPos_diaNeg_known_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1178,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOne_nonModal_known_S4",
-   "end": 1222,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1223,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_nonMint_known_S4",
-   "end": 1283,
-   "refs": [
-    "modalApplyOneS4Rules_boxPos_diaNeg_known_S4",
-    "modalApplyOne_nonModal_known_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1284,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOne_boxPos_fst_S4",
-   "end": 1300,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1301,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOne_boxPos_snd_S4",
-   "end": 1317,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1318,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOne_diamondNeg_fst_S4",
-   "end": 1340,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1341,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOne_diamondNeg_snd_S4",
-   "end": 1361,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1362,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneT_boxPos_diaNeg_universe_S4",
-   "end": 1497,
-   "refs": [
-    "modalApplyOne_boxPos_fst_S4",
-    "modalApplyOne_boxPos_snd_S4",
-    "modalApplyOne_diamondNeg_fst_S4",
-    "modalApplyOne_diamondNeg_snd_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1498,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Rules_boxPos_diaNeg_universe_S4",
-   "end": 1607,
-   "refs": [
-    "modalApplyOneT_boxPos_diaNeg_universe_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1608,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOne_nonModal_universe_S4",
-   "end": 1653,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1654,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_nonMint_universe_S4",
-   "end": 1702,
-   "refs": [
-    "modalApplyOneS4Rules_boxPos_diaNeg_universe_S4",
-    "modalApplyOne_nonModal_universe_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1703,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalStepBranchS4Keyed_keys_subset",
-   "end": 1737,
-   "refs": [
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1738,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalStepBranchS4KeyedOrdered_keys_subset",
-   "end": 1784,
-   "refs": [
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 1785,
+   "line": 834,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_keysTotal",
-   "end": 1967,
-   "refs": [
-    "modalApplyOneS4Keyed_nonMint_known_S4",
-    "modalStepBranchS4Keyed_keys_subset",
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1016,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 1968,
+   "line": 1017,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_keysTotal",
-   "end": 2155,
-   "refs": [
-    "modalApplyOneS4Keyed_nonMint_known_S4",
-    "modalStepBranchS4KeyedOrdered_keys_subset",
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1204,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 2156,
+   "line": 1205,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_keysDistinct",
-   "end": 2194,
-   "refs": [
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1243,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 2195,
+   "line": 1244,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_keysDistinct",
-   "end": 2237,
-   "refs": [
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1285,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 2238,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_nonMint_snd_eq_acc",
-   "end": 2277,
-   "refs": [
-    "modalApplyOneS4Rules_boxPos_diaNeg_known_S4",
-    "modalApplyOne_nonModal_known_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 2278,
+   "line": 1286,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_eNodup",
-   "end": 2323,
+   "end": 1331,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 2324,
+   "line": 1332,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_eNodup",
-   "end": 2383,
+   "end": 1391,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 2384,
+   "line": 1392,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_keysWorldsKnown",
-   "end": 2482,
-   "refs": [
-    "modalStepBranchS4Keyed_branch_superset",
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1490,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 2483,
+   "line": 1491,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_keysWorldsKnown",
-   "end": 2600,
-   "refs": [
-    "modalStepBranchS4KeyedOrdered_branch_superset",
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1608,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 2601,
+   "line": 1609,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_preserves_keysOriginS4",
-   "end": 2829,
-   "refs": [
-    "modalApplyOneS4Keyed_nonMint_snd_eq_acc",
-    "modalStepBranchS4Keyed_branch_superset",
-    "modalStepBranchS4Keyed_result_acc_eq",
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 1837,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 2830,
+   "line": 1838,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_keysOriginS4",
-   "end": 3066,
-   "refs": [
-    "modalApplyOneS4Keyed_nonMint_snd_eq_acc",
-    "modalStepBranchS4KeyedOrdered_branch_superset",
-    "modalStepBranchS4Keyed_result_acc_eq",
-    "modalStepBranchS4Keyed_result_keys_eq"
-   ],
+   "end": 2074,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvKeys"
   },
   {
-   "line": 3067,
+   "line": 2075,
    "vis": "private",
    "kind": "lemma",
    "name": "accFreshInv_append_S4",
-   "end": 3085,
+   "end": 2093,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 3086,
+   "line": 2094,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_accFresh",
-   "end": 3264,
+   "end": 2272,
    "refs": [
-    "accFreshInv_append_S4",
-    "modalApplyOneS4Keyed_nonMint_snd_eq_acc"
+    "accFreshInv_append_S4"
    ],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 3265,
+   "line": 2273,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_accFresh",
-   "end": 3450,
+   "end": 2458,
    "refs": [
-    "accFreshInv_append_S4",
-    "modalApplyOneS4Keyed_nonMint_snd_eq_acc"
+    "accFreshInv_append_S4"
    ],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 3451,
+   "line": 2459,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_accKnown",
-   "end": 3616,
-   "refs": [
-    "modalApplyOneS4Keyed_nonMint_snd_eq_acc"
-   ],
+   "end": 2624,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 3617,
+   "line": 2625,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_accKnown",
-   "end": 3794,
-   "refs": [
-    "modalApplyOneS4Keyed_nonMint_snd_eq_acc"
-   ],
+   "end": 2802,
+   "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 3795,
+   "line": 2803,
    "vis": "public",
    "kind": "def",
    "name": "worldsContiguousS4",
-   "end": 3805,
+   "end": 2813,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 3806,
+   "line": 2814,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_worldsContiguousS4",
-   "end": 4001,
+   "end": 3009,
    "refs": [
-    "modalApplyOneS4Keyed_nonMint_known_S4",
-    "modalStepBranchS4Keyed_branch_superset",
     "worldsContiguousS4"
    ],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 4002,
+   "line": 3010,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4",
-   "end": 4204,
+   "end": 3212,
    "refs": [
-    "modalApplyOneS4Keyed_nonMint_known_S4",
-    "modalStepBranchS4KeyedOrdered_branch_superset",
     "worldsContiguousS4"
    ],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 4205,
+   "line": 3213,
    "vis": "public",
    "kind": "lemma",
    "name": "modalKnownWorlds_length_le_worldBoundS4",
-   "end": 4242,
+   "end": 3250,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvAcc"
   },
   {
-   "line": 4243,
+   "line": 3251,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_worldBound",
-   "end": 4283,
+   "end": 3303,
    "refs": [
     "modalKnownWorlds_length_le_worldBoundS4",
     "worldsContiguousS4"
@@ -536,214 +278,42 @@
    "sub": "InvAcc"
   },
   {
-   "line": 4284,
-   "vis": "public",
-   "kind": "def",
-   "name": "modalHintikkaSetS4",
-   "end": 4310,
-   "refs": [],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4311,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "modalHintikkaSetS4_eq",
-   "end": 4322,
-   "refs": [
-    "modalHintikkaSetS4"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4323,
-   "vis": "public",
-   "kind": "def",
-   "name": "modalS4Saturated",
-   "end": 4337,
-   "refs": [],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4338,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "modalHintikkaSetS4_saturated",
-   "end": 4356,
-   "refs": [
-    "modalHintikkaSetS4",
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4357,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_box_pos_step",
-   "end": 4442,
-   "refs": [
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4443,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_dia_neg_step",
-   "end": 4534,
-   "refs": [
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4535,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_box_pos_self",
-   "end": 4617,
-   "refs": [
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4618,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_dia_neg_self",
-   "end": 4702,
-   "refs": [
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4703,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_box_neg",
-   "end": 4714,
-   "refs": [
-    "modalHintikkaSetS4"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4715,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_diamond_pos",
-   "end": 4738,
-   "refs": [
-    "modalHintikkaSetS4"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4739,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_box_pos_reflTransGen",
-   "end": 4754,
-   "refs": [
-    "hintikkaS4_box_pos_self",
-    "hintikkaS4_box_pos_step",
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4755,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_dia_neg_reflTransGen",
-   "end": 4785,
-   "refs": [
-    "hintikkaS4_dia_neg_self",
-    "hintikkaS4_dia_neg_step",
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4786,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_box_pos_reflTransGen_wrapped",
-   "end": 4802,
-   "refs": [
-    "hintikkaS4_box_pos_step",
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4803,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "hintikkaS4_dia_neg_reflTransGen_wrapped",
-   "end": 4848,
-   "refs": [
-    "hintikkaS4_dia_neg_step",
-    "modalS4Saturated"
-   ],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 4849,
+   "line": 3304,
    "vis": "public",
    "kind": "structure",
    "name": "S4LoopInv",
-   "end": 4898,
+   "end": 3353,
    "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 4899,
+   "line": 3354,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_eClosure",
-   "end": 4949,
+   "end": 3404,
    "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 4950,
+   "line": 3405,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_eClosure",
-   "end": 5012,
+   "end": 3467,
    "refs": [],
    "fam": "Invariant",
    "sub": "Invariant"
   },
   {
-   "line": 5013,
+   "line": 3468,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4_preserves_bClosure",
-   "end": 5157,
+   "end": 3612,
    "refs": [
-    "modalApplyOneS4Keyed_nonMint_universe_S4",
     "modalStepBranchS4_worldBound",
     "worldsContiguousS4"
    ],
@@ -751,13 +321,12 @@
    "sub": "Invariant"
   },
   {
-   "line": 5158,
+   "line": 3613,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_preserves_bClosure",
-   "end": 5321,
+   "end": 3776,
    "refs": [
-    "modalApplyOneS4Keyed_nonMint_universe_S4",
     "modalStepBranchS4_worldBound",
     "worldsContiguousS4"
    ],
@@ -765,11 +334,11 @@
    "sub": "Invariant"
   },
   {
-   "line": 5322,
+   "line": 3777,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4_preserves_S4LoopInv",
-   "end": 5378,
+   "end": 3833,
    "refs": [
     "S4LoopInv",
     "modalStepBranchS4_preserves_accFresh",
@@ -789,11 +358,11 @@
    "sub": "Invariant"
   },
   {
-   "line": 5379,
+   "line": 3834,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4KeyedOrdered_preserves_S4LoopInv",
-   "end": 5447,
+   "end": 3903,
    "refs": [
     "S4LoopInv",
     "modalStepBranchS4KeyedOrdered_preserves_accFresh",
@@ -814,160 +383,63 @@
    "sub": "Invariant"
   },
   {
-   "line": 5448,
-   "vis": "public",
-   "kind": "def",
-   "name": "modalExpandBranchesS4Keyed",
-   "end": 5514,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5515,
-   "vis": "public",
-   "kind": "def",
-   "name": "modalApplyOneS4KeyedSt",
-   "end": 5535,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5536,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "modalApplyOneS4KeyedSt_proj",
-   "end": 5554,
-   "refs": [
-    "modalApplyOneS4KeyedSt"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5555,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "modalApplyOneS4KeyedSt_eq",
-   "end": 5579,
-   "refs": [
-    "modalApplyOneS4KeyedSt"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5580,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "modalStepBranchGenSt_eq_S4Keyed",
-   "end": 5599,
-   "refs": [
-    "modalApplyOneS4KeyedSt",
-    "modalApplyOneS4KeyedSt_eq"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5600,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "modalExpandBranchesGenSt_eq_S4Keyed",
-   "end": 5669,
-   "refs": [
-    "modalApplyOneS4KeyedSt",
-    "modalExpandBranchesS4Keyed",
-    "modalStepBranchGenSt_eq_S4Keyed"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5670,
+   "line": 3904,
    "vis": "public",
    "kind": "def",
    "name": "modalTableauS4Keyed",
-   "end": 5684,
-   "refs": [
-    "modalExpandBranchesS4Keyed"
-   ],
+   "end": 3918,
+   "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 5685,
+   "line": 3919,
    "vis": "public",
    "kind": "theorem",
    "name": "modalTableauS4Keyed_eq_modalExpandBranchesGenSt",
-   "end": 5715,
+   "end": 3950,
    "refs": [
-    "modalApplyOneS4KeyedSt",
-    "modalExpandBranchesGenSt_eq_S4Keyed",
     "modalTableauS4Keyed"
    ],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 5716,
-   "vis": "public",
-   "kind": "def",
-   "name": "modalExpandBranchesS4KeyedOrdered",
-   "end": 5776,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 5777,
+   "line": 3951,
    "vis": "public",
    "kind": "def",
    "name": "modalTableauS4KeyedOrdered",
-   "end": 5797,
-   "refs": [
-    "modalExpandBranchesS4KeyedOrdered"
-   ],
+   "end": 3983,
+   "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 5798,
-   "vis": "public",
-   "kind": "theorem",
-   "name": "hintikka_congr_S4",
-   "end": 5838,
-   "refs": [],
-   "fam": "Hintikka",
-   "sub": "Hintikka"
-  },
-  {
-   "line": 5839,
+   "line": 3984,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneT_persistentFresh",
-   "end": 5915,
+   "end": 4060,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 5916,
+   "line": 4061,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneT_branchingLength",
-   "end": 5970,
+   "end": 4115,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 5971,
+   "line": 4116,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Rules_persistentFresh",
-   "end": 6045,
+   "end": 4190,
    "refs": [
     "modalApplyOneT_persistentFresh"
    ],
@@ -975,11 +447,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 6046,
+   "line": 4191,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Rules_branchingLength",
-   "end": 6098,
+   "end": 4243,
    "refs": [
     "modalApplyOneT_branchingLength"
    ],
@@ -987,11 +459,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 6099,
+   "line": 4244,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Keyed_persistentFresh_S4",
-   "end": 6148,
+   "end": 4293,
    "refs": [
     "modalApplyOneS4Rules_persistentFresh"
    ],
@@ -999,11 +471,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 6149,
+   "line": 4294,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Keyed_branchingLength_S4",
-   "end": 6203,
+   "end": 4348,
    "refs": [
     "modalApplyOneS4Rules_branchingLength"
    ],
@@ -1011,13 +483,12 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 6204,
+   "line": 4349,
    "vis": "private",
    "kind": "lemma",
    "name": "modalApplyOneS4Keyed_outputsSubsetUniverse_S4",
-   "end": 6265,
+   "end": 4410,
    "refs": [
-    "modalApplyOneS4Keyed_nonMint_universe_S4",
     "modalStepBranchS4_worldBound",
     "worldsContiguousS4"
    ],
@@ -1025,111 +496,65 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 6266,
+   "line": 4411,
    "vis": "public",
    "kind": "lemma",
    "name": "modalExpMeasure_entry_le_fuelS4",
-   "end": 6322,
+   "end": 4466,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 6323,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_fst_eq_of_not_box",
-   "end": 6361,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 6362,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneT_snd_eq",
-   "end": 6375,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 6376,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Rules_snd_eq",
-   "end": 6396,
-   "refs": [
-    "modalApplyOneT_snd_eq"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 6397,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_hasEdge_mono",
-   "end": 6455,
-   "refs": [
-    "modalApplyOneS4Rules_snd_eq"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 6456,
+   "line": 4467,
    "vis": "public",
    "kind": "structure",
    "name": "S4KeyedHintikkaInv",
-   "end": 6485,
+   "end": 4496,
    "refs": [],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 6486,
+   "line": 4497,
    "vis": "public",
    "kind": "lemma",
    "name": "S4KeyedHintikkaInv_weaken",
-   "end": 6524,
+   "end": 4535,
    "refs": [
-    "S4KeyedHintikkaInv",
-    "modalApplyOneS4Keyed_fst_eq_of_not_box"
+    "S4KeyedHintikkaInv"
    ],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 6525,
+   "line": 4536,
    "vis": "public",
    "kind": "lemma",
    "name": "modalS4Saturated_of_ordered_settled",
-   "end": 6607,
+   "end": 4618,
    "refs": [
-    "S4KeyedHintikkaInv",
-    "modalS4Saturated"
+    "S4KeyedHintikkaInv"
    ],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 6609,
+   "line": 4620,
    "vis": "public",
    "kind": "abbrev",
    "name": "Reds",
-   "end": 6615,
+   "end": 4626,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6616,
+   "line": 4627,
    "vis": "public",
    "kind": "def",
    "name": "accWithReds",
-   "end": 6620,
+   "end": 4631,
    "refs": [
     "Reds"
    ],
@@ -1137,11 +562,11 @@
    "sub": "Redirect"
   },
   {
-   "line": 6621,
+   "line": 4632,
    "vis": "public",
    "kind": "theorem",
    "name": "hasEdge_accWithReds_iff",
-   "end": 6640,
+   "end": 4651,
    "refs": [
     "Reds",
     "accWithReds"
@@ -1150,11 +575,11 @@
    "sub": "Redirect"
   },
   {
-   "line": 6641,
+   "line": 4652,
    "vis": "public",
    "kind": "lemma",
    "name": "reflTransGen_accWithReds_first_red",
-   "end": 6702,
+   "end": 4713,
    "refs": [
     "Reds",
     "accWithReds",
@@ -1164,101 +589,101 @@
    "sub": "Redirect"
   },
   {
-   "line": 6703,
+   "line": 4714,
    "vis": "public",
    "kind": "lemma",
    "name": "blockedRedirect_unwrapped_boxPos_mem",
-   "end": 6734,
+   "end": 4745,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6735,
+   "line": 4746,
    "vis": "public",
    "kind": "lemma",
    "name": "blockedRedirect_unwrapped_diaNeg_mem",
-   "end": 6771,
+   "end": 4782,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6772,
+   "line": 4783,
    "vis": "public",
    "kind": "lemma",
    "name": "blockedRedirect_boxed_boxPos_mem",
-   "end": 6803,
+   "end": 4814,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6804,
+   "line": 4815,
    "vis": "public",
    "kind": "lemma",
    "name": "blockedRedirect_boxed_diaNeg_mem",
-   "end": 6844,
+   "end": 4855,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6845,
+   "line": 4856,
    "vis": "public",
    "kind": "lemma",
    "name": "successorsOf_addEdge_of_ne",
-   "end": 6853,
+   "end": 4864,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6854,
+   "line": 4865,
    "vis": "public",
    "kind": "lemma",
    "name": "successorsOf_addEdge_self",
-   "end": 6865,
+   "end": 4876,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6866,
+   "line": 4877,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneS4_boxPos_fst_eq",
-   "end": 6936,
+   "end": 4947,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 6937,
+   "line": 4948,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneS4_diaNeg_fst_eq",
-   "end": 7021,
+   "end": 5032,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 7022,
+   "line": 5033,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOne_fst_eq_of_not_boxPos_diaNeg",
-   "end": 7041,
+   "end": 5052,
    "refs": [],
    "fam": "Redirect",
    "sub": "Redirect"
   },
   {
-   "line": 7042,
+   "line": 5053,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg",
-   "end": 7091,
+   "end": 5102,
    "refs": [
     "modalApplyOne_fst_eq_of_not_boxPos_diaNeg"
    ],
@@ -1266,11 +691,11 @@
    "sub": "Redirect"
   },
   {
-   "line": 7092,
+   "line": 5103,
    "vis": "public",
    "kind": "lemma",
    "name": "modalApplyOneS4_fst_congr_successorsOf",
-   "end": 7129,
+   "end": 5140,
    "refs": [
     "modalApplyOneS4_boxPos_fst_eq",
     "modalApplyOneS4_diaNeg_fst_eq",
@@ -1280,21 +705,18 @@
    "sub": "Redirect"
   },
   {
-   "line": 7130,
+   "line": 5141,
    "vis": "public",
    "kind": "lemma",
    "name": "modalS4Saturated_addEdge_of_blocked",
-   "end": 7254,
+   "end": 5263,
    "refs": [
     "blockedRedirect_boxed_boxPos_mem",
     "blockedRedirect_boxed_diaNeg_mem",
-    "hintikkaS4_box_pos_self",
-    "hintikkaS4_dia_neg_self",
     "modalApplyOneS4_boxPos_fst_eq",
     "modalApplyOneS4_diaNeg_fst_eq",
     "modalApplyOneS4_fst_congr_successorsOf",
     "modalApplyOneS4_fst_eq_of_not_boxPos_diaNeg",
-    "modalS4Saturated",
     "successorsOf_addEdge_of_ne",
     "successorsOf_addEdge_self"
    ],
@@ -1302,144 +724,54 @@
    "sub": "Redirect"
   },
   {
-   "line": 7255,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalStepBranchS4Keyed_blocked_witness_mem",
-   "end": 7283,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7284,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding",
-   "end": 7327,
-   "refs": [
-    "modalApplyOneS4Rules_boxPos_diaNeg_known_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7328,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Rules_boxPos_snd_eq_acc",
-   "end": 7336,
-   "refs": [
-    "modalApplyOneS4Rules_snd_eq",
-    "modalApplyOne_boxPos_snd_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7337,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Rules_diaNeg_snd_eq_acc",
-   "end": 7353,
-   "refs": [
-    "modalApplyOneS4Rules_snd_eq",
-    "modalApplyOne_diamondNeg_snd_S4"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7354,
-   "vis": "public",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box",
-   "end": 7385,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7386,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_keys_indep_of_not_box",
-   "end": 7402,
-   "refs": [
-    "modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7403,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalHintikkaClauseGen_S4Keyed_keys_indep",
-   "end": 7429,
-   "refs": [
-    "modalApplyOneS4Keyed_keys_indep_of_not_box"
-   ],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 7430,
+   "line": 5264,
    "vis": "private",
    "kind": "lemma",
    "name": "S4KeyedHintikkaInv_append",
-   "end": 7491,
+   "end": 5325,
    "refs": [
-    "S4KeyedHintikkaInv",
-    "modalHintikkaClauseGen_S4Keyed_keys_indep"
+    "S4KeyedHintikkaInv"
    ],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 7492,
+   "line": 5326,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv",
-   "end": 7840,
+   "end": 5674,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4KeyedHintikkaInv_append",
     "S4KeyedHintikkaInv_weaken",
-    "S4LoopInv",
-    "modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding",
-    "modalApplyOneS4Keyed_fst_eq_of_not_box",
-    "modalApplyOneS4Keyed_hasEdge_mono",
-    "modalStepBranchS4Keyed_blocked_witness_mem"
+    "S4LoopInv"
    ],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 7841,
+   "line": 5675,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv",
-   "end": 8032,
+   "end": 5866,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4KeyedHintikkaInv_append",
     "S4KeyedHintikkaInv_weaken",
     "S4LoopInv",
-    "modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding",
-    "modalApplyOneS4Keyed_fst_eq_of_not_box",
-    "modalApplyOneS4Keyed_hasEdge_mono",
     "modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv"
    ],
    "fam": "Invariant",
    "sub": "InvHintikka"
   },
   {
-   "line": 8033,
+   "line": 5867,
    "vis": "public",
    "kind": "def",
    "name": "S4OrderedFuelInv",
-   "end": 8044,
+   "end": 5878,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4LoopInv",
@@ -1449,11 +781,11 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 8045,
+   "line": 5879,
    "vis": "public",
    "kind": "theorem",
    "name": "modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv",
-   "end": 8077,
+   "end": 5911,
    "refs": [
     "S4OrderedFuelInv",
     "modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv",
@@ -1463,21 +795,21 @@
    "sub": "InvHintikka"
   },
   {
-   "line": 8078,
+   "line": 5912,
    "vis": "private",
    "kind": "lemma",
    "name": "stepBranch_findSome?_proj4to3",
-   "end": 8111,
+   "end": 5945,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 8112,
+   "line": 5946,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_proj_stepBranchGen",
-   "end": 8172,
+   "end": 6006,
    "refs": [
     "stepBranch_findSome?_proj4to3"
    ],
@@ -1485,11 +817,11 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 8173,
+   "line": 6007,
    "vis": "public",
    "kind": "lemma",
    "name": "modalExpMeasure_step_lt_S4Keyed",
-   "end": 8289,
+   "end": 6123,
    "refs": [
     "modalApplyOneS4Keyed_branchingLength_S4",
     "modalApplyOneS4Keyed_outputsSubsetUniverse_S4",
@@ -1501,21 +833,21 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 8290,
+   "line": 6124,
    "vis": "public",
    "kind": "lemma",
    "name": "modalStepBranchS4KeyedOrdered_proj",
-   "end": 8307,
+   "end": 6141,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 8308,
+   "line": 6142,
    "vis": "public",
    "kind": "lemma",
    "name": "modalExpMeasure_step_lt_S4KeyedOrdered",
-   "end": 8429,
+   "end": 6263,
    "refs": [
     "modalApplyOneS4Keyed_branchingLength_S4",
     "modalApplyOneS4Keyed_outputsSubsetUniverse_S4",
@@ -1527,61 +859,35 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 8430,
+   "line": 6264,
    "vis": "private",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_newExps_const",
-   "end": 8461,
+   "end": 6295,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 8462,
+   "line": 6296,
    "vis": "private",
    "kind": "lemma",
    "name": "modalStepBranchS4Keyed_none_saturated",
-   "end": 8492,
+   "end": 6330,
    "refs": [],
    "fam": "LoopChecking",
    "sub": "LoopChecking"
   },
   {
-   "line": 8493,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_boxNeg_ne_notApplicable",
-   "end": 8507,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 8508,
-   "vis": "private",
-   "kind": "lemma",
-   "name": "modalApplyOneS4Keyed_diaPos_ne_notApplicable",
-   "end": 8530,
-   "refs": [],
-   "fam": "Driver",
-   "sub": "Driver"
-  },
-  {
-   "line": 8531,
+   "line": 6331,
    "vis": "public",
    "kind": "theorem",
    "name": "modalExpandBranchesS4Keyed_hintikka",
-   "end": 8891,
+   "end": 6691,
    "refs": [
     "S4KeyedHintikkaInv",
     "S4LoopInv",
-    "hintikka_congr_S4",
-    "modalApplyOneS4Keyed_boxNeg_ne_notApplicable",
-    "modalApplyOneS4Keyed_diaPos_ne_notApplicable",
     "modalExpMeasure_step_lt_S4Keyed",
-    "modalExpandBranchesS4Keyed",
-    "modalHintikkaSetS4",
-    "modalHintikkaSetS4_eq",
     "modalStepBranchS4Keyed_newExps_const",
     "modalStepBranchS4Keyed_none_saturated",
     "modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv",
@@ -1592,14 +898,12 @@
    "sub": "LoopChecking"
   },
   {
-   "line": 8892,
+   "line": 6692,
    "vis": "public",
    "kind": "theorem",
    "name": "modalExpandBranchesS4Keyed_openBranch_initial_mem",
-   "end": 9023,
+   "end": 6823,
    "refs": [
-    "modalExpandBranchesS4Keyed",
-    "modalStepBranchS4Keyed_branch_superset",
     "modalStepBranchS4Keyed_newExps_const"
    ],
    "fam": "LoopChecking",

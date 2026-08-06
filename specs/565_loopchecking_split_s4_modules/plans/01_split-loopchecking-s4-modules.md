@@ -538,24 +538,47 @@ references now resolve through the import rather than in-file.
 
 ---
 
-### Phase 7: Extract `S4/Hintikka.lean` [NOT STARTED]
+### Phase 7: Extract `S4/Hintikka.lean` [COMPLETED]
 
 **Goal**: The Hintikka-set construction and its saturation step lemmas become a module importing
 `Driver`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/Hintikka.lean` from the Appendix A template.
-      **Confirm `@[expose] public section`.**
-- [ ] Move the `Hintikka`-assigned declarations by name (`modalHintikkaSetS4`, `_eq`,
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/Hintikka.lean` from the Appendix A template.
+      **Confirm `@[expose] public section`.** Confirmed.
+- [x] Move the `Hintikka`-assigned declarations by name (`modalHintikkaSetS4`, `_eq`,
       `modalS4Saturated`, `_saturated`, the `hintikkaS4_*` step/self/reflTransGen family,
-      `hintikka_congr_S4`).
-- [ ] **Do not move** `modalS4Saturated_addEdge_of_blocked` here despite its `modalS4Saturated`
+      `hintikka_congr_S4`). 15 declarations, 582 lines (hypothesis ~601; close).
+- [x] **Do not move** `modalS4Saturated_addEdge_of_blocked` here despite its `modalS4Saturated`
       name prefix — it consumes 8 `Redirect` declarations and belongs in `Redirect` (Phase 8).
-      This is research correction 4 of 4.
-- [ ] No de-privatizations expected (verify against the regenerated assignment).
-- [ ] Write the "Why a separate module" docstring paragraph.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      This is research correction 4 of 4. Confirmed left in place.
+- [x] No de-privatizations expected (verify against the regenerated assignment). Confirmed: 0.
+- [x] Write the "Why a separate module" docstring paragraph. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new findings; shake-flagged set remained 12/12.
+
+**Orphaned/two-level-separated-heading findings, resolved (module-content correctness)**: this
+phase surfaced the general shape of the recurring heading-attribution issue clearly enough to
+name it precisely: a heading immediately followed by blank line(s), then a *separate* docstring
+block, then the declaration -- two comment levels, not one -- is not reached by the span
+algorithm's single-absorption rule (by design, since unconditionally absorbing a second level
+would misattribute genuinely-shared headings like Phase 4's "Mint-Readiness" case). Four such
+headings needed explicit start-line overrides this phase rather than automatic handling:
+`"## S4 Hintikka Set"` (now correctly opens `Hintikka.lean`, attached to `modalHintikkaSetS4`),
+`"## Congruence Gate: hintikka_congr_S4"` (now correctly attached to `hintikka_congr_S4`, also
+in `Hintikka.lean`), and two pre-existing heading-pairs that needed to stay behind in
+`LoopChecking.lean` attached to non-Hintikka content: `"## Sanity Checks"` / `"## The S4 Loop
+Invariant"` (attached to `S4LoopInv`, Invariant-family) and `"## Keyed-Driver Termination
+Measure: Combinatorial Primitives"` / `"...Per-Call Obligations..."` (attached to
+`modalApplyOneT_persistentFresh`, LoopChecking-residual). Verified by direct inspection that
+both files are heading-orphan-clean after the fix, and that the remaining two heading->heading
+adjacencies visible in `LoopChecking.lean` are the same pre-existing baseline quirks documented
+since Phase 1, now simply repositioned as the correct prefix of the declaration they were always
+two hops away from.
+
+Zero downstream `.lean` file content changed. All gates green: build 3318 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 1 hour
 

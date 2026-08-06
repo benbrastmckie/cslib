@@ -1,0 +1,484 @@
+# Implementation Plan: Task #564
+
+- **Task**: 564 - Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated `keys'` derivation
+- **Status**: [NOT STARTED]
+- **Effort**: 4.6 hours
+- **Dependencies**: 553, 562, 563 (all landed)
+- **Research Inputs**: `specs/564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md`
+- **Artifacts**: plans/01_migrate-s4keyed-st-ladder.md (this file)
+- **Standards**: plan-format.md, status-markers.md, artifact-management.md, cslib.md, lean4.md, plan-compliance.md
+- **Type**: cslib
+- **Lean Intent**: false
+
+## Overview
+
+Two structurally independent halves, sequenced so a failure in one cannot strand the other.
+**Half 1 (Phases 2-3)** removes the `S4LoopInv.outDegEq` field and its three orphaned
+preservation lemmas — a pure deletion of already-proved material worth roughly 437 lines, which
+research established is where *all* of this task's line-count reduction actually lives.
+**Half 2 (Phases 4-5)** lands the state-threaded S4 Keyed bridge onto the `RuleApplySt` ladder
+**additively**, giving the landed ladder its first real consumer and discharging the "separate,
+later task" note in `Saturation.lean`, without redefining any existing declaration.
+
+The plan deliberately does **not** attempt the destructive redefinition of the bespoke drivers,
+and does **not** attempt the KeyedOrdered driver. Both exclusions are forced by verified findings,
+not by convenience — see Non-Goals.
+
+### Research Integration
+
+The research report overrides the task description on five points, and this plan is built on the
+corrected facts, not the description:
+
+1. **The line-count premise in the description is falsified.** Retiring the double `keys'`
+   derivation destructively is net **+80 lines** and requires re-verifying 40 downstream proof
+   sites, because those sites depend on the *definitional shape* of the steppers and the
+   `sf.sign`/`sf.formula` 14-leaf case split is required either way. The reduction lives entirely
+   in the `outDegEq` removal, so that goes **first**.
+2. **The bridge chain is already compiled and sorry-free.** All four declarations exist verbatim
+   at `specs/564_tableau_s4keyed_migration_st_ladder/assets/verified-st-bridge.lean`, compiled
+   with `lake env lean` against the live tree. Phase 4 is a transcription phase, not a
+   proof-authoring phase. Three specific tactic hazards were found and solved in the asset;
+   they are recorded inline in Phase 4 so the implementer does not re-derive them.
+3. **The KeyedOrdered driver is structurally unmigratable** onto this ladder.
+   `modalStepBranchGenSt` hardwires `b.findSome? f` and abstracts over the *rule*, not the
+   *traversal*; `modalStepBranchS4KeyedOrdered` is a two-stage traversal whose minting gate
+   depends on a global property of `b`. No choice of `apply : RuleApplySt Atom σ` can express it.
+4. **The description's `outDegEq` escape hatch does not trigger.** The cascade is 6 mechanical
+   sites, not four destructuring invariant proofs, and the field has **zero** code consumers
+   anywhere in `Cslib/`.
+5. **All line numbers in the description are stale.** This plan anchors on declaration names and
+   carries freshly re-verified line numbers (HEAD `9a3b2370`) as navigation hints only.
+
+### Prior Plan Reference
+
+No prior plan.
+
+### Roadmap Alignment
+
+No `specs/ROADMAP.md` consulted for this task (no `roadmap_path` in the delegation context).
+
+## Goals & Non-Goals
+
+**Goals**:
+- Remove `S4LoopInv.outDegEq`, its two provision sites, its two destructuring sites, its
+  positional-constructor site in the landed completeness capstone, and the three lemmas orphaned
+  by the removal (~437 lines).
+- Land `modalApplyOneS4KeyedSt` plus its three bridge theorems additively in `LoopChecking.lean`,
+  making `modalExpandBranchesS4Keyed` the `RuleApplySt` ladder's first real consumer.
+- Add the tableau-entry-point corollary tying `modalTableauS4Keyed` to
+  `modalExpandBranchesGenSt`, and retire the stale "separate, later task, out of scope here" note
+  in `Saturation.lean`.
+- Hold every verification gate at or better than the recorded baseline, with zero new `sorry`.
+
+**Non-Goals**:
+- **Migrating the KeyedOrdered driver.** Structurally impossible against the ladder as it stands
+  (research §3). It requires a new stepper-parameterised rung in `Saturation.lean` — a ~55-line
+  rung plus two ~50-line bridge proofs, itself roughly net-zero. Recommend a follow-up task.
+- **Destructively redefining `modalStepBranchS4Keyed` / `modalExpandBranchesS4Keyed`** as
+  instantiations of the generic ones. Net +80 lines and 40 proof sites re-verified (research §5).
+  Research explicitly recommends against it, and it would require user sign-off that is not
+  obtainable under autonomous orchestration.
+- **Adding a fuel parameter to `modalTableauGenSt`.** Would disturb the landed
+  `modalTableauGen_eq_St` bridge for zero benefit; `modalExpandBranchesGenSt` already takes fuel
+  as an argument.
+- **Touching `ModalPotentialInv.outDegEq` (`FmpMeasure.lean`), `modalStepBranch_preserves_outDegEq{,_gen}`,
+  or `modalStepBranchGen_preserves_outDegEq`.** Different structure, different driver, serves K.
+- Resolving the single pre-existing `sorry` at `FrameSoundness.lean:1251`.
+
+## Risks & Mitigations
+
+| Risk | Impact | Likelihood | Mitigation |
+|------|--------|------------|------------|
+| Positional constructor at `FrameCompleteness.lean:4130` is miscounted, silently shifting a later field's proof onto the wrong obligation | H | M | The slot to drop is the **6th** position of the inner anonymous constructor = the **4th** `?_`. Its matching bullet is identified by body, not position: `intro w` / `simp [outDeg, Accessibility.successorsOf, Accessibility.empty]` (verified at `:4141-4142`). A miscount surfaces immediately as a build error, not silently — the remaining obligations have incompatible types. |
+| Deleting the three lemmas before the field's provision sites leaves the tree red mid-phase | M | H | Phase 2 is declared `Commit Mode: atomic-batch`. Intermediate per-file red states are expected and MUST NOT be committed; one commit covers the whole batch after `lake build Cslib` is green. |
+| Asset's `public` modifiers conflict with `LoopChecking.lean`'s file-wide `@[expose] public section` (`:213`) | M | H | Strip every `public` modifier and the `module`/`import`/`namespace`/`open`/`variable`/`end` scaffolding from the asset when inlining. The surrounding declarations (`modalStepBranchS4Keyed:1287`, `modalExpandBranchesS4Keyed:8281`) are bare `def` — match them. |
+| `docBlame` lint fires on the four new declarations (asset docstrings say "EXPERIMENT 1/1b/2/3") | M | H | Phase 4 rewrites all four docstrings as real prose before running `lake lint`. Placeholder experiment labels must not land. |
+| Re-deriving the solved tactic hazards costs a dispatch and may reach a worse proof | M | M | The three hazards (`dsimp only` before `split`; `rw` not `simp only` for `modalApplyOneS4KeyedSt_eq`; trailing `rfl` in the `fuel = 0` base case) are recorded verbatim in Phase 4. Transcribe the asset; do not re-author. |
+| `lake shake` findings count drifts after the deletion (`isMintingShaped`/`outDeg` lose their last `LoopChecking` uses) | L | L | Both are declared in `FmpMeasure.lean`, which `LoopChecking` imports for dozens of other reasons, so no import becomes droppable. Gate on "no Modal/Tableau findings AND count stays 9", never on exit 0. |
+| Full `lake build Cslib` turnaround on an 11.7k-line file makes iteration slow | L | H | Use scoped `lake build Cslib.Logics.Modal.Tableau.LoopChecking` during a phase; reserve full `lake build Cslib` for phase-end. |
+
+## Implementation Phases
+
+**Dependency Analysis**:
+
+| Wave | Phases | Blocked by |
+|------|--------|------------|
+| 1 | 1 | -- |
+| 2 | 2 | 1 |
+| 3 | 3 | 2 |
+| 4 | 4 | 3 |
+| 5 | 5 | 4 |
+| 6 | 6 | 5 |
+
+Phases within the same wave can execute in parallel. This plan is a strict linear chain: Phases
+2-5 all edit `Cslib/Logics/Modal/Tableau/LoopChecking.lean`, so serialization is a file-territory
+requirement, not merely a logical one. Phase 4 has no *logical* dependency on Phases 2-3 (the two
+halves touch disjoint declarations) — if the ordering must be broken for recovery, Phase 4 can be
+run before Phase 2 without loss, but never concurrently with it.
+
+---
+
+### Phase 1: Re-verify and record the gate baseline [NOT STARTED]
+
+**Goal**: Establish that the tree is green *now*, at this HEAD, so that any later gate movement is
+attributable to this task's edits rather than inherited.
+
+**Tasks**:
+- [ ] Record `git log --oneline -1` (expected `9a3b2370` or a descendant).
+- [ ] Run `lake exe cache get` to ensure the Mathlib olean cache is present.
+- [ ] Run `lake build Cslib`; record exit code and job count.
+- [ ] Run the sorry census and record the count:
+      `grep -rn "^\s*sorry\s*$\|:= sorry\|<;> sorry\|exact sorry" Cslib/Logics/Modal/Tableau/`
+- [ ] Run `lake exe checkInitImports`; record exit code.
+- [ ] Run `lake exe lint-style`; record exit code.
+- [ ] Run `lake shake --add-public --keep-implied --keep-prefix`; record the finding count and
+      confirm none are in `Modal/Tableau`.
+- [ ] Record `wc -l` for the three in-scope files.
+
+**Timing**: 0.3 hours
+
+**Depends on**: none
+
+**Verification Tier**: full
+
+**Scope Hypothesis**: The baseline is expected to be `lake build Cslib` green, Modal/Tableau sorry
+census exactly **1** (`FrameSoundness.lean:1251`), `checkInitImports` and `lint-style` exit 0, and
+`lake shake` exit 1 with **9** findings, none in `Modal/Tableau`. `LoopChecking.lean` is expected
+at **11761** lines, `FrameCompleteness.lean` at **8266**, `Saturation.lean` at **755**. Confirm by
+running each command; if any figure differs, record the actual value and treat *it* as the
+baseline rather than adjusting the tree to match this hypothesis.
+
+**Files to modify**:
+- None (read-only measurement phase).
+
+**Verification**:
+- All seven measurements recorded in the phase notes.
+- No edits made.
+
+---
+
+### Phase 2: Remove `S4LoopInv.outDegEq` and its orphaned preservation lemmas [NOT STARTED]
+
+**Goal**: Delete the field, all four of its live sites, the positional constructor slot in the
+completeness capstone, and the three lemmas the removal orphans — leaving `lake build Cslib`
+green with no proof-script authoring at all.
+
+**Tasks**:
+- [ ] Delete the `outDegEq` field declaration and its docstring line from `structure S4LoopInv`
+      (field at `LoopChecking.lean:7690`; structure opens at `:7676`).
+- [ ] At `LoopChecking.lean:8163`, edit
+      `obtain ⟨hbC, heN, heC, haF, haK, hoD, hkT, hkL, hkD, hkI⟩ := hinv` — drop `hoD`, leaving a
+      9-way destructure.
+- [ ] At `LoopChecking.lean:8179-8180`, delete the
+      `outDegEq := modalStepBranchS4_preserves_outDegEq …` field assignment (2 lines).
+- [ ] At `LoopChecking.lean:8225`, apply the same `obtain` edit as above.
+- [ ] At `LoopChecking.lean:8244-8245`, delete the
+      `outDegEq := modalStepBranchS4KeyedOrdered_preserves_outDegEq …` field assignment (2 lines).
+- [ ] At `FrameCompleteness.lean:4130`, drop the **6th slot** (the **4th** `?_`) from the inner
+      anonymous constructor of
+      `refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_, ?_, ?_⟩, ⟨…⟩, ?_, ?_⟩`.
+- [ ] Delete the matching bullet at `FrameCompleteness.lean:4141-4142`, identified by its body
+      (`intro w` followed by
+      `simp [outDeg, Accessibility.successorsOf, Accessibility.empty]`) — **not** by position.
+      Do not touch the structurally similar `simp [outDeg, …]` at `FrameCompleteness.lean:7836`,
+      which is unrelated.
+- [ ] Delete `lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq` including its 5-line
+      docstring (`LoopChecking.lean:5674-5874`).
+- [ ] Delete `lemma modalStepBranchS4_preserves_outDegEq` including its docstring
+      (`LoopChecking.lean:5473-5672`).
+- [ ] Delete `lemma modalApplyOneS4KeyedMint_outDeg_step` including its `omit` line and docstring
+      (`LoopChecking.lean:1017-1042`) — orphaned because all four of its call sites (`:5516`,
+      `:5583`, `:5718`, `:5785`) live inside the two lemmas just deleted.
+- [ ] Confirm zero remaining references: `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean`
+      should return only the prose docstring hits handled in Phase 3, and
+      `grep -rn "modalApplyOneS4KeyedMint_outDeg_step\|modalStepBranchS4_preserves_outDegEq\|modalStepBranchS4KeyedOrdered_preserves_outDegEq" Cslib/`
+      should return nothing.
+- [ ] Run `lake build Cslib` to green.
+
+**Timing**: 1.5 hours
+
+**Depends on**: 1
+
+**Verification Tier**: full
+
+**Commit Mode**: atomic-batch
+
+**Scope Hypothesis**: This phase asserts **6 edit sites across 2 files** and **3 whole-declaration
+deletions totalling ~427 lines**, for a combined reduction of roughly **437 lines** once docstring
+lines are counted. It further asserts the field has **zero** code consumers — no `.outDegEq`
+projection exists anywhere in `Cslib/`. Confirm before deleting by running
+`grep -rn "\.outDegEq" Cslib/` and `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/`; the only
+`LoopChecking.lean` bindings should be `hoD` at `:8163` and `:8225`, each used solely to feed the
+field back at `:8179` / `:8244`. If a genuine consumer surfaces, stop and mark the phase
+`[BLOCKED]` rather than working around it. Confirm the final `wc -l` delta matches the ~437-line
+hypothesis; a materially different figure means a boundary was walked wrong.
+
+**Files to modify**:
+- `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - field removal, 2 `obtain` edits, 2 field-assignment
+  deletions, 3 whole-declaration deletions.
+- `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` - positional constructor slot + its bullet.
+
+**Verification**:
+- `lake build Cslib` exits 0.
+- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1.
+- `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns only prose docstring
+  lines (`:4644`, `:7667`, `:8148`, `:8196` before Phase 3 renumbering).
+- `wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean` shows a reduction of roughly 427 lines
+  against the Phase 1 baseline.
+
+---
+
+### Phase 3: Update the four field-list docstrings [NOT STARTED]
+
+**Goal**: Remove `outDegEq` from the four prose docstrings that enumerate `S4LoopInv`'s field
+list, so the documentation matches the structure.
+
+**Tasks**:
+- [ ] Update the field-run enumeration in the docstring at `LoopChecking.lean:4644` (pre-Phase-2
+      numbering) — the `accFresh`/`accKnown`/`outDegEq` run.
+- [ ] Update the field-run enumeration at `LoopChecking.lean:7667` (the `S4LoopInv` structure
+      docstring's `bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq` run).
+- [ ] Update the field-run enumeration at `LoopChecking.lean:8148`.
+- [ ] Update the field-list enumeration at `LoopChecking.lean:8196` (the explicit
+      `{bClosure,eNodup,eClosure,accFresh,accKnown,outDegEq,keysTotal,keyLowerBd,keysDistinct,keysInUniverse}`
+      brace list).
+- [ ] Re-locate each by `grep -n "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` after
+      Phase 2 — the line numbers above are pre-deletion and will have shifted.
+- [ ] Confirm `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns nothing.
+
+**Timing**: 0.4 hours
+
+**Depends on**: 2
+
+**Verification Tier**: prose
+
+**Scope Hypothesis**: Asserts exactly **4** docstring sites in `LoopChecking.lean` enumerating the
+field list. Confirm by `grep -n "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` after
+Phase 2 lands; if the count differs from 4, fix every hit found rather than only four. Missing one
+is a doc defect, not a build break — but the phase does not close until the grep is empty.
+
+**Files to modify**:
+- `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - four docstrings, prose only.
+
+**Verification**:
+- `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns no matches.
+- `lake build Cslib.Logics.Modal.Tableau.LoopChecking` still green (docstring edits cannot break
+  it, but confirm no accidental code-line damage).
+- `lake exe lint-style` exits 0 (guards against over-length docstring lines).
+
+---
+
+### Phase 4: Land the state-threaded S4 Keyed bridge additively [NOT STARTED]
+
+**Goal**: Transcribe the four verified declarations from the compiled asset into
+`LoopChecking.lean`, giving the `RuleApplySt` ladder its first real consumer without redefining
+anything that already exists.
+
+**Tasks**:
+- [ ] Read `specs/564_tableau_s4keyed_migration_st_ladder/assets/verified-st-bridge.lean` in full.
+- [ ] Insert the four declarations into `LoopChecking.lean` immediately **after**
+      `def modalExpandBranchesS4Keyed` (currently opening at `:8281`, pre-Phase-2 numbering) and
+      before `def modalTableauS4Keyed` (`:8346`), preserving the asset's internal order:
+      `modalApplyOneS4KeyedSt`, `modalApplyOneS4KeyedSt_proj`, `modalApplyOneS4KeyedSt_eq`,
+      `modalStepBranchGenSt_eq_S4Keyed`, `modalExpandBranchesGenSt_eq_S4Keyed`.
+- [ ] Strip the asset's module scaffolding when inlining: drop `module`, the `import` /
+      `public import` lines, `namespace Cslib.Logic.Modal.Tableau`, the `open` line, the
+      `variable` line, and the trailing `end`. All are already established in `LoopChecking.lean`
+      (`namespace` at `:215`, `open` at `:217`, `variable` at `:219`).
+- [ ] Strip every `public` modifier from the transcribed declarations. `LoopChecking.lean` carries
+      a file-wide `@[expose] public section` at `:213`, so bare `def`/`theorem` is correct and
+      matches the surrounding declarations.
+- [ ] Rewrite all four docstrings as real prose. The asset's `EXPERIMENT 1` / `EXPERIMENT 1b` /
+      `EXPERIMENT 2` / `EXPERIMENT 3` labels are development scaffolding and MUST NOT land.
+      Each declaration needs a docstring stating what it establishes, not how it was discovered.
+- [ ] Do **not** modify `modalApplyOneS4Keyed`, `modalStepBranchS4Keyed`,
+      `modalStepBranchS4KeyedBody`, `modalStepBranchS4KeyedOrdered`, or
+      `modalExpandBranchesS4Keyed`. This phase is strictly additive.
+- [ ] Run `lake build Cslib.Logics.Modal.Tableau.LoopChecking`, then `lake build Cslib`.
+- [ ] Run `lake lint` and address any `docBlame` hit on the new declarations.
+
+**Timing**: 1.2 hours
+
+**Depends on**: 3
+
+**Verification Tier**: full
+
+**Scope Hypothesis**: Asserts the asset transcribes to roughly **+100 lines** (an ~18-line
+definition plus ~80 lines of proof) across **5 new declarations** in exactly **one** file, with
+**zero** existing declarations modified. Confirm by diffing `wc -l` before and after and by
+`git diff --stat`, which must show `LoopChecking.lean` as the only changed file with additions
+only in the inserted region. If any existing declaration shows as modified, the insertion point
+was wrong — revert and re-place.
+
+**Files to modify**:
+- `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - five new declarations inserted after
+  `modalExpandBranchesS4Keyed`.
+
+**Verification**:
+- `lake build Cslib` exits 0.
+- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1.
+- `lake lint` reports no `docBlame` for the five new declarations.
+- `git diff --stat` shows additions only; no existing declaration body altered.
+- `grep -n "EXPERIMENT" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns nothing.
+
+**Solved tactic hazards — transcribe, do not re-derive**:
+1. In `modalApplyOneS4KeyedSt_eq`, after `cases s <;> cases f` the `{sign := …}.sign` projections
+   must be discharged with a bare `dsimp only` **before** `split`. Without it, `split` targets the
+   wrong `match` and `rfl` fails with a cross-arm mismatch (the `.neg, □φ` arm being offered for a
+   `.pos, ◇` formula).
+2. In `modalStepBranchGenSt_eq_S4Keyed`, use `rw [modalApplyOneS4KeyedSt_eq]` and **not**
+   `simp only [modalApplyOneS4KeyedSt_eq]`. `simp` normalises
+   `branches.map (fun _ => e ++ [sf])` into `List.replicate branches.length (e ++ [sf])` on one
+   side only, and the goal will not close. `rw` followed by a bare `rfl` closes it.
+3. In `modalExpandBranchesGenSt_eq_S4Keyed`, the `fuel = 0` base case needs a trailing `rfl`
+   after `simp only [modalExpandBranchesGenSt, modalExpandBranchesS4Keyed]`.
+
+---
+
+### Phase 5: Entry-point corollary and `Saturation.lean` note retirement [NOT STARTED]
+
+**Goal**: Close the ladder story end-to-end by tying `modalTableauS4Keyed` to
+`modalExpandBranchesGenSt`, and retire the now-stale "separate, later task, out of scope here"
+note that pointed at exactly this work.
+
+**Tasks**:
+- [ ] Add a corollary immediately after `def modalTableauS4Keyed` (currently `:8346`,
+      pre-Phase-2 numbering) stating that `modalTableauS4Keyed φ` equals
+      `modalExpandBranchesGenSt (modalApplyOneS4KeyedSt φ) [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty] [[(0, (∅ : Finset (Sign × Proposition Atom)))]] (modalFuelS4 φ)`.
+      It should follow from `modalExpandBranchesGenSt_eq_S4Keyed` by `rw` plus `rfl`; confirm the
+      exact initial-`keyss` argument against `modalTableauS4Keyed`'s own body rather than
+      assuming the shape above.
+- [ ] Give the corollary a real docstring explaining that the S4 entry point cannot route through
+      `modalTableauGenSt` because that hardwires K's `modalFuel φ`, whereas the S4 keyed loop
+      needs `modalFuelS4 φ` for its pigeonhole world bound.
+- [ ] Do **not** add a fuel parameter to `modalTableauGenSt` and do **not** touch
+      `modalTableauGen_eq_St`.
+- [ ] Update the note in `Saturation.lean` (currently around `:502-505`, the paragraph reading
+      "Nothing in the repository consumes this ladder yet. The intended first consumer is
+      `modalExpandBranchesS4Keyed` … a separate, later task, out of scope here.") to state that
+      the ladder now has `modalExpandBranchesS4Keyed` as a landed consumer via
+      `modalExpandBranchesGenSt_eq_S4Keyed`, and that the KeyedOrdered driver remains unmigrated
+      because `modalStepBranchGenSt` abstracts over the rule and not the traversal.
+- [ ] Run `lake build Cslib`.
+
+**Timing**: 0.7 hours
+
+**Depends on**: 4
+
+**Verification Tier**: full
+
+**Scope Hypothesis**: Asserts **1 new declaration** in `LoopChecking.lean` and **1 prose paragraph
+edit** in `Saturation.lean` — exactly two files. Confirm via `git diff --name-only` for this
+phase's commit. If the corollary does not close by `rw` + `rfl`, do not escalate to a bespoke
+proof: re-check the initial-argument shape against `modalTableauS4Keyed`'s body first, since a
+mismatch there is the likely cause.
+
+**Files to modify**:
+- `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - entry-point corollary after `modalTableauS4Keyed`.
+- `Cslib/Logics/Modal/Tableau/Saturation.lean` - retire the stale "separate, later task" note.
+
+**Verification**:
+- `lake build Cslib` exits 0.
+- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1.
+- `grep -n "separate, later task, out of scope here" Cslib/Logics/Modal/Tableau/Saturation.lean`
+  returns nothing.
+- `lake lint` reports no `docBlame` on the new corollary.
+
+---
+
+### Phase 6: Full CI gate and scope-exclusion record [NOT STARTED]
+
+**Goal**: Run the complete CSLib verification pipeline against the Phase 1 baseline and record the
+two forced scope exclusions so a future reader does not re-attempt them blind.
+
+**Tasks**:
+- [ ] Run `lake build Cslib`; confirm exit 0.
+- [ ] Run the sorry census; confirm the count is still exactly 1 and the single hit is
+      `FrameSoundness.lean:1251`.
+- [ ] Run `lake exe checkInitImports`; confirm exit 0.
+- [ ] Run `lake lint`; confirm no new findings against the Phase 1 baseline.
+- [ ] Run `lake exe lint-style`; confirm exit 0.
+- [ ] Run `lake shake --add-public --keep-implied --keep-prefix`; confirm **no Modal/Tableau
+      findings** and the count is still **9**. Do **not** gate on exit 0 — exit 1 with 9
+      non-Modal/Tableau findings is the expected, correct outcome.
+- [ ] Run `lake test`.
+- [ ] Record the net `wc -l` delta across the three in-scope files against the Phase 1 baseline.
+- [ ] Record in the task summary that the **KeyedOrdered migration** was excluded as structurally
+      impossible against the current ladder, with the reason (`modalStepBranchGenSt` abstracts
+      over the rule, not the traversal; the ordered driver's minting gate is a global property of
+      the branch), and recommend a follow-up task for the stepper-parameterised rung.
+- [ ] Record in the task summary that the **destructive redefinition** of the bespoke drivers was
+      excluded as net +80 lines across 40 re-verified proof sites, per the research measurement,
+      and that it would require explicit user sign-off.
+
+**Timing**: 0.5 hours
+
+**Depends on**: 5
+
+**Verification Tier**: full
+
+**Scope Hypothesis**: Asserts the net line delta across the three files is a reduction of roughly
+**330 lines** (~437 removed in Phases 2-3, ~105 added in Phases 4-5). Confirm by `wc -l` against
+the Phase 1 baseline. A materially different figure is not itself a failure, but it must be
+reported honestly in the summary rather than restated as the hypothesis.
+
+**Files to modify**:
+- None (verification and recording only).
+
+**Verification**:
+- All seven gate commands run, with results recorded against the Phase 1 baseline.
+- Both scope exclusions recorded with their reasons.
+
+---
+
+## Testing & Validation
+
+- [ ] `lake build Cslib` exits 0.
+- [ ] `grep -rn "^\s*sorry\s*$\|:= sorry\|<;> sorry\|exact sorry" Cslib/Logics/Modal/Tableau/`
+      returns exactly 1 hit, at `FrameSoundness.lean:1251`. **Zero-debt: no new `sorry` may be
+      introduced.** Nothing in this plan requires one — Phases 2-3 are pure deletion of
+      already-proved material, and every Phase 4 proof is already compiled in the asset.
+- [ ] `lake exe checkInitImports` exits 0.
+- [ ] `lake exe lint-style` exits 0.
+- [ ] `lake lint` shows no new findings, in particular no `docBlame` on any of the six new
+      declarations.
+- [ ] `lake shake --add-public --keep-implied --keep-prefix`: **no Modal/Tableau findings AND
+      count stays 9**. Do not gate on exit 0.
+- [ ] `lake test` passes.
+- [ ] No vacuous definitions (`def X := True`, `theorem X := trivial`) anywhere in the diff.
+- [ ] `grep -rn "\.outDegEq\|outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns
+      nothing; `ModalPotentialInv.outDegEq` in `FmpMeasure.lean` is untouched.
+
+## Artifacts & Outputs
+
+- `Cslib/Logics/Modal/Tableau/LoopChecking.lean` — `S4LoopInv.outDegEq` and three orphaned lemmas
+  removed; five bridge declarations plus one entry-point corollary added; four docstrings updated.
+- `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — positional constructor arity reduced by
+  one, matching bullet deleted.
+- `Cslib/Logics/Modal/Tableau/Saturation.lean` — stale "separate, later task" note retired.
+- `specs/564_tableau_s4keyed_migration_st_ladder/summaries/01_*-summary.md` — execution summary
+  including the gate table, the net line delta, and both recorded scope exclusions.
+- Recommendation (not an artifact of this task): a follow-up task for the stepper-parameterised
+  rung in `Saturation.lean` that would enable the KeyedOrdered migration.
+
+## Rollback/Contingency
+
+Each phase commits separately (Phase 2 as a single atomic batch), so rollback is per-phase via
+`git revert` of that phase's commit — no cross-phase entanglement exists because Phases 2-3 and
+Phases 4-5 touch disjoint declarations.
+
+- **Phase 2 fails mid-batch**: the tree is expected to be red between the field removal and the
+  last site edit. Do not commit. If the batch cannot be brought green, `git checkout` the two
+  files back to the Phase 1 commit (take a `bash .claude/scripts/git-snapshot.sh 564` first if any
+  unrelated uncommitted work exists) and mark the phase `[BLOCKED]` with the failing site named.
+- **Phase 4 fails**: the bridge is purely additive, so deleting the inserted region restores the
+  Phase 3 state exactly. If a transcribed proof does not compile, re-check the three recorded
+  tactic hazards before altering the proof — the asset compiled clean against this tree, so a
+  failure most likely means a hazard was transcribed away.
+- **Phase 5 fails**: revert the corollary only; the Phase 4 bridge stands on its own and the
+  `Saturation.lean` note edit can land independently.
+- **Any phase introduces a `sorry`**: this is a hard stop, not a contingency. Revert the phase and
+  mark it `[BLOCKED]`.
+- **Half-1 succeeds, Half-2 fails**: this is an acceptable partial outcome. The `outDegEq` removal
+  is the whole line-count payoff and is independently valuable; the task may close as
+  `[PARTIAL]` with Phases 4-6 outstanding rather than reverting Phases 2-3.

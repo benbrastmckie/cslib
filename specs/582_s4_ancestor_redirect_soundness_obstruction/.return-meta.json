@@ -1,0 +1,22 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-06T00:00:00Z",
+  "artifacts": [
+    "specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md",
+    "specs/582_s4_ancestor_redirect_soundness_obstruction/scratch_refute_ancestor_redirect.lean"
+  ],
+  "partial_progress": {
+    "stage": "research_complete",
+    "details": "Report written; refutation machine-checked; handoff emitted."
+  },
+  "metadata": {
+    "session_id": "unknown",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "recommended_route": "c-delete",
+    "key_finding": "lemma statement is refutable; countermodel machine-checked with no sorryAx",
+    "consumer_audit": "3 .lean hits, 1 declaration, 0 code consumers",
+    "sorry_baseline": {"framesoundness": 1, "repo_code_position": 28, "census_rows": 58}
+  }
+}

@@ -39,7 +39,7 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
+582 [RESEARCHED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
 
 ### Temporal Logic
 
@@ -208,10 +208,11 @@ VERIFY BEFORE STARTING: re-read Scheme.lean:2598-2622 and confirm the counter-in
 ---
 
 ### 582. Resolve the S4 ancestor-redirect sorry, the only sorry with no owning task
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 566, Task 567, Task 586
+- **Research**: [582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md]
 
 **Description**: Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1252) -- the ONLY sorry in the repository with no owning task.
 

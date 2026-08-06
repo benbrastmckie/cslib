@@ -1,0 +1,12 @@
+{
+  "status": "researched",
+  "summary": "Machine-checked refutation: the statement of branchSatisfiableIn_s4FC_ancestor_redirect is FALSE, not merely unprovable. Explicit 3-world countermodel (b = [T(box p)@0, F(p)@2], acc = {0->1, 2->1}, redirect 1->2) compiles clean under lake env lean with axioms [propext, Quot.sound] and no sorryAx. This eliminates route (a) on logical grounds -- there is no proof of a false statement to import from Massacci's deferred references [7]/[20]. Route (b) is technically possible but would produce a fourth statement of a fact already proved three times (branchSatisfiablePinnedIn_redirect_mechanical, branchSatisfiableIn_s4FC_addEdge_of_blocked, the S4RedirectSoundInv family), against the duplicate-elimination discipline task 586 just enforced. RECOMMENDATION: route (c) DELETE, with the finding relocated (not erased) into the accPinnedBy module comment and promoted to an executable regression witness in CslibTests/. Consumer audit re-run live: 3 .lean hits, exactly one the declaration, zero code consumers -- confirmed. Two corrections to the task brief: the third .lean hit is at FrameSoundness.lean:5294, not LoopChecking.lean:113, and there is an unmentioned fourth reference at Cslib/Logics/Modal/Tableau/README.md:66. Deletion-impact surface is six touch points, none a proof, including scripts/axiom-census-baseline.txt:40 which must be regenerated via check-axiom-census.sh --update rather than hand-edited.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md",
+      "type": "report",
+      "summary": "Research report: machine-checked refutation of the lemma statement, live consumer re-audit, findings from completed tasks 553/566/567/586, feasibility analysis of routes (a)/(b)/(c), recommendation of route (c) DELETE with a six-item deletion-impact work list and a finding-preservation plan."
+    }
+  ]
+}

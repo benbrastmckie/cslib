@@ -29,14 +29,20 @@
       "project_number": 582,
       "project_name": "s4_ancestor_redirect_soundness_obstruction",
       "title": "Resolve the S4 ancestor-redirect sorry, the only sorry with no owning task",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "created": "2026-07-28T13:29:56Z",
-      "last_updated": "2026-08-05T00:00:00Z",
-      "session_id": "sess_1785201767_9dbb98",
+      "last_updated": "2026-08-06T22:00:38Z",
+      "session_id": "sess_1786051015_f98818",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md",
+          "type": "report",
+          "summary": "Research report: machine-checked refutation of the lemma statement, live consumer re-audit, findings from completed tasks, feasibility analysis of routes (a)/(b)/(c), recommendation of route (c) DELETE with deletion-impact work list."
+        }
+      ],
       "blockers": [],
       "dependencies": [
         553,

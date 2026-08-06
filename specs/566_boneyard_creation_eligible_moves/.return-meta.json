@@ -1,0 +1,40 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-06T00:00:00Z",
+  "completed_at": "2026-08-06T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/566_boneyard_creation_eligible_moves/reports/01_boneyard-convention-and-consumer-reaudit.md",
+      "type": "report",
+      "summary": "Boneyard convention research, re-run consumer audit, carve-out verification, and exclusion-mechanics inventory for task 566."
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_complete",
+    "details": "All four research questions answered against the current tree. CI baseline re-verified. No blockers."
+  },
+  "key_findings": [
+    "Eligible set is THREE units (~157 lines), not four: blockedRedirect_boxctx_mem_of_boxOrigin (0 code consumers), blockedRedirect_diaNeg_mem_of_diaOrigin (0 refs at all), keysRootEmpty/keysRootEmpty_entry (0 external consumers).",
+    "outDegEq candidate is MOOT: modalStepBranchS4_preserves_outDegEq and modalStepBranchS4KeyedOrdered_preserves_outDegEq return zero grep hits; S4LoopInv has no outDegEq field. The surviving ModalPotentialInv.outDegEq in FmpMeasure.lean is a DIFFERENT, heavily-consumed declaration and is not a candidate.",
+    "Carve-out 1 HOLDS and is pinpointed: branchSatisfiableIn_s4FC_ancestor_redirect at FrameSoundness.lean:1227, sorry at :1251, matching the task's corrected figures and refuting the superseded 1220-1244 range. It is the sole Modal/Tableau row of scripts/axiom-census-baseline.txt.",
+    "Carve-out 2 HOLDS with a large margin: keysOriginS4 has 43 measured references in Cslib/. The 22-consumer figure remains unreproducible across three measurement methods; cite the qualitative fact. The FALSE removal claim is already retracted in-tree, so there is no stale comment at 2001-2002 to fix.",
+    "No build, lint, or census config needs changing for a root-level Boneyard/: all twelve mechanisms are lean_lib-scoped, import-reachability-scoped, or hardcoded to Cslib. Root placement is load-bearing; placing it under Cslib/ would break mk_all --check immediately.",
+    "TWO repo-wide .lean scanner exceptions found: .github/workflows/todo-issue.yml (diff-driven, would file GitHub issues for TODO markers in archived code; NOT triggered by this move since the eligible regions carry no markers) and scripts/bench/size/run (repo-wide glob, not CI-wired).",
+    "The move is not a cut-and-paste: LoopChecking.lean:184-185 asserts no Boneyard/ exists (falsified by this task), and four prose references would be left dangling, two of them inside refutation narratives. The keysRootEmpty section comment also carries the keysOriginS4 retraction, which must stay in live code."
+  ],
+  "verification_baseline": {
+    "lake_build_Cslib": "green, 3313 jobs",
+    "modal_tableau_sorry_census": 1,
+    "axiom_census": "43 sorryAx-tainted, baseline 43, exit 0",
+    "shake_residue": "9 flagged, baseline 9, exit 0",
+    "checkInitImports": "exit 0",
+    "lint_suppressions": "19, ceiling 19, exit 0",
+    "sorry_suppressions": "markers 18/18, sorries 28/28, exit 0"
+  },
+  "metadata": {
+    "session_id": "sess_1786030020_688c25_566",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

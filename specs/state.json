@@ -1602,7 +1602,7 @@
     {
       "project_number": 566,
       "project_name": "boneyard_creation_eligible_moves",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Create Boneyard/ with its convention and move only re-verified zero-consumer declarations",
       "topic": "Modal Logic",
@@ -1618,12 +1618,18 @@
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
         "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/566_boneyard_creation_eligible_moves/reports/01_boneyard-convention-and-consumer-reaudit.md",
+          "type": "report",
+          "summary": "Full research report: verified CI baseline (build 3313 jobs green, Modal/Tableau sorry census exactly 1, all five ratchets exit 0); re-run consumer audit by declaration name for every candidate; carve-out verification; upstream Boneyard convention from BimodalLogic/FormalSystem/Boneyard/README.md; complete twelve-mechanism exclusion table with exact scoping expressions plus two repo-wide scanner exceptions; implementation hazards (dangling prose references, falsified no-Boneyard assertion at LoopChecking.lean:184-185); six-phase decomposition."
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T00:00:00Z",
+      "last_updated": "2026-08-06T16:58:38Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1786030020_688c25_566",
       "parent_task": null
     },
     {

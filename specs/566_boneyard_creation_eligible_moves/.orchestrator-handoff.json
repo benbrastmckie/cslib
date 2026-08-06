@@ -1,0 +1,14 @@
+{
+  "status": "researched",
+  "summary": "Re-audit confirms three eligible declarations (two blockedRedirect_*_of_*Origin lemmas plus the keysRootEmpty pair), the outDegEq candidate is already moot, both carve-outs hold with carve-out 1 pinpointed at FrameSoundness.lean:1227/:1251, and a root-level Boneyard/ needs no build/lint/census config changes though two repo-wide .lean scanners are recorded exceptions.",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/566_boneyard_creation_eligible_moves/reports/01_boneyard-convention-and-consumer-reaudit.md",
+      "type": "report",
+      "summary": "Full research report: verified CI baseline (build 3313 jobs green, Modal/Tableau sorry census exactly 1, all five ratchets exit 0); re-run consumer audit by declaration name for every candidate; carve-out verification; upstream Boneyard convention from BimodalLogic/FormalSystem/Boneyard/README.md; complete twelve-mechanism exclusion table with exact scoping expressions plus two repo-wide scanner exceptions; implementation hazards (dangling prose references, falsified no-Boneyard assertion at LoopChecking.lean:184-185); six-phase decomposition."
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 1
+}

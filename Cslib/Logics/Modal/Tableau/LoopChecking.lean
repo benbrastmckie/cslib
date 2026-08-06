@@ -36,7 +36,7 @@ This module is now a **`public import` barrel plus a 20-declaration residue**: t
 two end-to-end capstone theorems. The equality-blocking loop-checking machinery this file used
 to hold directly -- universe/fuel bookkeeping, the birth-key guard, the rule-application driver,
 the Hintikka-set construction, the blocked-redirect machinery, and the four-way `S4LoopInv`
-invariant split -- was extracted into eleven `S4/*.lean` modules (below), each along the
+invariant split -- was extracted into ten `S4/*.lean` modules (below), each along the
 research-verified acyclic dependency layering. Every declaration that used to live here directly
 is still reachable through this file's `public import`s: **no downstream file needed to change
 its own imports** as a result of the split.

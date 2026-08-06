@@ -195,7 +195,7 @@ Modal/
                                     {Hintikka, InvariantKeys, InvariantAcc} -> {Redirect,
                                     Invariant} -> HintikkaInvariant. LoopChecking.lean (one level
                                     up) is the barrel: S4 entry points, termination measure, and
-                                    the two end-to-end capstones, re-exporting all eleven modules.
+                                    the two end-to-end capstones, re-exporting all ten modules.
 ```
 
 ### Temporal Logic (`Logics/Temporal/`)

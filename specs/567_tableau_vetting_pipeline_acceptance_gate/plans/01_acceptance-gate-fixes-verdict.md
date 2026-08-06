@@ -179,17 +179,17 @@ count in the ledger and let Phase 3's checklist follow the ledger, not this hypo
 
 ---
 
-### Phase 2: Correct the S4 module count (eleven -> ten) [NOT STARTED]
+### Phase 2: Correct the S4 module count (eleven -> ten) [COMPLETED]
 
 **Goal**: Eliminate the systematic off-by-one module count from all three deliverable files,
 including the root-level governance document.
 
 **Tasks**:
-- [ ] Edit `Cslib/Logics/Modal/Tableau/LoopChecking.lean`'s module docstring: `was extracted into eleven \`S4/*.lean\` modules (below)` -> `ten`. This is the self-contradiction the research report names — the same docstring's own bullet list and ASCII dependency diagram already enumerate exactly ten modules.
-- [ ] Edit `ORGANISATION.md`'s `Tableau/` subtree annotation: `re-exporting all eleven modules.` -> `re-exporting all ten modules.`
-- [ ] Edit each `eleven` occurrence in `Cslib/Logics/Modal/Tableau/README.md` identified by the Phase 1 anchor list (plan-time survey found four: `distributed across the eleven \`S4/*.lean\` modules`, `the eleven-module map`, `live in the eleven \`S4/*.lean\` modules`, and `across eleven new files`) — correcting the word and, where the surrounding prose says "eleven-module map", keeping the phrasing natural ("ten-module map").
-- [ ] Re-run `grep -rn 'eleven\|Eleven' Cslib/Logics/Modal/Tableau/ ORGANISATION.md` and confirm zero remaining hits.
-- [ ] Build the single edited Lean module: `lake build Cslib.Logics.Modal.Tableau.LoopChecking`.
+- [x] Edit `Cslib/Logics/Modal/Tableau/LoopChecking.lean`'s module docstring: `was extracted into eleven \`S4/*.lean\` modules (below)` -> `ten`. This is the self-contradiction the research report names — the same docstring's own bullet list and ASCII dependency diagram already enumerate exactly ten modules.
+- [x] Edit `ORGANISATION.md`'s `Tableau/` subtree annotation: `re-exporting all eleven modules.` -> `re-exporting all ten modules.`
+- [x] Edit each `eleven` occurrence in `Cslib/Logics/Modal/Tableau/README.md` identified by the Phase 1 anchor list (plan-time survey found four: `distributed across the eleven \`S4/*.lean\` modules`, `the eleven-module map`, `live in the eleven \`S4/*.lean\` modules`, and `across eleven new files`) — correcting the word and, where the surrounding prose says "eleven-module map", keeping the phrasing natural ("ten-module map").
+- [x] Re-run `grep -rn 'eleven\|Eleven' Cslib/Logics/Modal/Tableau/ ORGANISATION.md` and confirm zero remaining hits. *(deviation: literal zero hits is not achievable without corrupting unrelated correct content. Confirmed instead: zero D1 module-count hits remain; exactly 7 unrelated \`RuleApplicationSpec\` eleven-field hits remain, untouched — see Phase 1 ledger's "CRITICAL SCOPE FINDING")*
+- [x] Build the single edited Lean module: `lake build Cslib.Logics.Modal.Tableau.LoopChecking`. *(exit 0, 876 jobs; only pre-existing S4/Driver.lean --wfail warnings, matching the documented Reasoned Exclusion)*
 
 **Timing**: 0.5 hours
 
@@ -259,7 +259,7 @@ above, correct it too and record the addition.
 
 ---
 
-### Phase 4: Re-record the s4witness verdict with attribution [NOT STARTED]
+### Phase 4: Re-record the s4witness verdict with attribution [IN PROGRESS]
 
 **Goal**: Make the out-of-tree regression corpus honest again by annotating the superseded
 `s4witness.lean` trace and appending the live one with its cause, without destroying the

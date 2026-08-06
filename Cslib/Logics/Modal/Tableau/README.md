@@ -20,7 +20,7 @@ Lean 4.31.0) inside `LoopChecking.lean`'s header. The `LoopChecking.lean` size/d
 row below was corrected and re-verified twice since: once against tree state `11607e0f` (the
 `LoopChecking.lean` -> `S4/` module split's research baseline, 11,393 lines / 241 declarations),
 and again after the split completed (1,723 lines / 20 declarations, with the remaining content
-distributed across the eleven `S4/*.lean` modules -- see `LoopChecking.lean`'s own header for the
+distributed across the ten `S4/*.lean` modules -- see `LoopChecking.lean`'s own header for the
 module map). Every other row (`FrameSoundness.lean`/`FrameCompleteness.lean` sizes, the
 sorry/axiom censuses, the inventory tallies) is carried over from the original capture unchanged
 by this relocation -- this is a move-only refactor of `LoopChecking.lean`'s internal structure,
@@ -44,10 +44,10 @@ began -- the split's own Phase 1 baseline re-measured the pre-split file at **11
 above, which the file's own naive in-header grep undercounts). Post-split,
 `LoopChecking.lean` is **1,723 lines / 20 top-level declarations** (the S4 driver's entry
 points, its termination measure, and its two end-to-end capstone theorems -- see its module
-docstring for the full residue rationale and the eleven-module map). The other 221
-declarations / ~9,670 lines live in the eleven `S4/*.lean` modules (10,294 lines total there,
+docstring for the full residue rationale and the ten-module map). The other 221
+declarations / ~9,670 lines live in the ten `S4/*.lean` modules (10,294 lines total there,
 the ~624-line difference from the pre-split figure being expected per-module header/import/
-docstring overhead across eleven new files).
+docstring overhead across ten new files).
 
 `FrameSoundness.lean` 5,317 lines, `FrameCompleteness.lean` 4,307 lines, at the original `7eb51f69`
 capture -- neither re-measured by the `S4/` split (out of scope; re-run `wc -l` before citing).

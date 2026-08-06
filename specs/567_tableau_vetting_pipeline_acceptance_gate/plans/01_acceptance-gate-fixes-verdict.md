@@ -1,7 +1,7 @@
 # Implementation Plan: Tableau Vetting-Pipeline Acceptance Gate
 
 - **Task**: 567 - Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5 hours
 - **Dependencies**: 553, 558, 562, 563, 564, 565, 566, 586 (all landed; the programme is complete and this task is its terminal gate)
 - **Research Inputs**: `specs/567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md`
@@ -140,19 +140,19 @@ serialized behind Phase 2 despite having no logical dependency on it. Phase 4's 
 
 ---
 
-### Phase 1: Live re-measurement and evidence ledger [NOT STARTED]
+### Phase 1: Live re-measurement and evidence ledger [COMPLETED]
 
 **Goal**: Re-derive every disputed figure and every edit anchor against the current tree, so no
 later phase writes a number or targets a site on the research report's authority alone.
 
 **Tasks**:
-- [ ] Record the current tree SHA (`git rev-parse --short HEAD`) and confirm `git status --porcelain Cslib CslibTests ORGANISATION.md` is empty.
-- [ ] Re-run each README-documented measurement command and record the live value: S4 module count (`ls -1 Cslib/Logics/Modal/Tableau/S4/*.lean | wc -l`), `wc -l` on `LoopChecking.lean` / `FrameSoundness.lean` / `FrameCompleteness.lean` / `CslibTests/S4LoopGuardRegression.lean`, the attribute-aware declaration-count pattern against `LoopChecking.lean` and against `cat Cslib/Logics/Modal/Tableau/S4/*.lean`, the two-grep repo-wide sorry census (with and without the `Modal/Tableau/` filter), `grep -rnE '^axiom '` at both scopes, the `hintikkaS4_` count against `S4/Hintikka.lean`, and both `ModalTableauResult` span commands.
-- [ ] Partition every figure into **CORRECT (do not touch)** and **DRIFTED (correct in Phase 3)**, quoting the live command and its output for each.
-- [ ] Enumerate every literal `eleven` occurrence with `grep -rn 'eleven' Cslib/Logics/Modal/Tableau/ ORGANISATION.md` and record each as a quoted-string anchor (not a line number).
-- [ ] Re-run `lake env lean specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4witness.lean` and capture the full live trace verbatim for Phase 4.
-- [ ] Re-run the box-plus attribution chain (`git log -1 --format='%h %ad' --date=short` on `5733dcd1`, `7960c12e`, `80feb736`; `git merge-base --is-ancestor 5733dcd1 <first programme commit> && echo YES`) and record the outputs.
-- [ ] Write `specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md` holding the tree SHA, the CORRECT/DRIFTED partition with commands and outputs, the quoted-string anchor list, the live `s4witness` trace, and the attribution chain.
+- [x] Record the current tree SHA (`git rev-parse --short HEAD`) and confirm `git status --porcelain Cslib CslibTests ORGANISATION.md` is empty. *(tree SHA `3a11702e`, clean)*
+- [x] Re-run each README-documented measurement command and record the live value: S4 module count (`ls -1 Cslib/Logics/Modal/Tableau/S4/*.lean | wc -l`), `wc -l` on `LoopChecking.lean` / `FrameSoundness.lean` / `FrameCompleteness.lean` / `CslibTests/S4LoopGuardRegression.lean`, the attribute-aware declaration-count pattern against `LoopChecking.lean` and against `cat Cslib/Logics/Modal/Tableau/S4/*.lean`, the two-grep repo-wide sorry census (with and without the `Modal/Tableau/` filter), `grep -rnE '^axiom '` at both scopes, the `hintikkaS4_` count against `S4/Hintikka.lean`, and both `ModalTableauResult` span commands.
+- [x] Partition every figure into **CORRECT (do not touch)** and **DRIFTED (correct in Phase 3)**, quoting the live command and its output for each.
+- [x] Enumerate every literal `eleven` occurrence with `grep -rn 'eleven' Cslib/Logics/Modal/Tableau/ ORGANISATION.md` and record each as a quoted-string anchor (not a line number). *(deviation: discovered 12 total hits, not 6 — 6 are the D1 module-count off-by-one, 6 are an unrelated, CORRECT `RuleApplicationSpec` eleven-field figure that must NOT be touched; see ledger's "CRITICAL SCOPE FINDING")*
+- [x] Re-run `lake env lean specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4witness.lean` and capture the full live trace verbatim for Phase 4. *(matches research report's §5.4 trace exactly — box-plus attribution fully explains it, no unexplained residual divergence)*
+- [x] Re-run the box-plus attribution chain (`git log -1 --format='%h %ad' --date=short` on `5733dcd1`, `7960c12e`, `80feb736`; `git merge-base --is-ancestor 5733dcd1 <first programme commit> && echo YES`) and record the outputs.
+- [x] Write `specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md` holding the tree SHA, the CORRECT/DRIFTED partition with commands and outputs, the quoted-string anchor list, the live `s4witness` trace, and the attribution chain.
 
 **Timing**: 0.75 hours
 

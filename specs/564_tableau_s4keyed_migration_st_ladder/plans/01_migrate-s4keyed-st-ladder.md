@@ -166,43 +166,51 @@ baseline rather than adjusting the tree to match this hypothesis.
 
 ---
 
-### Phase 2: Remove `S4LoopInv.outDegEq` and its orphaned preservation lemmas [NOT STARTED]
+### Phase 2: Remove `S4LoopInv.outDegEq` and its orphaned preservation lemmas [COMPLETED]
 
 **Goal**: Delete the field, all four of its live sites, the positional constructor slot in the
 completeness capstone, and the three lemmas the removal orphans — leaving `lake build Cslib`
 green with no proof-script authoring at all.
 
 **Tasks**:
-- [ ] Delete the `outDegEq` field declaration and its docstring line from `structure S4LoopInv`
+- [x] Delete the `outDegEq` field declaration and its docstring line from `structure S4LoopInv`
       (field at `LoopChecking.lean:7690`; structure opens at `:7676`).
-- [ ] At `LoopChecking.lean:8163`, edit
+- [x] At `LoopChecking.lean:8163`, edit
       `obtain ⟨hbC, heN, heC, haF, haK, hoD, hkT, hkL, hkD, hkI⟩ := hinv` — drop `hoD`, leaving a
-      9-way destructure.
-- [ ] At `LoopChecking.lean:8179-8180`, delete the
+      9-way destructure. (Both occurrences at pre-edit `:8161` and `:8223` edited identically.)
+- [x] At `LoopChecking.lean:8179-8180`, delete the
       `outDegEq := modalStepBranchS4_preserves_outDegEq …` field assignment (2 lines).
-- [ ] At `LoopChecking.lean:8225`, apply the same `obtain` edit as above.
-- [ ] At `LoopChecking.lean:8244-8245`, delete the
+- [x] At `LoopChecking.lean:8225`, apply the same `obtain` edit as above.
+- [x] At `LoopChecking.lean:8244-8245`, delete the
       `outDegEq := modalStepBranchS4KeyedOrdered_preserves_outDegEq …` field assignment (2 lines).
-- [ ] At `FrameCompleteness.lean:4130`, drop the **6th slot** (the **4th** `?_`) from the inner
+- [x] At `FrameCompleteness.lean:4130`, drop the **6th slot** (the **4th** `?_`) from the inner
       anonymous constructor of
       `refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_, ?_, ?_⟩, ⟨…⟩, ?_, ?_⟩`.
-- [ ] Delete the matching bullet at `FrameCompleteness.lean:4141-4142`, identified by its body
+- [x] Delete the matching bullet at `FrameCompleteness.lean:4141-4142`, identified by its body
       (`intro w` followed by
       `simp [outDeg, Accessibility.successorsOf, Accessibility.empty]`) — **not** by position.
-      Do not touch the structurally similar `simp [outDeg, …]` at `FrameCompleteness.lean:7836`,
-      which is unrelated.
-- [ ] Delete `lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq` including its 5-line
-      docstring (`LoopChecking.lean:5674-5874`).
-- [ ] Delete `lemma modalStepBranchS4_preserves_outDegEq` including its docstring
-      (`LoopChecking.lean:5473-5672`).
-- [ ] Delete `lemma modalApplyOneS4KeyedMint_outDeg_step` including its `omit` line and docstring
-      (`LoopChecking.lean:1017-1042`) — orphaned because all four of its call sites (`:5516`,
-      `:5583`, `:5718`, `:5785`) live inside the two lemmas just deleted.
-- [ ] Confirm zero remaining references: `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean`
-      should return only the prose docstring hits handled in Phase 3, and
+      Confirmed the structurally similar `simp [outDeg, …]` at `FrameCompleteness.lean:7836`
+      (unrelated `ModalPotentialInv` site) was untouched.
+- [x] Delete `lemma modalStepBranchS4KeyedOrdered_preserves_outDegEq` including its docstring
+      (found at pre-Phase-2 `:5652-5847` after the field/obtain edits had already shifted line
+      numbers by -2 from the plan's stale `:5674-5874` estimate; re-located via fresh `grep -n`
+      per the phase's own file-territory sequencing rather than trusting stale numbers).
+- [x] Delete `lemma modalStepBranchS4_preserves_outDegEq` including its docstring (found at
+      `:5446-5645`, re-located the same way against the plan's stale `:5473-5672` estimate).
+- [x] Delete `lemma modalApplyOneS4KeyedMint_outDeg_step` including its `omit` line and docstring
+      (found at `:1017-1043`, re-located against the plan's stale `:1017-1042` estimate) —
+      orphaned because all four of its call sites lived inside the two lemmas just deleted.
+- [x] Confirm zero remaining references: `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean`
+      returns only the 4 prose docstring hits handled in Phase 3
+      (`:4617`, `:7237`, `:7716`, `:7762` post-deletion), and
       `grep -rn "modalApplyOneS4KeyedMint_outDeg_step\|modalStepBranchS4_preserves_outDegEq\|modalStepBranchS4KeyedOrdered_preserves_outDegEq" Cslib/`
-      should return nothing.
-- [ ] Run `lake build Cslib` to green.
+      returns nothing.
+- [x] Run `lake build Cslib` to green. Result: exit 0, "Build completed successfully (3313 jobs)".
+      `lake build Cslib.Logics.Modal.Tableau.LoopChecking` (866 jobs) and
+      `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` (900 jobs) both green individually
+      first, with only the pre-existing `simp_all`/flexible-tactic linter infos (now at
+      `FrameCompleteness.lean:5693`/`:5698`, shifted -2 lines from the Phase 1 baseline's
+      `:5695`/`:5700` by the constructor-slot deletion) — no new warnings.
 
 **Timing**: 1.5 hours
 
@@ -227,13 +235,17 @@ hypothesis; a materially different figure means a boundary was walked wrong.
   deletions, 3 whole-declaration deletions.
 - `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` - positional constructor slot + its bullet.
 
-**Verification**:
-- `lake build Cslib` exits 0.
-- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1.
+**Verification** (all confirmed):
+- `lake build Cslib` exits 0. Confirmed: "Build completed successfully (3313 jobs)".
+- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1. Confirmed:
+  `FrameSoundness.lean:1251` only.
 - `grep -rn "outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns only prose docstring
-  lines (`:4644`, `:7667`, `:8148`, `:8196` before Phase 3 renumbering).
+  lines. Confirmed: 4 hits at `:4617`, `:7237`, `:7716`, `:7762` (post-Phase-2 line numbers; the
+  plan's `:4644`/`:7667`/`:8148`/`:8196` estimates were pre-deletion and are handled in Phase 3).
 - `wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean` shows a reduction of roughly 427 lines
-  against the Phase 1 baseline.
+  against the Phase 1 baseline. Confirmed: 11761 -> 11325 = **436 lines removed**
+  (`FrameCompleteness.lean` also dropped 8266 -> 8264 = 2 lines from the constructor-slot/bullet
+  removal, for a combined 438-line reduction — within the plan's ~437-line hypothesis).
 
 ---
 

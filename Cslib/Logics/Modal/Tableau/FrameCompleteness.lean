@@ -4127,7 +4127,7 @@ private lemma modalTableauS4Keyed_initial (φ₀ : Proposition Atom) :
   have hknownW : modalKnownWorlds
       [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] = [0] := by
     simp [modalKnownWorlds]
-  refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_, ?_, ?_⟩,
+  refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_, ?_⟩,
       ⟨?_, ?_, ?_, ?_, ?_⟩, ?_, ?_⟩
   · intro x hx
     simp only [List.mem_singleton] at hx
@@ -4138,8 +4138,6 @@ private lemma modalTableauS4Keyed_initial (φ₀ : Proposition Atom) :
   · intro w w' hedge
     simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
     exact absurd hedge (by decide)
-  · intro w
-    simp [outDeg, Accessibility.successorsOf, Accessibility.empty]
   · intro w hw
     rw [hknownW] at hw
     simp only [List.mem_singleton] at hw

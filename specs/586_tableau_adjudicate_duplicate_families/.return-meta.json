@@ -1,58 +1,63 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-06T09:07:00Z",
-  "completed_at": "2026-08-06T09:27:00Z",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 586,
+  "session_id": "sess_1786030020_688c25_586",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "delegation_depth": 1,
+  "started_at": "2026-08-06T16:30:00Z",
+  "completed_at": "2026-08-06T16:45:00Z",
   "artifacts": [
     {
-      "path": "specs/586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md",
-      "type": "report",
-      "summary": "Adjudication of the 45 audited statement-equivalence rows against the current tree: 43 already deleted by task 558 phases 8-11, 1 out of scope (reachability), 1 actionable and verified deletable by a reversible build experiment. Includes re-measured gate baselines."
+      "path": "specs/586_tableau_adjudicate_duplicate_families/plans/01_delete-surviving-duplicate.md",
+      "type": "plan",
+      "summary": "Four-phase sequential plan for the honest actionable scope: drift-guard census, deletion of the single in-scope duplicate modalSubfmls_self_mem_S5 with 8 same-file call-site substitutions to the public FmpMeasure origin, reconciliation of three stale prose records, and a full gate against the research's re-measured baselines."
     }
   ],
-  "partial_progress": {
-    "stage": "complete",
-    "details": "Census, scope adjudication, de-risking experiment, and all gate baselines complete"
+  "phase_count": 4,
+  "estimated_hours": 2,
+  "dependency_waves": [[1], [2], [3], [4]],
+  "plan_metadata": {
+    "phases": 4,
+    "total_effort_hours": 2,
+    "complexity": "simple",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1], [2], [3], [4]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_adjudicate-duplicate-families.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-08-06"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
   },
-  "key_findings": {
-    "audit_premise_stale": true,
-    "audit_rows_total": 45,
-    "audit_rows_already_deleted": 43,
-    "audit_rows_surviving": 2,
+  "verification_tiers": {
+    "phase_1": "prose",
+    "phase_2": "local",
+    "phase_3": "prose",
+    "phase_4": "full"
+  },
+  "scope_notes": {
     "actionable_deletions": 1,
-    "actionable_declaration": "modalSubfmls_self_mem_S5 (S5Simplification.lean, private)",
-    "actionable_origin": "modalSubfmls_self_mem (FmpMeasure.lean, public @[simp] lemma, publicly imported)",
     "call_sites_to_rewrite": 8,
-    "out_of_scope_survivor": "accFreshInv_append_S4 (LoopChecking.lean) - class (c) import reachability, Soundness.lean unreachable",
-    "different_row_status": "hasEdge_mem_successorsOf_origin already correctly resolved; both converse directions preserved as distinct public lemmas in Support/Accessibility.lean",
-    "weaker_family_status": "all 6 already deleted; strong-form modalKnownWorlds_fold_spec preserved public in Support/KnownWorlds.lean and its .1 Nodup component is consumed by modalKnownWorlds_nodup (6 live consumers)",
-    "stale_rationale_falsified": "task 558 Phase 10 excluded modalSubfmls_self_mem on [Hashable Atom] grounds; git blame shows the origin gained 'omit [DecidableEq Atom] [Hashable Atom] in' on 2026-07-27, twelve days after the copy was created on 2026-07-15",
-    "residue_family_census": 14
+    "prose_defects_to_reconcile": 3,
+    "audit_rows_already_resolved": 43,
+    "out_of_scope_survivor": "accFreshInv_append_S4 (class (c) import reachability)",
+    "anti_target_warning": "The brief's 45-deletion premise is stale. The plan's Non-Goals name manufacturing work to reach 45 as the highest-severity failure mode.",
+    "planner_verified_anchors": "Confirmed independently at plan time: modalSubfmls_self_mem_S5 present with exactly 8 call sites (plus 1 declaration and 1 docstring mention) all in S5Simplification.lean; public @[simp] origin present in FmpMeasure.lean; accFreshInv_append_S4 present in LoopChecking.lean; FiveSimplification.lean orphaned section header present; repo-wide 'Local re-derivation' comment-site count is 13 while LoopChecking.lean's prose records 11.",
+    "planner_correction_to_research": "The research's Phase 3 item 2 describes LoopChecking.lean as recording 11 comment sites, which is correct for the 'Post-de-duplication update' bullet. The separate 'Inventory figures that drifted' block records 55 and 77 as explicitly-superseded historical baselines; the plan directs that those be left intact rather than rewritten."
   },
-  "baselines": {
-    "lake_build_Cslib": "exit 0, 3313 jobs",
-    "modal_tableau_sorry_census": 1,
-    "modal_tableau_sorry_location": "branchSatisfiableIn_s4FC_ancestor_redirect (FrameSoundness.lean)",
-    "modal_tableau_naive_sorry_grep": 24,
-    "modal_tableau_axioms": 0,
-    "lake_shake_findings": 9,
-    "lake_shake_findings_in_modal_tableau": 0,
-    "lake_shake_exit": 1,
-    "lake_lint_findings": 145,
-    "lake_lint_exit": 1,
-    "checkInitImports_exit": 0,
-    "lint_style_exit": 0,
-    "lake_test_exit": 0,
-    "lake_test_jobs": 3676,
-    "local_rederivation_comment_sites": 13
-  },
-  "verification_performed": {
-    "reversible_build_experiment": "Substituted the public origin at all 8 call sites and deleted the private declaration; lake build of S5Simplification + FiveSimplification + FrameSoundness green. Tree restored from a pre-experiment copy; git diff --stat on Cslib/ empty; rebuild green.",
-    "tree_state_after_research": "Cslib/ untouched"
-  },
-  "metadata": {
-    "session_id": "sess_1786030020_688c25_586",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+  "memory_candidates": [
+    {
+      "content": "An audit or inventory artifact can be stale by construction: check its commit time against the commit times of the changes it enumerates before planning from it. A census committed after the deletions it lists as 'surviving' describes a snapshot that no longer exists, and planning from it manufactures work that is already done. The countermeasure is a name-anchored census against the live tree as a mandatory first phase, gating all writes, with a hard stop rather than ad hoc re-derivation if the census diverges. Anchor such censuses on declaration names, never line numbers -- line numbers drift on every refactor. A corollary for exclusion records: a documented 'reasoned exclusion' can be falsified by a later unrelated change to the excluded item's origin (e.g. a signature acquiring an omit prefix), so re-verify an exclusion's stated evidence rather than inheriting its verdict.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/586_tableau_adjudicate_duplicate_families/plans/01_delete-surviving-duplicate.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["stale-audit", "drift-guard", "census", "reasoned-exclusions", "planning-scope", "name-anchoring"]
+    }
+  ],
+  "next_steps": "Run /implement 586 to execute the plan"
 }

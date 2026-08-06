@@ -1827,9 +1827,9 @@
       "title": "Adjudicate and delete the audited duplicate re-derivation families",
       "topic": "Modal Logic",
       "task_type": "cslib",
-      "status": "researched",
+      "status": "planned",
       "created": "2026-08-05T13:01:12Z",
-      "last_updated": "2026-08-06T16:27:15Z",
+      "last_updated": "2026-08-06T16:32:00Z",
       "dependencies": [
         553
       ],
@@ -1854,6 +1854,11 @@
           "path": "specs/586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md",
           "type": "report",
           "summary": "Name-anchored census of all 45 audited rows against the current tree, scope adjudication of the two survivors, git-blame falsification of task 558's stale [Hashable Atom] exclusion rationale, a verified reversible deletion experiment, and re-measured gate baselines (build 3313 jobs, sorry census 1, shake 9/none-in-Tableau, lint 145, test green)."
+        },
+        {
+          "path": "specs/586_tableau_adjudicate_duplicate_families/plans/01_delete-surviving-duplicate.md",
+          "type": "plan",
+          "summary": "Phased plan for deleting modalSubfmls_self_mem_S5 (S5Simplification.lean) and routing its 8 call sites to the public @[simp] origin modalSubfmls_self_mem (FmpMeasure.lean), reconciling three prose defects left by the already-landed deletions, and gating on build 3313 jobs / sorry census 1 / 0 axioms / shake 9 with none in Modal-Tableau / lint delta 0 against 145 / checkInitImports 0 / lint-style 0 / test green."
         }
       ],
       "completion_summary": null,

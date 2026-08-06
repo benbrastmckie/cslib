@@ -196,8 +196,9 @@ sorry (see Non-Goals) and does not write to `ROADMAP.md`.
 | 8 | 7.3, 7.4, 8 | 7.2 |
 | 9 | 7.5, 7.6, 7.7 | 7.4 |
 | 10 | 7.8 | 7.3, 7.5, 7.6, 7.7 |
-| 11 | 9 | 7.8, 8 |
-| 12 | 10 | 9 |
+| 11 | 9.1 | 7.8, 8 |
+| 12 | 9.2 | 9.1 |
+| 13 | 10 | 9.2 |
 
 Phases within the same wave can execute in parallel. Waves 1-9 are now complete: Wave 8 (Phases
 7.3, 7.4, 8) closed sorry-free with Phase 7.4's kill gate returning outcome (i), a clean PASS;
@@ -1382,38 +1383,126 @@ census over `Cslib/Logics/Modal/Tableau/` unchanged at exactly 1 (`FrameSoundnes
 
 ---
 
-### Phase 9: Fuel-induction wrapper, initialization, and the capstone scope decision [NOT STARTED]
+### Phase 9 Scope Decision
 
-- **Goal:** Wrap the step theorem in the fuel induction, establish initialization, and **decide
-  explicitly** the scope question v6 left open across four dispatches: whether an end-to-end
-  `modalTableauS4KeyedOrdered_sound`-shaped capstone is in scope for this task.
+**Decided this dispatch, autonomously, per the orchestrator's explicit instruction that this
+decision is not deferrable a fifth time and no human is available to prompt.**
+
+**Decision: the end-to-end capstone IS in scope. Per the plan's own mandatory split trigger, Phase
+9 is split into Phase 9.1 (fuel wrapper + initialization) and Phase 9.2 (capstone).**
+
+**Evidence, not preference:**
+
+1. **The plan's own "Definition of done"** (Overview) already names the fuel-induction wrapper as
+   the closing deliverable; it does not name the capstone as optional filler. The Goals list
+   separately instructs Phase 9 to "decide the end-to-end capstone scope question" — a decision,
+   not a default-out.
+2. **The feared cost comparison is evidenced false.** The Risk row worried the fuel wrapper could
+   be "comparable in size to the S5 Bespoke Fuel-Induction Assembly"
+   (`FrameSoundness.lean:2453-3320`, ~870 lines). Reading that assembly this dispatch shows it
+   decomposes into (i) `S5SoundInv` and the **per-step** preservation theorem
+   `modalStepBranchS5Gen_preserves_satIn` (the S5 analogue of what **this task's own Phase 7.8
+   already landed and committed** as `S4RedirectSoundInv_step`), and (ii) the **outer fuel
+   induction** `modalExpandBranchesS5Gen_closed_unsatIn`, and (iii) the **capstone**
+   `modalTableauS5Gen_sound`/`modalTableauS5_sound` — which is a **thin, ~30-60 line corollary**
+   of (ii), not a comparably-sized item. The 870-line figure is dominated by (i), which this task
+   already paid for across Phases 1-8. What Phase 9 actually owes is (ii) plus the cheap (iii).
+3. **The capstone is mathematically free once (ii) exists**, and genuinely establishes real
+   soundness, not a diluted form. At the initial state (`Er = []`, `acc = Accessibility.empty`),
+   `S4RedirectSoundInv`'s conjunct (b) reduces exactly to the plain, undiluted edge-realization
+   clause (the `(w, w') ∈ Er` disjunct is vacuously false since `Er = []`, and `acc = ∅` supplies
+   no edges to begin with) and conjuncts (a)/(c)/(d) are vacuous. So `S4RedirectSoundInv` at the
+   initial branch is *definitionally* `branchSatisfiableIn s4FC`-equivalent, and the outer fuel
+   wrapper's contradiction at that specific initial call gives the **standard, undiluted**
+   `¬branchSatisfiableIn s4FC [F(φ₀)@0] Accessibility.empty` — exactly `s4Valid φ₀`'s defining
+   contrapositive, mirroring `modalTableauS5Gen_sound`'s own closing `by_contra`/countermodel
+   argument line-for-line.
+4. **The capstone is the named deliverable of the broader effort this task is part of.**
+   `modalTableauS4KeyedOrdered`'s own docstring (`LoopChecking.lean:8435`) states it is the
+   "successor to `modalTableauS4Keyed`, which [is] retire[d] once this entry point has a proved
+   soundness/completeness pair of its own" — i.e. a `modalTableauS4KeyedOrdered_sound`-shaped
+   theorem is already the anticipated name for exactly this result, not a novel scope addition.
+5. **A genuine, previously-unaccounted prerequisite was found and is recorded honestly, not
+   papered over**: `S4KeyedHintikkaInv` (`LoopChecking.lean:9181`) has a landed single-step
+   preservation theorem for the OLD unordered driver
+   (`modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`, `LoopChecking.lean:10230-10565`, ~336
+   lines) but **no analogue for the ordered driver** — grep for `KeyedOrdered.*[Hh]intikka` and for
+   `preserves_S4KeyedHintikkaInv` in `LoopChecking.lean` returns nothing. This is a real gap the
+   plan's Scope Hypothesis did not name, discovered by reading what `S4RedirectSoundInv_step`
+   (Phase 7.8) actually needs (`hHinv : S4KeyedHintikkaInv`) versus what the codebase can currently
+   supply across MULTIPLE steps (only a single-step fact is available, and only for the retired
+   driver). Every rule-level helper the unordered proof calls
+   (`modalApplyOneS4Keyed_{boxNeg,diaPos}_{blocked,unblocked}_eq`,
+   `modalApplyOneS4KeyedMint_{boxNeg,diaPos}_witness`, `modalStepBranchS4Keyed_blocked_witness_mem`,
+   `modalApplyOneS4Keyed_hasEdge_mono`) is about the **rule function**
+   `modalApplyOneS4Keyed`/`blockingWorldS4Keyed`, not the stepper, and is therefore
+   driver-independent and reusable verbatim — de-risking the port to a mechanical case-structure
+   swap (via `modalStepBranchS4KeyedOrdered_cases`, exactly as Phase 7.8 already did for
+   `S4RedirectSoundInv_step`), not a new mathematical question. This is folded into Phase 9.1 as
+   its first task, named explicitly rather than discovered mid-proof and absorbed silently.
+
+**Revised effort estimate** (supersedes the original 4h/250-line Scope Hypothesis, which did not
+anticipate item 5 above): Phase 9.1 now carries the Hintikka port (~250-350 lines, by direct
+analogy with the unordered original) plus the outer fuel induction (~150-250 lines, by direct
+analogy with the generic `modalExpandBranchesGen_closed_unsatIn`, `FrameSoundness.lean:740-909`,
+~170 lines) plus initialization (~40 lines) — roughly 450-650 lines total, materially larger than
+the original 250-line estimate but not comparable to the 870-line whole S5 assembly, since this
+task's Phase 7.8 already paid the per-step-preservation cost the S5 figure's largest component
+represents. Phase 9.2 (the capstone) is estimated ~40-80 lines by direct analogy with
+`modalTableauS5Gen_sound`.
+
+**If Phase 9.1 does not close within this dispatch**: per this task's own established discipline
+(Phases 7.6, 7.7 both required multiple dispatches and recorded honest Progress Records rather
+than forcing completion), any incomplete sub-item is left `[IN PROGRESS]` with a Progress Record
+naming exactly what landed sorry-free and what remains, never a committed `sorry`.
+
+---
+
+### Phase 9.1: Fuel-induction wrapper and initialization [IN PROGRESS]
+
+- **Goal:** Land the missing `S4KeyedHintikkaInv` ordered-driver step-preservation prerequisite,
+  establish initialization at the seed state, and wrap Phase 7.8's step theorem plus Phase 8's
+  terminal payoff in the outer fuel induction over `modalExpandBranchesS4KeyedOrdered`.
 - **Depends on:** 7.8, 8
-- **Timing:** 4 hours (see split trigger below)
+- **Timing:** revised to ~6-8 hours per the Phase 9 Scope Decision above (may require more than one
+  dispatch; see that decision's own contingency note)
 - **Verification Tier:** interface
 - **Commit Mode:** per-substep
-- **Scope Hypothesis:** This phase asserts the fuel wrapper can mirror the existing
-  `modalExpandBranchesGen_closed_unsatIn` (`FrameSoundness.lean:740`) /
-  `modalStepBranchS5Gen_preserves_satIn` (`:2491`) assembly shape, and estimates roughly 250 lines
-  in `FrameCompleteness.lean`. **Both are hypotheses, and the second is known-shaky**: the S5
-  Bespoke Fuel-Induction Assembly spans `FrameSoundness.lean:2453-3320` (~870 lines). **Split
-  trigger, mandatory**: the phase's first task is the scope decision; if the end-to-end capstone is
-  judged in scope, split into `9.1` (fuel wrapper + initialization) and `9.2` (capstone) and record
-  the split here before continuing. Do not run this phase unbounded.
-- **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
+- **Scope Hypothesis:** see the Phase 9 Scope Decision above for the full revised estimate and its
+  evidence. Confirm the ~450-650-line combined estimate against `git diff --stat` at phase close.
+- **Owns:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (the new
+  `modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv` prerequisite only — this is the one
+  narrow, justified exception to the plan's stated "no new declarations in `LoopChecking.lean`"
+  expectation, since the prerequisite is about the driver's own invariant suite, not about
+  `S4RedirectSoundInv`, and belongs alongside its sibling `_preserves_*` lemmas for the ordered
+  driver already in that file), `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (the fuel
+  wrapper and initialization lemma).
 
 - **Tasks:**
-  - [ ] **Scope decision, first.** Read `modalExpandBranchesGen_closed_unsatIn` and the S5 bespoke
-        assembly. Decide and record in a `#### Phase 9 Scope Decision` subsection whether this
-        task's definition of done requires only the fuel wrapper or also the end-to-end capstone.
-        If the capstone is in scope, split per the trigger above. This decision was deferred four
-        times in v6; it is not deferrable again.
-  - [ ] Establish initialization: at `(b = [F(φ₀)@0], e = [], acc = ∅, keys = [(0, ∅)])` with
-        `Er = []`, conjuncts (a), (c), (d) are vacuous ((d) because `acc = ∅` makes every
-        `outDeg acc _ = 0`), and (b) is exactly "some S4 countermodel of `φ₀` satisfies the branch"
-        — the standard soundness hypothesis (report §3.2, "Initialization").
-  - [ ] Thread the fuel induction, consuming Phase 7.8's step theorem and Phase 8's terminal payoff.
-        The ghost list `Er` grows monotonically across steps; carry the `∃ Er' ⊇ Er` existential
-        through the induction.
+  - [ ] Port `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`
+        (`LoopChecking.lean:10230-10565`) to the ordered driver as
+        `modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv`, mirroring Phase 7.8's own
+        case structure (`modalStepBranchS4KeyedOrdered_cases`: primary-scan hit dispatches on
+        `sf`'s shape directly; settled fallback sub-splits on `blockingWorldS4Keyed`) in place of
+        the unordered proof's direct `by_cases hmint` off a bare `findSome?` selection. Reuse the
+        rule-level helper lemmas verbatim (they are driver-independent, per the Scope Decision's
+        item 5).
+  - [ ] Establish initialization: at `(b = [F(φ₀)@0], e = [], acc = Accessibility.empty,
+        keys = [(0, ∅)])` with `Er = []`, conjuncts (a), (c), (d) are vacuous ((d) because
+        `acc = Accessibility.empty` makes every `outDeg acc _ = 0`), and (b) is exactly "some S4
+        countermodel of `φ₀` satisfies the branch" — the standard soundness hypothesis (report
+        §3.2, "Initialization"). Reuse `modalTableauS4Keyed_initial`
+        (`FrameCompleteness.lean:4114-4184`) for the `S4LoopInv`/`S4KeyedHintikkaInv`/
+        `worldsContiguousS4` witnesses at this exact same seed state where its shape fits.
+  - [ ] Thread the outer fuel induction over `modalExpandBranchesS4KeyedOrdered`
+        (`LoopChecking.lean:8380-8422`), mirroring `modalExpandBranchesGen_closed_unsatIn`'s
+        structure (`FrameSoundness.lean:740-909`) adapted to the bespoke recursive
+        `processNext`/`modalExpandBranchesS4KeyedOrdered` shape (not a `RuleApply`-generic
+        instance), consuming Phase 7.8's step theorem, Phase 8's terminal payoff, and this phase's
+        own `S4KeyedHintikkaInv` port plus the already-landed
+        `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` (`LoopChecking.lean:8210`). The ghost
+        list `Er` grows monotonically across steps; carry the `∃ Er' ⊇ Er` existential through the
+        induction.
   - [ ] Record a module comment naming what the result does and does **not** say: it establishes
         soundness of the keyed ordered driver via a predicate that quarantines redirect edges from
         semantic edge-realization. It does **not** remove or discharge the standing sorry at
@@ -1421,8 +1510,37 @@ census over `Cslib/Logics/Modal/Tableau/` unchanged at exactly 1 (`FrameSoundnes
         established is not provable. No task numbers in the comment.
   - [ ] `#print axioms`; scoped builds of every touched module; `lint-style`; census exactly 1.
 
-- **Done when:** the scope decision is recorded; the fuel wrapper and initialization are sorry-free
-  and committed; census exactly 1; scoped builds and `lint-style` clean.
+- **Done when:** the Hintikka prerequisite, initialization, and fuel wrapper are sorry-free and
+  committed; census exactly 1; scoped builds and `lint-style` clean.
+
+---
+
+### Phase 9.2: End-to-end soundness capstone [NOT STARTED]
+
+- **Goal:** State and prove `modalTableauS4KeyedOrdered_sound`: if the ordered keyed driver closes
+  on `F(φ₀)@0`, then `φ₀` is `s4Valid`. A thin corollary of Phase 9.1's fuel wrapper, mirroring
+  `modalTableauS5Gen_sound`/`modalTableauS5_sound` (`FrameSoundness.lean:3261-3320`).
+- **Depends on:** 9.1
+- **Timing:** 1 hour (thin corollary; see the Phase 9 Scope Decision's evidence)
+- **Verification Tier:** local
+- **Commit Mode:** per-substep
+- **Scope Hypothesis:** ~40-80 lines in `FrameCompleteness.lean`, no other file. If closing this
+  corollary turns out to need anything beyond Phase 9.1's fuel wrapper plus a `by_contra`/
+  countermodel argument mirroring `modalTableauS5Gen_sound`'s, that is a defect in Phase 9.1's own
+  statement shape to record and repair there, not to paper over here.
+- **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
+
+- **Tasks:**
+  - [ ] State `modalTableauS4KeyedOrdered_sound (φ₀ : Proposition Atom) (h : modalTableauS4KeyedOrdered
+        φ₀ = .closed) : s4Valid φ₀`.
+  - [ ] Prove by `by_contra` on an assumed countermodel, build the initial `S4RedirectSoundInv`
+        witness at `Er = []` from that countermodel (conjuncts (a)/(c)/(d) vacuous, (b) direct),
+        feed Phase 9.1's fuel wrapper, and derive the contradiction — mirroring
+        `modalTableauS5Gen_sound`'s proof body exactly in shape.
+  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+
+- **Done when:** the capstone is sorry-free and committed; census exactly 1; scoped build and
+  `lint-style` clean.
 
 ---
 
@@ -1430,7 +1548,7 @@ census over `Cslib/Logics/Modal/Tableau/` unchanged at exactly 1 (`FrameSoundnes
 
 - **Goal:** Extend the regression corpus with a permanent witness row, run the full CSLib CI
   pipeline, and close the task out.
-- **Depends on:** 9
+- **Depends on:** 9.2
 - **Timing:** 2 hours
 - **Verification Tier:** full
 - **Commit Mode:** per-substep

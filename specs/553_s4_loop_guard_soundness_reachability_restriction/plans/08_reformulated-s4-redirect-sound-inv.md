@@ -1479,22 +1479,38 @@ naming exactly what landed sorry-free and what remains, never a committed `sorry
   wrapper and initialization lemma).
 
 - **Tasks:**
-  - [ ] Port `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`
+  - [x] Port `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`
         (`LoopChecking.lean:10230-10565`) to the ordered driver as
         `modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv`, mirroring Phase 7.8's own
         case structure (`modalStepBranchS4KeyedOrdered_cases`: primary-scan hit dispatches on
         `sf`'s shape directly; settled fallback sub-splits on `blockingWorldS4Keyed`) in place of
         the unordered proof's direct `by_cases hmint` off a bare `findSome?` selection. Reuse the
         rule-level helper lemmas verbatim (they are driver-independent, per the Scope Decision's
-        item 5).
-  - [ ] Establish initialization: at `(b = [F(φ₀)@0], e = [], acc = Accessibility.empty,
+        item 5). *(Landed sorry-free, 199 lines, `LoopChecking.lean`. Confirmed simpler than
+        feared: the settled-fallback branch of `modalStepBranchS4KeyedOrdered_cases` reduces to a
+        literal call of the OLD unordered `modalStepBranchS4Keyed`, so it is discharged by the
+        existing unordered theorem directly with zero new content; only the primary-scan-hit
+        branch — confined to the non-mint case by construction — needed new proof text, and every
+        rule-level helper it calls is driver-independent as predicted. Also landed the combinator
+        `S4OrderedFuelInv`/`modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv`
+        (`LoopChecking.lean`, +35 lines), bundling this plus the four `S4LoopInv`-derived facts
+        `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` already supplies into ONE
+        preservation call for the outer induction to consume.)*
+  - [x] Establish initialization: at `(b = [F(φ₀)@0], e = [], acc = Accessibility.empty,
         keys = [(0, ∅)])` with `Er = []`, conjuncts (a), (c), (d) are vacuous ((d) because
         `acc = Accessibility.empty` makes every `outDeg acc _ = 0`), and (b) is exactly "some S4
         countermodel of `φ₀` satisfies the branch" — the standard soundness hypothesis (report
         §3.2, "Initialization"). Reuse `modalTableauS4Keyed_initial`
         (`FrameCompleteness.lean:4114-4184`) for the `S4LoopInv`/`S4KeyedHintikkaInv`/
         `worldsContiguousS4` witnesses at this exact same seed state where its shape fits.
-  - [ ] Thread the outer fuel induction over `modalExpandBranchesS4KeyedOrdered`
+        *(Landed as `S4RedirectSoundInv_initial`, `FrameCompleteness.lean`, 34 lines — the
+        `S4RedirectSoundInv` half only, built directly from an assumed countermodel witness
+        `(W, m, f, hFC, hnotsat)`, mirroring `modalTableauS5Gen_sound`'s own countermodel
+        construction. The `S4LoopInv`/`S4KeyedHintikkaInv`/`worldsContiguousS4` reuse of
+        `modalTableauS4Keyed_initial` is deferred to whichever dispatch writes the outer
+        induction's entry call, since it is only needed there, not as a standalone fact.)*
+  - [ ] *(deviation: not completed this dispatch — see the Phase 9.1 Progress Record below)*
+        Thread the outer fuel induction over `modalExpandBranchesS4KeyedOrdered`
         (`LoopChecking.lean:8380-8422`), mirroring `modalExpandBranchesGen_closed_unsatIn`'s
         structure (`FrameSoundness.lean:740-909`) adapted to the bespoke recursive
         `processNext`/`modalExpandBranchesS4KeyedOrdered` shape (not a `RuleApply`-generic
@@ -1512,6 +1528,82 @@ naming exactly what landed sorry-free and what remains, never a committed `sorry
 
 - **Done when:** the Hintikka prerequisite, initialization, and fuel wrapper are sorry-free and
   committed; census exactly 1; scoped builds and `lint-style` clean.
+
+#### Phase 9.1 Progress Record (first dispatch, incomplete — continuation required)
+
+**Landed and committed this dispatch, all sorry-free** (`#print axioms` via `lake env lean`:
+exactly `propext`, `Classical.choice`, `Quot.sound` on every new declaration; scoped builds,
+`checkInitImports`, `lint-style` all clean; sorry census held at exactly 1
+(`FrameSoundness.lean:1251`) after every commit):
+
+1. `modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv` (`LoopChecking.lean`, 199 lines) —
+   the prerequisite the Phase 9 Scope Decision named as genuinely missing.
+2. `S4OrderedFuelInv` and `modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv`
+   (`LoopChecking.lean`, 35 lines) — bundles item 1 with the four facts
+   `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` already supplies
+   (`S4LoopInv`, `keysWorldsKnown`, `worldsContiguousS4`, `keysOriginS4`) into ONE
+   preservation call, cutting what the outer induction needs to invoke per step from two
+   theorems to one.
+3. `S4RedirectSoundInv_initial` (`FrameCompleteness.lean`, 34 lines) — the seed-state
+   `S4RedirectSoundInv` witness from an assumed countermodel.
+
+**What remains: the outer fuel induction itself
+(`modalExpandBranchesS4KeyedOrdered_closed_unsatIn`).** Not yet written. The design is fully
+worked out below so a continuation dispatch does not need to re-derive it:
+
+- **Technique confirmed to transfer**: the generic proof's by-contra/recursive-`ih` pattern
+  (`modalExpandBranchesGen_closed_unsatIn`, `FrameSoundness.lean:793-909`) needs NO
+  existential-witness bookkeeping threaded explicitly through the outer `List.Forall₂` — it
+  works by assuming the CURRENT branch is Er-satisfiable, applying Phase 7.8's step theorem to
+  get SOME child also Er-satisfiable, and contradicting that against the SAME induction's own
+  recursively-established "every child is Er-unsatisfiable" fact (obtained by applying `ih` to
+  the full `done ++ newBs ++ bt` list, mirroring lines 872-880 of the generic proof exactly).
+  This is confirmed applicable here without modification.
+- **The genuine new difficulty is 4-column threading**, not present in the generic proof (which
+  only threads `branches`/`accs`, using bare length equalities for `expandedSets`). Here `e` and
+  `keys` are NOT bookkeeping-only — `S4OrderedFuelInv`/`S4RedirectSoundInv` both depend on them
+  — so they must be threaded pointwise alongside `acc`, not just length-checked.
+- **Resolving design, worked out this dispatch**: `e`, `acc`, `keys` are ALWAYS produced and
+  replicated TOGETHER as a single triple per step (confirmed from
+  `modalStepBranchS4KeyedBody`'s definition: every result arm's `newAcc`/`keys'` is a single
+  value, and the paired `e'` — `[e ++ [sf]]` for linear/persistent, the constant map
+  `branches.map (fun _ => e ++ [sf])` for branching — is likewise a single value replicated
+  across children exactly like `newAcc`/`keys'` already are). This licenses bundling
+  `(e, acc, keys)` into ONE `S4KOState := List SF × Accessibility × List (WorldIndex × Finset
+  (Sign × Proposition Atom))` triple type and threading `List.Forall₂ (S4KOFullInv φ₀) branches
+  (expandedSets.zip (accs.zip keyss))` as the single invariant relation, where `S4KOFullInv φ₀ b
+  s := S4OrderedFuelInv φ₀ b s.1 s.2.1 s.2.2 ∧ ∃ Er, S4RedirectSoundInv φ₀ b s.1 s.2.1 s.2.2 Er`.
+  This design was drafted (not committed — no file was left in a broken state) and is sound in
+  principle, but was found to add real proof-obligation surface at EVERY `cases`/`List.mem`
+  step relative to the generic proof's plain `accs`-only threading, because
+  `modalExpandBranchesS4KeyedOrdered.processNext` still pattern-matches on `pendingExp`,
+  `pendingAccs`, `pendingKeys` as THREE SEPARATE lists (matching its own literal definition, not
+  a zipped one), so every cons-step needs an explicit `List.zip_cons_cons`-style rewrite to
+  relate the zipped invariant's cons-shape back to the three separate lists' cons-shapes, and the
+  BASE CASE (`fuel = 0`) needs an additional membership-transport step: the driver's own
+  `fuel = 0` branch only ever consults `branches.zip accs` (not `expandedSets`/`keyss` at all),
+  so extracting the OUTPUT conclusion (which ranges over `branches` paired with the FULL
+  `expandedSets.zip (accs.zip keyss)` triple) from a fact established over `branches.zip accs`
+  alone requires an index-alignment argument that was not completed this dispatch.
+- **What a continuation dispatch should do first**: attempt the base-case membership-transport
+  step in isolation (small, self-contained, and the one piece of genuinely new reasoning this
+  design needs beyond mechanically repeating the generic proof's structure four-columns-wide) —
+  if it closes cleanly, the succ case is a mechanical (if long) transcription of
+  `modalExpandBranchesGen_closed_unsatIn`'s succ case with `accFreshInv`/`branchSatisfiableIn`
+  replaced by `S4KOFullInv`/the Er-existential and `modalStepBranch_preserves_accFreshInv_gen`/
+  `modalStepBranchGen_preserves_satIn` replaced by
+  `modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv`/`S4RedirectSoundInv_step`. If the
+  zip-triple design proves too awkward in practice, the fallback is an index-based (`List.get`/
+  `getElem?`) formulation instead of `List.Forall₂`, traded for less append/replicate-lemma
+  reuse and more explicit index arithmetic — not attempted, recorded as the named alternative.
+
+**Why this dispatch stopped here rather than pushing through**: per this task's own standing
+discipline (Phases 7.6, 7.7 both required multiple dispatches and recorded honest Progress
+Records rather than forcing completion; "never commit a `sorry`, stop at a clean boundary rather
+than rush"), the outer induction is real, bounded, and now fully designed, but writing and
+verifying its 4-column-threaded double induction was judged to exceed what could be completed
+soundly with the turns remaining after landing the three prerequisites above. No incomplete or
+unbuilt Lean was left in any tracked file.
 
 ---
 

@@ -499,10 +499,17 @@ with the three bridge theorems establishing that the state-threaded driver at `�
 lifted via `liftRuleApply`, computes the same result as the stateless driver
 (`modalStepBranchGen_eq_St`/`modalExpandBranchesGen_eq_St`/`modalTableauGen_eq_St`).
 
-Nothing in the repository consumes this ladder yet. The intended first consumer is
-`modalExpandBranchesS4Keyed`, which today derives its own `keys'` bookkeeping twice; migrating it
-onto `modalExpandBranchesGenSt` (threading `keyss : List σ` as the abstract state) is a separate,
-later task, out of scope here. -/
+The ladder now has a landed consumer: `modalExpandBranchesS4Keyed` (`LoopChecking.lean`) is
+bridged onto `modalExpandBranchesGenSt` via `modalExpandBranchesGenSt_eq_S4Keyed`, instantiated
+at the keyed `RuleApplySt` rule `modalApplyOneS4KeyedSt` (threading `keyss : List σ`, with
+`σ := List (WorldIndex × Finset (Sign × Proposition Atom))` as the abstract state), and the
+migration is additive -- `modalApplyOneS4Keyed`, `modalStepBranchS4Keyed`, and
+`modalExpandBranchesS4Keyed` themselves are untouched. The KeyedOrdered driver
+(`modalStepBranchS4KeyedOrdered`/`modalExpandBranchesS4KeyedOrdered`) remains unmigrated: it is
+structurally impossible against this ladder as it stands, since `modalStepBranchGenSt` abstracts
+over the *rule* passed to it, not over the *traversal* it performs, while the ordered driver's
+minting gate depends on a global, traversal-level property of the branch that no choice of rule
+can express. -/
 
 /-- The shape of a state-threading rule-application function: `RuleApply Atom`, generalized
 with an extra state parameter `σ` that is read and written on every step alongside the

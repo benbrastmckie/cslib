@@ -388,31 +388,36 @@ was wrong — revert and re-place.
 
 ---
 
-### Phase 5: Entry-point corollary and `Saturation.lean` note retirement [NOT STARTED]
+### Phase 5: Entry-point corollary and `Saturation.lean` note retirement [COMPLETED]
 
 **Goal**: Close the ladder story end-to-end by tying `modalTableauS4Keyed` to
 `modalExpandBranchesGenSt`, and retire the now-stale "separate, later task, out of scope here"
 note that pointed at exactly this work.
 
 **Tasks**:
-- [ ] Add a corollary immediately after `def modalTableauS4Keyed` (currently `:8346`,
-      pre-Phase-2 numbering) stating that `modalTableauS4Keyed φ` equals
+- [x] Added a corollary `modalTableauS4Keyed_eq_modalExpandBranchesGenSt` immediately after
+      `def modalTableauS4Keyed` (found post-Phase-2/3/4 at `:8067-8071`, not the stale pre-Phase-2
+      `:8346` estimate) stating that `modalTableauS4Keyed φ` equals
       `modalExpandBranchesGenSt (modalApplyOneS4KeyedSt φ) [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty] [[(0, (∅ : Finset (Sign × Proposition Atom)))]] (modalFuelS4 φ)`.
-      It should follow from `modalExpandBranchesGenSt_eq_S4Keyed` by `rw` plus `rfl`; confirm the
-      exact initial-`keyss` argument against `modalTableauS4Keyed`'s own body rather than
-      assuming the shape above.
-- [ ] Give the corollary a real docstring explaining that the S4 entry point cannot route through
+      Confirmed the exact initial-`keyss` argument against `modalTableauS4Keyed`'s own body
+      (`unfold`ed via `lean_goal` before writing the proof) rather than assuming the plan's shape
+      blind — it matched exactly. Closes by `unfold modalTableauS4Keyed; rw
+      [modalExpandBranchesGenSt_eq_S4Keyed]` alone (the trailing `rw` auto-discharges via `rfl`
+      once the `let`-bound `initialBranch` zeta-reduces to the literal singleton list, so no
+      separate `rfl` line was needed).
+- [x] Gave the corollary a real docstring explaining that the S4 entry point cannot route through
       `modalTableauGenSt` because that hardwires K's `modalFuel φ`, whereas the S4 keyed loop
-      needs `modalFuelS4 φ` for its pigeonhole world bound.
-- [ ] Do **not** add a fuel parameter to `modalTableauGenSt` and do **not** touch
-      `modalTableauGen_eq_St`.
-- [ ] Update the note in `Saturation.lean` (currently around `:502-505`, the paragraph reading
-      "Nothing in the repository consumes this ladder yet. The intended first consumer is
-      `modalExpandBranchesS4Keyed` … a separate, later task, out of scope here.") to state that
-      the ladder now has `modalExpandBranchesS4Keyed` as a landed consumer via
-      `modalExpandBranchesGenSt_eq_S4Keyed`, and that the KeyedOrdered driver remains unmigrated
-      because `modalStepBranchGenSt` abstracts over the rule and not the traversal.
-- [ ] Run `lake build Cslib`.
+      needs `modalFuelS4 φ` for its pigeonhole world bound `modalWorldBoundS4`.
+- [x] Confirmed no fuel parameter was added to `modalTableauGenSt` and `modalTableauGen_eq_St`
+      was not touched.
+- [x] Updated the note in `Saturation.lean` (found at `:502-505`, matching the plan's estimate) to
+      state that the ladder now has `modalExpandBranchesS4Keyed` as a landed consumer via
+      `modalExpandBranchesGenSt_eq_S4Keyed` (instantiated at `modalApplyOneS4KeyedSt`, threading
+      `keyss : List σ` with `σ := List (WorldIndex × Finset (Sign × Proposition Atom))`), and
+      that the KeyedOrdered driver remains unmigrated because `modalStepBranchGenSt` abstracts
+      over the rule and not the traversal, while the ordered driver's minting gate depends on a
+      global, traversal-level property of the branch.
+- [x] Ran `lake build Cslib`: exit 0, "Build completed successfully (3313 jobs)".
 
 **Timing**: 0.7 hours
 
@@ -430,12 +435,16 @@ mismatch there is the likely cause.
 - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - entry-point corollary after `modalTableauS4Keyed`.
 - `Cslib/Logics/Modal/Tableau/Saturation.lean` - retire the stale "separate, later task" note.
 
-**Verification**:
-- `lake build Cslib` exits 0.
-- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1.
+**Verification** (all confirmed):
+- `lake build Cslib` exits 0. Confirmed: "Build completed successfully (3313 jobs)".
+- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1. Confirmed:
+  `FrameSoundness.lean:1251` only.
 - `grep -n "separate, later task, out of scope here" Cslib/Logics/Modal/Tableau/Saturation.lean`
-  returns nothing.
-- `lake lint` reports no `docBlame` on the new corollary.
+  returns nothing. Confirmed.
+- `lake lint` reports no `docBlame` on the new corollary. Confirmed: 0 `docBlame` hits in the
+  entire `lake lint` output, and zero hits on `modalTableauS4Keyed_eq_modalExpandBranchesGenSt`.
+- `git diff --name-only` for this phase's commit shows exactly the two declared files
+  (`LoopChecking.lean`, `Saturation.lean`), matching the Scope Hypothesis.
 
 ---
 

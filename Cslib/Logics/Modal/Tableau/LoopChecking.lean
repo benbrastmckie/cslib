@@ -8070,6 +8070,24 @@ def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
   modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty]
     [[(0, (∅ : Finset (Sign × Proposition Atom)))]] (modalFuelS4 φ)
 
+/-- **Entry-point corollary, closing the `RuleApplySt` ladder story end-to-end.**
+`modalTableauS4Keyed` -- the keyed S4 decision procedure's entry point -- equals the generic
+state-threaded entry-point machinery (`modalExpandBranchesGenSt`) instantiated at the keyed
+`RuleApplySt` rule `modalApplyOneS4KeyedSt φ`, at the same initial branch/accessibility/keys and
+the same `modalFuelS4 φ` fuel bound. This cannot route through `modalTableauGenSt`
+(`Saturation.lean`) instead, because that entry point hardwires K's `modalFuel φ`, whereas the S4
+keyed loop needs `modalFuelS4 φ` for its pigeonhole world bound `modalWorldBoundS4` -- K's fuel is
+confirmed NOT provably sufficient here (see `modalTableauS4Keyed`'s own docstring above). No fuel
+parameter is added to `modalTableauGenSt`, and `modalTableauGen_eq_St` is untouched. -/
+theorem modalTableauS4Keyed_eq_modalExpandBranchesGenSt (φ : Proposition Atom) :
+    modalTableauS4Keyed φ =
+      modalExpandBranchesGenSt (modalApplyOneS4KeyedSt φ)
+        [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[(0, (∅ : Finset (Sign × Proposition Atom)))]]
+        (modalFuelS4 φ) := by
+  unfold modalTableauS4Keyed
+  rw [modalExpandBranchesGenSt_eq_S4Keyed]
+
 /-! ## Ordered Keyed S4 Driver and Entry Point (Successor to the Bespoke Driver Above)
 
 Structural copies of `modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` above, with the reordered

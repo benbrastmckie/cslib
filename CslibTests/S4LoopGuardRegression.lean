@@ -8,6 +8,8 @@ module
 
 import Cslib.Logics.Modal.Tableau.LoopChecking
 public meta import Cslib.Logics.Modal.Tableau.LoopChecking
+import Cslib.Logics.Modal.Tableau.FrameCompleteness
+public meta import Cslib.Logics.Modal.Tableau.FrameCompleteness
 
 /-! # S4 Keyed Loop-Check Guard Regression Corpus
 
@@ -193,5 +195,20 @@ counterparts immediately above. -/
 #guard_msgs in
 #eval s4Verdict (modalExpandBranchesS4KeyedOrdered tAxiom [[⟨.neg, tAxiom, 0⟩]] [[]]
   [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × P)))]] 400)
+
+/-! ## Soundness capstone, ordered driver
+
+Permanent type-level witness that `modalTableauS4KeyedOrdered_sound`
+(`Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`) is stated over the correct
+driver/entry-point pairing for this file's own `tAxiom`/`s4Valid` vocabulary. `h` is an
+unproved parameter (not independently established here -- `decide`/`native_decide`/`rfl` all
+stall on the fuel driver's `WellFounded.fix`, per the file docstring above and
+`CslibTests/TableauConformance.lean`'s documented blocker), so this is a compile-time API/shape
+regression, not a computational one: it would fail to type-check if the capstone's statement
+ever drifted from `modalTableauS4KeyedOrdered φ₀ = .closed → s4Valid φ₀`. The `#eval` control
+immediately above independently confirms `modalTableauS4KeyedOrdered tAxiom` actually evaluates
+to `.closed`, so this hypothesis is non-vacuously satisfiable, not just well-typed. -/
+example (h : modalTableauS4KeyedOrdered tAxiom = .closed) : s4Valid tAxiom :=
+  modalTableauS4KeyedOrdered_sound tAxiom h
 
 end CslibTests.S4LoopGuardRegression

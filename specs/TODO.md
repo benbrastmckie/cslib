@@ -11,13 +11,12 @@ next_project_number: 588
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,554,568,569,583,586 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,566,571,576 | 36,37,181,425,554,568,586 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,565 | 39,40,566 | foundations, modal logic |
-| 4 | 567 | 565 | modal logic |
-| 5 | 511,534,582 | 567 | modal logic |
-| 6 | 506,548 | 511 | modal logic |
-| 7 | 300 | 506 | modal logic |
+| 1 | 36,37,181,375,400,409,425,554,566,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,565,571,576 | 36,37,181,425,554,566,568 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,567 | 39,40,565 | foundations, modal logic |
+| 4 | 511,534,582 | 567 | modal logic |
+| 5 | 506,548 | 511 | modal logic |
+| 6 | 300 | 506 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -38,16 +37,15 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-586 [PLANNED] — [Continuation of Task A of the modal-tableau refactor programme; 
-  └─ 566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
-    └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
-      └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
-        └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-          └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-            └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-          └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-        └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-        └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
+566 [NOT STARTED] — [Task H of the modal-tableau refactor programme; P3.] Create Bone
+  └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
+    └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
+      └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+        └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+          └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+        └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+      └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+      └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
 
 ### Temporal Logic
 
@@ -88,12 +86,13 @@ next_project_number: 588
 ---
 
 ### 586. Adjudicate and delete the audited duplicate re-derivation families
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553
 - **Research**: [586_tableau_adjudicate_duplicate_families/reports/01_adjudicate-duplicate-families.md]
 - **Plan**: [586_tableau_adjudicate_duplicate_families/plans/01_delete-surviving-duplicate.md]
+- **Summary**: [586_tableau_adjudicate_duplicate_families/summaries/01_delete-surviving-duplicate-summary.md]
 
 **Description**: [Continuation of Task A of the modal-tableau refactor programme; adjudicates the duplicate families the Support-module extraction left unresolved.] The statement-equivalence audit is DONE and is the input to this task -- do not re-run it: specs/558_tableau_support_private_dedup/reports/02_statement-equivalence-audit.md classifies 45 surviving re-derivation rows across four families (KNOWNWORLDS, SUBFMLS/UNIVERSE, ACCESSIBILITY, MEASURE) as 38 IDENTICAL, 6 WEAKER, 1 DIFFERENT, 0 NOT_FOUND. Delete the adjudicated duplicates and replace them with imports of the public origins.
 --- THE THREE VERDICT CLASSES AND WHAT EACH REQUIRES ---

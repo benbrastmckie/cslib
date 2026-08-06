@@ -459,34 +459,34 @@ that computes its own expectation asserts nothing.
 
 ---
 
-### Phase 6: Full CI gate and closeout [NOT STARTED]
+### Phase 6: Full CI gate and closeout [COMPLETED]
 
 **Goal**: Every gate is green and every figure matches the baseline; the task's claims are
 evidenced rather than asserted.
 
 **Tasks**:
 
-- [ ] `lake build Cslib` — expect green at **3313 jobs**. `Boneyard/` must NOT appear in the build
+- [x] `lake build Cslib` — expect green at **3313 jobs**. `Boneyard/` must NOT appear in the build
       output. A job-count deviation is a signal that a consumer was missed; investigate rather than
       accept.
-- [ ] Modal/Tableau sorry census via the canonical two-grep recipe recorded in `LoopChecking.lean`
+- [x] Modal/Tableau sorry census via the canonical two-grep recipe recorded in `LoopChecking.lean`
       — expect exactly **1**, `branchSatisfiableIn_s4FC_ancestor_redirect` in `FrameSoundness.lean`.
-- [ ] `bash scripts/check-shake-residue.sh` — gate on **9 findings, none in Modal/Tableau**, exit 0
+- [x] `bash scripts/check-shake-residue.sh` — gate on **9 findings, none in Modal/Tableau**, exit 0
       against the unmodified baseline. Do not gate on a raw "zero findings" reading.
-- [ ] `bash scripts/check-axiom-census.sh` — 43 sorryAx-tainted, exit 0; exactly one Modal/Tableau
+- [x] `bash scripts/check-axiom-census.sh` — 43 sorryAx-tainted, exit 0; exactly one Modal/Tableau
       row, and it is the carve-out declaration.
-- [ ] `lake exe checkInitImports` — exit 0.
-- [ ] `bash scripts/check-lint-suppressions.sh` (19, ceiling 19) and
+- [x] `lake exe checkInitImports` — exit 0.
+- [x] `bash scripts/check-lint-suppressions.sh` (19, ceiling 19) and
       `bash scripts/check-sorry-suppressions.sh` (markers 18, sorries 28) — both exit 0.
-- [ ] `lake test` — green.
-- [ ] `lake exe mk_all --check` — green; confirm it does not demand a `Boneyard.lean` aggregator.
-- [ ] Confirm no baseline file was modified: grep each of `axiom-census-baseline.txt`,
+- [x] `lake test` — green.
+- [x] `lake exe mk_all --check` — green; confirm it does not demand a `Boneyard.lean` aggregator.
+- [x] Confirm no baseline file was modified: grep each of `axiom-census-baseline.txt`,
       `shake-residue-baseline.txt`, `sorry-suppression-baseline.txt`,
       `lint-suppression-baseline.txt`, and `nolints.json` for the three moved declaration names —
       expect zero hits in all five, and confirm the files are unmodified in `git status`.
-- [ ] Confirm the final Directory Inventory table in `Boneyard/README.md` reports measured file and
+- [x] Confirm the final Directory Inventory table in `Boneyard/README.md` reports measured file and
       line counts, not estimates.
-- [ ] Confirm both carve-outs are intact: `branchSatisfiableIn_s4FC_ancestor_redirect` is still in
+- [x] Confirm both carve-outs are intact: `branchSatisfiableIn_s4FC_ancestor_redirect` is still in
       `FrameSoundness.lean`, and `keysOriginS4` and its relatives are still in `LoopChecking.lean`.
 
 **Timing**: 0.75 hours

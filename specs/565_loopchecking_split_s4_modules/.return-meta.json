@@ -1,41 +1,44 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-06T00:00:00Z",
-  "completed_at": "2026-08-06T00:00:00Z",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 565,
+  "session_id": "sess_1786030020_688c25_565",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
     {
-      "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
-      "type": "report",
-      "summary": "Research report on splitting LoopChecking.lean into an import-acyclic S4/ module cluster."
-    },
-    {
-      "path": "specs/565_loopchecking_split_s4_modules/artifacts/module-assignment.md",
-      "type": "data",
-      "summary": "241-declaration to target-module assignment table."
-    },
-    {
-      "path": "specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json",
-      "type": "data",
-      "summary": "Declaration reference graph with module assignments."
+      "type": "plan",
+      "path": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
+      "summary": "15-phase implementation plan for splitting LoopChecking.lean (11,393 lines / 241 decls) into eleven S4/*.lean modules along the verified acyclic dependency layering, with LoopChecking.lean retained as a public-import barrel for zero downstream churn, plus ORGANISATION.md subtree expansion and module-size guidance."
     }
   ],
-  "partial_progress": {
-    "stage": "research complete",
-    "details": "All five research questions answered with measured evidence. Layering verified to have zero forward edges across 241 declarations."
+  "phase_count": 15,
+  "estimated_hours": 19,
+  "dependency_waves": [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15]],
+  "plan_metadata": {
+    "phases": 15,
+    "total_effort_hours": 19,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15]],
+    "reports_integrated": [
+      {
+        "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-08-06"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
   },
-  "metadata": {
-    "session_id": "sess_1786030020_688c25_565",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "measured": {
-      "loopchecking_lines": 11393,
-      "loopchecking_declarations": 241,
-      "private_declarations": 58,
-      "private_crossing_seams": 26,
-      "zero_consumer_privates": 3,
-      "proposed_modules": 11,
-      "forward_edge_violations": 0
+  "memory_candidates": [
+    {
+      "content": "Splitting a very large Lean module: the natural declaration families are typically DISCONTIGUOUS in the source, so a contiguous line-range cut cannot produce them. The reliable procedure is (1) build a declaration-level reference graph by stripping comments, tokenising each declaration's statement-plus-proof span, and intersecting against the local declaration-name set; (2) propose a partition; (3) check for forward edges (a module referencing one later in the intended import order) and iterate until zero. Two structural consequences recur: a module not named in the original split proposal is often FORCED (e.g. a Driver module, because the invariant lemmas name the driver definitions in their own statements, so leaving drivers in the parent creates a cycle), and the parent file should be retained as a public-import barrel so zero downstream files change. Lean-specific hazards that make or break such a split: every new module needs its own `@[expose] public section` (omitting one produces a diffuse unfold-failure cascade in DOWNSTREAM modules, far from the omission); declarations whose consumers land in a different module must be de-privatized and then need docstrings for docBlame under --wfail; per-module import sets must be PRUNED empirically via a shake-residue loop, not copied from the parent, or the import-debt ratchet fails; and re-exports the barrel does not itself consume need `-- shake: keep`, which does not move the blanket-suppression ratchet.",
+      "category": "PATTERN",
+      "source_artifact": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["lean-module-split", "declaration-dependency-graph", "import-acyclicity", "expose-public-section", "barrel-module", "shake-import-pruning"]
     }
-  }
+  ],
+  "next_steps": "Run /implement 565 to execute the plan"
 }

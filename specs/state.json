@@ -1574,7 +1574,7 @@
     {
       "project_number": 565,
       "project_name": "loopchecking_split_s4_modules",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md",
       "topic": "Modal Logic",
@@ -1596,11 +1596,16 @@
           "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
           "type": "report",
           "summary": "Full research report: re-measurement, discontiguity evidence (Universe spans 6 disjoint runs L229-L9499), verified acyclic 11-module layering with per-module decl/line counts and import edges, four non-obvious assignment corrections, 26 seam-crossing private declarations, @[expose] public section hazard, zero-downstream-churn barrel strategy, ORGANISATION.md edits, and an 11-phase decomposition."
+        },
+        {
+          "path": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
+          "type": "plan",
+          "summary": "15-phase plan: baseline/layering re-verification, eleven bottom-up module extractions (one per phase, atomic-batch), barrel finalization plus header re-homing, ORGANISATION.md edits, full gate sweep. 19 hours estimated."
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-06T17:52:26Z",
+      "last_updated": "2026-08-06T18:00:26Z",
       "next_artifact_number": 1,
       "session_id": "sess_1786030020_688c25_565",
       "parent_task": null

@@ -1,24 +1,17 @@
 {
-  "status": "researched",
-  "summary": "Re-measured LoopChecking.lean at 11,393 lines / 241 declarations and derived an empirically verified zero-cycle 11-module S4/ layering, finding that a seventh 'Driver' module is structurally forced because the invariant material makes 248 references into the driver definitions.",
+  "status": "planned",
+  "task_number": 565,
+  "session_id": "sess_1786030020_688c25_565",
+  "phase": "plan",
+  "summary": "Created a 15-phase implementation plan to split Cslib/Logics/Modal/Tableau/LoopChecking.lean (11,393 lines / 241 declarations) into eleven S4/*.lean modules along the research-verified acyclic dependency layering. Phase 1 is a baseline-capture and layering-re-verification gate (regenerate decl-graph.json against the live tree; the forward-edge check must report zero violations before any file is written). Phases 2-12 extract one module per phase bottom-up (Universe, BirthKey, Guard, Driver split across two phases, Hintikka, Redirect, InvariantKeys, InvariantAcc, Invariant, HintikkaInvariant), each declared Commit Mode: atomic-batch over a pre-declared file set (new module + LoopChecking.lean + Cslib.lean) because intermediate mid-move states are red. Phase 13 finalizes LoopChecking.lean as a public-import barrel with -- shake: keep annotations and rewrites its header, re-homing the misplaced subsystem-wide Measured Baseline census block to Modal/Tableau/README.md with corrected figures. Phase 14 makes the two ORGANISATION.md edits (Tableau/ subtree expansion, module-size guidance). Phase 15 is the full gate sweep with job-count delta reconciliation. Recorded deviation from the task description: a seventh S4/Driver.lean module is structurally forced (248 invariant-to-driver references would otherwise create an import cycle), and the invariant material is split four ways rather than left as one 4,445-line module. Verification gates are baseline-relative throughout: gate on lake build Cslib green plus an explainable job-count delta rather than the number 3313; Modal/Tableau sorry census exactly 1; shake exit 1 with no Modal/Tableau findings and the global count at baseline (never gate on shake exit 0); axiom census unchanged; checkInitImports, mk_all --check, lint-style, lake test, and the Boneyard quarantine self-test all green. The plan validates clean under validate-artifact.sh --strict with zero warnings.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
-      "type": "report",
-      "summary": "Full research report: re-measurement, discontiguity evidence (Universe spans 6 disjoint runs L229-L9499), verified acyclic 11-module layering with per-module decl/line counts and import edges, four non-obvious assignment corrections, 26 seam-crossing private declarations, @[expose] public section hazard, zero-downstream-churn barrel strategy, ORGANISATION.md edits, and an 11-phase decomposition."
-    },
-    {
-      "path": "specs/565_loopchecking_split_s4_modules/artifacts/module-assignment.md",
-      "type": "data",
-      "summary": "Complete 241-declaration mapping grouped by target module with private flag, kind, and current line number."
-    },
-    {
-      "path": "specs/565_loopchecking_split_s4_modules/artifacts/decl-graph.json",
-      "type": "data",
-      "summary": "Machine-readable reference graph: per-declaration name, visibility, kind, line span, local dependencies, and assigned target module."
+      "path": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
+      "type": "plan",
+      "summary": "15-phase plan: baseline/layering re-verification, eleven bottom-up module extractions (one per phase, atomic-batch), barrel finalization plus header re-homing, ORGANISATION.md edits, full gate sweep. 19 hours estimated."
     }
   ],
-  "phases_completed": 5,
-  "phases_total": 5
+  "phases_completed": 0,
+  "phases_total": 15
 }

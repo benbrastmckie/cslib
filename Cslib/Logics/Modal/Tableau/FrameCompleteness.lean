@@ -8224,6 +8224,43 @@ this task established is not provable for the keyed S4 guard in general (see the
 Verdict above): that sorry documents a standing, deliberate scope decision and is left untouched.
 -/
 
+/-- **Phase 9.2: the end-to-end soundness capstone.** If the ordered keyed driver closes on
+`F(φ₀)@0`, then `φ₀` is `s4Valid`. Mirrors `modalTableauS5Gen_sound`'s own countermodel/by-contra
+argument in shape: assumes a countermodel, builds the seed-state `S4KOFullInv` witness (the
+`S4RedirectSoundInv` half from `S4RedirectSoundInv_initial`, the `S4OrderedFuelInv` half from
+`modalTableauS4Keyed_initial` plus `keysOriginS4_entry`), and derives the contradiction directly
+from the outer fuel induction `modalExpandBranchesS4KeyedOrdered_closed_False`. Per that
+theorem's own scope note: this establishes genuine, unweakened `s4Valid`, not a diluted form,
+because `S4RedirectSoundInv` at the seed state (`Er = []`) is definitionally the plain
+edge-realization clause. -/
+theorem modalTableauS4KeyedOrdered_sound (φ₀ : Proposition Atom)
+    (h : modalTableauS4KeyedOrdered φ₀ = .closed) : s4Valid φ₀ := by
+  intro World m hFC w
+  by_contra hnotsat
+  have hRS := S4RedirectSoundInv_initial φ₀ m (fun _ => w) hFC hnotsat
+  obtain ⟨hLoop, hHintikka, hKW, hWC⟩ := modalTableauS4Keyed_initial φ₀
+  have hKO := keysOriginS4_entry φ₀
+  have hOF : S4OrderedFuelInv φ₀
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty [((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))] :=
+    ⟨hLoop, hHintikka, hKW, hWC, hKO⟩
+  have hFull : S4KOFullInv φ₀
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty [((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))] :=
+    ⟨hOF, [], hRS⟩
+  have hEx : Ex4Inv φ₀
+      [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty]
+      [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]] :=
+    Ex4Inv_of_mem_const φ₀ (List.mem_singleton_self _) rfl rfl rfl hFull
+  have h' : modalExpandBranchesS4KeyedOrdered φ₀
+      [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+      (modalFuelS4 φ₀) = .closed := h
+  exact modalExpandBranchesS4KeyedOrdered_closed_False φ₀ (modalFuelS4 φ₀)
+    [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+    [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]] hEx h'
+
 end Cslib.Logic.Modal.Tableau
 
 end

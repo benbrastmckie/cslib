@@ -1629,7 +1629,7 @@ unbuilt Lean was left in any tracked file.
 
 ---
 
-### Phase 9.2: End-to-end soundness capstone [IN PROGRESS]
+### Phase 9.2: End-to-end soundness capstone [COMPLETED]
 
 - **Goal:** State and prove `modalTableauS4KeyedOrdered_sound`: if the ordered keyed driver closes
   on `F(φ₀)@0`, then `φ₀` is `s4Valid`. A thin corollary of Phase 9.1's fuel wrapper, mirroring
@@ -1645,20 +1645,40 @@ unbuilt Lean was left in any tracked file.
 - **Owns:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.
 
 - **Tasks:**
-  - [ ] State `modalTableauS4KeyedOrdered_sound (φ₀ : Proposition Atom) (h : modalTableauS4KeyedOrdered
+  - [x] State `modalTableauS4KeyedOrdered_sound (φ₀ : Proposition Atom) (h : modalTableauS4KeyedOrdered
         φ₀ = .closed) : s4Valid φ₀`.
-  - [ ] Prove by `by_contra` on an assumed countermodel, build the initial `S4RedirectSoundInv`
+  - [x] Prove by `by_contra` on an assumed countermodel, build the initial `S4RedirectSoundInv`
         witness at `Er = []` from that countermodel (conjuncts (a)/(c)/(d) vacuous, (b) direct),
         feed Phase 9.1's fuel wrapper, and derive the contradiction — mirroring
         `modalTableauS5Gen_sound`'s proof body exactly in shape.
-  - [ ] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+        *(Landed exactly as scoped: the `S4RedirectSoundInv` half from `S4RedirectSoundInv_initial`,
+        the `S4OrderedFuelInv` half from the private `modalTableauS4Keyed_initial` (4 conjuncts)
+        plus `keysOriginS4_entry` (the 5th), bundled into `S4KOFullInv` then `Ex4Inv` via
+        `Ex4Inv_of_mem_const` at the singleton seed worklist, fed to
+        `modalExpandBranchesS4KeyedOrdered_closed_False`. Compiled on the first attempt --
+        confirms the Phase 9 Scope Decision's "thin corollary" estimate. ~35 lines,
+        `FrameCompleteness.lean`.)*
+  - [x] `#print axioms`; scoped build; `lint-style`; census exactly 1.
+        *(`#print axioms Cslib.Logic.Modal.Tableau.modalTableauS4KeyedOrdered_sound` via
+        `lake env lean`: exactly `propext, Classical.choice, Quot.sound`. Scoped
+        `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`: clean. `lake exe lint-style`:
+        clean. `lake exe checkInitImports`: clean. Bare-tactic sorry census: exactly 1
+        (`FrameSoundness.lean:1251`, untouched). A full whole-project `lake lint` was run once
+        after Phase 9.1's outer induction landed (before the capstone) and reported zero
+        `FrameCompleteness.lean`/`LoopChecking.lean` warnings; a SECOND full run, attempted after
+        adding the capstone, was inconclusive -- it did not complete, apparently starved by
+        unrelated concurrent heavy `lean`/`lake` processes from another project observed running
+        on the same host (not from this task or session). Not re-attempted this dispatch given
+        the capstone's small size (~35 lines) and its use of only already-lint-clean patterns;
+        recorded honestly rather than claimed. The full `lake lint` re-run is mandatory at
+        Phase 10 regardless, which will confirm or refute this.)*
 
 - **Done when:** the capstone is sorry-free and committed; census exactly 1; scoped build and
-  `lint-style` clean.
+  `lint-style` clean. **All met.**
 
 ---
 
-### Phase 10: Regression corpus, full CI gate, and close-out [NOT STARTED]
+### Phase 10: Regression corpus, full CI gate, and close-out [IN PROGRESS]
 
 - **Goal:** Extend the regression corpus with a permanent witness row, run the full CSLib CI
   pipeline, and close the task out.

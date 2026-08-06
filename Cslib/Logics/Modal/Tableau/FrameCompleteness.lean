@@ -7801,6 +7801,40 @@ theorem S4RedirectSoundInv_not_isModalClosed (φ₀ : Proposition Atom)
     ⟨W, m, f, fun w w' hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
       hb⟩
 
+/-! ## Phase 9.1: Initialization at the Seed State
+
+The seed state of `modalTableauS4KeyedOrdered` (`b = [F(φ₀)@0]`, `e = []`,
+`acc = Accessibility.empty`, `keys = [(0, ∅)]`) satisfies `S4RedirectSoundInv` at `Er = []`
+whenever a countermodel of `φ₀` exists: conjuncts (a) and (c) are vacuous over the empty ghost
+list, conjunct (d) is vacuous since `Accessibility.empty` gives every world `outDeg = 0`
+(no recorded edges at all), and conjunct (b) reduces to the plain, undiluted edge-realization
+clause -- the `(w, w') ∈ Er` disjunct never fires since `Er = []`. So at the seed state
+`S4RedirectSoundInv` carries EXACTLY the standard undiluted soundness hypothesis, not a diluted
+form; this is what licenses Phase 9.2's capstone to conclude genuine `s4Valid`, not a weakened
+statement. -/
+
+/-- The seed state's `S4RedirectSoundInv` witness, built from an assumed countermodel of `φ₀`
+(a world `f 0` at which `φ₀` fails, in a model satisfying `s4FC`). -/
+theorem S4RedirectSoundInv_initial (φ₀ : Proposition Atom)
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (hFC : s4FC m.r) (hnotsat : ¬ Satisfies m (f 0) φ₀) :
+    S4RedirectSoundInv φ₀
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty
+      [((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))] [] := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro p hp; simp at hp
+  · refine ⟨W, m, f, hFC, ?_, ?_⟩
+    · intro w w' hedge
+      exact absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge])
+    · intro sf hmem
+      simp only [List.mem_singleton] at hmem
+      subst hmem
+      exact sfSat_neg m f φ₀ 0 hnotsat
+  · intro p hp; simp at hp
+  · intro sf hsfmem hshape houtdeg
+    exact absurd houtdeg (by simp [outDeg, Accessibility.successorsOf, Accessibility.empty])
+
 end Cslib.Logic.Modal.Tableau
 
 end

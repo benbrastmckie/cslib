@@ -1,0 +1,20 @@
+{
+  "status": "researched",
+  "artifacts": [
+    {
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md",
+      "type": "report",
+      "summary": "Acceptance-gate CI verification research report with live measurements, findings ledger, and verdict structure."
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All five research questions answered against the current tree (1d824cfd). Seven-step CI order run in full; ten of the ratchet/gate scripts run; seven declarations axiom-verified; two of eight out-of-tree probes re-run."
+  },
+  "metadata": {
+    "session_id": "sess_1786030020_688c25_567",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

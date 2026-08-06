@@ -35,7 +35,7 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
+567 [RESEARCHED] — [Task I of the modal-tableau refactor programme; P4, final accept
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
@@ -299,10 +299,11 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 567. Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 558, Task 562, Task 563, Task 564, Task 565, Task 566, Task 586
+- **Research**: [567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md]
 
 **Description**: [Task I of the modal-tableau refactor programme; P4, final acceptance gate. Depends on every other task in the programme.] Run the seven-step CI order from .claude/rules/cslib.md against CONTRIBUTING.md, NOTATION.md, ORGANISATION.md and CODE_OF_CONDUCT.md. It has never been run on this subsystem. PREREQUISITE, budget for it: lake exe checkInitImports currently FAILS on a stale build unrelated to this subsystem (a missing Constructive/Nested/Soundness.olean), so a full lake build must clear that before verification against the stated gate is meaningful. ACCEPTANCE CRITERIA: behaviour preservation demonstrated by modalTableauS4Keyed_complete and the six landed Decidable instances (K/T/B/S5/Five/KB5) remaining green; the Tableau sorry census not rising above its measured baseline of exactly 1; no new axioms above the measured subsystem baseline of zero; checkInitImports and lint-style clean; and the existing executable regression corpora (CslibTests/S4LoopGuardRegression.lean, 197 lines, plus the probe harnesses under the S4 loop-guard task's artifacts directory) reproducing their recorded verdicts EXACTLY.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

@@ -10762,6 +10762,41 @@ theorem modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv (φ₀ : Prop
   · exact modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv φ₀ b e acc keys newBs newExps
       newAcc keys' hLoopInv hHinv hfallback
 
+/-- **The combined structural invariant bundle Phase 9's fuel induction threads.** Everything
+`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` and
+`modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv` jointly need as ambient state,
+packaged as one `Prop` so a single `List.Forall₂`-style relation carries all of it through the
+outer fuel induction, mirroring how `S5SoundInv` (`FrameSoundness.lean`) bundles
+`accFreshInv ∧ accReachableInv ∧ accTargetsKnown` for the S5 assembly. -/
+def S4OrderedFuelInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop :=
+  S4LoopInv φ₀ b e acc keys ∧ S4KeyedHintikkaInv φ₀ b e acc keys ∧
+  (∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b) ∧ worldsContiguousS4 b ∧
+  keysOriginS4 b acc keys
+
+/-- Every `modalStepBranchS4KeyedOrdered` step preserves the combined `S4OrderedFuelInv` bundle,
+for every child branch/expanded-set pair. Direct assembly of
+`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` (supplies four of the five conjuncts) and
+`modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv` (the fifth) -- no independent proof
+content of its own. -/
+theorem modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hinv : S4OrderedFuelInv φ₀ b e acc keys)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ e' ∈ newExps, S4OrderedFuelInv φ₀ b' e' newAcc keys' := by
+  obtain ⟨hLoop, hH, hKW, hWC, hKO⟩ := hinv
+  have hL := modalStepBranchS4KeyedOrdered_preserves_S4LoopInv φ₀ b e acc keys newBs newExps
+    newAcc keys' hLoop hKW hWC hKO hstep
+  have hHi := modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv φ₀ b e acc keys newBs
+    newExps newAcc keys' hLoop hH hstep
+  intro b' hb' e' he'
+  exact ⟨hL.1 b' hb' e' he', hHi b' hb' e' he', hL.2.1 b' hb', hL.2.2.1 b' hb', hL.2.2.2 b' hb'⟩
+
 /-! ## 4-Tuple Stepper Projection Bridge + Local Measure-Split Helpers
 
 The measure-decrease engine (`modalExpMeasure_step_lt_gen`, `FmpMeasure.lean:3227`) is phrased

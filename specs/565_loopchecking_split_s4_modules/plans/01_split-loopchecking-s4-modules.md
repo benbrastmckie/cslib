@@ -600,24 +600,58 @@ moving.
 
 ---
 
-### Phase 8: Extract `S4/Redirect.lean` [NOT STARTED]
+### Phase 8: Extract `S4/Redirect.lean` [COMPLETED]
 
 **Goal**: The blocked-redirect / `accWithReds` machinery becomes a module importing `Universe`,
 `BirthKey`, `Guard`, `Driver`, `Hintikka`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/Redirect.lean` from the Appendix A template.
-      **Confirm `@[expose] public section`.**
-- [ ] Move the `Redirect`-assigned declarations by name, **including
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/Redirect.lean` from the Appendix A template.
+      **Confirm `@[expose] public section`.** Confirmed. 16 declarations, 644 lines (hypothesis
+      ~639; close).
+- [x] Move the `Redirect`-assigned declarations by name, **including
       `modalS4Saturated_addEdge_of_blocked`** (research correction 4 of 4 — it consumes
       `blockedRedirect_boxed_*`, `successorsOf_addEdge_*`, and `modalApplyOneS4_*_fst_eq`).
-- [ ] Carry `@[nolint unusedArguments]` on `Reds` with its declaration.
-- [ ] No de-privatizations expected (verify).
-- [ ] Write the "Why a separate module" docstring paragraph, noting that this module sits above
+      Confirmed included.
+- [x] Carry `@[nolint unusedArguments]` on `Reds` with its declaration. *(deviation: altered --
+      discovered and fixed a real tooling bug this phase: `decl-graph.json`'s regeneration script
+      records a declaration's bare keyword line, not any preceding `@[attr]` line, and the
+      extraction toolkit's span-start walk did not independently check for a preceding
+      single-line attribute either -- only for `omit ... in`. For `Reds`, whose immediate
+      predecessor in file order was NOT being moved this phase, this would have silently
+      DROPPED `@[nolint unusedArguments]` from the moved declaration and left an orphaned
+      attribute line stuck in `LoopChecking.lean`. Audited the two prior `@[simp]` occurrences
+      (Phase 4, `modalMintShape_boxNeg`/`_diaPos`) and confirmed those were not corrupted --
+      their immediate predecessor was co-moved in the same phase, so concatenation order
+      accidentally reconstructed the correct text. Fixed the toolkit to explicitly absorb a
+      preceding single-line `@[...]` attribute (innermost, closest to the declaration, checked
+      before the docstring/omit-line levels) rather than relying on accidental self-healing.
+      Verified `@[nolint unusedArguments]` now correctly precedes `abbrev Reds` in
+      `Redirect.lean`.)*
+- [x] No de-privatizations expected (verify). Confirmed: 0.
+- [x] Write the "Why a separate module" docstring paragraph, noting that this module sits above
       `Hintikka` because of `modalS4Saturated_addEdge_of_blocked` — the one place the name prefix
-      misleads.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      misleads. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. Two real findings this phase: (1) `LoopChecking.lean` itself --
+      shake wants to drop its `public import S4.Redirect` since the barrel's own residual body
+      doesn't directly use anything from `Redirect`. This is exactly the barrel-pattern false
+      positive the plan's Phase 13 anticipates (research predicted `S4.Redirect` as one of three
+      re-exports needing `-- shake: keep`); applied the annotation now rather than waiting, since
+      each phase gates on shake cleanliness. (2) `FrameCompleteness.lean` was transiently flagged
+      wanting a direct `S4.Redirect` import as a knock-on of (1)'s pre-fix state; resolved
+      automatically once (1) was fixed, no baseline update needed this phase.
+
+**Orphaned-heading finding, resolved (module-content correctness)**: `modalS4Saturated_addEdge_of_blocked`
+(the last Redirect declaration) absorbed a dangling `"## Single-Step Invariant Preservation"`
+heading as trailing content -- its true subject, `modalStepBranchS4Keyed_blocked_witness_mem`,
+already moved to `Driver.lean` in Phase 6, but the heading itself only became adjacent to
+Redirect's tail once Phases 7-8 removed the remaining intervening content. Deleted it from
+`Redirect.lean` (same progressive-drift pattern as Phase 5's "Minting-Content Equality Closure").
+
+Zero downstream `.lean` file content changed. All gates green: build 3319 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 1 hour
 

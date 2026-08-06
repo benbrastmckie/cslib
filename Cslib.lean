@@ -508,6 +508,7 @@ public import Cslib.Logics.Modal.Tableau.S4.BirthKey
 public import Cslib.Logics.Modal.Tableau.S4.Driver
 public import Cslib.Logics.Modal.Tableau.S4.Guard
 public import Cslib.Logics.Modal.Tableau.S4.Hintikka
+public import Cslib.Logics.Modal.Tableau.S4.Redirect
 public import Cslib.Logics.Modal.Tableau.S4.Universe
 public import Cslib.Logics.Modal.Tableau.S5Simplification
 public import Cslib.Logics.Modal.Tableau.Saturation

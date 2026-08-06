@@ -832,23 +832,43 @@ boneyard quarantine all pass.
 
 ---
 
-### Phase 12: Extract `S4/HintikkaInvariant.lean` [NOT STARTED]
+### Phase 12: Extract `S4/HintikkaInvariant.lean` [COMPLETED]
 
 **Goal**: The keyed-Hintikka and ordered-fuel invariants become the top `S4/` module, importing
 `Hintikka`, `InvariantAcc`, and `Invariant`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/HintikkaInvariant.lean` from the Appendix A template.
-      **Confirm `@[expose] public section`.**
-- [ ] Move `S4KeyedHintikkaInv`, `_weaken`, `modalS4Saturated_of_ordered_settled`,
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/HintikkaInvariant.lean` from the Appendix A template.
+      **Confirm `@[expose] public section`.** Confirmed. 8 declarations, 802 lines (hypothesis
+      ~801; matches almost exactly).
+- [x] Move `S4KeyedHintikkaInv`, `_weaken`, `modalS4Saturated_of_ordered_settled`,
       `S4KeyedHintikkaInv_append`, the two `_preserves_S4KeyedHintikkaInv` theorems,
       `S4OrderedFuelInv`, and `modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv`.
-- [ ] Write the "Why a separate module" docstring paragraph.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
-- [ ] **Confirm the residue**: after this phase `LoopChecking.lean` should hold exactly the 20
+      Confirmed.
+- [x] Write the "Why a separate module" docstring paragraph. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new findings; shake-flagged set remained 12/12.
+- [x] **Confirm the residue**: after this phase `LoopChecking.lean` should hold exactly the 20
       retained declarations (entry points, termination measure, capstones). Report the actual
-      count and line total.
+      count and line total. **Confirmed exactly 20 declarations, 1723 lines** (hypothesis 20
+      decls / ~1,460 lines — decl count matches exactly, line total higher than hypothesized;
+      the observed figure is authoritative and carried into Phase 13's header rewrite).
+
+**Two dangling-heading findings, resolved (module-content correctness)**: (1)
+`"## 4-Tuple Stepper Projection Bridge + Local Measure-Split Helpers"`, whose subject
+`modalStepBranchS4Keyed_proj_stepBranchGen` is LoopChecking-residual (not moved), drifted onto
+this phase's tail; relocated back to precede `stepBranch_findSome?_proj4to3` (the section's
+actual first declaration) in `LoopChecking.lean`. (2)
+`"## Keys-Threaded Hintikka-Tracking Invariant Bundle"`, a separate two-level-removed heading
+whose subject `S4KeyedHintikkaInv` *did* move this phase, was left orphaned in
+`LoopChecking.lean` (immediately followed by heading (1) with no real content between, since
+its own single-absorption docstring is a distinct block). Relocated it to precede
+`S4KeyedHintikkaInv`'s own docstring in `HintikkaInvariant.lean`. Both confirmed via the
+standard orphan check and a full compile of the affected declarations either side.
+
+Zero downstream `.lean` file content changed. All gates green: build 3323 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 1 hour
 

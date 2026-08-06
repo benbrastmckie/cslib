@@ -1,18 +1,45 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-06T15:47:00Z",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "specs/564_tableau_s4keyed_migration_st_ladder/summaries/01_migrate-s4keyed-st-ladder-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: all 6 phases completed, gate table, net line-count delta (-256), plan deviations, and both recorded scope exclusions."
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib/Logics/Modal/Tableau/Saturation.lean"
+  ],
+  "phases_completed": 6,
+  "phases_total": 6,
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 1,
+    "sorry_note": "Pre-existing sorry at FrameSoundness.lean:1251, unchanged baseline, out of scope per plan Non-Goals",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
+    "stage": "complete",
+    "details": "All 6 phases completed and committed. lake build Cslib green (3313 jobs), lake test passes (9378 jobs), sorry census unchanged at 1, lake lint zero findings in touched files, lake shake 9 findings none in Modal/Tableau (baseline match). Net -256 lines across the three in-scope files.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 6
+  },
+  "completion_data": {
+    "completion_summary": "Migrated the S4 Keyed drivers onto the RuleApplySt ladder and removed S4LoopInv.outDegEq plus its three orphaned preservation lemmas. Half 1 (Phases 2-3) deleted the outDegEq field and orphaned lemmas (438 lines). Half 2 (Phases 4-5) landed a state-threaded S4 Keyed bridge additively (modalApplyOneS4KeyedSt plus four bridge theorems, transcribed from a pre-verified asset) and closed the entry-point story with a corollary tying modalTableauS4Keyed to modalExpandBranchesGenSt, retiring the stale note in Saturation.lean. Net -256 lines across the three in-scope files. All verification gates held at or better than the Phase 1 baseline: lake build Cslib green, sorry census unchanged at 1, checkInitImports/lint-style/lake test all green, lake shake stayed at 9 findings none in Modal/Tableau, zero new docBlame findings, zero vacuous definitions, zero new axioms. Two scope exclusions recorded per the plan's Non-Goals: the KeyedOrdered driver migration (structurally impossible against the current ladder; recommend a follow-up task for a stepper-parameterised rung) and the destructive redefinition of the bespoke drivers (net +80 lines across 40 re-verified proof sites per research measurement; requires explicit user sign-off).",
+    "roadmap_items": []
   },
   "metadata": {
     "session_id": "sess_1786030020_688c25_564",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

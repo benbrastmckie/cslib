@@ -1,7 +1,7 @@
 # Implementation Plan: Task #564
 
 - **Task**: 564 - Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated `keys'` derivation
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4.6 hours
 - **Dependencies**: 553, 562, 563 (all landed)
 - **Research Inputs**: `specs/564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md`
@@ -448,28 +448,47 @@ mismatch there is the likely cause.
 
 ---
 
-### Phase 6: Full CI gate and scope-exclusion record [NOT STARTED]
+### Phase 6: Full CI gate and scope-exclusion record [COMPLETED]
 
 **Goal**: Run the complete CSLib verification pipeline against the Phase 1 baseline and record the
 two forced scope exclusions so a future reader does not re-attempt them blind.
 
 **Tasks**:
-- [ ] Run `lake build Cslib`; confirm exit 0.
-- [ ] Run the sorry census; confirm the count is still exactly 1 and the single hit is
+- [x] Ran `lake build Cslib`; confirmed exit 0 (3313 jobs).
+- [x] Ran the sorry census; confirmed the count is still exactly 1 and the single hit is
       `FrameSoundness.lean:1251`.
-- [ ] Run `lake exe checkInitImports`; confirm exit 0.
-- [ ] Run `lake lint`; confirm no new findings against the Phase 1 baseline.
-- [ ] Run `lake exe lint-style`; confirm exit 0.
-- [ ] Run `lake shake --add-public --keep-implied --keep-prefix`; confirm **no Modal/Tableau
-      findings** and the count is still **9**. Do **not** gate on exit 0 — exit 1 with 9
-      non-Modal/Tableau findings is the expected, correct outcome.
-- [ ] Run `lake test`.
-- [ ] Record the net `wc -l` delta across the three in-scope files against the Phase 1 baseline.
-- [ ] Record in the task summary that the **KeyedOrdered migration** was excluded as structurally
-      impossible against the current ladder, with the reason (`modalStepBranchGenSt` abstracts
-      over the rule, not the traversal; the ordered driver's minting gate is a global property of
-      the branch), and recommend a follow-up task for the stepper-parameterised rung.
-- [ ] Record in the task summary that the **destructive redefinition** of the bespoke drivers was
+- [x] Ran `lake exe checkInitImports`; confirmed exit 0.
+- [x] Ran `lake lint`; confirmed no findings in any of the three modified files
+      (`LoopChecking.lean`, `FrameCompleteness.lean`, `Saturation.lean`) — 145 total findings
+      repo-wide, all in files this task did not touch (e.g. `FmpMeasure.lean`,
+      `FrameSoundness.lean`'s pre-existing `unusedArguments` findings). *(Note: Phase 1's task
+      list did not itself run a full `lake lint`, only `lint-style`/`shake`, so there is no
+      Phase-1-captured absolute count to diff against; "no new findings" is verified instead by
+      confirming zero findings land in the three files this task edited.)*
+- [x] Ran `lake exe lint-style`; confirmed exit 0.
+- [x] Ran `lake shake --add-public --keep-implied --keep-prefix`; confirmed **no Modal/Tableau
+      findings** and the count is still **9** (identical file set to the Phase 1 baseline:
+      `TimeM.lean`, `MultiTape/Deterministic.lean`, `StackTape.lean`, `Relation/Defs.lean`,
+      `SingleTape/NonDeterministic.lean`, `Relation/Confluence.lean`, `Control/Monad/Free.lean`,
+      `CCS/Basic.lean`, `CombinatoryLogic/Defs.lean`). Gated on the finding count, not exit code —
+      exit 1 is the expected, correct outcome.
+- [x] Ran `lake test`; confirmed pass (9378 jobs, including
+      `CslibTests.S4LoopGuardRegression`).
+- [x] Recorded the net `wc -l` delta across the three in-scope files against the Phase 1 baseline:
+      `LoopChecking.lean` 11761 -> 11500 (**-261**), `FrameCompleteness.lean` 8266 -> 8264
+      (**-2**), `Saturation.lean` 755 -> 762 (**+7**) — **net -256 lines** across the three files.
+      This is a materially different figure from the plan's ~330-line hypothesis (~437 removed in
+      Phases 2-3 vs. an actual combined removal/addition profile of -438 in Phase 2, ~0 net in
+      Phase 3, +157 in Phase 4, +25 in Phase 5), reported honestly here rather than restated as
+      the hypothesis — the whole-payoff `outDegEq` removal (Phase 2) still delivered the bulk of
+      the reduction; Phase 4's bridge transcription (real prose docstrings replacing terse
+      EXPERIMENT labels) simply cost more lines than the plan's terse ~100-line estimate.
+- [x] Recorded in this summary (see Phase 6 notes below) that the **KeyedOrdered migration** was
+      excluded as structurally impossible against the current ladder, with the reason
+      (`modalStepBranchGenSt` abstracts over the rule, not the traversal; the ordered driver's
+      minting gate is a global property of the branch), and recommends a follow-up task for the
+      stepper-parameterised rung.
+- [x] Recorded in this summary that the **destructive redefinition** of the bespoke drivers was
       excluded as net +80 lines across 40 re-verified proof sites, per the research measurement,
       and that it would require explicit user sign-off.
 
@@ -487,29 +506,33 @@ reported honestly in the summary rather than restated as the hypothesis.
 **Files to modify**:
 - None (verification and recording only).
 
-**Verification**:
-- All seven gate commands run, with results recorded against the Phase 1 baseline.
-- Both scope exclusions recorded with their reasons.
+**Verification** (all confirmed):
+- All seven gate commands run, with results recorded against the Phase 1 baseline. Confirmed.
+- Both scope exclusions recorded with their reasons. Confirmed (see summary artifact).
 
 ---
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib` exits 0.
-- [ ] `grep -rn "^\s*sorry\s*$\|:= sorry\|<;> sorry\|exact sorry" Cslib/Logics/Modal/Tableau/`
+- [x] `lake build Cslib` exits 0. Confirmed (3313 jobs).
+- [x] `grep -rn "^\s*sorry\s*$\|:= sorry\|<;> sorry\|exact sorry" Cslib/Logics/Modal/Tableau/`
       returns exactly 1 hit, at `FrameSoundness.lean:1251`. **Zero-debt: no new `sorry` may be
-      introduced.** Nothing in this plan requires one — Phases 2-3 are pure deletion of
-      already-proved material, and every Phase 4 proof is already compiled in the asset.
-- [ ] `lake exe checkInitImports` exits 0.
-- [ ] `lake exe lint-style` exits 0.
-- [ ] `lake lint` shows no new findings, in particular no `docBlame` on any of the six new
-      declarations.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix`: **no Modal/Tableau findings AND
-      count stays 9**. Do not gate on exit 0.
-- [ ] `lake test` passes.
-- [ ] No vacuous definitions (`def X := True`, `theorem X := trivial`) anywhere in the diff.
-- [ ] `grep -rn "\.outDegEq\|outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns
-      nothing; `ModalPotentialInv.outDegEq` in `FmpMeasure.lean` is untouched.
+      introduced.** Confirmed — Phases 2-3 were pure deletion of already-proved material, and
+      every Phase 4/5 proof was already compiled in the asset or closes by `rw`+auto-`rfl`.
+- [x] `lake exe checkInitImports` exits 0. Confirmed.
+- [x] `lake exe lint-style` exits 0. Confirmed.
+- [x] `lake lint` shows no new findings, in particular no `docBlame` on any of the six new
+      declarations. Confirmed — zero findings land in any of the three files this task touched.
+- [x] `lake shake --add-public --keep-implied --keep-prefix`: **no Modal/Tableau findings AND
+      count stays 9**. Confirmed (identical 9-file finding set to the Phase 1 baseline). Not
+      gated on exit 0 (exit 1 is expected).
+- [x] `lake test` passes. Confirmed (9378 jobs).
+- [x] No vacuous definitions (`def X := True`, `theorem X := trivial`) anywhere in the diff.
+      Confirmed via `git diff 9a3b2370 HEAD -- Cslib/` grepped for the vacuous patterns: zero
+      hits.
+- [x] `grep -rn "\.outDegEq\|outDegEq" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns
+      nothing; `ModalPotentialInv.outDegEq` in `FmpMeasure.lean` is untouched. Confirmed —
+      `git diff 9a3b2370 HEAD -- Cslib/Logics/Modal/Tableau/FmpMeasure.lean` is empty.
 
 ## Artifacts & Outputs
 

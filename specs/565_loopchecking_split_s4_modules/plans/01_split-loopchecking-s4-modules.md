@@ -673,26 +673,32 @@ unusedArguments]` attribute travels; ~639 lines. Confirm before moving.
 
 ---
 
-### Phase 9: Extract `S4/InvariantKeys.lean` [NOT STARTED]
+### Phase 9: Extract `S4/InvariantKeys.lean` [COMPLETED]
 
 **Goal**: The six keys-facing `S4LoopInv` field preservation lemmas become a module importing
 `Universe`, `BirthKey`, `Guard`, `Driver`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/InvariantKeys.lean` from the Appendix A template.
-      **Confirm `@[expose] public section`.**
-- [ ] Move the `keyLowerBd`, `keysInUniverse`, `keysTotal`, `keysDistinct`, `keysWorldsKnown`, and
-      `keysOriginS4` preservation pairs.
-- [ ] **Research correction 3 of 4**: move
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/InvariantKeys.lean` from the Appendix A template.
+      **Confirm `@[expose] public section`.** Confirmed. 14 declarations, 1742 lines (hypothesis
+      ~1725; close; the largest of the four invariant modules as expected).
+- [x] Move the `keyLowerBd`, `keysInUniverse`, `keysTotal`, `keysDistinct`, `keysWorldsKnown`, and
+      `keysOriginS4` preservation pairs. Confirmed.
+- [x] **Research correction 3 of 4**: move
       `successorBirthContent_boxNeg_subset_relevantSetFinset` and
       `successorBirthContent_diamondPos_subset_relevantSetFinset` here, **not** to `BirthKey`
       despite their names — they reference `modalApplyOneS4KeyedMint` and its equation lemmas, and
       `keyLowerBd` consumes them. Remove `private` from both if the regenerated graph shows a
-      cross-module consumer; otherwise keep `private`.
-- [ ] Write the "Why a separate module" docstring paragraph, recording that the invariant material
-      is split four ways because a single `Invariant.lean` would be ~4,445 lines.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      cross-module consumer; otherwise keep `private`. Confirmed no cross-module consumer for
+      either; both kept `private`.
+- [x] Write the "Why a separate module" docstring paragraph, recording that the invariant material
+      is split four ways because a single `Invariant.lean` would be ~4,445 lines. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new findings; shake-flagged set remained 12/12.
+
+Zero orphaned headings this phase; zero downstream `.lean` file content changed. All gates
+green: build 3320 jobs, sorry census 1, axiom census 43, lint-suppressions 19, checkInitImports,
+mk_all --check, lint-style, lake test, boneyard quarantine all pass.
 
 **Timing**: 1.5 hours
 

@@ -3,11 +3,11 @@
   "started_at": "2026-08-06T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_8_complete",
-    "details": "Phases 1-8 complete and committed. Build green at 3319 jobs. Phase 8 fixed a real extraction-tooling bug (dropped @[attr] lines when the immediately-preceding declaration wasn't co-moved) and applied the first -- shake: keep annotation on LoopChecking.lean's S4.Redirect import, matching research's prediction.",
+    "stage": "phase_9_complete",
+    "details": "Phases 1-9 complete and committed. Build green at 3320 jobs.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 8
+    "phases_completed": 9
   },
   "metadata": {
     "session_id": "sess_1786030020_688c25_565",

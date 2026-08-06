@@ -10563,6 +10563,205 @@ theorem modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv (φ₀ : Proposition
       · -- notApplicable: impossible, `findSome?` only returns `some` when applicable.
         rw [hres] at hsf; simp at hsf
 
+/-- **`S4KeyedHintikkaInv` preservation for the ordered driver.** Every
+`modalStepBranchS4KeyedOrdered` step preserves the keys-threaded Hintikka-tracking invariant
+bundle, given the ambient frozen `S4LoopInv` structure. Ports
+`modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv` (above) to the ordered driver via
+`modalStepBranchS4KeyedOrdered_cases`: the settled-fallback branch reduces to a literal call of
+`modalStepBranchS4Keyed`, so it is discharged by the unordered theorem directly with no new
+content; the primary-scan-hit branch selects a NON-MINT candidate
+(`modalMintShape sf = false`, `modalNonMintCandidates`'s own predicate), so it is confined to the
+unordered proof's own "non-mint" case (its final `by_cases hmint2` branch), restated here against
+the shared body `modalStepBranchS4KeyedBody` in place of the bare `findSome?` extraction -- the
+SAME per-formula mechanics (`modalStepBranchS4Keyed_eq_findSome_body` confirms the two traversals
+share this body verbatim), just reached via a different selection route. No mint case ever arises
+in the primary-scan-hit branch, so it needs none of the unordered proof's mint-shape content. -/
+theorem modalStepBranchS4KeyedOrdered_preserves_S4KeyedHintikkaInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hLoopInv : S4LoopInv φ₀ b e acc keys)
+    (hHinv : S4KeyedHintikkaInv φ₀ b e acc keys)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ e' ∈ newExps, S4KeyedHintikkaInv φ₀ b' e' newAcc keys' := by
+  rcases modalStepBranchS4KeyedOrdered_cases φ₀ b e acc keys newBs newExps newAcc keys' hstep with
+    ⟨sf, hcand, hbody⟩ | ⟨-, hfallback⟩
+  · -- Primary-scan hit: `sf` is non-mint-shaped (by `modalNonMintCandidates`'s own predicate).
+    have hsfmemb := modalNonMintCandidates_subset φ₀ keys b e acc hcand
+    have hsfnote := modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf hcand
+    have hmintapp : modalMintShape sf = false ∧
+        (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable = true := by
+      unfold modalNonMintCandidates at hcand
+      have hpred := (List.mem_filter.mp hcand).2
+      simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+      exact ⟨hpred.1.1, hpred.2⟩
+    obtain ⟨hmshape, -⟩ := hmintapp
+    have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) := by
+      refine ⟨?_, ?_⟩
+      · rintro ⟨hs, φ, hf⟩
+        exact absurd hmshape (by simp [modalMintShape, hs, hf])
+      · rintro ⟨hs, φ, hf⟩
+        exact absurd hmshape (by simp [modalMintShape, hs, hf])
+    have hany : e.any (· == sf) = false := by
+      rw [List.any_eq_false]
+      intro x hx heq
+      rw [beq_iff_eq] at heq
+      subst heq
+      exact hsfnote hx
+    unfold modalStepBranchS4KeyedBody at hbody
+    rw [if_neg (by simp [hany])] at hbody
+    rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+    rw [hpair] at hbody
+    dsimp only at hbody
+    have haccsub : ∀ w w', acc.hasEdge w w' = true → newAcc0.hasEdge w w' = true := by
+      intro w w' h
+      have hmono := modalApplyOneS4Keyed_hasEdge_mono φ₀ keys sf b acc h
+      rwa [hpair] at hmono
+    by_cases hmint2 : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+    · -- pos-box / neg-diamond: always persistent (never linear/branching).
+      have hne := modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding φ₀ keys sf b acc hsfmemb
+        hLoopInv.accKnown hmint2
+      rw [hpair] at hne
+      dsimp only at hne
+      rcases hres : result with lf | brs | lf | _
+      · exact absurd hres (by rw [hres] at hne; rcases hne with h | ⟨_, h⟩ <;> simp_all)
+      · exact absurd hres (by rw [hres] at hne; rcases hne with h | ⟨_, h⟩ <;> simp_all)
+      · rw [hres] at hbody
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        have hkeq : keys' = keys := by
+          rw [← hnewKeys]
+          rcases hs : sf.sign with _ | _ <;>
+            rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.2
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.1
+        intro b' hb' e' he'
+        rw [← hnewBs] at hb'; simp only [List.mem_singleton] at hb'
+        rw [← hnewExps] at he'; simp only [List.mem_singleton] at he'
+        subst hb'; rw [he', hkeq]; subst hnewAcc
+        have hbsub : ∀ x ∈ b, x ∈ lf ++ b := fun x hx => List.mem_append_right _ hx
+        exact S4KeyedHintikkaInv_weaken φ₀ b (lf ++ b) e acc newAcc0 keys hbsub haccsub hHinv
+      · exact absurd hres (by rw [hres] at hne; rcases hne with h | ⟨_, h⟩ <;> simp_all)
+    · -- genuinely propositional: `sf.formula` is neither box- nor diamond-shaped at all.
+      have hnbd2 : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+          ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
+        ⟨fun hc => hmint2 (Or.inl hc), fun hc => hmint2 (Or.inr hc)⟩
+      have hnb : ∀ ψ, sf.formula ≠ .box ψ := by
+        intro ψ hform
+        rcases hs : sf.sign with _ | _
+        · exact hnbd2.1 ⟨hs, ψ, hform⟩
+        · exact hnbd.1 ⟨hs, ψ, hform⟩
+      have hnd : ∀ ψ, sf.formula ≠ .diamond ψ := by
+        intro ψ hform
+        rcases hs : sf.sign with _ | _
+        · exact hnbd.2 ⟨hs, ψ, hform⟩
+        · exact hnbd2.2 ⟨hs, ψ, hform⟩
+      rcases hres : result with lf | brs | lf | _
+      · -- linear (propositional rule, e.g. and/or/imp)
+        rw [hres] at hbody
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        have hkeq : keys' = keys := by
+          rw [← hnewKeys]
+          rcases hs : sf.sign with _ | _ <;>
+            rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.2
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.1
+        intro b' hb' e' he'
+        rw [← hnewBs] at hb'; simp only [List.mem_singleton] at hb'
+        rw [← hnewExps] at he'; simp only [List.mem_singleton] at he'
+        subst hb'; subst he'; subst hnewAcc; rw [hkeq]
+        have hbsub : ∀ x ∈ b, x ∈ lf ++ b := fun x hx => List.mem_append_right _ hx
+        have hweak := S4KeyedHintikkaInv_weaken φ₀ b (lf ++ b) e acc newAcc0 keys hbsub haccsub
+          hHinv
+        have hinveq : (modalApplyOneS4Keyed φ₀ keys
+            (⟨sf.sign, sf.formula, sf.label⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            (lf ++ b) newAcc0).1 = RuleResult.linear lf := by
+          rw [← modalApplyOneS4Keyed_fst_eq_of_not_box φ₀ keys sf.sign sf.formula sf.label
+            hnb hnd b (lf ++ b) acc newAcc0]
+          rw [← hres]; exact congrArg Prod.fst hpair
+        refine S4KeyedHintikkaInv_append φ₀ (lf ++ b) e newAcc0 keys keys sf hweak ?_
+          (fun ψ' hform => absurd hform (hnb ψ')) (fun ψ' hform => absurd hform (hnd ψ'))
+          (fun ψ' w hsfeq2 => absurd (congrArg SignedFormula.formula hsfeq2) (hnb ψ'))
+          (fun ψ' w hsfeq2 => absurd (congrArg SignedFormula.formula hsfeq2) (hnd ψ'))
+        unfold modalHintikkaClauseGen
+        rcases hff : sf.formula with p | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ
+        · rw [hff] at hinveq; rw [hinveq]; exact fun x hx => List.mem_append_left _ hx
+        · rw [hff] at hinveq; rw [hinveq]; exact fun x hx => List.mem_append_left _ hx
+        · rw [hff] at hinveq; rw [hinveq]; exact fun x hx => List.mem_append_left _ hx
+        · rw [hff] at hinveq; rw [hinveq]; exact fun x hx => List.mem_append_left _ hx
+        · rw [hff] at hinveq; rw [hinveq]; exact fun x hx => List.mem_append_left _ hx
+        · exact absurd hff (hnb ψ)
+        · exact absurd hff (hnd ψ)
+      · -- branching (propositional or-rule)
+        rw [hres] at hbody
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        have hkeq : keys' = keys := by
+          rw [← hnewKeys]
+          rcases hs : sf.sign with _ | _ <;>
+            rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.2
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.1
+        intro b' hb' e' he'
+        rw [← hnewBs] at hb'
+        obtain ⟨br, hbrmem, rfl⟩ := List.mem_map.mp hb'
+        rw [← hnewExps] at he'
+        obtain ⟨br', hbr'mem, he'eq⟩ := List.mem_map.mp he'
+        subst hnewAcc; rw [hkeq]
+        have hbsub : ∀ x ∈ b, x ∈ br ++ b := fun x hx => List.mem_append_right _ hx
+        have hweak := S4KeyedHintikkaInv_weaken φ₀ b (br ++ b) e acc newAcc0 keys hbsub haccsub
+          hHinv
+        have hinveq : (modalApplyOneS4Keyed φ₀ keys
+            (⟨sf.sign, sf.formula, sf.label⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            (br ++ b) newAcc0).1 = RuleResult.branching brs := by
+          rw [← modalApplyOneS4Keyed_fst_eq_of_not_box φ₀ keys sf.sign sf.formula sf.label
+            hnb hnd b (br ++ b) acc newAcc0]
+          rw [← hres]; exact congrArg Prod.fst hpair
+        rw [← he'eq]
+        refine S4KeyedHintikkaInv_append φ₀ (br ++ b) e newAcc0 keys keys sf hweak ?_
+          (fun ψ' hform => absurd hform (hnb ψ')) (fun ψ' hform => absurd hform (hnd ψ'))
+          (fun ψ' w hsfeq2 => absurd (congrArg SignedFormula.formula hsfeq2) (hnb ψ'))
+          (fun ψ' w hsfeq2 => absurd (congrArg SignedFormula.formula hsfeq2) (hnd ψ'))
+        unfold modalHintikkaClauseGen
+        rcases hff : sf.formula with p | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ
+        · rw [hff] at hinveq; rw [hinveq]
+          exact ⟨br, hbrmem, fun x hx => List.mem_append_left _ hx⟩
+        · rw [hff] at hinveq; rw [hinveq]
+          exact ⟨br, hbrmem, fun x hx => List.mem_append_left _ hx⟩
+        · rw [hff] at hinveq; rw [hinveq]
+          exact ⟨br, hbrmem, fun x hx => List.mem_append_left _ hx⟩
+        · rw [hff] at hinveq; rw [hinveq]
+          exact ⟨br, hbrmem, fun x hx => List.mem_append_left _ hx⟩
+        · rw [hff] at hinveq; rw [hinveq]
+          exact ⟨br, hbrmem, fun x hx => List.mem_append_left _ hx⟩
+        · exact absurd hff (hnb ψ)
+        · exact absurd hff (hnd ψ)
+      · -- persistent (no change to `e`)
+        rw [hres] at hbody
+        simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+        obtain ⟨hnewBs, hnewExps, hnewAcc, hnewKeys⟩ := hbody
+        have hkeq : keys' = keys := by
+          rw [← hnewKeys]
+          rcases hs : sf.sign with _ | _ <;>
+            rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.2
+          · exact absurd ⟨hs, ψ, hf⟩ hnbd.1
+        intro b' hb' e' he'
+        rw [← hnewBs] at hb'; simp only [List.mem_singleton] at hb'
+        rw [← hnewExps] at he'; simp only [List.mem_singleton] at he'
+        subst hb'; rw [he', hkeq]; subst hnewAcc
+        have hbsub : ∀ x ∈ b, x ∈ lf ++ b := fun x hx => List.mem_append_right _ hx
+        exact S4KeyedHintikkaInv_weaken φ₀ b (lf ++ b) e acc newAcc0 keys hbsub haccsub hHinv
+      · -- notApplicable: impossible, `findSome?` only returns `some` when applicable.
+        rw [hres] at hbody; simp at hbody
+  · exact modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv φ₀ b e acc keys newBs newExps
+      newAcc keys' hLoopInv hHinv hfallback
+
 /-! ## 4-Tuple Stepper Projection Bridge + Local Measure-Split Helpers
 
 The measure-decrease engine (`modalExpMeasure_step_lt_gen`, `FmpMeasure.lean:3227`) is phrased

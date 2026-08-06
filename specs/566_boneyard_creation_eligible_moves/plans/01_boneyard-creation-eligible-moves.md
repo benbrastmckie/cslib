@@ -1,7 +1,7 @@
 # Implementation Plan: Create `Boneyard/` and Move Re-Verified Zero-Consumer Declarations
 
 - **Task**: 566 - Create Boneyard/ with its convention and move only re-verified zero-consumer declarations
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 6 hours
 - **Dependencies**: 553, 563, 564, 586 (all landed)
 - **Research Inputs**: `specs/566_boneyard_creation_eligible_moves/reports/01_boneyard-convention-and-consumer-reaudit.md`
@@ -124,7 +124,7 @@ Phase 2's territory.
 
 ---
 
-### Phase 1: Create the quarantine skeleton and prove the exclusion empirically [NOT STARTED]
+### Phase 1: Create the quarantine skeleton and prove the exclusion empirically [COMPLETED]
 
 **Goal**: `Boneyard/` exists at the repository root with its convention documented, and the
 "no build/lint/census config needs changing" claim is confirmed by running the full gate set
@@ -132,27 +132,27 @@ Phase 2's territory.
 
 **Tasks**:
 
-- [ ] Record the pre-change baseline by running the gate set (see Testing & Validation) and
+- [x] Record the pre-change baseline by running the gate set (see Testing & Validation) and
       capturing each figure. This is the reference every later phase compares against.
-- [ ] Create `Boneyard/README.md` at the **repository root** (not under `Cslib/`), covering:
-  - [ ] The archival criterion: a file belongs here when it is unreachable from every Lake target
+- [x] Create `Boneyard/README.md` at the **repository root** (not under `Cslib/`), covering:
+  - [x] The archival criterion: a file belongs here when it is unreachable from every Lake target
         root and is not intended to become reachable. Unreachability alone is not sufficient —
         merely not-yet-wired code belongs elsewhere.
-  - [ ] The build policy, stated as *liveness equals reachability*: there is no Lake target
+  - [x] The build policy, stated as *liveness equals reachability*: there is no Lake target
         covering `Boneyard/`; import lines inside archived files are historical text, not build
         edges; stale imports in never-built code are cosmetic and need not be repaired.
-  - [ ] The `#exit` guard convention and the `ARCHIVED (Boneyard)` header-docstring convention
+  - [x] The `#exit` guard convention and the `ARCHIVED (Boneyard)` header-docstring convention
         (header names the moved declarations and ends `Do not import from live code.`).
-  - [ ] A Directory Inventory table with columns: subdirectory / files / lines / archived-from /
+  - [x] A Directory Inventory table with columns: subdirectory / files / lines / archived-from /
         why-archived.
-  - [ ] "Sorry counts here are not bugs" — archived sorries are dead ends, not open obligations.
-  - [ ] "Do not grep this directory when auditing live identifier usage."
-  - [ ] The **three standing invariants**, each of which would individually undo the quarantine:
+  - [x] "Sorry counts here are not bugs" — archived sorries are dead ends, not open obligations.
+  - [x] "Do not grep this directory when auditing live identifier usage."
+  - [x] The **three standing invariants**, each of which would individually undo the quarantine:
         (1) never add `[[lean_lib]] name = "Boneyard"` to `lakefile.toml`; (2) never
         `import Boneyard.*` from anything reachable from `Cslib.lean` — because `srcDir` defaults
         to the repo root the module name *does* resolve, and this is the one live vector; (3)
         never pass `--scope Boneyard` to `check-sorry-suppressions.sh`.
-  - [ ] The **two repo-wide scanner constraints**: `.github/workflows/todo-issue.yml` is
+  - [x] The **two repo-wide scanner constraints**: `.github/workflows/todo-issue.yml` is
         diff-driven with no `paths-ignore` filter and would file GitHub issues for `TODO:`/`FIXME:`
         markers in archived code — therefore archived code MUST NOT carry live markers (neutralize
         to `ARCHIVED-TODO:` if a note is genuinely needed); and `scripts/bench/size/run` globs every
@@ -160,16 +160,16 @@ Phase 2's territory.
         CI-wired). Record that editing `todo-issue.yml` was considered and rejected because every
         file under `.github/workflows/` is shared with the upstream remote and each edit adds a
         recurring sync-conflict hunk.
-  - [ ] A note that **root-level placement is load-bearing, not cosmetic**: under `Cslib/` the
+  - [x] A note that **root-level placement is load-bearing, not cosmetic**: under `Cslib/` the
         directory would be globbed by `mk_all --check`, which would demand the files be imported
         from `Cslib.lean` and thereby pull them into the build, the censuses, and lint-style.
-- [ ] Create `Boneyard/ModalTableauS4Keyed/README.md` explaining why these particular declarations
+- [x] Create `Boneyard/ModalTableauS4Keyed/README.md` explaining why these particular declarations
       were archived: all three are sorry-free, proven, and true; eligibility rests purely on
       re-verified zero-consumer status, not on being broken; and moving-never-deleting is the
       right disposition because the provenance is the point.
-- [ ] Confirm `lakefile.toml`, `.gitignore`, `.github/workflows/**`, `scripts/nolints-style.txt`,
+- [x] Confirm `lakefile.toml`, `.gitignore`, `.github/workflows/**`, `scripts/nolints-style.txt`,
       and all baseline files are untouched.
-- [ ] Re-run the full gate set and confirm every figure is identical to the baseline captured at
+- [x] Re-run the full gate set and confirm every figure is identical to the baseline captured at
       the start of this phase.
 
 **Timing**: 0.75 hours

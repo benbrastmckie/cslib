@@ -1,24 +1,18 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "task_number": 566,
-  "session_id": "sess_1786030020_688c25_566",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/566_boneyard_creation_eligible_moves/plans/01_boneyard-creation-eligible-moves.md",
-      "summary": "Six-phase plan to create root-level Boneyard/ with documented convention and move three re-verified zero-consumer declaration units (~157 lines) out of LoopChecking.lean. Phases: (1) quarantine skeleton + empirical proof of no-config-change; (2) move the two blockedRedirect_*_of_*Origin lemmas; (3) move the keysRootEmpty pair with a comment split that keeps the keysOriginS4 retraction live; (4) reconcile the falsified no-Boneyard assertion and ORGANISATION.md; (5) B0-mirror quarantine self-test in pre-pr-check.sh; (6) full CI gate. Both carve-outs honoured; outDegEq excluded as moot."
-    }
-  ],
-  "metadata": {
-    "phase_count": 6,
-    "estimated_hours": 6,
-    "dependency_waves": [[1], [2, 5], [3], [4], [6]],
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1
+  "status": "in_progress",
+  "started_at": "2026-08-06T17:03:42Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, parsing delegation context and plan",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 0
   },
-  "memory_candidates": [],
-  "next_steps": "Run /implement 566 to execute the plan"
+  "metadata": {
+    "session_id": "sess_1786030020_688c25_566",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

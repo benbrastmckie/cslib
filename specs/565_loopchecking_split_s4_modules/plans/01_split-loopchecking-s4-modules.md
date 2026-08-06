@@ -209,35 +209,72 @@ discrepancy (a new declaration, a changed family assignment, a forward edge) blo
 
 ---
 
-### Phase 2: Extract `S4/Universe.lean` [NOT STARTED]
+### Phase 2: Extract `S4/Universe.lean` [COMPLETED]
 
 **Goal**: The lowest layer — universe/fuel/signed-subformula machinery — becomes a standalone
 module importing nothing else in `S4/`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/Universe.lean` from the Appendix A template.
-      **Confirm `@[expose] public section` and the trailing bare `end` are present.**
-- [ ] Move the `Universe`-assigned declarations out of `LoopChecking.lean`, anchoring on
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/Universe.lean` from the Appendix A template.
+      **Confirm `@[expose] public section` and the trailing bare `end` are present.** Confirmed.
+- [x] Move the `Universe`-assigned declarations out of `LoopChecking.lean`, anchoring on
       **declaration names** from the regenerated `module-assignment.md`, never on line numbers.
-- [ ] Remove `private` from the 11 seam-crossing declarations: `mem_modalUniverseS4_of`,
+      32 declarations moved (matches hypothesis), 469 lines (hypothesis ~499; close).
+- [x] Remove `private` from the 11 seam-crossing declarations: `mem_modalUniverseS4_of`,
       `mem_modalUniverseS4_of'`, `modalUniverseS4_mem_label`, `mem_of_any_beq_S4`,
       `any_beq_of_mem_S4`, `mem_signedSubfmls_of_formula_S4`, `modalNextWorld_fresh_beq_S4`,
       `modalTBoxSelf_fresh`, `modalTDiaNegSelf_fresh`, `modalFourBoxProp_fresh`,
-      `modalFourDiaNegProp_fresh`. Verify each has a docstring.
-- [ ] `any_beq_iff_mem` and `foldl_max_le_of_forall_le` stay `private` (no cross-seam consumer;
-      the latter is a deferred Boneyard candidate — carry unchanged).
-- [ ] Run `lean_local_search` on `modalTBoxSelf_fresh` and `mem_of_any_beq_S4` for namespace
-      collisions before building.
-- [ ] Write a "Why a separate module" docstring paragraph. `Universe.lean`'s six-run provenance
+      `modalFourDiaNegProp_fresh`. Verify each has a docstring. All 11 confirmed to already carry
+      docstrings (see Phase 1 `baseline.md`).
+- [x] `any_beq_iff_mem` and `foldl_max_le_of_forall_le` stay `private` (no cross-seam consumer;
+      the latter is a deferred Boneyard candidate — carry unchanged). Confirmed both stayed private.
+- [x] Run `lean_local_search` on `modalTBoxSelf_fresh` and `mem_of_any_beq_S4` for namespace
+      collisions before building. Zero collisions found (each name unique in the tree).
+- [x] Write a "Why a separate module" docstring paragraph. `Universe.lean`'s six-run provenance
       makes it look arbitrary to a reader who does not know the dependency structure — say so
-      explicitly, following `Support/Accessibility.lean`'s precedent.
-- [ ] Register `public import Cslib.Logics.Modal.Tableau.S4.Universe` in `Cslib.lean`, in
-      alphabetical position between `...Tableau.Rules` and `...Tableau.S5Simplification`.
-- [ ] Add `public import Cslib.Logics.Modal.Tableau.S4.Universe` to `LoopChecking.lean`.
-- [ ] Prune imports: start with `LoopChecking.lean`'s inherited set, build, run
+      explicitly, following `Support/Accessibility.lean`'s precedent. Done.
+- [x] Register `public import Cslib.Logics.Modal.Tableau.S4.Universe` in `Cslib.lean`, in
+      alphabetical position between `...Tableau.Rules` and `...Tableau.S5Simplification`. Done.
+- [x] Add `public import Cslib.Logics.Modal.Tableau.S4.Universe` to `LoopChecking.lean`. Done.
+- [x] Prune imports: start with `LoopChecking.lean`'s inherited set, build, run
       `bash scripts/check-shake-residue.sh`, remove exactly what it flags, rebuild; repeat until
       zero `Modal/Tableau/` findings. Consider whether `[Hashable Atom]` is needed in this
-      module's `variable` line.
+      module's `variable` line. *(deviation: altered -- see "New finding" below; the module's
+      own import set needed only `import Mathlib.Tactic.Ring` added beyond the Appendix A
+      upper-bound subset actually used, and `[Hashable Atom]`/`[DecidableEq Atom]` were both
+      kept since individual declarations use them (the per-declaration `omit [...] in` markers
+      that travelled with each moved declaration already opt out precisely where unneeded, so
+      the module-level variable line is not blanket-unused).)*
+
+**New finding (not anticipated by the plan, recorded here rather than silently worked around)**:
+moving `signedSubfmls` and friends out of `LoopChecking.lean` causes `lake shake` to newly flag
+**`S5Simplification.lean`** (wants to swap its existing direct `public import
+Cslib.Logics.Modal.Tableau.LoopChecking` for `S4.Universe`, since that is now the more specific
+definer) and, as a knock-on consequence of that suggested swap, **`FiveSimplification.lean`**
+(would need to add a direct `LoopChecking` import to keep reaching the residue transitively) and
+**`TDriver.lean`** (same knock-on shape). Investigated: `S5Simplification.lean` genuinely
+consumes `signedSubfmls`/`mem_signedSubfmls_of_formula_S5w`-adjacent facts already, pre-dating
+this task -- this is `lake shake`'s minimization opinion becoming more precise, not a new
+dependency. Actually re-pointing `S5Simplification.lean`'s import is forbidden by this plan's own
+Non-Goal ("No downstream import re-pointing... explicitly out of scope") and by Phase 13's
+`git diff --stat` check (zero downstream `.lean` files may change across the whole task), so the
+only downstream-file-content-preserving fix is the tooling's own sanctioned escape hatch:
+`bash scripts/check-shake-residue.sh --update`, adding these 3 files to the frozen baseline
+registry with this justification recorded in the phase commit. **This is expected to recur in
+later phases** whenever a declaration consumed directly by `S5Simplification.lean` or
+`FrameCompleteness.lean` (the two production files that import `LoopChecking.lean` directly)
+moves into a new `S4/` module -- flagged here for Phase 15's reconciliation table rather than
+re-litigated fresh each time it recurs.
+
+**New finding, resolved (module-content correctness, not a plan deviation)**: the automated
+per-declaration span extraction (docstring + `omit [...] in` modifier line, both walked
+upward from each declaration's keyword line) left one heading, `/-! ## Per-World Formula Sets
+-/`, orphaned in `LoopChecking.lean` (it introduced `formulasAtWorld`/`mem_formulasAtWorld_iff`,
+both moved). Relocated the heading into `Universe.lean` above the same two declarations and
+confirmed (by diffing against the pre-move baseline) that this is the *only* orphaned heading
+this move produced -- five other heading-immediately-followed-by-heading spots already existed,
+unchanged, in the pre-move baseline and are pre-existing quirks out of scope for this move-only
+refactor.
 
 **Timing**: 1.5 hours
 

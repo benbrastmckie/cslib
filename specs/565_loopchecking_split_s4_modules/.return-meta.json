@@ -1,44 +1,18 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "task_number": 565,
-  "session_id": "sess_1786030020_688c25_565",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
-      "summary": "15-phase implementation plan for splitting LoopChecking.lean (11,393 lines / 241 decls) into eleven S4/*.lean modules along the verified acyclic dependency layering, with LoopChecking.lean retained as a public-import barrel for zero downstream churn, plus ORGANISATION.md subtree expansion and module-size guidance."
-    }
-  ],
-  "phase_count": 15,
-  "estimated_hours": 19,
-  "dependency_waves": [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15]],
-  "plan_metadata": {
-    "phases": 15,
-    "total_effort_hours": 19,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12],[13],[14],[15]],
-    "reports_integrated": [
-      {
-        "path": "specs/565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-08-06"
-      }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
+  "status": "in_progress",
+  "started_at": "2026-08-06T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "phase_2_complete",
+    "details": "Phase 1 (baseline) and Phase 2 (S4/Universe.lean extraction) complete and committed. Build green at 3314 jobs. New finding: lake shake newly flags S5Simplification.lean/FiveSimplification.lean/TDriver.lean as a knock-on of moving Universe declarations out of the barrel; resolved via the sanctioned shake-residue-baseline.txt --update escape hatch (zero downstream .lean file content changed). Expected to recur in later phases.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 2
   },
-  "memory_candidates": [
-    {
-      "content": "Splitting a very large Lean module: the natural declaration families are typically DISCONTIGUOUS in the source, so a contiguous line-range cut cannot produce them. The reliable procedure is (1) build a declaration-level reference graph by stripping comments, tokenising each declaration's statement-plus-proof span, and intersecting against the local declaration-name set; (2) propose a partition; (3) check for forward edges (a module referencing one later in the intended import order) and iterate until zero. Two structural consequences recur: a module not named in the original split proposal is often FORCED (e.g. a Driver module, because the invariant lemmas name the driver definitions in their own statements, so leaving drivers in the parent creates a cycle), and the parent file should be retained as a public-import barrel so zero downstream files change. Lean-specific hazards that make or break such a split: every new module needs its own `@[expose] public section` (omitting one produces a diffuse unfold-failure cascade in DOWNSTREAM modules, far from the omission); declarations whose consumers land in a different module must be de-privatized and then need docstrings for docBlame under --wfail; per-module import sets must be PRUNED empirically via a shake-residue loop, not copied from the parent, or the import-debt ratchet fails; and re-exports the barrel does not itself consume need `-- shake: keep`, which does not move the blanket-suppression ratchet.",
-      "category": "PATTERN",
-      "source_artifact": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["lean-module-split", "declaration-dependency-graph", "import-acyclicity", "expose-public-section", "barrel-module", "shake-import-pruning"]
-    }
-  ],
-  "next_steps": "Run /implement 565 to execute the plan"
+  "metadata": {
+    "session_id": "sess_1786030020_688c25_565",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

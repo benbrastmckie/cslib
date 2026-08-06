@@ -18,3 +18,6 @@ Cslib/Foundations/Relation/Confluence.lean
 Cslib/Foundations/Relation/Defs.lean
 Cslib/Languages/CCS/Basic.lean
 Cslib/Languages/CombinatoryLogic/Defs.lean
+Cslib/Logics/Modal/Tableau/FiveSimplification.lean
+Cslib/Logics/Modal/Tableau/S5Simplification.lean
+Cslib/Logics/Modal/Tableau/TDriver.lean

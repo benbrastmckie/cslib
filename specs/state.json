@@ -1531,7 +1531,7 @@
     {
       "project_number": 564,
       "project_name": "tableau_s4keyed_migration_st_ladder",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Migrate the S4 Keyed drivers onto the St ladder and retire the duplicated keys' derivation",
       "topic": "Modal Logic",
@@ -1546,12 +1546,18 @@
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
         "Cslib/Logics/Modal/Tableau/Saturation.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md",
+          "type": "report",
+          "summary": "Full migration research: compiled St bridge chain, structural blocker on the ordered driver, modalFuel mismatch at the entry point, falsification of the line-count premise, and the complete 6-site outDegEq removal cascade with exact deletion ranges."
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-05T00:00:00Z",
+      "last_updated": "2026-08-06T15:40:42Z",
       "next_artifact_number": 1,
-      "session_id": "sess_1785110000_blockrev",
+      "session_id": "sess_1786030020_688c25_564",
       "parent_task": null
     },
     {

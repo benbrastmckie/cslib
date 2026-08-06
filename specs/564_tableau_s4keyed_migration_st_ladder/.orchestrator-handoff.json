@@ -1,0 +1,24 @@
+{
+  "status": "researched",
+  "summary": "Keyed-driver St-ladder migration is feasible and was proved by compiling a full bridge chain, but the KeyedOrdered driver is structurally unmigratable and the claimed line-count reduction lives entirely in the outDegEq removal (~437 lines), not in retiring the double derivation (which is net +80).",
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "/home/benjamin/Projects/cslib/specs/564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md",
+      "type": "report",
+      "summary": "Full migration research: compiled St bridge chain, structural blocker on the ordered driver, modalFuel mismatch at the entry point, falsification of the line-count premise, and the complete 6-site outDegEq removal cascade with exact deletion ranges."
+    },
+    {
+      "path": "/home/benjamin/Projects/cslib/specs/564_tableau_s4keyed_migration_st_ladder/assets/verified-st-bridge.lean",
+      "type": "report",
+      "summary": "Compiled-clean reference implementation of modalApplyOneS4KeyedSt plus the four bridge theorems, verified with lake env lean against the live tree."
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 1,
+  "notes": [
+    "KeyedOrdered driver cannot be migrated onto RuleApplySt/modalStepBranchGenSt: the ordered stepper's two-stage traversal is not a per-element findSome? function. Recommend scoping it out or budgeting a new stepper-parameterised rung.",
+    "modalTableauGenSt hardwires modalFuel; the S4 entry point must target modalExpandBranchesGenSt directly with modalFuelS4.",
+    "outDegEq removal verdict is REMOVE: zero consumers, 3 deletions (427 lines) plus 6 mechanical edit sites, all enumerated with exact ranges."
+  ]
+}

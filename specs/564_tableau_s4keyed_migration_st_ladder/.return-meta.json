@@ -1,0 +1,30 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-06T00:00:00Z",
+  "completed_at": "2026-08-06T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/564_tableau_s4keyed_migration_st_ladder/reports/01_s4keyed-st-ladder-migration.md",
+      "type": "report",
+      "summary": "S4 Keyed / KeyedOrdered St-ladder migration research with compiled bridge evidence and the full outDegEq removal cascade."
+    },
+    {
+      "path": "specs/564_tableau_s4keyed_migration_st_ladder/assets/verified-st-bridge.lean",
+      "type": "asset",
+      "summary": "Compiled-clean modalApplyOneS4KeyedSt and four bridge theorems, verified against the live tree with lake env lean."
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Baseline re-verified (lake build green, sorry census 1); migration bridge compiled; ordered-driver blocker established; outDegEq cascade fully enumerated with exact line ranges."
+  },
+  "metadata": {
+    "session_id": "sess_1786030020_688c25_564",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "sorry_census": 1,
+    "build_status": "green",
+    "searches_failed": []
+  }
+}

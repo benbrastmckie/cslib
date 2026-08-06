@@ -259,19 +259,19 @@ above, correct it too and record the addition.
 
 ---
 
-### Phase 4: Re-record the s4witness verdict with attribution [IN PROGRESS]
+### Phase 4: Re-record the s4witness verdict with attribution [COMPLETED]
 
 **Goal**: Make the out-of-tree regression corpus honest again by annotating the superseded
 `s4witness.lean` trace and appending the live one with its cause, without destroying the
 historical refutation the original documents.
 
 **Tasks**:
-- [ ] In `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md`, add a clearly-marked **SUPERSEDED** annotation immediately above the §2.2 "machine-checked trace" code block, stating that the trace was captured on 2026-07-26 code and no longer reproduces.
-- [ ] Append the live trace captured in Phase 1 verbatim, labelled with its capture date and the tree SHA, showing the three concrete divergences: `guard(pos,p0,@2)` reading `none` rather than `some 1` at step [6]; step [7] minting a fresh world 3 (`acc = [2→3 0→2 0→1]`) instead of firing the redirect edge `2→1`; and termination at [7] with `SATURATED OPEN` rather than continuing to [8], with a boxed member now present in the keys.
-- [ ] Attribute the change to the box-plus birth-key enrichment, citing the three commits by SHA (`80feb736` additive box-plus mint definitions, `7960c12e` mint-payload switch, `5733dcd1` birth-key enrichment, all 2026-08-05) and the declarations they introduced (`boxPlusPair`, `BoxPlusClosed`, `boxPlusExtraS4`, now in `Cslib/Logics/Modal/Tableau/S4/BirthKey.lean`). Anchor on declaration names, not line numbers.
-- [ ] State plainly that this is a **stale recorded verdict, not a behaviour-preservation failure**, and include the `git merge-base --is-ancestor` evidence from Phase 1 showing the enrichment predates the programme's first commit.
-- [ ] Confirm by re-reading the edited section that the original trace block, its hypothesis-instantiation table, and the surrounding refutation argument for `blockedRedirect_boxctx_mem` all survive intact — the annotation is additive only.
-- [ ] Confirm the in-tree corpus is untouched: `git status --porcelain CslibTests/` empty, and specifically that row 1 (KNOWN-UNSOUND, `"CLOSED"`) of `CslibTests/S4LoopGuardRegression.lean` was not modified.
+- [x] In `specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md`, add a clearly-marked **SUPERSEDED** annotation immediately above the §2.2 "machine-checked trace" code block, stating that the trace was captured on 2026-07-26 code and no longer reproduces.
+- [x] Append the live trace captured in Phase 1 verbatim, labelled with its capture date and the tree SHA, showing the three concrete divergences: `guard(pos,p0,@2)` reading `none` rather than `some 1` at step [6]; step [7] minting a fresh world 3 (`acc = [2→3 0→2 0→1]`) instead of firing the redirect edge `2→1`; and termination at [7] with `SATURATED OPEN` rather than continuing to [8], with a boxed member now present in the keys. *(new §2.2a subsection)*
+- [x] Attribute the change to the box-plus birth-key enrichment, citing the three commits by SHA (`80feb736` additive box-plus mint definitions, `7960c12e` mint-payload switch, `5733dcd1` birth-key enrichment, all 2026-08-05) and the declarations they introduced (`boxPlusPair`, `BoxPlusClosed`, `boxPlusExtraS4`, now in `Cslib/Logics/Modal/Tableau/S4/BirthKey.lean`). Anchor on declaration names, not line numbers.
+- [x] State plainly that this is a **stale recorded verdict, not a behaviour-preservation failure**, and include the `git merge-base --is-ancestor` evidence from Phase 1 showing the enrichment predates the programme's first commit.
+- [x] Confirm by re-reading the edited section that the original trace block, its hypothesis-instantiation table, and the surrounding refutation argument for `blockedRedirect_boxctx_mem` all survive intact — the annotation is additive only. *(verified: 75 insertions, 0 deletions)*
+- [x] Confirm the in-tree corpus is untouched: `git status --porcelain CslibTests/` empty, and specifically that row 1 (KNOWN-UNSOUND, `"CLOSED"`) of `CslibTests/S4LoopGuardRegression.lean` was not modified. *(confirmed empty; row 1 unchanged)*
 
 **Timing**: 0.75 hours
 

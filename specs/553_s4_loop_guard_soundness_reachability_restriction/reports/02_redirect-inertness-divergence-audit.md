@@ -93,6 +93,14 @@ Probe: `specs/553_.../artifacts/s4witness.lean`, driving `modalStepBranchS4Keyed
 (the ordered stepper — Route P) from the seed state `([F(φ₀)@0], [], ∅, [(0,∅)])`. Verbatim
 output at the redirect step:
 
+> **[SUPERSEDED — see §2.2a below]** The trace immediately below was captured on 2026-07-26
+> code, before this repository's driver adopted the box-plus birth-key enrichment (dated
+> 2026-08-05). It no longer reproduces against the current shipped driver. It is retained here
+> unmodified because it is the historical refutation this section's argument depends on — the
+> reason `blockedRedirect_boxctx_mem` was retired still holds, and the argument below (the
+> hypothesis-instantiation table and the refutation) is unaffected by the later enrichment. See
+> §2.2a for the live 2026-08-06 re-run and its attribution.
+
 ```
 [6] b = T(p0)@2, T(□p0)@2, T(◇p0)@2, T((□p0∧◇p0))@2, T(p0)@1,
         T(◇p0)@0, T(◇(□p0∧◇p0))@0, T((◇p0∧◇(□p0∧◇p0)))@0, F(φ₀)@0
@@ -134,6 +142,73 @@ Note the two inline claims in the `sorry` comment that this corrects: the commen
 is exactly right, and the trace realises it (`T(□p∧◇p)@2` decomposing at step [4]→[5]). The
 comment's "Nothing in the landed invariants forces `T(□ψ)@wBlock ∈ b`" is an understatement:
 `T(□ψ)@wBlock ∉ b`, full stop.
+
+### 2.2a Live re-run (2026-08-06) — stale recorded verdict, not a regression
+
+**This subsection is additive.** The trace in §2.2 above is retained verbatim as the historical
+refutation `blockedRedirect_boxctx_mem` was retired against; nothing above this point was
+deleted or edited beyond the `[SUPERSEDED]` pointer note.
+
+Re-running the identical probe (`specs/553_.../artifacts/s4witness.lean`, unmodified, same seed
+state) at tree state `3a11702e` on 2026-08-06 no longer reproduces the §2.2 trace. Full live
+output (captured verbatim in
+`specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md`):
+
+```
+[6] …  keys = 0↦{} 1↦{+p0,+p0,+p0} 2↦{+(□p0∧◇p0)}
+      guard(pos,p0,@2) = none
+      T(box p0)@1 ∈ b = false
+[7] acc = [2→3 0→2 0→1]
+      keys = 0↦{} 1↦{+p0,+p0,+p0} 2↦{+(□p0∧◇p0)} 3↦{+p0,+□p0,+p0,+p0}
+      guard(pos,p0,@2) = (some 3)
+      SATURATED OPEN
+```
+
+**Three concrete divergences from the §2.2 recorded trace:**
+
+1. `guard(pos,p0,@2)` reads `none` at step [6] (recorded: `some 1`). It still reads `some 1` at
+   steps [3]–[4], and reads `some 3` (not `some 1`) at [7].
+2. Step [7] **mints a fresh world 3** (`acc = [2→3 0→2 0→1]`) instead of firing the redirect
+   edge `2→1` (`acc = [2→1 0→2 0→1]`, the §2.2 recorded transition).
+3. The trace **terminates at [7]** with `SATURATED OPEN`; the §2.2 recorded trace continued to
+   `[8]`. `keys(3)` now carries a **boxed** member (`+□p0`), which no key in the §2.2 recorded
+   trace does.
+
+**Attribution — cause identified and dated, not guessed.** These are precisely the divergences
+this report's own §3.1 adversarial-verification table already attributes to the *boxed-key
+variant*: "reference produces `acc=[2→1 0→2 0→1]`; boxed produces `acc=[2→3 0→2 0→1]` (fresh
+world 3, no redirect)". That boxed-key enrichment was subsequently adopted into the shipped
+driver by three commits, all dated **2026-08-05**:
+
+- `80feb736` — "task 563 phase 1: additive box-plus mint definitions"
+- `7960c12e` — "task 563 phase 2-3: switch mint payload to additive box-plus"
+- `5733dcd1` — "task 563 phase 4-5: enrich birth key with box-plus members"
+
+These commits introduced `boxPlusPair`, `BoxPlusClosed`, and `boxPlusExtraS4`, now declared in
+`Cslib/Logics/Modal/Tableau/S4/BirthKey.lean`.
+
+**Chronology proves this predates the tableau-refactor programme that this gate is verifying:**
+
+```
+$ git log -1 --format='%h %ad' --date=short 5733dcd1
+5733dcd1 2026-08-05
+$ git merge-base --is-ancestor 5733dcd1 c8fede26 && echo YES
+YES
+```
+
+`5733dcd1` (the last of the three box-plus commits) is an ancestor of `c8fede26`, which the
+tableau-refactor programme's completion is anchored to — i.e. the box-plus enrichment landed
+**before** the programme's own commits began (the programme's `S4/`-extraction commits are dated
+2026-08-06, one day later).
+
+**Disposition: this is a stale recorded verdict, not a behaviour-preservation failure.** The
+§2.2 trace was captured on 2026-07-26 code and has not been touched since; the driver's minting
+behaviour was deliberately changed on 2026-08-05 by a separate, already-landed task, for reasons
+this report itself already analyses and endorses in §3.1. No commit belonging to the current
+acceptance-gate programme altered this behaviour. Under the acceptance-gate decision rule (an
+unexplained regression-corpus divergence is a FAIL even when every build is green; an
+*explained and dated* one, predating the programme, is not), this finding does not block
+acceptance.
 
 ### 2.3 Was there an unstated invariant that could have excluded it?
 

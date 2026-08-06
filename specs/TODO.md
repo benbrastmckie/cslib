@@ -11,11 +11,10 @@ next_project_number: 588
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,554,565,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,567,571,576 | 36,37,181,425,554,565,568 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,511,534,582 | 39,40,567 | foundations, modal logic |
-| 4 | 506,548 | 511 | modal logic |
-| 5 | 300 | 506 | modal logic |
+| 1 | 36,37,181,375,400,409,425,554,567,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,511,534,537,551,571,576,582 | 36,37,181,425,554,567,568 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,506,548 | 39,40,511 | foundations, modal logic |
+| 4 | 300 | 506 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,14 +35,13 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-565 [PLANNED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
-  └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
-    └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-      └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-        └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-      └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-    └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-    └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
+567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
+  └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+    └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+      └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+    └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+  └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+  └─ 582 [NOT STARTED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
 
 ### Temporal Logic
 
@@ -338,12 +336,13 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 565. Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 563, Task 564, Task 566, Task 586
 - **Research**: [565_loopchecking_split_s4_modules/reports/01_split-loopchecking-into-s4-modules.md]
 - **Plan**: [565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md]
+- **Summary**: [565_loopchecking_split_s4_modules/summaries/01_split-loopchecking-s4-modules.md]
 
 **Description**: [Task G of the modal-tableau refactor programme; P3. Depends on the review gate, box-plus and the migration, because the seams MOVE if box-plus is adopted.] Split LoopChecking.lean (10,540 lines / 230 declarations, measured) into an S4/ cluster of Universe, BirthKey, Guard, Invariant, Hintikka and Redirect modules. Note that these clusters' current source ranges are DISCONTIGUOUS -- itself the evidence that a line-count split would be wrong. DO NOT split mechanically by line count. Conform to ORGANISATION.md and NOTATION.md, preserve import acyclicity, and UPDATE ORGANISATION.md, which currently gives no line-count guidance and describes Modal/Tableau/ in one undifferentiated line. The Support-module dedup task should land first: it shrinks the files before the seams are cut.
 --- ESTABLISHED BY THE SUPPORT-MODULE EXTRACTION (landed; supersedes any conflicting figure above) ---

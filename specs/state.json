@@ -1574,7 +1574,7 @@
     {
       "project_number": 565,
       "project_name": "loopchecking_split_s4_modules",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Split LoopChecking.lean along the real S4 seams and update ORGANISATION.md",
       "topic": "Modal Logic",
@@ -1601,14 +1601,20 @@
           "path": "specs/565_loopchecking_split_s4_modules/plans/01_split-loopchecking-s4-modules.md",
           "type": "plan",
           "summary": "15-phase plan: baseline/layering re-verification, eleven bottom-up module extractions (one per phase, atomic-batch), barrel finalization plus header re-homing, ORGANISATION.md edits, full gate sweep. 19 hours estimated."
+        },
+        {
+          "path": "specs/565_loopchecking_split_s4_modules/summaries/01_split-loopchecking-s4-modules.md",
+          "type": "summary",
+          "summary": "Full implementation summary: what changed (eleven new S4/*.lean modules, barrel rewrite, README.md, ORGANISATION.md), decisions (structural Driver module, four-way invariant split, four research corrections, shake false-positive resolution policy, the attribute-drop tooling bug fix, the recurring heading-attribution gap), impacts (zero downstream churn, job-count delta), a full gate reconciliation table (baseline vs. final for every gate), and follow-ups (Boneyard candidates, pre-pr-check.sh step 5, optional downstream import optimization)."
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-08-06T18:00:26Z",
+      "last_updated": "2026-08-06T20:35:25Z",
       "next_artifact_number": 1,
       "session_id": "sess_1786030020_688c25_565",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Split Cslib/Logics/Modal/Tableau/LoopChecking.lean (11,393 lines / 241 declarations) into eleven S4/*.lean modules along the verified acyclic dependency layering, leaving LoopChecking.lean as a 20-declaration barrel (1,723 lines). Zero downstream .lean file changes. Updated Cslib.lean, ORGANISATION.md, and created Cslib/Logics/Modal/Tableau/README.md. Full gate sweep green (build, sorry/axiom census, shake residue, lint, tests, boneyard); pre-pr-check.sh 9/10 steps green with one documented, pre-existing, out-of-scope exclusion."
     },
     {
       "project_number": 566,

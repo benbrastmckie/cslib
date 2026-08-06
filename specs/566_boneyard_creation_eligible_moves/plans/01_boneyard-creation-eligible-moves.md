@@ -1,7 +1,7 @@
 # Implementation Plan: Create `Boneyard/` and Move Re-Verified Zero-Consumer Declarations
 
 - **Task**: 566 - Create Boneyard/ with its convention and move only re-verified zero-consumer declarations
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: 553, 563, 564, 586 (all landed)
 - **Research Inputs**: `specs/566_boneyard_creation_eligible_moves/reports/01_boneyard-convention-and-consumer-reaudit.md`

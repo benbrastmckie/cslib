@@ -7893,6 +7893,163 @@ def modalExpandBranchesS4Keyed
       | _, _, _, _ => .closed  -- malformed (length invariant rules this out)
     processNext branches expandedSets accs keyss [] [] [] []
 
+/-! ## `RuleApplySt` Bridge for the Keyed S4 Driver
+
+The `RuleApplySt` ladder's first real consumer: `modalApplyOneS4KeyedSt` below is the
+`RuleApplySt Atom (List (WorldIndex × Finset (Sign × Proposition Atom)))` instantiation of the
+keyed S4 rule, and the four theorems that follow bridge it, through the generic state-threaded
+driver (`modalStepBranchGenSt`/`modalExpandBranchesGenSt`, `Saturation.lean`), onto the bespoke
+keyed driver (`modalStepBranchS4Keyed`/`modalExpandBranchesS4Keyed`) defined above. This section
+is purely additive: none of `modalApplyOneS4Keyed`, `modalStepBranchS4Keyed`,
+`modalStepBranchS4KeyedBody`, `modalStepBranchS4KeyedOrdered`, or `modalExpandBranchesS4Keyed` is
+redefined. -/
+
+/-- **State-threaded keyed S4 stepper.** The `RuleApplySt` instantiation for the keyed S4 driver:
+threads the birth-key list `keys` explicitly through the rule's own signature instead of
+`modalApplyOneS4Keyed` re-deriving it from `blockingWorldS4Keyed`'s stateless computation site by
+site. Makes the `blockingWorldS4Keyed` blocking decision ONCE per call, at the two minting shapes
+(`.neg, □φ` and `.pos, ◇φ`); all other shapes fall through to `modalApplyOneS4` unchanged. -/
+def modalApplyOneS4KeyedSt (φ₀ : Proposition Atom) :
+    RuleApplySt Atom (List (WorldIndex × Finset (Sign × Proposition Atom))) :=
+  fun sf b acc keys =>
+    match sf.sign, sf.formula with
+    | .neg, .box φ =>
+      match blockingWorldS4Keyed φ₀ b keys .neg φ sf.label with
+      | some wBlock => (.linear [], acc.addEdge sf.label wBlock, keys)
+      | none =>
+        ((modalApplyOneS4KeyedMint sf b acc).1, (modalApplyOneS4KeyedMint sf b acc).2,
+          keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .neg φ sf.label)])
+    | .pos, .diamond φ =>
+      match blockingWorldS4Keyed φ₀ b keys .pos φ sf.label with
+      | some wBlock => (.linear [], acc.addEdge sf.label wBlock, keys)
+      | none =>
+        ((modalApplyOneS4KeyedMint sf b acc).1, (modalApplyOneS4KeyedMint sf b acc).2,
+          keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .pos φ sf.label)])
+    | _, _ => ((modalApplyOneS4 φ₀ sf b acc).1, (modalApplyOneS4 φ₀ sf b acc).2, keys)
+
+/-- **Projection bridge.** The state-threaded rule's `(RuleResult, Accessibility)` projection
+equals the output of the stateless `modalApplyOneS4Keyed` at the same arguments -- the
+state-threading is invisible to the first two components. -/
+theorem modalApplyOneS4KeyedSt_proj (φ₀ : Proposition Atom)
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    ((modalApplyOneS4KeyedSt φ₀ sf b acc keys).1,
+       (modalApplyOneS4KeyedSt φ₀ sf b acc keys).2.1)
+      = modalApplyOneS4Keyed φ₀ keys sf b acc := by
+  unfold modalApplyOneS4KeyedSt modalApplyOneS4Keyed
+  rcases sf with ⟨s, f, w⟩
+  cases s <;> cases f <;>
+    simp_all <;>
+    (try split) <;> simp_all
+
+/-- **Componentwise equation.** `modalApplyOneS4KeyedSt` is definitionally the stateless
+`modalApplyOneS4Keyed`'s `(RuleResult, Accessibility)` pair, paired with the same `keys'`
+expression the bespoke stepper `modalStepBranchS4Keyed` computes inline at each minting shape.
+This is the key lemma bridging the state-threaded and stateless keyed rules: it identifies the
+state-threaded rule's third component with the exact `keys'` term the ladder needs to
+reconstruct. -/
+theorem modalApplyOneS4KeyedSt_eq (φ₀ : Proposition Atom)
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    modalApplyOneS4KeyedSt φ₀ sf b acc keys =
+      ((modalApplyOneS4Keyed φ₀ keys sf b acc).1, (modalApplyOneS4Keyed φ₀ keys sf b acc).2,
+        (match sf.sign, sf.formula with
+          | .neg, .box φ =>
+            match blockingWorldS4Keyed φ₀ b keys .neg φ sf.label with
+            | some _ => keys
+            | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .neg φ sf.label)]
+          | .pos, .diamond φ =>
+            match blockingWorldS4Keyed φ₀ b keys .pos φ sf.label with
+            | some _ => keys
+            | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .pos φ sf.label)]
+          | _, _ => keys)) := by
+  unfold modalApplyOneS4KeyedSt modalApplyOneS4Keyed
+  rcases sf with ⟨s, f, w⟩
+  cases s <;> cases f <;> dsimp only <;>
+    (split <;> rename_i h <;> simp only [h])
+
+/-- **Generic stepper instantiation.** The state-threaded generic branch stepper
+`modalStepBranchGenSt`, instantiated at `modalApplyOneS4KeyedSt φ₀`, computes exactly the bespoke
+keyed stepper `modalStepBranchS4Keyed φ₀` -- the `RuleApplySt` ladder's generic per-branch step
+machinery is interchangeable with the hand-written keyed driver at every input. -/
+theorem modalStepBranchGenSt_eq_S4Keyed (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    modalStepBranchGenSt (modalApplyOneS4KeyedSt φ₀) b e acc keys
+      = modalStepBranchS4Keyed φ₀ b e acc keys := by
+  unfold modalStepBranchGenSt modalStepBranchS4Keyed
+  congr 1
+  funext sf
+  by_cases hexp : e.any (· == sf)
+  · simp [hexp]
+  · simp only [hexp, Bool.false_eq_true, if_false]
+    rw [modalApplyOneS4KeyedSt_eq]
+    rfl
+
+/-- **Generic loop instantiation (entry-point bridge).** The state-threaded generic fuel-based
+expansion loop `modalExpandBranchesGenSt`, instantiated at `modalApplyOneS4KeyedSt φ₀`, computes
+exactly the bespoke keyed loop `modalExpandBranchesS4Keyed φ₀` at every fuel value -- the
+`RuleApplySt` ladder's first genuine consumer, making `modalExpandBranchesS4Keyed` reachable
+through the generic driver rather than only through its own bespoke copy-and-thread
+implementation. -/
+theorem modalExpandBranchesGenSt_eq_S4Keyed (φ₀ : Proposition Atom)
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility)
+    (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+    (fuel : Nat) :
+    modalExpandBranchesGenSt (modalApplyOneS4KeyedSt φ₀) branches expandedSets accs keyss fuel
+      = modalExpandBranchesS4Keyed φ₀ branches expandedSets accs keyss fuel := by
+  induction fuel generalizing branches expandedSets accs keyss with
+  | zero => simp only [modalExpandBranchesGenSt, modalExpandBranchesS4Keyed]; rfl
+  | succ fuel' ih =>
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (pendingKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility)
+        (doneKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom)))),
+        modalExpandBranchesGenSt.processNext (modalApplyOneS4KeyedSt φ₀) fuel' pending pendingExp
+            pendingAccs pendingKeys done doneExp doneAccs doneKeys =
+          modalExpandBranchesS4Keyed.processNext φ₀ fuel' pending pendingExp pendingAccs
+            pendingKeys done doneExp doneAccs doneKeys by
+      have hkey := key branches expandedSets accs keyss [] [] [] []
+      simpa [modalExpandBranchesGenSt, modalExpandBranchesS4Keyed] using hkey
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys
+      simp [modalExpandBranchesGenSt.processNext, modalExpandBranchesS4Keyed.processNext]
+    | cons b restBs ih_inner =>
+      intro pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys
+      cases pendingExp with
+      | nil => simp [modalExpandBranchesGenSt.processNext, modalExpandBranchesS4Keyed.processNext]
+      | cons e restEs =>
+        cases pendingAccs with
+        | nil => simp [modalExpandBranchesGenSt.processNext, modalExpandBranchesS4Keyed.processNext]
+        | cons a restAs =>
+          cases pendingKeys with
+          | nil =>
+            simp [modalExpandBranchesGenSt.processNext, modalExpandBranchesS4Keyed.processNext]
+          | cons k restKs =>
+            simp only [modalExpandBranchesGenSt.processNext,
+              modalExpandBranchesS4Keyed.processNext]
+            by_cases hc : isModalClosed b
+            · simp only [hc, if_true]
+              exact ih_inner restEs restAs restKs (done ++ [b]) (doneExp ++ [e])
+                (doneAccs ++ [a]) (doneKeys ++ [k])
+            · simp only [hc, Bool.false_eq_true, if_false]
+              rw [modalStepBranchGenSt_eq_S4Keyed]
+              cases hs : modalStepBranchS4Keyed φ₀ b e a k with
+              | none => rfl
+              | some x =>
+                obtain ⟨newBs, newExps, newAcc, keys'⟩ := x
+                exact ih (done ++ newBs ++ restBs) (doneExp ++ newExps ++ restEs)
+                  (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                  (doneKeys ++ List.replicate newBs.length keys' ++ restKs)
+
 /-- The keyed S4 modal tableau decision procedure: the entry point for the bespoke keyed driver,
 mirroring `modalTableauGen`/`modalTableauS4`'s entry-branch shape (`F(φ)@0`), with
 `keys := [(0, ∅)]` at the start: the root world `0` is pre-existing (not minted), so it is seeded

@@ -303,34 +303,45 @@ is a doc defect, not a build break — but the phase does not close until the gr
 
 ---
 
-### Phase 4: Land the state-threaded S4 Keyed bridge additively [NOT STARTED]
+### Phase 4: Land the state-threaded S4 Keyed bridge additively [COMPLETED]
 
 **Goal**: Transcribe the four verified declarations from the compiled asset into
 `LoopChecking.lean`, giving the `RuleApplySt` ladder its first real consumer without redefining
 anything that already exists.
 
 **Tasks**:
-- [ ] Read `specs/564_tableau_s4keyed_migration_st_ladder/assets/verified-st-bridge.lean` in full.
-- [ ] Insert the four declarations into `LoopChecking.lean` immediately **after**
-      `def modalExpandBranchesS4Keyed` (currently opening at `:8281`, pre-Phase-2 numbering) and
-      before `def modalTableauS4Keyed` (`:8346`), preserving the asset's internal order:
+- [x] Read `specs/564_tableau_s4keyed_migration_st_ladder/assets/verified-st-bridge.lean` in full.
+- [x] Insert the four declarations into `LoopChecking.lean` immediately **after**
+      `def modalExpandBranchesS4Keyed` (found post-Phase-2/3 at `:7845-7894`, not the plan's stale
+      pre-Phase-2 `:8281` estimate) and before `def modalTableauS4Keyed` (found at `:7896`, not
+      the stale `:8346` estimate), preserving the asset's internal order:
       `modalApplyOneS4KeyedSt`, `modalApplyOneS4KeyedSt_proj`, `modalApplyOneS4KeyedSt_eq`,
       `modalStepBranchGenSt_eq_S4Keyed`, `modalExpandBranchesGenSt_eq_S4Keyed`.
-- [ ] Strip the asset's module scaffolding when inlining: drop `module`, the `import` /
+- [x] Stripped the asset's module scaffolding when inlining: dropped `module`, the `import` /
       `public import` lines, `namespace Cslib.Logic.Modal.Tableau`, the `open` line, the
-      `variable` line, and the trailing `end`. All are already established in `LoopChecking.lean`
-      (`namespace` at `:215`, `open` at `:217`, `variable` at `:219`).
-- [ ] Strip every `public` modifier from the transcribed declarations. `LoopChecking.lean` carries
-      a file-wide `@[expose] public section` at `:213`, so bare `def`/`theorem` is correct and
-      matches the surrounding declarations.
-- [ ] Rewrite all four docstrings as real prose. The asset's `EXPERIMENT 1` / `EXPERIMENT 1b` /
-      `EXPERIMENT 2` / `EXPERIMENT 3` labels are development scaffolding and MUST NOT land.
-      Each declaration needs a docstring stating what it establishes, not how it was discovered.
-- [ ] Do **not** modify `modalApplyOneS4Keyed`, `modalStepBranchS4Keyed`,
+      `variable` line, and the trailing `end`. All are already established in `LoopChecking.lean`.
+- [x] Stripped every `public` modifier from the transcribed declarations — bare `def`/`theorem`
+      matches the surrounding declarations under the file-wide `@[expose] public section`.
+- [x] Rewrote all four theorem docstrings as real prose (the `def modalApplyOneS4KeyedSt`
+      docstring was already real prose in the asset, not EXPERIMENT-labeled, and was kept with
+      light expansion). The asset's `EXPERIMENT 1` / `EXPERIMENT 1b` / `EXPERIMENT 2` /
+      `EXPERIMENT 3` labels do NOT land — confirmed by `grep -n "EXPERIMENT"` returning nothing.
+      Also added a `/-! ## RuleApplySt Bridge for the Keyed S4 Driver -/` section header
+      docstring above the five declarations, matching the file's existing section-header style.
+- [x] Confirmed no modification to `modalApplyOneS4Keyed`, `modalStepBranchS4Keyed`,
       `modalStepBranchS4KeyedBody`, `modalStepBranchS4KeyedOrdered`, or
-      `modalExpandBranchesS4Keyed`. This phase is strictly additive.
-- [ ] Run `lake build Cslib.Logics.Modal.Tableau.LoopChecking`, then `lake build Cslib`.
-- [ ] Run `lake lint` and address any `docBlame` hit on the new declarations.
+      `modalExpandBranchesS4Keyed` — insertion was strictly additive (verified via
+      `git diff --stat`, additions-only).
+- [x] Ran `lake build Cslib.Logics.Modal.Tableau.LoopChecking` (866 jobs, exit 0), then
+      `lake build Cslib` (3313 jobs, exit 0).
+- [x] Ran `lake lint`: zero `docBlame` findings anywhere in the output, and zero hits on any of
+      the five new declaration names. *(Deviation, not addressed: the transcribed
+      `modalApplyOneS4KeyedSt_proj`/`modalApplyOneS4KeyedSt_eq` proofs carry the three
+      plan-recorded "solved tactic hazards" verbatim, which trigger two pre-existing-style
+      `linter.flexible`/`linter.unusedSimpArgs` build-time warnings (not `lake lint` environment
+      findings, not one of the 7 prevention categories, and not gated by this plan's Testing &
+      Validation checklist). Per the plan's own instruction ("Transcribe the asset; do not
+      re-derive"), these were left as-is rather than risking the recorded hazards by rewriting.)*
 
 **Timing**: 1.2 hours
 
@@ -349,12 +360,19 @@ was wrong — revert and re-place.
 - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` - five new declarations inserted after
   `modalExpandBranchesS4Keyed`.
 
-**Verification**:
-- `lake build Cslib` exits 0.
-- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1.
-- `lake lint` reports no `docBlame` for the five new declarations.
-- `git diff --stat` shows additions only; no existing declaration body altered.
-- `grep -n "EXPERIMENT" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns nothing.
+**Verification** (all confirmed):
+- `lake build Cslib` exits 0. Confirmed: "Build completed successfully (3313 jobs)".
+- Sorry census in `Cslib/Logics/Modal/Tableau/` is still exactly 1. Confirmed:
+  `FrameSoundness.lean:1251` only.
+- `lake lint` reports no `docBlame` for the five new declarations. Confirmed: 0 `docBlame` hits
+  in the entire `lake lint` output.
+- `git diff --stat` shows additions only; no existing declaration body altered. Confirmed:
+  `Cslib/Logics/Modal/Tableau/LoopChecking.lean | 157 +++++++++++++++++++++++++++` — one file,
+  157 insertions, 0 deletions. (The plan's Scope Hypothesis estimated ~100 lines; actual is 157,
+  a materially different figure reported honestly here per the hypothesis's own instruction —
+  driven by the added section-header docstring and the more verbose real-prose theorem
+  docstrings replacing the terse EXPERIMENT labels, not by any extra code.)
+- `grep -n "EXPERIMENT" Cslib/Logics/Modal/Tableau/LoopChecking.lean` returns nothing. Confirmed.
 
 **Solved tactic hazards — transcribe, do not re-derive**:
 1. In `modalApplyOneS4KeyedSt_eq`, after `cases s <;> cases f` the `{sign := …}.sign` projections

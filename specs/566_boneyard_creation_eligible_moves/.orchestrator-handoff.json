@@ -1,14 +1,14 @@
 {
-  "status": "researched",
-  "summary": "Re-audit confirms three eligible declarations (two blockedRedirect_*_of_*Origin lemmas plus the keysRootEmpty pair), the outDegEq candidate is already moot, both carve-outs hold with carve-out 1 pinpointed at FrameSoundness.lean:1227/:1251, and a root-level Boneyard/ needs no build/lint/census config changes though two repo-wide .lean scanners are recorded exceptions.",
+  "status": "planned",
+  "summary": "Created a six-phase implementation plan for Boneyard/ creation and the three re-verified zero-consumer moves. Plan is built on the research report's re-audit: eligible set is three units (~157 lines), the outDegEq candidate is excluded as moot with the ModalPotentialInv.outDegEq grep trap named explicitly in Non-Goals, and both carve-outs (branchSatisfiableIn_s4FC_ancestor_redirect IMMOVABLE, keysOriginS4 pervasively consumed) are Non-Goals. Phase 1 proves the no-config-change claim empirically before any Lean code is at stake; Phases 2 and 3 are serialized because both edit LoopChecking.lean and both carry atomic-batch commit mode with pre-excision consumer re-greps; Phase 3 explicitly splits the keysRootEmpty section comment so the keysOriginS4 retraction stays in live code; Phase 4 repairs the falsified no-Boneyard assertion and documents Boneyard/ in ORGANISATION.md; Phase 5 adds a B0-mirror quarantine self-test to the non-synced pre-pr-check.sh; Phase 6 runs the full gate (build 3313 jobs with Boneyard absent, Modal/Tableau sorry census exactly 1, shake 9 findings with none in Modal/Tableau, axiom-census/checkInitImports/lint-style/lake test green, no baseline or workflow file modified).",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/566_boneyard_creation_eligible_moves/reports/01_boneyard-convention-and-consumer-reaudit.md",
-      "type": "report",
-      "summary": "Full research report: verified CI baseline (build 3313 jobs green, Modal/Tableau sorry census exactly 1, all five ratchets exit 0); re-run consumer audit by declaration name for every candidate; carve-out verification; upstream Boneyard convention from BimodalLogic/FormalSystem/Boneyard/README.md; complete twelve-mechanism exclusion table with exact scoping expressions plus two repo-wide scanner exceptions; implementation hazards (dangling prose references, falsified no-Boneyard assertion at LoopChecking.lean:184-185); six-phase decomposition."
+      "path": "specs/566_boneyard_creation_eligible_moves/plans/01_boneyard-creation-eligible-moves.md",
+      "type": "plan",
+      "summary": "Six-phase plan: quarantine skeleton with empirical exclusion proof; move blockedRedirect_*_of_*Origin pair; move keysRootEmpty pair with comment split preserving the keysOriginS4 retraction; prose reconciliation (falsified no-Boneyard assertion, ORGANISATION.md); B0-mirror quarantine self-test; full CI gate."
     }
   ],
-  "phases_completed": 1,
-  "phases_total": 1
+  "phases_completed": 0,
+  "phases_total": 6
 }

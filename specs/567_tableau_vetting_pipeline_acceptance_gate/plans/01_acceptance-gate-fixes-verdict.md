@@ -1,7 +1,7 @@
 # Implementation Plan: Tableau Vetting-Pipeline Acceptance Gate
 
 - **Task**: 567 - Run the CSLib vetting pipeline against the refactored Tableau subsystem as acceptance gate
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: 553, 558, 562, 563, 564, 565, 566, 586 (all landed; the programme is complete and this task is its terminal gate)
 - **Research Inputs**: `specs/567_tableau_vetting_pipeline_acceptance_gate/reports/01_acceptance-gate-ci-verification.md`
@@ -342,21 +342,21 @@ subsystem is a finding to record, not a number to force.
 
 ---
 
-### Phase 6: Acceptance-gate verdict document and fix-task handoff [NOT STARTED]
+### Phase 6: Acceptance-gate verdict document and fix-task handoff [COMPLETED]
 
 **Goal**: Emit the formal verdict and hand the out-of-scope findings forward without creating
 tasks directly.
 
 **Tasks**:
-- [ ] Write `specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/acceptance-gate-verdict.md` with: the verdict `PASS WITH FIX TASKS`, the tree SHA and toolchain it was taken against, and the four-level verdict grammar (`PASS` / `PASS WITH FIX TASKS` / `CONDITIONAL` / `FAIL`) with the condition under which each is emitted.
-- [ ] Include the **blocking criteria table** (all eleven, each with criterion, verification command, and the Phase 5 observed result) and the **non-blocking criteria table** (the four: `lake lint`, `lake build --wfail --iofail`, documentation-figure reproduction, out-of-tree probe reproduction) each with its rationale for being non-blocking.
-- [ ] Record the **decision rule** that separates fix-task-needed from blocking: no proof is weaker, the defect is pre-existing or documentational, and the fix is independently schedulable — all three must hold. State explicitly that an unexplained regression-corpus divergence would have been a FAIL, and that D8 avoided that only because its cause is identified and dated.
-- [ ] Record the **remediation ledger**: which findings this task fixed (the module count, the six drifted README figures, the two refreshed stale figures, the rescoped volatile command, the re-recorded `s4witness` verdict) and which it deliberately did not.
-- [ ] Record the **Reasoned Exclusions**: the 145 pre-existing `unusedArguments` findings (zero in programme territory, `lake lint` not in PR CI), the six unrun expensive probes, the `--wfail` six-module set, and the `s4ancestor.lean` harness having no logged actual result to reproduce at all.
-- [ ] Record the **standing do-nots** so a future reader does not undo them: the KNOWN-UNSOUND regression row must stay `"CLOSED"`; no direct `Cslib.Init` imports in the `S4/` modules.
-- [ ] Write `roadmap_items` into `completion_data` in `.return-meta.json` for the three proposed fix bundles: (a) retarget the stale out-of-tree probe artifact records — annotate the S4 loop-guard report 01's `s4probe.lean` harness description as a superseded revision and replace `s4subtractive3.lean`'s pre-split `LoopChecking.lean` line citations with declaration names; (b) repo-wide `unusedArguments` lint hygiene, 145 sites across 27 modules, uniform `omit [Hashable Atom] in` idiom; (c) re-establish the six expensive out-of-tree probe verdicts under a dedicated multi-hour budget.
-- [ ] Write `completion_summary` into `completion_data` and set `.return-meta.json` status to `implemented`.
-- [ ] Do **not** create tasks, edit `specs/state.json`'s `active_projects`, or invoke `/task`. The roadmap items are a proposal for the orchestrator/user.
+- [x] Write `specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/acceptance-gate-verdict.md` with: the verdict `PASS WITH FIX TASKS`, the tree SHA and toolchain it was taken against, and the four-level verdict grammar (`PASS` / `PASS WITH FIX TASKS` / `CONDITIONAL` / `FAIL`) with the condition under which each is emitted.
+- [x] Include the **blocking criteria table** (all eleven, each with criterion, verification command, and the Phase 5 observed result) and the **non-blocking criteria table** (the four: `lake lint`, `lake build --wfail --iofail`, documentation-figure reproduction, out-of-tree probe reproduction) each with its rationale for being non-blocking.
+- [x] Record the **decision rule** that separates fix-task-needed from blocking: no proof is weaker, the defect is pre-existing or documentational, and the fix is independently schedulable — all three must hold. State explicitly that an unexplained regression-corpus divergence would have been a FAIL, and that D8 avoided that only because its cause is identified and dated.
+- [x] Record the **remediation ledger**: which findings this task fixed (the module count, the six drifted README figures, the two refreshed stale figures, the rescoped volatile command, the re-recorded `s4witness` verdict) and which it deliberately did not.
+- [x] Record the **Reasoned Exclusions**: the 145 pre-existing `unusedArguments` findings (zero in programme territory, `lake lint` not in PR CI), the six unrun expensive probes, the `--wfail` six-module set, and the `s4ancestor.lean` harness having no logged actual result to reproduce at all.
+- [x] Record the **standing do-nots** so a future reader does not undo them: the KNOWN-UNSOUND regression row must stay `"CLOSED"`; no direct `Cslib.Init` imports in the `S4/` modules.
+- [x] Write `roadmap_items` into `completion_data` in `.return-meta.json` for the three proposed fix bundles: (a) retarget the stale out-of-tree probe artifact records — annotate the S4 loop-guard report 01's `s4probe.lean` harness description as a superseded revision and replace `s4subtractive3.lean`'s pre-split `LoopChecking.lean` line citations with declaration names; (b) repo-wide `unusedArguments` lint hygiene, 145 sites across 27 modules, uniform `omit [Hashable Atom] in` idiom; (c) re-establish the six expensive out-of-tree probe verdicts under a dedicated multi-hour budget.
+- [x] Write `completion_summary` into `completion_data` and set `.return-meta.json` status to `implemented`.
+- [x] Do **not** create tasks, edit `specs/state.json`'s `active_projects`, or invoke `/task`. The roadmap items are a proposal for the orchestrator/user. *(no task created; the pre-existing status transition on task 567 itself, planned->implementing, predates this agent's work and is not an active_projects addition/removal)*
 
 **Timing**: 0.75 hours
 

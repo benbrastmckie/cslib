@@ -1,18 +1,58 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-06T20:56:58Z",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/measurement-ledger.md",
+      "type": "artifact",
+      "summary": "Live re-measurement partition (Phase 1) plus Phase 3 discovery and Phase 5 post-fix evidence table"
+    },
+    {
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/artifacts/acceptance-gate-verdict.md",
+      "type": "artifact",
+      "summary": "Formal PASS WITH FIX TASKS verdict, blocking/non-blocking criteria tables, decision rule, remediation ledger, Reasoned Exclusions, roadmap items"
+    },
+    {
+      "path": "specs/567_tableau_vetting_pipeline_acceptance_gate/summaries/01_acceptance-gate-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for all six phases"
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/README.md",
+    "ORGANISATION.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context, tree SHA 3a11702e",
+    "stage": "complete",
+    "details": "All six phases completed. Verdict PASS WITH FIX TASKS emitted.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 6,
+    "last_completed_phase": "Phase 6: Acceptance-gate verdict document and fix-task handoff"
+  },
+  "completion_data": {
+    "completion_summary": "Ran the CSLib vetting pipeline against the refactored modal-tableau subsystem as the programme's terminal acceptance gate. Live re-measurement (Phase 1) confirmed nine documentation-accuracy defects plus two undiscovered axiom-census word-count drifts, all corrected in Phases 2-3 (S4 module count eleven->ten across three deliverable files; six drifted README.md numeric figures; two self-flagged stale FrameSoundness/FrameCompleteness sizes refreshed; the volatile repo-wide ModalTableauResult span command rescoped away from scanning specs/). Phase 4 re-recorded the s4witness.lean out-of-tree probe verdict additively, with the box-plus birth-key enrichment attribution (three commits, all dated 2026-08-05, confirmed by git merge-base to predate the programme's own commits) fully explaining all three observed divergences -- no unexplained residual, so the finding stayed non-blocking under the acceptance-gate decision rule. Phase 5 re-ran the full CI gate post-fix: all eleven blocking criteria green (build 3323 jobs, checkInitImports, lint-style, test, mk_all, shake residue, all four pre-pr-check ratchets, axiom-level behaviour preservation on the capstone and all six Decidable instances). Phase 6 emitted the formal verdict PASS WITH FIX TASKS with the full blocking/non-blocking criteria tables, decision rule, remediation ledger, and three roadmap items for out-of-scope remediation. Zero .lean proof terms touched; every edit confined to docstrings, README prose, and a specs-tree report.",
+    "roadmap_items": [
+      "Retarget stale out-of-tree probe artifact records: annotate the S4 loop-guard report 01's s4probe.lean harness description as describing a superseded revision of the file (eight identifiers it names -- dfsR, classify, statsL, badL, hasCountermodel, notS4Valid, def sat, def isS4 -- have zero matches in the current on-disk file), and replace s4subtractive3.lean's pre-split LoopChecking.lean:NNNN line citations with declaration names (the declarations still exist under the same names in S4/Hintikka.lean, S4/HintikkaInvariant.lean, S4/Driver.lean -- only the file:line citations are wrong).",
+      "Repo-wide unusedArguments lint hygiene: 145 sites across 27 modules (10 in Modal/Tableau/); uniform pattern is an unused [Hashable Atom] (or analogous) section-level instance binder; idiomatic fix is `omit [Hashable Atom] in` before the affected block.",
+      "Re-establish the six expensive out-of-tree probe verdicts (s4probe.lean, s4boxed.lean, s4ancestor.lean, s4subtractive.lean, s4subtractive2.lean, s4subtractive3.lean) under a dedicated multi-hour budget."
+    ]
   },
   "metadata": {
     "session_id": "sess_1786030020_688c25_567",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

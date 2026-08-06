@@ -304,24 +304,31 @@ report the actual moved-declaration count in the phase commit.
 
 ---
 
-### Phase 3: Extract `S4/BirthKey.lean` [NOT STARTED]
+### Phase 3: Extract `S4/BirthKey.lean` [COMPLETED]
 
 **Goal**: Birth-content and box-plus machinery becomes a module importing only `Universe`.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/BirthKey.lean` from the Appendix A template, with
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/BirthKey.lean` from the Appendix A template, with
       `public import Cslib.Logics.Modal.Tableau.S4.Universe`. **Confirm `@[expose] public
-      section`.**
-- [ ] Move the `BirthKey`-assigned declarations by name.
-- [ ] Remove `private` from the 4 seam-crossing declarations:
+      section`.** Confirmed.
+- [x] Move the `BirthKey`-assigned declarations by name. 17 declarations, 457 lines (hypothesis
+      ~441; close).
+- [x] Remove `private` from the 4 seam-crossing declarations:
       `boxPlusExtraS4_outputs_subset_S4`, `boxPlus_pos_disjunct_elim`,
       `boxPlus_neg_disjunct_elim`, `successorBirthContent_subset_signedSubfmls`. Verify docstrings.
-- [ ] **Do not move** `successorBirthContent_{boxNeg,diamondPos}_subset_relevantSetFinset` here
+      All 4 confirmed docstringed.
+- [x] **Do not move** `successorBirthContent_{boxNeg,diamondPos}_subset_relevantSetFinset` here
       despite their names — they reference `modalApplyOneS4KeyedMint` and belong in
-      `InvariantKeys` (Phase 9). This is research correction 3 of 4.
-- [ ] Write the "Why a separate module" docstring paragraph.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      `InvariantKeys` (Phase 9). This is research correction 3 of 4. Confirmed left in place.
+- [x] Write the "Why a separate module" docstring paragraph. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. No new `Modal/Tableau/` findings this phase (shake-flagged set
+      12/12, matching the baseline updated in Phase 2 exactly — no further residue growth).
+
+Zero downstream `.lean` file content changed (`git diff --stat` confirms). All gates green:
+build 3315 jobs, sorry census 1, axiom census 43, lint-suppressions 19, checkInitImports,
+mk_all --check, lint-style, lake test, boneyard quarantine all pass.
 
 **Timing**: 1 hour
 

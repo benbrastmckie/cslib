@@ -505,6 +505,7 @@ public import Cslib.Logics.Modal.Tableau.LoopChecking
 public import Cslib.Logics.Modal.Tableau.LoopInduction
 public import Cslib.Logics.Modal.Tableau.Rules
 public import Cslib.Logics.Modal.Tableau.S4.BirthKey
+public import Cslib.Logics.Modal.Tableau.S4.Driver
 public import Cslib.Logics.Modal.Tableau.S4.Guard
 public import Cslib.Logics.Modal.Tableau.S4.Universe
 public import Cslib.Logics.Modal.Tableau.S5Simplification

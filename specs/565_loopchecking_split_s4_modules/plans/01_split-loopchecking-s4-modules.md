@@ -406,39 +406,52 @@ simpNF-clean (they are in the tree today; `--wfail` catches a regression).
 
 ---
 
-### Phase 5: Extract `S4/Driver.lean`, Part 1 — Definitions and Equation Lemmas [NOT STARTED]
+### Phase 5: Extract `S4/Driver.lean`, Part 1 — Definitions and Equation Lemmas [COMPLETED]
 
 **Goal**: Create `S4/Driver.lean` holding the S4 rule-application and step-branch **definitions**
 plus their immediate equation/shape/witness lemmas. This is the structurally forced seventh
 module (research §2, option A) — a recorded deviation from the task description's six-family list.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/S4/Driver.lean` from the Appendix A template, importing
+- [x] Create `Cslib/Logics/Modal/Tableau/S4/Driver.lean` from the Appendix A template, importing
       `Universe`, `BirthKey`, `Guard`. **Confirm `@[expose] public section`** — this module is the
-      most heavily `unfold`ed in the cluster, so an omission here is maximally damaging.
-- [ ] Move the definitions and their immediate consequences: `modalApplyOneS4` and its
-      blocked/unblocked equation lemmas, `modalStepBranchS4`, `modalExpandBranchesS4`,
-      `modalTableauS4`, `modalApplyOneS4KeyedMint` (+ `_snd_eq`, `_fst_eq_or_linear`),
-      `modalApplyOneS4Keyed` (+ its four equation lemmas), `modalNonMintCandidates` (+ `_subset`,
-      `_not_mem_expanded`, `_eq_nil_iff`), `modalStepBranchS4Keyed`, `modalStepBranchS4KeyedBody`,
-      `modalStepBranchS4Keyed_eq_findSome_body`, `modalStepBranchS4KeyedOrdered` (+ `_cases`,
-      `_eq_none_iff`, `_selected_mem`, `_mintReady`), the `modalApplyOneS4Rules_*_fst` /
-      `_eq_S4Rules` group, the `modalApplyOne_*_mint_*_S4` group, the
-      `modalApplyOneS4KeyedMint_*_eq_S4` / `_witness` group, and the `*_outputs_subset_S4` group.
-      Anchor on the regenerated `module-assignment.md`, not this prose list.
-- [ ] Carry `modalStepBranchS4KeyedBody_isSome_of_mem_nonMintCandidates`,
+      most heavily `unfold`ed in the cluster, so an omission here is maximally damaging. Confirmed.
+- [x] Move the definitions and their immediate consequences (49 declarations, verified acyclic
+      w.r.t. the Phase 6 remainder — 0 forward refs from this half into the other — before
+      writing any file). 1205 lines moved. Anchored on the regenerated `decl-graph.json`'s
+      `sub == "Driver"` set, sorted by file order, cut at the first natural gap
+      (`modalApplyOne_boxNeg_outputs_subset_S4` at old-line 1445, next Driver decl at old-line
+      1651) rather than the prose list, per the plan's own instruction.
+- [x] Carry `modalStepBranchS4KeyedBody_isSome_of_mem_nonMintCandidates`,
       `modalNonMintCandidates_eq_nil_iff_findSome_eq_none`, `boxProps_outputs_subset_S4`, and
-      `diaNegProps_outputs_subset_S4` with their current `private` status unless the regenerated
-      graph shows a cross-module consumer.
-- [ ] Carry the two zero-consumer `private` lemmas
+      `diaNegProps_outputs_subset_S4` with their current `private` status. Confirmed unchanged.
+- [x] Carry the two zero-consumer `private` lemmas
       (`modalApplyOneS4Rules_boxPos_not_notApplicable_of_fourBoxProp_ne_nil`,
       `modalApplyOneS4Rules_diaNeg_not_notApplicable_of_fourDiaNegProp_ne_nil`) unchanged. Do not
-      delete — Boneyard archival is a declared non-goal.
-- [ ] Write the "Why a separate module" docstring paragraph, explicitly recording that this module
+      delete — Boneyard archival is a declared non-goal. Confirmed carried unchanged.
+- [x] Write the "Why a separate module" docstring paragraph, explicitly recording that this module
       exists because the invariant material makes ~248 references into these definitions, so
-      leaving them in `LoopChecking.lean` would create an import cycle.
-- [ ] Register in `Cslib.lean`; add the import to `LoopChecking.lean`.
-- [ ] Run the shake-prune loop.
+      leaving them in `LoopChecking.lean` would create an import cycle. Done.
+- [x] Register in `Cslib.lean`; add the import to `LoopChecking.lean`. Done.
+- [x] Run the shake-prune loop. One real finding this phase (unlike Phases 2-4): shake flagged
+      `Driver.lean` itself for a redundant `import Cslib.Init` (already reachable transitively
+      via `FmpMeasure`/`FrameRules`, per Appendix A's own note) — removed it, shake-flagged set
+      returned to exactly the Phase-2-baselined 12/12.
+
+**Orphaned-heading finding, resolved (module-content correctness)**: the automated span
+extraction attached a pre-existing heading, `/-! ## Minting-Content Equality Closure -/`
+(whose original content -- `any_beq_of_mem_S4`, `mem_of_any_beq_S4`, `boxPlus_pos_disjunct_elim`,
+etc. -- was fully relocated to `Universe`/`BirthKey` across Phases 2-3), as trailing content of
+`modalApplyOne_boxNeg_outputs_subset_S4` (the last Phase 5 declaration in file order). This left
+it dangling at the very end of `Driver.lean` with nothing following but `end`. Deleted it (its
+subject matter no longer describes anything in this file); confirmed by inspection this is the
+only new orphan Phase 5 produced, and that the two long-standing pre-existing heading-pair quirks
+("Key-Threaded S4 Step", "The Witness Disjunct (Gate)") moved into `Driver.lean` intact as a unit,
+unchanged from their baseline shape.
+
+Zero downstream `.lean` file content changed. All gates green: build 3317 jobs, sorry census 1,
+axiom census 43, lint-suppressions 19, checkInitImports, mk_all --check, lint-style, lake test,
+boneyard quarantine all pass.
 
 **Timing**: 2 hours
 

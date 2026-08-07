@@ -29,7 +29,10 @@
       "description": "Resolve the five import-reachability duplicate families in Cslib/Logics/Modal/Tableau/: accFreshInv_append, hasEdge_addEdge_mono, modalApplyOne_boxPos_acc_eq, modalApplyOne_diamondNeg_acc_eq, not_shape_of_not_or. These are privacy-caused duplicates that de-privatization alone cannot resolve: three consumer files cannot reach Soundness.lean where the largest family originates. This is a module-graph problem (new Support module or import restructure), not a statement-equivalence adjudication. The Support-module extraction audit supplies no verdict bearing on these, and the duplicate-family adjudication that followed it explicitly left this class untouched.",
       "topic": "Modal Logic",
       "created": "2026-08-07T08:01:17Z",
-      "last_updated": "2026-08-07T08:01:17Z"
+      "last_updated": "2026-08-07T08:01:17Z",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/"
+      ]
     },
     {
       "project_number": 583,
@@ -968,7 +971,12 @@
         592
       ],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-07T00:00:00Z",
+      "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+        "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean"
+      ]
     },
     {
       "project_number": 592,
@@ -980,7 +988,11 @@
       "description": "EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses that DO NOT EXIST in the repository. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C3).\n\nTHE DEFECT (verified 2026-08-07): there is no `scratch/` directory at the repository root, and none of these files exist:\n- `scratch/BetaSplitRefutation.lean` -- 10 citations. Load-bearing for DP-3, DP-4 and DP-5: cited as the machine-verified counterexample at `phiRef1` refuting augmented-frame positive-formula persistence, and separately for `reportMin phiRef1 realFuel` / `minBranchesAgree = true` establishing DP-4's refutation INDEPENDENTLY of DP-3.\n- `scratch/HvalidShapeRefutation.lean` -- 3 citations. Cited as refuting the OLD `hvalid` premise shape (`IValid (p -> (q -> p))` holds while the old premise body is false at a non-upward-closed witness valuation). This one justifies a statement-shape change that ALREADY LANDED, so its absence is a documentation defect rather than a live gate.\n- `scratch/PersistPrototype.lean` -- 1 citation.\n\nWHY THIS MATTERS: three sorries are annotated \"PERMANENTLY DEFERRED -- unprovable as stated ... terminal deferral, not an unfinished step. No follow-up is scheduled\" on the authority of these files. Three permanent abandonment decisions currently rest on evidence nobody can open. If the refutations are correct the deferrals are sound but unauditable; if any is wrong, work has been permanently abandoned in error. Neither can be determined today.\n\nESTABLISHED REMEDY -- follow it: this repository already promotes out-of-tree countermodels into compiling regression tests. See `CslibTests/AncestorRedirectRefutation.lean` and `CslibTests/S4LoopGuardRegression.lean`. The CS5 pair-seed task's description mandates the same pattern for its own probe (\"Land probe_refute_disjunctionProperty as a regression test so the unconditioned form can never be reintroduced\"). The out-of-tree S4 probe task does this for the six S4 probes; nothing covers the propositional ones.\n\nSCOPE: (1) attempt recovery of the three files from git history and from any out-of-tree location; (2) for each RECOVERED witness, reconstruct it as a compiling `CslibTests/` module and repoint the citing comments at the in-tree path; (3) for each IRRECOVERABLE witness, either re-derive the counterexample from the surviving prose description or -- if it cannot be re-derived -- DOWNGRADE the annotations it supports from \"refuted / PERMANENTLY DEFERRED\" to \"[UNVERIFIED], evidence lost\", which is the honest state. Do not leave a terminal-deferral claim standing on a missing file.\n\nEXPECTED OUTPUT: `phiRef1` and the `hvalid`-shape counterexample compiling in CslibTests/, all 14 citations repointed, sorry census unchanged. Zero new sorries, zero new axioms.\n\nSEQUENCING: this is the prerequisite for the disposition-decision task, which cannot be made responsibly against absent evidence.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-07T00:00:00Z",
+      "file_scope": [
+        "CslibTests/",
+        "Cslib/Logics/Propositional/Tableau/"
+      ]
     },
     {
       "project_number": 593,
@@ -995,7 +1007,11 @@
         592
       ],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-07T00:00:00Z",
+      "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/",
+        "Cslib/Logics/Propositional/Tableau/Minimal/"
+      ]
     },
     {
       "project_number": 594,
@@ -1007,7 +1023,11 @@
       "description": "METATASK. Bring all open task records in specs/state.json into agreement with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H1-H3, M4) at explicit user request for a metatask covering revisions to incomplete tasks.\n\nEVERY ITEM BELOW WAS VERIFIED ON 2026-08-07. Re-verify before acting -- do not act on this list blind.\n\n(1) SIX TASKS MARKED [BLOCKED] HAVE ZERO UNMET DEPENDENCIES. Resolving each edge against specs/state.json and specs/archive/state.json: 511, 554, 568, 583, 409, 37. specs/TODO.md's generated wave table places 511/554/568/583/409 in Wave 1 (\"no active dependencies\") while the tree entries immediately below render them [BLOCKED] -- the file contradicts itself within one section. Set 511, 554 and 568 to not_started (554's own description says its research is COMPLETE and the remaining work is \"LAND NOW (mechanical, no research risk)\"). Unblocking 511 and 554 cascades to release 506, 300, 537 and 551.\n\n(2) CLOSE 583 AS SUPERSEDED. Its target `intExpandBranches_openBranch_sat` was restated per its own SCOPE and is now SORRY-FREE at Scheme.lean:6806. Its cited lines are stale: :2583/:2623/:2598-2622 today hold `intUniverseExt_length_le`, `mem_intUniverseExt_of` and neighbours, with no sorry in that region. Its own VERIFY BEFORE STARTING clause mandates this: \"if the divergence repair has already restated the lemma, close this task as superseded rather than duplicating the work.\"\n\n(3) CLOSE 506 AS EXPANDED/PARTIAL AND RE-POINT 300. 506 landed Phases 1-7 green (zero sorry/axiom) and its entire remaining scope IS 511. The graph currently reads 300 -> 506 -> 511, so the umbrella cannot close until an empty intermediate does. Record 506's landed phases in its completion summary, then set 300's dependencies to [511].\n\n(4) THIRTY-SEVEN DEPENDENCY EDGES POINT AT ARCHIVED TASKS. generate-task-order.sh silently treats these as satisfied, which is exactly what makes the staleness invisible. Retarget or drop each. Known live retargets: 375's dependency on archived 317 should become [593] (its real gate is the propositional tableau sorries); 548's dependencies should add [597] (the driver-abstraction decision must precede its 8-corner expansion).\n\n(5) ADD A `blocked_reason` FIELD. There is currently no way to distinguish a genuine external gate from stale graph state. Genuine external gates to record: 37 (\"upstream BimodalLogic continuous frame development, not started upstream\"), 497 (\"external PR leanprover/cslib#607 not yet merged\"), 409 (\"parked behind an explicit trigger condition, not a dependency\"). Note 497 and 548 currently say \"BLOCKED\" in their description prose while carrying status not_started -- the prose and the status disagree in both directions across the task set.\n\n(6) REFRESH STALE DESCRIPTION TEXT. 375 names only the CPL and IPL TFAEs when `mplProofSystemsTfae` now also exists in ProofSystemEquivalence.lean; 571 qualifies its line numbers with \"as of\"; 548 says \"BLOCKED on 511/535 landing\" while 535 is archived.\n\n(7) REWRITE `active_goal`. Handled directly by the review that created this task -- verify it still reads correctly and reflects any status changes made above.\n\nCONSTRAINT: this task changes task METADATA only. No .lean file may be created, edited or deleted. All state.json writes go through .claude/scripts/state-write.sh (the single mutex-guarded writer); regenerate TODO.md via generate-todo.sh afterwards, never by hand.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-07T00:00:00Z",
+      "file_scope": [
+        "specs/state.json",
+        "specs/TODO.md"
+      ]
     },
     {
       "project_number": 595,
@@ -1021,7 +1041,10 @@
         594
       ],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-07T00:00:00Z",
+      "file_scope": [
+        "scripts/"
+      ]
     },
     {
       "project_number": 596,
@@ -1033,7 +1056,10 @@
       "description": "Realign specs/ROADMAP.md with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H4-H5).\n\nWHAT IS ALREADY CORRECT -- do not disturb it: the quantitative core reproduces exactly against the tree. The 27/23/4/0 sorry census (ROADMAP.md:146-149), the 15-system grid, the 24 subsumption theorems in InterSystem/AxiomSubsumption.lean, and the count of 6 `instDecidable*Valid` instances were all re-verified on 2026-08-07 and are accurate, reflecting the reconciliation commit 26644732.\n\n(1) SECTION B \"ABSTRACTION & REDUNDANCY CLEANUP\" (:165-176) IS 4/5 STALE. It is presented as the current priority but four of its five rows are completed-and-archived work:\n- :167 lists the modal tableau refactor programme as outstanding; ALL EIGHT of its tracked tasks are terminal in the archive (one expanded; the rest completed).\n- :167 states \"`LoopChecking.lean` alone is 10,723 lines / 230 declarations\". Actual: 1,626 lines / 20 declarations -- off by 6.6x. The split already shipped, into eleven Modal/Tableau/S4/*.lean modules (BirthKey, Driver, Guard, Hintikka, HintikkaInvariant, Invariant, InvariantAcc, InvariantKeys, Redirect, Universe). The CHANGE_LOG records the pre-split size as 11,393/241, so 10,723/230 was never accurate either.\n- :167 lists the `Boneyard/` quarantine as pending; Boneyard/ exists with README.md + ModalTableauS4Keyed.\n- :170 marks Foundations/Logic/Tableau/Blocking.lean \"(new)\"; it exists at 202 lines with `Branch.typeAt`, `containmentBlocked`, `distinctTypes_le_pow`, `strictChain_le_card`.\n- :171 lists proof-style simplification as lower-priority outstanding; both its tracked tasks are completed and archived.\nMove all five rows to Completed and correct the LoopChecking figure.\n\n(2) FURTHER FALSIFIED CLAIMS: :175 says BXCanonical has \"14 sorries\" -- actual 13 (ChronicleToCountermodel.lean 12 + Frame.lean 1). :157 attributes 23 sorries to three tasks, but ownership is actually split 13 / 9 / 1, and the 9 (Bundle/SuccRelation.lean 7 + Bundle/UntilSinceCoherence.lean 2, the strict Until/Since gap) belong to a task never named on the roadmap; it also double-counts the row at :158. :153 gates S4 decidability on a task that is completed. :155's tracking chain is 4/5 archived. :183 says the shared completeness infrastructure was \"folded into\" the Chronicle consolidation, but that closed as a DESCOPED PARTIAL with Phases 3b/3c/4a/4b formally abandoned and ~89% Chronicle duplication remaining -- the obligation was not absorbed; open task 41 still holds it and task 568 was created because the consolidation did not deliver it. :114 attributes all six decidability instances to FrameCompleteness.lean when K actually lives at CompletenessLoop.lean:2295.\n\n(3) TWENTY OF THIRTY OPEN TASKS HAVE NO ROADMAP PRESENCE. The largest omission is 548: :114 presents modal decidability as essentially delivered while 9 of the 15 cube corners (D, K4, K45, D4, D5, D45, DB, TB, and pure-K5) have no Decidable instance. Also absent: 537/551/554 (the CS5 stream -- and the \"Completed\" CS5 row at :130 is contradicted by Labelled/Soundness.lean:20, which states \"The general `nik_TS5_soundness` is not yet landed\"); 301/425 (temporal tableau, while :122 lists Temporal \"tableau\" as completed); 571; 568/569; 576; 39/40/41; 181; 400/497/409 (the entire propositional upstream stream); 588/589/590.\n\n(4) APPLY THE FIX THE PRIOR AUDIT ALREADY RECOMMENDED. specs/ROADMAP-alignment-audit.md:79 recommended adding a \"Modal Tableau Decidability\" section and was never applied. Add it, and give the CS5, temporal-tableau and propositional-upstream streams sections of their own.\n\n(5) RESOLVE OR TRACK THE SELF-DECLARED GAP at :173-176: \"Open decision (no task yet)\" on whether to complete BXCanonical/dense or abandon it in favour of the algebraic pipeline. Either create the task or record the decision.\n\nCONSTRAINT: documentation only. No .lean file may be edited. Every numeric claim added or retained must be re-verified against the tree at execution time, not copied from this description -- these figures are dated 2026-08-07 and the tree moves.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-07T00:00:00Z",
+      "file_scope": [
+        "specs/ROADMAP.md"
+      ]
     },
     {
       "project_number": 597,

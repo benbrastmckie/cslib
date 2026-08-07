@@ -245,7 +245,23 @@ is confirmed by reading its first 15 lines, not assumed.
 
 ---
 
-### Phase 3: Relocate the Upgraded Obstruction Record [NOT STARTED]
+### Phase 3: Relocate the Upgraded Obstruction Record [COMPLETED]
+
+**Phase Record**: Rewrote the "three prior soundness routes ... died" sentence in the
+`accPinnedBy` module comment (`FrameSoundness.lean:~5292`) to no longer name
+`branchSatisfiableIn_s4FC_ancestor_redirect` or say "above". Added a new `### The standalone
+redirect lemma was refuted, not merely left unproven` subsection carrying the three surviving
+facts from report §6 (statement is false + 3-line countermodel; why it is false — ancestor
+transitive-closure payload; Massacci citation dead end + category error re π-completeness),
+citing the Phase 2 regression witness by path
+(`CslibTests/AncestorRedirectRefutation.lean`), and recording the route decision inline
+(deleted because false; discharged sorry-free by `branchSatisfiableIn_s4FC_addEdge_of_blocked`
+and the `S4RedirectSoundInv` family). `git diff --stat` shows a single hunk in
+`FrameSoundness.lean`, comment-only; delimiters balanced (`/-! ... -/` intact). Fixed one
+line-length linter warning surfaced by the edit (5299 → wrapped). `lake build
+Cslib.Logics.Modal.Tableau.FrameSoundness` succeeds with only the pre-existing expected
+warnings (the `:1227` sorry, an unrelated pre-existing `S4/Driver.lean` warning) — no new
+warnings.
 
 **Goal**: Move the obstruction record — upgraded from "blocked" to "refuted" — into the
 `accPinnedBy` module comment, which already names this lemma as one of three dead routes. This

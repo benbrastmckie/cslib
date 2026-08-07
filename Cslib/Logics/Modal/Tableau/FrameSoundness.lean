@@ -5289,10 +5289,48 @@ the carrier (the parenthetical immediately following, `chunk_0267.md`-`chunk_026
 also exactly the upper half of the interval theorem `S_min ⊆ S ⊆ S_max` (`chunk_0246.md`
 L43-65), whose explicit warning -- *"a relation `S` between `S` and `S̄` may be nontransitive
 even if the original `R` is transitive"* -- is why an upper bound on `m.r`, not merely the
-edge conjunct's lower bound, is needed at all: three prior soundness routes for this guard
-died precisely because the witness model's ambient predecessors of the redirect's source
-label were uncontrolled (`branchSatisfiableIn_s4FC_ancestor_redirect` above; ancestor-only
-blocking; the origin-edge revision).
+edge conjunct's lower bound, is needed at all: three prior soundness routes for this guard died
+precisely because the witness model's ambient predecessors of the redirect's source label were
+uncontrolled -- a standalone, driver-independent redirect lemma naming only `src` (refuted
+below); ancestor-only blocking; the origin-edge revision.
+
+### The standalone redirect lemma was refuted, not merely left unproven
+
+A fourth route was attempted and recorded in this file as
+`branchSatisfiableIn_s4FC_ancestor_redirect`: the claim that `branchSatisfiableIn s4FC b acc`,
+`acc.hasEdge a src`, and hypotheses propagating box-positive/diamond-negative content from `src`
+to `a` alone (`hboxback`/`hdianeg`) suffice for `branchSatisfiableIn s4FC b (acc.addEdge src a)`.
+This is **not** an open conjecture: it is **false**, witnessed by an explicit three-world
+countermodel, and the lemma was deleted rather than left as a standing `sorry`.
+
+- **The statement is false.** Countermodel: `acc = {0→1, 2→1}`, `b = [T(□p)@0, F(p)@2]`, redirect
+  `src = 1`, `a = 2`. `hboxback`/`hdianeg` hold vacuously (no box-positive/diamond-negative
+  formula at label `1` occurs on `b`). `b` is `s4FC`-satisfiable at `acc`, but not at
+  `acc.addEdge 1 2`: the edge conjunct forces `m.r (f 0) (f 1)` and `m.r (f 1) (f 2)`,
+  transitivity forces `m.r (f 0) (f 2)`, and `T(□p)@0` then forces `p` at `f 2`, contradicting
+  `F(p)@2`.
+- **Why it is false.** Transitive closure transmits box-positive payload from *every*
+  `acc`-ancestor of `src` (here, `0`, via `2 → 1` and the closure edge `0 → 1 → 2` after the
+  redirect) -- not just from `src` itself. A hypothesis set naming only `src` cannot see the
+  payload carried by `src`'s own ancestors, so it cannot control what the redirect exposes them
+  to.
+- **The Massacci citation was a dead end, and additionally a category error here.** Massacci
+  (2000) Theorem 8.1 -- stated, never proved in that paper, deferred to refs [7]/[20] -- concerns
+  blocking on a **π-completed (saturated)** branch. The deleted lemma dropped saturation entirely
+  in pursuit of a driver-independent statement; that is exactly the hypothesis the countermodel
+  exploits (`[T(□p)@0, F(p)@2]` is nowhere near saturated). So the citation was never going to
+  close this lemma even if Theorem 8.1 had been proved -- the two statements are about different
+  things.
+
+The refutation is preserved as an executable regression witness at
+`CslibTests/AncestorRedirectRefutation.lean` (`RefuteAncestorRedirect.statement_is_false`), so a
+future re-derivation of this obstruction fails the test suite rather than being rediscovered from
+scratch. **Route decision**: the standalone lemma was deleted, not restated or retained, because
+its statement is false; the soundness obligation it attempted is discharged sorry-free by
+`branchSatisfiableIn_s4FC_addEdge_of_blocked` (below `extractModelS4`/`modalTruthLemmaS4`,
+`FrameCompleteness.lean`) under a Hintikka-saturation hypothesis, and independently by the
+`S4RedirectSoundInv` family (ghost-edge quarantine, `FrameCompleteness.lean`) -- both of which add
+the ancestor-visibility content this standalone route lacked.
 
 `accPinnedBy` quantifies only over `modalKnownWorlds b` -- **not** every `WorldIndex` --
 because `f : WorldIndex → W` is total: an unrestricted upper bound would force every UNUSED

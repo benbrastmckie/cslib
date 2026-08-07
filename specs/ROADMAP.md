@@ -143,17 +143,17 @@ flowchart TB
 
 ### A. Completeness / decidability gaps
 
-Verified sorry counts (2026-07-28): **28** code-position sorries repo-wide — Bimodal 23,
-Propositional 4, Modal 1. Temporal, LTL, HML, LinearLogic and Foundations are sorry-free.
-The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 4 and Modal 1 are **bare**,
-and are the stated reason `lake build --wfail --iofail` is red on this tree.
+Verified sorry counts (2026-08-07): **27** code-position sorries repo-wide — Bimodal 23,
+Propositional 4, Modal 0. Temporal, LTL, HML, LinearLogic and Foundations are sorry-free.
+The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 4 are **bare**, and are the
+stated reason `lake build --wfail --iofail` is red on this tree.
 
 | Item | Tracking | Notes |
 |------|----------|-------|
 | **S4** (reflexive-transitive) loop-checking termination bound + decidability | 511 → 506 → umbrella 300 | the last classical-cube decidability corner; `2^\|Sf\|` bound. Gated on the box-plus birth-keys task (563) |
 | Pure-K5 / pure-5 Euclidean completeness (no equivalence route) | 534 | corner deferred out of the KB5/Euclidean task |
 | Propositional tableau completeness (**4 sorries**) + atom-persistence lemma | 574 → 456 → 317, 430, 583 | all four share one root cause: the fuel-bounded persistence loop in `applyAllTImpRules`. 583 owns the one lemma that is false as stated and needs restating |
-| **S4 keyed loop-check guard soundness** (1 sorry, the only Modal one) | 553 → 582 | `branchSatisfiableIn_s4FC_ancestor_redirect`. The cited source (Massacci 2000, Thm 8.1) states the result and never proves it — see the in-file docstring |
+| **S4 keyed loop-check guard soundness** — DISCHARGED BY REFUTATION | 553 → 582 | the standalone ancestor-redirect route's statement was false (explicit countermodel), not merely unproven; the lemma was deleted and the soundness obligation is discharged sorry-free by `branchSatisfiableIn_s4FC_addEdge_of_blocked` + the `S4RedirectSoundInv` family — see `FrameSoundness.lean`'s `accPinnedBy` module comment and the regression witness `CslibTests/AncestorRedirectRefutation.lean` |
 | Bimodal **discrete** completeness pipeline (**23 sorries**) | 36, 37, 215 | gated on external BimodalLogic port; the *dense* pipeline is complete |
 | Bimodal → temporal conservativity (1 sorry) | 450 | domain mismatch: bimodal soundness needs `AddCommGroup D`, temporal completeness an arbitrary serial linear order |
 

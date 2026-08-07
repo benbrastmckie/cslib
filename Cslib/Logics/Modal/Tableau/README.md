@@ -63,15 +63,17 @@ been re-run with `wc -l` per that flag's own instruction.
   | sort -u | grep 'Modal/Tableau/'
 ```
 
-**1** in this subsystem: `branchSatisfiableIn_s4FC_ancestor_redirect` in `FrameSoundness.lean`,
-the retained, user-decided, immovable obstruction (see that lemma's docstring). Dropping the
-final `grep` gives **28** code-position sorries repo-wide. Re-verified unchanged (still exactly
-1, still that same lemma) at every phase boundary of the `S4/` module split -- a move-only
-refactor cannot introduce or remove a sorry, and the gate enforced it at each step.
+**0** in this subsystem, as of the deletion of a standalone ancestor-redirect decision-gate
+lemma whose statement was refuted by an explicit countermodel -- see `FrameSoundness.lean`'s
+`accPinnedBy` module comment for the refutation record and
+`CslibTests/AncestorRedirectRefutation.lean` for the executable regression witness. Dropping the
+final `grep` gives **27** code-position sorries repo-wide. Re-verified unchanged (still exactly
+0 in this subsystem) at every phase boundary of the `S4/` module split before the deletion -- a
+move-only refactor cannot introduce or remove a sorry, and the gate enforced it at each step.
 
 Three different definitions of "sorry count" circulate and they do not agree, so state which one
-is meant. The 28 above counts sorries in *code position*. The CI-pipeline grep
-(`grep -rn "\bsorry\b" Cslib/`, minus comment-leading lines) returns 158 because it also matches
+is meant. The 27 above counts sorries in *code position*. The CI-pipeline grep
+(`grep -rn "\bsorry\b" Cslib/`, minus comment-leading lines) returns 187 because it also matches
 docstring prose such as "sorry-free". The `declaration uses 'sorry'` warning count from an
 incremental `lake build` is an **undercount** and must never be used as a census: cached modules
 do not re-elaborate and so never re-emit their warnings.

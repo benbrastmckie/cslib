@@ -403,7 +403,35 @@ states this and the ratchet compares column 1 as an exact set.
 
 ---
 
-### Phase 6: Reconcile the Falsified Prose Records [NOT STARTED]
+### Phase 6: Reconcile the Falsified Prose Records [COMPLETED]
+
+**Phase Record**: Repo-wide sweep for `ancestor_redirect` (excluding `.git/` and all of
+`specs/**`, per the same not-a-live-ratchet principle the plan applies to `TODO.md`, since
+other tasks' own historical reports/plans/summaries are frozen records of decisions made at the
+time) found exactly the plan's predicted **two** live-tree files:
+`Cslib/Logics/Modal/Tableau/README.md` and `specs/ROADMAP.md` — confirming the plan's
+Scope Hypothesis (no fourth site found).
+
+- **README.md** "Sorry census": `**1**` → `**0**`; dropped the retained/immovable clause and
+  the lemma's name entirely (per the task's explicit "drop ... the naming" instruction — an
+  earlier draft of this edit still named it and was corrected before commit); re-measured
+  (not hand-decremented) the repo-wide figure `**28**` → `**27**`. Also re-measured the
+  adjacent, same-site "CI-pipeline grep" raw count (`grep -rn "\bsorry\b" Cslib/`), which had
+  independently drifted `158` → `187` since this section's last capture — corrected per the
+  task 567 house standard (live-re-measure, don't copy stale numbers forward), since it sits in
+  the same paragraph already being edited.
+- **ROADMAP.md** section-A prose: re-measured per-subsystem breakdown (Bimodal 23,
+  Propositional 4, Modal **0**, confirmed by direct census over each subsystem directory), date
+  stamp updated to the live measurement date, and the "Propositional 4 and Modal 1 are bare"
+  sentence revised to name only Propositional 4 as the `--wfail --iofail` red-cause.
+- **ROADMAP.md** Remaining table: the S4 keyed loop-check guard soundness row revised to
+  "DISCHARGED BY REFUTATION", Notes cell repointed from the deleted in-file docstring to the
+  relocated `accPinnedBy` record and the `CslibTests/` regression witness.
+- `specs/TODO.md` left untouched (explicit non-goal; historical measured-state prose generated
+  from `state.json`).
+- Final re-sweep confirms zero remaining live-tree prose asserting a Modal/Tableau sorry or
+  naming the deleted lemma as extant; `git status --short` confirms exactly the two expected
+  files touched.
 
 **Goal**: Correct every prose/numeric record the deletion falsifies, with all figures
 live-re-measured per the house standard established by task 567.

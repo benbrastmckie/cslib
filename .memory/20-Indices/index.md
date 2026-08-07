@@ -7,6 +7,9 @@
 
 ## Recent Memories
 
+- 2026-08-07 — [[private-lemmas-cause-cross-file-re-derivation]] — CSLib Tableau: private lemmas cause cross-file re-derivation at scale
+- 2026-08-07 — [[loop-check-blocking-record-identification-not-edge]] — Tableau loop-check blocking: record an identification, not an edge
+- 2026-08-07 — [[lemmon-box-plus-keys-free-in-subformula-world-bound]] — Lemmon box-plus keys are free in a subformula-indexed world bound
 - 2026-07-29 — [[timp-sibling-copies-break-world-creation-injection]] — T-signed implications are copied to every sibling world, so world creation is not injective into subformula positions
 - 2026-07-29 — [[eval-computable-definitions-before-assuming-invariants]] — #eval a computable Lean definition against a property before trying to prove it
 - 2026-07-29 — [[two-design-fixes-must-be-checked-for-mutual-compatibility]] — When two obligations are each resolved by a different design change, test the conjunction
@@ -23,10 +26,13 @@
 - [[timp-sibling-copies-break-world-creation-injection]]
 - [[eval-computable-definitions-before-assuming-invariants]]
 - [[two-design-fixes-must-be-checked-for-mutual-compatibility]]
+- [[private-lemmas-cause-cross-file-re-derivation]]
 
 ### [TECHNIQUE]
 - [[executed-conformance-before-completeness-proofs]]
 - [[validated-fast-language-reimplementation-as-search-instrument]]
+- [[loop-check-blocking-record-identification-not-edge]]
+- [[lemmon-box-plus-keys-free-in-subformula-world-bound]]
 
 ### [CONFIG]
 - [[cslib-tests-conformance-harness-imports-eval]]
@@ -47,6 +53,9 @@ Topics use slash-separated hierarchical paths (e.g., `python/libs/requests`, `me
 - [[intuitionistic-tableau-fitting-split-over-lindenbaum]] — Intuitionistic tableau T-implication rule design
 - [[temporal-tableau-426-427-file-territory]] — Temporal tableau completeness implementation
 - [[timp-sibling-copies-break-world-creation-injection]] — Intuitionistic tableau world-creation counting
+- [[private-lemmas-cause-cross-file-re-derivation]] — Module organisation and visibility in Cslib/Logics/Modal/Tableau
+- [[loop-check-blocking-record-identification-not-edge]] — Modal tableau loop-checking and soundness obligations
+- [[lemmon-box-plus-keys-free-in-subformula-world-bound]] — Filtration and birth keys in modal tableau FMP arguments
 
 ### meta/
 <!-- System building and .claude/ changes -->

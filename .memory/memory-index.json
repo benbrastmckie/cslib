@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-29T15:11:40Z",
-  "entry_count": 8,
-  "total_tokens": 1619,
+  "generated_at": "2026-08-07T07:43:35Z",
+  "entry_count": 11,
+  "total_tokens": 2220,
   "entries": [
     {
       "id": "cslib-tests-conformance-harness-imports-eval",
@@ -57,7 +57,7 @@
         "formalization-design"
       ],
       "summary": "# #eval a computable Lean definition against a property before trying to prove it Before proving anything about a **comp",
-      "token_count": 168,
+      "token_count": 167,
       "retrieval_count": 0,
       "last_retrieved": null
     },
@@ -115,7 +115,104 @@
         "Lindenbaum"
       ],
       "summary": "# Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion When an intuitio",
-      "token_count": 151,
+      "token_count": 150,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "lemmon-box-plus-keys-free-in-subformula-world-bound",
+      "path": ".memory/10-Memories/lemmon-box-plus-keys-free-in-subformula-world-bound.md",
+      "title": "Lemmon box-plus keys are free in a subformula-indexed world bound",
+      "created": "2026-08-07",
+      "modified": "2026-08-07",
+      "topic": "Filtration and birth keys in modal tableau finite-model-property arguments",
+      "source": "task-557: modal_tableau_refactor_abstractions_boneyard",
+      "tags": [
+        "TECHNIQUE",
+        "modal-logic",
+        "filtration",
+        "box-plus",
+        "lemmon",
+        "finite-model-property",
+        "S4",
+        "chagrov-zakharyaschev"
+      ],
+      "keywords": [
+        "TECHNIQUE",
+        "modal-logic",
+        "filtration",
+        "box-plus",
+        "lemmon",
+        "finite-model-property",
+        "S4",
+        "chagrov-zakharyaschev"
+      ],
+      "summary": "# Lemmon box-plus keys are free in a subformula-indexed world bound Enriching filtration or birth keys from the unwrappe",
+      "token_count": 258,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "loop-check-blocking-record-identification-not-edge",
+      "path": ".memory/10-Memories/loop-check-blocking-record-identification-not-edge.md",
+      "title": "Tableau loop-check blocking: record an identification, not an edge",
+      "created": "2026-08-07",
+      "modified": "2026-08-07",
+      "topic": "Modal tableau loop-checking and soundness obligations",
+      "source": "task-557: modal_tableau_refactor_abstractions_boneyard",
+      "tags": [
+        "TECHNIQUE",
+        "modal-logic",
+        "tableau",
+        "loop-checking",
+        "soundness",
+        "filtration",
+        "S4",
+        "massacci"
+      ],
+      "keywords": [
+        "TECHNIQUE",
+        "modal-logic",
+        "tableau",
+        "loop-checking",
+        "soundness",
+        "filtration",
+        "S4",
+        "massacci"
+      ],
+      "summary": "# Tableau loop-check blocking: record an identification, not an edge When a modal tableau loop-check blocks a minting st",
+      "token_count": 205,
+      "retrieval_count": 0,
+      "last_retrieved": null
+    },
+    {
+      "id": "private-lemmas-cause-cross-file-re-derivation",
+      "path": ".memory/10-Memories/private-lemmas-cause-cross-file-re-derivation.md",
+      "title": "CSLib Tableau: private lemmas cause cross-file re-derivation at scale",
+      "created": "2026-08-07",
+      "modified": "2026-08-07",
+      "topic": "Module organisation and visibility in Cslib/Logics/Modal/Tableau",
+      "source": "task-557: modal_tableau_refactor_abstractions_boneyard",
+      "tags": [
+        "PATTERN",
+        "cslib",
+        "lean4",
+        "private",
+        "duplication",
+        "module-organisation",
+        "tableau"
+      ],
+      "keywords": [
+        "PATTERN",
+        "cslib",
+        "lean4",
+        "private",
+        "duplication",
+        "module-organisation",
+        "tableau"
+      ],
+      "summary": "# CSLib Tableau: private lemmas cause cross-file re-derivation at scale In `Cslib/Logics/Modal/Tableau/`, 77 comment-att",
+      "token_count": 143,
       "retrieval_count": 0,
       "last_retrieved": null
     },
@@ -144,7 +241,7 @@
         "task-427"
       ],
       "summary": "# Tasks 426 & 427 share Completeness.lean \u2014 serialize, do not parallelize Tasks **426** (time-ordering / `ordConstraints",
-      "token_count": 381,
+      "token_count": 380,
       "retrieval_count": 0,
       "last_retrieved": null
     },
@@ -175,7 +272,7 @@
         "counterexample"
       ],
       "summary": "# T-signed implications are copied to every sibling world, so world creation is not injective into subformula positions ",
-      "token_count": 229,
+      "token_count": 228,
       "retrieval_count": 0,
       "last_retrieved": null
     },
@@ -204,7 +301,7 @@
         "root-cause"
       ],
       "summary": "# When two obligations are each resolved by a different design change, test the conjunction When two proof obligations i",
-      "token_count": 181,
+      "token_count": 180,
       "retrieval_count": 0,
       "last_retrieved": null
     },

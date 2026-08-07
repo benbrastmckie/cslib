@@ -468,7 +468,21 @@ addition.
 
 ---
 
-### Phase 7: Update the Boneyard Carve-Out Record [NOT STARTED]
+### Phase 7: Update the Boneyard Carve-Out Record [COMPLETED]
+
+**Phase Record**: Appended a dated (`2026-08-07`) "Addendum" section to task 566's summary
+(`specs/566_boneyard_creation_eligible_moves/summaries/01_boneyard-creation-eligible-moves-summary.md`,
+chosen because it already carries the Phase 6 carve-out confirmation table this addendum
+directly supersedes) recording: carve-out 1 has lapsed (declaration deleted, not moved); the
+lapse reason (both mechanical confirmations — the axiom-census row and the retention
+docstring — were consequences of the retained `sorry` and vanished with it); the Boneyard
+convention itself is unaffected (it archives provenance-bearing code, and a refuted statement
+was never provenance-bearing — the refutation itself is what was preserved, via task 582's
+`CslibTests/` regression witness and relocated `accPinnedBy` record); and carve-out 2 confirmed
+untouched, with a fresh live re-measurement (86 `keysOriginS4` occurrences, now distributed
+across `S4/*.lean` post-split) rather than trusting the summary's original pre-split
+42/43-hit figures. `git status --short` confirms exactly one file touched, inside
+`specs/566_.../`.
 
 **Goal**: Record that task 566's mandatory carve-out 1 no longer applies, as required by the
 task's definition of done.

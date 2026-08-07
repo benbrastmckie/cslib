@@ -135,3 +135,43 @@ This work was prepared with the assistance of Claude Code (Anthropic). The AI to
 - Drafting this summary
 
 All Lean code was verified to compile cleanly against the full CI gate set described above.
+
+## Addendum (2026-08-07): Carve-Out 1 Has Lapsed
+
+Task 582 produced a machine-checked refutation of `branchSatisfiableIn_s4FC_ancestor_redirect`'s
+statement (an explicit three-world countermodel, `axioms = [propext, Quot.sound]`, no
+`sorryAx`) and deleted the lemma rather than moving it to `Boneyard/`. **Carve-out 1
+(`branchSatisfiableIn_s4FC_ancestor_redirect` is IMMOVABLE, recorded above and in the research
+report's §3.1) has lapsed.**
+
+**Why it lapsed**: the carve-out's rationale was entirely parasitic on the retained `sorry`'s
+existence, never an independent ground. It cited exactly two mechanical confirmations in this
+summary's own Phase 6 table above (row "Carve-out 1" and the `check-axiom-census.sh` row noting
+"sole Modal/Tableau row is the carve-out") — the `axiom-census-baseline.txt` row (which existed
+only because the declaration was `sorryAx`-tainted) and the docstring's own "retained by explicit
+user decision" note. Both mechanical confirmations vanished the moment the `sorry` did: task 582
+removed the axiom-census row (58→57 rows, 43→42 tainted) in its own Phase 5, and the retention
+docstring no longer exists because the declaration itself was deleted, not moved.
+
+**The Boneyard convention itself is unaffected.** `Boneyard/` is for zero-consumer code with
+retained *provenance* value — code that once worked, or documents a real mechanism, and is worth
+keeping archived rather than erased. A **false statement** carries no such provenance value to
+preserve in quarantine: what is worth keeping is the *refutation*, not the falsified claim. Task
+582 preserved that refutation as an executable regression witness
+(`CslibTests/AncestorRedirectRefutation.lean`) and relocated the upgraded (refuted, not merely
+blocked) obstruction record into `FrameSoundness.lean`'s `accPinnedBy` module comment, which
+already named this lemma as one of three dead soundness routes for the same guard. This is
+consistent with, not a violation of, the "moving, never deleting" disposition this task
+established for provenance-bearing code (§3 above) — a refuted statement was never
+provenance-bearing in the first place.
+
+**Carve-out 2 (`keysOriginS4` and relatives) is confirmed untouched and still stands.**
+`keysOriginS4` no longer lives in `LoopChecking.lean` alone — it and its relatives were
+distributed across the `S4/*.lean` modules by the later `LoopChecking.lean` → `S4/` split (see
+`Cslib/Logics/Modal/Tableau/README.md`'s provenance note), and `grep -ro 'keysOriginS4'
+Cslib/ | wc -l` live-measures **86** occurrences today (a live re-measurement superseding this
+summary's original 42/43-hit figures, which predate that split). Task 582's own diff touches
+only `FrameSoundness.lean`, `CslibTests/`, `scripts/axiom-census-baseline.txt`,
+`Cslib/Logics/Modal/Tableau/README.md`, `specs/ROADMAP.md`, and this file (`git diff --stat`
+confirms zero changes to `LoopChecking.lean`, `S4/*.lean`, or `FrameCompleteness.lean`) — so
+carve-out 2's declarations are unambiguously unaffected by this task.

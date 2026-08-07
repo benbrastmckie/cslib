@@ -2,6 +2,18 @@
 
 - **Task**: 582 - s4_ancestor_redirect_soundness_obstruction
 - **Status**: [COMPLETED]
+- **Started**: 2026-08-07T07:04:49Z
+- **Completed**: 2026-08-07T07:28:23Z
+- **Artifacts**: `CslibTests/AncestorRedirectRefutation.lean` (new regression witness);
+  `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (lemma, docstring, and section comment
+  deleted; obstruction record relocated into the `accPinnedBy` module comment);
+  `Cslib/Logics/Modal/Tableau/README.md` and `specs/ROADMAP.md` (sorry-count prose
+  reconciled by live re-measurement); `scripts/axiom-census-baseline.txt` (regenerated via
+  `check-axiom-census.sh --update`)
+- **Standards**: CSLib `CONTRIBUTING.md`, `NOTATION.md`, `ORGANISATION.md`; verified against
+  `lake build --wfail --iofail`, `lake test`, and the five honesty-gate scripts
+  (`check-axiom-census.sh`, `check-sorry-suppressions.sh`, `check-shake-residue.sh`,
+  `check-lint-suppressions.sh`, `check-boneyard-quarantine.sh`)
 - **Plan**: `specs/582_s4_ancestor_redirect_soundness_obstruction/plans/01_delete-refuted-ancestor-redirect-lemma.md`
 - **Research**: `specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md`
 

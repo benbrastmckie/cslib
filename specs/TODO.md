@@ -6,12 +6,12 @@ next_project_number: 588
 
 ## Task Order
 
-*Updated 2026-08-06. Generated from state.json dependency graph.*
+*Updated 2026-08-07. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,582,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,506,537,548,551,571,576 | 36,37,181,425,511,554,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300 | 39,40,506 | foundations, modal logic |
 
@@ -39,7 +39,6 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-582 [RESEARCHED] — Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logic
 
 ### Temporal Logic
 
@@ -208,11 +207,12 @@ VERIFY BEFORE STARTING: re-read Scheme.lean:2598-2622 and confirm the counter-in
 ---
 
 ### 582. Resolve the S4 ancestor-redirect sorry, the only sorry with no owning task
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 553, Task 566, Task 567, Task 586
 - **Research**: [582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md]
+- **Plan**: [582_s4_ancestor_redirect_soundness_obstruction/plans/01_delete-refuted-ancestor-redirect-lemma.md]
 
 **Description**: Resolve `branchSatisfiableIn_s4FC_ancestor_redirect` (Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1252) -- the ONLY sorry in the repository with no owning task.
 

@@ -1,6 +1,13 @@
 # Research Report: `branchSatisfiableIn_s4FC_ancestor_redirect` — Obstruction Resolution
 
 **Task**: 582 — resolve the repository's only unowned `sorry`
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Date**: 2026-08-06
 **Status**: RESEARCHED
 **Recommendation**: **Route (c) — DELETE**, with the finding relocated, not discarded.

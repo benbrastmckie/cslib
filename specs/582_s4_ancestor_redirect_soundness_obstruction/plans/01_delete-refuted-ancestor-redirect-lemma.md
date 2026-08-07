@@ -1,7 +1,7 @@
 # Implementation Plan: Delete the Refuted Ancestor-Redirect Lemma
 
 - **Task**: 582 - s4_ancestor_redirect_soundness_obstruction
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None (tasks 553, 566, 567, 586 all [COMPLETED])
 - **Research Inputs**: specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md

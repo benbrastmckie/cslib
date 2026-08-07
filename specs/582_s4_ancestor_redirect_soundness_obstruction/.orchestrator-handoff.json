@@ -1,12 +1,32 @@
 {
-  "status": "researched",
-  "summary": "Machine-checked refutation: the statement of branchSatisfiableIn_s4FC_ancestor_redirect is FALSE, not merely unprovable. Explicit 3-world countermodel (b = [T(box p)@0, F(p)@2], acc = {0->1, 2->1}, redirect 1->2) compiles clean under lake env lean with axioms [propext, Quot.sound] and no sorryAx. This eliminates route (a) on logical grounds -- there is no proof of a false statement to import from Massacci's deferred references [7]/[20]. Route (b) is technically possible but would produce a fourth statement of a fact already proved three times (branchSatisfiablePinnedIn_redirect_mechanical, branchSatisfiableIn_s4FC_addEdge_of_blocked, the S4RedirectSoundInv family), against the duplicate-elimination discipline task 586 just enforced. RECOMMENDATION: route (c) DELETE, with the finding relocated (not erased) into the accPinnedBy module comment and promoted to an executable regression witness in CslibTests/. Consumer audit re-run live: 3 .lean hits, exactly one the declaration, zero code consumers -- confirmed. Two corrections to the task brief: the third .lean hit is at FrameSoundness.lean:5294, not LoopChecking.lean:113, and there is an unmentioned fourth reference at Cslib/Logics/Modal/Tableau/README.md:66. Deletion-impact surface is six touch points, none a proof, including scripts/axiom-census-baseline.txt:40 which must be regenerated via check-axiom-census.sh --update rather than hand-edited.",
+  "status": "implemented",
+  "summary": "Route (c) DELETE executed across all 8 plan phases. The refuted branchSatisfiableIn_s4FC_ancestor_redirect lemma (Cslib/Logics/Modal/Tableau/FrameSoundness.lean, the repository's only sorry with no owning task) has been deleted. Its refutation (machine-checked, sorry-free, [propext, Quot.sound] axioms, no sorryAx) is preserved as an executable regression witness at CslibTests/AncestorRedirectRefutation.lean, and the upgraded (refuted, not merely blocked) obstruction record is relocated into FrameSoundness.lean's accPinnedBy module comment. Cslib/Logics/Modal/Tableau/ is now at 0 code-position sorries (down from 1); the repository is at 27 (down from 28). Axiom census baseline regenerated (58->57 rows, 43->42 sorryAx-tainted, via --update, never hand-edited). README.md and ROADMAP.md prose reconciled by live re-measurement (never hand-decremented). Task 566's Boneyard carve-out 1 recorded as lapsed via a dated addendum; carve-out 2 (keysOriginS4) confirmed untouched. Full CI verification green: lake build --wfail --iofail (4 pre-existing unrelated Propositional sorry warnings remain, zero in Modal/Tableau, zero new anywhere), lake test exit 0, all five honesty-gate scripts (check-axiom-census.sh, check-sorry-suppressions.sh, check-shake-residue.sh, check-lint-suppressions.sh, check-boneyard-quarantine.sh) exit 0 at or better than baseline, checkInitImports/lint-style/shake/mk_all all clean on touched files. Cumulative diff matches the plan's predicted touch set exactly -- no other proof, definition, or theorem statement altered. One deviation: Phase 4's literal 0-hit grep verification was in tension with Phase 2/3's own prose naming the deleted identifier for documentation clarity; resolved by rewording both mentions descriptively without losing semantic content, documented inline in the plan and the summary.",
   "blockers": [],
   "artifacts": [
     {
-      "path": "specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md",
-      "type": "report",
-      "summary": "Research report: machine-checked refutation of the lemma statement, live consumer re-audit, findings from completed tasks 553/566/567/586, feasibility analysis of routes (a)/(b)/(c), recommendation of route (c) DELETE with a six-item deletion-impact work list and a finding-preservation plan."
+      "path": "specs/582_s4_ancestor_redirect_soundness_obstruction/plans/01_delete-refuted-ancestor-redirect-lemma.md",
+      "type": "plan",
+      "summary": "Implementation plan with all 8 phases marked [COMPLETED], each carrying a detailed phase record of what was measured/changed/verified."
+    },
+    {
+      "path": "specs/582_s4_ancestor_redirect_soundness_obstruction/summaries/01_delete-refuted-ancestor-redirect-lemma-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: outcome, phase-by-phase results, one documented plan deviation (Phase 4 grep-gate vs Phase 2/3 prose tension, resolved by rewording), files changed, commits, AI tools used."
+    },
+    {
+      "path": "CslibTests/AncestorRedirectRefutation.lean",
+      "type": "code",
+      "summary": "New executable regression witness: the promoted countermodel, sorry-free, axioms [propext, Quot.sound]."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "type": "code",
+      "summary": "Refuted lemma, its docstring, and its section comment deleted; accPinnedBy module comment carries the relocated, upgraded obstruction record."
+    },
+    {
+      "path": "specs/566_boneyard_creation_eligible_moves/summaries/01_boneyard-creation-eligible-moves-summary.md",
+      "type": "summary",
+      "summary": "Dated addendum recording that task 566's carve-out 1 has lapsed (declaration deleted, not moved), with carve-out 2 confirmed untouched."
     }
   ]
 }

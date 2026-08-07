@@ -1,22 +1,48 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-06T00:00:00Z",
+  "status": "implemented",
+  "started_at": "2026-08-07T07:05:06Z",
+  "completed_at": "2026-08-07T07:28:27Z",
   "artifacts": [
-    "specs/582_s4_ancestor_redirect_soundness_obstruction/reports/01_ancestor-redirect-refutation-and-route-choice.md",
-    "specs/582_s4_ancestor_redirect_soundness_obstruction/scratch_refute_ancestor_redirect.lean"
+    "specs/582_s4_ancestor_redirect_soundness_obstruction/plans/01_delete-refuted-ancestor-redirect-lemma.md",
+    "specs/582_s4_ancestor_redirect_soundness_obstruction/summaries/01_delete-refuted-ancestor-redirect-lemma-summary.md",
+    "CslibTests/AncestorRedirectRefutation.lean",
+    "CslibTests.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "scripts/axiom-census-baseline.txt",
+    "Cslib/Logics/Modal/Tableau/README.md",
+    "specs/ROADMAP.md",
+    "specs/566_boneyard_creation_eligible_moves/summaries/01_boneyard-creation-eligible-moves-summary.md"
   ],
   "partial_progress": {
-    "stage": "research_complete",
-    "details": "Report written; refutation machine-checked; handoff emitted."
+    "stage": "complete",
+    "details": "All 8 phases completed. Route (c) DELETE executed: refuted lemma deleted, refutation preserved as CslibTests/ regression witness, obstruction record relocated into accPinnedBy comment, axiom census regenerated, README/ROADMAP prose reconciled, task 566 carve-out 1 lapse recorded, full CI gate green.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 8,
+    "last_completed_phase": "Phase 8: Full Gate and Route Record"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_change": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "modal_tableau_sorry_census": 0,
+    "repo_wide_sorry_census": 27,
+    "repo_wide_sorry_census_before": 28,
+    "lake_test_exit": 0,
+    "check_axiom_census_exit": 0,
+    "check_sorry_suppressions_exit": 0,
+    "check_shake_residue_exit": 0,
+    "check_lint_suppressions_exit": 0,
+    "check_boneyard_quarantine_exit": 0
   },
   "metadata": {
-    "session_id": "unknown",
-    "agent_type": "cslib-research-agent",
+    "session_id": "sess_1786086204_15ca53",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "recommended_route": "c-delete",
-    "key_finding": "lemma statement is refutable; countermodel machine-checked with no sorryAx",
-    "consumer_audit": "3 .lean hits, 1 declaration, 0 code consumers",
-    "sorry_baseline": {"framesoundness": 1, "repo_code_position": 28, "census_rows": 58}
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

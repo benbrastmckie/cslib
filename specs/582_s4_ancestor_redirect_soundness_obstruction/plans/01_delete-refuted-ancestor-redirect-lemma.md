@@ -196,7 +196,18 @@ the route decision is invalidated and the task returns to research rather than p
 
 ---
 
-### Phase 2: Promote the Countermodel into CslibTests/ [NOT STARTED]
+### Phase 2: Promote the Countermodel into CslibTests/ [COMPLETED]
+
+**Phase Record**: Created `CslibTests/AncestorRedirectRefutation.lean` (namespace
+`RefuteAncestorRedirect`, per plan) adapted to the `module` + paired `import`/`public meta
+import` idiom from `S4LoopGuardRegression.lean`, with a full module docstring covering the
+refuted statement, the countermodel data, and the refutation mechanism. Registered
+`public import CslibTests.AncestorRedirectRefutation` in `CslibTests.lean` before
+`CslibTests.Bisimulation` (alphabetical). `lake build CslibTests` succeeds; `lake test` exit 0;
+`lean_verify` on `RefuteAncestorRedirect.statement_is_false` reports `["propext","Quot.sound"]`,
+no warnings, no `sorryAx`. Two-grep sorry census over `CslibTests/` unchanged at 0.
+`git status --short` confirms exactly the two expected paths touched
+(`CslibTests.lean`, `CslibTests/AncestorRedirectRefutation.lean`).
 
 **Goal**: Turn the scratch probe into a durable, executable regression witness so any future
 attempt to re-add the lemma fails the test suite.

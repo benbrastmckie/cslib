@@ -299,7 +299,28 @@ tier**: the risk here is an edit that crosses out of the comment boundary or unb
 
 ---
 
-### Phase 4: Delete the Section Comment, Docstring, and Lemma [NOT STARTED]
+### Phase 4: Delete the Section Comment, Docstring, and Lemma [COMPLETED]
+
+**Phase Record**: Re-derived boundaries by content (unchanged from Phase 1's hypothesis:
+section comment at `:1159`, `sorry` at `:1251`, next section at `:1253`). Deleted lines
+1159-1252 inclusive, leaving exactly one blank line between the preceding declaration and
+`/-! ### Propagation-Adequacy Invariant (S4-Keyed)`. `lake build
+Cslib.Logics.Modal.Tableau.FrameSoundness` succeeds with zero sorry warnings for this file.
+Modal/Tableau two-grep sorry census = **0**; repo-wide two-grep census = **27** (one fewer than
+Phase 1's 28). `lake test` exit 0.
+
+**Deviation/tension found and resolved**: the plan's Phase 4 verification requires
+`grep -rn 'branchSatisfiableIn_s4FC_ancestor_redirect' --include='*.lean' Cslib/ CslibTests/` to
+return **0 hits**, but Phase 2's and Phase 3's own prose (already committed) named the deleted
+identifier literally for documentation clarity, producing 2 hits (both comment prose, not code).
+Resolved by rewording both mentions (`CslibTests/AncestorRedirectRefutation.lean`'s module
+docstring; `FrameSoundness.lean`'s `accPinnedBy` comment) to describe the deleted lemma
+descriptively ("the deleted standalone, driver-independent ancestor-redirect decision-gate
+lemma") without reproducing the exact identifier substring, preserving full semantic content.
+Re-verified: grep now returns 0 hits; both files rebuild clean; `lake test` exit 0.
+`git status --short` confirms exactly the two expected Lean files touched by this phase's
+deletion + rewording (`Cslib/Logics/Modal/Tableau/FrameSoundness.lean`,
+`CslibTests/AncestorRedirectRefutation.lean`).
 
 **Goal**: Remove the false declaration and its `sorry`, bringing `FrameSoundness.lean` to zero
 sorries.

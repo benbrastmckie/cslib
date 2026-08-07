@@ -1156,100 +1156,6 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge hw')
 
-/-! ### Ancestor-Redirect Decision Gate (ancestor-only blocking)
-
-**The obligation.** The ancestor-only-blocking route redirects a would-be
-mint at `src` onto an EXISTING ancestor `a` (reached by an already-recorded chain of `acc`
-edges) whenever `a`'s recorded key equals the prospective successor's birth content. The
-single load-bearing risk the whole route rests on is whether *adding the back-edge `src → a`
-to `acc`* preserves `branchSatisfiableIn s4FC` — stated here as a standalone lemma with no
-dependence on any driver definition (`blockingWorldS4Anc`, `keys`, `spine`, etc. are never
-named; the two abstract hypotheses `hboxback`/`hdianeg` below are exactly what
-`S4LoopInv.keyLowerBd` composed with the guard's key-equality check would hand a caller).
-
-**Attempt and verdict.** `hasEdge_addEdge_cases` (published from `Support/Accessibility.lean`,
-formerly a local re-derivation of `Soundness.lean`'s private original) lets the added edge be
-case-split against the old one. The
-"reuse the ambient witness model unchanged" case is fine when `m.r (f src) (f a)` already
-holds. The general case forces extending `m.r` (S4's `IsTrans` field is a genuine structural
-property of the *concrete* relation, not a derivable notion, so `acc.hasEdge` growth cannot be
-absorbed by an unrelated model without enlarging `m.r` to remain transitive). But
-`branchSatisfiableIn`'s witness model is *existentially arbitrary*: nothing constrains `m.r` to
-equal the transitive closure of `acc`, so `m.r` may already relate `f src` to models of
-*other* worlds (not just those on the recorded spine) in ways `hboxback`/`hdianeg` — stated only
-about the single edge's endpoints `src`/`a` — cannot control. Any predecessor `x` of `f src` in
-the (unconstrained) ambient relation with its own box-positive branch formula would, after the
-closure forced by transitivity, need that formula's content to transfer to `f a` too, and no
-hypothesis available to a *standalone* (no-driver, no-Hintikka-completeness) lemma can supply
-this for an unbounded family of such `x`. This is not a new discovery: it is exactly what this
-file's own `branchPropAdequateIn` module comment (two sections below) already documents for
-Route P's identical redirect-to-an-existing-world shape ("breaks `branchSatisfiableIn`'s edge
-conjunct ... outright for such an edge"). The sorry below marks precisely this point; it is
-recorded as [BLOCKED] (see the lemma's own docstring below for the exact obstruction). -/
-
-/-- **Ancestor-redirect decision-gate lemma.** `a` an already-recorded ancestor of
-`src` (`acc.hasEdge a src`), with `a`'s current content already containing, UNWRAPPED, every
-box-positive/diamond-negative fact recorded at `src` (`hboxback`/`hdianeg` -- the semantic
-payoff of `S4LoopInv.keyLowerBd` composed with the guard's key-equality check, stated here with
-no reference to `keys`/`successorBirthContent`/`spine`). **Attempted; BLOCKED** -- see the
-module comment above for the exact obstruction. The `sorry` marks the one case genuinely not
-dischargeable from these hypotheses: an arbitrary `branchSatisfiableIn` witness need not have
-`m.r (f src) (f a)`, and extending `m.r` to add it (forced to close transitively, since
-`IsTrans` binds the concrete relation) requires box/diamond content transfer for *every*
-ambient predecessor of `f src`, not just `src` itself -- a fact no standalone,
-driver-independent hypothesis set can supply.
-
-**Consumer audit: zero consumers.** This lemma is referenced exactly once anywhere in the
-repository, by its own declaration:
-
-```
-grep -rn 'branchSatisfiableIn_s4FC_ancestor_redirect' --include='*.lean' Cslib/ CslibTests/ | wc -l
-```
-
-1 hit. Nothing consumes it, so the `sorry` below propagates into no other result: it is a
-recorded obstruction rather than load-bearing debt. It is also the modal Tableau subsystem's sole
-`sorry`, and it is retained by explicit user decision.
-
-**The cited source does not contain the proof this obstruction keeps being measured against.**
-Successive soundness routes for this guard have appealed to Massacci (2000), *Single Step Tableaux
-for Modal Logics*, Theorem 8.1 -- "if the L-tableau with local assumptions U and global
-assumptions G starting with `1 : A` terminates with a π-completed branch, then A is L-satisfiable
-for U and G" -- i.e. to the claim that blocking preserves satisfiability. **In that paper
-Theorem 8.1 is stated and never proved.** Its Appendix B.2, headed "PROOFS OF SECTION 8",
-contains a proof of Theorem 8.4 only; and where the section-8 (π-modal-completed) extension is
-discussed, the paper explicitly defers it to the completeness proofs of its references [7]
-(prefixed tableaux) and [20] (completeness via model graphs) rather than establishing it.
-
-This is recorded here because it changes how the obstruction above should be read. It is not a
-failure to transcribe an available argument: the argument is absent from the cited source. Any
-further attempt to close this `sorry` by following that citation will find nothing to follow, and
-would need to import the model-graph construction from the deferred references instead. -/
-lemma branchSatisfiableIn_s4FC_ancestor_redirect
-    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
-    (h : branchSatisfiableIn s4FC b acc)
-    {src a : WorldIndex}
-    (hanc : acc.hasEdge a src = true)
-    (hboxback : ∀ ψ, (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-        (⟨.pos, ψ, a⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
-    (hdianeg : ∀ ψ, (⟨.neg, .diamond ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-        (⟨.neg, ψ, a⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
-    branchSatisfiableIn s4FC b (acc.addEdge src a) := by
-  obtain ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, hb⟩ := h
-  by_cases hdirect : m.r (f src) (f a)
-  · -- The ambient witness already relates the two points: no model change needed.
-    refine ⟨W, m, f, ⟨hrefl, htrans⟩, ?_, hb⟩
-    intro u u' hedge
-    rcases hasEdge_addEdge_cases hedge with ⟨rfl, rfl⟩ | hold
-    · exact hdirect
-    · exact hedges u u' hold
-  · -- General case: `m.r` must be extended to relate `f src`, `f a`. Since `IsTrans` binds the
-    -- concrete relation, the extension must be closed transitively, which (per the module
-    -- comment above) requires controlling box/diamond content at every ambient predecessor of
-    -- `f src` -- not just at `src` itself. `hboxback`/`hdianeg` only speak about `src`, so this
-    -- case is not dischargeable from the stated (standalone, driver-independent) hypotheses.
-    -- This is the recorded [BLOCKED] obstruction (see the lemma's docstring above).
-    sorry
-
 /-! ### Propagation-Adequacy Invariant (S4-Keyed)
 
 The S4-keyed ordered driver's loop guard (`LoopChecking.lean`'s `blockingWorldS4Keyed`) can add a
@@ -5296,12 +5202,12 @@ below); ancestor-only blocking; the origin-edge revision.
 
 ### The standalone redirect lemma was refuted, not merely left unproven
 
-A fourth route was attempted and recorded in this file as
-`branchSatisfiableIn_s4FC_ancestor_redirect`: the claim that `branchSatisfiableIn s4FC b acc`,
-`acc.hasEdge a src`, and hypotheses propagating box-positive/diamond-negative content from `src`
-to `a` alone (`hboxback`/`hdianeg`) suffice for `branchSatisfiableIn s4FC b (acc.addEdge src a)`.
-This is **not** an open conjecture: it is **false**, witnessed by an explicit three-world
-countermodel, and the lemma was deleted rather than left as a standing `sorry`.
+A fourth route was attempted, as a standalone ancestor-redirect decision-gate lemma (since
+deleted): the claim that `branchSatisfiableIn s4FC b acc`, `acc.hasEdge a src`, and hypotheses
+propagating box-positive/diamond-negative content from `src` to `a` alone
+(`hboxback`/`hdianeg`) suffice for `branchSatisfiableIn s4FC b (acc.addEdge src a)`. This is
+**not** an open conjecture: it is **false**, witnessed by an explicit three-world countermodel,
+and the lemma was deleted rather than left as a standing `sorry`.
 
 - **The statement is false.** Countermodel: `acc = {0→1, 2→1}`, `b = [T(□p)@0, F(p)@2]`, redirect
   `src = 1`, `a = 2`. `hboxback`/`hdianeg` hold vacuously (no box-positive/diamond-negative

@@ -11,12 +11,12 @@ public meta import Cslib.Logics.Modal.Tableau.FrameSoundness
 
 /-! # Ancestor-Redirect Refutation
 
-Executable regression witness that the STATEMENT of the (now-deleted)
-`branchSatisfiableIn_s4FC_ancestor_redirect` lemma was **false**, not merely unprovable from the
-given hypotheses. `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`'s `accPinnedBy` module comment
-records the route decision this witness backs: the lemma was deleted because its statement is
-refutable, and the soundness obligation it served is discharged sorry-free by
-`branchSatisfiableIn_s4FC_addEdge_of_blocked` and the `S4RedirectSoundInv` family.
+Executable regression witness that the STATEMENT of the deleted standalone, driver-independent
+ancestor-redirect decision-gate lemma (formerly declared in `FrameSoundness.lean`; see that
+file's `accPinnedBy` module comment) was **false**, not merely unprovable from the given
+hypotheses. That module comment records the route decision this witness backs: the lemma was
+deleted because its statement is refutable, and the soundness obligation it served is discharged
+sorry-free by `branchSatisfiableIn_s4FC_addEdge_of_blocked` and the `S4RedirectSoundInv` family.
 
 ## The refuted statement
 

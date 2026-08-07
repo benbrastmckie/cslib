@@ -356,7 +356,22 @@ contains exactly one declaration before deleting.
 
 ---
 
-### Phase 5: Regenerate the Axiom Census Baseline [NOT STARTED]
+### Phase 5: Regenerate the Axiom Census Baseline [COMPLETED]
+
+**Phase Record**: `bash scripts/check-axiom-census.sh --update` → "Baseline updated: 42 tainted
+declaration(s)." Confirmed `Cslib.Logic.Modal.Tableau.branchSatisfiableIn_s4FC_ancestor_redirect`
+row is gone. File total: 58 → 57 lines; sorryAx-tainted data rows: 43 → 42 — exactly one row
+removed, matching the Phase 1 baseline and the Scope Hypothesis exactly. `bash
+scripts/check-axiom-census.sh` (no flag): exit 0, "42 (baseline: 42)".
+
+**Incidental non-compared metadata change, noted for the record**: `git diff` also shows the
+`reason` (column 3) for the already-tainted, unrelated row
+`Cslib.Logic.PL.openBranch_countermodel` changed from `Cslib.Logic.PL.truthLemma` to `direct`.
+The baseline file's own header states columns 2/3 are "D1 debt-ledger metadata ... NOT compared:
+a changed reason for an already-tainted declaration never fails this check, only a name entering
+or leaving the tainted set does." This is expected, benign regeneration drift, not scope creep
+from this task's deletion — the tainted *name set* changed by exactly one row (the target), as
+required.
 
 **Goal**: Bring the `sorryAx`-tainted exact-set ratchet in line with the deletion, by
 regeneration rather than hand-editing.

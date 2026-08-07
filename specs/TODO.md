@@ -1,5 +1,5 @@
 ---
-next_project_number: 591
+next_project_number: 598
 ---
 
 # TODO
@@ -11,9 +11,10 @@ next_project_number: 591
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,583,588,589,590 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,506,537,548,551,571,576 | 36,37,181,425,511,554,568 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300 | 39,40,506 | foundations, modal logic |
+| 1 | 36,37,181,400,409,425,511,534,554,568,569,583,588,589,590,592,594,596,597 | -- | propositional logic, modal logic, tableau infrastructure, ... |
+| 2 | 39,40,215,301,450,497,506,537,548,551,571,576,591,595 | 36,37,181,425,511,554,568,592,594,597 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,593 | 39,40,506,591 | foundations, propositional logic, modal logic |
+| 4 | 375 | 593 | propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -23,10 +24,13 @@ next_project_number: 591
 
 ### Propositional Logic
 
-375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
+592 [NOT STARTED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
+  └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
+    └─ 593 [NOT STARTED] — Restate and discharge the three propositional tableau completenes
+      └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
@@ -41,6 +45,10 @@ next_project_number: 591
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
+
+### Tableau Infrastructure
+
+597 [NOT STARTED] — DECISION TASK, deliberately sequenced BEFORE the remaining-cube-c
 
 ### Temporal Logic
 
@@ -68,7 +76,195 @@ next_project_number: 591
 
 589 [NOT STARTED] — Fix repo-wide unusedArguments lint findings across the Lean sourc
 
+### Agent System
+
+594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
+  └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
+596 [NOT STARTED] — Realign specs/ROADMAP.md with verified repository state. Created 
+
 ## Tasks
+
+### 597. Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Tableau Infrastructure
+- **Dependencies**: None
+
+**Description**: DECISION TASK, deliberately sequenced BEFORE the remaining-cube-corners decidability task. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding M1).
+
+THE SITUATION (measured 2026-08-07): Cslib/Logics/Modal/Tableau/ is 44,692 lines across 32 files -- 19% of the 236,442-line library. The generic abstraction, `RuleApplicationSpec` (GenericDriver.lean, 553 lines, 11 fields), covers the K-style finite-catalog counting termination regime ONLY. Two further regimes each received a bespoke parallel implementation:
+- K-style counting: GenericDriver.lean + Saturation.lean + FmpMeasure.lean, ~4,632 lines
+- S4 loop-checking: LoopChecking.lean + S4/*.lean (11 modules), ~10,900 lines
+- Universal-cluster propagation: S5Simplification.lean (2,331) + FiveSimplification.lean (3,802), 6,133 lines
+
+The modules document their own duplication. S5Simplification.lean's header says it instantiates the generic driver "mirroring the B-system build (FrameRules.lean/BDriver.lean) declaration-for-declaration". FiveSimplification.lean's header says it is "the 5/KB5 analogue of S5Simplification.lean's modalApplyOneS5w" whose mint arms are "shape-identical to modalApplyOneS5w's *except* for the Route (a) root-aware guard", and then enumerates precisely which lemmas carry over verbatim and which do not.
+
+WHY NOW: task 548 proposes adding 8 more cube corners (D, K4, K45, D4, D5, D45, DB, TB) and its own description spans all three regimes -- "transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules". At the current per-system rate that roughly doubles the subtree. The architectural decision is cheap now and expensive after.
+
+THE QUESTION: can one abstraction span the three termination regimes -- e.g. by generalising `RuleApplicationSpec` over the termination measure rather than fixing the K-style counting measure -- or is the per-regime split the correct steady state? Establish this against the ACTUAL proof scripts that would have to be re-cut, not against type signatures alone. The Chronicle consolidation failed at exactly this point: the types generalised but downstream rcases/simp behaviour broke, and a design that type-checks was not evidence. Do not repeat that mistake.
+
+BINDING PRIOR CONSTRAINTS -- honour them: the abstraction decision record (specs/archive/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md) recorded D7 as BINDING: "no lift into Foundations/; de-duplication precedes every abstraction change", and D5 accepted the Seam-2 module table only AS PROVISIONAL, "subject to re-cutting before any split". Note that record's sign-off block was never signed (annotated 2026-08-07 as superseded-by-execution) -- its verdicts were all ACCEPT and the work shipped, but treat the record as evidence rather than as an authority that was formally ratified.
+
+REPORTING CONTRACT: deliver either (a) a concrete abstraction with a phase-sized implementation sketch and an honest cost in re-cut proof sites, or (b) a reasoned finding that the per-regime split is correct and the cube expansion should proceed as-is. (b) is a valid and useful deliverable -- do not manufacture a refactor to avoid it. Either way, state explicitly what the expansion task should do.
+
+RESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. Implementation, if any, is a follow-on.
+
+---
+
+### 596. Correct ROADMAP.md's stale cleanup agenda and fold in the 20 unrepresented open tasks
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: Agent System
+- **Dependencies**: None
+
+**Description**: Realign specs/ROADMAP.md with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H4-H5).
+
+WHAT IS ALREADY CORRECT -- do not disturb it: the quantitative core reproduces exactly against the tree. The 27/23/4/0 sorry census (ROADMAP.md:146-149), the 15-system grid, the 24 subsumption theorems in InterSystem/AxiomSubsumption.lean, and the count of 6 `instDecidable*Valid` instances were all re-verified on 2026-08-07 and are accurate, reflecting the reconciliation commit 26644732.
+
+(1) SECTION B "ABSTRACTION & REDUNDANCY CLEANUP" (:165-176) IS 4/5 STALE. It is presented as the current priority but four of its five rows are completed-and-archived work:
+- :167 lists the modal tableau refactor programme as outstanding; ALL EIGHT of its tracked tasks are terminal in the archive (one expanded; the rest completed).
+- :167 states "`LoopChecking.lean` alone is 10,723 lines / 230 declarations". Actual: 1,626 lines / 20 declarations -- off by 6.6x. The split already shipped, into eleven Modal/Tableau/S4/*.lean modules (BirthKey, Driver, Guard, Hintikka, HintikkaInvariant, Invariant, InvariantAcc, InvariantKeys, Redirect, Universe). The CHANGE_LOG records the pre-split size as 11,393/241, so 10,723/230 was never accurate either.
+- :167 lists the `Boneyard/` quarantine as pending; Boneyard/ exists with README.md + ModalTableauS4Keyed.
+- :170 marks Foundations/Logic/Tableau/Blocking.lean "(new)"; it exists at 202 lines with `Branch.typeAt`, `containmentBlocked`, `distinctTypes_le_pow`, `strictChain_le_card`.
+- :171 lists proof-style simplification as lower-priority outstanding; both its tracked tasks are completed and archived.
+Move all five rows to Completed and correct the LoopChecking figure.
+
+(2) FURTHER FALSIFIED CLAIMS: :175 says BXCanonical has "14 sorries" -- actual 13 (ChronicleToCountermodel.lean 12 + Frame.lean 1). :157 attributes 23 sorries to three tasks, but ownership is actually split 13 / 9 / 1, and the 9 (Bundle/SuccRelation.lean 7 + Bundle/UntilSinceCoherence.lean 2, the strict Until/Since gap) belong to a task never named on the roadmap; it also double-counts the row at :158. :153 gates S4 decidability on a task that is completed. :155's tracking chain is 4/5 archived. :183 says the shared completeness infrastructure was "folded into" the Chronicle consolidation, but that closed as a DESCOPED PARTIAL with Phases 3b/3c/4a/4b formally abandoned and ~89% Chronicle duplication remaining -- the obligation was not absorbed; open task 41 still holds it and task 568 was created because the consolidation did not deliver it. :114 attributes all six decidability instances to FrameCompleteness.lean when K actually lives at CompletenessLoop.lean:2295.
+
+(3) TWENTY OF THIRTY OPEN TASKS HAVE NO ROADMAP PRESENCE. The largest omission is 548: :114 presents modal decidability as essentially delivered while 9 of the 15 cube corners (D, K4, K45, D4, D5, D45, DB, TB, and pure-K5) have no Decidable instance. Also absent: 537/551/554 (the CS5 stream -- and the "Completed" CS5 row at :130 is contradicted by Labelled/Soundness.lean:20, which states "The general `nik_TS5_soundness` is not yet landed"); 301/425 (temporal tableau, while :122 lists Temporal "tableau" as completed); 571; 568/569; 576; 39/40/41; 181; 400/497/409 (the entire propositional upstream stream); 588/589/590.
+
+(4) APPLY THE FIX THE PRIOR AUDIT ALREADY RECOMMENDED. specs/ROADMAP-alignment-audit.md:79 recommended adding a "Modal Tableau Decidability" section and was never applied. Add it, and give the CS5, temporal-tableau and propositional-upstream streams sections of their own.
+
+(5) RESOLVE OR TRACK THE SELF-DECLARED GAP at :173-176: "Open decision (no task yet)" on whether to complete BXCanonical/dense or abandon it in favour of the algebraic pipeline. Either create the task or record the decision.
+
+CONSTRAINT: documentation only. No .lean file may be edited. Every numeric claim added or retained must be re-verified against the tree at execution time, not copied from this description -- these figures are dated 2026-08-07 and the tree moves.
+
+---
+
+### 595. Add a dependency-integrity validation gate so task-graph staleness cannot recur silently
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: Agent System
+- **Dependencies**: Task 594
+
+**Description**: Build the validation gate that would have caught the task-graph findings automatically. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding H5 and recommendation 3).
+
+WHY THIS EXISTS -- the loop is not closing: specs/ROADMAP-alignment-audit.md:15 ALREADY recorded "the dependency graph is materially broken" with "one circular edge, five edges pointing at archived tasks, and a recurring completed-but-doesn't-unblock pattern that makes several [blocked] labels stale". Its recommendations were never applied, and on 2026-08-07 the same findings recurred at roughly three times the scale: 37 stale edges, 6 stale-blocked tasks, 20 tasks absent from the roadmap. A one-time cleanup (the reconciliation metatask) will regress again without a gate. There is no dependency-integrity check anywhere in .claude/scripts/ today.
+
+CHECKS TO IMPLEMENT (each must exit non-zero with an actionable message):
+(A) STALE BLOCK -- any task with status `blocked` whose dependencies are all satisfied (completed/abandoned in either specs/state.json or specs/archive/state.json) AND which carries no `blocked_reason`. This is the check that would have caught all six.
+(B) DANGLING EDGE -- any dependency naming a task number absent from both the active and archived sets.
+(C) CYCLE -- any directed cycle in the dependency graph. The prior audit found a 512<->517 cycle; none exists today, so this check guards a real historical failure mode.
+(D) PROSE/STATUS DISAGREEMENT -- any task whose description contains "BLOCKED" while its status is not `blocked`, or the converse. Currently fires on 497 and 548.
+(E) HUSK -- any task whose entire remaining scope is delegated to a single dependent task, surfaced as a warning rather than a failure (this one needs human judgement; 506 is the worked example).
+
+CRITICAL SCOPING CONSTRAINT -- READ BEFORE STARTING: this repository has NO `agent-system/` source store. Verified 2026-08-07: only two files under `.claude/` are git-tracked, and .claude/rules/source-store-deploy-boundary.md states that `.claude/**` is a disposable deploy artifact regenerated from `agent-system/extensions/**`. A script written into `.claude/scripts/` HERE will be silently wiped by the next deployment. The script must therefore be authored in the upstream source store repository that owns `agent-system/extensions/core/scripts/`, then deployed. FIRST STEP: locate that source store and confirm the correct write target. If it cannot be located, land the checker under this repository's own root-level `scripts/` directory (which IS tracked and IS the home of check-axiom-census.sh, check-sorry-suppressions.sh, check-shake-residue.sh and the other project gates) and record the deviation -- do NOT write into `.claude/scripts/` and call it done.
+
+WIRING: follow the existing project-gate convention in scripts/ and add it to the same gate set the other check-*.sh scripts belong to. Include a self-test with fixture inputs, matching the pattern used by check-runtime-file-tracking.sh (which uses synthetic `000_probe` / `sess_0000000000_probe` fixtures).
+
+SEQUENCING: the reconciliation metatask performs the one-time cleanup; this task prevents recurrence. Running this gate against the pre-cleanup state should reproduce all six stale-blocked findings -- use that as the acceptance test.
+
+---
+
+### 594. Metatask: reconcile all open task records against verified repository state
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: Agent System
+- **Dependencies**: None
+
+**Description**: METATASK. Bring all open task records in specs/state.json into agreement with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H1-H3, M4) at explicit user request for a metatask covering revisions to incomplete tasks.
+
+EVERY ITEM BELOW WAS VERIFIED ON 2026-08-07. Re-verify before acting -- do not act on this list blind.
+
+(1) SIX TASKS MARKED [BLOCKED] HAVE ZERO UNMET DEPENDENCIES. Resolving each edge against specs/state.json and specs/archive/state.json: 511, 554, 568, 583, 409, 37. specs/TODO.md's generated wave table places 511/554/568/583/409 in Wave 1 ("no active dependencies") while the tree entries immediately below render them [BLOCKED] -- the file contradicts itself within one section. Set 511, 554 and 568 to not_started (554's own description says its research is COMPLETE and the remaining work is "LAND NOW (mechanical, no research risk)"). Unblocking 511 and 554 cascades to release 506, 300, 537 and 551.
+
+(2) CLOSE 583 AS SUPERSEDED. Its target `intExpandBranches_openBranch_sat` was restated per its own SCOPE and is now SORRY-FREE at Scheme.lean:6806. Its cited lines are stale: :2583/:2623/:2598-2622 today hold `intUniverseExt_length_le`, `mem_intUniverseExt_of` and neighbours, with no sorry in that region. Its own VERIFY BEFORE STARTING clause mandates this: "if the divergence repair has already restated the lemma, close this task as superseded rather than duplicating the work."
+
+(3) CLOSE 506 AS EXPANDED/PARTIAL AND RE-POINT 300. 506 landed Phases 1-7 green (zero sorry/axiom) and its entire remaining scope IS 511. The graph currently reads 300 -> 506 -> 511, so the umbrella cannot close until an empty intermediate does. Record 506's landed phases in its completion summary, then set 300's dependencies to [511].
+
+(4) THIRTY-SEVEN DEPENDENCY EDGES POINT AT ARCHIVED TASKS. generate-task-order.sh silently treats these as satisfied, which is exactly what makes the staleness invisible. Retarget or drop each. Known live retargets: 375's dependency on archived 317 should become [593] (its real gate is the propositional tableau sorries); 548's dependencies should add [597] (the driver-abstraction decision must precede its 8-corner expansion).
+
+(5) ADD A `blocked_reason` FIELD. There is currently no way to distinguish a genuine external gate from stale graph state. Genuine external gates to record: 37 ("upstream BimodalLogic continuous frame development, not started upstream"), 497 ("external PR leanprover/cslib#607 not yet merged"), 409 ("parked behind an explicit trigger condition, not a dependency"). Note 497 and 548 currently say "BLOCKED" in their description prose while carrying status not_started -- the prose and the status disagree in both directions across the task set.
+
+(6) REFRESH STALE DESCRIPTION TEXT. 375 names only the CPL and IPL TFAEs when `mplProofSystemsTfae` now also exists in ProofSystemEquivalence.lean; 571 qualifies its line numbers with "as of"; 548 says "BLOCKED on 511/535 landing" while 535 is archived.
+
+(7) REWRITE `active_goal`. Handled directly by the review that created this task -- verify it still reads correctly and reflects any status changes made above.
+
+CONSTRAINT: this task changes task METADATA only. No .lean file may be created, edited or deleted. All state.json writes go through .claude/scripts/state-write.sh (the single mutex-guarded writer); regenerate TODO.md via generate-todo.sh afterwards, never by hand.
+
+---
+
+### 593. Restate the three propositional tableau completeness theorems to a provable form
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 591, Task 592
+
+**Description**: Restate and discharge the three propositional tableau completeness sorries that cannot be closed by proof effort. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C1); gated on the disposition decision and the evidentiary repair.
+
+THE THREE SITES:
+- DP-3: `intuitionisticTableau_complete`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:150, sorry at :161
+- DP-4: `minimalTableau_complete`, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:144, sorry at :155
+- DP-5: `truthLemma`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:689, sorry at :760 (the `T(phi' -> psi')` implication case)
+
+WHY RESTATEMENT AND NOT PROOF: all three are annotated in-source as PERMANENTLY DEFERRED / unprovable AT THE CURRENT STATEMENT. This is not a proof-effort obligation. DP-4 additionally needs TWO upward-closure premises (the valuation's AND `minBranchBotForces b`'s, a separate fact at the `bot` formula shape) where only one is supplied.
+
+THE PRECEDENT TO FOLLOW -- this route is already proven in this very file: `intExpandBranches_openBranch_sat` was in exactly this position (a refuted `fuel = 0` base case with a Lean-verified counter-instance) and was successfully repaired by the R1 restatement, which added `hUniv`/`hNW`/`hFuel` preconditions (plus `hLBS`/`hWH`/`hWHC`/`hNC`). It is now SORRY-FREE at Scheme.lean:6806, and its `fuel = 0` arm is discharged via `hFuel` giving `intWork ... < 0`, absurd by `omega`. The counter-instance comment survives near :6796 and :6980-6995 as the durable record of why the R1 hypotheses exist. Apply the same discipline: find the precondition that makes the statement true, add it, repair call sites, discharge.
+
+SCOPE: (a) consume the disposition verdict -- if the `exists edges` conjunct is TRUE, discharge directly and correct the PERMANENTLY DEFERRED annotations; if FALSE, derive the strengthened statements; (b) restate all three theorems; (c) repair every call site; (d) discharge all three sorries; (e) update the docstrings so they describe the landed statement rather than the abandoned one.
+
+CONSTRAINT: the restated theorems must still be strong enough for the TFAE-fold task (folding the tableau nodes into `cplProofSystemsTfae` / `iplProofSystemsTfae` / `mplProofSystemsTfae` in Cslib/Logics/Propositional/ProofSystemEquivalence.lean). A restatement that discharges the sorry but is too weak to serve the TFAE has not solved the problem -- verify the TFAE instantiation type-checks before declaring completion.
+
+Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry count drops from 4 to 0.
+
+---
+
+### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses that DO NOT EXIST in the repository. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C3).
+
+THE DEFECT (verified 2026-08-07): there is no `scratch/` directory at the repository root, and none of these files exist:
+- `scratch/BetaSplitRefutation.lean` -- 10 citations. Load-bearing for DP-3, DP-4 and DP-5: cited as the machine-verified counterexample at `phiRef1` refuting augmented-frame positive-formula persistence, and separately for `reportMin phiRef1 realFuel` / `minBranchesAgree = true` establishing DP-4's refutation INDEPENDENTLY of DP-3.
+- `scratch/HvalidShapeRefutation.lean` -- 3 citations. Cited as refuting the OLD `hvalid` premise shape (`IValid (p -> (q -> p))` holds while the old premise body is false at a non-upward-closed witness valuation). This one justifies a statement-shape change that ALREADY LANDED, so its absence is a documentation defect rather than a live gate.
+- `scratch/PersistPrototype.lean` -- 1 citation.
+
+WHY THIS MATTERS: three sorries are annotated "PERMANENTLY DEFERRED -- unprovable as stated ... terminal deferral, not an unfinished step. No follow-up is scheduled" on the authority of these files. Three permanent abandonment decisions currently rest on evidence nobody can open. If the refutations are correct the deferrals are sound but unauditable; if any is wrong, work has been permanently abandoned in error. Neither can be determined today.
+
+ESTABLISHED REMEDY -- follow it: this repository already promotes out-of-tree countermodels into compiling regression tests. See `CslibTests/AncestorRedirectRefutation.lean` and `CslibTests/S4LoopGuardRegression.lean`. The CS5 pair-seed task's description mandates the same pattern for its own probe ("Land probe_refute_disjunctionProperty as a regression test so the unconditioned form can never be reintroduced"). The out-of-tree S4 probe task does this for the six S4 probes; nothing covers the propositional ones.
+
+SCOPE: (1) attempt recovery of the three files from git history and from any out-of-tree location; (2) for each RECOVERED witness, reconstruct it as a compiling `CslibTests/` module and repoint the citing comments at the in-tree path; (3) for each IRRECOVERABLE witness, either re-derive the counterexample from the surviving prose description or -- if it cannot be re-derived -- DOWNGRADE the annotations it supports from "refuted / PERMANENTLY DEFERRED" to "[UNVERIFIED], evidence lost", which is the honest state. Do not leave a terminal-deferral claim standing on a missing file.
+
+EXPECTED OUTPUT: `phiRef1` and the `hvalid`-shape counterexample compiling in CslibTests/, all 14 citations repointed, sorry census unchanged. Zero new sorries, zero new axioms.
+
+SEQUENCING: this is the prerequisite for the disposition-decision task, which cannot be made responsibly against absent evidence.
+
+---
+
+### 591. Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 592
+
+**Description**: DECISION TASK. Resolve the single open decision point that gates the entire propositional tableau completeness chain. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C2) because NO open task owned this obligation.
+
+THE DECISION: `openBranch_countermodel` (Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7862, sorry at :7937) asserts an upward-closure conjunct for `intExtractValuation b` along the augmented `intAccessPreorder edges` frame. The in-source annotation states verbatim that this is "DISPOSITION UNDECIDED, gated on an open decision point -- do NOT read as REFUTED" and that "Resolving this needs a machine-checked confirmation or explicit human sign-off". Upward-closure is machine-verified to FAIL at `phiRef1`; what is [UNVERIFIED] is the step from that failure to falsity of the `exists edges` conjunct (the existential quantifies over edge sets, so one failing witness does not settle it).
+
+WHY THIS IS THE ROOT: both DP-3 (Intuitionistic/Completeness.lean:161) and DP-4 (Minimal/Completeness.lean:155) name this conjunct as the reason they are marked PERMANENTLY DEFERRED. DP-5 (Scheme.lean:760) shares the same augmented-edge persistence question. One decision determines all four sorries.
+
+SCOPE: determine, by machine-checked argument, whether the `exists edges` conjunct is (a) TRUE -- some edge set does give upward closure, in which case DP-3/DP-4 become dischargeable and the PERMANENTLY DEFERRED annotations are wrong and must be corrected; or (b) FALSE -- no edge set works, in which case the deferrals are sound but the completeness theorems must be RESTATED (see the restatement task) rather than left as terminal sorries.
+
+PREREQUISITE: the evidentiary-repair task must land first, or run concurrently -- the existing refutation evidence (scratch/BetaSplitRefutation.lean) is CITED BUT ABSENT from the repository, so the current evidentiary basis cannot be inspected. Do not re-derive from the prose annotations alone.
+
+DELIVERABLE: a machine-checked verdict plus the corrected in-source annotations at all four sites. A negative result (route (b)) is a valid and complete deliverable -- do not manufacture a proof to avoid it. Zero new sorries, zero new axioms.
+
+DO NOT: discharge DP-3 by `exact h Nat (intExtractValuation _b) _huc 0`. The source records that this type-checks but only launders the undecided conjunct through the file without resolving it.
+
+---
 
 ### 590. Reestablish out of tree probe verdicts
 - **Status**: [NOT STARTED]
@@ -227,7 +423,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 511, Task 535
+- **Dependencies**: Task 511, Task 535, Task 597
 
 **Description**: COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidability instances exist for only 6 of the 15 modal-cube systems: K (Tableau/CompletenessLoop.lean:2295), T (FrameCompleteness.lean:1318), KB (:1933), S5 (:2429), K5/Five (:3220), KB5 (:4165); S4 is in flight (tasks 506/511/535 own the loop-checking termination). The 8 remaining corners — D, K4, K45, D4, D5, D45, DB, TB — have sorry-free soundness + strong completeness + compactness + conservative extension but NO Valid predicate, no tableau driver, and no Decidable instance: the decidability column of the cube is ragged. Work (BLOCKED on 511/535 landing the S4 termination machinery): extend the generic tableau driver to the remaining corners — transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules. Where filtration/FMP is cheaper than loop-checking for a given corner, route via FMP instead. Acceptance: either a Decidable instance per corner, or an explicit documented out-of-scope note per corner stating why (e.g. cost/benefit), so the matrix is intentionally complete rather than accidentally ragged. Zero sorry, zero new axioms; keep all frozen deliverables from 300/534/506 untouched.
 
@@ -379,7 +575,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 317
+- **Dependencies**: Task 593
 
 **Description**: Fold the TABLEAU decision systems into the propositional proof-system TFAE. RECONCILED: the sequent edges are ALREADY done - Cslib/Logics/Propositional/ProofSystemEquivalence.lean has cplProofSystemsTfae (Hilbert/ND/LK) and iplProofSystemsTfae (Hilbert/ND/LJ). REMAINING: add the tableau nodes to both TFAEs, wiring Propositional/Tableau/{Classical,Intuitionistic,Minimal}/Completeness.lean into the equivalence. Depends on task 317 (propositional tableau completeness) landing its remaining sorries.
 

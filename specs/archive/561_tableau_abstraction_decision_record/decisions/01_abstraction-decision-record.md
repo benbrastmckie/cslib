@@ -639,7 +639,26 @@ no abstraction decision.
 
 | Field | Value |
 |---|---|
-| Reviewed by | _pending_ |
-| Date | _pending_ |
-| Outcome | _pending_ — ACCEPTED / ACCEPTED WITH AMENDMENTS / REJECTED |
-| Amendments | _pending_ |
+| Reviewed by | _never signed_ — see the superseded-by-execution note below |
+| Date | _never signed_ |
+| Outcome | _never signed_ — ACCEPTED / ACCEPTED WITH AMENDMENTS / REJECTED |
+| Amendments | _never signed_ |
+
+> **SUPERSEDED BY EXECUTION** (recorded 2026-08-07 by codebase review).
+>
+> This sign-off block was never completed, yet all six gated tasks (562, 563, 564, 565, 566, 567)
+> were executed and are archived `completed`. The paragraph above stating that they "remain gated"
+> is therefore **false as of this annotation** and is retained only as the record of what the gate
+> was intended to require.
+>
+> Realised risk is nil: every verdict in the §12 table above is an ACCEPT, so the work that shipped
+> is the work an ACCEPTED sign-off would have authorised. Nothing here needs to be undone, and this
+> annotation is not a retroactive approval — it records that the gate did not operate.
+>
+> The gap is procedural: a record that declares itself a blocking review gate has no mechanism
+> enforcing it, and autonomous orchestration cannot obtain a human signature. The same programme
+> demonstrates the working alternative — task 564 explicitly deferred a sub-decision on the grounds
+> that it "would require explicit user sign-off not obtainable under autonomous orchestration."
+> That deferral pattern is what a future gate of this kind should use: state the requirement at the
+> point of the individual decision, where an agent will encounter and honour it, rather than in a
+> terminal block of a document the gated tasks never re-read.

@@ -1,7 +1,7 @@
 {
   "_schema_version": "1.0.0",
   "_comment": "Review state tracking",
-  "_last_updated": "2026-07-28T17:14:32Z",
+  "_last_updated": "2026-08-07T00:00:00Z",
   "reviews": [
     {
       "review_id": "review-20260608",
@@ -287,12 +287,35 @@
       },
       "tasks_created": [],
       "registries_updated": []
+    },
+    {
+      "review_id": "review-2026-08-07",
+      "date": "2026-08-07",
+      "scope": "propositional and modal logic completion path; task-graph and roadmap infrastructure",
+      "report_path": "specs/reviews/review-2026-08-07.md",
+      "summary": {
+        "files_reviewed": 700,
+        "critical_issues": 3,
+        "high_issues": 5,
+        "medium_issues": 4,
+        "low_issues": 2
+      },
+      "tasks_created": [
+        591,
+        592,
+        593,
+        594,
+        595,
+        596,
+        597
+      ],
+      "registries_updated": []
     }
   ],
   "statistics": {
-    "total_reviews": 17,
-    "last_review": "2026-07-28",
-    "total_issues_found": 127,
-    "total_tasks_created": 27
+    "total_reviews": 18,
+    "last_review": "2026-08-07",
+    "total_issues_found": 141,
+    "total_tasks_created": 34
   }
 }

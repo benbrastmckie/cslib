@@ -1,5 +1,5 @@
 ---
-next_project_number: 590
+next_project_number: 591
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 590
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,583,588,589 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,583,588,589,590 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,506,537,548,551,571,576 | 36,37,181,425,511,554,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300 | 39,40,506 | foundations, modal logic |
 
@@ -40,6 +40,7 @@ next_project_number: 590
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
+590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
 
 ### Temporal Logic
 
@@ -68,6 +69,16 @@ next_project_number: 590
 589 [NOT STARTED] — Fix repo-wide unusedArguments lint findings across the Lean sourc
 
 ## Tasks
+
+### 590. Reestablish out of tree probe verdicts
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Re-establish the six out-of-tree probe verdicts under a dedicated multi-hour budget: s4probe.lean, s4boxed.lean, s4ancestor.lean, s4subtractive.lean, s4subtractive2.lean, s4subtractive3.lean. These probes are expensive to run and their recorded verdicts have drifted from the current tree. Two specific record defects must be corrected as part of this work, folded in here rather than tracked separately because re-running the probes supersedes them: (a) the S4 loop-guard report 01 describes an s4probe.lean harness from a superseded revision -- eight identifiers it names (dfsR, classify, statsL, badL, hasCountermodel, notS4Valid, def sat, def isS4) have zero matches in the current on-disk file; (b) s4subtractive3.lean carries pre-split LoopChecking.lean:NNNN line citations that no longer resolve -- the declarations still exist under the same names in S4/Hintikka.lean, S4/HintikkaInvariant.lean and S4/Driver.lean, so these should be replaced with declaration names rather than re-numbered. If the multi-hour re-run budget never materialises, split (a) and (b) out as a standalone documentation-only task: they have independent value as a stopgap, because the stale records actively mislead every reader until corrected.
+
+---
 
 ### 589. Repo wide unusedarguments lint hygiene
 - **Status**: [NOT STARTED]

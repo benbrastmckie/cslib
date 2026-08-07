@@ -1,6 +1,16 @@
 {
-  "next_project_number": 590,
+  "next_project_number": 591,
   "active_projects": [
+    {
+      "project_number": 590,
+      "project_name": "reestablish_out_of_tree_probe_verdicts",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Re-establish the six out-of-tree probe verdicts under a dedicated multi-hour budget: s4probe.lean, s4boxed.lean, s4ancestor.lean, s4subtractive.lean, s4subtractive2.lean, s4subtractive3.lean. These probes are expensive to run and their recorded verdicts have drifted from the current tree. Two specific record defects must be corrected as part of this work, folded in here rather than tracked separately because re-running the probes supersedes them: (a) the S4 loop-guard report 01 describes an s4probe.lean harness from a superseded revision -- eight identifiers it names (dfsR, classify, statsL, badL, hasCountermodel, notS4Valid, def sat, def isS4) have zero matches in the current on-disk file; (b) s4subtractive3.lean carries pre-split LoopChecking.lean:NNNN line citations that no longer resolve -- the declarations still exist under the same names in S4/Hintikka.lean, S4/HintikkaInvariant.lean and S4/Driver.lean, so these should be replaced with declaration names rather than re-numbered. If the multi-hour re-run budget never materialises, split (a) and (b) out as a standalone documentation-only task: they have independent value as a stopgap, because the stale records actively mislead every reader until corrected.",
+      "topic": "Modal Logic",
+      "created": "2026-08-07T08:03:17Z",
+      "last_updated": "2026-08-07T08:03:17Z"
+    },
     {
       "project_number": 589,
       "project_name": "repo_wide_unusedarguments_lint_hygiene",

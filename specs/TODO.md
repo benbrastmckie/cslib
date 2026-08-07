@@ -1,5 +1,5 @@
 ---
-next_project_number: 588
+next_project_number: 590
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 588
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,583 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,375,400,409,425,511,534,554,568,569,583,588,589 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,506,537,548,551,571,576 | 36,37,181,425,511,554,568 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300 | 39,40,506 | foundations, modal logic |
 
@@ -39,6 +39,7 @@ next_project_number: 588
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
+588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
 
 ### Temporal Logic
 
@@ -62,7 +63,31 @@ next_project_number: 588
 568 [BLOCKED] — [Follow-on created by the blocked-task review, at explicit user r
   └─ 576 [NOT STARTED] — Resolve the `namespace Chronicle` / `structure Chronicle` NAME CO
 
+### Code Hygiene
+
+589 [NOT STARTED] — Fix repo-wide unusedArguments lint findings across the Lean sourc
+
 ## Tasks
+
+### 589. Repo wide unusedarguments lint hygiene
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Fix repo-wide unusedArguments lint findings across the Lean sources: 145 sites in 27 modules, 10 of them in Cslib/Logics/Modal/Tableau/. The uniform pattern is an unused [Hashable Atom] (or analogous) section-level instance binder; the idiomatic fix is `omit [Hashable Atom] in` before the affected block. Distinct from the existing blanket file-scoped lint-suppression ratchet: these are live lint findings, not suppressions, so the ratchet baseline does not cover them.
+
+---
+
+### 588. Tableau import reachability duplicate families
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Resolve the five import-reachability duplicate families in Cslib/Logics/Modal/Tableau/: accFreshInv_append, hasEdge_addEdge_mono, modalApplyOne_boxPos_acc_eq, modalApplyOne_diamondNeg_acc_eq, not_shape_of_not_or. These are privacy-caused duplicates that de-privatization alone cannot resolve: three consumer files cannot reach Soundness.lean where the largest family originates. This is a module-graph problem (new Support module or import restructure), not a statement-equivalence adjudication. The Support-module extraction audit supplies no verdict bearing on these, and the duplicate-family adjudication that followed it explicitly left this class untouched.
+
+---
 
 ### 583. Restate intexpandbranches openbranch sat
 - **Status**: [BLOCKED]

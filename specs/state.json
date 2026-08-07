@@ -1,6 +1,26 @@
 {
-  "next_project_number": 588,
+  "next_project_number": 590,
   "active_projects": [
+    {
+      "project_number": 589,
+      "project_name": "repo_wide_unusedarguments_lint_hygiene",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Fix repo-wide unusedArguments lint findings across the Lean sources: 145 sites in 27 modules, 10 of them in Cslib/Logics/Modal/Tableau/. The uniform pattern is an unused [Hashable Atom] (or analogous) section-level instance binder; the idiomatic fix is `omit [Hashable Atom] in` before the affected block. Distinct from the existing blanket file-scoped lint-suppression ratchet: these are live lint findings, not suppressions, so the ratchet baseline does not cover them.",
+      "topic": "Code Hygiene",
+      "created": "2026-08-07T08:01:26Z",
+      "last_updated": "2026-08-07T08:01:26Z"
+    },
+    {
+      "project_number": 588,
+      "project_name": "tableau_import_reachability_duplicate_families",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Resolve the five import-reachability duplicate families in Cslib/Logics/Modal/Tableau/: accFreshInv_append, hasEdge_addEdge_mono, modalApplyOne_boxPos_acc_eq, modalApplyOne_diamondNeg_acc_eq, not_shape_of_not_or. These are privacy-caused duplicates that de-privatization alone cannot resolve: three consumer files cannot reach Soundness.lean where the largest family originates. This is a module-graph problem (new Support module or import restructure), not a statement-equivalence adjudication. The Support-module extraction audit supplies no verdict bearing on these, and the duplicate-family adjudication that followed it explicitly left this class untouched.",
+      "topic": "Modal Logic",
+      "created": "2026-08-07T08:01:17Z",
+      "last_updated": "2026-08-07T08:01:17Z"
+    },
     {
       "project_number": 583,
       "project_name": "restate_intexpandbranches_openbranch_sat",

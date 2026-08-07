@@ -515,7 +515,58 @@ Task-number citations are permitted here — this is the `specs/**` tree.
 
 ---
 
-### Phase 8: Full Gate and Route Record [NOT STARTED]
+### Phase 8: Full Gate and Route Record [COMPLETED]
+
+**Phase Record**: Full gate run (`lake exe cache get`: already warm, no-op).
+
+- `lake build --wfail --iofail` (whole project, full re-elaboration confirmed by files' fresh
+  mtimes from Phases 3-4 edits): exit 1 (expected — Propositional's 4 bare sorries pre-date this
+  task and already redden `--wfail`, per README's own documented reason). `declaration uses
+  'sorry'` warning set: exactly **4**, all in
+  `Cslib/Logics/Propositional/Tableau/{Intuitionistic/Completeness.lean:150,
+  Intuitionistic/Scheme.lean:689+7862, Minimal/Completeness.lean:144}` — zero in
+  `Cslib/Logics/Modal/Tableau/` (down from Phase 1's 1, `FrameSoundness.lean:1227`) and zero
+  new anywhere. All non-sorry warnings in the log (lint-style notes in `FrameCompleteness.lean`,
+  `S4/Driver.lean`) are confined to files this task's cumulative diff never touches (confirmed
+  by `git diff --stat` against those two files returning empty) — pre-existing, unrelated
+  noise, not new warnings from this task.
+- `lake test`: exit 0.
+- `bash scripts/check-axiom-census.sh`: exit 0, "42 (baseline: 42)".
+- Remaining honesty gates, all exit 0 at or better than Phase 1 baseline:
+  `check-sorry-suppressions.sh` ("markers: 18 (ceiling 18); sorries: 27 (ceiling 28)" —
+  improved), `check-shake-residue.sh` ("12 (baseline: 12)"), `check-lint-suppressions.sh`
+  ("19 (ceiling 19)"), `check-boneyard-quarantine.sh` (all five invariants hold).
+- `FrameSoundness.lean` confirmed to contain no code-position `sorry` (the only `\bsorry\b`
+  hits remaining are prose: "sorry-free", "standing `sorry`" — historical/descriptive, not
+  tactic usage).
+- Additional CI-pipeline steps (this agent's own required gate, beyond the plan's explicit
+  list): `lake exe checkInitImports` exit 0; `lake lint` — the only warnings in touched files
+  (`FrameSoundness.lean`) are pre-existing "unused argument" findings on declarations this task
+  never edited (outside both edit ranges), and none of the 7 mandatory lint-prevention
+  categories (docBlame, defLemma, defsWithUnderscore, simpNF, unusedSectionVars, topNamespace,
+  dupNamespace) fire on any touched file; `lake exe lint-style` exit 0, zero findings in touched
+  files; `lake shake --add-public --keep-implied --keep-prefix` — 12 flagged files, none of them
+  this task's touched files, matching the shake-residue baseline exactly; `lake exe mk_all
+  --module` — "No update necessary" (no new `Cslib/` files added; `CslibTests.lean` was updated
+  manually in Phase 2 per plan instruction, not via `mk_all`, since `CslibTests.lean` is
+  hand-maintained, not `mk_all`-generated).
+- Cumulative diff (`git diff --stat` across all seven phase commits): exactly the plan's
+  predicted touch set —
+  `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (140 lines changed: deletion + comment
+  relocation/reword only), `Cslib/Logics/Modal/Tableau/README.md` (16 lines), `CslibTests.lean`
+  (+1 line), `CslibTests/AncestorRedirectRefutation.lean` (new, 150 lines),
+  `scripts/axiom-census-baseline.txt` (3 lines), `specs/ROADMAP.md` (10 lines), and task 566's
+  summary (40 lines) — no path outside this set, no other proof/definition/theorem statement
+  altered.
+- Final repo-wide `ancestor_redirect` sweep (live tree, excluding `specs/**`): confirms zero
+  remaining assertions of a Modal/Tableau sorry or of the deleted lemma as extant.
+
+**Route recorded**: **(c) DELETE.** `branchSatisfiableIn_s4FC_ancestor_redirect` was deleted
+because its statement is false — a machine-checked three-world countermodel ships as an
+executable `CslibTests/` regression test (`RefuteAncestorRedirect.statement_is_false`) — and the
+soundness obligation it attempted is discharged sorry-free by
+`branchSatisfiableIn_s4FC_addEdge_of_blocked` and the `S4RedirectSoundInv` family. Modal/Tableau
+now has **0** code-position sorries; the repository has **27** (down from 28).
 
 **Goal**: Demonstrate every clause of the definition of done against the Phase 1 baselines, and
 record the route in the commit.

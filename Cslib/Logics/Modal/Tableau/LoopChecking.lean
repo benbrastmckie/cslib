@@ -2067,6 +2067,147 @@ theorem modalExpandBranchesS4Keyed_openBranch_initial_mem
                     · exact hAll_p b' (by simp [hbt]))
                   bR aR hinner
 
+/-! ## Ordered Groundwork: Keyed-Driver Initial-Branch Membership Persistence -/
+
+/-- **Ordered-driver form of `modalExpandBranchesS4Keyed_openBranch_initial_mem`.** Mirrors
+`modalExpandBranchesGen_openBranch_initial_mem` (`CompletenessLoop.lean`) for the ordered driver
+`modalExpandBranchesS4KeyedOrdered` -- needed since that driver is not an instance of
+`modalExpandBranchesGen`, so the generic lemma does not apply directly. Consumed by
+`modalTableauS4KeyedOrdered_complete` (`FrameCompleteness.lean`) to recover `F(φ0)@0 ∈ b` from
+the final open branch. Uses `modalStepBranchS4KeyedOrdered_branch_superset` (old branch content
+survives into every child) in place of the generic `modalStepBranchGen_mem_preserved`, and
+Phase 2's relocated `modalStepBranchS4KeyedOrdered_newExps_eq_map` for the length-matching
+step. -/
+theorem modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem
+    (φ₀ : Proposition Atom) (fuel : Nat)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility)
+      (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom)))),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      keyss.length = branches.length →
+      (∀ b₀ ∈ branches, sf ∈ b₀) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesS4KeyedOrdered φ₀ branches expandedSets accs keyss fuel =
+          .openBranch bR aR →
+        sf ∈ bR := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs keyss _hlen _hlenA _hlenK hAll bR aR h
+    simp only [modalExpandBranchesS4KeyedOrdered] at h
+    cases hfs : (branches.zip accs).findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | none => simp only [hfs] at h; exact absurd h (by simp)
+    | some p =>
+      obtain ⟨pb, pa⟩ := p
+      simp only [hfs] at h
+      injection h with hp1 hp2
+      obtain ⟨q, hqmem, hf⟩ := List.exists_of_findSome?_eq_some hfs
+      obtain ⟨qb, qa⟩ := q
+      simp only [] at hf
+      by_cases hcl : isModalClosed qb = true
+      · rw [if_pos hcl] at hf
+        exact absurd hf (by simp)
+      · rw [if_neg hcl] at hf
+        have hq0mem : qb ∈ branches := (List.of_mem_zip hqmem).1
+        have hqp : (qb, qa) = (pb, pa) := Option.some.inj hf
+        have hqfst : qb = bR := by
+          have : qb = pb := congrArg Prod.fst hqp
+          rw [this]; exact hp1
+        rw [hqfst] at hq0mem
+        exact hAll bR hq0mem
+  | succ fuel' ih =>
+    intro branches expandedSets accs keyss hlen hlenA hlenK hAll bR aR h
+    simp only [modalExpandBranchesS4KeyedOrdered] at h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (pendingKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility)
+        (doneKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom)))),
+        pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
+        pendingKeys.length = pending.length →
+        doneExp.length = done.length →
+        doneAccs.length = done.length →
+        doneKeys.length = done.length →
+        (∀ bp ∈ pending, sf ∈ bp) →
+        (∀ bd ∈ done, sf ∈ bd) →
+        modalExpandBranchesS4KeyedOrdered.processNext φ₀ fuel' pending pendingExp pendingAccs
+            pendingKeys done doneExp doneAccs doneKeys = .openBranch bR aR →
+        sf ∈ bR from
+      key branches expandedSets accs keyss [] [] [] [] hlen hlenA hlenK rfl rfl rfl hAll (by simp)
+        (by simpa [modalExpandBranchesS4KeyedOrdered] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys
+        _ _ _ _ _ _ _ _ hinner
+      simp [modalExpandBranchesS4KeyedOrdered.processNext] at hinner
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs pendingKeys done doneExp doneAccs doneKeys
+        hlength_p hlenP_accs hlenP_keys hdlength hdAccs hdKeys hAll_p hAll_d hinner
+      cases pendingAccs with
+      | nil => simp at hlenP_accs
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hlength_p
+        | cons e es =>
+          cases pendingKeys with
+          | nil => simp at hlenP_keys
+          | cons k restKs =>
+            simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p
+            simp only [List.length_cons, Nat.add_right_cancel_iff] at hlenP_accs
+            simp only [List.length_cons, Nat.add_right_cancel_iff] at hlenP_keys
+            simp only [modalExpandBranchesS4KeyedOrdered.processNext] at hinner
+            by_cases hcl : isModalClosed bh = true
+            · rw [if_pos hcl] at hinner
+              have hAll_bt : ∀ bp ∈ bt, sf ∈ bp := fun bp hbp => hAll_p bp (by simp [hbp])
+              have hAll_done_bh : ∀ bd ∈ done ++ [bh], sf ∈ bd := by
+                intro bd hbd
+                simp only [List.mem_append, List.mem_singleton] at hbd
+                rcases hbd with hd | heq
+                · exact hAll_d bd hd
+                · subst heq; exact hAll_p bd (by simp)
+              exact ih_inner es restAs restKs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+                (doneKeys ++ [k]) hlength_p hlenP_accs hlenP_keys
+                (by simp [hdlength]) (by simp [hdAccs]) (by simp [hdKeys])
+                hAll_bt hAll_done_bh hinner
+            · simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [hcl])] at hinner
+              cases hstep : modalStepBranchS4KeyedOrdered φ₀ bh e a k with
+              | none =>
+                rw [hstep] at hinner
+                have hbeq : bh = bR ∧ a = aR := by cases hinner; exact ⟨rfl, rfl⟩
+                exact hbeq.1 ▸ hAll_p bh (by simp)
+              | some step =>
+                obtain ⟨newBs, newExps, newAcc, keys'⟩ := step
+                rw [hstep] at hinner
+                have hbh_sf : sf ∈ bh := hAll_p bh (by simp)
+                have hNewBs_sf : ∀ b' ∈ newBs, sf ∈ b' :=
+                  fun b' hb' => modalStepBranchS4KeyedOrdered_branch_superset φ₀ bh e a k newBs
+                    newExps newAcc keys' hstep b' hb' sf hbh_sf
+                have hLenNBE : newExps.length = newBs.length := by
+                  obtain ⟨newExp, hEq⟩ :=
+                    modalStepBranchS4KeyedOrdered_newExps_eq_map φ₀ bh e a k newBs newExps newAcc
+                      keys' hstep
+                  simp [hEq]
+                exact ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
+                  (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                  (doneKeys ++ List.replicate newBs.length keys' ++ restKs)
+                  (by simp [hdlength, hlength_p, hLenNBE])
+                  (by simp [hdAccs, hlenP_accs])
+                  (by simp [hdKeys, hlenP_keys])
+                  (fun b' hb'_mem => by
+                    simp only [List.mem_append] at hb'_mem
+                    rcases hb'_mem with (hd | hn) | hbt
+                    · exact hAll_d b' hd
+                    · exact hNewBs_sf b' hn
+                    · exact hAll_p b' (by simp [hbt]))
+                  bR aR hinner
+
 end Cslib.Logic.Modal.Tableau
 
 end

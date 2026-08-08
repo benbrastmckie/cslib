@@ -314,7 +314,7 @@ and must be reported, not silently absorbed.
 
 ---
 
-### Phase 4: `modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem` [NOT STARTED]
+### Phase 4: `modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem` [COMPLETED]
 
 **Goal**: Structural port of `modalExpandBranchesS4Keyed_openBranch_initial_mem`
 (`LoopChecking.lean:1495`) to the ordered driver — the `F(φ₀)@0 ∈ b` initial-membership fact that

@@ -1,0 +1,107 @@
+{
+  "status": "partial",
+  "skeleton": false,
+  "revised_after": "task 511 research (specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md, 2026-08-08), which supersedes that task's earlier .orchestrator-handoff.json. Three conclusions changed materially and one finding was added; superseded positions are stated in the report rather than silently replaced.",
+  "summary": "Decision research complete. Deliverable class (b) with a scoped exception: the per-regime split is the correct steady state, and the expansion should be re-tranched for a reason other than duplication. FINDING 1 -- the abstraction the task hypothesised ALREADY EXISTS and is instantiated at four systems: AuxStepPreserved/AuxBounds/ModalLoopInvHintikka/modalExpandBranchesHintikka (CompletenessLoop.lean:230-430, :1410) factors the world-bound conjunct out of the loop invariant into an opaque step-preserved Aux predicate so K's rank/potential argument and S5w's tag-cardinality argument share one structure (ModalLoopAuxK, ModalLoopAuxS5w, ModalLoopAuxFive, ModalLoopAuxKb5''). Regimes 1 and 3 are already spanned by one abstraction; that premise in the task description is out of date. Two machine-checked refutations (modalApplyOneS5_rankStep_not_dischargeable; the R7 fuel-domination refutation) show unification under a single CONCRETE measure was never available. FINDING 2 -- the state-threading generalisation also already exists (RuleApplySt ladder, Saturation.lean:493-758, tasks 562/564) with a live consumer bridged via modalExpandBranchesGenSt_eq_S4Keyed. FINDING 3 -- pushing further has been MEASURED and is negative: task 564 measured destructive redefinition of the bespoke S4 steppers as generic instantiations at net +80 lines across 40 proof sites, because those sites depend on the definitional SHAPE of the steppers. This is the Chronicle failure mode instrumented in this subsystem with a number attached. FINDING 4 (revised) -- the expansion gate is that S4 is not yet finished (soundness proven for the ordered driver, completeness for the keyed one; modalTableauS4Keyed_sound is FALSE with a machine-checked countermodel; no instDecidableS4Valid) -- but per task 511's re-verification this is a bounded ~580-line six-item four-phase within-file port against already-landed ordered lemmas, independent of any abstraction decision. The K4/D4 gate is real but LIGHT and already unblocked. FINDING 5 (new) -- rule-application ORDER is soundness-critical: the unsoundness was repaired by changing WHEN a minting shape may fire (settled-context scheduling), not the guard predicate. So a traversal abstraction is unsound-by-construction unless it carries the ordering obligation, since the schedule it would make instantiable is one for which soundness is machine-checked false. This downgrades the traversal rung from 'small and on the critical path' to 'optional and larger than sized', and supplies the strongest POSITIVE argument for the split: the ordered driver could only be built because the bespoke path let scheduling change independently of the guard predicate; a shared traversal abstraction would have obstructed the repair that made S4 sound. No .lean file created, moved, or edited.",
+  "phases_completed": 0,
+  "phases_total": 0,
+  "sorry_inventory": [],
+  "blockers": [],
+  "measurements": {
+    "head": "5ea7152c",
+    "tableau_lines": 44692,
+    "tableau_files": 32,
+    "library_lines": 236442,
+    "library_files": 700,
+    "tableau_share_pct": 18.9,
+    "subsystem_declarations": 1133,
+    "tagged_per_system_lines": 27928,
+    "tagged_per_system_declarations": 628,
+    "shared_infrastructure_lines": 14238,
+    "shared_infrastructure_declarations": 505,
+    "cross_system_skeletons_ge2": 104,
+    "declarations_in_those_skeletons": 330,
+    "per_corner_cost_lines": {
+      "T": 1796,
+      "B": 1627,
+      "S5_plus_S5w": 3776,
+      "Five_plus_FiveProp": 3553,
+      "Kb5_family": 3636,
+      "S4_family": 13540
+    },
+    "clone_similarity": {
+      "Kb5''_from_Five": {"twin_pairs": 38, "lines": "1390 vs 1429", "median": 0.85, "above_0_90": 10},
+      "Five_from_S5w": {"twin_pairs": 16, "lines": "706 vs 782", "median": 0.63, "above_0_90": 0},
+      "S4KeyedOrdered_from_S4_unordered": {"twin_pairs": 14, "lines": "1881 vs 1920, 3801 combined", "median": 0.73, "note": "NEW, measured after task 511 flagged it. Intra-regime duplication -- the price of the scheduling change, not of a missing cross-regime abstraction. Largest single concrete duplication cost found. Task 511 will add 2 more ~250-line twins."}
+    },
+    "decidability_matrix": {
+      "K": true, "T": true, "B": true, "S5": true, "Five_K5": true, "KB5": true, "S4": false
+    },
+    "all_figures_from_task_description_reproduced_at_head": true,
+    "lake_build_run_by_this_task": false,
+    "build_facts_adopted_from_task_511": [
+      "lake build Cslib.Logics.Modal.Tableau.FrameCompleteness green (910 jobs)",
+      "lake build Cslib.Logics.Modal.Tableau.LoopChecking green (876 jobs)",
+      "lean_verify modalTableauS4KeyedOrdered_sound -> empty axiom list",
+      "modalStepBranchS4KeyedOrdered_none_saturated probed green as a one-line transfer, then reverted"
+    ]
+  },
+  "recommendation": {
+    "verdict": "per-regime split is correct steady state; do NOT build a new driver-level abstraction; re-tranche the 8-corner expansion",
+    "actions_in_order": [
+      "Finish S4 to the six-corner standard -- the six-item, ~580-line, four-phase port. Depends on NOTHING in this report; task 511 is already unblocked to do it. Until it lands there is no Tier-C template.",
+      "Prototype the universal-cluster rule combinator on exactly ONE pair (Kb5''-from-Five) and MEASURE the re-cut proof sites before generalising to three. Gate the Tier-B corners on that measurement, not on the design's plausibility."
+    ],
+    "actions_are_independent": true,
+    "do_not_do_yet": [
+      "The stepper/traversal rung. NOT on the critical path (S4's port runs against already-landed ordered lemmas), and a sound-by-construction version costs more than the ~155 lines task 564 sized, because it must carry the settled-context ordering obligation. Revisit only if a second scheduling regime appears."
+    ],
+    "rejected": [
+      "Destructive redefinition of bespoke S4 steppers as generic RuleApplySt instantiations -- measured at +80 lines / 40 proof sites by task 564",
+      "Extending RuleApplicationSpec with per-regime termination evidence -- that design already exists as Aux/ModalLoopInvHintikka/modalExpandBranchesHintikka",
+      "Any lift into Foundations/ -- D7 BINDING; reuse check re-run and confirms nothing there to extend"
+    ],
+    "deferred": [
+      "Joining axis 3 (Aux) to axis 4 (RuleApplySt). Now deferred for three reasons, not two: the +80-line measurement; it is not needed by anything on the critical path; and S4's live per-branch obligation is the S4OrderedFuelInv bundle threaded alongside keys, which no Prop-valued Aux over (b, e, acc) supplies -- so the join would be strictly larger than the arity edit first described, with no consumer asking for it."
+    ],
+    "changed_from_first_draft": "The traversal rung was action 1 and S4 completion was presented as depending on it. Both were wrong. S4 completion is independent and is now action 1; the rung is optional and re-costed upward."
+  },
+  "expansion_task_guidance": {
+    "do_not": "treat task 548's eight corners as one workstream",
+    "tranche_ungated_proceed_now": ["TB", "D", "DB"],
+    "tranche_gated_on_combinator_prototype": ["K45", "D5", "D45"],
+    "tranche_gated_on_S4_completion": ["K4", "D4"],
+    "tier_c_warning": "K4/D4 must be templated on the ORDERED stack only, AFTER the LoopChecking.lean:188-189 retirement of the unordered stack -- not on the current two-stack state. The S4 cluster currently carries two parallel stepper stacks at a measured 3,801 lines across 14 twin pairs; cloning it twice would replicate the retirement debt as well as the machinery. That retirement belongs to the expansion's sequencing, not to task 511, which correctly holds it out of scope.",
+    "caveat": "The tier assignment for the NEW corners is an assessment from frame conditions plus existing templates, not a measurement. The load-bearing part is the K4/D4 gate, which follows from transitivity alone (GenericDriver.lean:127-130 records that transitive box propagation falsifies rankStep). The K45/D45/D5 Tier-B placement rests on those being rooted-cluster logics addressable by the FiveSimplification technique -- plausible from that file's own references but NOT verified here."
+  },
+  "task_511_relationship": {
+    "status": "task 511 is UNBLOCKED with its own verified four-phase plan; this report's earlier retarget advice is WITHDRAWN",
+    "agreements_reached_independently": [
+      "Route (b) is moot for closing S4, and partly landed anyway as the RuleApplySt ladder",
+      "The soundness/completeness split across two drivers is real; the unordered keyed driver's soundness is FALSE, not merely unproven",
+      "No further driver abstraction is worth building on S4's account"
+    ],
+    "where_511_corrects_this_report": [
+      "Remaining S4 work is a bounded ~580-line six-item four-phase port, not a heavy precondition",
+      "The traversal rung is NOT needed to close S4's completeness -- the port runs against already-landed ordered lemmas"
+    ],
+    "what_this_report_contributes_back": "The ordering discipline task 511's Phase 2-3 ports depend on is the soundness-carrying content of the ordered driver, not a scheduling detail -- which is why a shared traversal abstraction would have obstructed rather than helped. And the two-stack duplication (3,801 lines / 14 twin pairs, plus the 2 more ~250-line twins its own phases add) is the argument for sequencing the unordered-stack retirement BEFORE K4/D4 are templated on this cluster."
+  },
+  "continuation_context": {
+    "report_path": "specs/597_modal_tableau_driver_abstraction_decision/reports/01_driver-abstraction-decision.md",
+    "files_modified": [
+      "specs/597_modal_tableau_driver_abstraction_decision/reports/01_driver-abstraction-decision.md",
+      "specs/597_modal_tableau_driver_abstraction_decision/.orchestrator-handoff.json",
+      "specs/597_modal_tableau_driver_abstraction_decision/.return-meta.json"
+    ],
+    "lean_files_modified_this_dispatch": [],
+    "next_action_hint": "This is a decision task; the deliverable is the report. Do NOT /plan 597 -- the two recommended actions are separate tasks with different owners, not phases of one plan: action 1 is task 511's existing scope (already unblocked, do not duplicate it), and action 2 is a new prototype task scoped to S5Simplification.lean + FiveSimplification.lean. Prefer /spawn for action 2. Task 548's description should be revised per expansion_task_guidance before it is researched."
+  },
+  "artifacts": [
+    {
+      "path": "specs/597_modal_tableau_driver_abstraction_decision/reports/01_driver-abstraction-decision.md",
+      "type": "report",
+      "summary": "12-section decision report, revised after task 511's research landed. HEAD re-measurement (all task-description figures reproduce exactly); the five-axis abstraction map (four landed, one missing); what actually varies across the three regimes; a quantitative duplication census (per-system line attribution, cross-system skeleton census, three clone-similarity families including the new intra-S4 3,801-line measurement); blast-radius counts; the S4 status matrix with its bounded remaining scope; the new order-is-soundness-critical finding and its constraint on abstraction design; six costed candidate designs with verdicts; the recommendation; per-tranche expansion guidance; the task 511 relationship; constraint compliance; and an explicit limits section marking which build facts are adopted rather than reproduced."
+    }
+  ]
+}

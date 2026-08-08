@@ -49,7 +49,7 @@ next_project_number: 598
 
 ### Tableau Infrastructure
 
-597 [RESEARCHING] — DECISION TASK, deliberately sequenced BEFORE the remaining-cube-c
+597 [RESEARCHED] — DECISION TASK, deliberately sequenced BEFORE the remaining-cube-c
 
 ### Temporal Logic
 
@@ -86,10 +86,11 @@ next_project_number: 598
 ## Tasks
 
 ### 597. Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: None
+- **Research**: [597_modal_tableau_driver_abstraction_decision/reports/01_driver-abstraction-decision.md]
 
 **Description**: DECISION TASK, deliberately sequenced BEFORE the remaining-cube-corners decidability task. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding M1).
 

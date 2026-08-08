@@ -1,0 +1,33 @@
+{
+  "status": "partial",
+  "started_at": "2026-08-08T00:00:00Z",
+  "completed_at": "2026-08-08T00:00:00Z",
+  "requires_user_review": true,
+  "artifacts": [
+    {
+      "path": "specs/597_modal_tableau_driver_abstraction_decision/reports/01_driver-abstraction-decision.md",
+      "type": "report",
+      "summary": "Driver abstraction decision evidence and recommendation (deliverable class (b) with a scoped exception)."
+    },
+    {
+      "path": "specs/597_modal_tableau_driver_abstraction_decision/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Orchestrator handoff with measurements, recommendation, expansion-task guidance, and task 511 guidance."
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_delivered_revised",
+    "details": "Decision research delivered as a report, then revised after task 511's research landed and superseded that task's earlier handoff. Three conclusions changed materially (S4's remaining scope is bounded not heavy; the traversal rung is optional not critical-path; task 511's retarget advice withdrawn) and one finding was added (rule-application order is soundness-critical, constraining any abstraction over scheduling). Status is 'partial' rather than terminal because the deliverable is a recommendation requiring user acceptance, and because the two follow-on actions are separate tasks with different owners, deliberately not planned here. No .lean file was created, moved, or edited."
+  },
+  "metadata": {
+    "session_id": "sess_1786219370_0903ea_597",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "head": "5ea7152c",
+    "lean_files_modified": [],
+    "lake_build_run": false,
+    "sorry_introduced": 0,
+    "axioms_introduced": 0
+  }
+}

@@ -1097,15 +1097,22 @@
     {
       "project_number": 597,
       "project_name": "modal_tableau_driver_abstraction_decision",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Tableau Infrastructure",
       "title": "Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion",
       "description": "DECISION TASK, deliberately sequenced BEFORE the remaining-cube-corners decidability task. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding M1).\n\nTHE SITUATION (measured 2026-08-07): Cslib/Logics/Modal/Tableau/ is 44,692 lines across 32 files -- 19% of the 236,442-line library. The generic abstraction, `RuleApplicationSpec` (GenericDriver.lean, 553 lines, 11 fields), covers the K-style finite-catalog counting termination regime ONLY. Two further regimes each received a bespoke parallel implementation:\n- K-style counting: GenericDriver.lean + Saturation.lean + FmpMeasure.lean, ~4,632 lines\n- S4 loop-checking: LoopChecking.lean + S4/*.lean (11 modules), ~10,900 lines\n- Universal-cluster propagation: S5Simplification.lean (2,331) + FiveSimplification.lean (3,802), 6,133 lines\n\nThe modules document their own duplication. S5Simplification.lean's header says it instantiates the generic driver \"mirroring the B-system build (FrameRules.lean/BDriver.lean) declaration-for-declaration\". FiveSimplification.lean's header says it is \"the 5/KB5 analogue of S5Simplification.lean's modalApplyOneS5w\" whose mint arms are \"shape-identical to modalApplyOneS5w's *except* for the Route (a) root-aware guard\", and then enumerates precisely which lemmas carry over verbatim and which do not.\n\nWHY NOW: task 548 proposes adding 8 more cube corners (D, K4, K45, D4, D5, D45, DB, TB) and its own description spans all three regimes -- \"transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules\". At the current per-system rate that roughly doubles the subtree. The architectural decision is cheap now and expensive after.\n\nTHE QUESTION: can one abstraction span the three termination regimes -- e.g. by generalising `RuleApplicationSpec` over the termination measure rather than fixing the K-style counting measure -- or is the per-regime split the correct steady state? Establish this against the ACTUAL proof scripts that would have to be re-cut, not against type signatures alone. The Chronicle consolidation failed at exactly this point: the types generalised but downstream rcases/simp behaviour broke, and a design that type-checks was not evidence. Do not repeat that mistake.\n\nBINDING PRIOR CONSTRAINTS -- honour them: the abstraction decision record (specs/archive/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md) recorded D7 as BINDING: \"no lift into Foundations/; de-duplication precedes every abstraction change\", and D5 accepted the Seam-2 module table only AS PROVISIONAL, \"subject to re-cutting before any split\". Note that record's sign-off block was never signed (annotated 2026-08-07 as superseded-by-execution) -- its verdicts were all ACCEPT and the work shipped, but treat the record as evidence rather than as an authority that was formally ratified.\n\nREPORTING CONTRACT: deliver either (a) a concrete abstraction with a phase-sized implementation sketch and an honest cost in re-cut proof sites, or (b) a reasoned finding that the per-regime split is correct and the cube expansion should proceed as-is. (b) is a valid and useful deliverable -- do not manufacture a refactor to avoid it. Either way, state explicitly what the expansion task should do.\n\nRESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. Implementation, if any, is a follow-on.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-08T20:05:33Z",
-      "session_id": "sess_1786219370_0903ea"
+      "last_updated": "2026-08-08T20:26:31Z",
+      "session_id": "sess_1786219370_0903ea",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/597_modal_tableau_driver_abstraction_decision/reports/01_driver-abstraction-decision.md",
+          "summary": "12-section decision report: keep the per-regime split; the hypothesised abstraction already exists at four systems; order-is-soundness-critical constrains any traversal abstraction"
+        }
+      ]
     }
   ],
   "repository_health": {

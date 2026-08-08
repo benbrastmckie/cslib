@@ -36,7 +36,7 @@ next_project_number: 598
 
 ### Modal Logic
 
-511 [RESEARCHING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [RESEARCHED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
@@ -478,7 +478,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586
@@ -486,6 +486,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Research**:
   - [511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md]
   - [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]
+  - [511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md]
 - **Summary**: [511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md]
 - **Handoff**: [511_s4_loop_checking_termination/handoffs/02_phase5-keylowerbd-fact-closed.md]
 

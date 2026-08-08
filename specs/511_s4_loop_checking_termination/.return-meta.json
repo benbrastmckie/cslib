@@ -1,18 +1,30 @@
 {
   "status": "researched",
+  "started_at": "2026-08-08T00:00:00Z",
   "artifacts": [
     {
+      "path": "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
       "type": "report",
-      "path": "specs/511_s4_loop_checking_termination/reports/02_spawn-analysis.md",
-      "summary": "Blocker analysis: task 511 Phase 7 driver/shadow-invariant mismatch (modalStepBranchS4Keyed vs modalTableauS4/modalApplyOneS4), one spawned follow-on task proposed"
+      "summary": "HEAD re-verification of the task 511 Phase 7 driver-mismatch blocker: the blocker no longer holds; the ordered keyed driver landed by task 553 resolves it; route (a) recommended with a four-phase shape and one lemma probed green."
     }
   ],
-  "next_steps": "Skill postflight will create tasks from .spawn-return.json (already applied directly: task 535 created, task 511 dependencies wired to [535], state.json + TODO.md updated)",
-  "proposed_task_count": 1,
+  "partial_progress": {
+    "stage": "research_written",
+    "details": "Report and orchestrator handoff written. Working tree contains no Lean source changes (probe reverted, git diff Cslib/ clean)."
+  },
   "metadata": {
-    "session_id": "sess_1784409549_3ce61d",
-    "agent_type": "spawn-agent",
-    "delegation_depth": 3,
-    "delegation_path": ["orchestrator", "spawn", "skill-spawn", "spawn-agent"]
+    "session_id": "sess_1786219370_0903ea_511",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "head_commit": "5ea7152c",
+    "verification": [
+      "lake build Cslib.Logics.Modal.Tableau.FrameCompleteness -- green, 910 jobs, exit 0",
+      "lake build Cslib.Logics.Modal.Tableau.LoopChecking -- green, 876 jobs (with temporary probe lemma; probe reverted)",
+      "sorry census over Cslib/Logics/Modal/Tableau/ -- zero",
+      "lean_verify Cslib.Logic.Modal.Tableau.modalTableauS4KeyedOrdered_sound -- empty axiom list, no sorryAx"
+    ],
+    "blocker_status": "resolved_at_head",
+    "recommended_route": "(a) completed against the ordered keyed driver modalTableauS4KeyedOrdered; NOT (b) framework generalization"
   }
 }

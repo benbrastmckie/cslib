@@ -1,55 +1,41 @@
 {
-  "status": "blocked",
+  "status": "researched",
   "skeleton": false,
-  "summary": "Phase 7 (final phase) attempted: the independent Hintikka-alignment rfl bridge was already landed by a prior dispatch (re-verified clean). A genuine, concrete attempt to close 9-B (wire modalStepBranchS4_worldBound into Decidable (s4Valid phi) fuel sufficiency) surfaced a structural gap not previously documented: the REAL decision procedure modalTableauS4 runs modalApplyOneS4/blockingWorldS4 (a LIVE-relevant-set guard), while S4LoopInv and modalStepBranchS4_worldBound (Phases 4-6) are proven only for the KEYED SHADOW stepper modalStepBranchS4Keyed/blockingWorldS4Keyed (a stable-birth-key guard) -- confirmed directly in modalStepBranchS4_preserves_S4LoopInv's hypothesis, which takes modalStepBranchS4Keyed as its step function, not modalStepBranchS4. Since S4LoopInv.keyLowerBd only gives keys subset-of live relevant sets (not equality), the live-set freshness guarantee blockingWorldS4_none_fresh does not imply keys-freshness -- the world-bound guarantee is proven about a driver modalTableauS4 does not run. Also discovered that task 515 (concurrent/later) already landed a more general Aux-parametrized rank-free top-loop lemma (modalExpandBranchesHintikka, CompletenessLoop.lean) built for S5, which is useful groundwork for the 9-A follow-on but does not by itself close S4 (wrapping keys in an existential Aux does not avoid the same guard-mismatch argument). Marked Phase 7 [BLOCKED] in the plan with this precise finding; recommend spawning the 9-A follow-on task with this sharpened scope. No sorry/axiom/vacuous placeholder introduced. Phases 1-6 (the original task 506 Phase 8 world-bound deliverable) remain a valid, self-contained, fully sorry-free artifact regardless of Phase 7's outcome. Both lake build Cslib.Logics.Modal.Tableau.LoopChecking and .FrameCompleteness green; lean_verify clean on all re-checked lemmas.",
-  "phases_completed": 6,
-  "phases_total": 7,
+  "summary": "Re-verified the recorded Phase 7 blocker against HEAD (5ea7152c). THE BLOCKER NO LONGER HOLDS, and it was not resolved by either route the prior handoff anticipated. Route (a) -- a bespoke S4 keyed top-level driver -- is ~85% landed by the dependencies: modalExpandBranchesS4Keyed/modalTableauS4Keyed AND a successor ordered pair modalExpandBranchesS4KeyedOrdered/modalTableauS4KeyedOrdered both exist with full processNext fuel inductions. The soundness re-verification the handoff flagged as unverified has been done and its answer inverted the plan: soundness is FALSE for the unordered keyed driver (machine-checked counterexample in CslibTests/S4LoopGuardRegression.lean, documented at FrameCompleteness.lean:4088-4104, two independent defects: birth-key staleness and unrestricted redirect reachability), and TRUE AND PROVED for the ordered driver (modalTableauS4KeyedOrdered_sound, FrameCompleteness.lean:8234, concluding genuine unweakened s4Valid; lean_verify returns an EMPTY axiom list). The repair was scheduling (settled-context: non-minting candidates first, minting only once no non-minting rule can fire) rather than a change to the guard predicate. Route (b) (generalizing RuleApply to thread opaque per-branch state) is moot for closing S4 and partly landed anyway as task 564's RuleApplySt ladder. What remains is a bounded ~580-line port: (1) modalStepBranchS4KeyedOrdered_none_saturated -- PROBED GREEN THIS DISPATCH as a one-liner via modalStepBranchS4KeyedOrdered_eq_none_iff, lake build 876/876 exit 0, then reverted; (2) relocate modalStepBranchS4KeyedOrdered_newExps_eq_map from FrameCompleteness.lean:7869 down into LoopChecking.lean (verified pure move, all deps in S4/Driver.lean and public); (3) modalExpandBranchesS4KeyedOrdered_hintikka (~370-line structural port of the landed unordered analogue, simplified by using the already-bundled S4OrderedFuelInv + modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv as the single step lemma); (4) modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem (~135-line port); (5) modalTableauS4KeyedOrdered_complete plus s4Valid_decides/instDecidableS4Valid mirroring kb5Valid_decides/instDecidableKb5Valid (FrameCompleteness.lean:4069-4082). The seed-state S4OrderedFuelInv witness needed by completeness is already assembled verbatim inside modalTableauS4KeyedOrdered_sound. RECOMMENDATION: do NOT re-block; proceed to /plan with the four-phase shape in the report. Tree verified green at HEAD: lake build on FrameCompleteness (910 jobs) and LoopChecking (876 jobs) both exit 0; sorry census over Cslib/Logics/Modal/Tableau/ is zero.",
+  "phases_completed": 0,
+  "phases_total": 0,
   "sorry_inventory": [],
-  "blockers": [
-    {
-      "phase": 7,
-      "what_failed": "Cannot wire modalStepBranchS4_worldBound (Phase 6) into fuel sufficiency for Decidable (s4Valid phi) as a direct application",
-      "what_was_tried": "Traced modalTableauS4's actual definition (modalTableauGen (modalApplyOneS4 phi) phi, guarded by blockingWorldS4) against S4LoopInv/modalStepBranchS4_worldBound's actual proof target (modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed). Confirmed via the theorem signature of modalStepBranchS4_preserves_S4LoopInv (hypothesis is modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4) that the world-bound machinery is proven for a keyed shadow stepper distinct from the real decision procedure. Verified the two guards are not interchangeable: keyLowerBd gives keys subset-of relevantSetFinset (not equality), so blockingWorldS4_none_fresh's live-set freshness contract does not imply keys-freshness -- this is the same class of gap Phase 5's own guard redesign (introducing blockingWorldS4Keyed as a second guard) was built to route around, now re-encountered from the Decidable-instance side. Surveyed task 515's newly-landed Aux-parametrized modalExpandBranchesHintikka (CompletenessLoop.lean, more general than the modalExpandBranchesGen_hintikka this task's research evaluated) and confirmed wrapping keys in an existential Aux does not avoid the mismatch, since AuxStepPreserved would still need the same insufficient live-guard argument.",
-      "root_cause": "modalTableauS4 (the real driver Decidable (s4Valid phi) must run) and modalStepBranchS4Keyed (the driver S4LoopInv/the pigeonhole world bound are proven for) are two distinct stepping functions with two distinct minting guards (blockingWorldS4 live-set-based vs blockingWorldS4Keyed birth-key-based). Phases 4-6 built the termination bound entirely around the keyed shadow driver as a proof-internal construction; no bridge or driver-swap connecting it to the real modalTableauS4 was built (nor was one anticipated with this precision in the plan's original Phase 7 wording, which described 'wire fuel sufficiency from modalStepBranchS4_worldBound' as if it were a direct application).",
-      "what_is_needed": "Either (a) a bespoke S4-specific top-level driver (modalExpandBranchesS4Keyed/modalTableauS4Keyed) built around modalStepBranchS4Keyed with its own full processNext-style fuel induction (RuleApply's fixed-per-call signature cannot thread keys across steps, so the generic modalExpandBranchesGen/modalTableauGen/even the new Aux-parametrized modalExpandBranchesHintikka cannot be reused directly), plus re-verification that soundness (modalTableauS4_sound, task 506) and the truth lemma reconnect against the keyed guard (plausible in principle -- non-minting behavior and blocked-target-has-content contracts agree between the two guards -- but unverified); or (b) generalizing the driver framework itself (RuleApply/Accessibility or a new wrapper) to carry extra opaque per-branch threaded state generically, a materially larger 9-A than originally scoped."
-    }
-  ],
+  "blockers": [],
   "continuation_context": {
-    "plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-    "summary_path": "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
+    "report_path": "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
+    "prior_plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+    "prior_plan_status": "Phases 1-6 landed sorry-free and remain valid; Phase 7 as written targets the wrong driver (modalTableauS4, live-guard) and should be superseded rather than resumed. A new plan is needed, not a resumption.",
     "files_modified": [
-      "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-      "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
-      "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json"
+      "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
+      "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json",
+      "specs/511_s4_loop_checking_termination/.return-meta.json"
     ],
     "lean_files_modified_this_dispatch": [],
-    "phases_landed": [1, 2, 3, 4, 5, 6],
-    "phases_not_attempted": [],
-    "phases_blocked": [7],
-    "is_successor": false,
-    "spawn_recommendation": {
-      "title": "abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)",
-      "scope": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/GenericDriver.lean, and (as the S4-consuming side) Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "shared_with": ["task 505 (B-system)", "task 513"],
-      "brief": "Survey task 515's Aux-parametrized modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka (CompletenessLoop.lean, landed for S5's ModalLoopAuxS5w) first -- it is real, useful groundwork for a state-free termination interface. It will need extending to support threaded per-branch state beyond a Prop-valued Aux (to carry S4's keys : List (WorldIndex x Finset (Sign x Proposition Atom))) before it can close S4's Decidable (s4Valid phi); alternatively, build a bespoke S4-local processNext-style driver directly around the already-landed modalStepBranchS4Keyed/S4LoopInv/modalStepBranchS4_worldBound (Cslib/Logics/Modal/Tableau/LoopChecking.lean, task 511 Phases 4-6, all sorry-free) if the generic extension is judged too invasive. Either resolution must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) and re-verify soundness/the truth lemma reconnect, since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4/blockingWorldS4, not the keyed guard the termination proof is about."
-    },
-    "next_action_hint": "Spawn the task described in spawn_recommendation above (do not inline it into 511 -- Planner Decision 2). Once spawned/landed, task 511 Phase 7 can be resumed by wiring the new interface (or the bespoke driver) against the already-landed, sorry-free Phases 1-6 machinery in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4."
+    "file_scope_correction": "The task's declared file_scope (LoopChecking.lean, FrameCompleteness.lean) is still correct for the remaining work, but note that task 565 split the S4 machinery into ten Cslib/Logics/Modal/Tableau/S4/*.lean modules that LoopChecking.lean now public-imports. The plan should reference S4/Driver.lean, S4/Invariant.lean, S4/HintikkaInvariant.lean, S4/Hintikka.lean, and S4/BirthKey.lean as READ-ONLY sources of already-landed lemmas; no edits to S4/*.lean are anticipated.",
+    "recommended_phases": [
+      "Phase 1 (LoopChecking.lean, ~40 lines): add modalStepBranchS4KeyedOrdered_none_saturated (exact proof text supplied in report section 4, already probed green); relocate modalStepBranchS4KeyedOrdered_newExps_eq_map from FrameCompleteness.lean:7869 into LoopChecking.lean, deleting the original.",
+      "Phase 2 (LoopChecking.lean, ~370 lines): modalExpandBranchesS4KeyedOrdered_hintikka -- structural port of modalExpandBranchesS4Keyed_hintikka (LoopChecking.lean:1134-1493) using S4OrderedFuelInv as the per-index hypothesis. Highest-risk phase, deliberately alone.",
+      "Phase 3 (LoopChecking.lean, ~135 lines): modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem -- structural port of LoopChecking.lean:1495.",
+      "Phase 4 (FrameCompleteness.lean, ~60 lines): modalTableauS4KeyedOrdered_complete, s4Valid_decides, instDecidableS4Valid; update the two stale prose notes at FrameCompleteness.lean:4099-4102 and LoopChecking.lean:151-152 that assert decidability is out of scope."
+    ],
+    "out_of_scope": [
+      "Retiring modalTableauS4Keyed/modalExpandBranchesS4Keyed and their unordered proof stack (LoopChecking.lean:188-189 earmarks this as a separate destructive phase, gated on Phase 4 landing first).",
+      "Retiring the live-guard modalTableauS4 (S4/Driver.lean:219).",
+      "The deliberately-weakened per-step soundness scope note in FrameSoundness.lean (FrameCompleteness.lean:8212-8221)."
+    ],
+    "task_597_flag": "Two findings bear on task 597's driver-abstraction decision without presupposing it: (1) S4's decidability does NOT gate on the abstraction decision -- the remaining work is a within-file port against already-proven ordered lemmas, so 511 should not wait for 597; (2) a cost data point for 597: the bespoke path has produced two parallel S4 driver stacks with ~15 duplicated modalStepBranchS4KeyedOrdered_preserves_* twins of modalStepBranchS4Keyed_preserves_*, and this task adds two more ~250-line structural twins -- but that duplication was cheap precisely because the lemmas were structural copies, and the ordered driver was only buildable because the bespoke path let scheduling change independently of the guard predicate.",
+    "next_action_hint": "Run /plan 511. Do not resume the existing plan's Phase 7; supersede it with a new plan encoding the four phases above. The standing permission to re-block is not needed -- no blocker remains."
   },
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "type": "lean_source",
-      "summary": "No changes this dispatch (already sorry-free from prior dispatches through Phase 6, including the independent Phase 7 rfl bridge modalHintikkaSetS4_eq); re-verified green and axiom-clean."
-    },
-    {
-      "path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-      "type": "plan",
-      "summary": "Phase 7 heading marked [BLOCKED]; task checklist updated; continuation note documents the driver/shadow-invariant mismatch finding and the sharpened 9-A/9-B options."
-    },
-    {
-      "path": "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
-      "type": "summary",
-      "summary": "Rewritten to reflect the final state: Phases 1-6 fully landed sorry-free (closes the original task 506 Phase 8 blocker), Phase 7 blocked with the precise finding and spawn recommendation."
+      "path": "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
+      "type": "report",
+      "summary": "HEAD re-verification of the Phase 7 blocker: blocker resolved by the ordered keyed driver landed by task 553; route (a) recommended with a four-phase shape; one new lemma probed green and reverted."
     }
   ]
 }

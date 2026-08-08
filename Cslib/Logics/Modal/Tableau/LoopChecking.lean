@@ -1137,6 +1137,72 @@ private lemma modalStepBranchS4KeyedOrdered_none_saturated (φ₀ : Proposition 
   modalStepBranchS4Keyed_none_saturated φ₀ b e acc keys
     ((modalStepBranchS4KeyedOrdered_eq_none_iff φ₀ b e acc keys).mp hstep) sf hsfb
 
+/-- **Structural fact**: whenever `modalStepBranchS4KeyedOrdered` steps, the returned `newExps`
+column is CONSTANT across `newBs` -- every one of the four `RuleResult` arms produces `newExps`
+as either a genuine singleton (matching `newBs`'s own singleton) or a `branches.map (fun _ => ...)`
+constant map post-composed with `newBs = branches.map (· ++ b)`, and `List.map_map` collapses the
+composition back to the same constant map over `branches`. This is what licenses transporting an
+existential `b' ∈ newBs` witness to a matching `newExps` entry without ever pinning down an
+index.
+
+**Relocated** from `FrameCompleteness.lean` so that the ordered top-loop Hintikka lemma (which
+lives here, below `FrameCompleteness` in the import order) can consume it. Pure move, no proof
+edit; the original call site at `FrameCompleteness.lean:8164`-adjacent continues to resolve via
+`FrameCompleteness.lean`'s public import of this module. -/
+lemma modalStepBranchS4KeyedOrdered_newExps_eq_map (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∃ e'0, newExps = newBs.map (fun _ => e'0) := by
+  rcases modalStepBranchS4KeyedOrdered_cases φ₀ b e acc keys newBs newExps newAcc keys' hstep with
+    ⟨sf, hcand, hbody⟩ | ⟨-, hfallback⟩
+  · have hsfnote := modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf hcand
+    have hany : e.any (· == sf) = false := by
+      rw [List.any_eq_false]
+      intro x hx heq
+      rw [beq_iff_eq] at heq
+      subst heq
+      exact hsfnote hx
+    unfold modalStepBranchS4KeyedBody at hbody
+    rw [if_neg (by simp [hany])] at hbody
+    rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+    rw [hpair] at hbody
+    dsimp only at hbody
+    rcases result with nf | brs | nf | -
+    · simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+      obtain ⟨rfl, rfl, -, -⟩ := hbody
+      exact ⟨e ++ [sf], rfl⟩
+    · simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+      obtain ⟨rfl, rfl, -, -⟩ := hbody
+      exact ⟨e ++ [sf], by rw [List.map_map]; rfl⟩
+    · simp only [Option.some.injEq, Prod.mk.injEq] at hbody
+      obtain ⟨rfl, rfl, -, -⟩ := hbody
+      exact ⟨e, rfl⟩
+    · simp at hbody
+  · unfold modalStepBranchS4Keyed at hfallback
+    obtain ⟨sf, -, hsf⟩ := List.exists_of_findSome?_eq_some hfallback
+    by_cases hany : e.any (· == sf) = true
+    · rw [if_pos hany] at hsf
+      simp at hsf
+    · rw [if_neg hany] at hsf
+      rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+      rw [hpair] at hsf
+      dsimp only at hsf
+      rcases result with nf | brs | nf | -
+      · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, rfl, -, -⟩ := hsf
+        exact ⟨e ++ [sf], rfl⟩
+      · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, rfl, -, -⟩ := hsf
+        exact ⟨e ++ [sf], by rw [List.map_map]; rfl⟩
+      · simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, rfl, -, -⟩ := hsf
+        exact ⟨e, rfl⟩
+      · simp at hsf
+
 /-- **The keyed top-loop Hintikka lemma**: an open branch produced by
 `modalExpandBranchesS4Keyed` is a Hintikka set for the LIVE S4 rule `modalApplyOneS4 φ₀`
 (bridged from the keyed rule via `hintikka_congr_S4`/`modalHintikkaSetS4_eq` at the very end).

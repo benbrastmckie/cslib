@@ -196,7 +196,7 @@ not something to patch around.
 
 ---
 
-### Phase 2: Relocate `_newExps_eq_map` for layering [NOT STARTED]
+### Phase 2: Relocate `_newExps_eq_map` for layering [COMPLETED]
 
 **Goal**: Move `modalStepBranchS4KeyedOrdered_newExps_eq_map` from `FrameCompleteness.lean:7869`
 down into `LoopChecking.lean`, so the Phase 3 Hintikka lemma (which lives below

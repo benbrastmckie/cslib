@@ -1,7 +1,7 @@
 # Implementation Plan: Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
 
 - **Task**: 592 - Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md`
@@ -132,7 +132,17 @@ owns the four files under `Cslib/Logics/Propositional/Tableau/`.
 
 ---
 
-### Phase 1: Capture the HEAD gate baseline [NOT STARTED]
+### Phase 1: Capture the HEAD gate baseline [COMPLETED]
+
+**Actual results** (Scope Hypothesis check): the failing-target set is **5** targets, not the
+hypothesized 1 -- `Cslib.Logics.Modal.Tableau.FrameCompleteness`,
+`Cslib.Logics.Modal.Tableau.S4.Driver`, `Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness`,
+`Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`,
+`Cslib.Logics.Propositional.Tableau.Minimal.Completeness`. Per the phase's own instruction ("If
+the set is larger than one target ... record the actual values and proceed -- the baseline is
+whatever it measures"), the wider set is recorded as-is in `gate-baseline-targets.txt` and used
+as the Phase 7 comparison point. The subtree sorry census matched the hypothesis exactly: 4, at
+the four named locations. `check-shake-residue.sh` matched its own baseline (12 flagged files).
 
 - **Goal:** Record the exact set of targets failing `lake build --wfail --iofail` at HEAD, before
   any edit, so every later phase can distinguish its own effect on the gate from the standing red.

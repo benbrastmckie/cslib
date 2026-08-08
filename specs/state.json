@@ -19,7 +19,12 @@
       "description": "Fix repo-wide unusedArguments lint findings across the Lean sources: 145 sites in 27 modules, 10 of them in Cslib/Logics/Modal/Tableau/. The uniform pattern is an unused [Hashable Atom] (or analogous) section-level instance binder; the idiomatic fix is `omit [Hashable Atom] in` before the affected block. Distinct from the existing blanket file-scoped lint-suppression ratchet: these are live lint findings, not suppressions, so the ratchet baseline does not cover them.",
       "topic": "Code Hygiene",
       "created": "2026-08-07T08:01:26Z",
-      "last_updated": "2026-08-07T08:01:26Z"
+      "last_updated": "2026-08-07T08:01:26Z",
+      "dependencies": [
+        534,
+        548,
+        593
+      ]
     },
     {
       "project_number": 588,
@@ -32,12 +37,17 @@
       "last_updated": "2026-08-07T08:01:17Z",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/"
+      ],
+      "dependencies": [
+        511,
+        534,
+        597
       ]
     },
     {
       "project_number": 583,
       "project_name": "restate_intexpandbranches_openbranch_sat",
-      "status": "blocked",
+      "status": "abandoned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "dependencies": [
@@ -56,7 +66,8 @@
       ],
       "blockers": [
         "Research (report 01_restate-openbranch-sat.md, adversarially verified) mechanically re-confirmed the lemma is FALSE as stated post-574 (live #eval counter-instance at fuel=0; sorry now Scheme.lean:2551). Every cheap restatement (0 < fuel, initial saturation, fuel-stability) fails IH-preservation or call-site dischargeability (Finding F3); the trichotomy alternative merely relocates the identical obligation into tableau_complete and instDecidableIValid. The provable restatement (Finding F5, R1: hUniv/hNW/hFuel hypotheses) is gated on a fuel-sufficiency development that does not exist yet: post-blocking world-label bound WBound(phi) from ancestor-blocking combinatorics + enlarged intUniverseExt/intExpMeasureExt + intFuel resize + threading invariants (the sorry-free but unused measure engine at Scheme.lean:1913-2487 is gated on unproven universe containment). Recommended next step: /spawn 583 to create the prerequisite task; then discharge together with truthLemma T-imp sorry (Scheme.lean:617) per the in-file STOP-gate."
-      ]
+      ],
+      "abandoned_reason": "Superseded: intExpandBranches_openBranch_sat was already restated by the R1 repair and is sorry-free at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:6806. The cited Scheme.lean:2583/:2623 now hold unrelated code (intUniverseExt_length_le, mem_intUniverseExt_of'). The task's own text mandates closure as superseded in exactly this case."
     },
     {
       "project_number": 534,
@@ -66,6 +77,7 @@
       "title": "Pure K5/5 Euclidean tableau completeness without the equivalence route",
       "description": "COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree (instDecidableFiveValid/instDecidableKb5Valid, FrameCompleteness.lean) is delivered via the KB5/S5 equivalence route, which leans on a full-equivalence closure. This task delivers genuine pure-K5 / pure-5 (Euclidean without full equivalence, no Mathlib closure operator) tableau soundness + completeness + decidability - the one modal-cube corner explicitly deferred out of the completed KB5/Euclidean task. Mirror the existing Five/KB5 development but over the bare Euclidean frame condition. Zero sorry, zero new axioms; keep the frozen equivalence-route deliverables untouched.",
       "dependencies": [
+        511,
         531,
         553,
         563,
@@ -88,7 +100,7 @@
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "blocked",
+      "status": "not_started",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [
@@ -169,7 +181,7 @@
         }
       ],
       "dependencies": [
-        506
+        511
       ],
       "parent_task": 296,
       "session_id": "sess_1784051532_07101c",
@@ -523,7 +535,9 @@
       "created": "2026-07-13T15:55:03Z",
       "last_updated": "2026-07-14T15:29:45Z",
       "dependencies": [
+        375,
         393,
+        400,
         425,
         449,
         535,
@@ -533,7 +547,7 @@
     {
       "project_number": 506,
       "project_name": "s4_loopchecking_machinery_termination_bound_and_decidability",
-      "status": "blocked",
+      "status": "partial",
       "task_type": "cslib",
       "description": "Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the S4 (reflexive-transitive) system, the acknowledged crux of the task. This is deliberately NOT an instantiation of the generic driver built in the prerequisite task -- S4's termination argument (loop-checking / subset-blocking) is structurally different from the K-style finite-catalog counting measure, because K's depth-based modalWorldBound provably breaks under transitive box propagation. It does reuse the T-rule (modalApplyOneT, delivered by the prerequisite task) for its reflexive component and follows the same frame-specific driver-variant file/module conventions. Add the 4-rule to FrameRules.lean: T(box phi)@w + edge w->w' gives T(box phi)@w' and T(phi)@w' (propagate the box itself transitively), dually F(diamond phi)@w gives F(diamond phi)@w'. Build the equality-of-formula-set blocking machinery in a new Cslib/Logics/Modal/Tableau/LoopChecking.lean: formulasAtWorld, an equality test over modalSubfmls phi0, and the diamond-rule minting guard that adds a loop-back edge instead of minting a new world when an equal-set world exists. Extract the countermodel via Relation.ReflTransGen (Std.Refl + IsTrans free). Prove the box-positive truth-lemma bridge by induction on the ReflTransGen path (ReflTransGen.head_induction_on), carrying T(box phi) via the 4-rule and discharging the reflexive endpoint via the T-rule. Prove S4 soundness via Satisfies.four (Basic.lean). If the termination bound closes, prove #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the equality-blocking guard, extend ModalPotentialInv (FmpMeasure.lean), establish fuel sufficiency, and state s4Valid / Decidable (s4Valid phi) against Cube.S4. This task carries explicit permission to land at [BLOCKED] (S4 rules/soundness/truth-lemma green, termination bound left open, documented goal state) rather than introduce a sorry or axiom -- do not force the 2^|Sf| invariant if it does not close within the run; document a recommended follow-on s4-loop-checking-termination task instead. Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (4-rule), Cslib/Logics/Modal/Tableau/LoopChecking.lean (new), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelS4, S4 bridge), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (S4 arm), Cslib/Logics/Modal/Tableau/FmpMeasure.lean (ModalPotentialInv extension, if termination closes).",
       "effort": "8-12 hours",
@@ -585,7 +599,8 @@
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
-      ]
+      ],
+      "partial_note": "Phases 1-7 landed green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom). All remaining scope (Phase 8 termination bound, Phase 9 decidability) is task 511's. Task 300 now depends on 511 directly rather than through this node."
     },
     {
       "project_number": 537,
@@ -834,7 +849,7 @@
     {
       "project_number": 554,
       "project_name": "cs5_pair_seed_disjunction_property_cutfree_research",
-      "status": "blocked",
+      "status": "not_started",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": [
@@ -985,7 +1000,7 @@
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Promote the three cited-but-absent propositional refutation witnesses into CslibTests/",
-      "description": "EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses that DO NOT EXIST in the repository. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C3).\n\nTHE DEFECT (verified 2026-08-07): there is no `scratch/` directory at the repository root, and none of these files exist:\n- `scratch/BetaSplitRefutation.lean` -- 10 citations. Load-bearing for DP-3, DP-4 and DP-5: cited as the machine-verified counterexample at `phiRef1` refuting augmented-frame positive-formula persistence, and separately for `reportMin phiRef1 realFuel` / `minBranchesAgree = true` establishing DP-4's refutation INDEPENDENTLY of DP-3.\n- `scratch/HvalidShapeRefutation.lean` -- 3 citations. Cited as refuting the OLD `hvalid` premise shape (`IValid (p -> (q -> p))` holds while the old premise body is false at a non-upward-closed witness valuation). This one justifies a statement-shape change that ALREADY LANDED, so its absence is a documentation defect rather than a live gate.\n- `scratch/PersistPrototype.lean` -- 1 citation.\n\nWHY THIS MATTERS: three sorries are annotated \"PERMANENTLY DEFERRED -- unprovable as stated ... terminal deferral, not an unfinished step. No follow-up is scheduled\" on the authority of these files. Three permanent abandonment decisions currently rest on evidence nobody can open. If the refutations are correct the deferrals are sound but unauditable; if any is wrong, work has been permanently abandoned in error. Neither can be determined today.\n\nESTABLISHED REMEDY -- follow it: this repository already promotes out-of-tree countermodels into compiling regression tests. See `CslibTests/AncestorRedirectRefutation.lean` and `CslibTests/S4LoopGuardRegression.lean`. The CS5 pair-seed task's description mandates the same pattern for its own probe (\"Land probe_refute_disjunctionProperty as a regression test so the unconditioned form can never be reintroduced\"). The out-of-tree S4 probe task does this for the six S4 probes; nothing covers the propositional ones.\n\nSCOPE: (1) attempt recovery of the three files from git history and from any out-of-tree location; (2) for each RECOVERED witness, reconstruct it as a compiling `CslibTests/` module and repoint the citing comments at the in-tree path; (3) for each IRRECOVERABLE witness, either re-derive the counterexample from the surviving prose description or -- if it cannot be re-derived -- DOWNGRADE the annotations it supports from \"refuted / PERMANENTLY DEFERRED\" to \"[UNVERIFIED], evidence lost\", which is the honest state. Do not leave a terminal-deferral claim standing on a missing file.\n\nEXPECTED OUTPUT: `phiRef1` and the `hvalid`-shape counterexample compiling in CslibTests/, all 14 citations repointed, sorry census unchanged. Zero new sorries, zero new axioms.\n\nSEQUENCING: this is the prerequisite for the disposition-decision task, which cannot be made responsibly against absent evidence.",
+      "description": "EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).\n\nCORRECTION 2026-08-08 -- READ THIS FIRST. The original description of this task asserted that scratch/BetaSplitRefutation.lean, scratch/HvalidShapeRefutation.lean and scratch/PersistPrototype.lean \"DO NOT EXIST in the repository\", and that three permanent-deferral decisions rest on evidence nobody can open. THAT PREMISE IS FALSE. All three files are present at HEAD:\n\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/BetaSplitRefutation.lean   (396 lines; phiRef1 at :235, report at :213)\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/HvalidShapeRefutation.lean (84 lines; phiK_valid : IValid phiK at :65, valuation_not_upward_closed at :57)\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean\n\nThe `scratch/...` prefix in the citations is relative to the OWNING TASK DIRECTORY, not to the repository root. Scheme.lean:3474 already writes the full form (`specs/430_.../scratch/PersistPrototype.lean`), which confirms the convention. The original review resolved the prefix against the repository root, found no scratch/ there, and inferred loss. No evidence was lost and no work was abandoned in error; the three deferral decisions are auditable today.\n\nCONSEQUENTLY THE \"IRRECOVERABLE\" BRANCH IS DELETED FROM THIS TASK. Do NOT downgrade any annotation to \"[UNVERIFIED], evidence lost\" -- doing so would corrupt a correct record. If a witness ever genuinely cannot be opened, stop and re-verify the path before concluding anything.\n\nTHE ACTUAL DEFECT: 14 citations carry a path that does not resolve from the repository root, distributed as\n  Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean          -- 2 (:52, :149)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean   -- 4 (:50, :134, :144, :158)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean      -- 1 (:297)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean         -- 7 (:585, :747, :3474, :7834, :7845, :7929, :7953)\nNote :3474 is already correct and is the reference form to copy.\n\nSCOPE:\n(1) Promote the two load-bearing witnesses into compiling regression tests under CslibTests/, following the established precedent (CslibTests/AncestorRedirectRefutation.lean, CslibTests/S4LoopGuardRegression.lean): phiRef1 and its report/reportMin evaluation from BetaSplitRefutation.lean, and the hvalid-shape counterexample (phiK_valid + valuation_not_upward_closed) from HvalidShapeRefutation.lean.\n(2) Repoint all 14 citations at the new in-tree CslibTests/ paths. PersistPrototype.lean is a prototype rather than a refutation witness -- repointing its single citation at the archive path is sufficient, no promotion needed.\n(3) Leave every \"refuted\" / \"PERMANENTLY DEFERRED\" annotation's VERDICT untouched. This task restores auditability of those verdicts; it does not re-adjudicate them. Re-adjudication is the disposition-decision task's job.\n\nEXPECTED OUTPUT: phiRef1 and the hvalid-shape counterexample compiling in CslibTests/, all 14 citations resolving from the repository root, sorry census unchanged at 4. Zero new sorries, zero new axioms.\n\nSEQUENCING: still the prerequisite for the disposition-decision task -- but that gate is now about having the evidence IN-TREE and CI-protected, not about recovering it.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
       "last_updated": "2026-08-07T00:00:00Z",

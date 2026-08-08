@@ -6,15 +6,16 @@ next_project_number: 598
 
 ## Task Order
 
-*Updated 2026-08-07. Generated from state.json dependency graph.*
+*Updated 2026-08-08. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,400,409,425,511,534,554,568,569,583,588,589,590,592,594,596,597 | -- | propositional logic, modal logic, tableau infrastructure, ... |
-| 2 | 39,40,215,301,450,497,506,537,548,551,571,576,591,595 | 36,37,181,425,511,554,568,592,594,597 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,593 | 39,40,506,591 | foundations, propositional logic, modal logic |
-| 4 | 375 | 593 | propositional logic |
+| 1 | 36,37,181,400,409,425,511,554,568,569,590,592,594,596,597 | -- | propositional logic, modal logic, tableau infrastructure, ... |
+| 2 | 39,40,215,300,301,450,506,534,537,548,551,571,576,591,595 | 36,37,181,425,511,554,568,592,594,597 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,588,593 | 39,40,534,591,597 | foundations, propositional logic, modal logic |
+| 4 | 375,589 | 534,548,593 | propositional logic, code hygiene |
+| 5 | 497 | 375,400,425 | propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -25,25 +26,25 @@ next_project_number: 598
 ### Propositional Logic
 
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+  └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-583 [BLOCKED] — Restate `intExpandBranches_openBranch_sat` (Cslib/Logics/Proposit
 592 [NOT STARTED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
     └─ 593 [NOT STARTED] — Restate and discharge the three propositional tableau completenes
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
-497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
+        └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 
 ### Modal Logic
 
-511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-  └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-    └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+511 [NOT STARTED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+  └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+  └─ 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+  └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+    └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
+554 [NOT STARTED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
-588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
 
 ### Tableau Infrastructure
@@ -225,22 +226,33 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 
-**Description**: EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses that DO NOT EXIST in the repository. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C3).
+**Description**: EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).
 
-THE DEFECT (verified 2026-08-07): there is no `scratch/` directory at the repository root, and none of these files exist:
-- `scratch/BetaSplitRefutation.lean` -- 10 citations. Load-bearing for DP-3, DP-4 and DP-5: cited as the machine-verified counterexample at `phiRef1` refuting augmented-frame positive-formula persistence, and separately for `reportMin phiRef1 realFuel` / `minBranchesAgree = true` establishing DP-4's refutation INDEPENDENTLY of DP-3.
-- `scratch/HvalidShapeRefutation.lean` -- 3 citations. Cited as refuting the OLD `hvalid` premise shape (`IValid (p -> (q -> p))` holds while the old premise body is false at a non-upward-closed witness valuation). This one justifies a statement-shape change that ALREADY LANDED, so its absence is a documentation defect rather than a live gate.
-- `scratch/PersistPrototype.lean` -- 1 citation.
+CORRECTION 2026-08-08 -- READ THIS FIRST. The original description of this task asserted that scratch/BetaSplitRefutation.lean, scratch/HvalidShapeRefutation.lean and scratch/PersistPrototype.lean "DO NOT EXIST in the repository", and that three permanent-deferral decisions rest on evidence nobody can open. THAT PREMISE IS FALSE. All three files are present at HEAD:
 
-WHY THIS MATTERS: three sorries are annotated "PERMANENTLY DEFERRED -- unprovable as stated ... terminal deferral, not an unfinished step. No follow-up is scheduled" on the authority of these files. Three permanent abandonment decisions currently rest on evidence nobody can open. If the refutations are correct the deferrals are sound but unauditable; if any is wrong, work has been permanently abandoned in error. Neither can be determined today.
+  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/BetaSplitRefutation.lean   (396 lines; phiRef1 at :235, report at :213)
+  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/HvalidShapeRefutation.lean (84 lines; phiK_valid : IValid phiK at :65, valuation_not_upward_closed at :57)
+  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean
 
-ESTABLISHED REMEDY -- follow it: this repository already promotes out-of-tree countermodels into compiling regression tests. See `CslibTests/AncestorRedirectRefutation.lean` and `CslibTests/S4LoopGuardRegression.lean`. The CS5 pair-seed task's description mandates the same pattern for its own probe ("Land probe_refute_disjunctionProperty as a regression test so the unconditioned form can never be reintroduced"). The out-of-tree S4 probe task does this for the six S4 probes; nothing covers the propositional ones.
+The `scratch/...` prefix in the citations is relative to the OWNING TASK DIRECTORY, not to the repository root. Scheme.lean:3474 already writes the full form (`specs/430_.../scratch/PersistPrototype.lean`), which confirms the convention. The original review resolved the prefix against the repository root, found no scratch/ there, and inferred loss. No evidence was lost and no work was abandoned in error; the three deferral decisions are auditable today.
 
-SCOPE: (1) attempt recovery of the three files from git history and from any out-of-tree location; (2) for each RECOVERED witness, reconstruct it as a compiling `CslibTests/` module and repoint the citing comments at the in-tree path; (3) for each IRRECOVERABLE witness, either re-derive the counterexample from the surviving prose description or -- if it cannot be re-derived -- DOWNGRADE the annotations it supports from "refuted / PERMANENTLY DEFERRED" to "[UNVERIFIED], evidence lost", which is the honest state. Do not leave a terminal-deferral claim standing on a missing file.
+CONSEQUENTLY THE "IRRECOVERABLE" BRANCH IS DELETED FROM THIS TASK. Do NOT downgrade any annotation to "[UNVERIFIED], evidence lost" -- doing so would corrupt a correct record. If a witness ever genuinely cannot be opened, stop and re-verify the path before concluding anything.
 
-EXPECTED OUTPUT: `phiRef1` and the `hvalid`-shape counterexample compiling in CslibTests/, all 14 citations repointed, sorry census unchanged. Zero new sorries, zero new axioms.
+THE ACTUAL DEFECT: 14 citations carry a path that does not resolve from the repository root, distributed as
+  Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean          -- 2 (:52, :149)
+  Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean   -- 4 (:50, :134, :144, :158)
+  Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean      -- 1 (:297)
+  Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean         -- 7 (:585, :747, :3474, :7834, :7845, :7929, :7953)
+Note :3474 is already correct and is the reference form to copy.
 
-SEQUENCING: this is the prerequisite for the disposition-decision task, which cannot be made responsibly against absent evidence.
+SCOPE:
+(1) Promote the two load-bearing witnesses into compiling regression tests under CslibTests/, following the established precedent (CslibTests/AncestorRedirectRefutation.lean, CslibTests/S4LoopGuardRegression.lean): phiRef1 and its report/reportMin evaluation from BetaSplitRefutation.lean, and the hvalid-shape counterexample (phiK_valid + valuation_not_upward_closed) from HvalidShapeRefutation.lean.
+(2) Repoint all 14 citations at the new in-tree CslibTests/ paths. PersistPrototype.lean is a prototype rather than a refutation witness -- repointing its single citation at the archive path is sufficient, no promotion needed.
+(3) Leave every "refuted" / "PERMANENTLY DEFERRED" annotation's VERDICT untouched. This task restores auditability of those verdicts; it does not re-adjudicate them. Re-adjudication is the disposition-decision task's job.
+
+EXPECTED OUTPUT: phiRef1 and the hvalid-shape counterexample compiling in CslibTests/, all 14 citations resolving from the repository root, sorry census unchanged at 4. Zero new sorries, zero new axioms.
+
+SEQUENCING: still the prerequisite for the disposition-decision task -- but that gate is now about having the evidence IN-TREE and CI-protected, not about recovering it.
 
 ---
 
@@ -280,7 +292,7 @@ DO NOT: discharge DP-3 by `exact h Nat (intExtractValuation _b) _huc 0`. The sou
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: None
+- **Dependencies**: Task 534, Task 548, Task 593
 
 **Description**: Fix repo-wide unusedArguments lint findings across the Lean sources: 145 sites in 27 modules, 10 of them in Cslib/Logics/Modal/Tableau/. The uniform pattern is an unused [Hashable Atom] (or analogous) section-level instance binder; the idiomatic fix is `omit [Hashable Atom] in` before the affected block. Distinct from the existing blanket file-scoped lint-suppression ratchet: these are live lint findings, not suppressions, so the ratchet baseline does not cover them.
 
@@ -290,14 +302,14 @@ DO NOT: discharge DP-3 by `exact h Nat (intExtractValuation _b) _huc 0`. The sou
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 511, Task 534, Task 597
 
 **Description**: Resolve the five import-reachability duplicate families in Cslib/Logics/Modal/Tableau/: accFreshInv_append, hasEdge_addEdge_mono, modalApplyOne_boxPos_acc_eq, modalApplyOne_diamondNeg_acc_eq, not_shape_of_not_or. These are privacy-caused duplicates that de-privatization alone cannot resolve: three consumer files cannot reach Soundness.lean where the largest family originates. This is a module-graph problem (new Support module or import restructure), not a statement-equivalence adjudication. The Support-module extraction audit supplies no verdict bearing on these, and the duplicate-family adjudication that followed it explicitly left this class untouched.
 
 ---
 
 ### 583. Restate intexpandbranches openbranch sat
-- **Status**: [BLOCKED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 574
@@ -378,7 +390,7 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -456,14 +468,14 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 531, Task 553, Task 563, Task 564, Task 566, Task 567, Task 586
+- **Dependencies**: Task 511, Task 531, Task 553, Task 563, Task 564, Task 566, Task 567, Task 586
 
 **Description**: COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree (instDecidableFiveValid/instDecidableKb5Valid, FrameCompleteness.lean) is delivered via the KB5/S5 equivalence route, which leans on a full-equivalence closure. This task delivers genuine pure-K5 / pure-5 (Euclidean without full equivalence, no Mathlib closure operator) tableau soundness + completeness + decidability - the one modal-cube corner explicitly deferred out of the completed KB5/Euclidean task. Mirror the existing Five/KB5 development but over the bare Euclidean frame condition. Zero sorry, zero new axioms; keep the frozen equivalence-route deliverables untouched.
 
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [BLOCKED]
+- **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586
@@ -480,7 +492,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 
 ### 506. S4 loopchecking machinery termination bound and decidability
 - **Effort**: 8-12 hours
-- **Status**: [BLOCKED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 511, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586
@@ -499,7 +511,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 393, Task 425, Task 449, Task 535, Task 542
+- **Dependencies**: Task 375, Task 393, Task 400, Task 425, Task 449, Task 535, Task 542
 
 **Description**: Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.
 
@@ -597,7 +609,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 506
+- **Dependencies**: Task 511
 - **Research**:
   - [300_modal_extensions_t_s4_s5/reports/01_frame-specific-tableau-extensions.md]
   - [300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md]

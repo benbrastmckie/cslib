@@ -1,6 +1,7 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
 public import CslibTests.AncestorRedirectRefutation
+public import CslibTests.BetaSplitRefutation
 public import CslibTests.Bisimulation
 public import CslibTests.CCS
 public import CslibTests.CLL

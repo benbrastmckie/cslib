@@ -266,7 +266,20 @@ risk before the 396-line file.
 
 ---
 
-### Phase 3: Promote BetaSplitRefutation into CslibTests/ and make it assert [NOT STARTED]
+### Phase 3: Promote BetaSplitRefutation into CslibTests/ and make it assert [COMPLETED]
+
+Scope Hypothesis confirmed exactly: `grep -c "#eval"` on the archived witness returned **16** at
+the hypothesized lines (252-256, 327-332, 392-396); after editing, `grep -c "#eval"` is **9** and
+`grep -c "#guard_msgs"` is **9** real directives (a 10th textual match is prose inside the module
+docstring referencing `` `#guard_msgs` ``, not a directive). The nine `#guard_msgs` expected
+strings were derived from a live `lake env lean` run on the pre-edit archived file (not
+hand-transcribed) and cross-checked against Finding 3's table -- all match exactly, including
+`branchesAgree = true`, `decisiveFacts = (true, false)`, and the decisive triple
+`some (2, 1, 2)`. `lake build --wfail --iofail CslibTests.BetaSplitRefutation` reports `✔ Built`
+(1.8s) with zero warnings/info specific to the new target on the first attempt (the doubled
+`Mathlib.Tactic.Ring`/`Mathlib.Tactic.NormNum` meta-imports from Finding 4 were applied verbatim
+and no `unknown tactic` error occurred). `lake test` succeeds. `lake exe lint-style` and
+`scripts/check-shake-residue.sh` report no new findings.
 
 - **Goal:** `CslibTests/BetaSplitRefutation.lean` exists, builds green under `--wfail --iofail`,
   and asserts the nine load-bearing refutation values via `#guard_msgs` rather than printing them.
@@ -343,7 +356,25 @@ risk before the 396-line file.
 
 ---
 
-### Phase 4: Docstring and style pass on BetaSplitRefutation [NOT STARTED]
+### Phase 4: Docstring and style pass on BetaSplitRefutation [COMPLETED WITH EXCLUSIONS]
+
+#### Reasoned Exclusions
+
+| Item | Reason | Evidence |
+|------|--------|----------|
+| Separate docstring-only edit pass on `CslibTests/BetaSplitRefutation.lean` | Phase 3 authored the promoted file in one `Write`, and docstrings for every currently-undocumented declaration (the fifteen named in the plan's task list, `pa`-`pc` expanded to three, plus the two private termination-arithmetic lemmas which had none in the archived original) were added at authoring time rather than as a follow-up edit. Re-editing an already-correct file a second time to satisfy phase sequencing would be pure churn with no behavioural difference. | Phase 3's commit (`CslibTests/BetaSplitRefutation.lean`) already contains the docstrings; verified below by an automated per-declaration scan and by re-running the exact Phase 4 verification checks. |
+
+Every declaration in the file was confirmed via a mechanical scan (regex over
+`def`/`abbrev`/`lemma`/`theorem`/`instance`/`structure`/`inductive`/`example` lines, checking the
+immediately preceding line closes a `/-- ... -/` block) to carry a preceding docstring; 0 missing.
+`AugRes`'s two constructors (`closed`, `openBranch`) also carry docstrings, checked by hand since
+they are not top-level declarations. This exceeds the plan's named fifteen -- the two private
+termination lemmas (`sum_map_pow_const₄`, `lex_lt_of_le_of_lt₄`) were also documented, since the
+100%-docstring bar is declaration-count-agnostic, not list-agnostic.
+
+- `lake build --wfail --iofail CslibTests.BetaSplitRefutation` still reports `✔ Built`, zero
+  warnings, zero `info:` lines (re-confirmed; no logic/imports/assertions changed since Phase 3).
+- `lake exe lint-style` reports no findings for the file.
 
 - **Goal:** Every declaration in `CslibTests/BetaSplitRefutation.lean` carries a docstring, matching
   the practice of every existing `CslibTests/` file.

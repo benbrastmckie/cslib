@@ -11,11 +11,10 @@ next_project_number: 598
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,506,534,548,554,568,569,590,592,594,596 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,537,551,571,576,588,591,595 | 36,37,181,425,534,554,568,592,594 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,593 | 39,40,591 | foundations, propositional logic |
-| 4 | 375,589 | 534,548,593 | propositional logic, code hygiene |
-| 5 | 497 | 375,400,425 | propositional logic |
+| 1 | 36,37,181,300,400,409,425,506,534,548,554,568,569,590,591,594,596 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,537,551,571,576,588,593,595 | 36,37,181,425,534,554,568,591,594 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,375,589 | 39,40,534,548,593 | foundations, propositional logic, code hygiene |
+| 4 | 497 | 375,400,425 | propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -28,11 +27,10 @@ next_project_number: 598
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-592 [IMPLEMENTING] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
-  └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
-    └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
-      └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
-        └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
+591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
+  └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
+    └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
+      └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 
 ### Modal Logic
 
@@ -218,12 +216,13 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 ---
 
 ### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md]
 - **Plan**: [592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md]
+- **Summary**: [592_promote_propositional_refutations_to_cslibtests/summaries/01_promote-refutation-witnesses-cslibtests-summary.md]
 
 **Description**: EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).
 

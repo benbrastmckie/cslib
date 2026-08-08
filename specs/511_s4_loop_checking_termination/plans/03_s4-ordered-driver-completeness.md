@@ -255,7 +255,7 @@ confirm the proof body is byte-identical.
 
 ---
 
-### Phase 3: `modalExpandBranchesS4KeyedOrdered_hintikka` [NOT STARTED]
+### Phase 3: `modalExpandBranchesS4KeyedOrdered_hintikka` [COMPLETED]
 
 **Goal**: Structural port of `modalExpandBranchesS4Keyed_hintikka`
 (`LoopChecking.lean:1134-1493`) to the ordered driver. This is the phase with real risk; it is

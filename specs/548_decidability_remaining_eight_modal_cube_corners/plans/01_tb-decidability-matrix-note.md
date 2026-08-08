@@ -336,7 +336,7 @@ hypothesis, not a target.
 
 ---
 
-### Phase 3: TB Rule and Agreement Lemma [NOT STARTED]
+### Phase 3: TB Rule and Agreement Lemma [COMPLETED]
 
 **Goal**: Land `modalApplyOneTB` and its agreement lemma in `FrameRules.lean`, append-only.
 

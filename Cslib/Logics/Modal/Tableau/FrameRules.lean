@@ -398,6 +398,64 @@ lemma modalApplyOneB_eq_of_not_boxPos_diaNeg
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
+/-! ## TB-Augmented Rule Application
+
+TB's rule is the merge of T's self-propagation arms (`modalTBoxSelf`, `modalTDiaNegSelf`) and
+B's predecessor-backward arms (`modalBBoxBack`, `modalBDiaNegBack`). B's arms are the
+predecessor-lookup family and carry the larger spec discharge (`BDriver.lean`, 1,124 lines,
+versus `TDriver.lean`, 809 lines), so `modalApplyOneTB` wraps `modalApplyOneB` (the inner
+layer) with T's self-propagation arms merged into the outer layer -- the exact layering pattern
+`modalApplyOneS4Rules` uses over `modalApplyOneT`, keeping the larger spec discharge innermost
+and maximising reuse from `modalApplyOneB_spec`. -/
+
+/-- Apply `modalApplyOneB` (K + B) together with the T self-propagation arms. For the two
+T-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), the T self-propagation formulas are merged into the
+B-augmented rule's `persistent` output (deduplicated); for every other signed-formula shape,
+`modalApplyOneTB` reduces to exactly `modalApplyOneB`. This wraps `modalApplyOneB` rather than
+`modalApplyOneT` so the symmetric (B) component -- the larger spec discharge -- stays
+innermost, giving the reflexive-symmetric TB rule set. -/
+def modalApplyOneTB
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
+  let (bResult, bAcc) := modalApplyOneB sf b acc
+  match sf.sign, sf.formula with
+  | .pos, .box φ =>
+    let selfNew := modalTBoxSelf b φ sf.label
+    match bResult with
+    | .persistent bForms =>
+      (.persistent (bForms ++ selfNew.filter (fun x => !(bForms.any (· == x)))), bAcc)
+    | .notApplicable =>
+      if selfNew.isEmpty then (.notApplicable, bAcc) else (.persistent selfNew, bAcc)
+    | other => (other, bAcc)
+  | .neg, .diamond φ =>
+    let selfNew := modalTDiaNegSelf b φ sf.label
+    match bResult with
+    | .persistent bForms =>
+      (.persistent (bForms ++ selfNew.filter (fun x => !(bForms.any (· == x)))), bAcc)
+    | .notApplicable =>
+      if selfNew.isEmpty then (.notApplicable, bAcc) else (.persistent selfNew, bAcc)
+    | other => (other, bAcc)
+  | _, _ => (bResult, bAcc)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneTB` agrees with `modalApplyOneB` outside the two T-relevant shapes
+(`T(□φ)@w`, `F(◇φ)@w`): the T self-propagation arms never affect any other rule dispatch. This
+is the load-bearing reuse mechanism: chained with `modalApplyOneB_eq_of_not_boxPos_diaNeg`
+(above) and `modalApplyOne`'s own case analysis, it lets TB inherit every propositional and
+mint case from K unchanged. -/
+lemma modalApplyOneTB_eq_of_not_boxPos_diaNeg
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneTB sf b acc = modalApplyOneB sf b acc := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOneTB
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
 end Cslib.Logic.Modal.Tableau
 
 end

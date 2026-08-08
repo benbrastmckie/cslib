@@ -1,7 +1,7 @@
 # Implementation Plan: TB Decidability + Intentional-Completeness Matrix Note
 
 - **Task**: 548 - Decidability for the remaining modal-cube corners (SCOPE NARROWED)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 16 hours
 - **Dependencies**: 511 (complete), 535 (archived-complete), 597 (complete)
 - **Research Inputs**: `specs/548_decidability_remaining_eight_modal_cube_corners/reports/01_eight-corner-decidability-research.md`
@@ -186,7 +186,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Intentional-Completeness Matrix Note [NOT STARTED]
+### Phase 1: Intentional-Completeness Matrix Note [COMPLETED]
 
 **Goal**: Land the second deliverable — an in-tree documented note recording, per remaining
 corner, the frame condition, assessed tier, named blocking gate, gate-owning successor task, and

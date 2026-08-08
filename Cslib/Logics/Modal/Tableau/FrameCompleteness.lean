@@ -8284,6 +8284,87 @@ instance instDecidableS4Valid (φ₀ : Proposition Atom) : Decidable (s4Valid φ
   | .openBranch _ _ =>
     .isFalse (fun hv => by rw [modalTableauS4KeyedOrdered_complete φ₀ hv] at h; cases h)
 
+/-! ## Modal-Cube Decidability Matrix: Coverage and Intentional Out-of-Scope Notes
+
+The modal cube (`Cslib/Logics/Modal/Cube.lean`) names fifteen systems: `K`, `T`, `B`, `Four`
+(K4), `Five` (K5), `K45`, `D`, `D4`, `D5`, `D45`, `DB`, `TB`, `KB5`, `S4`, `S5`. Eight of the
+fifteen are decidable in this tableau development; the remaining seven are documented here
+rather than implemented, each with its frame condition, assessed tier, named blocking gate, and
+a rough cost estimate, so the matrix is *intentionally* incomplete rather than accidentally
+ragged.
+
+### Covered (8/15)
+
+| System | Frame condition | `Decidable` instance | Driver |
+|--------|------------------|------------------------|--------|
+| K | none (`Set.univ`) | `instDecidableKValid` | `modalTableau` |
+| T | `Std.Refl` | `instDecidableTValid` | `modalTableauT` |
+| B | `Std.Symm` | `instDecidableBValid` | `modalTableauB` |
+| TB | `Std.Refl ∧ Std.Symm` | `instDecidableTBValid` | `modalTableauTB` |
+| K5 (`Five`) | `Relation.RightEuclidean` | `instDecidableFiveValid` | `modalTableauFive` |
+| KB5 | `Std.Symm ∧ Relation.RightEuclidean` | `instDecidableKb5Valid` | `modalTableauKb5''` |
+| S4 | `Std.Refl ∧ IsTrans` | `instDecidableS4Valid` | `modalTableauS4KeyedOrdered` (the
+  ordered, settled-context-scheduling driver -- see its own docstring above for why the
+  unordered keyed variant is unsound and is not used here) |
+| S5 | `Std.Refl ∧ IsTrans ∧ Relation.RightEuclidean` | `instDecidableS5Valid` | `modalTableauS5` |
+
+### Out of scope, with named gates (7/15)
+
+Each entry below is deliberately unimplemented. Every gate is a settled architectural
+obstruction, not an oversight -- discharging it is the sanctioned starting point for a future
+corner, not a re-litigation of the per-regime driver split (see "Settled decisions" below). Gate
+ownership by successor task is tracked in this task's own plan file, not restated here -- Lean
+source is not the place to cite task-tracker identifiers.
+
+- **D** -- frame condition `Relation.Serial`; no closure operator suffices; **Tier A**; gate:
+  serial-rule spec shape -- no known rule discharges
+  `RuleApplicationSpec.boxPosNotExpanding` for a seriality witness without either being unsound
+  or non-terminating (see "Refuted alternatives for D" below); cost estimate ~1,700 lines once
+  ungated.
+- **DB** -- frame condition `Relation.Serial ∧ Std.Symm`; closure `SymmGen` plus a serial
+  repair; **Tier A/B**; gate: serial-rule spec shape (same gate as D); cost estimate
+  ~1,700–3,600 lines.
+- **K4** -- frame condition `IsTrans`; closure `Relation.TransGen`; **Tier C**; gate: the
+  unordered S4 stepper-stack retirement, together with removing the T arm from the S4 rule
+  chain; cost estimate ~13,500 lines.
+- **D4** -- frame condition `Relation.Serial ∧ IsTrans`; closure `TransGen` plus a serial
+  repair; **Tier C**; gates: both of K4's gates, plus the serial-rule spec shape; cost estimate
+  ~13,500 lines.
+- **K45** -- frame condition `IsTrans ∧ Relation.RightEuclidean`; closure `EuclGen` (plus
+  transitivity); **Tier B**; gate: the universal-cluster rule-combinator prototype; cost
+  estimate ~3,600 lines.
+- **D5** -- frame condition `Relation.Serial ∧ Relation.RightEuclidean`; closure `EuclGen` plus
+  a serial repair; **Tier B**; gates: the rule-combinator prototype, plus the serial-rule spec
+  shape; cost estimate ~3,600 lines.
+- **D45** -- frame condition `Relation.Serial ∧ IsTrans ∧ Relation.RightEuclidean`; closure as
+  K45, plus a serial repair; **Tier B**; gates: the rule-combinator prototype, plus the
+  serial-rule spec shape; cost estimate ~3,600 lines.
+
+### Refuted mint-avoiding alternatives for D
+
+Three approaches to a seriality rule that avoids minting a fresh witness world were considered
+and refuted; recorded here so the refutations live in-tree rather than only in a task tracker:
+
+- **Self-loop-at-dead-ends closure**: unsound -- it licenses the T inference (reflexivity) at
+  worlds that are not actually reflexive, collapsing D into T.
+- **Fresh sink world**: relocates the minting problem rather than discharging it -- the rule
+  still mints, just at a world with no further obligations, which does not satisfy
+  `RuleApplicationSpec.boxPosNotExpanding` any more than a direct mint would.
+- **`F(□⊥)` seeding**: sound, but non-terminating under `rankStep` -- nothing bounds how many
+  times the seed can be re-applied along a branch.
+
+### Settled decisions
+
+- **Per-regime drivers are settled.** Each corner gets its own bespoke driver file
+  (`TDriver.lean`, `BDriver.lean`, `TBDriver.lean`, ...) rather than a generic traversal rung
+  parameterised over frame conditions. This decision was made deliberately and is not
+  reopened by adding a new corner; a future corner should add another sibling driver file, not
+  a generic abstraction.
+- **The ordered S4 driver, not the unordered keyed one, is the sound one.** See
+  `instDecidableS4Valid`'s own docstring above for the full account; it is not restated here.
+
+-/
+
 end Cslib.Logic.Modal.Tableau
 
 end

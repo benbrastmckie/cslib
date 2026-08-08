@@ -49,7 +49,7 @@ per-branch forcing hypothesis required by `tableau_complete minScheme`.
 
 **DP-4 is PERMANENTLY DEFERRED — unprovable as stated**, not merely unfinished, and is refuted
 **independently** of DP-3: the same machine-verified counterexample
-(`scratch/BetaSplitRefutation.lean`, `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`)
+(`CslibTests/BetaSplitRefutation.lean`, `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`)
 reproduces under `isMinimallyClosed` (`reportMin phiRef1 realFuel` yields the identical violation,
 and `minBranchesAgree = true` against the real `minimalTableau`). The mechanism is independent
 beta-splits at two augmented-preorder-equivalent worlds joined by a loop-back edge that
@@ -146,7 +146,7 @@ theorem minimalTableau_complete (φ : Proposition Atom)
   apply tableau_complete minScheme
   intro edges _b _huc
   -- DP-4 -- PERMANENTLY DEFERRED, unprovable as stated, refuted INDEPENDENTLY of DP-3 under
-  -- `isMinimallyClosed` (`scratch/BetaSplitRefutation.lean`'s `reportMin phiRef1 realFuel`,
+  -- `isMinimallyClosed` (`CslibTests/BetaSplitRefutation.lean`'s `reportMin phiRef1 realFuel`,
   -- `minBranchesAgree = true` against the real `minimalTableau`). `exact h Nat
   -- (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0` (for the appropriate
   -- `hbotuc`) would type-check once both upward-closure obligations named in the docstring above

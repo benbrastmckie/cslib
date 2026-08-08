@@ -582,9 +582,9 @@ hypotheses already in scope at every arm of the `key` induction below, including
 (`case6`). Gap 1's fuel-sufficiency side is therefore closed. This does **not** discharge the
 `sorry` immediately below, nor DP-3/DP-4/DP-5: those depend on the AUGMENTED-frame
 positive-formula persistence invariant, which is a strictly stronger statement that is separately
-REFUTED (see the `sorry`'s own annotation, and `scratch/BetaSplitRefutation.lean`). Retained here,
-uncorrected in place, as a historical record of the earlier (mistaken) blocker analysis; do not
-re-derive either the "not been built" claim or its correction.
+REFUTED (see the `sorry`'s own annotation, and `CslibTests/BetaSplitRefutation.lean`). Retained
+here, uncorrected in place, as a historical record of the earlier (mistaken) blocker analysis; do
+not re-derive either the "not been built" claim or its correction.
 
 **`sat_timp` IS an `IBranchSaturation` field** (`:105-108`), realized by `intApplyRuleFull`'s
 `.pos, .imp` branching arm (`Rules.lean:245-268`, `:274-275`), which fires reflexively at the
@@ -744,7 +744,8 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- DP-5 -- PERMANENTLY DEFERRED, unprovable as stated (not "pending Phases 7-11", not
       -- "deferred to future work"). The augmented-edge positive-formula persistence invariant
       -- this goal needs is REFUTED by a machine-verified counterexample:
-      -- `scratch/BetaSplitRefutation.lean` (`lake env lean`, zero errors, zero sorries) exhibits
+      -- `CslibTests/BetaSplitRefutation.lean` (`lake env lean`, zero errors, zero sorries)
+      -- exhibits
       -- `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`, for which
       -- `intExtractValuation b` is NOT upward-closed along the augmented `intAccessPreorder
       -- edges` frame: worlds `1` and `2` are augmented-preorder-equivalent (joined by the
@@ -7831,7 +7832,7 @@ public `tableau_complete`/`Decidable` contract, discharged elsewhere, does not).
 `intExtractValuation b`'s upward-closure along `intAccessPreorder edges` — the AUGMENTED frame
 (`edges` here is the `augSets` witness `intExpandBranches_openBranch_sat` threads, not the
 algorithm's raw edge list; see that lemma's docstring). This replaces the machine-verified
-defective premise `tableau_complete` used to demand (`scratch/HvalidShapeRefutation.lean`,
+defective premise `tableau_complete` used to demand (`CslibTests/HvalidShapeRefutation.lean`,
 `lake env lean` clean, zero sorries: `hvalid`'s old unconstrained-`(edges, b)` shape is false at
 a concrete witness even though the formula it is applied to is valid). Moving the obligation
 here, where `b`'s real provenance (`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`)
@@ -7842,8 +7843,8 @@ lemma gains the deferred obligation, relocated from the unfillable shape DP-3/DP
 **DISPOSITION UNDECIDED (this conjunct's `sorry`, gated on an open decision point).** Do NOT read
 this conjunct as REFUTED. What is machine-verified: `intExtractValuation b`'s upward closure
 along the reconstructed augmented `intAccessPreorder edges` frame FAILS for `phiRef1 :=
-((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`scratch/BetaSplitRefutation.lean`, zero errors, zero
-sorries, `branchesAgree = true` against the real `intuitionisticTableau`). What is **argued but
+((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`CslibTests/BetaSplitRefutation.lean`, zero errors,
+zero sorries, `branchesAgree = true` against the real `intuitionisticTableau`). What is **argued but
 [UNVERIFIED]** (not machine-checked): the further step from that failure to "this `∃ edges`
 conjunct of `openBranch_countermodel` is false for this `b`" assumes `¬IForces` is obtainable only
 through `truthLemma`'s `IFimpAccess` route. Counter-consideration, hand-checked: over the RAW
@@ -7926,7 +7927,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- DISPOSITION UNDECIDED, gated on an open decision point -- do NOT read as REFUTED. Upward
   -- closure of `intExtractValuation b` along the reconstructed augmented frame is
   -- machine-verified to FAIL at `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`
-  -- (`scratch/BetaSplitRefutation.lean`, zero errors, zero sorries). The further step from that
+  -- (`CslibTests/BetaSplitRefutation.lean`, zero errors, zero sorries). The further step from
+  -- that
   -- failure to "this `∃ edges` conjunct is false for this `b`" is an argued, [UNVERIFIED]
   -- inference (it assumes `¬IForces` is obtainable only through `IFimpAccess`); a hand-checked
   -- counter-consideration shows the raw frame `[(1,0),(2,1)]` satisfies upward closure but makes
@@ -7950,7 +7952,8 @@ contradicts the `¬IForces` conjunct.
 **Statement-shape fix.** `hvalid` now accepts the upward-closure fact as an explicit hypothesis
 rather than demanding `IForces` unconditionally at an arbitrary, unconstrained `(edges, b)` pair
 -- the old shape was machine-verified FALSE as a consequence of `IValid φ`
-(`scratch/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old `hvalid`'s body
+(`CslibTests/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old `hvalid`'s
+body
 is false at `edges = [(1, 0)]`, `b = [T(p)@0, T(q)@1]`, a valuation that is not upward-closed).
 The hypothesis `hvalid` encodes the per-scheme validity notion, quantified over the
 `edges`-parameterized `intAccessPreorder` frame (Route (a): `edges` is only discovered inside

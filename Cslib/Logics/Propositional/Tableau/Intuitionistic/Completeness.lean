@@ -47,7 +47,7 @@ to the per-branch forcing hypothesis required by `tableau_complete intScheme`.
 `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`), whose disposition is an
 open decision point (see that conjunct's docstring): upward closure of `intExtractValuation b`
 along the augmented `intAccessPreorder edges` frame is machine-verified to FAIL at
-`phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`scratch/BetaSplitRefutation.lean`,
+`phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`CslibTests/BetaSplitRefutation.lean`,
 `lake env lean` clean, zero sorries, `branchesAgree = true` against the real
 `intuitionisticTableau`). The mechanism is independent beta-splits at two
 augmented-preorder-equivalent worlds joined by a loop-back edge that `intFImpReuseWitnessAnc?`
@@ -131,7 +131,7 @@ Delegates to `tableau_complete intScheme`. **Statement-shape fix**: `tableau_com
 `intAccessPreorder edges`) as an explicit hypothesis, supplied by `openBranch_countermodel` --
 this replaces the OLD, machine-verified-defective shape (`hvalid` unconditionally quantified
 over an arbitrary, unconstrained `(edges, b)` pair, refuted by
-`scratch/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old premise's body
+`CslibTests/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old premise's body
 is false at a non-upward-closed witness valuation). With the new shape, `IValid φ` instantiates
 DIRECTLY: `World := Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val := intExtractValuation
 b`, and the supplied upward-closure hypothesis is exactly `IValid`'s own upward-closure premise.
@@ -141,7 +141,7 @@ deferred. **DP-3 is PERMANENTLY DEFERRED — unprovable as stated**, not "pendin
 phase: `openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is DISPOSITION
 UNDECIDED (an open decision point, not a landed fact) and the underlying augmented-frame
 positive-formula persistence it would need is REFUTED by a machine-verified counterexample
-(`scratch/BetaSplitRefutation.lean`, `phiRef1`). Discharging
+(`CslibTests/BetaSplitRefutation.lean`, `phiRef1`). Discharging
 `IValid φ Nat (intExtractValuation b) huc 0` here would type-check but would only launder a
 refuted premise through this file without being any more honest about it; the obligation stays
 visibly deferred here (see `Scheme.lean`'s `openBranch_countermodel` docstring for the full
@@ -155,7 +155,7 @@ theorem intuitionisticTableau_complete (φ : Proposition Atom)
   -- _huc 0` would type-check (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis,
   -- instantiated at the augmented frame `intAccessPreorder edges`), but it would consume
   -- `openBranch_countermodel`'s upward-closure conjunct, which is DISPOSITION UNDECIDED and
-  -- whose underlying content is refuted at `phiRef1` (`scratch/BetaSplitRefutation.lean`,
+  -- whose underlying content is refuted at `phiRef1` (`CslibTests/BetaSplitRefutation.lean`,
   -- `branchesAgree = true` against the real `intuitionisticTableau`). Left `sorry` deliberately
   -- -- see the docstring above. Not a route failure; no follow-up is scheduled.
   sorry

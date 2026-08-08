@@ -294,7 +294,7 @@ and the loop-back edge `(x, w)` it records is **never re-validated** afterwards.
 asserted can break while the edge itself remains on the branch, unconditionally: `x` and `w`
 stay preorder-equivalent under `intAccessPreorder`'s reflexive-transitive closure even though
 their forced atoms have since diverged. This is machine-verified, not hypothetical:
-`scratch/BetaSplitRefutation.lean` exhibits `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) →
+`CslibTests/BetaSplitRefutation.lean` exhibits `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) →
 pr`, where reuse fires with `(x, l) = (1, 2)` (containment genuinely holds at that moment), the
 `genCopies` channel then copies the unexpanded `T(pr ∨ ps)` to world `2` as a distinct `ISF`
 entry, and that copy's later, independent beta-split leaves worlds `1` and `2`

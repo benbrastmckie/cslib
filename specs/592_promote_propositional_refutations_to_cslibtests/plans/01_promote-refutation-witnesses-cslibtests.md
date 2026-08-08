@@ -419,7 +419,22 @@ committed before the purely additive part begins.
 
 ---
 
-### Phase 5: Repoint the thirteen scratch/*Refutation.lean citations [NOT STARTED]
+### Phase 5: Repoint the thirteen scratch/*Refutation.lean citations [COMPLETED]
+
+Scope Hypothesis confirmed: 14 `scratch/` occurrences at HEAD, exactly 1 remains after this
+phase's 13 substitutions (`Intuitionistic/Scheme.lean`, Phase 6's `PersistPrototype.lean` site,
+shifted to line 3475 by an earlier rewrap). Three lines needed rewrapping rather than the two
+hypothesized (`Scheme.lean:585` 98->101 confirmed; `Scheme.lean:7845`, inside the docstring,
+98->101 confirmed) plus `Scheme.lean:747` and `:7929`, which Finding 9 called borderline
+(exactly 100) but were rewrapped anyway as a conservative choice, not because they exceeded the
+limit -- rewrapping them costs nothing and removes any margin-of-error risk from the byte-count
+estimate. All rewraps break at word boundaries with no words dropped or truncated; the
+docstring block at `:7845` (site #12) was confirmed to stay well-formed by the plain build below.
+`git diff` was read explicitly across all four files: only path characters and line-wrapping
+changed; every verdict word (`REFUTED`, `PERMANENTLY DEFERRED`, `DISPOSITION UNDECIDED`,
+`[UNVERIFIED]`) is byte-identical to HEAD. `lake build` (plain, no `--wfail`) succeeds for all
+four edited modules (`Scheme`'s two pre-existing `sorry` warnings are the only output, matching
+the Phase 1 baseline). `lake exe lint-style` reports no findings for any of the four files.
 
 - **Goal:** All thirteen citations that name a refutation witness resolve from the repository root
   at their new `CslibTests/` locations.

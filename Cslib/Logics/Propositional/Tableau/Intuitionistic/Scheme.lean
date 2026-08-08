@@ -3472,8 +3472,9 @@ private lemma parAncestor_comparable {par : Nat → Nat} {x y c : Nat}
 
 /-- Forest/chain comparability along raw edges: any two worlds `isAccessible`-reachable to a
 common world `l` are themselves `isAccessible`-comparable. This is the `ForestComparable` shape
-`specs/430_.../scratch/PersistPrototype.lean` assumed as a hypothesis, before it was known to be
-derivable rather than needing fresh construction. -/
+`specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean`
+assumed as a hypothesis, before it was known to be derivable rather than needing fresh
+construction. -/
 private def ForestComparable (nw : Nat) (edges : IEdges) : Prop :=
   ∀ w x l : Nat, w < nw → x < nw →
     isAccessible edges w l = true → isAccessible edges x l = true →

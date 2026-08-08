@@ -502,7 +502,23 @@ the Phase 1 baseline). `lake exe lint-style` reports no findings for any of the 
 
 ---
 
-### Phase 6: Repair the PersistPrototype citation at Scheme.lean:3474 [NOT STARTED]
+### Phase 6: Repair the PersistPrototype citation at Scheme.lean:3474 [COMPLETED WITH EXCLUSIONS]
+
+#### Reasoned Exclusions
+
+| Item | Reason | Evidence |
+|------|--------|----------|
+| Phase 6's own verification bullet "`grep -rn \"scratch/\" Cslib/Logics/Propositional/Tableau/` returns **nothing**" (and the identical bullet in the plan's top-level Testing & Validation section) | Textually unsatisfiable given Finding 8's own prescribed repair, which this phase followed verbatim. The correct repaired form is the full archive path `specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean` -- and `scratch/` is a real, correct subdirectory of the archived task directory (confirmed by `test -f` below), not a defect to remove. Stripping `scratch/` from the path to satisfy the grep literally would reintroduce Finding 8's original defect (a citation that does not resolve). This is a plan-authoring inconsistency between Finding 8's prescription and the acceptance grep, discovered at implementation time, not a failure to execute the prescribed repair. | `git diff` above shows the repair matches Finding 8's prescribed form exactly. `grep -rn "scratch/" Cslib/Logics/Propositional/Tableau/` returns exactly one line, `Intuitionistic/Scheme.lean:3475`, which is this legitimate archive-path reference -- the same one-line result Phase 5 already recorded as expected residue. |
+| The line-3324 `` `specs/430_.../handoffs/` `` reference (a wholly separate citation, not one of Finding 9's 14 inventoried sites, referencing a "handoffs" directory rather than the `scratch/PersistPrototype.lean` witness) | Out of scope: not part of the three-witness citation inventory this task promotes/repoints (Goals section), and the plan's own `grep -rn "430_\.\.\." Cslib/` verification bullet appears to have been written assuming only the :3474/:3475 site existed, without accounting for this pre-existing, unrelated citation. Repairing it would be undisclosed scope expansion into a citation this plan never analysed. | `grep -rn "430_\.\.\." Cslib/` (literal-ellipsis pattern) returns exactly one line, `Scheme.lean:3324` -- untouched, pre-existing, out of scope. `:3475`'s ellipsis form was replaced by the full archive path (not by another ellipsis), so it does not match this pattern; it does match the broader substring `430_`, but that is expected and correct since it is now the fully-qualified directory name `430_prove_atom_persistence_upward_closure_for_intexpan`, not a residual ellipsis defect. |
+
+The phase's actual goal -- "the fourteenth citation resolves from the repository root" -- is met:
+`test -f specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean`
+confirms the archive path exists on disk. `lake build
+Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` (plain) succeeds. `lake exe lint-style`
+reports no findings near `:3475`. The write-time `no-task-references` hook did not fire (Finding
+8's `TASK_PATTERN` analysis holds: no literal `task`/`tasks` word precedes the digits in either
+path). `git diff` confirms no verdict or annotation text was altered, only the path and its
+rewrap.
 
 - **Goal:** The fourteenth citation resolves from the repository root.
 

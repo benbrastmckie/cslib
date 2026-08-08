@@ -1,7 +1,7 @@
 # Implementation Plan: Task #511
 
 - **Task**: 511 - S4 loop checking termination (close the termination bound and complete decidability)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 6 hours
 - **Dependencies**: 535, 553, 563, 564, 565, 566, 567, 586 (all landed; no live blocker at HEAD)
 - **Research Inputs**: `specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md`
@@ -146,7 +146,7 @@ verification tiers and commit modes genuinely differ, not to force two dispatche
 
 ---
 
-### Phase 1: Ordered saturation lemma [NOT STARTED]
+### Phase 1: Ordered saturation lemma [COMPLETED]
 
 **Goal**: Add `modalStepBranchS4KeyedOrdered_none_saturated` to `LoopChecking.lean` — the ordered
 twin of the private `modalStepBranchS4Keyed_none_saturated` (`LoopChecking.lean:1099`), and the

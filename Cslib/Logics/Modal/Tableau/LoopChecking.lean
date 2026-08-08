@@ -1122,6 +1122,21 @@ private lemma modalStepBranchS4Keyed_none_saturated (φ₀ : Proposition Atom)
     · exact absurd hbody (by simp)
     · rfl
 
+/-- **Ordered twin** of `modalStepBranchS4Keyed_none_saturated`. Transfers the saturated-leaf
+characterisation from the unordered keyed stepper to the ordered one via
+`modalStepBranchS4KeyedOrdered_eq_none_iff` (`S4/Driver.lean:678`), whose own docstring records
+that this transfer is exactly what it was written to enable: "lets later phases — the saturation
+step in particular — transfer facts about the old stepper's termination condition to the new one
+without re-deriving anything". -/
+private lemma modalStepBranchS4KeyedOrdered_none_saturated (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys = none)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsfb : sf ∈ b) :
+    sf ∈ e ∨ (modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable :=
+  modalStepBranchS4Keyed_none_saturated φ₀ b e acc keys
+    ((modalStepBranchS4KeyedOrdered_eq_none_iff φ₀ b e acc keys).mp hstep) sf hsfb
+
 /-- **The keyed top-loop Hintikka lemma**: an open branch produced by
 `modalExpandBranchesS4Keyed` is a Hintikka set for the LIVE S4 rule `modalApplyOneS4 φ₀`
 (bridged from the keyed rule via `hintikka_congr_S4`/`modalHintikkaSetS4_eq` at the very end).

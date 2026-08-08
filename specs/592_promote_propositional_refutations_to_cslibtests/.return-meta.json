@@ -1,24 +1,48 @@
 {
-  "status": "success",
+  "status": "planned",
   "artifacts": [
-    "specs/592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md"
+    {
+      "type": "plan",
+      "path": "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md",
+      "summary": "7-phase plan: capture HEAD gate baseline, promote both witnesses into CslibTests/ with #guard_msgs and barrel registration, repoint all 14 citations, final gate judged by set-difference against the baseline"
+    }
   ],
   "partial_progress": {
-    "stage": "research_written",
-    "details": "Research report written and verified non-empty. All 14 citations located with exact text and byte lengths; both load-bearing witnesses compiled at HEAD and prototyped green under CslibTests module-mode conventions; probes removed."
+    "stage": "plan_written",
+    "details": "Plan written and validated (validate-artifact.sh plan --strict: PASS, 0 warnings). All 7 phases carry Goal/Tasks/Timing/Depends on/Verification Tier; 6 carry Scope Hypothesis. Wave table matches per-phase Depends on fields exactly."
   },
   "metadata": {
     "session_id": "sess_1786219370_0903ea_592",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
     "task_number": 592,
     "task_type": "cslib",
-    "sorry_census_baseline": 4,
-    "citations_located": 14,
-    "witnesses_compile_at_head": true,
-    "promotion_prototyped_green": true,
+    "phase_count": 7,
+    "estimated_hours": 5.5,
+    "dependency_waves": [[1], [2], [3], [4, 5], [6], [7]],
+    "complexity": "medium",
+    "research_integrated": true,
+    "plan_version": 1,
+    "verification_tiers": {
+      "prose": [1],
+      "interface": [2, 3],
+      "local": [4, 5, 6],
+      "full": [7]
+    },
+    "report_discrepancy_corrected_at_plan_time": "Research Finding 5 states '14 bare #evals' and 'the five verbose ones'; its own enumerations total 16 (9 keep + 7 drop). Direct count at HEAD confirms 16. Plan uses 16/9/7 and requires implementation-time re-confirmation.",
+    "roadmap_consulted": "specs/ROADMAP.md (read-only; not modified)",
     "new_sorries": 0,
     "new_axioms": 0
-  }
+  },
+  "memory_candidates": [
+    {
+      "content": "When planning against a repository gate that is ALREADY failing at HEAD (pre-existing warnings promoted to errors by flags like `--wfail`), do not let the plan's acceptance criterion be the gate's exit code. Add a dedicated first phase whose only job is to capture the baseline failing-target set to a file from a clean tree, then make every later phase's acceptance a set-difference against that file plus 'my new targets are green'. This prevents the two standard failure modes: the implementer chasing a phantom regression it did not cause, and the implementer silently 'fixing' the pre-existing failure as a side quest (which hides real tracked debt). The baseline phase costs one build and carries verification tier `prose` because it edits no source. Applies to any red-at-HEAD gate, not just Lean/lake.",
+      "category": "PATTERN",
+      "source_artifact": "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["baseline-capture", "red-at-head", "gate-acceptance", "set-difference", "phantom-regression", "phase-decomposition"]
+    }
+  ],
+  "next_steps": "Run /implement 592 to execute the plan"
 }

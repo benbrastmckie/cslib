@@ -1,24 +1,25 @@
 {
   "task_number": 592,
-  "phase": "research",
+  "phase": "plan",
   "status": "success",
   "session_id": "sess_1786219370_0903ea_592",
   "artifacts": [
-    "specs/592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md"
+    "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md"
   ],
-  "next_phase": "plan",
+  "next_phase": "implement",
   "blockers": [],
-  "summary": "Research complete. The 2026-08-08 correction is confirmed: all three witnesses exist at HEAD under specs/archive/430_.../scratch/ and both load-bearing ones compile clean (lake env lean exit 0, zero sorries) against current Mathlib/Cslib, reproducing the documented refutation values exactly. Promotion into CslibTests/ was prototyped end-to-end and builds green (lake build --wfail --iofail -> Built) for both files; probes were removed afterwards. All 14 citations located with exact text and byte lengths.",
+  "summary": "7-phase plan written and strict-validated (0 warnings). Phase 1 captures the HEAD --wfail --iofail baseline so later phases judge the gate by set-difference, never exit code (Finding 6). Phases 2-4 promote both witnesses into CslibTests/ (module mode, doubled Mathlib tactic meta-imports, 9 #guard_msgs assertions, 7 verbose evals dropped, barrel registration, docstrings). Phases 5-6 repoint all 14 citations, treating Scheme.lean:3474 as a 14th repair site rather than a template (Finding 8). Phase 7 is the full gate. Estimated 5.5 hours across 6 waves; one genuine parallel wave (Phases 4 and 5, disjoint trees).",
   "key_findings": [
-    "Both witnesses compile at HEAD; every Cslib symbol they use still exists. No evidence lost.",
-    "CslibTests requires module mode; public meta import of Scheme is NOT enough -- ring and norm_num need their own explicit Mathlib.Tactic.Ring / Mathlib.Tactic.NormNum meta imports or the termination proof fails with 'unknown tactic'.",
-    "Bare #eval fails the pipeline's --iofail gate; the 9 compact evals must be wrapped in #guard_msgs (exact expected strings are recorded in the report) and 7 verbose evals dropped.",
-    "lake build --wfail --iofail is ALREADY RED at HEAD from the 2 pre-existing Scheme.lean sorry warnings -- acceptance must be 'failing-target set unchanged plus the 2 new targets green', not 'pipeline green'.",
-    "Scheme.lean:3474 is NOT a correct reference form as the task description states: it uses a literal ellipsis (specs/430_.../) and omits the archive/ segment, so it does not resolve either. It is a 14th site to repair, not the template.",
-    "Three lines exceed the 100-column limit after substitution and need rewrapping: Scheme.lean:585, Scheme.lean:7845, Scheme.lean:3474.",
-    "CslibTests is exempt from checkInitImports, the sorry-suppression sweep, and the axiom census; barrel registration in CslibTests.lean is what confers CI protection.",
-    "No new abstractions needed (reuse check clean). Sorry census stays at 4; zero new sorries, zero new axioms."
+    "Report figure corrected at plan time: Finding 5's '14 bare #evals' and 'five verbose ones' are wrong. Direct count at HEAD gives 16 #evals (lines 252-256, 327-332, 392-396); the enumerated lists (9 keep, 7 drop) are authoritative and total 16. Plan uses 16/9/7 and still requires grep re-confirmation.",
+    "Phase 1 exists solely to convert the already-red --wfail --iofail gate from an unusable exit-code signal into a usable set-difference signal. Acceptance is 'failing-target set unchanged from baseline plus the two new targets green', explicitly not 'pipeline green'.",
+    "Phases 2 and 3 are serialized (not parallel) because both must edit the shared CslibTests.lean barrel; Phases 4 and 5 are genuinely parallel (CslibTests/ vs Cslib/Logics/Propositional/Tableau/).",
+    "Verification tiers assigned deliberately, not by default: Phase 4 (docstrings) is `local` not `prose` because Lean /-- --/ doc comments compile; Phases 5-6 (comment edits) are `local` not `prose` because three lines need rewrapping and site #12 sits inside a docstring.",
+    "Fixing the pre-existing --wfail red, promoting PersistPrototype.lean, promoting the 5 uncited probes, and re-adjudicating any verdict are all explicit Non-Goals. The archive-path fragility under a future vault renumbering is recorded as an accepted known consequence, not a surprise.",
+    "Rollback guidance is asymmetric and stated: promotion alone (Phases 1-4) is separately shippable; citation repair alone is not, since it would point at files that do not yet exist. If work must stop mid-task, stop after Phase 4.",
+    "grep confirms 14 'scratch/' occurrences in the subtree at HEAD, matching the research inventory; ROADMAP.md consulted read-only and not modified."
   ],
-  "recommended_phases": 5,
+  "phase_count": 7,
+  "estimated_hours": 5.5,
+  "dependency_waves": [[1], [2], [3], [4, 5], [6], [7]],
   "risk_level": "low"
 }

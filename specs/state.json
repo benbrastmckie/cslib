@@ -1,5 +1,5 @@
 {
-  "next_project_number": 598,
+  "next_project_number": 601,
   "active_projects": [
     {
       "project_number": 590,
@@ -758,7 +758,7 @@
     {
       "project_number": 548,
       "project_name": "decidability_remaining_eight_modal_cube_corners",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
@@ -767,8 +767,25 @@
         535,
         597
       ],
-      "description": "COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidability instances exist for only 6 of the 15 modal-cube systems: K (Tableau/CompletenessLoop.lean:2295), T (FrameCompleteness.lean:1318), KB (:1933), S5 (:2429), K5/Five (:3220), KB5 (:4165); S4 is in flight (tasks 506/511/535 own the loop-checking termination). The 8 remaining corners — D, K4, K45, D4, D5, D45, DB, TB — have sorry-free soundness + strong completeness + compactness + conservative extension but NO Valid predicate, no tableau driver, and no Decidable instance: the decidability column of the cube is ragged. Work (BLOCKED on 511/535 landing the S4 termination machinery): extend the generic tableau driver to the remaining corners — transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules. Where filtration/FMP is cheaper than loop-checking for a given corner, route via FMP instead. Acceptance: either a Decidable instance per corner, or an explicit documented out-of-scope note per corner stating why (e.g. cost/benefit), so the matrix is intentionally complete rather than accidentally ragged. Zero sorry, zero new axioms; keep all frozen deliverables from 300/534/506 untouched.",
-      "created": "2026-07-23T17:20:09Z"
+      "description": "SCOPE NARROWED after research (report 01_eight-corner-decidability-research.md). The original eight-corner scope is not workable as written: the decidability matrix is already 7/15 (instDecidableS4Valid landed at Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:8281), the generic-driver extension this task proposed was formally rejected by the tableau driver abstraction decision (per-regime drivers stay bespoke), and a newly-discovered spec-shape blocker gates five of the eight corners: D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (GenericDriver.lean:239-243), which forbids a .linear mint at exactly the box-positive shape a D tableau must mint at; all three mint-avoiding alternatives were refuted (two unsound, one non-terminating). WORK: (1) Land TB end-to-end -- tbFC, tbValid, extractModelTB, the TB rule, RuleApplicationSpec discharge, truth lemma, soundness, completeness, tbValid_decides, instDecidableTBValid -- taking the matrix 7/15 to 8/15. TB is the only corner free of every gate: both ingredient rules exist and are non-minting, and Relation.ReflGen.compRel_symm (Foundations/Relation/Confluence.lean:368) is already in tree as exactly the frame instance it needs. (2) Land the intentional-completeness matrix note: for each of the seven remaining corners (D, K4, K45, D4, D5, D45), record frame condition, tier, the named gate blocking it, and cost estimate. This is the acceptance criterion's own second arm ('an explicit documented out-of-scope note per corner'), not a deferral -- it makes the matrix intentionally complete rather than accidentally ragged. The three blocking gates are owned by successor tasks 598, 599, 600. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched (FmpMeasure.lean carries an additional explicit no-touch). NOTE: the original description's task-534 freeze clause is vacuous (534 has no artifacts), and five of its seven line anchors were wrong -- corrected table in report section 1.2.",
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-08-08T23:45:35Z",
+      "session_id": "sess_1786228817_675b2c",
+      "artifacts": [
+        {
+          "path": "specs/548_decidability_remaining_eight_modal_cube_corners/reports/01_eight-corner-decidability-research.md",
+          "type": "report",
+          "summary": "Eight-corner decidability research: matrix is 7/15, TB is the only ungated corner, seriality rule blocks five corners"
+        },
+        {
+          "path": "specs/548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md",
+          "type": "plan",
+          "summary": "11-phase plan: TB corner end-to-end (7/15 -> 8/15) plus intentional-completeness matrix note"
+        }
+      ],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/"
+      ]
     },
     {
       "project_number": 551,
@@ -1141,6 +1158,51 @@
       "roadmap_items": [
         "Tableau driver abstraction decided: per-regime split retained; 8-corner expansion to be re-tranched on grounds other than duplication"
       ]
+    },
+    {
+      "project_number": 598,
+      "project_name": "serial_rule_spec_decision_tableau",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prototype and measure a serial-successor rule spec for the modal tableau driver. Research on the eight-corner decidability gap found that D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (Cslib/Logics/Modal/Tableau/GenericDriver.lean:239-243): that field forbids a .linear mint at the box-positive shape, which is exactly where a D tableau must mint a successor. Three mint-avoiding alternatives were refuted -- self-loop closure and fresh-sink are both unsound, and the F(box-bot) seeding trick is non-terminating because box-bot has constant modal depth. WORK: prototype an additive sibling spec (RuleApplicationSpecSerial) plus an additive modalLoopGen_eBoxOnlyNeg_serial, on D alone, and measure the cost. Additive means the existing RuleApplicationSpec and its discharge sites are untouched. Deliverable is a measured decision report plus the D prototype, not a full corner. UNBLOCKS: D, DB, D4, D5, D45 (five of the eight remaining modal-cube corners). Zero sorry, zero new axioms.",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "created": "2026-08-08T23:37:47Z",
+      "last_updated": "2026-08-08T23:37:47Z",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/"
+      ],
+      "dependencies": []
+    },
+    {
+      "project_number": 599,
+      "project_name": "euclidean_rule_combinator_prototype",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Prototype the Euclidean rule combinator identified as an open, unowned gate by the tableau driver abstraction decision (section 7.2). WORK: build the combinator on Kb5''-from-Five and measure it -- derive the KB5 rule set from the existing Five (K5) rule set via the combinator rather than restating it, and report the measured cost against the bespoke alternative. Deliverable is a measured prototype plus decision report. GATES: K45, D5, D45 in the modal-cube decidability matrix. Independent of the serial-rule spec decision and the S4 stepper-stack retirement -- all three can run in parallel. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched.",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "created": "2026-08-08T23:37:47Z",
+      "last_updated": "2026-08-08T23:37:47Z",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/"
+      ],
+      "dependencies": []
+    },
+    {
+      "project_number": 600,
+      "project_name": "unordered_s4_stepper_stack_retirement",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Retire the unordered S4 stepper stack at Cslib/Logics/Modal/Tableau/LoopChecking.lean:192 (the 'Phase 15' marker). Research on the eight-corner decidability gap measured 152 live references still pointing at it, making this a real migration rather than a deletion. The keyed-ordered S4 path that supersedes it already landed (modalTableauS4KeyedOrdered_sound / _complete, instDecidableS4Valid in FrameCompleteness.lean). WORK: migrate the live references to the keyed-ordered path and remove the unordered stack. HARD PREREQUISITE for the K4 and D4 modal-cube corners per the tableau driver abstraction decision (section 9). Independent of the serial-rule spec decision and the Euclidean rule-combinator prototype. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched.",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "created": "2026-08-08T23:37:47Z",
+      "last_updated": "2026-08-08T23:37:47Z",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/"
+      ],
+      "dependencies": []
     }
   ],
   "repository_health": {

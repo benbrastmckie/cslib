@@ -1,5 +1,5 @@
 ---
-next_project_number: 598
+next_project_number: 601
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 598
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,506,534,548,554,568,569,590,591,594,596 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,506,534,548,554,568,569,590,591,594,596,598,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,593,595 | 36,37,181,425,534,554,568,591,594 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,375,589 | 39,40,534,548,593 | foundations, propositional logic, code hygiene |
 | 4 | 497 | 375,400,425 | propositional logic |
@@ -38,11 +38,14 @@ next_project_number: 598
 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
   └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
-548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+548 [PLANNED] — SCOPE NARROWED after research (report 01_eight-corner-decidabilit
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
+598 [NOT STARTED] — Prototype and measure a serial-successor rule spec for the modal 
+599 [NOT STARTED] — Prototype the Euclidean rule combinator identified as an open, un
+600 [NOT STARTED] — Retire the unordered S4 stepper stack at Cslib/Logics/Modal/Table
 
 ### Temporal Logic
 
@@ -77,6 +80,36 @@ next_project_number: 598
 596 [NOT STARTED] — Realign specs/ROADMAP.md with verified repository state. Created 
 
 ## Tasks
+
+### 600. Unordered s4 stepper stack retirement
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Retire the unordered S4 stepper stack at Cslib/Logics/Modal/Tableau/LoopChecking.lean:192 (the 'Phase 15' marker). Research on the eight-corner decidability gap measured 152 live references still pointing at it, making this a real migration rather than a deletion. The keyed-ordered S4 path that supersedes it already landed (modalTableauS4KeyedOrdered_sound / _complete, instDecidableS4Valid in FrameCompleteness.lean). WORK: migrate the live references to the keyed-ordered path and remove the unordered stack. HARD PREREQUISITE for the K4 and D4 modal-cube corners per the tableau driver abstraction decision (section 9). Independent of the serial-rule spec decision and the Euclidean rule-combinator prototype. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched.
+
+---
+
+### 599. Euclidean rule combinator prototype
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Prototype the Euclidean rule combinator identified as an open, unowned gate by the tableau driver abstraction decision (section 7.2). WORK: build the combinator on Kb5''-from-Five and measure it -- derive the KB5 rule set from the existing Five (K5) rule set via the combinator rather than restating it, and report the measured cost against the bespoke alternative. Deliverable is a measured prototype plus decision report. GATES: K45, D5, D45 in the modal-cube decidability matrix. Independent of the serial-rule spec decision and the S4 stepper-stack retirement -- all three can run in parallel. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched.
+
+---
+
+### 598. Serial rule spec decision tableau
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Prototype and measure a serial-successor rule spec for the modal tableau driver. Research on the eight-corner decidability gap found that D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (Cslib/Logics/Modal/Tableau/GenericDriver.lean:239-243): that field forbids a .linear mint at the box-positive shape, which is exactly where a D tableau must mint a successor. Three mint-avoiding alternatives were refuted -- self-loop closure and fresh-sink are both unsound, and the F(box-bot) seeding trick is non-terminating because box-bot has constant modal depth. WORK: prototype an additive sibling spec (RuleApplicationSpecSerial) plus an additive modalLoopGen_eBoxOnlyNeg_serial, on D alone, and measure the cost. Additive means the existing RuleApplicationSpec and its discharge sites are untouched. Deliverable is a measured decision report plus the D prototype, not a full corner. UNBLOCKS: D, DB, D4, D5, D45 (five of the eight remaining modal-cube corners). Zero sorry, zero new axioms.
+
+---
 
 ### 597. Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion
 - **Status**: [COMPLETED]
@@ -432,12 +465,14 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 548. Decidability remaining eight modal cube corners
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 511, Task 535, Task 597
+- **Research**: [548_decidability_remaining_eight_modal_cube_corners/reports/01_eight-corner-decidability-research.md]
+- **Plan**: [548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md]
 
-**Description**: COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidability instances exist for only 6 of the 15 modal-cube systems: K (Tableau/CompletenessLoop.lean:2295), T (FrameCompleteness.lean:1318), KB (:1933), S5 (:2429), K5/Five (:3220), KB5 (:4165); S4 is in flight (tasks 506/511/535 own the loop-checking termination). The 8 remaining corners — D, K4, K45, D4, D5, D45, DB, TB — have sorry-free soundness + strong completeness + compactness + conservative extension but NO Valid predicate, no tableau driver, and no Decidable instance: the decidability column of the cube is ragged. Work (BLOCKED on 511/535 landing the S4 termination machinery): extend the generic tableau driver to the remaining corners — transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules. Where filtration/FMP is cheaper than loop-checking for a given corner, route via FMP instead. Acceptance: either a Decidable instance per corner, or an explicit documented out-of-scope note per corner stating why (e.g. cost/benefit), so the matrix is intentionally complete rather than accidentally ragged. Zero sorry, zero new axioms; keep all frozen deliverables from 300/534/506 untouched.
+**Description**: SCOPE NARROWED after research (report 01_eight-corner-decidability-research.md). The original eight-corner scope is not workable as written: the decidability matrix is already 7/15 (instDecidableS4Valid landed at Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:8281), the generic-driver extension this task proposed was formally rejected by the tableau driver abstraction decision (per-regime drivers stay bespoke), and a newly-discovered spec-shape blocker gates five of the eight corners: D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (GenericDriver.lean:239-243), which forbids a .linear mint at exactly the box-positive shape a D tableau must mint at; all three mint-avoiding alternatives were refuted (two unsound, one non-terminating). WORK: (1) Land TB end-to-end -- tbFC, tbValid, extractModelTB, the TB rule, RuleApplicationSpec discharge, truth lemma, soundness, completeness, tbValid_decides, instDecidableTBValid -- taking the matrix 7/15 to 8/15. TB is the only corner free of every gate: both ingredient rules exist and are non-minting, and Relation.ReflGen.compRel_symm (Foundations/Relation/Confluence.lean:368) is already in tree as exactly the frame instance it needs. (2) Land the intentional-completeness matrix note: for each of the seven remaining corners (D, K4, K45, D4, D5, D45), record frame condition, tier, the named gate blocking it, and cost estimate. This is the acceptance criterion's own second arm ('an explicit documented out-of-scope note per corner'), not a deferral -- it makes the matrix intentionally complete rather than accidentally ragged. The three blocking gates are owned by successor tasks 598, 599, 600. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched (FmpMeasure.lean carries an additional explicit no-touch). NOTE: the original description's task-534 freeze clause is vacuous (534 has no artifacts), and five of its seven line anchors were wrong -- corrected table in report section 1.2.
 
 ---
 

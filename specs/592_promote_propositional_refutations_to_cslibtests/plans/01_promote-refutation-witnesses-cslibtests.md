@@ -1,7 +1,7 @@
 # Implementation Plan: Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
 
 - **Task**: 592 - Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md`
@@ -573,7 +573,48 @@ conclusion that the `scratch/` prefix was task-directory-relative still stands; 
 
 ---
 
-### Phase 7: Final gate against the HEAD baseline [NOT STARTED]
+### Phase 7: Final gate against the HEAD baseline [COMPLETED]
+
+All acceptance criteria met:
+
+- `lake test` succeeds (`✔ [9391/9391] Built CslibTests`), confirming both promoted files are
+  barrel-reachable and CI-protected.
+- `lake build --wfail --iofail` over the repository: the failing-target set, extracted to
+  `gate-final-targets.txt`, is **byte-identical** (`diff` empty) to the Phase 1
+  `gate-baseline-targets.txt` (5 targets: `Cslib.Logics.Modal.Tableau.FrameCompleteness`,
+  `Cslib.Logics.Modal.Tableau.S4.Driver`,
+  `Cslib.Logics.Propositional.Tableau.Intuitionistic.{Completeness,Scheme}`,
+  `Cslib.Logics.Propositional.Tableau.Minimal.Completeness`). Neither
+  `CslibTests.HvalidShapeRefutation` nor `CslibTests.BetaSplitRefutation` appears in the failing
+  set; an explicit re-build of both targets confirms they remain green (only `Scheme`'s two
+  pre-existing `sorry` warnings are replayed as a dependency, not a failure of either new target).
+- Subtree sorry census re-confirmed exactly **4**, same four declarations as Phase 1
+  (`Intuitionistic/Completeness.lean:161`, `Minimal/Completeness.lean:155`,
+  `Intuitionistic/Scheme.lean:761`, `Intuitionistic/Scheme.lean:7940` -- line numbers for the
+  Scheme.lean sorries shifted by +1 from Phase 6's single-line rewrap insertion, same
+  declarations). Zero new axioms in the subtree (`grep -rn "^axiom "` returns 0).
+- `bash scripts/check-shake-residue.sh`: 12 flagged files, matching the Phase 1/Phase 3 baseline
+  exactly -- the doubled Mathlib tactic imports are genuinely used and not flagged.
+- `lake exe lint-style` over the whole repository: zero findings.
+- `lake exe checkInitImports`: clean (no output; both new `CslibTests/` files correctly omit
+  `Cslib.Init`, matching every other `CslibTests/` file).
+- Both barrel lines confirmed present in `CslibTests.lean` at their ASCII-sorted positions.
+- `git status --porcelain CslibTests/` is empty (both promotions already committed in Phases 2-3;
+  no probe residue).
+- File-scope confirmed: every file this task modified or created falls under `CslibTests/`,
+  `CslibTests.lean`, `Cslib/Logics/Propositional/Tableau/`, or the task directory. (Other
+  uncommitted changes visible in `git status` at Phase 7 time --
+  `.claude/scripts/literature-fidelity-audit.sh`, `.claude/scripts/literature-search.sh`,
+  `specs/events.jsonl` -- belong to other concurrently-running sessions/tasks in this shared
+  workspace and were left untouched, per the git-staging-scope discipline of under-staging rather
+  than over-staging.)
+
+**Definition of done, restated from the plan Overview, fully met**: both `CslibTests.*` targets
+build with zero warnings and zero `info:` lines; `lake test` passes; `grep -rn "scratch/"
+Cslib/Logics/Propositional/Tableau/` returns exactly the one legitimate archive-path reference at
+`:3475` documented as a Phase 6 Reasoned Exclusion (zero unresolvable/bare `scratch/`-relative
+citations remain); the sorry census in that subtree is still exactly 4; the `--wfail --iofail`
+failing-target set is byte-identical to the Phase 1 baseline.
 
 - **Goal:** Confirm the full acceptance criteria, with the `--wfail --iofail` result judged by
   set-difference against the Phase 1 baseline rather than by exit code.

@@ -1,0 +1,182 @@
+⚠ [3180/3191] Replaying Cslib.Logics.Modal.Tableau.S4.Driver
+trace: .> LEAN_PATH=/home/benjamin/Projects/cslib/.lake/packages/Cli/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/batteries/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/Qq/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/aesop/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/importGraph/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/plausible/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/mathlib/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/build/lib/lean /home/benjamin/.elan/toolchains/leanprover--lean4---v4.33.0-rc1/bin/lean /home/benjamin/Projects/cslib/Cslib/Logics/Modal/Tableau/S4/Driver.lean -o /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Modal/Tableau/S4/Driver.olean -i /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Modal/Tableau/S4/Driver.ilean -c /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Modal/Tableau/S4/Driver.c --setup /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Modal/Tableau/S4/Driver.setup.json --json
+warning: Cslib/Logics/Modal/Tableau/S4/Driver.lean:893:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: Cslib/Logics/Modal/Tableau/S4/Driver.lean:2395:4: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/S4/Driver.lean:2396:4: `(try split)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 2395!
+warning: Cslib/Logics/Modal/Tableau/S4/Driver.lean:2395:4: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/S4/Driver.lean:2396:4: `(try split)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 2395!
+warning: Cslib/Logics/Modal/Tableau/S4/Driver.lean:2423:41: This simp argument is unused:
+  h
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [3195/3323] Replaying Cslib.Logics.Modal.Tableau.FrameCompleteness
+trace: .> LEAN_PATH=/home/benjamin/Projects/cslib/.lake/packages/Cli/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/batteries/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/Qq/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/aesop/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/importGraph/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/plausible/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/mathlib/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/build/lib/lean /home/benjamin/.elan/toolchains/leanprover--lean4---v4.33.0-rc1/bin/lean /home/benjamin/Projects/cslib/Cslib/Logics/Modal/Tableau/FrameCompleteness.lean -o /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Modal/Tableau/FrameCompleteness.olean -i /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Modal/Tableau/FrameCompleteness.ilean -c /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Modal/Tableau/FrameCompleteness.c --setup /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Modal/Tableau/FrameCompleteness.setup.json --json
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5696:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5697:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5696!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+warning: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5701:6: `simp_all` is a flexible tactic modifying `⊢`. Try `simp_all?` and use the suggested `simp_all only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:5702:14: `(rcases hmem with rfl | rfl <;> rfl)`
+modifies the current goal, which was modified by the flexible tactic `simp_all` on line 5701!
+⚠ [3268/3323] Replaying Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
+trace: .> LEAN_PATH=/home/benjamin/Projects/cslib/.lake/packages/Cli/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/batteries/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/Qq/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/aesop/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/importGraph/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/plausible/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/mathlib/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/build/lib/lean /home/benjamin/.elan/toolchains/leanprover--lean4---v4.33.0-rc1/bin/lean /home/benjamin/Projects/cslib/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean -o /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.olean -i /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.ilean -c /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.c --setup /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.setup.json --json
+warning: Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:689:6: declaration uses `sorry`
+warning: Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7864:6: declaration uses `sorry`
+⚠ [3269/3323] Replaying Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
+trace: .> LEAN_PATH=/home/benjamin/Projects/cslib/.lake/packages/Cli/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/batteries/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/Qq/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/aesop/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/importGraph/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/plausible/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/mathlib/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/build/lib/lean /home/benjamin/.elan/toolchains/leanprover--lean4---v4.33.0-rc1/bin/lean /home/benjamin/Projects/cslib/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean -o /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.olean -i /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.ilean -c /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.c --setup /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.setup.json --json
+warning: Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:150:8: declaration uses `sorry`
+⚠ [3288/3323] Replaying Cslib.Logics.Propositional.Tableau.Minimal.Completeness
+trace: .> LEAN_PATH=/home/benjamin/Projects/cslib/.lake/packages/Cli/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/batteries/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/Qq/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/aesop/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/importGraph/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/plausible/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/packages/mathlib/.lake/build/lib/lean:/home/benjamin/Projects/cslib/.lake/build/lib/lean /home/benjamin/.elan/toolchains/leanprover--lean4---v4.33.0-rc1/bin/lean /home/benjamin/Projects/cslib/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean -o /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.olean -i /home/benjamin/Projects/cslib/.lake/build/lib/lean/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.ilean -c /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.c --setup /home/benjamin/Projects/cslib/.lake/build/ir/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.setup.json --json
+warning: Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:144:8: declaration uses `sorry`
+Some required targets logged failures:
+- Cslib.Logics.Modal.Tableau.S4.Driver
+- Cslib.Logics.Modal.Tableau.FrameCompleteness
+- Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
+- Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
+- Cslib.Logics.Propositional.Tableau.Minimal.Completeness
+error: build failed
+EXIT:1

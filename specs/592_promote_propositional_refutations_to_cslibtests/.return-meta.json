@@ -1,18 +1,70 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-08T14:15:22-07:00",
-  "artifacts": [],
+  "completed_at": "2026-08-08T14:42:55-07:00",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md",
+      "summary": "All 7 phases COMPLETED (Phase 4 and Phase 6 marked COMPLETED WITH EXCLUSIONS with documented Reasoned Exclusions)."
+    },
+    {
+      "type": "summary",
+      "path": "specs/592_promote_propositional_refutations_to_cslibtests/summaries/01_promote-refutation-witnesses-cslibtests-summary.md",
+      "summary": "Implementation summary covering what was built, verification results, plan deviations, and zero-debt confirmation."
+    }
+  ],
+  "modified_files": [
+    "CslibTests/HvalidShapeRefutation.lean",
+    "CslibTests/BetaSplitRefutation.lean",
+    "CslibTests.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-baseline.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-baseline-targets.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-final.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-final-targets.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/summaries/01_promote-refutation-witnesses-cslibtests-summary.md",
+    "specs/592_promote_propositional_refutations_to_cslibtests/.return-meta.json"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
+    "stage": "complete",
+    "details": "All 7 phases completed and committed as separate git commits (phase 1; phase 2; phase 3-4 combined; phase 5; phase 6; phase 7 pending this final commit).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 7,
+    "phases_total": 7
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "subtree_sorry_census": 4,
+    "subtree_sorry_census_unchanged": true,
+    "gate_failing_target_diff_empty": true,
+    "lint_style_findings": 0,
+    "check_init_imports_clean": true,
+    "shake_residue_matches_baseline": true
   },
   "metadata": {
     "session_id": "sess_1786219370_0903ea_592",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed",
+    "blocked_phase": null,
+    "requires_user_review": false,
+    "plan_deviations": [
+      "Phases 3 and 4 merged into one authoring pass/commit (file written once; both phases' verification criteria independently re-checked)",
+      "Phase 6 verification bullet 'grep scratch/ returns nothing' found textually unsatisfiable given Finding 8's own prescribed archive-path repair; documented as Reasoned Exclusion, actual phase goal (citation resolves from repo root) met",
+      "Out-of-scope, unrelated citation at Scheme.lean:3324 discovered and left untouched (not part of Finding 9's 14-site inventory)",
+      "Phase 1 baseline failing-target set was 5 targets, not the hypothesized 1; recorded as-is per the phase's own Scope Hypothesis instruction"
+    ]
   }
 }

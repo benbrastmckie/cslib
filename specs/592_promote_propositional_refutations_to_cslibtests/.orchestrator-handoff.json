@@ -1,0 +1,24 @@
+{
+  "task_number": 592,
+  "phase": "research",
+  "status": "success",
+  "session_id": "sess_1786219370_0903ea_592",
+  "artifacts": [
+    "specs/592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md"
+  ],
+  "next_phase": "plan",
+  "blockers": [],
+  "summary": "Research complete. The 2026-08-08 correction is confirmed: all three witnesses exist at HEAD under specs/archive/430_.../scratch/ and both load-bearing ones compile clean (lake env lean exit 0, zero sorries) against current Mathlib/Cslib, reproducing the documented refutation values exactly. Promotion into CslibTests/ was prototyped end-to-end and builds green (lake build --wfail --iofail -> Built) for both files; probes were removed afterwards. All 14 citations located with exact text and byte lengths.",
+  "key_findings": [
+    "Both witnesses compile at HEAD; every Cslib symbol they use still exists. No evidence lost.",
+    "CslibTests requires module mode; public meta import of Scheme is NOT enough -- ring and norm_num need their own explicit Mathlib.Tactic.Ring / Mathlib.Tactic.NormNum meta imports or the termination proof fails with 'unknown tactic'.",
+    "Bare #eval fails the pipeline's --iofail gate; the 9 compact evals must be wrapped in #guard_msgs (exact expected strings are recorded in the report) and 7 verbose evals dropped.",
+    "lake build --wfail --iofail is ALREADY RED at HEAD from the 2 pre-existing Scheme.lean sorry warnings -- acceptance must be 'failing-target set unchanged plus the 2 new targets green', not 'pipeline green'.",
+    "Scheme.lean:3474 is NOT a correct reference form as the task description states: it uses a literal ellipsis (specs/430_.../) and omits the archive/ segment, so it does not resolve either. It is a 14th site to repair, not the template.",
+    "Three lines exceed the 100-column limit after substitution and need rewrapping: Scheme.lean:585, Scheme.lean:7845, Scheme.lean:3474.",
+    "CslibTests is exempt from checkInitImports, the sorry-suppression sweep, and the axiom census; barrel registration in CslibTests.lean is what confers CI protection.",
+    "No new abstractions needed (reuse check clean). Sorry census stays at 4; zero new sorries, zero new axioms."
+  ],
+  "recommended_phases": 5,
+  "risk_level": "low"
+}

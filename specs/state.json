@@ -1006,19 +1006,26 @@
     {
       "project_number": 592,
       "project_name": "promote_propositional_refutations_to_cslibtests",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Promote the three cited-but-absent propositional refutation witnesses into CslibTests/",
       "description": "EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).\n\nCORRECTION 2026-08-08 -- READ THIS FIRST. The original description of this task asserted that scratch/BetaSplitRefutation.lean, scratch/HvalidShapeRefutation.lean and scratch/PersistPrototype.lean \"DO NOT EXIST in the repository\", and that three permanent-deferral decisions rest on evidence nobody can open. THAT PREMISE IS FALSE. All three files are present at HEAD:\n\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/BetaSplitRefutation.lean   (396 lines; phiRef1 at :235, report at :213)\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/HvalidShapeRefutation.lean (84 lines; phiK_valid : IValid phiK at :65, valuation_not_upward_closed at :57)\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean\n\nThe `scratch/...` prefix in the citations is relative to the OWNING TASK DIRECTORY, not to the repository root. Scheme.lean:3474 already writes the full form (`specs/430_.../scratch/PersistPrototype.lean`), which confirms the convention. The original review resolved the prefix against the repository root, found no scratch/ there, and inferred loss. No evidence was lost and no work was abandoned in error; the three deferral decisions are auditable today.\n\nCONSEQUENTLY THE \"IRRECOVERABLE\" BRANCH IS DELETED FROM THIS TASK. Do NOT downgrade any annotation to \"[UNVERIFIED], evidence lost\" -- doing so would corrupt a correct record. If a witness ever genuinely cannot be opened, stop and re-verify the path before concluding anything.\n\nTHE ACTUAL DEFECT: 14 citations carry a path that does not resolve from the repository root, distributed as\n  Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean          -- 2 (:52, :149)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean   -- 4 (:50, :134, :144, :158)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean      -- 1 (:297)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean         -- 7 (:585, :747, :3474, :7834, :7845, :7929, :7953)\nNote :3474 is already correct and is the reference form to copy.\n\nSCOPE:\n(1) Promote the two load-bearing witnesses into compiling regression tests under CslibTests/, following the established precedent (CslibTests/AncestorRedirectRefutation.lean, CslibTests/S4LoopGuardRegression.lean): phiRef1 and its report/reportMin evaluation from BetaSplitRefutation.lean, and the hvalid-shape counterexample (phiK_valid + valuation_not_upward_closed) from HvalidShapeRefutation.lean.\n(2) Repoint all 14 citations at the new in-tree CslibTests/ paths. PersistPrototype.lean is a prototype rather than a refutation witness -- repointing its single citation at the archive path is sufficient, no promotion needed.\n(3) Leave every \"refuted\" / \"PERMANENTLY DEFERRED\" annotation's VERDICT untouched. This task restores auditability of those verdicts; it does not re-adjudicate them. Re-adjudication is the disposition-decision task's job.\n\nEXPECTED OUTPUT: phiRef1 and the hvalid-shape counterexample compiling in CslibTests/, all 14 citations resolving from the repository root, sorry census unchanged at 4. Zero new sorries, zero new axioms.\n\nSEQUENCING: still the prerequisite for the disposition-decision task -- but that gate is now about having the evidence IN-TREE and CI-protected, not about recovering it.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-08T20:05:25Z",
+      "last_updated": "2026-08-08T20:16:52Z",
       "file_scope": [
         "CslibTests/",
         "Cslib/Logics/Propositional/Tableau/"
       ],
-      "session_id": "sess_1786219370_0903ea"
+      "session_id": "sess_1786219370_0903ea",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md",
+          "summary": "Witnesses confirmed intact and compiling; promotion prototyped green; all 14 citations located; --wfail --iofail gate already red at HEAD"
+        }
+      ]
     },
     {
       "project_number": 593,

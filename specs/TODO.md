@@ -28,7 +28,7 @@ next_project_number: 598
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-592 [RESEARCHING] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
+592 [RESEARCHED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
     └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -222,10 +222,11 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 ---
 
 ### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md]
 
 **Description**: EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).
 

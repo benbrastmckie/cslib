@@ -30,7 +30,7 @@ next_project_number: 598
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 592 [NOT STARTED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
-    └─ 593 [NOT STARTED] — Restate and discharge the three propositional tableau completenes
+    └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
         └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 
@@ -201,18 +201,19 @@ CONSTRAINT: this task changes task METADATA only. No .lean file may be created, 
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 591, Task 592
 
-**Description**: Restate and discharge the three propositional tableau completeness sorries that cannot be closed by proof effort. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C1); gated on the disposition decision and the evidentiary repair.
+**Description**: Restate and discharge the four propositional tableau completeness sorries that cannot be closed by proof effort. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C1); gated on the disposition decision and the evidentiary repair.
 
-THE THREE SITES:
+THE FOUR SITES:
 - DP-3: `intuitionisticTableau_complete`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:150, sorry at :161
 - DP-4: `minimalTableau_complete`, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:144, sorry at :155
 - DP-5: `truthLemma`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:689, sorry at :760 (the `T(phi' -> psi')` implication case)
+- DP-6: `openBranch_countermodel`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7862, sorry at :7937 (the `exists edges` upward-closure conjunct). ADDED 2026-08-08: this site was previously named in NO task's scope, while this task's own success metric ("count drops from 4 to 0") requires it. The disposition-decision task delivers the VERDICT plus corrected annotations at all four sites; discharging or restating this one is THIS task's obligation. The in-source annotation at :7920-7937 is explicit that no change to the statement is authorized until a machine-checked confirmation or explicit human sign-off exists -- so consume that verdict first, then restate or discharge here.
 
 WHY RESTATEMENT AND NOT PROOF: all three are annotated in-source as PERMANENTLY DEFERRED / unprovable AT THE CURRENT STATEMENT. This is not a proof-effort obligation. DP-4 additionally needs TWO upward-closure premises (the valuation's AND `minBranchBotForces b`'s, a separate fact at the `bot` formula shape) where only one is supplied.
 
 THE PRECEDENT TO FOLLOW -- this route is already proven in this very file: `intExpandBranches_openBranch_sat` was in exactly this position (a refuted `fuel = 0` base case with a Lean-verified counter-instance) and was successfully repaired by the R1 restatement, which added `hUniv`/`hNW`/`hFuel` preconditions (plus `hLBS`/`hWH`/`hWHC`/`hNC`). It is now SORRY-FREE at Scheme.lean:6806, and its `fuel = 0` arm is discharged via `hFuel` giving `intWork ... < 0`, absurd by `omega`. The counter-instance comment survives near :6796 and :6980-6995 as the durable record of why the R1 hypotheses exist. Apply the same discipline: find the precondition that makes the statement true, add it, repair call sites, discharge.
 
-SCOPE: (a) consume the disposition verdict -- if the `exists edges` conjunct is TRUE, discharge directly and correct the PERMANENTLY DEFERRED annotations; if FALSE, derive the strengthened statements; (b) restate all three theorems; (c) repair every call site; (d) discharge all three sorries; (e) update the docstrings so they describe the landed statement rather than the abandoned one.
+SCOPE: (a) consume the disposition verdict -- if the `exists edges` conjunct is TRUE, discharge directly and correct the PERMANENTLY DEFERRED annotations; if FALSE, derive the strengthened statements; (b) restate all four theorems; (c) repair every call site; (d) discharge all three sorries; (e) update the docstrings so they describe the landed statement rather than the abandoned one.
 
 CONSTRAINT: the restated theorems must still be strong enough for the TFAE-fold task (folding the tableau nodes into `cplProofSystemsTfae` / `iplProofSystemsTfae` / `mplProofSystemsTfae` in Cslib/Logics/Propositional/ProofSystemEquivalence.lean). A restatement that discharges the sorry but is too weak to serve the TFAE has not solved the problem -- verify the TFAE instantiation type-checks before declaring completion.
 

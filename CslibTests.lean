@@ -12,6 +12,7 @@ public import CslibTests.HasFresh
 public import CslibTests.HasSubstitution
 public import CslibTests.HasWellFormed
 public import CslibTests.HilbertSearch
+public import CslibTests.HvalidShapeRefutation
 public import CslibTests.ImportWithMathlib
 public import CslibTests.LTS
 public import CslibTests.LambdaCalculus

@@ -196,7 +196,15 @@ either to chase a phantom or to silently suppress a real sorry. Both are wrong.
 
 ---
 
-### Phase 2: Promote HvalidShapeRefutation into CslibTests/ [NOT STARTED]
+### Phase 2: Promote HvalidShapeRefutation into CslibTests/ [COMPLETED]
+
+Confirmed the Scope Hypothesis: no extra Mathlib tactic meta-imports were needed (single doubled
+import of `Scheme`), and the barrel line sorts between `CslibTests.HilbertSearch` and
+`CslibTests.ImportWithMathlib` as hypothesized. `lake build --wfail --iofail
+CslibTests.HvalidShapeRefutation` reports `✔ Built` with zero warnings/info specific to the new
+target (the logged `Scheme` failure is the pre-existing baseline red, unchanged). `lake test`
+succeeds (`✔ [9390/9390] Built CslibTests`). `lake exe lint-style` reports no findings for the
+new file.
 
 - **Goal:** `CslibTests/HvalidShapeRefutation.lean` exists as a module-mode, barrel-registered,
   fully-docstringed regression test that builds with zero warnings and zero `info:` lines.

@@ -11,9 +11,9 @@ next_project_number: 598
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,400,409,425,511,554,568,569,590,592,594,596 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,300,301,450,506,534,537,548,551,571,576,591,595 | 36,37,181,425,511,554,568,592,594 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,588,593 | 39,40,534,591 | foundations, propositional logic, modal logic |
+| 1 | 36,37,181,300,400,409,425,506,534,548,554,568,569,590,592,594,596 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,537,551,571,576,588,591,595 | 36,37,181,425,534,554,568,592,594 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,593 | 39,40,591 | foundations, propositional logic |
 | 4 | 375,589 | 534,548,593 | propositional logic, code hygiene |
 | 5 | 497 | 375,400,425 | propositional logic |
 
@@ -28,7 +28,7 @@ next_project_number: 598
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-592 [PLANNED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
+592 [IMPLEMENTING] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
     └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -36,12 +36,11 @@ next_project_number: 598
 
 ### Modal Logic
 
-511 [PLANNED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-  └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-  └─ 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-  └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-    └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
-  └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+  └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
+548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
@@ -219,7 +218,7 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 ---
 
 ### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -477,7 +476,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586
@@ -488,7 +487,9 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
   - [511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md]
   - [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]
   - [511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md]
-- **Summary**: [511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md]
+- **Summary**:
+  - [511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md]
+  - [511_s4_loop_checking_termination/summaries/03_s4-ordered-driver-completeness-summary.md]
 - **Handoff**: [511_s4_loop_checking_termination/handoffs/02_phase5-keylowerbd-fact-closed.md]
 
 **Description**: Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.

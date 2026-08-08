@@ -11,9 +11,9 @@ next_project_number: 598
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,400,409,425,511,554,568,569,590,592,594,596,597 | -- | propositional logic, modal logic, tableau infrastructure, ... |
-| 2 | 39,40,215,300,301,450,506,534,537,548,551,571,576,591,595 | 36,37,181,425,511,554,568,592,594,597 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,588,593 | 39,40,534,591,597 | foundations, propositional logic, modal logic |
+| 1 | 36,37,181,400,409,425,511,554,568,569,590,592,594,596 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,300,301,450,506,534,537,548,551,571,576,591,595 | 36,37,181,425,511,554,568,592,594 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,588,593 | 39,40,534,591 | foundations, propositional logic, modal logic |
 | 4 | 375,589 | 534,548,593 | propositional logic, code hygiene |
 | 5 | 497 | 375,400,425 | propositional logic |
 
@@ -28,7 +28,7 @@ next_project_number: 598
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-592 [RESEARCHED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
+592 [PLANNING] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
     └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -36,7 +36,7 @@ next_project_number: 598
 
 ### Modal Logic
 
-511 [RESEARCHED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [PLANNING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
@@ -46,10 +46,6 @@ next_project_number: 598
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
-
-### Tableau Infrastructure
-
-597 [RESEARCHED] — DECISION TASK, deliberately sequenced BEFORE the remaining-cube-c
 
 ### Temporal Logic
 
@@ -86,7 +82,7 @@ next_project_number: 598
 ## Tasks
 
 ### 597. Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: None
@@ -223,7 +219,7 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 ---
 
 ### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -480,7 +476,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586

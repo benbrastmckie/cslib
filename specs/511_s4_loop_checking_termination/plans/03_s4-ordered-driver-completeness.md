@@ -153,7 +153,7 @@ twin of the private `modalStepBranchS4Keyed_none_saturated` (`LoopChecking.lean:
 only piece of genuinely new proof content in this plan.
 
 **Tasks**:
-- [ ] Add the following `private lemma` to `LoopChecking.lean`, adjacent to the existing unordered
+- [x] Add the following `private lemma` to `LoopChecking.lean`, adjacent to the existing unordered
   `modalStepBranchS4Keyed_none_saturated` at `:1099` (place it after that lemma, inside or
   immediately following the `## Top-Loop Induction` section at `:1055`):
 
@@ -167,10 +167,10 @@ only piece of genuinely new proof content in this plan.
     modalStepBranchS4Keyed_none_saturated φ₀ b e acc keys
       ((modalStepBranchS4KeyedOrdered_eq_none_iff φ₀ b e acc keys).mp hstep) sf hsfb
   ```
-- [ ] Write a docstring recording that this is the ordered twin and that the transfer is exactly
+- [x] Write a docstring recording that this is the ordered twin and that the transfer is exactly
   what `modalStepBranchS4KeyedOrdered_eq_none_iff`'s own docstring (`S4/Driver.lean:678`) was
   written to enable.
-- [ ] Confirm no other declaration in the file already carries this name.
+- [x] Confirm no other declaration in the file already carries this name.
 
 **Timing**: 0.5 hours
 
@@ -204,14 +204,14 @@ down into `LoopChecking.lean`, so the Phase 3 Hintikka lemma (which lives below
 with no proof edit.
 
 **Tasks**:
-- [ ] Copy the declaration and its full docstring (`FrameCompleteness.lean:7862-7869` onward,
+- [x] Copy the declaration and its full docstring (`FrameCompleteness.lean:7862-7869` onward,
   through the end of its proof) into `LoopChecking.lean`, placed after the ordered-stepper
   material and before the ordered top-loop section that Phase 3 will add.
-- [ ] Delete the original from `FrameCompleteness.lean`.
-- [ ] Keep the declaration **non-`private`**. Its existing call site at
+- [x] Delete the original from `FrameCompleteness.lean`.
+- [x] Keep the declaration **non-`private`**. Its existing call site at
   `FrameCompleteness.lean:8164` must continue to resolve; `FrameCompleteness.lean:10`
   public-imports `LoopChecking`, so a non-private lemma is visible there.
-- [ ] Confirm the moved proof's only dependencies remain satisfied at the new location:
+- [x] Confirm the moved proof's only dependencies remain satisfied at the new location:
   `modalStepBranchS4KeyedOrdered_cases` (`S4/Driver.lean:648`),
   `modalNonMintCandidates_not_mem_expanded` (`S4/Driver.lean:414`),
   `modalStepBranchS4KeyedBody`, `modalStepBranchS4Keyed`, `modalApplyOneS4Keyed` — all in
@@ -262,15 +262,15 @@ confirm the proof body is byte-identical.
 deliberately alone.
 
 **Tasks**:
-- [ ] Open a new `/-! ## Ordered Top-Loop Induction — modalExpandBranchesS4KeyedOrdered_hintikka -/`
+- [x] Open a new `/-! ## Ordered Top-Loop Induction — modalExpandBranchesS4KeyedOrdered_hintikka -/`
   section in `LoopChecking.lean` and port the statement, substituting
   `modalExpandBranchesS4KeyedOrdered` for `modalExpandBranchesS4Keyed`.
-- [ ] **Use `S4OrderedFuelInv` (`S4/HintikkaInvariant.lean:828`) as the per-index hypothesis**, not
+- [x] **Use `S4OrderedFuelInv` (`S4/HintikkaInvariant.lean:828`) as the per-index hypothesis**, not
   a widened four-way conjunction, and
   `modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv` (`:840`) as the **single** step lemma
   replacing the unordered proof's separate `_preserves_S4LoopInv` /
   `_preserves_S4KeyedHintikkaInv` invocations.
-- [ ] Substitute the six stepper-specific facts one for one:
+- [x] Substitute the six stepper-specific facts one for one:
 
   | Unordered original | Ordered replacement |
   |---|---|
@@ -280,10 +280,10 @@ deliberately alone.
   | `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv` | folded into `_preserves_S4OrderedFuelInv` |
   | `modalExpMeasure_step_lt_S4Keyed` (`:810`) | `modalExpMeasure_step_lt_S4KeyedOrdered` (`:945`) |
   | `modalHintikkaSetS4_eq` / `hintikka_congr_S4` (the final bridge) | driver-independent; reuse verbatim |
-- [ ] Wherever the unordered proof destructures the step hypothesis via a direct `findSome?`
+- [x] Wherever the unordered proof destructures the step hypothesis via a direct `findSome?`
   extraction, thread `modalStepBranchS4KeyedOrdered_selected_mem` (`S4/Driver.lean:705`) instead.
   This is the documented, expected friction point.
-- [ ] Grep the finished declaration body for unqualified `modalStepBranchS4Keyed` /
+- [x] Grep the finished declaration body for unqualified `modalStepBranchS4Keyed` /
   `modalExpandBranchesS4Keyed` (i.e. without `Ordered`) and confirm every remaining occurrence is
   intentional — routing through the unordered driver here would pair completeness with a driver
   whose soundness is false.
@@ -323,16 +323,16 @@ and must be reported, not silently absorbed.
 `modalExpandBranchesGen` instance).
 
 **Tasks**:
-- [ ] Port the statement and `induction fuel` proof shape from `:1495` verbatim, substituting
+- [x] Port the statement and `induction fuel` proof shape from `:1495` verbatim, substituting
   `modalExpandBranchesS4KeyedOrdered` throughout. The statement's five length/membership
   hypotheses (`expandedSets.length = branches.length`, `accs.length = branches.length`,
   `keyss.length = branches.length`, `∀ b₀ ∈ branches, sf ∈ b₀`) carry over unchanged.
-- [ ] Substitute `modalStepBranchS4KeyedOrdered_branch_superset` (`S4/Driver.lean:1339`) for the
+- [x] Substitute `modalStepBranchS4KeyedOrdered_branch_superset` (`S4/Driver.lean:1339`) for the
   unordered superset fact.
-- [ ] Substitute Phase 2's relocated `modalStepBranchS4KeyedOrdered_newExps_eq_map` for
+- [x] Substitute Phase 2's relocated `modalStepBranchS4KeyedOrdered_newExps_eq_map` for
   `modalStepBranchS4Keyed_newExps_const` at the length-matching step (unordered call site
   `:1607`).
-- [ ] Repeat the Phase 3 `Ordered`-name grep check on the finished body.
+- [x] Repeat the Phase 3 `Ordered`-name grep check on the finished body.
 
 **Timing**: 1.5 hours
 
@@ -364,26 +364,26 @@ via `git diff --stat` and by enumerating cited lemmas against that two-item list
 `instDecidableS4Valid`, and correct the stale prose that asserts S4 decidability is out of scope.
 
 **Tasks**:
-- [ ] Add `modalTableauS4KeyedOrdered_complete` to `FrameCompleteness.lean`, as a near-verbatim
+- [x] Add `modalTableauS4KeyedOrdered_complete` to `FrameCompleteness.lean`, as a near-verbatim
   copy of `modalTableauS4Keyed_complete` (`:4189`), fed by the Phase 3 and Phase 4 lemmas plus the
   existing `modalOpenBranchS4_countermodel`.
-- [ ] For the seed-state `S4OrderedFuelInv` witness, reuse the expression already assembled
+- [x] For the seed-state `S4OrderedFuelInv` witness, reuse the expression already assembled
   verbatim inside `modalTableauS4KeyedOrdered_sound` at `FrameCompleteness.lean:8239-8246`:
   `⟨hLoop, hHintikka, hKW, hWC, hKO⟩` from `modalTableauS4Keyed_initial` (`:4114`, four conjuncts)
   plus `keysOriginS4_entry` (`S4/BirthKey.lean:241`, the fifth). Note `modalTableauS4Keyed_initial`
   is `private` and both consumers live in `FrameCompleteness.lean`, so no visibility change is
   needed.
-- [ ] Add `s4Valid_decides` and `instDecidableS4Valid` mirroring `kb5Valid_decides` /
+- [x] Add `s4Valid_decides` and `instDecidableS4Valid` mirroring `kb5Valid_decides` /
   `instDecidableKb5Valid` (`:4070-4082`) — three lines each, pointing at
   `modalTableauS4KeyedOrdered`, paired with the already-landed
   `modalTableauS4KeyedOrdered_sound` (`:8234`). **Do not point the instance at
   `modalTableauS4Keyed` or `modalTableauS4`.**
-- [ ] Update the stale prose at `FrameCompleteness.lean:4099-4102` ("The decidability half
+- [x] Update the stale prose at `FrameCompleteness.lean:4099-4102` ("The decidability half
   (`s4Valid_decides`/`instDecidableS4Valid`) remains out of scope until both a genuine soundness
   theorem and this completeness theorem exist for the same driver") — that condition is now met,
   for the ordered driver. Preserve the surrounding unsoundness warning about the *unordered*
   driver unchanged; only the out-of-scope claim is stale.
-- [ ] Update the stale prose at `LoopChecking.lean:151-152` ("The live `modalTableauS4` is NOT
+- [x] Update the stale prose at `LoopChecking.lean:151-152` ("The live `modalTableauS4` is NOT
   redefined; `instDecidableS4Valid` (deferred) would point at this declaration instead") to record
   that the instance now points at `modalTableauS4KeyedOrdered`.
 
@@ -423,20 +423,20 @@ overcounts, record the difference as a `#### Reasoned Exclusions` subsection on 
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Logics.Modal.Tableau.LoopChecking` exits 0 (baseline at HEAD: 876 jobs).
-- [ ] `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` exits 0 (baseline at HEAD: 910
+- [x] `lake build Cslib.Logics.Modal.Tableau.LoopChecking` exits 0 (baseline at HEAD: 876 jobs).
+- [x] `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` exits 0 (baseline at HEAD: 910
   jobs).
-- [ ] Full repository build green (Phase 5 gate).
-- [ ] Sorry census over `Cslib/Logics/Modal/Tableau/` is **zero** — the README's two-pattern
+- [x] Full repository build green (Phase 5 gate).
+- [x] Sorry census over `Cslib/Logics/Modal/Tableau/` is **zero** — the README's two-pattern
   command. All pre-existing repo sorries live in `Logics/Bimodal/` and
   `Logics/Propositional/Tableau/` and must be unchanged in count.
-- [ ] `lean_verify` on `instDecidableS4Valid` — no `sorryAx`, no unexpected axiom.
-- [ ] `lean_verify` on `modalTableauS4KeyedOrdered_sound` — still an empty axiom list.
-- [ ] `CslibTests/S4LoopGuardRegression.lean` still builds, including the ordered-driver soundness
+- [x] `lean_verify` on `instDecidableS4Valid` — no `sorryAx`, no unexpected axiom.
+- [x] `lean_verify` on `modalTableauS4KeyedOrdered_sound` — still an empty axiom list.
+- [x] `CslibTests/S4LoopGuardRegression.lean` still builds, including the ordered-driver soundness
   smoke row at `:211`.
-- [ ] `git diff --stat` confirms only the two `file_scope` files were modified; zero changes under
+- [x] `git diff --stat` confirms only the two `file_scope` files were modified; zero changes under
   `Cslib/Logics/Modal/Tableau/S4/`.
-- [ ] Every new declaration name contains `Ordered`; no new proof routes through the unsound
+- [x] Every new declaration name contains `Ordered`; no new proof routes through the unsound
   unordered keyed driver.
 
 ## Artifacts & Outputs

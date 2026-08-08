@@ -1,33 +1,48 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-08-08T21:15:10Z",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
-      "summary": "5-phase plan closing S4 decidability via the completeness half for the ordered keyed driver modalTableauS4KeyedOrdered, superseding the obsolete Phase 7 of plan 01."
+      "type": "summary",
+      "path": "specs/511_s4_loop_checking_termination/summaries/03_s4-ordered-driver-completeness-summary.md",
+      "summary": "Execution summary for the S4 ordered-driver completeness/decidability capstone: all 5 phases completed, full CI green, zero sorry, standard axiom triple only."
     }
   ],
-  "next_steps": "Run /implement 511 to execute the plan",
-  "memory_candidates": [
-    {
-      "content": "When a formal-verification task is blocked because a proof was built against a driver/implementation nothing actually runs, the durable fix is often not to reconcile the two but to check whether a THIRD artifact landed while the task sat blocked -- a new implementation whose internals are the ones the existing proof is already about. Re-verify a recorded blocker clause-by-clause against HEAD before re-planning: in this subsystem, two of three blocker clauses stayed literally true while ceasing to be relevant, because the consumer they referenced was superseded. Corollary for planning: pair soundness and completeness against the SAME concrete driver, and make the decidability capstone depend on both halves of that one driver -- the prior plan blocked precisely because that pairing was implicit rather than a phase dependency.",
-    "category": "INSIGHT",
-    "source_artifact": "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
-    "confidence": 0.75,
-    "suggested_keywords": ["blocker-reverification", "driver-mismatch", "soundness-completeness-pairing", "supersede-vs-resume", "lean-tableau"]
-    }
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
+    "specs/511_s4_loop_checking_termination/summaries/03_s4-ordered-driver-completeness-summary.md"
   ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "full_repo_build_jobs": 3323,
+    "lake_test_passed": true,
+    "loopchecking_build_jobs": 876,
+    "framecompleteness_build_jobs": 910,
+    "s4_loop_guard_regression_still_builds": true,
+    "note": "lean_verify MCP tool transiently reported sorryAx on instDecidableS4Valid; a fresh #print axioms via lean_run_code confirmed the clean standard propext/Classical.choice/Quot.sound triple, consistent with all its clean dependencies. Recorded as a tool-caching false positive, not a real finding."
+  },
+  "phases_completed": 5,
+  "phases_total": 5,
+  "partial_progress": {
+    "stage": "all_phases_complete",
+    "details": "All 5 phases landed, committed individually, full CI pipeline green, summary written.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 5,
+    "last_completed_phase": "Phase 5: Completeness and the decidability capstone"
+  },
   "metadata": {
     "session_id": "sess_1786219370_0903ea_511",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 5,
-    "estimated_hours": 6,
-    "dependency_waves": [[1], [2], [3], [4], [5]],
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 3,
-    "validation": "validate-artifact.sh --strict: PASS, 0 warnings"
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

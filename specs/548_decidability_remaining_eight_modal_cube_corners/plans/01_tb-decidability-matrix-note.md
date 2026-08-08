@@ -257,38 +257,55 @@ checking exactly eight of fifteen are covered after TB lands, and (b) `git diff 
 
 ---
 
-### Phase 2: TB Frame Condition, Validity, and Extraction [NOT STARTED]
+### Phase 2: TB Frame Condition, Validity, and Extraction [COMPLETED]
 
 **Goal**: Land `tbFC`, `tbValid`, and `extractModelTB` with the five extraction lemmas the truth
 lemma and completeness proof will consume.
 
 **Tasks**:
-- [ ] In `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`, append a `/-! ## TB (Reflexive-Symmetric
+- [x] In `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`, append a `/-! ## TB (Reflexive-Symmetric
       Frame) -/` section after the B section: `def tbFC : FrameCondition := fun {_} r => Std.Refl r ∧ Std.Symm r`
       and `def tbValid (φ : Proposition Atom) : Prop := frameValid tbFC φ`, mirroring `s5FC`/`s5Valid`
       (`:1572,:1576`) exactly in shape
-- [ ] Confirm the tableau-side `tbFC` elaborates without ambiguity against the Hilbert-side
+- [x] Confirm the tableau-side `tbFC` elaborates without ambiguity against the Hilbert-side
       `Cslib.Logic.Modal.tbFC` (different namespace, different type — same coexistence pattern
-      `s4FC`/`s5FC` already ship)
-- [ ] In `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`, append a `/-! ## TB
+      `s4FC`/`s5FC` already ship) *(confirmed: `lake build` green, no ambiguity)*
+- [x] In `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`, append a `/-! ## TB
       (Reflexive-Symmetric Frame) Extraction -/` section after the B extraction section (currently
       ending near `:472`), defining
       `def extractModelTB ... := extractModelWith (fun r => Relation.ReflGen (Relation.SymmGen r)) b acc`
-- [ ] Prove `extractModelTB_r` by `rfl`, mirroring `extractModelT_r` (`:113`) and
+- [x] Prove `extractModelTB_r` by `rfl`, mirroring `extractModelT_r` (`:113`) and
       `extractModelB_r` (`:437`)
-- [ ] Prove `extractModelTB_refl : Std.Refl (extractModelTB b acc).r` — `rw [extractModelTB_r];
+- [x] Prove `extractModelTB_refl : Std.Refl (extractModelTB b acc).r` — `rw [extractModelTB_r];
       infer_instance` off `Relation.reflexive_reflGen`, mirroring `extractModelT_refl` (`:120`)
-- [ ] Prove `extractModelTB_symm : Std.Symm (extractModelTB b acc).r` using
+- [x] Prove `extractModelTB_symm : Std.Symm (extractModelTB b acc).r` using
       `Relation.ReflGen.compRel_symm` (`Cslib/Foundations/Relation/Confluence.lean:368`), which
-      states exactly `ReflGen (SymmGen r) a b → ReflGen (SymmGen r) b a`
-- [ ] Prove `extractModelTB_hasEdge_imp_r` (forward edge survives, via
+      states exactly `ReflGen (SymmGen r) a b → ReflGen (SymmGen r) b a` *(required adding
+      `public import Cslib.Foundations.Relation.Confluence` to `FrameCompleteness.lean`'s import
+      list — not previously imported there — deviation: added, not in original task list)*
+- [x] Prove `extractModelTB_hasEdge_imp_r` (forward edge survives, via
       `Relation.ReflGen.single (Or.inl h)`) and `extractModelTB_hasEdge_symm_imp_r` (backward
       edge survives, via `Relation.ReflGen.single (Or.inr h)`), mirroring
       `extractModelB_hasEdge_imp_r` (`:457`) and `extractModelB_hasEdge_symm_imp_r` (`:468`)
 - [ ] Add a `extractModelTB_frame : tbFC (extractModelTB b acc).r` convenience conjunction if the
       completeness call site reads better with it; otherwise pass the two lemmas as a pair
-- [ ] Confirm no frozen declaration in either file was touched (`git diff` hunks are all
-      additions, all below the last frozen declaration in their section)
+      *(deviation: deferred — plan marks this conditional ("if... otherwise pass the two lemmas
+      as a pair"); Phase 10 will add it if the completeness call site needs it)*
+- [x] Confirm no frozen declaration in either file was touched (`git diff` hunks are all
+      additions, all below the last frozen declaration in their section) — verified: both diffs
+      are addition-only
+
+**Deviation (front-loaded Phase 9 content)**: while writing the TB frame-condition section in
+`FrameSoundness.lean`, also landed the rule-level TB soundness lemmas
+(`tbFC_imp_reflFC`/`tbFC_imp_symmFC` projections, `branchSatisfiableIn_tbFC_boxPos_self_mem`/
+`_diaNeg_self_mem`/`_boxPos_pred_mem`/`_diaNeg_pred_mem`, and
+`modalTBoxSelf_tbFC_sound`/`modalTDiaNegSelf_tbFC_sound`/`modalBBoxBack_tbFC_sound`/
+`modalBDiaNegBack_tbFC_sound`) that Phase 9's task list assigns to a later dispatch. These
+depend only on `tbFC`/`reflFC`/`symmFC` and the already-shipped T/B rule definitions, not on
+`modalApplyOneTB` (Phase 3) or the driver (Phase 4-8), so they slot naturally into the section
+Phase 2 creates. Phase 9 still owes the `modalApplyOneTB_sound` bundle (which needs
+`modalApplyOneTB` to exist) and the `FrameCompleteness.lean` discharge block; Phase 9's own
+checklist is annotated accordingly when reached.
 
 **Timing**: 1 hour
 

@@ -1552,6 +1552,182 @@ lemma modalBDiaNegBack_sound [DecidableEq Atom] [Hashable Atom]
   rw [hxeq]
   exact branchSatisfiableIn_symmFC_diaNeg_pred_mem h hmem hedge
 
+/-! ## TB (Reflexive-Symmetric Frame) -/
+
+/-- The reflexive-symmetric frame condition: `Std.Refl m.r ∧ Std.Symm m.r`. Instantiates
+`frameValid`/`branchSatisfiableIn` for the modal logic TB (`Cube.TB`,
+`K ∪ T ∪ B`). Conjoins `reflFC` and `symmFC` pointwise, mirroring how `s4FC`/`s5FC` conjoin
+their own component conditions. -/
+def tbFC : FrameCondition := fun {_} r => Std.Refl r ∧ Std.Symm r
+
+/-- TB-validity: `φ` is satisfied in every Kripke model whose relation is both reflexive and
+symmetric, at every world. Matches `Cube.TB`. -/
+def tbValid (φ : Proposition Atom) : Prop := frameValid tbFC φ
+
+/-! ### TB-Rule Semantic Soundness
+
+TB's rule arms are exactly T's self-propagation arms (`modalTBoxSelf`, `modalTDiaNegSelf`) and
+B's predecessor-backward arms (`modalBBoxBack`, `modalBDiaNegBack`), merged by
+`modalApplyOneTB` (`FrameRules.lean`). Since `tbFC r = Std.Refl r ∧ Std.Symm r`, every T-side
+obligation is discharged by projecting `.1` into `reflFC`, and every B-side obligation by
+projecting `.2` into `symmFC` -- the same projection pattern `s5FC_imp_fiveFC` already uses. -/
+
+/-- `tbFC`'s reflexivity conjunct implies `reflFC`: the projection lever every T-side TB
+soundness obligation uses. -/
+theorem tbFC_imp_reflFC {World : Type} {r : World → World → Prop} (h : tbFC r) : reflFC r := h.1
+
+/-- `tbFC`'s symmetry conjunct implies `symmFC`: the projection lever every B-side TB
+soundness obligation uses. -/
+theorem tbFC_imp_symmFC {World : Type} {r : World → World → Prop} (h : tbFC r) : symmFC r := h.2
+
+/-- Adding `T(φ)@w` to a branch witnessing `branchSatisfiableIn tbFC` preserves
+`branchSatisfiableIn tbFC`, given `T(□φ)@w` is already on the branch: the semantic core of the
+TB box-positive self-propagation arm (`modalTBoxSelf`), projected from `reflFC` through
+`tbFC_imp_reflFC`. -/
+lemma branchSatisfiableIn_tbFC_boxPos_self_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc)
+    {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchSatisfiableIn tbFC (⟨.pos, φ, w⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedges, hb⟩ := h
+  refine ⟨W, m, f, hFC, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun _ => ?_, fun hcontra => by simp at hcontra⟩
+    have hbox : Satisfies m (f w) (.box φ) := (hb _ hmem).1 rfl
+    have hrefl : Std.Refl m.r := tbFC_imp_reflFC hFC
+    exact hbox (f w) (hrefl.refl (f w))
+  · exact hb sf hold
+
+/-- Adding `F(φ)@w` to a branch witnessing `branchSatisfiableIn tbFC` preserves
+`branchSatisfiableIn tbFC`, given `F(◇φ)@w` is already on the branch: the semantic core of the
+TB diamond-negative self-propagation arm (`modalTDiaNegSelf`). Dual of
+`branchSatisfiableIn_tbFC_boxPos_self_mem`. -/
+lemma branchSatisfiableIn_tbFC_diaNeg_self_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc)
+    {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchSatisfiableIn tbFC (⟨.neg, φ, w⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedges, hb⟩ := h
+  refine ⟨W, m, f, hFC, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun hcontra => by simp at hcontra, fun _ hφ => ?_⟩
+    have hdianeg : ¬ Satisfies m (f w) (.diamond φ) := (hb _ hmem).2 rfl
+    have hrefl : Std.Refl m.r := tbFC_imp_reflFC hFC
+    exact hdianeg (Satisfies.diamond_iff.mpr ⟨f w, hrefl.refl (f w), hφ⟩)
+  · exact hb sf hold
+
+/-- Adding `T(φ)@v` to a branch witnessing `branchSatisfiableIn tbFC` preserves
+`branchSatisfiableIn tbFC`, given `T(□φ)@w` is already on the branch and `v → w` is a recorded
+edge: the semantic core of the TB box-positive predecessor-backward arm (`modalBBoxBack`),
+projected from `symmFC` through `tbFC_imp_symmFC`. -/
+lemma branchSatisfiableIn_tbFC_boxPos_pred_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc)
+    {φ : Proposition Atom} {v w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge v w = true) :
+    branchSatisfiableIn tbFC (⟨.pos, φ, v⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedges, hb⟩ := h
+  refine ⟨W, m, f, hFC, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun _ => ?_, fun hcontra => by simp at hcontra⟩
+    have hbox : Satisfies m (f w) (.box φ) := (hb _ hmem).1 rfl
+    have hsymm : Std.Symm m.r := tbFC_imp_symmFC hFC
+    have hmvw : m.r (f v) (f w) := hedges v w hedge
+    have hmwv : m.r (f w) (f v) := hsymm.symm (f v) (f w) hmvw
+    exact hbox (f v) hmwv
+  · exact hb sf hold
+
+/-- Adding `F(φ)@v` to a branch witnessing `branchSatisfiableIn tbFC` preserves
+`branchSatisfiableIn tbFC`, given `F(◇φ)@w` is already on the branch and `v → w` is a recorded
+edge: the semantic core of the TB diamond-negative predecessor-backward arm
+(`modalBDiaNegBack`). Dual of `branchSatisfiableIn_tbFC_boxPos_pred_mem`. -/
+lemma branchSatisfiableIn_tbFC_diaNeg_pred_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc)
+    {φ : Proposition Atom} {v w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge v w = true) :
+    branchSatisfiableIn tbFC (⟨.neg, φ, v⟩ :: b) acc := by
+  obtain ⟨W, m, f, hFC, hedges, hb⟩ := h
+  refine ⟨W, m, f, hFC, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun hcontra => by simp at hcontra, fun _ hφ => ?_⟩
+    have hdianeg : ¬ Satisfies m (f w) (.diamond φ) := (hb _ hmem).2 rfl
+    have hsymm : Std.Symm m.r := tbFC_imp_symmFC hFC
+    have hmvw : m.r (f v) (f w) := hedges v w hedge
+    have hmwv : m.r (f w) (f v) := hsymm.symm (f v) (f w) hmvw
+    exact hdianeg (Satisfies.diamond_iff.mpr ⟨f v, hmwv, hφ⟩)
+  · exact hb sf hold
+
+/-- Rule-level TB soundness for the box-positive self-propagation arm: every formula produced
+by `modalTBoxSelf` (given `T(□φ)@w` already on the branch) preserves `branchSatisfiableIn tbFC`
+when added to the branch. -/
+lemma modalTBoxSelf_tbFC_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalTBoxSelf b φ w, branchSatisfiableIn tbFC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalTBoxSelf at hsf
+  by_cases hcase :
+      b.any (· == (⟨.pos, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, List.mem_singleton] at hsf
+    subst hsf
+    exact branchSatisfiableIn_tbFC_boxPos_self_mem h hmem
+
+/-- Rule-level TB soundness for the diamond-negative self-propagation arm: every formula
+produced by `modalTDiaNegSelf` (given `F(◇φ)@w` already on the branch) preserves
+`branchSatisfiableIn tbFC` when added to the branch. Dual of `modalTBoxSelf_tbFC_sound`. -/
+lemma modalTDiaNegSelf_tbFC_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalTDiaNegSelf b φ w, branchSatisfiableIn tbFC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalTDiaNegSelf at hsf
+  by_cases hcase :
+      b.any (· == (⟨.neg, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, List.mem_singleton] at hsf
+    subst hsf
+    exact branchSatisfiableIn_tbFC_diaNeg_self_mem h hmem
+
+/-- Rule-level TB soundness for the box-positive predecessor-backward arm: every formula
+produced by `modalBBoxBack` (given `T(□φ)@w` already on the branch) preserves
+`branchSatisfiableIn tbFC` when added to the branch. -/
+lemma modalBBoxBack_tbFC_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalBBoxBack b acc φ w, branchSatisfiableIn tbFC (sf :: b) acc := by
+  intro sf hsf
+  obtain ⟨hxeq, hpred, -, -⟩ := modalBBoxBack_mem hsf
+  have hedge : acc.hasEdge sf.label w = true := modalBPredecessorsOf_hasEdge hpred
+  rw [hxeq]
+  exact branchSatisfiableIn_tbFC_boxPos_pred_mem h hmem hedge
+
+/-- Rule-level TB soundness for the diamond-negative predecessor-backward arm: every formula
+produced by `modalBDiaNegBack` (given `F(◇φ)@w` already on the branch) preserves
+`branchSatisfiableIn tbFC` when added to the branch. Dual of `modalBBoxBack_tbFC_sound`. -/
+lemma modalBDiaNegBack_tbFC_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn tbFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalBDiaNegBack b acc φ w, branchSatisfiableIn tbFC (sf :: b) acc := by
+  intro sf hsf
+  obtain ⟨hxeq, hpred, -, -⟩ := modalBDiaNegBack_mem hsf
+  have hedge : acc.hasEdge sf.label w = true := modalBPredecessorsOf_hasEdge hpred
+  rw [hxeq]
+  exact branchSatisfiableIn_tbFC_diaNeg_pred_mem h hmem hedge
+
 /-! ## S5 (Equivalence Frame), Five, KB5
 
 The frame-condition surface for S5's universal-cluster tableau (`S5Simplification.lean`) and

@@ -14,6 +14,7 @@ public import Cslib.Logics.Modal.Tableau.BDriver
 public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
 public import Cslib.Foundations.Relation.Euclidean
+public import Cslib.Foundations.Relation.Confluence
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
 
@@ -470,6 +471,77 @@ lemma extractModelB_hasEdge_symm_imp_r (b : List (SignedFormula (Proposition Ato
     (extractModelB b acc).r w v := by
   rw [extractModelB_r]
   exact Relation.SymmGen.of_rel_symm h
+
+/-! ## TB (Reflexive-Symmetric Frame) Extraction
+
+Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*reflexive closure of the symmetric closure* `Relation.ReflGen (Relation.SymmGen ·)` of
+`acc.hasEdge` as the model's relation (Strategy B, closure-at-extraction, instantiated with
+`Cl := fun r => Relation.ReflGen (Relation.SymmGen r)`). Both the `Std.Refl` and `Std.Symm`
+frame instances come free off this composite closure: reflexivity off `Relation.ReflGen` itself
+(`extractModelTB_refl`, mirroring `extractModelT_refl`), symmetry off
+`Relation.ReflGen.compRel_symm` (`Cslib/Foundations/Relation/Confluence.lean`), which states
+exactly `ReflGen (SymmGen r) a b → ReflGen (SymmGen r) b a` (`extractModelTB_symm`, below). -/
+
+/-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*reflexive closure of the symmetric closure* of `acc.hasEdge` as the model's relation. -/
+def extractModelTB
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Model WorldIndex Atom :=
+  extractModelWith (fun r => Relation.ReflGen (Relation.SymmGen r)) b acc
+
+omit [Hashable Atom] in
+/-- `extractModelTB`'s relation is exactly the reflexive closure of the symmetric closure of
+`acc.hasEdge`. -/
+lemma extractModelTB_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (extractModelTB b acc).r =
+      Relation.ReflGen (Relation.SymmGen (fun w w' => acc.hasEdge w w' = true)) := rfl
+
+omit [Hashable Atom] in
+/-- The reflexive frame condition holds of `extractModelTB b acc` "for free": `Relation.ReflGen`
+is always reflexive (`Relation.reflexive_reflGen`), regardless of the underlying raw edge
+relation `acc.hasEdge`. Discharges half of the `tbFC` witness (`FrameSoundness.lean`) for the
+TB countermodel. -/
+lemma extractModelTB_refl (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Std.Refl (extractModelTB b acc).r := by
+  rw [extractModelTB_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- The symmetric frame condition holds of `extractModelTB b acc` "for free", via
+`Relation.ReflGen.compRel_symm`, which states exactly `ReflGen (SymmGen r) a b → ReflGen
+(SymmGen r) b a`. Discharges the other half of the `tbFC` witness (`FrameSoundness.lean`) for
+the TB countermodel. -/
+lemma extractModelTB_symm (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Std.Symm (extractModelTB b acc).r := by
+  rw [extractModelTB_r]
+  exact ⟨fun _ _ h => Relation.ReflGen.compRel_symm h⟩
+
+omit [Hashable Atom] in
+/-- Every raw tableau edge `acc.hasEdge w w' = true` survives into `extractModelTB`'s
+(reflexive-of-symmetric-closure) relation via `Relation.ReflGen.single (Or.inl h)`: the forward
+direction, needed to reuse the K bridge lemmas the same way `extractModelT_hasEdge_imp_r` and
+`extractModelB_hasEdge_imp_r` do. -/
+lemma extractModelTB_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (extractModelTB b acc).r w w' := by
+  rw [extractModelTB_r]
+  exact Relation.ReflGen.single (Or.inl h)
+
+omit [Hashable Atom] in
+/-- The *backward* direction survives into `extractModelTB`'s relation too, via
+`Relation.ReflGen.single (Or.inr h)`: a raw edge `v → w` (`acc.hasEdge v w`) gives
+`(extractModelTB b acc).r w v` (the reversed pair) directly -- the reflexive-of-symmetric-
+closure analogue of `extractModelB_hasEdge_symm_imp_r` for the predecessor direction TB's B arm
+reads. -/
+lemma extractModelTB_hasEdge_symm_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {v w : WorldIndex} (h : acc.hasEdge v w = true) :
+    (extractModelTB b acc).r w v := by
+  rw [extractModelTB_r]
+  exact Relation.ReflGen.single (Or.inr h)
 
 /-! ## S5 (Equivalence Frame) Extraction
 

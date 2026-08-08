@@ -28,7 +28,7 @@ next_project_number: 598
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-592 [PLANNING] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
+592 [PLANNED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
     └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -36,7 +36,7 @@ next_project_number: 598
 
 ### Modal Logic
 
-511 [PLANNING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [PLANNED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
@@ -219,11 +219,12 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 ---
 
 ### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [592_promote_propositional_refutations_to_cslibtests/reports/01_promote-refutation-witnesses-cslibtests.md]
+- **Plan**: [592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md]
 
 **Description**: EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).
 
@@ -476,11 +477,13 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586
-- **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
+- **Plan**:
+  - [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
+  - [511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md]
 - **Research**:
   - [511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md]
   - [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]

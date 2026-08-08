@@ -1,30 +1,33 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-08T00:00:00Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
-      "type": "report",
-      "summary": "HEAD re-verification of the task 511 Phase 7 driver-mismatch blocker: the blocker no longer holds; the ordered keyed driver landed by task 553 resolves it; route (a) recommended with a four-phase shape and one lemma probed green."
+      "type": "plan",
+      "path": "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
+      "summary": "5-phase plan closing S4 decidability via the completeness half for the ordered keyed driver modalTableauS4KeyedOrdered, superseding the obsolete Phase 7 of plan 01."
     }
   ],
-  "partial_progress": {
-    "stage": "research_written",
-    "details": "Report and orchestrator handoff written. Working tree contains no Lean source changes (probe reverted, git diff Cslib/ clean)."
-  },
+  "next_steps": "Run /implement 511 to execute the plan",
+  "memory_candidates": [
+    {
+      "content": "When a formal-verification task is blocked because a proof was built against a driver/implementation nothing actually runs, the durable fix is often not to reconcile the two but to check whether a THIRD artifact landed while the task sat blocked -- a new implementation whose internals are the ones the existing proof is already about. Re-verify a recorded blocker clause-by-clause against HEAD before re-planning: in this subsystem, two of three blocker clauses stayed literally true while ceasing to be relevant, because the consumer they referenced was superseded. Corollary for planning: pair soundness and completeness against the SAME concrete driver, and make the decidability capstone depend on both halves of that one driver -- the prior plan blocked precisely because that pairing was implicit rather than a phase dependency.",
+    "category": "INSIGHT",
+    "source_artifact": "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
+    "confidence": 0.75,
+    "suggested_keywords": ["blocker-reverification", "driver-mismatch", "soundness-completeness-pairing", "supersede-vs-resume", "lean-tableau"]
+    }
+  ],
   "metadata": {
     "session_id": "sess_1786219370_0903ea_511",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "head_commit": "5ea7152c",
-    "verification": [
-      "lake build Cslib.Logics.Modal.Tableau.FrameCompleteness -- green, 910 jobs, exit 0",
-      "lake build Cslib.Logics.Modal.Tableau.LoopChecking -- green, 876 jobs (with temporary probe lemma; probe reverted)",
-      "sorry census over Cslib/Logics/Modal/Tableau/ -- zero",
-      "lean_verify Cslib.Logic.Modal.Tableau.modalTableauS4KeyedOrdered_sound -- empty axiom list, no sorryAx"
-    ],
-    "blocker_status": "resolved_at_head",
-    "recommended_route": "(a) completed against the ordered keyed driver modalTableauS4KeyedOrdered; NOT (b) framework generalization"
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 6,
+    "dependency_waves": [[1], [2], [3], [4], [5]],
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 3,
+    "validation": "validate-artifact.sh --strict: PASS, 0 warnings"
   }
 }

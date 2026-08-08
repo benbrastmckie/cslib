@@ -1,41 +1,55 @@
 {
-  "status": "researched",
+  "status": "planned",
   "skeleton": false,
-  "summary": "Re-verified the recorded Phase 7 blocker against HEAD (5ea7152c). THE BLOCKER NO LONGER HOLDS, and it was not resolved by either route the prior handoff anticipated. Route (a) -- a bespoke S4 keyed top-level driver -- is ~85% landed by the dependencies: modalExpandBranchesS4Keyed/modalTableauS4Keyed AND a successor ordered pair modalExpandBranchesS4KeyedOrdered/modalTableauS4KeyedOrdered both exist with full processNext fuel inductions. The soundness re-verification the handoff flagged as unverified has been done and its answer inverted the plan: soundness is FALSE for the unordered keyed driver (machine-checked counterexample in CslibTests/S4LoopGuardRegression.lean, documented at FrameCompleteness.lean:4088-4104, two independent defects: birth-key staleness and unrestricted redirect reachability), and TRUE AND PROVED for the ordered driver (modalTableauS4KeyedOrdered_sound, FrameCompleteness.lean:8234, concluding genuine unweakened s4Valid; lean_verify returns an EMPTY axiom list). The repair was scheduling (settled-context: non-minting candidates first, minting only once no non-minting rule can fire) rather than a change to the guard predicate. Route (b) (generalizing RuleApply to thread opaque per-branch state) is moot for closing S4 and partly landed anyway as task 564's RuleApplySt ladder. What remains is a bounded ~580-line port: (1) modalStepBranchS4KeyedOrdered_none_saturated -- PROBED GREEN THIS DISPATCH as a one-liner via modalStepBranchS4KeyedOrdered_eq_none_iff, lake build 876/876 exit 0, then reverted; (2) relocate modalStepBranchS4KeyedOrdered_newExps_eq_map from FrameCompleteness.lean:7869 down into LoopChecking.lean (verified pure move, all deps in S4/Driver.lean and public); (3) modalExpandBranchesS4KeyedOrdered_hintikka (~370-line structural port of the landed unordered analogue, simplified by using the already-bundled S4OrderedFuelInv + modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv as the single step lemma); (4) modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem (~135-line port); (5) modalTableauS4KeyedOrdered_complete plus s4Valid_decides/instDecidableS4Valid mirroring kb5Valid_decides/instDecidableKb5Valid (FrameCompleteness.lean:4069-4082). The seed-state S4OrderedFuelInv witness needed by completeness is already assembled verbatim inside modalTableauS4KeyedOrdered_sound. RECOMMENDATION: do NOT re-block; proceed to /plan with the four-phase shape in the report. Tree verified green at HEAD: lake build on FrameCompleteness (910 jobs) and LoopChecking (876 jobs) both exit 0; sorry census over Cslib/Logics/Modal/Tableau/ is zero.",
+  "summary": "Wrote a 5-phase implementation plan (plans/03_s4-ordered-driver-completeness.md, 6 hours, fully sequential) that closes S4 decidability by finishing the COMPLETENESS half for the ordered keyed driver modalTableauS4KeyedOrdered, whose soundness is already proved sorry-free and axiom-free (modalTableauS4KeyedOrdered_sound, FrameCompleteness.lean:8234, empty #print axioms list). This plan SUPERSEDES plans/01's Phase 7, which targets the wrong driver (live-guard modalTableauS4) and must not be resumed. Phase shape follows report 03's recommendation, refined from four phases to five: report Phase 1 was split into two phases because its two objectives have genuinely different verification tiers and commit modes -- adding modalStepBranchS4KeyedOrdered_none_saturated is a single-file additive green sub-step (local/per-substep), while relocating modalStepBranchS4KeyedOrdered_newExps_eq_map from FrameCompleteness.lean:7869 into LoopChecking.lean is a two-file move whose intermediate state is unavoidably red in either edit order (interface/atomic-batch, file set declared in advance). Phases 3/4/5 map one-to-one onto report Phases 2/3/4. The ~370-line Hintikka port is deliberately alone in Phase 3. Phase 5 carries Verification Tier full because instDecidableS4Valid is a new global instance affecting typeclass resolution repository-wide. SOUNDNESS CONSTRAINT ENCODED THROUGHOUT: soundness is FALSE for the UNORDERED keyed driver (machine-checked countermodel, CslibTests/S4LoopGuardRegression.lean, documented FrameCompleteness.lean:4088-4104); every new declaration name must contain 'Ordered', and Phases 3 and 4 each carry an explicit grep check for unqualified unordered references. Plan validated: validate-artifact.sh --strict PASS, 0 warnings.",
   "phases_completed": 0,
-  "phases_total": 0,
+  "phases_total": 5,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
+    "plan_path": "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
     "report_path": "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
-    "prior_plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-    "prior_plan_status": "Phases 1-6 landed sorry-free and remain valid; Phase 7 as written targets the wrong driver (modalTableauS4, live-guard) and should be superseded rather than resumed. A new plan is needed, not a resumption.",
+    "superseded_plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+    "superseded_plan_status": "Phases 1-6 landed sorry-free and remain valid in the tree. Phase 7 targets modalTableauS4 (live-guard) and is obsolete. Do NOT resume plan 01; execute plan 03 from Phase 1.",
     "files_modified": [
-      "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
+      "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
       "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json",
       "specs/511_s4_loop_checking_termination/.return-meta.json"
     ],
     "lean_files_modified_this_dispatch": [],
-    "file_scope_correction": "The task's declared file_scope (LoopChecking.lean, FrameCompleteness.lean) is still correct for the remaining work, but note that task 565 split the S4 machinery into ten Cslib/Logics/Modal/Tableau/S4/*.lean modules that LoopChecking.lean now public-imports. The plan should reference S4/Driver.lean, S4/Invariant.lean, S4/HintikkaInvariant.lean, S4/Hintikka.lean, and S4/BirthKey.lean as READ-ONLY sources of already-landed lemmas; no edits to S4/*.lean are anticipated.",
-    "recommended_phases": [
-      "Phase 1 (LoopChecking.lean, ~40 lines): add modalStepBranchS4KeyedOrdered_none_saturated (exact proof text supplied in report section 4, already probed green); relocate modalStepBranchS4KeyedOrdered_newExps_eq_map from FrameCompleteness.lean:7869 into LoopChecking.lean, deleting the original.",
-      "Phase 2 (LoopChecking.lean, ~370 lines): modalExpandBranchesS4KeyedOrdered_hintikka -- structural port of modalExpandBranchesS4Keyed_hintikka (LoopChecking.lean:1134-1493) using S4OrderedFuelInv as the per-index hypothesis. Highest-risk phase, deliberately alone.",
-      "Phase 3 (LoopChecking.lean, ~135 lines): modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem -- structural port of LoopChecking.lean:1495.",
-      "Phase 4 (FrameCompleteness.lean, ~60 lines): modalTableauS4KeyedOrdered_complete, s4Valid_decides, instDecidableS4Valid; update the two stale prose notes at FrameCompleteness.lean:4099-4102 and LoopChecking.lean:151-152 that assert decidability is out of scope."
+    "head_commit_at_planning": "07f64c9e46fade30310b77beabbbeebb1c9889ca",
+    "head_note": "Report 03 was written at 5ea7152c. The current HEAD 07f64c9e adds only a task-597 research artifact; all Cslib/ source anchors cited in the plan were independently re-verified against the working tree during planning and are unchanged.",
+    "dependency_waves": [[1], [2], [3], [4], [5]],
+    "phase_summary": [
+      "Phase 1 (LoopChecking.lean, ~15 lines, local, per-substep): add private lemma modalStepBranchS4KeyedOrdered_none_saturated. Exact proof text is supplied verbatim in the plan; it was probed green this research round (lake build LoopChecking 876/876, exit 0) and reverted. If it does not compile verbatim, STOP and report -- that is a regression finding, not something to patch around.",
+      "Phase 2 (LoopChecking.lean + FrameCompleteness.lean, ~35 lines moved, interface, ATOMIC-BATCH): relocate modalStepBranchS4KeyedOrdered_newExps_eq_map from FrameCompleteness.lean:7869 into LoopChecking.lean, deleting the original. Must stay non-private so the existing call site at FrameCompleteness.lean:8164 still resolves. Depends on 1 for territory serialization only, not logically.",
+      "Phase 3 (LoopChecking.lean, ~370 lines, local, per-substep): modalExpandBranchesS4KeyedOrdered_hintikka, structural port of LoopChecking.lean:1134-1493. Uses S4OrderedFuelInv (S4/HintikkaInvariant.lean:828) as the single per-index hypothesis and modalStepBranchS4KeyedOrdered_preserves_S4OrderedFuelInv (:840) as the single step lemma -- do NOT widen the unordered four-way conjunction to five. Highest-risk phase, deliberately alone.",
+      "Phase 4 (LoopChecking.lean, ~135 lines, local, per-substep): modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem, structural port of LoopChecking.lean:1495, substituting modalStepBranchS4KeyedOrdered_branch_superset (S4/Driver.lean:1339) and the Phase 2 relocated _newExps_eq_map.",
+      "Phase 5 (FrameCompleteness.lean + LoopChecking.lean, ~60 lines, FULL tier, per-substep): modalTableauS4KeyedOrdered_complete (copy of :4189) reusing the seed-state S4OrderedFuelInv witness already assembled at FrameCompleteness.lean:8239-8246; then s4Valid_decides and instDecidableS4Valid mirroring kb5Valid_decides/instDecidableKb5Valid (:4070-4082); then correct the two stale prose notes at FrameCompleteness.lean:4099-4102 and LoopChecking.lean:151-152."
     ],
+    "expected_friction": "Wherever the unordered original destructures the step hypothesis via a direct findSome? extraction, thread modalStepBranchS4KeyedOrdered_selected_mem (S4/Driver.lean:705) instead. Both prior ordered-twin ports needed exactly this substitution; it is budgeted, not a surprise.",
+    "verification_baseline": {
+      "loopchecking_build": "lake build Cslib.Logics.Modal.Tableau.LoopChecking -- 876 jobs, exit 0",
+      "framecompleteness_build": "lake build Cslib.Logics.Modal.Tableau.FrameCompleteness -- 910 jobs, exit 0",
+      "sorry_census": "zero under Cslib/Logics/Modal/Tableau/ (all 28 remaining repo sorries are in Logics/Bimodal/ and Logics/Propositional/Tableau/)",
+      "axiom_benchmark": "lean_verify on modalTableauS4KeyedOrdered_sound returns an EMPTY axiom list; this must remain empty"
+    },
     "out_of_scope": [
-      "Retiring modalTableauS4Keyed/modalExpandBranchesS4Keyed and their unordered proof stack (LoopChecking.lean:188-189 earmarks this as a separate destructive phase, gated on Phase 4 landing first).",
+      "Retiring modalTableauS4Keyed/modalExpandBranchesS4Keyed and their unordered proof stack (LoopChecking.lean:188-189 earmarks a separate destructive phase, gated on plan 03 Phase 5 landing first).",
       "Retiring the live-guard modalTableauS4 (S4/Driver.lean:219).",
-      "The deliberately-weakened per-step soundness scope note in FrameSoundness.lean (FrameCompleteness.lean:8212-8221)."
+      "Any driver-abstraction refactor -- task 597's decision report concluded the per-regime bespoke split is the correct steady state and that this port is independent of it. Do NOT generalize RuleApply/RuleApplySt here.",
+      "Any proof about the UNORDERED keyed driver's soundness -- it is false as stated.",
+      "Edits to any Cslib/Logics/Modal/Tableau/S4/*.lean module. Those ten modules are READ-ONLY sources of already-landed lemmas; file_scope is exactly LoopChecking.lean + FrameCompleteness.lean.",
+      "ROADMAP.md updates (roadmap_flag was not set and roadmap_path was not provided; the matching items are ROADMAP.md lines 114 and 153, for whoever runs /todo at completion)."
     ],
-    "task_597_flag": "Two findings bear on task 597's driver-abstraction decision without presupposing it: (1) S4's decidability does NOT gate on the abstraction decision -- the remaining work is a within-file port against already-proven ordered lemmas, so 511 should not wait for 597; (2) a cost data point for 597: the bespoke path has produced two parallel S4 driver stacks with ~15 duplicated modalStepBranchS4KeyedOrdered_preserves_* twins of modalStepBranchS4Keyed_preserves_*, and this task adds two more ~250-line structural twins -- but that duplication was cheap precisely because the lemmas were structural copies, and the ordered driver was only buildable because the bespoke path let scheduling change independently of the guard predicate.",
-    "next_action_hint": "Run /plan 511. Do not resume the existing plan's Phase 7; supersede it with a new plan encoding the four phases above. The standing permission to re-block is not needed -- no blocker remains."
+    "contingency": "If Phase 3 or 4 does not close within one dispatch, mark the phase [PARTIAL], commit what is green, and let /implement resume. Do NOT introduce a sorry to reach a passing build -- the task's whole value is a sorry-free, axiom-free decidability instance. If Phase 3 proves structurally harder than a port (a seventh required stepper fact appears, or the S4OrderedFuelInv simplification does not carry), report it as a finding and re-block with a sharpened goal state rather than widening scope into S4/*.lean.",
+    "next_action_hint": "Run /implement 511. Execute plan 03 from Phase 1; do not resume plan 01."
   },
   "artifacts": [
     {
-      "path": "specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md",
-      "type": "report",
-      "summary": "HEAD re-verification of the Phase 7 blocker: blocker resolved by the ordered keyed driver landed by task 553; route (a) recommended with a four-phase shape; one new lemma probed green and reverted."
+      "path": "specs/511_s4_loop_checking_termination/plans/03_s4-ordered-driver-completeness.md",
+      "type": "plan",
+      "summary": "5-phase, 6-hour sequential plan closing S4 decidability via the completeness half for the ordered keyed driver modalTableauS4KeyedOrdered; supersedes plan 01's Phase 7."
     }
   ]
 }

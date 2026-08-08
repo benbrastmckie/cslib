@@ -1,25 +1,45 @@
 {
-  "task_number": 592,
-  "phase": "plan",
-  "status": "success",
-  "session_id": "sess_1786219370_0903ea_592",
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "All 7 phases of plan 01 completed. CslibTests/HvalidShapeRefutation.lean and CslibTests/BetaSplitRefutation.lean are new, module-mode, barrel-registered, fully-docstringed regression tests promoted from specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/; both build with zero warnings/info under `lake build --wfail --iofail` and are barrel-reachable via `lake test`. BetaSplitRefutation.lean's nine load-bearing #evals were converted to #guard_msgs assertions (values derived from a live lake env lean run, cross-checked against the research report's Finding 3, not hand-transcribed); seven non-load-bearing #evals were dropped, defs retained. All 14 in-source citations in Cslib/Logics/Propositional/Tableau/ that pointed at the unresolvable scratch/-relative paths now resolve from the repository root -- 13 repointed to CslibTests/*.lean, the 14th (Scheme.lean:3474, PersistPrototype.lean) repaired to the full specs/archive/.../scratch/ path per Finding 8. All verdict text (REFUTED, PERMANENTLY DEFERRED, DISPOSITION UNDECIDED, [UNVERIFIED]) left byte-identical -- only path characters and line-wraps changed, confirmed by explicit git diff read. Phase 1's HEAD gate baseline (lake build --wfail --iofail) was wider than the plan's hypothesized 1 target: 5 pre-existing failing targets, recorded as-is per the phase's own Scope Hypothesis fallback. Phase 7's final gate re-run produced a byte-identical failing-target set (diff empty) -- no regression introduced. Subtree sorry census unchanged at 4 (same four declarations); zero new axioms; check-shake-residue.sh matches baseline (12 files); lake exe lint-style zero findings repo-wide; lake exe checkInitImports clean.",
   "artifacts": [
-    "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md"
+    {
+      "type": "plan",
+      "path": "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/592_promote_propositional_refutations_to_cslibtests/summaries/01_promote-refutation-witnesses-cslibtests-summary.md"
+    }
   ],
-  "next_phase": "implement",
   "blockers": [],
-  "summary": "7-phase plan written and strict-validated (0 warnings). Phase 1 captures the HEAD --wfail --iofail baseline so later phases judge the gate by set-difference, never exit code (Finding 6). Phases 2-4 promote both witnesses into CslibTests/ (module mode, doubled Mathlib tactic meta-imports, 9 #guard_msgs assertions, 7 verbose evals dropped, barrel registration, docstrings). Phases 5-6 repoint all 14 citations, treating Scheme.lean:3474 as a 14th repair site rather than a template (Finding 8). Phase 7 is the full gate. Estimated 5.5 hours across 6 waves; one genuine parallel wave (Phases 4 and 5, disjoint trees).",
-  "key_findings": [
-    "Report figure corrected at plan time: Finding 5's '14 bare #evals' and 'five verbose ones' are wrong. Direct count at HEAD gives 16 #evals (lines 252-256, 327-332, 392-396); the enumerated lists (9 keep, 7 drop) are authoritative and total 16. Plan uses 16/9/7 and still requires grep re-confirmation.",
-    "Phase 1 exists solely to convert the already-red --wfail --iofail gate from an unusable exit-code signal into a usable set-difference signal. Acceptance is 'failing-target set unchanged from baseline plus the two new targets green', explicitly not 'pipeline green'.",
-    "Phases 2 and 3 are serialized (not parallel) because both must edit the shared CslibTests.lean barrel; Phases 4 and 5 are genuinely parallel (CslibTests/ vs Cslib/Logics/Propositional/Tableau/).",
-    "Verification tiers assigned deliberately, not by default: Phase 4 (docstrings) is `local` not `prose` because Lean /-- --/ doc comments compile; Phases 5-6 (comment edits) are `local` not `prose` because three lines need rewrapping and site #12 sits inside a docstring.",
-    "Fixing the pre-existing --wfail red, promoting PersistPrototype.lean, promoting the 5 uncited probes, and re-adjudicating any verdict are all explicit Non-Goals. The archive-path fragility under a future vault renumbering is recorded as an accepted known consequence, not a surprise.",
-    "Rollback guidance is asymmetric and stated: promotion alone (Phases 1-4) is separately shippable; citation repair alone is not, since it would point at files that do not yet exist. If work must stop mid-task, stop after Phase 4.",
-    "grep confirms 14 'scratch/' occurrences in the subtree at HEAD, matching the research inventory; ROADMAP.md consulted read-only and not modified."
+  "next_action_hint": "complete",
+  "files_modified": [
+    "CslibTests/HvalidShapeRefutation.lean",
+    "CslibTests/BetaSplitRefutation.lean",
+    "CslibTests.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/592_promote_propositional_refutations_to_cslibtests/plans/01_promote-refutation-witnesses-cslibtests.md",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-baseline.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-baseline-targets.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-final.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/gate-final-targets.txt",
+    "specs/592_promote_propositional_refutations_to_cslibtests/summaries/01_promote-refutation-witnesses-cslibtests-summary.md",
+    "specs/592_promote_propositional_refutations_to_cslibtests/.return-meta.json"
   ],
-  "phase_count": 7,
-  "estimated_hours": 5.5,
-  "dependency_waves": [[1], [2], [3], [4, 5], [6], [7]],
-  "risk_level": "low"
+  "decisions_made": [
+    "Merged Phase 3 (imports/#guard_msgs) and Phase 4 (docstrings) into a single authoring pass and commit for CslibTests/BetaSplitRefutation.lean, since the file was written once with both scopes satisfied; both phases' verification criteria were independently re-checked and both marked complete in the plan (Phase 4 as [COMPLETED WITH EXCLUSIONS] with a Reasoned Exclusion documenting the merge).",
+    "Phase 6's verification bullet 'grep -rn \"scratch/\" ... returns nothing' was found textually unsatisfiable given Finding 8's own prescribed repair (the correct archive path legitimately contains the substring 'scratch/'); did not strip 'scratch/' from the correct path to force a false pass, since that would reintroduce Finding 8's original unresolvable-citation defect. Documented as a Reasoned Exclusion; phase's actual goal (citation resolves from repo root, confirmed by test -f) is met.",
+    "Left an unrelated, out-of-scope 430_...-ellipsis citation at Scheme.lean:3324 (referencing 'specs/430_.../handoffs/', not a scratch/ witness file) untouched -- it is not one of Finding 9's 14 inventoried sites and repairing it would be undisclosed scope expansion.",
+    "Recorded Phase 1's wider-than-hypothesized 5-target baseline as-is (not shrunk) per the phase's own Scope Hypothesis instruction, and used it verbatim as the Phase 7 comparison point."
+  ],
+  "dead_ends": [],
+  "plan_markers_verified": true,
+  "phases_completed": 7,
+  "phases_total": 7,
+  "sorry_inventory": []
 }

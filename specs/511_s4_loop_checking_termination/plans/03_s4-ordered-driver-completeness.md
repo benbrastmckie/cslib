@@ -1,7 +1,7 @@
 # Implementation Plan: Task #511
 
 - **Task**: 511 - S4 loop checking termination (close the termination bound and complete decidability)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: 535, 553, 563, 564, 565, 566, 567, 586 (all landed; no live blocker at HEAD)
 - **Research Inputs**: `specs/511_s4_loop_checking_termination/reports/03_head-reverification-ordered-driver.md`
@@ -358,7 +358,7 @@ via `git diff --stat` and by enumerating cited lemmas against that two-item list
 
 ---
 
-### Phase 5: Completeness and the decidability capstone [NOT STARTED]
+### Phase 5: Completeness and the decidability capstone [COMPLETED]
 
 **Goal**: Land `modalTableauS4KeyedOrdered_complete`, then `s4Valid_decides` and
 `instDecidableS4Valid`, and correct the stale prose that asserts S4 decidability is out of scope.

@@ -4094,12 +4094,15 @@ the driver below; it cannot be proved, because it is not true. Two independent d
 responsible -- comparing prospective minting content against each world's *recorded* birth key
 rather than its *live* content ("staleness"), and admitting a redirect edge with no restriction
 that the target be reachable from the source at all ("no reachability restriction") -- and
-repairing the first does not repair the second. The repair route under development changes
-*when* a minting shape may fire rather than the guard's comparison predicate, landing as a
-parallel "ordered" driver before this one is retired; consult `blockingWorldS4Keyed`'s docstring
-for the full account. The decidability half (`s4Valid_decides`/`instDecidableS4Valid`) remains
-out of scope until both a genuine soundness theorem and this completeness theorem exist for the
-same driver.
+repairing the first does not repair the second. The repair changes *when* a minting shape may
+fire rather than the guard's comparison predicate, landing as a parallel "ordered" driver
+(`modalTableauS4KeyedOrdered`) before this one is retired; consult `blockingWorldS4Keyed`'s
+docstring for the full account. **Correction**: the decidability half (`s4Valid_decides` /
+`instDecidableS4Valid`) is no longer out of scope -- both a genuine soundness theorem
+(`modalTableauS4KeyedOrdered_sound`, below) and a completeness theorem
+(`modalTableauS4KeyedOrdered_complete`, below) now exist for the *ordered* driver, and the
+decidability instance is built from that pair. It is NOT built from the unordered driver's
+theorems below, which pair a real completeness result with no valid soundness theorem.
 
 `modalTableauS4Keyed_complete` below is assembled from `modalExpandBranchesS4Keyed_hintikka`
 (`LoopChecking.lean`, the keyed top-loop Hintikka lemma, already bridged to the concrete
@@ -8197,6 +8200,89 @@ theorem modalTableauS4KeyedOrdered_sound (φ₀ : Proposition Atom)
   exact modalExpandBranchesS4KeyedOrdered_closed_False φ₀ (modalFuelS4 φ₀)
     [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
     [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]] hEx h'
+
+/-! ## S4KeyedOrdered Completeness and the Decidability Capstone
+
+The completeness half for the *ordered* driver, paired with `modalTableauS4KeyedOrdered_sound`
+above to close S4 decidability. Near-verbatim copy of `modalTableauS4Keyed_complete`
+(S4Keyed Completeness section above), fed by `modalExpandBranchesS4KeyedOrdered_hintikka` and
+`modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem` (`LoopChecking.lean`) in place of
+their unordered analogues. The seed-state `S4OrderedFuelInv` witness is assembled from the same
+ingredients `modalTableauS4KeyedOrdered_sound` already uses verbatim: the four conjuncts of
+`modalTableauS4Keyed_initial` plus the fifth, `keysOriginS4_entry`. -/
+
+/-- **S4-completeness of the ordered keyed modal tableau**: if `φ₀` is `s4Valid`,
+`modalTableauS4KeyedOrdered` closes on it. Contrapositively: an open branch is a genuine
+reflexive-transitive-frame countermodel. Assembled from
+`modalExpandBranchesS4KeyedOrdered_hintikka` (`LoopChecking.lean`, fed the corrected entry
+invariant `modalTableauS4Keyed_initial` plus `keysOriginS4_entry`, bundled as `S4OrderedFuelInv`),
+`modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem` (`LoopChecking.lean`), and
+`modalOpenBranchS4_countermodel` above. Mirrors `modalTableauS4Keyed_complete`. -/
+theorem modalTableauS4KeyedOrdered_complete (φ₀ : Proposition Atom) (h : s4Valid φ₀) :
+    modalTableauS4KeyedOrdered φ₀ = .closed := by
+  cases htab : modalTableauS4KeyedOrdered φ₀ with
+  | closed => rfl
+  | openBranch b a =>
+    exfalso
+    have h' : modalExpandBranchesS4KeyedOrdered φ₀
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+        (modalFuelS4 φ₀) = .openBranch b a := htab
+    obtain ⟨hLoop, hHintikka, hKW, hWC⟩ := modalTableauS4Keyed_initial φ₀
+    have hKO := keysOriginS4_entry φ₀
+    have hOF : S4OrderedFuelInv φ₀
+        [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+        Accessibility.empty [((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))] :=
+      ⟨hLoop, hHintikka, hKW, hWC, hKO⟩
+    have hH : modalHintikkaSetS4 φ₀ b a :=
+      modalExpandBranchesS4KeyedOrdered_hintikka φ₀ (modalFuelS4 φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+        rfl rfl rfl (modalExpMeasure_entry_le_fuelS4 φ₀)
+        (by
+          intro i bi ei ai keysi hib hie hia hik
+          match i with
+          | 0 =>
+            simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia hik
+            subst hib; subst hie; subst hia; subst hik
+            exact hOF
+          | n + 1 => simp at hib)
+        b a h'
+    have hmemInit : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+      modalExpandBranchesS4KeyedOrdered_openBranch_initial_mem φ₀ (modalFuelS4 φ₀)
+        (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+        rfl rfl rfl
+        (fun b₀ hb₀ => by
+          simp only [List.mem_singleton] at hb₀
+          subst hb₀
+          simp)
+        b a h'
+    obtain ⟨hnsat, hFC⟩ := modalOpenBranchS4_countermodel φ₀ b a hH hmemInit
+    exact hnsat (h WorldIndex (extractModelS4 b a) hFC 0)
+
+/-- **The ordered keyed modal tableau decides S4-validity**: `modalTableauS4KeyedOrdered φ₀`
+closes exactly when `φ₀` is `s4Valid`. Combines soundness (`modalTableauS4KeyedOrdered_sound`
+above) with completeness (`modalTableauS4KeyedOrdered_complete` above). Mirrors
+`kb5Valid_decides`. -/
+theorem s4Valid_decides (φ₀ : Proposition Atom) :
+    modalTableauS4KeyedOrdered φ₀ = .closed ↔ s4Valid φ₀ :=
+  ⟨modalTableauS4KeyedOrdered_sound φ₀, modalTableauS4KeyedOrdered_complete φ₀⟩
+
+/-- **S4-validity is decidable**: decide by running the ordered keyed modal tableau and consulting
+`s4Valid_decides`. No `Fintype Atom` assumption is needed, since the tableau computation itself is
+the decision procedure. Mirrors `instDecidableKb5Valid`.
+
+This is the constructive witness to S4's decidability -- the last classical-cube decidability
+corner, closed by the settled-context-scheduling ordered driver `modalTableauS4KeyedOrdered`
+(NOT the unordered `modalTableauS4Keyed`, whose soundness is false, and NOT the live-guard
+`modalTableauS4`, which has no completeness proof of its own). -/
+instance instDecidableS4Valid (φ₀ : Proposition Atom) : Decidable (s4Valid φ₀) :=
+  match h : modalTableauS4KeyedOrdered φ₀ with
+  | .closed => .isTrue ((s4Valid_decides φ₀).mp h)
+  | .openBranch _ _ =>
+    .isFalse (fun hv => by rw [modalTableauS4KeyedOrdered_complete φ₀ hv] at h; cases h)
 
 end Cslib.Logic.Modal.Tableau
 

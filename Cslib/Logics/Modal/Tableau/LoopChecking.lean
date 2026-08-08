@@ -149,7 +149,10 @@ which are stated for an arbitrary `keys` list. Fuel is `modalFuelS4 φ`, the S4-
 bound (sufficiency: `modalExpMeasure_entry_le_fuelS4`) -- K's `modalFuel φ` is confirmed NOT
 provably sufficient for
 the S4 keyed loop's pigeonhole world bound `modalWorldBoundS4`. The live `modalTableauS4` is NOT
-redefined; `instDecidableS4Valid` (deferred) would point at this declaration instead. -/
+redefined. **Correction**: `instDecidableS4Valid` now exists and points at the ordered successor
+`modalTableauS4KeyedOrdered` below (`FrameCompleteness.lean`), not at this (unordered) declaration
+-- soundness is false for the unordered keyed driver, so the decision procedure could not have
+been built on top of it. -/
 def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
   let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
     [⟨.neg, φ, 0⟩]

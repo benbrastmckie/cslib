@@ -100,7 +100,7 @@
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [
@@ -114,8 +114,8 @@
         586
       ],
       "parent_task": 506,
-      "last_updated": "2026-08-05T00:00:00Z",
-      "session_id": "sess_1784204000_p7block",
+      "last_updated": "2026-08-08T20:05:27Z",
+      "session_id": "sess_1786219370_0903ea",
       "artifacts": [
         {
           "type": "plan",
@@ -849,7 +849,7 @@
     {
       "project_number": 554,
       "project_name": "cs5_pair_seed_disjunction_property_cutfree_research",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": [
@@ -860,8 +860,8 @@
         "Disposition: report task closure per rescope — [BLOCKED], justification = report 02 section 5.4 cost table + the two machine-checked route closures, requires_user_review: true, and the two consumers' answers restated (pair-Lindenbaum consumer: obligation not dischargeable by any surveyed route without user-authorised collapse; labelled-soundness consumer: fold unrepairable, answer 'never', unchanged)",
         "Requires user review: (R-a) refuted machine-checked (IS5TotalModels.lean); continuation options per report 02 section 5.4 cost table (e.g. authorising the CS5=IS5 collapse route) are a user decision."
       ],
-      "last_updated": "2026-07-28T22:59:36Z",
-      "session_id": "sess_1785275816_a84520_554",
+      "last_updated": "2026-08-08T20:14:30Z",
+      "session_id": "sess_1786219370_0903ea",
       "topic": "Modal Logic",
       "artifacts": [
         {
@@ -878,6 +878,11 @@
           "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/summaries/03_ra-probe-summary.md",
           "type": "summary",
           "summary": "(R-a) probe refuted machine-checked; verdict landed as IS5TotalModels.lean; phases 3-6 blocked by design pending user review"
+        },
+        {
+          "type": "report",
+          "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md",
+          "summary": "Round-4 re-verification at HEAD: closures intact; re-affirm [BLOCKED]"
         }
       ]
     },
@@ -996,18 +1001,19 @@
     {
       "project_number": 592,
       "project_name": "promote_propositional_refutations_to_cslibtests",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Promote the three cited-but-absent propositional refutation witnesses into CslibTests/",
       "description": "EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Logics/Propositional/Tableau/ point at refutation witnesses using a stale, task-directory-relative path prefix. Created by the 2026-08-07 codebase review (finding C3); SCOPE CORRECTED by the 2026-08-08 review (finding C1).\n\nCORRECTION 2026-08-08 -- READ THIS FIRST. The original description of this task asserted that scratch/BetaSplitRefutation.lean, scratch/HvalidShapeRefutation.lean and scratch/PersistPrototype.lean \"DO NOT EXIST in the repository\", and that three permanent-deferral decisions rest on evidence nobody can open. THAT PREMISE IS FALSE. All three files are present at HEAD:\n\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/BetaSplitRefutation.lean   (396 lines; phiRef1 at :235, report at :213)\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/HvalidShapeRefutation.lean (84 lines; phiK_valid : IValid phiK at :65, valuation_not_upward_closed at :57)\n  specs/archive/430_prove_atom_persistence_upward_closure_for_intexpan/scratch/PersistPrototype.lean\n\nThe `scratch/...` prefix in the citations is relative to the OWNING TASK DIRECTORY, not to the repository root. Scheme.lean:3474 already writes the full form (`specs/430_.../scratch/PersistPrototype.lean`), which confirms the convention. The original review resolved the prefix against the repository root, found no scratch/ there, and inferred loss. No evidence was lost and no work was abandoned in error; the three deferral decisions are auditable today.\n\nCONSEQUENTLY THE \"IRRECOVERABLE\" BRANCH IS DELETED FROM THIS TASK. Do NOT downgrade any annotation to \"[UNVERIFIED], evidence lost\" -- doing so would corrupt a correct record. If a witness ever genuinely cannot be opened, stop and re-verify the path before concluding anything.\n\nTHE ACTUAL DEFECT: 14 citations carry a path that does not resolve from the repository root, distributed as\n  Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean          -- 2 (:52, :149)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean   -- 4 (:50, :134, :144, :158)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean      -- 1 (:297)\n  Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean         -- 7 (:585, :747, :3474, :7834, :7845, :7929, :7953)\nNote :3474 is already correct and is the reference form to copy.\n\nSCOPE:\n(1) Promote the two load-bearing witnesses into compiling regression tests under CslibTests/, following the established precedent (CslibTests/AncestorRedirectRefutation.lean, CslibTests/S4LoopGuardRegression.lean): phiRef1 and its report/reportMin evaluation from BetaSplitRefutation.lean, and the hvalid-shape counterexample (phiK_valid + valuation_not_upward_closed) from HvalidShapeRefutation.lean.\n(2) Repoint all 14 citations at the new in-tree CslibTests/ paths. PersistPrototype.lean is a prototype rather than a refutation witness -- repointing its single citation at the archive path is sufficient, no promotion needed.\n(3) Leave every \"refuted\" / \"PERMANENTLY DEFERRED\" annotation's VERDICT untouched. This task restores auditability of those verdicts; it does not re-adjudicate them. Re-adjudication is the disposition-decision task's job.\n\nEXPECTED OUTPUT: phiRef1 and the hvalid-shape counterexample compiling in CslibTests/, all 14 citations resolving from the repository root, sorry census unchanged at 4. Zero new sorries, zero new axioms.\n\nSEQUENCING: still the prerequisite for the disposition-decision task -- but that gate is now about having the evidence IN-TREE and CI-protected, not about recovering it.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z",
+      "last_updated": "2026-08-08T20:05:25Z",
       "file_scope": [
         "CslibTests/",
         "Cslib/Logics/Propositional/Tableau/"
-      ]
+      ],
+      "session_id": "sess_1786219370_0903ea"
     },
     {
       "project_number": 593,
@@ -1079,14 +1085,15 @@
     {
       "project_number": 597,
       "project_name": "modal_tableau_driver_abstraction_decision",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Tableau Infrastructure",
       "title": "Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion",
       "description": "DECISION TASK, deliberately sequenced BEFORE the remaining-cube-corners decidability task. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding M1).\n\nTHE SITUATION (measured 2026-08-07): Cslib/Logics/Modal/Tableau/ is 44,692 lines across 32 files -- 19% of the 236,442-line library. The generic abstraction, `RuleApplicationSpec` (GenericDriver.lean, 553 lines, 11 fields), covers the K-style finite-catalog counting termination regime ONLY. Two further regimes each received a bespoke parallel implementation:\n- K-style counting: GenericDriver.lean + Saturation.lean + FmpMeasure.lean, ~4,632 lines\n- S4 loop-checking: LoopChecking.lean + S4/*.lean (11 modules), ~10,900 lines\n- Universal-cluster propagation: S5Simplification.lean (2,331) + FiveSimplification.lean (3,802), 6,133 lines\n\nThe modules document their own duplication. S5Simplification.lean's header says it instantiates the generic driver \"mirroring the B-system build (FrameRules.lean/BDriver.lean) declaration-for-declaration\". FiveSimplification.lean's header says it is \"the 5/KB5 analogue of S5Simplification.lean's modalApplyOneS5w\" whose mint arms are \"shape-identical to modalApplyOneS5w's *except* for the Route (a) root-aware guard\", and then enumerates precisely which lemmas carry over verbatim and which do not.\n\nWHY NOW: task 548 proposes adding 8 more cube corners (D, K4, K45, D4, D5, D45, DB, TB) and its own description spans all three regimes -- \"transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules\". At the current per-system rate that roughly doubles the subtree. The architectural decision is cheap now and expensive after.\n\nTHE QUESTION: can one abstraction span the three termination regimes -- e.g. by generalising `RuleApplicationSpec` over the termination measure rather than fixing the K-style counting measure -- or is the per-regime split the correct steady state? Establish this against the ACTUAL proof scripts that would have to be re-cut, not against type signatures alone. The Chronicle consolidation failed at exactly this point: the types generalised but downstream rcases/simp behaviour broke, and a design that type-checks was not evidence. Do not repeat that mistake.\n\nBINDING PRIOR CONSTRAINTS -- honour them: the abstraction decision record (specs/archive/561_tableau_abstraction_decision_record/decisions/01_abstraction-decision-record.md) recorded D7 as BINDING: \"no lift into Foundations/; de-duplication precedes every abstraction change\", and D5 accepted the Seam-2 module table only AS PROVISIONAL, \"subject to re-cutting before any split\". Note that record's sign-off block was never signed (annotated 2026-08-07 as superseded-by-execution) -- its verdicts were all ACCEPT and the work shipped, but treat the record as evidence rather than as an authority that was formally ratified.\n\nREPORTING CONTRACT: deliver either (a) a concrete abstraction with a phase-sized implementation sketch and an honest cost in re-cut proof sites, or (b) a reasoned finding that the per-regime split is correct and the cube expansion should proceed as-is. (b) is a valid and useful deliverable -- do not manufacture a refactor to avoid it. Either way, state explicitly what the expansion task should do.\n\nRESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. Implementation, if any, is a follow-on.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z"
+      "last_updated": "2026-08-08T20:05:33Z",
+      "session_id": "sess_1786219370_0903ea"
     }
   ],
   "repository_health": {

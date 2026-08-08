@@ -1,59 +1,45 @@
 {
   "status": "partial",
   "requires_user_review": true,
-  "started_at": "2026-07-28T22:40:04Z",
-  "completed_at": "2026-07-28T23:05:00Z",
-  "phases_completed": 2,
-  "phases_total": 6,
-  "phase_number": 2,
-  "disposition": "Kill branch executed: (R-a) refuted (Phase 1), verdict landed in Cslib (Phase 2), Phases 3-6 [BLOCKED] by design. Task closes [BLOCKED] per user kill-criterion with report 02 section 5.4 cost table as justification; continuation requires explicit user decision.",
+  "started_at": "2026-08-08T20:10:00Z",
+  "completed_at": "2026-08-08T20:55:00Z",
+  "disposition": "Round-4 re-verification found nothing changed. All route closures hold sorry-free at HEAD; zero files under Cslib/Logics/Modal/Metalogic/ changed since the kill commit; no new route exists. Recommendation: re-affirm the user-prescribed [BLOCKED] closure with requires_user_review: true. No plan should be created.",
   "artifacts": [
     {
-      "type": "code",
-      "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean",
-      "summary": "Library-grade (R-a) verdict module: bforces_boxEm_of_total, boxEm_not_derivable (axiom-free), IS5TotalCountermodel, IS5TotalCountermodelSupply, is5TotalCountermodelSupply_false"
-    },
-    {
-      "type": "summary",
-      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/summaries/03_ra-probe-summary.md",
-      "summary": "Round-3 implementation summary (Phases 1-2, kill branch, disposition)"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-2-handoff-20260728.md",
-      "summary": "Phase 2 continuation handoff"
+      "type": "report",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md",
+      "summary": "Route-closure re-verification at HEAD, cost-table re-pricing against the landed Nested/ development, refutation of the reopening premise, and disposition recommendation (re-close)"
     }
   ],
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean",
-    "Cslib.lean",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/03_ra-probe-product-model.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-2-handoff-20260728.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/summaries/03_ra-probe-summary.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md",
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/.orchestrator-handoff.json",
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/.return-meta.json"
   ],
   "verification": {
     "verification_passed": true,
+    "build_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "notes": "Scoped builds green; checkInitImports exit 0; lint-style clean; shake clean on touched modules; lake test green; lean_verify — P1/P3 standard axioms only, P2 axiom-free; constructor/BibTag grep empty. Pre-existing repo drift from concurrent tasks (bare-sorry census 10 vs plan baseline 5; lake lint failures in Bimodal/Temporal modules) documented in handoff — zero findings in this task's touched files."
+    "notes": "Scoped lake build (IS5TotalModels, CS5Completeness, Nested.Soundness) green, 676 jobs. #print axioms: is5TotalCountermodelSupply_false, bforces_boxEm_of_total, is5_derivable_of_boxNotMem_transport, nested_sound all [propext, Classical.choice, Quot.sound]; boxEm_not_derivable axiom-free. No sorryAx. No Lean files written or modified this dispatch."
   },
   "memory_candidates": [
     {
-      "content": "When lake exe mk_all --module is run mid-flight in a repo with concurrent agent tasks, it can auto-register other tasks' unregistered files in the Cslib.lean barrel; territory discipline requires dropping those lines from your commit and leaving registration to the owning task.",
-      "topic": "cslib multi-agent hygiene",
+      "content": "A task closed [BLOCKED] under a user-prescribed kill-criterion carries requires_user_review: true and an empty dependencies array. Repository-review heuristics that flag '[BLOCKED] with zero unmet dependencies' as stale misclassify these by construction — a user-decision gate looks identical to a stale dependency block in the task graph. Check requires_user_review before reopening.",
+      "topic": "task-graph review heuristics",
       "type": "pattern"
+    },
+    {
+      "content": "When re-pricing a formalisation cost estimate against work that has since landed, check the DIRECTION of the landed theorem, not just its size. CSLib's Nested/ development landed ADS15 Theorem 4.1 (nested proof implies Hilbert derivability) sorry-free, but an underivability/exclusion argument consumes the converse (Hilbert implies cut-free nested) plus cut-elimination — so 2,953 landed lines moved the cost estimate not at all.",
+      "topic": "cslib formalization cost estimation",
+      "type": "insight"
     }
   ],
   "metadata": {
-    "session_id": "sess_1785275816_a84520_554",
-    "agent_type": "cslib-implementation-hard-agent",
+    "session_id": "sess_1786219370_0903ea_554",
+    "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

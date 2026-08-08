@@ -1,63 +1,63 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
+  "phase": "research",
   "status": "blocked",
   "trigger": "phase_dispatch",
-  "target": "Plan 03 Phase 2: Land the probe verdict in Cslib and execute the disposition (kill branch)",
-  "phases_completed": 2,
-  "phases_total": 6,
+  "target": "Re-verify the two machine-checked route closures at HEAD and recommend disposition after the 2026-08-08 review reopened the task",
+  "phases_completed": 1,
+  "phases_total": 1,
   "skeleton": false,
-  "summary": "Phase 2 kill branch complete: probe verdict landed as Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean (bforces_boxEm_of_total, boxEm_not_derivable axiom-free, IS5TotalCountermodel/IS5TotalCountermodelSupply/is5TotalCountermodelSupply_false), sorry-free; sanctioned docstring cross-reference added at CS5PairSeedRightExclusion (CS5Completeness.lean); barrel registered; plan Phases 3-6 marked [BLOCKED]: (R-a) refuted, see Phase 1. Task is now at its user-prescribed endpoint: per the rescoped kill-criterion the task closes [BLOCKED] with report 02 section 5.4 cost table as justification. Gates: scoped builds green, checkInitImports/lint-style/shake clean, lake test green, axiom audit clean, constructor/BibTag grep empty, zero sorries added.",
+  "summary": "Round-4 research: re-verification only, no new route found, no plan recommended. All route closures re-verify sorry-free at HEAD 5ea7152c (scoped build green, 676 jobs; #print axioms clean, no sorryAx): is5TotalCountermodelSupply_false (R-a refuted), is5_derivable_of_boxNotMem_transport (R-b is the CS5=IS5 collapse), boxEm_not_derivable (axiom-free), bforces_boxEm_of_total, nested_sound. Zero files under Cslib/Logics/Modal/Metalogic/ changed since the kill commit bedd7223 — all 33 changed Cslib files are classical/propositional/temporal tableau work from tasks 553/564/565/566/567/582/586, sharing no machinery with the constructive CS5 line. No new cut-elimination or conservativity abstraction landed that is instantiable here (the only cut-elim infrastructure is propositional LJ/LK and CLL). The one genuine change to report 02 section 5.4's cost table: Nested/ Stages B-D (2,953 lines, five modules, sorry-free, Theorem 4.1 complete) are landed — but soundness is nested-implies-Hilbert, the WRONG direction for an exclusion argument; Stage E is blocked at its first phase (Phase 14) on a machine-verified obstruction (InputCtx.fillLhs/fillEmpty are unconditionally box-shaped, so no rule supplies the bare atom-shaped RHS general id at A = bot needs); Stages F and G (19 of 32 phases, including all of cut-elimination and the unpublished-mathematics pair bridge) are untouched. Re-priced verdict: still prohibitive, and still on the user's explicit do-not-re-propose list. The reopening premise is unsound: this block was never dependency-blocked (dependencies is [] and always was) — it is a user-decision gate marked requires_user_review: true, which the review's 'zero unmet dependencies = stale' heuristic misclassifies by construction; and 'unblocking 554 releases 537 and 551' inverts causation, since the verdict those two were gated on has already been delivered and is negative (537's own blocker text prescribes closing on exactly this outcome). RECOMMENDATION: re-affirm the user-prescribed [BLOCKED] closure. Do not create a plan.",
   "sorry_inventory": [],
   "blockers": [
     {
       "phase": "task-disposition",
-      "target": "(R-a) refuted — product-model route dead; task closes [BLOCKED] per user kill-criterion",
-      "verbatim_goal": "Disposition: report task closure per rescope — [BLOCKED], justification = report 02 section 5.4 cost table + the two machine-checked route closures, requires_user_review: true, and the two consumers' answers restated (pair-Lindenbaum consumer: obligation not dischargeable by any surveyed route without user-authorised collapse; labelled-soundness consumer: fold unrepairable, answer 'never', unchanged)",
-      "what_was_tried": "Phase 1 probe machine-checked (R-a); it is refuted (is5TotalCountermodelSupply_false), so Phases 3-6 are not executable by design",
-      "why_it_failed": "Not a failure: the kill-criterion firing is the user-specified deliverable; the two machine-checked route closures are is5_derivable_of_boxNotMem_transport (R-b implies CS5=IS5 collapse) and is5TotalCountermodelSupply_false (R-a refuted)",
+      "target": "(R-a) refuted, (R-b) equivalent to the unadopted CS5=IS5 collapse; task re-closes [BLOCKED] per the user kill-criterion",
+      "verbatim_goal": "Disposition: re-affirm task closure per the 2026-07-26 rescope — [BLOCKED], justification = report 02 section 5.4 cost table (re-priced in report 04 section 3: still prohibitive) plus the two machine-checked route closures re-verified sorry-free at HEAD, requires_user_review: true, and the two consumers' answers restated (pair-Lindenbaum consumer: obligation not dischargeable by any surveyed route without user-authorised collapse; labelled-soundness consumer: fold unrepairable, answer 'never', unchanged)",
+      "what_was_tried": "Re-verified all five load-bearing declarations at HEAD via scoped lake build plus #print axioms; diffed Cslib/ from the kill commit to HEAD to check whether any completed dependency reopened a closed route; reuse-checked the library for newly landed cut-elimination or conservativity machinery; re-priced report 02 section 5.4's ADS15 row against the actually-landed Nested/ development; read the 2026-08-08 review's stated reopening rationale",
+      "why_it_failed": "Not a failure: nothing changed. The closures hold, nothing landed in the relevant tree, and the reopening rationale rests on a graph heuristic that cannot distinguish a dependency block from a user-decision block. The honest finding is that the user-prescribed closure should stand.",
       "requires_user_review": true
     }
   ],
   "artifacts": [
     {
-      "type": "code",
-      "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean",
-      "summary": "Library-grade verdict module: total-r models validate box a or not box a; IS5-underivable (axiom-free); total-countermodel supply refuted"
-    },
-    {
-      "type": "summary",
-      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/summaries/03_ra-probe-summary.md",
-      "summary": "Round-3 implementation summary (Phases 1-2, kill branch)"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-2-handoff-20260728.md",
-      "summary": "Phase 2 continuation handoff: current state, decisions, what not to try"
+      "type": "report",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md",
+      "summary": "Round-4 re-verification at HEAD: closures intact, nothing landed, cost table re-priced, reopening premise refuted, recommendation to re-affirm [BLOCKED]"
     }
   ],
   "next_action_hint": "close_task_blocked_requires_user_review",
   "requires_user_review": true,
-  "continuation_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-2-handoff-20260728.md",
+  "continuation_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md",
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5TotalModels.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean",
-    "Cslib.lean",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/03_ra-probe-product-model.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-2-handoff-20260728.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/summaries/03_ra-probe-summary.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md",
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/.orchestrator-handoff.json",
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/.return-meta.json"
   ],
   "decisions_made": [
-    "Used the plan's file path Metalogic/Intuitionistic/IS5TotalModels.lean (dispatch message's Constructive/Intuitionistic spelling does not exist; plan is the contract).",
-    "Dropped mk_all's auto-added barrel line for Foundations/Logic/Tableau/Blocking.lean — unregistered file owned by the concurrent shared-tableau task; registering it is its owner's work.",
-    "Documented repo drift honestly: bare-sorry census now 10 vs plan baseline 5 (4 in Bimodal ChronicleToCountermodel, 1 in Modal/Tableau/FrameSoundness, all from concurrent tasks); lake lint has pre-existing failures in Bimodal/Temporal modules. Zero findings and zero sorries in this task's touched files."
+    "Recommended disposition (ii) — re-affirm the user-prescribed [BLOCKED] closure — rather than (i) a new route, because no new route exists and the honest finding is that nothing changed.",
+    "Explicitly did NOT recommend planning the Nested/ Stage E-G continuation despite Stages B-D being landed and sorry-free: the landed asset is in the wrong direction for an exclusion argument, Stage E is blocked at its first phase on a machine-verified obstruction, and Stage G is unpublished mathematics — plus the route is on the user's explicit do-not-re-propose list.",
+    "Recorded, but did not recommend, the Phase 14 handoff's own open sub-question (a second look at whether ADS15 Proposition 3.1's induction has a formalization the earlier dispatch missed). It is a genuine unresolved question owned by the Nested/ development, not a route to this task's obligation.",
+    "No Lean files were written or modified; this was a read-and-verify research dispatch only."
   ],
   "dead_ends": [],
   "consumers_status": {
-    "pair_lindenbaum": "Obligation CS5PairSeedRightExclusion not dischargeable by any surveyed route without user-authorised CS5=IS5 collapse; both route residuals machine-closed and cross-referenced in its docstring.",
-    "labelled_soundness": "Fold unrepairable, answer 'never', unchanged (report 02 section 7)."
+    "pair_lindenbaum": "Unchanged and re-verified at HEAD: CS5PairSeedRightExclusion is not dischargeable by any surveyed route without user-authorised CS5=IS5 collapse. (R-b) is machine-checked equivalent to the collapse (is5_derivable_of_boxNotMem_transport, is5_iff_cs5_derivable_of_boxNotMem_transport); (R-a) is machine-refuted (is5TotalCountermodelSupply_false). Task 551's recorded blocker already anticipates this outcome.",
+    "labelled_soundness": "Unchanged: the sigAt fold is unrepairable, answer 'never' (report 02 section 4 and 7 — the missing bridge box(A or B) -> (box A or box B) fails already in classical S5). Task 537's recorded blocker prescribes closing on exactly this verdict."
   },
+  "verification": {
+    "verification_passed": true,
+    "build_passed": true,
+    "sorry_count": 0,
+    "axiom_findings": "is5TotalCountermodelSupply_false / bforces_boxEm_of_total / is5_derivable_of_boxNotMem_transport / nested_sound: [propext, Classical.choice, Quot.sound]; boxEm_not_derivable: axiom-free. No sorryAx in any of them.",
+    "notes": "Scoped lake build of IS5TotalModels + CS5Completeness + Nested.Soundness green at 676 jobs, first attempt. Nested/ carries zero real sorries (the two grep hits are docstring prose)."
+  },
+  "incidental_findings": [
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean",
+      "lines": "45-46",
+      "finding": "Module docstring still says 'The cut-free nested-sequent route (Constructive/Nested/) is the adopted alternative', predating the 2026-07-26 rescope that put that route on the explicit not-adopted list. One-sentence hygiene correction; outside this task's declared file_scope, recorded for a hygiene sweep owner."
+    }
+  ],
   "plan_markers_verified": true
 }

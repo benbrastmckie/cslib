@@ -28,7 +28,7 @@ next_project_number: 598
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-592 [NOT STARTED] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
+592 [RESEARCHING] — EVIDENTIARY REPAIR. Fourteen in-source citations across Cslib/Log
   └─ 591 [NOT STARTED] — DECISION TASK. Resolve the single open decision point that gates 
     └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
       └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
@@ -36,20 +36,20 @@ next_project_number: 598
 
 ### Modal Logic
 
-511 [NOT STARTED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [RESEARCHING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
     └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-554 [NOT STARTED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
+554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
 
 ### Tableau Infrastructure
 
-597 [NOT STARTED] — DECISION TASK, deliberately sequenced BEFORE the remaining-cube-c
+597 [RESEARCHING] — DECISION TASK, deliberately sequenced BEFORE the remaining-cube-c
 
 ### Temporal Logic
 
@@ -86,7 +86,7 @@ next_project_number: 598
 ## Tasks
 
 ### 597. Decide the tableau driver abstraction across three termination regimes, before the 8-corner expansion
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Tableau Infrastructure
 - **Dependencies**: None
@@ -222,7 +222,7 @@ Zero new sorries, zero new axioms. Expected outcome: propositional bare-sorry co
 ---
 
 ### 592. Promote the three cited-but-absent propositional refutation witnesses into CslibTests/
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -391,11 +391,13 @@ The FILE-LEVEL scope and the sorry COUNTS per file are unchanged and remain accu
 ---
 
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md]
+- **Research**:
+  - [554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md]
+  - [554_cs5_pair_seed_disjunction_property_cutfree_research/reports/04_route-closure-reverification.md]
 - **Plan**: [554_cs5_pair_seed_disjunction_property_cutfree_research/plans/03_ra-probe-product-model.md]
 - **Summary**: [554_cs5_pair_seed_disjunction_property_cutfree_research/summaries/03_ra-probe-summary.md]
 
@@ -476,7 +478,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586

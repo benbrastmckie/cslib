@@ -931,6 +931,203 @@ lemma modalApplyOneD_rankStep
   · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
     exact modalApplyOne_rank_step sf b acc hsfmem hInv rank hbound hedge
 
+/-! ## Discharging F5-F7 for `modalApplyOneD`
+
+Mirrors `TDriver.lean`'s discharge of the same three fields. D never touches `acc` at the two
+D-relevant shapes and never produces `.branching` there either (phase 5's `_boxPos_snd`/
+`_diaNeg_snd` lemmas are exactly the accessibility-unchanged fact), so K's own
+`outDegStep`/`knownWorldsStep`/`branchingLength` proofs transport with the self-conjunct's
+known-world membership as the only new content, exactly as T's do. -/
+
+omit [Hashable Atom] in
+/-- **F5 (`outDegStep`)**: the out-degree/expanded-set correspondence transports across a
+`modalApplyOneD sf b acc` call. Outside the two D-relevant shapes this is exactly K's own
+`modalApplyOne_outDeg_step`; at the two D-relevant shapes, both possible result shapes
+(`.notApplicable`/`.persistent`) map to the *same* right-hand side (`e`, unchanged) and the
+accessibility output is unchanged, so the equation reduces directly to `houtdeg` regardless of
+which of the two shapes actually fires. -/
+lemma modalApplyOneD_outDegStep
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (houtdeg : ∀ w, outDeg acc w =
+      (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    ∀ w, outDeg (modalApplyOneD sf b acc).snd w =
+      (List.filter (fun x => x.label == w && isMintingShaped x)
+        (match (modalApplyOneD sf b acc).fst with
+          | .linear _ => e ++ [sf]
+          | .branching _ => e ++ [sf]
+          | .persistent _ => e
+          | .notApplicable =>
+            (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length := by
+  intro w
+  by_cases hshape : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hshape with ⟨hsign, φ, hform⟩ | ⟨hsign, φ, hform⟩
+    · obtain ⟨s, form, wl⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      rw [modalApplyOneD_boxPos_snd, modalApplyOne_boxPos_acc_eq, modalApplyOneD_boxPos_fst]
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, wl⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
+      · simp only [hk]
+        split_ifs <;> exact houtdeg w
+      · simp only [hk]
+        exact houtdeg w
+    · obtain ⟨s, form, wl⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      rw [modalApplyOneD_diaNeg_snd, modalApplyOne_diamondNeg_acc_eq,
+        modalApplyOneD_diamondNeg_fst]
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, wl⟩) rfl φ rfl b acc with
+          hk | ⟨kForms, hk⟩
+      · simp only [hk]
+        split_ifs <;> exact houtdeg w
+      · simp only [hk]
+        exact houtdeg w
+  · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
+    exact modalApplyOne_outDeg_step sf b e acc houtdeg w
+
+omit [Hashable Atom] in
+/-- **F6 (`knownWorldsStep`)**: the known-worlds dichotomy for a single `modalApplyOneD sf b
+acc` call. Outside the two D-relevant shapes this is exactly K's own
+`modalApplyOne_knownWorlds_step`; at the two D-relevant shapes, `modalApplyOneD` never touches
+`acc`, so the left disjunct always holds, and the emitted list (K's own persistent output, when
+present, merged with at most one dual formula at the source's own -- hence known -- world) stays
+inside `modalKnownWorlds b` by K's own field combined with `label_mem_modalKnownWorlds`. -/
+lemma modalApplyOneD_knownWorldsStep
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
+    ((modalApplyOneD sf b acc).snd = acc ∧
+      (match (modalApplyOneD sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .notApplicable => True)) ∨
+    ((modalApplyOneD sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+      (match (modalApplyOneD sf b acc).fst with
+        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+        | .branching _ => False
+        | .persistent _ => False
+        | .notApplicable => False)) := by
+  by_cases hshape : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hshape with ⟨hsign, φ, hform⟩ | ⟨hsign, φ, hform⟩
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      left
+      refine ⟨?_, ?_⟩
+      · rw [modalApplyOneD_boxPos_snd]; exact modalApplyOne_boxPos_acc_eq b acc φ w
+      · rw [modalApplyOneD_boxPos_fst]
+        have hself : ∀ x ∈ modalDBoxDual b φ w, x.label ∈ modalKnownWorlds b := by
+          intro x hx
+          rcases modalDBoxDual_cases b φ w with h | ⟨h, -⟩
+          · rw [h] at hx; simp at hx
+          · rw [h] at hx
+            simp only [List.mem_singleton] at hx
+            subst hx
+            exact label_mem_modalKnownWorlds
+              (sf := (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) hsfmem
+        rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
+        · simp only [hk]
+          split_ifs with hemp
+          · trivial
+          · exact hself
+        · simp only [hk]
+          have hK := modalApplyOne_knownWorlds_step
+            (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+          rcases hK with ⟨-, hmatch⟩ | ⟨-, hfalse⟩
+          · rw [hk] at hmatch
+            intro x hx
+            simp only [List.mem_append, List.mem_filter] at hx
+            rcases hx with hx | ⟨hx, -⟩
+            · exact hmatch x hx
+            · exact hself x hx
+          · rw [hk] at hfalse; exact hfalse.elim
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      left
+      refine ⟨?_, ?_⟩
+      · rw [modalApplyOneD_diaNeg_snd]; exact modalApplyOne_diamondNeg_acc_eq b acc φ w
+      · rw [modalApplyOneD_diamondNeg_fst]
+        have hself : ∀ x ∈ modalDDiaNegDual b φ w, x.label ∈ modalKnownWorlds b := by
+          intro x hx
+          rcases modalDDiaNegDual_cases b φ w with h | ⟨h, -⟩
+          · rw [h] at hx; simp at hx
+          · rw [h] at hx
+            simp only [List.mem_singleton] at hx
+            subst hx
+            exact label_mem_modalKnownWorlds
+              (sf := (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) hsfmem
+        rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
+            hk | ⟨kForms, hk⟩
+        · simp only [hk]
+          split_ifs with hemp
+          · trivial
+          · exact hself
+        · simp only [hk]
+          have hK := modalApplyOne_knownWorlds_step
+            (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem
+            hknown
+          rcases hK with ⟨-, hmatch⟩ | ⟨-, hfalse⟩
+          · rw [hk] at hmatch
+            intro x hx
+            simp only [List.mem_append, List.mem_filter] at hx
+            rcases hx with hx | ⟨hx, -⟩
+            · exact hmatch x hx
+            · exact hself x hx
+          · rw [hk] at hfalse; exact hfalse.elim
+  · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
+    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+
+omit [Hashable Atom] in
+/-- **F7 (`branchingLength`)**: `modalApplyOneD` never introduces branching at the two
+D-relevant shapes (K's own dispatch is `persistent`/`notApplicable` only there, and the D-merge
+never turns either into `.branching`), so any `.branching` result must come from the `_, _`
+fallthrough, i.e. from `modalApplyOne` directly, where K's own `modalApplyOne_branching_length`
+applies. -/
+lemma modalApplyOneD_branchingLength
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hca : (modalApplyOneD sf b acc).fst = .branching brs) :
+    brs.length = 2 := by
+  by_cases hbp : sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ
+  · obtain ⟨hs, ψ, hf⟩ := hbp
+    have hsfeq : sf = (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rw [hsfeq, modalApplyOneD_boxPos_fst] at hca
+    rcases hk : (modalApplyOne (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca
+      simp only [RuleResult.branching.injEq] at hca
+      rw [← hca]
+      exact modalApplyOne_branching_length _ b acc kbrs hk
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca
+      split_ifs at hca
+  · by_cases hdn : sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ
+    · obtain ⟨hs, ψ, hf⟩ := hdn
+      have hsfeq : sf = (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq, modalApplyOneD_diamondNeg_fst] at hca
+      rcases hk : (modalApplyOne (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca
+        simp only [RuleResult.branching.injEq] at hca
+        rw [← hca]
+        exact modalApplyOne_branching_length _ b acc kbrs hk
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca
+        split_ifs at hca
+    · have heq : modalApplyOneD sf b acc = modalApplyOne sf b acc :=
+        modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc ⟨hbp, hdn⟩
+      rw [heq] at hca
+      exact modalApplyOne_branching_length sf b acc brs hca
+
 end Cslib.Logic.Modal.Tableau
 
 end

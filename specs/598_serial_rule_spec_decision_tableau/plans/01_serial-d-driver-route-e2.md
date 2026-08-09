@@ -399,7 +399,7 @@ counts, since research risk #1 turns specifically on whether `rankStep`'s plumbi
 
 ---
 
-### Phase 7: Field Discharges F5-F7 [NOT STARTED]
+### Phase 7: Field Discharges F5-F7 [COMPLETED]
 
 **Goal**: `outDegStep`, `knownWorldsStep`, and `branchingLength` are discharged for
 `modalApplyOneD`.

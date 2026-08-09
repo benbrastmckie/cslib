@@ -320,7 +320,7 @@ design finding to report, not a silent extra iteration to add.
 
 ---
 
-### Phase 5: D Driver Triple and Shape Lemmas [NOT STARTED]
+### Phase 5: D Driver Triple and Shape Lemmas [COMPLETED]
 
 **Goal**: The `modalStepBranchD` / `modalExpandBranchesD` / `modalTableauD` triple and the
 box-positive / diamond-negative shape lemmas exist and build.

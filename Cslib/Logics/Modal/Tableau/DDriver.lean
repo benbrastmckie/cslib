@@ -401,6 +401,205 @@ lemma modalExpMeasure_entry_le_fuel_at (φ0 φ : Proposition Atom) :
           (modalComplexity φ0 + 1) + 1)) := Nat.pow_le_pow_right (by norm_num) hfinal
     _ = modalFuel φ0 := rfl
 
+/-! ## D Driver Instantiation -/
+
+/-- One-step branch expansion for the D (serial-frame) tableau: the generic driver
+(`modalStepBranchGen`, `Saturation.lean`) instantiated at `apply := modalApplyOneD`
+(`FrameRules.lean`). -/
+def modalStepBranchD
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility) :=
+  modalStepBranchGen modalApplyOneD b e acc
+
+/-- Fuel-based expansion of a list of D-system branches: the generic driver
+(`modalExpandBranchesGen`, `Saturation.lean`) instantiated at `apply := modalApplyOneD`. -/
+def modalExpandBranchesD
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) : ModalTableauResult Atom :=
+  modalExpandBranchesGen modalApplyOneD branches expandedSets accs fuel
+
+/-- The D-system (serial-frame) modal tableau decision procedure: starts the signed tableau from
+`F(φ)` at world `0`, exactly as `modalTableauGen` does, but fuelled at the *dual-closed* seed
+`modalDualAugment φ` rather than at `φ` itself -- D's dual arms are only guaranteed to stay
+inside `modalUniverse (modalDualAugment φ)` (`RuleApplicationSpecAt`), so the termination
+argument needs the bigger universe's fuel bound (`modalExpMeasure_entry_le_fuel_at`). Not
+literally `modalTableauGen modalApplyOneD φ` (which would fuel at plain `φ`) for this reason. -/
+def modalTableauD (φ : Proposition Atom) : ModalTableauResult Atom :=
+  modalExpandBranchesD [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+    [Accessibility.empty] (modalFuel (modalDualAugment φ))
+
+/-! ## Shape Lemmas for the Two D-Relevant Signed-Formula Shapes
+
+The box-positive/diamond-negative shape dichotomies are the canonical, existentially-quantified
+`modalApplyOne_boxPos_eq`/`_diamondNeg_eq` in `Rules.lean` (the K discharges for
+`RuleApplicationSpec`'s F9/F10 fields), reached here via the `Rules → Saturation → Completeness →
+FmpMeasure → GenericDriver → DDriver` import chain. Mirrors `TDriver.lean:87-260`'s section of
+the same name, with T's self-propagation helpers (`modalTBoxSelf`/`modalTDiaNegSelf`) replaced by
+D's dual-propagation helpers (`modalDBoxDual`/`modalDDiaNegDual`, `FrameRules.lean`). -/
+
+omit [Hashable Atom] in
+/-- The accessibility component of `modalApplyOne` at a box-positive shaped signed formula is
+always unchanged. Driver-local restatement of `TDriver.lean`'s `private`
+`modalApplyOne_boxPos_acc_eq` (privacy prevents reuse across files -- the known, tracked
+duplication pattern in this driver family). -/
+private lemma modalApplyOne_boxPos_acc_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc := by
+  rcases modalApplyOne_fresh_local
+      (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc with
+    heq | ⟨wsf, rest, hfst, -⟩
+  · exact heq
+  · rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with h | ⟨_, h⟩ <;>
+      rw [h] at hfst <;> simp at hfst
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalApplyOne_boxPos_acc_eq` for the diamond-negative shape. -/
+private lemma modalApplyOne_diamondNeg_acc_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc := by
+  rcases modalApplyOne_fresh_local
+      (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc with
+    heq | ⟨wsf, rest, hfst, -⟩
+  · exact heq
+  · rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with h | ⟨_, h⟩ <;>
+      rw [h] at hfst <;> simp at hfst
+
+omit [Hashable Atom] in
+/-- `modalDBoxDual`'s output dichotomy: either empty, or the singleton dual formula `T(◇φ)@w`,
+in which case that formula was not already on the branch (from the `if`-guard). -/
+private lemma modalDBoxDual_cases
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) :
+    modalDBoxDual b φ w = [] ∨
+      (modalDBoxDual b φ w = [(⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom)
+          WorldIndex)] ∧
+        (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) := by
+  simp only [modalDBoxDual]
+  split_ifs with h
+  · left; rfl
+  · right; exact ⟨rfl, by simpa using h⟩
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalDBoxDual_cases` for `modalDDiaNegDual`. -/
+private lemma modalDDiaNegDual_cases
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) :
+    modalDDiaNegDual b φ w = [] ∨
+      (modalDDiaNegDual b φ w = [(⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom)
+          WorldIndex)] ∧
+        (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) := by
+  simp only [modalDDiaNegDual]
+  split_ifs with h
+  · left; rfl
+  · right; exact ⟨rfl, by simpa using h⟩
+
+omit [Hashable Atom] in
+/-- Every formula `modalDBoxDual` can emit is not already on the branch: direct corollary of
+`modalDBoxDual_cases`. -/
+private lemma modalDBoxDual_not_mem
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) : ∀ x ∈ modalDBoxDual b φ w, x ∉ b := by
+  rcases modalDBoxDual_cases b φ w with h | ⟨h, hnot⟩
+  · rw [h]; simp
+  · rw [h]; intro x hx; simp only [List.mem_singleton] at hx; subst hx; exact hnot
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalDBoxDual_not_mem` for `modalDDiaNegDual`. -/
+private lemma modalDDiaNegDual_not_mem
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) : ∀ x ∈ modalDDiaNegDual b φ w, x ∉ b := by
+  rcases modalDDiaNegDual_cases b φ w with h | ⟨h, hnot⟩
+  · rw [h]; simp
+  · rw [h]; intro x hx; simp only [List.mem_singleton] at hx; subst hx; exact hnot
+
+omit [Hashable Atom] in
+/-- Direct unfolding of `modalApplyOneD`'s `.fst` component at a box-positive shaped signed
+formula, in terms of the underlying `modalApplyOne` (K) result. -/
+lemma modalApplyOneD_boxPos_fst
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneD (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = (match (modalApplyOne (⟨.pos, .box φ, w⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+          | .persistent kForms =>
+            .persistent (kForms ++
+              (modalDBoxDual b φ w).filter (fun x => !(kForms.any (· == x))))
+          | .notApplicable =>
+            if (modalDBoxDual b φ w).isEmpty then .notApplicable
+            else .persistent (modalDBoxDual b φ w)
+          | other => other) := by
+  simp only [modalApplyOneD]
+  cases (modalApplyOne (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- **Lifted from the preserved prototype** (machine-checked there): the accessibility component
+of `modalApplyOneD` at a box-positive shaped signed formula is exactly K's own accessibility
+output (`modalApplyOneD` never touches `acc` for this shape). What F5/F6 (`outDegStep`/
+`knownWorldsStep`, phase 7) turn on. -/
+lemma modalApplyOneD_boxPos_snd (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneD (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+      = (modalApplyOne (⟨.pos, .box φ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).snd := by
+  simp only [modalApplyOneD]
+  cases (modalApplyOne (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalApplyOneD_boxPos_fst` for the diamond-negative shape. -/
+lemma modalApplyOneD_diamondNeg_fst
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneD (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = (match (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+          | .persistent kForms =>
+            .persistent (kForms ++
+              (modalDDiaNegDual b φ w).filter (fun x => !(kForms.any (· == x))))
+          | .notApplicable =>
+            if (modalDDiaNegDual b φ w).isEmpty then .notApplicable
+            else .persistent (modalDDiaNegDual b φ w)
+          | other => other) := by
+  simp only [modalApplyOneD]
+  cases (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- **Lifted from the preserved prototype** (machine-checked there): symmetric to
+`modalApplyOneD_boxPos_snd` for the diamond-negative shape. -/
+lemma modalApplyOneD_diaNeg_snd (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneD (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+      = (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).snd := by
+  simp only [modalApplyOneD]
+  cases (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Repackage a negated disjunction of the two D-relevant shapes into the conjunction of
+negations `modalApplyOneD_eq_of_not_boxPos_diaNeg` expects. Shared by every field's "not shaped"
+case below (phases 6-8). -/
+private lemma not_shape_of_not_or {sf : SignedFormula (Proposition Atom) WorldIndex}
+    (hshape : ¬ ((sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ))) :
+    ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+      ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
+  ⟨fun h => hshape (Or.inl h), fun h => hshape (Or.inr h)⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

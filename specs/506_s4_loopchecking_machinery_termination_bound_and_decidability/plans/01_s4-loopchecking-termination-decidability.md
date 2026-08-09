@@ -545,7 +545,7 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 8: S4 termination bound `#worlds <= 2^|Sf|` — HIGH RISK [BLOCKED]
+### Phase 8: S4 termination bound `#worlds <= 2^|Sf|` — HIGH RISK [COMPLETED WITH EXCLUSIONS]
 
 - **Goal**: Prove the equality-blocking loop invariant and the `2^|modalSubfmls phi0|`
   world bound. **This is the crux and the acknowledged blocker candidate.**
@@ -663,7 +663,7 @@ green and committed regardless of this phase's outcome.
 
 ---
 
-### Phase 9: Fuel sufficiency, `s4Valid`, and `Decidable (s4Valid phi)` — HIGH RISK, 510-GATED [BLOCKED]
+### Phase 9: Fuel sufficiency, `s4Valid`, and `Decidable (s4Valid phi)` — HIGH RISK, 510-GATED [COMPLETED WITH EXCLUSIONS]
 
 - **Goal**: Close the decidability endgame. **Doubly gated**: needs Phase 8's bound *and*
   task 510's generalized Hintikka chain.
@@ -754,3 +754,37 @@ verified in this run since Phase 8 blocked first.
   regress tasks 503/507.
 - If a phase times out mid-run, mark it `[PARTIAL]`, commit whatever is green (the CI gate
   guarantees a green commit), and record the resume point in the phase's Tasks list.
+
+---
+
+## Reconciliation Note (Phases 8-9)
+
+Phases 8 and 9 stood at `[BLOCKED]` while their objectives were, in fact, delivered through a
+different route. Both are now marked `[COMPLETED WITH EXCLUSIONS]`: the goals are met, but the
+specific implementation line planned here was excluded rather than executed.
+
+**Phase 8's blocker analysis was correct and is vindicated.** The open item was proving
+`worldSetsDistinct` preserved by `modalStepBranchS4`, and this plan declined to force it. That
+judgement held up: `S4/BirthKey.lean:77` records that the birth-key formulation is "a genuine
+loop invariant where the old `worldSetsDistinct` (over the live branch) was not." The planned
+proof was not merely hard — its target was not an invariant.
+
+**Where the objectives actually landed**, all sorry-free:
+
+| Planned deliverable | Delivered as |
+|---|---|
+| `S4LoopInv` (was to live in `LoopChecking.lean`) | `S4/Invariant.lean:85`, restated over birth keys |
+| `worldSetsDistinct` preservation | superseded by the birth-key invariant (`S4/BirthKey.lean`) |
+| Pigeonhole `#worlds <= 2^\|Sf\|` | `S4/Universe.lean:119` |
+| `modalStepBranchS4_worldBound` | `S4/InvariantAcc.lean:1330` |
+| Fuel sufficiency | `FrameCompleteness.lean:8830` ("outer fuel induction") |
+| `s4Valid_decides`, `instDecidableS4Valid` | `FrameCompleteness.lean:9089`, `:8281` |
+
+The invariant material was split four ways across `S4/InvariantKeys.lean`,
+`S4/InvariantAcc.lean`, `S4/Invariant.lean`, and `S4/HintikkaInvariant.lean` because a single
+file would have run to roughly 4,445 lines. `LoopChecking.lean:74-79` documents that split.
+
+**Exclusion recorded**: the unordered keyed driver this plan targeted was not the one the
+decision procedure was built on. `LoopChecking.lean:152` notes that soundness is false for the
+unordered keyed driver, so `instDecidableS4Valid` points at the *ordered* successor instead.
+Retiring the surviving unordered stack is tracked separately and is not in scope here.

@@ -11,7 +11,7 @@ next_project_number: 601
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,506,534,554,568,569,590,591,594,596,598,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,591,594,596,598,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,593,595 | 36,37,181,425,534,554,568,591,594 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,375,589 | 39,40,534,593 | foundations, propositional logic, code hygiene |
 | 4 | 497 | 375,400,425 | propositional logic |
@@ -35,7 +35,6 @@ next_project_number: 601
 ### Modal Logic
 
 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
   └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
@@ -532,7 +531,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 
 ### 506. S4 loopchecking machinery termination bound and decidability
 - **Effort**: 8-12 hours
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 511, Task 553, Task 563, Task 564, Task 565, Task 566, Task 567, Task 586

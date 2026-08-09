@@ -323,7 +323,9 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 4: Create the follow-on task for the `intFImpReuseWitnessAnc?` defect [NOT STARTED]
+### Phase 4: Create the follow-on task for the `intFImpReuseWitnessAnc?` defect [COMPLETED]
+<!-- confirmed by implementation agent: next_project_number re-read at write time (609, drifted from plan-time 607 as anticipated), new task created as project 609 "Re-validate intFImpReuseWitnessAnc? loop-back containment as the branch grows", dependencies: [604], file_scope: Expansion.lean. next_project_number incremented to 610, specs/TODO.md regenerated and confirmed to list task 609. No Cslib/ file touched by this phase. -->
+
 
 - **Goal:** The root-cause calculus defect is tracked as its own task, so it is neither
   attempted inside this task nor lost.

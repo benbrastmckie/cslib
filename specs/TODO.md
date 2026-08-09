@@ -1,5 +1,5 @@
 ---
-next_project_number: 607
+next_project_number: 610
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 607
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,604 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,605 | 36,37,181,375,400,425,534,554,568,594,604 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,604,607,608 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,605,609 | 36,37,181,375,400,425,534,554,568,594,604 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,606 | 39,40,605 | foundations, propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,9 +28,10 @@ next_project_number: 607
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-604 [PLANNED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
+604 [IMPLEMENTING] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
   └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
     └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
+  └─ 609 [NOT STARTED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
 
 ### Modal Logic
 
@@ -75,8 +76,59 @@ next_project_number: 607
 594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
   └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
 596 [IMPLEMENTING] — Realign specs/ROADMAP.md with verified repository state. Created 
+608 [NOT STARTED] — Discovered during task 596's ROADMAP realignment (2026-08-09; see
+
+### Bimodal Metalogic
+
+607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
 ## Tasks
+
+### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 604
+
+**Description**: `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`) records a loop-back edge on a `Sfor`-containment check at the moment the branch reuses an ancestor world -- but it never re-validates that containment as the branch continues to grow afterward. This is the root cause both the intuitionistic tableau completeness `truthLemma` restructure and the frame-adequacy analysis that preceded it converged on: it is why the AUGMENTED frame (`augSets`, threaded by `intExpandBranches_openBranch_sat`) carries `IFimpAccess` but REFUTES positive persistence (`CslibTests/BetaSplitRefutation.lean`, `firstViolation = some (2,1,2)`), and why the RAW frame (`rawEdges`) carries positive persistence (`IPosPersistRaw`, sorry-free) but REFUTES `IFimpAccess` at the blocked worlds pruning strands.
+
+WHY IT MATTERS: re-validating the loop-back containment as the branch grows is what would let the augmented frame carry positive persistence too, giving ONE frame with BOTH `IFimpAccess` and persistence simultaneously. That would collapse `openBranch_countermodel`'s remaining existential (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`, the sole live sorry in that file) into a direct `truthLemma` instantiation, since `truthLemma` itself is already sorry-free and parametric over any frame carrying both facts.
+
+EXCLUDED CONSTRUCTIONS (established by machine evidence, do not re-attempt without new evidence): rawEdges itself (fails IFimpAccess and is refuted as a conjunct-2 witness for phiRef1/phiRef3 -- CslibTests/WitnessProbe.lean, CslibTests/BetaSplitRefutation.lean); pruning at blocked worlds (fails dblNeg/peirce, where the loop-back is a self-reuse and cutting the world destroys the falsifying world); pruning at strictly-blocked worlds (fails phiRef3, which needs the self-reuse world cut -- the two pruning rules contradict each other on the same syntactic signal); and the greatest IFimpAccess-supported fixpoint (collapses to K = empty for phiRef1/phiRef2/phiRef3, since the unsupported blocked world strands its parent up to world 0). The maximal atom-inclusion frame was excluded even earlier.
+
+SCOPE: this is calculus-level work in Expansion.lean, explicitly OUT OF SCOPE for Scheme.lean-only dispatches. Do not attempt this inside a Scheme.lean-scoped task.
+
+SOURCE: specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md (sections 3, 4, 6) and specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md.
+
+---
+
+### 608. Fix lean-sorry-census.sh double-counting set_option warn.sorry false in as a sorry
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: Agent System
+- **Dependencies**: None
+
+**Description**: Discovered during task 596's ROADMAP realignment (2026-08-09; see specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md section 1 for the full evidence trail). .claude/scripts/lean-sorry-census.sh strips comments/strings correctly, then matches `\bsorry\b` on the stripped text. It does NOT exclude `set_option warn.sorry false in` -- because `.` is a non-word character, `\bsorry\b` also matches the "sorry" substring inside "warn.sorry", so every suppression-annotation line is counted as an extra phantom sorry on top of the real sorry it annotates.
+
+Verified for every Cslib/Logics/Bimodal file carrying sorries: script count 41 = 23 real sorry occurrences + 18 warn.sorry annotation lines double-counted. The 23-real figure independently matches task 215's own hand-audited scope (12 + 1 = 13 for the BXCanonical files specifically).
+
+Fix: exclude lines that are exactly (or contain only) the `set_option warn.sorry false in` directive from the `\bsorry\b` match -- e.g. strip `warn.sorry` as a compound token before the boundary match, or match `(?<!warn\.)\bsorry\b` (negative lookbehind), or line-level pre-filter any line whose stripped content is exactly the set_option directive. Add a regression fixture (a file with N suppression annotations and M real sorries, asserting the census reports M, not M+N) so this cannot silently regress. Cross-check against `lake build`'s compiler-backed "declaration uses 'sorry'" warning count (the script's own --cross-check flag) as part of the fix's verification, since that count is comment/annotation-immune by construction.
+
+---
+
+### 607. Decide: complete BXCanonical/dense or abandon it for the algebraic pipeline
+- **Status**: [NOT STARTED]
+- **Task Type**: lean4
+- **Topic**: Bimodal Metalogic
+- **Dependencies**: None
+
+**Description**: Tracked decision (created by task 596's ROADMAP realignment, per specs/ROADMAP.md Section B "Open decision"). The bimodal completeness layer has three constructions: `Algebraic` and `Bundle` form the wired, actively-used completeness pipeline; `BXCanonical` is a separate, incomplete leaf that nothing downstream imports.
+
+Measured 2026-08-09 (bash .claude/scripts/lean-sorry-census.sh, hand-verified against the raw `sorry` occurrences to exclude the script's warn.sorry-substring double-counting bug -- see specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md section 1): BXCanonical carries 13 live sorries (ChronicleToCountermodel.lean: 12, Frame.lean: 1), all gated on the WeakCanonical discrete-completeness port. Task 215 already owns filling these specific sorries once that port lands.
+
+This task is NOT about filling the sorries -- it is the prior architectural decision: (A) complete BXCanonical/dense once its blocking port lands (in which case task 215 delivers it), or (B) abandon BXCanonical/dense as dead weight and consolidate the bimodal completeness story onto the Algebraic+Bundle pipeline alone, retiring the file. Neither option should be taken autonomously by an implementer -- this task exists to hold the decision until a maintainer makes the call, at which point it should be re-scoped into either a completion task (if A) or a retirement/consolidation task (if B).
+
+---
 
 ### 606. Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold
 - **Status**: [NOT STARTED]
@@ -123,7 +175,7 @@ A documented negative or narrowing result is a legitimate outcome, recorded in-s
 ---
 
 ### 604. Prove the countermodel forcing conjunct over the constructed frame
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603

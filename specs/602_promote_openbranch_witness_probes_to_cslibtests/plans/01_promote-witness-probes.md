@@ -197,7 +197,7 @@ difference as a finding per the reconciliation protocol.
 
 ---
 
-### Phase 2: Promote WitnessSearch3.lean (maximal-frame sweep) [NOT STARTED]
+### Phase 2: Promote WitnessSearch3.lean (maximal-frame sweep) [COMPLETED]
 
 **Goal**: Create `CslibTests/WitnessSearch3.lean`, CI-protecting the claim that the maximal
 admissible inclusion frame is NOT a uniform witness — it fails at exactly the

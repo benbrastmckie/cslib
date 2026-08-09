@@ -5,6 +5,10 @@
   `modalExpandBranchesD_hintikka`
 - **Plan**: `specs/601_completeness_loop_specat_hintikka_chain/plans/01_specat-hintikka-chain-port.md`
 - **Status**: Implemented — all four phases complete, all acceptance gates pass
+- **Started**: TBD
+- **Completed**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 
 ## What Was Done
 

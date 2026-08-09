@@ -1,6 +1,13 @@
 # Research Report: Porting the CompletenessLoop Hintikka Chain to `RuleApplicationSpecAt`
 
 **Task**: 601 — CompletenessLoop `...At` Hintikka chain
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Date**: 2026-08-09
 **Session**: sess_1786289820_d4b093
 **Status**: Route selected and **empirically verified end-to-end** (full `lake build` green)

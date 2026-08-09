@@ -694,6 +694,8 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
     (hopen : S.closurePred b = false)
     (hsat : IBranchSaturation Atom b)
     (hfimp : IFimpAccess edges b)
+    (hpers : ∀ (χ : Proposition Atom) (x y : Nat), isAccessible edges x y = true →
+      (⟨.pos, χ, x⟩ : ISF Atom) ∈ b → (⟨.pos, χ, y⟩ : ISF Atom) ∈ b)
     (φ : Proposition Atom) (w : Nat) :
     letI : Preorder Nat := intAccessPreorder edges
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
@@ -764,8 +766,23 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- that parameter is the augmented frame. The lemma over a sub-`⊑` frame remains open; see
       -- `openBranch_countermodel`'s docstring (further below in this file) for the related
       -- disposition of why conjunct 1 needs no algorithm invariant at all.
-      intro _
-      sorry
+      intro hT w' hle
+      have hmem : (⟨.pos, .imp φ' ψ', w⟩ : ISF Atom) ∈ b := by
+        obtain ⟨sf, hsfb, hsfp⟩ := List.any_eq_true.mp hT
+        simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+        obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+        cases sf; simp_all
+      have hmem' : (⟨.pos, .imp φ' ψ', w'⟩ : ISF Atom) ∈ b := by
+        induction hle with
+        | refl => exact hmem
+        | @tail y w2 _hchain hstep ih => exact hpers _ y w2 hstep ih
+      have hany' : b.any
+          (fun sf => sf.sign == .pos && sf.formula == .imp φ' ψ' && sf.label == w') = true :=
+        List.any_eq_true.mpr ⟨_, hmem', by simp⟩
+      intro hforce_φ'
+      rcases hsat.sat_timp φ' ψ' w' hany' with hF | hT2
+      · exact absurd hforce_φ' ((ih_φ' w').2 hF)
+      · exact (ih_ψ' w').1 hT2
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
       -- hfimp (Route (a)) witnesses a genuinely edge-accessible w' with
       -- T(φ')@w', F(ψ')@w'; lift to the `intAccessPreorder` order, IH closes each
@@ -7983,71 +8000,12 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
         intExtractValuation b w p → intExtractValuation b w' p) ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
-  -- Extract structural properties of b from the openBranch result.
-  have hopen : S.closurePred b = false :=
-    intExpandBranches_openBranch_closed _ _ _ _ _ _ _ h
-  have hFmem : b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == 0) := by
-    have hmem : (⟨.neg, φ, 0⟩ : ISF Atom) ∈ b :=
-      intExpandBranches_openBranch_initial_mem _ _ _ _ _ _ _
-          (fun b₀ hb₀ => by
-              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hb₀
-              subst hb₀
-              exact List.mem_cons_self)
-          b h
-    exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
-  -- Obtain the saturation witness and its accumulated edges, together
-  -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
-  obtain ⟨edges, _rawEdges, _lbEdges, _nwF, hsat, hfimp, _hpp, _hrc, _hfc, _hwp⟩ :=
-    intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
-      [[]] [[]] _ _
-      (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
-      (by simp [IAllAccessConsistent, IExpandedAccessConsistent])
-      (by simp [IAllReuseContain, IReuseContain])
-      (fun b hb x hx => by
-        simp only [List.mem_singleton] at hb
-        subst hb
-        simp only [List.mem_singleton] at hx
-        subst hx
-        exact mem_intUniverseExt_of (Nat.zero_le _) (intSubfmls_self_mem φ))
-      (fun nw hnw => by simp only [List.mem_singleton] at hnw; subst hnw; exact WBound_pos φ)
-      (by simp only [IAllFuel]; exact ⟨intWork_init_lt_intFuelExt φ, trivial⟩)
-      (by simp [IAllLabelBoundStrict, ILabelBoundStrict])
-      ⟨IWorldHist_entry _ _ _ _, trivial⟩
-      ⟨IWorldHistCounter_entry, trivial⟩
-      (fun b' hb' ψ w hmem hcontra => by
-        simp only [posFormulasAt, List.mem_filterMap] at hcontra
-        obtain ⟨sf, hsfmem, hif⟩ := hcontra
-        by_cases hcond : sf.sign == .pos && sf.label == w
-        · simp only [hcond, ite_true, Option.some.injEq] at hif
-          simp only [Bool.and_eq_true] at hcond
-          have hposAny : b'.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w)
-              = true :=
-            List.any_eq_true.mpr ⟨sf, hsfmem, by simp [hcond.1, hcond.2, hif]⟩
-          have hnegAny : b'.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w)
-              = true :=
-            List.any_eq_true.mpr ⟨_, hmem, by simp⟩
-          exact S.no_contradiction b' hb' ψ w ⟨hposAny, hnegAny⟩
-        · simp only [hcond, Bool.false_eq_true, ite_false] at hif
-          exact absurd hif (by simp))
-      h
-  -- Apply the truth lemma's F-branch direction over the `intAccessPreorder edges` frame.
-  refine ⟨edges, ?_, (truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem⟩
-  -- sorry: upward-closure of `intExtractValuation b` along the AUGMENTED frame
-  -- `intAccessPreorder edges` (Route (a): `edges` is the `augSets` witness, not the
-  -- algorithm's raw edge list). This is the statement-shape-corrected form of the DP-3/DP-4
-  -- obligation -- see the docstring above -- now stated where `b`'s provenance is in scope
-  -- instead of at an arbitrary, unconstrained `(edges, b)` pair.
-  --
-  -- Open -- augmented-frame route known-bad, admissible edge space characterised (decided, not
-  -- refuted; see the full disposition in the docstring above). The AUGMENTED frame
-  -- `intAccessPreorder edges` fails upward closure at `phiRef1 := ((pr ∨ ps) ∧
-  -- ((ps → (ps → pr)) → pb)) → pr` (`CslibTests/BetaSplitRefutation.lean`, zero errors, zero
-  -- sorries) -- a bad witness choice, not a refutation of this conjunct: the admissible edge
-  -- space is exactly the subsets of the atom-inclusion preorder `⊑`, none of which need the
-  -- algorithm's own edge list, and the pruned witness `[(1, 0)]` (computed against the real
-  -- algorithm) satisfies both conjuncts. The general `∀ φ` form remains unproved and the
-  -- maximal `⊑` frame is not a uniform witness -- proving it is equivalent to procedure
-  -- completeness. The conjunct stays `sorry` for that genuine open reason, not a refuted one.
+  -- sorry (placeholder note, full annotation lands separately): the whole existential is the
+  -- genuinely open goal -- no `edges` witness is committed here. See the docstring above for
+  -- the frame-adequacy disposition; the former proof committed to the AUGMENTED (`augSets`)
+  -- witness via an early `refine`, which put a REFUTED statement (upward closure over that
+  -- frame) behind the surviving `sorry` instead of this open one. That extraction/`refine`
+  -- machinery survives verbatim in `openBranch_rawEdges_upward_closed` immediately below.
   sorry
 
 /-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly.** Constructs `edges` as

@@ -93,13 +93,15 @@ lemma minTruthLemma (b : IBranch Atom) (edges : IEdges)
     (hopen : isMinimallyClosed b = false)
     (hsat : IBranchSaturation Atom b)
     (hfimp : IFimpAccess edges b)
+    (hpers : ∀ (χ : Proposition Atom) (x y : Nat), isAccessible edges x y = true →
+      (⟨.pos, χ, x⟩ : ISF Atom) ∈ b → (⟨.pos, χ, y⟩ : ISF Atom) ∈ b)
     (φ : Proposition Atom) (w : Nat) :
     letI : Preorder Nat := intAccessPreorder edges
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) (minBranchBotForces b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) (minBranchBotForces b) w φ) := by
-  exact truthLemma minScheme b edges hopen hsat hfimp φ w
+  exact truthLemma minScheme b edges hopen hsat hfimp hpers φ w
 
 /-! ## Completeness Theorems -/
 

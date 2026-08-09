@@ -1,7 +1,7 @@
 # Implementation Plan: Discharge DP-5 and land the honest conjunct-2 negative result
 
 - **Task**: 604 - Prove the countermodel forcing conjunct over the constructed frame
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 4.5 hours
 - **Dependencies**: 603 (landed)
 - **Research Inputs**: specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md
@@ -134,7 +134,9 @@ performed; no roadmap phases are included.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Discharge DP-5 and restructure `openBranch_countermodel` [NOT STARTED]
+### Phase 1: Discharge DP-5 and restructure `openBranch_countermodel` [COMPLETED]
+<!-- confirmed by implementation agent: exactly 3 call sites of `truthLemma` (internal + intTruthLemma + minTruthLemma), both wrappers have no downstream consumers beyond docstrings. Full repo `lake build` green (3325 jobs); only pre-existing sorries remain (Scheme.lean:7994 openBranch_countermodel, Completeness.lean:156 intTruthLemma-adjacent, Minimal/Completeness.lean:152). truthLemma sorry warning confirmed gone. -->
+
 
 - **Goal:** `truthLemma` becomes sorry-free via the verified DP-5 proof; the two external
   wrappers thread the new `hpers` hypothesis; `openBranch_countermodel`'s single `sorry` moves

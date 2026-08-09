@@ -43,17 +43,19 @@ and `openBranch_countermodel intScheme` respectively, which carry the deferred s
 `Scheme.lean`. The remaining sorry in `intuitionisticTableau_complete` (DP-3) bridges `IValid φ`
 to the per-branch forcing hypothesis required by `tableau_complete intScheme`.
 
-**DP-3 is PERMANENTLY DEFERRED — unprovable as stated**, not merely unfinished. It consumes
-`openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`), whose disposition is an
-open decision point (see that conjunct's docstring): upward closure of `intExtractValuation b`
-along the augmented `intAccessPreorder edges` frame is machine-verified to FAIL at
-`phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`CslibTests/BetaSplitRefutation.lean`,
-`lake env lean` clean, zero sorries, `branchesAgree = true` against the real
-`intuitionisticTableau`). The mechanism is independent beta-splits at two
-augmented-preorder-equivalent worlds joined by a loop-back edge that `intFImpReuseWitnessAnc?`
-never re-validates once recorded (`Expansion.lean`). DP-3 therefore consumes a premise whose
-underlying content is refuted at this witness — it is not a route failure, and is not scheduled
-for any follow-up.
+**DP-3 is open — augmented-frame route known-bad, admissible edge space characterised**, not
+refuted. It consumes `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`); see
+that conjunct's docstring for the full disposition: the admissible `edges` are exactly the
+subsets of the atom-inclusion preorder `⊑`, none of which need the algorithm's own edge list,
+and a pruned witness (computed against the real `intuitionisticTableau`) satisfies both
+conjuncts for `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`. What IS
+machine-verified (`CslibTests/BetaSplitRefutation.lean`, `lake env lean` clean, zero sorries,
+`branchesAgree = true`) is that the AUGMENTED `intAccessPreorder edges` frame fails upward
+closure at `phiRef1` via independent beta-splits at two augmented-preorder-equivalent worlds
+joined by a loop-back edge that `intFImpReuseWitnessAnc?` never re-validates once recorded
+(`Expansion.lean`) — a bad witness choice, not a refutation of the conjunct DP-3 consumes. The
+general `∀ φ` form of that conjunct remains unproved (the maximal `⊑` frame is not a uniform
+witness), so DP-3's remaining obligation is genuinely open, not a small residual.
 
 ## References
 
@@ -137,27 +139,28 @@ DIRECTLY: `World := Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val := i
 b`, and the supplied upward-closure hypothesis is exactly `IValid`'s own upward-closure premise.
 
 The remaining sorry below is **not** the old unfillable shape -- it is deliberately left
-deferred. **DP-3 is PERMANENTLY DEFERRED — unprovable as stated**, not "pending" any future
-phase: `openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is DISPOSITION
-UNDECIDED (an open decision point, not a landed fact) and the underlying augmented-frame
-positive-formula persistence it would need is REFUTED by a machine-verified counterexample
+deferred. **DP-3 is open — augmented-frame route known-bad, admissible edge space
+characterised**, not "pending" any future phase in the old sense, but genuinely unresolved:
+`openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is open, and only the
+AUGMENTED-frame route to it is known-bad, refuted by a machine-verified counterexample
 (`CslibTests/BetaSplitRefutation.lean`, `phiRef1`). Discharging
-`IValid φ Nat (intExtractValuation b) huc 0` here would type-check but would only launder a
-refuted premise through this file without being any more honest about it; the obligation stays
-visibly deferred here (see `Scheme.lean`'s `openBranch_countermodel` docstring for the full
-disposition and the counterexample). No follow-up is scheduled: this is a terminal deferral, not
-an unfinished step. -/
+`IValid φ Nat (intExtractValuation b) huc 0` here would type-check but would only launder that
+still-open conjunct through this file without being any more honest about it; the obligation
+stays visibly deferred here (see `Scheme.lean`'s `openBranch_countermodel` docstring for the
+full disposition, the admissible-edge-space characterisation, and the counterexample). The
+remaining work is a uniform construction of `edges` from `b` plus a truth lemma over that frame,
+which -- per that docstring's structural argument -- is equivalent to proving the tableau
+procedure complete: genuine open work, not a small residual, and not attempted here. -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
   intro edges _b _huc
-  -- DP-3 -- PERMANENTLY DEFERRED, unprovable as stated. `exact h Nat (intExtractValuation _b)
+  -- DP-3 -- open, augmented-frame route known-bad. `exact h Nat (intExtractValuation _b)
   -- _huc 0` would type-check (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis,
-  -- instantiated at the augmented frame `intAccessPreorder edges`), but it would consume
-  -- `openBranch_countermodel`'s upward-closure conjunct, which is DISPOSITION UNDECIDED and
-  -- whose underlying content is refuted at `phiRef1` (`CslibTests/BetaSplitRefutation.lean`,
-  -- `branchesAgree = true` against the real `intuitionisticTableau`). Left `sorry` deliberately
-  -- -- see the docstring above. Not a route failure; no follow-up is scheduled.
+  -- instantiated at the augmented frame `intAccessPreorder edges`), but it would only launder
+  -- `openBranch_countermodel`'s upward-closure conjunct through this file: that conjunct is
+  -- open, not refuted (see the docstring above), so `_huc` at this frame does not genuinely
+  -- discharge it. Left `sorry` deliberately -- see the docstring above for the full disposition.
   sorry
 
 end Cslib.Logic.PL

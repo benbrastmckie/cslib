@@ -326,7 +326,7 @@ cross-reference sentence). Confirm by grepping `Scheme.lean` for `PERMANENTLY DE
 
 ---
 
-### Phase 4: Correct DP-3 in `Intuitionistic/Completeness.lean` (H5, H6, H7) [IN PROGRESS]
+### Phase 4: Correct DP-3 in `Intuitionistic/Completeness.lean` (H5, H6, H7) [COMPLETED]
 
 **Goal**: Re-annotate DP-3 as an **open** obligation blocked on a uniform frame construction,
 across all three hunks in the file, while keeping the `exact h …` prohibition.
@@ -378,7 +378,7 @@ mentions before, 0 after).
 
 ---
 
-### Phase 5: Correct DP-4 in `Minimal/Completeness.lean` (H8, H9, H10) [NOT STARTED]
+### Phase 5: Correct DP-4 in `Minimal/Completeness.lean` (H8, H9, H10) [IN PROGRESS]
 
 **Goal**: Re-annotate DP-4 as open, explicitly retract the "refuted **independently** of DP-3"
 claim, and keep the genuinely-separate `minBranchBotForces b` upward-closure obligation as a

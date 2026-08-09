@@ -11,10 +11,9 @@ next_project_number: 602
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,591,594,596,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,537,551,571,576,588,593,595 | 36,37,181,425,534,554,568,591,594 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,375,589 | 39,40,534,593 | foundations, propositional logic, code hygiene |
-| 4 | 497 | 375,400,425 | propositional logic |
+| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,593,594,596,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,450,537,551,571,576,588,589,595 | 36,37,181,425,534,554,568,593,594 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,497 | 39,40,375,400,425 | foundations, propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -27,10 +26,9 @@ next_project_number: 602
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-591 [PLANNED] — DECISION TASK. Resolve the single open decision point that gates 
-  └─ 593 [BLOCKED] — Restate and discharge the four propositional tableau completeness
-    └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
-      └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
+593 [BLOCKED] — Restate and discharge the four propositional tableau completeness
+  └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
+    └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 
 ### Modal Logic
 
@@ -301,12 +299,13 @@ SEQUENCING: still the prerequisite for the disposition-decision task -- but that
 ---
 
 ### 591. Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 592
 - **Research**: [591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md]
 - **Plan**: [591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md]
+- **Summary**: [591_decide_openbranch_countermodel_disposition/summaries/01_correct-openbranch-deferral-annotations-summary.md]
 
 **Description**: DECISION TASK. Resolve the single open decision point that gates the entire propositional tableau completeness chain. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C2) because NO open task owned this obligation.
 

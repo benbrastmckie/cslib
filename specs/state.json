@@ -1062,7 +1062,7 @@
     {
       "project_number": 591,
       "project_name": "decide_openbranch_countermodel_disposition",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)",
@@ -1071,7 +1071,7 @@
         592
       ],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-09T19:33:11Z",
+      "last_updated": "2026-08-09T20:08:25Z",
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
@@ -1088,8 +1088,14 @@
           "path": "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
           "type": "plan",
           "summary": "Six-phase annotation-correction plan for the openBranch_countermodel deferral sites"
+        },
+        {
+          "path": "specs/591_decide_openbranch_countermodel_disposition/summaries/01_correct-openbranch-deferral-annotations-summary.md",
+          "type": "summary",
+          "summary": "Execution summary for the openBranch_countermodel annotation correction"
         }
-      ]
+      ],
+      "completion_summary": "Corrected all 10 deferral-language hunks (H1-H10) across Scheme.lean and both Completeness.lean files, replacing the false 'PERMANENTLY DEFERRED / unprovable as stated / REFUTED / terminal deferral' framing with the machine-checked-correct framing: the openBranch_countermodel upward-closure conjunct is open (not refuted), the augmented-frame proof route is known-bad, and the admissible edge space is characterised as exactly the subsets of the atom-inclusion preorder. All four sorries were left untouched; the sorry-suppression and axiom-taint ratchets are byte-identical to the pre-edit baseline. Every corrected hunk keeps the DP-3 laundering prohibition, preserves the genuine BetaSplitRefutation.lean counterexample and the intFImpReuseWitnessAnc? defect as real, and states the honesty bound that the general forall-phi statement remains unproved and the maximal inclusion frame is not a uniform witness. Two tracker corrections and one CslibTests/ promotion follow-up are recorded in the summary for the user/orchestrator to act on."
     },
     {
       "project_number": 592,

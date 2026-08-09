@@ -1,0 +1,42 @@
+{
+  "phase": 1,
+  "phase_name": "Re-measure the full numeric baseline",
+  "started_at": "2026-08-09T00:00:00Z",
+  "last_updated": "2026-08-09T00:00:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Run sorry census per subtree and derive per-file breakdowns",
+      "status": "done",
+      "files_touched": ["specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md"],
+      "note": "Discovered a real regex bug in lean-sorry-census.sh: \\bsorry\\b also matches inside 'warn.sorry', double-counting each suppression annotation as a phantom sorry. True raw sorry count is 27 (Bi 23/Pr 4/Mo 0), matching the OLD roadmap figure, not the script's literal 45. Escalated to team-lead; pending decision before Phase 2 writes census prose."
+    },
+    {
+      "id": 2,
+      "description": "Enumerate decidability instances, modal grid, subsumption theorems, LoopChecking/S4 sizes, structural confirmations (Boneyard, Blocking.lean, Temporal/Tableau)",
+      "status": "done",
+      "files_touched": ["specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md"]
+    },
+    {
+      "id": 3,
+      "description": "Enumerate open tasks, cross-reference against ROADMAP.md citations, verify task statuses",
+      "status": "done",
+      "files_touched": ["specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md"]
+    },
+    {
+      "id": 4,
+      "description": "Sanity checks (Modal Tableau Decidability absence, BXCanonical decision untracked) and write measurement record",
+      "status": "done",
+      "files_touched": ["specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md"]
+    }
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "blocking_question_pending": {
+    "to": "team-lead",
+    "topic": "sorry census methodology: script bug means true raw count (27) matches old figure, contradicting the non-negotiable constraint's premise that 45 is correct and needs a 'why it undercounted' narrative",
+    "sent_at": "2026-08-09"
+  }
+}

@@ -1,27 +1,7 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "status": "in_progress",
+  "agent_type": "general-implementation-agent",
+  "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
   "session_id": "sess_1786312852_6b5c1b_596",
-  "task_number": 596,
-  "phase_count": 6,
-  "estimated_hours": 7,
-  "dependency_waves": [[1], [2], [3], [4], [5], [6]],
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md",
-      "summary": "Six-phase documentation-only plan realigning specs/ROADMAP.md with verified repository state: a measurement-first phase producing a command-cited measurement record, four editing phases (Section A census and rows, Completed-section falsified claims, Section B rewrite plus BXCanonical decision-task creation, Section C correction plus four new stream sections), and a whole-document consistency and residue sweep. Every figure is re-measured at execution time rather than copied from the research report."
-    }
-  ],
-  "memory_candidates": [
-    {
-      "content": "When a documentation-realignment task must correct figures that a prior review already got wrong, split the plan so that phase 1 is measurement-only and writes a command-cited measurement record artifact, and the final phase audits every figure in the deliverable back against that record. This makes 'the implementer copied a stale number from the plan' a mechanically detectable failure rather than a trust assumption, and preserves the expensive measurement work across a rollback of the edit phases.",
-      "category": "PATTERN",
-      "source_artifact": "specs/596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md",
-      "confidence": 0.75,
-      "suggested_keywords": ["measurement-record", "documentation-realignment", "stale-figures", "plan-structure", "verification-audit"]
-    }
-  ],
-  "next_steps": "Run /implement 596 to execute the plan"
+  "task_number": 596
 }

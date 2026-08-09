@@ -1,7 +1,7 @@
 # Implementation Plan: Realign ROADMAP.md with verified repository state
 
 - **Task**: 596 - Correct ROADMAP.md's stale cleanup agenda and fold in the unrepresented open tasks
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 7 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md`
@@ -125,48 +125,58 @@ after the first edits the same file, so no two edit phases may run concurrently.
 
 ---
 
-### Phase 1: Re-measure the full numeric baseline [NOT STARTED]
+### Phase 1: Re-measure the full numeric baseline [COMPLETED]
 
 **Goal**: Produce a dated, command-cited measurement record that every later phase writes from and
 that Phase 6 audits against. No ROADMAP.md edit occurs in this phase.
 
 **Tasks**:
-- [ ] Run the sorry census per subtree and record each figure:
+- [x] Run the sorry census per subtree and record each figure:
   - `bash .claude/scripts/lean-sorry-census.sh Cslib/Logics/Bimodal`
   - `bash .claude/scripts/lean-sorry-census.sh Cslib/Logics/Propositional`
   - `bash .claude/scripts/lean-sorry-census.sh Cslib/Logics/Modal`
   - `bash .claude/scripts/lean-sorry-census.sh Cslib/` (repo-wide total, plus confirmation that
     Temporal / LTL / HML / LinearLogic / Foundations are sorry-free)
-- [ ] From the repo-wide `sorry_inventory` output, derive the per-file Bimodal breakdown and the
+  *(completed: reproduced the predicted 41/4/0=45, but discovered a regex bug in the script
+  itself — `\bsorry\b` also matches inside `warn.sorry`, double-counting each suppression
+  annotation as a phantom sorry. True raw count is 27 (Bi 23/Pr 4/Mo 0), matching the OLD roadmap
+  figure. Escalated to team-lead before Phase 2; see reports/02_execution-time-measurements.md
+  section 1)*
+- [x] From the repo-wide `sorry_inventory` output, derive the per-file Bimodal breakdown and the
   BXCanonical subtotal (`BXCanonical/Chronicle/ChronicleToCountermodel.lean` +
   `BXCanonical/Frame.lean`) and the Bundle subtotal (`Bundle/SuccRelation.lean` +
-  `Bundle/UntilSinceCoherence.lean`).
-- [ ] Record how many Propositional sorries are bare vs `warn.sorry`-suppressed (this is what the
+  `Bundle/UntilSinceCoherence.lean`). *(completed: BXCanonical true count 13, Bundle true count 9)*
+- [x] Record how many Propositional sorries are bare vs `warn.sorry`-suppressed (this is what the
   existing prose claims drives the red `lake build --wfail --iofail`); confirm by inspecting the
-  inventory's cited lines, not by running a build.
-- [ ] Enumerate decidability instances and their true locations:
+  inventory's cited lines, not by running a build. *(completed: all 4 bare)*
+- [x] Enumerate decidability instances and their true locations:
   `grep -rn "^instance instDecidable.*Valid" --include=*.lean Cslib/` — record count and the
-  file:line of each, especially which file holds the K instance.
-- [ ] Measure the modal system grid: `ls Cslib/Logics/Modal/ProofSystem/Instances/ | wc -l` and
+  file:line of each, especially which file holds the K instance. *(completed: 8 Modal instances,
+  K in CompletenessLoop.lean:2308)*
+- [x] Measure the modal system grid: `ls Cslib/Logics/Modal/ProofSystem/Instances/ | wc -l` and
   the subsumption theorem count
   `grep -c "^theorem \|^lemma " Cslib/Logics/Modal/Metalogic/InterSystem/AxiomSubsumption.lean`.
-- [ ] Measure `wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean` and its declaration count; also
+  *(completed: 15 / 24, both confirmed accurate as-is)*
+- [x] Measure `wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean` and its declaration count; also
   `ls Cslib/Logics/Modal/Tableau/S4/` and the combined line total of that directory.
-- [ ] Confirm the structural claims: `Boneyard/` exists and its contents;
+  *(completed: 2216/15; S4/+LoopChecking combined 12,510)*
+- [x] Confirm the structural claims: `Boneyard/` exists and its contents;
   `Cslib/Foundations/Logic/Tableau/Blocking.lean` exists, its line count, and its declaration
-  list; `Cslib/Logics/Temporal/Tableau/` file list and line total.
-- [ ] Enumerate open tasks and their roadmap presence:
+  list; `Cslib/Logics/Temporal/Tableau/` file list and line total. *(completed)*
+- [x] Enumerate open tasks and their roadmap presence:
   - open task list from `specs/state.json` (`project_number`, `status`, `title`)
   - task numbers literally appearing in ROADMAP.md prose
   - the set difference: open tasks with zero roadmap presence, with counts for both sides
-- [ ] Read the status of every task number ROADMAP.md currently cites (from `specs/state.json` and
-  `specs/archive/state.json`) so later phases know which rows are terminal.
-- [ ] Confirm `grep -n "Modal Tableau Decidability" specs/ROADMAP.md` still returns nothing.
-- [ ] Confirm no task in either state file targets BXCanonical or the algebraic-pipeline decision
-  by name.
-- [ ] Write all of the above, with the exact command and its raw output for each figure, to
+  *(completed: 36/46 absent, matches research)*
+- [x] Read the status of every task number ROADMAP.md currently cites (from `specs/state.json` and
+  `specs/archive/state.json`) so later phases know which rows are terminal. *(completed)*
+- [x] Confirm `grep -n "Modal Tableau Decidability" specs/ROADMAP.md` still returns nothing.
+  *(completed: confirmed absent)*
+- [x] Confirm no task in either state file targets BXCanonical or the algebraic-pipeline decision
+  by name. *(completed: confirmed untracked)*
+- [x] Write all of the above, with the exact command and its raw output for each figure, to
   `specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md`,
-  headed with the execution date and `git rev-parse HEAD`.
+  headed with the execution date and `git rev-parse HEAD`. *(completed)*
 
 **Timing**: 1.5 hours
 

@@ -520,6 +520,7 @@ public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Support.Accessibility
 public import Cslib.Logics.Modal.Tableau.Support.KnownWorlds
+public import Cslib.Logics.Modal.Tableau.TBDriver
 public import Cslib.Logics.Modal.Tableau.TDriver
 public import Cslib.Logics.Propositional.CurryHoward.Defs
 public import Cslib.Logics.Propositional.CurryHoward.Isomorphism

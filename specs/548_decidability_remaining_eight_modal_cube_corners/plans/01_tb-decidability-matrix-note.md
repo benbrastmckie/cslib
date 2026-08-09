@@ -384,7 +384,7 @@ hypothesis, not a target.
 
 ---
 
-### Phase 4: TBDriver Module Skeleton, Shape Lemmas, and Barrel Registration [NOT STARTED]
+### Phase 4: TBDriver Module Skeleton, Shape Lemmas, and Barrel Registration [COMPLETED]
 
 **Goal**: Create `Cslib/Logics/Modal/Tableau/TBDriver.lean` with the driver triple and the shape
 lemmas for the two TB-relevant signed-formula shapes, and register it in the barrel.
@@ -399,11 +399,18 @@ lemmas for the two TB-relevant signed-formula shapes, and register it in the bar
       mirroring `BDriver.lean:97-200` and `TDriver.lean:87-247`. These characterise the merged
       output list at the box-positive and diamond-negative shapes and are the substrate every
       spec field below consumes
-- [ ] Add the local universe-membership helpers (cross-world variants) the B arms need, mirroring
+- [x] Add the local universe-membership helpers (cross-world variants) the B arms need, mirroring
       `BDriver.lean:201-234`; reuse `modalBPredecessorsOf_hasEdge` (`FrameRules.lean:238`),
       `modalBBoxBack_mem` (`:278`), `modalBDiaNegBack_mem` (`:297`),
       `modalBPredecessorsOf_mem_of_hasEdge` (`:317`), `modalBBoxBack_mem_of` (`:331`), and
-      `modalBDiaNegBack_mem_of` (`:343`) rather than re-deriving them
+      `modalBDiaNegBack_mem_of` (`:343`) rather than re-deriving them *(deviation: altered —
+      TBDriver.lean treats `modalApplyOneB`'s own result as an opaque witness satisfying the
+      already-proven `modalApplyOneB_spec` bundle, rather than descending to B's
+      `FrameRules.lean` primitives the way `BDriver.lean` had to descend to K's. Every field
+      discharge below consumes `modalApplyOneB_spec.<field>` directly, so the cross-world
+      predecessor-membership helpers B needed to re-derive its own fields from K primitives are
+      not needed a second time by TB. This maximises reuse from `modalApplyOneB_spec`, consistent
+      with Phase 3's stated layering rationale.)*
 - [ ] Register `public import Cslib.Logics.Modal.Tableau.TBDriver` in `Cslib.lean`, inserted in
       alphabetical position among the existing `Cslib.Logics.Modal.Tableau.*` entries
       (currently `:492-523`; TBDriver sorts after `Support.KnownWorlds` and before `TDriver`)

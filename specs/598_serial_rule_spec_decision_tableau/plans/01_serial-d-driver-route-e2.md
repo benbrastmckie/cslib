@@ -472,21 +472,97 @@ work, means the prototype was not actually reused and should be re-read.
 
 ---
 
-### Phase 9: Bridges, Hintikka, and Final Gate [NOT STARTED]
+### Phase 9: Bridges, Hintikka, and Final Gate [BLOCKED]
 
 **Goal**: The `_eq` bridges and `modalExpandBranchesD_hintikka` land, and the whole in-scope
 deliverable passes the full gate.
 
 **Tasks**:
-- [ ] Add `modalStepBranchD_eq`, `modalExpandBranchesD_eq`, and `modalTableauD_eq`, mirroring
+- [x] Add `modalStepBranchD_eq`, `modalExpandBranchesD_eq`, and `modalTableauD_eq`, mirroring
       `TDriver.lean:758-791`
 - [ ] Add `modalExpandBranchesD_hintikka`, mirroring `TDriver.lean:792-806`, consuming the phase-3
-      `…At` wrapper and phase 8's `modalApplyOneD_specAt`
-- [ ] Run the full repository gate set
-- [ ] Confirm the acceptance bar repo-wide: zero `sorry` and zero new axioms introduced by this
-      task's whole diff
-- [ ] Write the implementation summary, naming the phase-3 `file_scope` widening and the
-      out-of-scope follow-up explicitly
+      `…At` wrapper and phase 8's `modalApplyOneD_specAt` *(deviation: BLOCKED, see blocker below
+      -- not a one-liner as estimated)*
+- [x] Run the full repository gate set (on phases 1-8's delivered content)
+- [x] Confirm the acceptance bar for phases 1-8: zero `sorry` and zero new axioms
+- [ ] Write the implementation summary, naming the phase-3 `file_scope` widening, the phase-9
+      blocker, and the out-of-scope follow-up explicitly *(deviation: summary written recording
+      partial completion, per the Escalation Protocol, rather than a completed-task summary)*
+
+**BLOCKER** (Phase 9, `modalExpandBranchesD_hintikka`):
+
+- **What failed**: `modalExpandBranchesD_hintikka` cannot be a one-liner consuming
+  `modalApplyOneD_specAt : RuleApplicationSpecAt (modalDualAugment φ) modalApplyOneD` the way
+  `TDriver.lean:792-806`'s `modalExpandBranchesT_hintikka` consumes a full
+  `RuleApplicationSpec`. The generic top-loop engine `modalExpandBranchesGen_hintikka`
+  (`CompletenessLoop.lean:1874`) requires `spec : RuleApplicationSpec apply` (universally
+  quantified over `φ0`), which it feeds `spec.toCore` into `modalExpandBranchesHintikka`
+  (`CompletenessLoop.lean:1433`), which itself requires `hs : RuleApplicationSpecCore apply` --
+  again universal in `φ0`. D's F2 genuinely fails at a universal `φ0`
+  (`modalApplyOneD_outputsSubsetUniverse_fails`), so D can only ever supply
+  `RuleApplicationSpecCoreAt (modalDualAugment φ) modalApplyOneD` -- a **different, non-coercible
+  type** from `RuleApplicationSpecCore apply`, not a special case of it. No existing declaration
+  in `CompletenessLoop.lean` accepts the `…At`-narrowed interface at this level.
+
+- **What was tried**: traced the full dependency chain from `modalExpandBranchesGen_hintikka`
+  down through `modalExpandBranchesHintikka` (the big induction engine),
+  `ModalLoopAuxK_stepPreserved`, `modalStepHintikka_preserves_inv`, and the five `_core`-suffixed
+  twins (`modalLoopGen_bClosure_core`, `_eBoxOnlyNeg_core`, `_eDiamondOnlyPos_core`,
+  `_eBoxNegWitness_core`, `_eDiamondPosWitness_core`). `AuxStepPreserved`/`AuxBounds`/
+  `ModalLoopInvHintikka`/`ModalLoopAuxK`/`ModalLoopAuxK_bounds` are apply/`φ0`-generic (no spec
+  type embedded) and transport to D for free, with zero new code. Every other link in the chain
+  is typed over `RuleApplicationSpecCore`/`RuleApplicationSpec` specifically, not the narrower
+  `…At` siblings phase 2/3 added, and each would need its own additive `…At`-typed twin (the same
+  idiom this file already uses for the five `_core` twins) to accept D's witness.
+
+- **Why it's stuck**: measured the twin chain's size directly against the current file (line
+  ranges below). Total: **~755 lines** of new, purely-mechanical (type-swap-only) duplicate
+  content, concentrated in one ~324-line induction (`modalExpandBranchesHintikka`'s twin) plus six
+  supporting lemmas averaging ~60 lines each:
+  - `modalLoopGen_bClosure_core` (970-1019, 49 lines) -- needs `…At` twin (the one lemma that
+    actually touches `outputsSubsetUniverse`)
+  - `modalLoopGen_eBoxOnlyNeg_core` (1020-1078, 58 lines) -- needs `…At` twin (nominal-typing only,
+    does not itself use F2)
+  - `modalLoopGen_eDiamondOnlyPos_core` (1079-1137, 58 lines) -- ditto
+  - `modalLoopGen_eBoxNegWitness_core` (1138-1211, 73 lines) -- ditto
+  - `modalLoopGen_eDiamondPosWitness_core` (1212-1292, 80 lines) -- ditto
+  - `modalStepHintikka_preserves_inv` (1293-1357, 64 lines) -- needs `…At` twin
+  - `ModalLoopAuxK_stepPreserved` (1383-1432, 49 lines) -- needs `…At` twin
+  - `modalExpandBranchesHintikka` (1433-1757, **324 lines**) -- needs `…At` twin (the big
+    fuel-induction engine)
+
+  This is not a "mechanically forced ~10 line" edit like phase 3's narrowing -- it is a second
+  major undertaking, comparable in size to phases 4-8 combined, and it lands entirely in
+  `CompletenessLoop.lean` (2302 lines before this task), nearly doubling the affected section.
+  This is exactly the scenario the plan's own Rollback/Contingency section names: *"If the
+  phase-3 cascade exceeds the enumerated sites: stop before editing further ... A
+  `CompletenessLoop.lean` refactor is outside both the declared `file_scope` and Route E2's
+  additivity claim, and would justify re-opening the route decision rather than absorbing the
+  cost silently."* Phase 3's own narrowing (the ~10-line hypothesis reorder) was completed and is
+  NOT itself implicated -- this is a separate, larger discovery one phase later, at the point
+  `modalExpandBranchesD_hintikka` is actually assembled.
+
+- **What is needed**: a decision at the orchestrator/user level, not by the implementing agent,
+  between:
+  1. **Widen `file_scope` further and spawn a successor task** carrying the `…At`-typed twin
+     chain (six-lemma-plus-induction port, ~755 lines, `CompletenessLoop.lean`), depending on this
+     task, mirroring how the plan already carved the soundness/completeness arm
+     (`FrameSoundness.lean`/`FrameCompleteness.lean`) into its own out-of-scope follow-up section
+     below. This is the natural sibling of that decision, made for the same reason: a coherent,
+     separately-verifiable body of work large enough to warrant its own plan and phase structure.
+  2. **Generalize the five `_core` twins/`modalStepHintikka_preserves_inv`/
+     `modalExpandBranchesHintikka` in place** to take the raw, unbundled hypotheses directly
+     (the same pattern `FmpMeasure.lean`'s `_gen` lemmas already use, and the same pattern phase
+     3's narrowing exploited) rather than a bundled `RuleApplicationSpecCore`-typed parameter --
+     eliminating the Core/CoreAt type mismatch at its root instead of building a parallel twin
+     chain. This is a bigger, cross-cutting refactor of `CompletenessLoop.lean` and was explicitly
+     flagged as future work in that file's own docstring (`CompletenessLoop.lean:965-966`:
+     *"Weakening those five declarations in place to a Core-only signature is left for a future
+     generalization pass"*) -- extending that same generalization to `…At` is plausible but is a
+     design decision with its own tradeoffs, not a mechanical extension.
+
+  **Prohibited workarounds** (not used): no `sorry`, no `def X := True`/vacuous placeholder, and
+  no silent absorption of the ~755-line refactor into this task without recording it.
 
 **Timing**: 1 hour
 

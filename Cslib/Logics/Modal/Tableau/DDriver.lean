@@ -1259,6 +1259,30 @@ theorem modalApplyOneD_specAt (φ : Proposition Atom) :
     ⟨modalNextWorld b, (modalApplyOneD_diaPosWitness b acc ψ w).1,
       (modalApplyOneD_diaPosWitness b acc ψ w).2⟩
 
+/-! ## D Instantiation Bridges -/
+
+/-- `modalStepBranchD` is exactly `modalStepBranchGen modalApplyOneD` -- true `rfl`, since
+`modalStepBranchD` is *defined* as that instantiation. -/
+theorem modalStepBranchD_eq
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalStepBranchD b e acc = modalStepBranchGen modalApplyOneD b e acc := rfl
+
+/-- `modalExpandBranchesD` is exactly `modalExpandBranchesGen modalApplyOneD` -- true `rfl`. -/
+theorem modalExpandBranchesD_eq
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) :
+    modalExpandBranchesD branches expandedSets accs fuel =
+      modalExpandBranchesGen modalApplyOneD branches expandedSets accs fuel := rfl
+
+/-- `modalTableauD` is exactly `modalExpandBranchesGen modalApplyOneD` applied to the initial
+branch `[F(φ)@0]`, fuelled at the dual-closed seed `modalDualAugment φ` -- true `rfl`. Not a
+bridge to `modalTableauGen modalApplyOneD φ` (which would fuel at plain `φ`); see
+`modalTableauD`'s own docstring for why. -/
+theorem modalTableauD_eq (φ : Proposition Atom) :
+    modalTableauD φ = modalExpandBranchesGen modalApplyOneD
+      [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty] (modalFuel (modalDualAugment φ)) := rfl
+
 end Cslib.Logic.Modal.Tableau
 
 end

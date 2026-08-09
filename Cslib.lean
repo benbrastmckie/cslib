@@ -494,6 +494,7 @@ public import Cslib.Logics.Modal.Tableau.Branch
 public import Cslib.Logics.Modal.Tableau.Closure
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.CompletenessLoop
+public import Cslib.Logics.Modal.Tableau.DDriver
 public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Logics.Modal.Tableau.FiveSimplification
 public import Cslib.Logics.Modal.Tableau.FmpMeasure

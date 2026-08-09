@@ -1,14 +1,13 @@
 {
-  "status": "research_finished",
+  "status": "researched",
   "started_at": "2026-08-09T00:00:00Z",
   "finished_at": "2026-08-09T00:00:00Z",
   "artifacts": [
-    "specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md",
-    "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessProbe.lean",
-    "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessSearch2.lean",
-    "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessSearch3.lean",
-    "specs/591_decide_openbranch_countermodel_disposition/scratch/MinProbe.lean",
-    "specs/591_decide_openbranch_countermodel_disposition/.orchestrator-handoff.json"
+    {
+      "type": "report",
+      "path": "specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md",
+      "summary": "Machine-checked verdict on the openBranch_countermodel exists-edges conjunct"
+    }
   ],
   "partial_progress": {
     "stage": "finished",
@@ -26,8 +25,13 @@
     "session_id": "sess_1786294327_b96abd_591",
     "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "delegation_path": [
+      "orchestrator",
+      "research",
+      "cslib-research-agent"
+    ],
     "sorries_added": 0,
     "axioms_added": 0
-  }
+  },
+  "_original_status": "research_finished"
 }

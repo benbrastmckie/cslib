@@ -1062,7 +1062,7 @@
     {
       "project_number": 591,
       "project_name": "decide_openbranch_countermodel_disposition",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)",
@@ -1071,7 +1071,7 @@
         592
       ],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-09T16:52:59Z",
+      "last_updated": "2026-08-09T19:19:42Z",
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
@@ -1127,7 +1127,7 @@
     {
       "project_number": 593,
       "project_name": "restate_propositional_tableau_completeness_theorems",
-      "status": "not_started",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Restate the three propositional tableau completeness theorems to a provable form",
@@ -1141,7 +1141,8 @@
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/",
         "Cslib/Logics/Propositional/Tableau/Minimal/"
-      ]
+      ],
+      "blockers": "Premise disproved by task 591 research (specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md): this task's scope rests on route (b) — the exists-edges conjunct of openBranch_countermodel being FALSE — but that conjunct is NOT refuted. Witness edges=[(1,0)] satisfies both conjuncts for phiRef1 (40 witnesses under intScheme; minScheme witness also found). Restating the completeness theorems on the strength of a nonexistent refutation would be wrong. Needs re-scope via /revise before dispatch."
     },
     {
       "project_number": 594,

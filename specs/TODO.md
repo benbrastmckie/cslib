@@ -27,8 +27,8 @@ next_project_number: 602
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-591 [RESEARCHING] — DECISION TASK. Resolve the single open decision point that gates 
-  └─ 593 [NOT STARTED] — Restate and discharge the four propositional tableau completeness
+591 [RESEARCHED] — DECISION TASK. Resolve the single open decision point that gates 
+  └─ 593 [BLOCKED] — Restate and discharge the four propositional tableau completeness
     └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
       └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 
@@ -236,7 +236,7 @@ CONSTRAINT: this task changes task METADATA only. No .lean file may be created, 
 ---
 
 ### 593. Restate the three propositional tableau completeness theorems to a provable form
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 591, Task 592
@@ -301,7 +301,7 @@ SEQUENCING: still the prerequisite for the disposition-decision task -- but that
 ---
 
 ### 591. Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 592

@@ -1,32 +1,27 @@
 {
-  "status": "researched",
-  "agent_type": "general-research-agent",
-  "delegation_path": ["orchestrator", "research", "general-research-agent"],
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "session_id": "sess_1786312852_6b5c1b_596",
   "task_number": 596,
-  "findings_count": 24,
+  "phase_count": 6,
+  "estimated_hours": 7,
+  "dependency_waves": [[1], [2], [3], [4], [5], [6]],
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md",
-      "summary": "Re-verifies every numeric/structural claim in the task description and ROADMAP.md against the current tree; finds the ROADMAP sorry census (27/23/4/0) was already wrong at the exact commit it cites (actual 45/41/4/0), decidability matrix has grown to 8/15 (S4 and TB landed since the review), and open-task-without-roadmap-presence count grew from 20/30 to 36/46."
+      "type": "plan",
+      "path": "specs/596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md",
+      "summary": "Six-phase documentation-only plan realigning specs/ROADMAP.md with verified repository state: a measurement-first phase producing a command-cited measurement record, four editing phases (Section A census and rows, Completed-section falsified claims, Section B rewrite plus BXCanonical decision-task creation, Section C correction plus four new stream sections), and a whole-document consistency and residue sweep. Every figure is re-measured at execution time rather than copied from the research report."
     }
   ],
   "memory_candidates": [
     {
-      "content": "cslib's official sorry counter is .claude/scripts/lean-sorry-census.sh (comment/string-aware, depth-counts nested /- -/ comments). A naive grep -c 'sorry' or a count of 'set_option warn.sorry false in' suppression-annotation sites both undercount: a single suppressed declaration can contain multiple raw sorry occurrences (observed case: 7 suppression annotations covering 19 actual sorries in one Bimodal file). Any future sorry census in this repo should run the script fresh rather than trust a prose-stated count, even one dated at a specific commit.",
+      "content": "When a documentation-realignment task must correct figures that a prior review already got wrong, split the plan so that phase 1 is measurement-only and writes a command-cited measurement record artifact, and the final phase audits every figure in the deliverable back against that record. This makes 'the implementer copied a stale number from the plan' a mechanically detectable failure rather than a trust assumption, and preserves the expensive measurement work across a rollback of the edit phases.",
       "category": "PATTERN",
-      "source_artifact": "specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["sorry-census", "lean-sorry-census.sh", "cslib", "warn.sorry", "undercount"]
-    },
-    {
-      "content": "To verify a stale-looking metric against the exact historical commit it was dated to (not just current HEAD), use `git worktree add /tmp/<dir> <commit>` then re-run the same measurement script against the worktree path, then `git worktree remove /tmp/<dir> --force`. This distinguishes 'the figure was already wrong when written' from 'the figure drifted since it was written' -- a distinction that changes how a downstream correction task should be scoped.",
-      "category": "TECHNIQUE",
-      "source_artifact": "specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["git-worktree", "verification", "commit-scoped", "audit-technique"]
+      "source_artifact": "specs/596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["measurement-record", "documentation-realignment", "stale-figures", "plan-structure", "verification-audit"]
     }
   ],
-  "next_steps": "Run /plan 596 to create implementation plan"
+  "next_steps": "Run /implement 596 to execute the plan"
 }

@@ -74,7 +74,7 @@ next_project_number: 607
 
 594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
   └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
-596 [RESEARCHED] — Realign specs/ROADMAP.md with verified repository state. Created 
+596 [PLANNED] — Realign specs/ROADMAP.md with verified repository state. Created 
 
 ## Tasks
 
@@ -272,11 +272,12 @@ RESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. 
 ---
 
 ### 596. Correct ROADMAP.md's stale cleanup agenda and fold in the 20 unrepresented open tasks
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: meta
 - **Topic**: Agent System
 - **Dependencies**: None
 - **Research**: [596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md]
+- **Plan**: [596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md]
 
 **Description**: Realign specs/ROADMAP.md with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H4-H5).
 

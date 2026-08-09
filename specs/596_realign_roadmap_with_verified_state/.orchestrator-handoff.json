@@ -1,14 +1,14 @@
 {
-  "phase": "research",
+  "phase": "plan",
   "task_number": 596,
-  "status": "researched",
+  "status": "planned",
   "session_id": "sess_1786312852_6b5c1b_596",
   "artifacts": [
-    "specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md"
+    "specs/596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md"
   ],
-  "next_phase": "plan",
-  "decision": "Every numeric/structural claim in the task description and in ROADMAP.md was re-verified directly against the current tree (or, where the claim is inherently commit-scoped, against the exact commit ROADMAP.md cites). Most task-description claims hold and some have drifted further; one baseline figure the description said was already correct is in fact wrong even at the cited commit (sorry census: actual Bimodal=41/Propositional=4/Modal=0=45, not 23/4/0=27 -- confirmed via git-worktree checkout of commit 26644732, the exact commit ROADMAP.md's 'Verified sorry counts (2026-08-07)' line cites). Full findings, corrected figures, and per-claim verdicts are in the research report.",
+  "next_phase": "implement",
+  "decision": "Six sequential phases, documentation-only, single deliverable file (specs/ROADMAP.md). Phase 1 is measurement-only and produces reports/02_execution-time-measurements.md, a command-cited record every later phase writes from; Phase 6 audits every numeral in ROADMAP.md back against that record, so any figure copied from the plan or research report instead of measured is a detectable failure. Phases 2-5 correct Section A (sorry census plus methodology note explaining the suppression-site undercount, and all Section A rows), the Completed section's falsified claims (decidability instance count and file attribution, CS5, temporal tableau), Section B (stale rows moved to Completed, LoopChecking figure, Blocking.lean '(new)' tag, BXCanonical count) plus creation of a task to hold the BXCanonical/dense-vs-algebraic decision, and Section C plus four new stream sections (Modal Tableau Decidability, CS5, temporal tableau, propositional upstream) folding in the roadmap-absent open tasks. The BXCanonical decision is tracked, never decided autonomously.",
   "blockers": [],
   "requires_user_review": false,
-  "next_steps": "Run /plan 596 to create the ROADMAP.md realignment plan. The plan should use the corrected figures in the research report's 'Findings' tables (sorry census 45 not 27, decidability matrix 8/15 not 6/15, LoopChecking.lean 2,216/15 not 10,723/230, BXCanonical 21 sorries not 14, 36-of-46 open tasks absent from roadmap not 20-of-30) and should instruct the implementer to re-run the cited verification commands fresh at execution time rather than copy any number from the report verbatim, since the tree continues to move quickly (task count alone grew from 30 to 46 between the 2026-08-07 review and this research pass)."
+  "next_steps": "Run /implement 596. The implementer must treat every figure in the plan and the research report as a hypothesis and re-measure it at execution time using the commands embedded in each phase; Phase 1 must complete before any ROADMAP.md edit. Edits must be anchored by section heading and row text, never by the line numbers cited in the plan or report, since each phase shifts subsequent lines. No .lean file may be edited, and README.md is out of file_scope (stale figures there are flagged in the summary, not fixed)."
 }

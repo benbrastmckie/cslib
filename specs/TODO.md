@@ -11,9 +11,9 @@ next_project_number: 610
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,604,607,608 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,605,609 | 36,37,181,375,400,425,534,554,568,594,604 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,606 | 39,40,605 | foundations, propositional logic |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,605,607,608,609 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,606 | 36,37,181,375,400,425,534,554,568,594,605 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -28,10 +28,9 @@ next_project_number: 610
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-604 [IMPLEMENTING] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
-  └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
-    └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
-  └─ 609 [NOT STARTED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
+605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
+  └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
+609 [NOT STARTED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
 
 ### Modal Logic
 
@@ -107,11 +106,13 @@ SOURCE: specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/rep
 - **Topic**: Agent System
 - **Dependencies**: None
 
-**Description**: Discovered during task 596's ROADMAP realignment (2026-08-09; see specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md section 1 for the full evidence trail). .claude/scripts/lean-sorry-census.sh strips comments/strings correctly, then matches `\bsorry\b` on the stripped text. It does NOT exclude `set_option warn.sorry false in` -- because `.` is a non-word character, `\bsorry\b` also matches the "sorry" substring inside "warn.sorry", so every suppression-annotation line is counted as an extra phantom sorry on top of the real sorry it annotates.
+**Description**: Discovered during task 596's ROADMAP realignment (2026-08-09; see specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md section 1 for the full evidence trail, independently re-verified by team-lead with a corrected-regex re-run). The deployed .claude/scripts/lean-sorry-census.sh strips comments/strings correctly, then matches `\bsorry\b` on the stripped text. It does NOT exclude `set_option warn.sorry false in` -- because `.` is a non-word character, `\bsorry\b` also matches the "sorry" substring inside "warn.sorry", so every suppression-annotation line is counted as an extra phantom sorry on top of the real sorry it annotates.
 
-Verified for every Cslib/Logics/Bimodal file carrying sorries: script count 41 = 23 real sorry occurrences + 18 warn.sorry annotation lines double-counted. The 23-real figure independently matches task 215's own hand-audited scope (12 + 1 = 13 for the BXCanonical files specifically).
+Verified for every Cslib/Logics/Bimodal file carrying sorries: script count 41 = 23 real sorry occurrences + 18 warn.sorry annotation lines double-counted (repo-wide: 45 = 27 + 18). The 27/23 figures independently match the pre-existing ROADMAP.md census and task 215's own hand-audited scope (12 + 1 = 13 for the BXCanonical files specifically). Team-lead independently reproduced repo-wide 45->27, Bimodal 41->23 using the corrected regex `(?<![.\w])sorry\b` substituted into the script's own strip_lean_comments pipeline, and confirmed a naive grep-style count that skips the block-comment/docstring stripper gives 152 repo-wide -- the stripper itself is correct and valuable; the `\bsorry\b` regex is the only broken piece.
 
-Fix: exclude lines that are exactly (or contain only) the `set_option warn.sorry false in` directive from the `\bsorry\b` match -- e.g. strip `warn.sorry` as a compound token before the boundary match, or match `(?<!warn\.)\bsorry\b` (negative lookbehind), or line-level pre-filter any line whose stripped content is exactly the set_option directive. Add a regression fixture (a file with N suppression annotations and M real sorries, asserting the census reports M, not M+N) so this cannot silently regress. Cross-check against `lake build`'s compiler-backed "declaration uses 'sorry'" warning count (the script's own --cross-check flag) as part of the fix's verification, since that count is comment/annotation-immune by construction.
+CRITICAL -- fix target is the SOURCE STORE, NOT the deployed .claude/ copy: this repo's .claude/ tree is a gitignored deploy artifact regenerated from the source store (see .claude/rules/source-store-deploy-boundary.md). A hand-edit to .claude/scripts/lean-sorry-census.sh is silently wiped on the next regeneration. The actual fix target is the source-store copy at agent-system/extensions/lean/scripts/lean-sorry-census.sh (found on this machine at /home/benjamin/.config/nvim/agent-system/extensions/lean/scripts/lean-sorry-census.sh -- confirm the correct source-store root for whichever environment this task is executed in; it is a sibling extensions tree outside this repository, not a path under cslib/).
+
+Fix: exclude lines that are exactly (or contain only) the `set_option warn.sorry false in` directive from the `\bsorry\b` match -- e.g. use the negative-lookbehind regex `(?<![.\w])sorry\b` in place of `\bsorry\b` (verified to work by both the task-596 implementer and team-lead independently), or line-level pre-filter any line whose stripped content is exactly the set_option directive. Preserve the comment/string stripper (`strip_lean_comments`) unchanged -- it is correct and is the script's valuable part; only the final regex match needs to change. Add a regression fixture (a file with N suppression annotations and M real sorries, asserting the census reports M, not M+N) so this cannot silently regress. Cross-check against `lake build`'s compiler-backed "declaration uses 'sorry'" warning count (the script's own --cross-check flag) as part of the fix's verification, since that count is comment/annotation-immune by construction.
 
 ---
 
@@ -174,12 +175,13 @@ A documented negative or narrowing result is a legitimate outcome, recorded in-s
 ---
 
 ### 604. Prove the countermodel forcing conjunct over the constructed frame
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603
 - **Research**: [604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md]
 - **Plan**: [604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md]
+- **Summary**: [604_prove_countermodel_forcing_conjunct_over_constructed_frame/summaries/01_dp5-discharge-honest-restructure-summary.md]
 
 **Description**: Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0 phi` -- over the frame constructed by the predecessor task, at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.
 

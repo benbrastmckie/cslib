@@ -527,25 +527,25 @@ termination fields `rankStep`, `outDegStep`, `knownWorldsStep`.
 
 ---
 
-### Phase 7: TB Instantiation of the Generic Hintikka/Saturation Chain [NOT STARTED]
+### Phase 7: TB Instantiation of the Generic Hintikka/Saturation Chain [COMPLETED]
 
 **Goal**: Instantiate the generic Hintikka/saturation chain and the `accSourcesKnown` plumbing at
 `(modalApplyOneTB, modalApplyOneTB_spec)`, with no TB-specific proof content.
 
 **Tasks**:
-- [ ] Add the `/-! ## TB Instantiation of the Generic Hintikka/Saturation Chain -/` section,
+- [x] Add the `/-! ## TB Instantiation of the Generic Hintikka/Saturation Chain -/` section,
       mirroring `BDriver.lean:790-827`
-- [ ] Prove `modalStepBranchTB_eq`, `modalExpandBranchesTB_eq`, and `modalTableauTB_eq` — the
+- [x] Prove `modalStepBranchTB_eq`, `modalExpandBranchesTB_eq`, and `modalTableauTB_eq` — the
       definitional bridges from the TB-named driver to the generic one
-- [ ] Prove `modalExpandBranchesTB_hintikka` by applying `modalExpandBranchesGen_hintikka
+- [x] Prove `modalExpandBranchesTB_hintikka` by applying `modalExpandBranchesGen_hintikka
       modalApplyOneTB modalApplyOneTB_spec`, mirroring `BDriver.lean:826`
-- [ ] **Confirm rather than re-derive** the `accSourcesKnown` reuse: `accSourcesKnown`
+- [x] **Confirm rather than re-derive** the `accSourcesKnown` reuse: `accSourcesKnown`
       (`BDriver.lean:841`), `modalStepBranchGen_preserves_accSourcesKnown` (`:860`), and
       `modalExpandBranchesGen_openBranch_accSourcesKnown` (`:1071`) are already parameterised on
       an arbitrary spec. TB's predecessor-reading arms should consume them with zero new proof
       content. If a genuine TB-specific obligation appears here, record it explicitly — that
       would be a deviation from the B analogue and worth naming
-- [ ] Confirm `modalExpandBranchesGen_openBranch_accTargetsKnown` (`BDriver.lean:1100`) is
+- [x] Confirm `modalExpandBranchesGen_openBranch_accTargetsKnown` (`BDriver.lean:1100`) is
       likewise reusable
 
 **Timing**: 1 hour

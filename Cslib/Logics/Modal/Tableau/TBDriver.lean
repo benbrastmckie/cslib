@@ -854,6 +854,58 @@ theorem modalApplyOneTB_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT
   boxNegWitness' := modalApplyOneTB_boxNegWitness'
   diaPosWitness' := modalApplyOneTB_diaPosWitness'
 
+/-! ## TB Instantiation of the Generic Hintikka/Saturation Chain -/
+
+/-- `modalStepBranchTB` is exactly `modalStepBranchGen modalApplyOneTB` -- true `rfl`. -/
+theorem modalStepBranchTB_eq
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalStepBranchTB b e acc = modalStepBranchGen modalApplyOneTB b e acc := rfl
+
+/-- `modalExpandBranchesTB` is exactly `modalExpandBranchesGen modalApplyOneTB` -- true `rfl`. -/
+theorem modalExpandBranchesTB_eq
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) :
+    modalExpandBranchesTB branches expandedSets accs fuel =
+      modalExpandBranchesGen modalApplyOneTB branches expandedSets accs fuel := rfl
+
+/-- `modalTableauTB` is exactly `modalTableauGen modalApplyOneTB` -- true `rfl`. -/
+theorem modalTableauTB_eq (φ : Proposition Atom) :
+    modalTableauTB φ = modalTableauGen modalApplyOneTB φ := rfl
+
+/-- **`modalExpandBranchesTB_hintikka`**: the TB-system instantiation of the generic top-loop
+Hintikka lemma (`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), concluding in
+`modalHintikkaSetGen modalApplyOneTB bR aR`. A genuine one-liner, exactly as
+`modalExpandBranchesT_hintikka`/`modalExpandBranchesB_hintikka` were: direct application of
+`modalExpandBranchesGen_hintikka` at `(modalApplyOneTB, modalApplyOneTB_spec)`, with no
+TB-specific proof content whatsoever. -/
+theorem modalExpandBranchesTB_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      modalExpMeasure (modalUniverse φ0) branches expandedSets ≤ fuel →
+      (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+          (ai : Accessibility),
+        branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
+        ∃ rank, ModalLoopInvGen modalApplyOneTB φ0 bi ei ai rank) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesTB branches expandedSets accs fuel = .openBranch bR aR →
+        modalHintikkaSetGen modalApplyOneTB bR aR :=
+  modalExpandBranchesGen_hintikka modalApplyOneTB modalApplyOneTB_spec φ0 fuel
+
+/-! ## Reuse Confirmation: `accSourcesKnown`/`accTargetsKnown` Top-Loop Propagation
+
+`accSourcesKnown` (`BDriver.lean:841`), `modalStepBranchGen_preserves_accSourcesKnown`
+(`BDriver.lean:860`), `modalExpandBranchesGen_openBranch_accSourcesKnown` (`BDriver.lean:1071`),
+and `modalExpandBranchesGen_openBranch_accTargetsKnown` (`BDriver.lean:1100`) are all
+parameterised on an arbitrary `apply : RuleApply Atom` together with its own `freshLocal`
+witness -- they consume `modalApplyOneTB_spec.freshLocal` at the TB completeness call site
+(`FrameCompleteness.lean`, Phase 10) with zero new proof content here. Confirmed, not
+re-derived: TB's predecessor-reading arms are exactly B's (`modalApplyOneTB` wraps
+`modalApplyOneB` verbatim for the backward-propagation family), and neither generic lemma
+inspects `apply` beyond the `freshLocal` shape hypothesis both `modalApplyOneB_spec` and
+`modalApplyOneTB_spec` already discharge. -/
+
 end Cslib.Logic.Modal.Tableau
 
 end

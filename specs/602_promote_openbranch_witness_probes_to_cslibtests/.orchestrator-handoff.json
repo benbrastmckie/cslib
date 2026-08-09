@@ -1,0 +1,23 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Researched promoting the 4 scratch witness probes into CslibTests/. WitnessProbe.lean (~6.5s), WitnessSearch3.lean (~2.7s) are fast and promotable as-is via the #guard_msgs idiom. MinProbe.lean (~2.5s) has a doc-comment-before-#eval! parse error to fix first. WitnessSearch2.lean's exhaustive subset search times out (>9m, zero output) and must be replaced with specific-witness assertions, not ported whole. Registration is via CslibTests.lean barrel + lake exe mk_all --module.",
+  "artifacts": [
+    {"type": "report", "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md"}
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [],
+  "decisions_made": [
+    "Keep original probe base names (WitnessProbe/WitnessSearch2/WitnessSearch3/MinProbe) under CslibTests/ to minimize churn at the Scheme.lean citation sites",
+    "WitnessSearch2.lean's full powerset enumeration must NOT be executed in CI; assert only specific known witnesses instead",
+    "Convert all bare #eval!/doc-comment-before-#eval patterns to the /-- info: ... -/ #guard_msgs in #eval idiom used by BetaSplitRefutation.lean"
+  ],
+  "dead_ends": [
+    "Running WitnessSearch2.lean's searchWitness for phiRef1 via lake env lean: no output after 9m10s timeout, confirms it is not CI-viable as written"
+  ],
+  "decisions_deferred": [
+    "Updating Scheme.lean/Minimal/Completeness.lean's 'not CI-protected' citations is flagged as an out-of-scope follow-up (file_scope is CslibTests/ only)"
+  ]
+}

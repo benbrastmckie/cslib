@@ -1,0 +1,20 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-09T20:55:49Z",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Read all four scratch probes and BetaSplitRefutation.lean mirror pattern; empirically timed each probe via lake env lean; found MinProbe.lean has a doc-comment-before-#eval! parse error and WitnessSearch2.lean's full subset enumeration times out (>9m, zero output) and must not be ported into CI as-is; confirmed CslibTests.lean barrel + mk_all + testDriver registration mechanics; flagged stale 'not CI-protected' citations in Scheme.lean as out-of-scope follow-up."
+  },
+  "metadata": {
+    "session_id": "sess_1786308724_41a1c9_602",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

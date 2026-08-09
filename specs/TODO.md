@@ -29,8 +29,8 @@ next_project_number: 607
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-602 [RESEARCHING] — Promote the four machine-checked witness probes produced by the d
-603 [RESEARCHED] — Construct `edges` uniformly from an open branch `b` and discharge
+602 [RESEARCHED] — Promote the four machine-checked witness probes produced by the d
+603 [PLANNING] — Construct `edges` uniformly from an open branch `b` and discharge
   └─ 604 [NOT STARTED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
     └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
       └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
@@ -150,7 +150,7 @@ The existing sorries stay until this and the residual task land. Zero new sorrie
 ---
 
 ### 603. Construct a uniform frame for openBranch_countermodel and discharge the upward-closure conjunct
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -175,10 +175,11 @@ The four existing sorries stay until the successor tasks land. Zero new sorries,
 ---
 
 ### 602. Promote the openBranch_countermodel witness probes into CslibTests for CI protection
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md]
 
 **Description**: Promote the four machine-checked witness probes produced by the disposition investigation into CslibTests/ so they are CI-protected, mirroring how CslibTests/BetaSplitRefutation.lean protects the beta-split counterexample.
 

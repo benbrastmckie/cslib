@@ -1,7 +1,7 @@
 # Implementation Plan: Promote openBranch_countermodel Witness Probes to CslibTests
 
 - **Task**: 602 - Promote the openBranch_countermodel witness probes into CslibTests for CI protection
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md
@@ -135,7 +135,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Promote WitnessProbe.lean (intuitionistic witness for phiRef1) [NOT STARTED]
+### Phase 1: Promote WitnessProbe.lean (intuitionistic witness for phiRef1) [COMPLETED]
 
 **Goal**: Create `CslibTests/WitnessProbe.lean` — a compiling, `#guard_msgs`-asserted promotion
 of the scratch `WitnessProbe.lean` — and settle the promotion template the next two phases reuse.

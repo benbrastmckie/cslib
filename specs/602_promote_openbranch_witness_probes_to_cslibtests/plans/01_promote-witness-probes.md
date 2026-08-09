@@ -317,7 +317,7 @@ build output, escalating as a finding if a different set of candidates witnesses
 
 ---
 
-### Phase 4: Fold WitnessSearch2's CI-relevant content into WitnessProbe.lean [NOT STARTED]
+### Phase 4: Fold WitnessSearch2's CI-relevant content into WitnessProbe.lean [COMPLETED]
 
 **Goal**: Preserve what `WitnessSearch2.lean` certifies without executing its powerset
 enumeration: keep the specific-witness assertions fast and CI-protected, and record the

@@ -64,14 +64,12 @@ powerset needed. No exhaustive per-formula sweep is promoted for any formula; th
 witness asserted below and the `phiRef1`/`[(1,0),(2,0)]` witnesses in `MinProbe.lean` are the
 only specific edge-set witnesses this task promotes into CI.
 
-Measuring the cheap half of `WitnessSearch2.lean`'s enumeration (`inclPairs`, an O(n²) filter,
-with no powerset step) was considered as a bounded optional addition here, exposing
-`(worldCount, admissiblePairCount)` for `phiRef1`. It was not added: computing `inclPairs`
-requires the same `atomsAt`/`inclOk` machinery `WitnessSearch3.lean` already defines for the
-maximal-frame check, and duplicating it here for a single extra assertion was judged not to add
-CI-protected content beyond what `WitnessSearch3.lean` and the direct `check` assertions below
-already give. If a future task wants that specific search-space-size guarantee, `inclPairs` can
-be added as a small extension of this file at that time.
+The cheap half of `WitnessSearch2.lean`'s enumeration (`inclPairs`, an O(n²) filter, WITHOUT the
+powerset step) IS ported below as `searchSpaceSize`, measured at build time to complete in well
+under the ~10s budget. This CI-protects the size of the search space the 40-witness figure ranges
+over — the one part of `WitnessSearch2.lean` that is both cheap and load-bearing — plus the fact
+that the known witness `[(1,0)]` lies in that enumerated space (`witnessInSearchSpace`), which is
+the cheap, direct form of "the witness lies in the enumerated space" and needs no powerset.
 -/
 
 set_option autoImplicit false
@@ -203,5 +201,53 @@ falsify `phiRef1` (`evalF ... = false`, i.e. `¬forces = false`), giving `(false
 /-- info: ([1, 2], [2, 1]) -/
 #guard_msgs in
 #eval (succs [(1,0),(2,1),(1,2),(2,2)] 1, succs [(1,0),(2,1),(1,2),(2,2)] 2)
+
+/-! ## The search space `WitnessSearch2.lean`'s 40-witness figure ranges over
+
+`inclPairs` is `WitnessSearch2.lean`'s admissible-edge-pair computation (the atom-set-inclusion
+preorder `⊑`, restricted to `phiRef1`'s branch worlds plus one fresh atom-free world, matching the
+scratch enumeration's universe), WITHOUT the powerset step that made the full enumeration
+intractable. This alone is cheap (O(n²)) and is the part of `WitnessSearch2.lean` worth
+CI-protecting: the size of the space the (unverified-here) 40-witness figure ranges over. -/
+
+/-- Atom set of world `w` on `b`. -/
+def atomsAt (b : IBranch Nat) (w : Nat) : List Nat :=
+  (branchAtoms b).filter (forcesAtom b · w)
+
+/-- `A(p) ⊆ A(c)`: the only pairs an upward-closed valuation can tolerate. -/
+def inclOk (b : IBranch Nat) (p c : Nat) : Bool :=
+  (atomsAt b p).all fun x => (atomsAt b c).contains x
+
+/-- The admissible-edge-pair set `⊑`: every `(child, parent)` pair the atom-set-inclusion
+preorder allows, over `ws`. -/
+def inclPairs (b : IBranch Nat) (ws : List Nat) : IEdges :=
+  (ws.flatMap fun p => ws.map fun c => (c, p)).filter fun e => e.1 != e.2 && inclOk b e.2 e.1
+
+/-- The world universe `WitnessSearch2.lean`'s `searchWitness` used: `phiRef1`'s branch labels
+plus one fresh atom-free world. -/
+def searchWs : Option (List Nat) :=
+  realBranch.map fun b => branchLabels b ++ [(branchLabels b).foldl max 0 + 1]
+
+/-- `(worldCount, admissiblePairCount)` for `phiRef1` — the size of the search space the
+40-witness figure ranges over. -/
+def searchSpaceSize : Option (Nat × Nat) :=
+  match realBranch, searchWs with
+  | some b, some ws => some (ws.length, (inclPairs b ws).length)
+  | _, _ => none
+
+/-- info: some (4, 7) -/
+#guard_msgs in
+#eval searchSpaceSize
+
+/-- The known witness `[(1,0)]` lies within the enumerated admissible-pair space — the cheap,
+direct form of "the witness lies in the enumerated space", needing no powerset. -/
+def witnessInSearchSpace : Option Bool :=
+  match realBranch, searchWs with
+  | some b, some ws => some ((inclPairs b ws).contains (1, 0))
+  | _, _ => none
+
+/-- info: some true -/
+#guard_msgs in
+#eval witnessInSearchSpace
 
 end CslibTests.WitnessProbe

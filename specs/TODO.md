@@ -28,7 +28,7 @@ next_project_number: 607
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-604 [NOT STARTED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
+604 [RESEARCHING] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
   └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
     └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
@@ -74,7 +74,7 @@ next_project_number: 607
 
 594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
   └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
-596 [NOT STARTED] — Realign specs/ROADMAP.md with verified repository state. Created 
+596 [RESEARCHED] — Realign specs/ROADMAP.md with verified repository state. Created 
 
 ## Tasks
 
@@ -123,7 +123,7 @@ A documented negative or narrowing result is a legitimate outcome, recorded in-s
 ---
 
 ### 604. Prove the countermodel forcing conjunct over the constructed frame
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603
@@ -272,10 +272,11 @@ RESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. 
 ---
 
 ### 596. Correct ROADMAP.md's stale cleanup agenda and fold in the 20 unrepresented open tasks
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: meta
 - **Topic**: Agent System
 - **Dependencies**: None
+- **Research**: [596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md]
 
 **Description**: Realign specs/ROADMAP.md with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H4-H5).
 

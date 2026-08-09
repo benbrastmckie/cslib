@@ -1,0 +1,14 @@
+{
+  "phase": "research",
+  "task_number": 596,
+  "status": "researched",
+  "session_id": "sess_1786312852_6b5c1b_596",
+  "artifacts": [
+    "specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md"
+  ],
+  "next_phase": "plan",
+  "decision": "Every numeric/structural claim in the task description and in ROADMAP.md was re-verified directly against the current tree (or, where the claim is inherently commit-scoped, against the exact commit ROADMAP.md cites). Most task-description claims hold and some have drifted further; one baseline figure the description said was already correct is in fact wrong even at the cited commit (sorry census: actual Bimodal=41/Propositional=4/Modal=0=45, not 23/4/0=27 -- confirmed via git-worktree checkout of commit 26644732, the exact commit ROADMAP.md's 'Verified sorry counts (2026-08-07)' line cites). Full findings, corrected figures, and per-claim verdicts are in the research report.",
+  "blockers": [],
+  "requires_user_review": false,
+  "next_steps": "Run /plan 596 to create the ROADMAP.md realignment plan. The plan should use the corrected figures in the research report's 'Findings' tables (sorry census 45 not 27, decidability matrix 8/15 not 6/15, LoopChecking.lean 2,216/15 not 10,723/230, BXCanonical 21 sorries not 14, 36-of-46 open tasks absent from roadmap not 20-of-30) and should instruct the implementer to re-run the cited verification commands fresh at execution time rather than copy any number from the report verbatim, since the tree continues to move quickly (task count alone grew from 30 to 46 between the 2026-08-07 review and this research pass)."
+}

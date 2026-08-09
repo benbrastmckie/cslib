@@ -2666,6 +2666,95 @@ theorem modalTableauTB_sound (φ : Proposition Atom) (h : modalTableauTB φ = .c
   cases hunsat with
   | cons h_unsat _ => exact h_unsat hsat
 
+/-! ## `tbValid` Completeness -/
+
+/-- **TB-completeness of the modal tableau**: if the TB tableau on `φ0` returns an open branch,
+`φ0` is not TB-valid. Mirrors `modalTableauB_complete`: combines `modalExpandBranchesTB_hintikka`
+(`TBDriver.lean`) instantiated at the initial configuration, the generic initial-branch
+membership persistence lemma (`modalExpandBranchesGen_openBranch_initial_mem`), the
+`accSourcesKnown` top-loop propagation lemma (`modalExpandBranchesGen_openBranch_accSourcesKnown`,
+`BDriver.lean`) instantiated at `modalApplyOneTB_spec.freshLocal`, and the TB countermodel
+extraction above (`modalOpenBranchTB_countermodel`, Phase 8), discharging the `tbFC` frame
+condition on the open-branch countermodel with `⟨extractModelTB_refl b a, extractModelTB_symm b
+a⟩`. This direction is fully generic and does **not** depend on the generalized soundness-chain
+machinery above. -/
+theorem modalTableauTB_complete (φ0 : Proposition Atom)
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {a : Accessibility}
+    (h : modalTableauTB φ0 = .openBranch b a) :
+    ¬ tbValid φ0 := by
+  have h' : modalExpandBranchesTB
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty] (modalFuel φ0) = .openBranch b a := h
+  have hmeas := modalExpMeasure_entry_le_fuel φ0
+  have hInv : ∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+      (ai : Accessibility),
+      ([[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]])[i]? = some bi →
+      (([[]] : List (List (SignedFormula (Proposition Atom) WorldIndex))))[i]? = some ei →
+      ([Accessibility.empty])[i]? = some ai →
+      ∃ rank, ModalLoopInvGen modalApplyOneTB φ0 bi ei ai rank := by
+    intro i bi ei ai hib hie hia
+    match i with
+    | 0 =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+      subst hib; subst hie; subst hia
+      exact ⟨fun _ => modalDepth φ0, modalLoopInvGen_initial modalApplyOneTB φ0⟩
+    | n + 1 => simp at hib
+  have hH : modalHintikkaSetGen modalApplyOneTB b a :=
+    modalExpandBranchesTB_hintikka φ0 (modalFuel φ0)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl hmeas hInv b a h'
+  have hSrc : accSourcesKnown b a :=
+    modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneTB
+      modalApplyOneTB_spec.freshLocal
+      (modalFuel φ0)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl
+      (by
+        intro p hp
+        simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+        subst hp
+        exact accSourcesKnown_empty _)
+      b a h'
+  have hmemInit : (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    modalExpandBranchesGen_openBranch_initial_mem modalApplyOneTB (modalFuel φ0)
+      (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl
+      (fun b₀ hb₀ => by
+        simp only [List.mem_singleton] at hb₀
+        subst hb₀
+        simp)
+      b a h'
+  have hnot := modalOpenBranchTB_countermodel b a φ0 hSrc hH hmemInit
+  intro htv
+  exact hnot (htv WorldIndex (extractModelTB b a)
+    ⟨extractModelTB_refl b a, extractModelTB_symm b a⟩ 0)
+
+/-! ## `tbValid` Decidability -/
+
+/-- **The modal TB tableau decides TB-validity**: `modalTableauTB φ0` closes exactly when `φ0`
+is TB-valid. Combines soundness (`modalTableauTB_sound`, above) with completeness
+(`modalTableauTB_complete`, above) via the two-constructor dichotomy of `ModalTableauResult`.
+Mirrors `tValid_decides`/`bValid_decides` line-for-line. -/
+theorem tbValid_decides (φ0 : Proposition Atom) :
+    modalTableauTB φ0 = .closed ↔ tbValid φ0 := by
+  constructor
+  · exact modalTableauTB_sound φ0
+  · intro htv
+    cases htab : modalTableauTB φ0 with
+    | closed => rfl
+    | openBranch b a => exact absurd htv (modalTableauTB_complete φ0 htab)
+
+/-- **TB-validity is decidable**: decide by running the modal TB tableau
+(`modalTableauTB`) and consulting `tbValid_decides`. No `Fintype Atom` assumption is needed,
+since the tableau computation itself is the decision procedure. TB is a Tier A corner
+discharging the full `RuleApplicationSpec` (`modalApplyOneTB_spec`, `TBDriver.lean`). Mirrors
+`instDecidableTValid`/`instDecidableBValid` line-for-line. -/
+instance instDecidableTBValid (φ0 : Proposition Atom) : Decidable (tbValid φ0) :=
+  match h : modalTableauTB φ0 with
+  | .closed => .isTrue ((tbValid_decides φ0).mp h)
+  | .openBranch _ _ => .isFalse (modalTableauTB_complete φ0 h)
+
 /-! ## S5 Modal Truth Lemma
 
 `extractModelS5`'s relation is the *equivalence closure* `Relation.EqvGen acc.hasEdge`

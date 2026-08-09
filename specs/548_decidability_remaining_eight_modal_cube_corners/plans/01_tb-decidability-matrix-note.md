@@ -682,29 +682,29 @@ in this plan's "Structural findings" was wrong and that must be recorded, not ab
 
 ---
 
-### Phase 10: TB Completeness, `tbValid_decides`, and `instDecidableTBValid` [NOT STARTED]
+### Phase 10: TB Completeness, `tbValid_decides`, and `instDecidableTBValid` [COMPLETED]
 
 **Goal**: Close the corner — completeness, the decides equivalence, and the `Decidable` instance
 that takes the matrix to 8/15.
 
 **Tasks**:
-- [ ] Append a `/-! ## `tbValid` Completeness -/` section to
+- [x] Append a `/-! ## `tbValid` Completeness -/` section to
       `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`, proving
       `modalTableauTB_complete`, mirroring `modalTableauB_complete` (`:1712-1760`). Supply
       `accSourcesKnown` via `modalExpandBranchesGen_openBranch_accSourcesKnown` instantiated at
       `modalApplyOneTB_spec.freshLocal` (the same call shape used at `:1738`), and discharge the
       frame condition on the open-branch countermodel with
       `⟨extractModelTB_refl b a, extractModelTB_symm b a⟩`
-- [ ] Append a `/-! ## `tbValid` Decidability -/` section proving
+- [x] Append a `/-! ## `tbValid` Decidability -/` section proving
       `theorem tbValid_decides (φ₀ : Proposition Atom) : modalTableauTB φ₀ = .closed ↔ tbValid φ₀`,
       mirroring `bValid_decides` (`:1921`)
-- [ ] Land `instance instDecidableTBValid (φ₀ : Proposition Atom) : Decidable (tbValid φ₀)`,
+- [x] Land `instance instDecidableTBValid (φ₀ : Proposition Atom) : Decidable (tbValid φ₀)`,
       mirroring `instDecidableBValid` (`:1933`). No `Fintype Atom` assumption — the tableau
       computation is the decision procedure
-- [ ] Write the instance docstring naming which driver it uses (`modalTableauTB`) and stating that
+- [x] Write the instance docstring naming which driver it uses (`modalTableauTB`) and stating that
       TB is a Tier A corner discharging the full `RuleApplicationSpec`, following the pattern of
       `instDecidableS4Valid`'s docstring (`:8278-8280`)
-- [ ] Confirm the seven pre-existing `Decidable` instances and their sound/complete/decides
+- [x] Confirm the seven pre-existing `Decidable` instances and their sound/complete/decides
       triples are untouched
 
 **Timing**: 1.5 hours

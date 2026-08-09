@@ -3,11 +3,11 @@
   "started_at": "2026-08-08T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase 10",
-    "details": "Phase 9 (TB soundness: hAgreeTB, modalApplyOneTB_boxPos_soundIn, modalApplyOneTB_diaNeg_soundIn, modalTableauTB_sound) complete. Full Cslib build green, zero live sorry, standard axiom triple confirmed. Starting Phase 10 (TB completeness, tbValid_decides, instDecidableTBValid).",
-    "phases_completed": 9,
+    "stage": "phase 11",
+    "details": "Phase 10 (TB completeness, tbValid_decides, instDecidableTBValid, CslibTests smoke checks) complete. Full Cslib build green, zero live sorry, standard axiom triple confirmed. All 10/11 phases done. Starting Phase 11 (final verification gate and matrix-note reconciliation).",
+    "phases_completed": 10,
     "phases_total": 11,
-    "last_completed_phase": "Phase 9: TB Soundness"
+    "last_completed_phase": "Phase 10: TB Completeness, tbValid_decides, and instDecidableTBValid"
   },
   "metadata": {
     "session_id": "sess_1786228817_675b2c",

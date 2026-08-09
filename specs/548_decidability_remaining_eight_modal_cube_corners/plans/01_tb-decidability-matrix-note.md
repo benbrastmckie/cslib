@@ -390,12 +390,12 @@ hypothesis, not a target.
 lemmas for the two TB-relevant signed-formula shapes, and register it in the barrel.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Modal/Tableau/TBDriver.lean` with a module docstring stating what TB
+- [x] Create `Cslib/Logics/Modal/Tableau/TBDriver.lean` with a module docstring stating what TB
       is, which two arm families it merges, and that it discharges the full `RuleApplicationSpec`
       — mirroring `BDriver.lean`'s header (`:15-70`)
-- [ ] Define `modalStepBranchTB`, `modalExpandBranchesTB`, and `modalTableauTB` by instantiating
+- [x] Define `modalStepBranchTB`, `modalExpandBranchesTB`, and `modalTableauTB` by instantiating
       the generic driver at `modalApplyOneTB`, mirroring `BDriver.lean:76,85,94`
-- [ ] Add the `/-! ## Shape Lemmas for the Two TB-Relevant Signed-Formula Shapes -/` section,
+- [x] Add the `/-! ## Shape Lemmas for the Two TB-Relevant Signed-Formula Shapes -/` section,
       mirroring `BDriver.lean:97-200` and `TDriver.lean:87-247`. These characterise the merged
       output list at the box-positive and diamond-negative shapes and are the substrate every
       spec field below consumes
@@ -411,10 +411,10 @@ lemmas for the two TB-relevant signed-formula shapes, and register it in the bar
       predecessor-membership helpers B needed to re-derive its own fields from K primitives are
       not needed a second time by TB. This maximises reuse from `modalApplyOneB_spec`, consistent
       with Phase 3's stated layering rationale.)*
-- [ ] Register `public import Cslib.Logics.Modal.Tableau.TBDriver` in `Cslib.lean`, inserted in
+- [x] Register `public import Cslib.Logics.Modal.Tableau.TBDriver` in `Cslib.lean`, inserted in
       alphabetical position among the existing `Cslib.Logics.Modal.Tableau.*` entries
       (currently `:492-523`; TBDriver sorts after `Support.KnownWorlds` and before `TDriver`)
-- [ ] Leave the `RuleApplicationSpec` discharge as a named `/-! ## Discharging
+- [x] Leave the `RuleApplicationSpec` discharge as a named `/-! ## Discharging
       `RuleApplicationSpec` for `modalApplyOneTB` -/` section header with no declarations yet —
       Phases 5 and 6 fill it. Do **not** stub it with a `sorry`
 
@@ -444,25 +444,25 @@ line figure is an estimate from the B analogue, not a target — record the actu
 
 ---
 
-### Phase 5: Discharge `RuleApplicationSpecCore` Fields F1-F7 for `modalApplyOneTB` [NOT STARTED]
+### Phase 5: Discharge `RuleApplicationSpecCore` Fields F1-F7 for `modalApplyOneTB` [COMPLETED]
 
 **Goal**: Prove the first seven `RuleApplicationSpecCore` fields for `modalApplyOneTB`:
 `freshLocal`, `outputsSubsetUniverse`, `persistentFresh`, `branchingLength`, and the three
 termination fields `rankStep`, `outDegStep`, `knownWorldsStep`.
 
 **Tasks**:
-- [ ] Discharge the three **termination** fields first — `rankStep`, `outDegStep`,
+- [x] Discharge the three **termination** fields first — `rankStep`, `outDegStep`,
       `knownWorldsStep` — because they carry the plan's highest-impact risk. Both TB arm families
       are pure-`persistent` at existing worlds and never mint, so the merged rule agrees with
       `modalApplyOne` on every mint-shaped input via `modalApplyOneTB_eq_of_not_boxPos_diaNeg`,
       and the exact-decrement edge invariant is never entered by a TB-specific arm. Mirror
       `BDriver.lean:235-665` and the T analogue in `TDriver.lean:248-620`
-- [ ] Discharge `freshLocal` by agreement with `modalApplyOne` on mint-shaped inputs
-- [ ] Discharge `outputsSubsetUniverse` — the merged output list is the union of T's self-conjunct
+- [x] Discharge `freshLocal` by agreement with `modalApplyOne` on mint-shaped inputs
+- [x] Discharge `outputsSubsetUniverse` — the merged output list is the union of T's self-conjunct
       output and B's backward-conjunct output, each already known to lie in the universe at its
       own corner
-- [ ] Discharge `persistentFresh` and `branchingLength`
-- [ ] If any termination field genuinely fails, **stop**: mark the phase `[BLOCKED]`, record the
+- [x] Discharge `persistentFresh` and `branchingLength`
+- [x] If any termination field genuinely fails, **stop**: mark the phase `[BLOCKED]`, record the
       exact goal state and which field, and do not weaken `RuleApplicationSpec`, do not add a
       `sorry`, do not fall back to a `Core`-only discharge without escalating. TB's whole value is
       that it needs no bespoke termination argument

@@ -1,0 +1,28 @@
+{
+  "phase": 4,
+  "phase_name": "Rewrite Section B and track the BXCanonical decision",
+  "started_at": "2026-08-09T00:00:00Z",
+  "last_updated": "2026-08-09T00:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Section B rows checked, 4/5 terminal moved to Completed", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 2, "description": "LoopChecking.lean figure corrected with as-of date", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 3, "description": "Blocking.lean '(new)' tag dropped, size stated", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 4, "description": "Task 375 kept as sole outstanding Section B row", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 5, "description": "BXCanonical sorry count corrected (13)", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 6, "description": "Task 607 (BXCanonical decision) and 608 (census script bug) created", "status": "done", "files_touched": ["specs/state.json", "specs/TODO.md"]},
+    {"id": 7, "description": "Open decision paragraph repointed to task 607", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 8, "description": "Section B re-titled", "status": "done", "files_touched": ["specs/ROADMAP.md"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "4.6",
+      "description": "Create a task for the BXCanonical decision",
+      "type": "altered",
+      "reason": "Created a second task (608) beyond the plan's single task, to track the newly-discovered census-script bug. Reasonable extension of the same 'create a task' instruction, not deliverable scope creep.",
+      "annotation": "*(deviation: altered — see Phase 4 task 6 completion note)*"
+    }
+  ]
+}

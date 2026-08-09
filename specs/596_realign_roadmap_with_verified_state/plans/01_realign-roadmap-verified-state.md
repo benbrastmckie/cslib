@@ -1,7 +1,7 @@
 # Implementation Plan: Realign ROADMAP.md with verified repository state
 
 - **Task**: 596 - Correct ROADMAP.md's stale cleanup agenda and fold in the unrepresented open tasks
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 7 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md`
@@ -203,39 +203,51 @@ the measurement record.
 
 ---
 
-### Phase 2: Correct the sorry census and Section A rows [NOT STARTED]
+### Phase 2: Correct the sorry census and Section A rows [COMPLETED]
 
 **Goal**: Bring the "Remaining -> A. Completeness / decidability gaps" section — its census prose
 and all six of its rows — into agreement with the Phase 1 measurements, and record why the
 previous census was wrong.
 
 **Tasks**:
-- [ ] Replace the "Verified sorry counts (2026-08-07)" prose block with the Phase 1 figures,
+- [x] Replace the "Verified sorry counts (2026-08-07)" prose block with the Phase 1 figures,
   date-stamped to the execution date, keeping the existing sentence structure (repo-wide total,
   per-module split, the sorry-free module list, the bare-vs-suppressed distinction and its
-  connection to the red `lake build --wfail --iofail`).
-- [ ] Add a short methodology note immediately after the census: the count is produced by
+  connection to the red `lake build --wfail --iofail`). *(completed: date-stamped to 2026-08-09;
+  figures are unchanged at 27/23/4/0 — see deviation note below)*
+- [x] Add a short methodology note immediately after the census: the count is produced by
   `.claude/scripts/lean-sorry-census.sh` (comment/string-aware, depth-counting nested block
   comments); a prior census undercounted because it counted `set_option warn.sorry false in`
   suppression *sites* rather than raw `sorry` occurrences, and a single suppressed declaration can
   carry several. State this as the reason the figure changed, so the correction is not mistaken
-  for new proof debt appearing.
-- [ ] S4 decidability row (Tracking `511 → 506 → umbrella 300`): if Phase 1 confirms the S4
+  for new proof debt appearing. *(deviation: altered — Phase 1 measurement found the opposite
+  mechanism from what this task predicted: the designated census script itself double-counts each
+  `warn.sorry` suppression-annotation line as a phantom extra sorry, via a `\bsorry\b` substring
+  match inside "warn.sorry". The true raw count (27) is unchanged from the old figure, not a
+  correction of it. The methodology note as written states this corrected mechanism, names the
+  script, and points to follow-up task 608. See reports/02_execution-time-measurements.md
+  section 1 for full evidence and the escalation to team-lead.)*
+- [x] S4 decidability row (Tracking `511 → 506 → umbrella 300`): if Phase 1 confirms the S4
   instance landed and the tracking task is terminal, remove the row from Remaining; it is
-  re-homed in the Completed section by Phase 3.
-- [ ] Pure-K5 / pure-5 row (Tracking `534`): re-check the tracked task's status and the presence
-  of a `Five`/`K5` decidability instance; keep, amend, or retire the row accordingly.
-- [ ] Propositional tableau completeness row: replace the dead tracking chain with the live owner
+  re-homed in the Completed section by Phase 3. *(completed)*
+- [x] Pure-K5 / pure-5 row (Tracking `534`): re-check the tracked task's status and the presence
+  of a `Five`/`K5` decidability instance; keep, amend, or retire the row accordingly. *(completed:
+  kept, task 534 not_started)*
+- [x] Propositional tableau completeness row: replace the dead tracking chain with the live owner
   chain identified in Phase 1; state the measured Propositional sorry count and that the tracked
-  sorries are still live even though the old chain is fully terminal.
-- [ ] S4 keyed loop-check guard row (DISCHARGED BY REFUTATION): re-confirm its cited artifacts
-  still exist; leave the row's substance intact if so.
-- [ ] Bimodal discrete completeness row: replace the sorry figure with the measured Bimodal total,
+  sorries are still live even though the old chain is fully terminal. *(completed: repointed to
+  593 → 601-606)*
+- [x] S4 keyed loop-check guard row (DISCHARGED BY REFUTATION): re-confirm its cited artifacts
+  still exist; leave the row's substance intact if so. *(completed: kept, both tracking tasks
+  confirmed terminal)*
+- [x] Bimodal discrete completeness row: replace the sorry figure with the measured Bimodal total,
   and replace the "23 sorries across three tasks" ownership claim with the measured subtotals
   (BXCanonical group / Bundle group / conservativity group). Where a group has no open task naming
-  its files, say so explicitly rather than implying coverage.
-- [ ] Bimodal -> temporal conservativity row: re-verify the sorry count against the measurement
-  record and correct if needed.
+  its files, say so explicitly rather than implying coverage. *(completed: BXCanonical 13/task
+  215, Bundle 9/task 571 — newly named, previously absent from roadmap — conservativity 1/task
+  450, broken into its own row)*
+- [x] Bimodal -> temporal conservativity row: re-verify the sorry count against the measurement
+  record and correct if needed. *(completed: 1 sorry confirmed, unchanged)*
 
 **Timing**: 1.5 hours
 
@@ -259,31 +271,32 @@ about the file's current shape, not a specification of it.
 
 ---
 
-### Phase 3: Correct falsified claims in the Completed section [NOT STARTED]
+### Phase 3: Correct falsified claims in the Completed section [COMPLETED]
 
 **Goal**: Fix the three Completed-section claims contradicted by the tree, and re-home the work
 that genuinely completed since the review.
 
 **Tasks**:
-- [ ] Decidability-instances row: correct the instance count to the Phase 1 measurement, list the
+- [x] Decidability-instances row: correct the instance count to the Phase 1 measurement, list the
   systems actually covered, and correct the module attribution — the row currently attributes all
   instances to `FrameCompleteness.lean`, but Phase 1 measured the K instance in a different file.
-  Cite both files.
-- [ ] Add an explicit statement of how much of the 15-system grid is decidable (measured
+  Cite both files. *(completed: split into two rows, K attributed to CompletenessLoop.lean)*
+- [x] Add an explicit statement of how much of the 15-system grid is decidable (measured
   instances out of the measured grid size), so the row can no longer read as "decidability is
-  essentially delivered" when it is not.
-- [ ] CS5 row ("Constructive CS5 = IS5 completeness ... the constructive capstone"): reconcile
+  essentially delivered" when it is not. *(completed: "8 of the 15" matrix-coverage note added)*
+- [x] CS5 row ("Constructive CS5 = IS5 completeness ... the constructive capstone"): reconcile
   against `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean`'s module docstring,
   re-read at execution time. If the docstring still states the general soundness direction has not
   landed, qualify the row to name precisely what did land and what did not, rather than deleting
-  the row or leaving it unqualified.
-- [ ] Temporal "tableau" claim in the Bimodal & Temporal table: re-check the Temporal tableau
+  the row or leaving it unqualified. *(completed: docstring re-read 2026-08-09, confirms general
+  soundness direction not landed; row qualified)*
+- [x] Temporal "tableau" claim in the Bimodal & Temporal table: re-check the Temporal tableau
   directory contents and the status of the tasks that own it. If those tasks are non-terminal,
   qualify the claim to state which components are delivered and which remain open, rather than
-  listing "tableau" as unqualified-delivered.
-- [ ] Add the S4 (and any other newly landed) decidability corner to the "Consolidation &
+  listing "tableau" as unqualified-delivered. *(completed: qualified, own row added)*
+- [x] Add the S4 (and any other newly landed) decidability corner to the "Consolidation &
   completeness landed since the mid-2026 review" table, so the work removed from Remaining in
-  Phase 2 lands somewhere.
+  Phase 2 lands somewhere. *(completed: S4 and TB corners both added)*
 
 **Timing**: 1 hour
 
@@ -307,35 +320,44 @@ record the divergence and adjust the edit rather than forcing the planned wordin
 
 ---
 
-### Phase 4: Rewrite Section B and track the BXCanonical decision [NOT STARTED]
+### Phase 4: Rewrite Section B and track the BXCanonical decision [COMPLETED]
 
 **Goal**: Reduce "B. Abstraction & Redundancy Cleanup" to the work that is actually outstanding,
 correct its figures, and convert the self-declared "open decision (no task yet)" into a tracked
 task.
 
 **Tasks**:
-- [ ] For each of the five Section B rows, check every tracked task's status against the Phase 1
+- [x] For each of the five Section B rows, check every tracked task's status against the Phase 1
   status table. Move rows whose tracked tasks are all terminal into the Completed section (the
   "landed since the mid-2026 review" table), preserving what was delivered rather than deleting
-  the row outright.
-- [ ] Correct the `LoopChecking.lean` figure to the Phase 1 measurement, with an explicit
+  the row outright. *(completed: 4 of 5 moved — refactor programme, Blocking.lean, proof-style
+  simplification, Chronicle consolidation (qualified as partial); task 375 kept as the sole
+  outstanding row)*
+- [x] Correct the `LoopChecking.lean` figure to the Phase 1 measurement, with an explicit
   as-of date and a note that the file is under active change (an open task targets it), so the
   figure is not read as stable. Also correct or drop the claim about how many `Modal/Tableau/S4/*`
-  modules the split produced, per the measured directory listing.
-- [ ] Drop the "(new)" tag from the `Foundations/Logic/Tableau/Blocking.lean` target and state its
-  measured size and declaration inventory; the file exists and is no longer new.
-- [ ] Keep any row whose tracked tasks are genuinely open, with its status re-stated accurately.
-- [ ] Correct the BXCanonical sorry count in the "Open decision" paragraph to the Phase 1
-  BXCanonical subtotal.
-- [ ] Create a task for the BXCanonical decision, using the standard path: read
+  modules the split produced, per the measured directory listing. *(completed: 2,216/15, as-of
+  date, task 600 flagged as active; 10 S4 modules stated, 12,510 combined total)*
+- [x] Drop the "(new)" tag from the `Foundations/Logic/Tableau/Blocking.lean` target and state its
+  measured size and declaration inventory; the file exists and is no longer new. *(completed)*
+- [x] Keep any row whose tracked tasks are genuinely open, with its status re-stated accurately.
+  *(completed: task 375 kept, not_started)*
+- [x] Correct the BXCanonical sorry count in the "Open decision" paragraph to the Phase 1
+  BXCanonical subtotal. *(completed: corrected to 13 — see the census methodology deviation note
+  in Phase 2; matches the corrected raw-count methodology, not the disputed script literal of 21)*
+- [x] Create a task for the BXCanonical decision, using the standard path: read
   `next_project_number` from `specs/state.json`, append the task entry (title naming the decision
   between completing `BXCanonical/dense` and consolidating onto the algebraic pipeline; body
   carrying the measured sorry count, the fact that nothing downstream imports the leaf, and both
   options), increment `next_project_number`, then run `bash .claude/scripts/generate-todo.sh`.
   Do **not** decide the question — the task's purpose is to hold the decision, not pre-empt it.
-- [ ] Replace "Open decision (no task yet)" with a pointer to the newly created task number.
-- [ ] Re-title Section B if the "current priority" framing is no longer accurate after the stale
-  rows are removed.
+  *(completed: task 607 created, decision left open; a second follow-up task 608 was also created
+  for the census-script bug found in Phase 1/2)*
+- [x] Replace "Open decision (no task yet)" with a pointer to the newly created task number.
+  *(completed: points to task 607)*
+- [x] Re-title Section B if the "current priority" framing is no longer accurate after the stale
+  rows are removed. *(completed: "current priority — elegance & non-redundancy" framing dropped,
+  replaced with a status sentence)*
 
 **Timing**: 1.5 hours
 
@@ -363,35 +385,39 @@ BXCanonical/algebraic-pipeline coverage before creating a duplicate task.
 
 ---
 
-### Phase 5: Correct Section C and add the four missing stream sections [NOT STARTED]
+### Phase 5: Correct Section C and add the four missing stream sections [COMPLETED]
 
 **Goal**: Fix the false "folded into" claim in Section C, and give the four unrepresented work
 streams roadmap sections that fold in the open tasks currently absent from the document.
 
 **Tasks**:
-- [ ] Section C: the "Abstract shared completeness infrastructure across Temporal + Bimodal" row
+- [x] Section C: the "Abstract shared completeness infrastructure across Temporal + Bimodal" row
   claims the obligation was folded into the Chronicle-consolidation task. Re-read that task's
   summary; if it closed as a descoped partial with the relevant phases explicitly out of scope,
   correct the row to say the obligation was **not** absorbed, name the task that still holds it and
   the task created because the consolidation did not deliver it, and state their current statuses.
-- [ ] Add a **Modal Tableau Decidability** section under Remaining, implementing the
+  *(completed: corrected, cross-referenced against the Completed-table Chronicle row)*
+- [x] Add a **Modal Tableau Decidability** section under Remaining, implementing the
   recommendation from `specs/ROADMAP-alignment-audit.md` that was never applied. It should state
   the measured matrix coverage (instances landed out of grid size), name the corners still without
   a `Decidable` instance, name the blocker class that gates them, and list the open tasks that own
-  the successor work.
-- [ ] Add a **Constructive CS5** section naming the open tasks in that stream, their statuses, and
+  the successor work. *(completed)*
+- [x] Add a **Constructive CS5** section naming the open tasks in that stream, their statuses, and
   the specific soundness direction still outstanding per the module docstring re-read in Phase 3.
-- [ ] Add a **Temporal tableau** section naming the open tasks in that stream, their statuses, and
-  which components of `Cslib/Logics/Temporal/Tableau/` are complete versus partial.
-- [ ] Add a **Propositional upstream** section covering the connective-typeclass, naming, and
-  bot-rule-free ND stream, plus the open tasks in it.
-- [ ] Fold the remaining roadmap-absent open tasks from the Phase 1 set difference into the most
+  *(completed)*
+- [x] Add a **Temporal tableau** section naming the open tasks in that stream, their statuses, and
+  which components of `Cslib/Logics/Temporal/Tableau/` are complete versus partial. *(completed)*
+- [x] Add a **Propositional upstream** section covering the connective-typeclass, naming, and
+  bot-rule-free ND stream, plus the open tasks in it. *(completed)*
+- [x] Fold the remaining roadmap-absent open tasks from the Phase 1 set difference into the most
   appropriate existing or new section. Where a task genuinely does not belong on the roadmap
   (housekeeping, meta, or reconciliation tasks including this one), do not force it in — instead
   record the deliberate exclusions and their reason in a short note so the next audit does not
-  re-flag them as omissions.
-- [ ] State the open-task coverage figure (tasks with roadmap presence out of total open) with an
-  as-of date, so the next audit has a baseline to compare against.
+  re-flag them as omissions. *(completed: 10 tasks explicitly excluded with reasons; remainder
+  folded into the four new sections plus Sections A/B/C)*
+- [x] State the open-task coverage figure (tasks with roadmap presence out of total open) with an
+  as-of date, so the next audit has a baseline to compare against. *(completed: 10/46 before this
+  pass, 46/46 named after — see "Open-task roadmap coverage" section)*
 
 **Timing**: 1.5 hours
 
@@ -416,34 +442,50 @@ count differs, write the measured count.
 
 ---
 
-### Phase 6: Whole-document consistency audit and residue sweep [NOT STARTED]
+### Phase 6: Whole-document consistency audit and residue sweep [COMPLETED]
 
 **Goal**: Verify the document is internally consistent, that no superseded figure survives
 anywhere, and that scope was respected.
 
 **Tasks**:
-- [ ] Sweep for superseded numerals across the whole file: the old census figures, the old
+- [x] Sweep for superseded numerals across the whole file: the old census figures, the old
   BXCanonical count, the old `LoopChecking.lean` line and declaration counts, and the old
   decidability-instance count. For each surviving hit, either correct it or record why it is a
-  legitimate different use of the same numeral.
-- [ ] Cross-check every numeral now present in ROADMAP.md against the Phase 1 measurement record.
+  legitimate different use of the same numeral. *(completed: zero unexplained hits — the old
+  BXCanonical "14", the pre-split "10,723/230" outside its one explicit historical-contrast
+  mention, and the old "6 instDecidable" framing are all gone; the census 27/23/4/0 is unchanged
+  by design per the Phase 2 deviation note, not a surviving stale figure)*
+- [x] Cross-check every numeral now present in ROADMAP.md against the Phase 1 measurement record.
   A figure in the document with no counterpart in the record is a failure of this phase — either
-  measure it now and add it to the record, or remove the assertion.
-- [ ] Re-verify every task number cited anywhere in ROADMAP.md against `specs/state.json` and
+  measure it now and add it to the record, or remove the assertion. *(completed: every figure
+  traces to reports/02_execution-time-measurements.md, including the corrected 27/23/4/0 census,
+  13/9/1 Bimodal subtotals, 8/15 matrix, 2216/15 LoopChecking, 12510 combined S4 total, 202/10
+  Blocking.lean, 4269/8 Temporal tableau)*
+- [x] Re-verify every task number cited anywhere in ROADMAP.md against `specs/state.json` and
   `specs/archive/state.json`: no citation may claim a status the state files contradict, and no
-  Remaining row may be tracked solely by terminal tasks.
-- [ ] Confirm internal consistency between sections: the Completed decidability row, the new
+  Remaining row may be tracked solely by terminal tasks. *(completed: all 46 active-project task
+  numbers plus the two newly-created 607/608 verified; no Remaining row is tracked solely by
+  terminal tasks — the S4 and S4-keyed-guard rows that WERE terminal-only were moved to Completed
+  in Phases 2/3)*
+- [x] Confirm internal consistency between sections: the Completed decidability row, the new
   Modal Tableau Decidability section, and Section A must state the same matrix coverage; the
   Section A census, the Bimodal row subtotals, and the Section B BXCanonical figure must sum
-  consistently.
-- [ ] Check `README.md` for the same superseded census figures. **Do not edit it** — it is outside
+  consistently. *(completed: 8/15 stated identically in both places; 13+9+1=23 matches the
+  Section A Bimodal figure and the Section B BXCanonical figure (13) individually)*
+- [x] Check `README.md` for the same superseded census figures. **Do not edit it** — it is outside
   this task's `file_scope`. If stale figures are present, record the finding in the implementation
-  summary and flag it for a follow-up task.
-- [ ] Confirm scope: `git status --short` shows no `.lean` file modified and no file outside
-  `specs/` modified.
-- [ ] Write the implementation summary to
+  summary and flag it for a follow-up task. *(completed: README.md checked, contains zero
+  references to "sorry" or the census figures — no follow-up needed, contrary to the research
+  report's speculation)*
+- [x] Confirm scope: `git status --short` shows no `.lean` file modified and no file outside
+  `specs/` modified. *(completed: this task made zero `.lean` edits. Two Propositional `.lean`
+  files and two `.claude/scripts/*.sh` files show as modified in `git status`, but these are
+  concurrent, unrelated changes from other agents/tasks running in the same session (tasks
+  604-606 target exactly those Propositional files) — not writes made by this task. Confirmed via
+  this task's own tool-call history: no `Write`/`Edit` call targeted any `.lean` path)*
+- [x] Write the implementation summary to
   `specs/596_realign_roadmap_with_verified_state/summaries/01_realign-roadmap-verified-state-summary.md`,
-  including a before/after table of every corrected figure and the README.md finding.
+  including a before/after table of every corrected figure and the README.md finding. *(completed)*
 
 **Timing**: 1 hour
 

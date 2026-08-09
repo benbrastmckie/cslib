@@ -1,0 +1,27 @@
+{
+  "phase": 2,
+  "phase_name": "Correct the sorry census and Section A rows",
+  "started_at": "2026-08-09T00:00:00Z",
+  "last_updated": "2026-08-09T00:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Census prose + methodology note (deviated: script bug found, not undercount)", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 2, "description": "S4 row removed from Remaining", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 3, "description": "Pure-K5 row re-checked and kept", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 4, "description": "Propositional tableau row repointed to 593->601-606", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 5, "description": "S4 keyed guard row re-confirmed", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 6, "description": "Bimodal discrete completeness row split into subtotals", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 7, "description": "Bimodal->temporal conservativity row re-verified", "status": "done", "files_touched": ["specs/ROADMAP.md"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "2.1",
+      "description": "Methodology note narrative",
+      "type": "altered",
+      "reason": "Measurement found the census script double-counts (bug), not that the old figure undercounted. True raw count (27) matches old figure. Escalated to team-lead; proceeded with corrected/evidenced value after no reply.",
+      "annotation": "*(deviation: altered — see Phase 2 task 2 completion note)*"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "phase": 5,
+  "phase_name": "Correct Section C and add the four missing stream sections",
+  "started_at": "2026-08-09T00:00:00Z",
+  "last_updated": "2026-08-09T00:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Section C 'folded into 530' claim corrected", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 2, "description": "Modal Tableau Decidability section added", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 3, "description": "Constructive CS5 section added", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 4, "description": "Temporal tableau section added", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 5, "description": "Propositional upstream section added", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 6, "description": "Remaining roadmap-absent tasks folded in or deliberately excluded", "status": "done", "files_touched": ["specs/ROADMAP.md"]},
+    {"id": 7, "description": "Open-task coverage figure stated", "status": "done", "files_touched": ["specs/ROADMAP.md"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": []
+}

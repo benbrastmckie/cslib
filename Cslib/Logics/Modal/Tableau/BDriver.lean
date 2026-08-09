@@ -823,7 +823,7 @@ theorem modalExpandBranchesB_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
       ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
         modalExpandBranchesB branches expandedSets accs fuel = .openBranch bR aR →
         modalHintikkaSetGen modalApplyOneB bR aR :=
-  modalExpandBranchesGen_hintikka modalApplyOneB modalApplyOneB_spec φ0 fuel
+  modalExpandBranchesGen_hintikka modalApplyOneB φ0 (modalApplyOneB_spec.toAt φ0) fuel
 
 /-! ## `accSourcesKnown`: The Source-Side Twin of `accTargetsKnown`
 

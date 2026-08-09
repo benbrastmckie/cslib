@@ -3171,7 +3171,7 @@ theorem modalTableauS5_complete (φ₀ : Proposition Atom) (h : s5Valid φ₀) :
         [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
         [Accessibility.empty] (modalFuel φ₀) = .openBranch b a := htab
     have hH5w : modalHintikkaSetGen modalApplyOneS5w b a :=
-      modalExpandBranchesHintikka modalApplyOneS5w modalApplyOneS5w_specCore φ₀
+      modalExpandBranchesHintikka modalApplyOneS5w φ₀ (modalApplyOneS5w_specCore.toAt φ₀)
         (ModalLoopAuxS5w φ₀) (ModalLoopAuxS5w_stepPreserved φ₀) (ModalLoopAuxS5w_bounds φ₀)
         (modalFuel φ₀)
         [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
@@ -3949,7 +3949,7 @@ theorem modalTableauFive_complete (φ₀ : Proposition Atom) (h : fiveValid φ�
         [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
         [Accessibility.empty] (modalFuel φ₀) = .openBranch b a := htab
     have hH : modalHintikkaSetGen modalApplyOneFive b a :=
-      modalExpandBranchesHintikka modalApplyOneFive modalApplyOneFive_specCore φ₀
+      modalExpandBranchesHintikka modalApplyOneFive φ₀ (modalApplyOneFive_specCore.toAt φ₀)
         (ModalLoopAuxFive φ₀) (ModalLoopAuxFive_stepPreserved φ₀) (ModalLoopAuxFive_bounds φ₀)
         (modalFuel φ₀)
         [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
@@ -4822,7 +4822,7 @@ theorem modalTableauKb5''_complete (φ₀ : Proposition Atom) (h : kb5Valid φ�
         [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
         [Accessibility.empty] (modalFuel φ₀) = .openBranch b a := htab
     have hH : modalHintikkaSetGen modalApplyOneKb5'' b a :=
-      modalExpandBranchesHintikka modalApplyOneKb5'' modalApplyOneKb5''_specCore φ₀
+      modalExpandBranchesHintikka modalApplyOneKb5'' φ₀ (modalApplyOneKb5''_specCore.toAt φ₀)
         (ModalLoopAuxKb5'' φ₀) (ModalLoopAuxKb5''_stepPreserved φ₀) (ModalLoopAuxKb5''_bounds φ₀)
         (modalFuel φ₀)
         [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]

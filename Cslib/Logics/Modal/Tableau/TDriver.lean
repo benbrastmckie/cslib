@@ -802,7 +802,7 @@ theorem modalExpandBranchesT_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
       ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
         modalExpandBranchesT branches expandedSets accs fuel = .openBranch bR aR →
         modalHintikkaSetGen modalApplyOneT bR aR :=
-  modalExpandBranchesGen_hintikka modalApplyOneT modalApplyOneT_spec φ0 fuel
+  modalExpandBranchesGen_hintikka modalApplyOneT φ0 (modalApplyOneT_spec.toAt φ0) fuel
 
 end Cslib.Logic.Modal.Tableau
 

@@ -968,8 +968,8 @@ purely-additive `_core`-suffixed twins -- identical proof bodies, parametrized o
 `RuleApplicationSpecCore` directly -- leaving every existing declaration above untouched. -/
 
 private lemma modalLoopGen_bClosure_core
-    (apply : RuleApply Atom) (hcore : RuleApplicationSpecCore apply)
-    (φ0 : Proposition Atom)
+    (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (hcore : RuleApplicationSpecCoreAt φ0 apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
@@ -981,7 +981,7 @@ private lemma modalLoopGen_bClosure_core
   simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hclosure := hcore.outputsSubsetUniverse φ0 sf b acc hb hsfmem hAccInv hW
+  have hclosure := hcore.outputsSubsetUniverse sf b acc hb hsfmem hAccInv hW
   rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf hclosure
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
@@ -1018,7 +1018,8 @@ private lemma modalLoopGen_bClosure_core
   · rw [hfstc] at hsf; simp at hsf
 
 private lemma modalLoopGen_eBoxOnlyNeg_core
-    (apply : RuleApply Atom) (hcore : RuleApplicationSpecCore apply)
+    (apply : RuleApply Atom) {φ0 : Proposition Atom}
+    (hcore : RuleApplicationSpecCoreAt φ0 apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
@@ -1077,7 +1078,8 @@ private lemma modalLoopGen_eBoxOnlyNeg_core
   · rw [hfstc] at hsf; simp at hsf
 
 private lemma modalLoopGen_eDiamondOnlyPos_core
-    (apply : RuleApply Atom) (hcore : RuleApplicationSpecCore apply)
+    (apply : RuleApply Atom) {φ0 : Proposition Atom}
+    (hcore : RuleApplicationSpecCoreAt φ0 apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
@@ -1136,7 +1138,8 @@ private lemma modalLoopGen_eDiamondOnlyPos_core
   · rw [hfstc] at hsf; simp at hsf
 
 private lemma modalLoopGen_eBoxNegWitness_core
-    (apply : RuleApply Atom) (hcore : RuleApplicationSpecCore apply)
+    (apply : RuleApply Atom) {φ0 : Proposition Atom}
+    (hcore : RuleApplicationSpecCoreAt φ0 apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
@@ -1210,7 +1213,8 @@ private lemma modalLoopGen_eBoxNegWitness_core
   · rw [hfstc] at hsf; simp at hsf
 
 private lemma modalLoopGen_eDiamondPosWitness_core
-    (apply : RuleApply Atom) (hcore : RuleApplicationSpecCore apply)
+    (apply : RuleApply Atom) {φ0 : Proposition Atom}
+    (hcore : RuleApplicationSpecCoreAt φ0 apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
@@ -1291,8 +1295,8 @@ removed and replaced by the caller-supplied `AuxStepPreserved`/`AuxBounds` facts
 consumes `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean`) directly against `hs`'s three raw Core
 fields, bypassing the full-spec-typed `modalStepBranchGen_expMeasure_step_lt` wrapper. -/
 lemma modalStepHintikka_preserves_inv
-    (apply : RuleApply Atom) (hs : RuleApplicationSpecCore apply)
-    (φ0 : Proposition Atom)
+    (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (hs : RuleApplicationSpecCoreAt φ0 apply)
     (Aux : List (SignedFormula (Proposition Atom) WorldIndex) →
            List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop)
     (hAuxStep : AuxStepPreserved apply Aux) (hAuxBounds : AuxBounds φ0 Aux)
@@ -1317,7 +1321,7 @@ lemma modalStepHintikka_preserves_inv
   have hNodupAll : ∀ e' ∈ newExps, e'.Nodup :=
     modalStepBranch_preserves_expandedNodup_gen apply b e acc newBs newExps newAcc hstep heN
   have hBClosureAll : ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverse φ0 :=
-    modalLoopGen_bClosure_core apply hs φ0 b e acc newBs newExps newAcc hstep hbC hFresh hWb
+    modalLoopGen_bClosure_core apply φ0 hs b e acc newBs newExps newAcc hstep hbC hFresh hWb
   have hEClosureAll : ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
     modalStepBranch_eClosure_gen apply φ0 b e acc newBs newExps newAcc hstep hbC heC
   have hHintikkaAll :=
@@ -1344,7 +1348,7 @@ lemma modalStepHintikka_preserves_inv
         some (newBs, newBs.map (fun _ => newExp), newAcc) := by
       rw [hNewExpEq] at hstep; exact hstep
     have hdrop := modalExpMeasure_step_lt_gen apply hs.branchingLength hs.persistentFresh φ0
-      (hs.outputsSubsetUniverse φ0) [] [] newBs [] [] newExp b e acc newAcc rfl hbC hFresh hWb
+      hs.outputsSubsetUniverse [] [] newBs [] [] newExp b e acc newAcc rfl hbC hFresh hWb
       hstep'
     simp only [List.nil_append, List.append_nil] at hdrop
     rw [hNewExpEq]
@@ -1366,7 +1370,7 @@ theorem modalStepHintikka_preserves_inv_S5w
       ModalLoopInvHintikka modalApplyOneS5w φ0 (ModalLoopAuxS5w φ0) p.1 p.2 newAcc) ∧
       modalExpMeasure (modalUniverse φ0) newBs newExps + 1 ≤
         modalExpMeasure (modalUniverse φ0) [b] [e] :=
-  modalStepHintikka_preserves_inv modalApplyOneS5w modalApplyOneS5w_specCore φ0
+  modalStepHintikka_preserves_inv modalApplyOneS5w φ0 (modalApplyOneS5w_specCore.toAt φ0)
     (ModalLoopAuxS5w φ0) (ModalLoopAuxS5w_stepPreserved φ0) (ModalLoopAuxS5w_bounds φ0) b e acc
     newBs newExps newAcc hstep hinv
 
@@ -1380,8 +1384,8 @@ rank witness and `rankBound`/`rankEdge`/`phiBound` conservation, and -- the crux
 `modalStepBranch_preserves_outDegEq_gen`, whose conclusion is already stated at the **new**
 expanded set `p.2` (`∀ e' ∈ newExps, ∀ w, outDeg newAcc w = (e'.filter …).length`), exactly what
 the re-arity'd `Aux` can now consume where the old curried-`e` shape could not. -/
-theorem ModalLoopAuxK_stepPreserved (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
-    (φ0 : Proposition Atom) :
+theorem ModalLoopAuxK_stepPreserved (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (spec : RuleApplicationSpecAt φ0 apply) :
     AuxStepPreserved apply (ModalLoopAuxK φ0) := by
   rintro b e acc newBs newExps newAcc hstep hFresh hKnown ⟨rank, hpot, hphi⟩ p hp
   obtain ⟨hp1, hp2⟩ := List.of_mem_zip hp
@@ -1391,7 +1395,7 @@ theorem ModalLoopAuxK_stepPreserved (apply : RuleApply Atom) (spec : RuleApplica
   have hWb : modalMaxWorld b < modalWorldBound φ0 :=
     ModalLoopAuxK_bounds φ0 b e acc ⟨rank, hpot, hphi⟩
   refine ⟨rank', ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩, ?_⟩
-  · exact modalLoopGen_bClosure_core apply spec.toCore φ0 b e acc newBs newExps newAcc hstep
+  · exact modalLoopGen_bClosure_core apply φ0 spec.toCore b e acc newBs newExps newAcc hstep
       hpot.bClosure hFresh hWb p.1 hp1
   · exact modalStepBranch_preserves_expandedNodup_gen apply b e acc newBs newExps newAcc hstep
       hpot.eNodup p.2 hp2
@@ -1431,8 +1435,8 @@ both are `RuleApplicationSpecCore` fields (F11'/F12'), so this needs no extra hy
 `Aux := ModalLoopAuxK φ0` (see its proof below), which is what pins this factoring as faithful to
 the K-facing statement its `TDriver`/`BDriver` consumers depend on. -/
 theorem modalExpandBranchesHintikka
-    (apply : RuleApply Atom) (hs : RuleApplicationSpecCore apply)
-    (φ0 : Proposition Atom)
+    (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (hs : RuleApplicationSpecCoreAt φ0 apply)
     (Aux : List (SignedFormula (Proposition Atom) WorldIndex) →
            List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop)
     (hAuxStep : AuxStepPreserved apply Aux) (hAuxBounds : AuxBounds φ0 Aux)
@@ -1638,11 +1642,11 @@ theorem modalExpandBranchesHintikka
                     some (newBs, newBs.map (fun _ => newExp), newAcc) :=
                 hstepEq
               obtain ⟨hinvAll, -⟩ :=
-                modalStepHintikka_preserves_inv apply hs φ0 Aux hAuxStep hAuxBounds bh e a newBs
+                modalStepHintikka_preserves_inv apply φ0 hs Aux hAuxStep hAuxBounds bh e a newBs
                   (newBs.map (fun _ => newExp)) newAcc hstepEq' hinv
               have hWb : modalMaxWorld bh < modalWorldBound φ0 := hAuxBounds bh e a hinv.aux
               have hstep_lt := modalExpMeasure_step_lt_gen apply hs.branchingLength
-                hs.persistentFresh φ0 (hs.outputsSubsetUniverse φ0) done bt newBs doneExp es newExp
+                hs.persistentFresh φ0 hs.outputsSubsetUniverse done bt newBs doneExp es newExp
                 bh e a newAcc hdlength.symm hinv.bClosure hinv.accFresh hWb hstepEq'
               apply ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
                 (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
@@ -1872,8 +1876,8 @@ and `ModalLoopInvGen_iff_hintikka_auxK` converts this statement's per-index
 The semantically-loaded reasoning (the saturated-leaf discharge against F9-F12 of
 `RuleApplicationSpec`, `GenericDriver.lean`) now lives once, in the parametric lift. -/
 lemma modalExpandBranchesGen_hintikka
-    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
-    (φ0 : Proposition Atom) (fuel : Nat) :
+    (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (spec : RuleApplicationSpecAt φ0 apply) (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
       expandedSets.length = branches.length →
@@ -1887,8 +1891,8 @@ lemma modalExpandBranchesGen_hintikka
         modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
         modalHintikkaSetGen apply bR aR := by
   intro branches expandedSets accs hlen hlenA hfuel hInv bR aR h
-  exact modalExpandBranchesHintikka apply spec.toCore φ0 (ModalLoopAuxK φ0)
-    (ModalLoopAuxK_stepPreserved apply spec φ0) (ModalLoopAuxK_bounds φ0) fuel
+  exact modalExpandBranchesHintikka apply φ0 spec.toCore (ModalLoopAuxK φ0)
+    (ModalLoopAuxK_stepPreserved apply φ0 spec) (ModalLoopAuxK_bounds φ0) fuel
     branches expandedSets accs hlen hlenA hfuel
     (fun i bi ei ai hb he ha =>
       (ModalLoopInvGen_iff_hintikka_auxK apply φ0 bi ei ai).mp (hInv i bi ei ai hb he ha))
@@ -1941,7 +1945,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
     exact ⟨rank, (ModalLoopInv_iff_gen φ0 bi ei ai rank).mp hinv⟩
   rw [modalExpandBranches_eq] at h
   rw [modalHintikkaSet_eq]
-  exact modalExpandBranchesGen_hintikka modalApplyOne modalApplyOne_spec φ0 fuel branches
+  exact modalExpandBranchesGen_hintikka modalApplyOne φ0 (modalApplyOne_spec.toAt φ0) fuel branches
     expandedSets accs hlen hlenA hfuel hInv' bR aR h
 
 /-! ## Initial-Branch Membership Persistence -/

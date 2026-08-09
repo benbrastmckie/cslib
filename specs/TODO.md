@@ -11,10 +11,9 @@ next_project_number: 607
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,603 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,604 | 36,37,181,375,400,425,534,554,568,594,603 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,605 | 39,40,604 | foundations, propositional logic |
-| 4 | 606 | 605 | propositional logic |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,604 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,605 | 36,37,181,375,400,425,534,554,568,594,604 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,606 | 39,40,605 | foundations, propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -29,10 +28,9 @@ next_project_number: 607
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-603 [IMPLEMENTING] — Construct `edges` uniformly from an open branch `b` and discharge
-  └─ 604 [NOT STARTED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
-    └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
-      └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
+604 [NOT STARTED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
+  └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
+    └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
 ### Modal Logic
 
@@ -149,12 +147,13 @@ The existing sorries stay until this and the residual task land. Zero new sorrie
 ---
 
 ### 603. Construct a uniform frame for openBranch_countermodel and discharge the upward-closure conjunct
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [603_construct_uniform_frame_for_openbranch_countermodel/reports/01_uniform-frame-construction.md]
 - **Plan**: [603_construct_uniform_frame_for_openbranch_countermodel/plans/01_rawedges-upward-closure.md]
+- **Summary**: [603_construct_uniform_frame_for_openbranch_countermodel/summaries/01_rawedges-upward-closure-summary.md]
 
 **Description**: Construct `edges` uniformly from an open branch `b` and discharge conjunct 1 (upward closure) of openBranch_countermodel at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.
 

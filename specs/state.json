@@ -66,7 +66,7 @@
       "project_number": 603,
       "project_name": "construct_uniform_frame_for_openbranch_countermodel",
       "title": "Construct a uniform frame for openBranch_countermodel and discharge the upward-closure conjunct",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Construct `edges` uniformly from an open branch `b` and discharge conjunct 1 (upward closure) of openBranch_countermodel at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.\n\nESTABLISHED STRUCTURAL RESULT (machine-checked; treat as ground truth): with A(w) = { p | T(atom p)@w in b } and w <= w' iff A(w) subseteq A(w'), the admissible edge sets are EXACTLY the subsets of that atom-set inclusion preorder, and every such subset is automatically upward-closed. Consequence: conjunct 1 needs NO fact about the tableau algorithm -- no persistence, genCopies, or augmented-edge invariant. Instantiating `edges` with any sub-inclusion edge list discharges it by transitivity of subseteq on atom sets.\n\nSCOPE: define the construction (e.g. `inclEdges b : IEdges`, a tuned sub-preorder, or a per-formula construction accompanied by a proof that it always exists) and prove conjunct 1 for it. Producing the construction plus a proved conjunct 1 is the whole deliverable; conjunct 2 is deliberately out of scope and belongs to the successor task.\n\nKNOWN STARTING POINT, UNVERIFIED: a 'raw edges pruned at reuse/blocking sites' construction matches the [(1,0)] witness for phiRef1 and is the most promising candidate.\n\nRULED OUT -- do not re-attempt: the maximal inclusion frame is NOT a uniform witness. It fails at phiRef1 and phiRef3.\n\nALTERNATIVE ROUTE: the underlying algorithm defect is real and unfixed -- intFImpReuseWitnessAnc? (Expansion.lean) records a loop-back edge on a containment check it never re-validates as the branch grows, which is exactly what makes the augmented intAccessPreorder frame unusable. Fixing that defect is a second path to a workable frame and is in scope for this task if it proves the more tractable route.\n\nREUSE-FIRST (already checked, do not re-derive): intAccessPreorder (Scheme.lean:268), intExtractValuation (Soundness.lean:1129), IEdges / isAccessible (Rules.lean:85,92), IForces / IValid / iforces_persistence (Kripke.lean:81,145,128), and Mathlib.Relation.ReflTransGen as the closure mechanism. The frame construction itself is the only expected new definition.\n\nThe four existing sorries stay until the successor tasks land. Zero new sorries, zero new axioms.",
@@ -76,7 +76,7 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:40:42Z",
-      "last_updated": "2026-08-09T21:13:21Z",
+      "last_updated": "2026-08-09T21:42:45Z",
       "session_id": "sess_1786308724_41a1c9_603",
       "artifacts": [
         {
@@ -88,8 +88,14 @@
           "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/plans/01_rawedges-upward-closure.md",
           "type": "plan",
           "summary": "6 phases / 6.5h: structural isAccessible lemma, edges_shape_of_worldHist strengthening, IWorldsPlanted predicate + IWorldHist corollary, sat-lemma existential widening (atomic-batch), the target upward-closure lemma, and a full sorry/axiom gate"
+        },
+        {
+          "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/summaries/01_rawedges-upward-closure-summary.md",
+          "type": "summary",
+          "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Discharged conjunct 1 for a uniformly-constructed edges := rawEdges by adding a new sorry-free public lemma openBranch_rawEdges_upward_closed to Scheme.lean, plus its supporting machinery: isAccessible_target_mem_edges (structural half, no invariant), a strengthened edges_shape_of_worldHist (returns its already-computed 1<=c<nw bound), IWorldsPlanted/IWorldsPlanted_mono/IWorldHist_worldsPlanted (provenance half, mirrors the ForestComparable derivation), and a widened intExpandBranches_openBranch_sat existential (sixth conjunct IWorldsPlanted rawEdges b, atomic-batch). All 6 plan phases completed in order, no deviations. Full CSLib CI pipeline (cache get, lake build, checkInitImports, lake lint, lint-style, shake, mk_all, lake test) all green. Zero new sorries, zero new axioms; openBranch_countermodel's statement and its own pre-existing sorry are byte-identical/unchanged (only its internal obtain pattern grew one discarded _hwp binder)."
     },
     {
       "project_number": 602,

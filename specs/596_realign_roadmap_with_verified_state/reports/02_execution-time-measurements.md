@@ -87,13 +87,53 @@ measurement, that assertion holds: **the old figure was right; the "corrected" 4
 artifact of a bug in the designated counter script**, not of the suppression-methodology mechanism
 the task description hypothesized (annotations undercounting multi-sorry declarations).
 
-**Escalation**: this materially contradicts the task's own non-negotiable constraint ("The
-sorry-census correction must state WHY the previous figure was wrong ... not merely swap the
-number"). Flagged to the dispatching session (`team-lead`) before writing anything into
-ROADMAP.md; this record captures the full evidence trail regardless of the resolution. **A
-follow-up task to fix the `lean-sorry-census.sh` regex (exclude `set_option warn.sorry false in`
-lines from the match, e.g. via a line-level pre-filter or a more specific regex than `\bsorry\b`)
-should be created independently of how the ROADMAP census wording is resolved.**
+**Escalation and resolution**: this materially contradicted the task's own non-negotiable
+constraint ("The sorry-census correction must state WHY the previous figure was wrong ... not
+merely swap the number"). Flagged to the dispatching session (`team-lead`) before writing
+anything into ROADMAP.md. `team-lead` independently re-derived the finding and confirmed it,
+withdrawing the non-negotiable constraint. Their verification method, run with the corrected
+regex `(?<![.\w])sorry\b` (a negative lookbehind excluding `sorry` preceded by `.` or a word
+character, which correctly rejects the `warn.sorry` substring match while still matching a bare
+`sorry` term) substituted for the buggy `\bsorry\b` in the script's own `strip_lean_comments`
+pipeline, reproduced this record's numbers exactly:
+
+```
+$ python3 -c "
+import re
+# strip_lean_comments extracted verbatim from lean-sorry-census.sh, applied to Cslib/**/*.lean,
+# then matched with the corrected regex instead of \bsorry\b
+sorry_re = re.compile(r'(?<![.\w])sorry\b')
+# ... (same depth-counting comment/string stripper as the script, unchanged)
+"
+```
+
+| Scope | buggy (`\bsorry\b`) | corrected (`(?<![.\w])sorry\b`) |
+|---|---|---|
+| Repo-wide | 45 | **27** |
+| Bimodal | 41 | **23** |
+| Propositional | 4 | 4 (unaffected) |
+| Modal | 0 | 0 (unaffected) |
+
+Exactly the existing ROADMAP figure, exactly this record's per-file arithmetic (41 = 18
+annotations + 23 real), and confirmed independently in Python that `\bsorry\b` does match
+`set_option warn.sorry false in` directly. **Resolution: the OLD ROADMAP figure (27) was already
+correct; no correction is needed. ROADMAP.md's census section is written unchanged (27, Bimodal
+23/Propositional 4/Modal 0), re-verified and re-dated, with a short neutral footnote (not a "here
+is why the old figure was wrong" narrative, since it wasn't wrong) noting that the census script
+currently over-counts and that the figure quoted excludes that over-count.** A follow-up task
+(608) tracks the script fix; per team-lead's instruction the fix target is the SOURCE STORE
+(`agent-system/extensions/lean/scripts/lean-sorry-census.sh`, found via `find` at
+`/home/benjamin/.config/nvim/agent-system/extensions/lean/scripts/lean-sorry-census.sh`), not
+`.claude/scripts/lean-sorry-census.sh` (a gitignored deploy artifact — see
+`.claude/rules/source-store-deploy-boundary.md`). Team-lead also noted a naive `grep`-style count
+skipping the block-comment/docstring stripper gives 152 repo-wide — the stripper is the script's
+valuable, correct part; the `\bsorry\b` regex is the only broken piece, and the fix must preserve
+the stripper unchanged.
+
+**Correction addendum filed**: `reports/01_roadmap-realignment-verification.md` (the research
+report backing this plan) asserted this same withdrawn finding as its "biggest single finding" —
+a correction addendum has been added to the top of that report marking it WITHDRAWN, per
+team-lead's instruction, rather than silently deleting or rewriting the original claim.
 
 ### Bare vs. suppressed split (for the "gates lake build --wfail --iofail" claim)
 

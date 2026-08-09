@@ -156,26 +156,14 @@ what gates them.
 
 ### A. Completeness / decidability gaps
 
-Verified sorry counts (as of 2026-08-09): **27** code-position sorries repo-wide — Bimodal 23,
-Propositional 4, Modal 0. Temporal, LTL, HML, LinearLogic and Foundations are sorry-free.
-The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 4 are **bare**, and are the
-stated reason `lake build --wfail --iofail` is red on this tree.
+Verified sorry counts (re-verified as of 2026-08-09): **27** code-position sorries repo-wide —
+Bimodal 23, Propositional 4, Modal 0. Temporal, LTL, HML, LinearLogic and Foundations are
+sorry-free. The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 4 are **bare**, and
+are the stated reason `lake build --wfail --iofail` is red on this tree.
 
-**Methodology note**: the count is produced by re-running `.claude/scripts/lean-sorry-census.sh`
-(comment/string-aware, depth-counting nested block comments so a `sorry` mentioned only in a
-docstring or string literal is never counted) fresh against the tree. A 2026-08-09 re-audit
-initially suspected this figure undercounted — the script's own literal output for Bimodal is
-41, not 23 — but tracing the discrepancy found the opposite: **the script itself double-counts**.
-Its `\bsorry\b` matcher also matches the "sorry" substring inside `set_option warn.sorry false
-in` (the suppression-annotation directive), because `.` is a non-word character and creates a
-false word boundary. Every one of the 18 Bimodal suppression-annotation lines is therefore
-counted as an *extra* phantom sorry on top of the real one it annotates (41 = 23 real + 18
-annotation-line false positives, confirmed file-by-file). The true raw-sorry count is 23, which
-independently matches task 215's own hand-audited scope (12 sorries in
-`ChronicleToCountermodel.lean` + 1 in `Frame.lean` = 13, exactly the measured BXCanonical
-subtotal below). **27 is confirmed correct, not a correction** — a fix for the script's
-`warn.sorry`-substring bug is recorded as a follow-up (task 608) so a future census does not
-reintroduce this inflation.
+*(Note: `.claude/scripts/lean-sorry-census.sh` currently over-counts by one per `warn.sorry`
+suppression site — the figure above excludes those and reflects genuine `sorry` occurrences
+only; see task 608.)*
 
 | Item | Tracking | Notes |
 |------|----------|-------|

@@ -220,13 +220,22 @@ previous census was wrong.
   comments); a prior census undercounted because it counted `set_option warn.sorry false in`
   suppression *sites* rather than raw `sorry` occurrences, and a single suppressed declaration can
   carry several. State this as the reason the figure changed, so the correction is not mistaken
-  for new proof debt appearing. *(deviation: altered — Phase 1 measurement found the opposite
-  mechanism from what this task predicted: the designated census script itself double-counts each
-  `warn.sorry` suppression-annotation line as a phantom extra sorry, via a `\bsorry\b` substring
-  match inside "warn.sorry". The true raw count (27) is unchanged from the old figure, not a
-  correction of it. The methodology note as written states this corrected mechanism, names the
-  script, and points to follow-up task 608. See reports/02_execution-time-measurements.md
-  section 1 for full evidence and the escalation to team-lead.)*
+  for new proof debt appearing. *(deviation: altered — this task's premise was wrong, not just
+  its predicted number. Phase 1 measurement found the census script itself double-counts each
+  `warn.sorry` suppression-annotation line as a phantom extra sorry (`\bsorry\b` also matches the
+  substring inside "warn.sorry"), so the OLD figure (27) was already correct and there is no
+  "why the previous figure was wrong" to narrate. Escalated to team-lead before writing anything;
+  team-lead independently re-derived and confirmed the finding (corrected-regex re-run,
+  `(?<![.\w])sorry\b`, reproduces 45→27 / 41→23 exactly) and withdrew the task's non-negotiable
+  constraint. Per team-lead's explicit instruction, ROADMAP.md's census line was left unchanged
+  (27, re-verified and re-dated) with a short *neutral* footnote — not a methodology narrative
+  claiming the old figure was wrong — noting the script's over-count and that the quoted figure
+  excludes it. Follow-up task 608 (retargeted to the correct source-store path,
+  `agent-system/extensions/lean/scripts/lean-sorry-census.sh`, per team-lead) tracks the actual
+  script fix. A correction addendum was appended to
+  `reports/01_roadmap-realignment-verification.md` marking its withdrawn "27→45" finding, per
+  team-lead's instruction (committed by team-lead directly). Full evidence trail and the
+  team-lead exchange: `reports/02_execution-time-measurements.md` section 1.)*
 - [x] S4 decidability row (Tracking `511 → 506 → umbrella 300`): if Phase 1 confirms the S4
   instance landed and the tracking task is terminal, remove the row from Remaining; it is
   re-homed in the Completed section by Phase 3. *(completed)*

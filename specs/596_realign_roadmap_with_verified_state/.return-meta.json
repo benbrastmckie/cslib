@@ -10,10 +10,15 @@
       "type": "summary",
       "path": "specs/596_realign_roadmap_with_verified_state/summaries/01_realign-roadmap-verified-state-summary.md",
       "summary": "Implementation summary with before/after table of every corrected ROADMAP.md figure and the plan deviation"
+    },
+    {
+      "type": "report",
+      "path": "specs/596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md",
+      "summary": "Research report; carries a correction addendum (added by team-lead) marking its withdrawn sorry-census finding"
     }
   ],
   "completion_data": {
-    "completion_summary": "Realigned specs/ROADMAP.md with verified repository state as of 2026-08-09 across all six plan phases: corrected falsified decidability/CS5/Temporal claims, moved 8 terminal work items to Completed, added four new Remaining sections giving all 46 open tasks roadmap presence, and created tasks 607 (BXCanonical decision, tracked not decided) and 608 (fix a newly-discovered lean-sorry-census.sh double-counting bug). No .lean file was touched."
+    "completion_summary": "Realigned specs/ROADMAP.md with verified repository state as of 2026-08-09 across all six plan phases: corrected falsified decidability/CS5/Temporal claims, moved 8 terminal work items to Completed, added four new Remaining sections giving all 46 open tasks roadmap presence, and created tasks 607 (BXCanonical decision, tracked not decided) and 608 (fix a newly-discovered lean-sorry-census.sh double-counting bug, retargeted to the correct source-store path per team-lead). The sorry-census finding (script bug, old figure 27 was already correct) was escalated to and independently confirmed by team-lead, who withdrew the task's original non-negotiable constraint. No .lean file was touched."
   },
   "modified_files": [
     "specs/ROADMAP.md",

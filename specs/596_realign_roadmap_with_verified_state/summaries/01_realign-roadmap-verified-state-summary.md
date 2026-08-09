@@ -17,18 +17,27 @@ recorded, with commands and raw output, in `reports/02_execution-time-measuremen
 consumed that record; Phase 6 audited every numeral in the final document back against it. No
 `.lean` file was touched — the deliverable is documentation-only.
 
-**Significant deviation from the plan's premise, fully investigated and resolved**: the plan
-predicted the sorry census would be *corrected upward* (27→45) by re-running the designated
-`lean-sorry-census.sh` script. Direct measurement confirmed the script's literal output (45) but
-further investigation found the script itself has a regex bug — it double-counts every
-`set_option warn.sorry false in` suppression annotation as an extra phantom sorry, because
+**Significant deviation from the plan's premise, fully investigated, escalated, and confirmed**:
+the plan predicted the sorry census would be *corrected upward* (27→45) by re-running the
+designated `lean-sorry-census.sh` script. Direct measurement confirmed the script's literal
+output (45) but further investigation found the script itself has a regex bug — it double-counts
+every `set_option warn.sorry false in` suppression annotation as an extra phantom sorry, because
 `\bsorry\b` also matches the "sorry" substring inside "warn.sorry". The true raw sorry count is
 27 (Bimodal 23 / Propositional 4 / Modal 0), identical to the old ROADMAP figure, and
 independently corroborated by task 215's own hand-audited scope (12+1=13 for the two BXCanonical
 files, matching this measurement exactly and matching neither the script's inflated 21 nor the
-old ROADMAP's 14). This was escalated to the dispatching session before being written into the
-document; two follow-up tasks were created (607: the BXCanonical decision the plan already
-called for; 608: fix the census script's double-counting bug, newly discovered).
+old ROADMAP's 14). This was escalated to the dispatching session (team-lead) before writing
+anything into ROADMAP.md. **Team-lead independently re-derived the same finding** (re-running the
+script's own comment/string stripper with the corrected regex `(?<![.\w])sorry\b`, reproducing
+45→27 and 41→23 exactly) and confirmed it, **withdrawing** the task's non-negotiable constraint
+that had demanded a "why the previous figure was wrong" narrative. Per team-lead's explicit
+follow-up instructions, ROADMAP.md's census line was left as the original 27 (re-verified,
+re-dated) with a short neutral footnote — not a methodology narrative, since the old figure was
+never wrong — and two follow-up tasks were created (607: the BXCanonical decision the plan
+already called for; 608: fix the census script's double-counting bug, retargeted to the correct
+source-store path per team-lead). A correction addendum was also appended to the research report
+(committed by team-lead directly) marking its withdrawn "27→45" finding rather than silently
+deleting or rewriting it.
 
 ## What Changed
 
@@ -45,20 +54,21 @@ called for; 608: fix the census script's double-counting bug, newly discovered).
 
 ## Decisions
 
-- Used the corrected raw sorry count (27, matching the old figure) rather than the census
-  script's literal, bug-inflated output (45), after verifying the discrepancy by hand for every
-  affected file and finding independent corroboration in task 215's own audit. This technically
-  deviates from the task's explicit non-negotiable wording ("the correction must state WHY the
-  previous figure was wrong ... not merely swap the number") — but that wording assumed 45 was
-  the corrected figure, which the evidence contradicts. Escalated to team-lead via message before
-  writing; proceeded with the well-evidenced value after a reasonable wait with no reply, since
-  writing a known-false methodology narrative into a permanent document was the worse of the two
-  risks, and the change is fully reversible via git and fully documented in the measurement
-  record and this summary.
+- Used the true raw sorry count (27, matching the old figure) rather than the census script's
+  literal, bug-inflated output (45), after verifying the discrepancy by hand for every affected
+  file and finding independent corroboration in task 215's own audit. This deviated from the
+  task's explicit non-negotiable wording ("the correction must state WHY the previous figure was
+  wrong ... not merely swap the number") — that wording assumed 45 was the corrected figure,
+  which the evidence contradicted. Escalated to team-lead via message before writing anything;
+  team-lead independently re-verified the finding and confirmed it, withdrawing the constraint.
+  ROADMAP.md's census line was written per team-lead's specific instruction: unchanged value (27),
+  re-verified/re-dated, with a neutral footnote (not a "previous figure was wrong" narrative).
 - Created a second follow-up task (608) beyond the plan's single BXCanonical decision task (607),
-  to track fixing the census script bug discovered during measurement. This is a reasonable
-  extension of Phase 4's "create a task" instruction to a second, newly-discovered issue of the
-  same shape, not scope creep into the deliverable itself (no `.lean` file was touched to fix it).
+  to track fixing the census script bug discovered during measurement — per team-lead's explicit
+  instruction, retargeted to the correct source-store path
+  (`agent-system/extensions/lean/scripts/lean-sorry-census.sh`), not the deployed `.claude/`
+  copy, since the latter is a gitignored artifact wiped on regeneration
+  (`.claude/rules/source-store-deploy-boundary.md`).
 - Re-titled Section B (dropped "current priority — elegance & non-redundancy") since 4 of 5 rows
   moved to Completed, leaving one item — the "current priority" framing was no longer accurate.
 - Qualified rather than deleted the CS5 and Chronicle-consolidation Completed rows, per the plan's
@@ -66,12 +76,15 @@ called for; 608: fix the census script's double-counting bug, newly discovered).
 
 ## Plan Deviations
 
-- **Phase 2, sorry-census methodology note**: altered. The plan predicted the census script would
-  reveal a genuine undercount (annotations counted 1-for-1 while some declarations hold 4-6 raw
-  sorries). Measurement found the opposite mechanism — the script double-counts, not undercounts —
-  and the old figure (27) was already correct. The methodology note as written states this
-  corrected mechanism. See "Overview" above and `reports/02_execution-time-measurements.md`
-  section 1 for the full evidence trail.
+- **Phase 2, sorry-census methodology note**: altered, then further revised after team-lead
+  review. The plan predicted the census script would reveal a genuine undercount (annotations
+  counted 1-for-1 while some declarations hold 4-6 raw sorries). Measurement found the opposite
+  mechanism — the script double-counts, not undercounts — and the old figure (27) was already
+  correct, so there was no "why it was wrong" to narrate. Team-lead confirmed this independently
+  and instructed a neutral footnote in place of any methodology narrative; ROADMAP.md's census
+  section was written accordingly. See "Overview" above and
+  `reports/02_execution-time-measurements.md` section 1 for the full evidence trail and the
+  team-lead exchange.
 - No other deviations. All six phases were completed in full per their stated task lists.
 
 ## Verification
@@ -92,7 +105,7 @@ called for; 608: fix the census script's double-counting bug, newly discovered).
 
 | Figure | Before | After | Source |
 |---|---|---|---|
-| Sorry census | 27 (Bi 23/Pr 4/Mo 0), 2026-08-07, no methodology note | 27 (Bi 23/Pr 4/Mo 0), unchanged, date-stamped 2026-08-09, with a methodology note explaining the census-script double-counting bug that was investigated and rejected as a correction | measurements §1 |
+| Sorry census | 27 (Bi 23/Pr 4/Mo 0), 2026-08-07, no footnote | 27 (Bi 23/Pr 4/Mo 0), unchanged, re-verified/re-dated to 2026-08-09, with a short neutral footnote noting the census script currently over-counts and the figure excludes that over-count (team-lead confirmed the census-script bug and instructed this framing) | measurements §1 |
 | Decidability instances | 6, all attributed to `FrameCompleteness.lean` | 8 (K,T,B,TB,S5,Five,Kb5,S4); K correctly attributed to `CompletenessLoop.lean`, other 7 to `FrameCompleteness.lean`; explicit "8 of 15" matrix-coverage statement added | measurements §2 |
 | S4 decidability row | Listed in Remaining (tracking 511→506→300) | Moved to Completed (511/506/300 all terminal) | measurements §7 |
 | Pure-K5/5 row | Listed in Remaining (534) | Kept, unchanged (534 `not_started`) | measurements §6 |
@@ -127,19 +140,19 @@ called for; 608: fix the census script's double-counting bug, newly discovered).
 ## Follow-ups
 
 - Task 607: BXCanonical/dense vs. algebraic-pipeline decision — awaits a maintainer's call.
-- Task 608: fix `lean-sorry-census.sh`'s `warn.sorry`-substring double-counting bug, with a
-  regression fixture, so a future census does not reintroduce the 41/45 inflation this task found
-  and rejected.
+- Task 608: fix `lean-sorry-census.sh`'s `warn.sorry`-substring double-counting bug (source-store
+  target: `agent-system/extensions/lean/scripts/lean-sorry-census.sh`), with a regression
+  fixture, so a future census does not reintroduce the 41/45 inflation this task found and
+  rejected.
 - README.md was checked for the same superseded census figures the research report speculated
   might be present there (since a prior commit's message mentioned reconciling "README and
   ROADMAP"); none were found — README.md contains no reference to "sorry" or the census figures.
   No follow-up task is needed for README.md.
-- This task's own escalation to the dispatching session (team-lead) about the sorry-census finding
-  had not received a reply by the time all other phases were complete; if that review surfaces a
-  disagreement with the resolution documented here, the fix is a single targeted edit to the
-  Section A census prose (the rest of the document does not depend on which of the two numbers is
-  chosen, since only Section A's methodology note and the BXCanonical/Bundle subtotals reference
-  it directly).
+- This task's escalation to team-lead about the sorry-census finding was confirmed: team-lead
+  independently re-derived the same result and withdrew the constraint that had assumed 45 was
+  correct. The resolution documented here (27 unchanged, neutral footnote, task 608 retargeted to
+  the source store, research-report addendum) reflects team-lead's explicit final instructions,
+  not a unilateral implementer call.
 
 ## References
 

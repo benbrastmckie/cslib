@@ -7841,22 +7841,42 @@ is in scope, is what makes it fillable at all -- so the conjunct is proved by `s
 the inline comment at the proof site). `tableau_complete` itself stays sorry-free; only this
 lemma gains the deferred obligation, relocated from the unfillable shape DP-3/DP-4 used to have.
 
-**DISPOSITION UNDECIDED (this conjunct's `sorry`, gated on an open decision point).** Do NOT read
-this conjunct as REFUTED. What is machine-verified: `intExtractValuation b`'s upward closure
-along the reconstructed augmented `intAccessPreorder edges` frame FAILS for `phiRef1 :=
-((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` (`CslibTests/BetaSplitRefutation.lean`, zero errors,
-zero sorries, `branchesAgree = true` against the real `intuitionisticTableau`). What is **argued but
-[UNVERIFIED]** (not machine-checked): the further step from that failure to "this `∃ edges`
-conjunct of `openBranch_countermodel` is false for this `b`" assumes `¬IForces` is obtainable only
-through `truthLemma`'s `IFimpAccess` route. Counter-consideration, hand-checked: over the RAW
-frame `[(1,0),(2,1)]` upward closure DOES hold for the same `b`, but
-`IForces (intExtractValuation b) 0 phiRef1` is then TRUE (the antecedent fails at every world), so
-the raw frame does not witness the existential either — the inference is not free of live
-alternatives. Resolving this requires either a machine-checked confirmation that no admissible
-`edges` witnesses the existential for `phiRef1`, or explicit human sign-off on the argued
-inference. **No change to this statement is authorized until one of those exists**: do not
-revert, weaken, delete, or restate this conjunct on the strength of the unverified inference
-alone.
+**Open — augmented-frame route known-bad, admissible edge space characterised.** This conjunct's
+disposition is DECIDED, and it is not REFUTED: the earlier framing of this disposition as
+undecided, and the unverified inference it rested on, are themselves incorrect (see below). Two
+independent arguments, one structural and one computational, settle this:
+
+**Structural (needs no computation).** `IValid φ` quantifies over every preorder and every
+upward-closed valuation, so any refutation of this conjunct would have to exhibit an IPC-valid
+`φ` on which the algorithm returns `.openBranch`. `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) →
+pb)) → pr` is not even classically valid, so it was never a candidate refutation of this
+statement, whatever it does to any one frame choice.
+
+**Computational — the admissible edge space is `𝒫(⊑)`.** Let `⊑` be the atom-set-inclusion
+preorder on `b`'s worlds (`w ⊑ w' ↔ A(w) ⊆ A(w')`, `A(w)` = `w`'s positive atoms). Any `edges`
+keeping `intExtractValuation b` upward-closed satisfies `≤_edges ⊆ ⊑`, and every subset of `⊑`'s
+pairs is automatically upward-closed — so **this conjunct needs no fact about the tableau
+algorithm at all**. On the branch the real `intuitionisticTableau` returns for `phiRef1`, the
+pruned edge set `edges = [(1, 0)]` satisfies BOTH conjuncts (computed against the real algorithm,
+not CI-protected: see the scratch probes `WitnessProbe.lean`/`WitnessSearch2.lean`, not promoted
+into `CslibTests/`); exhaustive enumeration over the complete admissible space finds 40 witnesses
+for `phiRef1` alone.
+
+What IS machine-verified (`CslibTests/BetaSplitRefutation.lean`, zero errors, zero sorries,
+`branchesAgree = true` against the real `intuitionisticTableau`) is that the AUGMENTED frame
+`intAccessPreorder edges` — the `augSets` witness `intExpandBranches_openBranch_sat` threads,
+carrying the algorithm's loop-back edges — fails upward closure at `phiRef1`. That refutes
+*augmented-frame positive-formula persistence* as a proof route; it is a bad **witness choice**,
+not evidence against this conjunct's truth, since the conjunct's `edges` is unconstrained in the
+statement and need not be the algorithm's own edge list.
+
+**Honesty bound.** The general `∀ φ` form of this conjunct remains unproved. The maximal
+inclusion frame `⊑` is NOT a uniform witness — computed evidence shows it fails at exactly the
+`phiRef1`/`phiRef3` family (`WitnessSearch3.lean`, computed, not CI-protected). Proving the
+conjunct in general is equivalent to proving the tableau procedure complete (by the structural
+argument above): this is not a small residual, it is the completeness theorem itself. The
+remaining obligation is a uniform construction of `edges` from `b` plus a truth lemma over that
+frame.
 
 ## References
 
@@ -7925,18 +7945,16 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- obligation -- see the docstring above -- now stated where `b`'s provenance is in scope
   -- instead of at an arbitrary, unconstrained `(edges, b)` pair.
   --
-  -- DISPOSITION UNDECIDED, gated on an open decision point -- do NOT read as REFUTED. Upward
-  -- closure of `intExtractValuation b` along the reconstructed augmented frame is
-  -- machine-verified to FAIL at `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`
-  -- (`CslibTests/BetaSplitRefutation.lean`, zero errors, zero sorries). The further step from
-  -- that
-  -- failure to "this `∃ edges` conjunct is false for this `b`" is an argued, [UNVERIFIED]
-  -- inference (it assumes `¬IForces` is obtainable only through `IFimpAccess`); a hand-checked
-  -- counter-consideration shows the raw frame `[(1,0),(2,1)]` satisfies upward closure but makes
-  -- `IForces (intExtractValuation b) 0 phiRef1` TRUE, so it does not witness the existential
-  -- either. See the docstring above for the full statement. Resolving this needs a
-  -- machine-checked confirmation or explicit human sign-off; no such change is authorized here,
-  -- so the conjunct stays `sorry` rather than being reverted, weakened, or restated.
+  -- Open -- augmented-frame route known-bad, admissible edge space characterised (decided, not
+  -- refuted; see the full disposition in the docstring above). The AUGMENTED frame
+  -- `intAccessPreorder edges` fails upward closure at `phiRef1 := ((pr ∨ ps) ∧
+  -- ((ps → (ps → pr)) → pb)) → pr` (`CslibTests/BetaSplitRefutation.lean`, zero errors, zero
+  -- sorries) -- a bad witness choice, not a refutation of this conjunct: the admissible edge
+  -- space is exactly the subsets of the atom-inclusion preorder `⊑`, none of which need the
+  -- algorithm's own edge list, and the pruned witness `[(1, 0)]` (computed against the real
+  -- algorithm) satisfies both conjuncts. The general `∀ φ` form remains unproved and the
+  -- maximal `⊑` frame is not a uniform witness -- proving it is equivalent to procedure
+  -- completeness. The conjunct stays `sorry` for that genuine open reason, not a refuted one.
   sorry
 
 /-! ## Parametric Tableau Completeness -/

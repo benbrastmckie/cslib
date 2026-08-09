@@ -1,7 +1,7 @@
 # Implementation Plan: Correct the `openBranch_countermodel` deferral annotations
 
 - **Task**: 591 - Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 3.5 hours
 - **Dependencies**: None remaining (see Research Integration — the stated prerequisite is already satisfied)
 - **Research Inputs**: `specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md`
@@ -176,7 +176,7 @@ files), so they are territory-safe in parallel. If run serially, any order withi
 
 ---
 
-### Phase 1: Baseline capture and canonical corrected wording [NOT STARTED]
+### Phase 1: Baseline capture and canonical corrected wording [COMPLETED]
 
 **Goal**: Freeze the pre-edit mechanical baseline, and author one canonical corrected-annotation
 text block so the ten hunks do not drift into ten different framings.
@@ -223,7 +223,7 @@ silently editing a different set.
 
 ---
 
-### Phase 2: Correct `openBranch_countermodel` in `Scheme.lean` (H1, H2) [NOT STARTED]
+### Phase 2: Correct `openBranch_countermodel` in `Scheme.lean` (H1, H2) [IN PROGRESS]
 
 **Goal**: Replace the "DISPOSITION UNDECIDED / no change authorized" framing at the root site —
 the docstring and the proof-site comment of `openBranch_countermodel` — with the corrected

@@ -1,19 +1,32 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-09T20:55:51Z",
-  "completed_at": "2026-08-09T21:05:44Z",
+  "status": "planned",
+  "started_at": "2026-08-09T21:10:00Z",
+  "completed_at": "2026-08-09T21:22:00Z",
   "artifacts": [
-    "specs/603_construct_uniform_frame_for_openbranch_countermodel/reports/01_uniform-frame-construction.md",
-    "specs/603_construct_uniform_frame_for_openbranch_countermodel/.orchestrator-handoff.json"
+    {
+      "type": "plan",
+      "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/plans/01_rawedges-upward-closure.md",
+      "summary": "6-phase plan (6.5h) discharging openBranch_countermodel conjunct 1 over rawEdges: structural isAccessible lemma, edges_shape_of_worldHist strengthening, IWorldsPlanted predicate + IWorldHist corollary, sat-lemma existential widening (atomic-batch), the standalone openBranch_rawEdges_upward_closed lemma, and a full sorry/axiom gate"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/.orchestrator-handoff.json",
+      "summary": "Orchestrator handoff for the plan phase: status planned, next_phase implement, 6 phases, wave map and Scope Hypotheses recorded"
+    }
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Research report and orchestrator handoff written. Recommended construction: reuse rawEdges from intExpandBranches_openBranch_sat, discharge conjunct 1 via IPosPersistRaw + ReflTransGen induction, one small IWorldHist-derived plumbing corollary needed."
+    "details": "Plan and orchestrator handoff written. All required plan-format fields verified present (Status, Task, Effort, Type; per-phase Depends on and Verification Tier on all 6 phases; wave table consistent with per-phase dependencies)."
   },
   "metadata": {
     "session_id": "sess_1786308724_41a1c9_603",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 6,
+    "estimated_hours": 6.5,
+    "dependency_waves": [[1, 2], [3], [4], [5], [6]]
+  },
+  "memory_candidates": [],
+  "next_steps": "Run /implement 603 to execute the plan"
 }

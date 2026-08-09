@@ -215,7 +215,9 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Record the frame-adequacy verdict at both `Scheme.lean` annotation sites [NOT STARTED]
+### Phase 2: Record the frame-adequacy verdict at both `Scheme.lean` annotation sites [COMPLETED]
+<!-- confirmed by implementation agent: annotations rewritten at the sat_timp STOP-gate note, the T-imp in-body comment, IPosPersistRaw's docstring, openBranch_countermodel's docstring/sorry-site, and openBranch_rawEdges_upward_closed's docstring. Vocabulary audit: no bare "task N" citation introduced (grep confirmed). Full repo lake build green (3325 jobs). -->
+
 
 - **Goal:** The file's existing honesty register carries the machine-checked frame-adequacy
   table, the exact residual obligation, and the excluded search space — with "refuted" used only

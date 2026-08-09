@@ -533,8 +533,25 @@ alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or 
 orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
 dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
 
-/-! ### `sat_timp` discharge — STOP-gate finding, UPDATED (Deliverable 6
-branching-rule redesign)
+/-! ### `sat_timp` discharge — STOP-gate finding, CLOSED (DP-5 discharged via `hpers`)
+
+**DISCHARGED (supersedes the "Gap 1" analysis below).** `truthLemma` now takes an explicit
+`hpers` hypothesis — positive-formula persistence along `edges`
+(`∀ χ x y, isAccessible edges x y = true → T(χ)@x ∈ b → T(χ)@y ∈ b`) — and the T-imp case is
+proved unconditionally from it plus `sat_timp` (see the proof at this lemma's T-imp case below:
+lift `T(φ'→ψ')@w ∈ b` to membership, chain `hpers` along `Relation.ReflTransGen` by
+`induction hle` to get `T(φ'→ψ')@w' ∈ b`, then close by `sat_timp` exactly as this note
+anticipated). This sidesteps Gap 1 rather than closing it via the originally-anticipated
+self-copy channel: `hpers` transfers the SOURCE world's `T(φ'→ψ')` membership to `w'` directly,
+so `w'` ends up carrying its own copy without any `Expansion.lean` self-copy machinery. The
+obstruction the note below diagnoses is real only at the AUGMENTED frame, where `hpers` is
+itself REFUTED (`CslibTests/BetaSplitRefutation.lean`) — it is an artefact of that frame
+CHOICE, not of the T-imp goal: `truthLemma`'s frame is a parameter, and over the raw frame or
+any sub-raw frame carrying `hpers` (`IPosPersistRaw`/`IWorldsPlanted`, `:6782`/`:3568`, both
+sorry-free) the case is unconditionally provable, which is exactly the DISCHARGED state
+`truthLemma` is in now. The remainder of this note (the self-copy-channel investigation
+below) is retained as the historical record of the route this file no longer takes; do not
+re-derive its "open"/"blocked" conclusions about Gap 1 as current.
 
 **Gap 2 (determinacy) is RESOLVED as of the `.pos, .imp` branching arm added to
 `intApplyRuleFull` (`Rules.lean:245-268`).** The STOP-gate below was written
@@ -666,8 +683,13 @@ recorded loop-back edge `(x, l)`, using the `Sfor`-containment established at th
 site), not the copy channel alone; a bounded self-copy variant is still one route to supplying
 `T(φ'→ψ')`'s own copy at directly-accessible worlds, but the augmented-frame gap must close
 first for either a bounded self-copy variant (a) or the quotient/blocking-frame reconstruction
-(b) to actually discharge this case. Do NOT attempt to force either `sorry` via a
-weakened/vacuous statement. -/
+(b) to actually discharge this case. This whole self-copy-channel analysis (i)-(ii) is now
+historical: DP-5 was discharged via the `hpers` route at the top of this note instead, which
+needs neither a self-copy channel nor a loop-back transfer lemma — it takes persistence as an
+explicit hypothesis and lets the CALLER supply it (refuted at the augmented frame, provable at
+the raw/sub-raw frame). The augmented-frame gap this paragraph names is real and still open, but
+it now blocks a DIFFERENT goal: `openBranch_countermodel`'s own surviving existential
+(`Scheme.lean`, further below), not this lemma's T-imp case. -/
 
 /-! ## Parametric Truth Lemma -/
 
@@ -717,55 +739,25 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
     simp only [IForces_imp]
     constructor
     · -- T(φ'→ψ')@w ∈ b → ∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
-      -- `sat_timp` (a live `IBranchSaturation` field, `:105-108`) supplies exactly
-      -- `∀ w' accessible from w, F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b` at any world `w'` carrying its
-      -- own `T(φ'→ψ')` copy: the `F(φ')@w'` arm contradicts `IForces val w' φ'` via `ih_φ'.2`,
-      -- and the `T(ψ')@w'` arm yields the goal via `ih_ψ'.1` -- see the "GAP 1 UPDATE" paragraph
-      -- of the "`sat_timp` discharge" STOP-gate note above this lemma. Gap 1 -- the disjunction
-      -- is only available at `w'` once `w'` actually carries its own `T(φ'→ψ')` copy -- is now
-      -- CONFIRMED unclosable with the machinery currently in this file, not merely unattempted:
-      -- the `applyAllTImpRules` self-copy channel the STOP-gate note's original route depended
-      -- on was deliberately removed by the ancestor-blocking calculus repair (commit
-      -- `a70187dd`), whose own docstring declares Gap 1 explicitly out of scope. The surviving
-      -- ψ-consequence propagation gives branch-membership implication at accessible worlds
-      -- (`T(φ)@w'∈b → T(ψ)@w'∈b`), but this goal needs `IForces` (semantic), not membership, and
-      -- `ih_φ'`/`ih_ψ'` never supply `Force → T(_)@w'∈b`. See the STOP-gate note for the full
-      -- analysis and the two live-but-unattempted continuation options.
+      -- DISCHARGED (DP-5). `hpers` transfers `T(φ'→ψ')`'s membership from the source world `w`
+      -- to the accessible world `w'` directly (chained along `Relation.ReflTransGen` by
+      -- `induction hle`), so `w'` carries its own `T(φ'→ψ')` copy without any self-copy channel
+      -- in `Expansion.lean`. `sat_timp` (a live `IBranchSaturation` field, `:105-108`) then
+      -- supplies `F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b`: the `F(φ')@w'` arm contradicts `IForces val w'
+      -- φ'` via `ih_φ'.2`, and the `T(ψ')@w'` arm yields the goal via `ih_ψ'.1`. See the
+      -- "`sat_timp` discharge" STOP-gate note above this lemma for the full history (the
+      -- originally-anticipated self-copy-channel route was superseded by this `hpers` route).
       --
-      -- sorry: assumes `∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'` follows
-      -- from `sat_timp`'s membership-level disjunction, which needs `w'` to carry its own
-      -- `T(φ'→ψ')` copy; deferred because that copy (or an equivalent totality/persistence fact
-      -- bridging `IForces → T(_)@w'∈b`) is not establishable from current library facts --
-      -- reintroducing the removed self-copy channel is termination-safe (the ancestor-blocking
-      -- calculus repair's own variant-selection probe already measured self-copy retention as
-      -- termination-orthogonal once ancestor blocking is active) but insufficient by itself:
-      -- `truthLemma`'s frame is `intAccessPreorder edges` over the AUGMENTED edge list
-      -- `intExpandBranches_openBranch_sat` returns (`augSets`, carrying the loop-back edges the
-      -- calculus repair's blocking-reuse route introduced), while any copy channel only ever
-      -- copies along the algorithm's RAW edges -- strictly fewer worlds than the goal quantifies
-      -- over. The real remaining obligation is a positive-formula persistence/transfer lemma
-      -- along the augmented accessibility relation (the same fact, atom-shaped, as the
-      -- monotonicity bridge the `Completeness.lean` files' `sorry`s below rest on).
-      --
-      -- DP-5 -- open, augmented-frame route known-bad (not "pending Phases 7-11", not
-      -- "deferred to future work" either -- this is a corrected disposition, not a schedule).
-      -- The augmented-edge positive-formula persistence invariant this goal needs IS refuted by
-      -- a machine-verified counterexample: `CslibTests/BetaSplitRefutation.lean` (`lake env
-      -- lean`, zero errors, zero sorries) exhibits
-      -- `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`, for which
-      -- `intExtractValuation b` is NOT upward-closed along the augmented `intAccessPreorder
-      -- edges` frame: worlds `1` and `2` are augmented-preorder-equivalent (joined by the
-      -- recorded loop-back edge `(1, 2)`) yet disagree on `pr` (`decisiveFacts = (true, false)`),
-      -- and `branchesAgree = true` confirms the recreated loop matches the REAL
-      -- `intuitionisticTableau`. The mechanism is independent beta-splits at two
-      -- augmented-preorder-equivalent worlds joined by a loop-back edge that
-      -- `intFImpReuseWitnessAnc?` never re-validates once recorded (see that declaration's
-      -- docstring in `Expansion.lean` for the frame-construction limitation this names). This
-      -- refutes the AUGMENTED-FRAME INSTANTIATION of the persistence invariant, not the goal
-      -- itself: `truthLemma`'s frame is a parameter, and this invariant is only needed when
-      -- that parameter is the augmented frame. The lemma over a sub-`⊑` frame remains open; see
-      -- `openBranch_countermodel`'s docstring (further below in this file) for the related
-      -- disposition of why conjunct 1 needs no algorithm invariant at all.
+      -- `hpers` is REFUTED at the AUGMENTED frame (`CslibTests/BetaSplitRefutation.lean`, zero
+      -- errors, zero sorries: `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` has
+      -- augmented-preorder-equivalent worlds `1`/`2` -- joined by a loop-back edge
+      -- `intFImpReuseWitnessAnc?` never re-validates once recorded, see that declaration's
+      -- docstring in `Expansion.lean` -- that disagree on `pr`), so this case is
+      -- unconditionally true only when the CALLER supplies `hpers` -- provable over the raw
+      -- frame (`IPosPersistRaw`/`IWorldsPlanted`, sorry-free) or any sub-raw frame, refuted over
+      -- the augmented frame. That caller-side obligation is `openBranch_countermodel`'s concern
+      -- (further below in this file), not this lemma's: `truthLemma` itself is now
+      -- unconditionally true over any frame carrying `hpers`.
       intro hT w' hle
       have hmem : (⟨.pos, .imp φ' ψ', w⟩ : ISF Atom) ∈ b := by
         obtain ⟨sf, hsfb, hsfp⟩ := List.any_eq_true.mp hT
@@ -6784,13 +6776,20 @@ private lemma intExpandBranches_openBranch_initial_mem (sf : ISF Atom) :
     simp only [intExpandBranches.go] at hgo
     exact ih (fun bp hbp => hPend bp (List.mem_cons_of_mem _ hbp)) hDone hgo
 
-/-- **Raw-edge positive-formula persistence** (plan Phase 7): a cheap stepping stone, NOT
-sufficient alone -- `truthLemma`'s frame is `intAccessPreorder edges` over the AUGMENTED edge
-list (`augSets`), strictly more worlds than any RAW-edge-only fact can reach (see the STOP-gate
-note above `truthLemma`, and report 05 §1/§4). Recorded so `intExpandBranches_openBranch_sat`'s
-conclusion carries at least the raw-edge half of the persistence invariant now, with the
-augmented-edge version (`IPosPersist`, Phase 11) exported once the reuse-time containment
-(Phase 8) and post-reuse closure lemma (Phase 9/10) land.
+/-- **Raw-edge positive-formula persistence** (plan Phase 7). **Update: this IS now sufficient**
+to instantiate `truthLemma`'s `hpers` hypothesis when `edges := rawEdges` -- `truthLemma`'s
+frame is a PARAMETER, not tied to the AUGMENTED `augSets` witness, and DP-5's T-imp case is
+proved directly from `hpers` (see `truthLemma`'s T-imp case and the `sat_timp` discharge
+STOP-gate note above it). The "NOT sufficient alone" framing this docstring originally carried
+was accurate only for the (now-superseded) assumption that `truthLemma` would always be
+instantiated at the augmented frame; it remains accurate for the AUGMENTED-edge version of
+persistence specifically, which is REFUTED at that frame
+(`CslibTests/BetaSplitRefutation.lean`) rather than merely unbuilt. Originally recorded so
+`intExpandBranches_openBranch_sat`'s conclusion carries at least the raw-edge half of the
+persistence invariant, with the augmented-edge version (`IPosPersist`, Phase 11) intended to
+export once the reuse-time containment (Phase 8) and post-reuse closure lemma (Phase 9/10)
+land -- that augmented-edge route is now known-refuted rather than pending, per
+`openBranch_countermodel`'s frame-adequacy table.
 
 The `hw'` side condition (some entry already present at `w'`) matches
 `applyPersistenceFixpoint_copy_complete`'s own hypothesis exactly (Phase 4, landed
@@ -7929,64 +7928,83 @@ world 0.
 
 ## Proof structure
 
-From `h : intExpandBranches ... S.closurePred = .openBranch b` we extract structural facts:
-1. `hopen`: the returned branch is open (`S.closurePred b = false`).
-2. `hsat`/`hfimp`: the returned branch is saturated, together with the edge-accessibility
-   upgrade of its F(φ→ψ) witnesses (Route (a)).
-3. `hFmem`: F(φ)@0 is on b (branch monotonicity: formulas are only added).
-Then `(truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem` closes the `¬IForces` conjunct,
-existentially packaging the `edges` the countermodel frame (`intAccessPreorder edges`) is
-installed over (Postmortem-5 revision: this internal conclusion MAY expose `edges`; the stable
-public `tableau_complete`/`Decidable` contract, discharged elsewhere, does not).
+The proof is currently a single `sorry` over the whole existential (see the sorry-site comment
+below): no `edges` witness is committed. An earlier revision extracted `h`'s structural facts
+(`hopen`, `hsat`/`hfimp`, `hFmem : F(φ)@0 ∈ b`, and `edges` itself via
+`intExpandBranches_openBranch_sat`) and closed the `¬IForces` conjunct with
+`(truthLemma S b edges hopen hsat hfimp hpers φ 0).2 hFmem`, committed to the AUGMENTED
+`augSets` witness via an early `refine` -- but `hpers` is REFUTED at that frame (see the
+frame-adequacy table below), so that route cannot supply `truthLemma`'s hypotheses honestly.
+The identical extraction machinery survives verbatim in `openBranch_rawEdges_upward_closed`
+immediately below, so it is available to a future attempt without being re-derived; existentially
+packaging `edges` here (rather than fixing it) is a Postmortem-5 revision -- this internal
+conclusion MAY expose `edges`, while the stable public `tableau_complete`/`Decidable` contract,
+discharged elsewhere, does not.
 
-**Statement-shape fix (upward-closure conjunct).** The conclusion additionally carries
-`intExtractValuation b`'s upward-closure along `intAccessPreorder edges` — the AUGMENTED frame
-(`edges` here is the `augSets` witness `intExpandBranches_openBranch_sat` threads, not the
-algorithm's raw edge list; see that lemma's docstring). This replaces the machine-verified
-defective premise `tableau_complete` used to demand (`CslibTests/HvalidShapeRefutation.lean`,
-`lake env lean` clean, zero sorries: `hvalid`'s old unconstrained-`(edges, b)` shape is false at
-a concrete witness even though the formula it is applied to is valid). Moving the obligation
-here, where `b`'s real provenance (`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`)
-is in scope, is what makes it fillable at all -- so the conjunct is proved by `sorry` for now (see
-the inline comment at the proof site). `tableau_complete` itself stays sorry-free; only this
-lemma gains the deferred obligation, relocated from the unfillable shape DP-3/DP-4 used to have.
+**Statement-shape fix (upward-closure conjunct).** The conclusion existentially quantifies over
+`edges`, unlike the machine-verified defective premise `tableau_complete` used to demand
+(`CslibTests/HvalidShapeRefutation.lean`, `lake env lean` clean, zero sorries: `hvalid`'s old
+unconstrained-`(edges, b)` shape is false at a concrete witness even though the formula it is
+applied to is valid). Moving the obligation here, where `b`'s real provenance
+(`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`) is in scope, is what makes it
+fillable at all. `tableau_complete` itself stays sorry-free; only this lemma carries the deferred
+obligation, relocated from the unfillable shape DP-3/DP-4 used to have.
 
-**Open — augmented-frame route known-bad, admissible edge space characterised.** This conjunct's
-disposition is DECIDED, and it is not REFUTED: the earlier framing of this disposition as
-undecided, and the unverified inference it rested on, are themselves incorrect (see below). Two
-independent arguments, one structural and one computational, settle this:
+**Open — no `edges` witness is committed by this proof.** Unlike an earlier revision, the proof
+below does NOT `refine` a specific `edges` (e.g. the AUGMENTED `augSets` witness
+`intExpandBranches_openBranch_sat` threads) and then `sorry` one conjunct over it — doing so
+would put a REFUTED statement (see the frame-adequacy table below) behind the `sorry`. The whole
+existential stays `sorry`, and that goal genuinely IS open, not refuted: `IValid φ` quantifies
+over every preorder and every upward-closed valuation, so any refutation would have to exhibit
+an IPC-valid `φ` on which the algorithm returns `.openBranch`, and no such `φ` is known or
+sought here.
 
-**Structural (needs no computation).** `IValid φ` quantifies over every preorder and every
-upward-closed valuation, so any refutation of this conjunct would have to exhibit an IPC-valid
-`φ` on which the algorithm returns `.openBranch`. `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) →
-pb)) → pr` is not even classically valid, so it was never a candidate refutation of this
-statement, whatever it does to any one frame choice.
+**Frame-adequacy table (machine-checked).** `truthLemma` consumes exactly two frame-dependent
+facts: `IFimpAccess edges b` (F-imp case) and positive persistence `hpers` along `edges` (T-imp
+case, DP-5, now discharged above). Conjunct 1 of this lemma is the atom-shaped special case of
+`hpers`. The two edge lists the algorithm produces sit on OPPOSITE sides of this pair:
 
-**Computational — the admissible edge space is `𝒫(⊑)`.** Let `⊑` be the atom-set-inclusion
-preorder on `b`'s worlds (`w ⊑ w' ↔ A(w) ⊆ A(w')`, `A(w)` = `w`'s positive atoms). Any `edges`
-keeping `intExtractValuation b` upward-closed satisfies `≤_edges ⊆ ⊑`, and every subset of `⊑`'s
-pairs is automatically upward-closed — so **this conjunct needs no fact about the tableau
-algorithm at all**. On the branch the real `intuitionisticTableau` returns for `phiRef1`, the
-pruned edge set `edges = [(1, 0)]` satisfies BOTH conjuncts (computed against the real algorithm,
-not CI-protected: see the scratch probes `WitnessProbe.lean`/`WitnessSearch2.lean`, not promoted
-into `CslibTests/`); exhaustive enumeration over the complete admissible space finds 40 witnesses
-for `phiRef1` alone.
+| frame | `IFimpAccess` | `hpers` |
+|---|---|---|
+| augmented (`augSets`) | holds (`:6924`) | REFUTED (`BetaSplitRefutation.lean`) |
+| raw (`rawEdges`) | REFUTED (`phiRef1`/`phiRef2` @2, `phiRef3` @3,4) | holds (`IPosPersistRaw`) |
 
-What IS machine-verified (`CslibTests/BetaSplitRefutation.lean`, zero errors, zero sorries,
-`branchesAgree = true` against the real `intuitionisticTableau`) is that the AUGMENTED frame
-`intAccessPreorder edges` — the `augSets` witness `intExpandBranches_openBranch_sat` threads,
-carrying the algorithm's loop-back edges — fails upward closure at `phiRef1`. That refutes
-*augmented-frame positive-formula persistence* as a proof route; it is a bad **witness choice**,
-not evidence against this conjunct's truth, since the conjunct's `edges` is unconstrained in the
-statement and need not be the algorithm's own edge list.
+Both refutations are machine-checked against the real algorithm at the real fuel: no candidate
+`edges` built from the algorithm's current output carries both predicates simultaneously, so no
+`truthLemma` call — over either edge list — closes this lemma's `¬IForces` conjunct together
+with a matching upward-closure proof.
 
-**Honesty bound.** The general `∀ φ` form of this conjunct remains unproved. The maximal
-inclusion frame `⊑` is NOT a uniform witness — computed evidence shows it fails at exactly the
-`phiRef1`/`phiRef3` family (`WitnessSearch3.lean`, computed, not CI-protected). Proving the
-conjunct in general is equivalent to proving the tableau procedure complete (by the structural
-argument above): this is not a small residual, it is the completeness theorem itself. The
-remaining obligation is a uniform construction of `edges` from `b` plus a truth lemma over that
-frame.
+**`rawEdges` is REFUTED as a conjunct-2 witness**, not merely unproved:
+`CslibTests/WitnessProbe.lean:174-176` (`#eval check [(1,0),(2,1)]` reports `some (true, true)` —
+upward-closed but FORCES `phiRef1` at world 0) together with
+`CslibTests/BetaSplitRefutation.lean:304` (the algorithm's real raw edge list for `phiRef1` at
+the real fuel `intFuelExt phiRef1` is exactly `[(1,0),(2,1)]`) and `:387`
+(`branchesAgree = true`, confirming that recreated list matches the REAL `intuitionisticTableau`
+run) together pin the algorithm's actual `rawEdges` output to a frame that satisfies conjunct 1
+but FAILS conjunct 2.
+
+**Three candidate sub-frame constructions are EXCLUDED**, not merely untried: pruning at blocked
+worlds and pruning at strictly-blocked worlds contradict each other on the same syntactic signal
+(the former fails `dblNeg`/`peirce`, the latter fails `phiRef3`), and the greatest
+`IFimpAccess`-supported fixpoint `K` — the construction a truth-lemma proof would actually need,
+since it makes the F-imp case close by construction — collapses to `K = ∅` for
+`phiRef1`/`phiRef2`/`phiRef3` (the unsupported blocked world strands its parent, up to world 0).
+The maximal atom-inclusion frame `⊑` was already excluded (fails `phiRef1`/`phiRef3`). None of
+the five natural constructions tried is a uniform witness.
+
+**The residual obligation is precisely this**: a frame carrying `IFimpAccess` and positive
+persistence SIMULTANEOUSLY, which the current calculus does not produce. This IS the surviving
+`sorry`'s goal, and it is OPEN, not refuted — the sub-frame search is not exhausted, merely
+unsuccessful with the constructions tried, and conjunct 2 can hold WITHOUT a truth lemma at all
+(e.g. `rawEdges` itself is a witness for `phiRef2`, even though the `IFimpAccess` fixpoint
+collapses there too) — so truth-lemma routes are strictly stronger than the goal and can fail
+where the goal succeeds.
+
+**Root cause, out of this file's scope.** Every route above dead-ends on the same defect:
+`intFImpReuseWitnessAnc?` (`Expansion.lean`) records a loop-back edge on a containment check it
+never re-validates as the branch grows. Re-validating it is what would let the augmented frame
+carry positive persistence, giving one frame with both predicates and collapsing this whole
+problem — that is calculus-level work in `Expansion.lean`, tracked separately from this file.
 
 ## References
 
@@ -8000,12 +8018,19 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
         intExtractValuation b w p → intExtractValuation b w' p) ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
-  -- sorry (placeholder note, full annotation lands separately): the whole existential is the
-  -- genuinely open goal -- no `edges` witness is committed here. See the docstring above for
-  -- the frame-adequacy disposition; the former proof committed to the AUGMENTED (`augSets`)
-  -- witness via an early `refine`, which put a REFUTED statement (upward closure over that
-  -- frame) behind the surviving `sorry` instead of this open one. That extraction/`refine`
-  -- machinery survives verbatim in `openBranch_rawEdges_upward_closed` immediately below.
+  -- sorry: the whole existential -- OPEN, not refuted (see the docstring's frame-adequacy
+  -- table above for the full disposition). No `edges` witness is committed here: an earlier
+  -- revision `refine`d the AUGMENTED `augSets` witness and then `sorry`d the upward-closure
+  -- conjunct alone, which put a REFUTED statement (augmented-frame positive persistence,
+  -- `CslibTests/BetaSplitRefutation.lean`) behind that `sorry`. `rawEdges` is REFUTED as a
+  -- conjunct-2 witness (`CslibTests/WitnessProbe.lean:174-176`,
+  -- `CslibTests/BetaSplitRefutation.lean:304,387`); three pruning-rule constructions and the
+  -- `IFimpAccess` greatest fixpoint are EXCLUDED (collapse to `K = ∅`); the maximal
+  -- atom-inclusion frame `⊑` was already excluded. The residual obligation is a frame carrying
+  -- both `IFimpAccess` and positive persistence, which the current calculus does not produce --
+  -- root cause is `intFImpReuseWitnessAnc?` (`Expansion.lean`), calculus-level work outside
+  -- this file. The extraction/`refine` machinery an earlier revision used here survives
+  -- verbatim in `openBranch_rawEdges_upward_closed` immediately below, so nothing is lost.
   sorry
 
 /-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly.** Constructs `edges` as
@@ -8017,11 +8042,16 @@ produces and `openBranch_countermodel` discards as `_rawEdges` -- and proves upw
 corollary of `IWorldHist`'s (H3) clause, derived above) chained over one `Relation.ReflTransGen`
 step at a time.
 
-Conjunct 2 (`¬ IForces ...`) is deliberately NOT addressed here -- see the successor task. This
-lemma is decoupled from `openBranch_countermodel`'s own `sorry` above: that lemma's `edges`
-binding is the AUGMENTED `augSets` witness, which conjunct 2's `truthLemma` call needs, and
-`rawEdges` is not (yet) shown to support `IFimpAccess`, so the two conjuncts cannot currently
-share one uniform `edges` -- reconciling them is the successor task's job, not this one's. -/
+Conjunct 2 (`¬ IForces ...`) is deliberately NOT addressed here. This lemma is decoupled from
+`openBranch_countermodel`'s own `sorry` above, which commits to no `edges` witness at all (see
+that lemma's docstring for the frame-adequacy table). Reconciling the two conjuncts over one
+uniform `edges` is now KNOWN IMPOSSIBLE on the algorithm's current output, not merely
+undone: `rawEdges` supports positive persistence but is REFUTED for `IFimpAccess`
+(`CslibTests/BetaSplitRefutation.lean`, `CslibTests/WitnessProbe.lean:174-176`), while the
+augmented frame `openBranch_countermodel` used to commit to supports `IFimpAccess` but is
+REFUTED for positive persistence -- neither edge list the algorithm currently produces carries
+both. Closing this gap is calculus-level work on `intFImpReuseWitnessAnc?` (`Expansion.lean`),
+outside this file's scope. -/
 lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)
     (b : IBranch Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]

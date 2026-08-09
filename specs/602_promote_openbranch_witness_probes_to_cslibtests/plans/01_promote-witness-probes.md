@@ -1,7 +1,7 @@
 # Implementation Plan: Promote openBranch_countermodel Witness Probes to CslibTests
 
 - **Task**: 602 - Promote the openBranch_countermodel witness probes into CslibTests for CI protection
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md

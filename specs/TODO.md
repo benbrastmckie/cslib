@@ -11,7 +11,7 @@ next_project_number: 607
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,602,603 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,603 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,604 | 36,37,181,375,400,425,534,554,568,594,603 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,605 | 39,40,604 | foundations, propositional logic |
 | 4 | 606 | 605 | propositional logic |
@@ -29,7 +29,6 @@ next_project_number: 607
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-602 [PLANNED] — Promote the four machine-checked witness probes produced by the d
 603 [IMPLEMENTING] — Construct `edges` uniformly from an open branch `b` and discharge
   └─ 604 [NOT STARTED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
     └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
@@ -176,12 +175,13 @@ The four existing sorries stay until the successor tasks land. Zero new sorries,
 ---
 
 ### 602. Promote the openBranch_countermodel witness probes into CslibTests for CI protection
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md]
 - **Plan**: [602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md]
+- **Summary**: [602_promote_openbranch_witness_probes_to_cslibtests/summaries/01_promote-witness-probes-summary.md]
 
 **Description**: Promote the four machine-checked witness probes produced by the disposition investigation into CslibTests/ so they are CI-protected, mirroring how CslibTests/BetaSplitRefutation.lean protects the beta-split counterexample.
 

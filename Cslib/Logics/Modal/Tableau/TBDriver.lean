@@ -728,6 +728,132 @@ private lemma modalApplyOneTB_branchingLength
   · rw [modalApplyOneTB_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or_TB hshape)] at hbr
     exact modalApplyOneB_spec.branchingLength sf b acc brs hbr
 
+/-! ## Discharging F8-F12 (the Hintikka/Saturation Chain Fields) -/
+
+/-- **F8 (`localShapeInvariance`)**: outside the two T-relevant shapes (guaranteed here, since
+`φ` is neither box- nor diamond-shaped), `modalApplyOneTB` agrees with `modalApplyOneB` on both
+calls (`modalApplyOneTB_eq_of_not_boxPos_diaNeg`), so `modalApplyOneB_spec`'s own field
+transports directly. -/
+private lemma modalApplyOneTB_localShapeInvariance
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc acc' : Accessibility) :
+    (modalApplyOneTB ⟨s, φ, w⟩ b acc).1 = (modalApplyOneTB ⟨s, φ, w⟩ b' acc').1 := by
+  have hnotshape : ∀ (b'' : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc'' : Accessibility),
+      modalApplyOneTB (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b'' acc''
+        = modalApplyOneB (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b'' acc'' := by
+    intro b'' acc''
+    apply modalApplyOneTB_eq_of_not_boxPos_diaNeg
+    refine ⟨?_, ?_⟩
+    · rintro ⟨-, ψ, hform⟩; exact hnb ψ hform
+    · rintro ⟨-, ψ, hform⟩; exact hnd ψ hform
+  rw [hnotshape b acc, hnotshape b' acc']
+  exact modalApplyOneB_spec.localShapeInvariance s φ w hnb hnd b b' acc acc'
+
+/-- **F9 (`boxPosNotExpanding`)**: `modalApplyOneTB`'s box-positive dispatch
+(`modalApplyOneTB_boxPos_fst`) maps `modalApplyOneB`'s `.persistent bForms ↦ .persistent (bForms
+++ selfNew...)` and `.notApplicable ↦ .notApplicable | .persistent selfNew` -- stays in the
+Propagating class either way. -/
+private lemma modalApplyOneTB_boxPosNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .pos)
+    (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneTB sf b acc).1 = .notApplicable ∨
+      ∃ out, (modalApplyOneTB sf b acc).1 = .persistent out := by
+  obtain ⟨s, φ, w⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  rw [modalApplyOneTB_boxPos_fst]
+  rcases modalApplyOneB_spec.boxPosNotExpanding (⟨.pos, .box ψ, w⟩) rfl ψ rfl b acc with
+      hk | ⟨bForms, hk⟩
+  · simp only [hk]; split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · simp only [hk]; exact Or.inr ⟨_, rfl⟩
+
+/-- **F10 (`diaNegNotExpanding`)**: dual of F9 for the diamond-negative shape, via
+`modalApplyOneTB_diamondNeg_fst`. -/
+private lemma modalApplyOneTB_diaNegNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .neg)
+    (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneTB sf b acc).1 = .notApplicable ∨
+      ∃ out, (modalApplyOneTB sf b acc).1 = .persistent out := by
+  obtain ⟨s, φ, w⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  rw [modalApplyOneTB_diamondNeg_fst]
+  rcases modalApplyOneB_spec.diaNegNotExpanding (⟨.neg, .diamond ψ, w⟩) rfl ψ rfl b acc with
+      hk | ⟨bForms, hk⟩
+  · simp only [hk]; split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · simp only [hk]; exact Or.inr ⟨_, rfl⟩
+
+/-- **F11' (`boxNegWitness'`)**: `⟨.neg, .box ψ, w⟩` misses both TB-relevant shapes (it is
+neither `.pos, .box` nor `.neg, .diamond`), so `modalApplyOneTB` agrees with `modalApplyOneB`
+here (`modalApplyOneTB_eq_of_not_boxPos_diaNeg`), and `modalApplyOneB_spec`'s own existential
+witness field transports directly -- K's own two mint arms, inherited unchanged through both
+layers. -/
+private lemma modalApplyOneTB_boxNegWitness'
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    ∃ w', (modalApplyOneTB (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w w' ∧
+      ∃ rest,
+        (modalApplyOneTB (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
+  have heq : modalApplyOneTB
+      (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneB (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
+    modalApplyOneTB_eq_of_not_boxPos_diaNeg _ b acc ⟨by simp, by simp⟩
+  rw [heq]
+  exact modalApplyOneB_spec.boxNegWitness' b acc ψ w
+
+/-- **F12' (`diaPosWitness'`)**: dual of F11'. -/
+private lemma modalApplyOneTB_diaPosWitness'
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    ∃ w', (modalApplyOneTB (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w w' ∧
+      ∃ rest,
+        (modalApplyOneTB (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
+  have heq : modalApplyOneTB
+      (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneB (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          b acc :=
+    modalApplyOneTB_eq_of_not_boxPos_diaNeg _ b acc ⟨by simp, by simp⟩
+  rw [heq]
+  exact modalApplyOneB_spec.diaPosWitness' b acc ψ w
+
+/-- **`modalApplyOneTB` satisfies `RuleApplicationSpec`**: the interface witness for the TB
+driver, combining the eleven fields discharged above. This is the TB-system analogue of
+`BDriver.lean`'s `modalApplyOneB_spec` and `TDriver.lean`'s `modalApplyOneT_spec`, and unblocks
+reusing the K-style FMP termination measure and the generic Hintikka/saturation chain for
+`modalTableauTB` via the `(apply, spec)`-bundled wrapper theorems. This is the **full**
+`RuleApplicationSpec`, not `RuleApplicationSpecCore` -- TB is a Tier A corner, and a Core-only
+discharge would silently move it to Tier B. -/
+theorem modalApplyOneTB_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneTB where
+  freshLocal := modalApplyOneTB_freshLocal
+  outputsSubsetUniverse := modalApplyOneTB_outputsSubsetUniverse
+  persistentFresh := modalApplyOneTB_persistentFresh
+  rankStep := modalApplyOneTB_rankStep
+  outDegStep := modalApplyOneTB_outDegStep
+  knownWorldsStep := modalApplyOneTB_knownWorldsStep
+  branchingLength := modalApplyOneTB_branchingLength
+  localShapeInvariance := modalApplyOneTB_localShapeInvariance
+  boxPosNotExpanding := modalApplyOneTB_boxPosNotExpanding
+  diaNegNotExpanding := modalApplyOneTB_diaNegNotExpanding
+  boxNegWitness' := modalApplyOneTB_boxNegWitness'
+  diaPosWitness' := modalApplyOneTB_diaPosWitness'
+
 end Cslib.Logic.Modal.Tableau
 
 end

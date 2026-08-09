@@ -3,11 +3,11 @@
   "started_at": "2026-08-08T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase 5",
-    "details": "Phase 4 (TBDriver skeleton, shape lemmas, barrel) complete and committed. Working on Phase 5 (F1-F7 RuleApplicationSpecCore fields).",
-    "phases_completed": 4,
+    "stage": "phase 7",
+    "details": "Phases 4-6 complete and committed (TBDriver skeleton, F1-F7, F8-F12 + modalApplyOneTB_spec assembled with full RuleApplicationSpec, standard axiom triple, zero sorry). Starting Phase 7 (generic Hintikka chain instantiation).",
+    "phases_completed": 6,
     "phases_total": 11,
-    "last_completed_phase": "Phase 4: TBDriver Module Skeleton, Shape Lemmas, and Barrel Registration"
+    "last_completed_phase": "Phase 6: Discharge F8-F12 and Assemble modalApplyOneTB_spec"
   },
   "metadata": {
     "session_id": "sess_1786228817_675b2c",

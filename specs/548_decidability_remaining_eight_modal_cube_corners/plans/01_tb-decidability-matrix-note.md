@@ -485,26 +485,26 @@ termination fields `rankStep`, `outDegStep`, `knownWorldsStep`.
 
 ---
 
-### Phase 6: Discharge F8-F12 and Assemble `modalApplyOneTB_spec` [NOT STARTED]
+### Phase 6: Discharge F8-F12 and Assemble `modalApplyOneTB_spec` [COMPLETED]
 
 **Goal**: Prove the Hintikka/saturation chain fields `localShapeInvariance` (F8),
 `boxPosNotExpanding` (F9), `diaNegNotExpanding` (F10), `boxNegWitness'` (F11'), and
 `diaPosWitness'` (F12'), then assemble the full eleven-field `modalApplyOneTB_spec`.
 
 **Tasks**:
-- [ ] Discharge F8 `localShapeInvariance`, mirroring `BDriver.lean:666-771` and
+- [x] Discharge F8 `localShapeInvariance`, mirroring `BDriver.lean:666-771` and
       `TDriver.lean:621-739`
-- [ ] Discharge F9 `boxPosNotExpanding`: the TB box-positive arm emits the T self-conjunct **and**
+- [x] Discharge F9 `boxPosNotExpanding`: the TB box-positive arm emits the T self-conjunct **and**
       the B backward conjunct, both `.persistent`, never `.linear`. Use the existentially-
       quantified `∃ out, (apply sf b acc).1 = .persistent out` form the bundle already uses so the
       merged output list is accommodated directly
-- [ ] Discharge F10 `diaNegNotExpanding` dually
-- [ ] Discharge F11' `boxNegWitness'` and F12' `diaPosWitness'` — these are K's own two mint arms,
+- [x] Discharge F10 `diaNegNotExpanding` dually
+- [x] Discharge F11' `boxNegWitness'` and F12' `diaPosWitness'` — these are K's own two mint arms,
       inherited unchanged through the agreement lemma
-- [ ] Assemble `theorem modalApplyOneTB_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneTB`
+- [x] Assemble `theorem modalApplyOneTB_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneTB`
       from the eleven field proofs, mirroring `modalApplyOneB_spec` (`BDriver.lean:772`) and
       `modalApplyOneT_spec` (`TDriver.lean:740`)
-- [ ] Confirm it is the **full** `RuleApplicationSpec`, not `RuleApplicationSpecCore` — TB is a
+- [x] Confirm it is the **full** `RuleApplicationSpec`, not `RuleApplicationSpecCore` — TB is a
       Tier A corner and a Core-only discharge would silently move it to Tier B
 
 **Timing**: 2 hours

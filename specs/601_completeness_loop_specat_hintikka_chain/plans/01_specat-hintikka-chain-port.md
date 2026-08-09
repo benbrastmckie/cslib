@@ -3,7 +3,7 @@
 - **Task**: 601 - Port the CompletenessLoop.lean top-loop Hintikka chain to the additive
   `RuleApplicationSpecAt` interface so D (and DB/D4/D5/D45) can reach
   `modalExpandBranchesD_hintikka`
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None (research complete; verified patch artifact on disk)
 - **Research Inputs**: `specs/601_completeness_loop_specat_hintikka_chain/reports/01_specat-hintikka-chain-route.md`
@@ -325,30 +325,50 @@ gate is a precondition for the next.
 
 ---
 
-### Phase 4: CI Lint Gates and Residual Recording [NOT STARTED]
+### Phase 4: CI Lint Gates and Residual Recording [COMPLETED]
 
 - **Goal**: Run the full CSLib CI verification order clean, and record the out-of-scope residuals
   for the successor task without absorbing them.
 
 - **Tasks**:
-  - [ ] `lake exe cache get` if the Mathlib olean cache is cold (step 0; skip if warm).
-  - [ ] `lake build` — full project, syntax linters run during build.
-  - [ ] `lake exe checkInitImports` — every file imports `Cslib.Init`.
-  - [ ] `lake lint` — environment linters. Not exercised during research; expect this to be the
-        gate most likely to surface something new.
-  - [ ] `lake exe lint-style` — text linters. Watch the 100-char limit on the new `DDriver.lean`
+  - [x] `lake exe cache get` if the Mathlib olean cache is cold (step 0; skip if warm). *(Cache
+        was already warm at task start; confirmed at Phase 1: "No files to download".)*
+  - [x] `lake build` — full project, syntax linters run during build. *(3325/3325 jobs, green.)*
+  - [x] `lake exe checkInitImports` — every file imports `Cslib.Init`. *(Clean, zero output.)*
+  - [x] `lake lint` — environment linters. Not exercised during research; expect this to be the
+        gate most likely to surface something new. *(373 total warning/error lines across the
+        whole library, all pre-existing debt in files this task never touched -- e.g.
+        `Cslib/Logics/Bimodal/...`, `Cslib/Logics/LTL/...`, `Cslib/Logics/Temporal/...`. Zero
+        hits in any of the 7 files this task modified; specifically zero hits for the 7 lint
+        prevention categories (docBlame/defLemma/defsWithUnderscore/simpNF/unusedSectionVars/
+        topNamespace/dupNamespace) in `Modal/Tableau/*`.)*
+  - [x] `lake exe lint-style` — text linters. Watch the 100-char limit on the new `DDriver.lean`
         theorem and the `FrameCompleteness.lean` `.toAt φ₀` insertions; the verified patch already
-        wraps them, so preserve that wrapping rather than reflowing.
-  - [ ] `lake test` — run `CslibTests/`.
-  - [ ] `lake shake --add-public --keep-implied --keep-prefix` — import minimization.
-  - [ ] Skip `lake exe mk_all --module`: no new file was added, so the `Cslib.lean` barrel is
+        wraps them, so preserve that wrapping rather than reflowing. *(Zero violations project-
+        wide; also caught and fixed two >100-char lines introduced by Phase 3's own docstring
+        prose in `CompletenessLoop.lean` and `GenericDriver.lean` before this gate ran.)*
+  - [x] `lake test` — run `CslibTests/`. *(9393/9393 built, exit 0.)*
+  - [x] `lake shake --add-public --keep-implied --keep-prefix` — import minimization. *(12
+        pre-existing suggestions project-wide (exit 1), none caused by this task's diff. Only one
+        of the 7 touched files appears -- `TDriver.lean`, an "add LoopChecking" suggestion -- and
+        this task's diff to that file touches only docstring prose and a same-symbols argument
+        reorder, no import list change, confirmed via `git diff HEAD~3`. Not applied: `--fix`
+        would touch files and an import list far outside this task's declared scope (Phase 1's
+        5-file/DDriver split, Non-Goals' "no new... barrel change"). Recorded here as a residual,
+        not absorbed.)*
+  - [x] Skip `lake exe mk_all --module`: no new file was added, so the `Cslib.lean` barrel is
         unchanged.
-  - [ ] Final axiom audit: `#print axioms modalExpandBranchesD_hintikka`,
+  - [x] Final axiom audit: `#print axioms modalExpandBranchesD_hintikka`,
         `modalExpandBranchesGen_hintikka`, `modalExpandBranchesHintikka`, and
         `modalTableau_complete` — all four must be exactly
-        `[propext, Classical.choice, Quot.sound]`.
-  - [ ] Final `sorry` audit across the six touched files: every hit must be docstring prose.
-  - [ ] Record in the implementation summary, as **out of scope, flagged not absorbed**: (a)
+        `[propext, Classical.choice, Quot.sound]`. *(Confirmed via `#print axioms` for all four.)*
+  - [x] Final `sorry` audit across the six touched files: every hit must be docstring prose.
+        *(7 files audited -- CompletenessLoop.lean, TDriver.lean, BDriver.lean, TBDriver.lean,
+        FrameCompleteness.lean, DDriver.lean, GenericDriver.lean; 6 grep hits total, every one
+        prose describing an unrelated pre-existing standing sorry in FrameSoundness.lean, not a
+        tactic block. Zero new axioms confirmed via `git diff HEAD~3 | grep '^\+axiom '` (blank)
+        against the 26 pre-existing project-wide `axiom` declarations.)*
+  - [x] Record in the implementation summary, as **out of scope, flagged not absorbed**: (a)
         `modalTableauD_complete` needs a `modalLoopInvGen_initial_at` sibling in `DDriver.lean`
         (~60-80 lines) because `modalLoopInvGen_initial` proves the initial invariant where branch
         formula and seed coincide, while D needs branch formula `φ` at seed `modalDualAugment φ`;
@@ -356,8 +376,11 @@ gate is a precondition for the next.
         `mem_modalSubfmls_foldrAnd_of_base` (`DDriver.lean:106`) and a `phiBound` re-derivation as
         the likely route, with the fuel bridge `modalExpMeasure_entry_le_fuel_at`
         (`DDriver.lean:359`) already landed; and (b) the Decidable-instance arm
-        (`FrameSoundness.lean` / `FrameCompleteness.lean`).
-  - [ ] Do not create the successor task from within this phase; record the residuals in the
+        (`FrameSoundness.lean` / `FrameCompleteness.lean`). *(Recorded in
+        summaries/01_specat-hintikka-chain-port-summary.md; also flagging a third residual
+        discovered during this phase: `TDriver.lean`'s pre-existing "add LoopChecking" shake
+        suggestion, unrelated to this task's diff.)*
+  - [x] Do not create the successor task from within this phase; record the residuals in the
         summary and let the orchestrator decide.
 
 - **Timing**: 60 minutes (dominated by build and lint wall time)

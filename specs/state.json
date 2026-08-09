@@ -48,7 +48,7 @@
       "project_number": 604,
       "project_name": "prove_countermodel_forcing_conjunct_over_constructed_frame",
       "title": "Prove the countermodel forcing conjunct over the constructed frame",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0 phi` -- over the frame constructed by the predecessor task, at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.\n\nTHIS IS THE HARD PART. Per the structural argument recorded in specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md, proving this in general is EQUIVALENT to proving the tableau procedure complete. Treat it as substantial open mathematical work, not a mechanical step.\n\nWHAT THIS REQUIRES: a truth lemma over the chosen frame. Note carefully that switching the witness away from the augmented intAccessPreorder frame does not eliminate this work -- it RELOCATES it. The existing conjunct-2 argument is tied to the augSets witness threaded by intExpandBranches_openBranch_sat, so a new frame needs its own forcing argument rather than inheriting that one.\n\nSTRUCTURAL CONSTRAINT (established, treat as ground truth): IValid phi quantifies over every preorder and every upward-closed valuation, so any refutation of openBranch_countermodel would have to exhibit an IPC-valid phi on which the algorithm returns .openBranch. phiRef1 is not even classically valid, so it was never such a candidate -- do not mistake a failing witness for a refutation.\n\nEVIDENCE AVAILABLE (does not constitute a general proof): witnesses exist for phiRef1, phiRef2, phiRef3, exMiddle, dblNeg, peirce, deMorgan, and dummett under intScheme, and for phiRef1 under minScheme. Eight formulas is not a forall phi proof.\n\nA DOCUMENTED NEGATIVE OR NARROWING RESULT IS A LEGITIMATE OUTCOME. If the constructed frame cannot support conjunct 2, record precisely why, in-source, with the same honesty discipline the current annotations use (open / route known-bad / space characterised -- never 'refuted' unless genuinely machine-refuted). Do not manufacture a proof to avoid a negative result.\n\nDP-5 (truthLemma, Scheme.lean:693, sorry at :768, the T(phi' -> psi') implication case) shares this frame-persistence question and is the natural companion site -- discharging it may fall out of the same truth lemma.\n\nThe existing sorries stay until this and the residual task land. Zero new sorries, zero new axioms.",
@@ -60,8 +60,15 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:41:11Z",
-      "last_updated": "2026-08-09T22:01:43Z",
-      "session_id": "sess_1786312852_6b5c1b_604"
+      "last_updated": "2026-08-09T22:18:07Z",
+      "session_id": "sess_1786312852_6b5c1b_604",
+      "artifacts": [
+        {
+          "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
+          "type": "report",
+          "summary": "Conjunct-2 frame adequacy: rawEdges refuted, DP-5 dischargeable"
+        }
+      ]
     },
     {
       "project_number": 603,
@@ -1330,14 +1337,14 @@
     {
       "project_number": 596,
       "project_name": "realign_roadmap_with_verified_state",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "meta",
       "topic": "Agent System",
       "title": "Correct ROADMAP.md's stale cleanup agenda and fold in the 20 unrepresented open tasks",
       "description": "Realign specs/ROADMAP.md with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H4-H5).\n\nWHAT IS ALREADY CORRECT -- do not disturb it: the quantitative core reproduces exactly against the tree. The 27/23/4/0 sorry census (ROADMAP.md:146-149), the 15-system grid, the 24 subsumption theorems in InterSystem/AxiomSubsumption.lean, and the count of 6 `instDecidable*Valid` instances were all re-verified on 2026-08-07 and are accurate, reflecting the reconciliation commit 26644732.\n\n(1) SECTION B \"ABSTRACTION & REDUNDANCY CLEANUP\" (:165-176) IS 4/5 STALE. It is presented as the current priority but four of its five rows are completed-and-archived work:\n- :167 lists the modal tableau refactor programme as outstanding; ALL EIGHT of its tracked tasks are terminal in the archive (one expanded; the rest completed).\n- :167 states \"`LoopChecking.lean` alone is 10,723 lines / 230 declarations\". Actual: 1,626 lines / 20 declarations -- off by 6.6x. The split already shipped, into eleven Modal/Tableau/S4/*.lean modules (BirthKey, Driver, Guard, Hintikka, HintikkaInvariant, Invariant, InvariantAcc, InvariantKeys, Redirect, Universe). The CHANGE_LOG records the pre-split size as 11,393/241, so 10,723/230 was never accurate either.\n- :167 lists the `Boneyard/` quarantine as pending; Boneyard/ exists with README.md + ModalTableauS4Keyed.\n- :170 marks Foundations/Logic/Tableau/Blocking.lean \"(new)\"; it exists at 202 lines with `Branch.typeAt`, `containmentBlocked`, `distinctTypes_le_pow`, `strictChain_le_card`.\n- :171 lists proof-style simplification as lower-priority outstanding; both its tracked tasks are completed and archived.\nMove all five rows to Completed and correct the LoopChecking figure.\n\n(2) FURTHER FALSIFIED CLAIMS: :175 says BXCanonical has \"14 sorries\" -- actual 13 (ChronicleToCountermodel.lean 12 + Frame.lean 1). :157 attributes 23 sorries to three tasks, but ownership is actually split 13 / 9 / 1, and the 9 (Bundle/SuccRelation.lean 7 + Bundle/UntilSinceCoherence.lean 2, the strict Until/Since gap) belong to a task never named on the roadmap; it also double-counts the row at :158. :153 gates S4 decidability on a task that is completed. :155's tracking chain is 4/5 archived. :183 says the shared completeness infrastructure was \"folded into\" the Chronicle consolidation, but that closed as a DESCOPED PARTIAL with Phases 3b/3c/4a/4b formally abandoned and ~89% Chronicle duplication remaining -- the obligation was not absorbed; open task 41 still holds it and task 568 was created because the consolidation did not deliver it. :114 attributes all six decidability instances to FrameCompleteness.lean when K actually lives at CompletenessLoop.lean:2295.\n\n(3) TWENTY OF THIRTY OPEN TASKS HAVE NO ROADMAP PRESENCE. The largest omission is 548: :114 presents modal decidability as essentially delivered while 9 of the 15 cube corners (D, K4, K45, D4, D5, D45, DB, TB, and pure-K5) have no Decidable instance. Also absent: 537/551/554 (the CS5 stream -- and the \"Completed\" CS5 row at :130 is contradicted by Labelled/Soundness.lean:20, which states \"The general `nik_TS5_soundness` is not yet landed\"); 301/425 (temporal tableau, while :122 lists Temporal \"tableau\" as completed); 571; 568/569; 576; 39/40/41; 181; 400/497/409 (the entire propositional upstream stream); 588/589/590.\n\n(4) APPLY THE FIX THE PRIOR AUDIT ALREADY RECOMMENDED. specs/ROADMAP-alignment-audit.md:79 recommended adding a \"Modal Tableau Decidability\" section and was never applied. Add it, and give the CS5, temporal-tableau and propositional-upstream streams sections of their own.\n\n(5) RESOLVE OR TRACK THE SELF-DECLARED GAP at :173-176: \"Open decision (no task yet)\" on whether to complete BXCanonical/dense or abandon it in favour of the algebraic pipeline. Either create the task or record the decision.\n\nCONSTRAINT: documentation only. No .lean file may be edited. Every numeric claim added or retained must be re-verified against the tree at execution time, not copied from this description -- these figures are dated 2026-08-07 and the tree moves.",
       "dependencies": [],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-09T22:15:47Z",
+      "last_updated": "2026-08-09T22:16:29Z",
       "file_scope": [
         "specs/ROADMAP.md"
       ],

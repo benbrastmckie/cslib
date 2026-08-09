@@ -1,0 +1,30 @@
+{
+  "status": "researched",
+  "summary": "Conjunct 2 over task 603's rawEdges frame is MACHINE-REFUTED, not merely hard: CslibTests/WitnessProbe.lean:174-176 asserts check [(1,0),(2,1)] = some (true, true) (upward-closed but FORCES phiRef1 at world 0), and BetaSplitRefutation.lean:304/:387 confirm [(1,0),(2,1)] is the real algorithm's rawEdges at the real fuel. A new eight-formula probe reproduces this and adds phiRef3, and excludes three further candidate constructions (prune-at-blocked fails dblNeg/peirce; prune-at-strictly-blocked fails phiRef3; the IFimpAccess greatest fixpoint collapses to the empty frame for phiRef1/2/3). Core finding: IFimpAccess and positive persistence sit on OPPOSITE frames -- augmented has IFimpAccess but persistence is refuted; raw has persistence but IFimpAccess is refuted (world 2 for phiRef1/phiRef2, worlds 3,4 for phiRef3). Separately and positively, DP-5 (truthLemma's T-imp sorry at Scheme.lean:768) IS dischargeable sorry-free over any persistence-carrying frame; the 15-line proof was applied and BUILT GREEN in a reverted spike (diff preserved at scratch/dp5-spike.diff).",
+  "artifacts": [
+    {
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
+      "type": "report",
+      "summary": "Frame-adequacy verdict: rawEdges refuted for conjunct 2, four candidate constructions excluded, DP-5 discharge verified by build, and the recommended honest landing (Scheme.lean 2 live sorries -> 1)"
+    },
+    {
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/PruneProbe.lean",
+      "type": "probe",
+      "summary": "Eight-formula probe: recovers real rawEdges/loop-back lists at intFuelExt fuel (recreation agreement asserted), locates IFimpAccess failure worlds, evaluates three pruning rules and the IFimpAccess support fixpoint"
+    },
+    {
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/dp5-spike.diff",
+      "type": "probe",
+      "summary": "The 28-line verified DP-5 discharge (truthLemma gains an hpers hypothesis; T-imp sorry replaced by a 15-line proof via sat_timp + chained persistence). Built green, then reverted."
+    }
+  ],
+  "blockers": [
+    {
+      "task": null,
+      "description": "openBranch_countermodel's remaining obligation needs a frame carrying IFimpAccess AND positive persistence simultaneously. The current calculus produces no such frame, and each available frame's missing half is machine-refuted rather than merely unproved. The root cause is the already-named Expansion.lean defect: intFImpReuseWitnessAnc? records a loop-back edge on a containment check it never re-validates as the branch grows. Fixing that is calculus-level work outside Scheme.lean and warrants its own task.",
+      "sorry_count": 1
+    }
+  ],
+  "continuation_context": "Recommended landing (report section 6, in order): (1) add the hpers hypothesis to truthLemma and replace the DP-5 sorry with the verified proof from scratch/dp5-spike.diff -- note intro hforce_phi' MUST come after the persistence `have`, or `induction hle` sweeps it into the motive; (2) openBranch_countermodel can then no longer instantiate truthLemma at the augmented frame (hpers is refuted there) and must NOT sorry a refuted hypothesis -- drop its frame-committing `refine <edges, ?_, ...>` so its single sorry is the whole existential, which is genuinely open; (3) net effect: Scheme.lean goes from 2 live sorries to 1, and the survivor's goal changes from a refuted statement (upward closure over augSets) to an open one; (4) update annotations at both sites with the frame-adequacy table, using 'refuted' only for the machine-refuted cells. Fallback if step 2 is judged out of scope: land the DP-5 proof as a standalone sorry-free variant beside truthLemma (task 603's precedent), at the cost of ~90 duplicated lines. Do NOT re-attempt rawEdges, the maximal inclusion frame, either pruning rule, or the IFimpAccess fixpoint -- all four are now excluded with machine evidence. Cslib/ was restored byte-identical after the spike; baseline lake build is green with sorry warnings at Scheme.lean:693 and :7977 only.",
+  "next_action_hint": "plan"
+}

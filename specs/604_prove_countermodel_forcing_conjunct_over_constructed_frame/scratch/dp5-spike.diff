@@ -1,0 +1,28 @@
+696a697,698
+>     (hpers : ∀ (χ : Proposition Atom) (x y : Nat), isAccessible edges x y = true →
+>       (⟨.pos, χ, x⟩ : ISF Atom) ∈ b → (⟨.pos, χ, y⟩ : ISF Atom) ∈ b)
+767,768c769,785
+<       intro _
+<       sorry
+---
+>       intro hT w' hle
+>       have hmem : (⟨.pos, .imp φ' ψ', w⟩ : ISF Atom) ∈ b := by
+>         obtain ⟨sf, hsfb, hsfp⟩ := List.any_eq_true.mp hT
+>         simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+>         obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+>         cases sf; simp_all
+>       have hmem' : (⟨.pos, .imp φ' ψ', w'⟩ : ISF Atom) ∈ b := by
+>         induction hle with
+>         | refl => exact hmem
+>         | @tail y w2 _hchain hstep ih => exact hpers _ y w2 hstep ih
+>       have hany' : b.any
+>           (fun sf => sf.sign == .pos && sf.formula == .imp φ' ψ' && sf.label == w') = true :=
+>         List.any_eq_true.mpr ⟨_, hmem', by simp⟩
+>       intro hforce_φ'
+>       rcases hsat.sat_timp φ' ψ' w' hany' with hF | hT2
+>       · exact absurd hforce_φ' ((ih_φ' w').2 hF)
+>       · exact (ih_ψ' w').1 hT2
+8034c8051
+<   refine ⟨edges, ?_, (truthLemma S b edges hopen hsat hfimp φ 0).2 hFmem⟩
+---
+>   refine ⟨edges, ?_, (truthLemma S b edges hopen hsat hfimp (by sorry) φ 0).2 hFmem⟩

@@ -28,7 +28,7 @@ next_project_number: 607
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-604 [RESEARCHING] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
+604 [RESEARCHED] — Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0
   └─ 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
     └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
@@ -74,7 +74,7 @@ next_project_number: 607
 
 594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
   └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
-596 [PLANNED] — Realign specs/ROADMAP.md with verified repository state. Created 
+596 [IMPLEMENTING] — Realign specs/ROADMAP.md with verified repository state. Created 
 
 ## Tasks
 
@@ -123,10 +123,11 @@ A documented negative or narrowing result is a legitimate outcome, recorded in-s
 ---
 
 ### 604. Prove the countermodel forcing conjunct over the constructed frame
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603
+- **Research**: [604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md]
 
 **Description**: Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0 phi` -- over the frame constructed by the predecessor task, at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.
 
@@ -272,7 +273,7 @@ RESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. 
 ---
 
 ### 596. Correct ROADMAP.md's stale cleanup agenda and fold in the 20 unrepresented open tasks
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: meta
 - **Topic**: Agent System
 - **Dependencies**: None

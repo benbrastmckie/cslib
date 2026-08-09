@@ -1,0 +1,23 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-09T00:00:00Z",
+  "artifacts": [
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/PruneProbe.lean",
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/dp5-spike.diff"
+  ],
+  "partial_progress": {
+    "stage": "research_complete",
+    "details": "Conjunct 2 over rawEdges machine-refuted; four candidate frames excluded; DP-5 discharge verified by lake build in a reverted spike; report and handoff written"
+  },
+  "metadata": {
+    "session_id": "sess_1786312852_6b5c1b_604",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "sorry_count_baseline": 2,
+    "sorry_count_after_recommended_landing": 1,
+    "new_sorries": 0,
+    "new_axioms": 0
+  }
+}

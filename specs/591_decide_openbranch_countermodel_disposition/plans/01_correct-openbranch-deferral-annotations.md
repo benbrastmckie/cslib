@@ -223,7 +223,7 @@ silently editing a different set.
 
 ---
 
-### Phase 2: Correct `openBranch_countermodel` in `Scheme.lean` (H1, H2) [IN PROGRESS]
+### Phase 2: Correct `openBranch_countermodel` in `Scheme.lean` (H1, H2) [COMPLETED]
 
 **Goal**: Replace the "DISPOSITION UNDECIDED / no change authorized" framing at the root site —
 the docstring and the proof-site comment of `openBranch_countermodel` — with the corrected
@@ -275,7 +275,7 @@ proof-site comment of `openBranch_countermodel`). Confirm by grepping `Scheme.le
 
 ---
 
-### Phase 3: Correct DP-5 and the stale cross-reference in `Scheme.lean` (H3, H4) [NOT STARTED]
+### Phase 3: Correct DP-5 and the stale cross-reference in `Scheme.lean` (H3, H4) [COMPLETED]
 
 **Goal**: Correct DP-5's conclusion — the augmented-frame refutation is real, but "a refutation
 of the STATEMENT" does not follow — and fix the stale claim at H4 that DP-3/DP-4/DP-5 all depend
@@ -326,7 +326,7 @@ cross-reference sentence). Confirm by grepping `Scheme.lean` for `PERMANENTLY DE
 
 ---
 
-### Phase 4: Correct DP-3 in `Intuitionistic/Completeness.lean` (H5, H6, H7) [NOT STARTED]
+### Phase 4: Correct DP-3 in `Intuitionistic/Completeness.lean` (H5, H6, H7) [IN PROGRESS]
 
 **Goal**: Re-annotate DP-3 as an **open** obligation blocked on a uniform frame construction,
 across all three hunks in the file, while keeping the `exact h …` prohibition.

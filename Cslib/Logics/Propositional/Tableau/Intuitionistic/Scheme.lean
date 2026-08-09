@@ -580,11 +580,15 @@ length-equality exit of `applyPersistenceFixpoint` genuinely IS fixpoint-ness
 discharges exactly that remaining case, stated for arbitrary `b` and `fuel`, with both its
 hypotheses already in scope at every arm of the `key` induction below, including the reuse arm
 (`case6`). Gap 1's fuel-sufficiency side is therefore closed. This does **not** discharge the
-`sorry` immediately below, nor DP-3/DP-4/DP-5: those depend on the AUGMENTED-frame
-positive-formula persistence invariant, which is a strictly stronger statement that is separately
-REFUTED (see the `sorry`'s own annotation, and `CslibTests/BetaSplitRefutation.lean`). Retained
-here, uncorrected in place, as a historical record of the earlier (mistaken) blocker analysis; do
-not re-derive either the "not been built" claim or its correction.
+`sorry` immediately below (DP-5's augmented-frame instantiation), which genuinely depends on the
+AUGMENTED-frame positive-formula persistence invariant and is refuted at `phiRef1` (see that
+`sorry`'s own annotation, and `CslibTests/BetaSplitRefutation.lean`). **Correction**: it does
+NOT, however, bear on DP-3/DP-4 the way an earlier note here claimed. Those consume
+`openBranch_countermodel`'s conjunct 1, which — per that lemma's docstring — needs no algorithm
+invariant at all, so the claim that all three depended on this refuted invariant was itself
+wrong for DP-3/DP-4; only DP-5's augmented-frame instantiation genuinely does. Retained here,
+uncorrected in place except for that one dependency claim, as a historical record of the earlier
+(mistaken) blocker analysis; do not re-derive the "not been built" claim or its correction.
 
 **`sat_timp` IS an `IBranchSaturation` field** (`:105-108`), realized by `intApplyRuleFull`'s
 `.pos, .imp` branching arm (`Rules.lean:245-268`, `:274-275`), which fires reflexively at the
@@ -741,11 +745,11 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- along the augmented accessibility relation (the same fact, atom-shaped, as the
       -- monotonicity bridge the `Completeness.lean` files' `sorry`s below rest on).
       --
-      -- DP-5 -- PERMANENTLY DEFERRED, unprovable as stated (not "pending Phases 7-11", not
-      -- "deferred to future work"). The augmented-edge positive-formula persistence invariant
-      -- this goal needs is REFUTED by a machine-verified counterexample:
-      -- `CslibTests/BetaSplitRefutation.lean` (`lake env lean`, zero errors, zero sorries)
-      -- exhibits
+      -- DP-5 -- open, augmented-frame route known-bad (not "pending Phases 7-11", not
+      -- "deferred to future work" either -- this is a corrected disposition, not a schedule).
+      -- The augmented-edge positive-formula persistence invariant this goal needs IS refuted by
+      -- a machine-verified counterexample: `CslibTests/BetaSplitRefutation.lean` (`lake env
+      -- lean`, zero errors, zero sorries) exhibits
       -- `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`, for which
       -- `intExtractValuation b` is NOT upward-closed along the augmented `intAccessPreorder
       -- edges` frame: worlds `1` and `2` are augmented-preorder-equivalent (joined by the
@@ -754,9 +758,12 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- `intuitionisticTableau`. The mechanism is independent beta-splits at two
       -- augmented-preorder-equivalent worlds joined by a loop-back edge that
       -- `intFImpReuseWitnessAnc?` never re-validates once recorded (see that declaration's
-      -- docstring in `Expansion.lean` for the frame-construction limitation this names). This is
-      -- a refutation of the STATEMENT, not a proof-route failure; see DP-5's row in the plan's
-      -- Planned Strategic Sorries table.
+      -- docstring in `Expansion.lean` for the frame-construction limitation this names). This
+      -- refutes the AUGMENTED-FRAME INSTANTIATION of the persistence invariant, not the goal
+      -- itself: `truthLemma`'s frame is a parameter, and this invariant is only needed when
+      -- that parameter is the augmented frame. The lemma over a sub-`⊑` frame remains open; see
+      -- `openBranch_countermodel`'s docstring (further below in this file) for the related
+      -- disposition of why conjunct 1 needs no algorithm invariant at all.
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.

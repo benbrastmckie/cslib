@@ -1128,6 +1128,137 @@ lemma modalApplyOneD_branchingLength
       rw [heq] at hca
       exact modalApplyOne_branching_length sf b acc brs hca
 
+/-! ## Discharging F8-F12 and Assembling the `RuleApplicationSpecAt` Bundle
+
+F8, F11', F12' below are lifted from the preserved prototype (machine-checked there, essentially
+verbatim). F9/F10 are new here (the prototype's own docstring claims them but its body does not
+actually state them as separate lemmas): both are quick corollaries of phase 5's
+`modalApplyOneD_boxPos_fst`/`_diamondNeg_fst`, mirroring `TDriver.lean`'s
+`modalApplyOneT_boxPosNotExpanding`/`_diaNegNotExpanding`. -/
+
+omit [Hashable Atom] in
+/-- **F8 (`localShapeInvariance`)**: lifted from the preserved prototype. -/
+lemma modalApplyOneD_localShapeInvariance
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc acc' : Accessibility) :
+    (modalApplyOneD ⟨s, φ, w⟩ b acc).1 = (modalApplyOneD ⟨s, φ, w⟩ b' acc').1 := by
+  have hnotshape : ∀ (b'' : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc'' : Accessibility),
+      modalApplyOneD (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b'' acc''
+        = modalApplyOne (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b'' acc'' := by
+    intro b'' acc''
+    apply modalApplyOneD_eq_of_not_boxPos_diaNeg
+    exact ⟨by rintro ⟨-, ψ, hform⟩; exact hnb ψ hform,
+           by rintro ⟨-, ψ, hform⟩; exact hnd ψ hform⟩
+  rw [hnotshape b acc, hnotshape b' acc']
+  exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
+
+omit [Hashable Atom] in
+/-- **F9 (`boxPosNotExpanding`)**: `modalApplyOneD`'s box-positive dispatch
+(`modalApplyOneD_boxPos_fst`) maps K's `.persistent kForms ↦ .persistent (kForms ++ dualNew...)`
+and `.notApplicable ↦ .notApplicable | .persistent dualNew` -- **stays in the Propagating
+class** either way. This is the field the task's original premise assumed was unsatisfiable for
+D; it is not -- the genuinely failing field is F2 (`outputsSubsetUniverse`), not this one. -/
+lemma modalApplyOneD_boxPosNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .pos)
+    (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneD sf b acc).1 = .notApplicable ∨
+      ∃ out, (modalApplyOneD sf b acc).1 = .persistent out := by
+  obtain ⟨s, φ, w⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  rw [modalApplyOneD_boxPos_fst]
+  rcases modalApplyOne_boxPos_eq (⟨.pos, .box ψ, w⟩) rfl ψ rfl b acc with hk | ⟨kForms, hk⟩
+  · simp only [hk]; split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · simp only [hk]; exact Or.inr ⟨_, rfl⟩
+
+omit [Hashable Atom] in
+/-- **F10 (`diaNegNotExpanding`)**: dual of F9 for the diamond-negative shape, via
+`modalApplyOneD_diamondNeg_fst`. -/
+lemma modalApplyOneD_diaNegNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .neg)
+    (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneD sf b acc).1 = .notApplicable ∨
+      ∃ out, (modalApplyOneD sf b acc).1 = .persistent out := by
+  obtain ⟨s, φ, w⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  rw [modalApplyOneD_diamondNeg_fst]
+  rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond ψ, w⟩) rfl ψ rfl b acc with
+      hk | ⟨kForms, hk⟩
+  · simp only [hk]; split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · simp only [hk]; exact Or.inr ⟨_, rfl⟩
+
+omit [Hashable Atom] in
+/-- **F11' (`boxNegWitness'`)**: `⟨.neg, .box ψ, w⟩` has sign `.neg`, so it misses D's
+`.pos, .box`/`.neg, .diamond` dual arms entirely -- `modalApplyOneD` agrees with `modalApplyOne`
+here, so K's own `modalApplyOne_boxNeg_witness` transports directly. Lifted from the preserved
+prototype (machine-checked there). -/
+lemma modalApplyOneD_boxNegWitness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneD (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOneD (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  rw [modalApplyOneD_eq_of_not_boxPos_diaNeg _ b acc ⟨by simp, by simp⟩]
+  exact modalApplyOne_boxNeg_witness b acc ψ w
+
+omit [Hashable Atom] in
+/-- **F12' (`diaPosWitness'`)**: dual of F11' -- `⟨.pos, .diamond ψ, w⟩` misses D's dual arms
+too. Lifted from the preserved prototype (machine-checked there). -/
+lemma modalApplyOneD_diaPosWitness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneD (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOneD (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  rw [modalApplyOneD_eq_of_not_boxPos_diaNeg _ b acc ⟨by simp, by simp⟩]
+  exact modalApplyOne_diamondPos_witness b acc ψ w
+
+/-- **`modalApplyOneD` satisfies `RuleApplicationSpecAt (modalDualAugment φ)`**: the interface
+witness for the D driver, combining the twelve fields discharged above (phases 6-8). This is the
+D-system analogue of `TDriver.lean`'s `modalApplyOneT_spec`, narrowed to `…At` because F2
+(`outputsSubsetUniverse`) only holds at the fixed dual-closed seed `modalDualAugment φ`, never at
+an arbitrary `φ0` -- exactly what `RuleApplicationSpecAt` (`GenericDriver.lean`) exists to
+express. Unblocks reusing the K-style FMP termination measure
+(`FmpMeasure.lean`/`GenericDriver.lean`'s `…At`-narrowed wrappers) for `modalTableauD`. -/
+theorem modalApplyOneD_specAt (φ : Proposition Atom) :
+    RuleApplicationSpecAt (modalDualAugment φ) (Atom := Atom) modalApplyOneD where
+  freshLocal := modalApplyOneD_freshLocal
+  outputsSubsetUniverse := modalApplyOneD_outputsSubsetUniverse_at φ
+  persistentFresh := modalApplyOneD_persistentFresh
+  rankStep := modalApplyOneD_rankStep
+  outDegStep := modalApplyOneD_outDegStep
+  knownWorldsStep := modalApplyOneD_knownWorldsStep
+  branchingLength := modalApplyOneD_branchingLength
+  localShapeInvariance := modalApplyOneD_localShapeInvariance
+  boxPosNotExpanding := modalApplyOneD_boxPosNotExpanding
+  diaNegNotExpanding := modalApplyOneD_diaNegNotExpanding
+  boxNegWitness' := fun b acc ψ w =>
+    ⟨modalNextWorld b, (modalApplyOneD_boxNegWitness b acc ψ w).1,
+      (modalApplyOneD_boxNegWitness b acc ψ w).2⟩
+  diaPosWitness' := fun b acc ψ w =>
+    ⟨modalNextWorld b, (modalApplyOneD_diaPosWitness b acc ψ w).1,
+      (modalApplyOneD_diaPosWitness b acc ψ w).2⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

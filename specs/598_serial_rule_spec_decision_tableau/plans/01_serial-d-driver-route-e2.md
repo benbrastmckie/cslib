@@ -436,7 +436,7 @@ genuinely new content.
 
 ---
 
-### Phase 8: F8-F12 and the `RuleApplicationSpecAt` Bundle [NOT STARTED]
+### Phase 8: F8-F12 and the `RuleApplicationSpecAt` Bundle [COMPLETED]
 
 **Goal**: The remaining five Hintikka/saturation fields are discharged and bundled into a single
 `RuleApplicationSpecAt (modalDualAugment φ) modalApplyOneD` witness.

@@ -1062,7 +1062,7 @@
     {
       "project_number": 591,
       "project_name": "decide_openbranch_countermodel_disposition",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "title": "Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)",
@@ -1071,11 +1071,19 @@
         592
       ],
       "created": "2026-08-07T00:00:00Z",
-      "last_updated": "2026-08-07T00:00:00Z",
+      "last_updated": "2026-08-09T16:52:59Z",
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
         "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean"
+      ],
+      "session_id": "sess_1786294327_b96abd_591",
+      "artifacts": [
+        {
+          "path": "specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md",
+          "type": "report",
+          "summary": "Machine-checked verdict on the openBranch_countermodel exists-edges conjunct"
+        }
       ]
     },
     {

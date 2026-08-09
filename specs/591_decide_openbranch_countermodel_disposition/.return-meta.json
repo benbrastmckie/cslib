@@ -1,0 +1,33 @@
+{
+  "status": "research_finished",
+  "started_at": "2026-08-09T00:00:00Z",
+  "finished_at": "2026-08-09T00:00:00Z",
+  "artifacts": [
+    "specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessProbe.lean",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessSearch2.lean",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessSearch3.lean",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/MinProbe.lean",
+    "specs/591_decide_openbranch_countermodel_disposition/.orchestrator-handoff.json"
+  ],
+  "partial_progress": {
+    "stage": "finished",
+    "details": "Verdict reached and machine-checked. Route (a): the exists-edges conjunct is NOT refuted; the cited inference is machine-refuted by an explicit witness plus exhaustive enumeration over the complete admissible edge-set space, under both intScheme and minScheme."
+  },
+  "verdict": {
+    "route": "a-corrected",
+    "conjunct_refuted": false,
+    "witness_for_phiRef1": "[(1,0)]",
+    "witness_count_phiRef1_intScheme": 40,
+    "minScheme_witness": true,
+    "general_forall_phi_statement_proved": false
+  },
+  "metadata": {
+    "session_id": "sess_1786294327_b96abd_591",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "sorries_added": 0,
+    "axioms_added": 0
+  }
+}

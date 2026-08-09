@@ -47,15 +47,20 @@ and `openBranch_countermodel minScheme` respectively, which carry the deferred s
 `Scheme.lean`. The remaining sorry in `minimalTableau_complete` (DP-4) bridges `MValid φ` to the
 per-branch forcing hypothesis required by `tableau_complete minScheme`.
 
-**DP-4 is PERMANENTLY DEFERRED — unprovable as stated**, not merely unfinished, and is refuted
-**independently** of DP-3: the same machine-verified counterexample
-(`CslibTests/BetaSplitRefutation.lean`, `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`)
-reproduces under `isMinimallyClosed` (`reportMin phiRef1 realFuel` yields the identical violation,
-and `minBranchesAgree = true` against the real `minimalTableau`). The mechanism is independent
-beta-splits at two augmented-preorder-equivalent worlds joined by a loop-back edge that
-`intFImpReuseWitnessAnc?` never re-validates once recorded (`Expansion.lean`). DP-4 is therefore
-not collateral damage from DP-3's dependency chain; it fails on its own terms under the minimal
-calculus's own closure predicate.
+**DP-4 is open — augmented-frame route known-bad, admissible edge space characterised**, not
+refuted, and the earlier claim that it is refuted **independently** of DP-3 is itself retracted:
+under `isMinimallyClosed`, the pruned edge set `edges = [(1, 0)]` (computed against the real
+`minimalTableau` for `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`) discharges BOTH
+upward-closure obligations `MValid` needs here — the valuation one and the `⊥` one — and still
+falsifies `phiRef1` at world 0 (`minBranchesAgree = true` against the real `minimalTableau`).
+That refutes the independent-refutation claim, not the conjunct. What IS machine-verified
+(`CslibTests/BetaSplitRefutation.lean`, `reportMin phiRef1 realFuel`) is that the same
+augmented-frame mechanism as DP-3 — independent beta-splits at two augmented-preorder-equivalent
+worlds joined by a loop-back edge that `intFImpReuseWitnessAnc?` never re-validates once
+recorded (`Expansion.lean`) — also fails upward closure under `isMinimallyClosed`. So DP-4 is
+NOT collateral damage from DP-3's dependency chain in the old refuted-consequence sense; it
+shares DP-3's bad witness choice, and its own upward-closure obligation (`minBranchBotForces b`,
+below) is a genuinely separate, still-open residual.
 
 ## References
 
@@ -133,25 +138,25 @@ Delegates to `tableau_complete minScheme`. **Statement-shape fix**: `tableau_com
 and `tableau_complete` docstrings for the machine-verified defect this replaces).
 
 `MValid φ` needs TWO upward-closure premises (val AND `botForces`); the supplied `_huc`
-discharges only the first. **DP-4 is PERMANENTLY DEFERRED — unprovable as stated**, not
-"pending" any future phase, and refuted **independently** of DP-3 (see "Notes on sorry" above:
-`reportMin phiRef1 realFuel` and `minBranchesAgree = true` against the real `minimalTableau`).
-Two obligations would need to be discharged even setting the refutation aside: (1)
-`openBranch_countermodel`'s own upward-closure conjunct, which is DISPOSITION UNDECIDED (an open
-decision point) in `Scheme.lean`; (2) `minBranchBotForces b`'s own upward-closure (a SEPARATE
-fact, at the `⊥` formula shape), not established. Neither is pursued: the underlying statement
-this sorry needs is refuted, so this is a terminal deferral, not an unfinished step. -/
+discharges only the first. **DP-4 is open — augmented-frame route known-bad**, not "pending" any
+future phase in the old sense, and the earlier claim that it is refuted **independently** of
+DP-3 is retracted (see "Notes on sorry" above: `[(1, 0)]` discharges both upward-closure
+obligations under `isMinimallyClosed` and still falsifies `phiRef1`, so the independent
+refutation does not hold). Two obligations remain genuinely open: (1)
+`openBranch_countermodel`'s own upward-closure conjunct in `Scheme.lean`, which is open with the
+augmented-frame route known-bad (see that docstring); (2) `minBranchBotForces b`'s own
+upward-closure (a SEPARATE fact, at the `⊥` formula shape) — a **named residual**: it holds at
+the `[(1, 0)]` witness (computed) but is not established in general. Neither is pursued here. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme
   intro edges _b _huc
-  -- DP-4 -- PERMANENTLY DEFERRED, unprovable as stated, refuted INDEPENDENTLY of DP-3 under
+  -- DP-4 -- open, augmented-frame route known-bad, sharing DP-3's bad witness choice under
   -- `isMinimallyClosed` (`CslibTests/BetaSplitRefutation.lean`'s `reportMin phiRef1 realFuel`,
   -- `minBranchesAgree = true` against the real `minimalTableau`). `exact h Nat
   -- (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0` (for the appropriate
   -- `hbotuc`) would type-check once both upward-closure obligations named in the docstring above
-  -- are discharged, but the underlying statement is refuted, so this is left `sorry`
-  -- deliberately. Not a route failure; no follow-up is scheduled.
+  -- are discharged; both are open, so this is left `sorry` deliberately.
   sorry
 
 end Cslib.Logic.PL

@@ -378,7 +378,7 @@ mentions before, 0 after).
 
 ---
 
-### Phase 5: Correct DP-4 in `Minimal/Completeness.lean` (H8, H9, H10) [IN PROGRESS]
+### Phase 5: Correct DP-4 in `Minimal/Completeness.lean` (H8, H9, H10) [COMPLETED]
 
 **Goal**: Re-annotate DP-4 as open, explicitly retract the "refuted **independently** of DP-3"
 claim, and keep the genuinely-separate `minBranchBotForces b` upward-closure obligation as a
@@ -429,7 +429,7 @@ named residual.
 
 ---
 
-### Phase 6: Full gate, cross-file consistency, and residual reporting [NOT STARTED]
+### Phase 6: Full gate, cross-file consistency, and residual reporting [IN PROGRESS]
 
 **Goal**: Run the complete repository gate, confirm the ten hunks now tell one consistent story
 across the three files, and record the residuals and tracker corrections the research phase

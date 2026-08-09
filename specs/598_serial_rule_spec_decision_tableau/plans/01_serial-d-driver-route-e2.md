@@ -356,7 +356,7 @@ estimate rests on that parallelism.
 
 ---
 
-### Phase 6: Field Discharges F1-F4 [NOT STARTED]
+### Phase 6: Field Discharges F1-F4 [COMPLETED]
 
 **Goal**: `freshLocal`, `outputsSubsetUniverse` (at `φ0 := φ⁺`), `persistentFresh`, and `rankStep`
 are discharged for `modalApplyOneD`.

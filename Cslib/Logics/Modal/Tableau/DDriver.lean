@@ -600,6 +600,337 @@ private lemma not_shape_of_not_or {sf : SignedFormula (Proposition Atom) WorldIn
       ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
   ⟨fun h => hshape (Or.inl h), fun h => hshape (Or.inr h)⟩
 
+/-! ## Discharging F1-F4 for `modalApplyOneD` at `RuleApplicationSpecAt (modalDualAugment φ)`
+
+Mirrors `TDriver.lean`'s discharge of the corresponding K-termination fields, F1-F3 reused
+essentially verbatim from the preserved prototype (machine-checked there), F4 (`rankStep`)
+re-derived with `modalDepth_diamond_eq_box` in place of T's strict depth decrease. F2
+(`outputsSubsetUniverse`) is the one field genuinely different from every other rule in the
+cube: it is proved only at the fixed dual-closed seed `modalDualAugment φ`, never at an arbitrary
+`φ0` (`modalApplyOneD_outputsSubsetUniverse_fails`, above, is the machine-checked refutation at a
+plain seed). -/
+
+omit [Hashable Atom] in
+/-- **F1 (`freshLocal`)**: `modalApplyOneD` never mints a world -- both dual arms are
+`persistent`. Lifted from the preserved prototype (machine-checked there). -/
+lemma modalApplyOneD_freshLocal
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneD sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOneD sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+      (modalApplyOneD sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  by_cases hshape : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hshape with ⟨hsign, φ, hform⟩ | ⟨hsign, φ, hform⟩
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      exact Or.inl
+        (modalApplyOneD_boxPos_snd b acc φ w ▸ modalApplyOne_boxPos_acc_eq b acc φ w)
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      exact Or.inl
+        (modalApplyOneD_diaNeg_snd b acc φ w ▸ modalApplyOne_diamondNeg_acc_eq b acc φ w)
+  · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
+    exact modalApplyOne_fresh_local sf b acc
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Restatement of `FmpMeasure.lean`'s `private` `modalUniverse_mem_label` (privacy prevents
+reuse across files). -/
+private lemma modalUniverse_mem_label' {φ0 : Proposition Atom}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverse φ0) :
+    x.label ≤ modalWorldBound φ0 := by
+  simp only [modalUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, hw, ψ, -, heq | heq⟩ := hx <;> (subst heq; exact Nat.lt_succ_iff.mp hw)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Dual-closed analogue of `FmpMeasure.lean`'s `modalUniverse_mem_of_sameWorld_subfml`: given
+`sf.formula = □ψ` with `sf` a branch member inside `modalUniverse (modalDualAugment φ)`, the
+dual `◇ψ` at `sf`'s own world is also inside that universe (`modalDualAugment_box_dual`,
+phase 4). -/
+private lemma modalUniverse_dualAugment_mem_box_dual {φ ψ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hb : ∀ x ∈ b, x ∈ modalUniverse (modalDualAugment φ))
+    {sf : SignedFormula (Proposition Atom) WorldIndex} (hsf : sf ∈ b)
+    (hform : sf.formula = Proposition.box ψ) (s : Sign) :
+    (⟨s, Proposition.diamond ψ, sf.label⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse (modalDualAugment φ) := by
+  have hmemU : sf ∈ modalUniverse (modalDualAugment φ) := hb sf hsf
+  have hform' : (Proposition.box ψ) ∈ modalSubfmls (modalDualAugment φ) :=
+    hform ▸ modalUniverse_mem_formula hmemU
+  exact mem_modalUniverse_of (modalUniverse_mem_label' hmemU)
+    (modalDualAugment_box_dual φ ψ hform')
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Symmetric to `modalUniverse_dualAugment_mem_box_dual`, using `modalDualAugment_dia_dual`. -/
+private lemma modalUniverse_dualAugment_mem_dia_dual {φ ψ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hb : ∀ x ∈ b, x ∈ modalUniverse (modalDualAugment φ))
+    {sf : SignedFormula (Proposition Atom) WorldIndex} (hsf : sf ∈ b)
+    (hform : sf.formula = Proposition.diamond ψ) (s : Sign) :
+    (⟨s, Proposition.box ψ, sf.label⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse (modalDualAugment φ) := by
+  have hmemU : sf ∈ modalUniverse (modalDualAugment φ) := hb sf hsf
+  have hform' : (Proposition.diamond ψ) ∈ modalSubfmls (modalDualAugment φ) :=
+    hform ▸ modalUniverse_mem_formula hmemU
+  exact mem_modalUniverse_of (modalUniverse_mem_label' hmemU)
+    (modalDualAugment_dia_dual φ ψ hform')
+
+omit [Hashable Atom] in
+/-- **F2 (`outputsSubsetUniverse`), at the fixed seed `modalDualAugment φ`**: the field that
+genuinely fails for `modalApplyOneD` at a plain seed
+(`modalApplyOneD_outputsSubsetUniverse_fails`, above) holds at the dual-closed seed. Mirrors
+`TDriver.lean`'s `modalApplyOneT_outputsSubsetUniverse`, with the self-propagated-subformula
+membership argument (`modalUniverse_mem_of_sameWorld_subfml`) replaced by the dual-closure
+membership argument built just above. States at a fixed `φ0`, never `∀ φ0` -- the whole point of
+the `RuleApplicationSpecAt` sibling. -/
+lemma modalApplyOneD_outputsSubsetUniverse_at (φ : Proposition Atom)
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hb : ∀ x ∈ b, x ∈ modalUniverse (modalDualAugment φ)) (hsf : sf ∈ b)
+    (hInv : accFreshInv b acc)
+    (hW : modalMaxWorld b < modalWorldBound (modalDualAugment φ)) :
+    (match (modalApplyOneD sf b acc).fst with
+      | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverse (modalDualAugment φ)
+      | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverse (modalDualAugment φ)
+      | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverse (modalDualAugment φ)
+      | .notApplicable => True) := by
+  by_cases hshape : (sf.sign = .pos ∧ ∃ ψ, sf.formula = .box ψ) ∨
+      (sf.sign = .neg ∧ ∃ ψ, sf.formula = .diamond ψ)
+  · rcases hshape with ⟨hsign, ψ, hform⟩ | ⟨hsign, ψ, hform⟩
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      rw [modalApplyOneD_boxPos_fst]
+      have hself : ∀ x ∈ modalDBoxDual b ψ w, x ∈ modalUniverse (modalDualAugment φ) := by
+        rcases modalDBoxDual_cases b ψ w with h | ⟨h, -⟩
+        · rw [h]; simp
+        · rw [h]
+          intro x hx
+          simp only [List.mem_singleton] at hx
+          subst hx
+          exact modalUniverse_dualAugment_mem_box_dual hb hsf rfl .pos
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box ψ, w⟩) rfl ψ rfl b acc with hk | ⟨kForms, hk⟩
+      · rw [hk]; split_ifs with hemp
+        · trivial
+        · exact hself
+      · rw [hk]
+        have hkforms : ∀ x ∈ kForms, x ∈ modalUniverse (modalDualAugment φ) := by
+          have hout := modalApplyOne_outputs_subset (modalDualAugment φ)
+            (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
+          rwa [hk] at hout
+        intro x hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hkforms x hx
+        · exact hself x hx
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      rw [modalApplyOneD_diamondNeg_fst]
+      have hself : ∀ x ∈ modalDDiaNegDual b ψ w, x ∈ modalUniverse (modalDualAugment φ) := by
+        rcases modalDDiaNegDual_cases b ψ w with h | ⟨h, -⟩
+        · rw [h]; simp
+        · rw [h]
+          intro x hx
+          simp only [List.mem_singleton] at hx
+          subst hx
+          exact modalUniverse_dualAugment_mem_dia_dual hb hsf rfl .neg
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond ψ, w⟩) rfl ψ rfl b acc with
+          hk | ⟨kForms, hk⟩
+      · rw [hk]; split_ifs with hemp
+        · trivial
+        · exact hself
+      · rw [hk]
+        have hkforms : ∀ x ∈ kForms, x ∈ modalUniverse (modalDualAugment φ) := by
+          have hout := modalApplyOne_outputs_subset (modalDualAugment φ)
+            (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf
+            hInv hW
+          rwa [hk] at hout
+        intro x hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hkforms x hx
+        · exact hself x hx
+  · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
+    exact modalApplyOne_outputs_subset (modalDualAugment φ) sf b acc hb hsf hInv hW
+
+omit [Hashable Atom] in
+/-- **F3 (`persistentFresh`)**: whenever `modalApplyOneD sf b acc` produces a `.persistent`
+result, the emitted formulas are nonempty and fresh. At the two D-relevant shapes, composes K's
+own `modalApplyOne_persistent_props` with `modalDBoxDual_not_mem`/`modalDDiaNegDual_not_mem`
+(phase 5); at every other shape `modalApplyOneD` reduces to `modalApplyOne` directly. -/
+lemma modalApplyOneD_persistentFresh
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hca : (modalApplyOneD sf b acc).fst = .persistent nf) :
+    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
+  by_cases hbp : sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ
+  · obtain ⟨hs, ψ, hf⟩ := hbp
+    have hsfeq : sf = (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rw [hsfeq, modalApplyOneD_boxPos_fst] at hca
+    rcases hk : (modalApplyOne (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca
+      simp only [RuleResult.persistent.injEq] at hca
+      obtain ⟨hkf, hkfresh⟩ := modalApplyOne_persistent_props _ b acc kf hk
+      have hself : ∀ x ∈ modalDBoxDual b ψ sf.label, x ∉ b := modalDBoxDual_not_mem b ψ sf.label
+      refine ⟨?_, ?_⟩
+      · rw [← hca]; exact List.append_ne_nil_of_left_ne_nil hkf _
+      · intro x hx
+        rw [← hca] at hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hkfresh x hx
+        · exact hself x hx
+    · rw [hk] at hca
+      split_ifs at hca with hemp
+      simp only [RuleResult.persistent.injEq] at hca
+      subst hca
+      exact ⟨by simpa using hemp, modalDBoxDual_not_mem b ψ sf.label⟩
+  · by_cases hdn : sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ
+    · obtain ⟨hs, ψ, hf⟩ := hdn
+      have hsfeq : sf = (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq, modalApplyOneD_diamondNeg_fst] at hca
+      rcases hk : (modalApplyOne (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca
+        simp only [RuleResult.persistent.injEq] at hca
+        obtain ⟨hkf, hkfresh⟩ := modalApplyOne_persistent_props _ b acc kf hk
+        have hself : ∀ x ∈ modalDDiaNegDual b ψ sf.label, x ∉ b :=
+          modalDDiaNegDual_not_mem b ψ sf.label
+        refine ⟨?_, ?_⟩
+        · rw [← hca]; exact List.append_ne_nil_of_left_ne_nil hkf _
+        · intro x hx
+          rw [← hca] at hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hkfresh x hx
+          · exact hself x hx
+      · rw [hk] at hca
+        split_ifs at hca with hemp
+        simp only [RuleResult.persistent.injEq] at hca
+        subst hca
+        exact ⟨by simpa using hemp, modalDDiaNegDual_not_mem b ψ sf.label⟩
+    · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc ⟨hbp, hdn⟩] at hca
+      exact modalApplyOne_persistent_props sf b acc nf hca
+
+omit [Hashable Atom] in
+/-- **F4 (`rankStep`)**: given `rank` satisfying the depth-bound/edge invariants pre-call,
+`modalApplyOneD sf b acc` yields a `rank'` satisfying both invariants. Mirrors `TDriver.lean`'s
+`modalApplyOneT_rankStep`; the only arithmetic difference is `modalDepth_diamond_eq_box` (phase
+4) in place of T's strict depth decrease -- D's dual emits an equally-deep formula, not a
+strictly shallower one, but both satisfy the `≤` this field needs. -/
+lemma modalApplyOneD_rankStep
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hInv : accFreshInv b acc)
+    (rank : WorldIndex → Nat)
+    (hbound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label)
+    (hedge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ w w', (modalApplyOneD sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+      (match (modalApplyOneD sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+        | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+        | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+        | .notApplicable => True) := by
+  by_cases hshape : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hshape with ⟨hsign, ψ, hform⟩ | ⟨hsign, ψ, hform⟩
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      obtain ⟨rank', hagree, hedge', hdepth⟩ :=
+        modalApplyOne_rank_step (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          b acc hsfmem hInv rank hbound hedge
+      have hwlt : w < modalNextWorld b :=
+        modalNextWorld_gt b (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          hsfmem
+      have hragree : rank' w = rank w := hagree w (Nat.ne_of_lt hwlt)
+      have hψdepth : modalDepth (Proposition.diamond ψ) ≤ rank' w := by
+        have hbw : modalDepth (Proposition.box ψ) ≤ rank w := hbound _ hsfmem
+        rw [modalDepth_diamond_eq_box]
+        omega
+      refine ⟨rank', hagree, ?_, ?_⟩
+      · rw [modalApplyOneD_boxPos_snd]; exact hedge'
+      · rw [modalApplyOneD_boxPos_fst]
+        rcases modalApplyOne_boxPos_eq (⟨.pos, .box ψ, w⟩) rfl ψ rfl b acc with hk | ⟨kForms, hk⟩
+        · simp only [hk] at hdepth ⊢
+          split_ifs with hemp
+          · trivial
+          · intro x hx
+            rcases modalDBoxDual_cases b ψ w with h | ⟨h, -⟩
+            · rw [h] at hemp; simp at hemp
+            · rw [h] at hx
+              simp only [List.mem_singleton] at hx
+              subst hx
+              exact hψdepth
+        · simp only [hk] at hdepth ⊢
+          intro x hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hdepth x hx
+          · rcases modalDBoxDual_cases b ψ w with h | ⟨h, -⟩
+            · rw [h] at hx; simp at hx
+            · rw [h] at hx
+              simp only [List.mem_singleton] at hx
+              subst hx
+              exact hψdepth
+    · obtain ⟨s, form, w⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      obtain ⟨rank', hagree, hedge', hdepth⟩ :=
+        modalApplyOne_rank_step
+          (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          b acc hsfmem hInv rank hbound hedge
+      have hwlt : w < modalNextWorld b :=
+        modalNextWorld_gt b (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          hsfmem
+      have hragree : rank' w = rank w := hagree w (Nat.ne_of_lt hwlt)
+      have hψdepth : modalDepth (Proposition.box ψ) ≤ rank' w := by
+        have hbw : modalDepth (Proposition.diamond ψ) ≤ rank w := hbound _ hsfmem
+        rw [← modalDepth_diamond_eq_box]
+        omega
+      refine ⟨rank', hagree, ?_, ?_⟩
+      · rw [modalApplyOneD_diaNeg_snd]; exact hedge'
+      · rw [modalApplyOneD_diamondNeg_fst]
+        rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond ψ, w⟩) rfl ψ rfl b acc with
+            hk | ⟨kForms, hk⟩
+        · simp only [hk] at hdepth ⊢
+          split_ifs with hemp
+          · trivial
+          · intro x hx
+            rcases modalDDiaNegDual_cases b ψ w with h | ⟨h, -⟩
+            · rw [h] at hemp; simp at hemp
+            · rw [h] at hx
+              simp only [List.mem_singleton] at hx
+              subst hx
+              exact hψdepth
+        · simp only [hk] at hdepth ⊢
+          intro x hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hdepth x hx
+          · rcases modalDDiaNegDual_cases b ψ w with h | ⟨h, -⟩
+            · rw [h] at hx; simp at hx
+            · rw [h] at hx
+              simp only [List.mem_singleton] at hx
+              subst hx
+              exact hψdepth
+  · rw [modalApplyOneD_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)]
+    exact modalApplyOne_rank_step sf b acc hsfmem hInv rank hbound hedge
+
 end Cslib.Logic.Modal.Tableau
 
 end

@@ -6,14 +6,14 @@ next_project_number: 601
 
 ## Task Order
 
-*Updated 2026-08-08. Generated from state.json dependency graph.*
+*Updated 2026-08-09. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,506,534,548,554,568,569,590,591,594,596,598,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,506,534,554,568,569,590,591,594,596,598,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,593,595 | 36,37,181,425,534,554,568,591,594 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,375,589 | 39,40,534,548,593 | foundations, propositional logic, code hygiene |
+| 3 | 41,375,589 | 39,40,534,593 | foundations, propositional logic, code hygiene |
 | 4 | 497 | 375,400,425 | propositional logic |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -38,7 +38,6 @@ next_project_number: 601
 506 [PARTIAL] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
   └─ 588 [NOT STARTED] — Resolve the five import-reachability duplicate families in Cslib/
-548 [PLANNED] — SCOPE NARROWED after research (report 01_eight-corner-decidabilit
 554 [BLOCKED] — [RESCOPED 2026-07-26 by explicit user decision, adopting report 0
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
@@ -465,12 +464,13 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 548. Decidability remaining eight modal cube corners
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 511, Task 535, Task 597
 - **Research**: [548_decidability_remaining_eight_modal_cube_corners/reports/01_eight-corner-decidability-research.md]
 - **Plan**: [548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md]
+- **Summary**: [548_decidability_remaining_eight_modal_cube_corners/summaries/01_tb-decidability-matrix-note-summary.md]
 
 **Description**: SCOPE NARROWED after research (report 01_eight-corner-decidability-research.md). The original eight-corner scope is not workable as written: the decidability matrix is already 7/15 (instDecidableS4Valid landed at Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:8281), the generic-driver extension this task proposed was formally rejected by the tableau driver abstraction decision (per-regime drivers stay bespoke), and a newly-discovered spec-shape blocker gates five of the eight corners: D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (GenericDriver.lean:239-243), which forbids a .linear mint at exactly the box-positive shape a D tableau must mint at; all three mint-avoiding alternatives were refuted (two unsound, one non-terminating). WORK: (1) Land TB end-to-end -- tbFC, tbValid, extractModelTB, the TB rule, RuleApplicationSpec discharge, truth lemma, soundness, completeness, tbValid_decides, instDecidableTBValid -- taking the matrix 7/15 to 8/15. TB is the only corner free of every gate: both ingredient rules exist and are non-minting, and Relation.ReflGen.compRel_symm (Foundations/Relation/Confluence.lean:368) is already in tree as exactly the frame instance it needs. (2) Land the intentional-completeness matrix note: for each of the seven remaining corners (D, K4, K45, D4, D5, D45), record frame condition, tier, the named gate blocking it, and cost estimate. This is the acceptance criterion's own second arm ('an explicit documented out-of-scope note per corner'), not a deferral -- it makes the matrix intentionally complete rather than accidentally ragged. The three blocking gates are owned by successor tasks 598, 599, 600. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched (FmpMeasure.lean carries an additional explicit no-touch). NOTE: the original description's task-534 freeze clause is vacuous (534 has no artifacts), and five of its seven line anchors were wrong -- corrected table in report section 1.2.
 

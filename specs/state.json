@@ -758,7 +758,7 @@
     {
       "project_number": 548,
       "project_name": "decidability_remaining_eight_modal_cube_corners",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
@@ -769,7 +769,7 @@
       ],
       "description": "SCOPE NARROWED after research (report 01_eight-corner-decidability-research.md). The original eight-corner scope is not workable as written: the decidability matrix is already 7/15 (instDecidableS4Valid landed at Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:8281), the generic-driver extension this task proposed was formally rejected by the tableau driver abstraction decision (per-regime drivers stay bespoke), and a newly-discovered spec-shape blocker gates five of the eight corners: D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (GenericDriver.lean:239-243), which forbids a .linear mint at exactly the box-positive shape a D tableau must mint at; all three mint-avoiding alternatives were refuted (two unsound, one non-terminating). WORK: (1) Land TB end-to-end -- tbFC, tbValid, extractModelTB, the TB rule, RuleApplicationSpec discharge, truth lemma, soundness, completeness, tbValid_decides, instDecidableTBValid -- taking the matrix 7/15 to 8/15. TB is the only corner free of every gate: both ingredient rules exist and are non-minting, and Relation.ReflGen.compRel_symm (Foundations/Relation/Confluence.lean:368) is already in tree as exactly the frame instance it needs. (2) Land the intentional-completeness matrix note: for each of the seven remaining corners (D, K4, K45, D4, D5, D45), record frame condition, tier, the named gate blocking it, and cost estimate. This is the acceptance criterion's own second arm ('an explicit documented out-of-scope note per corner'), not a deferral -- it makes the matrix intentionally complete rather than accidentally ragged. The three blocking gates are owned by successor tasks 598, 599, 600. Zero sorry, zero new axioms; keep frozen deliverables from task 300 and task 506 untouched (FmpMeasure.lean carries an additional explicit no-touch). NOTE: the original description's task-534 freeze clause is vacuous (534 has no artifacts), and five of its seven line anchors were wrong -- corrected table in report section 1.2.",
       "created": "2026-07-23T17:20:09Z",
-      "last_updated": "2026-08-08T23:45:35Z",
+      "last_updated": "2026-08-09T01:08:14Z",
       "session_id": "sess_1786228817_675b2c",
       "artifacts": [
         {
@@ -781,11 +781,17 @@
           "path": "specs/548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md",
           "type": "plan",
           "summary": "11-phase plan: TB corner end-to-end (7/15 -> 8/15) plus intentional-completeness matrix note"
+        },
+        {
+          "path": "specs/548_decidability_remaining_eight_modal_cube_corners/summaries/01_tb-decidability-matrix-note-summary.md",
+          "type": "summary",
+          "summary": "TB decidability landed end-to-end (matrix 7/15 -> 8/15) plus intentional-completeness note for the seven remaining corners"
         }
       ],
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/"
-      ]
+      ],
+      "completion_summary": "Landed TB decidability end-to-end (frame condition, validity, extractor, rule, full RuleApplicationSpec discharge, truth lemma, soundness, completeness, tbValid_decides, instDecidableTBValid), taking the modal-cube decidability matrix from 7/15 to 8/15, plus the intentional-completeness matrix note for the remaining seven corners. All 11 plan phases completed, zero sorry, standard axiom triple, all frozen deliverables byte-identical (2124 insertions / 0 deletions across the whole task), FmpMeasure.lean untouched, all regression tests green."
     },
     {
       "project_number": 551,

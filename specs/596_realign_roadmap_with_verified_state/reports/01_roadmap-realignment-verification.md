@@ -1,5 +1,56 @@
 # Research Report: Task 596
 
+> ## ⚠ CORRECTION — SORRY-CENSUS FINDING WITHDRAWN (added 2026-08-09, post-implementation)
+>
+> **This report's headline finding — that ROADMAP.md's "27 sorries (Bimodal 23 / Propositional 4
+> / Modal 0)" census was already wrong at commit `26644732`, with the real figures being 45 / 41
+> — is WITHDRAWN. It is false. The original 27 / 23 / 4 / 0 figures are CORRECT and remain on
+> ROADMAP.md unchanged.**
+>
+> The body below is preserved verbatim rather than rewritten, so the reasoning that produced the
+> error stays inspectable. Affected passages: the "Biggest single finding" bullet in the
+> Executive Summary, the "Sorry census" row of the Findings table, the per-file Bimodal
+> breakdown table (`Total 41`), the "BXCanonical total is 21" line, and the Risk note. Treat
+> every 41 / 45 / 21 figure in this report as an artifact, not a measurement.
+>
+> **Root cause**: `.claude/scripts/lean-sorry-census.sh` — which this report designates
+> "authoritative" — has a regex defect. Its matcher is `\bsorry\b`, and because `.` is a
+> non-word character, that pattern also matches the `sorry` substring inside
+> `set_option warn.sorry false in`. Every suppression-annotation line is therefore counted as a
+> phantom extra sorry on top of the real one it annotates. The script's comment/docstring
+> stripping is sound; only the regex is broken.
+>
+> **Verification** (performed by the orchestrator, independently of both this report and the
+> implementation agent that first caught it): `strip_lean_comments` was taken verbatim from the
+> census script and re-run over `Cslib/**/*.lean` with the regex — and only the regex — changed
+> to `(?<![.\w])sorry\b`:
+>
+> | Scope | script (buggy) | corrected |
+> |---|---|---|
+> | Repo | 45 | **27** |
+> | Bimodal | 41 | **23** |
+> | Propositional | 4 | 4 |
+> | Modal | 0 | 0 |
+>
+> Exactly the figures ROADMAP.md already carried. The arithmetic reconciles per file
+> (41 = 23 real + 18 `warn.sorry` annotation lines), and task 215's independent hand-audit of the
+> two BXCanonical files (12 + 1 = 13) corroborates the corrected count against this report's 21.
+>
+> **The proposed mechanism in the body below is also wrong**, not merely the number: the body
+> attributes the gap to suppression annotations being counted 1-for-1 while annotated
+> declarations hold 4-6 raw sorries each. The real direction is the opposite — the script
+> over-counts, the roadmap did not under-count.
+>
+> **Do not follow this report's recommendation to use `lean-sorry-census.sh` as the census of
+> record** until task 608 lands the regex fix (source-store target:
+> `agent-system/extensions/**`, not `.claude/`). Until then, subtract `warn.sorry` lines or match
+> with `(?<![.\w])sorry\b`.
+>
+> Everything else in this report — the decidability matrix (8/15), LoopChecking.lean's
+> 2,216 lines / 15 declarations, the Section B stale-row confirmations, the tracking-chain and
+> roadmap-absence counts — came from direct measurement rather than this script and is unaffected
+> by this correction.
+
 **Task**: 596 - Correct ROADMAP.md's stale cleanup agenda and fold in the unrepresented open tasks
 **Started**: 2026-08-09
 **Completed**: 2026-08-09
@@ -7,7 +58,7 @@
 **Dependencies**: None
 **Sources/Inputs**:
 - Live tree at `/home/benjamin/Projects/cslib` (HEAD `d1de5b85`)
-- `bash .claude/scripts/lean-sorry-census.sh` (comment/string-aware sorry counter — authoritative)
+- `bash .claude/scripts/lean-sorry-census.sh` (comment/string-aware sorry counter — **NOT authoritative; see the CORRECTION banner above — this script over-counts `warn.sorry` lines**)
 - `git worktree` checkout of commit `26644732` (the exact commit ROADMAP.md's "Verified sorry
   counts (2026-08-07)" line cites) for apples-to-apples comparison
 - `specs/state.json`, `specs/archive/state.json`

@@ -198,25 +198,28 @@ gate is a precondition for the next.
 
 ---
 
-### Phase 2: Land `modalExpandBranchesD_hintikka` [NOT STARTED]
+### Phase 2: Land `modalExpandBranchesD_hintikka` [COMPLETED]
 
 - **Goal**: Add the D-system instantiation of the generic top-loop Hintikka lemma to
   `DDriver.lean`, unblocking D/DB/D4/D5/D45.
 
 - **Tasks**:
-  - [ ] Append the `/-! ## D Instantiation of the Generic Top-Loop Hintikka Lemma -/` section and
+  - [x] Append the `/-! ## D Instantiation of the Generic Top-Loop Hintikka Lemma -/` section and
         `theorem modalExpandBranchesD_hintikka` immediately before
         `end Cslib.Logic.Modal.Tableau` in `DDriver.lean`, per report §4.4.
-  - [ ] Write a full CSLib-style docstring (the report's version is abbreviated). It must name:
+  - [x] Write a full CSLib-style docstring (the report's version is abbreviated). It must name:
         the lemma as the D-system instantiation of `modalExpandBranchesGen_hintikka`; the seed
         `φ0 := modalDualAugment φ` and why D's dual-closed seed differs from T/B/TB's plain `φ0`;
         and `modalApplyOneD_specAt φ` (`DDriver.lean:1243`) as the twelve-field witness supplied
-        in place of a universally-quantified spec.
-  - [ ] Confirm the proof term stays a one-liner:
+        in place of a universally-quantified spec. *(Replaced the patch's abbreviated one-line
+        docstring with a full multi-paragraph docstring naming all three required elements.)*
+  - [x] Confirm the proof term stays a one-liner:
         `modalExpandBranchesGen_hintikka modalApplyOneD (modalDualAugment φ)
         (modalApplyOneD_specAt φ) fuel`. If it does not elaborate as written, stop and report —
-        do not introduce a bespoke D-specific derivation.
-  - [ ] Confirm no `Cslib.lean` barrel change is needed (no new file added).
+        do not introduce a bespoke D-specific derivation. *(Elaborated as written; `lake build
+        Cslib.Logics.Modal.Tableau.DDriver` green, 882 jobs.)*
+  - [x] Confirm no `Cslib.lean` barrel change is needed (no new file added). *(Confirmed —
+        DDriver.lean already existed and is already registered.)*
 
 - **Timing**: 30 minutes
 

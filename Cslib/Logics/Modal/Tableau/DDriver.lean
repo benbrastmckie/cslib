@@ -1283,6 +1283,45 @@ theorem modalTableauD_eq (φ : Proposition Atom) :
       [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
       [Accessibility.empty] (modalFuel (modalDualAugment φ)) := rfl
 
+/-! ## D Instantiation of the Generic Top-Loop Hintikka Lemma -/
+
+/-- **`modalExpandBranchesD_hintikka`**: the D-system instantiation of
+`modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean`), the generic top-loop lemma showing
+that whenever `modalExpandBranchesGen`'s worklist loop terminates in an `.openBranch`, that
+branch is a full Hintikka set for `apply`.
+
+The seed here is `modalDualAugment φ`, not plain `φ0` as in the T/B/TB instantiations
+(`TDriver.lean`, `BDriver.lean`, `TBDriver.lean`): D's `outputsSubsetUniverse` obligation
+(interface field F2) only holds at the dual-closed seed, because D's rule set can introduce a
+formula's dual mid-branch and the universe must already contain it. `modalDualAugment φ`
+conjoins `φ` with the dual of every subformula of `φ` up front so that closure holds
+unconditionally; a plain `φ0` seed would not. This is exactly why `modalApplyOneD`'s spec witness
+is typed at the narrowed `RuleApplicationSpecAt (modalDualAugment φ)` interface rather than a
+universally-quantified `RuleApplicationSpec` — see `modalApplyOneD_specAt`'s own docstring above.
+
+The proof term supplies `modalApplyOneD_specAt φ` (`DDriver.lean:1243`) — the twelve-field
+`RuleApplicationSpecAt (modalDualAugment φ) modalApplyOneD` witness assembled in phases 6-8 of
+this file — in place of the universally-quantified spec `modalExpandBranchesGen_hintikka` used to
+require before this task's narrowing. Because that narrowing is a strict weakening of the
+generic lemma's hypothesis (Phase 1 of this port), the D-specific witness discharges it directly
+and the whole derivation is a one-liner: no bespoke D-specific proof, no re-derivation of the
+top-loop induction. -/
+theorem modalExpandBranchesD_hintikka (φ : Proposition Atom) (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      modalExpMeasure (modalUniverse (modalDualAugment φ)) branches expandedSets ≤ fuel →
+      (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+          (ai : Accessibility),
+        branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
+        ∃ rank, ModalLoopInvGen modalApplyOneD (modalDualAugment φ) bi ei ai rank) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesD branches expandedSets accs fuel = .openBranch bR aR →
+        modalHintikkaSetGen modalApplyOneD bR aR :=
+  modalExpandBranchesGen_hintikka modalApplyOneD (modalDualAugment φ)
+    (modalApplyOneD_specAt φ) fuel
+
 end Cslib.Logic.Modal.Tableau
 
 end

@@ -21,6 +21,12 @@ the K-style FMP termination measure (`modalUniverse`/`modalWork`/`modalExpMeasur
 - `RuleApplicationSpec apply`: the structural-hypothesis bundle (eleven fields, see below --
   seven from the termination-lemma generalization, four more, F9-F12, from the
   Hintikka/saturation generalization).
+- `RuleApplicationSpecAt φ0 apply`/`RuleApplicationSpecCoreAt φ0 apply`: additive siblings of
+  `RuleApplicationSpec`/`RuleApplicationSpecCore` that narrow `outputsSubsetUniverse` from
+  `∀ φ0, …` to a single structure-parametric `φ0`, for rules (e.g. D, `DDriver.lean`) whose
+  outputs are only universe-closed at one dual-closed seed, not at an arbitrary universe.
+  `RuleApplicationSpec.toAt`/`RuleApplicationSpecCore.toAt` project any existing witness down to
+  this narrower interface at an arbitrary `φ0`, for free.
 - `modalApplyOne_spec`: `modalApplyOne` (K) trivially satisfies the bundle.
 - `modalStepBranchGen_preserves_outDegEq`/`_exists_rank'`/`_preserves_accTargetsKnown`/
   `_knownWorlds`/`_eClosure`/`_potential_step`/`_worldBound`/`_expMeasure_step_lt`: the
@@ -344,6 +350,173 @@ projection name). -/
 theorem RuleApplicationSpec.toCore {apply : RuleApply Atom} (spec : RuleApplicationSpec apply) :
     RuleApplicationSpecCore apply :=
   spec.toRuleApplicationSpecCore
+
+/-! ## The Additive `…At` Sibling: Universe Fixed at a Single `φ0`
+
+`RuleApplicationSpecCoreAt`/`RuleApplicationSpecAt` narrow `outputsSubsetUniverse` from
+`∀ φ0, …` to a single, structure-parametric `φ0`. This is the interface D's rule
+(`modalApplyOneD`, `FrameRules.lean`) actually satisfies: its dual arms escape `modalUniverse
+φ0` for a *plain* `φ0` (`modalApplyOneD_outputsSubsetUniverse_fails`, `DDriver.lean`), but do
+stay inside the dual-closed universe `modalUniverse (modalDualAugment φ0)` at that one fixed
+`φ0` (`DDriver.lean`). Every other field is identical to `RuleApplicationSpecCore`/
+`RuleApplicationSpec` -- only `outputsSubsetUniverse`'s universal quantifier over `φ0` is
+narrowed to the structure's own parameter.
+
+`RuleApplicationSpecCore.toAt`/`RuleApplicationSpec.toAt` project any (universally-quantified)
+existing witness down to this narrower interface at an arbitrary `φ0`, so every existing
+instance (K/T/B/TB/Five/Kb5''/S5w) can supply a `…At` witness for free without re-proving
+anything. This narrowing is purely additive: `RuleApplicationSpec`/`RuleApplicationSpecCore`
+themselves, and all seven of `RuleApplicationSpec`'s existing discharge sites, are untouched. -/
+
+/-- Core-projection of `RuleApplicationSpecCore`, universe fixed at a single `φ0`: identical to
+`RuleApplicationSpecCore` except `outputsSubsetUniverse` is stated only at the structure's own
+`φ0` rather than universally quantified over it. See the section docstring above for the
+motivating example (D's rule). -/
+structure RuleApplicationSpecCoreAt (φ0 : Proposition Atom) (apply : RuleApply Atom) : Prop where
+  /-- World-creation confinement, identical to `RuleApplicationSpecCore.freshLocal`. -/
+  freshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label)
+  /-- Catalog membership, narrowed to the structure's own fixed `φ0` rather than universally
+  quantified -- the one field this sibling exists to weaken. -/
+  outputsSubsetUniverse : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ x ∈ b, x ∈ modalUniverse φ0) → sf ∈ b → accFreshInv b acc →
+      modalMaxWorld b < modalWorldBound φ0 →
+      (match (apply sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
+        | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverse φ0
+        | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
+        | .notApplicable => True)
+  /-- Persistence hook, identical to `RuleApplicationSpecCore.persistentFresh`. -/
+  persistentFresh : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+      (nf : List (SignedFormula (Proposition Atom) WorldIndex)),
+      (apply sf b acc).fst = .persistent nf → nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b
+  /-- Branching arity, identical to `RuleApplicationSpecCore.branchingLength`. -/
+  branchingLength : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+      (brs : List (List (SignedFormula (Proposition Atom) WorldIndex))),
+      (apply sf b acc).fst = .branching brs → brs.length = 2
+  /-- **F8**, identical to `RuleApplicationSpecCore.localShapeInvariance`. -/
+  localShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
+      (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →
+      ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+        (acc acc' : Accessibility),
+      (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1
+  /-- **F9**, identical to `RuleApplicationSpecCore.boxPosNotExpanding`. -/
+  boxPosNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
+      sf.sign = .pos → ∀ (ψ : Proposition Atom), sf.formula = .box ψ →
+      ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).1 = .notApplicable ∨
+        ∃ out, (apply sf b acc).1 = .persistent out
+  /-- **F10**, identical to `RuleApplicationSpecCore.diaNegNotExpanding`. -/
+  diaNegNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
+      sf.sign = .neg → ∀ (ψ : Proposition Atom), sf.formula = .diamond ψ →
+      ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).1 = .notApplicable ∨
+        ∃ out, (apply sf b acc).1 = .persistent out
+  /-- **F11'**, identical to `RuleApplicationSpecCore.boxNegWitness'`. -/
+  boxNegWitness' : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc : Accessibility) (ψ : Proposition Atom) (w : WorldIndex),
+      ∃ w', (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+          = acc.addEdge w w' ∧
+      ∃ rest,
+        (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest)
+  /-- **F12'**, identical to `RuleApplicationSpecCore.diaPosWitness'`. -/
+  diaPosWitness' : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc : Accessibility) (ψ : Proposition Atom) (w : WorldIndex),
+      ∃ w', (apply (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+          = acc.addEdge w w' ∧
+      ∃ rest,
+        (apply (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest)
+
+/-- Universe-fixed sibling of `RuleApplicationSpec`: identical except `outputsSubsetUniverse` is
+stated only at the structure's own `φ0`. See the section docstring above for the motivating
+example (D's rule) and `RuleApplicationSpecCoreAt` for the narrowed field. -/
+structure RuleApplicationSpecAt (φ0 : Proposition Atom) (apply : RuleApply Atom) : Prop extends
+    RuleApplicationSpecCoreAt φ0 apply where
+  /-- Per-call rank-step, identical to `RuleApplicationSpec.rankStep`. -/
+  rankStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accFreshInv b acc →
+      ∀ (rank : WorldIndex → Nat),
+      (∀ x ∈ b, modalDepth x.formula ≤ rank x.label) →
+      (∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) →
+      ∃ rank' : WorldIndex → Nat,
+        (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+        (∀ w w', (apply sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+          | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .notApplicable => True)
+  /-- Per-call outDeg-step, identical to `RuleApplicationSpec.outDegStep`. -/
+  outDegStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length) →
+      ∀ w, outDeg (apply sf b acc).snd w =
+        (List.filter (fun x => x.label == w && isMintingShaped x)
+          (match (apply sf b acc).fst with
+            | .linear _ => e ++ [sf]
+            | .branching _ => e ++ [sf]
+            | .persistent _ => e
+            | .notApplicable => (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length
+  /-- Per-call knownWorlds-step, identical to `RuleApplicationSpec.knownWorldsStep`. -/
+  knownWorldsStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accTargetsKnown b acc →
+      ((apply sf b acc).snd = acc ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .notApplicable => True)) ∨
+      ((apply sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+          | .branching _ => False
+          | .persistent _ => False
+          | .notApplicable => False))
+
+/-- The Core-projection theorem for the `…At` sibling, analogous to `RuleApplicationSpec.toCore`. -/
+theorem RuleApplicationSpecAt.toCore {φ0 : Proposition Atom} {apply : RuleApply Atom}
+    (spec : RuleApplicationSpecAt φ0 apply) : RuleApplicationSpecCoreAt φ0 apply :=
+  spec.toRuleApplicationSpecCoreAt
+
+/-- Every `RuleApplicationSpecCore` witness (universally quantified over `φ0`) projects down to
+a `RuleApplicationSpecCoreAt` witness at an arbitrary fixed `φ0`, by specializing
+`outputsSubsetUniverse` and reusing every other field unchanged. -/
+theorem RuleApplicationSpecCore.toAt {apply : RuleApply Atom}
+    (spec : RuleApplicationSpecCore apply)
+    (φ0 : Proposition Atom) : RuleApplicationSpecCoreAt φ0 apply where
+  freshLocal := spec.freshLocal
+  outputsSubsetUniverse := spec.outputsSubsetUniverse φ0
+  persistentFresh := spec.persistentFresh
+  branchingLength := spec.branchingLength
+  localShapeInvariance := spec.localShapeInvariance
+  boxPosNotExpanding := spec.boxPosNotExpanding
+  diaNegNotExpanding := spec.diaNegNotExpanding
+  boxNegWitness' := spec.boxNegWitness'
+  diaPosWitness' := spec.diaPosWitness'
+
+/-- Every `RuleApplicationSpec` witness (universally quantified over `φ0`) projects down to a
+`RuleApplicationSpecAt` witness at an arbitrary fixed `φ0`, by specializing
+`outputsSubsetUniverse` (via `RuleApplicationSpecCore.toAt`) and reusing every other field
+unchanged. This is the projection that lets D (`DDriver.lean`) reuse the generic driver without
+requiring any existing `RuleApplicationSpec` instance to be re-proved. -/
+theorem RuleApplicationSpec.toAt {apply : RuleApply Atom} (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom) : RuleApplicationSpecAt φ0 apply where
+  toRuleApplicationSpecCoreAt := spec.toCore.toAt φ0
+  rankStep := spec.rankStep
+  outDegStep := spec.outDegStep
+  knownWorldsStep := spec.knownWorldsStep
 
 /-! ## The Trivial K Witness -/
 

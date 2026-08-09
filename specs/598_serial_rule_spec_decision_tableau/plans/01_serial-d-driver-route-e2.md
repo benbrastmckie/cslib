@@ -159,7 +159,7 @@ prototype should be re-read before continuing.
 
 ---
 
-### Phase 2: Additive `RuleApplicationSpecAt` Sibling [NOT STARTED]
+### Phase 2: Additive `RuleApplicationSpecAt` Sibling [COMPLETED]
 
 **Goal**: `GenericDriver.lean` carries the `…At` structures and the `toAt` projection, with
 `RuleApplicationSpec` and its seven discharge sites untouched.

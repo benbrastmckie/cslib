@@ -43,9 +43,10 @@ Soundness and completeness proofs are in the dedicated `Soundness.lean` and
 
 `minimalTableau_sound` is sorry-free. The completeness direction
 (`minimalTableau_complete` in `Minimal/Completeness.lean`) rests on the deferred completeness
-sorries:
-- the parametric `truthLemma` in `Intuitionistic/Scheme.lean` (the minimal tableau reuses
-  `truthLemma minScheme`, so it inherits this sorry)
+sorries. The parametric `truthLemma` in `Intuitionistic/Scheme.lean` (which the minimal tableau
+reuses as `truthLemma minScheme`) is now sorry-free — it gained an explicit `hpers`
+(positive-persistence) hypothesis and is unconditionally true over any frame carrying it. The
+remaining sorries are:
 - the open-branch countermodel structural property in `Intuitionistic/Scheme.lean`
 - the `MValid → forcing` bridge in `Minimal/Completeness.lean` (uses `truthLemma minScheme`)
 

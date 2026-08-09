@@ -38,10 +38,13 @@ From an open saturated branch `b`, the countermodel is:
 
 ## Notes on sorry
 
-`intTruthLemma` and `intuitionisticOpenBranch_countermodel` delegate to `truthLemma intScheme`
-and `openBranch_countermodel intScheme` respectively, which carry the deferred sorries in
-`Scheme.lean`. The remaining sorry in `intuitionisticTableau_complete` (DP-3) bridges `IValid φ`
-to the per-branch forcing hypothesis required by `tableau_complete intScheme`.
+`intTruthLemma` delegates to `truthLemma intScheme`, which is now sorry-free (DP-5 discharged
+via an explicit `hpers` positive-persistence hypothesis, threaded through here as `hpers`
+above). `intuitionisticOpenBranch_countermodel` delegates to `openBranch_countermodel
+intScheme`, which still carries the deferred sorry in `Scheme.lean` (the existential's whole
+statement, genuinely open — see that lemma's docstring). The remaining sorry in
+`intuitionisticTableau_complete` (DP-3) bridges `IValid φ` to the per-branch forcing hypothesis
+required by `tableau_complete intScheme`.
 
 **DP-3 is open — augmented-frame route known-bad, admissible edge space characterised**, not
 refuted. It consumes `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`); see
@@ -74,8 +77,9 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-- The truth lemma for the intuitionistic tableau.
 
-Delegates to `truthLemma intScheme`. The parametric sorry in `truthLemma` is the single
-deferred completeness obligation.
+Delegates to `truthLemma intScheme`, which is sorry-free (DP-5 discharged via the `hpers`
+positive-persistence hypothesis taken above and threaded through). The single deferred
+completeness obligation now lives in `openBranch_countermodel` (`Scheme.lean`), not here.
 
 **Route (a) frame**: takes `edges`/`hfimp` and installs
 `intAccessPreorder edges` as the countermodel frame via `letI` (Postmortem-5 revision — this

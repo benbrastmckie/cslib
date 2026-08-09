@@ -284,11 +284,13 @@ carrier types**:
   (`minFinBotForces w := (⊥ ∈ w.carrier)`). Carrier is a `Finset (Proposition Atom)`.
   **Sorry-free.**
 - `truthLemma minScheme`: world type `Nat` (tableau branch labels). `modelBot` is the
-  minimal-closure predicate applied to branch labels. **Currently sorry.**
+  minimal-closure predicate applied to branch labels. **Now sorry-free** (gained an explicit
+  `hpers` positive-persistence hypothesis).
 
 Factoring a common truth-lemma or world-type abstraction is **explicitly deferred**: the
-carriers are structurally incompatible, coupling them would thread through the open
-`truthLemma` sorry, and the payoff is low while that sorry remains open.
+carriers remain structurally incompatible regardless of `truthLemma`'s own sorry status, and
+the payoff is low while `openBranch_countermodel` (`Tableau/Intuitionistic/Scheme.lean`) —
+which `truthLemma` alone does not discharge — remains open.
 Cross-reference: `int_fin_truth_lemma` for the analogous intuitionistic FMP lemma. -/
 theorem min_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : MinFinWorld φ) :

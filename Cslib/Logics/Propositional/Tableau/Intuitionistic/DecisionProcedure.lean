@@ -35,9 +35,10 @@ The `Derivable IntPropAxiom φ` instance uses `int_soundness_completeness` to re
 
 `intuitionisticTableau_sound` is now sorry-free. The completeness direction
 (`intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`) still rests on
-four deferred sorries in the completeness development:
-- the parametric `truthLemma` in `Intuitionistic/Scheme.lean` (forcing ↔ membership, all
-  connectives)
+three deferred sorries in the completeness development. The parametric `truthLemma` in
+`Intuitionistic/Scheme.lean` (forcing ↔ membership, all connectives) is now sorry-free — it
+gained an explicit `hpers` (positive-persistence) hypothesis and is unconditionally true over
+any frame carrying it. The remaining sorries are:
 - the open-branch countermodel structural property in `Intuitionistic/Scheme.lean`
 - the `IValid → forcing` bridge in `Intuitionistic/Completeness.lean` (uses the
   parametric `truthLemma`)

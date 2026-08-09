@@ -314,13 +314,14 @@ over **disjoint carrier types**:
   resting on the `IntLindenbaum.lean` substrate: `int_imp_witness`, `int_prime_exclusion`,
   `intDeductiveClosure`). Carrier is a `Finset (Proposition Atom)`. **Sorry-free.**
 - `truthLemma`: world type `Nat` (tableau branch labels from `IBranch`). Carrier is a
-  signed-branch occurrence predicate. **Currently sorry.**
+  signed-branch occurrence predicate. **Now sorry-free** (gained an explicit `hpers`
+  positive-persistence hypothesis).
 
 Factoring a common truth-lemma or world-type abstraction spanning these two carrier systems
-is **explicitly deferred**: the carriers are structurally incompatible, coupling them would
-thread through the still-open parametric `truthLemma` sorry, and the payoff is low while that
-sorry remains open. Cross-reference: `min_fin_truth_lemma` for the analogous minimal FMP
-lemma. -/
+is **explicitly deferred**: the carriers remain structurally incompatible regardless of
+`truthLemma`'s own sorry status, and the payoff is low while `openBranch_countermodel`
+(`Tableau/Intuitionistic/Scheme.lean`) — which `truthLemma` alone does not discharge — remains
+open. Cross-reference: `min_fin_truth_lemma` for the analogous minimal FMP lemma. -/
 theorem int_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : IntFinWorld φ) :
     ∀ {ψ : PL.Proposition Atom}, ψ ∈ φ.subformulas →

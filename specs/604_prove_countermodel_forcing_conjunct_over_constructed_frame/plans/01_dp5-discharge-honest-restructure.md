@@ -280,7 +280,9 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Sweep stale cross-file "truthLemma carries a sorry" claims [NOT STARTED]
+### Phase 3: Sweep stale cross-file "truthLemma carries a sorry" claims [COMPLETED]
+<!-- confirmed by implementation agent: swept 6 files (IntDecidability.lean, MinDecidability.lean, Intuitionistic/Completeness.lean, Minimal/Completeness.lean, Intuitionistic/DecisionProcedure.lean, Minimal/DecisionProcedure.lean) matching the hypothesised set exactly. Confirming grep returns no remaining assertion that truthLemma carries a sorry. Full repo lake build green (3325 jobs). check-task-references.sh fails only on pre-existing .memory/ entries unrelated to this task -- zero new task-reference violations in Cslib/. -->
+
 
 - **Goal:** No file in the repository still asserts that the parametric `truthLemma` carries the
   single deferred completeness obligation, since it no longer carries any sorry.

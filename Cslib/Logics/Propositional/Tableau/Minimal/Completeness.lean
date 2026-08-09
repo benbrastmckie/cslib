@@ -42,10 +42,13 @@ From an open saturated branch `b`, construct a Kripke model as follows:
 
 ## Notes on sorry
 
-`minTruthLemma` and `minOpenBranch_countermodel` delegate to `truthLemma minScheme`
-and `openBranch_countermodel minScheme` respectively, which carry the deferred sorries in
-`Scheme.lean`. The remaining sorry in `minimalTableau_complete` (DP-4) bridges `MValid φ` to the
-per-branch forcing hypothesis required by `tableau_complete minScheme`.
+`minTruthLemma` delegates to `truthLemma minScheme`, which is now sorry-free (DP-5 discharged
+via an explicit `hpers` positive-persistence hypothesis, threaded through here as `hpers`
+above). `minOpenBranch_countermodel` delegates to `openBranch_countermodel minScheme`, which
+still carries the deferred sorry in `Scheme.lean` (the existential's whole statement, genuinely
+open — see that lemma's docstring). The remaining sorry in `minimalTableau_complete` (DP-4)
+bridges `MValid φ` to the per-branch forcing hypothesis required by `tableau_complete
+minScheme`.
 
 **DP-4 is open — augmented-frame route known-bad, admissible edge space characterised**, not
 refuted, and the earlier claim that it is refuted **independently** of DP-3 is itself retracted:
@@ -79,8 +82,9 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-- The truth lemma for the minimal tableau.
 
-Delegates to `truthLemma minScheme`. The parametric sorry in `truthLemma` is the single
-deferred completeness obligation.
+Delegates to `truthLemma minScheme`, which is sorry-free (DP-5 discharged via the `hpers`
+positive-persistence hypothesis taken above and threaded through). The single deferred
+completeness obligation now lives in `openBranch_countermodel` (`Scheme.lean`), not here.
 
 **Route (a) frame**: takes `edges`/`hfimp` and installs
 `intAccessPreorder edges` as the countermodel frame via `letI` (mirrors

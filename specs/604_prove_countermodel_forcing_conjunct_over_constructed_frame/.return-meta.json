@@ -1,23 +1,32 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-09T00:00:00Z",
+  "status": "planned",
   "artifacts": [
-    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
-    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/PruneProbe.lean",
-    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/dp5-spike.diff"
+    {
+      "type": "plan",
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
+      "summary": "Five-phase plan: discharge DP-5 with the build-verified proof, thread hpers through two wrapper call sites, restructure openBranch_countermodel so its one sorry is honest (2 sorries -> 1), record the frame-adequacy negative result, and create a follow-on task for the Expansion.lean root cause"
+    }
   ],
-  "partial_progress": {
-    "stage": "research_complete",
-    "details": "Conjunct 2 over rawEdges machine-refuted; four candidate frames excluded; DP-5 discharge verified by lake build in a reverted spike; report and handoff written"
-  },
+  "next_steps": "Run /implement 604 to execute the plan",
   "metadata": {
     "session_id": "sess_1786312852_6b5c1b_604",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "sorry_count_baseline": 2,
-    "sorry_count_after_recommended_landing": 1,
-    "new_sorries": 0,
-    "new_axioms": 0
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 4.5,
+    "dependency_waves": [[1, 4], [2, 3], [5]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When a plan adds a hypothesis to a shared parametric lemma in a Lean library, the phase boundary must be drawn around ALL call sites, not around the file that owns the lemma. In Cslib's tableau stack, adding `hpers` to `Scheme.lean`'s parametric `truthLemma` mechanically breaks `intTruthLemma` and `minTruthLemma` in two separate `Completeness.lean` files, both of which pass arguments positionally. A research report scoped to the owning file will not surface this. The planner-side check is a two-command grep before phase sizing: `grep -rn \"<lemma>\" --include=*.lean <src>` for call sites, then the same grep on each wrapper's own name to size the downstream blast radius. If the wrappers have no consumers, the fix is contained and belongs in the SAME atomic-batch phase as the signature change, because every intermediate per-file state is red and an every-phase-ends-green constraint would otherwise be violated.",
+      "category": "PATTERN",
+      "source_artifact": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["lean", "signature-change", "call-site-inventory", "atomic-batch", "phase-sizing", "parametric-lemma"]
+    }
+  ],
+  "modified_files": [
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md"
+  ]
 }

@@ -48,7 +48,7 @@
       "project_number": 604,
       "project_name": "prove_countermodel_forcing_conjunct_over_constructed_frame",
       "title": "Prove the countermodel forcing conjunct over the constructed frame",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Prove conjunct 2 of openBranch_countermodel -- `not IForces ... 0 phi` -- over the frame constructed by the predecessor task, at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.\n\nTHIS IS THE HARD PART. Per the structural argument recorded in specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md, proving this in general is EQUIVALENT to proving the tableau procedure complete. Treat it as substantial open mathematical work, not a mechanical step.\n\nWHAT THIS REQUIRES: a truth lemma over the chosen frame. Note carefully that switching the witness away from the augmented intAccessPreorder frame does not eliminate this work -- it RELOCATES it. The existing conjunct-2 argument is tied to the augSets witness threaded by intExpandBranches_openBranch_sat, so a new frame needs its own forcing argument rather than inheriting that one.\n\nSTRUCTURAL CONSTRAINT (established, treat as ground truth): IValid phi quantifies over every preorder and every upward-closed valuation, so any refutation of openBranch_countermodel would have to exhibit an IPC-valid phi on which the algorithm returns .openBranch. phiRef1 is not even classically valid, so it was never such a candidate -- do not mistake a failing witness for a refutation.\n\nEVIDENCE AVAILABLE (does not constitute a general proof): witnesses exist for phiRef1, phiRef2, phiRef3, exMiddle, dblNeg, peirce, deMorgan, and dummett under intScheme, and for phiRef1 under minScheme. Eight formulas is not a forall phi proof.\n\nA DOCUMENTED NEGATIVE OR NARROWING RESULT IS A LEGITIMATE OUTCOME. If the constructed frame cannot support conjunct 2, record precisely why, in-source, with the same honesty discipline the current annotations use (open / route known-bad / space characterised -- never 'refuted' unless genuinely machine-refuted). Do not manufacture a proof to avoid a negative result.\n\nDP-5 (truthLemma, Scheme.lean:693, sorry at :768, the T(phi' -> psi') implication case) shares this frame-persistence question and is the natural companion site -- discharging it may fall out of the same truth lemma.\n\nThe existing sorries stay until this and the residual task land. Zero new sorries, zero new axioms.",
@@ -60,13 +60,18 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:41:11Z",
-      "last_updated": "2026-08-09T22:18:07Z",
+      "last_updated": "2026-08-09T22:24:55Z",
       "session_id": "sess_1786312852_6b5c1b_604",
       "artifacts": [
         {
           "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
           "type": "report",
           "summary": "Conjunct-2 frame adequacy: rawEdges refuted, DP-5 dischargeable"
+        },
+        {
+          "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
+          "type": "plan",
+          "summary": "DP-5 discharge and honest restructure"
         }
       ]
     },

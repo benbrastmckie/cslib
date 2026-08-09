@@ -1,30 +1,35 @@
 {
-  "status": "researched",
-  "summary": "Conjunct 2 over task 603's rawEdges frame is MACHINE-REFUTED, not merely hard: CslibTests/WitnessProbe.lean:174-176 asserts check [(1,0),(2,1)] = some (true, true) (upward-closed but FORCES phiRef1 at world 0), and BetaSplitRefutation.lean:304/:387 confirm [(1,0),(2,1)] is the real algorithm's rawEdges at the real fuel. A new eight-formula probe reproduces this and adds phiRef3, and excludes three further candidate constructions (prune-at-blocked fails dblNeg/peirce; prune-at-strictly-blocked fails phiRef3; the IFimpAccess greatest fixpoint collapses to the empty frame for phiRef1/2/3). Core finding: IFimpAccess and positive persistence sit on OPPOSITE frames -- augmented has IFimpAccess but persistence is refuted; raw has persistence but IFimpAccess is refuted (world 2 for phiRef1/phiRef2, worlds 3,4 for phiRef3). Separately and positively, DP-5 (truthLemma's T-imp sorry at Scheme.lean:768) IS dischargeable sorry-free over any persistence-carrying frame; the 15-line proof was applied and BUILT GREEN in a reverted spike (diff preserved at scratch/dp5-spike.diff).",
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Five-phase plan implementing report section 6's recommended landing: discharge DP-5 (truthLemma's T-imp sorry) with the build-verified 15-line proof, thread the new hpers hypothesis through the two external wrapper call sites, and restructure openBranch_countermodel so its single surviving sorry carries the genuinely-open existential instead of the machine-refuted augmented-frame upward-closure goal. Net effect: Scheme.lean 2 live sorries -> 1, zero new sorries, zero new axioms, zero new definitions or imports. Conjunct 2 over rawEdges is NOT attempted -- it is machine-refuted and the plan lands that as a documented negative in the file's honesty register. A dedicated phase creates a follow-on task for the root-cause Expansion.lean defect (intFImpReuseWitnessAnc? never re-validates its loop-back containment check).",
   "artifacts": [
     {
-      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
-      "type": "report",
-      "summary": "Frame-adequacy verdict: rawEdges refuted for conjunct 2, four candidate constructions excluded, DP-5 discharge verified by build, and the recommended honest landing (Scheme.lean 2 live sorries -> 1)"
-    },
-    {
-      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/PruneProbe.lean",
-      "type": "probe",
-      "summary": "Eight-formula probe: recovers real rawEdges/loop-back lists at intFuelExt fuel (recreation agreement asserted), locates IFimpAccess failure worlds, evaluates three pruning rules and the IFimpAccess support fixpoint"
-    },
-    {
-      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/scratch/dp5-spike.diff",
-      "type": "probe",
-      "summary": "The 28-line verified DP-5 discharge (truthLemma gains an hpers hypothesis; T-imp sorry replaced by a 15-line proof via sat_timp + chained persistence). Built green, then reverted."
+      "type": "plan",
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md"
     }
   ],
-  "blockers": [
-    {
-      "task": null,
-      "description": "openBranch_countermodel's remaining obligation needs a frame carrying IFimpAccess AND positive persistence simultaneously. The current calculus produces no such frame, and each available frame's missing half is machine-refuted rather than merely unproved. The root cause is the already-named Expansion.lean defect: intFImpReuseWitnessAnc? records a loop-back edge on a containment check it never re-validates as the branch grows. Fixing that is calculus-level work outside Scheme.lean and warrants its own task.",
-      "sorry_count": 1
-    }
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md"
   ],
-  "continuation_context": "Recommended landing (report section 6, in order): (1) add the hpers hypothesis to truthLemma and replace the DP-5 sorry with the verified proof from scratch/dp5-spike.diff -- note intro hforce_phi' MUST come after the persistence `have`, or `induction hle` sweeps it into the motive; (2) openBranch_countermodel can then no longer instantiate truthLemma at the augmented frame (hpers is refuted there) and must NOT sorry a refuted hypothesis -- drop its frame-committing `refine <edges, ?_, ...>` so its single sorry is the whole existential, which is genuinely open; (3) net effect: Scheme.lean goes from 2 live sorries to 1, and the survivor's goal changes from a refuted statement (upward closure over augSets) to an open one; (4) update annotations at both sites with the frame-adequacy table, using 'refuted' only for the machine-refuted cells. Fallback if step 2 is judged out of scope: land the DP-5 proof as a standalone sorry-free variant beside truthLemma (task 603's precedent), at the cost of ~90 duplicated lines. Do NOT re-attempt rawEdges, the maximal inclusion frame, either pruning rule, or the IFimpAccess fixpoint -- all four are now excluded with machine evidence. Cslib/ was restored byte-identical after the spike; baseline lake build is green with sorry warnings at Scheme.lean:693 and :7977 only.",
-  "next_action_hint": "plan"
+  "decisions_made": [
+    "PLAN-TIME DISCOVERY not in the research report: truthLemma has TWO external call sites beyond openBranch_countermodel -- intTruthLemma (Intuitionistic/Completeness.lean:97) and minTruthLemma (Minimal/Completeness.lean:102), both passing arguments positionally. Adding hpers breaks both, so the delegation's 'file in scope is Scheme.lean only' constraint cannot hold literally for the recommended landing. Both wrappers were verified to have NO downstream consumers beyond docstrings, so the fix is contained (~4 lines each). The plan proceeds under the stated assumption that these two edits are in scope as the mechanical closure of a signature change.",
+    "Phase 1 is a declared atomic-batch spanning three files (Scheme.lean + the two wrappers). Splitting it would leave the repo build red between commits, violating the every-phase-ends-green constraint.",
+    "The preserved spike diff's THIRD hunk must NOT be landed: it passes (by sorry) for hpers at the openBranch_countermodel call site, and hpers is machine-refuted at the augmented frame. Sorrying a refuted statement is exactly what the file's honesty discipline forbids. Phase 1 drops the frame-committing refine line instead.",
+    "openBranch_countermodel's now-dead extraction block (the ~40-line intExpandBranches_openBranch_sat invocation) is deleted rather than underscore-kept, because the identical invocation survives verbatim in openBranch_rawEdges_upward_closed directly below in the same file. Underscore-prefixing is the documented fallback.",
+    "Annotations must name the root-cause defect by its durable anchor (intFImpReuseWitnessAnc? in Expansion.lean) and NEVER by task number: Cslib/** is a deliverable tree governed by the no-task-references-in-deliverables rule, which is enforced by a blocking write-time hook.",
+    "Phase 3 was added beyond the report's scope: discharging DP-5 makes stale the claims in ~6 other files that 'the parametric sorry in truthLemma is the single deferred completeness obligation'. Leaving them is itself an honesty defect. The file list is carried as a Scope Hypothesis to be confirmed by grep at implement time."
+  ],
+  "dead_ends": [
+    "rawEdges as a conjunct-2 witness -- machine-refuted (WitnessProbe.lean:174-176 gives check [(1,0),(2,1)] = some (true, true)).",
+    "Prune-at-blocked-worlds -- fails dblNeg and peirce (self-reuse loop-back; cutting world 2 destroys the falsifying world).",
+    "Prune-at-strictly-blocked-worlds -- fails phiRef3; contradicts the prune-at-blocked rule on the same syntactic signal.",
+    "The greatest IFimpAccess-supported subframe (fixpoint) -- collapses to K = the empty frame for phiRef1, phiRef2, phiRef3.",
+    "The maximal atom-inclusion frame -- already excluded by prior work, fails phiRef1/phiRef3.",
+    "Any route that goes through a truth lemma is strictly stronger than conjunct 2 and can fail where the goal succeeds (the phiRef2 case)."
+  ],
+  "phases_completed": 0,
+  "phases_total": 5,
+  "plan_markers_verified": true
 }

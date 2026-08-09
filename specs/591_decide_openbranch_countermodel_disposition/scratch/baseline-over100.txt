@@ -1,0 +1,3 @@
+== Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean ==
+== Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean ==
+== Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean ==

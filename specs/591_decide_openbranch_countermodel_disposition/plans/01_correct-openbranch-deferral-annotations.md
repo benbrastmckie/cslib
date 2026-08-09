@@ -1,7 +1,7 @@
 # Implementation Plan: Correct the `openBranch_countermodel` deferral annotations
 
 - **Task**: 591 - Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: None remaining (see Research Integration — the stated prerequisite is already satisfied)
 - **Research Inputs**: `specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md`
@@ -429,7 +429,7 @@ named residual.
 
 ---
 
-### Phase 6: Full gate, cross-file consistency, and residual reporting [IN PROGRESS]
+### Phase 6: Full gate, cross-file consistency, and residual reporting [COMPLETED]
 
 **Goal**: Run the complete repository gate, confirm the ten hunks now tell one consistent story
 across the three files, and record the residuals and tracker corrections the research phase

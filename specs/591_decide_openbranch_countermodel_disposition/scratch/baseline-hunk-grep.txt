@@ -1,0 +1,55 @@
+== Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean ==
+569:refuted
+585:REFUTED
+744:PERMANENTLY DEFERRED
+744:unprovable as stated
+746:REFUTED
+1939:REFUTED
+2088:refuted
+2454:refuted
+2547:refuted
+2550:refuted
+2557:refuted
+2565:refuted
+2752:refuted
+3143:refuted
+3623:refuted
+4252:REFUTED
+4269:refuted
+6797:refuted
+7844:DISPOSITION UNDECIDED
+7845:REFUTED
+7849:UNVERIFIED
+7928:DISPOSITION UNDECIDED
+7928:REFUTED
+7933:UNVERIFIED
+== Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean ==
+46:PERMANENTLY DEFERRED
+46:unprovable as stated
+55:refuted
+133:refuted
+140:PERMANENTLY DEFERRED
+140:unprovable as stated
+143:REFUTED
+146:refuted
+148:terminal deferral
+154:PERMANENTLY DEFERRED
+154:unprovable as stated
+157:DISPOSITION UNDECIDED
+158:refuted
+160:no follow-up
+== Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean ==
+50:PERMANENTLY DEFERRED
+50:unprovable as stated
+50:refuted
+136:PERMANENTLY DEFERRED
+136:unprovable as stated
+137:refuted
+140:DISPOSITION UNDECIDED
+143:refuted
+143:terminal deferral
+148:PERMANENTLY DEFERRED
+148:unprovable as stated
+148:refuted
+153:refuted
+154:no follow-up

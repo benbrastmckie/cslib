@@ -1,59 +1,73 @@
 {
-  "status": "planned",
-  "started_at": "2026-08-09T12:25:00Z",
-  "finished_at": "2026-08-09T12:40:00Z",
+  "status": "implemented",
+  "started_at": "2026-08-09T12:37:10-07:00",
+  "finished_at": "2026-08-09T13:06:06-07:00",
   "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/591_decide_openbranch_countermodel_disposition/summaries/01_correct-openbranch-deferral-annotations-summary.md",
+      "summary": "Execution summary recording the 10 corrected hunks, byte-identical sorry/axiom ratchets, the pre-existing (non-regression) step-5 pre-pr-check.sh failure, the two tracker corrections, and the CslibTests/ promotion follow-up recommendation."
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "summary": "Corrected openBranch_countermodel docstring/proof-site comment (H1, H2), DP-5's in-proof comment (H3), and the stale DP-3/DP-4/DP-5 cross-reference (H4) from false 'refuted/permanently deferred' framing to 'open, augmented-frame route known-bad, admissible edge space characterised'. Comments only; both sorries untouched."
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "summary": "Corrected DP-3's module notes, theorem docstring, and in-proof comment (H5-H7) to the open framing, preserving the exact h Nat (intExtractValuation _b) _huc 0 laundering prohibition with the corrected reason. Comments only; sorry untouched."
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "summary": "Retracted DP-4's 'refuted independently of DP-3' claim (H8-H10): the pruned witness [(1,0)] discharges both upward-closure obligations under isMinimallyClosed and still falsifies phiRef1. Promoted minBranchBotForces b's upward-closure to a named open residual. Comments only; sorry untouched."
+    },
     {
       "type": "plan",
       "path": "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
-      "summary": "Six-phase annotation-correction plan replacing the false 'PERMANENTLY DEFERRED / refuted' framing at 10 deferral-language hunks across the three in-scope Lean files with the corrected 'open, augmented-frame route known-bad, admissible space characterised' framing. All four sorries stay; zero new sorries, zero new axioms."
+      "summary": "All 6 phases marked [COMPLETED]; plan-level Status set to [COMPLETED]."
     }
   ],
   "partial_progress": {
     "stage": "finished",
-    "details": "Plan authored and strict-validated (validate-artifact.sh plan --strict: PASS, 0 warnings)."
+    "details": "All 6 phases completed: baseline capture, Scheme.lean H1/H2, Scheme.lean H3/H4, Intuitionistic/Completeness.lean H5-H7, Minimal/Completeness.lean H8-H10, full gate and residual reporting.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 6,
+    "phases_total": 6
   },
-  "phase_count": 6,
-  "estimated_hours": 3.5,
-  "dependency_waves": [[1], [2], [3, 4, 5], [6]],
-  "plan_metadata": {
-    "phases": 6,
-    "total_effort_hours": 3.5,
-    "complexity": "medium",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1], [2], [3, 4, 5], [6]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_openbranch-countermodel-disposition.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-08-09"
-      }
-    ],
-    "skeleton": false,
-    "follow_up_tasks": []
-  },
-  "scope_correction": {
-    "delegation_named_sites": 4,
-    "hunks_actually_found": 10,
-    "note": "The four delegated sites are a subset. The module-level '## Notes on sorry' sections of both Completeness.lean files (3 hunks each) and one stale DP-3/DP-4/DP-5 cross-reference in Scheme.lean repeat the same false claims. All 10 hunks lie inside the declared file_scope; leaving the module notes uncorrected would make each file self-contradictory. Phase 1 re-confirms the count before any edit."
-  },
-  "memory_candidates": [
-    {
-      "content": "In a Lean repo whose sorry-debt ratchet strips block comments (/- ... -/, including /-- ... -/) before counting code-position \\bsorry\\b occurrences, that ratchet doubles as a comment-delimiter-breakage detector for docstring-only edits. A comment-only change must leave the per-file sorry count bit-identical; any movement means a /- or -/ delimiter broke and prose is now being elaborated as code. This makes an otherwise-expensive full build unnecessary as the per-phase gate for annotation-correction work -- run the cheap census after every hunk and reserve the full build for the final gate. Verified against cslib's scripts/check-sorry-suppressions.sh, whose header documents the comment-stripping discrimination rule.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
-      "confidence": 0.7,
-      "suggested_keywords": ["lean", "sorry-ratchet", "docstring-edit", "verification-tier", "comment-delimiter", "cslib"]
-    }
+  "phases_completed": 6,
+  "phases_total": 6,
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/01-baseline.md",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/02-canonical-wording.md",
+    "specs/591_decide_openbranch_countermodel_disposition/summaries/01_correct-openbranch-deferral-annotations-summary.md"
   ],
-  "next_steps": "Run /implement 591 to execute the plan",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 27,
+    "sorry_count_in_scope_files": 4,
+    "vacuous_count": 0,
+    "axiom_count": 42,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial",
+    "ci_pipeline_notes": "pre-pr-check.sh steps 1,6,7,8,9,10 pass with zero delta from the Phase 1 baseline (ratchets unchanged, byte-identical sorry census, unchanged axiom census). Step 5 (lake build --wfail --iofail, full-repo warning gate) reports FAIL, but this is a pre-existing, documented condition unrelated to this task's edits: pre-pr-check.sh's own inline comment states the three Propositional/Tableau/* files (and their four pre-existing sorries, which this task's hard constraint requires to stay) trip step 5 repo-wide; the log also shows unrelated pre-existing 'flexible' linter warnings in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean and S4/Driver.lean. Scoped lake build of each of the three modified modules succeeds cleanly with no warnings beyond the four pre-existing sorry declarations."
+  },
+  "completion_data": {
+    "completion_summary": "Corrected all 10 deferral-language hunks (H1-H10) across Scheme.lean and both Completeness.lean files, replacing the false 'PERMANENTLY DEFERRED / unprovable as stated / REFUTED / terminal deferral' framing with the machine-checked-correct framing: the openBranch_countermodel upward-closure conjunct is open (not refuted), the augmented-frame proof route is known-bad, and the admissible edge space is characterised as exactly the subsets of the atom-inclusion preorder. All four sorries were left untouched; the sorry-suppression and axiom-taint ratchets are byte-identical to the pre-edit baseline. Every corrected hunk keeps the DP-3 laundering prohibition, preserves the genuine BetaSplitRefutation.lean counterexample and the intFImpReuseWitnessAnc? defect as real, and states the honesty bound that the general forall-phi statement remains unproved and the maximal inclusion frame is not a uniform witness. Two tracker corrections and one CslibTests/ promotion follow-up are recorded in the summary for the user/orchestrator to act on."
+  },
   "metadata": {
     "session_id": "sess_1786294327_b96abd_591",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "sorries_added": 0,
-    "axioms_added": 0
+    "axioms_added": 0,
+    "compliance_check": "passed"
   }
 }

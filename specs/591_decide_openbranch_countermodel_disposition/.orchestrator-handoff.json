@@ -1,23 +1,59 @@
 {
-  "phase": "plan",
+  "phase": "implement",
   "task_number": 591,
-  "status": "planned",
+  "status": "implemented",
   "session_id": "sess_1786294327_b96abd_591",
-  "summary": "Six-phase annotation-correction plan. The research verdict (route (a), corrected framing) is integrated: the exists-edges conjunct is NOT refuted, and the [UNVERIFIED] inference the four deferrals rest on is machine-refuted. A grep of the three in-scope files found 10 deferral-language hunks, not the 4 named in the delegation -- the module-level '## Notes on sorry' sections of both Completeness.lean files and one stale DP-3/DP-4/DP-5 cross-reference in Scheme.lean repeat the same false claims, and all extra hunks lie inside file_scope. Phases: (1) baseline capture + canonical corrected wording; (2) Scheme.lean openBranch_countermodel docstring + proof-site; (3) Scheme.lean DP-5 + stale cross-reference; (4) Intuitionistic/Completeness.lean DP-3 x3; (5) Minimal/Completeness.lean DP-4 x3; (6) full pre-pr-check gate + residual reporting. Eight binding content rules (C1-C8) enforce: the four sorries stay, comments/docstrings only, the `exact h Nat (intExtractValuation _b) _huc 0` prohibition is preserved with a corrected reason, no overclaim (the forall-phi statement stays unproved and the maximal inclusion frame is not a uniform witness), the augmented-frame counterexample is preserved as a real refutation of THAT invariant, no task-number citations, evidence honesty (lead with the self-contained structural argument, label computed evidence as computed), and the repo's hard 100-column limit.",
+  "summary": "Executed all 6 phases of the annotation-correction plan. Corrected the 10 deferral-language hunks (H1-H10) across Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean, Intuitionistic/Completeness.lean, and Minimal/Completeness.lean, replacing the false 'PERMANENTLY DEFERRED / unprovable as stated / REFUTED / terminal deferral / no follow-up scheduled / DISPOSITION UNDECIDED' framing with the corrected framing: open, augmented-frame route known-bad, admissible edge space characterised. The four sorries stay untouched and in their original positions; zero new sorries; zero new axioms. Every corrected hunk states the honesty bound (forall-phi statement unproved, maximal inclusion frame not a uniform witness) and preserves the genuine survivors (BetaSplitRefutation.lean counterexample, intFImpReuseWitnessAnc? defect). The DP-3 laundering prohibition (`exact h Nat (intExtractValuation _b) _huc 0`) is preserved with the corrected reason. Comments/docstrings only -- no tactic, statement, or signature line touched in any of the three files.",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
-      "summary": "Six-phase annotation-correction plan for the openBranch_countermodel deferral sites; strict-validated, 0 warnings"
+      "summary": "Six-phase annotation-correction plan; all 6 phases marked [COMPLETED], plan-level Status set to [COMPLETED]"
+    },
+    {
+      "type": "summary",
+      "path": "specs/591_decide_openbranch_countermodel_disposition/summaries/01_correct-openbranch-deferral-annotations-summary.md",
+      "summary": "Execution summary: hunks corrected, byte-identical sorry/axiom ratchets, pre-existing (non-regression) pre-pr-check.sh step-5 failure explained, tracker corrections and CslibTests/ promotion follow-up recorded"
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "summary": "H1-H4 corrected: openBranch_countermodel docstring/proof-site, DP-5 in-proof comment, stale DP-3/DP-4/DP-5 cross-reference. Comments only; 2 sorries untouched."
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+      "summary": "H5-H7 corrected: DP-3 module notes, theorem docstring, in-proof comment. Comments only; 1 sorry untouched."
+    },
+    {
+      "type": "implementation",
+      "path": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+      "summary": "H8-H10 corrected: DP-4 module notes, theorem docstring, in-proof comment; retracted 'refuted independently of DP-3' claim. Comments only; 1 sorry untouched."
     }
   ],
   "blockers": [],
-  "next_action_hint": "implement",
-  "next_phase": "implement",
-  "phases_completed": 0,
+  "next_action_hint": "complete",
+  "next_phase": "complete",
+  "phases_completed": 6,
   "phases_total": 6,
   "dependency_waves": [[1], [2], [3, 4, 5], [6]],
   "estimated_hours": 3.5,
   "requires_user_review": false,
-  "next_steps": "Run /implement 591 to execute the plan. TWO TRACKER CORRECTIONS carried forward from research, to be recorded (not actioned) by the implement phase's summary: (1) the task description's PREREQUISITE premise is false -- CslibTests/BetaSplitRefutation.lean is present and CI-protected, so nothing blocks this work; (2) the restatement task (restate_propositional_tableau_completeness_theorems) rests on the now-disproved premise that the conjunct is refuted and should be re-scoped or blocked rather than executed as written. ONE NEW FOLLOW-UP RECOMMENDATION: promote the research scratch probes (WitnessProbe, WitnessSearch2, WitnessSearch3, MinProbe) into CslibTests/, mirroring BetaSplitRefutation.lean's promotion, so the corrected annotations' computed evidence becomes CI-protected -- deliberately out of scope here because it is outside file_scope."
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/01-baseline.md",
+    "specs/591_decide_openbranch_countermodel_disposition/scratch/02-canonical-wording.md",
+    "specs/591_decide_openbranch_countermodel_disposition/summaries/01_correct-openbranch-deferral-annotations-summary.md"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_in_scope_files": 4,
+    "sorry_count_delta": 0,
+    "axiom_count_delta": 0,
+    "ci_pipeline_notes": "pre-pr-check.sh steps 1,6,7,8,9,10 pass with zero delta from baseline. Step 5 (lake build --wfail --iofail) FAILs, but this is a pre-existing, documented, repo-wide condition (the four in-scope sorries this task's hard constraints require to stay, plus unrelated pre-existing 'flexible' linter warnings in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean and S4/Driver.lean), not a regression introduced by this task. Scoped builds of all three modified modules succeed cleanly."
+  },
+  "next_steps": "Two tracker corrections recorded in the summary for user action (not actioned here, out of this task's scope): (1) the task description's stated prerequisite (BetaSplitRefutation.lean absent) is false -- it is present and CI-protected; (2) the restatement task (restate_propositional_tableau_completeness_theorems) rests on the now-disproved premise that the conjunct is refuted and should be re-scoped or blocked. One follow-up recommendation: promote the research scratch probes (WitnessProbe, WitnessSearch2, WitnessSearch3, MinProbe) into CslibTests/ so the corrected annotations' computed evidence becomes CI-protected -- deliberately not done here (outside file_scope)."
 }

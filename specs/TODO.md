@@ -233,7 +233,7 @@ CONSTRAINT: this task changes task METADATA only. No .lean file may be created, 
 
 ---
 
-### 593. Restate the three propositional tableau completeness theorems to a provable form
+### 593. Find a uniform frame construction for openBranch_countermodel, then discharge the four propositional tableau completeness sorries
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic

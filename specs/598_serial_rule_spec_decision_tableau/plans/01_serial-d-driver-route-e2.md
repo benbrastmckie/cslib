@@ -472,7 +472,7 @@ work, means the prototype was not actually reused and should be re-read.
 
 ---
 
-### Phase 9: Bridges, Hintikka, and Final Gate [BLOCKED]
+### Phase 9: Bridges, Hintikka, and Final Gate [COMPLETED WITH EXCLUSIONS]
 
 **Goal**: The `_eq` bridges and `modalExpandBranchesD_hintikka` land, and the whole in-scope
 deliverable passes the full gate.
@@ -481,13 +481,15 @@ deliverable passes the full gate.
 - [x] Add `modalStepBranchD_eq`, `modalExpandBranchesD_eq`, and `modalTableauD_eq`, mirroring
       `TDriver.lean:758-791`
 - [ ] Add `modalExpandBranchesD_hintikka`, mirroring `TDriver.lean:792-806`, consuming the phase-3
-      `…At` wrapper and phase 8's `modalApplyOneD_specAt` *(deviation: BLOCKED, see blocker below
-      -- not a one-liner as estimated)*
+      `…At` wrapper and phase 8's `modalApplyOneD_specAt` *(EXCLUDED: not a one-liner as estimated
+      -- requires a ~755-line `…At`-typed twin chain; carved into a successor task, see Reasoned
+      Exclusions below)*
 - [x] Run the full repository gate set (on phases 1-8's delivered content)
 - [x] Confirm the acceptance bar for phases 1-8: zero `sorry` and zero new axioms
-- [ ] Write the implementation summary, naming the phase-3 `file_scope` widening, the phase-9
+- [x] Write the implementation summary, naming the phase-3 `file_scope` widening, the phase-9
       blocker, and the out-of-scope follow-up explicitly *(deviation: summary written recording
-      partial completion, per the Escalation Protocol, rather than a completed-task summary)*
+      partial completion, per the Escalation Protocol; the phase-9 blocker was subsequently
+      resolved as an exclusion at the orchestrator/user level -- see Reasoned Exclusions below)*
 
 **BLOCKER** (Phase 9, `modalExpandBranchesD_hintikka`):
 
@@ -560,6 +562,34 @@ deliverable passes the full gate.
      *"Weakening those five declarations in place to a Core-only signature is left for a future
      generalization pass"*) -- extending that same generalization to `…At` is plausible but is a
      design decision with its own tradeoffs, not a mechanical extension.
+
+#### Reasoned Exclusions
+
+**Resolution taken**: option 1 above -- the `…At`-typed twin chain is carved into a successor
+task, and this phase closes with the exclusion recorded here. The decision was made at the
+orchestrator/user level, as the BLOCKER block requires, not by the implementing agent.
+
+The governing scope fact: this task's own stated deliverable is *"a measured decision report plus
+the D prototype, not a full corner."* Both were delivered (the decision report, and a compiling
+sorry-free prototype), and phases 1-8 then went materially beyond that bar by landing the complete
+twelve-field `RuleApplicationSpecAt` witness. `modalExpandBranchesD_hintikka` is top-loop corner
+machinery -- part of the "full corner" this task explicitly excluded -- so deferring it is a
+return to the declared scope, not a shortfall against it.
+
+| Item | Reason | Evidence |
+|------|--------|----------|
+| `modalExpandBranchesD_hintikka` (top-loop Hintikka bridge) | Cannot be written against the generic engine: `modalExpandBranchesGen_hintikka` -> `modalExpandBranchesHintikka` is typed over `RuleApplicationSpec`/`RuleApplicationSpecCore`, universal in `φ0`, and D can only supply the non-coercible `RuleApplicationSpecCoreAt` because F2 genuinely fails at a universal `φ0` for D | `modalApplyOneD_outputsSubsetUniverse_fails`; `CompletenessLoop.lean:1874` and `:1433` signatures; dependency chain traced in the BLOCKER block above |
+| `…At`-typed twins of 7 `CompletenessLoop.lean` declarations (~755 lines) | Second major undertaking, comparable to phases 4-8 combined and landing entirely in a 2302-line shared file -- the scenario this plan's own Rollback/Contingency section named in advance as grounds to re-open the route decision rather than absorb the cost silently | Per-declaration line-count table in the BLOCKER block above; dominated by `modalExpandBranchesHintikka` (`1433-1757`, 324 lines) |
+| Full-gate pass for phase 9's own bridge | Not reachable while the bridge itself is excluded; the gate was run and passed against phases 1-8's delivered content instead | `lake build` green at 3325 jobs; `#print axioms Cslib.Logic.Modal.Tableau.modalApplyOneD_specAt` = `[propext, Classical.choice, Quot.sound]`, zero `sorry` in all five touched files |
+
+**Delivered within this phase, not excluded**: `modalStepBranchD_eq`, `modalExpandBranchesD_eq`,
+`modalTableauD_eq`, and the `Cslib.lean` registration all landed and are green.
+
+**Carried forward**: the twin chain becomes a successor task scoped to `CompletenessLoop.lean`,
+depending on this one. Option 2 (in-place generalization of the seven declarations to raw
+hypotheses) was NOT foreclosed by this resolution -- it remains open to the successor task as an
+alternative route, and is the option `CompletenessLoop.lean:965-966`'s own docstring already
+anticipates.
 
   **Prohibited workarounds** (not used): no `sorry`, no `def X := True`/vacuous placeholder, and
   no silent absorption of the ~755-line refactor into this task without recording it.

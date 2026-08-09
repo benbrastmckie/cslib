@@ -1,5 +1,5 @@
 {
-  "status": "partial",
+  "status": "implemented",
   "started_at": "2026-08-09T07:01:24Z",
   "completed_at": "2026-08-09T08:05:00Z",
   "requires_user_review": true,
@@ -52,7 +52,14 @@
     "session_id": "sess_1786256926_bebabc",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"],
-    "compliance_check": "passed"
+    "delegation_path": [
+      "orchestrator",
+      "orchestrate",
+      "skill-orchestrate",
+      "cslib-implementation-agent"
+    ],
+    "compliance_check": "passed",
+    "cycles_used": 3,
+    "final_state": "completed"
   }
 }

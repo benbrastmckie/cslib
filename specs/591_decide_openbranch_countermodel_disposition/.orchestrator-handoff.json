@@ -1,36 +1,23 @@
 {
-  "_agent_original": {
-    "phase": "research",
-    "task_number": 591,
-    "status": "complete",
-    "session_id": "sess_1786294327_b96abd_591",
-    "artifacts": [
-      "specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md",
-      "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessProbe.lean",
-      "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessSearch2.lean",
-      "specs/591_decide_openbranch_countermodel_disposition/scratch/WitnessSearch3.lean",
-      "specs/591_decide_openbranch_countermodel_disposition/scratch/MinProbe.lean"
-    ],
-    "next_phase": "plan",
-    "decision": "ROUTE (a), with a corrected framing. The `exists edges` conjunct of openBranch_countermodel is NOT refuted; the [UNVERIFIED] inference the four deferrals rest on is machine-REFUTED. For phiRef1, on the branch the real intuitionisticTableau returns, edges = [(1,0)] satisfies BOTH conjuncts (upward closure true, IForces at 0 false). Exhaustive enumeration over the complete admissible edge-set space finds 40 witnesses for phiRef1 under intScheme, and witnesses for phiRef2/phiRef3/exMiddle/dblNeg/peirce/deMorgan/dummett; under minScheme, [(1,0)] discharges BOTH upward-closure obligations (valuation and bot) and still falsifies phiRef1, refuting DP-4's claim of independent refutation. Structural argument independent of computation: any refutation of the lemma must exhibit an IPC-VALID formula left open by the algorithm (since IValid quantifies over all preorders and all upward-closed valuations); phiRef1 is not even classically valid, so it was never a candidate refutation. New structural lemma: admissible edge sets are EXACTLY the subsets of the atom-set inclusion preorder, and every such subset is automatically upward-closed -- so conjunct 1 needs no algorithm invariant at all. DELIVERABLE FOR PLAN/IMPLEMENT: correct the annotations at all four sites (Scheme.lean:7862/:7937, Intuitionistic/Completeness.lean:161, Minimal/Completeness.lean:155, Scheme.lean:760) from 'PERMANENTLY DEFERRED / unprovable as stated / refuted' to 'open, augmented-frame route known-bad, admissible space characterised'. The four sorries STAY. Zero new sorries, zero new axioms.",
-    "blockers": [],
-    "requires_user_review": true,
-    "next_steps": "Plan the annotation-correction change across the four sites per section 6 of the report. TWO TASK-TRACKER CORRECTIONS NEEDED: (1) the task description's PREREQUISITE premise is false -- CslibTests/BetaSplitRefutation.lean is PRESENT (the evidentiary-repair task already completed and promoted it out of scratch/), so nothing blocks this work; (2) the restatement task (restate_propositional_tableau_completeness_theorems) rests on the premise that the conjunct is refuted, which is now disproved -- it should be re-scoped or blocked rather than executed as written. The general forall-phi statement remains unproved: per the structural argument, proving it is equivalent to proving the tableau procedure complete, and the maximal inclusion frame is NOT a uniform witness (fails at phiRef1/phiRef3), so a uniform frame construction is genuine open work, not a small residual."
-  },
-  "phase": "research",
+  "phase": "plan",
   "task_number": 591,
-  "status": "researched",
+  "status": "planned",
   "session_id": "sess_1786294327_b96abd_591",
-  "summary": "Route (a) corrected: the exists-edges conjunct of openBranch_countermodel is NOT refuted; the inference the four deferrals cite is machine-refuted (witness edges=[(1,0)] for phiRef1, 40 witnesses under intScheme, minScheme witness too). Four sorries stay; annotations must be corrected.",
+  "summary": "Six-phase annotation-correction plan. The research verdict (route (a), corrected framing) is integrated: the exists-edges conjunct is NOT refuted, and the [UNVERIFIED] inference the four deferrals rest on is machine-refuted. A grep of the three in-scope files found 10 deferral-language hunks, not the 4 named in the delegation -- the module-level '## Notes on sorry' sections of both Completeness.lean files and one stale DP-3/DP-4/DP-5 cross-reference in Scheme.lean repeat the same false claims, and all extra hunks lie inside file_scope. Phases: (1) baseline capture + canonical corrected wording; (2) Scheme.lean openBranch_countermodel docstring + proof-site; (3) Scheme.lean DP-5 + stale cross-reference; (4) Intuitionistic/Completeness.lean DP-3 x3; (5) Minimal/Completeness.lean DP-4 x3; (6) full pre-pr-check gate + residual reporting. Eight binding content rules (C1-C8) enforce: the four sorries stay, comments/docstrings only, the `exact h Nat (intExtractValuation _b) _huc 0` prohibition is preserved with a corrected reason, no overclaim (the forall-phi statement stays unproved and the maximal inclusion frame is not a uniform witness), the augmented-frame counterexample is preserved as a real refutation of THAT invariant, no task-number citations, evidence honesty (lead with the self-contained structural argument, label computed evidence as computed), and the repo's hard 100-column limit.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md",
-      "summary": "Machine-checked verdict on the openBranch_countermodel exists-edges conjunct"
+      "type": "plan",
+      "path": "specs/591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md",
+      "summary": "Six-phase annotation-correction plan for the openBranch_countermodel deferral sites; strict-validated, 0 warnings"
     }
   ],
   "blockers": [],
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
+  "next_phase": "implement",
   "phases_completed": 0,
-  "phases_total": 0
+  "phases_total": 6,
+  "dependency_waves": [[1], [2], [3, 4, 5], [6]],
+  "estimated_hours": 3.5,
+  "requires_user_review": false,
+  "next_steps": "Run /implement 591 to execute the plan. TWO TRACKER CORRECTIONS carried forward from research, to be recorded (not actioned) by the implement phase's summary: (1) the task description's PREREQUISITE premise is false -- CslibTests/BetaSplitRefutation.lean is present and CI-protected, so nothing blocks this work; (2) the restatement task (restate_propositional_tableau_completeness_theorems) rests on the now-disproved premise that the conjunct is refuted and should be re-scoped or blocked rather than executed as written. ONE NEW FOLLOW-UP RECOMMENDATION: promote the research scratch probes (WitnessProbe, WitnessSearch2, WitnessSearch3, MinProbe) into CslibTests/, mirroring BetaSplitRefutation.lean's promotion, so the corrected annotations' computed evidence becomes CI-protected -- deliberately out of scope here because it is outside file_scope."
 }

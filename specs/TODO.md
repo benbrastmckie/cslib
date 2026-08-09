@@ -27,7 +27,7 @@ next_project_number: 602
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-591 [RESEARCHED] — DECISION TASK. Resolve the single open decision point that gates 
+591 [PLANNED] — DECISION TASK. Resolve the single open decision point that gates 
   └─ 593 [BLOCKED] — Restate and discharge the four propositional tableau completeness
     └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
       └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
@@ -301,11 +301,12 @@ SEQUENCING: still the prerequisite for the disposition-decision task -- but that
 ---
 
 ### 591. Decide the openBranch_countermodel upward-closure disposition (root of DP-3/DP-4/DP-5)
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 592
 - **Research**: [591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md]
+- **Plan**: [591_decide_openbranch_countermodel_disposition/plans/01_correct-openbranch-deferral-annotations.md]
 
 **Description**: DECISION TASK. Resolve the single open decision point that gates the entire propositional tableau completeness chain. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, finding C2) because NO open task owned this obligation.
 

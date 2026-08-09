@@ -41,7 +41,7 @@ next_project_number: 601
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
-598 [NOT STARTED] — Prototype and measure a serial-successor rule spec for the modal 
+598 [PARTIAL] — Prototype and measure a serial-successor rule spec for the modal 
 599 [NOT STARTED] — Prototype the Euclidean rule combinator identified as an open, un
 600 [NOT STARTED] — Retire the unordered S4 stepper stack at Cslib/Logics/Modal/Table
 
@@ -100,10 +100,13 @@ next_project_number: 601
 ---
 
 ### 598. Serial rule spec decision tableau
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [598_serial_rule_spec_decision_tableau/reports/01_serial-rule-spec-decision.md]
+- **Plan**: [598_serial_rule_spec_decision_tableau/plans/01_serial-d-driver-route-e2.md]
+- **Summary**: [598_serial_rule_spec_decision_tableau/summaries/01_serial-d-driver-route-e2-summary.md]
 
 **Description**: Prototype and measure a serial-successor rule spec for the modal tableau driver. Research on the eight-corner decidability gap found that D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (Cslib/Logics/Modal/Tableau/GenericDriver.lean:239-243): that field forbids a .linear mint at the box-positive shape, which is exactly where a D tableau must mint a successor. Three mint-avoiding alternatives were refuted -- self-loop closure and fresh-sink are both unsound, and the F(box-bot) seeding trick is non-terminating because box-bot has constant modal depth. WORK: prototype an additive sibling spec (RuleApplicationSpecSerial) plus an additive modalLoopGen_eBoxOnlyNeg_serial, on D alone, and measure the cost. Additive means the existing RuleApplicationSpec and its discharge sites are untouched. Deliverable is a measured decision report plus the D prototype, not a full corner. UNBLOCKS: D, DB, D4, D5, D45 (five of the eight remaining modal-cube corners). Zero sorry, zero new axioms.
 

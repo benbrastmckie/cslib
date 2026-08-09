@@ -1,23 +1,30 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "research",
-  "status": "researched",
-  "summary": "Researched promoting the 4 scratch witness probes into CslibTests/. WitnessProbe.lean (~6.5s), WitnessSearch3.lean (~2.7s) are fast and promotable as-is via the #guard_msgs idiom. MinProbe.lean (~2.5s) has a doc-comment-before-#eval! parse error to fix first. WitnessSearch2.lean's exhaustive subset search times out (>9m, zero output) and must be replaced with specific-witness assertions, not ported whole. Registration is via CslibTests.lean barrel + lake exe mk_all --module.",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Created a 5-phase plan promoting three of the four scratch witness probes into CslibTests/ as #guard_msgs-asserted, CI-protected files (WitnessProbe, WitnessSearch3, MinProbe), with MinProbe's doc-comment-before-#eval! parse error fixed by construction. WitnessSearch2's exhaustive powerset enumeration is deliberately not ported as a live computation; its CI-relevant content folds into WitnessProbe as specific-witness assertions plus attributed prose. Final phase runs mk_all barrel registration and the full CSLib CI order.",
   "artifacts": [
-    {"type": "report", "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md"}
+    {
+      "type": "plan",
+      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md"
+    }
   ],
-  "blockers": [],
-  "next_action_hint": "plan",
-  "files_modified": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md"
+  ],
   "decisions_made": [
-    "Keep original probe base names (WitnessProbe/WitnessSearch2/WitnessSearch3/MinProbe) under CslibTests/ to minimize churn at the Scheme.lean citation sites",
-    "WitnessSearch2.lean's full powerset enumeration must NOT be executed in CI; assert only specific known witnesses instead",
-    "Convert all bare #eval!/doc-comment-before-#eval patterns to the /-- info: ... -/ #guard_msgs in #eval idiom used by BetaSplitRefutation.lean"
+    "Three promoted files, not four: WitnessSearch2.lean gets no CslibTests/ counterpart because a file of that name containing no search would misrepresent itself; its content folds into CslibTests/WitnessProbe.lean.",
+    "Base names kept (WitnessProbe, WitnessSearch3, MinProbe) to minimise the diff at the later Scheme.lean citation-update follow-up.",
+    "MinProbe's parse error is fixed by converting the two offending /-- ... -/ blocks into #guard_msgs arguments, which removes the docstring-attachment problem rather than working around it.",
+    "A reconciliation protocol distinguishes formatting differences (transcribe the actual string) from semantic differences (escalate as a finding, mark phase BLOCKED, never adjust the assertion).",
+    "Research report correction applied: MinProbe.lean does NOT import Minimal.Soundness; WitnessSearch3.lean does, and that import is tested for removal in Phase 2.",
+    "Phase 4's cheap inclPairs assertion is bounded by a measured ~10s budget with a documented prose-only fallback."
   ],
   "dead_ends": [
-    "Running WitnessSearch2.lean's searchWitness for phiRef1 via lake env lean: no output after 9m10s timeout, confirms it is not CI-viable as written"
+    "Porting WitnessSearch2.lean's subsets/searchWitness full enumeration into CI: research measured no output after 9m10s, not even for the first formula. Do not retry as a live build-time computation."
   ],
-  "decisions_deferred": [
-    "Updating Scheme.lean/Minimal/Completeness.lean's 'not CI-protected' citations is flagged as an out-of-scope follow-up (file_scope is CslibTests/ only)"
-  ]
+  "phases_completed": 0,
+  "phases_total": 5,
+  "plan_markers_verified": true
 }

@@ -1,20 +1,34 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-09T20:55:49Z",
+  "status": "planned",
   "artifacts": [
     {
       "type": "report",
-      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md"
+      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md",
+      "summary": "Research report establishing probe runtimes, the MinProbe parse error, the WitnessSearch2 timeout, and CslibTests promotion/registration mechanics"
+    },
+    {
+      "type": "plan",
+      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md",
+      "summary": "5-phase implementation plan promoting three witness probes into CslibTests/ with #guard_msgs assertions, barrel registration, and full CSLib CI gate"
     }
   ],
-  "partial_progress": {
-    "stage": "complete",
-    "details": "Read all four scratch probes and BetaSplitRefutation.lean mirror pattern; empirically timed each probe via lake env lean; found MinProbe.lean has a doc-comment-before-#eval! parse error and WitnessSearch2.lean's full subset enumeration times out (>9m, zero output) and must not be ported into CI as-is; confirmed CslibTests.lean barrel + mk_all + testDriver registration mechanics; flagged stale 'not CI-protected' citations in Scheme.lean as out-of-scope follow-up."
-  },
+  "next_steps": "Run /implement 602 to execute the plan",
   "metadata": {
     "session_id": "sess_1786308724_41a1c9_602",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 5,
+    "estimated_hours": 5,
+    "dependency_waves": [[1], [2, 3], [4], [5]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When promoting a Lean scratch probe into CslibTests/, a `/-- ... -/` doc comment placed directly above a bare `#eval!` is a parse error in this repo's module-file dialect (\"unexpected token '#eval!'; expected 'lemma'\") because a declaration docstring must attach to a declaration. The CslibTests promotion idiom fixes this for free: `/-- info: <expected> -/` immediately followed by `#guard_msgs in` then plain `#eval` -- there the docstring is consumed by the #guard_msgs elaborator, not the docstring mechanism. Converting bare `#eval!` to this idiom simultaneously fixes the parse error and turns an unasserted printed value into a CI-protected build failure on drift. Use plain `#eval`, not `#eval!`, and namespace under `CslibTests.<Name>` so the topNamespace/dupNamespace linters pass.",
+      "category": "PATTERN",
+      "source_artifact": "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["lean4", "guard_msgs", "CslibTests", "eval", "docstring", "promotion"]
+    }
+  ]
 }

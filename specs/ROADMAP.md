@@ -156,9 +156,9 @@ what gates them.
 
 ### A. Completeness / decidability gaps
 
-Verified sorry counts (re-verified as of 2026-08-09): **27** code-position sorries repo-wide —
-Bimodal 23, Propositional 4, Modal 0. Temporal, LTL, HML, LinearLogic and Foundations are
-sorry-free. The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 4 are **bare**, and
+Verified sorry counts (re-verified as of 2026-08-09): **26** code-position sorries repo-wide —
+Bimodal 23, Propositional 3, Modal 0. Temporal, LTL, HML, LinearLogic and Foundations are
+sorry-free. The Bimodal 23 are all `warn.sorry`-suppressed; the Propositional 3 are **bare**, and
 are the stated reason `lake build --wfail --iofail` is red on this tree.
 
 *(Note: `.claude/scripts/lean-sorry-census.sh` currently over-counts by one per `warn.sorry`
@@ -168,7 +168,7 @@ only; see task 608.)*
 | Item | Tracking | Notes |
 |------|----------|-------|
 | Pure-K5 / pure-5 Euclidean completeness (no equivalence route) | 534 | corner deferred out of the KB5/Euclidean task; task 534 is `not_started` (as of 2026-08-09) |
-| Propositional tableau completeness (**4 sorries**, as of 2026-08-09) + atom-persistence lemma | 593 → 601, 602, 603, 604, 605, 606 | the original tracking chain (574 → 456 → 317, 430, 583) is now fully terminal (574, 456, 317, 430 completed; 583 abandoned) with no successor named on the roadmap; the 4 live sorries it was tracking (`Intuitionistic/Scheme.lean` ×2, `Intuitionistic/Completeness.lean`, `Minimal/Completeness.lean`) are now owned by task 593's expansion tree — 601/602/603 completed, 604 in progress, 605/606 not started |
+| Propositional tableau completeness (**3 sorries**, as of 2026-08-09) + atom-persistence lemma | 593 → 601, 602, 603, 604, 605, 606 | the original tracking chain (574 → 456 → 317, 430, 583) is now fully terminal (574, 456, 317, 430 completed; 583 abandoned) with no successor named on the roadmap; the live sorries it was tracking are now owned by task 593's expansion tree — 601/602/603/604 completed, 605/606 not started. Task 604 discharged the `truthLemma` T-imp sorry (DP-5) and restructured `openBranch_countermodel`, taking `Intuitionistic/Scheme.lean` from 2 sorries to 1, so the remaining 3 are `Intuitionistic/Scheme.lean` ×1, `Intuitionistic/Completeness.lean`, `Minimal/Completeness.lean`. Scheme.lean's surviving sorry is the **open** existential (`∃ edges, upward-closed ∧ ¬IForces`); the frames previously tried for it are machine-**refuted**, with root cause `intFImpReuseWitnessAnc?` in `Expansion.lean` tracked as task 609 |
 | **S4 keyed loop-check guard soundness** — DISCHARGED BY REFUTATION | 553 → 582 | both terminal (archived); the standalone ancestor-redirect route's statement was false (explicit countermodel), not merely unproven; the lemma was deleted and the soundness obligation is discharged sorry-free by `branchSatisfiableIn_s4FC_addEdge_of_blocked` + the `S4RedirectSoundInv` family — see `FrameSoundness.lean`'s `accPinnedBy` module comment and the regression witness `CslibTests/AncestorRedirectRefutation.lean` |
 | Bimodal **discrete** completeness pipeline (**23 sorries** as of 2026-08-09, split BXCanonical 13 / Bundle 9 / TemporalConservativity 1) | 36, 37, 215, 571 | gated on external BimodalLogic port; the *dense* pipeline is complete. BXCanonical (13: `ChronicleToCountermodel.lean` 12 + `Frame.lean` 1) is owned by task 215; Bundle (9: `SuccRelation.lean` 7 + `UntilSinceCoherence.lean` 2, the strict Until/Since gap) is owned by task 571 (`blocked`, not previously named on this roadmap); the 1-sorry TemporalConservativity group is broken out as its own row below (task 450) |
 | Bimodal → temporal conservativity (1 sorry) | 450 | domain mismatch: bimodal soundness needs `AddCommGroup D`, temporal completeness an arbitrary serial linear order; task 450 `not_started` |

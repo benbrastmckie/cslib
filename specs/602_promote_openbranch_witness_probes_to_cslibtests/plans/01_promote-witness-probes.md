@@ -256,7 +256,7 @@ build-without-it step, and record the actual outcome either way.
 
 ---
 
-### Phase 3: Promote MinProbe.lean, fixing the parse error [NOT STARTED]
+### Phase 3: Promote MinProbe.lean, fixing the parse error [COMPLETED]
 
 **Goal**: Create `CslibTests/MinProbe.lean` — the minimal-scheme (`isMinimallyClosed`) witness
 evidence — with the scratch file's doc-comment-before-`#eval!` parse error fixed by construction.

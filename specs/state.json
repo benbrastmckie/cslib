@@ -10,6 +10,7 @@
       "topic": "Propositional Logic",
       "description": "Consume the frame construction and forcing proof from the predecessor tasks, then discharge or restate the four propositional tableau completeness sorries, repair every call site, and verify the TFAE instantiation.\n\nTHE FOUR SITES (line numbers current as of the annotation-correction landing; re-verify before editing):\n- DP-3: intuitionisticTableau_complete, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:154, sorry at :164\n- DP-4: minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160\n- DP-5: truthLemma, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:693, sorry at :768 (the T(phi prime -> psi prime) implication case)\n- DP-6: openBranch_countermodel, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7891, sorry at :7965 (the exists edges upward-closure conjunct)\n\nSCOPE: (a) discharge each sorry, or -- where the landed construction supports only a weaker statement -- restate the theorem to what is actually provable; (b) repair every call site the restatement affects; (c) update the docstrings so they describe the landed statement rather than an abandoned one, replacing the current open / augmented-frame-route-known-bad / admissible-space-characterised annotations with the resolved wording.\n\nHARD CONSTRAINT -- THE TFAE FOLD: any restated theorem must still be strong enough to fold the tableau nodes into cplProofSystemsTfae / iplProofSystemsTfae / mplProofSystemsTfae in Cslib/Logics/Propositional/ProofSystemEquivalence.lean. A restatement that discharges a sorry but is too weak to serve the TFAE has NOT solved the problem. Verify the TFAE instantiation type-checks before declaring completion.\n\nEXPLICITLY OUT OF BOUNDS: laundering a sorry via a weakened statement. In particular the in-source prohibition at the DP-3 site stands -- do NOT discharge it with exact h Nat (intExtractValuation _b) _huc 0; that type-checks but only launders an undischarged conjunct through the file without resolving it.\n\nPRECEDENT TO FOLLOW: intExpandBranches_openBranch_sat was in exactly this position (a refuted fuel = 0 base case with a Lean-verified counter-instance) and was repaired by the R1 restatement adding hUniv / hNW / hFuel preconditions (plus hLBS / hWH / hWHC / hNC). It is now sorry-free at Scheme.lean:6815, its fuel = 0 arm discharged via hFuel giving intWork ... < 0, absurd by omega. The counter-instance record survives near :6805 and :6999 as the durable explanation of why the R1 hypotheses exist -- preserve that kind of durable record here too.\n\nZero new sorries, zero new axioms. If the predecessor tasks landed a negative or narrowing result rather than a proof, this task narrows to updating the annotations to the resolved wording and recording what remains open -- that is a legitimate completion, not a failure.",
       "dependencies": [
+        603,
         604,
         605
       ],
@@ -32,6 +33,7 @@
       "topic": "Propositional Logic",
       "description": "Establish upward-closure of `minBranchBotForces b` at the `bot` formula shape -- the second, genuinely separate obligation at the DP-4 site (minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160).\n\nWHY THIS IS SEPARATE: DP-4 needs TWO upward-closure premises -- the valuation's AND minBranchBotForces b's, which is a distinct fact at the bot formula shape -- where only one is supplied. This is not a restatement of the openBranch_countermodel conjunct; it is an independent obligation that must be discharged before DP-4 can close.\n\nCURRENT STATUS (machine-checked): the property HOLDS at the [(1,0)] witness under minScheme, where that edge set discharges BOTH upward-closure obligations and still falsifies phiRef1 at world 0. It is NOT established in general. The former claim that DP-4 was refuted independently of the DP-3 site has been retracted; the site is open, not refuted.\n\nSCOPE: prove upward-closure of minBranchBotForces b in general over the frame the frame-construction task produces, or determine and document precisely what additional precondition it needs -- following the R1 precedent (find the precondition that makes the statement true, add it, repair call sites, discharge) established by intExpandBranches_openBranch_sat, now sorry-free at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:6815.\n\nA documented negative or narrowing result is a legitimate outcome, recorded in-source with the same honesty discipline as the current annotations. Zero new sorries, zero new axioms.",
       "dependencies": [
+        603,
         604
       ],
       "file_scope": [
@@ -64,7 +66,7 @@
       "project_number": 603,
       "project_name": "construct_uniform_frame_for_openbranch_countermodel",
       "title": "Construct a uniform frame for openBranch_countermodel and discharge the upward-closure conjunct",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Construct `edges` uniformly from an open branch `b` and discharge conjunct 1 (upward closure) of openBranch_countermodel at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean.\n\nESTABLISHED STRUCTURAL RESULT (machine-checked; treat as ground truth): with A(w) = { p | T(atom p)@w in b } and w <= w' iff A(w) subseteq A(w'), the admissible edge sets are EXACTLY the subsets of that atom-set inclusion preorder, and every such subset is automatically upward-closed. Consequence: conjunct 1 needs NO fact about the tableau algorithm -- no persistence, genCopies, or augmented-edge invariant. Instantiating `edges` with any sub-inclusion edge list discharges it by transitivity of subseteq on atom sets.\n\nSCOPE: define the construction (e.g. `inclEdges b : IEdges`, a tuned sub-preorder, or a per-formula construction accompanied by a proof that it always exists) and prove conjunct 1 for it. Producing the construction plus a proved conjunct 1 is the whole deliverable; conjunct 2 is deliberately out of scope and belongs to the successor task.\n\nKNOWN STARTING POINT, UNVERIFIED: a 'raw edges pruned at reuse/blocking sites' construction matches the [(1,0)] witness for phiRef1 and is the most promising candidate.\n\nRULED OUT -- do not re-attempt: the maximal inclusion frame is NOT a uniform witness. It fails at phiRef1 and phiRef3.\n\nALTERNATIVE ROUTE: the underlying algorithm defect is real and unfixed -- intFImpReuseWitnessAnc? (Expansion.lean) records a loop-back edge on a containment check it never re-validates as the branch grows, which is exactly what makes the augmented intAccessPreorder frame unusable. Fixing that defect is a second path to a workable frame and is in scope for this task if it proves the more tractable route.\n\nREUSE-FIRST (already checked, do not re-derive): intAccessPreorder (Scheme.lean:268), intExtractValuation (Soundness.lean:1129), IEdges / isAccessible (Rules.lean:85,92), IForces / IValid / iforces_persistence (Kripke.lean:81,145,128), and Mathlib.Relation.ReflTransGen as the closure mechanism. The frame construction itself is the only expected new definition.\n\nThe four existing sorries stay until the successor tasks land. Zero new sorries, zero new axioms.",
@@ -74,13 +76,21 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:40:42Z",
-      "last_updated": "2026-08-09T20:40:42Z"
+      "last_updated": "2026-08-09T21:06:42Z",
+      "session_id": "sess_1786308724_41a1c9_603",
+      "artifacts": [
+        {
+          "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/reports/01_uniform-frame-construction.md",
+          "type": "report",
+          "summary": "Construction recommendation (reuse rawEdges), proof mechanism (IPosPersistRaw + ReflTransGen induction), the one plumbing gap and how to close it (IWorldHist-derived corollary mirroring ForestComparable), a concrete Lean lemma skeleton, ruled-out routes, and the reuse-first/zero-debt checks"
+        }
+      ]
     },
     {
       "project_number": 602,
       "project_name": "promote_openbranch_witness_probes_to_cslibtests",
       "title": "Promote the openBranch_countermodel witness probes into CslibTests for CI protection",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Promote the four machine-checked witness probes produced by the disposition investigation into CslibTests/ so they are CI-protected, mirroring how CslibTests/BetaSplitRefutation.lean protects the beta-split counterexample.\n\nTHE PROBES (currently at specs/591_decide_openbranch_countermodel_disposition/scratch/, runnable via `lake env lean <file>` from the repo root, NOT CI-protected):\n- WitnessProbe.lean -- the [(1,0)] witness for phiRef1 satisfying both conjuncts of openBranch_countermodel\n- WitnessSearch2.lean, WitnessSearch3.lean -- exhaustive enumeration over the admissible edge-set space (40 witnesses for phiRef1 under intScheme; witnesses for phiRef2, phiRef3, exMiddle, dblNeg, peirce, deMorgan, dummett)\n- MinProbe.lean -- the minScheme witness, where [(1,0)] discharges both upward-closure obligations and still falsifies phiRef1 at world 0\n\nWHY: this evidence is what retracted the former PERMANENTLY DEFERRED / refuted annotations at the four deferral sites. It is currently unprotected -- a future change to intuitionisticTableau, intScheme, minScheme, or the admissible-edge characterisation could silently invalidate it with no CI signal. The corrected in-source annotations cite this evidence, so an unprotected probe means a docstring that can silently become false.\n\nSCOPE: adapt each probe to the CslibTests/ conventions used by BetaSplitRefutation.lean (#guard_msgs assertions rather than bare #eval, module docstring stating what is being asserted and why), register them in the build, and confirm they run in the CI pipeline. Where a probe's enumeration is too slow for CI, reduce it to the specific asserted witnesses and keep the full search documented in the module docstring rather than executed.\n\nDo NOT weaken an assertion to make it pass. If a probe does not reproduce, that is a finding to report, not a test to soften. Zero new sorries, zero new axioms.",
@@ -90,7 +100,8 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:40:42Z",
-      "last_updated": "2026-08-09T20:40:42Z"
+      "last_updated": "2026-08-09T20:54:56Z",
+      "session_id": "sess_1786308724_41a1c9_602"
     },
     {
       "project_number": 601,

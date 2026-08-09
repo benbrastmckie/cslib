@@ -1,0 +1,38 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Identified the uniform-frame construction for openBranch_countermodel's conjunct 1 (upward closure): reuse `rawEdges`, the tree-only parent-child edge witness intExpandBranches_openBranch_sat already produces (Scheme.lean:6842-6844), currently discarded in openBranch_countermodel's proof as `_rawEdges`. Conjunct 1 is exactly the one-hop specialization of IPosPersistRaw (Scheme.lean:6701-6704, already sorry-free, discharged via applyPersistenceFixpoint_copy_complete at 7052-7055) chained over intAccessPreorder's Relation.ReflTransGen closure. This is independently corroborated by task 591's machine-checked probe evidence (WitnessProbe.lean:87 `check [(1,0),(2,1)]` = raw tree = upward-closed true for phiRef1), which the new IPosPersistRaw-based argument explains generally rather than for one example. Exactly one small plumbing gap remains before the target lemma can be written proof-complete: IPosPersistRaw's `b.any (label==w')=true` side condition needs a 'every rawEdges child has a planted branch entry' corollary, cheaply derivable from IWorldHist's already-threaded (H3) clause (Scheme.lean:3272) plus a minor strengthening of edges_shape_of_worldHist (Scheme.lean:3355-3382) to retain its already-computed `1<=c<nw` bound -- exact structural precedent already exists in-file: ForestComparable (3329-3348, 3491-3499) was derived the identical way, as a pure corollary at the same induction exit point (7017-7060), no new invariant-threading required. Recommended target: a NEW standalone lemma (e.g. openBranch_rawEdges_upward_closed), decoupled from openBranch_countermodel's own sorry, since that lemma's `edges` binding is shared with conjunct 2 (successor task's job to reconcile). The maximal-inclusion-frame route and a from-scratch inclEdges definition were considered and explicitly NOT recommended, per the delegation's ruling-out and because rawEdges is both already-proved-upward-closed and the more plausible candidate for conjunct-2 reconciliation later. Zero new sorries/axioms required by this route.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/reports/01_uniform-frame-construction.md",
+      "summary": "Construction recommendation (reuse rawEdges), proof mechanism (IPosPersistRaw + ReflTransGen induction), the one plumbing gap and how to close it (IWorldHist-derived corollary mirroring ForestComparable), a concrete Lean lemma skeleton, ruled-out routes, and the reuse-first/zero-debt checks"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "next_phase": "plan",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "requires_user_review": false,
+  "modified_files": [
+    "specs/603_construct_uniform_frame_for_openbranch_countermodel/reports/01_uniform-frame-construction.md",
+    "specs/603_construct_uniform_frame_for_openbranch_countermodel/.orchestrator-handoff.json",
+    "specs/603_construct_uniform_frame_for_openbranch_countermodel/.return-meta.json"
+  ],
+  "decisions_made": [
+    "Recommended reusing the algorithm's own rawEdges (already computed and already proved upward-closed via the sorry-free IPosPersistRaw) rather than defining a fresh inclEdges from atom-set inclusion, because rawEdges is more likely to be reconcilable with conjunct 2 in the successor task.",
+    "Recommended a standalone new lemma rather than editing openBranch_countermodel's existing sorry directly, since that sorry's `edges` binding must simultaneously satisfy conjunct 2 (out of scope here) and cannot be swapped to rawEdges without re-solving IFimpAccess/truthLemma over the raw frame.",
+    "Identified the one missing plumbing piece (a branch-entry-existence corollary of IWorldHist's H3 clause) and pinned its derivation to the exact site (Scheme.lean:7017-7060) and pattern (ForestComparable's own derivation) already used for an analogous corollary in this file, rather than proposing new invariant-threading through the 10-case induction.",
+    "Did not pursue the alternative route (fixing intFImpReuseWitnessAnc?'s defect in Expansion.lean) since it is outside file_scope and the rawEdges route looks tractable without it; recorded only as a noted alternative."
+  ],
+  "dead_ends": [
+    "Maximal inclusion frame `⊑` as edges: explicitly ruled out per delegation; task 591's WitnessSearch3.lean shows it is not a uniform witness (fails phiRef1/phiRef3) when required to also serve conjunct 2."
+  ],
+  "verification": {
+    "verification_passed": false,
+    "notes": "Research only; no Lean file was edited and no lake build was run in this dispatch. The recommended lemma is not yet written in-source -- this is implementation-phase work. Confidence in the route is high: it rests on an already-sorry-free library lemma (IPosPersistRaw) plus one small corollary modeled exactly on an already-landed precedent (ForestComparable) in the same file."
+  },
+  "next_steps": "Plan phase should scope: (1) the isAccessible-unfolding structural lemma (no invariant needed), (2) the IWorldHist-derived branch-entry-existence corollary plus widening intExpandBranches_openBranch_sat's existential by one conjunct, (3) the standalone openBranch_rawEdges_upward_closed (or equivalently named) lemma via ReflTransGen induction over IPosPersistRaw. All three are additive to Scheme.lean; the existing 4 sorries and openBranch_countermodel's own signature stay untouched."
+}

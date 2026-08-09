@@ -1,30 +1,26 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Created a 5-phase plan promoting three of the four scratch witness probes into CslibTests/ as #guard_msgs-asserted, CI-protected files (WitnessProbe, WitnessSearch3, MinProbe), with MinProbe's doc-comment-before-#eval! parse error fixed by construction. WitnessSearch2's exhaustive powerset enumeration is deliberately not ported as a live computation; its CI-relevant content folds into WitnessProbe as specific-witness assertions plus attributed prose. Final phase runs mk_all barrel registration and the full CSLib CI order.",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Promoted WitnessProbe.lean, WitnessSearch3.lean, and MinProbe.lean from the task-591 scratch directory into CslibTests/ as #guard_msgs-protected CI tests (25 assertions total), fixing MinProbe's parse error by construction and folding WitnessSearch2's search-space content into WitnessProbe.lean instead of porting its intractable powerset enumeration. Full CSLib CI order green, negative control confirmed load-bearing, zero new sorries/axioms.",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md"
-    }
+    {"type": "summary", "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/summaries/01_promote-witness-probes-summary.md"}
   ],
-  "next_action_hint": "implement",
+  "blockers": [],
+  "next_action_hint": "none",
   "files_modified": [
+    "CslibTests/WitnessProbe.lean",
+    "CslibTests/WitnessSearch3.lean",
+    "CslibTests/MinProbe.lean",
+    "CslibTests.lean",
     "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md"
   ],
   "decisions_made": [
-    "Three promoted files, not four: WitnessSearch2.lean gets no CslibTests/ counterpart because a file of that name containing no search would misrepresent itself; its content folds into CslibTests/WitnessProbe.lean.",
-    "Base names kept (WitnessProbe, WitnessSearch3, MinProbe) to minimise the diff at the later Scheme.lean citation-update follow-up.",
-    "MinProbe's parse error is fixed by converting the two offending /-- ... -/ blocks into #guard_msgs arguments, which removes the docstring-attachment problem rather than working around it.",
-    "A reconciliation protocol distinguishes formatting differences (transcribe the actual string) from semantic differences (escalate as a finding, mark phase BLOCKED, never adjust the assertion).",
-    "Research report correction applied: MinProbe.lean does NOT import Minimal.Soundness; WitnessSearch3.lean does, and that import is tested for removal in Phase 2.",
-    "Phase 4's cheap inclPairs assertion is bounded by a measured ~10s budget with a documented prose-only fallback."
+    "Minimal.Soundness import in WitnessSearch3.lean's scratch original was dead; omitted in the promoted file.",
+    "WitnessSearch2.lean's exhaustive enumeration folded into WitnessProbe.lean as a bounded inclPairs search-space-size check (no powerset), not ported as a live full search."
   ],
-  "dead_ends": [
-    "Porting WitnessSearch2.lean's subsets/searchWitness full enumeration into CI: research measured no output after 9m10s, not even for the first formula. Do not retry as a live build-time computation."
-  ],
-  "phases_completed": 0,
+  "dead_ends": [],
+  "phases_completed": 5,
   "phases_total": 5,
   "plan_markers_verified": true
 }

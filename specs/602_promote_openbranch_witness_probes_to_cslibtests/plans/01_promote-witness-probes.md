@@ -380,7 +380,7 @@ prose-only fallback and record the measured time rather than removing the budget
 
 ---
 
-### Phase 5: Barrel registration, full CI gate, and follow-up record [NOT STARTED]
+### Phase 5: Barrel registration, full CI gate, and follow-up record [COMPLETED]
 
 **Goal**: Register the three new files so `lake test` picks them up, run the full CSLib CI order
 green, and record the out-of-scope follow-up findings.

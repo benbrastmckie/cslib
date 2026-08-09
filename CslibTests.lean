@@ -18,8 +18,11 @@ public import CslibTests.ImportWithMathlib
 public import CslibTests.LTS
 public import CslibTests.LambdaCalculus
 public import CslibTests.MLL
+public import CslibTests.MinProbe
 public import CslibTests.ModalFrameSeparation
 public import CslibTests.Propositional
 public import CslibTests.Reduction
 public import CslibTests.S4LoopGuardRegression
 public import CslibTests.TableauConformance
+public import CslibTests.WitnessProbe
+public import CslibTests.WitnessSearch3

@@ -1,34 +1,69 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-08-09T21:19:02Z",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/reports/01_promote-witness-probes.md",
-      "summary": "Research report establishing probe runtimes, the MinProbe parse error, the WitnessSearch2 timeout, and CslibTests promotion/registration mechanics"
+      "type": "code",
+      "path": "CslibTests/WitnessProbe.lean",
+      "summary": "Intuitionistic [(1,0)] witness for phiRef1 (7 #guard_msgs assertions), plus folded WitnessSearch2 search-space content (2 more assertions)"
     },
     {
-      "type": "plan",
-      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md",
-      "summary": "5-phase implementation plan promoting three witness probes into CslibTests/ with #guard_msgs assertions, barrel registration, and full CSLib CI gate"
+      "type": "code",
+      "path": "CslibTests/WitnessSearch3.lean",
+      "summary": "Maximal-inclusion-frame sweep over 8 intuitionistic + 4 minimal formulas (12 #guard_msgs assertions)"
+    },
+    {
+      "type": "code",
+      "path": "CslibTests/MinProbe.lean",
+      "summary": "Minimal-scheme (isMinimallyClosed) witness evidence for phiRef1 (6 #guard_msgs assertions); scratch parse error fixed by construction"
+    },
+    {
+      "type": "code",
+      "path": "CslibTests.lean",
+      "summary": "Barrel regenerated via lake exe mk_all --module; three new public import lines"
+    },
+    {
+      "type": "summary",
+      "path": "specs/602_promote_openbranch_witness_probes_to_cslibtests/summaries/01_promote-witness-probes-summary.md",
+      "summary": "Implementation summary with reconciliation findings, plan deviations, CI verification table, and flagged Cslib/ follow-ups"
     }
   ],
-  "next_steps": "Run /implement 602 to execute the plan",
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All 5 phases completed; full CSLib CI pipeline green; negative control confirmed assertions are load-bearing",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 5
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "modified_files": [
+    "CslibTests/WitnessProbe.lean",
+    "CslibTests/WitnessSearch3.lean",
+    "CslibTests/MinProbe.lean",
+    "CslibTests.lean",
+    "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md",
+    "specs/602_promote_openbranch_witness_probes_to_cslibtests/summaries/01_promote-witness-probes-summary.md"
+  ],
   "metadata": {
     "session_id": "sess_1786308724_41a1c9_602",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 5,
-    "estimated_hours": 5,
-    "dependency_waves": [[1], [2, 3], [4], [5]]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   },
-  "memory_candidates": [
-    {
-      "content": "When promoting a Lean scratch probe into CslibTests/, a `/-- ... -/` doc comment placed directly above a bare `#eval!` is a parse error in this repo's module-file dialect (\"unexpected token '#eval!'; expected 'lemma'\") because a declaration docstring must attach to a declaration. The CslibTests promotion idiom fixes this for free: `/-- info: <expected> -/` immediately followed by `#guard_msgs in` then plain `#eval` -- there the docstring is consumed by the #guard_msgs elaborator, not the docstring mechanism. Converting bare `#eval!` to this idiom simultaneously fixes the parse error and turns an unasserted printed value into a CI-protected build failure on drift. Use plain `#eval`, not `#eval!`, and namespace under `CslibTests.<Name>` so the topNamespace/dupNamespace linters pass.",
-      "category": "PATTERN",
-      "source_artifact": "specs/602_promote_openbranch_witness_probes_to_cslibtests/plans/01_promote-witness-probes.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["lean4", "guard_msgs", "CslibTests", "eval", "docstring", "promotion"]
-    }
+  "findings": [
+    "Minimal.Soundness import in WitnessSearch3.lean's scratch original proved dead; omitted in the promoted file, build succeeds.",
+    "No semantic drift in any of the 25 promoted assertions; two transcription-only corrections were made (WitnessSearch3.lean's flattened tuple printing, WitnessProbe.lean's searchSpaceSize count 6->7)."
+  ],
+  "follow_ups": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean lines 7954 and 7968 (drifted from plan anchors 7868/7882) carry stale 'not CI-protected' citations; should retarget to CslibTests/WitnessProbe.lean and CslibTests/WitnessSearch3.lean. Out of file_scope, not edited.",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean (~lines 141-146) cites the minimal-scheme witness inline with no filename; can now cite CslibTests/MinProbe.lean. Out of file_scope, not edited."
   ]
 }

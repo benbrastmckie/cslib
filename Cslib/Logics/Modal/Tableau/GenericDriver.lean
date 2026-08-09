@@ -138,12 +138,14 @@ convention this design specifies.
 ## Completeness and Soundness Are Both Generic Over `(apply, spec)`
 
 The completeness-side Hintikka/saturation chain is fully generic over `(apply, spec)`:
-`modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean`) turns any
-`RuleApplicationSpec apply` witness -- e.g. T's `modalApplyOneT_spec` (`TDriver.lean`) -- into a
-Hintikka-set-producing top-loop lemma for free. The T-specific completeness work
-(`hintikkaT_box_pos`/`hintikkaT_diamond_neg`, `modalTruthLemmaT`, `modalTableauT_complete`, all
-in `FrameCompleteness.lean`) needed new content only at the two shapes where T's rule differs
-from K's; the other two modal shapes reuse the free projection bridges
+`modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean`) is typed at the `φ0`-indexed
+`RuleApplicationSpecAt φ0 apply` interface, so it turns any `RuleApplicationSpec apply` witness --
+e.g. T's `modalApplyOneT_spec` (`TDriver.lean`) -- into a Hintikka-set-producing top-loop lemma
+for free, one `.toAt φ0` step away (`RuleApplicationSpec.toAt`, below). The T-specific
+completeness work (`hintikkaT_box_pos`/`hintikkaT_diamond_neg`, `modalTruthLemmaT`,
+`modalTableauT_complete`, all in `FrameCompleteness.lean`) needed new content only at the two
+shapes where T's rule differs from K's; the other two modal shapes reuse the free projection
+bridges
 `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (`Completeness.lean`).
 
 The soundness side is likewise generic, via the frame-relativized chain in `FrameSoundness.lean`:
@@ -366,7 +368,12 @@ narrowed to the structure's own parameter.
 existing witness down to this narrower interface at an arbitrary `φ0`, so every existing
 instance (K/T/B/TB/Five/Kb5''/S5w) can supply a `…At` witness for free without re-proving
 anything. This narrowing is purely additive: `RuleApplicationSpec`/`RuleApplicationSpecCore`
-themselves, and all seven of `RuleApplicationSpec`'s existing discharge sites, are untouched. -/
+themselves, and all seven of `RuleApplicationSpec`'s existing discharge sites, are untouched.
+`CompletenessLoop.lean`'s top-loop Hintikka chain, however, has since been narrowed to consume
+this `…At` interface directly (its nine declarations are now typed at `RuleApplicationSpecCoreAt
+φ0`/`RuleApplicationSpecAt φ0`, not the universal originals), so its T/B/TB/S5/Five/Kb5''
+call sites now go through `.toAt φ0` rather than the universal spec directly -- unblocking D's
+otherwise-only-`…At`-satisfiable `modalApplyOneD` from reusing the same chain. -/
 
 /-- Core-projection of `RuleApplicationSpecCore`, universe fixed at a single `φ0`: identical to
 `RuleApplicationSpecCore` except `outputsSubsetUniverse` is stated only at the structure's own

@@ -41,7 +41,7 @@ merged into the outer layer's `persistent` output.
   `FrameRules.lean` primitives), and separately bounding the appended T self-conjunct via the
   same same-world-subformula argument `TDriver.lean` uses.
 - `modalExpandBranchesTB_hintikka`: one-line instantiation of the generic top-loop Hintikka lemma
-  at `(modalApplyOneTB, modalApplyOneTB_spec)`.
+  at `modalApplyOneTB` and `modalApplyOneTB_spec.toAt φ0`.
 
 ## Strategy
 
@@ -876,8 +876,9 @@ theorem modalTableauTB_eq (φ : Proposition Atom) :
 Hintikka lemma (`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), concluding in
 `modalHintikkaSetGen modalApplyOneTB bR aR`. A genuine one-liner, exactly as
 `modalExpandBranchesT_hintikka`/`modalExpandBranchesB_hintikka` were: direct application of
-`modalExpandBranchesGen_hintikka` at `(modalApplyOneTB, modalApplyOneTB_spec)`, with no
-TB-specific proof content whatsoever. -/
+`modalExpandBranchesGen_hintikka` at `modalApplyOneTB` and `modalApplyOneTB_spec.toAt φ0`
+(`RuleApplicationSpec.toAt`, `GenericDriver.lean`), with no TB-specific proof content
+whatsoever. -/
 theorem modalExpandBranchesTB_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),

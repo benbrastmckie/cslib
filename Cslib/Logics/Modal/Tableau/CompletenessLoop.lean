@@ -37,7 +37,8 @@ step preserves this bundle on every child branch it produces, while the base-3 c
   single shared rank map `rank'`) on every child branch/expanded-set pair, and strictly decreases
   `modalExpMeasure` by at least one.
 - `modalExpandBranchesGen_hintikka` (the crux): the generic top-loop Hintikka lemma,
-  over an abstract `(apply, spec)`, concluding in `modalHintikkaSetGen apply bR aR` (not the
+  over an abstract `apply` and a `φ0`-indexed `RuleApplicationSpecAt φ0 apply` witness,
+  concluding in `modalHintikkaSetGen apply bR aR` (not the
   concrete `modalHintikkaSet bR aR`) -- this is what lets the T, B, and S4 systems consume
   the generic Hintikka-set statement shape. `TDriver.lean`'s `modalExpandBranchesT_hintikka`
   one-liner is the structural proof this generalization succeeded. `RuleApplicationSpec` grows
@@ -962,10 +963,14 @@ The five rule-dependent helpers above (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
 `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) are declared against the full
 `RuleApplicationSpec`, but each proof body only ever consumes a Core field
 (`outputsSubsetUniverse`, `boxPosNotExpanding`, `diaNegNotExpanding`, `freshLocal`,
-`boxNegWitness'`/`diaPosWitness'`). Weakening those five declarations in place to a Core-only
-signature is left for a future generalization pass, so instead this section lands five
-purely-additive `_core`-suffixed twins -- identical proof bodies, parametrized over
-`RuleApplicationSpecCore` directly -- leaving every existing declaration above untouched. -/
+`boxNegWitness'`/`diaPosWitness'`). This section lands five purely-additive `_core`-suffixed
+twins -- identical proof bodies, parametrized over `RuleApplicationSpecCoreAt φ0` directly --
+leaving every existing declaration above untouched. The generalization pass that instead
+*weakens* declarations in place (narrowing their own hypothesis from `RuleApplicationSpecCore`/
+`RuleApplicationSpec` to the `φ0`-indexed `RuleApplicationSpecCoreAt φ0`/`RuleApplicationSpecAt
+φ0` interface) has since happened for the declarations below this section
+(`modalStepHintikka_preserves_inv` through `modalExpandBranchesGen_hintikka`), unblocking the D
+driver's reuse of the top-loop Hintikka chain. -/
 
 private lemma modalLoopGen_bClosure_core
     (apply : RuleApply Atom) (φ0 : Proposition Atom)
@@ -1291,7 +1296,7 @@ private lemma modalLoopGen_eDiamondPosWitness_core
 `modalStepGen_preserves_invariant` to the rank-free, `Aux`-parametrized invariant, with the two
 `potential_step`-derived lines (the existential rank witness and the `phiBound` re-derivation)
 removed and replaced by the caller-supplied `AuxStepPreserved`/`AuxBounds` facts. Only needs
-`RuleApplicationSpecCore` -- no `rankStep`/`outDegStep`/`knownWorldsStep`. The measure-drop
+`RuleApplicationSpecCoreAt φ0` -- no `rankStep`/`outDegStep`/`knownWorldsStep`. The measure-drop
 consumes `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean`) directly against `hs`'s three raw Core
 fields, bypassing the full-spec-typed `modalStepBranchGen_expMeasure_step_lt` wrapper. -/
 lemma modalStepHintikka_preserves_inv
@@ -1375,12 +1380,13 @@ theorem modalStepHintikka_preserves_inv_S5w
     newBs newExps newAcc hstep hinv
 
 /-- **`modalStepHintikka_preserves_inv` instantiated at K's `Aux`**: unlike
-S5w, this instantiation is **generic over any `apply` with a full `RuleApplicationSpec`** -- not
-per-logic -- so K, T, and B all get their `AuxStepPreserved` witness from this one theorem. This
-is the intended "K/T/B pay nothing" guarantee, actually delivered here. Every field is
-discharged by a landed, public lemma: `spec.toCore`-parametrized `_core` twins (above) for the
-five rule-dependent conjuncts, `modalStepBranch_potential_step_gen` (`FmpMeasure.lean`) for the
-rank witness and `rankBound`/`rankEdge`/`phiBound` conservation, and -- the crux --
+S5w, this instantiation is **generic over any `apply` with a `RuleApplicationSpecAt φ0`
+witness** -- not per-logic -- so K, T, and B all get their `AuxStepPreserved` witness from this
+one theorem. This is the intended "K/T/B pay nothing" guarantee, actually delivered here. Every
+field is discharged by a landed, public lemma: `spec.toCore`-parametrized `_core` twins (above,
+themselves typed at `RuleApplicationSpecCoreAt φ0`) for the five rule-dependent conjuncts,
+`modalStepBranch_potential_step_gen` (`FmpMeasure.lean`) for the rank witness and
+`rankBound`/`rankEdge`/`phiBound` conservation, and -- the crux --
 `modalStepBranch_preserves_outDegEq_gen`, whose conclusion is already stated at the **new**
 expanded set `p.2` (`∀ e' ∈ newExps, ∀ w, outDeg newAcc w = (e'.filter …).length`), exactly what
 the re-arity'd `Aux` can now consume where the old curried-`e` shape could not. -/
@@ -1417,9 +1423,9 @@ theorem ModalLoopAuxK_stepPreserved (apply : RuleApply Atom) (φ0 : Proposition 
 /-- **Parametric top-loop Hintikka lemma**: the `Aux`-parametrized analogue of
 `modalExpandBranchesGen_hintikka` (below), built on `modalStepHintikka_preserves_inv`
 the same way that lemma is itself built on `modalStepGen_preserves_invariant`. Takes only
-`RuleApplicationSpecCore` (no `rankStep`/`outDegStep`/`knownWorldsStep`) plus the caller-supplied
-`Aux`/`AuxStepPreserved`/`AuxBounds` triple in place of a rank witness; the per-index hypothesis
-is `ModalLoopInvHintikka apply φ0 Aux bi ei ai` (no existential `rank`), not
+`RuleApplicationSpecCoreAt φ0` (no `rankStep`/`outDegStep`/`knownWorldsStep`) plus the
+caller-supplied `Aux`/`AuxStepPreserved`/`AuxBounds` triple in place of a rank witness; the
+per-index hypothesis is `ModalLoopInvHintikka apply φ0 Aux bi ei ai` (no existential `rank`), not
 `∃ rank, ModalLoopInvGen apply φ0 bi ei ai rank`.
 
 A pure substitution port of `modalExpandBranchesGen_hintikka`'s proof: `spec ↦ hs`, the rank
@@ -1868,8 +1874,10 @@ met.
 replaces: that induction turned out to be the `Aux := ModalLoopAuxK φ0` special case of the
 parametric lift, so re-deriving it here both eliminates the duplicate and serves as the standing
 regression check that the parametric factoring is faithful to the K-facing contract. Three pieces
-bridge the gap: `spec.toCore` weakens `RuleApplicationSpec` to the `RuleApplicationSpecCore` the
-lift asks for, `ModalLoopAuxK_stepPreserved`/`ModalLoopAuxK_bounds` supply the `Aux` obligations,
+bridge the gap: `spec.toCore` (`RuleApplicationSpecAt.toCore`, `GenericDriver.lean`) projects the
+`φ0`-indexed `RuleApplicationSpecAt φ0 apply` this lemma's own hypothesis carries down to the
+`RuleApplicationSpecCoreAt φ0` the parametric lift asks for,
+`ModalLoopAuxK_stepPreserved`/`ModalLoopAuxK_bounds` supply the `Aux` obligations,
 and `ModalLoopInvGen_iff_hintikka_auxK` converts this statement's per-index
 `∃ rank, ModalLoopInvGen …` hypothesis into the lift's rank-free `ModalLoopInvHintikka …`.
 

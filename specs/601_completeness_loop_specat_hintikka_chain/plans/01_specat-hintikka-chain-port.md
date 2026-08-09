@@ -244,45 +244,53 @@ gate is a precondition for the next.
 
 ---
 
-### Phase 3: Docstring Reconciliation [NOT STARTED]
+### Phase 3: Docstring Reconciliation [COMPLETED]
 
 - **Goal**: Bring every docstring that describes the pre-narrowing interface into agreement with
   the landed signatures, including the section header that explicitly defers this pass.
 
 - **Tasks**:
-  - [ ] `CompletenessLoop.lean` `## Step Preservation for ModalLoopInvHintikka` section header
+  - [x] `CompletenessLoop.lean` `## Step Preservation for ModalLoopInvHintikka` section header
         (around line 961-968, shifted by Phase 1): rewrite. It currently states that weakening the
         five declarations in place "is left for a future generalization pass" and that the `_core`
         twins leave "every existing declaration above untouched." Both clauses are now false.
         Record that the generalization pass happened and that the twins are typed at
         `RuleApplicationSpecCoreAt φ0`.
-  - [ ] `modalStepHintikka_preserves_inv` docstring: "Only needs `RuleApplicationSpecCore`" ->
+  - [x] `modalStepHintikka_preserves_inv` docstring: "Only needs `RuleApplicationSpecCore`" ->
         `RuleApplicationSpecCoreAt φ0`.
-  - [ ] `modalExpandBranchesHintikka` docstring: "Takes only `RuleApplicationSpecCore`" ->
+  - [x] `modalExpandBranchesHintikka` docstring: "Takes only `RuleApplicationSpecCore`" ->
         `RuleApplicationSpecCoreAt φ0`.
-  - [ ] `ModalLoopAuxK_stepPreserved` docstring: "generic over any `apply` with a full
+  - [x] `ModalLoopAuxK_stepPreserved` docstring: "generic over any `apply` with a full
         `RuleApplicationSpec`" -> `RuleApplicationSpecAt φ0`; the `spec.toCore`-parametrized
         phrasing also needs updating.
-  - [ ] `modalExpandBranchesGen_hintikka` docstring: the "`spec.toCore` weakens
+  - [x] `modalExpandBranchesGen_hintikka` docstring: the "`spec.toCore` weakens
         `RuleApplicationSpec` to the `RuleApplicationSpecCore` the lift asks for" sentence
         describes the old bridging and must describe the `...At` chain instead.
-  - [ ] `CompletenessLoop.lean` module docstring (around line 39): the
+  - [x] `CompletenessLoop.lean` module docstring (around line 39): the
         `modalExpandBranchesGen_hintikka` bullet says "over an abstract `(apply, spec)`" — update
         to reflect the `φ0`-indexed spec.
-  - [ ] `GenericDriver.lean` around line 365-369: "This narrowing is purely additive:
+  - [x] `GenericDriver.lean` around line 365-369: "This narrowing is purely additive:
         `RuleApplicationSpec`/`RuleApplicationSpecCore` themselves, and all seven of
         `RuleApplicationSpec`'s existing discharge sites, are untouched." Keep the true part (the
         structures and all seven witnesses genuinely are unchanged) and add that
         `CompletenessLoop.lean`'s consumers are now typed at the `...At` interface.
-  - [ ] `GenericDriver.lean` module docstring (around line 141): the
+  - [x] `GenericDriver.lean` module docstring (around line 141): the
         `modalExpandBranchesGen_hintikka` / "turns any `RuleApplicationSpec apply` witness ... into
         a Hintikka-set-producing top-loop lemma for free" passage now needs the `.toAt φ0` step.
-  - [ ] `TDriver.lean` (around 779-786): "direct application of `modalExpandBranchesGen_hintikka`
+  - [x] `TDriver.lean` (around 779-786): "direct application of `modalExpandBranchesGen_hintikka`
         at `(modalApplyOneT, modalApplyOneT_spec)`" -> `modalApplyOneT_spec.toAt φ0`.
-  - [ ] `BDriver.lean` (around 809-811): same treatment for `modalApplyOneB_spec`.
-  - [ ] `TBDriver.lean` (around 876-879): same treatment for `modalApplyOneTB_spec`.
-  - [ ] Read the resulting diff end to end and confirm every changed hunk lies inside a `/-- -/`
-        or `/-! -/` comment block — no hunk may cross out of a comment boundary.
+  - [x] `BDriver.lean` (around 809-811): same treatment for `modalApplyOneB_spec`.
+  - [x] `TBDriver.lean` (around 876-879): same treatment for `modalApplyOneTB_spec`.
+  - [x] Read the resulting diff end to end and confirm every changed hunk lies inside a `/-- -/`
+        or `/-! -/` comment block — no hunk may cross out of a comment boundary. *(Confirmed via
+        `git diff` hunk-header inspection: all 9 hunks across the 5 files land inside `/-- -/` or
+        `/-! -/` blocks; no signature, term, or tactic text touched.)*
+  - [x] **Overrun beyond the enumerated eleven** (per this phase's Scope Hypothesis): the
+        module-docstring "Main Results" bullets in `BDriver.lean:46` and `TBDriver.lean:44` also
+        described the pre-narrowing call shape (`(modalApplyOneB, modalApplyOneB_spec)` /
+        `(modalApplyOneTB, modalApplyOneTB_spec)`); fixed both to `modalApplyOne{B,TB}_spec.toAt
+        φ0`. `TDriver.lean`'s analogous module-docstring bullet had no such mention (grepped, no
+        match) so needed no change.
 
 - **Timing**: 45 minutes
 

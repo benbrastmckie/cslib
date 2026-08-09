@@ -780,7 +780,8 @@ Hintikka lemma
 `modalHintikkaSetGen modalApplyOneT bR aR`.
 
 **This is a genuine one-liner** -- direct application of `modalExpandBranchesGen_hintikka` at
-`(modalApplyOneT, modalApplyOneT_spec)`, with no T-specific proof content whatsoever. This
+`modalApplyOneT` and `modalApplyOneT_spec.toAt φ0` (`RuleApplicationSpec.toAt`,
+`GenericDriver.lean`), with no T-specific proof content whatsoever. This
 typechecks as a one-liner only because (a) F9/F10
 (`GenericDriver.lean`) are stated with the existentially-quantified `∃ out` payload rather than
 K's concrete `boxPropagation` shape, and (b) the crux `modalExpandBranchesGen_hintikka`

@@ -43,7 +43,7 @@ This module instantiates the generic tableau driver (`Saturation.lean`'s `modalS
   extra invariant needed there) -- so the discharge pattern matches T/S5 exactly, as
   `GenericDriver.lean`'s module docstring anticipates for B.
 - `modalExpandBranchesB_hintikka`: one-line instantiation of the generic top-loop Hintikka lemma
-  at `(modalApplyOneB, modalApplyOneB_spec)`.
+  at `modalApplyOneB` and `modalApplyOneB_spec.toAt φ0`.
 
 ## Strategy
 
@@ -808,8 +808,9 @@ theorem modalTableauB_eq (φ : Proposition Atom) :
 /-- **`modalExpandBranchesB_hintikka`**: the B-system instantiation of the generic top-loop
 Hintikka lemma (`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), concluding in
 `modalHintikkaSetGen modalApplyOneB bR aR`. A one-liner, exactly as `modalExpandBranchesT_hintikka`
-was for T: direct application of `modalExpandBranchesGen_hintikka` at
-`(modalApplyOneB, modalApplyOneB_spec)`, with no B-specific proof content whatsoever. -/
+was for T: direct application of `modalExpandBranchesGen_hintikka` at `modalApplyOneB` and
+`modalApplyOneB_spec.toAt φ0` (`RuleApplicationSpec.toAt`, `GenericDriver.lean`), with no
+B-specific proof content whatsoever. -/
 theorem modalExpandBranchesB_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),

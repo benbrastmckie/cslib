@@ -456,6 +456,98 @@ lemma modalApplyOneTB_eq_of_not_boxPos_diaNeg
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
+/-! ## D-Specific (Serial-Frame) Dual-Propagation Helpers
+
+The D rule encodes seriality (`Relation.Serial`, i.e. every world has a successor) via two
+PERSISTENT dual arms at the *same* world `w`, mirroring T's self-propagation shape rather than
+minting any new successor: `T(□φ)@w ⊢ T(◇φ)@w` and `F(◇φ)@w ⊢ F(□φ)@w`. This is deliberately
+**not** the `.linear`-mint pattern K's `boxPos`/`diamondNeg` arms use for possibly-new
+successors -- minting there would trip `RuleApplicationSpec.boxPosNotExpanding` (F9), which
+forbids a `.linear` result at exactly the box-positive shape a naive D rule would mint at. The
+dual arms sidestep this by staying `persistent`, exactly as T's self-propagation does.
+
+**Universe note**: unlike T's self-propagation (whose output `φ` is already a subformula of the
+seed `φ0`, since `□φ ∈ modalSubfmls φ0 → φ ∈ modalSubfmls φ0`), D's dual output `◇φ`/`□φ` is
+generally *not* a subformula of a plain `φ0` -- `modalApplyOneD_outputsSubsetUniverse_fails`
+(`DDriver.lean`) is the machine-checked counterexample. `RuleApplicationSpecAt`
+(`GenericDriver.lean`) and `modalDualAugment` (`DDriver.lean`) exist precisely to fix D's
+universe at a dual-closed `φ0`, additively, without touching `modalSubfmls` or the plain
+`RuleApplicationSpec` any other rule in this cube discharges.
+
+## Main Definitions
+
+- `modalDBoxDual`/`modalDDiaNegDual`: the two D-specific dual-propagation helpers (self-world,
+  unconditional on `acc`, persistent).
+- `modalApplyOneD`: apply the K rules (`modalApplyOne`) together with the D dual-propagation
+  arms, merging persistent-rule outputs. Reduces to `modalApplyOne` exactly outside the two
+  D-relevant signed-formula shapes (`T(□φ)@w`, `F(◇φ)@w`). -/
+
+/-- The D dual-propagation for box-positives: from `T(□φ)@w`, generate `T(◇φ)@w` (the *same*
+world `w`, not a recorded successor), filtered to exclude formulas already on the branch.
+Justified by the seriality of the extracted model's relation (Strategy B), not by any `acc`
+edge. -/
+def modalDBoxDual (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (φ : Proposition Atom) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, .diamond φ, w⟩
+  if b.any (· == sf) then [] else [sf]
+
+/-- The D dual-propagation for diamond-negatives: from `F(◇φ)@w`, generate `F(□φ)@w` (the
+*same* world `w`), filtered to exclude formulas already on the branch. Dual of
+`modalDBoxDual`. -/
+def modalDDiaNegDual (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (φ : Proposition Atom) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, .box φ, w⟩
+  if b.any (· == sf) then [] else [sf]
+
+/-! ## D-Augmented Rule Application -/
+
+/-- Apply the K modal rules together with the D dual-propagation arms. For the two
+D-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), the D dual-propagation formulas are merged into
+the K rule's `persistent` output (deduplicated); for every other signed-formula shape,
+`modalApplyOneD` reduces to exactly `modalApplyOne` (the K rule dispatch), matching the same
+"no new worlds" shape as `modalApplyOneT`: the D arms are pure `persistent` outputs at
+existing worlds, never `linear`/`branching`. -/
+def modalApplyOneD
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
+  let (kResult, kAcc) := modalApplyOne sf b acc
+  match sf.sign, sf.formula with
+  | .pos, .box φ =>
+    let dualNew := modalDBoxDual b φ sf.label
+    match kResult with
+    | .persistent kForms =>
+      (.persistent (kForms ++ dualNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
+    | .notApplicable =>
+      if dualNew.isEmpty then (.notApplicable, kAcc) else (.persistent dualNew, kAcc)
+    | other => (other, kAcc)
+  | .neg, .diamond φ =>
+    let dualNew := modalDDiaNegDual b φ sf.label
+    match kResult with
+    | .persistent kForms =>
+      (.persistent (kForms ++ dualNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
+    | .notApplicable =>
+      if dualNew.isEmpty then (.notApplicable, kAcc) else (.persistent dualNew, kAcc)
+    | other => (other, kAcc)
+  | _, _ => (kResult, kAcc)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneD` agrees with `modalApplyOne` outside the two D-relevant shapes
+(`T(□φ)@w`, `F(◇φ)@w`): the D arms never affect any other rule dispatch. -/
+lemma modalApplyOneD_eq_of_not_boxPos_diaNeg
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneD sf b acc = modalApplyOne sf b acc := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOneD
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
 end Cslib.Logic.Modal.Tableau
 
 end

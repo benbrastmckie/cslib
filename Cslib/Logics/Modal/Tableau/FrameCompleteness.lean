@@ -2481,6 +2481,191 @@ instance instDecidableBValid (φ0 : Proposition Atom) : Decidable (bValid φ0) :
   | .closed => .isTrue ((bValid_decides φ0).mp h)
   | .openBranch _ _ => .isFalse (modalTableauB_complete φ0 h)
 
+/-! ## TB Soundness Discharges + `modalTableauTB_sound`
+
+The generalized frame-relativized soundness chain
+(`modalStepBranchGen_preserves_satIn`/`modalExpandBranchesGen_closed_unsatIn`,
+`FrameSoundness.lean`) takes three raw hypotheses (`hAgree`/`hBoxPos`/`hDiaNeg`) rather than a
+hard-coded `modalApplyOne`, so TB's soundness side only needs its own `hAgree`/`hBoxPos`/
+`hDiaNeg` triple -- mirroring exactly how T and B are instantiated (`hAgreeT`/`hAgreeB`,
+`modalApplyOneT_boxPos_soundIn`/`modalApplyOneB_boxPos_soundIn`, `modalTableauT_sound`/
+`modalTableauB_sound`). `modalApplyOneTB_boxPos_soundIn`/`_diaNeg_soundIn` treat
+`modalApplyOneB_boxPos_soundIn`/`_diaNeg_soundIn` as a black box for the *entire* B-merged output
+(supplying `tbFC_imp_symmFC hFC`), then layer T's self-conjunct soundness on top using
+`tbFC_imp_reflFC hFC`'s reflexivity, exactly as `modalApplyOneT_boxPos_soundIn` layers T's
+self-conjunct over K.
+
+The `branchSatisfiableIn`-relative semantic lemmas landed in `FrameSoundness.lean`'s TB section
+(`branchSatisfiableIn_tbFC_boxPos_self_mem`/`_diaNeg_self_mem`/`_boxPos_pred_mem`/
+`_diaNeg_pred_mem`, `modalTBoxSelf_tbFC_sound`/`modalTDiaNegSelf_tbFC_sound`/
+`modalBBoxBack_tbFC_sound`/`modalBDiaNegBack_tbFC_sound`) are the TB analogues of T's own
+`branchSatisfiableIn_reflFC_boxPos_mem`/`modalTBoxSelf_sound` and B's
+`branchSatisfiableIn_symmFC_boxPos_pred_mem`/`modalBBoxBack_sound` -- genuine in-tree semantic
+soundness infrastructure, but (matching the T/B precedent exactly: `modalApplyOneT_boxPos_soundIn`
+does not call `branchSatisfiableIn_reflFC_boxPos_mem`/`modalTBoxSelf_sound` as black boxes either,
+per that theorem's own docstring, which mirrors them "inline" instead) not directly invoked by
+the `sfSat`/`RuleResultSat`-based chain below, which is the one `modalTableauTB_sound` actually
+needs. -/
+
+omit [Hashable Atom] in
+/-- **S-agree for TB**: `modalApplyOneTB` agrees with `modalApplyOne` (K) off the two
+propagating shapes -- required by `modalStepBranchGen_preserves_satIn`/
+`modalExpandBranchesGen_closed_unsatIn`'s `hAgree` parameter, which is hard-coded against
+`modalApplyOne` specifically (not an arbitrary intermediate rule). Chains
+`modalApplyOneTB_eq_of_not_boxPos_diaNeg` (`FrameRules.lean`, TB agrees with B) with
+`modalApplyOneB_eq_of_not_boxPos_diaNeg` (`FrameRules.lean`, B agrees with K); zero new proof
+content. -/
+theorem hAgreeTB
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneTB sf b acc = modalApplyOne sf b acc := by
+  rw [modalApplyOneTB_eq_of_not_boxPos_diaNeg sf b acc h,
+    modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc h]
+
+/-- **S-boxPos for TB**: frame-relativized semantic soundness of `modalApplyOneTB`'s
+box-positive output at `FC := tbFC`. Splits `RuleResultSat` over the `bForms ++
+selfNew.filter …` append (`modalApplyOneTB_boxPos_fst`, `TBDriver.lean`): the `bForms` half is
+`modalApplyOneB_boxPos_soundIn`'s own conclusion (treated as a black box, supplying
+`tbFC_imp_symmFC hFC`); the `selfNew` half (at most one extra formula, `T(φ)@lbl` from
+`T(□φ)@lbl` at the *same* world) is justified directly by reflexivity
+(`(tbFC_imp_reflFC hFC).refl (f lbl)`), mirroring `modalApplyOneT_boxPos_soundIn`'s own
+self-conjunct argument. -/
+theorem modalApplyOneTB_boxPos_soundIn
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hFC : tbFC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneTB
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneTB
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  obtain ⟨hsndeqB, hRRSB⟩ :=
+    modalApplyOneB_boxPos_soundIn m f φ lbl b acc (tbFC_imp_symmFC hFC) hacc hb hmem
+  have hselfSat : Satisfies m (f lbl) φ := by
+    have hbox : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
+    simp only [Satisfies] at hbox
+    exact hbox (f lbl) ((tbFC_imp_reflFC hFC).refl (f lbl))
+  refine ⟨?_, ?_⟩
+  · rw [modalApplyOneTB_boxPos_snd]; exact hsndeqB
+  · rw [modalApplyOneTB_boxPos_fst]
+    rcases modalApplyOneB_spec.boxPosNotExpanding
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc with
+        hk | ⟨bForms, hk⟩
+    · rw [hk] at hRRSB ⊢
+      split_ifs with hemp
+      · trivial
+      · intro sf' hmem'
+        simp only [modalTBoxSelf] at hmem'
+        split_ifs at hmem' with hcase
+        · simp at hmem'
+        · simp only [List.mem_singleton] at hmem'
+          subst hmem'
+          exact sfSat_pos m f φ lbl hselfSat
+    · rw [hk] at hRRSB ⊢
+      intro sf' hmem'
+      simp only [List.mem_append, List.mem_filter] at hmem'
+      rcases hmem' with hmem' | ⟨hmem', -⟩
+      · exact hRRSB sf' hmem'
+      · simp only [modalTBoxSelf] at hmem'
+        split_ifs at hmem' with hcase
+        · simp at hmem'
+        · simp only [List.mem_singleton] at hmem'
+          subst hmem'
+          exact sfSat_pos m f φ lbl hselfSat
+
+/-- **S-diaNeg for TB**: dual of `modalApplyOneTB_boxPos_soundIn` for the diamond-negative
+shape. -/
+theorem modalApplyOneTB_diaNeg_soundIn
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hFC : tbFC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem :
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneTB
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOneTB
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  obtain ⟨hsndeqB, hRRSB⟩ :=
+    modalApplyOneB_diaNeg_soundIn m f φ lbl b acc (tbFC_imp_symmFC hFC) hacc hb hmem
+  have hselfSat : ¬ Satisfies m (f lbl) φ := by
+    have hdia : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
+    rw [Satisfies.diamond_iff] at hdia
+    push Not at hdia
+    exact hdia (f lbl) ((tbFC_imp_reflFC hFC).refl (f lbl))
+  refine ⟨?_, ?_⟩
+  · rw [modalApplyOneTB_diamondNeg_snd]; exact hsndeqB
+  · rw [modalApplyOneTB_diamondNeg_fst]
+    rcases modalApplyOneB_spec.diaNegNotExpanding
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+        with hk | ⟨bForms, hk⟩
+    · rw [hk] at hRRSB ⊢
+      split_ifs with hemp
+      · trivial
+      · intro sf' hmem'
+        simp only [modalTDiaNegSelf] at hmem'
+        split_ifs at hmem' with hcase
+        · simp at hmem'
+        · simp only [List.mem_singleton] at hmem'
+          subst hmem'
+          exact sfSat_neg m f φ lbl hselfSat
+    · rw [hk] at hRRSB ⊢
+      intro sf' hmem'
+      simp only [List.mem_append, List.mem_filter] at hmem'
+      rcases hmem' with hmem' | ⟨hmem', -⟩
+      · exact hRRSB sf' hmem'
+      · simp only [modalTDiaNegSelf] at hmem'
+        split_ifs at hmem' with hcase
+        · simp at hmem'
+        · simp only [List.mem_singleton] at hmem'
+          subst hmem'
+          exact sfSat_neg m f φ lbl hselfSat
+
+/-- **`modalTableauTB` is sound**: if the TB tableau closes on `F(φ)`, then `φ` is `tbValid`.
+Contrapositive over `tbFC`, mirroring `modalTableauT_sound`/`modalTableauB_sound`: feeds
+`modalExpandBranchesGen_closed_unsatIn tbFC modalApplyOneTB` at the initial configuration
+`[[F(φ)@0]] [[]] [Accessibility.empty]`. The initial `branchSatisfiableIn tbFC` witness uses the
+reflexive-symmetric falsifying model directly (available since `tbValid = frameValid tbFC`
+quantifies only reflexive-symmetric models, so the `by_contra` model satisfies `tbFC` by
+hypothesis). -/
+theorem modalTableauTB_sound (φ : Proposition Atom) (h : modalTableauTB φ = .closed) :
+    tbValid φ := by
+  intro World m hfc w
+  by_contra hnotsat
+  have hsat : branchSatisfiableIn tbFC [⟨.neg, φ, 0⟩] Accessibility.empty :=
+    ⟨World, m, fun _ => w, hfc,
+      fun w1 w2 hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
+      fun sf hmem => by
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+        subst hmem
+        exact ⟨fun h => by simp at h, fun _ => hnotsat⟩⟩
+  have hunsat := modalExpandBranchesGen_closed_unsatIn tbFC modalApplyOneTB
+    modalApplyOneTB_spec.freshLocal
+    hAgreeTB
+    (fun m f φ lbl b acc hFC hacc hb hmem =>
+      modalApplyOneTB_boxPos_soundIn m f φ lbl b acc hFC hacc hb hmem)
+    (fun m f φ lbl b acc hFC hacc hb hmem =>
+      modalApplyOneTB_diaNeg_soundIn m f φ lbl b acc hFC hacc hb hmem)
+    (modalFuel φ)
+    [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty]
+    rfl rfl
+    (List.Forall₂.cons (accFreshInv_empty _) List.Forall₂.nil)
+    (by
+      have h' : modalExpandBranchesTB
+          [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+          [Accessibility.empty] (modalFuel φ) = .closed := h
+      exact h')
+  cases hunsat with
+  | cons h_unsat _ => exact h_unsat hsat
+
 /-! ## S5 Modal Truth Lemma
 
 `extractModelS5`'s relation is the *equivalence closure* `Relation.EqvGen acc.hasEdge`

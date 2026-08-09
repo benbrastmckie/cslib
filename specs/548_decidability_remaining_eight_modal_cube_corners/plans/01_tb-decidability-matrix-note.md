@@ -620,30 +620,42 @@ in this plan's "Structural findings" was wrong and that must be recorded, not ab
 
 ---
 
-### Phase 9: TB Soundness [NOT STARTED]
+### Phase 9: TB Soundness [COMPLETED]
 
 **Goal**: Prove the TB arm soundness discharges against `tbFC` and land `modalTableauTB_sound`.
 
 **Tasks**:
-- [ ] In `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`, append a `/-! ### TB-Rule Semantic
+- [x] In `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`, append a `/-! ### TB-Rule Semantic
       Soundness -/` subsection under the TB section added in Phase 2
-- [ ] Prove `branchSatisfiableIn_tbFC_boxPos_self_mem` / `_diaNeg_self_mem` — the T arms' soundness
+- [x] Prove `branchSatisfiableIn_tbFC_boxPos_self_mem` / `_diaNeg_self_mem` — the T arms' soundness
       relative to `tbFC`, reducing to the reflexivity conjunct `.1`. These mirror
       `branchSatisfiableIn_reflFC_boxPos_mem` / `_diaNeg_mem` but with the conjunct projection.
       Reuse the frozen `modalTBoxSelf_sound` / `modalTDiaNegSelf_sound` where the shapes allow,
       projecting `tbFC`'s `Std.Refl` conjunct into `reflFC`
-- [ ] Prove `branchSatisfiableIn_tbFC_boxPos_pred_mem` / `_diaNeg_pred_mem` — the B arms' soundness
+- [x] Prove `branchSatisfiableIn_tbFC_boxPos_pred_mem` / `_diaNeg_pred_mem` — the B arms' soundness
       relative to `tbFC`, reducing to the symmetry conjunct `.2`, mirroring
       `branchSatisfiableIn_symmFC_boxPos_pred_mem` (`:1486`) and `_diaNeg_pred_mem` (`:1508`) with
       the conjunct projection. Reuse `modalBBoxBack_sound` and `modalBDiaNegBack_sound` the same
       way
-- [ ] Prove `modalApplyOneTB_sound` (or the equivalently-named per-arm bundle the shape demands)
-      combining the four
-- [ ] In `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`, append a `/-! ## TB Soundness
+- [x] Prove `modalApplyOneTB_sound` (or the equivalently-named per-arm bundle the shape demands)
+      combining the four *(deviation: altered — landed as the `hAgreeTB`/
+      `modalApplyOneTB_boxPos_soundIn`/`modalApplyOneTB_diaNeg_soundIn` triple in
+      `FrameCompleteness.lean`, exactly mirroring T's `hAgreeT`/`modalApplyOneT_boxPos_soundIn`/
+      `modalApplyOneT_diaNeg_soundIn` and B's `hAgreeB`/`modalApplyOneB_boxPos_soundIn`/
+      `modalApplyOneB_diaNeg_soundIn` shape, rather than a single `modalApplyOneTB_sound` name —
+      neither T nor B has a single combining theorem of that name either; each instead supplies
+      the triple directly to `modalExpandBranchesGen_closed_unsatIn`. The `_soundIn` pair treats
+      `modalApplyOneB_boxPos_soundIn`/`_diaNeg_soundIn` as a black box for the full B-merged
+      output via `tbFC_imp_symmFC`, then layers T's self-conjunct via `tbFC_imp_reflFC`, so the
+      "combining the four" branchSatisfiableIn-relative lemmas are subsumed by this sfSat/
+      RuleResultSat-relative chain, matching precisely how T's own proof does not call its
+      `branchSatisfiableIn_reflFC_boxPos_mem`/`modalTBoxSelf_sound` analogues as black boxes
+      either — see that theorem's own docstring.)*
+- [x] In `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`, append a `/-! ## TB Soundness
       Discharges + `modalTableauTB_sound` -/` section and prove
       `modalTableauTB_sound : modalTableauTB φ = .closed → tbValid φ`, mirroring
       `modalTableauB_sound` (`:1885`) and its discharge block (`:1762-1884`)
-- [ ] Note the projection pattern: because `tbFC r = Std.Refl r ∧ Std.Symm r`, every T-side
+- [x] Note the projection pattern: because `tbFC r = Std.Refl r ∧ Std.Symm r`, every T-side
       obligation is `reflFC` applied to `h.1` and every B-side obligation is `symmFC` applied to
       `h.2`. This is the same projection `s5FC_imp_fiveFC` (`FrameSoundness.lean:1608`) already
       uses; follow it rather than re-proving the arm soundness from semantics

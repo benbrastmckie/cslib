@@ -203,7 +203,7 @@ the same ~120-line estimate.
 
 ---
 
-### Phase 3: F2 Hypothesis Narrowing [NOT STARTED]
+### Phase 3: F2 Hypothesis Narrowing [COMPLETED]
 
 **Goal**: `modalExpMeasure_step_lt_gen` accepts the narrowed `hOutputsSubsetUniverse`, all
 consumption sites pass, and the `…At` wrapper in `GenericDriver.lean` exists — with the full build

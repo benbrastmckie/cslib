@@ -1343,8 +1343,9 @@ lemma modalStepHintikka_preserves_inv
     have hstep' : modalStepBranchGen apply b e acc =
         some (newBs, newBs.map (fun _ => newExp), newAcc) := by
       rw [hNewExpEq] at hstep; exact hstep
-    have hdrop := modalExpMeasure_step_lt_gen apply hs.branchingLength hs.persistentFresh
-      hs.outputsSubsetUniverse φ0 [] [] newBs [] [] newExp b e acc newAcc rfl hbC hFresh hWb hstep'
+    have hdrop := modalExpMeasure_step_lt_gen apply hs.branchingLength hs.persistentFresh φ0
+      (hs.outputsSubsetUniverse φ0) [] [] newBs [] [] newExp b e acc newAcc rfl hbC hFresh hWb
+      hstep'
     simp only [List.nil_append, List.append_nil] at hdrop
     rw [hNewExpEq]
     exact hdrop
@@ -1641,8 +1642,8 @@ theorem modalExpandBranchesHintikka
                   (newBs.map (fun _ => newExp)) newAcc hstepEq' hinv
               have hWb : modalMaxWorld bh < modalWorldBound φ0 := hAuxBounds bh e a hinv.aux
               have hstep_lt := modalExpMeasure_step_lt_gen apply hs.branchingLength
-                hs.persistentFresh hs.outputsSubsetUniverse φ0 done bt newBs doneExp es newExp bh e
-                a newAcc hdlength.symm hinv.bClosure hinv.accFresh hWb hstepEq'
+                hs.persistentFresh φ0 (hs.outputsSubsetUniverse φ0) done bt newBs doneExp es newExp
+                bh e a newAcc hdlength.symm hinv.bClosure hinv.accFresh hWb hstepEq'
               apply ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
                 (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
               · simp only [List.length_append, List.length_map, hdlength]

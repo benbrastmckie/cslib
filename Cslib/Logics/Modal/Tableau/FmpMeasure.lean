@@ -3146,8 +3146,12 @@ branching output to always have exactly two sub-branches, a fact not covered by 
 `RuleApplicationSpec` fields above -- mirrors the `RuleApplicationSpec.branchingLength` field
 (`GenericDriver.lean`), discharged for `modalApplyOne` by the pre-existing
 `modalApplyOne_branching_length`. `hPersistentFresh`/`hOutputsSubsetUniverse` are the raw forms
-of the pre-existing `persistentFresh`/`outputsSubsetUniverse` fields. Case-splits over the four
-`RuleResult` outcomes exactly as the classical template, replacing
+of the pre-existing `persistentFresh`/`outputsSubsetUniverse` fields; `hOutputsSubsetUniverse` is
+stated at the lemma's own (already-bound) `φ0` rather than universally quantified, so a caller
+whose only witness is `RuleApplicationSpecAt`/`RuleApplicationSpecCoreAt` (`GenericDriver.lean`
+-- e.g. D, `DDriver.lean`, whose `outputsSubsetUniverse` genuinely fails at an arbitrary `φ0`)
+can still discharge it directly, with no `φ0`-specialization needed at the call site. Case-splits
+over the four `RuleResult` outcomes exactly as the classical template, replacing
 `classicalBranchComplexity`'s per-output complexity accounting with the counting `R`-drop lemmas
 (`modalWork_drop_linear`/`_persistent`, already rule-agnostic), whose `+1 ≤` shape supplies both
 the `1 ≤ R`-parent bound and the `child ≤ R-1` bound the `pow3_*` lemmas need in one step.
@@ -3162,8 +3166,8 @@ lemma modalExpMeasure_step_lt_gen
       (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
       (nf : List (SignedFormula (Proposition Atom) WorldIndex)),
       (apply sf b acc).fst = .persistent nf → nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b)
-    (hOutputsSubsetUniverse : ∀ (φ0 : Proposition Atom)
-      (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (φ0 : Proposition Atom)
+    (hOutputsSubsetUniverse : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
       (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
       (∀ x ∈ b, x ∈ modalUniverse φ0) → sf ∈ b → accFreshInv b acc →
       modalMaxWorld b < modalWorldBound φ0 →
@@ -3172,7 +3176,6 @@ lemma modalExpMeasure_step_lt_gen
         | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverse φ0
         | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
         | .notApplicable => True))
-    (φ0 : Proposition Atom)
     (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -3242,7 +3245,7 @@ lemma modalExpMeasure_step_lt_gen
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
     obtain ⟨hnfne, hnffresh⟩ := hPersistentFresh sf bh acc nf hca
     obtain ⟨x0, hx0mem⟩ := List.exists_mem_of_ne_nil nf hnfne
-    have hclosure := hOutputsSubsetUniverse φ0 sf bh acc hb hsfmem hInv hW
+    have hclosure := hOutputsSubsetUniverse sf bh acc hb hsfmem hInv hW
     rw [hca] at hclosure
     have hx0U : x0 ∈ U := hclosure x0 hx0mem
     have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
@@ -3278,8 +3281,8 @@ lemma modalExpMeasure_step_lt
       ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
   rw [modalStepBranch_eq] at hstep
   exact modalExpMeasure_step_lt_gen modalApplyOne modalApplyOne_branching_length
-    modalApplyOne_persistent_props modalApplyOne_outputs_subset
-    φ0 done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW hstep
+    modalApplyOne_persistent_props φ0 (modalApplyOne_outputs_subset φ0)
+    done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW hstep
 
 /-! ## Downstream Reuse Helpers (T, S5, B existing-world propagation)
 

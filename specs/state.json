@@ -1169,19 +1169,34 @@
     {
       "project_number": 598,
       "project_name": "serial_rule_spec_decision_tableau",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Prototype and measure a serial-successor rule spec for the modal tableau driver. Research on the eight-corner decidability gap found that D's seriality rule cannot satisfy RuleApplicationSpec.boxPosNotExpanding (Cslib/Logics/Modal/Tableau/GenericDriver.lean:239-243): that field forbids a .linear mint at the box-positive shape, which is exactly where a D tableau must mint a successor. Three mint-avoiding alternatives were refuted -- self-loop closure and fresh-sink are both unsound, and the F(box-bot) seeding trick is non-terminating because box-bot has constant modal depth. WORK: prototype an additive sibling spec (RuleApplicationSpecSerial) plus an additive modalLoopGen_eBoxOnlyNeg_serial, on D alone, and measure the cost. Additive means the existing RuleApplicationSpec and its discharge sites are untouched. Deliverable is a measured decision report plus the D prototype, not a full corner. UNBLOCKS: D, DB, D4, D5, D45 (five of the eight remaining modal-cube corners). Zero sorry, zero new axioms.",
       "topic": "Modal Logic",
       "priority": "medium",
       "created": "2026-08-08T23:37:47Z",
-      "last_updated": "2026-08-08T23:37:47Z",
+      "last_updated": "2026-08-09T07:01:24Z",
       "file_scope": [
         "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
         "Cslib/Logics/Modal/Tableau/FrameRules.lean",
-        "Cslib/Logics/Modal/Tableau/DDriver.lean"
+        "Cslib/Logics/Modal/Tableau/DDriver.lean",
+        "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+        "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
       ],
-      "dependencies": []
+      "dependencies": [],
+      "session_id": "sess_1786256926_bebabc",
+      "artifacts": [
+        {
+          "path": "specs/598_serial_rule_spec_decision_tableau/reports/01_serial-rule-spec-decision.md",
+          "type": "report",
+          "summary": "Serial rule spec decision report (route E2)"
+        },
+        {
+          "path": "specs/598_serial_rule_spec_decision_tableau/plans/01_serial-d-driver-route-e2.md",
+          "type": "plan",
+          "summary": "Route E2 implementation plan (9 phases)"
+        }
+      ]
     },
     {
       "project_number": 599,

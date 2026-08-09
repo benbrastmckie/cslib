@@ -717,8 +717,33 @@ theorem modalStepBranchGen_expMeasure_step_lt
     modalExpMeasure (modalUniverse φ0) (done ++ newBs ++ bt)
         (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
       ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) :=
-  modalExpMeasure_step_lt_gen apply spec.branchingLength spec.persistentFresh
-    spec.outputsSubsetUniverse φ0 done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW
+  modalExpMeasure_step_lt_gen apply spec.branchingLength spec.persistentFresh φ0
+    (spec.outputsSubsetUniverse φ0) done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv
+    hW hstep
+
+/-- **`…At` sibling of `modalStepBranchGen_expMeasure_step_lt`**, taking `RuleApplicationSpecAt
+φ0 apply` instead of `RuleApplicationSpec apply`: identical proof, except
+`spec.outputsSubsetUniverse` is already stated at the fixed `φ0` (no explicit specialization
+needed), which is exactly what lets a rule whose universe-closure only holds at one dual-closed
+seed (D, `DDriver.lean`) reuse the counting-measure engine. -/
+theorem modalStepBranchGenAt_expMeasure_step_lt
+    {φ0 : Proposition Atom} (apply : RuleApply Atom) (spec : RuleApplicationSpecAt φ0 apply)
+    (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc newAcc : Accessibility)
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ modalUniverse φ0)
+    (hInv : accFreshInv bh acc)
+    (hW : modalMaxWorld bh < modalWorldBound φ0)
+    (hstep : modalStepBranchGen apply bh e acc = some (newBs, newBs.map (fun _ => newExp),
+      newAcc)) :
+    modalExpMeasure (modalUniverse φ0) (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) :=
+  modalExpMeasure_step_lt_gen apply spec.branchingLength spec.persistentFresh φ0
+    spec.outputsSubsetUniverse done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW
     hstep
 
 end Cslib.Logic.Modal.Tableau

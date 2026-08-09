@@ -135,8 +135,8 @@ private lemma tbCounterR_symm : Std.Symm tbCounterR where
 private theorem tb_box_atom_holds : Satisfies tbCounterModel (0 : Fin 3) (.box (.atom ())) := by
   intro w' hw'
   match w' with
-  | 0 => show (0 : Fin 3) ≠ 2; decide
-  | 1 => show (1 : Fin 3) ≠ 2; decide
+  | 0 => change (0 : Fin 3) ≠ 2; decide
+  | 1 => change (1 : Fin 3) ≠ 2; decide
   | 2 => exact hw'.elim
 
 /-- `□□p` fails at world `0` of `tbCounterModel`: `1`'s neighbor `2` fails `p`, so `□p` fails at

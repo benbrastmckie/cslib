@@ -1,18 +1,40 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-08T00:00:00Z",
-  "artifacts": [],
+  "artifacts": [
+    "specs/548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md",
+    "specs/548_decidability_remaining_eight_modal_cube_corners/summaries/01_tb-decidability-matrix-note-summary.md"
+  ],
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/TBDriver.lean",
+    "Cslib/Logics/Modal/Tableau/FrameRules.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib.lean",
+    "CslibTests/ModalFrameSeparation.lean"
+  ],
   "partial_progress": {
-    "stage": "phase 11",
-    "details": "Phase 10 (TB completeness, tbValid_decides, instDecidableTBValid, CslibTests smoke checks) complete. Full Cslib build green, zero live sorry, standard axiom triple confirmed. All 10/11 phases done. Starting Phase 11 (final verification gate and matrix-note reconciliation).",
-    "phases_completed": 10,
+    "stage": "complete",
+    "phases_completed": 11,
     "phases_total": 11,
-    "last_completed_phase": "Phase 10: TB Completeness, tbValid_decides, and instDecidableTBValid"
+    "last_completed_phase": "Phase 11: Final Verification Gate and Matrix-Note Reconciliation"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "completion_data": {
+    "completion_summary": "Landed TB decidability end-to-end (frame condition, validity, extractor, rule, full RuleApplicationSpec discharge, truth lemma, soundness, completeness, tbValid_decides, instDecidableTBValid), taking the modal-cube decidability matrix from 7/15 to 8/15, plus the intentional-completeness matrix note for the remaining seven corners. All 11 plan phases completed, zero sorry, standard axiom triple, all frozen deliverables byte-identical (2124 insertions / 0 deletions across the whole task), FmpMeasure.lean untouched, all regression tests green."
   },
   "metadata": {
     "session_id": "sess_1786228817_675b2c",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

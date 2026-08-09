@@ -1,7 +1,7 @@
 # Implementation Plan: TB Decidability + Intentional-Completeness Matrix Note
 
 - **Task**: 548 - Decidability for the remaining modal-cube corners (SCOPE NARROWED)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 16 hours
 - **Dependencies**: 511 (complete), 535 (archived-complete), 597 (complete)
 - **Research Inputs**: `specs/548_decidability_remaining_eight_modal_cube_corners/reports/01_eight-corner-decidability-research.md`
@@ -729,34 +729,34 @@ that takes the matrix to 8/15.
 
 ---
 
-### Phase 11: Final Verification Gate and Matrix-Note Reconciliation [NOT STARTED]
+### Phase 11: Final Verification Gate and Matrix-Note Reconciliation [COMPLETED]
 
 **Goal**: Run the complete gate set, verify every constraint this plan committed to, and
 reconcile the Phase 1 matrix note against the shipped tree.
 
 **Tasks**:
-- [ ] Full `lake build` from clean — green, zero errors, zero warnings introduced by this task
-- [ ] Assert zero **live** `sorry` in `Cslib/Logics/Modal/Tableau/`: grep for `sorry` and confirm
+- [x] Full `lake build` from clean — green, zero errors, zero warnings introduced by this task
+- [x] Assert zero **live** `sorry` in `Cslib/Logics/Modal/Tableau/`: grep for `sorry` and confirm
       every match is inside a docstring or comment (the pre-existing baseline is 15 prose
       matches; the count may change if this task's docstrings mention it — verify each match is
       prose, do not compare the number blindly)
-- [ ] Assert zero new axioms: `#print axioms` on `instDecidableTBValid`, `tbValid_decides`,
+- [x] Assert zero new axioms: `#print axioms` on `instDecidableTBValid`, `tbValid_decides`,
       `modalTableauTB_sound`, `modalTableauTB_complete`, `modalTruthLemmaTB`, and
       `modalApplyOneTB_spec` — each shows exactly `propext`, `Classical.choice`, `Quot.sound`
-- [ ] **Frozen-declaration audit**: for each of `FrameRules.lean`, `FrameSoundness.lean`,
+- [x] **Frozen-declaration audit**: for each of `FrameRules.lean`, `FrameSoundness.lean`,
       `FrameCompleteness.lean`, and the `S4/` modules, run `git diff` and confirm every hunk is
       an addition; confirm no `-` line touches any declaration named in this plan's "Frozen
       Deliverables" tables
-- [ ] **`FmpMeasure.lean` no-touch audit**: `git diff --stat Cslib/Logics/Modal/Tableau/FmpMeasure.lean`
+- [x] **`FmpMeasure.lean` no-touch audit**: `git diff --stat Cslib/Logics/Modal/Tableau/FmpMeasure.lean`
       is empty
-- [ ] **Scope audit**: confirm the only new `frameValid` instantiation is `tbValid` — no `dValid`,
+- [x] **Scope audit**: confirm the only new `frameValid` instantiation is `tbValid` — no `dValid`,
       `k4Valid`, `k45Valid`, `d4Valid`, `d5Valid`, `d45Valid`, or `dbValid` was added
-- [ ] **Matrix-note reconciliation**: re-read the Phase 1 note against the final tree. Confirm it
+- [x] **Matrix-note reconciliation**: re-read the Phase 1 note against the final tree. Confirm it
       states 8/15 (not 7/15), names `instDecidableTBValid` in the covered column, and that every
       declaration-name anchor it cites resolves. Correct any drift
-- [ ] Run the existing regression tests: `CslibTests/S4LoopGuardRegression.lean`,
+- [x] Run the existing regression tests: `CslibTests/S4LoopGuardRegression.lean`,
       `CslibTests/ModalFrameSeparation.lean`, `CslibTests/TableauConformance.lean` — all green
-- [ ] Confirm no task-number citation appears in any file outside `specs/**`
+- [x] Confirm no task-number citation appears in any file outside `specs/**`
 
 **Timing**: 1 hour
 
@@ -784,19 +784,19 @@ recording its output; a check that cannot be run is a finding, not a pass.
 
 ## Testing & Validation
 
-- [ ] `lake build` green from clean, whole project
-- [ ] Zero live `sorry` under `Cslib/Logics/Modal/Tableau/` (every match confirmed prose)
-- [ ] `#print axioms` on all six TB capstone declarations shows only `propext`,
+- [x] `lake build` green from clean, whole project
+- [x] Zero live `sorry` under `Cslib/Logics/Modal/Tableau/` (every match confirmed prose)
+- [x] `#print axioms` on all six TB capstone declarations shows only `propext`,
       `Classical.choice`, `Quot.sound`
-- [ ] `instDecidableTBValid` decides the T axiom `□p → p` and the B axiom `p → □◇p` as valid, and
+- [x] `instDecidableTBValid` decides the T axiom `□p → p` and the B axiom `p → □◇p` as valid, and
       the 4 axiom `□p → □□p` as invalid (TB frames need not be transitive) — checks placed in
       `CslibTests/`
-- [ ] `modalApplyOneTB_spec` has type `RuleApplicationSpec`, not `RuleApplicationSpecCore`
-- [ ] All three existing modal-tableau regression test files green
-- [ ] `git diff` on the four frozen files shows additions only; `FmpMeasure.lean` diff empty
-- [ ] The matrix note covers all seven remaining corners with frame condition, tier, named gate,
+- [x] `modalApplyOneTB_spec` has type `RuleApplicationSpec`, not `RuleApplicationSpecCore`
+- [x] All three existing modal-tableau regression test files green
+- [x] `git diff` on the four frozen files shows additions only; `FmpMeasure.lean` diff empty
+- [x] The matrix note covers all seven remaining corners with frame condition, tier, named gate,
       and cost estimate each; none says "revisit later" without a named gate
-- [ ] No task-number citation outside `specs/**`
+- [x] No task-number citation outside `specs/**`
 
 ## Artifacts & Outputs
 

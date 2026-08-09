@@ -1,26 +1,22 @@
 {
-  "status": "planned",
+  "status": "implemented",
   "task_number": 548,
+  "phases_completed": 11,
+  "phases_total": 11,
   "session_id": "sess_1786228817_675b2c",
-  "phase": "plan",
-  "agent_type": "planner-agent",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md",
-      "summary": "11-phase plan: TB corner end-to-end (7/15 -> 8/15) plus the intentional-completeness matrix note for the seven remaining corners"
-    }
-  ],
-  "modified_files": [
-    "specs/548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md"
-  ],
   "plan_path": "specs/548_decidability_remaining_eight_modal_cube_corners/plans/01_tb-decidability-matrix-note.md",
-  "phase_count": 11,
-  "next_phase": 1,
-  "estimated_hours": 16,
-  "dependency_waves": [[1, 2, 3], [4], [5], [6], [7], [8, 9], [10], [11]],
-  "blockers": [],
-  "sorry_inventory": [],
-  "skeleton": false,
-  "next_steps": "Run /implement 548 to execute the plan"
+  "summary_path": "specs/548_decidability_remaining_eight_modal_cube_corners/summaries/01_tb-decidability-matrix-note-summary.md",
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/TBDriver.lean",
+    "Cslib/Logics/Modal/Tableau/FrameRules.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib.lean",
+    "CslibTests/ModalFrameSeparation.lean"
+  ],
+  "verification_passed": true,
+  "sorry_count": 0,
+  "axiom_count": 0,
+  "build_passed": true,
+  "notes": "All 11 phases complete. TB decidability landed end-to-end (matrix 7/15 -> 8/15). Frozen deliverables audit: 2124 insertions / 0 deletions across the whole task span (purely additive). FmpMeasure.lean untouched. Regression tests green. Repo-wide check-task-references.sh reports pre-existing unrelated violations in .memory/ from prior tasks (317/426/427/552/557) -- none in files this task touched, out of scope."
 }

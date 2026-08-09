@@ -1,7 +1,57 @@
 {
-  "status": "in_progress",
-  "agent_type": "general-implementation-agent",
-  "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
-  "session_id": "sess_1786312852_6b5c1b_596",
-  "task_number": 596
+  "status": "implemented",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md",
+      "summary": "Command-cited fresh measurement record; documents the discovery that lean-sorry-census.sh double-counts warn.sorry suppression annotations as phantom sorries"
+    },
+    {
+      "type": "summary",
+      "path": "specs/596_realign_roadmap_with_verified_state/summaries/01_realign-roadmap-verified-state-summary.md",
+      "summary": "Implementation summary with before/after table of every corrected ROADMAP.md figure and the plan deviation"
+    }
+  ],
+  "completion_data": {
+    "completion_summary": "Realigned specs/ROADMAP.md with verified repository state as of 2026-08-09 across all six plan phases: corrected falsified decidability/CS5/Temporal claims, moved 8 terminal work items to Completed, added four new Remaining sections giving all 46 open tasks roadmap presence, and created tasks 607 (BXCanonical decision, tracked not decided) and 608 (fix a newly-discovered lean-sorry-census.sh double-counting bug). No .lean file was touched."
+  },
+  "modified_files": [
+    "specs/ROADMAP.md",
+    "specs/state.json",
+    "specs/TODO.md",
+    "specs/596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md",
+    "specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md",
+    "specs/596_realign_roadmap_with_verified_state/summaries/01_realign-roadmap-verified-state-summary.md",
+    "specs/596_realign_roadmap_with_verified_state/progress/phase-1-progress.json",
+    "specs/596_realign_roadmap_with_verified_state/progress/phase-2-progress.json",
+    "specs/596_realign_roadmap_with_verified_state/progress/phase-3-progress.json",
+    "specs/596_realign_roadmap_with_verified_state/progress/phase-4-progress.json",
+    "specs/596_realign_roadmap_with_verified_state/progress/phase-5-progress.json",
+    "specs/596_realign_roadmap_with_verified_state/progress/phase-6-progress.json",
+    "specs/596_realign_roadmap_with_verified_state/.orchestrator-handoff.json"
+  ],
+  "memory_candidates": [
+    {
+      "content": "When a documentation task delegates to a designated 'source of truth' script (e.g. a sorry-census counter) to correct a prior figure, verify the script's own output against a hand count before trusting it, especially when the fix mechanism it's supposed to reveal (e.g. 'suppression sites were undercounted') can be checked directly. In this case the census script's \\bsorry\\b regex also matched inside 'warn.sorry' (set_option warn.sorry false in), silently double-counting every suppression annotation as an extra phantom sorry -- the exact inverse of the undercounting bug the task assumed. Cross-checking against an independent source (a different task's own hand-audited sorry count) gave strong corroboration before writing the corrected figure.",
+      "category": "PATTERN",
+      "source_artifact": "specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["sorry-census", "regex-word-boundary-bug", "measurement-verification", "cross-corroboration", "documentation-realignment"]
+    },
+    {
+      "content": "A regex `\\bsorry\\b` applied to Lean 4 source will also match inside `set_option warn.sorry false in`, because `.` is a non-word character and creates a false word boundary before 'sorry'. Any Lean sorry-counting tool must explicitly exclude the warn.sorry suppression-annotation directive (e.g. via a line-level pre-filter, a negative lookbehind `(?<!warn\\.)\\bsorry\\b`, or stripping the literal directive text) or it will overcount by exactly the number of suppression annotations present.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md",
+      "confidence": 0.9,
+      "suggested_keywords": ["lean4", "sorry-count", "regex-bug", "word-boundary", "warn.sorry"]
+    }
+  ],
+  "metadata": {
+    "session_id": "sess_1786312852_6b5c1b_596",
+    "agent_type": "general-implementation-agent",
+    "delegation_depth": 2,
+    "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
+    "phases_completed": 6,
+    "phases_total": 6
+  }
 }

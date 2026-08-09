@@ -11,7 +11,7 @@ next_project_number: 610
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,596,599,600,604,607,608 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,604,607,608 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,605,609 | 36,37,181,375,400,425,534,554,568,594,604 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,606 | 39,40,605 | foundations, propositional logic |
 
@@ -75,7 +75,6 @@ next_project_number: 610
 
 594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
   └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
-596 [IMPLEMENTING] — Realign specs/ROADMAP.md with verified repository state. Created 
 608 [NOT STARTED] — Discovered during task 596's ROADMAP realignment (2026-08-09; see
 
 ### Bimodal Metalogic
@@ -326,12 +325,15 @@ RESEARCH/DECISION ONLY: no .lean file is created, moved or edited by this task. 
 ---
 
 ### 596. Correct ROADMAP.md's stale cleanup agenda and fold in the 20 unrepresented open tasks
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: meta
 - **Topic**: Agent System
 - **Dependencies**: None
-- **Research**: [596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md]
+- **Research**:
+  - [596_realign_roadmap_with_verified_state/reports/01_roadmap-realignment-verification.md]
+  - [596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md]
 - **Plan**: [596_realign_roadmap_with_verified_state/plans/01_realign-roadmap-verified-state.md]
+- **Summary**: [596_realign_roadmap_with_verified_state/summaries/01_realign-roadmap-verified-state-summary.md]
 
 **Description**: Realign specs/ROADMAP.md with verified repository state. Created by the 2026-08-07 codebase review (specs/reviews/review-2026-08-07.md, findings H4-H5).
 

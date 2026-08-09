@@ -11,7 +11,7 @@ next_project_number: 602
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,591,594,596,599,600,601 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,591,594,596,599,600 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,593,595 | 36,37,181,425,534,554,568,591,594 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,375,589 | 39,40,534,593 | foundations, propositional logic, code hygiene |
 | 4 | 497 | 375,400,425 | propositional logic |
@@ -43,7 +43,6 @@ next_project_number: 602
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
 599 [NOT STARTED] — Prototype the Euclidean rule combinator identified as an open, un
 600 [NOT STARTED] — Retire the unordered S4 stepper stack at Cslib/Logics/Modal/Table
-601 [NOT STARTED] — Port the CompletenessLoop.lean top-loop Hintikka chain to the add
 
 ### Temporal Logic
 
@@ -80,10 +79,13 @@ next_project_number: 602
 ## Tasks
 
 ### 601. Completeness loop specat hintikka chain
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 598
+- **Research**: [601_completeness_loop_specat_hintikka_chain/reports/01_specat-hintikka-chain-route.md]
+- **Plan**: [601_completeness_loop_specat_hintikka_chain/plans/01_specat-hintikka-chain-port.md]
+- **Summary**: [601_completeness_loop_specat_hintikka_chain/summaries/01_specat-hintikka-chain-port-summary.md]
 
 **Description**: Port the CompletenessLoop.lean top-loop Hintikka chain to the additive RuleApplicationSpecAt interface so D (and DB/D4/D5/D45) can reach modalExpandBranchesD_hintikka. BACKGROUND: the D driver now supplies the complete twelve-field witness modalApplyOneD_specAt : RuleApplicationSpecAt (modalDualAugment phi) modalApplyOneD (DDriver.lean), but the generic engine modalExpandBranchesGen_hintikka -> modalExpandBranchesHintikka is typed over RuleApplicationSpec / RuleApplicationSpecCore, universally quantified over phi0. D can only ever supply RuleApplicationSpecCoreAt -- a different, non-coercible type -- because F2 outputsSubsetUniverse genuinely fails at a universal phi0 for D (modalApplyOneD_outputsSubsetUniverse_fails). WORK: choose and execute one of two measured routes. Route 1 (additive twins): add ...At-typed twins of seven declarations -- modalLoopGen_bClosure_core (49 lines), _eBoxOnlyNeg_core (58), _eDiamondOnlyPos_core (58), _eBoxNegWitness_core (73), _eDiamondPosWitness_core (80), modalStepHintikka_preserves_inv (64), ModalLoopAuxK_stepPreserved (49), and modalExpandBranchesHintikka (324) -- measured at ~755 lines of mechanical type-swap duplication. Route 2 (in-place generalization): weaken those declarations to take raw unbundled hypotheses instead of a bundled RuleApplicationSpecCore parameter, the pattern FmpMeasure.lean's _gen lemmas already use and which CompletenessLoop.lean:965-966's own docstring anticipates; removes the Core/CoreAt mismatch at its root but is a cross-cutting refactor of a shared 2302-line file that other corners depend on. Evaluate both against blast radius before committing. Then land modalExpandBranchesD_hintikka in DDriver.lean. NOT IN SCOPE: the Decidable-instance arm (FrameSoundness.lean/FrameCompleteness.lean), which remains a separate follow-up. UNBLOCKS: D, DB, D4, D5, D45. Zero sorry, zero new axioms. Prior analysis: the Reasoned Exclusions and BLOCKER blocks in phase 9 of specs/598_serial_rule_spec_decision_tableau/plans/01_serial-d-driver-route-e2.md carry the per-declaration line-count table and the full dependency-chain trace.
 

@@ -1,35 +1,48 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Five-phase plan implementing report section 6's recommended landing: discharge DP-5 (truthLemma's T-imp sorry) with the build-verified 15-line proof, thread the new hpers hypothesis through the two external wrapper call sites, and restructure openBranch_countermodel so its single surviving sorry carries the genuinely-open existential instead of the machine-refuted augmented-frame upward-closure goal. Net effect: Scheme.lean 2 live sorries -> 1, zero new sorries, zero new axioms, zero new definitions or imports. Conjunct 2 over rawEdges is NOT attempted -- it is machine-refuted and the plan lands that as a documented negative in the file's honesty register. A dedicated phase creates a follow-on task for the root-cause Expansion.lean defect (intFImpReuseWitnessAnc? never re-validates its loop-back containment check).",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Executed all 5 plan phases. Phase 1 (atomic-batch, commit 0e22f0d9) discharged DP-5: truthLemma gained an explicit hpers positive-persistence hypothesis and the T(phi'->psi') sorry was replaced with the verified 15-line proof (chain hpers along Relation.ReflTransGen, close via sat_timp); intTruthLemma and minTruthLemma (the two external call sites the research report flagged as an incomplete-scope discovery) thread hpers through. openBranch_countermodel's frame-committing refine (which had silently sorried a machine-refuted statement -- upward closure over the augmented augSets frame) was dropped; its single surviving sorry now carries the whole existential, which is genuinely open. Full repo lake build green (3325 jobs). Phase 2 (commit 6265117a) rewrote the honesty-register annotations at five sites in Scheme.lean (the truthLemma STOP-gate note, the T-imp in-body comment, IPosPersistRaw's docstring, openBranch_countermodel's docstring/sorry-site, openBranch_rawEdges_upward_closed's stale successor-task claim) with the machine-checked frame-adequacy table, CI citations, and the precise open residual obligation. Phase 3 (commit 66fbab50) swept the six files (matching the plan's hypothesised set exactly) that still asserted truthLemma carries a sorry, correcting each to point the deferred-obligation pointer at openBranch_countermodel instead. Phase 4 (commit 8ed4e308) created follow-on task 609 for the intFImpReuseWitnessAnc? calculus-level root-cause repair in Expansion.lean, re-reading next_project_number fresh (609, drifted from plan-time 607 as anticipated) rather than reusing a stale number. Phase 5 (commit aebc7a84) ran full final verification: Scheme.lean live sorry count confirmed 2->1 via the build's own warning output (openBranch_countermodel only), zero new axioms (lean_verify on truthLemma/intTruthLemma/minTruthLemma: propext/Classical.choice/Quot.sound only), zero new defs/typeclasses/notations/imports (diff grep), full CSLib CI gate green (checkInitImports, lake lint 0 new warnings in the 7 touched files, lint-style clean, shake clean, mk_all no-update, lake test all 9396 jobs including the CI-protected refutation assertions), no task-number citations in any touched Cslib/ file, and the implementation summary written. The task's literal target -- conjunct 2 of openBranch_countermodel over the rawEdges frame -- is machine-refuted (CslibTests/WitnessProbe.lean, CslibTests/BetaSplitRefutation.lean); this is the delegation-authorised documented negative result, delivered alongside the DP-5 positive result and the honest restructure.",
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md"
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
+      "summary": "All five phases marked [COMPLETED] with implementation-time confirmation notes"
+    },
+    {
+      "type": "summary",
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/summaries/01_dp5-discharge-honest-restructure-summary.md",
+      "summary": "Full implementation summary: negative result, positive result, restructure, measured verification, follow-on task"
+    },
+    {
+      "type": "report",
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md",
+      "summary": "Research report this plan implemented (frame-adequacy table, DP-5 spike verification, four excluded constructions)"
     }
   ],
-  "next_action_hint": "implement",
+  "next_action_hint": "task_complete",
   "files_modified": [
-    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md"
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean",
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/summaries/01_dp5-discharge-honest-restructure-summary.md",
+    "specs/state.json",
+    "specs/TODO.md"
   ],
   "decisions_made": [
-    "PLAN-TIME DISCOVERY not in the research report: truthLemma has TWO external call sites beyond openBranch_countermodel -- intTruthLemma (Intuitionistic/Completeness.lean:97) and minTruthLemma (Minimal/Completeness.lean:102), both passing arguments positionally. Adding hpers breaks both, so the delegation's 'file in scope is Scheme.lean only' constraint cannot hold literally for the recommended landing. Both wrappers were verified to have NO downstream consumers beyond docstrings, so the fix is contained (~4 lines each). The plan proceeds under the stated assumption that these two edits are in scope as the mechanical closure of a signature change.",
-    "Phase 1 is a declared atomic-batch spanning three files (Scheme.lean + the two wrappers). Splitting it would leave the repo build red between commits, violating the every-phase-ends-green constraint.",
-    "The preserved spike diff's THIRD hunk must NOT be landed: it passes (by sorry) for hpers at the openBranch_countermodel call site, and hpers is machine-refuted at the augmented frame. Sorrying a refuted statement is exactly what the file's honesty discipline forbids. Phase 1 drops the frame-committing refine line instead.",
-    "openBranch_countermodel's now-dead extraction block (the ~40-line intExpandBranches_openBranch_sat invocation) is deleted rather than underscore-kept, because the identical invocation survives verbatim in openBranch_rawEdges_upward_closed directly below in the same file. Underscore-prefixing is the documented fallback.",
-    "Annotations must name the root-cause defect by its durable anchor (intFImpReuseWitnessAnc? in Expansion.lean) and NEVER by task number: Cslib/** is a deliverable tree governed by the no-task-references-in-deliverables rule, which is enforced by a blocking write-time hook.",
-    "Phase 3 was added beyond the report's scope: discharging DP-5 makes stale the claims in ~6 other files that 'the parametric sorry in truthLemma is the single deferred completeness obligation'. Leaving them is itself an honesty defect. The file list is carried as a Scope Hypothesis to be confirmed by grep at implement time."
+    "Widened Phase 1's file scope to include the two external truthLemma wrapper call sites (Intuitionistic/Completeness.lean, Minimal/Completeness.lean) per the plan's own pre-authorised 'Discovered during planning' section -- the delegation's 'file in scope is Scheme.lean' constraint could not hold literally for the hpers signature change.",
+    "Did not sorry hpers at any call site, including as a workaround to keep openBranch_countermodel's old refine shape -- hpers is machine-refuted at the augmented frame, and sorrying a refuted statement is exactly what the file's honesty discipline forbids (explicit Rollback/Contingency guidance).",
+    "Kept the historical STOP-gate/Gap-1 self-copy-channel analysis in Scheme.lean rather than deleting it, adding prominent DISCHARGED/CLOSED correction paragraphs at its open and close instead -- matches the file's own established 'CORRECTION (annotation-and-docstring close-out)' idiom for retaining superseded analysis as a historical record.",
+    "Re-read next_project_number immediately before the Phase 4 write (609) rather than trusting the plan's stated value (607), per the plan's own drift-risk warning; other tasks were confirmed to have been created in-session between plan time and Phase 4.",
+    "Did not attempt any of the five excluded frame constructions (rawEdges, prune-at-blocked, prune-at-strictly-blocked, IFimpAccess greatest fixpoint, maximal atom-inclusion frame) -- all are positively machine-excluded, not merely untried, per the research report."
   ],
-  "dead_ends": [
-    "rawEdges as a conjunct-2 witness -- machine-refuted (WitnessProbe.lean:174-176 gives check [(1,0),(2,1)] = some (true, true)).",
-    "Prune-at-blocked-worlds -- fails dblNeg and peirce (self-reuse loop-back; cutting world 2 destroys the falsifying world).",
-    "Prune-at-strictly-blocked-worlds -- fails phiRef3; contradicts the prune-at-blocked rule on the same syntactic signal.",
-    "The greatest IFimpAccess-supported subframe (fixpoint) -- collapses to K = the empty frame for phiRef1, phiRef2, phiRef3.",
-    "The maximal atom-inclusion frame -- already excluded by prior work, fails phiRef1/phiRef3.",
-    "Any route that goes through a truth lemma is strictly stronger than conjunct 2 and can fail where the goal succeeds (the phiRef2 case)."
-  ],
-  "phases_completed": 0,
+  "dead_ends": [],
+  "phases_completed": 5,
   "phases_total": 5,
   "plan_markers_verified": true
 }

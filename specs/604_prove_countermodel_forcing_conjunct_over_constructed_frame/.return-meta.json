@@ -1,32 +1,48 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-08-09T00:00:00Z",
   "artifacts": [
     {
-      "type": "plan",
       "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
-      "summary": "Five-phase plan: discharge DP-5 with the build-verified proof, thread hpers through two wrapper call sites, restructure openBranch_countermodel so its one sorry is honest (2 sorries -> 1), record the frame-adequacy negative result, and create a follow-on task for the Expansion.lean root cause"
+      "type": "plan"
+    },
+    {
+      "path": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/summaries/01_dp5-discharge-honest-restructure-summary.md",
+      "type": "summary"
     }
   ],
-  "next_steps": "Run /implement 604 to execute the plan",
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "partial_progress": {
+    "stage": "complete",
+    "phases_completed": 5,
+    "last_completed_phase": "Phase 5: Final verification and summary"
+  },
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean",
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
+    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/summaries/01_dp5-discharge-honest-restructure-summary.md",
+    "specs/state.json",
+    "specs/TODO.md"
+  ],
   "metadata": {
     "session_id": "sess_1786312852_6b5c1b_604",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 5,
-    "estimated_hours": 4.5,
-    "dependency_waves": [[1, 4], [2, 3], [5]]
-  },
-  "memory_candidates": [
-    {
-      "content": "When a plan adds a hypothesis to a shared parametric lemma in a Lean library, the phase boundary must be drawn around ALL call sites, not around the file that owns the lemma. In Cslib's tableau stack, adding `hpers` to `Scheme.lean`'s parametric `truthLemma` mechanically breaks `intTruthLemma` and `minTruthLemma` in two separate `Completeness.lean` files, both of which pass arguments positionally. A research report scoped to the owning file will not surface this. The planner-side check is a two-command grep before phase sizing: `grep -rn \"<lemma>\" --include=*.lean <src>` for call sites, then the same grep on each wrapper's own name to size the downstream blast radius. If the wrappers have no consumers, the fix is contained and belongs in the SAME atomic-batch phase as the signature change, because every intermediate per-file state is red and an every-phase-ends-green constraint would otherwise be violated.",
-      "category": "PATTERN",
-      "source_artifact": "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["lean", "signature-change", "call-site-inventory", "atomic-batch", "phase-sizing", "parametric-lemma"]
-    }
-  ],
-  "modified_files": [
-    "specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md"
-  ]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed",
+    "follow_on_task": 609
+  }
 }

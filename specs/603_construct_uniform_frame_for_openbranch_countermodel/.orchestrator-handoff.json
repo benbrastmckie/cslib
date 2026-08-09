@@ -1,40 +1,48 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Six-phase plan to discharge conjunct 1 by instantiating edges := rawEdges (the tree-only witness intExpandBranches_openBranch_sat already returns and openBranch_countermodel discards). Route: a no-invariant isAccessible target-membership lemma, a strengthened edges_shape_of_worldHist returning its already-computed 1<=c<nw bound, a new IWorldsPlanted predicate plus IWorldHist-derived corollary (mirroring the landed ForestComparable precedent), one added conjunct on the sat lemma's existential, then the standalone sorry-free openBranch_rawEdges_upward_closed via ReflTransGen induction over IPosPersistRaw. All edits confined to Scheme.lean; existing sorries and openBranch_countermodel's statement untouched.",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Discharged conjunct 1 for a uniformly-constructed edges := rawEdges by adding a new sorry-free public lemma openBranch_rawEdges_upward_closed to Scheme.lean, plus its supporting machinery: isAccessible_target_mem_edges (structural half, no invariant), a strengthened edges_shape_of_worldHist (returns its already-computed 1<=c<nw bound), IWorldsPlanted/IWorldsPlanted_mono/IWorldHist_worldsPlanted (provenance half, mirrors the ForestComparable derivation), and a widened intExpandBranches_openBranch_sat existential (sixth conjunct IWorldsPlanted rawEdges b, atomic-batch). All 6 plan phases completed in order, no deviations. Full CSLib CI pipeline (cache get, lake build, checkInitImports, lake lint, lint-style, shake, mk_all, lake test) all green. Zero new sorries, zero new axioms; openBranch_countermodel's statement and its own pre-existing sorry are byte-identical/unchanged (only its internal obtain pattern grew one discarded _hwp binder).",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/plans/01_rawedges-upward-closure.md",
-      "summary": "6 phases / 6.5h: structural isAccessible lemma, edges_shape_of_worldHist strengthening, IWorldsPlanted predicate + IWorldHist corollary, sat-lemma existential widening (atomic-batch), the target upward-closure lemma, and a full sorry/axiom gate"
+      "summary": "6-phase plan, all phases marked [COMPLETED], plan-level Status [COMPLETED]"
+    },
+    {
+      "type": "summary",
+      "path": "specs/603_construct_uniform_frame_for_openbranch_countermodel/summaries/01_rawedges-upward-closure-summary.md",
+      "summary": "Implementation summary: what changed, decisions, impacts, follow-ups"
     }
   ],
   "blockers": [],
-  "next_action_hint": "implement",
-  "next_phase": "implement",
-  "phases_completed": 0,
+  "next_action_hint": "task_complete",
+  "next_phase": "complete",
+  "phases_completed": 6,
   "phases_total": 6,
   "requires_user_review": false,
   "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/603_construct_uniform_frame_for_openbranch_countermodel/plans/01_rawedges-upward-closure.md",
+    "specs/603_construct_uniform_frame_for_openbranch_countermodel/summaries/01_rawedges-upward-closure-summary.md",
     "specs/603_construct_uniform_frame_for_openbranch_countermodel/.orchestrator-handoff.json",
     "specs/603_construct_uniform_frame_for_openbranch_countermodel/.return-meta.json"
   ],
   "decisions_made": [
-    "Adopted the research report's rawEdges route unchanged; did NOT plan any edit to openBranch_countermodel's own sorry, since that lemma's edges binding is shared with conjunct 2 (successor task).",
-    "Corrected the research skeleton's induction choice: plain `induction hle` (ReflTransGen's tail-peeling recursor) matches the goal shape directly and is the planned first attempt; head_induction_on and trans_induction_on are recorded as fallbacks.",
-    "Planned to strengthen edges_shape_of_worldHist in place rather than add a sibling corollary, conditional on a grep confirming its single caller (IWorldHist_forestComparable). Recorded as a Scope Hypothesis with an explicit sibling-corollary fallback if more callers exist.",
-    "Declared Phase 4 (widening the sat lemma's existential across statement + suffices + witness + destructuring sites) as Commit Mode atomic-batch, since intermediate per-site states are red by construction.",
-    "Split the plumbing gap into two independent halves so Phases 1 and 2 can run in parallel (wave 1): the structural isAccessible half needs no invariant, the provenance half needs IWorldHist."
+    "Used plain `induction hle` (ReflTransGen tail-peeling, via `| @tail y w2 hchain hstep ih`) per the plan's correction over the research report's head_induction_on sketch -- it unified directly, no fallback needed.",
+    "Confirmed via grep (per Phase 2/4 Scope Hypotheses) that edges_shape_of_worldHist has exactly one caller and intExpandBranches_openBranch_sat's conclusion shape occurs at exactly the 3 declared sites plus the one obtain-destructuring site in openBranch_countermodel -- strengthened/widened in place as planned, no sibling-corollary fallback needed.",
+    "Kept openBranch_rawEdges_upward_closed fully decoupled from openBranch_countermodel's own sorry, per delegation scope: conjunct 2 and the two-conjunct reconciliation are explicitly out of scope."
   ],
-  "dead_ends": [
-    "Maximal atom-set inclusion frame and a from-scratch inclEdges definition: both explicitly out of plan scope per the delegation and the research report's ruled-out section.",
-    "Fixing intFImpReuseWitnessAnc? in Expansion.lean: outside file_scope, recorded as a noted alternative only."
-  ],
+  "dead_ends": [],
   "verification": {
     "verification_passed": true,
-    "notes": "Plan-time verification only: no Lean edit, no lake build. Every cited line anchor (Scheme.lean:268-274, 3272, 3355-3382, 3491-3517, 6701-6704, 6815-6844, 6882-6883, 7052-7060, 7914, 7965) was re-read from source during planning and confirmed. Grep confirmed the sat lemma's conclusion shape occurs at exactly 3 sites, its tuple-construction at exactly 1 site, and openBranch_countermodel as its only caller; those counts are carried into the plan as Scope Hypotheses for implementation-time re-confirmation rather than treated as facts."
+    "sorry_count": 2,
+    "sorry_locations": "Scheme.lean:693 (truthLemma), Scheme.lean:8051 (openBranch_countermodel) -- both pre-existing, unchanged in semantics, shifted only by line insertions above them",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lean_verify on all 7 new/modified declarations (isAccessible_target_mem_edges, edges_shape_of_worldHist, IWorldHist_forestComparable, IWorldsPlanted_mono, IWorldHist_worldsPlanted, intExpandBranches_openBranch_sat, openBranch_rawEdges_upward_closed) reports only propext/Classical.choice/Quot.sound, no sorryAx. Full lake build, lake lint, lake exe lint-style, lake shake, lake exe mk_all --module, and lake test all pass with zero errors and zero Scheme.lean-attributable warnings beyond the two pre-existing sorry warnings. git diff --stat -- Cslib/ touches exactly one file."
   },
-  "next_steps": "Run /implement 603 to execute the plan. Waves: [1,2] parallel, then 3, then 4 (atomic-batch), then 5, then 6 (full gate)."
+  "next_steps": "Task 603 implementation complete. Successor task should reconcile conjunct 1 (this lemma, over rawEdges) and conjunct 2 (still sorry in openBranch_countermodel) under one uniform edges."
 }

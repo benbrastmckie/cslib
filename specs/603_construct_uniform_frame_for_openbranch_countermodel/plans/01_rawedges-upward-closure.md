@@ -1,7 +1,7 @@
 # Implementation Plan: Uniform frame for `openBranch_countermodel` conjunct 1
 
 - **Task**: 603 - Construct a uniform frame for openBranch_countermodel and discharge the upward-closure conjunct
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/603_construct_uniform_frame_for_openbranch_countermodel/reports/01_uniform-frame-construction.md`
@@ -112,7 +112,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: Structural `isAccessible` target-membership lemma [NOT STARTED]
+### Phase 1: Structural `isAccessible` target-membership lemma [COMPLETED]
 
 **Goal**: Prove, with no invariant hypotheses at all, that a non-reflexive `isAccessible`
 success means the target is a child endpoint of some edge.
@@ -143,7 +143,7 @@ success means the target is a child endpoint of some edge.
 
 ---
 
-### Phase 2: Strengthen `edges_shape_of_worldHist` to return the world bound [NOT STARTED]
+### Phase 2: Strengthen `edges_shape_of_worldHist` to return the world bound [COMPLETED]
 
 **Goal**: Make `edges_shape_of_worldHist` return the `1 ≤ c ∧ c < nw` bound it already computes
 and discards, so the planted-entry corollary can invoke `IWorldHist`'s (H3) clause.
@@ -178,7 +178,7 @@ untouched, then record the deviation in the phase notes.
 
 ---
 
-### Phase 3: `IWorldsPlanted` predicate and its `IWorldHist` corollary [NOT STARTED]
+### Phase 3: `IWorldsPlanted` predicate and its `IWorldHist` corollary [COMPLETED]
 
 **Goal**: Export "every edge-list child has a branch entry" as a predicate plus a corollary
 derived purely from `IWorldHist` + `IWorldHistCounter`, mirroring `IWorldHist_forestComparable`.
@@ -211,7 +211,7 @@ derived purely from `IWorldHist` + `IWorldHistCounter`, mirroring `IWorldHist_fo
 
 ---
 
-### Phase 4: Widen `intExpandBranches_openBranch_sat`'s existential [NOT STARTED]
+### Phase 4: Widen `intExpandBranches_openBranch_sat`'s existential [COMPLETED]
 
 **Goal**: Add `IWorldsPlanted rawEdges b` as a sixth conjunct to the sat lemma's conclusion and
 discharge it at the existing induction exit site.
@@ -261,7 +261,7 @@ build.
 
 ---
 
-### Phase 5: The target lemma `openBranch_rawEdges_upward_closed` [NOT STARTED]
+### Phase 5: The target lemma `openBranch_rawEdges_upward_closed` [COMPLETED]
 
 **Goal**: State and prove the standalone conjunct-1 lemma over `rawEdges`, sorry-free.
 
@@ -303,7 +303,7 @@ build.
 
 ---
 
-### Phase 6: Full gate, sorry/axiom audit, and standards compliance [NOT STARTED]
+### Phase 6: Full gate, sorry/axiom audit, and standards compliance [COMPLETED]
 
 **Goal**: Prove the whole change is green, additive, and debt-free.
 
@@ -338,15 +338,20 @@ build.
 
 ## Testing & Validation
 
-- [ ] Full `lake build` green with zero errors
-- [ ] `openBranch_rawEdges_upward_closed` elaborates with no goals remaining and no `sorry`
-- [ ] `#print axioms openBranch_rawEdges_upward_closed` shows no `sorryAx`
-- [ ] `openBranch_countermodel`'s statement is byte-identical to its pre-change form, and its
-      `sorry` remains in place
-- [ ] Pre-existing sorries unchanged in count and semantics (Scheme.lean:768, Scheme.lean:7965)
-- [ ] `git diff --name-only` lists only
+- [x] Full `lake build` green with zero errors
+- [x] `openBranch_rawEdges_upward_closed` elaborates with no goals remaining and no `sorry`
+- [x] `#print axioms openBranch_rawEdges_upward_closed` shows no `sorryAx` (via `lean_verify`:
+      `propext`, `Classical.choice`, `Quot.sound` only)
+- [x] `openBranch_countermodel`'s statement is byte-identical to its pre-change form, and its
+      `sorry` remains in place (only its internal `obtain` pattern grew one `_hwp` binder to
+      match the widened `intExpandBranches_openBranch_sat` existential; verified via `git diff`)
+- [x] Pre-existing sorries unchanged in count and semantics (now at Scheme.lean:768,
+      Scheme.lean:8051 -- same two declarations, `truthLemma` and `openBranch_countermodel`,
+      shifted by the additions above them)
+- [x] `git diff --name-only -- Cslib/` lists only
       `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`
-- [ ] No new axioms, no new `Expansion.lean` / `Soundness.lean` / `Rules.lean` edits
+- [x] No new axioms (`grep -c "^axiom "` = 0), no new `Expansion.lean` / `Soundness.lean` /
+      `Rules.lean` edits
 
 ## Artifacts & Outputs
 

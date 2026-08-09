@@ -3351,11 +3351,13 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- Counting/pigeonhole step: `edges`'s length exactly matches the number of DISTINCT required
 `(c, par c)` pairs (`1 ≤ c < nw`), all of which are already members (H1); by
 `Finset.eq_of_subset_of_card_le`, `edges.toFinset` cannot exceed that required set, so `edges`
-contains nothing else. -/
+contains nothing else. The conclusion also returns the `1 ≤ c < nw` bound the pigeonhole
+argument already establishes internally (previously extracted and discarded): this is what
+`IWorldHist_worldsPlanted` needs to invoke `IWorldHist`'s (H3) clause on the recovered `c`. -/
 private lemma edges_shape_of_worldHist {par : Nat → Nat} {nw : Nat} {edges : IEdges}
     (hlen : nw = edges.length + 1)
     (hmem : ∀ c, 1 ≤ c → c < nw → (c, par c) ∈ edges) :
-    ∀ p ∈ edges, ∃ c, p = (c, par c) := by
+    ∀ p ∈ edges, ∃ c, 1 ≤ c ∧ c < nw ∧ p = (c, par c) := by
   classical
   have hlen' : edges.length = nw - 1 := by omega
   set S : Finset (Nat × Nat) := (Finset.Ico 1 nw).image (fun c => (c, par c)) with hS
@@ -3378,8 +3380,8 @@ private lemma edges_shape_of_worldHist {par : Nat → Nat} {nw : Nat} {edges : I
   intro p hp
   have hpS : p ∈ S := by rw [hSeq]; exact List.mem_toFinset.mpr hp
   simp only [hS, Finset.mem_image, Finset.mem_Ico] at hpS
-  obtain ⟨c, ⟨_hc1, _hc2⟩, hceq⟩ := hpS
-  exact ⟨c, hceq.symm⟩
+  obtain ⟨c, ⟨hc1, hc2⟩, hceq⟩ := hpS
+  exact ⟨c, hc1, hc2, hceq.symm⟩
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The direction (H1-acc) does NOT supply: given `edges_shape_of_worldHist`'s shape fact,
@@ -3432,6 +3434,41 @@ private lemma parAncestor_of_isAccessible {par : Nat → Nat} {edges : IEdges}
           · right; exact Relation.ReflTransGen.head hpar_eq hpar3
       · simp only [Bool.not_eq_true] at hpc
         simp [hpc] at hfilt
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Structural half of `IPosPersistRaw`'s side-condition gap (needs no `IWorldHist` invariant):
+a non-reflexive `isAccessible` success means the target `w'` is a child endpoint of some edge in
+`edges`. Proved by unfolding `isAccessible.go`'s DFS exactly as `parAncestor_of_isAccessible`
+does above, but the conclusion tracked is raw edge-list membership at `w'` rather than a
+`parAncestor` chain to the DFS's start point -- since that membership fact, once found at any
+depth, needs no further composition, the induction is simpler than
+`parAncestor_of_isAccessible`'s. -/
+private lemma isAccessible_target_mem_edges {edges : IEdges} {w w' : Nat}
+    (h : isAccessible edges w w' = true) (hne : w ≠ w') : ∃ p, (w', p) ∈ edges := by
+  simp only [isAccessible] at h
+  have hne' : ¬ (w == w') := by simpa using hne
+  simp only [hne', Bool.false_eq_true, ite_false] at h
+  suffices key : ∀ (current fuel : Nat), isAccessible.go edges w' current fuel = true →
+      ∃ p, (w', p) ∈ edges from key w edges.length h
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro hstep
+    rw [List.any_eq_true] at hstep
+    obtain ⟨child, hchild, hcond⟩ := hstep
+    simp only [List.mem_filterMap] at hchild
+    obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hchild
+    by_cases hpc : p == current
+    · simp only [hpc, ite_true, Option.some.injEq] at hfilt
+      by_cases hce : child == w'
+      · have hceq : child = w' := by simpa using hce
+        exact ⟨p, (hfilt.trans hceq) ▸ hedges⟩
+      · simp only [hce, Bool.false_eq_true, ite_false] at hcond
+        exact ih child hcond
+    · simp only [Bool.not_eq_true] at hpc
+      simp [hpc] at hfilt
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `parAncestor` unwinds to explicit `par`-iteration -- the standard bridge that makes
@@ -3498,8 +3535,10 @@ private lemma IWorldHist_forestComparable {φ0 : Proposition Atom} {b : IBranch 
     (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges) :
     ForestComparable nw edges := by
   obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := hWH
-  have hshape : ∀ p ∈ edges, ∃ c, p = (c, par c) :=
+  have hshapeB : ∀ p ∈ edges, ∃ c, 1 ≤ c ∧ c < nw ∧ p = (c, par c) :=
     edges_shape_of_worldHist hWHC (fun c hc1 hc2 => (hall c hc1 hc2).1)
+  have hshape : ∀ p ∈ edges, ∃ c, p = (c, par c) :=
+    fun p hp => let ⟨c, _hc1, _hc2, hceq⟩ := hshapeB p hp; ⟨c, hceq⟩
   have hacc' : ∀ c' c, c < nw → parAncestor par c' c → isAccessible edges c' c = true := by
     intro c' c hcnw hpa
     rcases Nat.eq_zero_or_pos c with hc0 | hcpos
@@ -3514,6 +3553,48 @@ private lemma IWorldHist_forestComparable {φ0 : Proposition Atom} {b : IBranch 
   rcases parAncestor_comparable hwl' hxl' with hwx | hxw
   · left; exact hacc' w x hxnw hwx
   · right; exact hacc' x w hwnw hxw
+
+/-! ### `IWorldsPlanted`: the provenance half of `IPosPersistRaw`'s side-condition gap
+
+`IPosPersistRaw`'s (Scheme.lean:6701-6704) third hypothesis needs "the target world already has
+*some* entry on `b`", `b.any (fun sf => sf.label == w') = true`, at every raw edge-list child.
+This is the provenance half of the gap (§3 item 2 of the supporting research report), the
+counterpart to `isAccessible_target_mem_edges`'s structural half above: it is a pure corollary
+of the already-landed `IWorldHist`/`IWorldHistCounter` invariants, following exactly the
+`ForestComparable` derivation pattern (`edges_shape_of_worldHist` plus `IWorldHist`'s (H3)
+clause) -- no new invariant threading through `intExpandBranches_openBranch_sat`'s induction. -/
+
+/-- Every raw edge-list child already has some entry planted on `b`. -/
+private def IWorldsPlanted (edges : IEdges) (b : IBranch Atom) : Prop :=
+  ∀ c p : Nat, (c, p) ∈ edges → b.any (fun sf => sf.label == c) = true
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `IWorldsPlanted` is monotone in the branch: a planted entry survives any superset. -/
+private lemma IWorldsPlanted_mono {edges : IEdges} {b b' : IBranch Atom}
+    (hmem : ∀ x ∈ b, x ∈ b') (h : IWorldsPlanted edges b) : IWorldsPlanted edges b' := by
+  intro c p hcp
+  obtain ⟨sf, hsf, hcond⟩ := List.any_eq_true.mp (h c p hcp)
+  exact List.any_eq_true.mpr ⟨sf, hmem sf hsf, hcond⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **`IWorldsPlanted` export**: derived entirely from `IWorldHist` (supplying (H1)'s membership
+shape and (H3)'s planted-entry fact) plus `IWorldHistCounter` (supplying the length fact
+`edges_shape_of_worldHist` needs), mirroring `IWorldHist_forestComparable` exactly -- same two
+hypotheses, computable at the same exit site (Scheme.lean:7058). -/
+private lemma IWorldHist_worldsPlanted {φ0 : Proposition Atom} {b : IBranch Atom}
+    {e : List (ISF Atom)} {nw : Nat} {edges : IEdges}
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges) :
+    IWorldsPlanted edges b := by
+  obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := hWH
+  have hshapeB : ∀ p ∈ edges, ∃ c, 1 ≤ c ∧ c < nw ∧ p = (c, par c) :=
+    edges_shape_of_worldHist hWHC (fun c hc1 hc2 => (hall c hc1 hc2).1)
+  intro c p hcp
+  obtain ⟨c', hc1, hc2, hceq⟩ := hshapeB (c, p) hcp
+  rw [Prod.mk.injEq] at hceq
+  obtain ⟨hcc', -⟩ := hceq
+  subst hcc'
+  have hplanted : (⟨.neg, obl c, c⟩ : ISF Atom) ∈ b := (hall c hc1 hc2).2.2.2.2.2.2.1
+  exact List.any_eq_true.mpr ⟨_, hplanted, by simp⟩
 
 /-- List companion of `IWorldHistCounter`, a 2-list zip over `(nws, edgeSets)` mirroring
 `IAllLabelBoundStrict`'s shape (companion, not merged, of `IAllNW`). -/
@@ -6841,7 +6922,7 @@ private lemma intExpandBranches_openBranch_sat
         = .openBranch b) :
     ∃ (edges rawEdges lbEdges : IEdges) (nwF : Nat), IBranchSaturation Atom b ∧
       IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧
-      ForestComparable nwF rawEdges := by
+      ForestComparable nwF rawEdges ∧ IWorldsPlanted rawEdges b := by
   rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
@@ -6880,7 +6961,7 @@ private lemma intExpandBranches_openBranch_sat
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
       ∃ (edges rawEdges lbEdges : IEdges) (nwF : Nat), IBranchSaturation Atom b ∧
         IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧
-        ForestComparable nwF rawEdges from
+        ForestComparable nwF rawEdges ∧ IWorldsPlanted rawEdges b from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets [] lbSets []
       hAC hLen0 hLenF0 trivial rfl rfl hACC trivial hARC trivial
       hUniv hNW hFuel (by simp [IAllUniv]) (by simp [IAllNW]) trivial
@@ -7056,8 +7137,13 @@ private lemma intExpandBranches_openBranch_sat
           -- Phase 10 (first construction step): the `ForestComparable` export, a pure
           -- corollary of `IWorldHist`/`IWorldHistCounter` (no new invariant threading needed).
           have hfc : ForestComparable nwH edgesH := IWorldHist_forestComparable hWH_head hWHC_head
+          -- Provenance half of `IPosPersistRaw`'s side-condition gap: same corollary shape as
+          -- `hfc` above, transported from `bh` to `bPers` via `hmemP` (mirrors `hARC_bPers`'s
+          -- transport just above).
+          have hwp : IWorldsPlanted edgesH bPers :=
+            IWorldsPlanted_mono hmemP (IWorldHist_worldsPlanted hWH_head hWHC_head)
           exact ⟨augH, edgesH, lbH, nwH, IExpandedConsistent_sat hstep hIC_bPers,
-            IExpandedAccessConsistent_sat hstep hACC_bPers, hpp, hARC_bPers, hfc⟩
+            IExpandedAccessConsistent_sat hstep hACC_bPers, hpp, hARC_bPers, hfc, hwp⟩
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
     · rename_i heq
@@ -7911,7 +7997,7 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact List.any_eq_true.mpr ⟨_, hmem, by simp⟩
   -- Obtain the saturation witness and its accumulated edges, together
   -- with the edge-accessibility upgrade `hfimp` of its F(φ→ψ) witnesses.
-  obtain ⟨edges, _rawEdges, _lbEdges, _nwF, hsat, hfimp, _hpp, _hrc, _hfc⟩ :=
+  obtain ⟨edges, _rawEdges, _lbEdges, _nwF, hsat, hfimp, _hpp, _hrc, _hfc, _hwp⟩ :=
     intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
       [[]] [[]] _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
@@ -7963,6 +8049,80 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- maximal `⊑` frame is not a uniform witness -- proving it is equivalent to procedure
   -- completeness. The conjunct stays `sorry` for that genuine open reason, not a refuted one.
   sorry
+
+/-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly.** Constructs `edges` as
+`rawEdges` -- the tree-only parent-child edge witness `intExpandBranches_openBranch_sat` already
+produces and `openBranch_countermodel` discards as `_rawEdges` -- and proves upward-closure of
+`intExtractValuation b` along `intAccessPreorder rawEdges` for any `b` arising from an
+`intExpandBranches` run. Needs no fact about the tableau algorithm beyond `IPosPersistRaw`
+(already sorry-free, `Scheme.lean:6701-6704`) plus `IWorldsPlanted` (the branch-entry-existence
+corollary of `IWorldHist`'s (H3) clause, derived above) chained over one `Relation.ReflTransGen`
+step at a time.
+
+Conjunct 2 (`¬ IForces ...`) is deliberately NOT addressed here -- see the successor task. This
+lemma is decoupled from `openBranch_countermodel`'s own `sorry` above: that lemma's `edges`
+binding is the AUGMENTED `augSets` witness, which conjunct 2's `truthLemma` call needs, and
+`rawEdges` is not (yet) shown to support `IFimpAccess`, so the two conjuncts cannot currently
+share one uniform `edges` -- reconciling them is the successor task's job, not this one's. -/
+lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)
+    (b : IBranch Atom)
+    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+        [intFuelExt φ] S.closurePred = .openBranch b) :
+    ∃ edges : IEdges,
+      ∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intExtractValuation b w p → intExtractValuation b w' p := by
+  obtain ⟨_edges, rawEdges, _lbEdges, _nwF, _hsat, _hfimp, hpp, _hrc, _hfc, hwp⟩ :=
+    intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+      [[]] [[]] _ _
+      (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
+      (by simp [IAllAccessConsistent, IExpandedAccessConsistent])
+      (by simp [IAllReuseContain, IReuseContain])
+      (fun b hb x hx => by
+        simp only [List.mem_singleton] at hb
+        subst hb
+        simp only [List.mem_singleton] at hx
+        subst hx
+        exact mem_intUniverseExt_of (Nat.zero_le _) (intSubfmls_self_mem φ))
+      (fun nw hnw => by simp only [List.mem_singleton] at hnw; subst hnw; exact WBound_pos φ)
+      (by simp only [IAllFuel]; exact ⟨intWork_init_lt_intFuelExt φ, trivial⟩)
+      (by simp [IAllLabelBoundStrict, ILabelBoundStrict])
+      ⟨IWorldHist_entry _ _ _ _, trivial⟩
+      ⟨IWorldHistCounter_entry, trivial⟩
+      (fun b' hb' ψ w hmem hcontra => by
+        simp only [posFormulasAt, List.mem_filterMap] at hcontra
+        obtain ⟨sf, hsfmem, hif⟩ := hcontra
+        by_cases hcond : sf.sign == .pos && sf.label == w
+        · simp only [hcond, ite_true, Option.some.injEq] at hif
+          simp only [Bool.and_eq_true] at hcond
+          have hposAny : b'.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w)
+              = true :=
+            List.any_eq_true.mpr ⟨sf, hsfmem, by simp [hcond.1, hcond.2, hif]⟩
+          have hnegAny : b'.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w)
+              = true :=
+            List.any_eq_true.mpr ⟨_, hmem, by simp⟩
+          exact S.no_contradiction b' hb' ψ w ⟨hposAny, hnegAny⟩
+        · simp only [hcond, Bool.false_eq_true, ite_false] at hif
+          exact absurd hif (by simp))
+      h
+  refine ⟨rawEdges, ?_⟩
+  intro w w' p hle hval
+  induction hle with
+  | refl => exact hval
+  | @tail y w2 hchain hstep ih =>
+    by_cases hyw2 : y = w2
+    · exact hyw2 ▸ ih
+    · simp only [intExtractValuation, List.any_eq_true] at ih
+      obtain ⟨sf, hsfb, hsfp⟩ := ih
+      simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+      obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+      have hsfeq : sf = (⟨.pos, .atom p, y⟩ : ISF Atom) := by cases sf; simp_all
+      have hmem_y : (⟨.pos, .atom p, y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
+      obtain ⟨p', hp'⟩ := isAccessible_target_mem_edges hstep hyw2
+      have hentry : b.any (fun sf => sf.label == w2) = true := hwp w2 p' hp'
+      have hmem_w2 : (⟨.pos, .atom p, w2⟩ : ISF Atom) ∈ b :=
+        hpp (.atom p) y w2 hstep hmem_y hentry
+      simp only [intExtractValuation]
+      exact List.any_eq_true.mpr ⟨_, hmem_w2, by simp⟩
 
 /-! ## Parametric Tableau Completeness -/
 

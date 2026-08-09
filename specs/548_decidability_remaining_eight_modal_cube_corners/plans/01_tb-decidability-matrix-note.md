@@ -567,31 +567,31 @@ termination fields `rankStep`, `outDegStep`, `knownWorldsStep`.
 
 ---
 
-### Phase 8: TB Modal Truth Lemma and Open-Branch Countermodel [NOT STARTED]
+### Phase 8: TB Modal Truth Lemma and Open-Branch Countermodel [COMPLETED]
 
 **Goal**: Prove `modalTruthLemmaTB` against `extractModelTB` and derive
 `modalOpenBranchTB_countermodel`. This is the hardest proof in the task.
 
 **Tasks**:
-- [ ] Add a `/-! ## TB Modal Truth Lemma -/` section to
+- [x] Add a `/-! ## TB Modal Truth Lemma -/` section to
       `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`, after the B truth-lemma section
       (currently `:1322-1700`)
-- [ ] State `modalTruthLemmaTB` mirroring `modalTruthLemmaB` (`:1527`): for every `φ` and `w`,
+- [x] State `modalTruthLemmaTB` mirroring `modalTruthLemmaB` (`:1527`): for every `φ` and `w`,
       `⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelTB b acc) w φ` and the negative dual, given
       `accSourcesKnown b acc` and the Hintikka hypothesis
-- [ ] Propositional cases: reuse the same structure as `modalTruthLemmaB` — no TB-specific content
-- [ ] **Box-positive case — the three-way decomposition**: `rcases` the
+- [x] Propositional cases: reuse the same structure as `modalTruthLemmaB` — no TB-specific content
+- [x] **Box-positive case — the three-way decomposition**: `rcases` the
       `ReflGen (SymmGen (acc.hasEdge · ·)) w w'` hypothesis into
-  - [ ] `.refl` (w = w'): discharged by T's self-conjunct, the `hintikkaT_box_pos`-family bridge
-  - [ ] `.single (.inl h)` (forward raw edge): discharged by K's existing `hintikka_box_pos`
+  - [x] `.refl` (w = w'): discharged by T's self-conjunct, the `hintikkaT_box_pos`-family bridge
+  - [x] `.single (.inl h)` (forward raw edge): discharged by K's existing `hintikka_box_pos`
         bridge via `extractModelTB_hasEdge_imp_r`
-  - [ ] `.single (.inr h)` (backward raw edge): discharged by B's backward conjunct
+  - [x] `.single (.inr h)` (backward raw edge): discharged by B's backward conjunct
         (`hintikkaB_box_pos`-family) via `extractModelTB_hasEdge_symm_imp_r`
-- [ ] Diamond-negative case: dual of the above, same three subcases
-- [ ] Box-negative and diamond-positive cases: reuse the free generic bridges
+- [x] Diamond-negative case: dual of the above, same three subcases
+- [x] Box-negative and diamond-positive cases: reuse the free generic bridges
       `hintikka_box_neg_gen` / `hintikka_diamond_pos_gen` from `Completeness.lean` unchanged
-- [ ] Derive `modalOpenBranchTB_countermodel`, mirroring `modalOpenBranchB_countermodel` (`:1694`)
-- [ ] Confirm `modalTruthLemmaS4` (`:234`) and `modalOpenBranchS4_countermodel` (`:405`), both
+- [x] Derive `modalOpenBranchTB_countermodel`, mirroring `modalOpenBranchB_countermodel` (`:1694`)
+- [x] Confirm `modalTruthLemmaS4` (`:234`) and `modalOpenBranchS4_countermodel` (`:405`), both
       frozen, are untouched
 
 **Timing**: 2 hours

@@ -3,11 +3,11 @@
   "started_at": "2026-08-08T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase 8",
-    "details": "Phases 4-7 complete and committed. TBDriver.lean fully discharges RuleApplicationSpec and instantiates the generic Hintikka chain. Starting Phase 8 (TB modal truth lemma + open-branch countermodel), the hardest proof in the task.",
-    "phases_completed": 7,
+    "stage": "phase 9",
+    "details": "Phase 8 (TB truth lemma + open-branch countermodel, the hardest proof in the task) complete. Full Cslib build green, zero live sorry, standard axiom triple confirmed. Starting Phase 9 (TB soundness).",
+    "phases_completed": 8,
     "phases_total": 11,
-    "last_completed_phase": "Phase 7: TB Instantiation of the Generic Hintikka/Saturation Chain"
+    "last_completed_phase": "Phase 8: TB Modal Truth Lemma and Open-Branch Countermodel"
   },
   "metadata": {
     "session_id": "sess_1786228817_675b2c",

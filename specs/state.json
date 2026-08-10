@@ -1,5 +1,5 @@
 {
-  "next_project_number": 610,
+  "next_project_number": 613,
   "active_projects": [
     {
       "project_number": 606,
@@ -12,7 +12,8 @@
       "dependencies": [
         603,
         604,
-        605
+        605,
+        609
       ],
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
@@ -22,7 +23,7 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:41:33Z",
-      "last_updated": "2026-08-09T20:41:33Z"
+      "last_updated": "2026-08-10T00:24:52Z"
     },
     {
       "project_number": 605,
@@ -1010,6 +1011,64 @@
       "last_updated": "2026-08-09T22:54:00Z",
       "session_id": "sess_1786312852_6b5c1b_604",
       "artifacts": []
+    },
+    {
+      "project_number": 610,
+      "project_name": "wire_d_corner_decidable_instance",
+      "task_type": "cslib",
+      "status": "not_started",
+      "topic": "Modal Logic",
+      "title": "Wire the D (serial) corner through to instDecidableDValid",
+      "description": "Wire the D (serial) corner through to a `Decidable` instance. The expensive machinery already exists and is green; only the final soundness/completeness/instance chain is missing.\n\nWHAT EXISTS (landed 2026-08-09, verified): `Cslib/Logics/Modal/Tableau/DDriver.lean` (1,327 lines, registered in Cslib.lean) carrying `modalDualAugment`, the D driver triple, the complete twelve-field witness `modalApplyOneD_specAt`, `modalTableauD_eq`, and `modalExpandBranchesD_hintikka`. Build green at 3325 jobs, zero sorry in all touched files, `#print axioms modalApplyOneD_specAt = [propext, Classical.choice, Quot.sound]`.\n\nWHAT IS MISSING (verified absent by grep): `dValid`, `modalTableauD_sound`, `modalTableauD_complete`, `instDecidableDValid`. Every covered corner (K, T, B, TB, K5, KB5, S4, S5) has all four; D has none.\n\nSCOPE: follow the T corner end-to-end as the pattern -- `tValid` (FrameSoundness.lean), `modalTableauT_sound`/`modalTableauT_complete`, `instDecidableTValid` (FrameCompleteness.lean) -- and produce the D analogues. The serial-rule spec-shape gate that previously blocked this is DISCHARGED: research machine-checked that its founding premise was false (`modalApplyOneD` already satisfies `boxPosNotExpanding`; only `outputsSubsetUniverse` failed, for a universe reason, and that was narrowed via the additive `RuleApplicationSpecCoreAt`/`RuleApplicationSpecAt` siblings). The top-loop chain was retyped to the `...At` interface, landing `modalExpandBranchesD_hintikka` and explicitly unblocking D/DB/D4/D5/D45.\n\nNOTE: do NOT re-litigate the per-regime driver split. That decision is settled -- each corner gets its own bespoke driver file rather than a generic traversal rung parameterised over frame conditions (see the \"Settled decisions\" block in FrameCompleteness.lean).\n\nZero new sorries, zero new axioms. Verify `lake build` green and `#print axioms instDecidableDValid` before completion.\n\nSOURCE: specs/reviews/review-2026-08-09.md finding C1.",
+      "dependencies": [],
+      "created": "2026-08-10T00:25:34Z",
+      "last_updated": "2026-08-10T00:25:34Z",
+      "session_id": "sess_1786321492_0b7ee5",
+      "artifacts": [],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/DDriver.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+        "Cslib.lean"
+      ]
+    },
+    {
+      "project_number": 611,
+      "project_name": "correct_stale_decidability_matrix_doc",
+      "task_type": "cslib",
+      "status": "not_started",
+      "topic": "Modal Logic",
+      "title": "Correct the stale decidability-matrix documentation and record the 10-of-15 scope decision",
+      "description": "Correct the decidability-matrix documentation block in `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (currently around lines 9110-9185), which is stale relative to what landed on 2026-08-09.\n\nTHREE STALE CLAIMS TO FIX:\n1. The block names \"serial-rule spec shape\" as a live gate blocking D, DB, D4, D5 and D45. That gate is DISCHARGED -- its founding premise was machine-checked false, `DDriver.lean` was built with the full twelve-field witness, and the top-loop `...At` retype landed `modalExpandBranchesD_hintikka`.\n2. It prices D at \"~1,700 lines once ungated\". The 1,327-line driver is already built; only the sound/complete/instance wiring remains.\n3. The \"Covered (8/15)\" table must move D into the covered set once the wiring task lands, and the \"Out of scope, with named gates\" list must drop D and re-state DB's gate (its serial gate is discharged; only the SymmGen closure plus serial repair remain).\n\nALSO RECORD THE SCOPE DECISION (made 2026-08-09, see ROADMAP.md): the target is 10 of 15 corners. D and DB are IN scope. K45, D5 and D45 remain in scope but sequenced behind the Euclidean rule-combinator prototype. K4 and D4 are DELIBERATELY EXCLUDED at Tier C (~13,500 lines each, ~27,000 combined) -- the matrix stays intentionally incomplete there, and the block should say so as a decision rather than as an unmet gate.\n\nCONSTRAINT: documentation-only in the Lean source -- do not change any proof, definition or instance. This task exists separately from the wiring task specifically so the two do not write `FrameCompleteness.lean` concurrently.\n\nSOURCE: specs/reviews/review-2026-08-09.md finding C1.",
+      "dependencies": [
+        610
+      ],
+      "created": "2026-08-10T00:25:34Z",
+      "last_updated": "2026-08-10T00:25:34Z",
+      "session_id": "sess_1786321492_0b7ee5",
+      "artifacts": [],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+      ]
+    },
+    {
+      "project_number": 612,
+      "project_name": "review_20260809_metadata_hygiene_batch",
+      "task_type": "meta",
+      "status": "not_started",
+      "topic": "Agent System",
+      "title": "Metadata and hygiene batch from the 2026-08-09 review",
+      "description": "Batch of small, independent corrections surfaced by the 2026-08-09 review. Each is self-contained; none requires research.\n\n1. RE-TIGHTEN THE SORRY RATCHET. `bash scripts/check-sorry-suppressions.sh` reports `sorries: 26 (baseline ceiling 28)` and prints an ACTION REQUIRED block. The un-ratcheted file is `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (baseline `0 1`, actual `0 0`) -- the S4 redirect lemma deleted during the ancestor-redirect refutation. Run `bash scripts/check-sorry-suppressions.sh --update` and commit the updated baseline. One command.\n\n2. REFRESH TASK 606's STALE SITE LIST. Its description enumerates \"THE FOUR SITES\" including `DP-5: truthLemma, Scheme.lean:693, sorry at :768`. DP-5 was discharged by task 604 and `truthLemma` is now sorry-free. All four cited line numbers are stale (the file has grown past 8,000 lines). Correct to the three live sites: `Intuitionistic/Scheme.lean:8034` (DP-6, the open existential), `Intuitionistic/Completeness.lean:170` (DP-3), `Minimal/Completeness.lean:166` (DP-4).\n\n3. UNBLOCK TASK 554. It carries `status: blocked` with `dependencies: []` and nothing actually blocking it, while gating tasks 537 and 551 -- the entire constructive CS5 line, which the 2026-08-09 scope decision KEPT IN SCOPE. Either transition it to `not_started` or record what it is blocked on.\n\n4. BACKFILL `file_scope` ON 497 AND 589. Both are absent. 497 is the `imp`->`impl` rename (~271 files); 589 is the repo-wide `unusedArguments` lint (33 files across five trees). Both are invisible to any clash check. 497 is now transitively serialized behind the propositional chain via 375, but remains unscoped against everything else.\n\n5. RE-BASELINE THE ROADMAP COVERAGE COUNT. `specs/ROADMAP.md` instructs the next audit to \"use the 46-task, fully-covered baseline\". Thirteen tasks were archived on 2026-08-09, leaving 36 open. Coverage itself is intact -- all 36 open tasks are named in the roadmap, verified mechanically -- so only the number needs updating.\n\nNOT IN SCOPE: the `file_scope` read/write distinction (that is task 595's charter, and it needs a schema decision first).\n\nSOURCE: specs/reviews/review-2026-08-09.md findings H2, M1, M3, L1, L2.",
+      "dependencies": [],
+      "created": "2026-08-10T00:25:34Z",
+      "last_updated": "2026-08-10T00:25:34Z",
+      "session_id": "sess_1786321492_0b7ee5",
+      "artifacts": [],
+      "file_scope": [
+        "scripts/sorry-suppression-baseline.txt",
+        "specs/state.json",
+        "specs/ROADMAP.md"
+      ]
     }
   ],
   "repository_health": {

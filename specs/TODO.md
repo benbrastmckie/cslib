@@ -1,18 +1,18 @@
 ---
-next_project_number: 610
+next_project_number: 613
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-08-09. Generated from state.json dependency graph.*
+*Updated 2026-08-10. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,605,607,608,609 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,606 | 36,37,181,375,400,425,534,554,568,594,605 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,605,607,608,609,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,606,611 | 36,37,181,375,400,425,534,554,568,594,605,609,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -31,6 +31,7 @@ next_project_number: 610
 605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
   └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 609 [NOT STARTED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
+  └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece (see above)
 
 ### Modal Logic
 
@@ -43,6 +44,8 @@ next_project_number: 610
 590 [NOT STARTED] — Re-establish the six out-of-tree probe verdicts under a dedicated
 599 [NOT STARTED] — Prototype the Euclidean rule combinator identified as an open, un
 600 [NOT STARTED] — Retire the unordered S4 stepper stack at Cslib/Logics/Modal/Table
+610 [NOT STARTED] — Wire the D (serial) corner through to a `Decidable` instance. The
+  └─ 611 [NOT STARTED] — Correct the decidability-matrix documentation block in `Cslib/Log
 
 ### Temporal Logic
 
@@ -75,12 +78,80 @@ next_project_number: 610
 594 [NOT STARTED] — METATASK. Bring all open task records in specs/state.json into ag
   └─ 595 [NOT STARTED] — Build the validation gate that would have caught the task-graph f
 608 [NOT STARTED] — Discovered during task 596's ROADMAP realignment (2026-08-09; see
+612 [NOT STARTED] — Batch of small, independent corrections surfaced by the 2026-08-0
 
 ### Bimodal Metalogic
 
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
 ## Tasks
+
+### 612. Metadata and hygiene batch from the 2026-08-09 review
+- **Status**: [NOT STARTED]
+- **Task Type**: meta
+- **Topic**: Agent System
+- **Dependencies**: None
+
+**Description**: Batch of small, independent corrections surfaced by the 2026-08-09 review. Each is self-contained; none requires research.
+
+1. RE-TIGHTEN THE SORRY RATCHET. `bash scripts/check-sorry-suppressions.sh` reports `sorries: 26 (baseline ceiling 28)` and prints an ACTION REQUIRED block. The un-ratcheted file is `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (baseline `0 1`, actual `0 0`) -- the S4 redirect lemma deleted during the ancestor-redirect refutation. Run `bash scripts/check-sorry-suppressions.sh --update` and commit the updated baseline. One command.
+
+2. REFRESH TASK 606's STALE SITE LIST. Its description enumerates "THE FOUR SITES" including `DP-5: truthLemma, Scheme.lean:693, sorry at :768`. DP-5 was discharged by task 604 and `truthLemma` is now sorry-free. All four cited line numbers are stale (the file has grown past 8,000 lines). Correct to the three live sites: `Intuitionistic/Scheme.lean:8034` (DP-6, the open existential), `Intuitionistic/Completeness.lean:170` (DP-3), `Minimal/Completeness.lean:166` (DP-4).
+
+3. UNBLOCK TASK 554. It carries `status: blocked` with `dependencies: []` and nothing actually blocking it, while gating tasks 537 and 551 -- the entire constructive CS5 line, which the 2026-08-09 scope decision KEPT IN SCOPE. Either transition it to `not_started` or record what it is blocked on.
+
+4. BACKFILL `file_scope` ON 497 AND 589. Both are absent. 497 is the `imp`->`impl` rename (~271 files); 589 is the repo-wide `unusedArguments` lint (33 files across five trees). Both are invisible to any clash check. 497 is now transitively serialized behind the propositional chain via 375, but remains unscoped against everything else.
+
+5. RE-BASELINE THE ROADMAP COVERAGE COUNT. `specs/ROADMAP.md` instructs the next audit to "use the 46-task, fully-covered baseline". Thirteen tasks were archived on 2026-08-09, leaving 36 open. Coverage itself is intact -- all 36 open tasks are named in the roadmap, verified mechanically -- so only the number needs updating.
+
+NOT IN SCOPE: the `file_scope` read/write distinction (that is task 595's charter, and it needs a schema decision first).
+
+SOURCE: specs/reviews/review-2026-08-09.md findings H2, M1, M3, L1, L2.
+
+---
+
+### 611. Correct the stale decidability-matrix documentation and record the 10-of-15 scope decision
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 610
+
+**Description**: Correct the decidability-matrix documentation block in `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (currently around lines 9110-9185), which is stale relative to what landed on 2026-08-09.
+
+THREE STALE CLAIMS TO FIX:
+1. The block names "serial-rule spec shape" as a live gate blocking D, DB, D4, D5 and D45. That gate is DISCHARGED -- its founding premise was machine-checked false, `DDriver.lean` was built with the full twelve-field witness, and the top-loop `...At` retype landed `modalExpandBranchesD_hintikka`.
+2. It prices D at "~1,700 lines once ungated". The 1,327-line driver is already built; only the sound/complete/instance wiring remains.
+3. The "Covered (8/15)" table must move D into the covered set once the wiring task lands, and the "Out of scope, with named gates" list must drop D and re-state DB's gate (its serial gate is discharged; only the SymmGen closure plus serial repair remain).
+
+ALSO RECORD THE SCOPE DECISION (made 2026-08-09, see ROADMAP.md): the target is 10 of 15 corners. D and DB are IN scope. K45, D5 and D45 remain in scope but sequenced behind the Euclidean rule-combinator prototype. K4 and D4 are DELIBERATELY EXCLUDED at Tier C (~13,500 lines each, ~27,000 combined) -- the matrix stays intentionally incomplete there, and the block should say so as a decision rather than as an unmet gate.
+
+CONSTRAINT: documentation-only in the Lean source -- do not change any proof, definition or instance. This task exists separately from the wiring task specifically so the two do not write `FrameCompleteness.lean` concurrently.
+
+SOURCE: specs/reviews/review-2026-08-09.md finding C1.
+
+---
+
+### 610. Wire the D (serial) corner through to instDecidableDValid
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Wire the D (serial) corner through to a `Decidable` instance. The expensive machinery already exists and is green; only the final soundness/completeness/instance chain is missing.
+
+WHAT EXISTS (landed 2026-08-09, verified): `Cslib/Logics/Modal/Tableau/DDriver.lean` (1,327 lines, registered in Cslib.lean) carrying `modalDualAugment`, the D driver triple, the complete twelve-field witness `modalApplyOneD_specAt`, `modalTableauD_eq`, and `modalExpandBranchesD_hintikka`. Build green at 3325 jobs, zero sorry in all touched files, `#print axioms modalApplyOneD_specAt = [propext, Classical.choice, Quot.sound]`.
+
+WHAT IS MISSING (verified absent by grep): `dValid`, `modalTableauD_sound`, `modalTableauD_complete`, `instDecidableDValid`. Every covered corner (K, T, B, TB, K5, KB5, S4, S5) has all four; D has none.
+
+SCOPE: follow the T corner end-to-end as the pattern -- `tValid` (FrameSoundness.lean), `modalTableauT_sound`/`modalTableauT_complete`, `instDecidableTValid` (FrameCompleteness.lean) -- and produce the D analogues. The serial-rule spec-shape gate that previously blocked this is DISCHARGED: research machine-checked that its founding premise was false (`modalApplyOneD` already satisfies `boxPosNotExpanding`; only `outputsSubsetUniverse` failed, for a universe reason, and that was narrowed via the additive `RuleApplicationSpecCoreAt`/`RuleApplicationSpecAt` siblings). The top-loop chain was retyped to the `...At` interface, landing `modalExpandBranchesD_hintikka` and explicitly unblocking D/DB/D4/D5/D45.
+
+NOTE: do NOT re-litigate the per-regime driver split. That decision is settled -- each corner gets its own bespoke driver file rather than a generic traversal rung parameterised over frame conditions (see the "Settled decisions" block in FrameCompleteness.lean).
+
+Zero new sorries, zero new axioms. Verify `lake build` green and `#print axioms instDecidableDValid` before completion.
+
+SOURCE: specs/reviews/review-2026-08-09.md finding C1.
+
+---
 
 ### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
 - **Status**: [NOT STARTED]
@@ -134,7 +205,7 @@ This task is NOT about filling the sorries -- it is the prior architectural deci
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: Task 603, Task 604, Task 605
+- **Dependencies**: Task 603, Task 604, Task 605, Task 609
 
 **Description**: Consume the frame construction and forcing proof from the predecessor tasks, then discharge or restate the four propositional tableau completeness sorries, repair every call site, and verify the TFAE instantiation.
 

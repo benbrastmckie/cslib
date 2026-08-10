@@ -204,13 +204,34 @@ The classical-cube decidability matrix is **8 of 15** systems complete (K, T, B,
 KB5, S4 — see Completed → "Tableau decision procedures" above). Task 548 (`completed`,
 scope-narrowed) established that the remaining 7 corners — **D, D4, D5, D45, DB, K4, K45** — have
 no `Decidable` instance, gated on a seriality/`RuleApplicationSpec` spec-shape blocker for D-type
-frames. Successor work:
+frames.
+
+**Scope decision (2026-08-09): the target is 10 of 15, not 15 of 15.** D and DB are in scope;
+K45, D5 and D45 stay in scope but sequenced behind the Euclidean rule-combinator prototype; K4
+and D4 are deliberately excluded (see the exclusion table below). The matrix is therefore
+*intentionally* incomplete at two corners rather than indefinitely open at seven.
+
+**The D-type serial gate is discharged.** Task 598 machine-checked that the gate's founding
+premise was false — `modalApplyOneD` already satisfies `boxPosNotExpanding`; only
+`outputsSubsetUniverse` failed, for a universe reason, narrowed via the additive
+`RuleApplicationSpecCoreAt`/`RuleApplicationSpecAt` siblings — and built `DDriver.lean` (1,327
+lines, twelve-field witness `modalApplyOneD_specAt`, green, sorry-free, no new axioms). Task 601
+then retyped the top-loop chain to the `...At` interface, landing `modalExpandBranchesD_hintikka`
+and unblocking D/DB/D4/D5/D45. What remains for D is only the `dValid` /
+`modalTableauD_sound` / `modalTableauD_complete` / `instDecidableDValid` wiring, which every
+covered corner has and D does not. The in-source matrix block at
+`Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` still describes the gate as live and prices D
+at ~1,700 lines; both are stale (task 611).
 
 | Item | Tracking |
 |------|----------|
 | Decide the tableau driver abstraction across termination regimes (foundation for the D-type gate) | 597 (`completed`), 598 (`completed`) |
+| Port the top-loop Hintikka chain to the `RuleApplicationSpecAt` interface | 601 (`completed`) |
+| Wire the D corner through to `instDecidableDValid` | 610 (`not_started`) |
+| Correct the stale in-source matrix and record this scope decision there | 611 (`not_started`) |
 | Prototype the Euclidean rule combinator identified as an open, unowned gate | 599 (`not_started`) |
 | Retire the unordered S4 stepper stack at `LoopChecking.lean` | 600 (`not_started`) |
+| DB corner (`Relation.Serial ∧ Std.Symm`; `SymmGen` closure plus a serial repair) | in scope, unowned — schedule after 610 |
 
 This section implements the recommendation from `specs/ROADMAP-alignment-audit.md:79`, previously
 unapplied.
@@ -223,6 +244,15 @@ direct one-point-model route); the general labelled soundness direction `nik_TS5
 **not** — the tree-shape invariant and graph-lifting machinery remain outstanding, and the
 direct-induction route was assessed intractable at standard effort pending a genuine open
 mathematical question (`Labelled/Soundness.lean` module docstring, re-read 2026-08-09).
+
+**Scope decision (2026-08-09): CS5 is IN scope.** The modal layer is not "finished" until
+`nik_TS5_soundness` lands. This is a deliberate acceptance of an unbounded tail: the obstruction
+is a genuine open mathematical question (the exact-symmetry obstruction), and the routed
+alternative — the Hilbert-labelled adequacy bridge — has never been costed. Consequently no
+completion claim for Modal should be made on the strength of its zero sorry count alone; a
+sorry-free tree and a complete one are different properties here, and this is the gap between
+them. Task 554 is the entry point and currently carries a stale `blocked` status with no unmet
+dependencies (task 612).
 
 | Item | Tracking |
 |------|----------|
@@ -251,6 +281,22 @@ Foundational work on the Propositional layer that Modal/Temporal/Bimodal all bui
 | Unbundle connective typeclasses; reconcile with fmontesi PR #607 | 400 (`not_started`) |
 | Reconcile `imp` vs `impl` naming in `Cslib/Logics/Propositional` | 497 (`not_started`) |
 | Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion | 409 (`blocked`) |
+
+### Deliberately excluded formalization content (scope decision, 2026-08-09)
+
+Distinct from the housekeeping exclusions below: the following is real formalization content
+that is deliberately **not** being built, so a future audit reads it as a decision rather than
+as an unmet gate.
+
+| Excluded | Cost | Reason |
+|----------|------|--------|
+| **K4** decidability corner (`IsTrans`; `Relation.TransGen` closure) | ~13,500 lines | Tier C. Gated on the unordered S4 stepper retirement plus removal of the T arm from the S4 rule chain. Excluded on cost: the pair below is ~27,000 lines, roughly a third of the existing Modal tree, for two corners of a matrix already documented as intentionally incomplete |
+| **D4** decidability corner (`Relation.Serial ∧ IsTrans`) | ~13,500 lines | Tier C. Gated on both of K4's gates plus the serial repair; excluded with K4 for the same reason |
+
+Reversal trigger: if the K4 gates are discharged incidentally by other work (in particular task
+600's stepper retirement), re-price both corners before treating this exclusion as still binding
+— the D-family precedent shows a Tier estimate can collapse once its gate turns out to be
+mis-stated.
 
 ### Deliberately excluded from this roadmap (as of 2026-08-09)
 

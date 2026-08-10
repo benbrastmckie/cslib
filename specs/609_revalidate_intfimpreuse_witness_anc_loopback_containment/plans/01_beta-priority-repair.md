@@ -296,10 +296,42 @@ the true set is larger, do not silently absorb it — record the delta.
 
 ---
 
-### Phase 3: Swap the call site and reconcile the test corpus [NOT STARTED]
+### Phase 3: Swap the call site and reconcile the test corpus [IN PROGRESS]
 
 **Goal**: Land the actual calculus repair. This is the phase the report calls "worth landing
 standalone": verdict-preserving, strictly reduces world creation, no new proof debt.
+
+**Scope Correction (discovered at implementation time, not pre-declared in Phase 1/2 planning)**:
+This phase's true blast radius is substantially larger than its own Scope Hypothesis or Timing
+estimate (2 hours) accounts for. Confirmed by direct inspection: `intExpandBranches_openBranch_sat`
+and its companion lemmas do **not** hand-write `match _hstep : intStepBranch ... with` blocks
+mirroring `go`'s structure -- they use Lean's auto-generated functional-induction principle,
+`induction ... using intExpandBranches.go.induct`, at **four separate call sites**
+(`grep -n "using intExpandBranches.go.induct"` finds them at approximately `:5767`, `:5991`,
+`:6734`, `:7147`). Once `go`'s match target swaps from `intStepBranch bPers e nw` to
+`intStepBranchPrio bPers e nw`, Lean regenerates `go.induct` to bind the induction's `_hstep`
+hypothesis at `intStepBranchPrio bPers e nw = ...` instead -- automatically, since the
+principle is derived from the definition, not hand-authored. This means **every** call site
+inside all four induction blocks that currently feeds `_hstep` (or a case-bound equivalent) to
+an `intStepBranch`-hypothesis-typed lemma breaks, not just the six sites Phase 2 re-based.
+Confirmed additional lemma family requiring the same `IStepShape` generalization treatment
+Phase 2 gave `intExpMeasure_step_lt`/`_branch`: `intStepBranch_linear_preserves`,
+`intStepBranch_linear_preserves_univ`, `intStepBranch_linear_preserves_labelStrict`,
+`intStepBranch_linear_preserves_nw_of_none`, `intStepBranch_branch_preserves`,
+`intStepBranch_branch_preserves_labelStrict`, `intStepBranch_branch_preserves_univ`,
+`intStepBranch_branch_preserves_nw`, plus completing the deferred generalization of
+`intStepBranch_branchingResult_length` and `intStepBranch_some_exists_fuel` (Phase 2 kept both
+`intStepBranch`-specific precisely because their live call sites are inside this induction and
+`CslibTests/BetaSplitRefutation.lean:203`, both explicitly this phase's territory). Call-site
+count inside the four induction blocks is in the dozens (a non-exhaustive grep of
+`intStepBranch_(linear|branch)_preserves|some_exists_fuel|branchingResult_length` within
+`Scheme.lean`'s `:5700`-`:8000` range found 20+ occurrences before this note was written; a
+fresh count should be taken at execution time, per this plan's own delta-recording convention).
+This is recorded as a delta, not silently absorbed: the swap is a real, single atomic-batch unit
+of work (the induction cannot be half-migrated and still build), but it is closer to the scale of
+Phases 1+2 combined than to a standalone 2-hour edit. A future dispatch resuming this phase
+should re-run the greps above to get current line numbers and counts before starting, and budget
+accordingly rather than trusting the original Timing estimate.
 
 **Tasks**:
 - [ ] Swap the single call site in `intExpandBranches.go` from `intStepBranch bPers e nw` to

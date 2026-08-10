@@ -197,33 +197,33 @@ import block, the `open` line, the module docstring, and one appended section.
 
 ---
 
-### Phase 2: Remove the KNOWN IMPOSSIBLE claim in Scheme.lean [NOT STARTED]
+### Phase 2: Remove the KNOWN IMPOSSIBLE claim in Scheme.lean [COMPLETED]
 
 **Goal**: Eliminate the file's central internal contradiction by rewriting
 `openBranch_rawEdges_upward_closed`'s docstring, and record the retention rationale for both
 now-unused raw-edges lemmas per decision (c).
 
 **Tasks**:
-- [ ] Read `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` around `:9640-9700` to
+- [x] Read `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` around `:9640-9700` to
       re-locate the docstring (line numbers in the report may have drifted; anchor on the
       declaration name `openBranch_rawEdges_upward_closed`, not the line number).
-- [ ] Rewrite the docstring, deleting every one of these now-false present-tense clauses:
+- [x] Rewrite the docstring, deleting every one of these now-false present-tense clauses:
       (i) that `openBranch_countermodel` carries a `sorry`; (ii) that it "commits to no `edges`
       witness at all"; (iii) that reconciling the two conjuncts over one uniform `edges` is
       "KNOWN IMPOSSIBLE"; (iv) that closing the gap is calculus-level work "outside this file's
       scope".
-- [ ] Replace with the landed account: `openBranch_countermodel` is sorry-free and commits to the
+- [x] Replace with the landed account: `openBranch_countermodel` is sorry-free and commits to the
       augmented-frame witness; the reconciliation the old text called impossible is performed in
       this same file via `hpersAug`; the calculus-level `intFImpReuseWitnessAnc?` loop-back
       re-validation that made it possible has landed. Cross-reference the frame-adequacy table by
       its content ("augmented, post-repair | holds | holds"), not by line number.
-- [ ] State plainly that this lemma is **retained but not on the live route** — it is the durable
+- [x] State plainly that this lemma is **retained but not on the live route** — it is the durable
       record of the raw-frame approach, superseded by the augmented-frame route through
       `hpersAug`. Do not delete it and do not mark it deprecated.
-- [ ] Apply the same retention wording to `openBranch_rawEdges_both_upward_closed`'s docstring.
-- [ ] Confirm by inspection of the resulting diff that every changed hunk lies inside a `/-- -/`
+- [x] Apply the same retention wording to `openBranch_rawEdges_both_upward_closed`'s docstring.
+- [x] Confirm by inspection of the resulting diff that every changed hunk lies inside a `/-- -/`
       docstring and no declaration body, binder, or statement was touched.
-- [ ] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`.
+- [x] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`.
 
 **Timing**: 0.75 hours
 

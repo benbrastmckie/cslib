@@ -9664,8 +9664,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     exact S.modelBot_uc b (fun x y => isAccessible edges x y = true)
       (fun {x y} hstep hmem => hpersAug (HasBot.bot : Proposition Atom) x y hstep hmem) hle hval
 
-/-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly for arbitrary `χ`.**
-Constructs `edges` as `rawEdges` -- the tree-only parent-child edge witness
+/-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly for arbitrary `χ`, over the
+raw-frame witness.** Constructs `edges` as `rawEdges` -- the tree-only parent-child edge witness
 `intExpandBranches_openBranch_sat` already produces and `openBranch_countermodel` discards as
 `_rawEdges` -- and proves upward-closure of positive `χ`-membership in `b` along
 `intAccessPreorder rawEdges`, for ANY `χ : Proposition Atom`, not just `χ := .atom p`. Needs no
@@ -9676,16 +9676,17 @@ time. Instantiating `χ` at `.atom p` recovers `intExtractValuation` upward-clos
 it at `HasBot.bot` gives `minBranchBotForces` upward-closure at the SAME `edges` witness -- see
 `openBranch_rawEdges_both_upward_closed` immediately below.
 
-Conjunct 2 (`¬ IForces ...`) is deliberately NOT addressed here. This lemma is decoupled from
-`openBranch_countermodel`'s own `sorry` above, which commits to no `edges` witness at all (see
-that lemma's docstring for the frame-adequacy table). Reconciling the two conjuncts over one
-uniform `edges` is now KNOWN IMPOSSIBLE on the algorithm's current output, not merely
-undone: `rawEdges` supports positive persistence but is REFUTED for `IFimpAccess`
-(`CslibTests/BetaSplitRefutation.lean`, `CslibTests/WitnessProbe.lean:174-176`), while the
-augmented frame `openBranch_countermodel` used to commit to supports `IFimpAccess` but is
-REFUTED for positive persistence -- neither edge list the algorithm currently produces carries
-both. Closing this gap is calculus-level work on `intFImpReuseWitnessAnc?` (`Expansion.lean`),
-outside this file's scope. -/
+**Retained but not on the live route.** `openBranch_countermodel` is sorry-free and commits to
+the augmented-frame witness, not this lemma's raw-frame witness; see that lemma's docstring for
+the frame-adequacy table (`augmented, post-repair | holds | holds`). This lemma's own
+conjunct-2 gap -- reconciling raw-frame upward-closure with `IFimpAccess` over one uniform
+`edges` -- is exactly the reconciliation the augmented-frame route performs instead, via
+`hpersAug` (`Scheme.lean:9645-9665`, fed by the `intFImpReuseWitnessAnc?` loop-back
+re-validation in `Expansion.lean`). That reconciliation is NOT impossible; it is simply not
+performed over `rawEdges`, because the raw frame is REFUTED for `IFimpAccess`
+(`CslibTests/BetaSplitRefutation.lean`, `CslibTests/WitnessProbe.lean:174-176`) even though it
+supports positive persistence. This lemma is kept as the durable record of that raw-frame route,
+superseded by -- but not deprecated in favor of -- the augmented-frame route. -/
 lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)
     (b : IBranch Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
@@ -9754,7 +9755,11 @@ the `χ`-general lemma above. `minBranchBotForces` and `intExtractValuation` are
 `List.any` shape at different formula constructors (`HasBot.bot` versus `.atom p`), so no
 coercion is needed at either instantiation. This is the lemma that makes `minBranchBotForces`'s
 upward closure "free" from the already-`χ`-general `IPosPersistRaw`: no new proof obligation,
-just a second instantiation of the same generalized fact. -/
+just a second instantiation of the same generalized fact.
+
+**Retained but not on the live route**, for the same reason as `openBranch_rawEdges_upward_closed`
+above: `openBranch_countermodel` routes through the augmented frame via `hpersAug` instead of
+through this raw-frame witness. Kept as the durable record of the raw-frame approach. -/
 lemma openBranch_rawEdges_both_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)
     (b : IBranch Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]

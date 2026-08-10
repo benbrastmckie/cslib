@@ -1,34 +1,36 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "task_number": 497,
-  "phase": "research",
-  "session_id": "sess_1786397542_991316_497",
-  "status": "researched",
-  "timestamp": "2026-08-10T21:52:00Z",
-  "summary": "Research complete with empirical build evidence. The arrow-only change (infix:30 -> infixr:25) has ZERO transitive parse impact: all 372 modules in the dependency cone built green (2013 jobs, 0 errors, warnings unchanged). One framing correction is load-bearing: iff sits at infix:30 (same level as the arrow) in Modal, LTL and Temporal, so moving the arrow alone inverts the arrow/iff binding; iff must move to infixr:20 in those three files. That combined variant also builds green. Working tree reverted clean.",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Created a 3-phase, 1.25-hour plan for the narrowed arrow-notation reconciliation. Phase 1 moves 7 declaration lines (4 arrow to infixr:25, 3 iff to infixr:20) across the four in-scope files as one atomic batch; Phase 2 syncs the 2 LTL/Temporal docstring precedence tables; Phase 3 verifies via the 372-module targeted build recipe plus rfl capability checks. No call-site-fixing phases: research empirically proved transitive parse impact is zero. Propositional/Defs.lean and the HasImp rebind remain out of scope.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/497_reconcile_imp_naming/reports/01_arrow-notation-precedence-reconciliation.md"
+      "type": "plan",
+      "path": "specs/497_reconcile_imp_naming/plans/01_arrow-precedence-infixr-reconciliation.md"
     }
   ],
   "blockers": [],
-  "next_action_hint": "plan",
-  "files_modified": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/497_reconcile_imp_naming/plans/01_arrow-precedence-infixr-reconciliation.md",
+    "specs/497_reconcile_imp_naming/.return-meta.json"
+  ],
   "decisions_made": [
-    "Recommended edit set is 7 declaration lines plus 2 docstring precedence tables, not 4 lines: arrow infix:30 -> infixr:25 at Bimodal/Syntax/Formula.lean:101, LTL/Syntax/Formula.lean:209, Modal/Basic.lean:234, Temporal/Syntax/Formula.lean:169; PLUS iff infix:30 -> infixr:20 at LTL/Syntax/Formula.lean:210, Modal/Basic.lean:237, Temporal/Syntax/Formula.lean:170.",
-    "Task framing's premise that fork ordering is 36>35>30>20 holds only for the out-of-scope Propositional/Defs.lean; in three of the four in-scope files iff is at 30, not 20. Verified by rfl that leaving iff at 30 makes 'a -> b <-> c' parse as 'a -> (b <-> c)', inverting the standard binding and diverging from upstream.",
-    "Bimodal declares no iff notation at all, so it needs only the arrow edit.",
-    "Do NOT move and (36) or or (35). Their order relative to the arrow is preserved at either precedence and both already require parentheses as arrow arguments; build confirms zero impact. Defer or-at-35-vs-30 and the infix-to-infixr conversion for and/or to the notation-wide reconciliation.",
-    "Verification must use the targeted module list derived from Cslib.lean (372 modules), never a bare full lake build, which stalls on Propositional/Tableau/Intuitionistic/Scheme.lean. Expected signature: exit 0, 2013 jobs, 0 errors, 32 warnings.",
-    "Zero-debt: no sorry, no axiom, no BLOCKED recommendation needed. Pure notation-declaration edit with a green build already demonstrated."
+    "Edit set is 7 declaration lines, not 4: the co-declared iff at infix:30 in Modal/LTL/Temporal must move to infixr:20 alongside the arrow, or the arrow-only change leaves iff binding tighter (research confirmed by rfl).",
+    "No call-site remediation phases: research built all 372 modules in the dependency cone green under both the arrow-only and arrow+iff variants, so the set of sites needing fixes is empty.",
+    "Phase 1 declared Commit Mode atomic-batch so the arrow-only intermediate state -- which is exactly the known-inverted-iff hazard -- is never a commit boundary.",
+    "Phase 3 verification uses the targeted `lake build $(cat /tmp/targets.txt)` recipe only; a bare full lake build is forbidden because it stalls indefinitely on Propositional/Tableau/Intuitionistic/Scheme.lean.",
+    "Warning count 32 is treated as a hard gate, not an observation: a rise blocks phase closure.",
+    "Bimodal gets no iff edit (declares none) and Modal gets no docstring edit (has no header precedence table)."
   ],
   "dead_ends": [
-    "Reasoning about parse impact from precedence arithmetic alone was insufficient: the infix:29 equivalence operator at Foundations/Logic/LogicalEquivalence.lean:33 looked like a genuine regression source (its args require prec >= 30, which an infixr:25 arrow fails), but every co-occurrence of it with an arrow in the four in-scope subtrees turned out to be a comment. Do not re-open this as a blocker.",
-    "Turnstile/derivation notations (Bimodal/ProofSystem/Derivation.lean:108, Temporal/ProofSystem/Derivation.lean:86) were suspected at-risk but use unannotated notation:50 arguments and are precedence-immune. Validity notations with annotated :50 args reject an arrow at 25, but already reject one at 30, so they are already parenthesized today. Neither is a regression.",
-    "The hypothesis that any existing site relies on the current non-associative parse is refuted by a full green build of the dependency cone; do not budget plan phases for fixing call sites."
+    "Do not re-investigate the infix:29 equivalence operator at Foundations/Logic/LogicalEquivalence.lean:33: real hazard in a minimal model, but every equivalence/arrow co-occurrence in the four subtrees is a comment.",
+    "Do not re-check turnstile notations: they use unannotated notation:50 arguments and are precedence-immune.",
+    "Do not re-check validity notations with annotated :50 arguments: they already require parentheses today, so nothing changes.",
+    "Do not move the conjunction (36) or disjunction (35) notations: order is preserved at either arrow precedence and both already require parenthesized arrow arguments; these belong to the notation-wide reconciliation.",
+    "Do not re-derive scope: Propositional/Defs.lean is owned by a sibling task with a standing-approval chain, and the HasImp rebind belongs to a different sibling task."
   ],
-  "phases_completed": 1,
-  "phases_total": 1,
-  "plan_markers_verified": false
+  "phases_completed": 0,
+  "phases_total": 3,
+  "plan_markers_verified": true
 }

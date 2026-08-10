@@ -1,0 +1,32 @@
+{
+  "status": "partial",
+  "started_at": "2026-08-10T00:00:00Z",
+  "completed_at": "2026-08-10T00:00:00Z",
+  "requires_user_review": true,
+  "artifacts": [
+    "specs/375_proof_system_equivalence_tableau_sequent_edges/reports/01_tableau-tfae-fold-already-landed.md",
+    "specs/375_proof_system_equivalence_tableau_sequent_edges/.orchestrator-handoff.json"
+  ],
+  "partial_progress": {
+    "stage": "research_finished_no_op_recommended",
+    "details": "Research produced a definitive negative result: the deliverable already exists in-repo, landed by task 606. All five research questions answered with file:line and machine-verified evidence. No implementation work remains, so no plan/implement dispatch is recommended."
+  },
+  "findings": {
+    "superseded_by_task": 606,
+    "landing_commit": "8bfebc43",
+    "target_file": "Cslib/Logics/Propositional/ProofSystemEquivalence.lean",
+    "declarations_verified": 15,
+    "sorry_free": true,
+    "axiom_profile": "propext, Classical.choice, Quot.sound",
+    "build_status": "green",
+    "dependency_317_blocking": false
+  },
+  "metadata": {
+    "session_id": "sess_1786378622_28837b",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 2,
+    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-research-agent"],
+    "task_number": 375,
+    "task_type": "cslib"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "task_number": 375,
+  "phase": "research",
+  "status": "no_op_required",
+  "session_id": "sess_1786378622_28837b",
+  "artifacts": [
+    "specs/375_proof_system_equivalence_tableau_sequent_edges/reports/01_tableau-tfae-fold-already-landed.md"
+  ],
+  "headline": "Task already complete in-repo; superseded by task 606. No implementation delta remains.",
+  "evidence": {
+    "file": "Cslib/Logics/Propositional/ProofSystemEquivalence.lean",
+    "tableau_folds_present": [
+      "cplProofSystemsWithTableauTfae:203",
+      "iplProofSystemsWithTableauTfae:229",
+      "mplProofSystemsWithTableauTfae:252"
+    ],
+    "mpl_tfae_present": "mplProofSystemsTfae:141 (task description's 'no minimal TFAE' premise is stale)",
+    "landing_commit": "8bfebc43 task 606 phase 1: land the TFAE fold in ProofSystemEquivalence.lean",
+    "build": "lake build Cslib.Logics.Propositional.ProofSystemEquivalence -> success (986 jobs)",
+    "axioms": "All 15 checked decls (6 TFAEs, 3 folds, 3 *_complete, 3 *_decides) report [propext, Classical.choice, Quot.sound]; no sorryAx",
+    "blocker_317": "RESOLVED - task 317 archived; its 4 tracked sorries discharged by tasks 430/585/606"
+  },
+  "recommendation": {
+    "dispatch_plan_phase": false,
+    "dispatch_implement_phase": false,
+    "next_status": "COMPLETED",
+    "rationale": "Zero code delta. Recommend [COMPLETED] with supersession note (or [ABANDONED] as duplicate of 606); bookkeeping choice for user.",
+    "out_of_scope_followup": "Two pre-existing unusedDecidableInType lint warnings: Tableau/Intuitionistic/DecisionProcedure.lean:159, Tableau/Minimal/DecisionProcedure.lean:173"
+  },
+  "blockers": [],
+  "requires_user_review": true
+}

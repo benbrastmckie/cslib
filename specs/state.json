@@ -5,7 +5,7 @@
       "project_number": 606,
       "project_name": "discharge_propositional_tableau_completeness_and_verify_tfae",
       "title": "Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Consume the frame construction and forcing proof from the predecessor tasks, then discharge or restate the four propositional tableau completeness sorries, repair every call site, and verify the TFAE instantiation.\n\nTHE FOUR SITES (line numbers current as of the annotation-correction landing; re-verify before editing):\n- DP-3: intuitionisticTableau_complete, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:154, sorry at :164\n- DP-4: minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160\n- DP-5: truthLemma, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:693, sorry at :768 (the T(phi prime -> psi prime) implication case)\n- DP-6: openBranch_countermodel, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7891, sorry at :7965 (the exists edges upward-closure conjunct)\n\nSCOPE: (a) discharge each sorry, or -- where the landed construction supports only a weaker statement -- restate the theorem to what is actually provable; (b) repair every call site the restatement affects; (c) update the docstrings so they describe the landed statement rather than an abandoned one, replacing the current open / augmented-frame-route-known-bad / admissible-space-characterised annotations with the resolved wording.\n\nHARD CONSTRAINT -- THE TFAE FOLD: any restated theorem must still be strong enough to fold the tableau nodes into cplProofSystemsTfae / iplProofSystemsTfae / mplProofSystemsTfae in Cslib/Logics/Propositional/ProofSystemEquivalence.lean. A restatement that discharges a sorry but is too weak to serve the TFAE has NOT solved the problem. Verify the TFAE instantiation type-checks before declaring completion.\n\nEXPLICITLY OUT OF BOUNDS: laundering a sorry via a weakened statement. In particular the in-source prohibition at the DP-3 site stands -- do NOT discharge it with exact h Nat (intExtractValuation _b) _huc 0; that type-checks but only launders an undischarged conjunct through the file without resolving it.\n\nPRECEDENT TO FOLLOW: intExpandBranches_openBranch_sat was in exactly this position (a refuted fuel = 0 base case with a Lean-verified counter-instance) and was repaired by the R1 restatement adding hUniv / hNW / hFuel preconditions (plus hLBS / hWH / hWHC / hNC). It is now sorry-free at Scheme.lean:6815, its fuel = 0 arm discharged via hFuel giving intWork ... < 0, absurd by omega. The counter-instance record survives near :6805 and :6999 as the durable explanation of why the R1 hypotheses exist -- preserve that kind of durable record here too.\n\nZero new sorries, zero new axioms. If the predecessor tasks landed a negative or narrowing result rather than a proof, this task narrows to updating the annotations to the resolved wording and recording what remains open -- that is a legitimate completion, not a failure.",
@@ -23,7 +23,26 @@
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:41:33Z",
-      "last_updated": "2026-08-10T00:24:52Z"
+      "last_updated": "2026-08-10T16:14:55Z",
+      "session_id": "sess_1786375467_9fbdb7",
+      "artifacts": [
+        {
+          "path": "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/reports/01_tableau-completeness-ground-truth.md",
+          "type": "report",
+          "summary": "Ground-truth audit: all four DP sorries already discharged; TFAE fold absent but machine-verified feasible; ~12 stale annotation blocks catalogued"
+        },
+        {
+          "path": "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/plans/01_tfae-fold-and-annotation-closeout.md",
+          "type": "plan",
+          "summary": "6-phase plan: TFAE fold + stale-annotation closeout"
+        },
+        {
+          "path": "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/summaries/01_tfae-fold-and-annotation-closeout-summary.md",
+          "type": "summary",
+          "summary": "TFAE fold landed; ~12 stale annotation blocks closed; full CI green"
+        }
+      ],
+      "completion_summary": "Landed the CPL/IPL/MPL tableau-fold TFAE theorems (research-verified probe reused verbatim) and closed roughly a dozen stale annotation blocks across seven files, eliminating the internal contradiction where a docstring declared 'KNOWN IMPOSSIBLE' a reconciliation a sorry-free proof performs nearby. Zero new sorries, zero new axioms, full CI pipeline green."
     },
     {
       "project_number": 605,

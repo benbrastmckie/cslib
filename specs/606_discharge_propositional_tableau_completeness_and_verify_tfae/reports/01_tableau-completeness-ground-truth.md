@@ -1,6 +1,13 @@
 # Research Report: Propositional Tableau Completeness Ground Truth and the TFAE Fold
 
 **Task**: 606 — Discharge or restate the four propositional tableau completeness theorems and
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 verify the TFAE fold
 **Session**: sess_1786375467_9fbdb7
 **Date**: 2026-08-10

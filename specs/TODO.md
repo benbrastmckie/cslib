@@ -11,7 +11,7 @@ next_project_number: 613
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,606,607,608,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,375,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -28,7 +28,6 @@ next_project_number: 613
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
 ### Modal Logic
 
@@ -202,10 +201,13 @@ This task is NOT about filling the sorries -- it is the prior architectural deci
 ---
 
 ### 606. Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603, Task 604, Task 605, Task 609
+- **Research**: [606_discharge_propositional_tableau_completeness_and_verify_tfae/reports/01_tableau-completeness-ground-truth.md]
+- **Plan**: [606_discharge_propositional_tableau_completeness_and_verify_tfae/plans/01_tfae-fold-and-annotation-closeout.md]
+- **Summary**: [606_discharge_propositional_tableau_completeness_and_verify_tfae/summaries/01_tfae-fold-and-annotation-closeout-summary.md]
 
 **Description**: Consume the frame construction and forcing proof from the predecessor tasks, then discharge or restate the four propositional tableau completeness sorries, repair every call site, and verify the TFAE instantiation.
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #606
 
 - **Task**: 606 - Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: 603, 604, 605, 609 (all complete)
 - **Research Inputs**: specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/reports/01_tableau-completeness-ground-truth.md

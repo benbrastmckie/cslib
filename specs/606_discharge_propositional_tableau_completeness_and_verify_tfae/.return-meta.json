@@ -49,7 +49,13 @@
     "session_id": "sess_1786375467_9fbdb7",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate"],
-    "compliance_check": "passed"
+    "delegation_path": [
+      "orchestrator",
+      "orchestrate",
+      "skill-orchestrate"
+    ],
+    "compliance_check": "passed",
+    "cycles_used": 3,
+    "final_state": "completed"
   }
 }

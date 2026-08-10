@@ -23,7 +23,7 @@ next_project_number: 622
 
 ### Propositional Logic
 
-497 [NOT STARTED] — [REVISED 2026-08-10 by the propositional review — the stated bloc
+497 [NOT STARTED] — [RETARGETED 2026-08-10 — this task is NO LONGER an identifier ren
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
 616 [NOT STARTED] — Repair the stale and self-contradictory documentation layer in th
@@ -847,32 +847,128 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 400
 
-**Description**: [REVISED 2026-08-10 by the propositional review — the stated block is LIFTED and the direction is now DETERMINED.]
+**Description**: [RETARGETED 2026-08-10 — this task is NO LONGER an identifier rename. The rename is already done. What remains is the `→` NOTATION gap. All claims below were verified directly against fork `main` and `upstream/main` @ `3951377e` (fetched 2026-08-10); re-verify before acting, the commands are cheap.]
 
-Reconcile `imp` vs `impl` naming for the propositional connectives (the `Proposition.imp` constructor and `→` notation) with the rest of the library. Raised in review of PR #648 by thomaskwaring.
+Reconcile the fork's `→` notation for the implication connective with upstream. Originally raised in review of PR #648 by thomaskwaring as an `imp` vs `impl` naming question; that naming question has since resolved itself, and the notation divergence underneath it has not.
 
-=== WHAT CHANGED ===
+=== THE IDENTIFIER RENAME IS ALREADY COMPLETE — DO NOT RE-LITIGATE ===
 
-The original text read: "BLOCKED until #607 (external PR, leanprover/cslib) is merged." PR #607 MERGED ON 2026-08-03. That block no longer applies.
+Fork `main` already uses `imp` for every connective identifier. All five `→` notation declarations bind to a `.imp` field:
 
-THE DIRECTION IS SETTLED, AND IT INVERTS THIS TASK'S IMPLIED FRAMING. The original noted "(noting Modal uses 'impl')", implying the rename might run Propositional `imp` → `impl`. Upstream merged `class HasImp` with field `imp` and `scoped infixr:25 " → " => HasImp.imp` (`Cslib/Foundations/Logic/Operators.lean`). So `imp` is the library-wide standard and MODAL'S `impl` IS THE OUTLIER. Verify this against `upstream/main` before acting — do not take this paragraph on trust.
+  Cslib/Logics/Bimodal/Syntax/Formula.lean:101   => Formula.imp
+  Cslib/Logics/LTL/Syntax/Formula.lean:209       => Formula.imp
+  Cslib/Logics/Modal/Basic.lean:234              => Proposition.imp
+  Cslib/Logics/Propositional/Defs.lean:109       => Proposition.imp
+  Cslib/Logics/Temporal/Syntax/Formula.lean:169  => Formula.imp
 
-=== A SECOND CONFLICT, NOT PREVIOUSLY RECORDED ===
+Only 4 `impl` tokens survive anywhere in `Cslib/` on `main`, all in
+`Cslib/Foundations/Logic/Theorems/Propositional/Connectives.lean` lines 469, 471, 502, 504 — and
+all four are a LOCAL TACTIC HYPOTHESIS NAME (`have impl := ModusPonens.mp bc dne_ψ`), not a
+connective identifier. Renaming them is cosmetic and optional, not part of the reconciliation.
 
-Beyond the identifier name, the NOTATION ITSELF differs, in two ways:
-  - Precedence: fork `infix:30 " → "` vs upstream `infixr:25 " → "`.
-  - Associativity: fork uses `infix` (NON-associative); upstream uses `infixr` (right-associative).
-The associativity gap is the more dangerous of the two: `a → b → c` parses upstream and FAILS TO PARSE in the fork. Any reconciliation must cover notation, not just the identifier.
+CORRECTION TO THE PRIOR (2026-08-10) REVISION: that revision claimed "MODAL'S `impl` IS THE
+OUTLIER" and told a future reader to expect a rename in `Modal`. That claim is FALSE for `main`
+— `Modal/Basic.lean:234` already reads `Proposition.imp`. It is corrected here rather than
+deleted because it is the reason this task has looked far larger than it is.
 
-=== SEQUENCING ===
+The rename did NOT arrive from upstream. It landed independently in commit `c308d028`
+("refactor modal formula, satisfies, and cube"), which IS an ancestor of `main`, well before
+PR #607. `impl` appears ZERO times in any upstream `.lean` file. `impl` now survives only on
+three unmerged feature branches (`feat/propositional-v2`, `feat/modal-formula-primitives`,
+`feat/temporal-formula-propositional`); those are stale snapshots and whether they are rebased
+or abandoned is OUT OF SCOPE here.
 
-This task is now DOWNSTREAM of the `Proposition` representation decision (the reconciliation task covering the merged #607 divergence). Reason: if that decision adopts upstream's four-constructor `Proposition`, this rename is subsumed by that migration and must not be done twice; if it keeps the fork's five-primitive type, this rename stands alone. DO NOT START THE RENAME BEFORE THAT DECISION LANDS.
+=== THE ACTUAL REMAINING GAP: NOTATION, IN THREE PARTS ===
 
-DEPENDENCY CLEANUP APPLIED 2026-08-10: the previous dependency list was [375, 393, 400, 425, 449, 535, 542]. Of those, 375, 393, 449, 535 and 542 are all archived/completed. The edge to 425 (temporal tableau decision procedure) was spurious — nothing about a temporal tableau gates a propositional connective rename. Dependencies are now [400] alone.
+Upstream, in `Cslib/Foundations/Logic/Operators.lean` (added by PR #607, commit `b8ad3923`,
+merged 2026-08-03), declares:
 
-=== SCOPE NOTE ===
+  class HasImp (α : Type*) where
+    imp (a b : α) : α
 
-The rename is large (~271 files by the earlier estimate) and `file_scope` was absent — flagged separately as a task-record defect. Re-derive the true file set at planning time rather than trusting that figure.
+  @[inherit_doc] scoped infixr:25 " → " => HasImp.imp
+
+Against that, the fork diverges in three ways:
+
+(a) PRECEDENCE — fork `infix:30` vs upstream `infixr:25`.
+
+(b) ASSOCIATIVITY — fork uses non-associative `infix`; upstream uses right-associative `infixr`.
+    This is the higher-severity half: `a → b → c` parses upstream and FAILS in the fork. Worse,
+    because the fork's notation is non-associative, Lean's own `Prop`-level arrow wins the
+    overload, so a chained expression surfaces as a TYPE MISMATCH rather than a notation error —
+    materially harder to diagnose.
+
+(c) STRUCTURE — upstream binds `→` ONCE, at the typeclass. The fork binds it FIVE times, once per
+    concrete formula type, at the five sites listed above.
+
+REFINEMENT TO (c), NOT PREVIOUSLY RECORDED AND MATERIAL TO COST: the fork ALREADY HAS `HasImp`.
+It is declared at `Cslib/Foundations/Logic/Connectives.lean:85`, in the SAME namespace
+`Cslib.Logic` as upstream's, with the SAME field name `imp` (`imp : F → F → F`, definitionally
+upstream's `imp (a b : α) : α`), and it has 1039 usage sites across the fork. What the fork lacks
+is any NOTATION bound to it: `git grep -E '(infix|infixr|infixl|notation).*HasImp' main` returns
+ZERO. So part (c) is "rebind the arrow to an existing class field", not "introduce a typeclass".
+That is much cheaper than the earlier framing implied — but see the sequencing section, because it
+is also the part most likely to be done by someone else first.
+
+=== SEQUENCING — READ THIS BEFORE PLANNING; MOST OF THIS TASK MAY ALREADY BE SPOKEN FOR ===
+
+The dependency graph does NOT gate this task: its sole dependency (400, the
+`reconcile_connectives_pr607` falsum-representation decision) is `status=completed`. But that
+task's completion carved out three follow-ups whose scopes OVERLAP this one, and the plan phase
+MUST resolve the overlap explicitly rather than assume it away:
+
+  - 621 `propositional_notation_infixr` — changes all five connective notations in
+    `Cslib/Logics/Propositional/Defs.lean` from `infix` to `infixr` at upstream's precedences.
+    Its `file_scope` is exactly `["Cslib/Logics/Propositional/Defs.lean"]`. It therefore ALREADY
+    OWNS parts (a) and (b) for `Defs.lean:109`. Do not duplicate that edit here.
+  - 619 `reconcile_connectives_operators` — reconciles the fork's `Connectives.lean` against
+    upstream's `Operators.lean`, where `HasAnd`/`HasOr`/`HasImp`/`HasBox` are duplicated in
+    namespace `Cslib.Logic`. Part (c) lives inside that reconciliation's blast radius: where `→`
+    should bind is a consequence of which `HasImp` survives.
+  - 620 `rebase_pr648_clear_review` — also touches `Propositional/Defs.lean` and carries a
+    STANDING APPROVAL against a specific approved scope; widening that diff forfeits the approval.
+    (621 already declares a dependency on 620 for exactly this reason.)
+
+WHAT IS LEFT THAT IS UNIQUELY THIS TASK'S: the `→` notation in the FOUR files 621's scope does not
+reach — `Bimodal/Syntax/Formula.lean:101`, `LTL/Syntax/Formula.lean:209`, `Modal/Basic.lean:234`,
+`Temporal/Syntax/Formula.lean:169`. All four declare `@[inherit_doc] scoped infix:30 " → "`, and
+all four carry the same non-associativity hazard, alongside equally non-associative sibling
+connectives. None is covered elsewhere today. Planning should either (i) narrow this task to those
+four files and defer (c) to 619, or (ii) argue for folding it into one of the siblings — but it
+must CHOOSE, and record the choice.
+
+Second sequencing axis: adopting `infixr:25` standalone and adopting `HasImp` as part of merging
+#607 are DIFFERENT JOBS, and doing the first can make the second redundant. Fork `main` is 21
+commits behind `upstream/main` and has NO `Cslib/Foundations/Logic/Operators.lean`; `b8ad3923` is
+NOT an ancestor of `main`. So the upstream sync is genuinely still pending despite the falsum
+decision having completed. Decide sequencing against that sync explicitly rather than assuming.
+
+=== SCOPE — THE OLD ESTIMATE IS DEAD ===
+
+The previous "~271 files" figure is WITHDRAWN. It was never verified, and it is meaningless now
+that the rename it estimated is already done. Do NOT substitute a grep for `→` as a proxy: that
+matches 547 files under `Cslib/` but overwhelmingly hits Lean's own function arrow rather than the
+connective, so it is not a usable figure. True scope must be derived at planning time from the
+five notation declaration sites plus the TRANSITIVE PARSE IMPACT of the associativity change —
+i.e. the sites that currently rely on the non-associative parse and will need fixing once `→`
+becomes right-associative. Verify with `lake build` that the tree stays green.
+
+Note on relative precedence, so planning does not over-worry: the fork's ordering
+(∧ 36 > ∨ 35 > → 30 > ↔ 20) and upstream's (∧ 36 > ∨ 30 > → 25 > ↔ 20) agree on ORDER, so moving
+`→` from 30 to 25 alone does not invert any relationship. The sibling connectives' absolute levels
+still differ from upstream (notably `∨` at 35 vs 30); that is a real remaining divergence but it
+belongs to the notation-wide reconciliation, not to this arrow-scoped task, unless planning
+deliberately widens.
+
+RECORD DEFECT, STILL OPEN: `file_scope` is ABSENT from this task's record and must be backfilled.
+Once planning narrows the scope per the sequencing section above, set it — the four
+non-Propositional formula files are the likely value.
+
+DEPENDENCY CLEANUP (applied 2026-08-10, still accurate): the previous dependency list was
+[375, 393, 400, 425, 449, 535, 542]. Of those, 375, 393, 449, 535 and 542 are archived/completed.
+The edge to 425 (temporal tableau decision procedure) was spurious — nothing about a temporal
+tableau gates a propositional connective notation change. Dependencies are now [400] alone, and
+400 is completed.
 
 ---
 

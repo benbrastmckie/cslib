@@ -11,8 +11,8 @@ next_project_number: 613
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,375,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -23,10 +23,8 @@ next_project_number: 613
 
 ### Propositional Logic
 
-375 [RESEARCHED] — Fold the TABLEAU decision systems into the propositional proof-sy
-  └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-  └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
+  └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 
 ### Modal Logic
@@ -611,7 +609,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 ---
 
 ### 375. Proof system equivalence tableau sequent edges
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 593

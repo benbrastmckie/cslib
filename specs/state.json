@@ -342,7 +342,7 @@
     {
       "project_number": 375,
       "project_name": "proof_system_equivalence_tableau_sequent_edges",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fold the TABLEAU decision systems into the propositional proof-system TFAE. RECONCILED: the sequent edges are ALREADY done - Cslib/Logics/Propositional/ProofSystemEquivalence.lean has cplProofSystemsTfae (Hilbert/ND/LK) and iplProofSystemsTfae (Hilbert/ND/LJ). REMAINING: add the tableau nodes to both TFAEs, wiring Propositional/Tableau/{Classical,Intuitionistic,Minimal}/Completeness.lean into the equivalence. Depends on task 317 (propositional tableau completeness) landing its remaining sorries.",
@@ -359,7 +359,8 @@
           "summary": "Tableau TFAE fold already landed by task 606; zero code delta remains"
         }
       ],
-      "session_id": "sess_1786378622_28837b"
+      "session_id": "sess_1786378622_28837b",
+      "completion_summary": "Tableau nodes folded into the propositional proof-system TFAEs. Verified already landed by task 606: cplProofSystemsWithTableauTfae (ProofSystemEquivalence.lean:203), iplProofSystemsWithTableauTfae (:229), mplProofSystemsWithTableauTfae (:252), each composing the corresponding *_decides result with the existing soundness/completeness bridge. Zero code delta remained; lake build succeeds and axiom checks on all 15 relevant declarations report no sorryAx. Task closed as superseded."
     },
     {
       "project_number": 400,

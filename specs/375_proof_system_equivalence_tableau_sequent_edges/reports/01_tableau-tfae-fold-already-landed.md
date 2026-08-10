@@ -1,6 +1,13 @@
 # Research Report: Tableau Folds in the Propositional Proof-System TFAE
 
 **Task**: 375 — proof_system_equivalence_tableau_sequent_edges
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Session**: sess_1786378622_28837b
 **Date**: 2026-08-10
 **Agent**: cslib-research-agent

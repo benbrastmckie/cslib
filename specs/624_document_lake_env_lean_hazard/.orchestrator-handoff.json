@@ -1,19 +1,28 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "research",
-  "status": "researched",
-  "summary": "Confirmed CONTRIBUTING.md's Continuous Integration section (new subsection after Imports) as the doc home for the lake env lean hazard; matched house style from Testing/Imports subsections. Verified all technical claims against task 622's direct-measurement report without re-running the diverging command. Flagged the ToC companion edit as required.",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Wrote a single-phase, documentation-only plan for adding a `## Building a single file` subsection to CONTRIBUTING.md, placed last under `# Continuous Integration` immediately after `## Imports`, plus the required hand-maintained Table of Contents entry. The plan specifies a symptom-first content shape (hang signature, rule, one-sentence `--setup` mechanism, two secondary hazards, optional escape hatch) sized to match the terse register of the adjacent subsections. Scope is one file; verification is prose-tier and explicitly forbids running the diverging command.",
   "artifacts": [
-    {"type": "report", "path": "specs/624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md"}
+    {
+      "type": "plan",
+      "path": "specs/624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md"
+    }
   ],
-  "blockers": [],
-  "next_action_hint": "plan",
-  "files_modified": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md"
+  ],
   "decisions_made": [
-    "New subsection heading: '## Building a single file', placed as the last subsection under '# Continuous Integration', immediately after '## Imports'",
-    "Table of Contents (lines 3-41) must gain a matching entry — hand-maintained, not auto-generated",
-    "Do not include the specific hanging reproduction command as a copy-pasteable example; describe the general unsafe pattern (lake env lean <file>) instead",
-    "scripts/README.md's AxiomCensus.lean entry (lake env lean --run ... after a full lake build) is a distinct, safe usage pattern and must not be conflated with the hazard"
+    "Doc home is CONTRIBUTING.md's `# Continuous Integration` section; new subsection titled `## Building a single file`, placed last, immediately after `## Imports`.",
+    "The hand-maintained Table of Contents entry `  - [Building a single file](#building-a-single-file)` is an in-scope, required companion edit, not optional polish.",
+    "Sized as one phase (~0.5 h): documentation-only, single file, no dependencies.",
+    "Content is symptom-first so a contributor mid-hang can pattern-match before reading the cause.",
+    "scripts/README.md's `AxiomCensus.lean` `lake env lean --run` usage is a distinct SAFE pattern and must not be cited alongside the hazard.",
+    "The diverging command is never run during implementation or verification; all technical figures are restated from the prior stall investigation's measurements."
   ],
-  "dead_ends": []
+  "dead_ends": [],
+  "phases_completed": 0,
+  "phases_total": 1,
+  "plan_markers_verified": true
 }

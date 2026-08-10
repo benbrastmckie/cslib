@@ -1,34 +1,20 @@
 {
-  "status": "researched",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 624,
+  "session_id": "sess_1786397542_991316_624",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "summary": "Created a single-phase implementation plan to add a `## Building a single file` subsection (plus its required Table of Contents entry) to CONTRIBUTING.md, documenting that bare `lake env lean <file>` is unsafe on module-system files here and that `lake build <Module.Name>` is the correct single-module build.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md",
-      "summary": "Confirms CONTRIBUTING.md's Continuous Integration section (new subsection after Imports) as the doc home, matches house style, verifies all technical claims against task 622's measurements, and flags the required Table of Contents companion edit."
+      "type": "plan",
+      "path": "specs/624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md",
+      "summary": "Single-phase, documentation-only plan scoped to CONTRIBUTING.md: new `## Building a single file` subsection last under `# Continuous Integration`, plus the matching hand-maintained ToC entry. Includes a symptom-first 5-point content shape, explicit do-not list (no AxiomCensus conflation, no copy-pasteable hanging command, never run the diverging command), and prose-tier verification."
     }
   ],
-  "next_steps": "Run /plan 624 to create implementation plan for the CONTRIBUTING.md subsection.",
-  "metadata": {
-    "session_id": "sess_1786397542_991316_624",
-    "agent_type": "general-research-agent",
-    "findings_count": 5,
-    "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "research", "general-research-agent"]
-  },
-  "memory_candidates": [
-    {
-      "content": "In this repo, CONTRIBUTING.md's Table of Contents (lines 3-41) is hand-maintained, not auto-generated. Any new heading added anywhere in the file needs a matching manually-inserted anchor line in the ToC block, or the document becomes internally inconsistent (every existing heading has a ToC entry).",
-      "category": "PATTERN",
-      "source_artifact": "specs/624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md",
-      "confidence": 0.75,
-      "suggested_keywords": ["CONTRIBUTING.md", "table of contents", "markdown", "documentation", "cslib"]
-    },
-    {
-      "content": "lake env lean <file> is unsafe for module-system files in cslib: it never passes --setup (which lake build always does), so Lean 4.33's module/public import exposure configuration is absent and elaboration can diverge with no diagnostic. It also bypasses dependency resolution (consumes stale .oleans) and never writes an .olean without -o, so a missing .olean after such a run is not evidence the module has never built. Correct check: lake build <Module.Name>; if raw lean output is needed, lake env lean --setup <module>.setup.json <file> (setup.json lives under .lake/build/ir/...).",
-      "category": "CONFIG",
-      "source_artifact": "specs/622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md",
-      "confidence": 0.95,
-      "suggested_keywords": ["lake", "lean", "module system", "--setup", "build", "cslib", "elaboration hang"]
-    }
-  ]
+  "phase_count": 1,
+  "estimated_hours": 0.5,
+  "dependency_waves": [[1]],
+  "next_steps": "Run /implement 624 to execute the plan",
+  "memory_candidates": []
 }

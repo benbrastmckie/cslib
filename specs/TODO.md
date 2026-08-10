@@ -1,5 +1,5 @@
 ---
-next_project_number: 622
+next_project_number: 623
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 622
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,497,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,497,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620,622 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -32,6 +32,7 @@ next_project_number: 622
 619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
+622 [NOT STARTED] — A full `lake build` on `main` does not complete. It stalls indefi
 
 ### Modal Logic
 
@@ -86,6 +87,63 @@ next_project_number: 622
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
 ## Tasks
+
+### 622. Investigate why Tableau/Intuitionistic/Scheme.lean never completes a build, blocking full lake build
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: A full `lake build` on `main` does not complete. It stalls indefinitely while elaborating
+`Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`.
+
+=== OBSERVED, 2026-08-10 ===
+
+Discovered incidentally while build-testing a connective-notation change; the stall is NOT
+caused by that change (the change was to `Propositional/Defs.lean` and was reverted; the stall
+reproduces independently of it).
+
+  - Single `lean` worker pegged at ~101% CPU for 92 minutes with no completion.
+  - Resident memory ~1.3 GB and stable (not obviously an unbounded leak).
+  - The file is 9,884 lines with ~485 connective-notation occurrences.
+  - NO cached `.olean` exists for this module anywhere under `.lake/build` — i.e. it has never
+    successfully built in this checkout, as opposed to being merely stale.
+  - It sits in `namespace Cslib.Logic.PL` and opens `Cslib.Logic.Tableau`; it is a
+    single-logic-namespace file, so multi-namespace notation overloading is not implicated.
+
+The build was terminated with SIGTERM (`lake` exit 143) rather than allowed to finish, so the
+upper bound on elaboration time is unknown — it may be very slow rather than truly
+non-terminating. Distinguishing "pathologically slow" from "diverges" is the first thing to
+establish.
+
+=== WHY IT MATTERS ===
+
+`lake build` is step 1 of the CSLib CI verification order, so a tree that cannot complete it
+cannot pass CI. Any task requiring final green-build verification is gated behind this, including
+the propositional-notation reconciliation work. Targeted per-module builds (`lake build
+Module.Name`) still work and are unaffected, which is why this has not blocked day-to-day work
+and may have gone unnoticed.
+
+=== SUGGESTED STARTING POINTS ===
+
+  - Establish termination: run the single module with a generous wall clock and
+    `set_option maxHeartbeats 0` behaviour characterised, to separate slow from divergent.
+  - Profile it: `lean_profile_proof` on the heaviest declarations, or `set_option profiler true`,
+    to find the hot declaration rather than guessing.
+  - Check `set_option maxHeartbeats` / `maxRecDepth` overrides already present in the file, which
+    could be masking a runaway elaboration.
+  - Determine whether the module is reachable from the `Cslib.lean` barrel import, and whether it
+    is new/unfinished work that was never green rather than a regression.
+  - Bisect against history if it ever built: `git log --follow` the file and test an older
+    revision.
+
+=== SCOPE NOTE ===
+
+`file_scope` is set to the single stalling file, which is where investigation starts. If the root
+cause turns out to be in a dependency (e.g. the shared `Tableau` infrastructure), widen it then
+rather than assuming it now.
+
+---
 
 ### 621. Switch the five Propositional connective notations from infix to infixr at upstream precedences
 - **Status**: [NOT STARTED]
@@ -969,6 +1027,47 @@ DEPENDENCY CLEANUP (applied 2026-08-10, still accurate): the previous dependency
 The edge to 425 (temporal tableau decision procedure) was spurious — nothing about a temporal
 tableau gates a propositional connective notation change. Dependencies are now [400] alone, and
 400 is completed.
+
+=== NARROW-VS-FOLD DECISION: RESOLVED 2026-08-10 — NARROW, WITH BUILD EVIDENCE ===
+
+The sequencing section above asks planning to choose between (i) narrowing to the four
+non-Propositional files and (ii) folding into a sibling. THAT CHOICE IS NOW MADE: NARROW.
+`file_scope` is set accordingly and no longer needs backfilling.
+
+It was decided empirically, not by argument. The hypothesis under test was that splitting PL
+from the other four logics is unsafe: 19 files open two of the five scoped logic namespaces at
+once (18 of them pair `PL` with another) — essentially the whole `ConservativeExtension` family,
+because conservative-extension proofs are exactly where a propositional formula is related to
+its modal/temporal embedding. The worry was that PL at `infixr:25` alongside Modal/Bimodal/
+Temporal at `infix:30` would put the same `→` token in scope at two precedences AND two
+associativities simultaneously.
+
+THE HYPOTHESIS IS REFUTED. The PL-only change (all four `infix` declarations moved to `infixr`
+at upstream precedences) was applied to `Cslib/Logics/Propositional/Defs.lean` and all 19
+mixed-namespace modules were built against it — `lake build`, 928 jobs, exit 0, zero errors.
+Verified by `.olean` mtimes postdating the source edit, so these are genuine rebuilds, not stale
+cache. The `scoped` notations resolve by type (`Proposition` vs `Formula`), so the elaborator
+disambiguates and the precedence difference never becomes a parse conflict. The experimental
+edit was reverted; the tree is clean.
+
+CONSEQUENCE: the four sites in this task's `file_scope` can move independently of
+`Propositional/Defs.lean`. Task 621 may land before, after, or concurrently with this task
+without a coordinated build.
+
+SECOND REASON NARROW WON, INDEPENDENT OF THE BUILD: 621 depends on 620, which carries a standing
+approval scoped to `Propositional/Defs.lean`. Folding these four files into 621 would couple
+Bimodal/LTL/Modal/Temporal to that approval gate for no technical reason.
+
+STILL TRUE AND UNCHANGED: part (c) — rebinding `→` to the existing `HasImp` (declared at
+`Cslib/Foundations/Logic/Connectives.lean:85`, 1039 usage sites, currently with NO notation bound
+to it) — remains 619's, not this task's.
+
+PRE-EXISTING BLOCKER FOUND WHILE TESTING, NOT CAUSED BY IT: a full `lake build` on `main` does
+not complete. It stalls indefinitely on `Cslib/Logics/Propositional/Tableau/Intuitionistic/
+Scheme.lean` (9,884 lines) — 92 minutes of pegged CPU at 1.3 GB RSS with no completion, and no
+cached `.olean` for that module at all, i.e. it has never built in this checkout. That is tracked
+separately. It gates FINAL verification of this task (and of 619/620/621), though not the
+targeted per-module builds used above.
 
 ---
 

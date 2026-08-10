@@ -383,6 +383,92 @@ lemma intStepBranchPrioFirstPass_none_frozen
     | linearResult _ _ _ => rw [hint] at hsf; simp at hsf
     | branchingResult _ _ => rw [hint] at hsf; simp at hsf
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `intApplyRuleFull`'s `.linearResult` new-edge component is `some _` exactly for the
+world-creating `.neg, .imp` case (`intFImpRule`'s output) -- every other rule shape emits
+`none`. Contrapositive-shaped companion to `intApplyRuleFull_labels_eq_of_not_worldCreating`;
+same case-bash proof style. -/
+private lemma intApplyRuleFull_not_worldCreating_newEdge_none
+    {sf : ISF Atom} {nw : Nat} {b : IBranch Atom} (hwc : isWorldCreating sf ≠ true)
+    {newForms : List (ISF Atom)} {nw' : Nat} {newEdge : Option (Nat × Nat)}
+    (h : intApplyRuleFull sf nw b = .linearResult newForms nw' newEdge) :
+    newEdge = none := by
+  rcases sf with ⟨s, f, l⟩
+  simp only [isWorldCreating] at hwc
+  cases s <;> cases f <;> simp_all [intApplyRuleFull]
+
+omit [Hashable Atom] in
+/-- If `intStepBranchPrioFirstPass` returns a `.linearResult` with a new edge planted, that
+new edge is `none` -- the first pass only ever selects non-world-creating formulas (its own
+guard excludes `isWorldCreating sf`), and `intApplyRuleFull_not_worldCreating_newEdge_none`
+above shows only world-creating formulas ever plant an edge. -/
+private lemma intStepBranchPrioFirstPass_linearResult_newEdge_none
+    {b : IBranch Atom} {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {newForms : List (ISF Atom)} {nw' : Nat} {newEdge : Option (Nat × Nat)}
+    {exp' : List (ISF Atom)}
+    (h : intStepBranchPrioFirstPass b expanded nextWorld
+      = some (.linearResult newForms nw' newEdge, exp')) :
+    newEdge = none := by
+  simp only [intStepBranchPrioFirstPass] at h
+  obtain ⟨sf, _, hsf⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hguard : (expanded.any (· == sf) || isWorldCreating sf) = true
+  · simp [hguard] at hsf
+  · simp only [Bool.not_eq_true] at hguard
+    simp only [hguard, Bool.false_eq_true, ↓reduceIte] at hsf
+    have hwc : isWorldCreating sf ≠ true := by
+      simp only [Bool.or_eq_false_iff] at hguard
+      simp [hguard.2]
+    cases hint : intApplyRuleFull sf nextWorld b with
+    | notApplicable => simp [hint] at hsf
+    | linearResult fs n ed =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq,
+        IntRuleResult.linearResult.injEq] at hsf
+      obtain ⟨⟨-, -, hed⟩, -⟩ := hsf
+      exact hed ▸ intApplyRuleFull_not_worldCreating_newEdge_none hwc hint
+    | branchingResult bs n => simp [hint] at hsf
+
+omit [Hashable Atom] in
+/-- **The world-creating checkpoint** (the fact plan Phase 6's origin-tracking machinery
+needed but had not yet landed): whenever `intStepBranchPrio` actually plants a new edge (i.e.
+fires the world-creating `F(φ → ψ)` rule), it can only have reached that outcome via its
+SECOND pass (`intStepBranch`, the fallback) -- the FIRST pass (`intStepBranchPrioFirstPass`)
+never plants an edge (previous lemma), so if the first pass HAD returned `some` here, the
+overall result's edge component would have to be `none`, contradicting the hypothesis.
+Composed with `intStepBranchPrioFirstPass_none_frozen`, this is the "record-time checkpoint"
+`IReuseFrozenOrigin_snoc`'s docstring names: `IFrozenBelow nextWorld expanded b` is available
+for free exactly when a new loop-back edge is about to be recorded. -/
+lemma intStepBranchPrio_newEdge_firstPass_none
+    {b : IBranch Atom} {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {newForms : List (ISF Atom)} {nw' : Nat} {newE : Nat × Nat} {newExp : List (ISF Atom)}
+    (hstep : intStepBranchPrio b expanded nextWorld
+      = some (.linearResult newForms nw' (some newE), newExp)) :
+    intStepBranchPrioFirstPass b expanded nextWorld = none := by
+  cases hfp : intStepBranchPrioFirstPass b expanded nextWorld with
+  | none => rfl
+  | some r =>
+    exfalso
+    simp only [intStepBranchPrio, hfp] at hstep
+    obtain ⟨r1, e1⟩ := r
+    simp only [Option.some.injEq, Prod.mk.injEq] at hstep
+    obtain ⟨hr, -⟩ := hstep
+    subst hr
+    have := intStepBranchPrioFirstPass_linearResult_newEdge_none hfp
+    simp at this
+
+omit [Hashable Atom] in
+/-- **Direct corollary**: at the exact moment `intStepBranchPrio` plants a new edge, the
+branch is already `IFrozenBelow nextWorld expanded` -- composes the previous lemma with
+`intStepBranchPrioFirstPass_none_frozen`. This is the checkpoint fact used to justify a
+freshly-recorded loop-back edge's `IReuseFrozenOrigin` witness (`Scheme.lean`,
+`IReuseFrozenOrigin_snoc`'s call site). -/
+lemma intStepBranchPrio_newEdge_frozen
+    {b : IBranch Atom} {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {newForms : List (ISF Atom)} {nw' : Nat} {newE : Nat × Nat} {newExp : List (ISF Atom)}
+    (hstep : intStepBranchPrio b expanded nextWorld
+      = some (.linearResult newForms nw' (some newE), newExp)) :
+    IFrozenBelow nextWorld expanded b :=
+  intStepBranchPrioFirstPass_none_frozen (intStepBranchPrio_newEdge_firstPass_none hstep)
+
 /-! ## Sfor-Containment Loop-Check -/
 
 /-- The **ancestor-directed** `Sfor`-containment loop-check (the ancestor-blocking calculus

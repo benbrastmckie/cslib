@@ -809,7 +809,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 
 ---
 
-### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
+### 400. Falsum representation decision: keep primitive bot; rebase PR #648
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic

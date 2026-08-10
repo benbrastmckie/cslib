@@ -1,7 +1,7 @@
 # Implementation Plan: Task #400 — Engage PR #607 (connective typeclasses)
 
 - **Task**: 400 - Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
-- **Status**: [IMPLEMENTING]
+- **Status**: [SUPERSEDED] (2026-08-10)
 - **Effort**: ~9.5 hours agent-doable work (plus human-authored review + external upstream wait)
 - **Dependencies**: None (independent of the 407-409 IPL-base refactor)
 - **Research Inputs**: reports/01_pr607-engagement.md; reports/02_engagement-strategy.md (primary, live-PR-grounded)
@@ -9,6 +9,34 @@
 - **Standards**: plan-format.md; status-markers.md; artifact-management.md; tasks.md; CONTRIBUTING.md; NOTATION.md; ORGANISATION.md
 - **Type**: cslib
 - **Lean Intent**: false
+
+> ## ⚠ SUPERSEDED — 2026-08-10. Do not execute this plan.
+>
+> This plan was written to help PR #607 land while it was still OPEN. **#607 merged on 2026-08-03**
+> (commit `b8ad3923`), which makes its central deliverable — a human-authored review helping that PR
+> land — unreachable. Phases 5–8 are moot, not pending.
+>
+> It is also built on a premise later verified FALSE: that #607 would settle the falsum
+> representation question. It did not. Bot-as-atom traces to commit `61785643` (#89), the original
+> definitions commit, four PRs earlier; #607's only constructor-level change to `Proposition` was
+> the rename `impl` -> `imp`. #607 is **orthogonal** to falsum, so Phase 6's "await upstream
+> resolution of the falsum question" was waiting on a decision that was never in flight.
+>
+> **Superseded by**: `reports/03_falsum-representation-decision.md`, which recommends OPTION B
+> (keep the fork's primitive `bot`) and carries a standalone action checklist in section 9. The
+> task's own description in `specs/state.json` was corrected against the live record the same day.
+>
+> **What remains valid and should be reused, not rewritten**: Phases 1–4 are genuinely [COMPLETED]
+> and their output files under `review-scaffolding/` stand on their own merits —
+> `01_comparison-tables.md`, `02_falsum-bridge-sketch.md` (whose retraction of the `HasBot`
+> recommendation was correct and is now confirmed), `03_grind-direction-finding.md`, and
+> `04_review-packet.md`. Phase 2's Mathlib-`Bot`/`Top`-reuse finding is load-bearing for the Option B
+> recommendation.
+>
+> **What is moot**: Phase 5 (post a review on an already-merged PR), Phase 6 (await a resolution that
+> was never pending), and Phases 7–8 (conditional on Phase 6). The live successor work is the PR #648
+> rebase, the Connectives/Operators reconciliation, and the `infix` -> `infixr` notation change — all
+> three named in the corrected task description, none started.
 
 ## Overview
 
@@ -237,7 +265,7 @@ skeleton, ready for the human to adapt — explicitly not finished prose.
 
 ---
 
-### Phase 5: HUMAN GATE — author and post the review on #607 / Zulip [NOT STARTED]
+### Phase 5: HUMAN GATE — author and post the review on #607 / Zulip [SUPERSEDED] (moot: #607 merged 2026-08-03)
 
 **Goal**: The human author rewrites the scaffolding in their own words and posts the review on PR #607
 (and/or the Zulip "Propositional Logic" thread).
@@ -264,7 +292,7 @@ skeleton, ready for the human to adapt — explicitly not finished prose.
 
 ---
 
-### Phase 6: HUMAN/EXTERNAL GATE — await upstream resolution [NOT STARTED] [BLOCKED]
+### Phase 6: HUMAN/EXTERNAL GATE — await upstream resolution [SUPERSEDED] (moot: no falsum decision was ever in flight upstream)
 
 **Goal**: Wait for #607's maintainers to resolve the two gating questions: (a) falsum/verum +
 derived-`¬` approach, and (b) naming (`Has` prefix; `impl` vs `imp`), and ideally for #607 to merge.
@@ -289,7 +317,7 @@ derived-`¬` approach, and (b) naming (`Has` prefix; `impl` vs `imp`), and ideal
 
 ---
 
-### Phase 7: CONDITIONAL — register `PL.Proposition` against #607's merged typeclasses [NOT STARTED] [BLOCKED]
+### Phase 7: CONDITIONAL — register `PL.Proposition` against #607's merged typeclasses [SUPERSEDED] (was conditional on Phase 6)
 
 **Goal**: Once #607 merges and conventions settle (Phase 6), re-point the fork's five-primitive
 `Cslib.Logic.PL.Proposition` at the upstream atomic classes and drop superseded local notation.
@@ -324,7 +352,7 @@ derived-`¬` approach, and (b) naming (`Has` prefix; `impl` vs `imp`), and ideal
 
 ---
 
-### Phase 8: CONDITIONAL — record connective notation in NOTATION.md; reconcile ORGANISATION.md [NOT STARTED] [BLOCKED]
+### Phase 8: CONDITIONAL — record connective notation in NOTATION.md; reconcile ORGANISATION.md [SUPERSEDED] (was conditional on Phase 6)
 
 **Goal**: Capture the agreed connective precedence ladder in NOTATION.md (currently silent on
 connectives) and fix the ORGANISATION.md drift (it lists `Axioms.lean` as the typeclass home and

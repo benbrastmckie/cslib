@@ -10,14 +10,21 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Completeness
 public import Mathlib.Data.List.TFAE
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.DecisionProcedure
+public import Cslib.Logics.Propositional.Tableau.Minimal.DecisionProcedure
+public import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure
+public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
 import Mathlib.Tactic.TFAE
 
 /-! # Proof System Equivalences for Propositional Logic
 
-This module collects three-way equivalences between the Hilbert-style proof system,
-natural deduction (ND), and sequent calculus for classical (CPL), intuitionistic (IPL), and
-minimal (MPL) propositional logic, stated as `List.TFAE` theorems. All three logic strengths
-now have a three-way equivalence, making the proof-system × logic matrix structurally symmetric.
+This module collects equivalences between the Hilbert-style proof system, natural deduction
+(ND), sequent calculus, and (at the empty context) the tableau decision procedure, for
+classical (CPL), intuitionistic (IPL), and minimal (MPL) propositional logic, stated as
+`List.TFAE` theorems. All three logic strengths have a three-way equivalence at both the
+context-based and closed-formula levels, and the closed-formula equivalences additionally
+fold in the tableau decision procedure as a fourth node, making the proof-system × logic
+matrix structurally symmetric.
 
 ## Main Results
 
@@ -29,6 +36,12 @@ now have a three-way equivalence, making the proof-system × logic matrix struct
 - `mplProofSystemsTfaeClosed`: MPL three-way equivalence at the empty context.
 - `mplHilbertIffNd`: MPL two-way equivalence (Hilbert ↔ ND), context-based (retained for
   backward compatibility; superseded but not replaced by `mplProofSystemsTfae`).
+- `cplProofSystemsWithTableauTfae`: CPL four-way equivalence (Hilbert, ND, LK, tableau) at the
+  empty context.
+- `iplProofSystemsWithTableauTfae`: IPL four-way equivalence (Hilbert, ND, LJ, tableau) at the
+  empty context.
+- `mplProofSystemsWithTableauTfae`: MPL four-way equivalence (Hilbert, ND, LM, tableau) at the
+  empty context.
 
 ## Dependencies
 
@@ -36,13 +49,18 @@ The proofs are purely compositional, relying on existing bridge theorems:
 - `hilbert_iff_nd_ctx_cl`, `nd_iff_lk` (LK completeness)
 - `hilbert_iff_nd_ctx_int`, `nd_iff_lj` (LJ completeness)
 - `hilbert_iff_nd_ctx_min`, `nd_iff_lm` (LM completeness)
+- `prop_completeness_iff_tautology`, `classicalTableau_decides` (CPL tableau fold)
+- `int_soundness_completeness`, `ivalid_universe_invariant`, `intuitionisticTableau_decides`
+  (IPL tableau fold)
+- `min_soundness_completeness`, `mvalid_universe_invariant`, `minimalTableau_decides`
+  (MPL tableau fold)
 -/
 
 @[expose] public section
 
 namespace Cslib.Logic.PL
 
-open InferenceSystem
+open InferenceSystem Cslib.Logic.Tableau
 
 variable {Atom : Type*} [DecidableEq Atom]
 
@@ -153,6 +171,98 @@ theorem mplHilbertIffNd {Γ : Ctx Atom} {φ : PL.Proposition Atom} :
     Deriv MinPropAxiom Γ.toList φ ↔
     DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom) (Γ ⊢ φ) :=
   hilbert_iff_nd_ctx_min
+
+/-! ## Tableau Folds (closed formulas only)
+
+The tableau decision procedures (`classicalTableau`, `intuitionisticTableau`,
+`minimalTableau`) take a single closed formula and no context argument, so each fold below
+extends the corresponding `...Closed` three-way equivalence with a fourth node rather than
+extending the context-based equivalence. These theorems additionally require
+`[Hashable Atom]`, which the tableau algorithms need for their internal branch bookkeeping;
+that constraint is scoped to this section alone so the six equivalences above, which are pure
+proof-theoretic statements, are not forced to carry it. -/
+
+section WithTableau
+
+variable [Hashable Atom]
+
+omit [Hashable Atom] in
+/-- **CPL Four-Way Equivalence** (closed, with tableau): At the empty context, the following
+are equivalent:
+1. Hilbert derivability: `Derivable PropositionalAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory PropositionalAxiom) (∅ ⊢ φ)`
+3. LK provability: `Nonempty (LKProof (∅ ⊢ₛ {φ}))`
+4. Tableau closure: `classicalTableau φ = .closed`
+
+Nodes 1-3 are `cplProofSystemsTfaeClosed`. Node 1 ↔ 4 composes
+`prop_completeness_iff_tautology` (`Tautology φ ↔ Derivable PropositionalAxiom φ`) with
+`classicalTableau_decides` (`classicalTableau φ = .closed ↔ Tautology φ`); CPL has no universe
+parameter, so this composition closes by `rw`. Unlike the IPL/MPL folds below,
+`classicalTableau` only requires `[DecidableEq Atom]`, not `[Hashable Atom]`, so this theorem
+omits the section's `[Hashable Atom]` variable. -/
+theorem cplProofSystemsWithTableauTfae (φ : PL.Proposition Atom) :
+    [Derivable PropositionalAxiom φ,
+     DerivableIn (AxiomTheory (@PropositionalAxiom Atom) : Theory Atom)
+       ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (LKProof ((∅ : Ctx Atom) ⊢ₛ ({φ} : Finset _))),
+     classicalTableau φ = .closed].TFAE := by
+  have h := cplProofSystemsTfaeClosed (Atom := Atom) φ
+  tfae_have 1 ↔ 2 := h.out 0 1
+  tfae_have 2 ↔ 3 := h.out 1 2
+  tfae_have 1 ↔ 4 := by
+    rw [← prop_completeness_iff_tautology, ← classicalTableau_decides]
+  tfae_finish
+
+/-- **IPL Four-Way Equivalence** (closed, with tableau): At the empty context, the following
+are equivalent:
+1. Hilbert derivability: `Derivable IntPropAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory IntPropAxiom) (∅ ⊢ φ)`
+3. LJ provability: `Nonempty (LJProof (∅ ⊢ φ))`
+4. Tableau closure: `intuitionisticTableau φ = .closed`
+
+Nodes 1-3 are `iplProofSystemsTfaeClosed`. Node 1 ↔ 4 composes `int_soundness_completeness`
+(`IValid.{u,u} φ ↔ Derivable IntPropAxiom φ`) with `ivalid_universe_invariant`
+(`IValid.{_,v} φ ↔ IValid.{_,0} φ`) and `intuitionisticTableau_decides`
+(`intuitionisticTableau φ = .closed ↔ IValid.{_,0} φ`). The universe-invariance step cannot be
+discharged by `rw` — it leaves an unsolvable universe metavariable — so the composition is
+built in term mode via `Iff.trans`. -/
+theorem iplProofSystemsWithTableauTfae (φ : PL.Proposition Atom) :
+    [Derivable IntPropAxiom φ,
+     DerivableIn (AxiomTheory (@IntPropAxiom Atom) : Theory Atom) ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (LJProof ((∅ : Ctx Atom) ⊢ φ)),
+     intuitionisticTableau φ = .closed].TFAE := by
+  have h := iplProofSystemsTfaeClosed (Atom := Atom) φ
+  tfae_have 1 ↔ 2 := h.out 0 1
+  tfae_have 2 ↔ 3 := h.out 1 2
+  tfae_have 1 ↔ 4 := by
+    exact int_soundness_completeness.symm.trans
+      ((ivalid_universe_invariant φ).trans (intuitionisticTableau_decides φ).symm)
+  tfae_finish
+
+/-- **MPL Four-Way Equivalence** (closed, with tableau): At the empty context, the following
+are equivalent:
+1. Hilbert derivability: `Derivable MinPropAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory MinPropAxiom) (∅ ⊢ φ)`
+3. LM provability: `Nonempty (SeqProofMinimal (∅ ⊢ φ))`
+4. Tableau closure: `minimalTableau φ = .closed`
+
+Nodes 1-3 are `mplProofSystemsTfaeClosed`. Node 1 ↔ 4 composes `min_soundness_completeness`
+with `mvalid_universe_invariant` and `minimalTableau_decides`, the exact MPL analogue of the
+IPL fold above (same `rw`-vs-`Iff.trans` gotcha, same reason). -/
+theorem mplProofSystemsWithTableauTfae (φ : PL.Proposition Atom) :
+    [Derivable MinPropAxiom φ,
+     DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom) ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (SeqProofMinimal ((∅ : Ctx Atom) ⊢ φ)),
+     minimalTableau φ = .closed].TFAE := by
+  have h := mplProofSystemsTfaeClosed (Atom := Atom) φ
+  tfae_have 1 ↔ 2 := h.out 0 1
+  tfae_have 2 ↔ 3 := h.out 1 2
+  tfae_have 1 ↔ 4 := by
+    exact min_soundness_completeness.symm.trans
+      ((mvalid_universe_invariant φ).trans (minimalTableau_decides φ).symm)
+  tfae_finish
+
+end WithTableau
 
 end Cslib.Logic.PL
 

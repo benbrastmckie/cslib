@@ -129,7 +129,7 @@ def goRaw
       match f with
       | 0 => .openBranch bPers augH edges
       | f' + 1 =>
-        match _hstep : intStepBranch bPers e nw with
+        match _hstep : intStepBranchPrio bPers e nw with
         | none => .openBranch bPers augH edges
         | some (.linearResult newForms nw' newEdge, newExp) =>
           match newEdge with
@@ -200,7 +200,8 @@ decreasing_by
       List.sum_cons, List.sum_nil, List.append_nil]
     omega
   · apply Prod.Lex.left
-    have hlen : branches'.length = 2 := intStepBranch_branchingResult_length _hstep
+    have hlen : branches'.length = 2 :=
+      intStepBranch_branchingResult_length (intStepBranchPrio_some_exists _hstep)
     have hconst := sum_map_pow_const₄ branches' f'
     rw [hlen] at hconst
     have h1 : 1 ≤ (3 : Nat) ^ f' := Nat.one_le_pow _ _ (by norm_num)
@@ -301,11 +302,11 @@ assertion. -/
 def phiRef4 : Proposition Nat :=
   ((pr ∨ ps) ∧ (pc ∧ ((ps → (ps → pr)) → pb))) → pr
 
-/-- info: ("OPEN", 17, 2, [(1, 0), (2, 1)], [(1, 2), (2, 2)], some (2, 1, 2)) -/
+/-- info: ("OPEN", 17, 2, [(1, 0), (2, 1)], [(2, 2), (1, 2)], none) -/
 #guard_msgs in
 #eval report phiRef1 40
 
-/-- info: [(2, [2, 3]), (1, [3]), (0, [])] -/
+/-- info: [(2, [3]), (1, [3]), (0, [])] -/
 #guard_msgs in
 #eval atomTable phiRef1 40
 
@@ -378,7 +379,7 @@ def branchDump : List (Bool × Proposition Nat × Nat) :=
   | none => []
   | some b => b.map fun sf => (sf.sign == .pos, sf.formula, sf.label)
 
-/-- info: ("OPEN", 17, 2, [(1, 0), (2, 1)], [(1, 2), (2, 2)], some (2, 1, 2)) -/
+/-- info: ("OPEN", 17, 2, [(1, 0), (2, 1)], [(2, 2), (1, 2)], none) -/
 #guard_msgs in
 #eval atRealFuel
 
@@ -390,7 +391,7 @@ def branchDump : List (Bool × Proposition Nat × Nat) :=
 #guard_msgs in
 #eval fimpWitnesses
 
-/-- info: (true, false) -/
+/-- info: (false, false) -/
 #guard_msgs in
 #eval decisiveFacts
 
@@ -459,7 +460,7 @@ def minAtomTable : List (Nat × List Nat) :=
   | .openBranch b _ _ =>
     (branchLabels b).map fun w => (w, (branchAtoms b).filter (forcesAtom b · w))
 
-/-- info: ("OPEN", 17, 2, [(1, 0), (2, 1)], [(1, 2), (2, 2)], some (2, 1, 2)) -/
+/-- info: ("OPEN", 17, 2, [(1, 0), (2, 1)], [(2, 2), (1, 2)], none) -/
 #guard_msgs in
 #eval reportMin phiRef1 realFuel
 
@@ -467,7 +468,7 @@ def minAtomTable : List (Nat × List Nat) :=
 #guard_msgs in
 #eval minBranchesAgree
 
-/-- info: [(2, [2, 3]), (1, [3]), (0, [])] -/
+/-- info: [(2, [3]), (1, [3]), (0, [])] -/
 #guard_msgs in
 #eval minAtomTable
 

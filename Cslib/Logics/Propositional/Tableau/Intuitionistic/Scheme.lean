@@ -1261,7 +1261,7 @@ private lemma any_beq_eq_false_of_not_mem {e : List (ISF Atom)} {sf : ISF Atom}
     obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hcase
     exact absurd ((beq_iff_eq.mp hxeq) ▸ hx) hne
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- Extracts the processed formula from a `some` result of `intStepBranch`: some
 `sf ∈ b` had `intApplyRuleFull sf nw b = result` and `newExp = e ++ [sf]`. Now a thin
 weakening of `intStepBranch_some_shape` (drops the `sf ∉ e` conjunct), rather than its own
@@ -1269,9 +1269,9 @@ direct unfold, per Phase 2's re-basing. -/
 private lemma intStepBranch_some_exists
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
-    (hstep : intStepBranch b e nw = some (result, newExp)) :
+    (hshape : IStepShape b e nw result newExp) :
     ∃ sf, sf ∈ b ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf] := by
-  obtain ⟨sf, hsfb, -, hint, hnewExp⟩ := intStepBranch_some_shape hstep
+  obtain ⟨sf, hsfb, -, hint, hnewExp⟩ := hshape
   exact ⟨sf, hsfb, hint, hnewExp⟩
 
 omit [Hashable Atom] in
@@ -1368,12 +1368,12 @@ private lemma intStepBranch_linear_preserves
     {newExp : List (ISF Atom)}
     (hIC : IExpandedConsistent b e) (hLB : ILabelBound b nw)
     (hACC : IExpandedAccessConsistent edges b e)
-    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    (hshape : IStepShape b e nw (.linearResult newForms nw' newEdge) newExp) :
     IExpandedConsistent (Branch.extendMany b newForms) newExp ∧
       ILabelBound (Branch.extendMany b newForms) nw' ∧
       IExpandedAccessConsistent (newEdge.elim edges (fun ed => edges ++ [ed]))
         (Branch.extendMany b newForms) newExp := by
-  obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hshape
   have hsfl : sf.label ≤ nw := hLB sf hsfb
   obtain ⟨s, ff, l⟩ := sf
   simp only at hsfl hint
@@ -1476,7 +1476,7 @@ private lemma intStepBranch_linear_preserves
                   List.any_eq_true.mpr ⟨⟨.neg, ψ, nw⟩, hmemNew _ ?_, by simp⟩⟩ <;>
             rw [← hnf] <;> simp
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- **Phase 4**: a `linearResult` step of `intStepBranch` preserves the strict label-bound
 companion `ILabelBoundStrict`: the ALPHA arms (`.pos,.and` / `.neg,.or`) only ever emit
 formulas at the processed formula's own label `l`, and `l < nw` is exactly the head fact
@@ -1490,9 +1490,9 @@ private lemma intStepBranch_linear_preserves_labelStrict
     {newForms : List (ISF Atom)} {nw' : Nat} {newEdge : Option (Nat × Nat)}
     {newExp : List (ISF Atom)}
     (hLBS : ILabelBoundStrict b nw)
-    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    (hshape : IStepShape b e nw (.linearResult newForms nw' newEdge) newExp) :
     ILabelBoundStrict (Branch.extendMany b newForms) nw' := by
-  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hshape
   have hsfl : sf.label < nw := hLBS sf hsfb
   obtain ⟨s, ff, l⟩ := sf
   simp only at hsfl hint
@@ -1552,12 +1552,12 @@ private lemma intStepBranch_branch_preserves
     {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
     (hIC : IExpandedConsistent b e) (hLB : ILabelBound b nw)
     (hACC : IExpandedAccessConsistent edges b e)
-    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    (hshape : IStepShape b e nw (.branchingResult branches' nw') newExp) :
     ∀ br ∈ branches',
       IExpandedConsistent (Branch.extendMany b br) newExp ∧
         ILabelBound (Branch.extendMany b br) nw' ∧
         IExpandedAccessConsistent edges (Branch.extendMany b br) newExp := by
-  obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hshape
   have hsfl : sf.label ≤ nw := hLB sf hsfb
   obtain ⟨s, ff, l⟩ := sf
   simp only at hsfl hint
@@ -1657,7 +1657,7 @@ private lemma intStepBranch_branch_preserves
         · exact sfAccessSat_mono hmemOld (hACC sf' hsf')
         · rcases hbr with rfl | rfl <;> simp [sfAccessSat]
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- **Phase 4**: a `branchingResult` step of `intStepBranch` preserves the strict label-bound
 companion `ILabelBoundStrict` on every sub-branch: branching arms (`.pos,.or` / `.pos,.imp`
 Deliverable 6 / `.neg,.and`) never mint a world (`nw' = nw`) and every disjunct formula is
@@ -1667,9 +1667,9 @@ private lemma intStepBranch_branch_preserves_labelStrict
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
     (hLBS : ILabelBoundStrict b nw)
-    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    (hshape : IStepShape b e nw (.branchingResult branches' nw') newExp) :
     ∀ br ∈ branches', ILabelBoundStrict (Branch.extendMany b br) nw' := by
-  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hshape
   have hsfl : sf.label < nw := hLBS sf hsfb
   obtain ⟨s, ff, l⟩ := sf
   simp only at hsfl hint
@@ -3149,9 +3149,9 @@ private lemma intStepBranch_linear_preserves_univ {φ0 : Proposition Atom}
     {newForms : List (ISF Atom)} {nw' : Nat} {newEdge : Option (Nat × Nat)}
     {newExp : List (ISF Atom)}
     (hUniv : ∀ x ∈ b, x ∈ intUniverseExt φ0) (hnwB : nw ≤ WBound φ0)
-    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    (hshape : IStepShape b e nw (.linearResult newForms nw' newEdge) newExp) :
     ∀ x ∈ Branch.extendMany b newForms, x ∈ intUniverseExt φ0 := by
-  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hshape
   have houts := intApplyRuleFull_outputs_subset_ext hUniv hsfb hnwB
   simp only [hint] at houts
   intro x hx
@@ -3169,9 +3169,9 @@ private lemma intStepBranch_branch_preserves_univ {φ0 : Proposition Atom}
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
     (hUniv : ∀ x ∈ b, x ∈ intUniverseExt φ0) (hnwB : nw ≤ WBound φ0)
-    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    (hshape : IStepShape b e nw (.branchingResult branches' nw') newExp) :
     ∀ br ∈ branches', ∀ x ∈ Branch.extendMany b br, x ∈ intUniverseExt φ0 := by
-  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, hsfb, hint, -⟩ := intStepBranch_some_exists hshape
   have houts := intApplyRuleFull_outputs_subset_ext hUniv hsfb hnwB
   simp only [hint] at houts
   intro br hbr x hx
@@ -3282,29 +3282,29 @@ private lemma intApplyRuleFull_branchingResult_nextWorld {sf : ISF Atom} {nw nw'
       simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
       exact hint.2.symm
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- `hNW` is preserved by a `linearResult` step of `intStepBranch` when no edge is
 created (the ALPHA arm): the world counter is untouched. -/
 private lemma intStepBranch_linear_preserves_nw_of_none
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {newForms : List (ISF Atom)} {nw' : Nat} {newExp : List (ISF Atom)}
-    (hstep : intStepBranch b e nw = some (.linearResult newForms nw' none, newExp)) :
+    (hshape : IStepShape b e nw (.linearResult newForms nw' none) newExp) :
     nw' = nw := by
-  obtain ⟨sf, -, hint, -⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, -, hint, -⟩ := intStepBranch_some_exists hshape
   rcases intApplyRuleFull_linearResult_nextWorld hint with ⟨-, heq⟩ | ⟨ed, hcon, -⟩
   · exact heq
   · exact absurd hcon (by simp)
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- `hNW` is preserved by a `branchingResult` step of `intStepBranch` on every
 sub-branch (the BETA arm): the world counter is untouched, and every child inherits
 the same (unchanged) counter. -/
 private lemma intStepBranch_branch_preserves_nw
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
-    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    (hshape : IStepShape b e nw (.branchingResult branches' nw') newExp) :
     nw' = nw := by
-  obtain ⟨sf, -, hint, -⟩ := intStepBranch_some_exists hstep
+  obtain ⟨sf, -, hint, -⟩ := intStepBranch_some_exists hshape
   exact intApplyRuleFull_branchingResult_nextWorld hint
 
 omit [Hashable Atom] in
@@ -4972,20 +4972,20 @@ lemma intApplyRuleFull_branchingResult_length {sf : ISF Atom} {nextWorld : Nat}
          exact h.1 ▸ rfl)
       | simp [intApplyRuleFull] at h
 
-omit [Hashable Atom] in
-/-- `intStepBranch` lift of `intApplyRuleFull_branchingResult_length`: a branching step
-always produces exactly two sub-branch extension lists. Re-based (Phase 2 of the
-beta-priority repair) to consume `intStepBranch_some_shape` instead of unfolding `intStepBranch`
-directly; the hypothesis itself stays `intStepBranch`-specific here (rather than generalized to
-`IStepShape`) because this lemma's one live call site, `CslibTests/BetaSplitRefutation.lean:203`,
-is explicitly Phase 3's to re-point (`goRaw`'s termination measure, alongside the call-site
-swap), not Phase 2's. -/
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- Branching-step lift of `intApplyRuleFull_branchingResult_length`: a branching step
+always produces exactly two sub-branch extension lists. Generalized (Phase 3 of the
+beta-priority repair) from `intStepBranch`-specific to `IStepShape`, so it serves both
+`intStepBranch` (via `intStepBranch_some_shape`) and `intStepBranchPrio` (via
+`intStepBranchPrio_some_exists`) at its call sites -- `intExpandBranches.go`'s own
+termination proof (the beta-arm `decreasing_by` case) and `CslibTests/BetaSplitRefutation.lean`'s
+`goRaw` termination measure, both of which now feed `intStepBranchPrio`. -/
 lemma intStepBranch_branchingResult_length {b : IBranch Atom}
     {expanded : List (ISF Atom)} {nextWorld : Nat}
     {brs : List (List (ISF Atom))} {nw' : Nat} {exp' : List (ISF Atom)}
-    (h : intStepBranch b expanded nextWorld = some (.branchingResult brs nw', exp')) :
+    (hshape : IStepShape b expanded nextWorld (.branchingResult brs nw') exp') :
     brs.length = 2 := by
-  obtain ⟨sf, -, -, hint, -⟩ := intStepBranch_some_shape h
+  obtain ⟨sf, -, -, hint, -⟩ := hshape
   exact intApplyRuleFull_branchingResult_length hint
 
 /-- Sum of `3 ^ ·` over a constant-fuel list is `length * 3 ^ c` (beta-arm bookkeeping
@@ -5092,20 +5092,18 @@ private lemma intWork_persistence_le (U : List (ISF Atom)) (b : IBranch Atom)
 
 omit [Hashable Atom] in
 /-- `intStepBranch_some_exists`, additionally exposing the "not already expanded"
-witness (`e.any (· == sf) = false`) that `intWork_drop` needs and the original lemma
-consumes internally without surfacing. Re-based (Phase 2 of the beta-priority repair) to
-consume `intStepBranch_some_shape` (which already carries the same fact as `sf ∉ e`) instead
-of its own direct unfold, converted to the `List.any`-Bool-false form via
-`any_beq_eq_false_of_not_mem`. The hypothesis stays `intStepBranch`-specific rather than
-generalized to `IStepShape`: this lemma's four live call sites sit inside the `go` induction
-that Phase 3 re-points to `intStepBranchPrio`, not Phase 2's. -/
+witness (`e.any (· == sf) = false`) that `intWork_drop` needs, converted from `IStepShape`'s
+`sf ∉ e` (Prop) negation via `any_beq_eq_false_of_not_mem`. Generalized (Phase 3 of the
+beta-priority repair) from `intStepBranch`-specific to `IStepShape` directly: this lemma's
+live call sites sit inside the `go` induction (`intExpandBranches_openBranch_sat`), which now
+supplies the shape via `intStepBranchPrio_some_exists`. -/
 private lemma intStepBranch_some_exists_fuel
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
-    (hstep : intStepBranch b e nw = some (result, newExp)) :
+    (hshape : IStepShape b e nw result newExp) :
     ∃ sf, sf ∈ b ∧ e.any (· == sf) = false ∧ intApplyRuleFull sf nw b = result ∧
       newExp = e ++ [sf] := by
-  obtain ⟨sf, hsfb, hsfne, hint, hnewExp⟩ := intStepBranch_some_shape hstep
+  obtain ⟨sf, hsfb, hsfne, hint, hnewExp⟩ := hshape
   exact ⟨sf, hsfb, any_beq_eq_false_of_not_mem hsfne, hint, hnewExp⟩
 
 omit [Hashable Atom] in
@@ -5160,7 +5158,7 @@ def intExpandBranches.go
         -- Per-branch fuel exhausted: return the (open) branch as countermodel
         .openBranch bPers
       | f' + 1 =>
-        match _hstep : intStepBranch bPers e nw with
+        match _hstep : intStepBranchPrio bPers e nw with
         | none =>
           -- Branch is saturated and open: countermodel
           .openBranch bPers
@@ -5249,7 +5247,8 @@ decreasing_by
     omega
   · -- Beta arm: 3 ^ (f' + 1) replaced by 2 * 3 ^ f' (exactly two children)
     apply Prod.Lex.left
-    have hlen : branches'.length = 2 := intStepBranch_branchingResult_length _hstep
+    have hlen : branches'.length = 2 :=
+      intStepBranch_branchingResult_length (intStepBranchPrio_some_exists _hstep)
     have hconst := sum_map_pow_const branches' f'
     rw [hlen] at hconst
     have _hp : (3 : Nat) ^ (f' + 1) = 3 ^ f' * 3 := pow_succ 3 f'
@@ -6094,7 +6093,8 @@ private lemma intExpandBranches_closed_unsat
         freshAbove_applyPersistenceFixpoint bh edgesH nwH (f' + 1) hfreshHead
       have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH :=
         fun sf' hmem' => Nat.ne_of_lt (hfreshAbove_pers.1 sf' hmem')
-      obtain ⟨sf, hsf_mem, hresult_sf, -⟩ := intStepBranch_some_exists hstep
+      obtain ⟨sf, hsf_mem, hresult_sf, -⟩ :=
+        intStepBranch_some_exists (intStepBranchPrio_some_exists hstep)
       have hnw'eq := intApplyRuleFull_none_nw sf nwH bPers newForms nw' hresult_sf
       have hlabels :=
         intApplyRuleFull_none_labels sf nwH bPers newForms nw' hresult_sf
@@ -6307,7 +6307,8 @@ private lemma intExpandBranches_closed_unsat
             freshAbove_applyPersistenceFixpoint bh edgesH nwH (f' + 1) hfreshHead
           have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH :=
             fun sf' hmem' => Nat.ne_of_lt (hfreshAbove_pers.1 sf' hmem')
-          obtain ⟨sf, hsf_mem, hresult_sf, -⟩ := intStepBranch_some_exists hstep
+          obtain ⟨sf, hsf_mem, hresult_sf, -⟩ :=
+            intStepBranch_some_exists (intStepBranchPrio_some_exists hstep)
           obtain ⟨he, hnw'eq, hlabels⟩ :=
             intApplyRuleFull_some_info sf nwH bPers newForms nw' newE hresult_sf
           have hfreshNew : FreshAbove (Branch.extendMany bPers newForms)
@@ -6430,7 +6431,8 @@ private lemma intExpandBranches_closed_unsat
         freshAbove_applyPersistenceFixpoint bh edgesH nwH (f' + 1) hfreshHead
       have hfresh : ∀ sf' ∈ bPers, sf'.label ≠ nwH :=
         fun sf' hmem' => Nat.ne_of_lt (hfreshAbove_pers.1 sf' hmem')
-      obtain ⟨sf, hsf_mem, hresult_sf, -⟩ := intStepBranch_some_exists hstep
+      obtain ⟨sf, hsf_mem, hresult_sf, -⟩ :=
+        intStepBranch_some_exists (intStepBranchPrio_some_exists hstep)
       have hnw'eq : nw' = nwH :=
         intApplyRuleFull_branching_nw sf nwH bPers branches' nw' hresult_sf
       have hfreshBr : ∀ br ∈ branches',
@@ -7316,8 +7318,10 @@ private lemma intExpandBranches_openBranch_sat
           -- transport just above).
           have hwp : IWorldsPlanted edgesH bPers :=
             IWorldsPlanted_mono hmemP (IWorldHist_worldsPlanted hWH_head hWHC_head)
-          exact ⟨augH, edgesH, lbH, nwH, IExpandedConsistent_sat hstep hIC_bPers,
-            IExpandedAccessConsistent_sat hstep hACC_bPers, hpp, hARC_bPers, hfc, hwp⟩
+          exact ⟨augH, edgesH, lbH, nwH,
+            IExpandedConsistent_sat (intStepBranchPrio_none_iff.mp hstep) hIC_bPers,
+            IExpandedAccessConsistent_sat (intStepBranchPrio_none_iff.mp hstep) hACC_bPers,
+            hpp, hARC_bPers, hfc, hwp⟩
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
     · rename_i heq
@@ -7391,16 +7395,21 @@ private lemma intExpandBranches_openBranch_sat
           have hLBS_bPers : ILabelBoundStrict bPers nwH :=
             ILabelBoundStrict_applyPersistenceFixpoint (f' + 1) hLBS_bh_nwH
           obtain ⟨hIC_ext, hLB_ext, hACC_ext⟩ :=
-            intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers hstep
+            intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers
+              (intStepBranchPrio_some_exists hstep)
           -- R1 threading: hUniv, hNW, hFuel for the ALPHA child
           -- `Branch.extendMany bPers newForms`.
           have hUniv_ext : ∀ x ∈ Branch.extendMany bPers newForms, x ∈ intUniverseExt φ0 :=
-            intStepBranch_linear_preserves_univ hUniv_bPers hNWP_head hstep
-          have hnw'_eq : nw' = nwH := intStepBranch_linear_preserves_nw_of_none hstep
+            intStepBranch_linear_preserves_univ hUniv_bPers hNWP_head
+              (intStepBranchPrio_some_exists hstep)
+          have hnw'_eq : nw' = nwH :=
+            intStepBranch_linear_preserves_nw_of_none (intStepBranchPrio_some_exists hstep)
           have hNW_ext : nw' ≤ WBound φ0 := hnw'_eq ▸ hNWP_head
           have hLBS_ext : ILabelBoundStrict (Branch.extendMany bPers newForms) nw' :=
-            intStepBranch_linear_preserves_labelStrict hLBS_bPers hstep
-          obtain ⟨sf, hsfb, hsfe, -, hnewExp⟩ := intStepBranch_some_exists_fuel hstep
+            intStepBranch_linear_preserves_labelStrict hLBS_bPers
+              (intStepBranchPrio_some_exists hstep)
+          obtain ⟨sf, hsfb, hsfe, -, hnewExp⟩ :=
+            intStepBranch_some_exists_fuel (intStepBranchPrio_some_exists hstep)
           have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
           have hsub : ∀ z ∈ bPers, z ∈ Branch.extendMany bPers newForms :=
             fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz
@@ -7536,7 +7545,8 @@ private lemma intExpandBranches_openBranch_sat
               have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
                 IExpandedAccessConsistent_mono hmemP hACC_bh_eH
               have hARC_bPers : IReuseContain lbH bPers := IReuseContain_mono hmemP hARC_bh_head
-              obtain ⟨sf, hsfb, hsfe, hint, hnewExp⟩ := intStepBranch_some_exists_fuel hstep
+              obtain ⟨sf, hsfb, hsfe, hint, hnewExp⟩ :=
+                intStepBranch_some_exists_fuel (intStepBranchPrio_some_exists hstep)
               have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
               have hdrop := intWork_drop (intUniverseExt φ0) bPers bPers eH sf hsfU hsfe
                 (fun z hz => hz)
@@ -7771,20 +7781,23 @@ private lemma intExpandBranches_openBranch_sat
               have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
                 IExpandedAccessConsistent_mono hmemP hACC_bh_eH
               obtain ⟨hIC_ext, hLB_ext, hACC_ext⟩ :=
-                intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers hstep
+                intStepBranch_linear_preserves hIC_bPers hLB_bPers hACC_bPers
+                  (intStepBranchPrio_some_exists hstep)
               -- R1 threading: hUniv, hNW (DP-2 fresh-mint), hFuel for the fresh-mint child
               -- `Branch.extendMany bPers newForms`.
               have hUniv_ext : ∀ x ∈ Branch.extendMany bPers newForms, x ∈ intUniverseExt φ0 :=
-                intStepBranch_linear_preserves_univ hUniv_bPers hNWP_head hstep
+                intStepBranch_linear_preserves_univ hUniv_bPers hNWP_head
+                  (intStepBranchPrio_some_exists hstep)
               obtain ⟨sf, hsfb, hsfe, hintSf, hnewExp⟩ :=
-                intStepBranch_some_exists_fuel hstep
+                intStepBranch_some_exists_fuel (intStepBranchPrio_some_exists hstep)
               have hnw'_eq : nw' = nwH + 1 := by
                 rcases intApplyRuleFull_linearResult_nextWorld hintSf with
                   ⟨hc, -⟩ | ⟨ed, -, heqnw⟩
                 · exact absurd hc (by simp)
                 · exact heqnw
               have hLBS_ext : ILabelBoundStrict (Branch.extendMany bPers newForms) nw' :=
-                intStepBranch_linear_preserves_labelStrict hLBS_bPers hstep
+                intStepBranch_linear_preserves_labelStrict hLBS_bPers
+                  (intStepBranchPrio_some_exists hstep)
               have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
               have hsub : ∀ z ∈ bPers, z ∈ Branch.extendMany bPers newForms :=
                 fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz
@@ -7934,14 +7947,19 @@ private lemma intExpandBranches_openBranch_sat
             ILabelBound_applyPersistenceFixpoint (f' + 1) hLB_bh_nwH
           have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
             IExpandedAccessConsistent_mono hmemP hACC_bh_eH
-          have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hACC_bPers hstep
-          have hbrLBS := intStepBranch_branch_preserves_labelStrict hLBS_bPers hstep
+          have hbr := intStepBranch_branch_preserves hIC_bPers hLB_bPers hACC_bPers
+            (intStepBranchPrio_some_exists hstep)
+          have hbrLBS := intStepBranch_branch_preserves_labelStrict hLBS_bPers
+            (intStepBranchPrio_some_exists hstep)
           -- R1 threading: hUniv, hNW, hFuel for every BETA child
           -- `Branch.extendMany bPers br`, `br ∈ branches'`.
-          have hUniv_branch := intStepBranch_branch_preserves_univ hUniv_bPers hNWP_head hstep
-          have hnw'_eq : nw' = nwH := intStepBranch_branch_preserves_nw hstep
+          have hUniv_branch := intStepBranch_branch_preserves_univ hUniv_bPers hNWP_head
+            (intStepBranchPrio_some_exists hstep)
+          have hnw'_eq : nw' = nwH :=
+            intStepBranch_branch_preserves_nw (intStepBranchPrio_some_exists hstep)
           have hNW_ext : nw' ≤ WBound φ0 := by rw [hnw'_eq]; exact hNWP_head
-          obtain ⟨sf, hsfb, hsfe, -, hnewExp⟩ := intStepBranch_some_exists_fuel hstep
+          obtain ⟨sf, hsfb, hsfe, -, hnewExp⟩ :=
+            intStepBranch_some_exists_fuel (intStepBranchPrio_some_exists hstep)
           have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
           have hFuel_branch : ∀ br ∈ branches', intWork (intUniverseExt φ0)
               (Branch.extendMany bPers br) newExp < f' := by
@@ -8040,7 +8058,7 @@ private lemma intExpandBranches_openBranch_sat
     · rename_i heq
       have hcon := hstep.symm.trans heq
       simp at hcon
-    · exact absurd rfl (intStepBranch_result_ne_notApplicable hstep)
+    · exact absurd rfl (intStepBranchPrio_result_ne_notApplicable hstep)
   | case10 done doneExp doneNW doneEdges doneFuels head restBs pExp pNW pEdges pFuels
       hmismatch ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF

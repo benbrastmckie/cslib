@@ -158,7 +158,7 @@ def atomTable : List (Nat × List Nat) :=
   | none => []
   | some b => (branchLabels b).map fun w => (w, (branchAtoms b).filter (forcesAtom b · w))
 
-/-- info: [(2, [2, 3]), (1, [3]), (0, [])] -/
+/-- info: [(2, [3]), (1, [3]), (0, [])] -/
 #guard_msgs in
 #eval atomTable
 
@@ -169,9 +169,10 @@ def atomTable : List (Nat × List Nat) :=
 #guard_msgs in
 #eval check []
 
-/-! The raw tree edges: upward-closed, but also does not falsify `phiRef1` at world `0`. -/
+/-! The raw tree edges: upward-closed, and (post-repair) DOES falsify `phiRef1` at world `0` --
+this is now itself a witness (`upwardClosed = true`, `evalF ... = false`). -/
 
-/-- info: some (true, true) -/
+/-- info: some (true, false) -/
 #guard_msgs in
 #eval check [(1, 0), (2, 1)]
 
@@ -182,11 +183,14 @@ def atomTable : List (Nat × List Nat) :=
 #guard_msgs in
 #eval check [(1, 0)]
 
-/-! The augmented frame (raw plus loop-back edges) — the one the source construction actually
-refutes upward closure over. It is NOT upward-closed (`upwardClosed = false`) and also does not
-falsify `phiRef1` (`evalF ... = false`, i.e. `¬forces = false`), giving `(false, false)`. -/
+/-! This hardcoded edge set (raw tree plus the pre-repair calculus's loop-back edges) was the
+frame the source construction refuted upward closure over before the beta-priority repair
+(`(false, false)`: not upward-closed, and not falsifying). Under the repaired calculus this exact
+edge set is upward-closed and falsifies `phiRef1` at world `0`, giving `(true, false)` -- kept as
+a regression guard on the specific edge shape, not a claim about what edges the repaired
+algorithm now actually produces (see `report`/`atomTable` above for that). -/
 
-/-- info: some (false, false) -/
+/-- info: some (true, false) -/
 #guard_msgs in
 #eval check [(1, 0), (2, 1), (1, 2), (2, 2)]
 
@@ -235,7 +239,7 @@ def searchSpaceSize : Option (Nat × Nat) :=
   | some b, some ws => some (ws.length, (inclPairs b ws).length)
   | _, _ => none
 
-/-- info: some (4, 7) -/
+/-- info: some (4, 8) -/
 #guard_msgs in
 #eval searchSpaceSize
 

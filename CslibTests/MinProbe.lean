@@ -124,7 +124,7 @@ def minBranch : Option (IBranch Nat) :=
 
 /-! World table for the minimal run: `(world, positive atoms, forces ⊥)`. -/
 
-/-- info: some [(2, [2, 3], false), (1, [3], false), (0, [], false)] -/
+/-- info: some [(2, [3], false), (1, [3], false), (0, [], false)] -/
 #guard_msgs in
 #eval minBranch.map fun b =>
   ((branchLabels b).map fun w => (w, atomsAt b w, botAtMin b w))
@@ -148,11 +148,11 @@ def try1 (edges : IEdges) : Option (IEdges × Bool × Bool × Bool) :=
 #guard_msgs in
 #eval try1 [(1,0)]
 
-/-- info: some ([(1, 0), (2, 1)], true, true, false) -/
+/-- info: some ([(1, 0), (2, 1)], true, true, true) -/
 #guard_msgs in
 #eval try1 [(1,0),(2,1)]
 
-/-- info: some ([(2, 0)], true, true, false) -/
+/-- info: some ([(2, 0)], true, true, true) -/
 #guard_msgs in
 #eval try1 [(2,0)]
 

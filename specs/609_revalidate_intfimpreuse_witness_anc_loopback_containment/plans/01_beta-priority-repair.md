@@ -296,7 +296,7 @@ the true set is larger, do not silently absorb it — record the delta.
 
 ---
 
-### Phase 3: Swap the call site and reconcile the test corpus [IN PROGRESS]
+### Phase 3: Swap the call site and reconcile the test corpus [COMPLETED]
 
 **Goal**: Land the actual calculus repair. This is the phase the report calls "worth landing
 standalone": verdict-preserving, strictly reduces world creation, no new proof debt.
@@ -334,25 +334,68 @@ should re-run the greps above to get current line numbers and counts before star
 accordingly rather than trusting the original Timing estimate.
 
 **Tasks**:
-- [ ] Swap the single call site in `intExpandBranches.go` from `intStepBranch bPers e nw` to
+- [x] Swap the single call site in `intExpandBranches.go` from `intStepBranch bPers e nw` to
       `intStepBranchPrio bPers e nw` (`Scheme.lean`, the `match _hstep : ... with` under
       `| f' + 1 =>`; report cites `:5005`, re-locate by the `match _hstep` anchor).
-- [ ] Re-point `go`'s proof obligations at `intStepBranchPrio_some_exists` and the `none`-iff
+- [x] Re-point `go`'s proof obligations at `intStepBranchPrio_some_exists` and the `none`-iff
       bridge. Per report §5.2, every `none`-keyed result — saturation, `IBranchSaturation`,
       `intExpandBranches_openBranch_sat`'s open-branch leaf — needs no reproof, only the bridge.
-- [ ] Update `goRaw` in `CslibTests/BetaSplitRefutation.lean:132` to call `intStepBranchPrio`, and
+      *(As predicted by the Scope Correction: this required generalizing 8 more `intStepBranch_*`
+      lemmas -- `intStepBranch_linear_preserves`, `_linear_preserves_labelStrict`,
+      `_linear_preserves_univ`, `_linear_preserves_nw_of_none`, `intStepBranch_branch_preserves`,
+      `_branch_preserves_labelStrict`, `_branch_preserves_univ`, `_branch_preserves_nw` -- plus
+      completing the deferred `IStepShape` generalization of `intStepBranch_branchingResult_length`
+      and `intStepBranch_some_exists_fuel` from Phase 2, and generalizing the low-level
+      `intStepBranch_some_exists` helper itself (not separately named in the Scope Correction, but
+      needed by three direct call sites inside `intExpandBranches_closed_unsat`'s induction). Every
+      call site inside the four `intExpandBranches.go.induct` blocks that fed the old
+      `intStepBranch`-typed `hstep` to one of these lemmas now wraps it with
+      `intStepBranchPrio_some_exists hstep` first. The `none`-case leaf
+      (`IExpandedConsistent_sat`/`IExpandedAccessConsistent_sat`) wraps with
+      `intStepBranchPrio_none_iff.mp hstep`, and the defensive `notApplicable` arm now calls
+      Phase 1's `intStepBranchPrio_result_ne_notApplicable` directly. Confirmed empirically: only
+      ONE of the four induction blocks (`intExpandBranches_openBranch_sat`, the one starting at the
+      call site that was `:7147` at investigation time) needed any of this -- the other three
+      induction blocks (`intExpandBranches_openBranch_closed`, `intExpandBranches_closed_unsat`,
+      `intExpandBranches_openBranch_initial_mem`) either needed zero changes (their `hstep` is only
+      ever compared to other equations, never fed to an `intStepBranch`-specific lemma) or, for
+      `intExpandBranches_closed_unsat`, only the three direct `intStepBranch_some_exists` call
+      sites.)*
+- [x] Update `goRaw` in `CslibTests/BetaSplitRefutation.lean:132` to call `intStepBranchPrio`, and
       its termination measure at `:203` (`intStepBranch_branchingResult_length`) to the
       corresponding shape lemma. `goRaw` must continue to mirror the real algorithm — that is the
       entire purpose of the `branchesAgree` / `minBranchesAgree` fidelity checks.
-- [ ] Run the test corpus and reconcile every `#guard_msgs` whose expected value changed. Expected
-      to change: `BetaSplitRefutation`'s `report`/`atRealFuel` tuples (the persistence-violation
-      field `some (2, 1, 2)` should become the no-violation value) and any `phiRef3`-derived world
-      counts (report §4: 3 worlds vs baseline 4). Expected **unchanged**: `TableauConformance`'s
-      verdict assertions (report §4 measured 0 differences across all 20 rows).
-- [ ] Confirm the divergence witness (conformance row 20, complexity 9) still returns `OPEN` at
+      *(Confirmed: both `branchesAgree` and `minBranchesAgree` still evaluate `true` after the
+      swap, unchanged and unflagged by the `#guard_msgs` reconciliation below -- the recreation
+      still faithfully mirrors the real `intuitionisticTableau`/`minimalTableau` entry points.)*
+- [x] Run the test corpus and reconcile every `#guard_msgs` whose expected value changed.
+      **Actual results** (true set, per this task's own delta-recording convention -- the Scope
+      Hypothesis below undercounted which files changed): `BetaSplitRefutation.lean` (6 of 10
+      assertions changed: `report phiRef1`, `atomTable phiRef1`, `atRealFuel`, `decisiveFacts`,
+      `reportMin phiRef1 realFuel`, `minAtomTable` -- the persistence-violation field
+      `some (2, 1, 2)` became `none` exactly as predicted, and `pr` is no longer forced at world 2
+      without also being forced at world 1); `MinProbe.lean` (3 of 8 changed: the world table and
+      two `try1` witness rows flip from `false` to `true` on their falsification conjunct);
+      `WitnessProbe.lean` (4 of 10 changed: `atomTable`, both `check` calls on the raw-tree and
+      augmented-frame edge sets, and `searchSpaceSize`'s admissible-pair count `7 -> 8`);
+      `WitnessSearch3.lean` (4 of 13 changed: the `phiRef1`/`phiRef3` intuitionistic-scheme rows
+      and the `checkMin phiRef1` row all flip from the cited-failure `(true, false)` to
+      `(true, true)`, i.e. the frame-adequacy gap the whole task exists to close is gone).
+      **`TableauConformance.lean` needed zero changes**, confirming the Scope Hypothesis's central
+      claim (0 verdict differences across all 20 rows) even though the per-file failure
+      distribution among the other four files was wider than hypothesized. Stale prose narrative
+      in the three probe/search files (not just `BetaSplitRefutation.lean`, whose narrative is
+      Phase 4's explicit territory) was updated in place alongside the numeric reconciliation so
+      the files stay internally consistent -- see `WitnessProbe.lean`'s and `WitnessSearch3.lean`'s
+      updated module comments, phrased as empirical facts about the specific hardcoded edge sets
+      rather than claims about the algorithm's general behavior.
+- [x] Confirm the divergence witness (conformance row 20, complexity 9) still returns `OPEN` at
       `intFuelExt φ0` and the 14 IPC-valid rows still return `CLOSED` — this is the termination and
       completeness gate, and it is stronger evidence than any small-fuel growth table (the report
       explicitly declines to rely on those).
+      *(Confirmed via `lake test`: `CslibTests.TableauConformance` built with zero `#guard_msgs`
+      failures, meaning every one of its 20 row assertions -- including row 20 -- still holds at
+      its pre-change expected value.)*
 
 **Timing**: 2 hours
 
@@ -385,9 +428,20 @@ tuple.
 - The `atomic-batch` boundary is the whole file set above: intermediate per-file states are
   expected red and must not be committed.
 
+**Confirmed** (this dispatch): `lake exe cache get` (warm), scoped `lake build
+Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` green, `lake exe checkInitImports`
+clean, `lake lint` zero findings in touched files across all 7 prevention categories, `lake exe
+lint-style` clean, `lake shake --add-public --keep-implied --keep-prefix` clean for touched
+files, `lake exe mk_all --module` reports "No update necessary" (no new files), full `lake build`
+green at 3325 jobs (identical job count to the Phase 1/2 baseline), and `lake test` green at 9397
+jobs. Sorry count unchanged at 2 (`Scheme.lean:8203` `openBranch_countermodel`, Phase 8's
+territory; `Completeness.lean:181` `intuitionisticTableau_complete`, Phase 9's territory). Axiom
+count unchanged at 26. Committed as a single atomic-batch commit spanning `Expansion.lean`
+(no change this phase), `Scheme.lean`, and the four `CslibTests/*.lean` files.
+
 ---
 
-### Phase 4: Promote `phiRef4` and re-point the refutation narrative [NOT STARTED]
+### Phase 4: Promote `phiRef4` and re-point the refutation narrative [IN PROGRESS]
 
 **Goal**: Record the third refuting formula the report discovered, and re-point
 `BetaSplitRefutation.lean`'s prose from "here is the defect" to "here is the defect and here is the

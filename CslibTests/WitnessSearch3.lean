@@ -171,10 +171,11 @@ def deMorgan : Proposition Nat := ((pa ∧ pb) → .bot) → ((pa → .bot) ∨ 
 def dummett : Proposition Nat := (pa → pb) ∨ (pb → pa)
 
 /-! `(verdict, (UC, ¬Forces) without fresh world, (UC, ¬Forces) with fresh world)`. `(true, true)`
-in either slot means the maximal inclusion frame witnesses the existential. The `phiRef1` and
-`phiRef3` rows below FAIL — `(true, false)` — which is the cited fact. -/
+in either slot means the maximal inclusion frame witnesses the existential. Under the pre-repair
+calculus the `phiRef1` and `phiRef3` rows failed here (`(true, false)`); under the repaired
+beta-priority calculus (`intStepBranchPrio`, see `Expansion.lean`) every row below passes. -/
 
-/-- info: ("OPEN", (true, false), true, false) -/
+/-- info: ("OPEN", (true, true), true, true) -/
 #guard_msgs in
 #eval checkInt phiRef1
 
@@ -182,7 +183,7 @@ in either slot means the maximal inclusion frame witnesses the existential. The 
 #guard_msgs in
 #eval checkInt phiRef2
 
-/-- info: ("OPEN", (true, false), true, false) -/
+/-- info: ("OPEN", (true, true), true, true) -/
 #guard_msgs in
 #eval checkInt phiRef3
 
@@ -206,9 +207,10 @@ in either slot means the maximal inclusion frame witnesses the existential. The 
 #guard_msgs in
 #eval checkInt dummett
 
-/-! Minimal scheme (`isMinimallyClosed`) rows. `checkMin phiRef1` FAILS the maximal frame too. -/
+/-! Minimal scheme (`isMinimallyClosed`) rows. Under the pre-repair calculus `checkMin phiRef1`
+also failed the maximal frame; under the repaired calculus it passes. -/
 
-/-- info: ("OPEN", (true, false), true, false) -/
+/-- info: ("OPEN", (true, true), true, true) -/
 #guard_msgs in
 #eval checkMin phiRef1
 

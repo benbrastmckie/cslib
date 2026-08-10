@@ -30,7 +30,7 @@ next_project_number: 613
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 605 [PLANNED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
   └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
-609 [PLANNING] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
+609 [PLANNED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
   └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece (see above)
 
 ### Modal Logic
@@ -154,11 +154,12 @@ SOURCE: specs/reviews/review-2026-08-09.md finding C1.
 ---
 
 ### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 604
 - **Research**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md]
+- **Plan**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md]
 
 **Description**: `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`) records a loop-back edge on a `Sfor`-containment check at the moment the branch reuses an ancestor world -- but it never re-validates that containment as the branch continues to grow afterward. This is the root cause both the intuitionistic tableau completeness `truthLemma` restructure and the frame-adequacy analysis that preceded it converged on: it is why the AUGMENTED frame (`augSets`, threaded by `intExpandBranches_openBranch_sat`) carries `IFimpAccess` but REFUTES positive persistence (`CslibTests/BetaSplitRefutation.lean`, `firstViolation = some (2,1,2)`), and why the RAW frame (`rawEdges`) carries positive persistence (`IPosPersistRaw`, sorry-free) but REFUTES `IFimpAccess` at the blocked worlds pruning strands.
 

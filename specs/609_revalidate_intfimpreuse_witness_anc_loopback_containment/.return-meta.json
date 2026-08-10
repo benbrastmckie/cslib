@@ -1,33 +1,27 @@
 {
-  "status": "research_finished",
-  "started_at": "2026-08-09T17:36:02-07:00",
-  "finished_at": "2026-08-09T18:55:00-07:00",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 609,
+  "session_id": "sess_1786321994_b49e26_609",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md"
-    },
-    {
-      "type": "probe",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/scratch/ReuseRevalidateProbe.lean"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json"
+      "type": "plan",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+      "summary": "Nine-phase plan landing repair V1 (beta-priority rule selection in intStepBranch), through the snapshot-free IReuseContain, to discharging openBranch_countermodel and the downstream Completeness sorries. Waves [[1],[2],[3],[4,5],[6],[7],[8],[9]]. Passes validate-artifact.sh --strict with zero warnings."
     }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Report, probe and orchestrator handoff written. Recommendation: beta-priority rule ordering in intStepBranch (V1), machine-measured adequate on 15 formulas and verdict-equivalent on the 20-row conformance corpus. Fallback V2 (retract-on-violation) measured equally adequate. V3 (cyclic edges) excluded on termination grounds."
-  },
-  "metadata": {
-    "session_id": "sess_1786321994_b49e26_609",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "next_action_hint": "plan",
-    "new_sorries": 0,
-    "new_axioms": 0,
-    "source_files_modified": []
-  }
+  "phase_count": 9,
+  "estimated_hours": 15,
+  "dependency_waves": [[1], [2], [3], [4, 5], [6], [7], [8], [9]],
+  "memory_candidates": [
+    {
+      "content": "When a plan changes the behavior of an algorithm that a CI-protected regression test recreates locally, the test-file reconciliation belongs in the SAME phase as the behavior change, never a later cleanup phase. Diagnostic: grep the test file for calls into the library symbol being changed. In the cslib propositional tableau case, CslibTests/BetaSplitRefutation.lean's `goRaw` recreation calls the library `intStepBranch` directly while `branchesAgree` compares the recreation's output against the real `intuitionisticTableau` -- so the moment the library call site swaps, the fidelity assertion flips false and the phase cannot report green. A research report that sequences the test update last has produced a plan whose middle phases are red by construction. The general pattern: a phase boundary is only real if both sides of it are green, and a local recreation of a library algorithm couples the two sides invisibly.",
+      "category": "PATTERN",
+      "source_artifact": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["phase-sequencing", "regression-test-coupling", "guard-msgs", "green-phase-boundary", "algorithm-recreation", "cslib-tableau"]
+    }
+  ],
+  "next_steps": "Run /implement 609 to execute the plan"
 }

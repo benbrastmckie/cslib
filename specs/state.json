@@ -1,6 +1,16 @@
 {
-  "next_project_number": 613,
+  "next_project_number": 614,
   "active_projects": [
+    {
+      "project_number": 613,
+      "project_name": "fix_unuseddecidableintype_lint_warnings",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "description": "Fix the two unusedDecidableInType lint warnings in Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean:159 and Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean:173. Both are pre-existing and were surfaced while verifying the propositional tableau TFAE fold. Verify with lake lint after the fix.",
+      "created": "2026-08-10T16:41:53Z",
+      "last_updated": "2026-08-10T16:41:53Z"
+    },
     {
       "project_number": 606,
       "project_name": "discharge_propositional_tableau_completeness_and_verify_tfae",

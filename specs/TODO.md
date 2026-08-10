@@ -1,5 +1,5 @@
 ---
-next_project_number: 613
+next_project_number: 614
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 613
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612,613 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -65,6 +65,7 @@ next_project_number: 613
 
 ### Code Hygiene
 
+613 [NOT STARTED] — Fix the two unusedDecidableInType lint warnings in Cslib/Logics/P
 589 [NOT STARTED] — Fix repo-wide unusedArguments lint findings across the Lean sourc
 
 ### Agent System
@@ -79,6 +80,16 @@ next_project_number: 613
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
 ## Tasks
+
+### 613. Fix unuseddecidableintype lint warnings
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: Fix the two unusedDecidableInType lint warnings in Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean:159 and Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean:173. Both are pre-existing and were surfaced while verifying the propositional tableau TFAE fold. Verify with lake lint after the fix.
+
+---
 
 ### 612. Metadata and hygiene batch from the 2026-08-09 review
 - **Status**: [NOT STARTED]

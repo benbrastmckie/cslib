@@ -1,90 +1,59 @@
 {
   "task_number": 606,
   "task_name": "discharge_propositional_tableau_completeness_and_verify_tfae",
-  "phase": "plan",
-  "status": "planned",
+  "phase": "implement",
+  "status": "implemented",
   "session_id": "sess_1786375467_9fbdb7",
   "orchestrator_mode": true,
   "artifacts": [
     "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/reports/01_tableau-completeness-ground-truth.md",
-    "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/plans/01_tfae-fold-and-annotation-closeout.md"
+    "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/plans/01_tfae-fold-and-annotation-closeout.md",
+    "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/summaries/01_tfae-fold-and-annotation-closeout-summary.md"
   ],
   "plan_path": "specs/606_discharge_propositional_tableau_completeness_and_verify_tfae/plans/01_tfae-fold-and-annotation-closeout.md",
-  "phase_count": 6,
-  "estimated_hours": 5,
-  "dependency_waves": [[1, 2], [3], [4], [5], [6]],
-  "phases": [
-    {
-      "n": 1,
-      "name": "Land the TFAE fold in ProofSystemEquivalence.lean",
-      "depends_on": [],
-      "tier": "interface",
-      "territory": ["Cslib/Logics/Propositional/ProofSystemEquivalence.lean"],
-      "note": "Only phase with proof content. Reuse the verified probe verbatim; do not re-derive."
-    },
-    {
-      "n": 2,
-      "name": "Remove the KNOWN IMPOSSIBLE claim in Scheme.lean",
-      "depends_on": [],
-      "tier": "local",
-      "territory": ["Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"]
-    },
-    {
-      "n": 3,
-      "name": "Re-tense the augmented-frame refutation claims as historical",
-      "depends_on": [2],
-      "tier": "local",
-      "territory": [
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean"
-      ],
-      "note": "PRESERVE, DO NOT DELETE -- re-tense only. The phiRef1 counterexample explains why hpersAug exists."
-    },
-    {
-      "n": 4,
-      "name": "Clear the still open / still sorry claims",
-      "depends_on": [3],
-      "tier": "local",
-      "territory": [
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
-        "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean"
-      ]
-    },
-    {
-      "n": 5,
-      "name": "Adjacent-file sweep and stale-line-reference sweep",
-      "depends_on": [4],
-      "tier": "local",
-      "territory": [
-        "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
-        "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean",
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
-      ]
-    },
-    {
-      "n": 6,
-      "name": "Full verification gate",
-      "depends_on": [1, 5],
-      "tier": "full",
-      "territory": [],
-      "note": "lake build, lake test, lake exe lint-style, lake exe checkInitImports, lake lint, lake shake, 7x lean_verify"
+  "phases_completed": 6,
+  "phases_total": 6,
+  "modified_files": [
+    "Cslib/Logics/Propositional/ProofSystemEquivalence.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "build_passed": true,
+    "test_passed": true,
+    "lint_style_passed": true,
+    "check_init_imports_passed": true,
+    "lake_lint_new_findings_in_scope": 0,
+    "lake_shake_new_findings_in_scope": 0,
+    "sorry_count_in_scope": 0,
+    "vacuous_count_new": 0,
+    "axiom_count_delta": 0,
+    "lean_verify_results": {
+      "Cslib.Logic.PL.intuitionisticTableau_complete": "clean (propext, Classical.choice, Quot.sound), no sorryAx",
+      "Cslib.Logic.PL.minimalTableau_complete": "clean, no sorryAx",
+      "Cslib.Logic.PL.truthLemma": "clean, no sorryAx",
+      "Cslib.Logic.PL.openBranch_countermodel": "clean, no sorryAx",
+      "Cslib.Logic.PL.cplProofSystemsWithTableauTfae": "clean, no sorryAx",
+      "Cslib.Logic.PL.iplProofSystemsWithTableauTfae": "clean, no sorryAx",
+      "Cslib.Logic.PL.mplProofSystemsWithTableauTfae": "clean, no sorryAx"
     }
-  ],
-  "decisions_made_by_planner": {
-    "a_context_based_tfae_tableau_node": "NO -- tableau procedures are closed-formula only; fold into the three ...Closed variants.",
-    "b_adjacent_files": "YES -- IntDecidability.lean, MinDecidability.lean, Expansion.lean scoped in (explicit file_scope widening, 4 -> 7 files).",
-    "c_retain_unused_raw_edges_lemmas": "YES -- retain both with corrected docstrings as the durable raw-frame record."
   },
-  "critical_implementer_notes": [
-    "The verified probe file is at /tmp/claude-1000/-home-benjamin-Projects-cslib/2b7a4a92-9db5-490b-8511-e9e6eb44721a/scratchpad/tfae_probe.lean (lake env lean, exit 0). Reuse its proof bodies verbatim.",
-    "GOTCHA: rw cannot apply ivalid_universe_invariant / mvalid_universe_invariant (unsolvable universe metavariable). Use term-mode Iff.trans composition. CPL has no universe parameter and rw works there.",
-    "GOTCHA: [Hashable Atom] is required for the tableau nodes but ProofSystemEquivalence.lean's variable line declares only [DecidableEq Atom]. Add a NEW section with a local variable [Hashable Atom]; do NOT widen the six existing TFAE signatures.",
-    "No DP site needs any work: all four are already sorry-free and axiom-clean. Do not touch the DP-3 proof -- its in-source prohibition is resolved (the _huc conjunct is genuinely proved via hpersAug), not violated.",
-    "Zero new sorries, zero new axioms. No theorem statement is altered by any phase, so the laundering prohibition is never engaged.",
-    "Phases 2-5 are documentation-only but carry tier local (not prose) because Lean docstrings have a parse surface in a 9833-line file.",
-    "Do NOT fix the two pre-existing linter.unusedDecidableInType warnings on ivalid_universe_invariant / mvalid_universe_invariant -- out of scope, and changing those signatures touches the Decidable instances."
+  "decisions_made_by_planner_confirmed_followed": {
+    "a_context_based_tfae_tableau_node": "NO -- followed; only the three ...Closed variants gained a tableau node.",
+    "b_adjacent_files": "YES -- followed; IntDecidability.lean, MinDecidability.lean, Expansion.lean edited.",
+    "c_retain_unused_raw_edges_lemmas": "YES -- followed; both retained with corrected docstrings, not deleted."
+  },
+  "deviations": [
+    "Phase 3: the Scheme.lean:908-941-area self-copy-channel paragraph combined a REFUTED clause and a still-open/surviving-existential clause in one sentence; both were re-tensed together in Phase 3 (rather than splitting across Phases 3 and 4), and Phase 4 verified the result without re-editing it.",
+    "Phase 4: found and fixed an additional stale claim not pre-declared in the plan -- Scheme.lean's IAllReuseFrozenOrigin docstring claimed plan Phase 6 task-list item (d) was still open, directly contradicted by task 609's own commit history (phase 6.5: 'thread IAllReuseFrozenOrigin through the key induction') and by the hPendingARFO/hDoneARFO hypotheses now present in intExpandBranches_openBranch_sat's own statement."
   ],
-  "next_phase": "implement",
-  "requires_user_review": false
+  "blockers": [],
+  "next_phase": null,
+  "requires_user_review": false,
+  "completion_summary": "Landed the CPL/IPL/MPL tableau-fold TFAE theorems (research-verified probe reused verbatim from the report) and closed roughly a dozen stale annotation blocks across seven files, eliminating Scheme.lean's internal contradiction where a docstring declared a reconciliation 'KNOWN IMPOSSIBLE' twenty lines above where a sorry-free proof performs exactly that reconciliation. Zero new sorries, zero new axioms, no theorem statement altered, full 6-command CI gate green (lake build, lake test, lake exe lint-style, lake exe checkInitImports, lake lint, lake shake), and all seven target declarations lean_verify-clean."
 }

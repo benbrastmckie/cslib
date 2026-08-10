@@ -431,29 +431,44 @@ that no longer resolves to the declaration it names.
 
 ---
 
-### Phase 6: Full verification gate [NOT STARTED]
+### Phase 6: Full verification gate [COMPLETED]
 
 **Goal**: Run the complete CI gate set and confirm zero new sorries, zero new axioms, and no
 regression in the `#guard_msgs` assertions that pin the algorithm's behaviour.
 
 **Tasks**:
-- [ ] `lake build` (full project). Must exit 0 with zero errors.
-- [ ] `lake test` — the `CslibTests/` probe files (notably `BetaSplitRefutation.lean`) carry
-      `#guard_msgs` assertions pinning post-repair behaviour; all must still pass.
-- [ ] `lake exe lint-style` — text linters over every edited file.
-- [ ] `lake exe checkInitImports` — confirm the four new imports in `ProofSystemEquivalence.lean`
-      did not disturb the `Cslib.Init` requirement.
-- [ ] `lake lint` — environment linters; confirm the three new theorems raise no `docBlame` and no
+- [x] `lake build` (full project). Must exit 0 with zero errors. **Result: exit 0, 3325 jobs.**
+- [x] `lake test` — the `CslibTests/` probe files (notably `BetaSplitRefutation.lean`) carry
+      `#guard_msgs` assertions pinning post-repair behaviour; all must still pass. **Result: exit
+      0** (`lake test` full suite and a scoped rebuild of `CslibTests.BetaSplitRefutation` alone).
+- [x] `lake exe lint-style` — text linters over every edited file. **Result: exit 0, repo-wide and
+      scoped to all seven in-scope files individually.**
+- [x] `lake exe checkInitImports` — confirm the four new imports in `ProofSystemEquivalence.lean`
+      did not disturb the `Cslib.Init` requirement. **Result: exit 0.**
+- [x] `lake lint` — environment linters; confirm the three new theorems raise no `docBlame` and no
       naming violations. Confirm the two pre-existing `linter.unusedDecidableInType` warnings on
       `ivalid_universe_invariant` / `mvalid_universe_invariant` are unchanged and were not
-      "fixed" as a side effect.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — check import minimization on
+      "fixed" as a side effect. **Result: 149 pre-existing findings repo-wide, zero touching any
+      of the seven in-scope files; `unusedDecidableInType` is a build-time linter (visible under
+      `lake build`, not under `lake lint`'s 15-linter environment set) and both pre-existing
+      warnings were confirmed unchanged and un-"fixed" under `lake build`.**
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — check import minimization on
       `ProofSystemEquivalence.lean`. `lake exe mk_all --module` is NOT needed (no new file).
-- [ ] `lean_verify` on all four DP sites plus the three new TFAE theorems; confirm every one
-      reports exactly `{propext, Classical.choice, Quot.sound}` with no `sorryAx`.
-- [ ] `grep -rn '\bsorry\b'` across all seven in-scope files; confirm zero `sorry` tactic
-      occurrences and that every prose mention reads as historical.
-- [ ] Record the final gate results in the implementation summary.
+      **Result: none of the seven in-scope files appear in shake's suggested-changes list —
+      imports already minimal. `mk_all --module` confirmed "No update necessary".**
+- [x] `lean_verify` on all four DP sites plus the three new TFAE theorems; confirm every one
+      reports exactly `{propext, Classical.choice, Quot.sound}` with no `sorryAx`. **Result: all
+      seven return exactly `{propext, Classical.choice, Quot.sound}`, `warnings: []`.**
+- [x] `grep -rn '\bsorry\b'` across all seven in-scope files; confirm zero `sorry` tactic
+      occurrences and that every prose mention reads as historical. **Result: every hit in all
+      seven files is a prose mention inside a docstring or comment (manually reviewed line by
+      line); zero `sorry` tactic occurrences. A naive repo-wide raw grep count rises from the
+      task's pre-existing baseline because this task's own edits legitimately narrate discharged
+      obligations using the word "sorry" ("sorry-free", "no `sorry` remains", "used to carry a
+      `sorry`") — the authoritative check is `lean_verify`'s `sorryAx`-absence on all seven
+      target declarations, confirmed above, which transitively covers essentially all
+      proof-relevant content in the seven files.**
+- [x] Record the final gate results in the implementation summary.
 
 **Timing**: 0.75 hours
 

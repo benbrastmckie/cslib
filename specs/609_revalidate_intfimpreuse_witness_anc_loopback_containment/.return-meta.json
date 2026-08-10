@@ -1,50 +1,61 @@
 {
   "status": "partial",
-  "started_at": "2026-08-10T05:15:00Z",
-  "completed_at": "2026-08-10T05:55:00Z",
+  "started_at": "2026-08-09T00:00:00Z",
   "requires_user_review": false,
   "artifacts": [
     {
-      "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 6: added a Progress note recording task-list items (b) and (c) landed sorry-free (isAccessible_reconcile_of_worldHist, applyAllTImpRules_agrees_grow, applyPersistenceFixpoint_agrees_grow, IReuseFrozen, IAllReuseFrozen, IFrozenBelow_downward), updated the six IReuseContain_mono use-site line numbers plus the key-statement line number after this dispatch's insertions. Reverted a stray, factually-incorrect uncommitted Phase 7 [IN PROGRESS] marker back to [NOT STARTED] (second recurrence of this same issue). Phase 6 heading remains [IN PROGRESS]."
+      "type": "plan",
+      "summary": "Phase 6: diagnosed a third gap -- IReuseFrozen as landed (item c) cannot be re-established round-to-round, since IFrozenBelow_applyPersistenceFixpoint needs IPosPersistRaw about the pre-persistence branch, which does not hold in general. Closed the gap at the design level with new origin-tracking machinery (IReuseFrozenOrigin + 4 lemmas + IAllReuseFrozenOrigin + append/map_const), all sorry-free, axiom-clean, full CI green. Items (d)-(f) (threading into key, six-site rewiring, final IReuseContain restatement) remain fully open for the next dispatch; heading stays [IN PROGRESS]."
     },
     {
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/09_phase6-origin-tracking-machinery.md",
       "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/08_phase6-items-b-c-landed.md",
-      "summary": "Condensed record of what landed for items (b) and (c), current line numbers for remaining task-list items (d)-(f), and the recurring stray Phase 7 marker correction."
+      "summary": "Full record of the gap diagnosis, the origin-tracking design, and the concrete next-dispatch task list for items (d)-(f)."
+    },
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "lean_source",
+      "summary": "Added IReuseFrozenOrigin, IReuseFrozenOrigin_frozenBelow/_snoc/_persist/_extendMany, IAllReuseFrozenOrigin/_append/_map_const (206 lines, purely additive, private declarations)."
     }
   ],
-  "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/08_phase6-items-b-c-landed.md",
-    "specs/state.json"
-  ],
   "partial_progress": {
-    "stage": "phase6_items_b_c_landed",
-    "details": "Landed isAccessible_reconcile_of_worldHist (Scheme.lean:3904), applyAllTImpRules_agrees_grow (Scheme.lean:7464), applyPersistenceFixpoint_agrees_grow (Scheme.lean:7589) for task-list item (b); IReuseFrozen (Scheme.lean:7741), IReuseFrozen_snoc, IAllReuseFrozen, IAllReuseFrozen_append, IAllReuseFrozen_map_const (Scheme.lean:7750-7815) plus IFrozenBelow_downward (Expansion.lean) for task-list item (c). All eight sorry-free, axiom-clean (propext/Classical.choice/Quot.sound only, matching baseline). Full CI pipeline green: lake build (3325 jobs), checkInitImports, lake lint (zero new findings in Scheme.lean/Expansion.lean; 149 pre-existing library-wide, same as baseline), lint-style (clean), shake (clean, no import suggestions for touched files), mk_all (no update needed), lake test (9397 jobs green). Sorry count 196->196, axiom count 26->26, vacuous-def grep 1->1 (all unchanged). Items (d)-(f) not yet started: (d) threading IAllReuseFrozen through the key statement and outer hARC parameter; (e) rewiring the six IReuseContain_mono use sites using items (b)+(c); (f) final restatement of IReuseContain to drop the snapshot. Phase 6 remains [IN PROGRESS].",
+    "stage": "phase6_origin_tracking_machinery_landed",
+    "details": "Landed origin-tracking freeze machinery closing a newly-diagnosed round-to-round preservation gap in item (c)'s IReuseFrozen. Items (d)-(f) not yet attempted; Phase 6 remains [IN PROGRESS].",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 5
   },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 196,
+    "sorry_baseline": 196,
+    "vacuous_count": 1,
+    "axiom_count": 26,
+    "axiom_baseline": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "lake_build_full": "green, 3325 jobs, only pre-existing warnings/sorries",
+    "check_init_imports": "clean",
+    "lake_lint": "373 findings total, 0 attributable to Scheme.lean",
+    "lint_style": "clean",
+    "shake": "no suggestion for Scheme.lean",
+    "mk_all": "no update necessary",
+    "lake_test": "green, 9397 jobs, exit 0"
+  },
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/09_phase6-origin-tracking-machinery.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.return-meta.json",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json",
+    "specs/state.json"
+  ],
   "metadata": {
     "session_id": "sess_1786336315_39f0e4",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed"
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 196,
-    "sorry_count_baseline": 196,
-    "vacuous_count": 1,
-    "vacuous_count_note": "Pre-existing false positive (Computability/URM/Basic.lean, theorem ... := trivial -- a real, non-vacuous theorem the grep heuristic cannot distinguish), unrelated to this dispatch.",
-    "axiom_count": 26,
-    "axiom_count_baseline": 26,
-    "build_passed": true,
-    "ci_pipeline_passed": true
   }
 }

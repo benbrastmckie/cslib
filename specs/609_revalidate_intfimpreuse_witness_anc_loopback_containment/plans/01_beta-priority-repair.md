@@ -914,6 +914,86 @@ sites (item (e)'s target), current as of THIS dispatch: `:7962` (case2), `:8059`
 `:8735` (case8) — same case mapping as the previous dispatch's Scope Hypothesis paragraph above,
 only the line numbers moved.
 
+**Progress note (this dispatch, a THIRD gap found and closed at the design level -- item (c)'s
+landed `IReuseFrozen`/`IAllReuseFrozen` do not actually support round-to-round preservation, and
+this dispatch lands the fix as new, sorry-free, free-standing machinery)**: before attempting
+items (d)-(f) as literally sequenced, this dispatch worked out WHY the previous dispatch's own
+"do not attempt a cheap `IReuseFrozen_mono` shortcut" warning (immediately above) is not just
+a warning about a missing one-liner, but a symptom of a real design gap in `IReuseFrozen` itself:
+
+1. **The gap.** `IReuseFrozen lbH e b := ∀ x l, (x,l) ∈ lbH → IFrozenBelow (l+1) e b` states
+   `IFrozenBelow` about the CURRENT `(e, b)` directly. This is provable at the EXACT round `(x,l)`
+   is recorded (`intStepBranchPrioFirstPass_none_frozen`), but is NOT re-derivable at any LATER
+   round: doing so needs `IFrozenBelow_applyPersistenceFixpoint`'s `hpp : IPosPersistRaw edges b`
+   hypothesis about that round's own PRE-persistence branch (`bh`, not `bPers`) --
+   checked directly against `IFrozenBelow_applyPersistenceFixpoint`'s actual signature
+   (`Scheme.lean`, Phase 5 section) -- and `IPosPersistRaw` about a PRE-persistence `bh` does not
+   hold in general (only `applyPersistenceFixpoint_copy_complete`-style derivation about the
+   POST-persistence output does, exactly the same asymmetry the Phase 6 investigation note's
+   point 3 already diagnosed for `IReuseContain`'s own transport). So `IAllReuseFrozen` cannot
+   actually be threaded through `key` and re-established at every round the way `IAllReuseContain`
+   is -- it would need a fresh `IFrozenBelow` derivation at every round that the file's own
+   machinery cannot supply.
+2. **The fix: origin-tracking.** `IReuseFrozenOrigin (φ0) (lbH) (e) (edges) (nw) (b) : Prop`
+   (`Scheme.lean:7841` as of this dispatch, right after `IAllReuseFrozen_map_const`) replaces the
+   CURRENT-state `IFrozenBelow` claim with a full EXISTENTIAL checkpoint snapshot per edge: the
+   origin `(b_o, e_o, edges_o, nw_o)` at record time, carrying its own
+   `IFrozenBelow`/`IPosPersistRaw`/`IExpandedConsistent`/consistency/`IWorldHist`/
+   `IWorldHistCounter` facts, PLUS three monotonicity witnesses (`e_o ⊆ e`, `edges_o ⊆ edges`,
+   `nw_o ≤ nw` -- the origin's own bookkeeping only ever grows into the current state) AND the
+   actual freeze CONTENT as its own conjunct, `∀ sf ∈ b, sf.label < l+1 → sf ∈ b_o` (current
+   content below the threshold already agrees with the origin). This is deliberately heavier than
+   `IReuseFrozen` -- it is the SAME kind of "existential witness that survives forever" idea
+   `IReuseContain`'s OLD `bSnap` snapshot already used, just decorated with enough checkpoint
+   context to be RE-EXTENDABLE forward using machinery already on hand, rather than merely
+   asserting containment directly.
+3. **Four supporting lemmas landed, all sorry-free** (`Scheme.lean:7866-7944`):
+   - `IReuseFrozenOrigin_frozenBelow`: derives `IFrozenBelow (l+1) e b` about the CURRENT `(e,b)`
+     FROM the existential (`hagree` transports `sf ∈ b` down to `sf ∈ b_o`, the origin's own
+     `hfrz` classifies it, and `e_o ⊆ e` lifts the `sf ∈ e_o` disjunct to `sf ∈ e`). This is what
+     unlocks `IFrozenBelow_intStepBranchPrio_ge` at any later round WITHOUT needing fresh
+     `IPosPersistRaw` about that round's own pre-persistence branch -- the actual fix for the gap.
+   - `IReuseFrozenOrigin_snoc`: records a freshly-minted edge, using the CURRENT state as its own
+     origin reflexively (mirrors `IReuseFrozen_snoc`, but threading the full checkpoint).
+   - `IReuseFrozenOrigin_persist`: advances across ONE round's `applyPersistenceFixpoint` (same
+     `e`/`edges`/`nw` throughout a round, only the branch grows `bh → bPers`) -- a direct corollary
+     of `applyPersistenceFixpoint_agrees_grow` (item (b), already landed) at each edge's own origin.
+   - `IReuseFrozenOrigin_extendMany`: advances across `Branch.extendMany bPers newForms`, GIVEN
+     every element of `newForms` lands at a label `≥ l+1` (the label bound
+     `IFrozenBelow_intStepBranchPrio_ge` supplies at each SIX-SITE use, composed with
+     `IReuseFrozenOrigin_frozenBelow` above -- not yet wired at the sites themselves).
+   - `IAllReuseFrozenOrigin`/`_append`/`_map_const` (`Scheme.lean:7951-8038`): the 5-list zip
+     companion over `(bs, expSets, edgeSets, nws, lbSets)`, mirroring `IAllReuseFrozen`'s 3-list
+     zip but extended with the per-branch-position `edges`/`nw` context this origin-tracked
+     version needs to check its monotonicity conjuncts against, plus append/map_const companions
+     mirroring the established template exactly.
+
+   All eight declarations verified individually via `lean_verify`: axioms are a subset of the
+   file's existing baseline (`propext`/`Classical.choice`/`Quot.sound`), zero sorries.
+
+4. **Not yet done (items (d)-(f) remain fully open)**: `IAllReuseFrozenOrigin` is NOT yet threaded
+   through `intExpandBranches_openBranch_sat`'s `key` statement (item (d)), the six
+   `IReuseContain_mono` use sites are UNTOUCHED (item (e) -- wiring each site needs its own local
+   `IWorldHist`/`hstep`/label-bound facts, already present in context at each site per the earlier
+   Scope Hypothesis paragraph, composed with `IReuseFrozenOrigin_persist`/`_extendMany` above), and
+   `IReuseContain` itself is UNCHANGED (item (f), still the snapshot-existential form). The NEXT
+   dispatch's job is exactly items (d)-(f) as originally sequenced, now backed by machinery that
+   should make the six-site wiring mechanical rather than open-ended: at each site, derive the
+   label bound via `IFrozenBelow_intStepBranchPrio_ge` (using `IReuseFrozenOrigin_frozenBelow`'s
+   output as the `hfrz` input), then call `IReuseFrozenOrigin_persist`/`_extendMany` as
+   appropriate for that site's transport shape (persistence-fixpoint vs. content-only growth),
+   and finally build the ACTUAL `IReuseContain` (bare, post-restatement) transport from
+   `IReuseFrozenOrigin_frozenBelow`'s derived `IFrozenBelow` fact plus a case split on whether the
+   target formula was already present pre-transport (trivial, via existing
+   `applyPersistenceFixpoint_mem_preserved`/`Branch.extendMany` monotonicity) or newly arrived
+   (impossible below the freeze threshold, by the derived `IFrozenBelow` fact itself).
+
+**Verification (this dispatch)**: `lake exe cache get` warm/no-op; `lake build` (scoped then
+full, all 3325 jobs) green, only pre-existing warnings/sorries; `lake exe checkInitImports`
+clean; `lake lint`/`lake exe lint-style`/`lake shake`/`lake exe mk_all --module`/`lake test`
+results recorded in the handoff. Sorry count 196 -> 196 (unchanged), axiom count 26 -> 26
+(unchanged).
+
 **Tasks**:
 - [ ] Restate `IReuseContain` (`Scheme.lean:6814`) with `bSnap := b`:
       `∀ x l, (x, l) ∈ lbEdges → ∀ χ, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b → (⟨.pos, χ, x⟩ : ISF Atom) ∈ b`.

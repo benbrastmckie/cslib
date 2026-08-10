@@ -7810,6 +7810,212 @@ private lemma IAllReuseFrozen_map_const {branches' : List (IBranch Atom)}
     simp only [List.map_cons, IAllReuseFrozen]
     exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
 
+/-! ### Origin-tracked reuse-time freeze witness (plan Phase 6, task-list items (d)-(f) prep,
+this dispatch's own investigation)
+
+`IReuseFrozen` above asserts `IFrozenBelow (l + 1) e b` about the CURRENT `e`/`b` directly. This
+is provable at the EXACT round a loop-back edge `(x, l)` is recorded (via
+`intStepBranchPrioFirstPass_none_frozen`), but is NOT re-derivable at later rounds: doing so
+needs `IPosPersistRaw edges b` about that LATER round's own PRE-persistence branch, which does
+not hold in general (`applyPersistenceFixpoint_copy_complete` only ever establishes
+`IPosPersistRaw` about a round's POST-persistence OUTPUT, never its input -- checked directly,
+this is the same gap the Phase 6 investigation note's point 3 already diagnosed for
+`IReuseContain`'s own transport, and it applies identically here since `IFrozenBelow`'s own
+persistence-fixpoint preservation lemma, `IFrozenBelow_applyPersistenceFixpoint`, has exactly
+this `hpp : IPosPersistRaw edges b` shape about its INPUT branch). `IReuseFrozenOrigin` below
+instead carries a full checkpoint SNAPSHOT -- the origin `(b_o, e_o, edges_o, nw_o)` at record
+time, with its own freeze/persistence/consistency facts -- plus THREE monotonicity witnesses
+relating it to the CURRENT `(e, edges, nw)` (`e_o ⊆ e`, `edges_o ⊆ edges`, `nw_o ≤ nw` -- the
+origin's own bookkeeping only ever grows into the current state) and the actual freeze CONTENT,
+`∀ sf ∈ b, sf.label < l + 1 → sf ∈ b_o` (current content below the threshold already agrees with
+the origin). The content conjunct is what gets re-derived round by round, via
+`IReuseFrozenOrigin_persist`/`IReuseFrozenOrigin_extendMany` below, using
+`applyPersistenceFixpoint_agrees_grow` (already landed, plan Phase 6 item (b)) and
+`IFrozenBelow_intStepBranchPrio_ge` (already landed, plan Phase 5) rather than needing fresh
+`IPosPersistRaw` about each round's own pre-persistence branch. **Not yet threaded through `key`
+or wired into the six `IReuseContain_mono` use sites** -- this section lands the single-branch
+machinery only; the `IAllReuseFrozenOrigin` list companion (mirroring `IAllReuseFrozen`'s 3-list
+zip, extended with the per-position `edges`/`nw` context this origin-tracked version needs to
+check monotonicity against) and the six-site wiring remain for a future dispatch. -/
+
+private def IReuseFrozenOrigin (φ0 : Proposition Atom) (lbH : IEdges) (e : List (ISF Atom))
+    (edges : IEdges) (nw : Nat) (b : IBranch Atom) : Prop :=
+  ∀ x l : Nat, (x, l) ∈ lbH →
+    ∃ (b_o : IBranch Atom) (e_o : List (ISF Atom)) (edges_o : IEdges) (nw_o : Nat),
+      IFrozenBelow (l + 1) e_o b_o ∧
+      IPosPersistRaw edges_o b_o ∧
+      IExpandedConsistent b_o e_o ∧
+      (∀ w' : Nat, w' < l + 1 → ∀ χ : Proposition Atom,
+        ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b_o ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b_o)) ∧
+      IWorldHist φ0 b_o e_o nw_o edges_o ∧
+      IWorldHistCounter nw_o edges_o ∧
+      l + 1 ≤ nw_o ∧
+      (∀ y ∈ e_o, y ∈ e) ∧
+      (∀ p ∈ edges_o, p ∈ edges) ∧
+      nw_o ≤ nw ∧
+      (∀ y ∈ b_o, y ∈ b) ∧
+      (∀ sf ∈ b, sf.label < l + 1 → sf ∈ b_o)
+
+omit [Hashable Atom] in
+/-- Every `IReuseFrozenOrigin`-tracked edge's threshold is a genuine `IFrozenBelow` fact about
+the CURRENT `(e, b)`, not just the origin -- the derivation this dispatch's investigation
+identified: the origin's own `IFrozenBelow (l+1) e_o b_o` transports through `e_o ⊆ e` and the
+content agreement `b ⊆ b_o` below `l + 1`. This is the key that unlocks
+`IFrozenBelow_intStepBranchPrio_ge` at ANY later round without re-deriving `IPosPersistRaw` about
+that round's pre-persistence branch. -/
+private lemma IReuseFrozenOrigin_frozenBelow {φ0 : Proposition Atom} {lbH : IEdges}
+    {e : List (ISF Atom)} {edges : IEdges} {nw : Nat} {b : IBranch Atom} {x l : Nat}
+    (hxl : (x, l) ∈ lbH) (h : IReuseFrozenOrigin φ0 lbH e edges nw b) :
+    IFrozenBelow (l + 1) e b := by
+  obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
+    hnwle, hmono, hagree⟩ := h x l hxl
+  intro sf hsfb hlt
+  rcases hfrz sf (hagree sf hsfb hlt) hlt with hwc | hexp | hns
+  · exact Or.inl hwc
+  · exact Or.inr (Or.inl (hesub _ hexp))
+  · exact Or.inr (Or.inr hns)
+
+omit [Hashable Atom] in
+/-- Extending `IReuseFrozenOrigin` by a newly recorded loop-back edge `(x, l)`, planted using
+the CURRENT `(b, e, edges, nw)` as its OWN origin (reflexively) -- at the reuse arm this is
+exactly the checkpoint `intStepBranchPrioFirstPass_none_frozen` supplies, weakened to `l + 1` via
+`IFrozenBelow_downward` (mirrors `IReuseFrozen_snoc`'s shape, but threading the full checkpoint
+context needed to re-derive containment at any later round). -/
+private lemma IReuseFrozenOrigin_snoc {φ0 : Proposition Atom} {lbH : IEdges}
+    {e : List (ISF Atom)} {edges : IEdges} {nw : Nat} {b : IBranch Atom} {x l : Nat}
+    (h : IReuseFrozenOrigin φ0 lbH e edges nw b)
+    (hfrz : IFrozenBelow (l + 1) e b) (hpp : IPosPersistRaw edges b)
+    (hic : IExpandedConsistent b e)
+    (hcons : ∀ w' : Nat, w' < l + 1 → ∀ χ : Proposition Atom,
+      ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges)
+    (hw0 : l + 1 ≤ nw) :
+    IReuseFrozenOrigin φ0 (lbH ++ [(x, l)]) e edges nw b := by
+  intro x' l' hx'l'
+  rcases List.mem_append.mp hx'l' with h' | h'
+  · exact h x' l' h'
+  · simp only [List.mem_singleton, Prod.mk.injEq] at h'
+    obtain ⟨rfl, rfl⟩ := h'
+    exact ⟨b, e, edges, nw, hfrz, hpp, hic, hcons, hWH, hWHC, hw0,
+      (fun y hy => hy), (fun p hp => hp), le_refl nw, (fun y hy => hy),
+      (fun sf hsfb _ => hsfb)⟩
+
+omit [Hashable Atom] in
+/-- **Advance across a single-round persistence fixpoint**: `IReuseFrozenOrigin` survives
+`applyPersistenceFixpoint`, at the SAME `(e, edges, nw)` (a round's own persistence-fixpoint
+pass never changes its own `e`/`edges`/`nw`, only the branch content). Direct corollary of
+`applyPersistenceFixpoint_agrees_grow` (plan Phase 6 item (b)) at each recorded edge's own
+origin. -/
+private lemma IReuseFrozenOrigin_persist {φ0 : Proposition Atom} {lbH : IEdges}
+    {e : List (ISF Atom)} {edges : IEdges} {nw : Nat} {bh : IBranch Atom} {fuel : Nat}
+    (hWH : IWorldHist φ0 bh e nw edges) (hWHC : IWorldHistCounter nw edges)
+    (h : IReuseFrozenOrigin φ0 lbH e edges nw bh) :
+    IReuseFrozenOrigin φ0 lbH e edges nw (applyPersistenceFixpoint bh edges fuel) := by
+  intro x l hxl
+  obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
+    hnwle, hmono, hagree⟩ := h x l hxl
+  refine ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
+    hnwle, fun y hy => applyPersistenceFixpoint_mem_preserved bh edges fuel y (hmono y hy), ?_⟩
+  exact applyPersistenceFixpoint_agrees_grow hw0 hnwle hedgesub hfrz hpp hic hcons hWH_o hWH hWHC
+    fuel bh hmono hagree
+
+omit [Hashable Atom] in
+/-- **Advance across content-only branch growth**: `IReuseFrozenOrigin` survives
+`Branch.extendMany bPers newForms`, at the SAME `(e, edges, nw)`, GIVEN every element of
+`newForms` lands at a label `≥ l + 1` for the specific edge `(x, l)` under consideration -- the
+label-bound fact `IFrozenBelow_intStepBranchPrio_ge` supplies at each use site (composed with
+`IReuseFrozenOrigin_frozenBelow` above), no fresh `IPosPersistRaw` needed. -/
+private lemma IReuseFrozenOrigin_extendMany {φ0 : Proposition Atom} {lbH : IEdges}
+    {e : List (ISF Atom)} {edges : IEdges} {nw : Nat} {bPers : IBranch Atom}
+    {newForms : List (ISF Atom)}
+    (hbound : ∀ x l : Nat, (x, l) ∈ lbH → ∀ sf' ∈ newForms, l + 1 ≤ sf'.label)
+    (h : IReuseFrozenOrigin φ0 lbH e edges nw bPers) :
+    IReuseFrozenOrigin φ0 lbH e edges nw (Branch.extendMany bPers newForms) := by
+  intro x l hxl
+  obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
+    hnwle, hmono, hagree⟩ := h x l hxl
+  refine ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
+    hnwle, fun y hy => by
+      simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hmono y hy), ?_⟩
+  intro sf hsf hlt
+  simp only [Branch.extendMany, List.mem_append] at hsf
+  rcases hsf with hsf | hsf
+  · exact absurd hlt (not_lt.mpr (hbound x l hxl sf hsf))
+  · exact hagree sf hsf hlt
+
+/-- List companion of `IReuseFrozenOrigin`, a 5-list zip over `(bs, expSets, edgeSets, nws,
+lbSets)` -- mirroring `IAllReuseFrozen`'s 3-list zip, extended with the per-branch-position
+`edges`/`nw` context `IReuseFrozenOrigin` itself needs to state its origin-monotonicity
+conjuncts against. Not yet threaded through `intExpandBranches_openBranch_sat`'s `key`
+statement (plan Phase 6 task-list item (d), still open). -/
+private def IAllReuseFrozenOrigin (φ0 : Proposition Atom) (bs : List (IBranch Atom))
+    (expSets : List (List (ISF Atom))) (edgeSets : List IEdges) (nws : List Nat)
+    (lbSets : List IEdges) : Prop :=
+  match bs, expSets, edgeSets, nws, lbSets with
+  | [], [], [], [], [] => True
+  | b :: bs', e :: expSets', edges :: edgeSets', nw :: nws', lbH :: lbT' =>
+      IReuseFrozenOrigin φ0 lbH e edges nw b ∧
+        IAllReuseFrozenOrigin φ0 bs' expSets' edgeSets' nws' lbT'
+  | _, _, _, _, _ => False
+
+omit [Hashable Atom] in
+/-- `IAllReuseFrozenOrigin` combines under list append (mirrors `IAllReuseFrozen_append`). -/
+private lemma IAllReuseFrozenOrigin_append {φ0 : Proposition Atom}
+    {bs1 bs2 : List (IBranch Atom)} {expSets1 expSets2 : List (List (ISF Atom))}
+    {edgeSets1 edgeSets2 : List IEdges} {nws1 nws2 : List Nat} {lb1 lb2 : List IEdges}
+    (h1 : IAllReuseFrozenOrigin φ0 bs1 expSets1 edgeSets1 nws1 lb1)
+    (h2 : IAllReuseFrozenOrigin φ0 bs2 expSets2 edgeSets2 nws2 lb2) :
+    IAllReuseFrozenOrigin φ0 (bs1 ++ bs2) (expSets1 ++ expSets2) (edgeSets1 ++ edgeSets2)
+      (nws1 ++ nws2) (lb1 ++ lb2) := by
+  induction bs1 generalizing expSets1 edgeSets1 nws1 lb1 with
+  | nil =>
+    cases expSets1 with
+    | nil =>
+      cases edgeSets1 with
+      | nil =>
+        cases nws1 with
+        | nil =>
+          cases lb1 with
+          | nil => simpa using h2
+          | cons _ _ => simp [IAllReuseFrozenOrigin] at h1
+        | cons _ _ => simp [IAllReuseFrozenOrigin] at h1
+      | cons _ _ => simp [IAllReuseFrozenOrigin] at h1
+    | cons _ _ => simp [IAllReuseFrozenOrigin] at h1
+  | cons bh bt ih =>
+    cases expSets1 with
+    | nil => simp [IAllReuseFrozenOrigin] at h1
+    | cons eh et =>
+      cases edgeSets1 with
+      | nil => simp [IAllReuseFrozenOrigin] at h1
+      | cons edgh edgt =>
+        cases nws1 with
+        | nil => simp [IAllReuseFrozenOrigin] at h1
+        | cons nwh nwt =>
+          cases lb1 with
+          | nil => simp [IAllReuseFrozenOrigin] at h1
+          | cons lbh lbt =>
+            simp only [IAllReuseFrozenOrigin] at h1
+            obtain ⟨hARF, hrest⟩ := h1
+            simp only [List.cons_append]
+            exact ⟨hARF, ih hrest⟩
+
+omit [Hashable Atom] in
+/-- `IAllReuseFrozenOrigin` holds along a constant-valued `map` (mirrors
+`IAllReuseFrozen_map_const`; used for the BETA arm, where every child shares the same expanded
+set, raw edges, next-world counter, and loop-back list). -/
+private lemma IAllReuseFrozenOrigin_map_const {φ0 : Proposition Atom}
+    {branches' : List (IBranch Atom)} (f : IBranch Atom → IBranch Atom)
+    {e' : List (ISF Atom)} {edges' : IEdges} {nw' : Nat} {lbH' : IEdges}
+    (h : ∀ br ∈ branches', IReuseFrozenOrigin φ0 lbH' e' edges' nw' (f br)) :
+    IAllReuseFrozenOrigin φ0 (branches'.map f) (branches'.map (fun _ => e'))
+      (branches'.map (fun _ => edges')) (branches'.map (fun _ => nw'))
+      (branches'.map (fun _ => lbH')) := by
+  induction branches' with
+  | nil => simp [IAllReuseFrozenOrigin]
+  | cons bh bt ih =>
+    simp only [List.map_cons, IAllReuseFrozenOrigin]
+    exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
+
 /-- **R1 restatement** (Phase 6: `hUniv`/`hNW`/per-branch `hFuel` hypothesis threading;
 subsumes the prior fuel-materialization report's F5 form). If the per-branch-fuel engine
 returns `.openBranch b`, then `b` is Hintikka-saturated and carries an `IFimpAccess`

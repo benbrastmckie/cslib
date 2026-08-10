@@ -23,7 +23,7 @@ next_project_number: 619
 
 ### Propositional Logic
 
-400 [RESEARCHED] — [REVISED 2026-08-10 by the propositional review — the original pr
+400 [RESEARCHED] — [REVISED 2026-08-10 — SECOND revision. The first revision's load-
   └─ 497 [NOT STARTED] — [REVISED 2026-08-10 by the propositional review — the stated bloc
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
@@ -817,54 +817,80 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 - **Plan**: [400_reconcile_connectives_pr607/plans/02_pr607-engagement.md]
 - **Research**: [400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md]
 
-**Description**: [REVISED 2026-08-10 by the propositional review — the original premise is dead; see below.]
+**Description**: [REVISED 2026-08-10 — SECOND revision. The first revision's load-bearing premises were verified FALSE against the live record; corrected below. Decision landed: OPTION B.]
 
-DECIDE how the fork's five-primitive `Proposition` reconciles with what upstream actually merged. RESEARCH AND DECISION FIRST — do not begin a type migration under this task.
+DECISION MADE. Research deliverable complete: reports/03_falsum-representation-decision.md (section 9 is a standalone action checklist). Recommendation: OPTION B — keep the fork's primitive `bot`.
 
-=== WHY THIS WAS REWRITTEN ===
+=== WHAT THE FIRST REVISION GOT WRONG (verified 2026-08-10 against freshly fetched refs; upstream/main = 3951377e) ===
 
-The original task said: "Engage fmontesi PR #607 to land the connective typeclasses there [...] DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles."
+CORRECTION 1 — "PR #607 settled the falsum question AGAINST the fork's design" is FALSE.
+  - `instBotProposition [Bot Atom] : Bot (Proposition Atom) := ⟨.atom ⊥⟩` was introduced in commit 61785643, "feat(Logics/Propositional): definitions (#89)" — the ORIGINAL definitions commit, four PRs before #607.
+  - #607 is commit b8ad3923, "feat(Logic): logical operators", touching 9 files. Its ONLY constructor-level change to `Proposition` was the rename `impl` -> `imp`. It did not add, remove, or alter any constructor, and did not touch the `Bot` instance. The bot-as-atom lines appear in its diff as UNCHANGED CONTEXT.
+  - #607 is therefore ORTHOGONAL to the falsum representation question. No falsum decision was made there, so there is nothing to have "settled against". The premise that motivated Option A does not exist.
 
-PR #607 MERGED ON 2026-08-03 without that review. The falsum question settled AGAINST the fork's design. The original deliverable is unachievable; the concern behind it is now a live structural conflict.
+CORRECTION 2 — "PR #648 carries CHANGES_REQUESTED [read as standing opposition]" is MISLEADING.
+  Review record (`gh pr view 648`, read-only):
+    2026-06-15  ctchou         CHANGES_REQUESTED
+    2026-07-06  thomaskwaring  APPROVED
+    2026-07-13  benbrastmckie  COMMENTED x5 (answering all five inline comments)
+  - thomaskwaring APPROVED after negotiating a compromise on Zulip (2026-06-28: "if we are going to have bot as a primitive, we should also have efq"), which was implemented 2026-06-29. His 2026-06-16 objection — the one the first revision quoted — was SUPERSEDED by his own later approval.
+  - ctchou's is the only outstanding blocking review, and its FIRST bullet reads verbatim: "I like the idea of adding \bot as a primitive." Its four points are procedural: file organization (why both Semantics/Basic.lean and Semantics/Bool.lean), references (prefer Avigad's textbook over 1930s German sources), and "You should definitely coordinate this PR with #607 and #587. #536 is ready to merge, so you should wait for it."
+  - That coordination instruction is now ACTIONABLE: #607 has merged.
+  - There is NO standing technical opposition to primitive bot on the record. A third participant (Matthew Doty) independently backed it on DPLL grounds.
 
-=== VERIFIED STATE (2026-08-10) ===
+CORRECTION 3 — "the HasBot prediction held" OVERSTATES.
+  The fork's own review-scaffolding/02_falsum-bridge-sketch.md had ALREADY retracted the HasBot recommendation: Mathlib's `Bot`/`Top` supply the notation and the fork already uses them, so a five-primitive `Proposition` registers against merged #607 with ZERO new typeclasses. No `HasBot` was needed, so its absence is not a gap.
+  The real finding is a DOCUMENTATION BUG in merged upstream code: upstream `Cslib/Logics/Propositional/Defs.lean:36-37` promises `HasBot (Proposition Atom)` and `HasTop (Proposition Atom)` instances for classes that exist NOWHERE upstream. #607's own diff added that text.
 
-WHAT MERGED (`upstream/main`, `Cslib/Foundations/Logic/Operators.lean` + `Cslib/Logics/Propositional/Defs.lean`):
-  - `Proposition` has FOUR constructors: atom, and, or, imp. There is NO `bot` constructor.
-  - Bottom is `instBotProposition [Bot Atom] : Bot (Proposition Atom) := ⟨.atom ⊥⟩` — falsum is an ATOM, gated on `[Bot Atom]`.
-  - `neg` derived: `abbrev Proposition.neg [Bot Atom] := (Proposition.imp · ⊥)`; `top` derived from `[Inhabited Atom]`.
-  - Classes landed: `HasAnd`, `HasOr`, `HasImp`, `HasIff`, `HasNot`, `HasBox`, `HasDiamond`, ... — and NO `HasBot`, NO `HasTop`.
-  - Notation: `@[inherit_doc] scoped infixr:25 " → " => HasImp.imp`.
+CORRECTION 4 — the notation divergence is WORSE than described, and not confined to the arrow.
+  ALL FIVE fork connectives are non-associative `infix`, vs upstream `infixr`:
+    fork:     and infix:36,  or infix:35,  imp infix:30,  iff infix:20,  not prefix:40
+    upstream: and infixr:36, or infixr:30, imp infixr:25, iff infixr:20, not notation:max
+  Empirically verified: `a → b` parses, `a → (b → c)` parses, but `a → b → c`, `a ∧ b ∧ c`, and `a ∨ b ∨ c` ALL FAIL — and they fail as Prop-level TYPE MISMATCHES (Lean's own `And`/`Or`/`→` win the overload), not as notation errors, which makes them materially harder to diagnose. Relative precedence ORDERING is preserved between fork and upstream.
 
-WHAT THIS FORK HAS (`Cslib/Logics/Propositional/Defs.lean`):
-  - `Proposition` has FIVE constructors including primitive `| bot`.
-  - `instance : Bot (Proposition Atom) := ⟨.bot⟩`, `instance : Top (Proposition Atom) := ⟨.top⟩`.
-  - Its own `PropositionalConnectives` bundle; `Cslib/Foundations/Logic/Operators.lean` does not exist here.
-  - Notation: `scoped infix:30 " → "` — DIFFERENT PRECEDENCE (30 vs 25) AND DIFFERENT ASSOCIATIVITY (`infix`, non-associative, vs upstream `infixr`, right-associative). The associativity difference is the subtler hazard: `a → b → c` parses in upstream and fails to parse here.
+=== THE DECISION ===
 
-THE ORIGINAL TASK'S PRIMARY POINT WAS CORRECT AND WENT UNADDRESSED. It predicted: "#607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully." No `HasBot` landed. The prediction held.
+OPTION B — keep the fork's primitive `bot`. Note that "re-argue" overstates the work required: the argument was already won on the record before #607 merged, and there is no standing opposition to overcome.
 
-SCALE OF THE DIVERGENCE: `git diff --stat upstream/main..HEAD -- Cslib/Logics/Propositional/` reports 117 files changed, 42,166 insertions, 238 deletions. The fork is 21 commits behind `upstream/main`.
+Measured basis for REJECTING OPTION A (migrate to four constructors with `.atom ⊥`):
+  - 512 of 1,614 declarations in Propositional/ (31.7%) would acquire a `[Bot Atom]` gate.
+  - 165 `.bot` token lines across 39 files; 120 match-arm lines; 50 fully-qualified `Proposition.bot`; 790 bare `⊥` glyph occurrences. (Repo-wide `.bot` is 2,287 lines across 228 files, but that figure includes Modal/Temporal/Bimodal/LTL formula types carrying their own primitive bot — not all PL.Proposition.)
+  - Three central semantic definitions (Tautology, IValid, and substitution closure) change MEANING, not merely signature.
+  - All three tableau DecisionProcedure files currently carry only `[DecidableEq Atom] [Hashable Atom]`; MValid/IValid carry only `{Atom : Type u}`. The `[Bot Atom]` gate propagates into all of them.
+  - Risk is borne by a 42,166-line, zero-sorry development (0 sorries in Propositional/; 1 repo-wide).
+  - The one genuine benefit — MValid loses its `bot_forces` quantifier (thomaskwaring's argument, correct for minimal logic taken alone) — is outweighed within the same development, because the IPL and CPL layers pay a side-condition tax to buy it.
 
-PR #648 IS CAUGHT IN THIS. Still OPEN ("feat(Logics/Propositional): five-primitive formula type with primitive bot"), `reviewDecision: CHANGES_REQUESTED`, last updated 2026-07-13. Reviewer thomaskwaring argued against primitive falsum on 2026-06-16 ("If `⊥` is included in minimal logic it behaves precisely like the atomic formulae, so why not represent it as such?" and "while having falsum as a primitive is more conventional, the current design was discussed fairly thoroughly"). #607 then landed exactly that alternative. Read the full #648 thread and the CSLib Zulip "Propositional Logic" topic before deciding anything.
+Basis for REJECTING OPTION C (accept divergence): forfeits a 42k-line sorry-free development that two upstream reviewers signalled they want; blocks #649; and does not even avoid the Connectives/Operators reconciliation work, which is required under every option.
 
-=== THE DECISION TO MAKE ===
+=== PR #648 DISPOSITION ===
 
-Three live options. Weigh them; recommend one; do not implement under this task.
+REWORK AND REBASE. Do not close. Do not leave pending.
+  - Keep scope EXACTLY as approved: four files, ungated efq, IPL base, minimal logic deferred.
+  - Do NOT widen to the fork's current `[IsIntuitionistic T]`-gated efq design. That is the deferred fragment work thomaskwaring explicitly agreed to postpone; widening it forfeits a standing approval.
+  - Rebase onto upstream/main @ 3951377e, absorbing: the v4.33.0-rc1 -> v4.33.0 toolchain and Mathlib pin bump; #753's InferenceSystem/Congruence refactor; and the IsIntuitionistic/IsClassical shape reconciliation below.
+  - Re-request review from ctchou, itemising the four dispositions. Note that thomaskwaring's approval stands — it should be cited, not re-litigated.
+  - The GitHub text must be HUMAN-AUTHORED per the CSLib AI policy. Chris Henson formally challenged an LLM-drafted message on this exact Zulip topic (near/605827029). No agent-drafted GitHub or Zulip prose exists for this task, deliberately.
 
-OPTION A — ADAPT to upstream's representation. Migrate the fork's `Proposition` to four constructors with `.atom ⊥`. COST: every one of the ~42,000 lines that pattern-matches on `.bot` is affected, and the `[Bot Atom]` gate propagates into statements that currently need no such hypothesis (note `MValid`/`IValid` and the tableau `Decidable` instances currently require only `[DecidableEq Atom] [Hashable Atom]`). MEASURE THIS before recommending it — count `.bot` match sites and `Bot`-free public statements.
+=== NEWLY SURFACED — NOT NAMED IN THE FIRST REVISION ===
 
-OPTION B — RE-ARGUE for primitive bot, now that #607 has landed. The technical case is on the record in the #648 thread. ASSESS HONESTLY whether it is still winnable given that (a) the maintainers merged the alternative, and (b) #648 already carries CHANGES_REQUESTED. If the recommendation is B, it must name what NEW argument or evidence is being brought that was not already made in June — repeating the June argument is not a plan.
+IsIntuitionistic/IsClassical SHAPE DRIFT. The fork's Propositional/Defs.lean does not import InferenceSystem and states these as theory-membership predicates (`(bot → A) ∈ T`, Defs.lean:166,175), while upstream states them over an inference system (`S⇓`, `[InferenceSystem S (Proposition Atom)]`). PR #648 had ALREADY reconciled this against #536; the fork's main has since drifted BACK. 80 files in the fork reference InferenceSystem — just not from Propositional/Defs.lean. This is a reconciliation obligation under EVERY option and must be folded into the #648 rebase.
 
-OPTION C — ACCEPT DIVERGENCE. Keep the fork's type; do not upstream `Propositional/`. This has knock-on effects on PRs #649 (LTL) and #662 (Modal semantics), both open and both potentially depending on the propositional base. Determine whether they do.
+CONNECTIVES/OPERATORS COLLISION. Four classes are duplicated in namespace `Cslib.Logic` between the fork's Foundations/Logic/Connectives.lean and merged Operators.lean: HasAnd, HasOr, HasImp, HasBox. Upstream additionally has HasIff, HasNot, HasDiamond; the fork names its own `HasDia` where upstream says `HasDiamond`. Must be resolved under EVERY option; prerequisite for #649; independent of falsum.
 
-=== DELIVERABLE ===
+TOOLCHAIN DRIFT IS NOT A DIFFERENTIATOR. The 21 unmerged upstream commits include a bump to v4.33.0 (fork pins v4.33.0-rc1; Mathlib pin 169c26b5 vs upstream v4.33.0). One release-candidate of drift, identical work under A, B, and C — a prerequisite for the #648 rebase only, not an input to the option choice.
 
-A research report recommending A, B, or C with measured costs — specifically including the `.bot` match-site count for Option A and an honest winnability assessment for Option B — plus an explicit recommendation on what to do with the open PR #648 (rework, close, or leave pending). NO .lean file is created, moved, or edited under this task.
+=== DOWNSTREAM PRs ===
 
-=== DOWNSTREAM ===
+#649 (LTL) DEPENDS on the propositional base — its changed files include Propositional/{Defs.lean, NaturalDeduction/Basic.lean, NaturalDeduction/Theory.lean} plus Foundations/Logic/Connectives.lean; it is stacked on #648.
+#662 (Modal semantics) DOES NOT depend on it — its changed files are Modal/{Basic,Cube,Denotation,LogicalEquivalence}.lean plus references.bib, and upstream Modal/Basic.lean imports only Operators/InferenceSystem/Relation.Euclidean/Mathlib, with no Logics.Propositional import.
 
-The `imp`/`impl` naming reconciliation task depends on this outcome (upstream settled on `HasImp.imp`, so the rename direction is determined once the representation question is). Do not start that rename before this decision lands.
+=== SCOPE AND STATE ===
+
+Research deliverable COMPLETE. Orchestration deliberately halted at [RESEARCHED] by user direction — no plan or implement phase was run, and none should be inferred as pending. No .lean file was created, moved, or edited under this task. Nothing was posted to GitHub or Zulip; all gh and Zulip access was read-only.
+
+Three follow-ups, NONE started here: (1) rebase and clear review on #648 per the disposition above (needs human-authored GitHub text); (2) reconcile Foundations/Logic/Connectives.lean against merged Operators.lean; (3) switch the fork's five Propositional notation declarations from `infix` to `infixr` at upstream precedences (low-risk, self-contained, orthogonal to falsum).
+
+The imp/impl naming reconciliation task is UNBLOCKED and its direction is determined: upstream landed `HasImp.imp` and the fork already uses `imp`.
 
 ---
 

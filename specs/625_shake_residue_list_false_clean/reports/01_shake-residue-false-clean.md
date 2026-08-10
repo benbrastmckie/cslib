@@ -287,6 +287,33 @@ concluding. No baseline files, build artifacts, or committed state were altered 
   `check-runtime-file-tracking.sh`'s live-git-probe pattern, which does not fit this script's
   external-tool-output-parsing shape.
 
+## Recommendations
+
+1. **Take the narrow fix branch.** Because `lake shake` exits 1 (empirically confirmed, not
+   inferred) on the out-of-date-target failure mode, hoisting the existing
+   `exit 1 + empty parse -> exit 2` guard into `--list` closes the defect completely. The
+   three-mode positive-confirmation redesign the task held in reserve is not required, and the
+   baseline ratchet in `scripts/shake-residue-baseline.txt` is not at risk.
+2. **Implement it as a shared helper, not a third copy of the guard.** Extract
+   `validate_shake_result()` / `run_and_validate_shake()` and route all three modes
+   (`--list`, `--update`, bare) through it, mirroring `check-axiom-census.sh`'s
+   `run_and_validate_census()`. Copy-paste divergence across the three modes is what produced
+   this defect in the first place.
+3. **Guard the `--list` print with `[ -n "$live" ]`.** An unconditional `printf` would emit a
+   stray newline on a genuinely clean run, changing `--list`'s output contract from zero bytes
+   to one — a second, quieter false signal in the same code path.
+4. **Add a `--self-test` subcommand** with literal captured fixtures assigned directly to
+   `$shake_raw`/`$shake_exit`, bypassing `lake` entirely. Follow
+   `check-boneyard-quarantine.sh`'s self-test convention rather than
+   `check-runtime-file-tracking.sh`, whose live-git-probe shape does not fit an
+   external-tool-output-parsing script. Include the literal reproduced stale-target transcript,
+   and confirm the self-test actually *fails* against a copy with the fix reverted.
+5. **Keep the self-test away from the real baseline.** Redirect the baseline path to a temp
+   file for the `--update` assertions and assert `scripts/shake-residue-baseline.txt` is
+   byte-unchanged afterward.
+6. **Reconcile the EXIT-CODE CONTRACT header block** so the documented rule and all three
+   implemented paths agree, and preserve the script's deliberate absence of `set -e`.
+
 ## Risks & Mitigations
 
 - **Risk**: A future edit to `parse_flagged_set`'s regex (e.g. if `lake shake`'s output format

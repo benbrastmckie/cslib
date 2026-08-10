@@ -11,7 +11,7 @@ next_project_number: 626
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620,625 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -84,17 +84,16 @@ next_project_number: 626
 
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
-### Repository Tooling
-
-625 [NOT STARTED] — `scripts/check-shake-residue.sh --list` can exit 0 with zero outp
-
 ## Tasks
 
 ### 625. check-shake-residue.sh --list reports a false clean when lake shake fails on an out-of-date target
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: Repository Tooling
 - **Dependencies**: None
+- **Research**: [625_shake_residue_list_false_clean/reports/01_shake-residue-false-clean.md]
+- **Plan**: [625_shake_residue_list_false_clean/plans/01_shake-list-guard-hoist.md]
+- **Summary**: [625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md]
 
 **Description**: `scripts/check-shake-residue.sh --list` can exit 0 with zero output when `lake shake` did not actually complete an analysis — indistinguishable from a genuine "nothing flagged" result. Observed live during task 623's verification step, which used `--list` as its closing check.
 

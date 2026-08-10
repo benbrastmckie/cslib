@@ -20,22 +20,41 @@
       "category": "PATTERN",
       "source_artifact": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
       "confidence": 0.85,
-      "suggested_keywords": ["bash", "ratchet-script", "exit-code-contract", "shared-validator", "ci-gate"]
+      "suggested_keywords": [
+        "bash",
+        "ratchet-script",
+        "exit-code-contract",
+        "shared-validator",
+        "ci-gate"
+      ]
     },
     {
       "content": "For a bash self-test subcommand that injects captured fixture output in place of a real external-tool call, add an env-var short-circuit at the top of the impure runner function (e.g. SHAKE_SELF_TEST_FIXTURE) that populates the same output globals a real run would, and use a SECOND env var to redirect any ratchet/baseline file the script would write (e.g. SHAKE_SELF_TEST_BASELINE) so subprocess end-to-end assertions can never clobber the real baseline. Assert the real baseline is byte-identical before/after the self-test as a hard requirement, not a nicety. When asserting 'zero bytes of stdout' from a subprocess, capture to a real file and use wc -c -- command substitution silently strips trailing newlines and will hide a stray blank-line regression.",
       "category": "TECHNIQUE",
       "source_artifact": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
       "confidence": 0.85,
-      "suggested_keywords": ["bash", "self-test", "fixture-injection", "baseline-safety", "byte-empty-stdout"]
+      "suggested_keywords": [
+        "bash",
+        "self-test",
+        "fixture-injection",
+        "baseline-safety",
+        "byte-empty-stdout"
+      ]
     }
   ],
   "metadata": {
     "session_id": "sess_1786402759_26b020",
     "agent_type": "general-implementation-agent",
     "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "general-implementation-agent"],
+    "delegation_path": [
+      "orchestrator",
+      "orchestrate",
+      "skill-orchestrate",
+      "general-implementation-agent"
+    ],
     "phases_completed": 5,
-    "phases_total": 5
+    "phases_total": 5,
+    "cycles_used": 3,
+    "final_state": "completed"
   }
 }

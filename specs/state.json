@@ -1207,7 +1207,7 @@
     {
       "project_number": 625,
       "project_name": "shake_residue_list_false_clean",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "general",
       "topic": "Repository Tooling",
       "priority": "low",
@@ -1218,8 +1218,26 @@
         "scripts/check-shake-residue.sh"
       ],
       "created": "2026-08-10T22:30:00Z",
-      "last_updated": "2026-08-10T22:30:00Z",
-      "artifacts": []
+      "last_updated": "2026-08-10T23:25:41Z",
+      "artifacts": [
+        {
+          "path": "specs/625_shake_residue_list_false_clean/reports/01_shake-residue-false-clean.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/625_shake_residue_list_false_clean/plans/01_shake-list-guard-hoist.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary covering all five phases, decisions, plan deviations, verification, and follow-ups."
+        }
+      ],
+      "session_id": "sess_1786402759_26b020",
+      "completion_summary": "Fixed scripts/check-shake-residue.sh --list's false-clean defect by consolidating both fatal shake-result conditions into a shared validate_shake_result()/run_and_validate_shake() helper (mirroring check-axiom-census.sh), rewiring all three usage modes onto it, adding a --self-test subcommand with four fixtures (including the literal reproduced stale-target regression), and reconciling the EXIT-CODE CONTRACT header."
     }
   ],
   "repository_health": {

@@ -8014,7 +8014,7 @@ packaging `edges` here (rather than fixing it) is a Postmortem-5 revision -- thi
 conclusion MAY expose `edges`, while the stable public `tableau_complete`/`Decidable` contract,
 discharged elsewhere, does not.
 
-**Statement-shape fix (upward-closure conjunct).** The conclusion existentially quantifies over
+**Statement-shape fix (upward-closure conjuncts).** The conclusion existentially quantifies over
 `edges`, unlike the machine-verified defective premise `tableau_complete` used to demand
 (`CslibTests/HvalidShapeRefutation.lean`, `lake env lean` clean, zero sorries: `hvalid`'s old
 unconstrained-`(edges, b)` shape is false at a concrete witness even though the formula it is
@@ -8022,6 +8022,21 @@ applied to is valid). Moving the obligation here, where `b`'s real provenance
 (`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`) is in scope, is what makes it
 fillable at all. `tableau_complete` itself stays sorry-free; only this lemma carries the deferred
 obligation, relocated from the unfillable shape DP-3/DP-4 used to have.
+
+**Third conjunct: `S.modelBot b`'s upward-closure.** The existential carries a THIRD conjunct
+beyond the valuation upward-closure and the `¬IForces` obligation:
+`∀ {w w'}, w ≤ w' → S.modelBot b w → S.modelBot b w'`. This mirrors the analogous, previously
+missing conjunct of `MValid`/`IValid` (`CslibTests/MvalidBotShapeRefutation.lean` machine-checks
+that omitting it makes the old `hvalid` premise shape false even when the valuation conjunct
+holds). Unlike conjunct 2 above, this third conjunct costs NOTHING beyond what conjunct 1
+already proves: `openBranch_rawEdges_upward_closed`'s `χ`-general statement (proved above this
+lemma) already discharges upward closure for ANY positive-formula shape at ONE shared `rawEdges`
+witness, so `openBranch_rawEdges_both_upward_closed`'s valuation instance (`χ := .atom p`) and
+`⊥`-shape instance (`χ := HasBot.bot`) are two instantiations of the same fact, not two separate
+obligations. Whatever witness this lemma's still-open `sorry` eventually commits to for
+conjuncts 1/2, if it is a sub-frame of `rawEdges` (any edge list `edges'` with
+`∀ e ∈ edges', e ∈ rawEdges`), `intAccessPreorder_mono_subset` transfers BOTH upward-closure
+facts to it for free -- the third conjunct never needs its own frame search.
 
 **Open — no `edges` witness is committed by this proof.** Unlike an earlier revision, the proof
 below does NOT `refine` a specific `edges` (e.g. the AUGMENTED `augSets` witness
@@ -8219,30 +8234,36 @@ lemma openBranch_rawEdges_both_upward_closed (S : IntMinScheme Atom) (φ : Propo
 branch-derived Kripke model, then the parametric expansion closes on `φ`.
 
 Proof: by contrapositive. If the expansion returns `.openBranch b`, then
-`openBranch_countermodel S` gives `∃ edges, huc ∧ ¬ @IForces Atom Nat (intAccessPreorder edges)
-(intExtractValuation b) (S.modelBot b) 0 φ` (Route (a)), where `huc` is the upward-closure of
-`intExtractValuation b` along `intAccessPreorder edges`; feeding both to `hvalid edges b huc`
-contradicts the `¬IForces` conjunct.
+`openBranch_countermodel S` gives `∃ edges, huc ∧ hbuc ∧ ¬ @IForces Atom Nat
+(intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ` (Route (a)), where `huc`
+is the upward-closure of `intExtractValuation b` and `hbuc` is the upward-closure of
+`S.modelBot b`, both along `intAccessPreorder edges`; feeding all three to
+`hvalid edges b huc hbuc` contradicts the `¬IForces` conjunct.
 
-**Statement-shape fix.** `hvalid` now accepts the upward-closure fact as an explicit hypothesis
+**Statement-shape fix.** `hvalid` now accepts BOTH upward-closure facts as explicit hypotheses
 rather than demanding `IForces` unconditionally at an arbitrary, unconstrained `(edges, b)` pair
--- the old shape was machine-verified FALSE as a consequence of `IValid φ`
-(`CslibTests/HvalidShapeRefutation.lean`: `IValid (p → (q → p))` holds while the old `hvalid`'s
-body
-is false at `edges = [(1, 0)]`, `b = [T(p)@0, T(q)@1]`, a valuation that is not upward-closed).
-The hypothesis `hvalid` encodes the per-scheme validity notion, quantified over the
+-- the old shape (valuation premise only) was machine-verified FALSE as a consequence of
+`IValid φ`/`MValid φ` in two separate ways: `CslibTests/HvalidShapeRefutation.lean`
+(`IValid (p → (q → p))` holds while the old `hvalid`'s body is false at `edges = [(1, 0)]`,
+`b = [T(p)@0, T(q)@1]`, a valuation that is not upward-closed) and
+`CslibTests/MvalidBotShapeRefutation.lean` (the `⊥`-shape analogue: `MValid` true, valuation
+upward-closed, `bot_forces` upward-closure still missing, `hvalid`'s body still false). The
+hypothesis `hvalid` encodes the per-scheme validity notion, quantified over the
 `edges`-parameterized `intAccessPreorder` frame (Route (a): `edges` is only discovered inside
-`openBranch_countermodel`'s own proof, so `hvalid` must accept it as an argument), now WITH the
-upward-closure premise `openBranch_countermodel` supplies:
-- For `intScheme` (where `modelBot b = fun _ => False`): `hvalid edges b huc` follows from
+`openBranch_countermodel`'s own proof, so `hvalid` must accept it as an argument), now WITH both
+upward-closure premises `openBranch_countermodel` supplies:
+- For `intScheme` (where `modelBot b = fun _ => False`): `hvalid edges b huc hbuc` follows from
   `IValid φ` applied at World `= ℕ` with the `intAccessPreorder edges` instance,
-  `val = intExtractValuation b`, and `huc` directly as `IValid`'s upward-closure hypothesis.
-- For `minScheme` (where `modelBot b = minBranchBotForces b`): `hvalid edges b huc` follows from
-  `MValid φ` applied analogously, using `huc` for `MValid`'s first upward-closure hypothesis and
-  a separately-established upward-closure of `minBranchBotForces b` for its second.
+  `val = intExtractValuation b`, using `huc` and `hbuc` directly as `IValid`'s two
+  upward-closure hypotheses (`hbuc` is trivial here, since `modelBot` is always `False`).
+- For `minScheme` (where `modelBot b = minBranchBotForces b`): `hvalid edges b huc hbuc` follows
+  from `MValid φ` applied analogously, using `huc` for `MValid`'s valuation upward-closure
+  hypothesis and `hbuc` for its `bot_forces` upward-closure hypothesis -- both supplied together
+  by `openBranch_countermodel`, not established separately.
 
 This theorem is sorry-free given `openBranch_countermodel S`; the deferred obligation (proving
-`huc` itself) now lives entirely inside `openBranch_countermodel`, not in `hvalid`'s callers.
+`huc`/`hbuc` themselves) now lives entirely inside `openBranch_countermodel`, not in `hvalid`'s
+callers.
 
 ## References
 

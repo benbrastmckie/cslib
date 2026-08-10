@@ -19,12 +19,15 @@ tableau and connects it to derivability via `min_soundness_completeness`.
 
 - `minimalTableau_sound`: Proved (sorry-free) in `Minimal.Soundness`. If
   `minimalTableau φ = closed`, then `MValid φ`.
-- `minimalTableau_complete`: In `Minimal.Completeness`; `MValid φ` implies
-  `minimalTableau φ = closed`. Rests on the deferred completeness sorries (see "Notes on sorry"
-  below).
-- `minimalTableau_decides`: Biconditional combining soundness and completeness.
-- `instDecidableMValid`: A `Decidable (MValid φ)` instance via tableau (NEW to CSLib).
-- `instDecidableDerivableMinPropAxiom`: `Decidable (Derivable MinPropAxiom φ)` via tableau.
+- `minimalTableau_complete`: In `Minimal.Completeness`; `MValid.{_, 0} φ` implies
+  `minimalTableau φ = closed`. Sorry-free (see "Notes on sorry" below for what still carries
+  `sorryAx` one level down).
+- `minimalTableau_decides`: Biconditional combining soundness and completeness, at `MValid.{_,0}`.
+- `instDecidableMValid`: A `Decidable (MValid.{_, 0} φ)` instance via tableau (NEW to CSLib).
+- `instDecidableDerivableMinPropAxiom`: `Decidable (Derivable MinPropAxiom φ)` via tableau, at
+  `MValid`'s original, unpinned universe (routed through `mvalid_universe_invariant`).
+- `mvalid_descend` / `mvalid_universe_invariant`: `MValid` is invariant under the universe
+  `World` is quantified over -- the bridge that lets the `Type 0` pin above cost nothing.
 
 ## Design
 
@@ -42,17 +45,20 @@ Soundness and completeness proofs are in the dedicated `Soundness.lean` and
 ## Notes on sorry
 
 `minimalTableau_sound` is sorry-free. The completeness direction
-(`minimalTableau_complete` in `Minimal/Completeness.lean`) rests on the deferred completeness
-sorries. The parametric `truthLemma` in `Intuitionistic/Scheme.lean` (which the minimal tableau
-reuses as `truthLemma minScheme`) is now sorry-free — it gained an explicit `hpers`
+(`minimalTableau_complete` in `Minimal/Completeness.lean`) is now ALSO sorry-free: the old
+`MValid → forcing` bridge sorry is discharged, since `minOpenBranch_countermodel` now supplies
+both of `MValid`'s upward-closure conjuncts together (see `Minimal/Completeness.lean`'s "Notes
+on sorry" for the full disposition and the statement-shape defect this closure depended on
+fixing). The parametric `truthLemma` in `Intuitionistic/Scheme.lean` (which the minimal tableau
+reuses as `truthLemma minScheme`) is likewise sorry-free — it gained an explicit `hpers`
 (positive-persistence) hypothesis and is unconditionally true over any frame carrying it. The
-remaining sorries are:
+one remaining sorry in this dependency chain is:
 - the open-branch countermodel structural property in `Intuitionistic/Scheme.lean`
-- the `MValid → forcing` bridge in `Minimal/Completeness.lean` (uses `truthLemma minScheme`)
+  (`openBranch_countermodel`'s existential itself — genuinely open, not refuted)
 
 The `Decidable` instance (`instDecidableDerivableMinPropAxiom`) carries the soundness branch
-clean and the countermodel branch with the deferred completeness `sorryAx`. This sorry-taint is
-pre-existing and will be resolved once the deferred completeness sorries are filled.
+clean and the countermodel branch with `openBranch_countermodel`'s deferred `sorryAx`. This
+sorry-taint is pre-existing and will be resolved once that one remaining sorry is filled.
 
 ## Two Decision Routes — Distinct Roles
 
@@ -64,7 +70,8 @@ CSLib contains **two independent decision procedures** for `Derivable MinPropAxi
   intuitionistic expansion (`intExpandBranches`) with `isMinimallyClosed` closure predicate.
   Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
 - **Axiom profile**: Carries the deferred completeness `sorryAx` (see above). Will become
-  sorry-free once the deferred completeness sorries are filled.
+  sorry-free once the one remaining completeness sorry (`openBranch_countermodel`'s existential
+  in `Intuitionistic/Scheme.lean`) is filled.
 - **Exposed as**: `instDecidableDerivableMinPropAxiom` — the **sole registered `Decidable`
   instance** for `Derivable MinPropAxiom φ`.
 - **Role**: Canonical extension-facing instance for minimal propositional logic.

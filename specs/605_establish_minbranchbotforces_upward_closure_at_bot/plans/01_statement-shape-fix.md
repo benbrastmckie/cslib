@@ -365,37 +365,40 @@ concurrently with explicit file ownership.
 
 ---
 
-### Phase 5: Rewrite in-source annotations to the resolved disposition [NOT STARTED]
+### Phase 5: Rewrite in-source annotations to the resolved disposition [COMPLETED]
 
 - **Goal:** Bring every docstring and inline annotation that describes the old two-obligation
   framing into line with what is now true, and record the universe-pin finding where the DP-3 site
   will need it.
 
 - **Tasks:**
-  - [ ] `Minimal/Completeness.lean`: rewrite `minimalTableau_complete`'s docstring. Remove the
+  - [x] `Minimal/Completeness.lean`: rewrite `minimalTableau_complete`'s docstring. Remove the
     "two upward-closure premises / DP-4 is open" framing and the stale `sorry` narrative. State
     plainly that the site now rests on `openBranch_countermodel` alone, that the `⊥`-shape
     obligation is discharged via the `χ`-general raw-edge persistence lemma, and that the earlier
     premise shape was refuted by `CslibTests/MvalidBotShapeRefutation.lean`.
-  - [ ] `Minimal/Completeness.lean`: update `minOpenBranch_countermodel`'s docstring for the third
+  - [x] `Minimal/Completeness.lean`: update `minOpenBranch_countermodel`'s docstring for the third
     conjunct, replacing the "only ONE of `MValid`'s two upward-closure premises" sentence.
-  - [ ] `Minimal/Completeness.lean` / `Minimal/DecisionProcedure.lean`: update the "Notes on
+  - [x] `Minimal/Completeness.lean` / `Minimal/DecisionProcedure.lean`: update the "Notes on
     sorry" sections for the new census.
-  - [ ] `Intuitionistic/Completeness.lean`: add the universe-pin note to DP-3's docstring — the
+  - [x] `Intuitionistic/Completeness.lean`: add the universe-pin note to DP-3's docstring — the
     quoted one-liner `exact h Nat (intExtractValuation _b) _huc 0` does **not** type-check as
     written, because `IValid` quantifies `World : Type v` while the countermodel frame is
     `Nat : Type 0`; closing DP-3 will need the same `.{_, 0}` pin and the `ULift` transport now
     available in `Minimal/DecisionProcedure.lean`. Keep the deliberate `sorry` and its existing
-    rationale intact.
-  - [ ] `Scheme.lean`: update `openBranch_countermodel`'s and `tableau_complete`'s docstrings to
+    rationale intact. *(also corrected the theorem docstring's and inline comment's stale claim
+    that the one-liner "would type-check")*
+  - [x] `Scheme.lean`: update `openBranch_countermodel`'s and `tableau_complete`'s docstrings to
     describe the third conjunct and to note that a sub-frame of `rawEdges` discharges both
     upward-closure conjuncts via `openBranch_rawEdges_both_upward_closed`.
-  - [ ] `CslibTests/MvalidBotShapeRefutation.lean`: if the module docstring written in Phase 1
+  - [x] `CslibTests/MvalidBotShapeRefutation.lean`: if the module docstring written in Phase 1
     described the defect as live, adjust it to record that the shape is now fixed and this file
-    stands as the regression guard.
-  - [ ] Cite durable anchors only — lemma names, file paths, section headings. No task numbers in
+    stands as the regression guard. *(already written in the resolved past-tense framing at
+    Phase 1 landing time; no further edit needed)*
+  - [x] Cite durable anchors only — lemma names, file paths, section headings. No task numbers in
     any file outside `specs/**`; describe the sibling beta-priority rule-selection reorder by
-    content if it is mentioned at all.
+    content if it is mentioned at all. *(no task-number citations found by grep in any of the
+    five touched files)*
 
 - **Timing:** 1 hour
 

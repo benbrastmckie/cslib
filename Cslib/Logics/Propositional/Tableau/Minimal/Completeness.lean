@@ -19,7 +19,7 @@ valid, then the tableau closes on `φ`.
 
 - `minBranchBotForces`: Defined in `Minimal.Soundness`; see that module.
 - `minTruthLemma`: Delegates to the parametric `truthLemma minScheme` from `Scheme.lean`.
-- `minimalTableau_complete`: If `MValid φ`, then `minimalTableau φ = closed`.
+- `minimalTableau_complete`: If `MValid.{_, 0} φ`, then `minimalTableau φ = closed`. Sorry-free.
 
 ## Design
 
@@ -42,28 +42,39 @@ From an open saturated branch `b`, construct a Kripke model as follows:
 
 ## Notes on sorry
 
-`minTruthLemma` delegates to `truthLemma minScheme`, which is now sorry-free (DP-5 discharged
+`minTruthLemma` delegates to `truthLemma minScheme`, which is sorry-free (DP-5 discharged
 via an explicit `hpers` positive-persistence hypothesis, threaded through here as `hpers`
 above). `minOpenBranch_countermodel` delegates to `openBranch_countermodel minScheme`, which
 still carries the deferred sorry in `Scheme.lean` (the existential's whole statement, genuinely
-open — see that lemma's docstring). The remaining sorry in `minimalTableau_complete` (DP-4)
-bridges `MValid φ` to the per-branch forcing hypothesis required by `tableau_complete
-minScheme`.
+open — see that lemma's docstring).
 
-**DP-4 is open — augmented-frame route known-bad, admissible edge space characterised**, not
-refuted, and the earlier claim that it is refuted **independently** of DP-3 is itself retracted:
-under `isMinimallyClosed`, the pruned edge set `edges = [(1, 0)]` (computed against the real
-`minimalTableau` for `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`) discharges BOTH
-upward-closure obligations `MValid` needs here — the valuation one and the `⊥` one — and still
-falsifies `phiRef1` at world 0 (`minBranchesAgree = true` against the real `minimalTableau`).
-That refutes the independent-refutation claim, not the conjunct. What IS machine-verified
-(`CslibTests/BetaSplitRefutation.lean`, `reportMin phiRef1 realFuel`) is that the same
-augmented-frame mechanism as DP-3 — independent beta-splits at two augmented-preorder-equivalent
-worlds joined by a loop-back edge that `intFImpReuseWitnessAnc?` never re-validates once
-recorded (`Expansion.lean`) — also fails upward closure under `isMinimallyClosed`. So DP-4 is
-NOT collateral damage from DP-3's dependency chain in the old refuted-consequence sense; it
-shares DP-3's bad witness choice, and its own upward-closure obligation (`minBranchBotForces b`,
-below) is a genuinely separate, still-open residual.
+`minimalTableau_complete` (DP-4) is now **sorry-free**. The old two-obligation framing (a
+valuation upward-closure premise plus a separately-tracked `⊥`-shape upward-closure premise) is
+retired: `openBranch_countermodel`'s existential now supplies BOTH conjuncts directly, so DP-4
+instantiates `MValid.{_, 0} φ` with everything it needs in one call, and rests on exactly the
+same single open obligation as DP-3 — `openBranch_countermodel`'s own existential in
+`Scheme.lean`. The `⊥`-shape conjunct costs nothing beyond the valuation one: both are the SAME
+`χ`-general raw-edge persistence fact (`openBranch_rawEdges_upward_closed`/
+`openBranch_rawEdges_both_upward_closed` in `Scheme.lean`), instantiated at `χ := .atom p` and
+`χ := HasBot.bot` respectively.
+
+**Why the old, two-premise `hvalid` shape could not have closed DP-4 as previously stated.**
+`CslibTests/MvalidBotShapeRefutation.lean` machine-checks that `tableau_complete`'s `hvalid`
+body, quantified over an ARBITRARY unconstrained `(edges, b)` pair with only the valuation
+upward-closure premise supplied, is refuted: `φ = ⊥ → ((⊥ → ⊥) → ⊥)` is `MValid`, yet the
+`hvalid` body is false at an atom-free witness whose `minBranchBotForces` is not upward closed.
+Adding the matching `bot_forces`-upward-closure premise to `hvalid` (and the matching conjunct
+to `openBranch_countermodel`) is what makes the goal provable at all — this is the SAME kind of
+statement-shape defect `CslibTests/HvalidShapeRefutation.lean` documents for the valuation
+conjunct, one conjunct later.
+
+**Universe pin.** `minimalTableau_complete` is stated at `MValid.{_, 0} φ` because the
+countermodel frame here is built from `Nat : Type 0`, while `MValid.{u, v}` quantifies
+`World : Type v` in general. `Minimal/DecisionProcedure.lean`'s `mvalid_universe_invariant`
+proves this pin costs nothing (`MValid` is universe-invariant), so
+`instDecidableDerivableMinPropAxiom` there keeps its original, universe-unpinned public
+statement despite `minimalTableau_decides`/`instDecidableMValid` now being pinned to `Type 0`
+alongside this theorem.
 
 ## References
 
@@ -118,11 +129,10 @@ Delegates to `openBranch_countermodel minScheme`. The structural sorries in
 `Intuitionistic.Completeness.intuitionisticOpenBranch_countermodel`'s existential exposure of
 `edges`.
 
-**Statement-shape fix**: the conclusion also carries the upward-closure of
-`intExtractValuation b` along `intAccessPreorder edges` (see `Scheme.lean`'s
-`openBranch_countermodel` docstring). This is only ONE of `MValid`'s two upward-closure
-premises -- `minimalTableau_complete` below still needs `minBranchBotForces b`'s upward-closure
-separately.
+**Statement-shape fix**: the conclusion carries BOTH of `MValid`'s upward-closure conjuncts --
+`intExtractValuation b`'s and `minBranchBotForces b`'s -- along `intAccessPreorder edges` (see
+`Scheme.lean`'s `openBranch_countermodel` docstring). `minimalTableau_complete` below needs
+nothing further from this lemma: both conjuncts arrive here together.
 
 If `minimalTableau φ = openBranch b`, then `intExtractValuation b` and `minBranchBotForces b`
 define a minimal Kripke model that falsifies `φ` at world 0 (over edge-accessibility). -/
@@ -137,24 +147,23 @@ lemma minOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
         (intExtractValuation b) (minBranchBotForces b) 0 φ := by
   exact openBranch_countermodel minScheme φ b h
 
-/-- **Minimal Tableau Completeness**: If `φ` is minimally valid, then the minimal
-tableau closes on `φ`.
+/-- **Minimal Tableau Completeness**: If `φ` is minimally valid (at universe `0`), then the
+minimal tableau closes on `φ`. Sorry-free.
 
 Delegates to `tableau_complete minScheme`. **Statement-shape fix**: `tableau_complete`'s
-`hvalid` premise now accepts `intExtractValuation b`'s upward-closure as an explicit hypothesis
-(mirrors `intuitionisticTableau_complete`'s fix; see `Scheme.lean`'s `openBranch_countermodel`
-and `tableau_complete` docstrings for the machine-verified defect this replaces).
+`hvalid` premise now accepts BOTH of `MValid`'s upward-closure conjuncts as explicit hypotheses
+(`_huc` for the valuation, `_hbuc` for `minBranchBotForces`; mirrors
+`intuitionisticTableau_complete`'s fix; see `Scheme.lean`'s `openBranch_countermodel` and
+`tableau_complete` docstrings for the machine-verified defect this replaces, and
+`CslibTests/MvalidBotShapeRefutation.lean` for the refutation of the old, `⊥`-conjunct-missing
+shape).
 
-`MValid φ` needs TWO upward-closure premises (val AND `botForces`); the supplied `_huc`
-discharges only the first. **DP-4 is open — augmented-frame route known-bad**, not "pending" any
-future phase in the old sense, and the earlier claim that it is refuted **independently** of
-DP-3 is retracted (see "Notes on sorry" above: `[(1, 0)]` discharges both upward-closure
-obligations under `isMinimallyClosed` and still falsifies `phiRef1`, so the independent
-refutation does not hold). Two obligations remain genuinely open: (1)
-`openBranch_countermodel`'s own upward-closure conjunct in `Scheme.lean`, which is open with the
-augmented-frame route known-bad (see that docstring); (2) `minBranchBotForces b`'s own
-upward-closure (a SEPARATE fact, at the `⊥` formula shape) — a **named residual**: it holds at
-the `[(1, 0)]` witness (computed) but is not established in general. Neither is pursued here. -/
+This site now rests on exactly one obligation, the same one DP-3 rests on:
+`openBranch_countermodel`'s own existential in `Scheme.lean` (`minOpenBranch_countermodel`'s
+delegate above), which supplies `edges`, `_huc`, and `_hbuc` together. With both conjuncts in
+hand, `MValid.{_, 0} φ` instantiates directly at `World := Nat`,
+`[Preorder Nat] := intAccessPreorder edges`, `val := intExtractValuation _b`,
+`bot_forces := minBranchBotForces _b` -- no separate `⊥`-shape residual remains. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid.{_, 0} φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme

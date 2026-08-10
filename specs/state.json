@@ -1103,7 +1103,7 @@
     {
       "project_number": 622,
       "project_name": "investigate_scheme_build_stall",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
@@ -1113,7 +1113,16 @@
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
       ],
-      "created": "2026-08-10T20:34:20Z"
+      "created": "2026-08-10T20:34:20Z",
+      "last_updated": "2026-08-10T21:15:42Z",
+      "session_id": "sess_1786394597_5be929",
+      "artifacts": [
+        {
+          "path": "specs/622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md",
+          "type": "report",
+          "summary": "Root-cause report: full lake build is green in 222 s; the hang reproduces only when lean is invoked without Lake's --setup, and disappears with it (23.78 s)"
+        }
+      ]
     }
   ],
   "repository_health": {

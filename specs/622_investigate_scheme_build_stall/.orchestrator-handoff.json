@@ -1,0 +1,35 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "trigger": "phase_dispatch",
+  "target": "Investigate why Tableau/Intuitionistic/Scheme.lean never completes a build, blocking full lake build",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "skeleton": false,
+  "summary": "PREMISE FALSIFIED — there is no build stall and no code defect. Measured at HEAD b83ae232 with a clean Cslib/ tree: full `lake build` completes green in 222.31 s (3325 jobs, 0 errors); a re-run is a 1.68 s no-op; `lake build` of the Scheme module alone is 26.08 s (Scheme itself 18 s) and produces a 1.8 MB .olean plus a 217 KB .c. The 92-minute hang was real but is an artifact of the reproduction command, not of the file: `lean` invoked on Scheme.lean WITHOUT Lake's `--setup` argument diverges, while the same invocation WITH `--setup` exits 0 in 23.78 s. That one flag is the entire difference, and `lake build` always passes it. The hang signature matched the report exactly (101-128% CPU on one core, RSS byte-identical at 1,340,544 KB, no diagnostic, SIGTERM->143 because `lake env lean` forwards the child status), which is what identifies it as the same event. The missing .olean is explained by the same fact: `lake env lean` without `-o` never writes one, so its absence is a property of the command line, not evidence the module never built. Independent corroboration that the file has been green all along: Completeness.lean:11 carries `public import ...Scheme`, and Completeness.olean (08:59) plus DecisionProcedure.olean (07:47) could not exist without Scheme.olean; Scheme.trace (09:03:18) records a successful build with output hash 140aff11b3342d89 matching Scheme.olean.hash; and the last commit changing CODE in Scheme.lean is f78d0556 (07:32) — every hunk in the four later commits (54a8ad8a, 0bdf038d, a0aafc5e, 7e8b56b1) is comment/docstring prose, so the elaboration workload is unchanged since the last known-good build. The file is genuinely sorry-free (all 26 `sorry` strings are prose in docstrings). Cost of the hang was localised by prefix bisection: lines 1-8310 elaborate in 15.89 s, lines 1-9631 exceed 420 s, so 100% of the anomalous cost is the single ~1,320-line lemma intExpandBranches_openBranch_sat (8311-9631), whose proof does a 10-target simultaneous `induction ... using intExpandBranches.go.induct` over a WF-recursive definition with ~30 intros per case. Two hypotheses were ruled out: it is NOT kernel type-checking (`-Ddebug.skipKernelTC=true` still hangs) and it is NOT heartbeat-bounded (400 s on default maxHeartbeats with no deterministic-timeout error; the file has ZERO set_option lines, so nothing is being masked). A secondary real issue was found and is now resolved by the build: Defs.olean (11:56, built from the since-reverted notation experiment) was stale against Defs.lean (13:31), which also made the ad-hoc `lake env lean` runs untrustworthy since they bypass dependency resolution. RECOMMENDATION: close as NOT-A-BUG; do not create a plan; do not edit Scheme.lean. CI step 1 is not blocked.",
+  "sorry_inventory": [],
+  "blockers": [],
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md",
+      "summary": "Root-cause report: full lake build is green in 222 s; the hang reproduces only when `lean` is invoked without Lake's `--setup`, and disappears with it (23.78 s)"
+    }
+  ],
+  "next_action_hint": "close_task_not_a_bug",
+  "requires_user_review": false,
+  "continuation_path": "specs/622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md",
+  "modified_files": [
+    "specs/622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md",
+    "specs/622_investigate_scheme_build_stall/.orchestrator-handoff.json",
+    "specs/622_investigate_scheme_build_stall/.return-meta.json"
+  ],
+  "decisions_made": [
+    "Recommended NOT-A-BUG closure rather than any code change: the file builds in 18 s under `lake build` and no code in it has changed since its last known-good build, so there is nothing to fix.",
+    "Did NOT recommend refactoring the 10-target induction in intExpandBranches_openBranch_sat despite it being the sole cost centre of the hang. Under the real build path that lemma is unremarkable, so a refactor would be optimising a path that only exists under a malformed invocation — high risk against a 1,320-line sorry-free proof for zero CI benefit.",
+    "Did NOT recommend adding set_option maxHeartbeats/maxRecDepth overrides. The file has zero set_option lines and the divergence provably does not check heartbeats (400 s on the default limit with no deterministic-timeout error), so an override would neither help nor mask anything.",
+    "Explicitly rejected the task description's inference that a missing .olean proves the module never built: `lake env lean` without `-o` never emits one, and Completeness.olean/DecisionProcedure.olean plus Scheme.trace's recorded output hash prove the opposite.",
+    "Recorded two optional hygiene follow-ups (the Intuitionistic.lean sub-barrel omits Scheme even though Cslib.lean:636 imports it; and `lake env lean <file>` is unsafe for module-system files in this repo) as independent items NOT to be bundled into this task's closure."
+  ]
+}

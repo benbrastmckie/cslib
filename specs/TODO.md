@@ -32,7 +32,7 @@ next_project_number: 623
 619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
-622 [NOT STARTED] — A full `lake build` on `main` does not complete. It stalls indefi
+622 [RESEARCHED] — A full `lake build` on `main` does not complete. It stalls indefi
 
 ### Modal Logic
 
@@ -89,10 +89,11 @@ next_project_number: 623
 ## Tasks
 
 ### 622. Investigate why Tableau/Intuitionistic/Scheme.lean never completes a build, blocking full lake build
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md]
 
 **Description**: A full `lake build` on `main` does not complete. It stalls indefinitely while elaborating
 `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`.

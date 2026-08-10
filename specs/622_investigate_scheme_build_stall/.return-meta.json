@@ -1,0 +1,52 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T14:00:00Z",
+  "completed_at": "2026-08-10T14:20:00Z",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/622_investigate_scheme_build_stall/reports/01_scheme-build-stall-root-cause.md",
+      "summary": "Premise falsified: full lake build is green in 222 s; the hang reproduces only without Lake's --setup flag and disappears with it (23.78 s). Recommend NOT-A-BUG closure."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/622_investigate_scheme_build_stall/.orchestrator-handoff.json",
+      "summary": "Orchestrator handoff, status completed, next_action_hint close_task_not_a_bug"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Root cause established empirically; no plan phase recommended"
+  },
+  "findings": {
+    "verdict": "not_a_bug",
+    "full_lake_build_seconds": 222.31,
+    "full_lake_build_jobs": 3325,
+    "full_lake_build_errors": 0,
+    "scheme_module_build_seconds": 18,
+    "with_setup_seconds": 23.78,
+    "without_setup": "diverges (>19 min, killed)",
+    "root_cause": "Reproduction command omitted Lake's --setup argument; not a property of Scheme.lean",
+    "cost_centre_under_hang": "intExpandBranches_openBranch_sat (Scheme.lean:8311-9631), 10-target induction using intExpandBranches.go.induct",
+    "kernel_tc_ruled_out": true,
+    "heartbeat_bounded_ruled_out": true,
+    "file_is_sorry_free": true,
+    "secondary_issue_resolved": "Defs.olean (11:56) was stale vs Defs.lean (13:31); resolved by lake build",
+    "optional_followups": [
+      "Intuitionistic.lean sub-barrel omits Scheme though Cslib.lean:636 imports it",
+      "Document that `lake env lean <file>` is unsafe for module-system files; use `lake build <Module.Name>`"
+    ]
+  },
+  "metadata": {
+    "session_id": "sess_1786394597_5be929",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": [
+      "orchestrator",
+      "research",
+      "cslib-research-agent"
+    ],
+    "task_number": 622,
+    "head_commit": "b83ae232"
+  }
+}

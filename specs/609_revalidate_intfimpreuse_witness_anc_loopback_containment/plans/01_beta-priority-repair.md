@@ -490,7 +490,7 @@ at 2, axiom count unchanged at 26.
 
 ---
 
-### Phase 5: The freeze lemma [IN PROGRESS]
+### Phase 5: The freeze lemma [COMPLETED]
 
 **Goal**: Prove the one genuinely new obligation the repair creates — under beta-priority, no arm
 of `go` adds a positive entry at a world that already carries a recorded loop-back. Additive; the
@@ -598,6 +598,45 @@ dispatch resuming Phase 5/6 should start from `IFrozenBelow_intStepBranchPrio_ge
 sketch above, rather than re-deriving the mechanism a third time. Escalating to V2 remains
 unwarranted: nothing found this dispatch weakens that conclusion.
 
+**Progress note (this dispatch, completing mechanism 3(b) and closing Phase 5)**: the persistence
+half sketched above is now fully formalized and landed, sorry-free and axiom-clean, in
+`Scheme.lean` immediately after `IFrozenBelow_intStepBranchPrio_ge`:
+
+- `isf_any_mem`: a small extraction helper (a `List.any` witness over the `(sign, formula, label)`
+  triple pins down the exact `ISF Atom` membership), mirroring the existing extraction pattern in
+  `applyAllTImpRules_copy_complete_of_fixpoint`. Used throughout the two lemmas below.
+- `applyAllTImpRules_agrees`: the single-round case. Given the checkpoint facts about a FIXED
+  branch `b` (`IFrozenBelow w0 e b`, `IPosPersistRaw edges b`, `IExpandedConsistent b e`, an
+  open-branch "no complementary `T(χ)`/`F(χ)` pair below `w0`" hypothesis, and the
+  `IWorldHist`/`IWorldHistCounter` pair `IWorldHist_isAccessible_lt` needs), one round of
+  `applyAllTImpRules` applied to any `bv` that CONTAINS `b` and AGREES with `b` below `w0`
+  (`∀ sf ∈ bv, sf.label < w0 → sf ∈ b`) still agrees with `b` below `w0`. The genCopies channel is
+  closed directly from `IPosPersistRaw` (no `w0` restriction needed: any copy it would produce is
+  already present). The ψ-consequence channel (`intTImpRule`'s direct clause) is closed exactly as
+  sketched: `IWorldHist_isAccessible_lt` pins the source label below `w0` too; `IPosPersistRaw`
+  propagates the SOURCE implication's copy to the target label; `IFrozenBelow` forces that copy to
+  be `e`-expanded; `IExpandedConsistent` reads off the Fitting-split resolution
+  (`F(φ)@w' ∨ T(ψ)@w'`); and the open-branch consistency hypothesis rules out `F(φ)@w'` given
+  `T(φ)@w'` is exactly `intTImpRule`'s own firing precondition -- leaving `T(ψ)@w'` already
+  present, so nothing new is ever added.
+- `applyPersistenceFixpoint_agrees`: the fuel-recursive composition of the single-round case across
+  `applyPersistenceFixpoint`'s own internal fixpoint recursion (the fuel loop WITHIN one `go` call,
+  not the outer `go`-to-`go` recursion, which stays Phase 6's territory). The fixed branch `b` and
+  all its checkpoint facts never change across rounds; only the varying branch `bv` (and its
+  agreement-with-`b`-below-`w0` witness) is threaded as an explicit universally-quantified
+  induction target, which sidesteps needing to `generalizing` the fixed hypotheses.
+- `IFrozenBelow_applyPersistenceFixpoint`: **mechanism 3(b), landed** -- the direct corollary at
+  `bv := b` (reflexive agreement/monotonicity): `applyPersistenceFixpoint b edges fuel`, run at the
+  top of every `intExpandBranches.go` call, preserves `IFrozenBelow w0 e`.
+
+This closes every Task item below: the freeze lemma (both the step half,
+`IFrozenBelow_intStepBranchPrio_ge`, and the persistence half,
+`IFrozenBelow_applyPersistenceFixpoint`) is now fully proved. Phase 5 is complete. What remains is
+Phase 6's own, separately-scoped mandate: composing these per-`go`-call facts across the OUTER
+`go`-to-`go` recursion (all four `go.induct` blocks) to actually replace `IReuseContain_mono` at
+its use sites -- a distinct, larger induction-threading task, not a continuation of Phase 5's own
+proof obligations.
+
 **Tasks**:
 - [x] State the freeze lemma. Landed as `IFrozenBelow` (`Expansion.lean`) plus the `IResultLabelsGe`
       family (`Scheme.lean`) -- the checkpoint precondition and the single-step conclusion,
@@ -607,17 +646,20 @@ unwarranted: nothing found this dispatch weakens that conclusion.
 - [x] Obtain the first-pass-empty hypothesis at the world-creating arm by unfolding
       `intStepBranchPrio` — landed as `intStepBranchPrioFirstPass_none_frozen`.
 - [x] Prove it (the single-step case). Landed as `IFrozenBelow_intStepBranchPrio_ge`; the
-      "downward-only" fact this task anticipated is supplied by the NEW `IWorldHist_isAccessible_lt`
-      plus the already-landed `applyAllTImpRules_copy_complete_of_fixpoint` for the persistence half
-      (mechanism 3(b), sketched above but not yet formalized as a lemma -- *(deviation: deferred to
-      a follow-up dispatch, since it composes with Phase 6's induction rather than standing alone)*).
+      "downward-only" fact this task anticipated is supplied by `IWorldHist_isAccessible_lt`.
+- [x] Prove the persistence half (mechanism 3(b)). Landed as `IFrozenBelow_applyPersistenceFixpoint`
+      (via `applyAllTImpRules_agrees`/`applyPersistenceFixpoint_agrees`), sorry-free and
+      axiom-clean. *(deviation: this task item was not separately enumerated in the plan's original
+      task list -- added here since it is exactly "the persistence half" the Investigation note's
+      point 3(b) named as still open, and closing it is what completes Phase 5)*
 - [ ] If the lemma resists: escalate to V2. *(deviation: not applicable -- the lemma does not
-      resist; the freeze claim is confirmed true and the step-level case is proved. Remaining work
-      is scale, not a dead end, per the Investigation note's own point 5)*
+      resist; the freeze claim is confirmed true and BOTH the step-level and persistence-level
+      cases are proved. No scope remains at the Phase 5 level; V2 was never warranted)*
 
-**Timing**: 2 hours (original estimate; actual this dispatch: full step-lemma landed, persistence
-half and multi-step composition still open -- budget the continuation at Phase 1+2 combined scale
-per the Investigation note)
+**Timing**: 2 hours (original estimate; actual across the two dispatches that completed this
+phase: full step lemma plus the persistence half and its fuel-recursive composition, all landed
+sorry-free -- closer to the Phase 1+2 combined scale flagged by the Investigation note, as
+anticipated)
 
 **Depends on**: 3
 
@@ -632,18 +674,23 @@ per the Investigation note)
   `intStepBranchPrioFirstPass`)*
 - `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - `IWorldHist_isAccessible_lt`
   (beside `IWorldHist_forestComparable`), the freeze step lemma family (beside `IPosPersistRaw`,
-  ahead of `IReuseContain` as planned)
+  ahead of `IReuseContain` as planned), and (this dispatch) `isf_any_mem`,
+  `applyAllTImpRules_agrees`, `applyPersistenceFixpoint_agrees`,
+  `IFrozenBelow_applyPersistenceFixpoint` (immediately after the step-lemma family, still ahead of
+  `IReuseContain`)
 
 **Verification**:
 - `lake build` of `Rules.lean`/`Expansion.lean`/`Scheme.lean` succeeds (confirmed; full `lake build`
-  green at 3325 jobs, `lake test` green at 9397 jobs, unchanged from the Phase 3/4 baseline).
-- Zero new sorries, zero new axioms — `lean_verify` and `lake env lean #print axioms` on all six new
-  declarations confirm no `sorryAx`, only `propext`/`Quot.sound`/`Classical.choice`.
+  green, `lake test` green, verdict-unchanged from the Phase 3/4 baseline -- see the phase-closing
+  CI run below).
+- Zero new sorries, zero new axioms — `lean_verify` on all ten new declarations (six from the prior
+  dispatch, four this dispatch) confirms no `sorryAx`, only `propext`/`Quot.sound`/
+  `Classical.choice`.
 - No existing declaration modified (confirmed: diff is purely additive across all three files).
 
 ---
 
-### Phase 6: Snapshot-free `IReuseContain`, re-threaded through the `key` induction [NOT STARTED]
+### Phase 6: Snapshot-free `IReuseContain`, re-threaded through the `key` induction [IN PROGRESS]
 
 **Goal**: Drop the snapshot existential. This is the mint-time weakening the defect forced, and the
 repair is what makes dropping it possible.

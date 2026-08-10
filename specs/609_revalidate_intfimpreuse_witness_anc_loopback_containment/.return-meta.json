@@ -3,8 +3,6 @@
   "started_at": "2026-08-09T00:00:00Z",
   "requires_user_review": false,
   "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md"
   ],
@@ -12,26 +10,27 @@
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 5 remains [IN PROGRESS]; its Investigation note is followed by a new Progress note recording six landed, verified, additive declarations (the freeze-lemma checkpoint and single-step invariant) plus a concrete two-item continuation sketch (persistence-fixpoint preservation, multi-step induction composition) for the next dispatch."
+      "summary": "Phase 5 (The freeze lemma) marked [COMPLETED]: mechanism 3(b) (persistence-fixpoint preservation) landed sorry-free, closing the phase's last open task item. Phase 6 (threading IFrozenBelow through the four go.induct blocks to replace IReuseContain_mono) remains [IN PROGRESS]/not started -- named as the next dispatch's objective."
     }
   ],
   "completion_data": {
-    "phases_completed": 4,
+    "phases_completed": 5,
     "phases_total": 9,
     "phases_completed_names": [
       "Phase 1: intStepBranchPrio and its bridges (additive)",
       "Phase 2: Re-base the six unfolding proofs onto a shared extraction shape",
       "Phase 3: Swap the call site and reconcile the test corpus",
-      "Phase 4: Promote phiRef4 and re-point the refutation narrative"
+      "Phase 4: Promote phiRef4 and re-point the refutation narrative",
+      "Phase 5: The freeze lemma"
     ],
-    "continuation_path": "Resume at Phase 5 (The freeze lemma, still [IN PROGRESS]), specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md. Read the Phase 5 section's 'Progress note (this dispatch...)' block first -- it names the six new sorry-free declarations already landed (isRuleShape/intApplyRuleFull_notApplicable_iff in Rules.lean; IFrozenBelow/intStepBranchPrioFirstPass_none_frozen in Expansion.lean; IWorldHist_isAccessible_lt and the IFrozenBelow_intStepBranchPrio_ge step-lemma family in Scheme.lean) and gives a concrete two-item continuation sketch: (1) prove persistence-fixpoint preservation of IFrozenBelow using the already-landed applyAllTImpRules_copy_complete_of_fixpoint plus the new IWorldHist_isAccessible_lt (genCopies channel) and IExpandedConsistent plus a branch-consistency fact (intTImpRule's direct channel); (2) thread IFrozenBelow through intExpandBranches_openBranch_sat's four go.induct blocks (Phase 6's original mandate) to replace IReuseContain_mono at each use site. Budget at Phase 1+2 combined scale, not the plan's original 2-hour estimate for Phase 5."
+    "continuation_path": "Phase 5 is now fully COMPLETED (both the step-level case, IFrozenBelow_intStepBranchPrio_ge, and the persistence-fixpoint case, IFrozenBelow_applyPersistenceFixpoint, are landed sorry-free and axiom-clean). Resume at Phase 6 (Snapshot-free IReuseContain, re-threaded through the key induction), specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md. Phase 6's task: restate IReuseContain with bSnap:=b (dropping the snapshot existential), and replace IReuseContain_mono at each of its use sites inside intExpandBranches_openBranch_sat's induction (four go.induct blocks, per the plan's own Scope Hypothesis at approximately 6+ use sites) with the newly-landed IFrozenBelow_applyPersistenceFixpoint plus IFrozenBelow_intStepBranchPrio_ge, composed across the OUTER go-to-go recursion (i.e., establishing IFrozenBelow at the checkpoint moment a loop-back edge is recorded, in intFImpReuseWitnessAnc?'s reuse arm, and propagating it forward through every subsequent go call to the final returned open branch b). This is explicitly the largest remaining piece of this plan (the plan's own Phase 5 Investigation note sizes it comparable to Phases 1-11 of the plan's own lineage). Budget a dedicated dispatch for it rather than attempting it inside a tight remaining-budget window."
   },
   "partial_progress": {
-    "stage": "phase_5_checkpoint_and_step_lemma_landed",
-    "details": "Phases 1-4 remain landed and committed from prior dispatches (through cd421ee8). This dispatch re-derived the Phase 5 freeze mechanism from first principles, confirmed the prior dispatch's Investigation note is correct, and landed six new sorry-free, axiom-clean, purely additive declarations across three files (commit 4ffd1821): isRuleShape and intApplyRuleFull_notApplicable_iff in Rules.lean (a bare, nw/b-independent shape characterization of intApplyRuleFull's .notApplicable result); IFrozenBelow and intStepBranchPrioFirstPass_none_frozen in Expansion.lean (the checkpoint precondition and its derivation from intStepBranchPrioFirstPass returning none, i.e. exactly the moment intStepBranchPrio falls through to world-creation); and in Scheme.lean, IWorldHist_isAccessible_lt (a new label-order corollary of the already-landed IWorldHist/IWorldHistCounter invariants -- raw-edge accessibility only flows from smaller to larger labels, needing no new invariant threading) plus the freeze single-step conclusion family (IResultLabelsGe, IResultLabelsEq, IResultLabelsEq_imp_Ge, intApplyRuleFull_labels_eq_of_not_worldCreating, IFrozenBelow_intStepBranchPrio_ge) proving that one intStepBranchPrio step, given IFrozenBelow w0 e b and w0 <= nw, can only write new content at labels >= w0. This is mechanism 3(a) from the Investigation note, proved in full. Mechanism 3(b) (persistence-fixpoint preservation) is sketched but not yet formalized, and the multi-step composition into intExpandBranches_openBranch_sat's induction (needed for the actual IReuseContain_mono replacement Phase 6 wants) remains open -- both are recorded precisely in the plan's new Progress note. Full lake build green at 3325 jobs (unchanged job count), lake test green at 9397 jobs, TableauConformance's 20 rows unchanged, checkInitImports/lake lint/lint-style/shake/mk_all all clean on touched files. Stopped at this green boundary per explicit delegation-context instruction rather than rushing the remaining, substantially larger composition work.",
+    "stage": "phase_5_completed_mechanism_3b_landed",
+    "details": "Phases 1-4 remain landed and committed from prior dispatches. The immediately-prior dispatch (commit 4ffd1821) landed mechanism 3(a) (the single-step freeze case, IFrozenBelow_intStepBranchPrio_ge) plus its supporting machinery (isRuleShape, intApplyRuleFull_notApplicable_iff in Rules.lean; IFrozenBelow, intStepBranchPrioFirstPass_none_frozen in Expansion.lean; IWorldHist_isAccessible_lt in Scheme.lean). This dispatch completed mechanism 3(b) (persistence-fixpoint preservation), the item explicitly left open by that prior dispatch's Progress note. Four new declarations landed in Scheme.lean, all sorry-free and axiom-clean (propext/Quot.sound/Classical.choice only, confirmed via lean_verify on each): isf_any_mem (a small List.any-witness extraction helper mirroring the existing pattern in applyAllTImpRules_copy_complete_of_fixpoint); applyAllTImpRules_agrees (the single-round case: one round of applyAllTImpRules cannot introduce content below a checkpoint w0, given IFrozenBelow, IPosPersistRaw, IExpandedConsistent, an open-branch no-complementary-pair-below-w0 hypothesis, and IWorldHist/IWorldHistCounter for the label-order fact -- the genCopies channel closes directly from IPosPersistRaw with no w0 restriction needed, and the psi-consequence channel (intTImpRule's direct clause) closes via IWorldHist_isAccessible_lt pinning the source below w0, IPosPersistRaw propagating the source implication's copy to the target, IFrozenBelow forcing that copy to be e-expanded, IExpandedConsistent reading off the Fitting-split resolution, and the no-complementary-pair hypothesis ruling out the F(phi) disjunct); applyPersistenceFixpoint_agrees (the fuel-recursive composition of the single-round case across applyPersistenceFixpoint's own internal fixpoint loop, structured with the fixed checkpoint branch b held constant across the induction while only the varying branch bv and its agreement witness are threaded as explicit universally-quantified induction targets, avoiding a `generalizing` conflict with the fixed hypotheses); and IFrozenBelow_applyPersistenceFixpoint (mechanism 3(b) itself, the direct corollary at bv:=b: applyPersistenceFixpoint b edges fuel, run at the top of every intExpandBranches.go call, preserves IFrozenBelow w0 e). This closes every open task item in Phase 5's own task list; the phase heading is now marked [COMPLETED] in the plan. Full lake build green at 3325 jobs (identical job count to the Phase 3/4/prior-dispatch baseline -- no new files, confirmed by `lake exe mk_all --module` reporting 'No update necessary'), lake test green (exit 0, TableauConformance's conformance corpus unaffected -- module untouched), checkInitImports clean, lake lint zero findings in Scheme.lean (confirmed via full lake lint run filtered to Scheme.lean), lake exe lint-style clean, lake shake clean for Scheme.lean (only pre-existing, unrelated findings in FrameCompleteness.lean and Minimal/DecisionProcedure.lean, both outside this task's territory). Sorry count unchanged at 2 (Scheme.lean:8558 openBranch_countermodel, Phase 8's territory; Completeness.lean:191 intuitionisticTableau_complete, Phase 9's territory); axiom count unchanged at 26. Stopped at this green boundary (Phase 5 fully complete) per the delegation instruction's own framing ('a completed Phase 5 alone is a successful dispatch') rather than starting Phase 6's substantially larger induction-threading work inside the remaining budget.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 4
+    "phases_completed": 5
   },
   "metadata": {
     "session_id": "sess_1786321994_b49e26_609",
@@ -44,20 +43,18 @@
     "verification_passed": true,
     "sorry_count_scoped": 2,
     "sorry_count_scoped_baseline": 2,
-    "sorry_count_scoped_note": "Scoped to this task's territory: Scheme.lean:8327 (openBranch_countermodel, Phase 8) and Completeness.lean:181 (intuitionisticTableau_complete, Phase 9); both pre-existing and unchanged. Repository-wide grep -rn sorry Cslib/ returns 196, an unrelated library-wide baseline covering many other in-progress tasks, not scoped to task 609.",
+    "sorry_count_scoped_note": "Scoped to this task's territory: Scheme.lean:8558 (openBranch_countermodel, Phase 8) and Completeness.lean:191 (intuitionisticTableau_complete, Phase 9); both pre-existing and unchanged by this dispatch.",
     "vacuous_count": 0,
     "axiom_count": 26,
     "axiom_count_baseline": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
     "new_declarations_verified_sorry_free": [
-      "Cslib.Logic.PL.isRuleShape",
-      "Cslib.Logic.PL.intApplyRuleFull_notApplicable_iff",
-      "Cslib.Logic.PL.IFrozenBelow",
-      "Cslib.Logic.PL.intStepBranchPrioFirstPass_none_frozen",
-      "Cslib.Logic.PL.IWorldHist_isAccessible_lt",
-      "Cslib.Logic.PL.IFrozenBelow_intStepBranchPrio_ge"
+      "Cslib.Logic.PL.isf_any_mem",
+      "Cslib.Logic.PL.applyAllTImpRules_agrees",
+      "Cslib.Logic.PL.applyPersistenceFixpoint_agrees",
+      "Cslib.Logic.PL.IFrozenBelow_applyPersistenceFixpoint"
     ],
-    "note": "lake exe cache get warm; scoped builds of Rules.lean/Expansion.lean/Scheme.lean all green; full lake build green at 3325 jobs (identical job count to the Phase 3/4 baseline); lake test green at 9397 jobs with TableauConformance's 20 rows verdict-unchanged; checkInitImports clean; lake lint zero findings in touched files; lake exe lint-style clean; lake shake clean for touched files; lake exe mk_all --module reports no update necessary. Every new declaration verified individually via both the lean-lsp lean_verify tool and a direct `lake env lean #print axioms` invocation (used as a cross-check after lean_verify returned a spurious sorryAx on one declaration immediately after a large edit, before a fresh lake build/LSP restart -- the direct #print axioms call and a subsequent lean_verify after lean_build both confirmed no sorryAx, matching every other declaration's clean result)."
+    "note": "lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme green throughout iterative development; full lake build green at 3325 jobs (identical job count to baseline); lake test green (exit 0); checkInitImports clean; lake lint zero findings in Scheme.lean; lake exe lint-style clean; lake shake clean for Scheme.lean; lake exe mk_all --module reports no update necessary. Every new declaration verified individually via lean_verify (lean-lsp MCP), all reporting axioms=[propext, Quot.sound, Classical.choice] or a subset thereof, no sorryAx."
   }
 }

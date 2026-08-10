@@ -7084,6 +7084,213 @@ private lemma IFrozenBelow_intStepBranchPrio_ge
     rw [hint] at heq
     exact IResultLabelsEq_imp_Ge hlge heq
 
+/-! ### Freeze persistence-fixpoint preservation (plan Phase 5, mechanism 3(b))
+
+`IFrozenBelow_intStepBranchPrio_ge` covers a single `intStepBranchPrio` step in isolation. The
+other half of the freeze argument (Phase 5's Investigation note, point 3(b)) is that
+`applyPersistenceFixpoint`/`applyAllTImpRules`, run at the TOP of every `intExpandBranches.go`
+call, also cannot introduce genuinely new content below a checkpoint `w0`, given `IFrozenBelow
+w0 e b` together with the raw-edge persistence invariant `IPosPersistRaw edges b` and open-branch
+consistency. Two channels make up `applyAllTImpRules`: the generalized copy channel (`genCopies`,
+copying an existing positive formula to every accessible world lacking its own copy) is vacuous
+below `w0` -- indeed everywhere -- directly from `IPosPersistRaw`, no `w0` restriction needed.
+The ψ-consequence channel (`intTImpRule`'s direct clause, deriving `T(ψ)@w'` from `T(φ→ψ)@w` and
+`T(φ)@w'`) needs more: `IWorldHist_isAccessible_lt` pins the SOURCE of any accessibility edge
+landing below `w0` to also be below `w0`; `IFrozenBelow` then forces the source's copy of
+`T(φ→ψ)` (itself already `IPosPersistRaw`-propagated to the target) to be `e`-expanded;
+`IExpandedConsistent` reads off its Fitting-split resolution (`F(φ)@w' ∨ T(ψ)@w'`); and
+open-branch consistency (no complementary `T(φ)`/`F(φ)` pair) rules out the `F(φ)@w'` disjunct
+given `T(φ)@w'` is exactly `intTImpRule`'s own firing precondition -- leaving `T(ψ)@w'` already
+present, so nothing new is ever added. -/
+
+omit [Hashable Atom] in
+/-- Extraction helper: a `List.any` witness for the `(sign, formula, label)` triple pins down
+the exact `ISF Atom` membership (mirrors the extraction pattern in
+`applyAllTImpRules_copy_complete_of_fixpoint`). -/
+private lemma isf_any_mem {b' : IBranch Atom} {s : Sign} {χ : Proposition Atom} {l : Nat}
+    (h : b'.any (fun sf => sf.sign == s && sf.formula == χ && sf.label == l) = true) :
+    (⟨s, χ, l⟩ : ISF Atom) ∈ b' := by
+  rw [List.any_eq_true] at h
+  obtain ⟨sf, hsfmem, hsfeq⟩ := h
+  simp only [Bool.and_eq_true, beq_iff_eq] at hsfeq
+  obtain ⟨⟨hsign, hform⟩, hlabel⟩ := hsfeq
+  have hsfeq' : sf = (⟨s, χ, l⟩ : ISF Atom) := by
+    obtain ⟨s', f', l'⟩ := sf
+    simp only [SignedFormula.mk.injEq]
+    exact ⟨hsign, hform, hlabel⟩
+  rw [← hsfeq']
+  exact hsfmem
+
+omit [Hashable Atom] in
+/-- **Single-round freeze preservation**: given the checkpoint facts about a FIXED branch `b`
+(`IFrozenBelow`, `IPosPersistRaw`, `IExpandedConsistent`, open-branch consistency, and the
+`IWorldHist`/`IWorldHistCounter` pair `IWorldHist_isAccessible_lt` needs), one round of
+`applyAllTImpRules` applied to any `bv` that agrees with `b` below `w0` (and contains `b`) still
+agrees with `b` below `w0`. This is the per-round step of the fuel induction
+`applyPersistenceFixpoint_agrees` below performs; `b` never changes across rounds, only `bv`
+does, which is why every checkpoint hypothesis is stated about the fixed `b` and not `bv`. -/
+private lemma applyAllTImpRules_agrees
+    {φ0 : Proposition Atom} {edges : IEdges} {e : List (ISF Atom)} {w0 nw : Nat}
+    {b : IBranch Atom}
+    (hw0 : w0 ≤ nw) (hfrz : IFrozenBelow w0 e b) (hpp : IPosPersistRaw edges b)
+    (hic : IExpandedConsistent b e)
+    (hcons : ∀ w' : Nat, w' < w0 → ∀ χ : Proposition Atom,
+      ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges)
+    {bv : IBranch Atom} (hmono : ∀ x ∈ b, x ∈ bv)
+    (hagree : ∀ sf ∈ bv, sf.label < w0 → sf ∈ b) :
+    ∀ sf ∈ applyAllTImpRules bv edges, sf.label < w0 → sf ∈ b := by
+  intro sf hsf hlt
+  simp only [applyAllTImpRules, List.mem_append] at hsf
+  rcases hsf with (hsf | hsf) | hsf
+  · exact hagree sf hsf hlt
+  · simp only [List.mem_flatten, List.mem_filterMap] at hsf
+    obtain ⟨toAdd, ⟨y, hymem, hyeq⟩, hsfmem⟩ := hsf
+    rcases y with ⟨ys, yf, yl⟩
+    cases ys with
+    | neg => simp at hyeq
+    | pos =>
+      cases yf with
+      | atom a => simp at hyeq
+      | bot => simp at hyeq
+      | and φ ψ => simp at hyeq
+      | or φ ψ => simp at hyeq
+      | imp φ ψ =>
+        simp only [] at hyeq
+        split at hyeq
+        · exact absurd hyeq (by simp)
+        · rename_i hne
+          rw [Option.some.injEq] at hyeq
+          subst hyeq
+          simp only [intTImpRule, List.mem_filterMap] at hsfmem
+          obtain ⟨w', hw'mem, hsfeq⟩ := hsfmem
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'mem
+          obtain ⟨⟨z, hzmem, hzeq⟩, hacc⟩ := hw'mem
+          split at hsfeq
+          · rename_i hTphi
+            split at hsfeq
+            · simp at hsfeq
+            · rename_i hTpsi
+              rw [Bool.not_eq_true] at hTpsi
+              rw [Option.some.injEq] at hsfeq
+              subst hsfeq
+              -- Source label `yl` is also `< w0`: reflexive (`yl = w'`) or via the
+              -- label-order fact (`yl ≠ w'`).
+              have hw'nw : w' < nw := lt_of_lt_of_le hlt hw0
+              have hylw0 : yl < w0 := by
+                by_cases hyw' : yl = w'
+                · exact hyw' ▸ hlt
+                · exact lt_trans (IWorldHist_isAccessible_lt hWH hWHC hw'nw hacc hyw') hlt
+              -- The source copy `T(φ→ψ)@yl` is already in `b` (agreement, `yl < w0`).
+              have hsrc_b : (⟨.pos, φ.imp ψ, yl⟩ : ISF Atom) ∈ b := hagree _ hymem hylw0
+              -- `w'` already carries an entry on `b` too (witnessed by `T(φ)@w'`'s copy).
+              have hTphi_b : (⟨.pos, φ, w'⟩ : ISF Atom) ∈ b := hagree _ (isf_any_mem hTphi) hlt
+              have hw'ent_b : b.any (fun sf' => sf'.label == w') = true :=
+                List.any_eq_true.mpr ⟨_, hTphi_b, by simp⟩
+              -- `IPosPersistRaw` propagates the copy `T(φ→ψ)@w'` into `b`.
+              have hcopy_b : (⟨.pos, φ.imp ψ, w'⟩ : ISF Atom) ∈ b :=
+                hpp _ yl w' hacc hsrc_b hw'ent_b
+              -- `IFrozenBelow` forces this copy to already be `e`-expanded.
+              have hexp : (⟨.pos, φ.imp ψ, w'⟩ : ISF Atom) ∈ e := by
+                rcases hfrz _ hcopy_b hlt with hwc | hexp | hns
+                · exact absurd hwc (by simp [isWorldCreating])
+                · exact hexp
+                · exact absurd hns (by simp [isRuleShape])
+              -- `IExpandedConsistent` reads off the Fitting-split resolution at `w'`.
+              rcases hic _ hexp with hFphi | hTpsi_b
+              · exact absurd ⟨hTphi_b, isf_any_mem hFphi⟩ (hcons w' hlt φ)
+              · exact isf_any_mem hTpsi_b
+          · simp at hsfeq
+  · simp only [List.mem_flatten, List.mem_filterMap] at hsf
+    obtain ⟨toAdd, ⟨y, hymem, hyeq⟩, hsfmem⟩ := hsf
+    rcases y with ⟨ys, yf, yl⟩
+    cases ys with
+    | neg => simp at hyeq
+    | pos =>
+      simp only [] at hyeq
+      split at hyeq
+      · exact absurd hyeq (by simp)
+      · rename_i hne
+        rw [Option.some.injEq] at hyeq
+        subst hyeq
+        simp only [List.mem_filterMap] at hsfmem
+        obtain ⟨w', hw'mem, hsfeq⟩ := hsfmem
+        split at hsfeq
+        · simp at hsfeq
+        · rename_i hguard
+          rw [Bool.not_eq_true] at hguard
+          rw [Option.some.injEq] at hsfeq
+          subst hsfeq
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'mem
+          obtain ⟨⟨z, hzmem, hzeq⟩, hacc⟩ := hw'mem
+          have hw'nw : w' < nw := lt_of_lt_of_le hlt hw0
+          have hylw0 : yl < w0 := by
+            by_cases hyw' : yl = w'
+            · exact hyw' ▸ hlt
+            · exact lt_trans (IWorldHist_isAccessible_lt hWH hWHC hw'nw hacc hyw') hlt
+          have hsrc_b : (⟨.pos, yf, yl⟩ : ISF Atom) ∈ b := hagree _ hymem hylw0
+          have hz_b : z ∈ b := hagree z hzmem (hzeq ▸ hlt)
+          have hw'ent_b : b.any (fun sf' => sf'.label == w') = true :=
+            List.any_eq_true.mpr ⟨z, hz_b, by simp [hzeq]⟩
+          have hcopy_b : (⟨.pos, yf, w'⟩ : ISF Atom) ∈ b := hpp yf yl w' hacc hsrc_b hw'ent_b
+          have hcopy_bv : (⟨.pos, yf, w'⟩ : ISF Atom) ∈ bv := hmono _ hcopy_b
+          have hcontra : (List.any bv fun y' =>
+              y'.sign == Sign.pos && y'.formula == yf && y'.label == w') = true :=
+            List.any_eq_true.mpr ⟨_, hcopy_bv, by simp⟩
+          rw [hguard] at hcontra
+          exact absurd hcontra (by simp)
+
+omit [Hashable Atom] in
+/-- **Fuel-recursive freeze preservation**: `applyAllTImpRules_agrees`, iterated across
+`applyPersistenceFixpoint`'s fuel recursion. `b`, and every checkpoint fact about it, stays
+fixed throughout; only the varying branch `bv` (and its agreement-with-`b`-below-`w0` witness)
+is threaded as an explicit induction target, avoiding the need to `generalizing` the fixed
+hypotheses. -/
+private lemma applyPersistenceFixpoint_agrees
+    {φ0 : Proposition Atom} {edges : IEdges} {e : List (ISF Atom)} {w0 nw : Nat}
+    {b : IBranch Atom}
+    (hw0 : w0 ≤ nw) (hfrz : IFrozenBelow w0 e b) (hpp : IPosPersistRaw edges b)
+    (hic : IExpandedConsistent b e)
+    (hcons : ∀ w' : Nat, w' < w0 → ∀ χ : Proposition Atom,
+      ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges) :
+    ∀ (fuel : Nat) (bv : IBranch Atom), (∀ x ∈ b, x ∈ bv) →
+      (∀ sf ∈ bv, sf.label < w0 → sf ∈ b) →
+      ∀ sf ∈ applyPersistenceFixpoint bv edges fuel, sf.label < w0 → sf ∈ b := by
+  intro fuel
+  induction fuel with
+  | zero => intro bv _ hagree; simpa [applyPersistenceFixpoint] using hagree
+  | succ fuel' ih =>
+    intro bv hmono hagree
+    simp only [applyPersistenceFixpoint]
+    split
+    · exact hagree
+    · refine ih (applyAllTImpRules bv edges) ?_ ?_
+      · intro x hx
+        simp only [applyAllTImpRules, List.mem_append]
+        exact Or.inl (Or.inl (hmono x hx))
+      · exact applyAllTImpRules_agrees hw0 hfrz hpp hic hcons hWH hWHC hmono hagree
+
+omit [Hashable Atom] in
+/-- **Mechanism 3(b), landed**: `applyPersistenceFixpoint b edges fuel`, run at the top of a
+`intExpandBranches.go` call, preserves `IFrozenBelow w0 e`. Direct corollary of
+`applyPersistenceFixpoint_agrees` at `bv := b` (reflexive agreement/monotonicity): every element
+of the persistence-fixpoint output with label `< w0` was already in `b`, hence already satisfies
+one of `IFrozenBelow`'s three disjuncts by `hfrz` itself. -/
+private lemma IFrozenBelow_applyPersistenceFixpoint
+    {φ0 : Proposition Atom} {edges : IEdges} {e : List (ISF Atom)} {w0 nw : Nat} {fuel : Nat}
+    {b : IBranch Atom}
+    (hw0 : w0 ≤ nw) (hfrz : IFrozenBelow w0 e b) (hpp : IPosPersistRaw edges b)
+    (hic : IExpandedConsistent b e)
+    (hcons : ∀ w' : Nat, w' < w0 → ∀ χ : Proposition Atom,
+      ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges) :
+    IFrozenBelow w0 e (applyPersistenceFixpoint b edges fuel) := by
+  intro sf hsf hlt
+  exact hfrz sf
+    (applyPersistenceFixpoint_agrees hw0 hfrz hpp hic hcons hWH hWHC fuel b (fun _ h => h)
+      (fun _ h _ => h) sf hsf hlt) hlt
+
 /-- **Reuse-time containment, per recorded loop-back edge** (plan Phase 8): for every
 loop-back edge `(x, l)` recorded so far (NOT the raw parent-child edges, which
 `IPosPersistRaw` already covers more strongly), there EXISTS a branch snapshot `bSnap`,

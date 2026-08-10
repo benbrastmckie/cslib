@@ -296,7 +296,7 @@ concurrently with explicit file ownership.
 
 ---
 
-### Phase 4: Statement-shape fix, DP-4 closure, and universe pin [NOT STARTED]
+### Phase 4: Statement-shape fix, DP-4 closure, and universe pin [COMPLETED]
 
 - **Goal:** Add the `modelBot` upward-closure conjunct through `openBranch_countermodel` and
   `tableau_complete`, mirror it at both `Completeness.lean` call sites, replace DP-4's `sorry`
@@ -305,24 +305,26 @@ concurrently with explicit file ownership.
   the Phase 3 bridge.
 
 - **Tasks:**
-  - [ ] `Scheme.lean`: add the third conjunct
+  - [x] `Scheme.lean`: add the third conjunct
     `∀ {w w'}, w ≤ w' → S.modelBot b w → S.modelBot b w'` to `openBranch_countermodel`'s
     existential. It goes behind the existing `sorry`; no new sorry is introduced.
-  - [ ] `Scheme.lean`: add the matching premise to `tableau_complete`'s `hvalid`, and destructure
+  - [x] `Scheme.lean`: add the matching premise to `tableau_complete`'s `hvalid`, and destructure
     the now-4-tuple in its `openBranch` branch (`⟨edges, huc, hbuc, hcm⟩`).
-  - [ ] `Intuitionistic/Completeness.lean`: mirror the conjunct on
+  - [x] `Intuitionistic/Completeness.lean`: mirror the conjunct on
     `intuitionisticOpenBranch_countermodel`, and add `_hbuc` to the `intro` at
     `intuitionisticTableau_complete`. For `intScheme`, `modelBot = fun _ => False`, so the
     conjunct is trivial — zero proof cost on the intuitionistic side. DP-3's `sorry` stays.
-  - [ ] `Minimal/Completeness.lean`: mirror the conjunct on `minOpenBranch_countermodel`; pin
+  - [x] `Minimal/Completeness.lean`: mirror the conjunct on `minOpenBranch_countermodel`; pin
     `minimalTableau_complete` to `(h : MValid.{_, 0} φ)`; replace the DP-4 `sorry` with
     `exact @h Nat (intAccessPreorder edges) (intExtractValuation _b) (minBranchBotForces _b) _huc _hbuc 0`.
-  - [ ] `Minimal/DecisionProcedure.lean`: pin `minimalTableau_decides` and `instDecidableMValid`
+  - [x] `Minimal/DecisionProcedure.lean`: pin `minimalTableau_decides` and `instDecidableMValid`
     to `MValid.{_, 0}`, and give `instDecidableDerivableMinPropAxiom` a
     `letI : Decidable (MValid φ) := decidable_of_iff (MValid.{_, 0} φ) (mvalid_universe_invariant φ).symm`
     so its original statement is preserved.
-  - [ ] Verify the whole batch together — intermediate per-file states are expected red and must
-    not be committed.
+  - [x] Verify the whole batch together — intermediate per-file states are expected red and must
+    not be committed. *(scoped build across all four modules green; full `lake build` green at
+    3325 jobs, matching the research report's verification record; `lake test` green at 9397
+    jobs)*
 
 - **Timing:** 1.5 hours
 

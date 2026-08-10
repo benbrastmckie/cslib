@@ -105,7 +105,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 Combines `minimalTableau_sound` (from `Minimal.Soundness`) and `minimalTableau_complete`
 (from `Minimal.Completeness`) into a single biconditional. -/
 theorem minimalTableau_decides (φ : Proposition Atom) :
-    minimalTableau φ = .closed ↔ MValid φ :=
+    minimalTableau φ = .closed ↔ MValid.{_, 0} φ :=
   ⟨minimalTableau_sound φ, minimalTableau_complete φ⟩
 
 /-! ## Decidable Instances (NEW to CSLib) -/
@@ -114,7 +114,7 @@ theorem minimalTableau_decides (φ : Proposition Atom) :
 
 This is a NEW decidability result for CSLib: minimal propositional validity was not
 previously decidable by a constructive procedure in this library. -/
-instance instDecidableMValid (φ : Proposition Atom) : Decidable (MValid φ) :=
+instance instDecidableMValid (φ : Proposition Atom) : Decidable (MValid.{_, 0} φ) :=
   match h : minimalTableau φ with
   | .closed => isTrue (minimalTableau_sound φ h)
   | .openBranch _ =>
@@ -175,9 +175,13 @@ theorem mvalid_universe_invariant (φ : Proposition Atom) :
   ⟨mvalid_descend, fun h => minimalTableau_sound φ (minimalTableau_complete φ h)⟩
 
 /-- `Derivable MinPropAxiom φ` is decidable via the minimal tableau and the completeness
-theorem `min_soundness_completeness`. -/
+theorem `min_soundness_completeness`. Routes through `mvalid_universe_invariant` so this
+instance's public statement stays at `MValid`'s original, unpinned universe even though
+`instDecidableMValid` above is now pinned to `Type 0`. -/
 instance instDecidableDerivableMinPropAxiom (φ : Proposition Atom) :
     Decidable (Derivable MinPropAxiom φ) :=
+  letI : Decidable (MValid φ) :=
+    decidable_of_iff (MValid.{_, 0} φ) (mvalid_universe_invariant φ).symm
   decidable_of_iff (MValid φ) min_soundness_completeness
 
 end Cslib.Logic.PL

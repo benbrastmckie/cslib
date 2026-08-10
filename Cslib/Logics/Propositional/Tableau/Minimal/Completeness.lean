@@ -131,6 +131,8 @@ lemma minOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
     ∃ edges : IEdges,
       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
         intExtractValuation b w p → intExtractValuation b w' p) ∧
+      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        minBranchBotForces b w → minBranchBotForces b w') ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges)
         (intExtractValuation b) (minBranchBotForces b) 0 φ := by
   exact openBranch_countermodel minScheme φ b h
@@ -154,16 +156,11 @@ augmented-frame route known-bad (see that docstring); (2) `minBranchBotForces b`
 upward-closure (a SEPARATE fact, at the `⊥` formula shape) — a **named residual**: it holds at
 the `[(1, 0)]` witness (computed) but is not established in general. Neither is pursued here. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
-    (h : MValid φ) : minimalTableau φ = .closed := by
+    (h : MValid.{_, 0} φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme
-  intro edges _b _huc
-  -- DP-4 -- open, augmented-frame route known-bad, sharing DP-3's bad witness choice under
-  -- `isMinimallyClosed` (`CslibTests/BetaSplitRefutation.lean`'s `reportMin phiRef1 realFuel`,
-  -- `minBranchesAgree = true` against the real `minimalTableau`). `exact h Nat
-  -- (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0` (for the appropriate
-  -- `hbotuc`) would type-check once both upward-closure obligations named in the docstring above
-  -- are discharged; both are open, so this is left `sorry` deliberately.
-  sorry
+  intro edges _b _huc _hbuc
+  exact @h Nat (intAccessPreorder edges) (intExtractValuation _b)
+    (minBranchBotForces _b) _huc _hbuc 0
 
 end Cslib.Logic.PL
 

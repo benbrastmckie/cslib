@@ -8089,6 +8089,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     ∃ edges : IEdges,
       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
         intExtractValuation b w p → intExtractValuation b w' p) ∧
+      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        S.modelBot b w → S.modelBot b w') ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
   -- sorry: the whole existential -- OPEN, not refuted (see the docstring's frame-adequacy
@@ -8249,6 +8251,8 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
     (hvalid : ∀ (edges : IEdges) (b : IBranch Atom),
       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
         intExtractValuation b w p → intExtractValuation b w' p) →
+      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        S.modelBot b w → S.modelBot b w') →
       @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ) :
     intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
         [intFuelExt φ] S.closurePred = .closed := by
@@ -8257,8 +8261,8 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
       [intFuelExt φ] S.closurePred with
   | closed => exact hne hresult
   | openBranch b =>
-    obtain ⟨edges, huc, hcm⟩ := openBranch_countermodel S φ b hresult
-    exact absurd (hvalid edges b huc) hcm
+    obtain ⟨edges, huc, hbuc, hcm⟩ := openBranch_countermodel S φ b hresult
+    exact absurd (hvalid edges b huc hbuc) hcm
 
 end Cslib.Logic.PL
 

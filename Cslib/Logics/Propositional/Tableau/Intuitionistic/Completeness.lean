@@ -125,6 +125,8 @@ lemma intuitionisticOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition
     ∃ edges : IEdges,
       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
         intExtractValuation b w p → intExtractValuation b w' p) ∧
+      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intBotForces w → intBotForces w') ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) intBotForces 0 φ
       := by
   exact openBranch_countermodel intScheme φ b h
@@ -160,7 +162,7 @@ procedure complete: genuine open work, not a small residual, and not attempted h
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
     (h : IValid φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
-  intro edges _b _huc
+  intro edges _b _huc _hbuc
   -- DP-3 -- open, augmented-frame route known-bad. `exact h Nat (intExtractValuation _b)
   -- _huc 0` would type-check (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis,
   -- instantiated at the augmented frame `intAccessPreorder edges`), but it would only launder

@@ -1,0 +1,36 @@
+{
+  "phase": 1,
+  "phase_name": "Add `## Building a single file` subsection and ToC entry",
+  "started_at": "2026-08-10T00:00:00Z",
+  "last_updated": "2026-08-10T00:10:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Confirm current CONTRIBUTING.md structure matches Scope Hypothesis",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 2,
+      "description": "Insert ToC entry for Building a single file",
+      "status": "done",
+      "files_touched": ["CONTRIBUTING.md"]
+    },
+    {
+      "id": 3,
+      "description": "Insert new ## Building a single file subsection with symptom-first content shape",
+      "status": "done",
+      "files_touched": ["CONTRIBUTING.md"]
+    },
+    {
+      "id": 4,
+      "description": "Verify heading level, backticks, no emoji/banner formatting",
+      "status": "done",
+      "files_touched": []
+    }
+  ],
+  "current_objective": 4,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": []
+}

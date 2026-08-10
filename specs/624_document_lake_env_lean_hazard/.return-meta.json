@@ -1,20 +1,23 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "task_number": 624,
-  "session_id": "sess_1786397542_991316_624",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "summary": "Created a single-phase implementation plan to add a `## Building a single file` subsection (plus its required Table of Contents entry) to CONTRIBUTING.md, documenting that bare `lake env lean <file>` is unsafe on module-system files here and that `lake build <Module.Name>` is the correct single-module build.",
+  "status": "implemented",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md",
-      "summary": "Single-phase, documentation-only plan scoped to CONTRIBUTING.md: new `## Building a single file` subsection last under `# Continuous Integration`, plus the matching hand-maintained ToC entry. Includes a symptom-first 5-point content shape, explicit do-not list (no AxiomCensus conflation, no copy-pasteable hanging command, never run the diverging command), and prose-tier verification."
+      "type": "summary",
+      "path": "specs/624_document_lake_env_lean_hazard/summaries/01_lake-env-lean-hazard-doc-summary.md",
+      "summary": "Documents the lake env lean hang hazard and lake build correct alternative in CONTRIBUTING.md, plus the matching ToC entry."
     }
   ],
-  "phase_count": 1,
-  "estimated_hours": 0.5,
-  "dependency_waves": [[1]],
-  "next_steps": "Run /implement 624 to execute the plan",
-  "memory_candidates": []
+  "completion_data": {
+    "completion_summary": "Added a `## Building a single file` subsection and matching Table of Contents entry to CONTRIBUTING.md, documenting the `lake env lean <file>` hang hazard and the correct `lake build <Module.Name>` alternative."
+  },
+  "modified_files": ["CONTRIBUTING.md"],
+  "memory_candidates": [],
+  "metadata": {
+    "session_id": "sess_1786397542_991316_624",
+    "agent_type": "general-implementation-agent",
+    "delegation_depth": 2,
+    "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
+    "phases_completed": 1,
+    "phases_total": 1
+  }
 }

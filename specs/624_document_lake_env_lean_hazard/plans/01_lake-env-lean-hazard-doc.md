@@ -1,7 +1,7 @@
 # Implementation Plan: Document `lake env lean` hazard in CONTRIBUTING.md
 
 - **Task**: 624 - Document that `lake env lean <file>` is unsafe for module-system files and that `lake build <Module.Name>` is the correct single-module build
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 0.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md`
@@ -77,24 +77,26 @@ No ROADMAP.md consulted for this task (none provided in delegation context).
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Add `## Building a single file` subsection and ToC entry [NOT STARTED]
+### Phase 1: Add `## Building a single file` subsection and ToC entry [COMPLETED]
 
 **Goal**: `CONTRIBUTING.md` contains a new terse subsection documenting the `lake env lean`
 hazard and the correct `lake build <Module.Name>` alternative, with a matching Table of Contents
 entry.
 
 **Tasks**:
-- [ ] Read `CONTRIBUTING.md` and confirm the current `# Continuous Integration` subsection order
+- [x] Read `CONTRIBUTING.md` and confirm the current `# Continuous Integration` subsection order
       ends with `## Imports`, and that the ToC `Continuous Integration` block ends with the
-      `[Imports](#imports)` line.
-- [ ] Insert `  - [Building a single file](#building-a-single-file)` into the ToC immediately
+      `[Imports](#imports)` line. *(completed: confirmed, matched Scope Hypothesis exactly)*
+- [x] Insert `  - [Building a single file](#building-a-single-file)` into the ToC immediately
       after the `  - [Imports](#imports)` line, at the same two-space indent as its siblings.
-- [ ] Insert a new `## Building a single file` subsection after the final paragraph of
-      `## Imports` and before the `# Getting started` heading.
-- [ ] Write the subsection following the symptom-first content shape (see Content Shape below),
+      *(completed)*
+- [x] Insert a new `## Building a single file` subsection after the final paragraph of
+      `## Imports` and before the `# Getting started` heading. *(completed)*
+- [x] Write the subsection following the symptom-first content shape (see Content Shape below),
       in 2-4 short paragraphs matching the register of `## Testing` and `## Imports`.
-- [ ] Re-read the edited region to confirm the heading level is `##` (not `###`), commands are in
-      inline backticks, and no emoji or warning-banner formatting was introduced.
+      *(completed: 3 paragraphs)*
+- [x] Re-read the edited region to confirm the heading level is `##` (not `###`), commands are in
+      inline backticks, and no emoji or warning-banner formatting was introduced. *(completed)*
 
 **Content Shape** (order is load-bearing — symptom first so a contributor mid-hang can match
 what they are seeing):
@@ -159,15 +161,16 @@ the ToC entry adjacent to its siblings, and record the deviation in the summary.
 
 ## Testing & Validation
 
-- [ ] `CONTRIBUTING.md` is the only file changed.
-- [ ] New subsection present, at `##` level, last under `# Continuous Integration`.
-- [ ] ToC entry present, correctly indented, correctly slugified as `#building-a-single-file`.
-- [ ] Prose covers all five content-shape points in order (symptom, rule, mechanism, secondary
-      hazards, optional escape hatch).
-- [ ] Length and register comparable to the adjacent `## Testing` / `## Imports` subsections
-      (2-4 short paragraphs; no tables, no banners, no emoji).
-- [ ] No `lake env lean` command was executed during implementation or verification.
-- [ ] No `AxiomCensus.lean` reference introduced.
+- [x] `CONTRIBUTING.md` is the only file changed. *(completed: `git diff --stat` confirms scope)*
+- [x] New subsection present, at `##` level, last under `# Continuous Integration`. *(completed)*
+- [x] ToC entry present, correctly indented, correctly slugified as `#building-a-single-file`.
+      *(completed)*
+- [x] Prose covers all five content-shape points in order (symptom, rule, mechanism, secondary
+      hazards, optional escape hatch). *(completed)*
+- [x] Length and register comparable to the adjacent `## Testing` / `## Imports` subsections
+      (2-4 short paragraphs; no tables, no banners, no emoji). *(completed: 3 paragraphs)*
+- [x] No `lake env lean` command was executed during implementation or verification. *(completed)*
+- [x] No `AxiomCensus.lean` reference introduced. *(completed)*
 
 ## Artifacts & Outputs
 

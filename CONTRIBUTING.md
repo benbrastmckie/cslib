@@ -15,6 +15,7 @@
   - [Testing](#testing)
   - [Linting](#linting)
   - [Imports](#imports)
+  - [Building a single file](#building-a-single-file)
 - [Getting started](#getting-started)
   - [Before you start: coordination to avoid rework](#before-you-start-coordination-to-avoid-rework)
   - [Finding tasks](#finding-tasks)
@@ -130,6 +131,25 @@ running `lake exe mk_all` locally, which will make the required changes.
 
 CSLib tests for minimized imports using `lake shake --add-public --keep-implied --keep-prefix`, which also comes with a `--fix` option.
 See `lake shake --help` for the special comment syntax used to preserve imports required for tactics or typeclasses.
+
+## Building a single file
+
+If you ever see a `lean` process that never finishes and never errors — roughly one core's worth
+of CPU, resident memory flat rather than growing, no diagnostic output, for many minutes with no
+observed upper bound — you are most likely running bare `lake env lean <file>` on a file in this
+repository. Do not do this; use `lake build <Module.Name>` to build a single module instead.
+
+The reason is that `lake build` always passes `--setup`, while `lake env lean` never does, and
+without it Lean's module system lacks the `module` / `public import` exposure configuration it
+needs, which is what causes elaboration to diverge. The same invocation with `--setup` completes
+in well under a minute.
+
+Two secondary hazards follow from the same missing setup: `lake env lean` bypasses dependency
+resolution, so it can silently reuse stale `.olean` files, and without an explicit `-o` it never
+writes an `.olean` at all, so a missing `.olean` after such a run says nothing about whether the
+module ever built. If you genuinely need raw `lean` output, the safe form is `lake env lean
+--setup <module>.setup.json <file>`, where the setup JSON lives under `.lake/build/ir/` after a
+build.
 
 # Getting started
 

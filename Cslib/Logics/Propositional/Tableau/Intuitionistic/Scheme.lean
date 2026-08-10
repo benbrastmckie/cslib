@@ -383,6 +383,79 @@ lemma intAccessPreorder_mono_append {edges : IEdges} (newEdge : Nat × Nat) {w w
     @LE.le Nat (intAccessPreorder (edges ++ [newEdge])).toLE w w' :=
   Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) _ _ h
 
+/-! ### Sub-frame monotonicity
+
+Upward closure is *anti-monotone* in the edge set: growing `edges` to any superset `edges'`
+(not just a single-edge append) can only add reachability, never remove it, so any
+accessibility fact established relative to `edges` survives relative to `edges'`. This is the
+subset-general form of the append-monotonicity lemmas above, modelled verbatim on their proof
+shape. It is what lets both of `openBranch_rawEdges_upward_closed`'s upward-closure conjuncts
+(and, via `openBranch_rawEdges_both_upward_closed`, `minBranchBotForces`'s `⊥`-shape instance)
+transfer to any sub-frame of `rawEdges`, not just to `rawEdges` itself. -/
+
+/-- `isAccessible.go` is monotone under passing to a superset edge list: any reachability
+witness found using `edges` survives when `edges` is replaced by any `edges'` containing all of
+`edges`'s entries (the DFS's per-step candidate-children list can only gain entries, never lose
+them, under such an inclusion). Subset-general counterpart of `isAccessible_go_append_mono`. -/
+private lemma isAccessible_go_subset_mono
+    (edges edges' : IEdges) (hsub : ∀ e ∈ edges, e ∈ edges') (target : Nat) :
+    ∀ (current fuel : Nat), isAccessible.go edges target current fuel = true →
+      isAccessible.go edges' target current fuel = true := by
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro h
+    rw [List.any_eq_true] at h ⊢
+    obtain ⟨child, hchild, hcond⟩ := h
+    simp only [List.mem_filterMap] at hchild
+    obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hchild
+    by_cases hp : p == current
+    · simp only [hp, ite_true, Option.some.injEq] at hfilt
+      refine ⟨child, ?_, ?_⟩
+      · simp only [List.mem_filterMap]
+        refine ⟨(c, p), hsub _ hedges, ?_⟩
+        simp [hp, hfilt]
+      · by_cases hce : child == target
+        · simp [hce]
+        · simp only [hce, Bool.false_eq_true, ite_false] at hcond ⊢
+          exact ih child hcond
+    · simp only [Bool.not_eq_true] at hp
+      simp [hp] at hfilt
+
+/-- `isAccessible` is monotone under passing to a superset edge list of at least the same
+length (the top-level wrapper combining `isAccessible_go_subset_mono` with
+`isAccessible_go_fuel_mono`, mirroring `isAccessible_append_mono`'s structure; also handles the
+`w == w'` short-circuit case). The length hypothesis supplies the extra fuel `isAccessible`'s
+fuel bound `edges.length` needs when `edges'` is longer than `edges`. -/
+private lemma isAccessible_subset_mono {edges edges' : IEdges}
+    (hsub : ∀ e ∈ edges, e ∈ edges') (hlen : edges.length ≤ edges'.length) {w w' : Nat}
+    (h : isAccessible edges w w' = true) : isAccessible edges' w w' = true := by
+  simp only [isAccessible] at h ⊢
+  by_cases heq : w == w'
+  · simp [heq]
+  · simp only [heq, Bool.false_eq_true, ite_false] at h ⊢
+    have h1 := isAccessible_go_subset_mono edges edges' hsub w' w edges.length h
+    have hgen : ∀ d : Nat, isAccessible.go edges' w' w (edges.length + d) = true := by
+      intro d
+      induction d with
+      | zero => simpa using h1
+      | succ m ih => exact isAccessible_go_fuel_mono edges' w' w _ ih
+    obtain ⟨d, hd⟩ := Nat.le.dest hlen
+    rw [← hd]
+    exact hgen d
+
+/-- `intAccessPreorder`'s `≤` is monotone under passing to a superset edge list: any
+accessibility fact established relative to `edges` remains true relative to any `edges'`
+containing `edges`'s entries (of at least the same length). Lifts `isAccessible_subset_mono`
+through `Relation.ReflTransGen.mono`. -/
+lemma intAccessPreorder_mono_subset {edges edges' : IEdges}
+    (hsub : ∀ e ∈ edges, e ∈ edges') (hlen : edges.length ≤ edges'.length) {w w' : Nat}
+    (h : @LE.le Nat (intAccessPreorder edges).toLE w w') :
+    @LE.le Nat (intAccessPreorder edges').toLE w w' :=
+  Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_subset_mono hsub hlen hxy) _ _ h
+
 /-! ### One-hop ancestry extension (DP-2 support)
 
 `isAccessible edges · ·` does not need full transitivity for the mint-time argument used by
@@ -8033,14 +8106,17 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
   -- verbatim in `openBranch_rawEdges_upward_closed` immediately below, so nothing is lost.
   sorry
 
-/-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly.** Constructs `edges` as
-`rawEdges` -- the tree-only parent-child edge witness `intExpandBranches_openBranch_sat` already
-produces and `openBranch_countermodel` discards as `_rawEdges` -- and proves upward-closure of
-`intExtractValuation b` along `intAccessPreorder rawEdges` for any `b` arising from an
-`intExpandBranches` run. Needs no fact about the tableau algorithm beyond `IPosPersistRaw`
-(already sorry-free, `Scheme.lean:6701-6704`) plus `IWorldsPlanted` (the branch-entry-existence
-corollary of `IWorldHist`'s (H3) clause, derived above) chained over one `Relation.ReflTransGen`
-step at a time.
+/-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly for arbitrary `χ`.**
+Constructs `edges` as `rawEdges` -- the tree-only parent-child edge witness
+`intExpandBranches_openBranch_sat` already produces and `openBranch_countermodel` discards as
+`_rawEdges` -- and proves upward-closure of positive `χ`-membership in `b` along
+`intAccessPreorder rawEdges`, for ANY `χ : Proposition Atom`, not just `χ := .atom p`. Needs no
+fact about the tableau algorithm beyond `IPosPersistRaw` (already sorry-free, `χ`-general at
+`Scheme.lean:6701-6704`) plus `IWorldsPlanted` (the branch-entry-existence corollary of
+`IWorldHist`'s (H3) clause, derived above) chained over one `Relation.ReflTransGen` step at a
+time. Instantiating `χ` at `.atom p` recovers `intExtractValuation` upward-closure; instantiating
+it at `HasBot.bot` gives `minBranchBotForces` upward-closure at the SAME `edges` witness -- see
+`openBranch_rawEdges_both_upward_closed` immediately below.
 
 Conjunct 2 (`¬ IForces ...`) is deliberately NOT addressed here. This lemma is decoupled from
 `openBranch_countermodel`'s own `sorry` above, which commits to no `edges` witness at all (see
@@ -8057,8 +8133,9 @@ lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Propositio
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
         [intFuelExt φ] S.closurePred = .openBranch b) :
     ∃ edges : IEdges,
-      ∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
-        intExtractValuation b w p → intExtractValuation b w' p := by
+      ∀ (χ : Proposition Atom) {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        b.any (fun sf => sf.sign == .pos && sf.formula == χ && sf.label == w) = true →
+        b.any (fun sf => sf.sign == .pos && sf.formula == χ && sf.label == w') = true := by
   obtain ⟨_edges, rawEdges, _lbEdges, _nwF, _hsat, _hfimp, hpp, _hrc, _hfc, hwp⟩ :=
     intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
       [[]] [[]] _ _
@@ -8093,24 +8170,46 @@ lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Propositio
           exact absurd hif (by simp))
       h
   refine ⟨rawEdges, ?_⟩
-  intro w w' p hle hval
+  intro χ w w' hle hval
   induction hle with
   | refl => exact hval
   | @tail y w2 hchain hstep ih =>
     by_cases hyw2 : y = w2
     · exact hyw2 ▸ ih
-    · simp only [intExtractValuation, List.any_eq_true] at ih
+    · simp only [List.any_eq_true] at ih
       obtain ⟨sf, hsfb, hsfp⟩ := ih
       simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
       obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
-      have hsfeq : sf = (⟨.pos, .atom p, y⟩ : ISF Atom) := by cases sf; simp_all
-      have hmem_y : (⟨.pos, .atom p, y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
+      have hsfeq : sf = (⟨.pos, χ, y⟩ : ISF Atom) := by cases sf; simp_all
+      have hmem_y : (⟨.pos, χ, y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
       obtain ⟨p', hp'⟩ := isAccessible_target_mem_edges hstep hyw2
       have hentry : b.any (fun sf => sf.label == w2) = true := hwp w2 p' hp'
-      have hmem_w2 : (⟨.pos, .atom p, w2⟩ : ISF Atom) ∈ b :=
-        hpp (.atom p) y w2 hstep hmem_y hentry
-      simp only [intExtractValuation]
+      have hmem_w2 : (⟨.pos, χ, w2⟩ : ISF Atom) ∈ b :=
+        hpp χ y w2 hstep hmem_y hentry
       exact List.any_eq_true.mpr ⟨_, hmem_w2, by simp⟩
+
+/-- Both of `openBranch_rawEdges_upward_closed`'s upward-closure instances -- valuation and
+`⊥`-shape (`minBranchBotForces`) -- derived at one shared `edges` witness from a single call to
+the `χ`-general lemma above. `minBranchBotForces` and `intExtractValuation` are the same
+`List.any` shape at different formula constructors (`HasBot.bot` versus `.atom p`), so no
+coercion is needed at either instantiation. This is the lemma that makes `minBranchBotForces`'s
+upward closure "free" from the already-`χ`-general `IPosPersistRaw`: no new proof obligation,
+just a second instantiation of the same generalized fact. -/
+lemma openBranch_rawEdges_both_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)
+    (b : IBranch Atom)
+    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+        [intFuelExt φ] S.closurePred = .openBranch b) :
+    ∃ edges : IEdges,
+      (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        intExtractValuation b w p → intExtractValuation b w' p) ∧
+      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
+        minBranchBotForces b w → minBranchBotForces b w') := by
+  obtain ⟨edges, hgen⟩ := openBranch_rawEdges_upward_closed S φ b h
+  refine ⟨edges, ?_, ?_⟩
+  · intro w w' p hle hval
+    exact hgen (.atom p) hle hval
+  · intro w w' hle hbot
+    exact hgen (HasBot.bot : Proposition Atom) hle hbot
 
 /-! ## Parametric Tableau Completeness -/
 

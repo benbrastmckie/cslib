@@ -196,7 +196,7 @@ concurrently with explicit file ownership.
 
 ---
 
-### Phase 2: Chi-generalization and sub-frame monotonicity in `Scheme.lean` [NOT STARTED]
+### Phase 2: Chi-generalization and sub-frame monotonicity in `Scheme.lean` [COMPLETED]
 
 - **Goal:** Generalize `openBranch_rawEdges_upward_closed` from `χ := .atom p` to arbitrary
   `χ : Proposition Atom`, add the two `isAccessible` sub-frame monotonicity lemmas, and expose
@@ -204,22 +204,24 @@ concurrently with explicit file ownership.
   valuable even if nothing else in this plan lands.
 
 - **Tasks:**
-  - [ ] Add `isAccessible_go_subset_mono` (private) next to the existing
+  - [x] Add `isAccessible_go_subset_mono` (private) next to the existing
     `isAccessible_go_append_mono`, modelled verbatim on that lemma's proof shape.
-  - [ ] Add `isAccessible_subset_mono` (private) next to `isAccessible_append_mono`.
-  - [ ] Add `intAccessPreorder_mono_subset`, lifting through `Relation.ReflTransGen.mono`.
-  - [ ] Generalize `openBranch_rawEdges_upward_closed`'s conclusion to the bare
+  - [x] Add `isAccessible_subset_mono` (private) next to `isAccessible_append_mono`.
+  - [x] Add `intAccessPreorder_mono_subset`, lifting through `Relation.ReflTransGen.mono`.
+  - [x] Generalize `openBranch_rawEdges_upward_closed`'s conclusion to the bare
     positive-formula-membership predicate quantified over `χ`, per the report's §3 statement. The
     proof body needs three substitutions: `.atom p` → `χ`, drop the `intExtractValuation` unfolds,
     bind `χ` in the `intro`.
-  - [ ] Add `openBranch_rawEdges_both_upward_closed`, deriving the valuation fact at `χ := .atom p`
+  - [x] Add `openBranch_rawEdges_both_upward_closed`, deriving the valuation fact at `χ := .atom p`
     and the `⊥` fact at `χ := HasBot.bot` from one call to the generalized lemma.
-  - [ ] Rewrite every `PROBE:` / `**PROBE**:` docstring marker on these five declarations to
+  - [x] Rewrite every `PROBE:` / `**PROBE**:` docstring marker on these five declarations to
     production wording. State what each lemma says and why it exists (anti-monotonicity of upward
     closure in the edge set, so the result transfers to any sub-frame of `rawEdges`) — no probe
-    language, no task numbers.
-  - [ ] Confirm no other call site of `openBranch_rawEdges_upward_closed` exists that the
-    generalized statement breaks.
+    language, no task numbers. *(all production wording; zero `PROBE` occurrences confirmed by
+    grep)*
+  - [x] Confirm no other call site of `openBranch_rawEdges_upward_closed` exists that the
+    generalized statement breaks. *(grepped `Cslib/` and `CslibTests/` — zero external
+    consumers, only the definition itself and doc-comment mentions)*
 
 - **Timing:** 1.5 hours
 

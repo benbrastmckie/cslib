@@ -18,7 +18,17 @@ import Mathlib.Tactic.NormNum
 public meta import Mathlib.Tactic.NormNum
 
 /-!
-# Targeted beta-split refutation: the closure-asymmetry construction
+# Targeted beta-split refutation: the closure-asymmetry construction (pre-repair record)
+
+**Post-repair status**: the beta-priority repair (`intStepBranchPrio`, `Expansion.lean`) closes
+the defect this file documents. Every `#guard_msgs` assertion below is asserted against the
+REPAIRED calculus and passes -- the persistence-violation field that used to read
+`some (2, 1, 2)` now reads `none`, and `decisiveFacts`/`try1`/`check` all report no violation.
+The recipe below (steps 1-5) is the mechanism that produced the violation under the PRE-repair
+naive-order calculus, kept as the durable record of what was refuted and why the repair exists,
+per the module-comment convention `intExpandBranches_openBranch_sat`'s own counter-instance notes
+follow (`Scheme.lean`, near the `openBranch_countermodel` region). `branchesAgree` /
+`minBranchesAgree` below confirm the recreation still tracks the real, repaired algorithm exactly.
 
 `Gap1FixpointProbe.lean` established (empirically, `nonGenuine = 0` over every loop iteration of
 seven candidates) that `applyPersistenceFixpoint b edges f` is a genuine `applyAllTImpRules`
@@ -55,9 +65,11 @@ The recipe (derived, not guessed):
    `T(pr)@2` child does NOT close, because reuse suppressed the creation of a world carrying
    `F(pr)` below `2`, and `F(pr)@2` is absent.
 
-Net: `T(pr)@2` on the returned open branch, `T(pr)@1` absent, with `1` and `2`
-augmented-equivalent. That is an atom-level upward-closure violation over
-`intAccessPreorder augEdges`.
+Net (pre-repair): `T(pr)@2` on the returned open branch, `T(pr)@1` absent, with `1` and `2`
+augmented-equivalent. That was an atom-level upward-closure violation over
+`intAccessPreorder augEdges`. Under the repaired calculus, beta-priority scheduling changes which
+rule fires when a world is about to be created, closing this gap; see the post-repair status note
+above and the `#guard_msgs` assertions below for the current (fixed) values.
 
 This file is a promoted, CI-protected regression test (module mode, `#guard_msgs`-asserted); the
 `goRaw` local recreation deliberately duplicates the private `intExpandBranches.go` (the
@@ -295,10 +307,11 @@ promoted to an assertion. -/
 def phiRef3 : Proposition Nat :=
   ((pr ∨ ps) ∧ ((ps → (ps → (ps → pr))) → pb)) → pr
 
-/-- Variant: extra conjunct supplying an unrelated positive atom, so the containment check has
-more to match on (tests robustness of the construction rather than its core). A robustness
-variant, not cited by any annotation; kept interactively inspectable but not promoted to an
-assertion. -/
+/-- A THIRD genuine refuting formula (extra conjunct supplying an unrelated positive atom `pc`,
+so the containment check has more to match on than `phiRef1`'s core shape). Under the pre-repair
+calculus this exhibited the same augmented-frame persistence failure as `phiRef1`, at `(2 -> 1)`;
+promoted here to a `#guard_msgs` assertion, alongside `phiRef1`, as a second regression guard on
+the repair. -/
 def phiRef4 : Proposition Nat :=
   ((pr ∨ ps) ∧ (pc ∧ ((ps → (ps → pr)) → pb))) → pr
 
@@ -309,6 +322,14 @@ def phiRef4 : Proposition Nat :=
 /-- info: [(2, [3]), (1, [3]), (0, [])] -/
 #guard_msgs in
 #eval atomTable phiRef1 40
+
+/-- info: ("OPEN", 23, 2, [(1, 0), (2, 1)], [(2, 2), (1, 2)], none) -/
+#guard_msgs in
+#eval report phiRef4 40
+
+/-- info: [(2, [4, 3]), (1, [4, 3]), (0, [])] -/
+#guard_msgs in
+#eval atomTable phiRef4 40
 
 /-! ## Fidelity check against the REAL `intuitionisticTableau`, and the closing argument
 
@@ -396,26 +417,34 @@ def branchDump : List (Bool × Proposition Nat × Nat) :=
 #eval decisiveFacts
 
 /-!
-## Verdict: REFUTED (machine-verified)
+## Verdict: REPAIRED (machine-verified) -- pre-repair defect record below
 
 `phiRef1 = ((pr | ps) & ((ps -> (ps -> pr)) -> pb)) -> pr` is not intuitionistically valid (take
 `pr` false, `ps` true: the antecedent holds because `ps -> (ps -> pr)` is false), so
-`.openBranch` is the correct verdict and this is not a soundness anomaly. The defect is in the
-COUNTERMODEL the open branch yields:
+`.openBranch` is the correct verdict, and that has not changed. What HAS changed is the
+countermodel the open branch now yields, under the repaired (beta-priority) calculus:
 
-- the real `intuitionisticTableau phiRef1` returns `.openBranch b` (branch reproduced exactly by
-  the recreation, `branchesAgree = true`);
-- the augmented edge list the `key` induction constructs on that path is
-  `[(1,0), (2,1)] ++ [(1,2), (2,2)]`, whose `(1,2)` component is the recorded loop-back edge from
-  the reuse event `(x, l) = (1, 2)`;
-- `isAccessible aug 2 1 = true`, so `2 <= 1` in `intAccessPreorder aug`;
-- `intExtractValuation b 2 pr` holds and `intExtractValuation b 1 pr` does not.
+- the real `intuitionisticTableau phiRef1` still returns `.openBranch b` (branch reproduced
+  exactly by the recreation, `branchesAgree = true` above);
+- `decisiveFacts = (false, false)` above: `pr` is forced at neither world `2` nor world `1`, so
+  there is no atom on which upward closure of `intExtractValuation b` along
+  `intAccessPreorder aug` could fail;
+- `IFimpAccess` and `¬ forces φ @0` already held over the augmented frame in the PRE-repair
+  baseline too (report §3) -- positive persistence (`hpers`) was the sole missing ingredient the
+  repair needed to supply, not a rebuild of the whole frame-adequacy argument.
 
-So upward closure of `intExtractValuation b` along `intAccessPreorder aug` is FALSE. World `1`
-was forced onto the `ps` disjunct of `T(pr | ps)@1` by closure against `F(pr)@1`; the `genCopies`
-copy `T(pr | ps)@2` is a distinct `ISF` entry that split independently AFTER the loop-back edge
-was recorded, and its `T(pr)@2` child did not close because reuse had suppressed creation of any
-world carrying `F(pr)` below `2`.
+**Pre-repair record** (durable history of what was refuted, and why the repair exists): under
+the naive-order calculus, the augmented edge list the `key` induction constructed on this path
+was `[(1,0), (2,1)] ++ [(1,2), (2,2)]`, whose `(1,2)` component was the recorded loop-back edge
+from the reuse event `(x, l) = (1, 2)`; `isAccessible aug 2 1 = true` gave `2 <= 1` in
+`intAccessPreorder aug`; and `intExtractValuation b 2 pr` held while `intExtractValuation b 1 pr`
+did not -- an atom-level upward-closure violation. World `1` was forced onto the `ps` disjunct of
+`T(pr | ps)@1` by closure against `F(pr)@1`; the `genCopies` copy `T(pr | ps)@2` was a distinct
+`ISF` entry that split independently AFTER the loop-back edge was recorded, and its `T(pr)@2`
+child did not close because reuse had suppressed creation of any world carrying `F(pr)` below
+`2`. Beta-priority scheduling (`intStepBranchPrio`) defers the world-creating `F(phi -> psi)` rule
+until no other rule applies anywhere on the branch, which changes the reuse-firing order enough
+that this specific asymmetry no longer arises.
 -/
 
 /-! ## Minimal-closure variant (DP-4's calculus)

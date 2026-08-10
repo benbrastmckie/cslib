@@ -441,26 +441,35 @@ count unchanged at 26. Committed as a single atomic-batch commit spanning `Expan
 
 ---
 
-### Phase 4: Promote `phiRef4` and re-point the refutation narrative [IN PROGRESS]
+### Phase 4: Promote `phiRef4` and re-point the refutation narrative [COMPLETED]
 
 **Goal**: Record the third refuting formula the report discovered, and re-point
 `BetaSplitRefutation.lean`'s prose from "here is the defect" to "here is the defect and here is the
 repair that removes it". Runs in parallel with Phase 5.
 
 **Tasks**:
-- [ ] Promote `phiRef4` (`BetaSplitRefutation.lean:301`) from an interactively-inspectable
+- [x] Promote `phiRef4` (`BetaSplitRefutation.lean:301`) from an interactively-inspectable
       robustness variant to a `#guard_msgs`-asserted case. The report §3 measured it as a genuine
       third refuting formula: it fails augmented-frame persistence exactly as `phiRef1` does, at
       `(2 → 1)`, contradicting its current docstring's "not promoted to an assertion" framing.
-- [ ] Update `phiRef4`'s docstring to state what it actually is.
-- [ ] Re-point the file's module comment and "Verdict: REFUTED" narrative at the repaired calculus.
+      *(Under the now-repaired calculus, `report phiRef4 40` evaluates to
+      `("OPEN", 23, 2, [(1, 0), (2, 1)], [(2, 2), (1, 2)], none)` and `atomTable phiRef4 40` to
+      `[(2, [4, 3]), (1, [4, 3]), (0, [])]` -- both asserted as new `#guard_msgs` cases, serving as
+      a second regression guard on the repair alongside `phiRef1`'s.)*
+- [x] Update `phiRef4`'s docstring to state what it actually is.
+- [x] Re-point the file's module comment and "Verdict: REFUTED" narrative at the repaired calculus.
       The `#guard_msgs` values are a regression guard on the defect, and the defect is now removed —
       say so, and preserve the pre-repair values in prose as the durable record of what was
       refuted, following the `intExpandBranches_openBranch_sat` counter-instance precedent
       (`Scheme.lean` near `:6805`/`:6999`) of keeping the refutation legible after the repair.
-- [ ] Record in the same file that `IFimpAccess` and `¬ forces φ @0` already held over the
+      *(Added a "Post-repair status" paragraph at the top of the module doc, reframed the "Net:"
+      recipe conclusion as pre-repair history, and retitled/rewrote "Verdict: REFUTED" to
+      "Verdict: REPAIRED (machine-verified) -- pre-repair defect record below", preserving the
+      full pre-repair mechanism description as an explicitly-labeled historical record.)*
+- [x] Record in the same file that `IFimpAccess` and `¬ forces φ @0` already held over the
       augmented frame in the baseline, and that `hpers` was the sole missing ingredient (report §3)
       — this sharpens the inherited frame-adequacy table and is worth not losing.
+      *(Recorded in the rewritten "Verdict: REPAIRED" section.)*
 
 **Timing**: 1 hour
 
@@ -474,6 +483,10 @@ repair that removes it". Runs in parallel with Phase 5.
 **Verification**:
 - `lake build CslibTests` succeeds with the new `phiRef4` assertions.
 - The pre-repair refutation values remain findable in the file as prose.
+
+**Confirmed** (this dispatch): `lake build CslibTests.BetaSplitRefutation` green (972 jobs),
+full `lake build` and `lake test` both green, `lake exe lint-style` clean. Sorry count unchanged
+at 2, axiom count unchanged at 26.
 
 ---
 

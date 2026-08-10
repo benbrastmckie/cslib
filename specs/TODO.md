@@ -158,6 +158,7 @@ SOURCE: specs/reviews/review-2026-08-09.md finding C1.
 - **Dependencies**: Task 604
 - **Research**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md]
 - **Plan**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md]
+- **Summary**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/summaries/01_beta-priority-repair-summary.md]
 
 **Description**: `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`) records a loop-back edge on a `Sfor`-containment check at the moment the branch reuses an ancestor world -- but it never re-validates that containment as the branch continues to grow afterward. This is the root cause both the intuitionistic tableau completeness `truthLemma` restructure and the frame-adequacy analysis that preceded it converged on: it is why the AUGMENTED frame (`augSets`, threaded by `intExpandBranches_openBranch_sat`) carries `IFimpAccess` but REFUTES positive persistence (`CslibTests/BetaSplitRefutation.lean`, `firstViolation = some (2,1,2)`), and why the RAW frame (`rawEdges`) carries positive persistence (`IPosPersistRaw`, sorry-free) but REFUTES `IFimpAccess` at the blocked worlds pruning strands.
 

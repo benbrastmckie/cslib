@@ -58,9 +58,10 @@ CSLib contains **two independent decision procedures** for `Derivable IntPropAxi
 - **Module**: `Tableau/Intuitionistic/DecisionProcedure.lean`
 - **Mechanism**: Constructive signed-tableau proof-search with countermodel extraction.
   Decides via `instDecidableIValid` composed with `int_soundness_completeness`.
-- **Axiom profile**: Carries `sorryAx` from four open completeness sorries (`Scheme.lean:246`,
-  `Scheme.lean:519`, `Completeness.lean:113`, `Minimal/Completeness.lean:110`). Will become
-  sorry-free once those four are discharged.
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free**. The completeness
+  chain this route rests on (`openBranch_countermodel`'s existential in `Scheme.lean`,
+  `intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`, and
+  `minimalTableau_complete` in `Minimal/Completeness.lean`) is fully discharged.
 - **Exposed as**: `instDecidableDerivableIntPropAxiom` (the **sole registered `Decidable`
   instance** for `Derivable IntPropAxiom φ`).
 - **Role**: Canonical extension-facing instance. The modal, temporal, and bimodal extensions

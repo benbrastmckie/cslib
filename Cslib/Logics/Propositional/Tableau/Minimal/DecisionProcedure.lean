@@ -44,21 +44,21 @@ Soundness and completeness proofs are in the dedicated `Soundness.lean` and
 
 ## Notes on sorry
 
-`minimalTableau_sound` is sorry-free. The completeness direction
-(`minimalTableau_complete` in `Minimal/Completeness.lean`) is now ALSO sorry-free: the old
-`MValid → forcing` bridge sorry is discharged, since `minOpenBranch_countermodel` now supplies
-both of `MValid`'s upward-closure conjuncts together (see `Minimal/Completeness.lean`'s "Notes
-on sorry" for the full disposition and the statement-shape defect this closure depended on
-fixing). The parametric `truthLemma` in `Intuitionistic/Scheme.lean` (which the minimal tableau
-reuses as `truthLemma minScheme`) is likewise sorry-free — it gained an explicit `hpers`
-(positive-persistence) hypothesis and is unconditionally true over any frame carrying it. The
-one remaining sorry in this dependency chain is:
-- the open-branch countermodel structural property in `Intuitionistic/Scheme.lean`
-  (`openBranch_countermodel`'s existential itself — genuinely open, not refuted)
+This module is sorry-free, and so is everything it depends on. `minimalTableau_sound` is
+sorry-free. The completeness direction (`minimalTableau_complete` in `Minimal/Completeness.lean`)
+is sorry-free: the old `MValid → forcing` bridge sorry is discharged, since
+`minOpenBranch_countermodel` now supplies both of `MValid`'s upward-closure conjuncts together
+(see `Minimal/Completeness.lean`'s "Notes on sorry" for the full disposition and the
+statement-shape defect this closure depended on fixing). The parametric `truthLemma` in
+`Intuitionistic/Scheme.lean` (which the minimal tableau reuses as `truthLemma minScheme`) is
+likewise sorry-free — it gained an explicit `hpers` (positive-persistence) hypothesis and is
+unconditionally true over any frame carrying it. The open-branch countermodel structural property
+in `Intuitionistic/Scheme.lean` (`openBranch_countermodel`'s existential) is now ALSO sorry-free:
+the AUGMENTED `augSets` witness carries `IFimpAccess` and positive persistence simultaneously
+post-repair (see that lemma's docstring for the full disposition), closing what used to be this
+dependency chain's one remaining declaration-level sorry.
 
-The `Decidable` instance (`instDecidableDerivableMinPropAxiom`) carries the soundness branch
-clean and the countermodel branch with `openBranch_countermodel`'s deferred `sorryAx`. This
-sorry-taint is pre-existing and will be resolved once that one remaining sorry is filled.
+The `Decidable` instance (`instDecidableDerivableMinPropAxiom`) is now sorry-free end to end.
 
 ## Two Decision Routes — Distinct Roles
 
@@ -69,9 +69,8 @@ CSLib contains **two independent decision procedures** for `Derivable MinPropAxi
 - **Mechanism**: Constructive signed-tableau proof-search/countermodel. Reuses the
   intuitionistic expansion (`intExpandBranches`) with `isMinimallyClosed` closure predicate.
   Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
-- **Axiom profile**: Carries the deferred completeness `sorryAx` (see above). Will become
-  sorry-free once the one remaining completeness sorry (`openBranch_countermodel`'s existential
-  in `Intuitionistic/Scheme.lean`) is filled.
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free** (see "Notes on
+  sorry" above).
 - **Exposed as**: `instDecidableDerivableMinPropAxiom` — the **sole registered `Decidable`
   instance** for `Derivable MinPropAxiom φ`.
 - **Role**: Canonical extension-facing instance for minimal propositional logic.

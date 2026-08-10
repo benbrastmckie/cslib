@@ -30,7 +30,9 @@ decidability of `IValid`. Concretely:
    using iterated `impR` / `impL` steps in each direction.
 
 4. Combine with `lj_iff_ivalid` to reduce to `IValid (ctxToImp Γ A)`, which is decidable
-   via `instDecidableIValid` from the intuitionistic tableau.
+   via `instDecidableIValid` from the intuitionistic tableau (routed through
+   `ivalid_universe_invariant` to bridge `instDecidableIValid`'s `Type 0` pin to the unpinned
+   universe `lj_iff_ivalid` needs).
 
 ## Main Results
 
@@ -184,9 +186,19 @@ and `lj_iff_ivalid`:
 3. `IValid (ctxToImp Γ A)` is decidable by `instDecidableIValid` (from the intuitionistic
    tableau decision procedure).
 
-The instance is `noncomputable` because `ctxToImp` uses `Finset.toList`. -/
+The instance is `noncomputable` because `ctxToImp` uses `Finset.toList`.
+
+**Universe note.** `instDecidableIValid` (from `Intuitionistic/DecisionProcedure.lean`) is pinned
+to `IValid.{_, 0}`, while `lj_iff_ivalid` needs `IValid.{u, u}` (`u` = `Atom`'s own universe). The
+local `letI` below routes through `ivalid_universe_invariant` -- the same bridge
+`instDecidableDerivableIntPropAxiom` uses -- to recover an unpinned `Decidable (IValid _)`
+instance before `decidable_of_iff` is applied, exactly mirroring
+`Minimal/DecisionProcedure.lean`'s `mvalid_universe_invariant` pattern. -/
 noncomputable instance instDecidableLJDerivable {Γ : Ctx Atom} {A : Proposition Atom} :
     Decidable (Nonempty (LJProof (Γ ⊢ A))) :=
+  letI : Decidable (IValid (ctxToImp Γ A)) :=
+    decidable_of_iff (IValid.{_, 0} (ctxToImp Γ A))
+      (ivalid_universe_invariant (ctxToImp Γ A)).symm
   decidable_of_iff (IValid (ctxToImp Γ A)) <| by
     constructor
     · -- IValid (ctxToImp Γ A) → Nonempty (LJProof (Γ ⊢ A))

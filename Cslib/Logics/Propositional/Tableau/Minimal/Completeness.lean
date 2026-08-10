@@ -42,21 +42,23 @@ From an open saturated branch `b`, construct a Kripke model as follows:
 
 ## Notes on sorry
 
-`minTruthLemma` delegates to `truthLemma minScheme`, which is sorry-free (DP-5 discharged
-via an explicit `hpers` positive-persistence hypothesis, threaded through here as `hpers`
-above). `minOpenBranch_countermodel` delegates to `openBranch_countermodel minScheme`, which
-still carries the deferred sorry in `Scheme.lean` (the existential's whole statement, genuinely
-open — see that lemma's docstring).
+This module is sorry-free, and so is everything it depends on. `minTruthLemma` delegates to
+`truthLemma minScheme`, which is sorry-free (DP-5 discharged via an explicit `hpers`
+positive-persistence hypothesis, threaded through here as `hpers` above).
+`minOpenBranch_countermodel` delegates to `openBranch_countermodel minScheme`, which is now ALSO
+sorry-free (the AUGMENTED `augSets` witness carries `IFimpAccess` and positive persistence
+simultaneously post-repair, closing the existential that used to be `Scheme.lean`'s one remaining
+declaration-level sorry -- see that lemma's docstring for the full disposition).
 
-`minimalTableau_complete` (DP-4) is now **sorry-free**. The old two-obligation framing (a
+`minimalTableau_complete` (DP-4) is **sorry-free**. The old two-obligation framing (a
 valuation upward-closure premise plus a separately-tracked `⊥`-shape upward-closure premise) is
 retired: `openBranch_countermodel`'s existential now supplies BOTH conjuncts directly, so DP-4
-instantiates `MValid.{_, 0} φ` with everything it needs in one call, and rests on exactly the
-same single open obligation as DP-3 — `openBranch_countermodel`'s own existential in
-`Scheme.lean`. The `⊥`-shape conjunct costs nothing beyond the valuation one: both are the SAME
-`χ`-general raw-edge persistence fact (`openBranch_rawEdges_upward_closed`/
-`openBranch_rawEdges_both_upward_closed` in `Scheme.lean`), instantiated at `χ := .atom p` and
-`χ := HasBot.bot` respectively.
+instantiates `MValid.{_, 0} φ` with everything it needs in one call. Mirrors DP-3
+(`intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`), which discharges the
+same way via `openBranch_countermodel intScheme`. The `⊥`-shape conjunct costs nothing beyond the
+valuation one: both are the SAME `χ`-general raw-edge persistence fact
+(`openBranch_rawEdges_upward_closed`/`openBranch_rawEdges_both_upward_closed` in `Scheme.lean`),
+instantiated at `χ := .atom p` and `χ := HasBot.bot` respectively.
 
 **Why the old, two-premise `hvalid` shape could not have closed DP-4 as previously stated.**
 `CslibTests/MvalidBotShapeRefutation.lean` machine-checks that `tableau_complete`'s `hvalid`
@@ -122,8 +124,8 @@ lemma minTruthLemma (b : IBranch Atom) (edges : IEdges)
 
 /-- An open saturated branch from the minimal tableau yields a Kripke countermodel.
 
-Delegates to `openBranch_countermodel minScheme`. The structural sorries in
-`openBranch_countermodel` remain deferred.
+Delegates to `openBranch_countermodel minScheme`, which is sorry-free (see `Scheme.lean`'s
+docstring for the AUGMENTED-frame proof this lemma inherits).
 
 **Route (a) frame**: mirrors
 `Intuitionistic.Completeness.intuitionisticOpenBranch_countermodel`'s existential exposure of

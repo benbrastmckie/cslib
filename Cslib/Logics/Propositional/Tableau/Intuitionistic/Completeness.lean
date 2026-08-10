@@ -19,7 +19,8 @@ intuitionistically valid, then the tableau closes on `φ`.
 
 - `intExtractValuation`: Defined in `Intuitionistic.Soundness`; see that module.
 - `intTruthLemma`: Delegates to the parametric `truthLemma intScheme` from `Scheme.lean`.
-- `intuitionisticTableau_complete`: If `IValid φ`, then `intuitionisticTableau φ = closed`.
+- `intuitionisticTableau_complete`: If `IValid.{_, 0} φ`, then `intuitionisticTableau φ = closed`.
+  Sorry-free.
 
 ## Design
 
@@ -38,33 +39,33 @@ From an open saturated branch `b`, the countermodel is:
 
 ## Notes on sorry
 
-`intTruthLemma` delegates to `truthLemma intScheme`, which is now sorry-free (DP-5 discharged
-via an explicit `hpers` positive-persistence hypothesis, threaded through here as `hpers`
-above). `intuitionisticOpenBranch_countermodel` delegates to `openBranch_countermodel
-intScheme`, which still carries the deferred sorry in `Scheme.lean` (the existential's whole
-statement, genuinely open — see that lemma's docstring). The remaining sorry in
-`intuitionisticTableau_complete` (DP-3) bridges `IValid φ` to the per-branch forcing hypothesis
-required by `tableau_complete intScheme`.
+This module is now sorry-free. `intTruthLemma` delegates to `truthLemma intScheme`, which is
+sorry-free (DP-5 discharged via an explicit `hpers` positive-persistence hypothesis, threaded
+through here as `hpers` above). `intuitionisticOpenBranch_countermodel` delegates to
+`openBranch_countermodel intScheme`, which is now ALSO sorry-free: the AUGMENTED `augSets`
+witness carries `IFimpAccess` and positive persistence simultaneously post-repair, closing the
+existential that used to be `Scheme.lean`'s one remaining declaration-level sorry (see that
+lemma's docstring for the full disposition). `intuitionisticTableau_complete` (DP-3), which used
+to defer its own obligation, now discharges directly from `openBranch_countermodel`'s upward-closure
+conjunct via `_huc` -- no laundering, since that conjunct is genuinely proved, not merely assumed.
 
-**DP-3 is open — augmented-frame route known-bad, admissible edge space characterised**, not
-refuted. It consumes `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`); see
-that conjunct's docstring for the full disposition: the admissible `edges` are exactly the
-subsets of the atom-inclusion preorder `⊑`, none of which need the algorithm's own edge list,
-and a pruned witness (computed against the real `intuitionisticTableau`) satisfies both
-conjuncts for `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`. What IS
-machine-verified (`CslibTests/BetaSplitRefutation.lean`, `lake env lean` clean, zero sorries,
-`branchesAgree = true`) is that the AUGMENTED `intAccessPreorder edges` frame fails upward
-closure at `phiRef1` via independent beta-splits at two augmented-preorder-equivalent worlds
-joined by a loop-back edge that `intFImpReuseWitnessAnc?` never re-validates once recorded
-(`Expansion.lean`) — a bad witness choice, not a refutation of the conjunct DP-3 consumes. The
-general `∀ φ` form of that conjunct remains unproved (the maximal `⊑` frame is not a uniform
-witness), so DP-3's remaining obligation is genuinely open, not a small residual.
+**DP-3, historical record.** DP-3 used to be open because `openBranch_countermodel`'s
+upward-closure conjunct (`Scheme.lean`) was open, with only the AUGMENTED-frame route to it
+known-bad (refuted by `CslibTests/BetaSplitRefutation.lean`'s `phiRef1` counterexample: the
+pre-repair augmented frame failed upward closure via independent beta-splits at two
+augmented-preorder-equivalent worlds joined by a loop-back edge `intFImpReuseWitnessAnc?` never
+re-validated once recorded). Re-validating that loop-back containment as the branch grows
+(`Expansion.lean`) is what closes the conjunct, giving one frame that carries both `IFimpAccess`
+and positive persistence simultaneously -- see `Scheme.lean`'s `openBranch_countermodel`
+docstring for the full frame-adequacy table and the three excluded sub-frame constructions.
 
-**Universe pin recorded, not yet built.** Closing DP-3 (once the conjunct above is available)
-will also need `h : IValid φ` pinned to `IValid.{_, 0} φ` before it can apply at the `Nat`-frame
-countermodel here, the same way `Minimal/DecisionProcedure.lean`'s `mvalid_universe_invariant`
-pins `MValid` for DP-4 -- see `intuitionisticTableau_complete`'s docstring below for the
-machine-verified detail.
+**Universe pin, now built.** `intuitionisticTableau_complete` is stated at `h : IValid.{_, 0} φ`
+so it can apply directly at the `Nat`-frame countermodel here, the same way
+`Minimal/Completeness.lean`'s `minimalTableau_complete` pins `MValid.{_, 0}` for DP-4. This
+module's own theorem stays pinned; `Intuitionistic/DecisionProcedure.lean`'s
+`ivalid_descend` / `ivalid_universe_invariant` (mirroring `Minimal/DecisionProcedure.lean`'s
+`mvalid_descend` / `mvalid_universe_invariant`) let the `Decidable`/biconditional instances built
+on top of it keep their original, unpinned public statement.
 
 ## References
 
@@ -110,9 +111,8 @@ lemma intTruthLemma (b : IBranch Atom) (edges : IEdges)
 
 /-- An open saturated branch from the intuitionistic tableau yields a Kripke countermodel.
 
-Delegates to `openBranch_countermodel intScheme`. The structural sorries in
-`openBranch_countermodel` (relating `intExpandBranches ... = .openBranch b` to properties
-of `b`) are deferred.
+Delegates to `openBranch_countermodel intScheme`, which is sorry-free (see `Scheme.lean`'s
+docstring for the AUGMENTED-frame proof this lemma inherits).
 
 **Route (a) frame**: the conclusion existentially exposes the `edges`
 the `intAccessPreorder` countermodel frame is installed over (Postmortem-5 revision: this
@@ -154,41 +154,31 @@ for `MValid`/`minScheme` the same way). For `intScheme`, `intBotForces = fun _ =
 `_hbuc` is trivially dischargeable once `_huc` is -- the fix costs nothing extra on the
 intuitionistic side.
 
-**Universe pin needed, not yet applied.** With the new shape, `IValid φ` instantiated at
-`World := Nat`, `[Preorder Nat] := intAccessPreorder edges`, `val := intExtractValuation b`
-would need `IValid.{_, 0} φ`, mirroring the pin `Minimal/DecisionProcedure.lean`'s
-`mvalid_universe_invariant` resolves for `MValid`/DP-4: `IValid.{u, v}` quantifies
-`World : Type v` while the countermodel frame here is `Nat : Type 0`, so `h`'s own bound
-universe parameter cannot be instantiated as stated (`exact h Nat (intExtractValuation _b) _huc
-0` does NOT type-check as written -- verified). An earlier version of this docstring claimed
-that call would type-check; it does not. Closing DP-3 will need the same `.{_, 0}` pin on `h`'s
-type and the same `ULift` transport `mvalid_universe_invariant` already builds for `MValid`, once
-someone builds the `IValid` analogue.
+**Universe pin applied.** `intuitionisticTableau_complete` is now stated at `IValid.{_, 0} φ`,
+mirroring the pin `Minimal/Completeness.lean`'s `minimalTableau_complete` already carries for
+`MValid`/DP-4: `IValid.{u, v}` quantifies `World : Type v` while the countermodel frame here is
+built from `Nat : Type 0`, so the theorem's own `h` must be pinned to `v := 0` before
+`@h Nat (intAccessPreorder edges) (intExtractValuation _b) _huc 0` type-checks (it now does --
+verified by `lake build`). An earlier version of this docstring recorded that the unpinned call
+does NOT type-check; that diagnosis stands for the unpinned `IValid φ` shape, and is exactly why
+the pin was added here rather than attempted against the old signature.
+`Intuitionistic/DecisionProcedure.lean` supplies the `ivalid_descend` / `ivalid_universe_invariant`
+bridge (mirroring `mvalid_descend` / `mvalid_universe_invariant`) that lets callers of the
+`Decidable`/biconditional instances built on top of this theorem keep an unpinned, universe-generic
+public statement despite this theorem's own pin.
 
-The remaining sorry below is **not** the old unfillable shape -- it is deliberately left
-deferred. **DP-3 is open — augmented-frame route known-bad, admissible edge space
-characterised**, not "pending" any future phase in the old sense, but genuinely unresolved:
-`openBranch_countermodel`'s own upward-closure conjunct (`Scheme.lean`) is open, and only the
-AUGMENTED-frame route to it is known-bad, refuted by a machine-verified counterexample
-(`CslibTests/BetaSplitRefutation.lean`, `phiRef1`). Even setting the universe pin aside,
-discharging this site would only launder that still-open conjunct through this file without
-being any more honest about it; the obligation stays visibly deferred here (see `Scheme.lean`'s
-`openBranch_countermodel` docstring for the full disposition, the admissible-edge-space
-characterisation, and the counterexample). The remaining work is a uniform construction of
-`edges` from `b` plus a truth lemma over that frame, which -- per that docstring's structural
-argument -- is equivalent to proving the tableau procedure complete: genuine open work, not a
-small residual, and not attempted here. -/
+**DP-3, now sorry-free.** `openBranch_countermodel`'s upward-closure conjunct (`Scheme.lean`) is
+discharged (the AUGMENTED `augSets` witness carries positive persistence post-repair, see that
+lemma's docstring), so `_huc` genuinely discharges the goal here rather than laundering an open
+obligation through this file -- the prohibition this docstring used to record no longer applies.
+`IValid` takes no separate `bot_forces` argument (it is fixed to `fun _ => False`), so `_hbuc` is
+simply unused: `intScheme.modelBot` is defeq to `fun _ _ => False`, matching `IValid`'s fixed
+`bot_forces` on the nose, with no `modelBot_uc`-style bridge needed on this side. -/
 theorem intuitionisticTableau_complete (φ : Proposition Atom)
-    (h : IValid φ) : intuitionisticTableau φ = .closed := by
+    (h : IValid.{_, 0} φ) : intuitionisticTableau φ = .closed := by
   apply tableau_complete intScheme
   intro edges _b _huc _hbuc
-  -- DP-3 -- open, augmented-frame route known-bad. Even setting aside the universe pin the
-  -- docstring above records (`h` would need `IValid.{_, 0} φ` to apply at the `Nat`-frame
-  -- countermodel), `_huc`/`_hbuc` at this frame do not genuinely discharge the goal: they would
-  -- only launder `openBranch_countermodel`'s upward-closure conjunct through this file, and that
-  -- conjunct is open, not refuted (see the docstring above). Left `sorry` deliberately -- see the
-  -- docstring above for the full disposition.
-  sorry
+  exact @h Nat (intAccessPreorder edges) (intExtractValuation _b) _huc 0
 
 end Cslib.Logic.PL
 

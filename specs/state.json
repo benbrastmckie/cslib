@@ -1046,7 +1046,12 @@
         {
           "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
           "type": "plan",
-          "summary": "Phase 6 [COMPLETED]: IReuseContain restated in bare snapshot-free form, all six use sites wired, IReuseContain_mono/_snoc removed."
+          "summary": "All 9 phases [COMPLETED]. Plan-level Status set to [COMPLETED]. Phase 9 discharged intuitionisticTableau_complete (DP-3), the last declaration-level sorry in the repo, via an IValid.{_, 0} universe pin plus a new ivalid_descend/ivalid_universe_invariant bridge."
+        },
+        {
+          "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/summaries/01_beta-priority-repair-summary.md",
+          "type": "summary",
+          "summary": "Full task summary: all 9 phases, final verification (0 declaration-level sorries repo-wide), plan deviations, task 606 reconciliation."
         }
       ]
     },

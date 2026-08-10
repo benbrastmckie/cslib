@@ -1,7 +1,7 @@
 # Implementation Plan: Beta-Priority Repair of Loop-Back Containment
 
 - **Task**: 609 - Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 15 hours
 - **Dependencies**: 604 (completed). Coordination-only with 605; see "Coordination with Task 605".
 - **Research Inputs**: `specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md`
@@ -1240,34 +1240,51 @@ have evolved past the patch.
 
 ---
 
-### Phase 9: The downstream `Completeness.lean` sorries and the 606 handoff [NOT STARTED]
+### Phase 9: The downstream `Completeness.lean` sorries and the 606 handoff [COMPLETED]
 
 **Goal**: Collapse the remaining downstream sorries and leave task 606 an accurate, non-misleading
 record.
 
 **Tasks**:
-- [ ] Discharge `intuitionisticTableau_complete` (`Intuitionistic/Completeness.lean:170`).
-      **It is not the bare one-liner the research report quotes.** The report's
-      `exact h Nat (intExtractValuation _b) _huc 0` does not typecheck: `IValid` quantifies
-      `World : Type v` while the countermodel frame is `Nat : Type 0`. This site needs the same
-      `.{_, 0}` universe pin and the same `ULift` transport that 605 builds
-      (`mvalid_descend` / `mvalid_universe_invariant` in `Minimal/DecisionProcedure.lean`). If 605
-      has landed, route through those; if not, the transport bridge must be built here, and that
-      is a scope increase worth surfacing rather than absorbing silently.
-- [ ] Check `minimalTableau_complete` (`Minimal/Completeness.lean:166`) before editing it. Under
-      605's option A this site is **already closed by 605** and needs nothing from this task. Only
-      discharge it if it is genuinely still open.
-- [ ] **Rewrite, do not delete, the in-source prohibition** at
-      `Intuitionistic/Completeness.lean:164-170` and its counterpart in `Minimal/Completeness.lean`.
-      Those notes forbid the one-liner *on the ground that* `openBranch_countermodel`'s conjunct is
-      open and `_huc` therefore launders it. Phase 8 makes that ground false. The replacement note
-      must say: the one-liner is now legitimate **because** the conjunct is genuinely discharged,
-      and name the phase/lemma that discharged it. A reader who finds the one-liner with no
-      explanation cannot tell honest discharge from laundering — which is precisely what task 606's
-      description warns against.
-- [ ] Update the "Notes on sorry" sections at the head of both files.
-- [ ] Record the 605/609 reconciliation state for task 606: which conjuncts 609 discharged, which
-      606 must thread from 605, and whether the universe pin was present when Phase 8 ran.
+- [x] Discharge `intuitionisticTableau_complete` (`Intuitionistic/Completeness.lean`, DP-3).
+      Confirmed the report-quote caveat first: the bare one-liner does NOT typecheck unpinned.
+      Fixed by pinning the theorem's own hypothesis to `IValid.{_, 0} φ` (mirroring
+      `minimalTableau_complete`'s existing `MValid.{_, 0}` pin, rather than reusing 605's `MValid`
+      bridge directly -- `IValid` is a distinct def with no `bot_forces` argument, so the transport
+      lemma has to be built for `IValid` specifically, simplified accordingly). Proof body:
+      `exact @h Nat (intAccessPreorder edges) (intExtractValuation _b) _huc 0`.
+      *(deviation: this pin change is a breaking change to `intuitionisticTableau_complete`'s
+      public type, so downstream consumers in `Intuitionistic/DecisionProcedure.lean` and
+      `SequentCalculus/LJ/Decidability.lean` also required updates -- see below; not itself listed
+      in the plan's "Files to modify" but required to keep the build green, exactly mirroring how
+      605's own `MValid.{_, 0}` pin required `Minimal/DecisionProcedure.lean`'s
+      `mvalid_descend`/`mvalid_universe_invariant` bridge.)*
+- [x] Checked `minimalTableau_complete` (`Minimal/Completeness.lean`) before editing: confirmed
+      genuinely already closed by 605 (sorry-free, `MValid.{_, 0} φ` pinned, direct one-call
+      proof). No edit to its theorem body; only its stale "Notes on sorry" prose needed updating
+      (below).
+- [x] **Rewrote, did not delete, the in-source prohibition** at `Intuitionistic/Completeness.lean`
+      (docstring above `intuitionisticTableau_complete`). The replacement records why the
+      one-liner is now legitimate -- Phase 8 discharged `openBranch_countermodel`'s upward-closure
+      conjunct -- and names the discharging lemma. No live counterpart prohibition text existed in
+      `Minimal/Completeness.lean` (605 had already fully retired it there); confirmed via grep
+      before concluding there was nothing to rewrite on that side.
+- [x] Updated the "Notes on sorry" sections at the head of both `Completeness.lean` files, plus
+      (required for consistency, since they made the same now-false claims) the parallel sections
+      in `Intuitionistic/DecisionProcedure.lean`, `Minimal/DecisionProcedure.lean`,
+      `Metalogic/IntDecidability.lean`, and `Metalogic/MinDecidability.lean` -- all previously
+      stated some form of "carries the deferred completeness `sorryAx`" or cited now-discharged
+      sorry line numbers; all now state the module is sorry-free.
+      *(deviation: altered/expanded scope -- the plan named only the two `Completeness.lean`
+      files' "Notes on sorry" sections; the four additional files were touched because they
+      contained the SAME class of now-false claim about these exact theorems, and leaving them
+      stale beside newly-sorry-free code would itself be a laundering-adjacent honesty gap.)*
+- [x] Recorded the 605/609 reconciliation state for task 606 in this dispatch's orchestrator
+      handoff (`coordination_notes`): all four sites task 606's description names (DP-3, DP-4,
+      DP-5, DP-6) are now sorry-free -- DP-3 by this phase, DP-4 by 605, DP-5/DP-6 by earlier
+      phases of this plan -- so task 606's premise (four open completeness sorries to discharge
+      or restate) no longer holds and its scope should be re-verified against the current tree
+      before any further dispatch on it.
 
 **Timing**: 1 hour
 

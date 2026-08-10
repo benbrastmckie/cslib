@@ -62,10 +62,10 @@ CSLib contains **two independent decision procedures** for `Derivable MinPropAxi
 - **Module**: `Tableau/Minimal/DecisionProcedure.lean`
 - **Mechanism**: Constructive signed-tableau proof-search with countermodel extraction.
   Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
-- **Axiom profile**: Carries `sorryAx` from open completeness sorries (`Scheme.lean:246`,
-  `Scheme.lean:519`, `Minimal/Completeness.lean:110`). Will become sorry-free once those are
-  discharged. (Minimal reuses the shared parametric `truthLemma minScheme` from
-  `Scheme.lean:246`, so it also depends on that sorry.)
+- **Axiom profile**: `{propext, Classical.choice, Quot.sound}` — **sorry-free**. The completeness
+  chain this route rests on (`openBranch_countermodel`'s existential in `Scheme.lean` and
+  `minimalTableau_complete` in `Minimal/Completeness.lean`) is fully discharged. (Minimal reuses
+  the shared parametric `truthLemma minScheme` from `Scheme.lean`, likewise sorry-free.)
 - **Exposed as**: `instDecidableDerivableMinPropAxiom` (the **sole registered `Decidable`
   instance** for `Derivable MinPropAxiom φ`).
 - **Role**: Canonical extension-facing instance for minimal propositional logic.

@@ -1,61 +1,49 @@
 {
   "status": "partial",
   "started_at": "2026-08-09T00:00:00Z",
-  "requires_user_review": false,
+  "completed_at": "2026-08-10T06:00:00Z",
   "artifacts": [
     {
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
       "type": "plan",
-      "summary": "Phase 6: diagnosed a third gap -- IReuseFrozen as landed (item c) cannot be re-established round-to-round, since IFrozenBelow_applyPersistenceFixpoint needs IPosPersistRaw about the pre-persistence branch, which does not hold in general. Closed the gap at the design level with new origin-tracking machinery (IReuseFrozenOrigin + 4 lemmas + IAllReuseFrozenOrigin + append/map_const), all sorry-free, axiom-clean, full CI green. Items (d)-(f) (threading into key, six-site rewiring, final IReuseContain restatement) remain fully open for the next dispatch; heading stays [IN PROGRESS]."
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+      "summary": "Phase 6 marked [COMPLETED], full task list checked off with deviation annotations and a completion note."
     },
     {
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/09_phase6-origin-tracking-machinery.md",
       "type": "handoff",
-      "summary": "Full record of the gap diagnosis, the origin-tracking design, and the concrete next-dispatch task list for items (d)-(f)."
-    },
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "lean_source",
-      "summary": "Added IReuseFrozenOrigin, IReuseFrozenOrigin_frozenBelow/_snoc/_persist/_extendMany, IAllReuseFrozenOrigin/_append/_map_const (206 lines, purely additive, private declarations)."
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/10_phase6-complete.md",
+      "summary": "Full record of this dispatch's two commits closing Phase 6."
     }
   ],
   "partial_progress": {
-    "stage": "phase6_origin_tracking_machinery_landed",
-    "details": "Landed origin-tracking freeze machinery closing a newly-diagnosed round-to-round preservation gap in item (c)'s IReuseFrozen. Items (d)-(f) not yet attempted; Phase 6 remains [IN PROGRESS].",
+    "stage": "phase_6_completed",
+    "details": "Phase 6 ('Snapshot-free IReuseContain, re-threaded through the key induction') is fully closed and verified. Phase 7 ('Export augmented-frame positive persistence') is NOT STARTED and was not attempted this dispatch -- it requires fresh context budget as its own dispatch.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5
+    "phases_completed": 6
   },
   "verification": {
     "verification_passed": true,
     "sorry_count": 196,
-    "sorry_baseline": 196,
     "vacuous_count": 1,
     "axiom_count": 26,
-    "axiom_baseline": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "lake_build_full": "green, 3325 jobs, only pre-existing warnings/sorries",
-    "check_init_imports": "clean",
-    "lake_lint": "373 findings total, 0 attributable to Scheme.lean",
-    "lint_style": "clean",
-    "shake": "no suggestion for Scheme.lean",
-    "mk_all": "no update necessary",
-    "lake_test": "green, 9397 jobs, exit 0"
+    "notes": "intExpandBranches_openBranch_sat re-verified via lean_verify after both commits: axioms {propext, Classical.choice, Quot.sound}, no sorryAx. lake test run in the foreground (9397 jobs, exit 0) after each commit, not backgrounded."
   },
   "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/09_phase6-origin-tracking-machinery.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.return-meta.json",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json",
-    "specs/state.json"
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/10_phase6-complete.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json"
   ],
   "metadata": {
     "session_id": "sess_1786336315_39f0e4",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "passed",
+    "requires_user_review": false,
+    "review_reason": "Phase 6 of the plan's 9 phases is now fully complete and verified. status is 'partial' at the task level only because Phases 7-9 remain -- not because anything in this dispatch is incomplete, blocked, or unverified. Two commits (237cfcc4..21a2e460..97796a79) landed, each independently full-CI-verified."
   }
 }

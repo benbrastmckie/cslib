@@ -267,51 +267,26 @@
     {
       "project_number": 400,
       "project_name": "reconcile_connectives_pr607",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)",
       "description": "[REVISED 2026-08-10 by the propositional review — the original premise is dead; see below.]\n\nDECIDE how the fork's five-primitive `Proposition` reconciles with what upstream actually merged. RESEARCH AND DECISION FIRST — do not begin a type migration under this task.\n\n=== WHY THIS WAS REWRITTEN ===\n\nThe original task said: \"Engage fmontesi PR #607 to land the connective typeclasses there [...] DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles.\"\n\nPR #607 MERGED ON 2026-08-03 without that review. The falsum question settled AGAINST the fork's design. The original deliverable is unachievable; the concern behind it is now a live structural conflict.\n\n=== VERIFIED STATE (2026-08-10) ===\n\nWHAT MERGED (`upstream/main`, `Cslib/Foundations/Logic/Operators.lean` + `Cslib/Logics/Propositional/Defs.lean`):\n  - `Proposition` has FOUR constructors: atom, and, or, imp. There is NO `bot` constructor.\n  - Bottom is `instBotProposition [Bot Atom] : Bot (Proposition Atom) := ⟨.atom ⊥⟩` — falsum is an ATOM, gated on `[Bot Atom]`.\n  - `neg` derived: `abbrev Proposition.neg [Bot Atom] := (Proposition.imp · ⊥)`; `top` derived from `[Inhabited Atom]`.\n  - Classes landed: `HasAnd`, `HasOr`, `HasImp`, `HasIff`, `HasNot`, `HasBox`, `HasDiamond`, ... — and NO `HasBot`, NO `HasTop`.\n  - Notation: `@[inherit_doc] scoped infixr:25 \" → \" => HasImp.imp`.\n\nWHAT THIS FORK HAS (`Cslib/Logics/Propositional/Defs.lean`):\n  - `Proposition` has FIVE constructors including primitive `| bot`.\n  - `instance : Bot (Proposition Atom) := ⟨.bot⟩`, `instance : Top (Proposition Atom) := ⟨.top⟩`.\n  - Its own `PropositionalConnectives` bundle; `Cslib/Foundations/Logic/Operators.lean` does not exist here.\n  - Notation: `scoped infix:30 \" → \"` — DIFFERENT PRECEDENCE (30 vs 25) AND DIFFERENT ASSOCIATIVITY (`infix`, non-associative, vs upstream `infixr`, right-associative). The associativity difference is the subtler hazard: `a → b → c` parses in upstream and fails to parse here.\n\nTHE ORIGINAL TASK'S PRIMARY POINT WAS CORRECT AND WENT UNADDRESSED. It predicted: \"#607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully.\" No `HasBot` landed. The prediction held.\n\nSCALE OF THE DIVERGENCE: `git diff --stat upstream/main..HEAD -- Cslib/Logics/Propositional/` reports 117 files changed, 42,166 insertions, 238 deletions. The fork is 21 commits behind `upstream/main`.\n\nPR #648 IS CAUGHT IN THIS. Still OPEN (\"feat(Logics/Propositional): five-primitive formula type with primitive bot\"), `reviewDecision: CHANGES_REQUESTED`, last updated 2026-07-13. Reviewer thomaskwaring argued against primitive falsum on 2026-06-16 (\"If `⊥` is included in minimal logic it behaves precisely like the atomic formulae, so why not represent it as such?\" and \"while having falsum as a primitive is more conventional, the current design was discussed fairly thoroughly\"). #607 then landed exactly that alternative. Read the full #648 thread and the CSLib Zulip \"Propositional Logic\" topic before deciding anything.\n\n=== THE DECISION TO MAKE ===\n\nThree live options. Weigh them; recommend one; do not implement under this task.\n\nOPTION A — ADAPT to upstream's representation. Migrate the fork's `Proposition` to four constructors with `.atom ⊥`. COST: every one of the ~42,000 lines that pattern-matches on `.bot` is affected, and the `[Bot Atom]` gate propagates into statements that currently need no such hypothesis (note `MValid`/`IValid` and the tableau `Decidable` instances currently require only `[DecidableEq Atom] [Hashable Atom]`). MEASURE THIS before recommending it — count `.bot` match sites and `Bot`-free public statements.\n\nOPTION B — RE-ARGUE for primitive bot, now that #607 has landed. The technical case is on the record in the #648 thread. ASSESS HONESTLY whether it is still winnable given that (a) the maintainers merged the alternative, and (b) #648 already carries CHANGES_REQUESTED. If the recommendation is B, it must name what NEW argument or evidence is being brought that was not already made in June — repeating the June argument is not a plan.\n\nOPTION C — ACCEPT DIVERGENCE. Keep the fork's type; do not upstream `Propositional/`. This has knock-on effects on PRs #649 (LTL) and #662 (Modal semantics), both open and both potentially depending on the propositional base. Determine whether they do.\n\n=== DELIVERABLE ===\n\nA research report recommending A, B, or C with measured costs — specifically including the `.bot` match-site count for Option A and an honest winnability assessment for Option B — plus an explicit recommendation on what to do with the open PR #648 (rework, close, or leave pending). NO .lean file is created, moved, or edited under this task.\n\n=== DOWNSTREAM ===\n\nThe `imp`/`impl` naming reconciliation task depends on this outcome (upstream settled on `HasImp.imp`, so the rename direction is determined once the representation question is). Do not start that rename before this decision lands.",
       "created": "2026-06-28T15:43:45Z",
-      "last_updated": "2026-07-28T17:18:33Z",
+      "last_updated": "2026-08-10T17:47:07Z",
       "next_artifact_number": 3,
       "artifacts": [
-        {
-          "type": "report",
-          "path": "specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md",
-          "summary": "Initial PR #607 engagement: HasBot/derived-neg point + naming/precedence/bundling nits"
-        },
-        {
-          "type": "report",
-          "path": "specs/400_reconcile_connectives_pr607/reports/02_engagement-strategy.md",
-          "summary": "Live-PR-grounded engagement strategy: incremental (not alternative); reuse Mathlib Bot/Top, derived-neg bridge; human-authorable review skeleton"
-        },
         {
           "path": "specs/400_reconcile_connectives_pr607/plans/02_pr607-engagement.md",
           "type": "plan",
           "summary": "PR #607 engagement plan: agent-doable review scaffolding (Phases 1-4), human review gate + upstream-resolution gate (5-6, BLOCKED), conditional downstream Proposition-instance registration (7-8, BLOCKED on upstream)"
         },
         {
+          "path": "specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md",
           "type": "report",
-          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/01_comparison-tables.md",
-          "summary": "Phase 1: #607 class inventory, notation divergences, naming options, precedence ladder, file-org consensus, prior-comment anchor"
-        },
-        {
-          "type": "report",
-          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/02_falsum-bridge-sketch.md",
-          "summary": "Phase 2: verified derived-neg bridge reusing Mathlib Bot/Top (no new HasBot); HasNot instance + rfl bridges; diamond hazard noted"
-        },
-        {
-          "type": "report",
-          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/03_grind-direction-finding.md",
-          "summary": "Phase 3: empirical grind finding - abbrev transparent (grind works); upstream primitive+wrapper needs simp[_def]; notation->constructor is the helpful direction"
-        },
-        {
-          "type": "report",
-          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/04_review-packet.md",
-          "summary": "Phase 4: consolidated human-review scaffolding packet (priority-ordered, AI-policy header, verified Lean exhibits) - material for human to adapt, not prose to paste"
+          "summary": "Falsum representation decision: recommends Option B (primitive bot); #607 shown orthogonal to falsum; PR #648 rework-and-rebase"
         }
       ],
-      "session_id": "sess_1782759395_5a8840",
+      "session_id": "sess_1786383117_557518",
       "dependencies": [],
       "topic": "Propositional Logic",
       "blockers": [

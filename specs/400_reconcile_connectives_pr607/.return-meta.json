@@ -1,0 +1,31 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T00:00:00Z",
+  "completed_at": "2026-08-10T00:00:00Z",
+  "artifacts": [
+    "specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md"
+  ],
+  "partial_progress": {
+    "stage": "research_delivered",
+    "details": "Decision report written recommending Option B; it is the FINAL deliverable (scope confirmed research-only, no plan or implement phase follows), and carries a standalone action checklist in section 9. All required measurements taken (.bot match-site counts, Bot-free public statement census, #649/#662 dependency determination) against refs re-fetched 2026-08-10 (upstream/main = 3951377e). Two load-bearing premises in the task description corrected against the live record, plus a third divergence surfaced that the description did not name (IsIntuitionistic/IsClassical shape: the fork's Propositional/Defs.lean has drifted back away from the inference-system-parameterized form that PR #648 had already reconciled). No .lean file created, moved, or edited; no GitHub or Zulip write performed."
+  },
+  "scope": "research-only; final deliverable",
+  "recommendation": "OPTION B",
+  "pr_648_recommendation": "rework and rebase (do not close, do not leave pending)",
+  "key_measurements": {
+    "bot_match_sites_propositional": 165,
+    "bot_match_arm_lines_propositional": 120,
+    "bot_match_sites_repo_wide": 2287,
+    "decls_gaining_Bot_Atom_gate": "512 of 1614 (31.7%)",
+    "cross_module_importers": 21,
+    "pr649_depends_on_propositional_base": true,
+    "pr662_depends_on_propositional_base": false,
+    "sorries_in_propositional": 0
+  },
+  "metadata": {
+    "session_id": "sess_1786383117_557518",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

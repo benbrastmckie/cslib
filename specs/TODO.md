@@ -23,7 +23,7 @@ next_project_number: 619
 
 ### Propositional Logic
 
-400 [NOT STARTED] — [REVISED 2026-08-10 by the propositional review — the original pr
+400 [RESEARCHED] — [REVISED 2026-08-10 by the propositional review — the original pr
   └─ 497 [NOT STARTED] — [REVISED 2026-08-10 by the propositional review — the stated bloc
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
@@ -810,18 +810,12 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 ---
 
 ### 400. Unbundle connective typeclasses; reconcile with fmontesi PR #607 (Waring's flag a)
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**:
-  - [400_reconcile_connectives_pr607/reports/01_pr607-engagement.md]
-  - [400_reconcile_connectives_pr607/reports/02_engagement-strategy.md]
-  - [400_reconcile_connectives_pr607/review-scaffolding/01_comparison-tables.md]
-  - [400_reconcile_connectives_pr607/review-scaffolding/02_falsum-bridge-sketch.md]
-  - [400_reconcile_connectives_pr607/review-scaffolding/03_grind-direction-finding.md]
-  - [400_reconcile_connectives_pr607/review-scaffolding/04_review-packet.md]
 - **Plan**: [400_reconcile_connectives_pr607/plans/02_pr607-engagement.md]
+- **Research**: [400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md]
 
 **Description**: [REVISED 2026-08-10 by the propositional review — the original premise is dead; see below.]
 

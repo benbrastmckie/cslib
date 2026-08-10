@@ -1,7 +1,7 @@
 # Implementation Plan: Task #625
 
 - **Task**: 625 - shake_residue_list_false_clean
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/625_shake_residue_list_false_clean/reports/01_shake-residue-false-clean.md`

@@ -1,16 +1,27 @@
 {
   "session_id": "sess_1786402759_26b020",
   "task_number": 625,
-  "phase": "plan",
-  "agent_type": "planner-agent",
-  "status": "planned",
+  "phase": "implement",
+  "agent_type": "general-implementation-agent",
+  "status": "implemented",
+  "summary": "Fixed scripts/check-shake-residue.sh --list's false-clean defect: consolidated both fatal shake-result conditions (non-0/1 exit; exit-1-with-empty-parse) into a shared validate_shake_result()/run_and_validate_shake() helper mirroring check-axiom-census.sh's run_and_validate_census(), rewired all three usage modes (--list, --update, bare) onto it, added a --self-test subcommand with four deterministic fixtures (including the literal reproduced stale-target regression, verified to make the self-test fail when the fix is reverted), and reconciled the EXIT-CODE CONTRACT header. All five plan phases COMPLETED and verified live against the built repo; scripts/shake-residue-baseline.txt confirmed byte-unchanged throughout.",
+  "blockers": [],
+  "phases_completed": 5,
+  "phases_total": 5,
   "plan_path": "specs/625_shake_residue_list_false_clean/plans/01_shake-list-guard-hoist.md",
-  "phase_count": 5,
-  "estimated_hours": 2.5,
-  "complexity": "medium",
-  "dependency_waves": [[1], [2], [3], [4], [5]],
-  "file_scope": ["scripts/check-shake-residue.sh"],
-  "research_integrated": true,
-  "next_steps": "Run /implement 625 to execute the plan",
-  "notes": "Strict sequential chain; all phases edit one file. Narrow-fix branch confirmed by research (lake shake exits 1). Phase 2 is the defect fix; Phase 3 self-test must include the reproduced stale-target fixture asserted in all three modes. pre-pr-check.sh wiring is an explicit Non-Goal/follow-up."
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
+      "summary": "Implementation summary covering all five phases, decisions, plan deviations, verification, and follow-ups."
+    },
+    {
+      "type": "source",
+      "path": "scripts/check-shake-residue.sh",
+      "summary": "The one file modified: shared validator, --list defect fix, --self-test subcommand, reconciled header."
+    }
+  ],
+  "modified_files": ["scripts/check-shake-residue.sh"],
+  "next_steps": "None required -- task complete. Optional named follow-up (deliberately not done): wire --self-test into scripts/pre-pr-check.sh alongside its existing Boneyard quarantine self-test step (out of this task's declared file scope).",
+  "notes": "Deviation: the Phase 1 grep-count-returns-1 verification bullet's true satisfaction point is end of Phase 2, not Phase 1 (documented and reconciled). Deviation: Phase 5's optional pre-pr-check.sh run was deliberately skipped as too costly, per the plan's own explicit skip-with-disclosure allowance; the bare verify path it would exercise was already run and verified directly. Two unrelated pre-existing dirty files (.claude/scripts/literature-fidelity-audit.sh, .claude/scripts/literature-search.sh) were present before this task began and were left untouched, out of scope."
 }

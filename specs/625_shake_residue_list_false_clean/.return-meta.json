@@ -1,11 +1,41 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
+      "summary": "All five plan phases implemented and verified: shared validate_shake_result()/run_and_validate_shake() helper, --list guard-hoist fix, --self-test subcommand with four fixtures, reconciled header, and full-gate live verification."
+    }
+  ],
+  "completion_data": {
+    "completion_summary": "Fixed scripts/check-shake-residue.sh --list's false-clean defect by consolidating both fatal shake-result conditions into a shared validate_shake_result()/run_and_validate_shake() helper (mirroring check-axiom-census.sh), rewiring all three usage modes onto it, adding a --self-test subcommand with four fixtures (including the literal reproduced stale-target regression), and reconciling the EXIT-CODE CONTRACT header.",
+    "roadmap_items": []
+  },
+  "modified_files": [
+    "scripts/check-shake-residue.sh"
+  ],
+  "memory_candidates": [
+    {
+      "content": "For bash ratchet/gate scripts that wrap an external tool with a 0/1/2-style exit-code contract across multiple usage modes (--list/--update/bare), consolidate the fatal-condition checks into one shared validator function composed with the impure tool-invocation function, rather than duplicating the guard per mode. check-axiom-census.sh's run_and_validate_census() is the in-tree template; check-shake-residue.sh's --list guard-hoist defect was caused by exactly this kind of duplication drifting out of sync. Keep the pure validation logic (reads globals, returns 0/2, never calls exit) as a function separate from the impure runner, so a --self-test-style fixture can call the validator directly without invoking the real external tool.",
+      "category": "PATTERN",
+      "source_artifact": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["bash", "ratchet-script", "exit-code-contract", "shared-validator", "ci-gate"]
+    },
+    {
+      "content": "For a bash self-test subcommand that injects captured fixture output in place of a real external-tool call, add an env-var short-circuit at the top of the impure runner function (e.g. SHAKE_SELF_TEST_FIXTURE) that populates the same output globals a real run would, and use a SECOND env var to redirect any ratchet/baseline file the script would write (e.g. SHAKE_SELF_TEST_BASELINE) so subprocess end-to-end assertions can never clobber the real baseline. Assert the real baseline is byte-identical before/after the self-test as a hard requirement, not a nicety. When asserting 'zero bytes of stdout' from a subprocess, capture to a real file and use wc -c -- command substitution silently strips trailing newlines and will hide a stray blank-line regression.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/625_shake_residue_list_false_clean/summaries/01_shake-list-guard-hoist-summary.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["bash", "self-test", "fixture-injection", "baseline-safety", "byte-empty-stdout"]
+    }
+  ],
   "metadata": {
     "session_id": "sess_1786402759_26b020",
     "agent_type": "general-implementation-agent",
     "delegation_depth": 2,
     "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "general-implementation-agent"],
-    "phases_completed": 0,
+    "phases_completed": 5,
     "phases_total": 5
   }
 }

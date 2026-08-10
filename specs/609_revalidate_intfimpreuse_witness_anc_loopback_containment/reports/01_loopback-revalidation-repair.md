@@ -1,6 +1,13 @@
 # Research Report: re-validating `intFImpReuseWitnessAnc?`'s loop-back containment
 
 **Task**: 609 — revalidate_intfimpreuse_witness_anc_loopback_containment
+- **Started**: TBD
+- **Completed**: TBD
+- **Effort**: TBD
+- **Dependencies**: TBD
+- **Sources/Inputs**: TBD
+- **Artifacts**: TBD
+- **Standards**: TBD
 **Session**: sess_1786321994_b49e26_609
 **Files in scope**: `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean` (calculus),
 with the payoff landing in `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`

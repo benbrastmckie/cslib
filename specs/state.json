@@ -1046,7 +1046,7 @@
         {
           "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
           "type": "plan",
-          "summary": "Phase 6: diagnosed and closed a third gap (IReuseFrozen from item (c) cannot be re-established round-to-round) via new origin-tracking machinery (IReuseFrozenOrigin + 4 lemmas + IAllReuseFrozenOrigin), sorry-free; items (d)-(f) documented for next dispatch."
+          "summary": "Phase 6 [COMPLETED]: IReuseContain restated in bare snapshot-free form, all six use sites wired, IReuseContain_mono/_snoc removed."
         }
       ]
     },

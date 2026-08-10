@@ -1,5 +1,5 @@
 ---
-next_project_number: 619
+next_project_number: 622
 ---
 
 # TODO
@@ -11,8 +11,8 @@ next_project_number: 619
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,497,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -23,13 +23,15 @@ next_project_number: 619
 
 ### Propositional Logic
 
-400 [RESEARCHED] — [REVISED 2026-08-10 — SECOND revision. The first revision's load-
-  └─ 497 [NOT STARTED] — [REVISED 2026-08-10 by the propositional review — the stated bloc
+497 [NOT STARTED] — [REVISED 2026-08-10 by the propositional review — the stated bloc
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
 616 [NOT STARTED] — Repair the stale and self-contradictory documentation layer in th
 617 [NOT STARTED] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
 618 [NOT STARTED] — Close the remaining coverage gaps in the propositional metatheory
+619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
+620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
+  └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
 
 ### Modal Logic
 
@@ -84,6 +86,119 @@ next_project_number: 619
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
 ## Tasks
+
+### 621. Switch the five Propositional connective notations from infix to infixr at upstream precedences
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: Task 620
+
+**Description**: Change this fork's five `Cslib/Logics/Propositional/Defs.lean` connective notation declarations from non-associative `infix` to right-associative `infixr` at upstream's precedences.
+
+SOURCE: `specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md` §6, filed there as an independent finding to act on REGARDLESS of the falsum decision.
+
+=== THE DIVERGENCE ===
+
+  fork:     and infix:36,  or infix:35,  imp infix:30,  iff infix:20,  not prefix:40
+  upstream: and infixr:36, or infixr:30, imp infixr:25, iff infixr:20, not notation:max
+
+Relative precedence ORDERING is preserved between fork and upstream; the associativity is not.
+
+=== WHY IT MATTERS ===
+
+Empirically verified: `a -> b` parses and `a -> (b -> c)` parses, but `a -> b -> c`, `a AND b AND c`, and `a OR b OR c` ALL FAIL in the fork. This is not confined to the arrow — all five connectives are affected.
+
+The failure mode is the hazard: because the fork's notations are non-associative, Lean's own Prop-level `And`/`Or`/`->` win the overload, so a chained expression surfaces as a TYPE MISMATCH rather than a notation error. That is materially harder to diagnose than a parse failure would be.
+
+=== SCOPE ===
+
+Low-risk, self-contained, orthogonal to falsum. Verify with `lake build` that the tree stays green; expect to fix any sites that relied on the old non-associative parse.
+
+=== ORDERING CONSTRAINT (why this depends on the PR #648 rebase) ===
+
+This task edits `Propositional/Defs.lean`, which is also in the #648 rebase's file scope. #648 carries a STANDING APPROVAL against a specific approved scope, and the decision report is explicit that widening that scope forfeits the approval. Landing a notation change into Defs.lean before the rebase risks polluting the approved diff. Sequence it after.
+
+---
+
+### 620. Rebase PR #648 onto current upstream and clear the stale blocking review
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Rebase the open PR #648 ("feat(Logics/Propositional): five-primitive formula type with primitive bot") onto current `upstream/main` and clear ctchou's stale blocking review.
+
+SOURCE: `specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md` §5, which recommends REWORK AND REBASE — explicitly not close, not leave pending.
+
+=== WHY THE PR IS NOT ACTUALLY OPPOSED ===
+
+Review record (verified read-only 2026-08-10):
+  2026-06-15  ctchou         CHANGES_REQUESTED
+  2026-07-06  thomaskwaring  APPROVED
+  2026-07-13  benbrastmckie  COMMENTED x5 (answering all five inline comments)
+
+thomaskwaring APPROVED after a Zulip compromise (2026-06-28: "if we are going to have bot as a primitive, we should also have efq") that was implemented 2026-06-29. His approval STANDS and should be cited, not re-litigated.
+
+ctchou's is the only outstanding blocking review. Its FIRST bullet reads verbatim: "I like the idea of adding \bot as a primitive." Its four points are procedural: file organization (why both Semantics/Basic.lean and Semantics/Bool.lean), references (prefer Avigad's textbook over 1930s German sources), and "You should definitely coordinate this PR with #607 and #587. #536 is ready to merge, so you should wait for it." That coordination instruction is now ACTIONABLE — #607 merged 2026-08-03.
+
+There is NO standing technical opposition to primitive bot on the record. A third participant (Matthew Doty) independently backed it on DPLL grounds.
+
+=== SCOPE: KEEP EXACTLY AS APPROVED ===
+
+Four files, ungated efq, IPL base, minimal logic deferred.
+
+Do NOT widen to the fork's current `[IsIntuitionistic T]`-gated efq design. That is the deferred fragment work thomaskwaring explicitly agreed to postpone; widening it FORFEITS a standing approval. It belongs in a follow-up PR.
+
+=== WHAT THE REBASE MUST ABSORB ===
+
+1. Toolchain and Mathlib pin bump: fork pins `leanprover/lean4:v4.33.0-rc1` and Mathlib `169c26b5`; upstream is at `v4.33.0` for both. One release-candidate of drift.
+2. PR #753's InferenceSystem/Congruence framework refactor (commit 3491c629).
+3. IsIntuitionistic/IsClassical SHAPE RECONCILIATION. The fork's `Propositional/Defs.lean` does not import InferenceSystem and states these as theory-membership predicates (`(bot -> A) in T`, Defs.lean:166,175); upstream states them over an inference system (`S-down-arrow`, `[InferenceSystem S (Proposition Atom)]`). #648 had ALREADY reconciled this against #536; the fork's main has since drifted BACK. 80 files in the fork reference InferenceSystem — just not from Propositional/Defs.lean.
+
+=== THEN ===
+
+Re-request review from ctchou, itemising the four dispositions.
+
+=== HARD CONSTRAINTS ===
+
+- The GitHub text MUST be HUMAN-AUTHORED per the CSLib AI policy (Chris Henson formally challenged an LLM-drafted message on this exact Zulip topic, near/605827029). An agent may produce factual scaffolding — dispositions, diffs, tables — but never finished prose to paste.
+- NO agent-initiated push, `gh pr` write, or Zulip post. Per `.claude/rules/pr-prohibition.md`, only user-invoked commands may push or post.
+
+---
+
+### 619. Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` against the `Cslib/Foundations/Logic/Operators.lean` that merged upstream in PR #607 (commit b8ad3923).
+
+SOURCE: the falsum representation decision report, `specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md`, which identified this as required under EVERY option considered there (adapt, re-argue, or diverge) and INDEPENDENT of the falsum question. It is not contingent on the Option B decision.
+
+=== THE COLLISION ===
+
+Four classes are duplicated in namespace `Cslib.Logic` between the fork's Connectives.lean and merged Operators.lean:
+  HasAnd, HasOr, HasImp, HasBox
+
+Upstream additionally defines: HasIff, HasNot, HasDiamond.
+The fork names its own `HasDia` where upstream says `HasDiamond` — a naming divergence, not merely a duplicate.
+
+=== WHY THIS MATTERS NOW ===
+
+Prerequisite for PR #649 (LTL), which is stacked on #648 and whose changed files include `Foundations/Logic/Connectives.lean`. #649 cannot land cleanly while the duplication stands.
+
+=== SCOPE ===
+
+Decide, per class, whether to drop the fork's definition in favour of upstream's, keep the fork's under a distinct name, or upstream a delta. Resolve `HasDia` vs `HasDiamond` explicitly. Verify with `lake build` that the tree stays green.
+
+Do NOT fold the falsum representation question into this task — it is settled (keep primitive bot) and orthogonal.
+
+=== CONSTRAINT ===
+
+No GitHub or Zulip post may be authored by an agent (CSLib AI policy; Chris Henson formally challenged an LLM-drafted message on the Propositional Logic topic, near/605827029). If outward communication is needed, produce a factual scaffolding file for a human to adapt.
+
+---
 
 ### 618. Propositional coverage gaps and ordering overclaim
 - **Status**: [NOT STARTED]
@@ -810,7 +925,7 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 ---
 
 ### 400. Falsum representation decision: keep primitive bot; rebase PR #648
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

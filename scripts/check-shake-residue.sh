@@ -92,6 +92,41 @@ parse_flagged_set() {
     | sort -u
 }
 
+# Validates the two fatal conditions shared by all three usage modes, given the globals
+# $shake_exit and $live already populated by the caller (run_and_validate_shake below, or a
+# --self-test fixture assigning them directly with no `lake` invocation at all -- this is why
+# this function is pure/globals-only and deliberately kept separate from the impure run_shake).
+# Returns 0 if the run is trustworthy, 2 (with a stderr diagnostic) otherwise. Never calls `exit`
+# itself so callers (e.g. --update) can append their own diagnostic line before exiting.
+validate_shake_result() {
+  if [ "$shake_exit" -ne 0 ] && [ "$shake_exit" -ne 1 ]; then
+    echo "ERROR: lake shake exited $shake_exit (expected 0 or 1). Environment likely broken" >&2
+    echo "(missing .olean files?) -- run a full 'lake build' first. This is NOT reported as a" >&2
+    echo "clean/empty flagged set." >&2
+    return 2
+  fi
+  if [ "$shake_exit" -eq 1 ] && [ -z "$live" ]; then
+    echo "ERROR: lake shake exited 1 (has suggestions) but no flagged-file lines were parseable" >&2
+    echo "from its output. Either shake's output format changed (update the extractor in this" >&2
+    echo "script) or the environment is broken. This is NOT reported as a clean/empty flagged set." >&2
+    return 2
+  fi
+  return 0
+}
+
+# Runs `lake shake` exactly once, computes the parsed flagged set, and validates both fatal
+# conditions via validate_shake_result. On success, leaves $live populated (global, not local --
+# callers such as the bare verify path's downstream comparison logic depend on reading it after
+# this returns) and returns 0. On failure, returns 2 -- caller must `exit 2` itself (this
+# function does not exit, so `--update` can append its own "refusing to update baseline" line
+# first, matching check-axiom-census.sh's run_and_validate_census()).
+live=""
+run_and_validate_shake() {
+  run_shake
+  live="$(parse_flagged_set)"
+  validate_shake_result
+}
+
 case "${1:-}" in
   --list)
     run_shake
@@ -103,14 +138,8 @@ case "${1:-}" in
     exit 0
     ;;
   --update)
-    run_shake
-    live="$(parse_flagged_set)"
-    if [ "$shake_exit" -ne 0 ] && [ "$shake_exit" -ne 1 ]; then
-      echo "ERROR: lake shake exited $shake_exit (expected 0 or 1); refusing to update baseline from a failed run." >&2
-      exit 2
-    fi
-    if [ "$shake_exit" -eq 1 ] && [ -z "$live" ]; then
-      echo "ERROR: lake shake exited 1 (suggestions expected) but no flagged-file lines were parseable from its output; refusing to update baseline from an unparseable run." >&2
+    if ! run_and_validate_shake; then
+      echo "ERROR: refusing to update baseline from a failed/unparseable run." >&2
       exit 2
     fi
     {
@@ -144,20 +173,7 @@ if [ ! -f "$BASELINE" ]; then
   exit 2
 fi
 
-run_shake
-live="$(parse_flagged_set)"
-
-if [ "$shake_exit" -ne 0 ] && [ "$shake_exit" -ne 1 ]; then
-  echo "ERROR: lake shake exited $shake_exit (expected 0 or 1). Environment likely broken" >&2
-  echo "(missing .olean files?) -- run a full 'lake build' first. This is NOT reported as a" >&2
-  echo "clean/empty flagged set." >&2
-  exit 2
-fi
-
-if [ "$shake_exit" -eq 1 ] && [ -z "$live" ]; then
-  echo "ERROR: lake shake exited 1 (has suggestions) but no flagged-file lines were parseable" >&2
-  echo "from its output. Either shake's output format changed (update the extractor in this" >&2
-  echo "script) or the environment is broken. This is NOT reported as a clean/empty flagged set." >&2
+if ! run_and_validate_shake; then
   exit 2
 fi
 

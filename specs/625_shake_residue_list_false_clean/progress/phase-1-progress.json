@@ -1,0 +1,21 @@
+{
+  "phase": 1,
+  "phase_name": "Extract the shared shake validator",
+  "started_at": "2026-08-10T23:13:10Z",
+  "last_updated": "2026-08-10T23:20:00Z",
+  "objectives": [
+    {"id": 1, "description": "Add validate/run_and_validate_shake helper and rewire --update and bare path", "status": "done", "files_touched": ["scripts/check-shake-residue.sh"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "1.verification",
+      "description": "Phase 1 Verification bullet asserts `grep -c 'expected 0 or 1' scripts/check-shake-residue.sh` returns 1 after Phase 1.",
+      "type": "deferred",
+      "reason": "The --list branch (untouched by Phase 1's own task list, which only rewires --update and bare) still carries its own copy of the 'expected 0 or 1' guard text, so the count is 2 at the end of Phase 1, not 1. Phase 2's task list explicitly replaces the --list branch body with a call to run_and_validate_shake, which removes that copy and brings the count to 1. This verification bullet's true satisfaction point is the end of Phase 2, not Phase 1; reconciled per the Scope Hypothesis's own 'stop and reconcile rather than proceeding' guidance rather than blocking. Confirmed count=1 at end of Phase 2 (see phase-2-progress.json).",
+      "annotation": "*(deviation: deferred to phase 2 — grep count check verified there instead)*"
+    }
+  ]
+}

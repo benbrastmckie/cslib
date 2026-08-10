@@ -1,0 +1,16 @@
+{
+  "session_id": "sess_1786402759_26b020",
+  "task_number": 625,
+  "phase": "plan",
+  "agent_type": "planner-agent",
+  "status": "planned",
+  "plan_path": "specs/625_shake_residue_list_false_clean/plans/01_shake-list-guard-hoist.md",
+  "phase_count": 5,
+  "estimated_hours": 2.5,
+  "complexity": "medium",
+  "dependency_waves": [[1], [2], [3], [4], [5]],
+  "file_scope": ["scripts/check-shake-residue.sh"],
+  "research_integrated": true,
+  "next_steps": "Run /implement 625 to execute the plan",
+  "notes": "Strict sequential chain; all phases edit one file. Narrow-fix branch confirmed by research (lake shake exits 1). Phase 2 is the defect fix; Phase 3 self-test must include the reproduced stale-target fixture asserted in all three modes. pre-pr-check.sh wiring is an explicit Non-Goal/follow-up."
+}

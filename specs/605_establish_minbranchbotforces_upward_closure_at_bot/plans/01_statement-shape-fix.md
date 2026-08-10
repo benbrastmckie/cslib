@@ -251,24 +251,27 @@ concurrently with explicit file ownership.
 
 ---
 
-### Phase 3: Additive universe-invariance bridge in `DecisionProcedure.lean` [NOT STARTED]
+### Phase 3: Additive universe-invariance bridge in `DecisionProcedure.lean` [COMPLETED]
 
 - **Goal:** Land `mvalid_descend` and `mvalid_universe_invariant` as purely additive, green
   lemmas, before any universe pin exists. This is what lets Phase 4 pin
   `minimalTableau_complete` without leaving `DecisionProcedure.lean` red.
 
 - **Tasks:**
-  - [ ] Add `mvalid_descend : MValid.{_, v} φ → MValid.{_, 0} φ`, proved by lifting a `Type 0`
+  - [x] Add `mvalid_descend : MValid.{_, v} φ → MValid.{_, 0} φ`, proved by lifting a `Type 0`
     model through `ULift` (`Preorder.lift ULift.down`) and transporting forcing back along
     `ULift.down` by induction on `φ`.
-  - [ ] Add `mvalid_universe_invariant : MValid.{_, v} φ ↔ MValid.{_, 0} φ`. The reverse direction
+  - [x] Add `mvalid_universe_invariant : MValid.{_, v} φ ↔ MValid.{_, 0} φ`. The reverse direction
     composes `minimalTableau_complete` (instantiated at universe `0`, which type-checks against
     the current unpinned signature) with the universe-polymorphic `minimalTableau_sound`.
-  - [ ] Rewrite both `PROBE:` docstrings to production wording explaining that `MValid` is
+  - [x] Rewrite both `PROBE:` docstrings to production wording explaining that `MValid` is
     universe-invariant and why the `Type 0` direction needs an explicit `ULift` transport.
-  - [ ] Do **not** touch `minimalTableau_decides`, `instDecidableMValid`, or
+    *(zero `PROBE` occurrences confirmed by grep; also added `omit [DecidableEq Atom]
+    [Hashable Atom] in` before `mvalid_descend` to clear an `unusedSectionVars` warning
+    surfaced by the build)*
+  - [x] Do **not** touch `minimalTableau_decides`, `instDecidableMValid`, or
     `instDecidableDerivableMinPropAxiom` in this phase — those change in Phase 4 together with the
-    pin.
+    pin. *(confirmed unchanged in this commit)*
 
 - **Timing:** 1 hour
 

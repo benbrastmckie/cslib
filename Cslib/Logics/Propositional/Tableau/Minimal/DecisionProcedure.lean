@@ -122,6 +122,58 @@ instance instDecidableMValid (φ : Proposition Atom) : Decidable (MValid φ) :=
       have hclosed := minimalTableau_complete φ hvalid
       by simp [hclosed] at h)
 
+/-! ## Universe Invariance of `MValid`
+
+`MValid.{u, v} φ` quantifies `World : Type v`, but `minimalTableau_complete`'s countermodel
+frame is built from `Nat : Type 0` — so applying it needs `MValid` pinned at universe `0`. The
+two theorems below establish that this pin costs nothing: `MValid` is invariant under the choice
+of `World`'s universe, in both directions. The forward direction (`Type 0 → Type v`) is free —
+complete at `0`, then apply the universe-polymorphic `minimalTableau_sound` at `v`. The reverse
+direction (`Type v → Type 0`) needs an explicit transport: `mvalid_descend` lifts an arbitrary
+`Type 0` model through `ULift` into a `Type v` model witnessing the same `IForces` behaviour (by
+induction on `φ`, since `IForces` only ever inspects `val`/`bot_forces` pointwise), then pulls
+the `Type v`-validity witness back down along `ULift.down`. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Validity over `Type v` worlds descends to validity over `Type 0` worlds. Proved by lifting
+an arbitrary `Type 0` model through `ULift` (`Preorder.lift ULift.down`) into a `Type v` model,
+applying the `Type v` validity hypothesis there, and transporting the resulting forcing fact back
+down along `ULift.down` by induction on `φ` (forcing only ever inspects `val`/`bot_forces`
+pointwise, so it commutes with any bijection on worlds). -/
+theorem mvalid_descend {φ : Proposition Atom} (h : MValid.{_, v} φ) : MValid.{_, 0} φ := by
+  intro World _inst val bot_forces vuc buc w
+  letI : Preorder (ULift.{v, 0} World) := Preorder.lift ULift.down
+  have key : ∀ (ψ : Proposition Atom) (x : ULift.{v, 0} World),
+      IForces (fun (W : ULift.{v, 0} World) p => val W.down p)
+        (fun (W : ULift.{v, 0} World) => bot_forces W.down) x ψ ↔
+      IForces val bot_forces x.down ψ := by
+    intro ψ
+    induction ψ with
+    | atom p => intro x; exact Iff.rfl
+    | bot => intro x; exact Iff.rfl
+    | imp a b iha ihb =>
+      intro x
+      constructor
+      · intro hf y hy hya
+        exact (ihb ⟨y⟩).mp (hf ⟨y⟩ hy ((iha ⟨y⟩).mpr hya))
+      · intro hf y hy hya
+        exact (ihb y).mpr (hf y.down hy ((iha y).mp hya))
+    | and a b iha ihb => intro x; exact and_congr (iha x) (ihb x)
+    | or a b iha ihb => intro x; exact or_congr (iha x) (ihb x)
+  exact (key φ ⟨w⟩).mp
+    (h (ULift.{v, 0} World) (fun W p => val W.down p) (fun W => bot_forces W.down)
+      (fun p hle hv => vuc p hle hv) (fun hle hb => buc hle hb) ⟨w⟩)
+
+/-- `MValid` is invariant under the universe at which `World` is quantified: validity over
+`Type 0` worlds and validity over arbitrary `Type v` worlds coincide. The forward direction is
+free (complete at `0`, then apply the universe-polymorphic `minimalTableau_sound` at `v`); the
+reverse direction is `mvalid_descend`'s `ULift` transport. This is what lets
+`instDecidableDerivableMinPropAxiom` below keep its original, universe-unpinned public statement
+even though `minimalTableau_decides`/`instDecidableMValid` are now pinned to `Type 0`. -/
+theorem mvalid_universe_invariant (φ : Proposition Atom) :
+    MValid.{_, v} φ ↔ MValid.{_, 0} φ :=
+  ⟨mvalid_descend, fun h => minimalTableau_sound φ (minimalTableau_complete φ h)⟩
+
 /-- `Derivable MinPropAxiom φ` is decidable via the minimal tableau and the completeness
 theorem `min_soundness_completeness`. -/
 instance instDecidableDerivableMinPropAxiom (φ : Proposition Atom) :

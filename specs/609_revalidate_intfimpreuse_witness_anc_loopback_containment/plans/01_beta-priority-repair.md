@@ -490,7 +490,7 @@ at 2, axiom count unchanged at 26.
 
 ---
 
-### Phase 5: The freeze lemma [NOT STARTED]
+### Phase 5: The freeze lemma [IN PROGRESS]
 
 **Goal**: Prove the one genuinely new obligation the repair creates — under beta-priority, no arm
 of `go` adds a positive entry at a world that already carries a recorded loop-back. Additive; the
@@ -543,35 +543,103 @@ global rather than local:
    know its retraction doesn't disturb already-recorded containment elsewhere), so escalating to V2
    would not avoid this work, only relocate it.
 
-**Tasks**:
-- [ ] State the freeze lemma. Informally (report §5.4): when the world-creating arm is reached, the
-      first pass returned `none`, so nothing on the branch is pending; afterwards formulas are only
-      added at the newly created leaf world or pushed **downward** by `applyAllTImpRules`' copy
-      channel and `intTImpRule`, both of which write only to descendants; neither `x` nor `w` is a
-      descendant of a world created after them, so their positive content is frozen.
-- [ ] Obtain the first-pass-empty hypothesis at the world-creating arm by unfolding
-      `intStepBranchPrio` — report §5.3 notes it is available directly there.
-- [ ] Prove it. The downward-only property of the copy channel is the load-bearing input; check
-      whether an existing lemma about `applyAllTImpRules` / `intTImpRule` target labels already
-      supplies it before proving a new one.
-- [ ] If the lemma resists: **escalate to V2, do not weaken `IReuseContain`.** Record the blocker
-      and stop the phase at `[BLOCKED]` rather than introducing a sorry. Phases 1-4 remain landed
-      and independently valuable.
+**Progress note (this dispatch, resuming from the Investigation note above)**: the mechanism was
+re-derived independently from first principles (confirming point 1-5 above) and sharpened into a
+concrete, mostly-landed formalization. Six new sorry-free, axiom-clean declarations are committed
+(`lean_verify`/`lake env lean #print axioms` confirm `[propext, Quot.sound]` and/or
+`Classical.choice` only on every one — no `sorryAx`, no new axioms):
 
-**Timing**: 2 hours
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean`: `isRuleShape` (a bare
+  `(sign, formula)`-shape predicate, `nextWorld`/`b`-independent) and
+  `intApplyRuleFull_notApplicable_iff` (`intApplyRuleFull sf nw b = .notApplicable ↔ isRuleShape
+  sf = false`, for every `nw`/`b`).
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`: `IFrozenBelow w0 e b` (every
+  formula on `b` labeled below `w0` is world-creating, already in `e`, or ruleless) and
+  `intStepBranchPrioFirstPass_none_frozen` (the checkpoint entry point: `intStepBranchPrioFirstPass
+  b e nextWorld = none → IFrozenBelow nextWorld e b`, i.e. exactly the moment `intStepBranchPrio`
+  falls through to its world-creating second pass).
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (beside `IPosPersistRaw`, ahead of
+  `IReuseContain`): `IWorldHist_isAccessible_lt` (a new, general corollary of the already-landed
+  `IWorldHist`/`IWorldHistCounter` invariants: `isAccessible edges w w' = true → w ≠ w' → w' < nw →
+  w < w'` -- raw-edge reachability only ever flows from a smaller label to a larger one, no new
+  invariant threading required), plus the freeze STEP lemma family
+  (`IResultLabelsGe`/`IResultLabelsEq`/`IResultLabelsEq_imp_Ge`/
+  `intApplyRuleFull_labels_eq_of_not_worldCreating`/`IFrozenBelow_intStepBranchPrio_ge`): given
+  `IFrozenBelow w0 e b` and `w0 ≤ nw`, a SINGLE `intStepBranchPrio` step's output formulas are all
+  labeled `≥ w0` (world-creating arm writes only at the fresh `nw`; every other arm writes only at
+  the selected `sf.label`, which `IFrozenBelow` itself forces to be `≥ w0` on pain of contradicting
+  `intStepBranchPrio_result_ne_notApplicable`). This is genuinely mechanism 3(a) from the
+  Investigation note above, proved in full.
+
+**What remains (mechanism 3(b) and the multi-step composition)**: `IFrozenBelow_intStepBranchPrio_ge`
+covers ONE `intStepBranchPrio` step in isolation. Two further, larger pieces are still needed
+before Phase 6 can consume a genuine drop-in replacement for `IReuseContain_mono`:
+1. **Persistence-fixpoint preservation** (mechanism 3(b)): show `applyPersistenceFixpoint`/
+   `applyAllTImpRules`, applied at the TOP of each `go` call, also cannot write below the checkpoint
+   `w0`. Sketch, not yet formalized: the ALREADY-landed `applyAllTImpRules_copy_complete_of_fixpoint`
+   (`Scheme.lean` above `IPosPersistRaw`) plus the NEW `IWorldHist_isAccessible_lt` together show the
+   generalized-copy channel is vacuous below `w0` whenever `IPosPersistRaw` already holds there (any
+   accessible source reaching a target `w' < w0` is itself `< w0` by the label-order fact, and
+   `IPosPersistRaw` -- already a continuously-threaded invariant of `bPers` at every induction step
+   -- has no gap to fill there). `intTImpRule`'s OWN direct `T(ψ)@w'` clause additionally needs
+   `IExpandedConsistent` (already landed) plus a branch-consistency fact (no complementary `T`/`F`
+   pair -- should already be available from the open-branch path) to show its precondition
+   `T(φ)@w' present ∧ T(ψ)@w' absent` cannot hold below `w0` once the source `T(φ→ψ)` is itself
+   already-expanded there.
+2. **Composition across MANY steps, i.e. actually threading `IFrozenBelow` through
+   `intExpandBranches_openBranch_sat`'s induction** (all four `go.induct` blocks) so that the
+   checkpoint fact at loop-back-record time survives all the way to whatever `openBranch b` is
+   finally returned. This is Phase 6's original mandate ("replace `IReuseContain_mono`... at each
+   of its use sites") and is where the genuinely large remaining effort lives -- item 1 above is a
+   prerequisite lemma for it, not a substitute.
+
+Given the standalone STEP lemma (item, not composition) is now fully landed and verified, a future
+dispatch resuming Phase 5/6 should start from `IFrozenBelow_intStepBranchPrio_ge` and item 1's
+sketch above, rather than re-deriving the mechanism a third time. Escalating to V2 remains
+unwarranted: nothing found this dispatch weakens that conclusion.
+
+**Tasks**:
+- [x] State the freeze lemma. Landed as `IFrozenBelow` (`Expansion.lean`) plus the `IResultLabelsGe`
+      family (`Scheme.lean`) -- the checkpoint precondition and the single-step conclusion,
+      respectively. *(deviation: altered -- decomposed into a checkpoint predicate + step lemma
+      rather than one monolithic statement, since the eventual multi-step composition (item 2
+      above) needs both pieces separately)*
+- [x] Obtain the first-pass-empty hypothesis at the world-creating arm by unfolding
+      `intStepBranchPrio` — landed as `intStepBranchPrioFirstPass_none_frozen`.
+- [x] Prove it (the single-step case). Landed as `IFrozenBelow_intStepBranchPrio_ge`; the
+      "downward-only" fact this task anticipated is supplied by the NEW `IWorldHist_isAccessible_lt`
+      plus the already-landed `applyAllTImpRules_copy_complete_of_fixpoint` for the persistence half
+      (mechanism 3(b), sketched above but not yet formalized as a lemma -- *(deviation: deferred to
+      a follow-up dispatch, since it composes with Phase 6's induction rather than standing alone)*).
+- [ ] If the lemma resists: escalate to V2. *(deviation: not applicable -- the lemma does not
+      resist; the freeze claim is confirmed true and the step-level case is proved. Remaining work
+      is scale, not a dead end, per the Investigation note's own point 5)*
+
+**Timing**: 2 hours (original estimate; actual this dispatch: full step-lemma landed, persistence
+half and multi-step composition still open -- budget the continuation at Phase 1+2 combined scale
+per the Investigation note)
 
 **Depends on**: 3
 
 **Verification Tier**: local
 
 **Files to modify**:
-- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - the freeze lemma, placed beside
-  the `IReuseContain` family (currently `:6814`ff)
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean` - `isRuleShape`,
+  `intApplyRuleFull_notApplicable_iff` *(deviation: altered -- plan named only `Scheme.lean`; the
+  bare-shape characterization of `intApplyRuleFull` belongs beside its definition)*
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean` - `IFrozenBelow`,
+  `intStepBranchPrioFirstPass_none_frozen` *(deviation: altered -- same rationale, beside
+  `intStepBranchPrioFirstPass`)*
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - `IWorldHist_isAccessible_lt`
+  (beside `IWorldHist_forestComparable`), the freeze step lemma family (beside `IPosPersistRaw`,
+  ahead of `IReuseContain` as planned)
 
 **Verification**:
-- `lake build` of `Scheme.lean` succeeds.
-- Zero new sorries, zero new axioms — `lean_verify` the new lemma.
-- No existing declaration modified.
+- `lake build` of `Rules.lean`/`Expansion.lean`/`Scheme.lean` succeeds (confirmed; full `lake build`
+  green at 3325 jobs, `lake test` green at 9397 jobs, unchanged from the Phase 3/4 baseline).
+- Zero new sorries, zero new axioms — `lean_verify` and `lake env lean #print axioms` on all six new
+  declarations confirm no `sorryAx`, only `propext`/`Quot.sound`/`Classical.choice`.
+- No existing declaration modified (confirmed: diff is purely additive across all three files).
 
 ---
 

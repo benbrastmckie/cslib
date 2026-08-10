@@ -323,6 +323,54 @@ lemma intStepBranchPrio_result_ne_notApplicable
     subst hr; subst hexp
     exact intStepBranchPrioFirstPass_result_ne_notApplicable hfp
 
+/-! ## Freeze Precondition (plan Phase 5) -/
+
+/-- **Freeze precondition** (plan Phase 5, beta-priority repair): every formula on `b` with
+label below `w0` is either world-creating (deliberately deferred by
+`intStepBranchPrioFirstPass`'s first-pass guard), already recorded in `e`, or carries no rule
+at all (`isRuleShape sf = false` -- atoms, `⊥`, which `intApplyRuleFull` never processes).
+This is exactly the negation of `intStepBranchPrioFirstPass`'s selection guard, restricted to
+labels below `w0` (`intStepBranchPrioFirstPass_none_frozen` below) -- the "nothing pending
+below `w0`" checkpoint the freeze argument turns on: once every candidate below `w0` is
+disposed of one way or another, no alpha/beta step can ever again write NEW content below
+`w0` (only world-creation can still act on the surviving `isWorldCreating` candidates, and it
+only ever writes at its own `nextWorld`, never below it). -/
+def IFrozenBelow (w0 : Nat) (e : List (ISF Atom)) (b : IBranch Atom) : Prop :=
+  ∀ sf ∈ b, sf.label < w0 → isWorldCreating sf = true ∨ sf ∈ e ∨ isRuleShape sf = false
+
+omit [Hashable Atom] in
+/-- The world-creating checkpoint: when `intStepBranchPrioFirstPass` returns `none` at
+`(b, e, nextWorld)`, `b` is `IFrozenBelow nextWorld e` -- every formula on the branch (not just
+those below `nextWorld`, though `ILabelBoundStrict` typically pins all of `b` there already) is
+either world-creating, already expanded, or ruleless. This is the entry point of the freeze
+argument: `intStepBranchPrio` only reaches its second (world-creating) pass exactly when this
+holds (`intStepBranchPrio`'s `none` branch, unfolded). -/
+lemma intStepBranchPrioFirstPass_none_frozen
+    {b : IBranch Atom} {e : List (ISF Atom)} {nextWorld : Nat}
+    (h : intStepBranchPrioFirstPass b e nextWorld = none) :
+    IFrozenBelow nextWorld e b := by
+  intro sf hsfb _hlt
+  simp only [intStepBranchPrioFirstPass] at h
+  rw [List.findSome?_eq_none_iff] at h
+  have hsf := h sf hsfb
+  by_cases hguard : (e.any (· == sf) || isWorldCreating sf) = true
+  · rw [Bool.or_eq_true] at hguard
+    rcases hguard with hexp | hwc
+    · right; left
+      rw [List.any_eq_true] at hexp
+      obtain ⟨sf', hsf'mem, hsf'eq⟩ := hexp
+      simp only [beq_iff_eq] at hsf'eq
+      rwa [hsf'eq] at hsf'mem
+    · left; exact hwc
+  · simp only [Bool.not_eq_true] at hguard
+    simp only [hguard, Bool.false_eq_true, if_false] at hsf
+    right; right
+    rw [← intApplyRuleFull_notApplicable_iff sf nextWorld b]
+    cases hint : intApplyRuleFull sf nextWorld b with
+    | notApplicable => rfl
+    | linearResult _ _ _ => rw [hint] at hsf; simp at hsf
+    | branchingResult _ _ => rw [hint] at hsf; simp at hsf
+
 /-! ## Sfor-Containment Loop-Check -/
 
 /-- The **ancestor-directed** `Sfor`-containment loop-check (the ancestor-blocking calculus

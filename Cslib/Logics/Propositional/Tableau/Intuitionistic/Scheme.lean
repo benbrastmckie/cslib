@@ -3760,6 +3760,32 @@ private lemma IWorldHist_forestComparable {φ0 : Proposition Atom} {b : IBranch 
   · left; exact hacc' w x hxnw hwx
   · right; exact hacc' x w hwnw hxw
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Label-order export** (plan Phase 5, beta-priority repair): derived entirely from
+`IWorldHist`/`IWorldHistCounter`, mirroring `IWorldHist_forestComparable`'s derivation pattern
+-- no new invariant threading through `intExpandBranches_openBranch_sat`'s induction is
+required. `isAccessible`-reachability under the raw edges only ever flows from a SMALLER label
+(ancestor) to a LARGER one (descendant): a direct corollary of `parAncestor_of_isAccessible`
+(isAccessible collapses to a `parAncestor` chain, given the `edges` shape `IWorldHist`
+supplies) composed with `parAncestor_le`'s non-strict descent bound, sharpened to strict by the
+`w ≠ w'` hypothesis. This is the fact the freeze argument needs to rule out a freshly-minted
+world `w' ≥ w0` from ever appearing as an `isAccessible`-source reaching a target `w < w0` born
+strictly earlier: such an edge would force `w' < w`, contradicting `w0 ≤ w'`. -/
+private lemma IWorldHist_isAccessible_lt {φ0 : Proposition Atom} {b : IBranch Atom}
+    {e : List (ISF Atom)} {nw : Nat} {edges : IEdges}
+    (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges)
+    {w w' : Nat} (hw' : w' < nw) (hacc : isAccessible edges w w' = true) (hne : w ≠ w') :
+    w < w' := by
+  obtain ⟨par, obl, sfor, fire, hpar0, hall⟩ := hWH
+  have hshapeB : ∀ p ∈ edges, ∃ c, 1 ≤ c ∧ c < nw ∧ p = (c, par c) :=
+    edges_shape_of_worldHist hWHC (fun c hc1 hc2 => (hall c hc1 hc2).1)
+  have hshape : ∀ p ∈ edges, ∃ c, p = (c, par c) :=
+    fun p hp => let ⟨c, _hc1, _hc2, hceq⟩ := hshapeB p hp; ⟨c, hceq⟩
+  have hpar : parAncestor par w w' := parAncestor_of_isAccessible hshape w w' hacc
+  have hdesc : ∀ x, 1 ≤ x → x < nw → par x < x := fun c hc1 hc2 => (hall c hc1 hc2).2.1
+  have hle : w ≤ w' := parAncestor_le hpar0 hdesc hw' hpar
+  exact lt_of_le_of_ne hle hne
+
 /-! ### `IWorldsPlanted`: the provenance half of `IPosPersistRaw`'s side-condition gap
 
 `IPosPersistRaw`'s (Scheme.lean:6701-6704) third hypothesis needs "the target world already has
@@ -6959,6 +6985,104 @@ private def IPosPersistRaw (edges : IEdges) (b : IBranch Atom) : Prop :=
   ∀ (χ : Proposition Atom) (w w' : Nat), isAccessible edges w w' = true →
     (⟨.pos, χ, w⟩ : ISF Atom) ∈ b → b.any (fun sf => sf.label == w') = true →
     (⟨.pos, χ, w'⟩ : ISF Atom) ∈ b
+
+/-! ### Freeze step lemma (plan Phase 5)
+
+`IFrozenBelow` (`Expansion.lean`) is the checkpoint precondition: once
+`intStepBranchPrioFirstPass` returns `none` at `(bPers, e, nw)`, `bPers` is `IFrozenBelow nw e`.
+This section supplies the STEP-level half of the freeze argument report §5.4 calls for: given
+`IFrozenBelow w0 e b` for a threshold `w0 ≤ nw` (not necessarily the literal checkpoint value --
+the invariant is stable, see `IFrozenBelow`'s docstring), a single `intStepBranchPrio` step can
+only write new content at labels `≥ w0`. This is the "alpha/beta processing at that label is
+impossible" half of the report's mechanism (Phase 5's investigation note, point 3(a)); it does
+NOT yet cover the persistence-copy half (point 3(b), which additionally needs `IPosPersistRaw`
+and is deferred to Phase 6, where it composes with the main induction's already-threaded
+invariants rather than needing a second bespoke induction here). -/
+
+/-- The labels an intuitionistic rule-application result can newly write are all `≥ w0`:
+`.linearResult`'s `newForms` for the alpha/world-creating case, every branch's formulas for the
+`.branchingResult` beta case, vacuously `True` for `.notApplicable`. -/
+private def IResultLabelsGe (w0 : Nat) : IntRuleResult Atom → Prop
+  | .linearResult newForms _ _ => ∀ sf' ∈ newForms, w0 ≤ sf'.label
+  | .branchingResult branches' _ => ∀ br ∈ branches', ∀ sf' ∈ br, w0 ≤ sf'.label
+  | .notApplicable => True
+
+/-- The labels an intuitionistic rule-application result can newly write are all EXACTLY `l`:
+the non-world-creating shape (mirrors `IResultLabelsGe` but with equality). -/
+private def IResultLabelsEq (l : Nat) : IntRuleResult Atom → Prop
+  | .linearResult newForms _ _ => ∀ sf' ∈ newForms, sf'.label = l
+  | .branchingResult branches' _ => ∀ br ∈ branches', ∀ sf' ∈ br, sf'.label = l
+  | .notApplicable => True
+
+omit [DecidableEq Atom] [Hashable Atom] in
+private lemma IResultLabelsEq_imp_Ge {l w0 : Nat} (hle : w0 ≤ l) {result : IntRuleResult Atom}
+    (heq : IResultLabelsEq l result) : IResultLabelsGe w0 result := by
+  cases result with
+  | notApplicable => trivial
+  | linearResult newForms nw' ed => intro x hx; rw [heq x hx]; exact hle
+  | branchingResult branches' nw' => intro br hbr x hx; rw [heq br hbr x hx]; exact hle
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Non-world-creating `intApplyRuleFull` results write only at `sf.label` itself: covers every
+shape but `.neg, .imp` (the world-creating one, whose output goes entirely to the fresh
+`nextWorld` instead -- see `IFrozenBelow_intStepBranchPrio_ge`'s other case). Purely mechanical:
+each of the five surviving shapes (`.pos/.neg` × `.and`/`.or`, plus `.pos, .imp`) constructs its
+output list literally at `sf.label`; the six ruleless shapes (atoms, `⊥`) are `.notApplicable`,
+vacuously satisfying `IResultLabelsEq`. -/
+private lemma intApplyRuleFull_labels_eq_of_not_worldCreating
+    {sf : ISF Atom} {nw : Nat} {b : IBranch Atom} (hwc : isWorldCreating sf ≠ true) :
+    IResultLabelsEq sf.label (intApplyRuleFull sf nw b) := by
+  rcases sf with ⟨s, f, l⟩
+  simp only [isWorldCreating] at hwc
+  cases s <;> cases f <;> simp_all [intApplyRuleFull, IResultLabelsEq]
+
+omit [Hashable Atom] in
+/-- **Freeze step** (plan Phase 5): once `IFrozenBelow w0 e b` holds and `w0 ≤ nw`, a single
+`intStepBranchPrio` step's output is `IResultLabelsGe w0`. The selected formula `sf`
+(`intStepBranchPrio_some_exists`) is either already `w0`-safe (`w0 ≤ sf.label`, in which case
+`intApplyRuleFull_labels_eq_of_not_worldCreating` pins every non-world-creating rule's output at
+`sf.label`, hence `≥ w0`) or world-creating (in which case `intFImpRule`'s output is entirely at
+the fresh `nw ≥ w0`, regardless of `sf.label`); `sf ∈ e` is excluded by `IStepShape`, and `sf`
+being neither world-creating nor `w0`-safe nor `e`-recorded would force `intApplyRuleFull sf nw
+b = .notApplicable` (`IFrozenBelow`'s third disjunct via `intApplyRuleFull_notApplicable_iff`),
+contradicting `intStepBranchPrio_result_ne_notApplicable`. -/
+private lemma IFrozenBelow_intStepBranchPrio_ge
+    {b : IBranch Atom} {e : List (ISF Atom)} {w0 nw : Nat} (hnw : w0 ≤ nw)
+    (hfrz : IFrozenBelow w0 e b)
+    {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
+    (hstep : intStepBranchPrio b e nw = some (result, newExp)) :
+    IResultLabelsGe w0 result := by
+  obtain ⟨sf, hsfb, hsfne, hint, -⟩ := intStepBranchPrio_some_exists hstep
+  have hresne : result ≠ .notApplicable := intStepBranchPrio_result_ne_notApplicable hstep
+  by_cases hwc : isWorldCreating sf = true
+  · -- World-creating: `sf = ⟨.neg, .imp φ ψ, l⟩`; `intFImpRule`'s output is entirely at `nw`.
+    rcases sf with ⟨s, f, l⟩
+    simp only [isWorldCreating] at hwc
+    cases s <;> cases f <;> simp_all only [Bool.false_eq_true]
+    rename_i φ ψ
+    simp only [intApplyRuleFull] at hint
+    subst hint
+    simp only [IResultLabelsGe]
+    intro x hx
+    simp only [intFImpRule] at hx
+    rcases List.mem_append.mp hx with hx | hx
+    · simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+      rcases hx with rfl | rfl <;> exact hnw
+    · simp only [propagatePersistence, List.mem_map] at hx
+      obtain ⟨χ, -, hχ⟩ := hx
+      rw [← hχ]
+      exact hnw
+  · -- Not world-creating: `IFrozenBelow` forces `w0 ≤ sf.label`.
+    have hlge : w0 ≤ sf.label := by
+      by_contra hlt
+      simp only [not_le] at hlt
+      rcases hfrz sf hsfb hlt with hwc' | hexp | hns
+      · exact hwc hwc'
+      · exact hsfne hexp
+      · exact hresne (hint ▸ (intApplyRuleFull_notApplicable_iff sf nw b).mpr hns)
+    have heq := intApplyRuleFull_labels_eq_of_not_worldCreating (sf := sf) (nw := nw) (b := b) hwc
+    rw [hint] at heq
+    exact IResultLabelsEq_imp_Ge hlge heq
 
 /-- **Reuse-time containment, per recorded loop-back edge** (plan Phase 8): for every
 loop-back edge `(x, l)` recorded so far (NOT the raw parent-child edges, which

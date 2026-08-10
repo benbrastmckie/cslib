@@ -282,6 +282,30 @@ def intApplyRuleFull (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
   -- All others: atoms, bot, etc.
   | _, _ => .notApplicable
 
+/-- Whether a signed formula's bare `(sign, formula)` shape carries an intuitionistic tableau
+rule at all: true for `.and`/`.or` in either sign and `.imp` in either sign (world-creating
+`F(φ → ψ)` included), false for atoms and `⊥` in either sign. Independent of `nextWorld`/`b` --
+mirrors `intApplyRuleFull`'s match exactly, and `intApplyRuleFull_notApplicable_iff` below
+confirms it characterizes `intApplyRuleFull`'s `.notApplicable` result precisely, for every
+`nextWorld`/`b`. Used by the beta-priority freeze argument (plan Phase 5,
+`Expansion.lean`'s `IFrozenBelow`): a formula outside this shape can never generate new branch
+content, regardless of how many times it is (re-)considered. -/
+def isRuleShape (sf : ISF Atom) : Bool :=
+  match sf.sign, sf.formula with
+  | .pos, .and _ _ | .neg, .and _ _ | .pos, .or _ _ | .neg, .or _ _
+  | .neg, .imp _ _ | .pos, .imp _ _ => true
+  | _, _ => false
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `intApplyRuleFull sf nextWorld b = .notApplicable` exactly when `sf`'s shape carries no
+rule (`isRuleShape sf = false`), for every `nextWorld`/`b`: `intApplyRuleFull`'s six non-
+`.notApplicable` clauses are exactly the six `isRuleShape`-true shapes, and none of them ever
+returns `.notApplicable` (each constructs a `.linearResult` or `.branchingResult` outright). -/
+lemma intApplyRuleFull_notApplicable_iff (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
+    intApplyRuleFull sf nextWorld b = .notApplicable ↔ isRuleShape sf = false := by
+  rcases sf with ⟨s, f, l⟩
+  cases s <;> cases f <;> simp [intApplyRuleFull, isRuleShape]
+
 end Cslib.Logic.PL
 
 end

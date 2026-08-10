@@ -695,6 +695,97 @@ anticipated)
 **Goal**: Drop the snapshot existential. This is the mint-time weakening the defect forced, and the
 repair is what makes dropping it possible.
 
+**Investigation note (this dispatch, not pre-declared in Phase 1-5 planning)**: the mechanism was
+worked out in full and is TRUE, but this dispatch made a deliberate decision NOT to force the
+threading through in a single sitting, because a second, previously-unforeseen gap surfaced
+mid-derivation that needs its own new lemma before the induction-threading can even start. Recorded
+here in full so the next dispatch does not have to re-derive it. **Zero code was changed this
+dispatch** (no edits to any `.lean` file); the tree is exactly as left by the Phase 5 closing commit
+(`ab3f283e`).
+
+1. **The target shape, confirmed.** Dropping the snapshot means `IReuseContain`'s bare claim
+   (`(pos,χ,l)∈b → (pos,χ,x)∈b` for the CURRENT, growing `b`) can only stay true forever if nothing
+   NEW ever arrives at label `l` after the edge `(x,l)` is recorded — i.e. exactly Phase 5's freeze
+   mechanism, instantiated at the checkpoint `w0 := l + 1` (not `l` itself: `IFrozenBelow` covers
+   labels strictly `< w0`, and `l + 1` is the smallest threshold that also covers `l`). This
+   threshold is available for free at record time: `IFrozenBelow nwH eH bPers` already holds there
+   (`intStepBranchPrioFirstPass_none_frozen` + the checkpoint), `l < nwH` (`ILabelBoundStrict`), and
+   `IFrozenBelow` is downward-closed in its threshold (`w0' ≤ w0 → IFrozenBelow w0 e b →
+   IFrozenBelow w0' e b`, immediate from the definition, not yet stated as its own lemma but trivial
+   to add), so `IFrozenBelow (l+1) eH bPers` follows directly.
+2. **The needed companion invariant.** A new per-edge predicate, sketched as
+   `IReuseFrozen (lbH : IEdges) (e : List (ISF Atom)) (b : IBranch Atom) : Prop := ∀ x l, (x,l) ∈
+   lbH → IFrozenBelow (l + 1) e b`, threaded ALONGSIDE `IAllReuseContain` via a new 3-list zip
+   `IAllReuseFrozen` over `(bs, expSets, lbSets)` (mirroring `IAllWorldHist`'s 4-list-zip template
+   at `Scheme.lean:3873` — `IAllReuseContain`'s existing 2-list zip is not wide enough since it does
+   not carry the per-branch expanded set `e` that `IFrozenBelow` needs). This is what replaces
+   `IReuseContain_mono` at every use site: given `IReuseFrozen` for the OLD edges plus Phase 5's two
+   composition lemmas, the newly-added content at each step is provably disjoint from every
+   recorded edge's frozen label, so containment survives branch growth without a snapshot.
+3. **The gap Phase 5's own lemmas do not yet cover.** `IFrozenBelow_applyPersistenceFixpoint` /
+   `applyAllTImpRules_agrees` (both landed, `Scheme.lean` ~7132-7292) require `hpp : IPosPersistRaw
+   edges b` about the SAME `b` that is fed into `applyPersistenceFixpoint b edges fuel` — i.e. about
+   the PRE-fixpoint branch. Checked directly: `IPosPersistRaw` does NOT hold for `bh` (the branch
+   entering a go-call, before its own persistence pass) in general — it is exactly what
+   `applyPersistenceFixpoint` exists to ESTABLISH, via `applyPersistenceFixpoint_copy_complete`,
+   which only ever concludes `IPosPersistRaw edges (applyPersistenceFixpoint b edges fuel)` (the
+   POST-fixpoint output), never about the pre-state. So `hpp` cannot be discharged fresh at every
+   go-call the way `hIC_bPers`/`hACC_bPers`/etc. are. The correct instantiation is instead to hold
+   `b` FIXED at the ORIGIN — the `bPers` at the exact go-call where `(x, l)` was recorded (case6,
+   `hARC_new`'s site) — where `IPosPersistRaw edgesH_origin bPers_origin` IS freshly derivable
+   (same `applyPersistenceFixpoint_copy_complete` call case6 already needs for other purposes), and
+   let `bv` range over every LATER go-call's own branch, composing `applyAllTImpRules_agrees`
+   per-round with `b` pinned at the origin (mirroring exactly how the OLD `bSnap` witness was
+   pinned once and never re-derived).
+4. **The newly-discovered second gap.** That "origin-pinned" composition also pins `edges` at the
+   origin's `edgesH_origin` inside `hpp`/`hacc`, but the ACTUAL round being composed at a later
+   go-call runs against that LATER go-call's own (larger) raw-edge list `edgesH' ⊇ edgesH_origin`
+   (raw edges only grow, one new pair per minted world). `applyAllTImpRules_agrees`'s proof uses
+   `hacc : isAccessible edges w w' = true` (at whichever `edges` is supplied) to justify `hpp`'s
+   copy-propagation, so the origin-pinned and later-actual edge lists must be reconciled: I need
+   `isAccessible edgesH_origin w w' = isAccessible edgesH' w w'` for `w' < w0` (both labels already
+   existing at origin time). Checked: `isAccessible_append_mono` (`Scheme.lean:367`) only gives ONE
+   direction (append never LOSES reachability) — the REVERSE (append never GAINS reachability whose
+   target is not the fresh node itself) is not yet stated anywhere in the file. It is TRUE and
+   should be a clean, self-contained proof: a freshly-minted edge `(nw, l)` has `nw` appearing
+   NOWHERE as a parent-slot (first component) in the existing edge list (it is a brand-new node), so
+   any DFS path that routes through `(nw, l)` reaches a dead end at `nw` — `nw` has no outgoing
+   edges of its own in either the old or the extended list (the sole edge mentioning `nw`, `(nw,
+   l)`, has `nw` in the child slot, not the parent slot) — so no reachability witness for a target
+   `w' ≠ nw` can newly depend on it. A full proof needs a `isAccessible.go`-level induction
+   parallel to `isAccessible_go_append_mono`'s (`Scheme.lean:316`) but concluding the REVERSE
+   implication under the freshness hypothesis; sketch: `isAccessible.go (edges ++ [(nw, l)]) target
+   current fuel = true ∧ target ≠ nw → isAccessible.go edges target current fuel = true`, by
+   induction on fuel, splitting on whether the found child candidate came from an old edge
+   (immediate) or from the new edge (only possible when `current = l`, giving candidate `child =
+   nw`; since `target ≠ nw` the recursive call needs `isAccessible.go _ target nw fuel' = true`, but
+   `nw` has zero candidate children in `edges ++ [(nw, l)]` under the freshness hypothesis, so that
+   recursive call is vacuously `false`, contradiction — this branch cannot occur).
+5. **Concrete task list for the next dispatch, in dependency order** (none of this is committed
+   yet): (a) `isAccessible_append_eq_of_fresh` (or similar name) per point 4's sketch; (b) generalize
+   `applyAllTImpRules_agrees`/`applyPersistenceFixpoint_agrees` (or add a corollary) to compose
+   across a GROWING `edges ⊇ edges₀` using (a) to relate the origin's `hpp` to the current round's
+   `hacc`; (c) land `IReuseFrozen`/`IAllReuseFrozen` per point 2 with the append/map_const companion
+   lemmas the existing zip types all carry; (d) thread `IAllReuseFrozen` through the `key` suffices
+   statement of `intExpandBranches_openBranch_sat` (`Scheme.lean:7434` as of this dispatch) alongside
+   `IAllReuseContain`; (e) replace the six confirmed `IReuseContain_mono` use sites (below) with the
+   composed freeze argument, and extend `IReuseContain_snoc`'s call site (case6, `Scheme.lean:7958`
+   as of this dispatch) to also establish the newly-recorded edge's `IReuseFrozen` witness per
+   point 1; (f) only then restate `IReuseContain` itself to drop the snapshot (this is a small,
+   final step once (a)-(e) are in place, since the containment claim itself does not change shape —
+   only what justifies its preservation does).
+
+**Scope Hypothesis, resolved this dispatch**: `grep -n IReuseContain_mono` finds exactly six use
+sites, all inside `intExpandBranches_openBranch_sat`'s induction (`Scheme.lean:7403-8595` as of this
+dispatch) and nowhere else in the file: `:7533` (case2, bh→bPers persistence transport), `:7630`
+(case4, same), `:7747-7748` (case5, bPers→extendMany step transport), `:7878` (case6, bh→bPers
+persistence transport, alongside the `IReuseContain_snoc` call at `:7958-7959` for the NEW edge),
+`:8135-8136` (case7, bPers→extendMany mint-arm step transport), `:8304-8309` (case8, bPers→branch
+step transport, once per BETA child). The induction has 10 cases total (`case1`-`case10`); only
+cases 2, 4, 5, 6, 7, 8 touch `IAllReuseContain` at all (case1/3/9/10 are dead-end/absurd arms). Line
+numbers will drift again on the next dispatch's own insertions — re-run the grep before editing, per
+this plan's own delta-recording convention.
+
 **Tasks**:
 - [ ] Restate `IReuseContain` (`Scheme.lean:6814`) with `bSnap := b`:
       `∀ x l, (x, l) ∈ lbEdges → ∀ χ, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b → (⟨.pos, χ, x⟩ : ISF Atom) ∈ b`.

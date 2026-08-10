@@ -3,33 +3,38 @@
   "phase": "implement",
   "status": "partial",
   "continuation_path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-  "summary": "Resumed from Phase 5, which the prior dispatch (4ffd1821) had left with mechanism 3(a) (the single-step freeze case) fully landed but mechanism 3(b) (persistence-fixpoint preservation) still open. This dispatch closed mechanism 3(b): four new sorry-free, axiom-clean declarations landed in Scheme.lean (committed ab3f283e) -- isf_any_mem (a small List.any-witness extraction helper), applyAllTImpRules_agrees (one round of applyAllTImpRules cannot introduce content below a checkpoint w0, given IFrozenBelow/IPosPersistRaw/IExpandedConsistent/an open-branch no-complementary-pair hypothesis/IWorldHist-IWorldHistCounter; the genCopies channel closes directly from IPosPersistRaw with no w0 restriction, and intTImpRule's direct psi-consequence channel closes via IWorldHist_isAccessible_lt pinning the source below w0, IPosPersistRaw propagating the copy, IFrozenBelow forcing e-expansion, IExpandedConsistent reading off the Fitting-split resolution, and the consistency hypothesis ruling out the F(phi) disjunct), applyPersistenceFixpoint_agrees (the fuel-recursive composition across applyPersistenceFixpoint's own internal loop, with the fixed checkpoint branch b held constant throughout the induction), and IFrozenBelow_applyPersistenceFixpoint (mechanism 3(b) itself: applyPersistenceFixpoint preserves IFrozenBelow). This closes every open item in Phase 5's task list; the phase heading is now marked [COMPLETED] in the plan. Phase 6 (snapshot-free IReuseContain, re-threaded through intExpandBranches_openBranch_sat's four go.induct blocks to replace IReuseContain_mono at each use site) is the next objective and remains the largest piece of this plan -- explicitly not attempted this dispatch, per the instruction that a completed Phase 5 alone is a successful dispatch. Full lake build green at 3325 jobs (unchanged), lake test green (exit 0, conformance corpus unaffected -- module untouched), checkInitImports/lint/lint-style/shake all clean, zero new sorries (2 pre-existing, Phase 8/9 territory), zero new axioms (26, unchanged).",
+  "summary": "Resumed from Phase 5, COMPLETED at commit ab3f283e (mechanism 3(a) and 3(b) of the freeze lemma both landed, sorry-free). This dispatch worked Phase 6 (snapshot-free IReuseContain, re-threaded through intExpandBranches_openBranch_sat's induction) end-to-end at the design level but landed ZERO code: confirmed the six IReuseContain_mono use sites (all inside the sat lemma's induction, cases 2/4/5/6/7/8, current line numbers recorded in the plan), designed the IReuseFrozen/IAllReuseFrozen companion invariant needed to replace them, and traced the composition argument through to a second, previously-unforeseen gap discovered mid-derivation: Phase 5's landed IFrozenBelow_applyPersistenceFixpoint/applyAllTImpRules_agrees require IPosPersistRaw about the PRE-fixpoint branch, which forces an origin-pinned (not per-go-call-fresh) instantiation, which in turn needs a not-yet-proved 'isAccessible is unaffected by appending a fresh edge, for old targets' lemma (the reverse direction of the already-landed isAccessible_append_mono). Both gaps, and a concrete dependency-ordered task list for the next dispatch, are recorded in full in the plan's Phase 6 Investigation note and in handoffs/06_phase6-investigation.md. An initial attempt at the new isAccessible lemma produced an unresolved sub-case; rather than force it through or risk a sorry, this dispatch stopped and handed off precisely instead.",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 5 marked [COMPLETED] with a new Progress note documenting mechanism 3(b)'s landing and closing all task-list items. Phase 6 is next."
+      "summary": "Phase 6 Investigation note added, documenting the target invariant shape, the two composition gaps, and a dependency-ordered next-steps list. Phase 6 heading remains [IN PROGRESS] (unchanged from entry state)."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/06_phase6-investigation.md",
+      "summary": "Condensed pointer to the plan's Investigation note plus the reasoning for stopping without landing code."
     }
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md"
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/06_phase6-investigation.md"
   ],
   "phases_completed": 5,
   "phases_total": 9,
   "decisions_made": [
-    "Stated applyAllTImpRules_agrees/applyPersistenceFixpoint_agrees around a fixed base branch `b` (carrying all checkpoint invariants) and a separately-quantified varying branch `bv` (with an explicit 'contains b and agrees with b below w0' pair of hypotheses), rather than generalizing `b` itself through the fuel induction -- this avoids losing the fixed IFrozenBelow/IPosPersistRaw/IExpandedConsistent/consistency/IWorldHist hypotheses, which are about the ORIGINAL branch entering the go-call, not about intermediate fixpoint-iteration states (which do not themselves satisfy IPosPersistRaw in general -- only a genuine fixpoint does).",
-    "Added isf_any_mem as a small reusable extraction helper rather than inlining the List.any-witness-to-membership argument three times, mirroring the existing extraction pattern already used in applyAllTImpRules_copy_complete_of_fixpoint.",
-    "Did not attempt Phase 6 this dispatch. Mechanism 3(b) alone required a full single-round lemma plus a fuel-recursive composition lemma (a two-lemma, non-trivial induction on its own); Phase 6's threading through FOUR go.induct blocks at real use sites is a substantially larger, separately-scoped task per the plan's own sizing, and starting it without a full dispatch budget risked leaving an unverifiable half-threaded state. Stopped at the Phase 5 completion boundary instead, per the delegation instruction's own framing that this constitutes a successful dispatch."
+    "Chose to record a precise, actionable Investigation note (mirroring Phase 5's own successful precedent of a multi-dispatch, investigation-first phase) rather than force either the new isAccessible lemma or the full IReuseFrozen threading through under this dispatch's remaining time budget, after a first attempt at the isAccessible lemma surfaced a genuinely unresolved sub-case rather than a clean proof.",
+    "Confirmed via direct inspection that IPosPersistRaw does not hold for bh (a go-call's pre-persistence branch) in general -- it is what applyPersistenceFixpoint exists to establish -- so the origin-pinned composition strategy (mirroring the OLD bSnap witness's fixed-once-forever shape) is the only correct route, not a per-go-call-fresh re-derivation.",
+    "Did not touch any .lean file this dispatch -- the tree is byte-identical to the Phase 5 closing commit ab3f283e for all Cslib/ sources."
   ],
   "dead_ends": [
-    "None discovered this dispatch. V2 (retract-on-violation) remains unwarranted."
+    "A first attempt at 'isAccessible unaffected by a fresh edge, for old targets' hit an unresolved sub-case when written under time pressure. Not committed. The plan's Investigation note point 4 records a validated proof sketch (freshly-minted node has no outgoing edges, so any DFS path through the new edge dead-ends there) -- the next attempt should start fresh from that sketch rather than resume the abandoned attempt."
   ],
   "coordination_notes": [
-    "Territory disjointness with task 605 held throughout: all edits confined to Scheme.lean's IPosPersistRaw/freeze-lemma region (immediately after IFrozenBelow_intStepBranchPrio_ge, still ahead of IReuseContain); 605's isAccessible-monotonicity/openBranch_countermodel/tableau_complete region at the end of Scheme.lean was untouched.",
-    "Phase 6 (not reached) will need to re-verify exact line numbers before editing, since this dispatch's insertions shifted line numbers throughout Scheme.lean again (roughly 155 lines added between IFrozenBelow_intStepBranchPrio_ge and IReuseContain)."
+    "Territory disjointness with task 605 held (trivially -- no code was edited this dispatch).",
+    "Phase 6 line-number references in the plan (six IReuseContain_mono use sites, IReuseContain_snoc's call site, the key suffices statement) will drift again once code is actually landed -- re-grep before editing, per the plan's own delta-recording convention."
   ],
   "sorry_inventory": [],
   "plan_markers_verified": true

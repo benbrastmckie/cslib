@@ -158,27 +158,6 @@ SOURCE: specs/reviews/review-2026-08-09.md finding C1.
 
 ---
 
-### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 604
-- **Research**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md]
-- **Plan**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md]
-- **Summary**: [609_revalidate_intfimpreuse_witness_anc_loopback_containment/summaries/01_beta-priority-repair-summary.md]
-
-**Description**: `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`) records a loop-back edge on a `Sfor`-containment check at the moment the branch reuses an ancestor world -- but it never re-validates that containment as the branch continues to grow afterward. This is the root cause both the intuitionistic tableau completeness `truthLemma` restructure and the frame-adequacy analysis that preceded it converged on: it is why the AUGMENTED frame (`augSets`, threaded by `intExpandBranches_openBranch_sat`) carries `IFimpAccess` but REFUTES positive persistence (`CslibTests/BetaSplitRefutation.lean`, `firstViolation = some (2,1,2)`), and why the RAW frame (`rawEdges`) carries positive persistence (`IPosPersistRaw`, sorry-free) but REFUTES `IFimpAccess` at the blocked worlds pruning strands.
-
-WHY IT MATTERS: re-validating the loop-back containment as the branch grows is what would let the augmented frame carry positive persistence too, giving ONE frame with BOTH `IFimpAccess` and persistence simultaneously. That would collapse `openBranch_countermodel`'s remaining existential (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`, the sole live sorry in that file) into a direct `truthLemma` instantiation, since `truthLemma` itself is already sorry-free and parametric over any frame carrying both facts.
-
-EXCLUDED CONSTRUCTIONS (established by machine evidence, do not re-attempt without new evidence): rawEdges itself (fails IFimpAccess and is refuted as a conjunct-2 witness for phiRef1/phiRef3 -- CslibTests/WitnessProbe.lean, CslibTests/BetaSplitRefutation.lean); pruning at blocked worlds (fails dblNeg/peirce, where the loop-back is a self-reuse and cutting the world destroys the falsifying world); pruning at strictly-blocked worlds (fails phiRef3, which needs the self-reuse world cut -- the two pruning rules contradict each other on the same syntactic signal); and the greatest IFimpAccess-supported fixpoint (collapses to K = empty for phiRef1/phiRef2/phiRef3, since the unsupported blocked world strands its parent up to world 0). The maximal atom-inclusion frame was excluded even earlier.
-
-SCOPE: this is calculus-level work in Expansion.lean, explicitly OUT OF SCOPE for Scheme.lean-only dispatches. Do not attempt this inside a Scheme.lean-scoped task.
-
-SOURCE: specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md (sections 3, 4, 6) and specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md.
-
----
-
 ### 608. Fix lean-sorry-census.sh double-counting set_option warn.sorry false in as a sorry
 - **Status**: [NOT STARTED]
 - **Task Type**: meta
@@ -206,56 +185,6 @@ Fix: exclude lines that are exactly (or contain only) the `set_option warn.sorry
 Measured 2026-08-09 (bash .claude/scripts/lean-sorry-census.sh, hand-verified against the raw `sorry` occurrences to exclude the script's warn.sorry-substring double-counting bug -- see specs/596_realign_roadmap_with_verified_state/reports/02_execution-time-measurements.md section 1): BXCanonical carries 13 live sorries (ChronicleToCountermodel.lean: 12, Frame.lean: 1), all gated on the WeakCanonical discrete-completeness port. Task 215 already owns filling these specific sorries once that port lands.
 
 This task is NOT about filling the sorries -- it is the prior architectural decision: (A) complete BXCanonical/dense once its blocking port lands (in which case task 215 delivers it), or (B) abandon BXCanonical/dense as dead weight and consolidate the bimodal completeness story onto the Algebraic+Bundle pipeline alone, retiring the file. Neither option should be taken autonomously by an implementer -- this task exists to hold the decision until a maintainer makes the call, at which point it should be re-scoped into either a completion task (if A) or a retirement/consolidation task (if B).
-
----
-
-### 606. Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 603, Task 604, Task 605, Task 609
-- **Research**: [606_discharge_propositional_tableau_completeness_and_verify_tfae/reports/01_tableau-completeness-ground-truth.md]
-- **Plan**: [606_discharge_propositional_tableau_completeness_and_verify_tfae/plans/01_tfae-fold-and-annotation-closeout.md]
-- **Summary**: [606_discharge_propositional_tableau_completeness_and_verify_tfae/summaries/01_tfae-fold-and-annotation-closeout-summary.md]
-
-**Description**: Consume the frame construction and forcing proof from the predecessor tasks, then discharge or restate the four propositional tableau completeness sorries, repair every call site, and verify the TFAE instantiation.
-
-THE FOUR SITES (line numbers current as of the annotation-correction landing; re-verify before editing):
-- DP-3: intuitionisticTableau_complete, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:154, sorry at :164
-- DP-4: minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160
-- DP-5: truthLemma, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:693, sorry at :768 (the T(phi prime -> psi prime) implication case)
-- DP-6: openBranch_countermodel, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7891, sorry at :7965 (the exists edges upward-closure conjunct)
-
-SCOPE: (a) discharge each sorry, or -- where the landed construction supports only a weaker statement -- restate the theorem to what is actually provable; (b) repair every call site the restatement affects; (c) update the docstrings so they describe the landed statement rather than an abandoned one, replacing the current open / augmented-frame-route-known-bad / admissible-space-characterised annotations with the resolved wording.
-
-HARD CONSTRAINT -- THE TFAE FOLD: any restated theorem must still be strong enough to fold the tableau nodes into cplProofSystemsTfae / iplProofSystemsTfae / mplProofSystemsTfae in Cslib/Logics/Propositional/ProofSystemEquivalence.lean. A restatement that discharges a sorry but is too weak to serve the TFAE has NOT solved the problem. Verify the TFAE instantiation type-checks before declaring completion.
-
-EXPLICITLY OUT OF BOUNDS: laundering a sorry via a weakened statement. In particular the in-source prohibition at the DP-3 site stands -- do NOT discharge it with exact h Nat (intExtractValuation _b) _huc 0; that type-checks but only launders an undischarged conjunct through the file without resolving it.
-
-PRECEDENT TO FOLLOW: intExpandBranches_openBranch_sat was in exactly this position (a refuted fuel = 0 base case with a Lean-verified counter-instance) and was repaired by the R1 restatement adding hUniv / hNW / hFuel preconditions (plus hLBS / hWH / hWHC / hNC). It is now sorry-free at Scheme.lean:6815, its fuel = 0 arm discharged via hFuel giving intWork ... < 0, absurd by omega. The counter-instance record survives near :6805 and :6999 as the durable explanation of why the R1 hypotheses exist -- preserve that kind of durable record here too.
-
-Zero new sorries, zero new axioms. If the predecessor tasks landed a negative or narrowing result rather than a proof, this task narrows to updating the annotations to the resolved wording and recording what remains open -- that is a legitimate completion, not a failure.
-
----
-
-### 605. Establish upward-closure of minBranchBotForces at the bot formula shape
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 603, Task 604
-- **Research**: [605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md]
-- **Plan**: [605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md]
-- **Summary**: [605_establish_minbranchbotforces_upward_closure_at_bot/summaries/01_statement-shape-fix-summary.md]
-
-**Description**: Establish upward-closure of `minBranchBotForces b` at the `bot` formula shape -- the second, genuinely separate obligation at the DP-4 site (minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160).
-
-WHY THIS IS SEPARATE: DP-4 needs TWO upward-closure premises -- the valuation's AND minBranchBotForces b's, which is a distinct fact at the bot formula shape -- where only one is supplied. This is not a restatement of the openBranch_countermodel conjunct; it is an independent obligation that must be discharged before DP-4 can close.
-
-CURRENT STATUS (machine-checked): the property HOLDS at the [(1,0)] witness under minScheme, where that edge set discharges BOTH upward-closure obligations and still falsifies phiRef1 at world 0. It is NOT established in general. The former claim that DP-4 was refuted independently of the DP-3 site has been retracted; the site is open, not refuted.
-
-SCOPE: prove upward-closure of minBranchBotForces b in general over the frame the frame-construction task produces, or determine and document precisely what additional precondition it needs -- following the R1 precedent (find the precondition that makes the statement true, add it, repair call sites, discharge) established by intExpandBranches_openBranch_sat, now sorry-free at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:6815.
-
-A documented negative or narrowing result is a legitimate outcome, recorded in-source with the same honesty discipline as the current annotations. Zero new sorries, zero new axioms.
 
 ---
 
@@ -329,48 +258,6 @@ EVERY ITEM BELOW WAS VERIFIED ON 2026-08-07. Re-verify before acting -- do not a
 (7) REWRITE `active_goal`. Handled directly by the review that created this task -- verify it still reads correctly and reflects any status changes made above.
 
 CONSTRAINT: this task changes task METADATA only. No .lean file may be created, edited or deleted. All state.json writes go through .claude/scripts/state-write.sh (the single mutex-guarded writer); regenerate TODO.md via generate-todo.sh afterwards, never by hand.
-
----
-
-### 593. Find a uniform frame construction for openBranch_countermodel, then discharge the four propositional tableau completeness sorries
-- **Status**: [EXPANDED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 591, Task 592
-
-**Description**: Find a uniform frame construction that discharges the `exists edges` conjunct of `openBranch_countermodel`, then discharge or restate the four propositional tableau completeness sorries that depend on it. Originating finding: specs/reviews/review-2026-08-07.md, finding C1. RE-SCOPED 2026-08-09 after the disposition verdict in specs/591_decide_openbranch_countermodel_disposition/reports/01_openbranch-countermodel-disposition.md.
-
-THE FOUR SITES (line numbers current as of the annotation-correction landing):
-- DP-3: `intuitionisticTableau_complete`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:154, sorry at :164
-- DP-4: `minimalTableau_complete`, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160
-- DP-5: `truthLemma`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:693, sorry at :768 (the `T(phi' -> psi')` implication case)
-- DP-6: `openBranch_countermodel`, Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:7891, sorry at :7965 (the `exists edges` upward-closure conjunct)
-
-WHAT IS NOW SETTLED (machine-checked; treat as ground truth):
-1. The `exists edges` conjunct is NOT refuted. The `[UNVERIFIED]` inference that the former "PERMANENTLY DEFERRED / unprovable as stated / refuted" annotations rested on is itself machine-REFUTED. Those annotation strings no longer occur anywhere under `Cslib/`.
-2. Witness evidence: on the branch the real `intuitionisticTableau` returns for `phiRef1`, `edges = [(1, 0)]` satisfies BOTH conjuncts. Exhaustive enumeration over the complete admissible edge-set space finds 40 witnesses for `phiRef1` under `intScheme`, plus witnesses for `phiRef2`, `phiRef3`, `exMiddle`, `dblNeg`, `peirce`, `deMorgan`, and `dummett`. Under `minScheme`, `[(1, 0)]` discharges BOTH upward-closure obligations (the valuation's and `minBranchBotForces b`'s) and still falsifies `phiRef1` at world 0 -- retracting DP-4's former claim of an independent refutation.
-3. Structural characterisation: with `A(w) = { p | T(atom p)@w in b }` and `w <= w'` iff `A(w) subseteq A(w')`, the admissible edge sets are EXACTLY the subsets of that atom-set inclusion preorder, and every such subset is automatically upward-closed. Consequence: conjunct 1 needs NO fact about the tableau algorithm -- no persistence, `genCopies`, or augmented-edge invariant. Instantiating `edges` with any sub-inclusion edge list discharges it by transitivity of `subseteq` on atom sets.
-4. The structural argument (independent of any computation): `IValid phi` quantifies over every preorder and every upward-closed valuation, so any refutation of `openBranch_countermodel` would have to exhibit an IPC-valid `phi` on which the algorithm returns `.openBranch`. `phiRef1` is not even classically valid, so it was never such a candidate.
-5. Prerequisites already satisfied -- do NOT re-do them: (a) the disposition verdict is delivered and all four in-source annotations are already corrected to "open, augmented-frame route known-bad, admissible edge space characterised"; the four sorries deliberately remain; (b) the evidentiary repair is done -- `CslibTests/BetaSplitRefutation.lean` is present (22 KB, `#guard_msgs`-asserted, CI-protected), contrary to the earlier claim that it was cited but absent.
-
-HONESTY BOUND -- what is NOT established: `openBranch_countermodel` is a `forall phi` statement and remains UNPROVED. The evidence above covers eight formulas under `intScheme` and two under `minScheme`; it constructs no general witness. The maximal inclusion frame is NOT a uniform witness -- it fails at `phiRef1` and `phiRef3`. Per the structural argument, proving the general statement is equivalent to proving the tableau procedure complete. This is substantial open mathematical work, not a mechanical restatement and not a small residual.
-
-THE REAL OPEN OBLIGATION (this task's scope):
-(a) Construct `edges` uniformly from the branch `b` -- e.g. `inclEdges b : IEdges`, or a tuned sub-preorder, or a per-formula construction accompanied by a proof that it always exists. Conjunct 1 then falls out of transitivity of `subseteq` on atom sets, independently of every algorithm invariant.
-(b) Prove conjunct 2 (`not IForces ... 0 phi`) over THAT frame. This requires a truth lemma over the chosen frame and is the hard part -- it is where the completeness content actually lives. Note that switching the witness away from the augmented frame does not eliminate this work, it relocates it: the existing conjunct-2 argument is tied to the `augSets` witness threaded by `intExpandBranches_openBranch_sat`.
-(c) Only once (a) and (b) exist: discharge or restate DP-3/DP-4/DP-5/DP-6, repair every call site, and update the docstrings to describe the landed statement rather than an abandoned one.
-Known starting point, unverified: a "raw edges pruned at reuse/blocking sites" construction matches the `phiRef1` witness and is the most promising candidate. Ruled out: the maximal inclusion frame (see the honesty bound). Alternative route: the underlying algorithm defect is real and unfixed -- `intFImpReuseWitnessAnc?` records a loop-back edge on a containment check it never re-validates as the branch grows, which is exactly what makes the augmented frame unusable; fixing it is a second path to a workable frame.
-Genuinely separate residual to keep named: upward-closure of `minBranchBotForces b` at the `bot` formula shape is a second obligation at the DP-4 site. It holds at the `[(1, 0)]` witness but is not established in general.
-
-THE PRECEDENT TO FOLLOW -- this route is already proven in this very file. `intExpandBranches_openBranch_sat` was in exactly this position (a refuted `fuel = 0` base case with a Lean-verified counter-instance) and was successfully repaired by the R1 restatement, which added `hUniv`/`hNW`/`hFuel` preconditions (plus `hLBS`/`hWH`/`hWHC`/`hNC`). It is now SORRY-FREE at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:6815, and its `fuel = 0` arm is discharged via `hFuel` giving `intWork ... < 0`, absurd by `omega`. The counter-instance record survives near :6805 and :6999 as the durable explanation of why the R1 hypotheses exist. The methodological discipline still applies -- find the precondition (here: the frame construction) that makes the statement true, add it, repair call sites, discharge -- with one difference from the R1 case: there, the needed precondition was already identifiable from the counter-instance; here, the needed construction is not yet known and finding it is the research content of the task.
-
-CONSTRAINT: any restated theorem must still be strong enough for the TFAE fold -- folding the tableau nodes into `cplProofSystemsTfae` / `iplProofSystemsTfae` / `mplProofSystemsTfae` in Cslib/Logics/Propositional/ProofSystemEquivalence.lean. A restatement that discharges a sorry but is too weak to serve the TFAE has not solved the problem; verify the TFAE instantiation type-checks before declaring completion.
-
-Zero new sorries, zero new axioms. The four existing sorries stay until (a) and (b) actually land -- laundering them via a weakened statement is explicitly out of bounds, and the existing in-source prohibition on `exact h Nat (intExtractValuation _b) _huc 0` at the DP-3 site stands (it launders an undischarged conjunct).
-
-REALISTIC OUTCOME -- the former success metric ("propositional bare-sorry count drops from 4 to 0") is NOT honestly achievable as a single task and is retired. Since (b) is equivalent to tableau completeness, no sorry-count reduction can be promised in advance. Success is instead: EITHER a uniform frame construction is found and proved (in which case the four sorries follow and the 4-to-0 outcome is reached), OR a documented negative/narrowing result that further constrains the admissible construction space, recorded in-source with the same honesty discipline the current annotations use. Either outcome is a legitimate completion. Consider `/task --expand` to split the frame-construction search from the downstream discharge/restatement work.
-
-EXISTING EVIDENCE TO REUSE (do not re-derive): the machine-checked probes `WitnessProbe.lean`, `WitnessSearch2.lean`, `WitnessSearch3.lean`, and `MinProbe.lean` are preserved at specs/591_decide_openbranch_countermodel_disposition/scratch/ and run via `lake env lean <file>` from the repo root. They are not yet CI-protected; promoting them into `CslibTests/`, mirroring `BetaSplitRefutation.lean`, is a recommended low-cost first step. Reuse-first check already done: `intAccessPreorder` (Scheme.lean:268), `intExtractValuation` (Soundness.lean:1129), `IEdges`/`isAccessible` (Rules.lean:85,92), and `IForces`/`IValid`/`iforces_persistence` (Kripke.lean:81,145,128) cover everything needed; `Mathlib.Relation.ReflTransGen` is already the closure mechanism in use. The only candidate new definition is the frame construction itself.
 
 ---
 
@@ -616,17 +503,6 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 - **Plan**: [400_reconcile_connectives_pr607/plans/02_pr607-engagement.md]
 
 **Description**: [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md] Engage fmontesi PR #607 (feat(Logic): logical operators) to land the connective typeclasses there instead of in #648 (Waring, Zulip 606970606). PREREQ DONE: our Connectives.lean removed from #648 (commit 85db79a6 on feat/propositional-ipl-base). PRIMARY POINT for the #607 review: #607 makes negation primitive (HasNot) and has NO HasBot; for IPL/MPL, neg is definitionally (phi -> bot), so #607 needs a HasBot (and HasTop) class with neg/top DERIVED, else the five-primitive Proposition (primitive bot) cannot register faithfully. SECONDARY: naming HasImpl/impl vs HasImp/imp; notation precedence conflicts (-> 25 vs 30, or 30 vs 35); bundle-vs-a-la-carte (PropositionalConnectives); notation ownership (typeclass notation + _def lemmas vs direct-on-Proposition). DELIVERABLE: human-authored review on #607 (Zulip AI policy), then register Proposition instances via #607 once the falsum question settles. Independent of the IPL-base work.
-
----
-
-### 375. Proof system equivalence tableau sequent edges
-- **Status**: [COMPLETED]
-- **Task Type**: cslib
-- **Topic**: Propositional Logic
-- **Dependencies**: Task 593
-- **Research**: [375_proof_system_equivalence_tableau_sequent_edges/reports/01_tableau-tfae-fold-already-landed.md]
-
-**Description**: Fold the TABLEAU decision systems into the propositional proof-system TFAE. RECONCILED: the sequent edges are ALREADY done - Cslib/Logics/Propositional/ProofSystemEquivalence.lean has cplProofSystemsTfae (Hilbert/ND/LK) and iplProofSystemsTfae (Hilbert/ND/LJ). REMAINING: add the tableau nodes to both TFAEs, wiring Propositional/Tableau/{Classical,Intuitionistic,Minimal}/Completeness.lean into the equivalence. Depends on task 317 (propositional tableau completeness) landing its remaining sorries.
 
 ---
 

@@ -54,12 +54,50 @@
 #   - shake exit 1 but zero flagged-file lines parseable from its output -> environment error,
 #     exit 2 immediately (never silently treat an unparseable failed run as an empty clean set)
 #
+# All four bullet rules above govern all THREE usage modes uniformly -- `--list`, `--update`, and
+# the bare verify gate -- with no per-mode exception. The single implementation of these rules is
+# `validate_shake_result()` (the two fatal-condition checks) composed with `run_shake()` by
+# `run_and_validate_shake()`, mirroring how check-axiom-census.sh's own EXIT-CODE CONTRACT block
+# names `run_and_validate_census()` as its single implementation. If a fourth call site is ever
+# added, it MUST call `run_and_validate_shake()` (or, for a --self-test-style fixture that
+# already has `$shake_exit`/`$live` populated, `validate_shake_result()` directly) -- never
+# re-implement either fatal condition inline. Re-implementing inline, even once, is exactly the
+# defect this script once shipped: `--list` carried only the non-0/1-exit guard and silently
+# omitted the exit-1-with-empty-parse guard, so it reported a stale/broken `lake shake` run as a
+# false "nothing flagged" clean result.
+#
 # Usage:
 #   check-shake-residue.sh            verify against the baseline (exit 1 on regression)
 #   check-shake-residue.sh --update   rewrite the baseline from the current live flagged set
 #   check-shake-residue.sh --list     print the current live flagged set, one path per line
+#   check-shake-residue.sh --self-test
+#                                     run the fixture-based self-test (no `lake` invocation, no
+#                                     built .olean tree required); exits 0 if every assertion
+#                                     passes, 1 if any assertion fails
 #
 # Exit: 0 clean or improved, 1 regression (new import debt), 2 usage/environment error.
+# `--self-test` is the one exception to this three-way contract: it exits 0 on all-assertions-pass
+# and 1 on any failed assertion, matching check-boneyard-quarantine.sh's self-test exit contract
+# rather than the ratchet's own 0/1/2 meaning.
+#
+# SELF-TEST FIXTURE INJECTION (env vars, --self-test only)
+#
+#   SHAKE_SELF_TEST_FIXTURE   when non-empty, short-circuits `run_shake()`'s real `lake shake`
+#                             invocation and instead populates $shake_raw/$shake_exit from a
+#                             named literal fixture (see load_self_test_fixture() below: flagged,
+#                             stale-target, clean, bad-exit). Consulted ONLY when non-empty --
+#                             never touched on any normal invocation path.
+#   SHAKE_SELF_TEST_BASELINE  when non-empty, overrides $BASELINE so --self-test's own subprocess
+#                             `--update` assertions never write to the real
+#                             scripts/shake-residue-baseline.txt ratchet file. Consulted only by
+#                             --self-test's own subprocess re-invocations.
+#
+# Both variables exist solely to make --self-test's per-mode assertions possible without a `lake`
+# invocation or a built .olean tree; they are never read outside of a --self-test run.
+#
+# `--self-test` is NOT currently wired into scripts/pre-pr-check.sh (it would sit beside that
+# script's existing Boneyard quarantine self-test step). Deliberately deferred -- run it manually
+# (`bash scripts/check-shake-residue.sh --self-test`) until a future change wires it in.
 
 set -uo pipefail
 

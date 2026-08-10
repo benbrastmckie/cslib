@@ -297,31 +297,35 @@ still present before closing the phase; that triple is non-negotiable regardless
 
 ---
 
-### Phase 4: Reconcile the EXIT-CODE CONTRACT header and usage block [NOT STARTED]
+### Phase 4: Reconcile the EXIT-CODE CONTRACT header and usage block [COMPLETED]
 
 **Goal**: Make the documented rule, the named implementing function, and all three implemented
 paths agree — the drift between header and implementation is what allowed this defect.
 
 **Tasks**:
-- [ ] In the EXIT-CODE CONTRACT block (lines 46-55), state explicitly that all four bullet rules
+- [x] In the EXIT-CODE CONTRACT block (lines 46-55), state explicitly that all four bullet rules
       govern **all three usage modes** (`--list`, `--update`, and the bare verify gate)
       uniformly. The current text reads mode-agnostically while the implementation was not; make
-      the universality explicit rather than implicit.
-- [ ] Name `validate_shake_result()` / `run_and_validate_shake()` as the single implementation of
+      the universality explicit rather than implicit. *(completed)*
+- [x] Name `validate_shake_result()` / `run_and_validate_shake()` as the single implementation of
       those rules, mirroring how `check-axiom-census.sh`'s header names `run_and_validate_census`
       inside its own contract block, and state that adding a fourth call site means calling the
-      helper, never re-implementing the conditions inline.
-- [ ] Preserve the existing justification for the absence of `set -e` (lines 48-50) verbatim in
-      substance — it explains why the naive fix is wrong and must not be lost.
-- [ ] Extend the Usage block (lines 57-61) with the `--self-test` line, and the `Exit:` line
+      helper, never re-implementing the conditions inline. *(completed)*
+- [x] Preserve the existing justification for the absence of `set -e` (lines 48-50) verbatim in
+      substance — it explains why the naive fix is wrong and must not be lost. *(completed:
+      original wording left byte-identical, only additions made after it)*
+- [x] Extend the Usage block (lines 57-61) with the `--self-test` line, and the `Exit:` line
       (line 62) to note `--self-test` exits 0 on all-pass / 1 on any failed assertion.
-- [ ] Document `SHAKE_SELF_TEST_FIXTURE` (and any baseline-override variable added in Phase 3) in
+      *(completed)*
+- [x] Document `SHAKE_SELF_TEST_FIXTURE` (and any baseline-override variable added in Phase 3) in
       the header: what it does, that it is consulted only when non-empty, and that it exists
-      solely for `--self-test`.
-- [ ] Add a short note recording that `--self-test` is **not** currently wired into
+      solely for `--self-test`. *(completed: both `SHAKE_SELF_TEST_FIXTURE` and
+      `SHAKE_SELF_TEST_BASELINE` documented in a new "SELF-TEST FIXTURE INJECTION" subsection)*
+- [x] Add a short note recording that `--self-test` is **not** currently wired into
       `scripts/pre-pr-check.sh`, so a future maintainer knows it must be run deliberately. Do not
       cite a task number — use a durable anchor (the script name and the step-10 Boneyard
-      self-test it would sit beside).
+      self-test it would sit beside). *(completed: no task-number citation; anchored to
+      `scripts/pre-pr-check.sh`'s existing Boneyard quarantine self-test step by name)*
 
 **Timing**: 0.5 hours
 

@@ -1,0 +1,19 @@
+{
+  "phase": 4,
+  "phase_name": "Reconcile the EXIT-CODE CONTRACT header and usage block",
+  "started_at": "2026-08-10T23:58:00Z",
+  "last_updated": "2026-08-11T00:05:00Z",
+  "objectives": [
+    {"id": 1, "description": "Extend EXIT-CODE CONTRACT header block: mode-uniformity statement, name the helper functions, extend Usage/Exit lines, document SELF-TEST env vars, note the pre-pr-check.sh non-wiring follow-up", "status": "done", "files_touched": ["scripts/check-shake-residue.sh"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "verification_notes": [
+    "git diff -U0 -- scripts/check-shake-residue.sh: every changed hunk lies inside the leading # comment block (lines 57-100 region), zero executable lines touched.",
+    "bash -n scripts/check-shake-residue.sh parses clean.",
+    "grep -n 'validate_shake_result\\|run_and_validate_shake' scripts/check-shake-residue.sh shows both header mentions and definitions.",
+    "No task-number citation patterns found in scripts/check-shake-residue.sh."
+  ]
+}

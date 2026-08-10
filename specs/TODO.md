@@ -1,5 +1,5 @@
 ---
-next_project_number: 625
+next_project_number: 626
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 625
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620,625 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -84,7 +84,109 @@ next_project_number: 625
 
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
+### Repository Tooling
+
+625 [NOT STARTED] — `scripts/check-shake-residue.sh --list` can exit 0 with zero outp
+
 ## Tasks
+
+### 625. check-shake-residue.sh --list reports a false clean when lake shake fails on an out-of-date target
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Repository Tooling
+- **Dependencies**: None
+
+**Description**: `scripts/check-shake-residue.sh --list` can exit 0 with zero output when `lake shake` did not actually complete an analysis — indistinguishable from a genuine "nothing flagged" result. Observed live during task 623's verification step, which used `--list` as its closing check.
+
+=== OBSERVED ===
+
+Running `lake shake` against a tree whose `Cslib` facade target is not fully built produces
+`target is out-of-date and needs to be rebuilt` rather than an import analysis. The wrapper's
+flagged-line extractor (`parse_flagged_set`, `grep -E '^/.*\.lean:$'`) matches only shake's
+per-file header lines, so that error text yields an EMPTY live set. Confirmed directly:
+
+    printf 'error: target is out-of-date and needs to be rebuilt\n' | grep -E '^/.*\.lean:$'
+    -> no match
+
+=== ROOT CAUSE: A GUARD ASYMMETRY ACROSS THE THREE MODES ===
+
+The script's own EXIT-CODE CONTRACT (header comment, lines 46-55) specifies TWO fatal
+conditions. Both are implemented on the bare/verify path and on `--update`, but only ONE is
+implemented on `--list`:
+
+| Path                  | non-0/1 shake exit | shake exit 1 + empty parse |
+|-----------------------|--------------------|----------------------------|
+| bare (verify gate)    | exit 2 (L150-155)  | exit 2 (L157-162)          |
+| `--update`            | exit 2 (L108-111)  | exit 2 (L112-115)          |
+| `--list`              | exit 2 (L99-102)   | MISSING -> falls to exit 0 |
+
+So a shake run that exits 1 while producing no parseable flagged lines is correctly rejected by
+the two paths that mutate or gate, and silently reported as clean by `--list`. The header
+comment at lines 54-55 states the intended rule without qualification ("never silently treat an
+unparseable failed run as an empty clean set"), so `--list` diverges from the script's own
+documented contract.
+
+=== SEVERITY: BOUNDED, BUT REAL ===
+
+NOT a CI weakening. This script is deliberately local-only — `.github/workflows/lean_action_ci.yml`
+lines 25 and 77 record that shake enforcement lives outside CI on purpose. The gating caller,
+`scripts/pre-pr-check.sh:93`, invokes the script BARE, and that path already has both guards.
+
+The exposure is that `--list` is used as a human- and agent-facing VERIFICATION step. Task 623's
+plan named `bash scripts/check-shake-residue.sh --list` as its pre-close confirmation, and that
+is exactly where the false clean fired — the agent noticed only because it independently
+reproduced the underlying `lake shake` failure and substituted a scoped `lake shake --force`
+invocation. A less careful run would have recorded a passing verification.
+
+=== DETERMINE THIS FIRST — IT CHANGES THE FIX ===
+
+Establish what exit code `lake shake` actually returns when it fails with `target is out-of-date`.
+The evidence is consistent with either 0 or 1 (for `--list` to have exited 0 silently, shake must
+have returned one of them, since a third value is already caught at L99-102). The two cases need
+different fixes:
+
+  - **If shake exits 1**: hoisting the existing `exit 1 + empty -> exit 2` guard into the `--list`
+    branch closes the defect completely. ~5 lines, mirroring L112-115 verbatim.
+
+  - **If shake exits 0**: the guard hoist does NOT help, and the problem is materially worse than
+    the `--list` branch alone. `--update` would then write an EMPTY baseline, destroying the
+    12-entry ratchet in `scripts/shake-residue-baseline.txt`; and the bare verify path would
+    report all 12 baseline entries as `IMPROVED` and print the suggestion to re-run `--update` —
+    an inviting trap chain that ends in a silently zeroed gate. In this case the fix must be a
+    positive-confirmation check (e.g. require evidence that shake actually analyzed the target)
+    applied to ALL THREE modes, not an exit-code refinement.
+
+Do not assume the benign case. Reproduce it: the failure mode is reachable by invoking the script
+when the `Cslib` facade target lacks fresh oleans.
+
+=== SUGGESTED APPROACH ===
+
+1. Reproduce and record shake's real exit code in the out-of-date failure mode.
+2. Apply the fix indicated by that finding (guard hoist, or positive-confirmation across all
+   three modes).
+3. Keep the script's existing no-`set -e` design and its documented 0/1 exit-code contract — the
+   header block at lines 46-55 explains why `set -e` is wrong here.
+4. Add a self-test with synthetic shake output fixtures, matching the fixture convention already
+   used by `check-runtime-file-tracking.sh`.
+5. Update the EXIT-CODE CONTRACT header block so the documented rule and the three implemented
+   paths agree.
+
+=== NOTE ON FILE_SCOPE OVERLAP ===
+
+Task 595 declares a coarse `file_scope` of `["scripts/"]`, which directory-prefix-overlaps this
+task's file. The two touch DIFFERENT files — 595 creates a new dependency-integrity gate; this
+task edits an existing script — so no serializing `dependencies[]` edge was added, to avoid
+blocking a small fix behind a large unstarted metatask. The runtime admission gate
+(`orchestrate-batch-admit.sh`) will defer co-dispatch if they are ever batched together, which is
+the intended safety net for exactly this coarse-declaration case.
+
+=== PROVENANCE ===
+
+Surfaced during task 623's implementation (adding the missing Scheme import to the intuitionistic
+tableau sub-barrel), where `--list` was the plan's verification step. Independent of that task's
+outcome, which was verified by other means and completed successfully.
+
+---
 
 ### 624. Document that lake env lean skips --setup and is unsafe for module-system files
 - **Status**: [COMPLETED]

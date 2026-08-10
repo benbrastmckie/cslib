@@ -1,0 +1,27 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T00:00:00Z",
+  "completed_at": "2026-08-10T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/623_intuitionistic_barrel_omits_scheme/reports/01_barrel-scheme-omission.md",
+      "summary": "Barrel convention survey across all 26 Cslib/Logics/ sub-barrels; verdict that the Scheme omission is an oversight fixable with one public import line, and that Cslib.lean must not be touched (mk_all-generated, CI-enforced exhaustive)"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Static survey finished; no lake build run, per task cost constraint. One residual item deferred to implementation: confirm lake shake does not flag the barrel (requires a built tree)."
+  },
+  "metadata": {
+    "session_id": "sess_1786397542_991316_623",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "barrels_surveyed": 26,
+    "barrels_exhaustive": 13,
+    "barrels_partial": 13,
+    "builds_run": 0,
+    "mcp_tools_used": []
+  }
+}

@@ -40,14 +40,17 @@ avoided to prevent typeclass resolution ambiguity on `Bool`-valued data.
 `intClosed_unsatisfiable`. For minimal soundness with arbitrary `botForces`, pass
 `minClosed_unsatisfiable` directly to `intExpandBranches_closed_unsat`.
 
-`modelBot_uc` (upward-closure of `modelBot b`) is omitted from this interface because
-it requires a saturation hypothesis for the minimal scheme; it is proved inline inside
-the parametric truth lemma in `Scheme.lean`.
+`modelBot_uc` (upward-closure of `modelBot b`) takes a step-relation-level persistence
+witness for the `⊥` shape as a hypothesis, rather than being derivable from `bot_truth`
+alone: `bot_truth` only relates `modelBot` to branch content in one direction
+(`T(⊥)@w ∈ b → modelBot b w`), so recovering `T(⊥)@w ∈ b` from `modelBot b w` -- needed to
+chain persistence forward -- is not available for an arbitrary `modelBot`. Both `intScheme`
+and `minScheme` discharge it without needing that recovery (see the field's own doc comment).
 
 ## Main Definitions
 
 - `IntMinScheme`: Structure with fields `closurePred`, `modelBot`, `closed_unsat`,
-  `bot_truth`.
+  `bot_truth`, `modelBot_uc`.
 - `intScheme`: Intuitionistic instance (`isIntuitionisticallyClosed`, `fun _ _ => False`).
 - `minScheme`: Minimal instance (`isMinimallyClosed`, `minBranchBotForces`).
 
@@ -170,6 +173,24 @@ structure IntMinScheme (Atom : Type*) [DecidableEq Atom] [Hashable Atom] where
       ∀ (φ : Proposition Atom) (w : Nat),
         ¬ (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) = true ∧
            b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true)
+  /-- Upward-closure of `modelBot b`, conditional on a step-relation-level persistence witness
+  for the `⊥` shape -- matching `intExpandBranches_openBranch_sat`'s χ-general 7th conjunct
+  (equivalently `openBranch_rawEdges_upward_closed`'s χ-general conclusion) instantiated at
+  `χ := HasBot.bot`. This is NOT derivable from `bot_truth`/`no_contradiction` alone: those
+  relate `modelBot` to branch content in only ONE direction (`T(⊥)@w ∈ b → modelBot b w`), so
+  recovering `T(⊥)@w ∈ b` from `modelBot b w` -- needed to chain persistence forward to `w'` --
+  is not available for an arbitrary `modelBot` without an independent totality/bivalence fact
+  (none is established in this file, see the STOP-gate note above `truthLemma`). Both instances
+  discharge it without any such recovery:
+  - Intuitionistic: `modelBot := fun _ _ => False`, so the hypothesis `modelBot b w` is
+    vacuously `False` and upward-closure is immediate.
+  - Minimal: `modelBot := minBranchBotForces b`, *definitionally* `T(⊥)@w ∈ b`, so the
+    persistence witness applies directly with no recovery step needed. -/
+  modelBot_uc : ∀ (b : IBranch Atom) (step : Nat → Nat → Prop),
+      (∀ {w w' : Nat}, step w w' →
+        (⟨.pos, (HasBot.bot : Proposition Atom), w⟩ : ISF Atom) ∈ b →
+        (⟨.pos, (HasBot.bot : Proposition Atom), w'⟩ : ISF Atom) ∈ b) →
+      ∀ {w w' : Nat}, Relation.ReflTransGen step w w' → modelBot b w → modelBot b w'
 
 /-! ## Intuitionistic Scheme Instance -/
 
@@ -220,6 +241,7 @@ def intScheme : IntMinScheme Atom where
     obtain ⟨_, hnocontra⟩ := hopen
     -- Branch.hasContradiction = isMinimallyClosed (definitional)
     exact minOpen_no_contradiction b hnocontra φ w
+  modelBot_uc := fun _ _ _ {_ _} _hle hbot => hbot.elim
 
 /-! ## Minimal Scheme Instance -/
 
@@ -245,6 +267,21 @@ def minScheme : IntMinScheme Atom where
       exact minOpen_no_contradiction b hopen (HasBot.bot : Proposition Atom) w ⟨hTbot, hFbot⟩
   no_contradiction := fun b hopen φ w =>
     minOpen_no_contradiction b hopen φ w
+  modelBot_uc := fun b step hpers {_ _} hle hbot => by
+    simp only [minBranchBotForces] at hbot ⊢
+    induction hle with
+    | refl => exact hbot
+    | @tail y w2 _hchain hstep ih =>
+      simp only [List.any_eq_true] at ih
+      obtain ⟨sf, hsfb, hsfp⟩ := ih
+      simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+      obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+      have hsfeq : sf = (⟨.pos, (HasBot.bot : Proposition Atom), y⟩ : ISF Atom) := by
+        cases sf; simp_all
+      have hmem_y : (⟨.pos, (HasBot.bot : Proposition Atom), y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
+      have hmem_w2 : (⟨.pos, (HasBot.bot : Proposition Atom), w2⟩ : ISF Atom) ∈ b :=
+        hpers hstep hmem_y
+      exact List.any_eq_true.mpr ⟨_, hmem_w2, by simp⟩
 
 /-! ## Edge-Accessibility Preorder
 
@@ -9471,100 +9508,77 @@ world 0.
 - At `intScheme`: specializes to `intuitionisticOpenBranch_countermodel`.
 - At `minScheme`: specializes to `minOpenBranch_countermodel`.
 
-## Proof structure
+## Proof structure (sorry-free)
 
-The proof is currently a single `sorry` over the whole existential (see the sorry-site comment
-below): no `edges` witness is committed. An earlier revision extracted `h`'s structural facts
-(`hopen`, `hsat`/`hfimp`, `hFmem : F(φ)@0 ∈ b`, and `edges` itself via
-`intExpandBranches_openBranch_sat`) and closed the `¬IForces` conjunct with
-`(truthLemma S b edges hopen hsat hfimp hpers φ 0).2 hFmem`, committed to the AUGMENTED
-`augSets` witness via an early `refine` -- but `hpers` is REFUTED at that frame (see the
-frame-adequacy table below), so that route cannot supply `truthLemma`'s hypotheses honestly.
-The identical extraction machinery survives verbatim in `openBranch_rawEdges_upward_closed`
-immediately below, so it is available to a future attempt without being re-derived; existentially
-packaging `edges` here (rather than fixing it) is a Postmortem-5 revision -- this internal
-conclusion MAY expose `edges`, while the stable public `tableau_complete`/`Decidable` contract,
-discharged elsewhere, does not.
+The proof commits to the AUGMENTED `augSets` witness `intExpandBranches_openBranch_sat`
+threads (the accumulator that also carries the loop-back edges `intFImpReuseWitnessAnc?`
+records) and closes all three conjuncts from ONE `truthLemma` instantiation at that frame:
+`hopen`/`hsat`/`hfimp`/`edges` are extracted exactly as `openBranch_rawEdges_upward_closed`
+below does, plus the 7th conjunct `hpersAug` -- χ-general positive persistence over the
+AUGMENTED frame, established by re-validating `intFImpReuseWitnessAnc?`'s loop-back
+containment as the branch grows (`IAugMembers`/`IReuseContain`, closing the historical gap
+recorded below). Conjunct 3 (`¬IForces`) is `(truthLemma S b edges hopen hsat hfimp hpersAug
+φ 0).2 hFmem`, where `hFmem : F(φ)@0 ∈ b` comes from `intExpandBranches_openBranch_initial_mem`
+(the seed formula persists to the final branch). Conjuncts 1 and 2 (`intExtractValuation`
+upward-closure and `S.modelBot` upward-closure) are both χ-general instantiations of
+`hpersAug` (at `χ := .atom p` and `χ := HasBot.bot` respectively), tail-peeled along the
+`ReflTransGen` chain exactly as `openBranch_rawEdges_upward_closed`'s proof does; conjunct 2
+routes through the new `IntMinScheme.modelBot_uc` field (see that field's doc comment) since
+`S.modelBot` is abstract and `bot_truth` alone cannot recover branch membership from it.
 
-**Statement-shape fix (upward-closure conjuncts).** The conclusion existentially quantifies over
-`edges`, unlike the machine-verified defective premise `tableau_complete` used to demand
-(`CslibTests/HvalidShapeRefutation.lean`, `lake env lean` clean, zero sorries: `hvalid`'s old
-unconstrained-`(edges, b)` shape is false at a concrete witness even though the formula it is
-applied to is valid). Moving the obligation here, where `b`'s real provenance
+**Statement-shape fix (upward-closure conjuncts, historical).** The conclusion existentially
+quantifies over `edges`, unlike the machine-verified defective premise `tableau_complete` used
+to demand (`CslibTests/HvalidShapeRefutation.lean`, `lake env lean` clean, zero sorries:
+`hvalid`'s old unconstrained-`(edges, b)` shape is false at a concrete witness even though the
+formula it is applied to is valid). Moving the obligation here, where `b`'s real provenance
 (`hUniv`/`hFuel`/`hACC` from `intExpandBranches_openBranch_sat`) is in scope, is what makes it
-fillable at all. `tableau_complete` itself stays sorry-free; only this lemma carries the deferred
-obligation, relocated from the unfillable shape DP-3/DP-4 used to have.
+fillable at all.
 
 **Third conjunct: `S.modelBot b`'s upward-closure.** The existential carries a THIRD conjunct
 beyond the valuation upward-closure and the `¬IForces` obligation:
 `∀ {w w'}, w ≤ w' → S.modelBot b w → S.modelBot b w'`. This mirrors the analogous, previously
 missing conjunct of `MValid`/`IValid` (`CslibTests/MvalidBotShapeRefutation.lean` machine-checks
 that omitting it makes the old `hvalid` premise shape false even when the valuation conjunct
-holds). Unlike conjunct 2 above, this third conjunct costs NOTHING beyond what conjunct 1
-already proves: `openBranch_rawEdges_upward_closed`'s `χ`-general statement (proved above this
-lemma) already discharges upward closure for ANY positive-formula shape at ONE shared `rawEdges`
-witness, so `openBranch_rawEdges_both_upward_closed`'s valuation instance (`χ := .atom p`) and
-`⊥`-shape instance (`χ := HasBot.bot`) are two instantiations of the same fact, not two separate
-obligations. Whatever witness this lemma's still-open `sorry` eventually commits to for
-conjuncts 1/2, if it is a sub-frame of `rawEdges` (any edge list `edges'` with
-`∀ e ∈ edges', e ∈ rawEdges`), `intAccessPreorder_mono_subset` transfers BOTH upward-closure
-facts to it for free -- the third conjunct never needs its own frame search.
+holds). It is discharged the same way conjunct 1 is (a `χ`-general instantiation of `hpersAug`
+at `χ := HasBot.bot`), routed through `IntMinScheme.modelBot_uc`.
 
-**Open — no `edges` witness is committed by this proof.** Unlike an earlier revision, the proof
-below does NOT `refine` a specific `edges` (e.g. the AUGMENTED `augSets` witness
-`intExpandBranches_openBranch_sat` threads) and then `sorry` one conjunct over it — doing so
-would put a REFUTED statement (see the frame-adequacy table below) behind the `sorry`. The whole
-existential stays `sorry`, and that goal genuinely IS open, not refuted: `IValid φ` quantifies
-over every preorder and every upward-closed valuation, so any refutation would have to exhibit
-an IPC-valid `φ` on which the algorithm returns `.openBranch`, and no such `φ` is known or
-sought here.
+**Frame-adequacy table (historical record).** The augmented frame used to be REFUTED for
+positive persistence, and the raw frame REFUTED for `IFimpAccess` -- no single frame the
+pre-repair algorithm produced carried both predicates `truthLemma` needs simultaneously.
+This is exactly the residual obligation `intFImpReuseWitnessAnc?`'s loop-back-containment
+repair closes: re-validating the containment check as the branch grows lets the augmented
+frame carry positive persistence WITHOUT losing `IFimpAccess`, so one frame now carries both.
 
-**Frame-adequacy table (machine-checked).** `truthLemma` consumes exactly two frame-dependent
-facts: `IFimpAccess edges b` (F-imp case) and positive persistence `hpers` along `edges` (T-imp
-case, DP-5, now discharged above). Conjunct 1 of this lemma is the atom-shaped special case of
-`hpers`. The two edge lists the algorithm produces sit on OPPOSITE sides of this pair:
-
-| frame | `IFimpAccess` | `hpers` |
+| frame | `IFimpAccess` | positive persistence |
 |---|---|---|
-| augmented (`augSets`) | holds (`:6924`) | REFUTED (`BetaSplitRefutation.lean`) |
+| augmented (`augSets`), pre-repair | holds | REFUTED (`BetaSplitRefutation.lean`) |
+| augmented (`augSets`), post-repair | holds (`:6924`) | **holds** (`hpersAug`, this file) |
 | raw (`rawEdges`) | REFUTED (`phiRef1`/`phiRef2` @2, `phiRef3` @3,4) | holds (`IPosPersistRaw`) |
 
-Both refutations are machine-checked against the real algorithm at the real fuel: no candidate
-`edges` built from the algorithm's current output carries both predicates simultaneously, so no
-`truthLemma` call — over either edge list — closes this lemma's `¬IForces` conjunct together
-with a matching upward-closure proof.
-
-**`rawEdges` is REFUTED as a conjunct-2 witness**, not merely unproved:
-`CslibTests/WitnessProbe.lean:174-176` (`#eval check [(1,0),(2,1)]` reports `some (true, true)` —
-upward-closed but FORCES `phiRef1` at world 0) together with
+`rawEdges` was, and remains, REFUTED as a witness for `IFimpAccess` (unaffected by this
+repair): `CslibTests/WitnessProbe.lean:174-176` (`#eval check [(1,0),(2,1)]` reports
+`some (true, true)` — upward-closed but FORCES `phiRef1` at world 0) together with
 `CslibTests/BetaSplitRefutation.lean:304` (the algorithm's real raw edge list for `phiRef1` at
 the real fuel `intFuelExt phiRef1` is exactly `[(1,0),(2,1)]`) and `:387`
 (`branchesAgree = true`, confirming that recreated list matches the REAL `intuitionisticTableau`
-run) together pin the algorithm's actual `rawEdges` output to a frame that satisfies conjunct 1
-but FAILS conjunct 2.
+run) together pin the algorithm's actual `rawEdges` output to a frame that satisfies positive
+persistence but FAILS `IFimpAccess` — which is exactly why the AUGMENTED frame, not `rawEdges`,
+is this proof's witness.
 
-**Three candidate sub-frame constructions are EXCLUDED**, not merely untried: pruning at blocked
-worlds and pruning at strictly-blocked worlds contradict each other on the same syntactic signal
-(the former fails `dblNeg`/`peirce`, the latter fails `phiRef3`), and the greatest
-`IFimpAccess`-supported fixpoint `K` — the construction a truth-lemma proof would actually need,
-since it makes the F-imp case close by construction — collapses to `K = ∅` for
-`phiRef1`/`phiRef2`/`phiRef3` (the unsupported blocked world strands its parent, up to world 0).
-The maximal atom-inclusion frame `⊑` was already excluded (fails `phiRef1`/`phiRef3`). None of
-the five natural constructions tried is a uniform witness.
+**Three candidate sub-frame constructions were EXCLUDED during the search that preceded this
+repair**, not merely untried: pruning at blocked worlds and pruning at strictly-blocked worlds
+contradict each other on the same syntactic signal (the former fails `dblNeg`/`peirce`, the
+latter fails `phiRef3`), and the greatest `IFimpAccess`-supported fixpoint `K` collapses to
+`K = ∅` for `phiRef1`/`phiRef2`/`phiRef3` (the unsupported blocked world strands its parent, up
+to world 0). The maximal atom-inclusion frame `⊑` was also excluded (fails `phiRef1`/`phiRef3`).
+None of those five constructions was a uniform witness; the actual fix was calculus-level
+(re-validating `intFImpReuseWitnessAnc?`'s loop-back containment), not a different frame
+construction over the unrepaired algorithm.
 
-**The residual obligation is precisely this**: a frame carrying `IFimpAccess` and positive
-persistence SIMULTANEOUSLY, which the current calculus does not produce. This IS the surviving
-`sorry`'s goal, and it is OPEN, not refuted — the sub-frame search is not exhausted, merely
-unsuccessful with the constructions tried, and conjunct 2 can hold WITHOUT a truth lemma at all
-(e.g. `rawEdges` itself is a witness for `phiRef2`, even though the `IFimpAccess` fixpoint
-collapses there too) — so truth-lemma routes are strictly stronger than the goal and can fail
-where the goal succeeds.
-
-**Root cause, out of this file's scope.** Every route above dead-ends on the same defect:
-`intFImpReuseWitnessAnc?` (`Expansion.lean`) records a loop-back edge on a containment check it
-never re-validates as the branch grows. Re-validating it is what would let the augmented frame
-carry positive persistence, giving one frame with both predicates and collapsing this whole
-problem — that is calculus-level work in `Expansion.lean`, tracked separately from this file.
+**Root cause, now repaired.** `intFImpReuseWitnessAnc?` (`Expansion.lean`) used to record a
+loop-back edge on a containment check it never re-validated as the branch grows. Re-validating
+it is what lets the augmented frame carry positive persistence, giving one frame with both
+predicates and closing this lemma's `sorry`.
 
 ## References
 
@@ -9580,20 +9594,75 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
         S.modelBot b w → S.modelBot b w') ∧
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
-  -- sorry: the whole existential -- OPEN, not refuted (see the docstring's frame-adequacy
-  -- table above for the full disposition). No `edges` witness is committed here: an earlier
-  -- revision `refine`d the AUGMENTED `augSets` witness and then `sorry`d the upward-closure
-  -- conjunct alone, which put a REFUTED statement (augmented-frame positive persistence,
-  -- `CslibTests/BetaSplitRefutation.lean`) behind that `sorry`. `rawEdges` is REFUTED as a
-  -- conjunct-2 witness (`CslibTests/WitnessProbe.lean:174-176`,
-  -- `CslibTests/BetaSplitRefutation.lean:304,387`); three pruning-rule constructions and the
-  -- `IFimpAccess` greatest fixpoint are EXCLUDED (collapse to `K = ∅`); the maximal
-  -- atom-inclusion frame `⊑` was already excluded. The residual obligation is a frame carrying
-  -- both `IFimpAccess` and positive persistence, which the current calculus does not produce --
-  -- root cause is `intFImpReuseWitnessAnc?` (`Expansion.lean`), calculus-level work outside
-  -- this file. The extraction/`refine` machinery an earlier revision used here survives
-  -- verbatim in `openBranch_rawEdges_upward_closed` immediately below, so nothing is lost.
-  sorry
+  -- Committed to the AUGMENTED `augSets` witness -- no longer refuted at this frame: the
+  -- augmented-frame positive-persistence gap the frame-adequacy table above used to record is
+  -- now closed (see this lemma's docstring), so both `IFimpAccess` and positive persistence hold
+  -- SIMULTANEOUSLY here, which is exactly what a `truthLemma` instantiation needs.
+  have hopen : S.closurePred b = false :=
+    intExpandBranches_openBranch_closed [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+      S.closurePred b h
+  obtain ⟨edges, _rawEdges, _lbEdges, _nwF, hsat, hfimp, _hpp, _hrc, _hfc, _hwp, hpersAug⟩ :=
+    intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+      [[]] [[]] _ _
+      (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
+      (by simp [IAllAccessConsistent, IExpandedAccessConsistent])
+      (by simp [IAllReuseContain, IReuseContain])
+      (by simp [IAllReuseFrozenOrigin, IReuseFrozenOrigin])
+      (by simp [IAllAugMembers, IAugMembers])
+      (fun b hb x hx => by
+        simp only [List.mem_singleton] at hb
+        subst hb
+        simp only [List.mem_singleton] at hx
+        subst hx
+        exact mem_intUniverseExt_of (Nat.zero_le _) (intSubfmls_self_mem φ))
+      (fun nw hnw => by simp only [List.mem_singleton] at hnw; subst hnw; exact WBound_pos φ)
+      (by simp only [IAllFuel]; exact ⟨intWork_init_lt_intFuelExt φ, trivial⟩)
+      (by simp [IAllLabelBoundStrict, ILabelBoundStrict])
+      ⟨IWorldHist_entry _ _ _ _, trivial⟩
+      ⟨IWorldHistCounter_entry, trivial⟩
+      (fun b' hb' ψ w hmem hcontra => by
+        simp only [posFormulasAt, List.mem_filterMap] at hcontra
+        obtain ⟨sf, hsfmem, hif⟩ := hcontra
+        by_cases hcond : sf.sign == .pos && sf.label == w
+        · simp only [hcond, ite_true, Option.some.injEq] at hif
+          simp only [Bool.and_eq_true] at hcond
+          have hposAny : b'.any (fun sf => sf.sign == .pos && sf.formula == ψ && sf.label == w)
+              = true :=
+            List.any_eq_true.mpr ⟨sf, hsfmem, by simp [hcond.1, hcond.2, hif]⟩
+          have hnegAny : b'.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w)
+              = true :=
+            List.any_eq_true.mpr ⟨_, hmem, by simp⟩
+          exact S.no_contradiction b' hb' ψ w ⟨hposAny, hnegAny⟩
+        · simp only [hcond, Bool.false_eq_true, ite_false] at hif
+          exact absurd hif (by simp))
+      h
+  have hFmem : (⟨.neg, φ, 0⟩ : ISF Atom) ∈ b :=
+    intExpandBranches_openBranch_initial_mem ⟨.neg, φ, 0⟩ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+      [intFuelExt φ] S.closurePred (fun b0 hb0 => by simp_all) b h
+  have hFmemAny : b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == 0) = true :=
+    List.any_eq_true.mpr ⟨_, hFmem, by simp⟩
+  refine ⟨edges, ?_, ?_, (truthLemma S b edges hopen hsat hfimp hpersAug φ 0).2 hFmemAny⟩
+  · -- Conjunct 1: `intExtractValuation b` upward-closure along `edges`, from `hpersAug`
+    -- instantiated at `χ := .atom p` and tail-peeled along the `ReflTransGen` chain -- the same
+    -- shape as `openBranch_rawEdges_upward_closed`'s proof below, but over the augmented frame.
+    intro w w' p hle hval
+    induction hle with
+    | refl => exact hval
+    | @tail y w2 _hchain hstep ih =>
+      simp only [intExtractValuation, List.any_eq_true] at ih
+      obtain ⟨sf, hsfb, hsfp⟩ := ih
+      simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+      obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+      have hsfeq : sf = (⟨.pos, .atom p, y⟩ : ISF Atom) := by cases sf; simp_all
+      have hmem_y : (⟨.pos, .atom p, y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
+      have hmem_w2 : (⟨.pos, .atom p, w2⟩ : ISF Atom) ∈ b := hpersAug (.atom p) y w2 hstep hmem_y
+      simp only [intExtractValuation]
+      exact List.any_eq_true.mpr ⟨_, hmem_w2, by simp⟩
+  · -- Conjunct 2: `S.modelBot b` upward-closure, via the new `modelBot_uc` structure field,
+    -- fed the `χ := HasBot.bot` instantiation of `hpersAug` as its persistence witness.
+    intro w w' hle hval
+    exact S.modelBot_uc b (fun x y => isAccessible edges x y = true)
+      (fun {x y} hstep hmem => hpersAug (HasBot.bot : Proposition Atom) x y hstep hmem) hle hval
 
 /-- **Conjunct 1 of `openBranch_countermodel`, discharged uniformly for arbitrary `χ`.**
 Constructs `edges` as `rawEdges` -- the tree-only parent-child edge witness

@@ -1,26 +1,39 @@
 {
   "status": "implemented",
-  "started_at": "2026-08-10T00:00:00Z",
-  "completed_at": "2026-08-10T00:00:00Z",
+  "started_at": "2026-08-10T14:10:30Z",
+  "completed_at": "2026-08-10T14:31:26Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 7 marked [COMPLETED]. All four task-list items checked off with deviation annotation (conclusion extended directly rather than a separate corollary, since the underlying IAugMembers invariant needed threading regardless)."
+      "summary": "Phase 8 marked [COMPLETED], task list checked off with a deviation annotation on the hbuc-sourcing item (new IntMinScheme.modelBot_uc field, since openBranch_rawEdges_both_upward_closed only covers minBranchBotForces, not an abstract S.modelBot)."
     },
     {
       "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/11_phase7-complete.md",
-      "summary": "Full record of Phase 7: isAccessible_decompose (generic graph decomposition), IAugMembers/IAllAugMembers (new provenance invariant threaded through all ten key-induction cases), IAugMembers_persist (the payoff lemma), the 7th conjunct on intExpandBranches_openBranch_sat, and a type-checking shape-check example against truthLemma's hpers parameter."
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/12_phase8-complete.md",
+      "summary": "Full record of the openBranch_countermodel discharge, the new modelBot_uc structure field and its rationale, the docstring rewrite, and full verification detail."
     }
   ],
-  "blockers": [],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+  ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Phase 7 fully implemented and verified in one dispatch.",
+    "details": "Phase 8 fully discharged in one green checkpoint: openBranch_countermodel sorry-free, new IntMinScheme.modelBot_uc field added and both instances updated, docstring rewritten.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 7
+    "phases_completed": 8,
+    "last_completed_phase": "Phase 8: Discharge openBranch_countermodel"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 1,
+    "sorry_count_before": 2,
+    "sorry_count_note": "Declaration-level sorry count across the whole repo (lake build's 'declaration uses sorry' warnings), which is the authoritative signal -- went from 2 to 1. The remaining one is Intuitionistic/Completeness.lean:181, explicitly Phase 9's territory. (A raw grep -rn sorry word-count on Cslib/ also dropped, from 196 to 187, but that delta is dominated by prose 'sorry' mentions removed from openBranch_countermodel's rewritten docstring, not proof content -- the declaration-level count is the meaningful metric.)",
+    "vacuous_count": 1,
+    "axiom_count": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   },
   "metadata": {
     "session_id": "sess_1786368658_52fe41",
@@ -28,19 +41,5 @@
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed"
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 196,
-    "vacuous_count": 1,
-    "axiom_count": 26,
-    "build_passed": true,
-    "ci_pipeline_passed": true
-  },
-  "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/11_phase7-complete.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.return-meta.json"
-  ]
+  }
 }

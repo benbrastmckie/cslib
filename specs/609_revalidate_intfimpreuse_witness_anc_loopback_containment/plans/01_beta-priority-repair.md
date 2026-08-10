@@ -1154,33 +1154,67 @@ can now instantiate `truthLemma` at the augmented frame using this conjunct dire
 
 ---
 
-### Phase 8: Discharge `openBranch_countermodel` [NOT STARTED]
+### Phase 8: Discharge `openBranch_countermodel` [COMPLETED]
 
 **Goal**: Replace the whole-existential `sorry` with a direct `truthLemma` instantiation at the
 augmented frame. This is the phase that interacts with task 605.
 
 **Tasks**:
-- [ ] **First**, detect the landed statement shape. Read `openBranch_countermodel`'s signature
+- [x] **First**, detect the landed statement shape. Read `openBranch_countermodel`'s signature
       (currently around `Scheme.lean:8014`) and check whether 605's modelBot upward-closure
       conjunct is present. Do not assume either way; both branches are legitimate.
-- [ ] Instantiate `truthLemma` at the augmented frame, supplying `hfimp` from `IFimpAccess` (which
+      *(605's patch WAS landed: the three-conjunct shape — `huc`/`hbuc`/`hcm` — was already the
+      live signature at dispatch start, confirmed by direct read.)*
+- [x] Instantiate `truthLemma` at the augmented frame, supplying `hfimp` from `IFimpAccess` (which
       the report §3 confirms already holds over the augmented frame for every measured formula) and
       `hpers` from Phase 7.
-- [ ] Discharge `huc` (the valuation's upward-closure conjunct) and `hcm` (the `¬IForces`
+- [x] Discharge `huc` (the valuation's upward-closure conjunct) and `hcm` (the `¬IForces`
       conjunct). Per report §3, conjunct 2 already held over the augmented frame in the baseline —
       `hpers` was the only gap, and Phase 7 closes it.
-- [ ] If 605's `hbuc` conjunct is present: source it from 605's `openBranch_rawEdges_both_upward_closed`,
+- [x] If 605's `hbuc` conjunct is present: source it from 605's `openBranch_rawEdges_both_upward_closed`,
       which by design returns both upward-closure facts at one shared `edges`. Do **not** re-derive,
       weaken, or drop it, and do **not** revert the `MValid.{_, 0}` universe pin. If it is absent:
       discharge the two-conjunct shape and add an in-source note naming the exact seam where the
       third conjunct will thread, addressed to whoever reconciles 605 and 609.
-- [ ] This phase edits 605's declared territory at the end of `Scheme.lean`. If 605 landed first,
+      *(deviation: `openBranch_rawEdges_both_upward_closed`'s second conjunct proves
+      `minBranchBotForces` upward-closure specifically, at `rawEdges` — it does not directly supply
+      `S.modelBot` upward-closure for an ABSTRACT `S : IntMinScheme Atom`, since `bot_truth`
+      relates `modelBot` to branch content in only one direction (`T(⊥)@w∈b → modelBot b w`), not an
+      iff, so `modelBot b w → T(⊥)@w∈b` — needed to chain `hpersAug` forward — is not recoverable
+      generically. Added a new `IntMinScheme.modelBot_uc` structure field instead: it takes a
+      step-relation-level persistence witness for the `⊥` shape as a hypothesis (matching
+      `hpersAug`/`openBranch_rawEdges_upward_closed`'s χ-general conclusion instantiated at
+      `χ := HasBot.bot`) and concludes `modelBot` upward-closure along that step relation's
+      `ReflTransGen` closure. `intScheme` discharges it trivially (`modelBot ≡ False`);
+      `minScheme` discharges it by unfolding `minBranchBotForces` to branch membership and
+      applying the persistence witness directly (the same tail-peeling shape
+      `openBranch_rawEdges_upward_closed`'s own proof uses). This is additive to
+      `IntMinScheme` (both existing instances updated, no other call site affected) and keeps
+      `openBranch_countermodel`'s own parameter list unchanged, matching the Scope Hypothesis
+      that 605's patch only touches the conclusion shape.)*
+- [x] This phase edits 605's declared territory at the end of `Scheme.lean`. If 605 landed first,
       rebase onto its version rather than re-applying the pre-605 shape.
-- [ ] Rewrite the `openBranch_countermodel` docstring. It currently carries a long
+- [x] Rewrite the `openBranch_countermodel` docstring. It currently carries a long
       frame-adequacy table asserting that "no candidate `edges` built from the algorithm's current
       output carries both predicates simultaneously" and that the residual obligation is open. That
       is true of the *pre-repair* calculus and false of the repaired one. Preserve the refuted-frame
       record as history — it explains why the repair exists — and state plainly what changed.
+
+**Completion note**: `openBranch_countermodel` is now sorry-free, committed to the AUGMENTED
+`augSets` witness (via the same entry-state `intExpandBranches_openBranch_sat` call
+`openBranch_rawEdges_upward_closed` uses), closing all three conjuncts from one `truthLemma`
+instantiation: conjunct 3 (`¬IForces`) via `hFmem` (`intExpandBranches_openBranch_initial_mem`)
+fed to `truthLemma`'s F-branch; conjuncts 1/2 via χ-general instantiations of Phase 7's `hpersAug`
+(`χ := .atom p` / `χ := HasBot.bot`) tail-peeled along the `ReflTransGen` chain, mirroring
+`openBranch_rawEdges_upward_closed`'s own proof shape. Full CI pipeline green: `lake build`
+3325 jobs, `checkInitImports` clean, `lake lint` zero `Scheme.lean` findings, `lint-style` clean,
+`shake` no suggestion, `mk_all` no update necessary, `lake test` 9397 jobs exit 0 zero `✖`.
+Declaration-level sorry count (whole repo, via `lake build`'s `declaration uses sorry` warnings):
+2 → 1 (the one remaining is `Intuitionistic/Completeness.lean:181`, Phase 9's territory,
+untouched). Axiom count 26 → 26, vacuous-definition grep 1 → 1 (unchanged, pre-existing
+`Computability/URM/Basic.lean` false positive). `openBranch_countermodel`, `tableau_complete`,
+and `minimalTableau_complete` re-verified via `lean_verify`: axioms
+`{propext, Classical.choice, Quot.sound}`, no `sorryAx`, all three.
 
 **Timing**: 2 hours
 

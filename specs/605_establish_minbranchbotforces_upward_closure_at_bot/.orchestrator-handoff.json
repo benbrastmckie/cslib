@@ -1,37 +1,26 @@
 {
-  "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Six-phase plan created for the verified statement-shape fix. Wave structure: [1] baseline capture + patch-currency check + landing CslibTests/MvalidBotShapeRefutation.lean; [2,3] chi-generalization of openBranch_rawEdges_upward_closed plus the two sub-frame monotonicity lemmas in Scheme.lean, IN PARALLEL WITH the additive ULift universe-invariance bridge in Minimal/DecisionProcedure.lean (disjoint files); [4] the statement-shape fix itself as one declared atomic-batch across four files -- third modelBot upward-closure conjunct on openBranch_countermodel, matching hvalid premise on tableau_complete, both Completeness.lean mirrors, DP-4 sorry replaced by the direct instantiation (research option A), and the MValid.{_, 0} universe pin with its three DecisionProcedure consumers routed through the Phase 3 bridge; [5] annotation rewrite across four Lean files plus the test module docstring; [6] full CSLib 7-step CI gate and zero-debt verification. KEY PLANNING DECISION: the research report's suggested step 4 was split into an additive pre-pin bridge (Phase 3) and the pin itself (Phase 4). Pinning minimalTableau_complete immediately breaks minimalTableau_decides and instDecidableMValid, so pin-and-consumers are inseparable -- but mvalid_descend and mvalid_universe_invariant both type-check against the UNPINNED signature, so they land green on their own. Without that split, no phase boundary between the shape fix and the DecisionProcedure repair could be green. Phase 4 is the only atomic-batch phase; every other phase is per-substep and ends green. Plan passes validate-artifact.sh --strict with zero warnings. Patch currency re-verified at plan time: git apply --check exits 0 against the current tree.",
+  "status": "implemented",
+  "task_number": 605,
+  "phases_completed": 6,
+  "phases_total": 6,
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md",
-      "summary": "Six phases, ~7 hours, waves [[1],[2,3],[4],[5],[6]]. Verification tiers: local, interface, local, full, local, full. Phase 4 declared Commit Mode: atomic-batch."
-    }
+    "specs/605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md",
+    "specs/605_establish_minbranchbotforces_upward_closure_at_bot/summaries/01_statement-shape-fix-summary.md"
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
-  "files_modified": [],
-  "decisions_made": [
-    "Adopted research recommendation option A (close DP-4's sorry) as the plan's default, with option B recorded as a two-line retreat under Rollback/Contingency. Under option B the universe pin and the Phase 3 bridge become unnecessary but harmless, since both are additive and independently green.",
-    "Split the research report's step 4 into Phase 3 (additive ULift universe-invariance bridge, pre-pin, green standalone) and Phase 4 (the pin plus its three consumer updates, inside the atomic batch). Rationale: pinning minimalTableau_complete to MValid.{_, 0} immediately red-lines minimalTableau_decides and instDecidableMValid, so those cannot be a separate phase; but both bridge lemmas provably type-check against the unpinned signature, so they can be.",
-    "Merged the research report's step 2 (land the refutation test) into Phase 1 alongside baseline capture. The refutation file is independent of the shape fix in both directions -- it does not need it and stays valid after it -- and both sub-tasks are small, keeping the plan at six phases rather than seven.",
-    "Declared Phase 4 as the plan's only Commit Mode: atomic-batch phase, pre-declared in advance per the anti-abuse guard. The third conjunct cannot be added to openBranch_countermodel without simultaneously repairing tableau_complete and both Completeness.lean mirrors; intermediate per-file states are expected red and must not be committed.",
-    "Assigned Phase 5 (comment/docstring-only edits) verification tier `local` rather than `prose`. Lean docstrings elaborate and are a real compile surface, which is exactly the prose tier's declared blind spot -- so the annotation phase must build its four touched modules, not merely read the diff.",
-    "Recorded an explicit no-task-numbers-in-Lean-files constraint on Phase 5. The sibling beta-priority interaction must be described by content, never by task number, per the no-task-references-in-deliverables rule; the plan file itself (under specs/) carries the task-number-level coordination."
+  "modified_files": [
+    "CslibTests/MvalidBotShapeRefutation.lean",
+    "CslibTests.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean"
   ],
-  "dead_ends": [
-    "Do not sequence the universe pin as its own phase after the shape fix. minimalTableau_decides and instDecidableMValid break the moment minimalTableau_complete is pinned, so any phase boundary drawn between the pin and those consumers is red by construction.",
-    "Do not treat the saved verified-shape-fix.patch as guaranteed-applicable at implementation time. It applies cleanly as of plan time, but sibling task 609 edits the same 8,166-line Scheme.lean; Phase 1's git apply --check gates this, and on failure later phases reconstruct hunks from the research report's section 4 change table rather than force-applying."
-  ],
-  "coordination_notes": [
-    "Task 609 phase 4 discharges openBranch_countermodel. After this plan lands, that existential carries a THIRD conjunct (S.modelBot b upward closure) -- 609's discharge must produce all three. The witness is already supplied by this plan's Phase 2 lemma openBranch_rawEdges_both_upward_closed, which returns both upward-closure facts at one shared edges.",
-    "Task 609 phase 4 also plans 'the two Completeness.lean one-liners'. Under option A the Minimal/Completeness.lean one-liner is ALREADY CLOSED by this plan; only the intuitionistic DP-3 one-liner remains for 609.",
-    "Task 609's report quotes `exact h Nat (intExtractValuation _b) _huc 0` as the DP-3 one-liner. That claim is false: IValid quantifies World : Type v while the countermodel frame is Nat : Type 0. DP-3 will need the same .{_, 0} pin and the same ULift transport this plan builds in Phase 3. Phase 5 records this at the DP-3 site so 609 does not rediscover it.",
-    "Territory in Scheme.lean is disjoint but shared-file: 609 edits the intStepBranch / intExpandBranches.go rule-selection region and the IReuseContain threading; this plan edits the isAccessible monotonicity region, openBranch_rawEdges_upward_closed, and openBranch_countermodel / tableau_complete at the end of the file. Whichever task lands second rebases rather than re-applies.",
-    "Task 606 depends on both 605 and 609. The reconciliation surface is exactly the arity of openBranch_countermodel's existential (three conjuncts after this plan) and whether Minimal/Completeness.lean's DP-4 site is closed (yes, under option A)."
-  ],
-  "sorry_inventory": [],
-  "plan_markers_verified": true
+  "session_id": "sess_1786321994_b49e26_605",
+  "summary": "Landed the verified statement-shape fix closing DP-4 (minimalTableau_complete): openBranch_countermodel gained a third upward-closure conjunct, tableau_complete's hvalid gained the matching premise, and a universe-invariance bridge (mvalid_descend/mvalid_universe_invariant) resolved the required MValid.{_,0} pin at zero cost to instDecidableDerivableMinPropAxiom's public statement. Sorry census in the propositional tableau completeness chain: 3 -> 2. Full lake build (3325 jobs) and lake test (9397 jobs) green; zero new axioms; zero new vacuous definitions. Landed CslibTests/MvalidBotShapeRefutation.lean as a permanent regression guard.",
+  "coordination_notes_for_task_609": [
+    "openBranch_countermodel's existential now carries a third conjunct (S.modelBot upward closure); any future discharge must produce all three conjuncts. Witness available via openBranch_rawEdges_both_upward_closed.",
+    "Minimal/Completeness.lean's DP-4 one-liner is already closed by this task -- no remaining call-site work there for 609.",
+    "DP-3's docstring now records that its previously-quoted one-liner does not type-check as written, and names the universe-pin fix Minimal/DecisionProcedure.lean already builds for MValid, ready to mirror for IValid.",
+    "Territory: this task touched isAccessible monotonicity, openBranch_rawEdges_upward_closed/_both_upward_closed, and openBranch_countermodel/tableau_complete at the end of Scheme.lean. 609's intStepBranch/intExpandBranches.go region and IReuseContain threading are disjoint and untouched."
+  ]
 }

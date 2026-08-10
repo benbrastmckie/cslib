@@ -1,13 +1,36 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-09T19:01:31-07:00",
-  "artifacts": [],
+  "artifacts": [
+    "specs/605_establish_minbranchbotforces_upward_closure_at_bot/summaries/01_statement-shape-fix-summary.md"
+  ],
   "partial_progress": {
-    "stage": "phase_4_complete",
-    "details": "Phases 1-4 complete: refutation test landed, chi-generalization landed, universe bridge landed, statement-shape fix + DP-4 closure + universe pin landed atomically. Full lake build green (3325 jobs), lake test green (9397 jobs). Sorry census 3 -> 2. Zero new axioms.",
+    "stage": "complete",
+    "details": "All 6 phases complete. Full CSLib CI pipeline green. Sorry census 3 -> 2. Zero new axioms. Zero new vacuous definitions.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 4
+    "phases_completed": 6
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "modified_files": [
+    "CslibTests/MvalidBotShapeRefutation.lean",
+    "CslibTests.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+    "specs/605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md",
+    "specs/605_establish_minbranchbotforces_upward_closure_at_bot/summaries/01_statement-shape-fix-summary.md"
+  ],
+  "completion_data": {
+    "completion_summary": "Landed the verified statement-shape fix: openBranch_countermodel gained a third upward-closure conjunct (S.modelBot), tableau_complete's hvalid gained the matching premise, and DP-4 (minimalTableau_complete) closed entirely via a universe-invariance bridge (mvalid_descend/mvalid_universe_invariant) that resolved the required MValid.{_,0} pin at zero cost to instDecidableDerivableMinPropAxiom's public statement. Sorry census in the propositional tableau completeness chain reduced from 3 to 2. Landed CslibTests/MvalidBotShapeRefutation.lean as a permanent regression guard. Full lake build (3325 jobs) and lake test (9397 jobs) green; zero new axioms; zero new vacuous definitions."
   },
   "metadata": {
     "session_id": "sess_1786321994_b49e26_605",

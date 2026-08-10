@@ -1,7 +1,7 @@
 # Implementation Plan: Statement-Shape Fix for `minBranchBotForces` Upward Closure
 
 - **Task**: 605 - establish_minbranchbotforces_upward_closure_at_bot
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 7 hours
 - **Dependencies**: None (blocks nothing; interacts with 609 — see Coordination below)
 - **Research Inputs**: `specs/605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md`
@@ -429,25 +429,29 @@ concurrently with explicit file ownership.
 
 ---
 
-### Phase 6: Full CSLib CI gate and zero-debt verification [NOT STARTED]
+### Phase 6: Full CSLib CI gate and zero-debt verification [COMPLETED]
 
 - **Goal:** Run the complete CSLib verification pipeline and confirm the zero-debt claims the
   research report makes.
 
 - **Tasks:**
-  - [ ] `lake exe cache get` (if the Mathlib cache is cold)
-  - [ ] `lake build` — full project, expected green
-  - [ ] `lake exe checkInitImports`
-  - [ ] `lake lint` — resolve any `docBlame` hit on the new declarations
-  - [ ] `lake exe lint-style`
-  - [ ] `lake test`
-  - [ ] `lake shake --add-public --keep-implied --keep-prefix`
-  - [ ] Confirm the final sorry census in the propositional tableau completeness chain is exactly
+  - [x] `lake exe cache get` (if the Mathlib cache is cold) *(cache already warm from Phases 1-4's builds)*
+  - [x] `lake build` — full project, expected green *(3325 jobs)*
+  - [x] `lake exe checkInitImports` *(exit 0, clean)*
+  - [x] `lake lint` — resolve any `docBlame` hit on the new declarations *(zero findings in any
+    of the five touched files; 373 pre-existing findings repo-wide, all out of scope)*
+  - [x] `lake exe lint-style` *(exit 0, clean)*
+  - [x] `lake test` *(9397 jobs, green)*
+  - [x] `lake shake --add-public --keep-implied --keep-prefix` *(zero findings in the five
+    touched files)*
+  - [x] Confirm the final sorry census in the propositional tableau completeness chain is exactly
     2, and that both remaining sites are the pre-existing `openBranch_countermodel` existential
-    and DP-3
-  - [ ] Confirm zero new axioms across the changed declarations
-  - [ ] Write the implementation summary, recording the option-A decision and the four 609
-    interaction points so task 606 can reconcile
+    and DP-3 *(confirmed: `Scheme.lean:8124`, `Intuitionistic/Completeness.lean:191`)*
+  - [x] Confirm zero new axioms across the changed declarations *(`lean_verify` on all four:
+    `{propext, sorryAx, Classical.choice, Quot.sound}`, the pre-existing profile)*
+  - [x] Write the implementation summary, recording the option-A decision and the four 609
+    interaction points so task 606 can reconcile *(written to
+    `summaries/01_statement-shape-fix-summary.md`)*
 
 - **Timing:** 1 hour
 
@@ -469,19 +473,19 @@ concurrently with explicit file ownership.
 
 ## Testing & Validation
 
-- [ ] `lake build` (full project) green
-- [ ] `lake test` green, including the new `CslibTests/MvalidBotShapeRefutation.lean`
-- [ ] `lake lint` clean on all new and changed declarations (docBlame in particular — five
+- [x] `lake build` (full project) green
+- [x] `lake test` green, including the new `CslibTests/MvalidBotShapeRefutation.lean`
+- [x] `lake lint` clean on all new and changed declarations (docBlame in particular — five
       declarations arrive with probe-era docstrings)
-- [ ] `lake exe lint-style` clean
-- [ ] `lake exe checkInitImports` clean
-- [ ] Sorry census in `Cslib/Logics/Propositional/Tableau/` reduced from 3 to 2; the two survivors
+- [x] `lake exe lint-style` clean
+- [x] `lake exe checkInitImports` clean
+- [x] Sorry census in `Cslib/Logics/Propositional/Tableau/` reduced from 3 to 2; the two survivors
       are `Scheme.lean`'s `openBranch_countermodel` and `Intuitionistic/Completeness.lean`'s DP-3
-- [ ] Zero new axioms (`lean_verify` on `minimalTableau_complete`, `minimalTableau_decides`,
+- [x] Zero new axioms (`lean_verify` on `minimalTableau_complete`, `minimalTableau_decides`,
       `instDecidableMValid`, `instDecidableDerivableMinPropAxiom`)
-- [ ] `instDecidableDerivableMinPropAxiom`'s public statement is unchanged despite the universe pin
-- [ ] No `PROBE` marker survives anywhere in `Cslib/`
-- [ ] No task-number citation in any file outside `specs/**`
+- [x] `instDecidableDerivableMinPropAxiom`'s public statement is unchanged despite the universe pin
+- [x] No `PROBE` marker survives anywhere in `Cslib/`
+- [x] No task-number citation in any file outside `specs/**`
 
 ## Artifacts & Outputs
 

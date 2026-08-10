@@ -1,0 +1,19 @@
+{
+  "phase": 3,
+  "phase_name": "Add the --self-test subcommand with fixtures",
+  "started_at": "2026-08-10T23:40:00Z",
+  "last_updated": "2026-08-10T23:55:00Z",
+  "objectives": [
+    {"id": 1, "description": "Add load_self_test_fixture, SHAKE_SELF_TEST_FIXTURE short-circuit in run_shake, SHAKE_SELF_TEST_BASELINE override, self_test_main, and --self-test case arm", "status": "done", "files_touched": ["scripts/check-shake-residue.sh"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "verification_notes": [
+    "bash scripts/check-shake-residue.sh --self-test: 18 passed, 0 failed, exit 0.",
+    "git diff --exit-code scripts/shake-residue-baseline.txt clean after --self-test run.",
+    "Deliberately reverted the Phase 2 --list fix in a scratch copy at /tmp/.../check-shake-residue-reverted.sh (restoring the old bare-guard-only branch body); re-ran --self-test against it: 17 passed, 1 failed -- the failure is exactly 'stale-target: --list exits 2' (expected 2, actual 0), confirming the self-test detects the exact reproduced regression and is not a vacuously-passing test. Scratch copy discarded afterwards (rm, not git checkout --).",
+    "bash scripts/check-shake-residue.sh --list (no SHAKE_SELF_TEST_FIXTURE set) still exits 0 with output identical to the baseline set -- normal invocation unaffected by the self-test machinery."
+  ]
+}

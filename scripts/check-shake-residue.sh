@@ -66,17 +66,95 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT" || exit 2
 
-BASELINE="scripts/shake-residue-baseline.txt"
+# SHAKE_SELF_TEST_BASELINE, when non-empty, overrides BASELINE. Consulted only by --self-test's
+# own subprocess re-invocations (see self_test_main below), so its fixture runs never write to
+# the real scripts/shake-residue-baseline.txt ratchet file. Never set on any normal invocation.
+BASELINE="${SHAKE_SELF_TEST_BASELINE:-scripts/shake-residue-baseline.txt}"
 SHAKE_ARGS=(--add-public --keep-implied --keep-prefix Cslib)
 
 # Runs `lake shake` exactly once, setting two globals: $shake_raw (its combined stdout+stderr)
 # and $shake_exit (its exit code). Must be called directly (NOT inside a `$(...)` command
 # substitution), or both assignments happen in a subshell and are lost to the caller.
+#
+# SHAKE_SELF_TEST_FIXTURE, when non-empty, short-circuits the real `lake shake` invocation and
+# instead populates $shake_raw/$shake_exit from a literal captured fixture (see
+# load_self_test_fixture below) -- consulted ONLY when non-empty, so this is never reachable on
+# any normal invocation path. It exists solely so --self-test's per-mode subprocess assertions
+# (self_test_main) can exercise --list/--update/bare end-to-end without a `lake` invocation or a
+# built .olean tree.
 shake_exit=0
 shake_raw=""
 run_shake() {
+  if [ -n "${SHAKE_SELF_TEST_FIXTURE:-}" ]; then
+    load_self_test_fixture "$SHAKE_SELF_TEST_FIXTURE"
+    return
+  fi
   shake_raw="$(lake shake "${SHAKE_ARGS[@]}" 2>&1)"
   shake_exit=$?
+}
+
+# Populates $shake_raw/$shake_exit from one of four literal fixtures, by name, with no `lake`
+# invocation. Used both by run_shake's SHAKE_SELF_TEST_FIXTURE short-circuit above (subprocess
+# end-to-end assertions) and directly by self_test_main's in-process assertions below.
+load_self_test_fixture() {
+  case "$1" in
+    flagged)
+      # A well-formed suggestions run: shake_exit=1, several genuine flagged-file header lines
+      # plus their add/remove delta lines, interleaved with harmless replay/warning noise that
+      # parse_flagged_set must NOT mistake for a flagged-file header.
+      shake_exit=1
+      shake_raw="$(cat <<EOF
+⚠ [12/50] Replayed Cslib.Foo
+⚠ [13/50] Replayed Cslib.Bar
+${REPO_ROOT}/Cslib/Foo.lean:
+  add #[Cslib.Bar]
+${REPO_ROOT}/Cslib/Baz.lean:
+  remove #[Cslib.Qux]
+warning: ${REPO_ROOT}/Cslib/Foo.lean:10:2: declaration uses \`sorry\`
+EOF
+)"
+      ;;
+    stale-target)
+      # The literal reproduced regression this task exists to fix: shake_exit=1 (Lake's
+      # pre-flight `checkNoBuild` staleness check fails before shake's own import-analysis logic
+      # ever runs), zero `^/.*\.lean:$` flagged-file header lines. Modeled directly on the
+      # reproduction transcript in specs/625_shake_residue_list_false_clean/reports/
+      # 01_shake-residue-false-clean.md (the literal "target is out-of-date" / "out of date
+      # oleans" error text, plus a repo-relative `:LINE:COL:`-style warning line that must NOT be
+      # mistaken for a flagged-file header by parse_flagged_set).
+      shake_exit=1
+      shake_raw="$(cat <<'EOF'
+✖ [3228/3325] Building Cslib.Logics.Propositional.NaturalDeduction.Normalization
+error: target is out-of-date and needs to be rebuilt
+Cslib/Logics/Modal/Tableau/S4/Driver.lean:893:100: warning: unused variable `h`
+error: there are out of date oleans; run `lake build` or fetch them from a cache first
+EOF
+)"
+      ;;
+    clean)
+      # A genuinely clean run: shake_exit=0, only harmless replay noise, no flagged lines.
+      shake_exit=0
+      shake_raw="$(cat <<'EOF'
+⚠ [1/50] Replayed Cslib.Foo
+⚠ [2/50] Replayed Cslib.Bar
+EOF
+)"
+      ;;
+    bad-exit)
+      # An unexpected shake exit code outside {0,1} -- environment/crash, never a clean/empty set.
+      shake_exit=2
+      shake_raw="$(cat <<'EOF'
+fatal: unexpected internal error
+stack trace omitted
+EOF
+)"
+      ;;
+    *)
+      echo "ERROR: unknown --self-test fixture '$1'." >&2
+      shake_exit=2
+      shake_raw=""
+      ;;
+  esac
 }
 
 # Emits the flagged set from $shake_raw as repo-relative paths, one per line, sorted for a
@@ -127,6 +205,135 @@ run_and_validate_shake() {
   validate_shake_result
 }
 
+# --self-test: asserts the guard in all three modes against deterministic fixtures, with no
+# `lake` invocation and no built .olean tree required. Encodes the reproduced regression (the
+# "stale-target" fixture) as a permanent, mechanical check that this asymmetry cannot silently
+# return -- see check-boneyard-quarantine.sh for this repo's "self-test" naming convention.
+# Prints one PASS/FAIL line per assertion plus a final summary. Returns 0 iff every assertion
+# passed, 1 otherwise; never calls `exit` itself so the caller controls the process exit code.
+self_test_main() {
+  local pass=0
+  local fail=0
+  local rc
+
+  # assert_eq: compares two already-computed strings and records PASS/FAIL. Kept as a nested
+  # function (not a subshell pipeline) so it can mutate the enclosing pass/fail counters.
+  assert_eq() {
+    local desc="$1" expected="$2" actual="$3"
+    if [ "$expected" = "$actual" ]; then
+      echo "PASS  $desc"
+      pass=$((pass + 1))
+    else
+      echo "FAIL  $desc"
+      echo "      expected: $(printf '%q' "$expected")"
+      echo "      actual:   $(printf '%q' "$actual")"
+      fail=$((fail + 1))
+    fi
+  }
+
+  echo "== check-shake-residue.sh --self-test =="
+  echo
+  echo "-- in-process assertions (validate_shake_result / parse_flagged_set, no lake, no subprocess) --"
+
+  # Fixture 1: flagged -- a well-formed suggestions run.
+  load_self_test_fixture flagged
+  live="$(parse_flagged_set)"
+  validate_shake_result; rc=$?
+  assert_eq "flagged: validate_shake_result returns 0" "0" "$rc"
+  assert_eq "flagged: parse_flagged_set returns the expected path set" \
+    "$(printf '%s\n' "Cslib/Baz.lean" "Cslib/Foo.lean")" "$live"
+
+  # Fixture 2: stale-target -- the literal reproduced regression.
+  load_self_test_fixture stale-target
+  live="$(parse_flagged_set)"
+  validate_shake_result; rc=$?
+  assert_eq "stale-target: validate_shake_result returns 2 (the regression this task fixes)" "2" "$rc"
+  assert_eq "stale-target: parse_flagged_set returns empty" "" "$live"
+
+  # Fixture 3: clean -- a genuinely clean run.
+  load_self_test_fixture clean
+  live="$(parse_flagged_set)"
+  validate_shake_result; rc=$?
+  assert_eq "clean: validate_shake_result returns 0" "0" "$rc"
+  assert_eq "clean: parse_flagged_set returns empty" "" "$live"
+
+  # Fixture 4: bad-exit -- an unexpected shake exit code.
+  load_self_test_fixture bad-exit
+  live="$(parse_flagged_set)"
+  validate_shake_result; rc=$?
+  assert_eq "bad-exit: validate_shake_result returns 2" "2" "$rc"
+
+  echo
+  echo "-- end-to-end per-mode assertions (subprocess re-invocation via SHAKE_SELF_TEST_FIXTURE, no real lake call) --"
+
+  # --update safety: point BASELINE at a scratch temp file for every subprocess fixture run below
+  # so the real scripts/shake-residue-baseline.txt is never written by this self-test. Also seed
+  # it with one entry so the bare mode's "baseline file missing" pre-check does not itself mask
+  # the guard assertions under test.
+  local tmp_baseline real_baseline_before real_baseline_after clean_out_file clean_bytes
+  tmp_baseline="$(mktemp)"
+  printf '%s\n' "Cslib/Placeholder.lean" > "$tmp_baseline"
+  real_baseline_before="$(cat "$BASELINE" 2>/dev/null || true)"
+
+  # fixture 2 (stale-target) must exit 2 in all three modes -- the non-negotiable triple this
+  # self-test exists to lock in; this IS the reproduced bug, encoded as a fixture.
+  SHAKE_SELF_TEST_FIXTURE=stale-target SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" --list >/dev/null 2>&1; rc=$?
+  assert_eq "stale-target: --list exits 2" "2" "$rc"
+  SHAKE_SELF_TEST_FIXTURE=stale-target SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" --update >/dev/null 2>&1; rc=$?
+  assert_eq "stale-target: --update exits 2" "2" "$rc"
+  SHAKE_SELF_TEST_FIXTURE=stale-target SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" >/dev/null 2>&1; rc=$?
+  assert_eq "stale-target: bare verify exits 2" "2" "$rc"
+
+  # fixture 4 (bad-exit) must exit 2 in all three modes.
+  SHAKE_SELF_TEST_FIXTURE=bad-exit SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" --list >/dev/null 2>&1; rc=$?
+  assert_eq "bad-exit: --list exits 2" "2" "$rc"
+  SHAKE_SELF_TEST_FIXTURE=bad-exit SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" --update >/dev/null 2>&1; rc=$?
+  assert_eq "bad-exit: --update exits 2" "2" "$rc"
+  SHAKE_SELF_TEST_FIXTURE=bad-exit SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" >/dev/null 2>&1; rc=$?
+  assert_eq "bad-exit: bare verify exits 2" "2" "$rc"
+
+  # fixture 3 (clean) --list must exit 0 with ZERO bytes of stdout -- no stray blank line. Uses a
+  # real file (not command substitution, which strips trailing newlines and would hide a stray
+  # newline) so the byte count is trustworthy.
+  clean_out_file="$(mktemp)"
+  SHAKE_SELF_TEST_FIXTURE=clean SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" --list >"$clean_out_file" 2>/dev/null; rc=$?
+  assert_eq "clean: --list exits 0" "0" "$rc"
+  clean_bytes="$(wc -c < "$clean_out_file" | tr -d '[:space:]')"
+  assert_eq "clean: --list emits zero bytes of stdout" "0" "$clean_bytes"
+  rm -f "$clean_out_file"
+
+  # fixture 1 (flagged) --list must exit 0 and print exactly the expected path set -- confirms
+  # normal operation is unaffected by the self-test machinery.
+  SHAKE_SELF_TEST_FIXTURE=flagged SHAKE_SELF_TEST_BASELINE="$tmp_baseline" \
+    bash "$0" --list >"$tmp_baseline.flagged_out" 2>/dev/null; rc=$?
+  assert_eq "flagged: --list exits 0" "0" "$rc"
+  assert_eq "flagged: --list prints the expected path set" \
+    "$(printf '%s\n' "Cslib/Baz.lean" "Cslib/Foo.lean")" "$(cat "$tmp_baseline.flagged_out")"
+  rm -f "$tmp_baseline.flagged_out"
+
+  rm -f "$tmp_baseline"
+
+  echo
+  echo "-- baseline safety check --"
+  real_baseline_after="$(cat "$BASELINE" 2>/dev/null || true)"
+  assert_eq "real baseline file ($BASELINE) is byte-unchanged by this self-test" \
+    "$real_baseline_before" "$real_baseline_after"
+
+  echo
+  echo "== self-test summary: $pass passed, $fail failed =="
+  if [ "$fail" -eq 0 ]; then
+    return 0
+  fi
+  return 1
+}
+
 case "${1:-}" in
   --list)
     if ! run_and_validate_shake; then
@@ -162,9 +369,13 @@ case "${1:-}" in
     echo "Baseline updated: $n file(s)."
     exit 0
     ;;
+  --self-test)
+    self_test_main
+    exit $?
+    ;;
   "") : ;;
   *)
-    echo "Usage: $0 [--update|--list]" >&2
+    echo "Usage: $0 [--update|--list|--self-test]" >&2
     exit 2
     ;;
 esac

@@ -220,16 +220,16 @@ unparseable/empty flagged set.
 
 ---
 
-### Phase 3: Add the `--self-test` subcommand with fixtures [NOT STARTED]
+### Phase 3: Add the `--self-test` subcommand with fixtures [COMPLETED]
 
 **Goal**: Encode the reproduced regression as a deterministic, `lake`-free fixture that asserts
 the guard fires in all three modes, so this asymmetry cannot silently return.
 
 **Tasks**:
-- [ ] Add a `--self-test` case to the `case "${1:-}"` statement (before the `""` and `*` arms),
+- [x] Add a `--self-test` case to the `case "${1:-}"` statement (before the `""` and `*` arms),
       following `check-boneyard-quarantine.sh`'s self-test naming and its 0-pass/1-fail exit
-      contract.
-- [ ] Define four fixtures as heredoc-assigned strings paired with an exit code:
+      contract. *(completed)*
+- [x] Define four fixtures as heredoc-assigned strings paired with an exit code:
       1. **flagged** — `shake_exit=1`, several `^/abs/path.lean:$` header lines plus
          `add #[...]` / `remove #[...]` delta lines and some `⚠ [n/m] Replayed X` noise.
       2. **stale-target** (the reproduced regression) — `shake_exit=1`, containing the literal
@@ -239,25 +239,32 @@ the guard fires in all three modes, so this asymmetry cannot silently return.
          `^/.*\.lean:$` lines. Source the text from the research report's reproduction section.
       3. **clean** — `shake_exit=0`, only harmless replay/warning noise, no flagged lines.
       4. **bad-exit** — `shake_exit=2`, arbitrary output.
-- [ ] Add in-process assertions calling `validate_shake_result` directly against each fixture
+      *(completed: all four implemented in `load_self_test_fixture()`, called both by `run_shake`'s
+      `SHAKE_SELF_TEST_FIXTURE` short-circuit and directly by the in-process assertions)*
+- [x] Add in-process assertions calling `validate_shake_result` directly against each fixture
       (set `shake_raw`/`shake_exit`, compute `live`, call, compare the return code): fixture 1 ->
       0, fixture 2 -> 2, fixture 3 -> 0, fixture 4 -> 2. Also assert `parse_flagged_set` returns
-      exactly the expected path set for fixture 1 and empty for fixtures 2 and 3.
-- [ ] Add end-to-end per-mode assertions by re-invoking the script as a subprocess with a fixture
+      exactly the expected path set for fixture 1 and empty for fixtures 2 and 3. *(completed)*
+- [x] Add end-to-end per-mode assertions by re-invoking the script as a subprocess with a fixture
       selector env var (`SHAKE_SELF_TEST_FIXTURE=<name> bash "$0" --list`, `… --update`, `… ""`).
       Make `run_shake` honor that variable at its top: when non-empty, populate
       `shake_raw`/`shake_exit` from the named fixture and return without invoking `lake`;
       otherwise behave exactly as today. Document the variable in the header (Phase 4).
-- [ ] **`--update` safety**: the `--update` end-to-end assertions must not clobber the real
+      *(completed)*
+- [x] **`--update` safety**: the `--update` end-to-end assertions must not clobber the real
       baseline. Point `BASELINE` at a temp file for fixture runs (e.g. honor a
       `SHAKE_SELF_TEST_BASELINE` override, or have the self-test run `--update` in a
       `mktemp -d` copy) and assert `scripts/shake-residue-baseline.txt` is byte-identical before
-      and after the self-test. Treat this as a hard requirement, not a nicety.
-- [ ] Assert per mode: fixture 2 -> exit 2 in `--list`, `--update`, **and** bare (this triple is
+      and after the self-test. Treat this as a hard requirement, not a nicety. *(completed:
+      `SHAKE_SELF_TEST_BASELINE` override + explicit before/after `assert_eq` on `$BASELINE`'s
+      content; empirically confirmed via `git diff --exit-code scripts/shake-residue-baseline.txt`)*
+- [x] Assert per mode: fixture 2 -> exit 2 in `--list`, `--update`, **and** bare (this triple is
       the regression this task exists to prevent); fixture 3 -> `--list` exits 0 with zero bytes
-      of stdout; fixture 4 -> exit 2 in all three modes.
-- [ ] Print one line per assertion with a PASS/FAIL prefix and a final summary; `exit 0` if all
-      pass, `exit 1` otherwise.
+      of stdout; fixture 4 -> exit 2 in all three modes. *(completed)*
+- [x] Print one line per assertion with a PASS/FAIL prefix and a final summary; `exit 0` if all
+      pass, `exit 1` otherwise. *(completed: 18 assertions total, all PASS on the real fix; 17
+      pass / 1 fail — the stale-target `--list` triple member — when deliberately run against a
+      scratch copy with the Phase 2 fix reverted, proving the self-test has teeth)*
 
 **Timing**: 1 hour
 

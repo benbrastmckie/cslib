@@ -162,21 +162,21 @@ differ from 7/4/3, stop and report rather than widening the edit set.
 
 ---
 
-### Phase 2: Sync the two header docstring precedence tables [NOT STARTED]
+### Phase 2: Sync the two header docstring precedence tables [COMPLETED]
 
 **Goal**: The human-readable precedence tables in the LTL and Temporal file headers state the
 precedences the file actually declares.
 
 **Tasks**:
-- [ ] `Cslib/Logics/LTL/Syntax/Formula.lean:37` — `` - `→` (infix, 30) : implication (`Formula.imp`) `` -> `(infixr, 25)`
-- [ ] `Cslib/Logics/LTL/Syntax/Formula.lean:38` — `` - `↔` (infix, 30) : biconditional (`Formula.iff`) `` -> `(infixr, 20)`
-- [ ] `Cslib/Logics/Temporal/Syntax/Formula.lean:37` — same arrow change
-- [ ] `Cslib/Logics/Temporal/Syntax/Formula.lean:38` — same iff change
-- [ ] Leave the `¬` (prefix, 40), `∧` (infix, 36), and `∨` (infix, 35) rows untouched — those
+- [x] `Cslib/Logics/LTL/Syntax/Formula.lean:37` — `` - `→` (infix, 30) : implication (`Formula.imp`) `` -> `(infixr, 25)`
+- [x] `Cslib/Logics/LTL/Syntax/Formula.lean:38` — `` - `↔` (infix, 30) : biconditional (`Formula.iff`) `` -> `(infixr, 20)`
+- [x] `Cslib/Logics/Temporal/Syntax/Formula.lean:37` — same arrow change
+- [x] `Cslib/Logics/Temporal/Syntax/Formula.lean:38` — same iff change
+- [x] Leave the `¬` (prefix, 40), `∧` (infix, 36), and `∨` (infix, 35) rows untouched — those
       declarations are not changing and their table rows remain accurate.
-- [ ] Confirm the two remaining in-scope files need no prose update: `Modal/Basic.lean` has no
+- [x] Confirm the two remaining in-scope files need no prose update: `Modal/Basic.lean` has no
       header precedence table, and `Bimodal/Syntax/Formula.lean` has no `→`/`↔` precedence prose.
-- [ ] Confirm `NOTATION.md` still needs no edit (it carries no precedence table; its only
+- [x] Confirm `NOTATION.md` still needs no edit (it carries no precedence table; its only
       nearby entry concerns `S` as *Since*).
 
 **Timing**: 15 minutes

@@ -34,8 +34,8 @@ Propositional connectives (scoped to `Cslib.Logic.Temporal`):
 - `¬` (prefix, 40) : negation (`Formula.neg`)
 - `∧` (infix, 36) : conjunction (`Formula.and`)
 - `∨` (infix, 35) : disjunction (`Formula.or`)
-- `→` (infix, 30) : implication (`Formula.imp`)
-- `↔` (infix, 30) : biconditional (`Formula.iff`)
+- `→` (infixr, 25) : implication (`Formula.imp`)
+- `↔` (infixr, 20) : biconditional (`Formula.iff`)
 
 Temporal operators (scoped to `Cslib.Logic.Temporal`):
 - `U` (infix, 40) : until (`Formula.untl`)

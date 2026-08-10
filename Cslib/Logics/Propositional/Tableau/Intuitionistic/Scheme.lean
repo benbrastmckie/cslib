@@ -9597,7 +9597,7 @@ frame carry positive persistence WITHOUT losing `IFimpAccess`, so one frame now 
 | frame | `IFimpAccess` | positive persistence |
 |---|---|---|
 | augmented (`augSets`), pre-repair | holds | REFUTED (`BetaSplitRefutation.lean`) |
-| augmented (`augSets`), post-repair | holds (`:6924`) | **holds** (`hpersAug`, this file) |
+| augmented (`augSets`), post-repair | holds (`hfimp`) | **holds** (`hpersAug`, this file) |
 | raw (`rawEdges`) | REFUTED (`phiRef1`/`phiRef2` @2, `phiRef3` @3,4) | holds (`IPosPersistRaw`) |
 
 `rawEdges` was, and remains, REFUTED as a witness for `IFimpAccess` (unaffected by this

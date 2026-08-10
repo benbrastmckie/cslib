@@ -275,22 +275,23 @@ Proof by structural induction on `ψ` with `w` fixed:
 
 **Infrastructure relationship** (factoring deferred):
 This lemma is the Minimal FMP analogue of the parametric `truthLemma S b …` in
-`Tableau/Intuitionistic/Scheme.lean:234` (also used by the minimal tableau via
-`truthLemma minScheme`). Both prove "forcing ↔ membership" statements, but over **disjoint
-carrier types**:
+`Tableau/Intuitionistic/Scheme.lean` (declaration `truthLemma`, also used by the minimal
+tableau via `truthLemma minScheme`). Both prove "forcing ↔ membership" statements, but over
+**disjoint carrier types**:
 - `min_fin_truth_lemma`: world type `MinFinWorld φ` (Finset-carrier `Σ`-bounded prime
   MinTheory worlds, resting on the minimal Lindenbaum substrate: `min_imp_witness`,
   `min_prime_exclusion`). Unlike the intuitionistic FMP, `⊥` may be forced at some worlds
   (`minFinBotForces w := (⊥ ∈ w.carrier)`). Carrier is a `Finset (Proposition Atom)`.
   **Sorry-free.**
 - `truthLemma minScheme`: world type `Nat` (tableau branch labels). `modelBot` is the
-  minimal-closure predicate applied to branch labels. **Now sorry-free** (gained an explicit
+  minimal-closure predicate applied to branch labels. **Sorry-free** (takes an explicit
   `hpers` positive-persistence hypothesis).
 
 Factoring a common truth-lemma or world-type abstraction is **explicitly deferred**: the
-carriers remain structurally incompatible regardless of `truthLemma`'s own sorry status, and
-the payoff is low while `openBranch_countermodel` (`Tableau/Intuitionistic/Scheme.lean`) —
-which `truthLemma` alone does not discharge — remains open.
+carriers remain structurally incompatible regardless of either lemma's sorry status, and the
+payoff is low. This is unrelated to completeness: both `truthLemma` and
+`openBranch_countermodel` (`Tableau/Intuitionistic/Scheme.lean`) are sorry-free and
+axiom-clean; nothing in this dependency chain remains open.
 Cross-reference: `int_fin_truth_lemma` for the analogous intuitionistic FMP lemma. -/
 theorem min_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : MinFinWorld φ) :

@@ -309,20 +309,21 @@ Proof by structural induction on `ψ` with `w` fixed:
 
 **Infrastructure relationship** (factoring deferred):
 This lemma is the FMP analogue of the parametric `truthLemma S b …` in
-`Tableau/Intuitionistic/Scheme.lean:234`. Both prove a "forcing ↔ membership" statement, but
-over **disjoint carrier types**:
+`Tableau/Intuitionistic/Scheme.lean` (declaration `truthLemma`). Both prove a "forcing ↔
+membership" statement, but over **disjoint carrier types**:
 - `int_fin_truth_lemma`: world type `IntFinWorld φ` (Finset-carrier `Σ`-bounded prime DCCS,
   resting on the `IntLindenbaum.lean` substrate: `int_imp_witness`, `int_prime_exclusion`,
   `intDeductiveClosure`). Carrier is a `Finset (Proposition Atom)`. **Sorry-free.**
 - `truthLemma`: world type `Nat` (tableau branch labels from `IBranch`). Carrier is a
-  signed-branch occurrence predicate. **Now sorry-free** (gained an explicit `hpers`
+  signed-branch occurrence predicate. **Sorry-free** (takes an explicit `hpers`
   positive-persistence hypothesis).
 
 Factoring a common truth-lemma or world-type abstraction spanning these two carrier systems
-is **explicitly deferred**: the carriers remain structurally incompatible regardless of
-`truthLemma`'s own sorry status, and the payoff is low while `openBranch_countermodel`
-(`Tableau/Intuitionistic/Scheme.lean`) — which `truthLemma` alone does not discharge — remains
-open. Cross-reference: `min_fin_truth_lemma` for the analogous minimal FMP lemma. -/
+is **explicitly deferred**: the carriers remain structurally incompatible regardless of either
+lemma's sorry status, and the payoff is low. This is unrelated to completeness: both
+`truthLemma` and `openBranch_countermodel` (`Tableau/Intuitionistic/Scheme.lean`) are sorry-free
+and axiom-clean; nothing in this dependency chain remains open. Cross-reference:
+`min_fin_truth_lemma` for the analogous minimal FMP lemma. -/
 theorem int_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : IntFinWorld φ) :
     ∀ {ψ : PL.Proposition Atom}, ψ ∈ φ.subformulas →

@@ -377,28 +377,32 @@ in-scope for this phase rather than deferring it.
 
 ---
 
-### Phase 5: Adjacent-file sweep and stale-line-reference sweep [NOT STARTED]
+### Phase 5: Adjacent-file sweep and stale-line-reference sweep [COMPLETED]
 
 **Goal**: Close the two adjacent-file sites admitted by decision (b), and replace drifted
 line-number citations with durable declaration-name anchors.
 
 **Tasks**:
-- [ ] `Metalogic/IntDecidability.lean`: rewrite "the payoff is low while `openBranch_countermodel`
+- [x] `Metalogic/IntDecidability.lean`: rewrite "the payoff is low while `openBranch_countermodel`
       ... which `truthLemma` alone does not discharge — remains open." It does not remain open.
-- [ ] `Metalogic/MinDecidability.lean`: the identical claim; rewrite identically.
-- [ ] Confirm (do not edit) that `Tableau/Minimal/DecisionProcedure.lean`'s "closing what used to
+- [x] `Metalogic/MinDecidability.lean`: the identical claim; rewrite identically.
+- [x] Confirm (do not edit) that `Tableau/Minimal/DecisionProcedure.lean`'s "closing what used to
       be this dependency chain's one remaining declaration-level sorry" is already correctly
-      past-tense. Record that it was checked.
-- [ ] Fix the confirmed drifted line references, preferring declaration names to line numbers in
-      every rewrite: the frame-adequacy table's `IFimpAccess` "holds (`:6924`)" citation (`:6924`
-      is now inside `intuitionisticTableau_sound`); the "`sorry` at `Completeness.lean:113` /
-      `Minimal/Completeness.lean:110`" citation (both now point at ordinary proved code); the
-      "`IPosPersistRaw`/`IWorldsPlanted`, `:6782`/`:3568`" citation (`IPosPersistRaw` is at
-      `:7239`); and the `IntDecidability.lean` / `MinDecidability.lean` citations of
-      "`Scheme.lean:234`" for `truthLemma` (it is at `:964`).
-- [ ] Where a rewrite can name a declaration instead of a line, name the declaration. The four DP
+      past-tense. Record that it was checked. *(Confirmed at `Minimal/DecisionProcedure.lean:50-59`
+      — already correctly past-tense; not edited.)*
+- [x] Fix the confirmed drifted line references, preferring declaration names to line numbers in
+      every rewrite: the frame-adequacy table's `IFimpAccess` "holds (`:6924`)" citation — replaced
+      with `` `hfimp` `` (the actual hypothesis name) rather than any line number, since re-deriving
+      a fresh precise line number would only drift again; the "`sorry` at `Completeness.lean:113` /
+      `Minimal/Completeness.lean:110`" citation — already replaced with prose in Phase 4's edit to
+      the same paragraph (no separate action needed here); the
+      "`IPosPersistRaw`/`IWorldsPlanted`, `:6782`/`:3568`" citation — already replaced with bare
+      declaration names in Phase 3's edit to the same sentence (no separate action needed here); and
+      the `IntDecidability.lean` / `MinDecidability.lean` citations of "`Scheme.lean:234`" for
+      `truthLemma` — replaced with the declaration name (bare `truthLemma`, no line number).
+- [x] Where a rewrite can name a declaration instead of a line, name the declaration. The four DP
       sites have already drifted twice in a 9833-line file under active development.
-- [ ] Scoped `lake build` of the two `Metalogic` modules and of `Scheme.lean`.
+- [x] Scoped `lake build` of the two `Metalogic` modules and of `Scheme.lean`.
 
 **Timing**: 0.75 hours
 

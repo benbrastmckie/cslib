@@ -1,27 +1,19 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-10T00:00:00Z",
-  "completed_at": "2026-08-10T00:00:00Z",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 623,
+  "session_id": "sess_1786397542_991316_623",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/623_intuitionistic_barrel_omits_scheme/reports/01_barrel-scheme-omission.md",
-      "summary": "Barrel convention survey across all 26 Cslib/Logics/ sub-barrels; verdict that the Scheme omission is an oversight fixable with one public import line, and that Cslib.lean must not be touched (mk_all-generated, CI-enforced exhaustive)"
+      "type": "plan",
+      "path": "specs/623_intuitionistic_barrel_omits_scheme/plans/01_add-scheme-to-sub-barrel.md",
+      "summary": "Single-phase plan: add one public import line for Intuitionistic.Scheme to the tableau sub-barrel, in dependency position between Soundness and Completeness, with targeted-build-only verification"
     }
   ],
-  "partial_progress": {
-    "stage": "complete",
-    "details": "Static survey finished; no lake build run, per task cost constraint. One residual item deferred to implementation: confirm lake shake does not flag the barrel (requires a built tree)."
-  },
-  "metadata": {
-    "session_id": "sess_1786397542_991316_623",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "barrels_surveyed": 26,
-    "barrels_exhaustive": 13,
-    "barrels_partial": 13,
-    "builds_run": 0,
-    "mcp_tools_used": []
-  }
+  "phase_count": 1,
+  "estimated_hours": 0.5,
+  "dependency_waves": [[1]],
+  "memory_candidates": [],
+  "next_steps": "Run /implement 623 to execute the plan"
 }

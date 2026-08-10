@@ -23,7 +23,7 @@ next_project_number: 625
 
 ### Propositional Logic
 
-497 [RESEARCHED] — [RETARGETED 2026-08-10 — this task is NO LONGER an identifier ren
+497 [PLANNED] — [RETARGETED 2026-08-10 — this task is NO LONGER an identifier ren
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
 616 [NOT STARTED] — Repair the stale and self-contradictory documentation layer in th
@@ -32,7 +32,7 @@ next_project_number: 625
 619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
-623 [RESEARCHED] — The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional
+623 [PLANNED] — The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional
 
 ### Modal Logic
 
@@ -88,16 +88,17 @@ next_project_number: 625
 
 ### Documentation
 
-624 [RESEARCHED] — Document that `lake env lean <file>` is unsafe for module-system 
+624 [PLANNED] — Document that `lake env lean <file>` is unsafe for module-system 
 
 ## Tasks
 
 ### 624. Document that lake env lean skips --setup and is unsafe for module-system files
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: markdown
 - **Topic**: Documentation
 - **Dependencies**: None
 - **Research**: [624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md]
+- **Plan**: [624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md]
 
 **Description**: Document that `lake env lean <file>` is unsafe for module-system files in this repository, and
 that `lake build <Module.Name>` is the correct way to build a single module.
@@ -138,11 +139,12 @@ this into that task's closure.
 ---
 
 ### 623. Reconcile Intuitionistic.lean sub-barrel omitting Scheme while Cslib.lean imports it directly
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [623_intuitionistic_barrel_omits_scheme/reports/01_barrel-scheme-omission.md]
+- **Plan**: [623_intuitionistic_barrel_omits_scheme/plans/01_add-scheme-to-sub-barrel.md]
 
 **Description**: The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` omits the `Scheme` module, even though `Cslib.lean:636` imports it directly with `public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`.
 
@@ -989,11 +991,12 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 497. Reconcile imp naming
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 400
 - **Research**: [497_reconcile_imp_naming/reports/01_arrow-notation-precedence-reconciliation.md]
+- **Plan**: [497_reconcile_imp_naming/plans/01_arrow-precedence-infixr-reconciliation.md]
 
 **Description**: [RETARGETED 2026-08-10 — this task is NO LONGER an identifier rename. The rename is already done. What remains is the `→` NOTATION gap. All claims below were verified directly against fork `main` and `upstream/main` @ `3951377e` (fetched 2026-08-10); re-verify before acting, the commands are cheap.]
 

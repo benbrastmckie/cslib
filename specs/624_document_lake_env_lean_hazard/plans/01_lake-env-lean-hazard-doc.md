@@ -1,7 +1,7 @@
 # Implementation Plan: Document `lake env lean` hazard in CONTRIBUTING.md
 
 - **Task**: 624 - Document that `lake env lean <file>` is unsafe for module-system files and that `lake build <Module.Name>` is the correct single-module build
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 0.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md`

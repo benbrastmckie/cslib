@@ -234,6 +234,95 @@ lemma intStepBranch_result_ne_notApplicable
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
       exact hsf.1.symm ▸ (by simp)
 
+/-! ## Beta-Priority Stepper -/
+
+/-- Whether a signed formula's rule application would create a fresh Kripke world.
+
+True exactly for `F(φ → ψ)` (`.neg, .imp`), which includes `F(¬φ) = F(φ → ⊥)` since negation is
+represented as implication to `⊥`. This is the sole world-creating case: `intApplyRuleFull`'s
+`.neg, .imp` clause is the only one that returns a fresh `nextWorld` via `intFImpRule`. -/
+def isWorldCreating (sf : ISF Atom) : Bool :=
+  match sf.sign, sf.formula with
+  | .neg, .imp _ _ => true
+  | _, _ => false
+
+/-- The non-world-creating first pass of `intStepBranchPrio`: identical in shape to
+`intStepBranch`, but additionally skips any `sf` for which `isWorldCreating sf` holds.
+Not `private`: `Scheme.lean`'s `intStepBranchPrio_none_iff`/`intStepBranchPrio_some_exists`
+bridges need to unfold it from outside this file. -/
+def intStepBranchPrioFirstPass (b : IBranch Atom) (expanded : List (ISF Atom))
+    (nextWorld : Nat) : Option (IntRuleResult Atom × List (ISF Atom)) :=
+  b.findSome? fun sf =>
+    if expanded.any (· == sf) || isWorldCreating sf then none
+    else
+      match intApplyRuleFull sf nextWorld b with
+      | .notApplicable => none
+      | result => some (result, expanded ++ [sf])
+
+/-- Beta-priority one-step expansion: defer world creation (`F(φ → ψ)`) until no other rule
+applies anywhere on the branch.
+
+The first pass (`intStepBranchPrioFirstPass`) mirrors `intStepBranch` but additionally skips
+world-creating formulas. If it finds nothing -- either every remaining formula is already
+`expanded`, or the only applicable formulas left are world-creating -- this falls through to
+`intStepBranch` itself, which will select a world-creating formula if (and only if) one
+remains. This strictly *defers*, never forbids, world creation: `intStepBranchPrio` returns
+`none` in exactly the same circumstances as `intStepBranch` (see `intStepBranchPrio_none_iff`
+below), so termination is inherited unconditionally from `intStepBranch`'s own `findSome?`
+search over a finite list -- no new fuel or measure argument is needed. -/
+def intStepBranchPrio (b : IBranch Atom) (expanded : List (ISF Atom)) (nextWorld : Nat) :
+    Option (IntRuleResult Atom × List (ISF Atom)) :=
+  match intStepBranchPrioFirstPass b expanded nextWorld with
+  | some r => some r
+  | none => intStepBranch b expanded nextWorld
+
+omit [Hashable Atom] in
+/-- If the first pass returns `some (r, e')`, then `r ≠ .notApplicable`. Same argument as
+`intStepBranch_result_ne_notApplicable`, with the extra `isWorldCreating` disjunct in the
+guard handled by the same `by_cases`/`simp` shape. -/
+private lemma intStepBranchPrioFirstPass_result_ne_notApplicable
+    {b : IBranch Atom} {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {r : IntRuleResult Atom} {exp' : List (ISF Atom)}
+    (h : intStepBranchPrioFirstPass b expanded nextWorld = some (r, exp')) :
+    r ≠ .notApplicable := by
+  simp only [intStepBranchPrioFirstPass] at h
+  obtain ⟨sf, _, hsf⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hguard : (expanded.any (· == sf) || isWorldCreating sf) = true
+  · simp [hguard] at hsf
+  · simp only [Bool.not_eq_true] at hguard
+    simp only [hguard, Bool.false_eq_true, ↓reduceIte] at hsf
+    cases hint : intApplyRuleFull sf nextWorld b with
+    | notApplicable => simp [hint] at hsf
+    | linearResult fs nw' e =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      exact hsf.1.symm ▸ (by simp)
+    | branchingResult bs nw' =>
+      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+      exact hsf.1.symm ▸ (by simp)
+
+omit [Hashable Atom] in
+/-- If `intStepBranchPrio` returns `some (r, e')`, then `r ≠ .notApplicable`.
+
+Either the first (non-world-creating) pass produced it
+(`intStepBranchPrioFirstPass_result_ne_notApplicable`), or the first pass returned `none` and
+the fallback to `intStepBranch` supplies the fact directly via
+`intStepBranch_result_ne_notApplicable`. -/
+lemma intStepBranchPrio_result_ne_notApplicable
+    {b : IBranch Atom} {expanded : List (ISF Atom)} {nextWorld : Nat}
+    {r : IntRuleResult Atom} {exp' : List (ISF Atom)}
+    (h : intStepBranchPrio b expanded nextWorld = some (r, exp')) : r ≠ .notApplicable := by
+  simp only [intStepBranchPrio] at h
+  cases hfp : intStepBranchPrioFirstPass b expanded nextWorld with
+  | none =>
+    simp only [hfp] at h
+    exact intStepBranch_result_ne_notApplicable h
+  | some rp =>
+    obtain ⟨r', exp''⟩ := rp
+    simp only [hfp, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨hr, hexp⟩ := h
+    subst hr; subst hexp
+    exact intStepBranchPrioFirstPass_result_ne_notApplicable hfp
+
 /-! ## Sfor-Containment Loop-Check -/
 
 /-- The **ancestor-directed** `Sfor`-containment loop-check (the ancestor-blocking calculus

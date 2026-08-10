@@ -1232,6 +1232,106 @@ private lemma intStepBranch_some_exists
       exact ⟨sf, hsfb, hint.trans hsf.1, hsf.2.symm⟩
 
 omit [Hashable Atom] in
+/-- `intStepBranchPrio` returns `none` in exactly the same circumstances as `intStepBranch`
+(Phase 1 of the beta-priority repair, report §5.2).
+
+Forward: if `intStepBranchPrio` is `none`, the first pass must have been `none` (else
+`intStepBranchPrio` would return `some`), so `intStepBranchPrio` reduces definitionally to
+`intStepBranch b e nw`, which is therefore `none`.
+
+Reverse: if `intStepBranch b e nw = none`, then by `List.findSome?_eq_none_iff`, no `sf ∈ b`
+satisfies `intStepBranch`'s guard-and-apply predicate. The first pass's predicate is strictly
+more restrictive (same predicate, plus `¬ isWorldCreating sf`), so no `sf ∈ b` satisfies it
+either; hence the first pass is also `none`, and `intStepBranchPrio` reduces to
+`intStepBranch b e nw = none`. Every `none`-keyed downstream fact -- saturation,
+`IBranchSaturation`, `intExpandBranches_openBranch_sat`'s open-branch leaf -- transfers across
+the swap via this bridge alone, with no reproof needed (Phase 3). -/
+lemma intStepBranchPrio_none_iff
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat} :
+    intStepBranchPrio b e nw = none ↔ intStepBranch b e nw = none := by
+  constructor
+  · intro h
+    simp only [intStepBranchPrio] at h
+    cases hfp : intStepBranchPrioFirstPass b e nw with
+    | none => simp only [hfp] at h; exact h
+    | some rp => simp only [hfp] at h; exact absurd h (by simp)
+  · intro h
+    have hfpNone : intStepBranchPrioFirstPass b e nw = none := by
+      simp only [intStepBranchPrioFirstPass]
+      rw [List.findSome?_eq_none_iff]
+      intro sf hsfb
+      simp only [intStepBranch, List.findSome?_eq_none_iff] at h
+      have hbody := h sf hsfb
+      by_cases hguard : (e.any (· == sf) || isWorldCreating sf) = true
+      · simp [hguard]
+      · simp only [Bool.not_eq_true] at hguard
+        rw [Bool.or_eq_false_iff] at hguard
+        simp only [hguard.1, Bool.false_eq_true, if_false] at hbody
+        simp only [hguard.1, hguard.2, Bool.or_self, Bool.false_eq_true, if_false]
+        exact hbody
+    simp only [intStepBranchPrio, hfpNone]
+    exact h
+
+omit [Hashable Atom] in
+/-- Extraction bridge for `intStepBranchPrio`, strengthened relative to
+`intStepBranch_some_exists` with the extra conjunct `sf ∉ e`: the processed formula was not
+already in the `expanded` set. This is exactly the fact the two `intExpMeasure` termination
+lemmas (`intExpMeasure_step_lt` and its branching companion, below) currently obtain by
+unfolding `intStepBranch` directly; exporting it here lets Phase 2 re-base those proofs onto a
+shared extraction shape without unfolding either stepper. -/
+lemma intStepBranchPrio_some_exists
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
+    (hstep : intStepBranchPrio b e nw = some (result, newExp)) :
+    ∃ sf, sf ∈ b ∧ sf ∉ e ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf] := by
+  simp only [intStepBranchPrio] at hstep
+  cases hfp : intStepBranchPrioFirstPass b e nw with
+  | none =>
+    simp only [hfp] at hstep
+    -- `hstep : intStepBranch b e nw = some (result, newExp)`; re-derive directly (mirroring
+    -- `intStepBranch_some_exists`) to additionally recover `sf ∉ e` from the same witness.
+    simp only [intStepBranch] at hstep
+    obtain ⟨sf, hsfb, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+    by_cases hexp : (e.any (· == sf)) = true
+    · simp [hexp] at hsf
+    · simp only [Bool.not_eq_true] at hexp
+      simp only [hexp, Bool.false_eq_true, if_false] at hsf
+      have hsfne : sf ∉ e := fun hmem => by
+        have hcontra : e.any (· == sf) = true := List.any_eq_true.mpr ⟨sf, hmem, by simp⟩
+        simp [hexp] at hcontra
+      cases hint : intApplyRuleFull sf nw b with
+      | notApplicable => simp [hint] at hsf
+      | linearResult fs nw' ed =>
+        simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+        exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
+      | branchingResult bs nw' =>
+        simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+        exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
+  | some rp =>
+    obtain ⟨result', newExp'⟩ := rp
+    simp only [hfp, Option.some.injEq, Prod.mk.injEq] at hstep
+    obtain ⟨hresEq, hnewExpEq⟩ := hstep
+    subst hresEq; subst hnewExpEq
+    simp only [intStepBranchPrioFirstPass] at hfp
+    obtain ⟨sf, hsfb, hsf⟩ := List.exists_of_findSome?_eq_some hfp
+    by_cases hguard : (e.any (· == sf) || isWorldCreating sf) = true
+    · simp [hguard] at hsf
+    · simp only [Bool.not_eq_true] at hguard
+      rw [Bool.or_eq_false_iff] at hguard
+      simp only [hguard.1, hguard.2, Bool.or_self, Bool.false_eq_true, if_false] at hsf
+      have hsfne : sf ∉ e := fun hmem => by
+        have hcontra : e.any (· == sf) = true := List.any_eq_true.mpr ⟨sf, hmem, by simp⟩
+        simp [hguard.1] at hcontra
+      cases hint : intApplyRuleFull sf nw b with
+      | notApplicable => simp [hint] at hsf
+      | linearResult fs nw' ed =>
+        simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+        exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
+      | branchingResult bs nw' =>
+        simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
+        exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
+
+omit [Hashable Atom] in
 /-- A `linearResult` step preserves `IExpandedConsistent`, `ILabelBound`, and the
 edge-accessibility companion `IExpandedAccessConsistent`: the processed
 formula's rule outputs are exactly the new formulas added to the branch, so `sfSatisfied`

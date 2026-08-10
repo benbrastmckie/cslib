@@ -1,7 +1,7 @@
 # Implementation Plan: Beta-Priority Repair of Loop-Back Containment
 
 - **Task**: 609 - Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 15 hours
 - **Dependencies**: 604 (completed). Coordination-only with 605; see "Coordination with Task 605".
 - **Research Inputs**: `specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md`
@@ -185,24 +185,28 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 1: `intStepBranchPrio` and its bridges (additive) [NOT STARTED]
+### Phase 1: `intStepBranchPrio` and its bridges (additive) [COMPLETED]
 
 **Goal**: Introduce the beta-priority stepper and every bridge lemma downstream work will consume,
 without changing any existing behavior. Nothing calls the new definition yet, so the tree stays
 green trivially.
 
 **Tasks**:
-- [ ] Add `isWorldCreating : ISF Atom → Bool` to `Expansion.lean`, true exactly on `.neg, .imp`.
+- [x] Add `isWorldCreating : ISF Atom → Bool` to `Expansion.lean`, true exactly on `.neg, .imp`.
       Confirm no symbol of that name already exists (grep returned none at plan time).
-- [ ] Add `intStepBranchPrio` beside `intStepBranch` in `Expansion.lean`, following report §5.1:
+- [x] Add `intStepBranchPrio` beside `intStepBranch` in `Expansion.lean`, following report §5.1:
       first pass skips `expanded` members and world-creating formulas; on `none`, fall through to
-      `intStepBranch b expanded nextWorld`.
-- [ ] Prove `intStepBranchPrio_result_ne_notApplicable`, mirroring
+      `intStepBranch b expanded nextWorld`. *(deviation: altered -- factored the first pass into
+      a named, non-private `intStepBranchPrioFirstPass` helper so `Scheme.lean`'s bridge lemmas
+      can unfold it; `private` was dropped from that helper specifically so it stays visible
+      across files, matching the plan's own file split for the none-iff/some-exists bridges)*
+- [x] Prove `intStepBranchPrio_result_ne_notApplicable`, mirroring
       `intStepBranch_result_ne_notApplicable` (`Expansion.lean:218`) with one extra `if`-guard case.
-- [ ] Prove the `none`-iff bridge: `intStepBranchPrio b e nw = none ↔ intStepBranch b e nw = none`.
+- [x] Prove the `none`-iff bridge: `intStepBranchPrio b e nw = none ↔ intStepBranch b e nw = none`.
       Forward is definitional (the second pass *is* `intStepBranch`); reverse holds because the
-      first pass searches a strict subset of the same candidates.
-- [ ] Prove `intStepBranchPrio_some_exists`, the extraction bridge, **strengthened with `sf ∉ e`**
+      first pass searches a strict subset of the same candidates. *(placed in `Scheme.lean`
+      beside `intStepBranch_some_exists`, per the phase's "Files to modify" list)*
+- [x] Prove `intStepBranchPrio_some_exists`, the extraction bridge, **strengthened with `sf ∉ e`**
       relative to the existing `intStepBranch_some_exists` (`Scheme.lean:1141`):
       `∃ sf, sf ∈ b ∧ sf ∉ e ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf]`.
       The `sf ∉ e` conjunct is what the `intExpMeasure` lemmas currently obtain by unfolding.

@@ -3876,6 +3876,85 @@ private lemma IWorldHist_isAccessible_lt {φ0 : Proposition Atom} {b : IBranch A
   have hle : w ≤ w' := parAncestor_le hpar0 hdesc hw' hpar
   exact lt_of_le_of_ne hle hne
 
+/-! ### Edge-list reconciliation across growth (plan Phase 6, task-list item (b) support) -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Edge-list reconciliation across growth** (plan Phase 6, Investigation note point 4, "the
+newly-discovered second gap"): given two `IWorldHist` witnesses at a SMALLER and a LARGER
+raw-edge list, where the smaller list's entries are literally contained in the larger one's (raw
+edges only ever grow via append across `intExpandBranches.go`'s induction, never rewritten or
+removed) and the target `w'` lies within the smaller list's own domain (`w' < nw_small`), any
+accessibility witness found relative to the LARGER edges reconciles down to the smaller edges.
+This is what composing `applyAllTImpRules_agrees`'s `hpp`/`hacc` hypotheses -- both stated about
+an EARLIER round's `edges` -- against a LATER round's own (bigger) `edges'` needs.
+
+Deliberately proved via `parAncestor`, not the go-level fresh-append lemma
+(`isAccessible_go_append_eq_of_fresh`): the fuel mismatch that a `.go`-level route hits (the
+larger list's own canonical fuel `edges_big.length` is strictly bigger than the smaller list's
+own `edges_small.length`, and downward fuel reduction is not valid for `isAccessible.go` in
+general) never arises here, because the wrapper-level route below re-derives
+`isAccessible edges_small w w' = true` AFRESH at `edges_small`'s OWN canonical fuel, via
+`hWH_small`'s own (H1-acc) clause, rather than trying to trim `hacc`'s witness down. The bridge:
+any `parAncestor`-chain ending at a target `c < nw_small` stays entirely inside `[0, c]`
+(`parAncestor_le`'s descent bound), hence entirely inside the domain where the two `IWorldHist`
+witnesses' `par` functions are FORCED to agree (`edges_shape_of_worldHist`'s uniqueness argument,
+using `hsub`) -- so the accessibility witness round-trips: `edges_big`'s `parAncestor` chain to
+`w'` is also a `par_small`-chain, and `hWH_small`'s own (H1-acc) clause converts that back into
+`isAccessible edges_small`. -/
+private lemma isAccessible_reconcile_of_worldHist
+    {φ0 : Proposition Atom} {b_small b_big : IBranch Atom} {e_small e_big : List (ISF Atom)}
+    {nw_small nw_big : Nat} {edges_small edges_big : IEdges}
+    (hWH_small : IWorldHist φ0 b_small e_small nw_small edges_small)
+    (hWH_big : IWorldHist φ0 b_big e_big nw_big edges_big)
+    (hWHC_big : IWorldHistCounter nw_big edges_big)
+    (hns : nw_small ≤ nw_big)
+    (hsub : ∀ p ∈ edges_small, p ∈ edges_big)
+    {w w' : Nat} (hw' : w' < nw_small)
+    (hacc : isAccessible edges_big w w' = true) :
+    isAccessible edges_small w w' = true := by
+  obtain ⟨par_small, obl_small, sfor_small, fire_small, hpar0_small, hall_small⟩ := hWH_small
+  obtain ⟨par_big, obl_big, sfor_big, fire_big, hpar0_big, hall_big⟩ := hWH_big
+  have hshape_big : ∀ p ∈ edges_big, ∃ c, 1 ≤ c ∧ c < nw_big ∧ p = (c, par_big c) :=
+    edges_shape_of_worldHist hWHC_big (fun c hc1 hc2 => (hall_big c hc1 hc2).1)
+  have hdesc_big : ∀ x, 1 ≤ x → x < nw_big → par_big x < x :=
+    fun c hc1 hc2 => (hall_big c hc1 hc2).2.1
+  -- The two `par` witnesses agree pointwise below `nw_small`.
+  have hpar_eq : ∀ c, 1 ≤ c → c < nw_small → par_small c = par_big c := by
+    intro c hc1 hc2
+    have hmem_small : (c, par_small c) ∈ edges_small := (hall_small c hc1 hc2).1
+    have hmem_big : (c, par_small c) ∈ edges_big := hsub _ hmem_small
+    obtain ⟨c', hc1', hc2', heq⟩ := hshape_big (c, par_small c) hmem_big
+    rw [Prod.mk.injEq] at heq
+    obtain ⟨hceq, hpeq⟩ := heq
+    exact hpeq.trans (by rw [hceq])
+  have hpar_eq_all : ∀ c, c < nw_small → par_big c = par_small c := by
+    intro c hc
+    rcases Nat.eq_zero_or_pos c with hc0 | hcpos
+    · subst hc0; rw [hpar0_big, hpar0_small]
+    · exact (hpar_eq c hcpos hc).symm
+  -- `isAccessible edges_big w w' = true` collapses to a `parAncestor par_big` chain.
+  have hshape_big' : ∀ p ∈ edges_big, ∃ c, p = (c, par_big c) :=
+    fun p hp => let ⟨c, _hc1, _hc2, hceq⟩ := hshape_big p hp; ⟨c, hceq⟩
+  have hpar : parAncestor par_big w w' := parAncestor_of_isAccessible hshape_big' w w' hacc
+  clear hacc
+  -- Convert to a `par_small`-chain: every element of the chain stays `< nw_small`.
+  have hpar_small : parAncestor par_small w w' := by
+    induction hpar using Relation.ReflTransGen.head_induction_on with
+    | refl => exact Relation.ReflTransGen.refl
+    | head hab hchain ih =>
+      rename_i x b
+      have hble : b ≤ w' := parAncestor_le hpar0_big hdesc_big (lt_of_lt_of_le hw' hns) hchain
+      have hblt : b < nw_small := lt_of_le_of_lt hble hw'
+      have heqb : par_big b = par_small b := hpar_eq_all b hblt
+      exact Relation.ReflTransGen.head (hab.trans heqb) ih
+  -- `hWH_small`'s own (H1-acc) clause closes the reconciliation.
+  rcases Nat.eq_zero_or_pos w' with hw0 | hw'pos
+  · subst hw0
+    have hw0' : w = 0 := parAncestor_zero hpar0_small hpar_small
+    subst hw0'
+    simp [isAccessible]
+  · exact (hall_small w' hw'pos hw').2.2.1 w hpar_small
+
 /-! ### `IWorldsPlanted`: the provenance half of `IPosPersistRaw`'s side-condition gap
 
 `IPosPersistRaw`'s (Scheme.lean:6701-6704) third hypothesis needs "the target world already has
@@ -7361,6 +7440,183 @@ private lemma applyPersistenceFixpoint_agrees
         exact Or.inl (Or.inl (hmono x hx))
       · exact applyAllTImpRules_agrees hw0 hfrz hpp hic hcons hWH hWHC hmono hagree
 
+/-! ### Growing-edges composition (plan Phase 6, task-list item (b))
+
+`applyAllTImpRules_agrees`/`applyPersistenceFixpoint_agrees` above are stated about a SINGLE
+`edges` value, shared between the checkpoint facts (`hfrz`, `hpp`, `hic`, `hcons`, all pinned to
+a fixed `b`) and the round actually being computed (`applyAllTImpRules bv edges`). Phase 6's
+Investigation note (point 4, "the newly-discovered second gap") identifies that composing the
+freeze argument ACROSS `intExpandBranches.go`'s induction needs a version where these two roles
+are decoupled: the checkpoint facts stay pinned to the ORIGIN round's SMALLER `edges_small` (the
+`(x, l)` reuse edge's own recording point), while the round being composed is a LATER go-call
+running against its own (bigger) `edges_big ⊇ edges_small`. `isAccessible_reconcile_of_worldHist`
+above is exactly the bridge this needs: every `isAccessible edges_big · ·` witness the proof
+extracts is reconciled down to `edges_small` before being fed to `hpp`, which only ever knows
+about `edges_small`. -/
+
+omit [Hashable Atom] in
+/-- **Single-round freeze preservation, across growing edges**: the growing-edges
+generalization of `applyAllTImpRules_agrees`. Identical proof shape, except every `hacc`
+witness extracted from `applyAllTImpRules bv edges_big`'s computation is reconciled down to
+`edges_small` (`isAccessible_reconcile_of_worldHist`) before being handed to `hpp`; the
+label-order fact (`IWorldHist_isAccessible_lt`) needs no reconciliation and is read off
+directly at `edges_big`/`hWH_big`. -/
+private lemma applyAllTImpRules_agrees_grow
+    {φ0 : Proposition Atom} {edges_small edges_big : IEdges} {e : List (ISF Atom)}
+    {w0 nw_small nw_big : Nat} {b : IBranch Atom}
+    {b_small b_big : IBranch Atom} {e_small e_big : List (ISF Atom)}
+    (hw0 : w0 ≤ nw_small) (hns : nw_small ≤ nw_big)
+    (hsub : ∀ p ∈ edges_small, p ∈ edges_big)
+    (hfrz : IFrozenBelow w0 e b) (hpp : IPosPersistRaw edges_small b)
+    (hic : IExpandedConsistent b e)
+    (hcons : ∀ w' : Nat, w' < w0 → ∀ χ : Proposition Atom,
+      ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
+    (hWH_small : IWorldHist φ0 b_small e_small nw_small edges_small)
+    (hWH_big : IWorldHist φ0 b_big e_big nw_big edges_big)
+    (hWHC_big : IWorldHistCounter nw_big edges_big)
+    {bv : IBranch Atom} (hmono : ∀ x ∈ b, x ∈ bv)
+    (hagree : ∀ sf ∈ bv, sf.label < w0 → sf ∈ b) :
+    ∀ sf ∈ applyAllTImpRules bv edges_big, sf.label < w0 → sf ∈ b := by
+  intro sf hsf hlt
+  simp only [applyAllTImpRules, List.mem_append] at hsf
+  rcases hsf with (hsf | hsf) | hsf
+  · exact hagree sf hsf hlt
+  · simp only [List.mem_flatten, List.mem_filterMap] at hsf
+    obtain ⟨toAdd, ⟨y, hymem, hyeq⟩, hsfmem⟩ := hsf
+    rcases y with ⟨ys, yf, yl⟩
+    cases ys with
+    | neg => simp at hyeq
+    | pos =>
+      cases yf with
+      | atom a => simp at hyeq
+      | bot => simp at hyeq
+      | and φ ψ => simp at hyeq
+      | or φ ψ => simp at hyeq
+      | imp φ ψ =>
+        simp only [] at hyeq
+        split at hyeq
+        · exact absurd hyeq (by simp)
+        · rename_i hne
+          rw [Option.some.injEq] at hyeq
+          subst hyeq
+          simp only [intTImpRule, List.mem_filterMap] at hsfmem
+          obtain ⟨w', hw'mem, hsfeq⟩ := hsfmem
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'mem
+          obtain ⟨⟨z, hzmem, hzeq⟩, hacc⟩ := hw'mem
+          split at hsfeq
+          · rename_i hTphi
+            split at hsfeq
+            · simp at hsfeq
+            · rename_i hTpsi
+              rw [Bool.not_eq_true] at hTpsi
+              rw [Option.some.injEq] at hsfeq
+              subst hsfeq
+              have hw'nw : w' < nw_small := lt_of_lt_of_le hlt hw0
+              have hw'nw_big : w' < nw_big := lt_of_lt_of_le hw'nw hns
+              have hylw0 : yl < w0 := by
+                by_cases hyw' : yl = w'
+                · exact hyw' ▸ hlt
+                · exact lt_trans
+                    (IWorldHist_isAccessible_lt hWH_big hWHC_big hw'nw_big hacc hyw') hlt
+              have hsrc_b : (⟨.pos, φ.imp ψ, yl⟩ : ISF Atom) ∈ b := hagree _ hymem hylw0
+              have hTphi_b : (⟨.pos, φ, w'⟩ : ISF Atom) ∈ b := hagree _ (isf_any_mem hTphi) hlt
+              have hw'ent_b : b.any (fun sf' => sf'.label == w') = true :=
+                List.any_eq_true.mpr ⟨_, hTphi_b, by simp⟩
+              have hacc_small : isAccessible edges_small yl w' = true :=
+                isAccessible_reconcile_of_worldHist hWH_small hWH_big hWHC_big hns hsub hw'nw hacc
+              have hcopy_b : (⟨.pos, φ.imp ψ, w'⟩ : ISF Atom) ∈ b :=
+                hpp _ yl w' hacc_small hsrc_b hw'ent_b
+              have hexp : (⟨.pos, φ.imp ψ, w'⟩ : ISF Atom) ∈ e := by
+                rcases hfrz _ hcopy_b hlt with hwc | hexp | hnsx
+                · exact absurd hwc (by simp [isWorldCreating])
+                · exact hexp
+                · exact absurd hnsx (by simp [isRuleShape])
+              rcases hic _ hexp with hFphi | hTpsi_b
+              · exact absurd ⟨hTphi_b, isf_any_mem hFphi⟩ (hcons w' hlt φ)
+              · exact isf_any_mem hTpsi_b
+          · simp at hsfeq
+  · simp only [List.mem_flatten, List.mem_filterMap] at hsf
+    obtain ⟨toAdd, ⟨y, hymem, hyeq⟩, hsfmem⟩ := hsf
+    rcases y with ⟨ys, yf, yl⟩
+    cases ys with
+    | neg => simp at hyeq
+    | pos =>
+      simp only [] at hyeq
+      split at hyeq
+      · exact absurd hyeq (by simp)
+      · rename_i hne
+        rw [Option.some.injEq] at hyeq
+        subst hyeq
+        simp only [List.mem_filterMap] at hsfmem
+        obtain ⟨w', hw'mem, hsfeq⟩ := hsfmem
+        split at hsfeq
+        · simp at hsfeq
+        · rename_i hguard
+          rw [Bool.not_eq_true] at hguard
+          rw [Option.some.injEq] at hsfeq
+          subst hsfeq
+          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'mem
+          obtain ⟨⟨z, hzmem, hzeq⟩, hacc⟩ := hw'mem
+          have hw'nw : w' < nw_small := lt_of_lt_of_le hlt hw0
+          have hw'nw_big : w' < nw_big := lt_of_lt_of_le hw'nw hns
+          have hylw0 : yl < w0 := by
+            by_cases hyw' : yl = w'
+            · exact hyw' ▸ hlt
+            · exact lt_trans
+                (IWorldHist_isAccessible_lt hWH_big hWHC_big hw'nw_big hacc hyw') hlt
+          have hsrc_b : (⟨.pos, yf, yl⟩ : ISF Atom) ∈ b := hagree _ hymem hylw0
+          have hz_b : z ∈ b := hagree z hzmem (hzeq ▸ hlt)
+          have hw'ent_b : b.any (fun sf' => sf'.label == w') = true :=
+            List.any_eq_true.mpr ⟨z, hz_b, by simp [hzeq]⟩
+          have hacc_small : isAccessible edges_small yl w' = true :=
+            isAccessible_reconcile_of_worldHist hWH_small hWH_big hWHC_big hns hsub hw'nw hacc
+          have hcopy_b : (⟨.pos, yf, w'⟩ : ISF Atom) ∈ b :=
+            hpp yf yl w' hacc_small hsrc_b hw'ent_b
+          have hcopy_bv : (⟨.pos, yf, w'⟩ : ISF Atom) ∈ bv := hmono _ hcopy_b
+          have hcontra : (List.any bv fun y' =>
+              y'.sign == Sign.pos && y'.formula == yf && y'.label == w') = true :=
+            List.any_eq_true.mpr ⟨_, hcopy_bv, by simp⟩
+          rw [hguard] at hcontra
+          exact absurd hcontra (by simp)
+
+omit [Hashable Atom] in
+/-- **Fuel-recursive freeze preservation, across growing edges**: the growing-edges
+generalization of `applyPersistenceFixpoint_agrees`, iterating `applyAllTImpRules_agrees_grow`
+across `applyPersistenceFixpoint`'s fuel recursion at the FIXED `edges_big` (edges do not grow
+WITHIN one `intExpandBranches.go` call's own persistence-fixpoint recursion -- only `bv` varies
+per round; the growth is between DIFFERENT go-calls). `b`, `edges_small`, and every checkpoint
+fact about them stay fixed throughout. -/
+private lemma applyPersistenceFixpoint_agrees_grow
+    {φ0 : Proposition Atom} {edges_small edges_big : IEdges} {e : List (ISF Atom)}
+    {w0 nw_small nw_big : Nat} {b : IBranch Atom}
+    {b_small b_big : IBranch Atom} {e_small e_big : List (ISF Atom)}
+    (hw0 : w0 ≤ nw_small) (hns : nw_small ≤ nw_big)
+    (hsub : ∀ p ∈ edges_small, p ∈ edges_big)
+    (hfrz : IFrozenBelow w0 e b) (hpp : IPosPersistRaw edges_small b)
+    (hic : IExpandedConsistent b e)
+    (hcons : ∀ w' : Nat, w' < w0 → ∀ χ : Proposition Atom,
+      ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
+    (hWH_small : IWorldHist φ0 b_small e_small nw_small edges_small)
+    (hWH_big : IWorldHist φ0 b_big e_big nw_big edges_big)
+    (hWHC_big : IWorldHistCounter nw_big edges_big) :
+    ∀ (fuel : Nat) (bv : IBranch Atom), (∀ x ∈ b, x ∈ bv) →
+      (∀ sf ∈ bv, sf.label < w0 → sf ∈ b) →
+      ∀ sf ∈ applyPersistenceFixpoint bv edges_big fuel, sf.label < w0 → sf ∈ b := by
+  intro fuel
+  induction fuel with
+  | zero => intro bv _ hagree; simpa [applyPersistenceFixpoint] using hagree
+  | succ fuel' ih =>
+    intro bv hmono hagree
+    simp only [applyPersistenceFixpoint]
+    split
+    · exact hagree
+    · refine ih (applyAllTImpRules bv edges_big) ?_ ?_
+      · intro x hx
+        simp only [applyAllTImpRules, List.mem_append]
+        exact Or.inl (Or.inl (hmono x hx))
+      · exact applyAllTImpRules_agrees_grow hw0 hns hsub hfrz hpp hic hcons
+          hWH_small hWH_big hWHC_big hmono hagree
+
 omit [Hashable Atom] in
 /-- **Mechanism 3(b), landed**: `applyPersistenceFixpoint b edges fuel`, run at the top of a
 `intExpandBranches.go` call, preserves `IFrozenBelow w0 e`. Direct corollary of
@@ -7469,6 +7725,89 @@ private lemma IAllReuseContain_map_const {branches' : List (IBranch Atom)}
   | nil => simp [IAllReuseContain]
   | cons bh bt ih =>
     simp only [List.map_cons, IAllReuseContain]
+    exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
+
+/-- **Reuse-time freeze witness, per recorded loop-back edge** (plan Phase 6, Investigation
+note point 2): every recorded loop-back edge `(x, l)` also carries a freeze checkpoint at
+`l + 1` -- `IFrozenBelow (l + 1) e b`, i.e. no rule application at or below `l` can ever again
+write genuinely new content once `(x, l)` is recorded. This is the companion invariant that lets
+`IReuseContain`'s snapshot existential eventually be dropped (Phase 6's target restatement):
+composed with Phase 5's freeze-preservation lemmas (`IFrozenBelow_intStepBranchPrio_ge`,
+`IFrozenBelow_applyPersistenceFixpoint` / `applyPersistenceFixpoint_agrees_grow`), containment of
+`l`'s positive content in `x` survives branch growth without ever re-deriving a snapshot, because
+nothing NEW ever arrives at `l` again. Threaded ALONGSIDE `IAllReuseContain` via a SEPARATE
+3-list zip `IAllReuseFrozen` (below), since `IFrozenBelow` needs the per-branch expanded set `e`
+that `IAllReuseContain`'s 2-list zip does not carry. -/
+private def IReuseFrozen (lbH : IEdges) (e : List (ISF Atom)) (b : IBranch Atom) : Prop :=
+  ∀ x l : Nat, (x, l) ∈ lbH → IFrozenBelow (l + 1) e b
+
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- Extending `IReuseFrozen` by a newly recorded loop-back edge `(x, l)`, given the freeze
+checkpoint at `l + 1` directly -- at the reuse arm this is exactly `IFrozenBelow_downward`
+applied to the record-time checkpoint `IFrozenBelow nwH eH bPers` (`intStepBranchPrioFirstPass`'s
+`none` result) at the recorded label's own successor `l + 1 ≤ nwH` (`l < nwH` from
+`ILabelBoundStrict`). -/
+private lemma IReuseFrozen_snoc {lbH : IEdges} {e : List (ISF Atom)} {b : IBranch Atom}
+    {x l : Nat} (h : IReuseFrozen lbH e b) (hfrz : IFrozenBelow (l + 1) e b) :
+    IReuseFrozen (lbH ++ [(x, l)]) e b := by
+  intro x' l' hx'l'
+  rcases List.mem_append.mp hx'l' with h' | h'
+  · exact h x' l' h'
+  · simp only [List.mem_singleton, Prod.mk.injEq] at h'
+    obtain ⟨rfl, rfl⟩ := h'
+    exact hfrz
+
+/-- List companion of `IReuseFrozen`, a 3-list zip over `(bs, expSets, lbSets)` mirroring
+`IAllWorldHist`'s 4-list-zip template (companion, not merged, threaded ALONGSIDE
+`IAllReuseContain`, since `IFrozenBelow` needs the per-branch expanded set `e` that
+`IAllReuseContain`'s 2-list zip does not carry). -/
+private def IAllReuseFrozen (bs : List (IBranch Atom)) (expSets : List (List (ISF Atom)))
+    (lbSets : List IEdges) : Prop :=
+  match bs, expSets, lbSets with
+  | [], [], [] => True
+  | b :: bs', e :: expSets', lbH :: lbT' =>
+      IReuseFrozen lbH e b ∧ IAllReuseFrozen bs' expSets' lbT'
+  | _, _, _ => False
+
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- `IAllReuseFrozen` combines under list append (mirrors `IAllWorldHist_append`). -/
+private lemma IAllReuseFrozen_append {bs1 bs2 : List (IBranch Atom)}
+    {expSets1 expSets2 : List (List (ISF Atom))} {lb1 lb2 : List IEdges}
+    (h1 : IAllReuseFrozen bs1 expSets1 lb1) (h2 : IAllReuseFrozen bs2 expSets2 lb2) :
+    IAllReuseFrozen (bs1 ++ bs2) (expSets1 ++ expSets2) (lb1 ++ lb2) := by
+  induction bs1 generalizing expSets1 lb1 with
+  | nil =>
+    cases expSets1 with
+    | nil =>
+      cases lb1 with
+      | nil => simpa using h2
+      | cons _ _ => simp [IAllReuseFrozen] at h1
+    | cons _ _ => simp [IAllReuseFrozen] at h1
+  | cons bh bt ih =>
+    cases expSets1 with
+    | nil => simp [IAllReuseFrozen] at h1
+    | cons eh et =>
+      cases lb1 with
+      | nil => simp [IAllReuseFrozen] at h1
+      | cons lbh lbt =>
+        simp only [IAllReuseFrozen] at h1
+        obtain ⟨hARF, hrest⟩ := h1
+        simp only [List.cons_append]
+        exact ⟨hARF, ih hrest⟩
+
+omit [Hashable Atom] [DecidableEq Atom] in
+/-- `IAllReuseFrozen` holds along a constant-valued `map` (mirrors `IAllWorldHist_map_const`;
+used for the BETA arm, where every child shares the same expanded set and loop-back list since
+branching never records a new loop-back edge or expands new content). -/
+private lemma IAllReuseFrozen_map_const {branches' : List (IBranch Atom)}
+    (f : IBranch Atom → IBranch Atom) {e' : List (ISF Atom)} {lbH' : IEdges}
+    (h : ∀ br ∈ branches', IReuseFrozen lbH' e' (f br)) :
+    IAllReuseFrozen (branches'.map f) (branches'.map (fun _ => e'))
+      (branches'.map (fun _ => lbH')) := by
+  induction branches' with
+  | nil => simp [IAllReuseFrozen]
+  | cons bh bt ih =>
+    simp only [List.map_cons, IAllReuseFrozen]
     exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
 
 /-- **R1 restatement** (Phase 6: `hUniv`/`hNW`/per-branch `hFuel` hypothesis threading;

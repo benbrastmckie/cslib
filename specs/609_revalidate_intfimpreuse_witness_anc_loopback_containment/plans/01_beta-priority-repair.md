@@ -834,6 +834,86 @@ above); the `key` suffices statement of `intExpandBranches_openBranch_sat` refer
 item (d) above is at `Scheme.lean:7524`. Line numbers will drift again on the next dispatch's own
 insertions — re-run the grep before editing, per this plan's own delta-recording convention.
 
+**Progress note (this dispatch, items (b) and (c) landed)**: this dispatch closes task-list items
+(b) and (c) in full, sorry-free and axiom-clean (`lean_verify`: `propext`/`Classical.choice`/
+`Quot.sound` only, matching the file's existing axiom profile). Zero of items (d)-(f) attempted;
+Phase 6 remains `[IN PROGRESS]`.
+
+1. **Item (b), landed via a NEW reconciliation lemma rather than item (a)'s go-level lemma.**
+   Point 4's "newly-discovered second gap" (relating an ORIGIN round's `hpp : IPosPersistRaw
+   edges_small b` to a LATER round's own bigger `edges_big ⊇ edges_small`) is closed by
+   `isAccessible_reconcile_of_worldHist` (`Scheme.lean:3879-3960` as of this dispatch, right after
+   `IWorldHist_isAccessible_lt`, under a new `### Edge-list reconciliation across growth` section):
+   given `IWorldHist`/`IWorldHistCounter` witnesses at both `edges_small` (`nw_small`) and
+   `edges_big` (`nw_big`), `nw_small ≤ nw_big`, `edges_small ⊆ edges_big` (list membership), and a
+   target `w' < nw_small`, any `isAccessible edges_big w w' = true` reconciles down to
+   `isAccessible edges_small w w' = true`. **Deliberately proved via `parAncestor`, not the
+   go-level fresh-append lemma** (`isAccessible_go_append_eq_of_fresh`, item (a)): any
+   `parAncestor`-chain ending at a target `c < nw_small` stays entirely inside `[0, c]`
+   (`parAncestor_le`'s descent bound), hence entirely inside the domain where the two `IWorldHist`
+   witnesses' `par` functions are FORCED to agree (`edges_shape_of_worldHist`'s uniqueness
+   argument, using the `hsub` containment) — so the witness round-trips through the smaller `par`
+   and `hWH_small`'s own (H1-acc) clause, at `edges_small`'s OWN canonical fuel. This sidesteps the
+   fuel-mismatch gap 3 identified in the previous dispatch's Progress note entirely (no fuel
+   arithmetic needed at all), confirming that dispatch's own prediction: "reach for
+   `IWorldHistCounter`/`edges_shape_of_worldHist`/`parAncestor_of_isAccessible` first, rather than
+   attempting a generic fuel-saturation lemma." Item (a)'s go-level lemma remains landed and
+   correct but is NOT used by this reconciliation route; it may still be useful at a future
+   go-call-local (non-wrapper) site, but is not required by items (b)-(f) as currently understood.
+
+   Built on top of this bridge: `applyAllTImpRules_agrees_grow` and
+   `applyPersistenceFixpoint_agrees_grow` (`Scheme.lean:7464-7625` as of this dispatch, immediately
+   after `applyPersistenceFixpoint_agrees`, before `IFrozenBelow_applyPersistenceFixpoint`, under a
+   new `### Growing-edges composition` section) are the literal growing-edges generalizations the
+   task list asked for: identical
+   proof shape to `applyAllTImpRules_agrees`/`applyPersistenceFixpoint_agrees`, except the
+   checkpoint facts (`hfrz`, `hpp`, `hic`, `hcons`) stay pinned to `edges_small`/a fixed `b` while
+   the round actually computed (`applyAllTImpRules bv edges_big`) runs against the bigger
+   `edges_big`; every `hacc` witness the proof extracts from that computation is reconciled down to
+   `edges_small` via `isAccessible_reconcile_of_worldHist` before being fed to `hpp`, while the
+   label-order fact (`IWorldHist_isAccessible_lt`) is read off directly at `edges_big` (it needs no
+   reconciliation). **Not yet wired into the induction** — these are free-standing lemmas, not yet
+   invoked at any of the six `IReuseContain_mono` use sites; that wiring is item (e)'s job, and
+   requires establishing at each use site the ACTUAL origin/later `IWorldHist` witnesses, the
+   `nw_small ≤ nw_big` fact, and the `edges_small ⊆ edges_big` containment fact (raw edges only
+   ever grow by append across the induction — true structurally, but not yet packaged as its own
+   reusable "raw edges are append-only" lemma; the next dispatch may need one).
+
+2. **Item (c), landed in full per the task list's literal wording.** `IReuseFrozen`
+   (`Scheme.lean:7741-7742` as of this dispatch, right after `IAllReuseContain_map_const`) is
+   `∀ x l, (x, l) ∈ lbH → IFrozenBelow (l + 1) e b`, exactly point 2's sketch. Companions landed
+   (`Scheme.lean:7750-7815` region, `IReuseFrozen_snoc`/`IAllReuseFrozen`/`IAllReuseFrozen_append`/
+   `IAllReuseFrozen_map_const`):
+   - `IFrozenBelow_downward` (`Expansion.lean`, right after `IFrozenBelow`'s definition): the
+     "trivial to add" downward-closure-in-threshold lemma point 1 named (`w0' ≤ w0 →
+     IFrozenBelow w0 e b → IFrozenBelow w0' e b`), a one-line consequence of `IFrozenBelow`'s
+     definition.
+   - `IReuseFrozen_snoc`: extends `IReuseFrozen` by a newly recorded loop-back edge `(x, l)`,
+     given the freeze checkpoint `IFrozenBelow (l + 1) e b` directly as a hypothesis (mirrors
+     `IReuseContain_snoc`'s shape).
+   - `IAllReuseFrozen`: the 3-list zip over `(bs, expSets, lbSets)` point 2 calls for, mirroring
+     `IAllWorldHist`'s 4-list-zip template (NOT `IAllReuseContain`'s narrower 2-list zip, which
+     lacks the per-branch expanded set `e` that `IFrozenBelow` needs) — plus `_append` and
+     `_map_const` companions, mirroring `IAllWorldHist_append`/`IAllWorldHist_map_const` exactly.
+
+   **Deliberately NOT attempted**: any "does `IReuseFrozen` survive branch growth on its own"
+   lemma. Unlike `IReuseContain_mono` (a one-liner, since its snapshot witness is literally
+   contained by hypothesis), `IFrozenBelow` is NOT naively monotone under branch growth — its
+   universal quantifier ranges over `∀ sf ∈ b`, so a BIGGER `b` is a STRICTLY STRONGER
+   requirement, not a weaker one; genuine preservation needs the real freeze machinery
+   (`IFrozenBelow_intStepBranchPrio_ge` + `IFrozenBelow_applyPersistenceFixpoint`/
+   `applyPersistenceFixpoint_agrees_grow`), which is exactly what item (e)'s wiring is for. Do
+   not attempt a cheap "IReuseFrozen_mono" shortcut in a future dispatch — it is not a one-liner.
+
+**Re-grep before editing** (line numbers shift again on the next dispatch's own insertions,
+`+~280` from this dispatch's combined insertion at three sites): `grep -n
+"IReuseContain_mono\|private def IReuseFrozen\|private def IAllReuseFrozen\|applyAllTImpRules_agrees_grow\|isAccessible_reconcile_of_worldHist"
+Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`. The six `IReuseContain_mono` use
+sites (item (e)'s target), current as of THIS dispatch: `:7962` (case2), `:8059` (case4), `:8177`
+(case5), `:8307` (case6, alongside the `IReuseContain_snoc` call at `:8388`), `:8565` (case7),
+`:8735` (case8) — same case mapping as the previous dispatch's Scope Hypothesis paragraph above,
+only the line numbers moved.
+
 **Tasks**:
 - [ ] Restate `IReuseContain` (`Scheme.lean:6814`) with `bSnap := b`:
       `∀ x l, (x, l) ∈ lbEdges → ∀ χ, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b → (⟨.pos, χ, x⟩ : ISF Atom) ∈ b`.

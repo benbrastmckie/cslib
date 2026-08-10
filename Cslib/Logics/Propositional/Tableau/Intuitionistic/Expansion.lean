@@ -338,6 +338,18 @@ only ever writes at its own `nextWorld`, never below it). -/
 def IFrozenBelow (w0 : Nat) (e : List (ISF Atom)) (b : IBranch Atom) : Prop :=
   ∀ sf ∈ b, sf.label < w0 → isWorldCreating sf = true ∨ sf ∈ e ∨ isRuleShape sf = false
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Downward closure in the threshold** (plan Phase 6, Investigation note point 1): a lower
+threshold is an easier freeze checkpoint to satisfy -- `sf.label < w0'` for `w0' ≤ w0` already
+forces `sf.label < w0`, so the wider `IFrozenBelow w0 e b` hypothesis directly supplies the
+disjunction the narrower `IFrozenBelow w0' e b` needs. This is what lets a checkpoint recorded at
+one point (e.g. `IFrozenBelow nwH eH bPers`, from `intStepBranchPrioFirstPass_none_frozen`) be
+weakened to any smaller threshold `w0' ≤ nwH` needed later (e.g. `l + 1` for a specific recorded
+loop-back label `l < nwH`), without re-deriving the checkpoint. -/
+lemma IFrozenBelow_downward {w0 w0' : Nat} {e : List (ISF Atom)} {b : IBranch Atom}
+    (hle : w0' ≤ w0) (h : IFrozenBelow w0 e b) : IFrozenBelow w0' e b :=
+  fun sf hsfb hlt => h sf hsfb (lt_of_lt_of_le hlt hle)
+
 omit [Hashable Atom] in
 /-- The world-creating checkpoint: when `intStepBranchPrioFirstPass` returns `none` at
 `(b, e, nextWorld)`, `b` is `IFrozenBelow nextWorld e` -- every formula on the branch (not just

@@ -1035,7 +1035,7 @@
         "CslibTests/TableauConformance.lean"
       ],
       "created": "2026-08-09T22:54:00Z",
-      "last_updated": "2026-08-10T04:49:04Z",
+      "last_updated": "2026-08-10T05:36:04Z",
       "session_id": "sess_1786336315_39f0e4",
       "artifacts": [
         {
@@ -1046,7 +1046,7 @@
         {
           "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
           "type": "plan",
-          "summary": "Phase 6 carries an Investigation Note (mechanism, two gaps, dependency-ordered task list, resolved Scope Hypothesis) plus a Progress note: task-list item (a) (`isAccessible_go_append_eq_of_fresh` + dead-end helper) is landed sorry-free; heading remains [IN PROGRESS] pending items (b)-(f)."
+          "summary": "Phase 6 items (a)-(c) landed sorry-free: (a) isAccessible reverse-direction go-level lemmas; (b) isAccessible_reconcile_of_worldHist plus applyAllTImpRules_agrees_grow/applyPersistenceFixpoint_agrees_grow (growing-edges composition, closing the wrapper-level fuel-mismatch gap via parAncestor rather than fuel arithmetic); (c) IReuseFrozen/IAllReuseFrozen plus IFrozenBelow_downward. Items (d)-(f) (threading into the key statement, six IReuseContain_mono use-site rewrites, final restatement) remain; heading stays [IN PROGRESS]."
         }
       ]
     },

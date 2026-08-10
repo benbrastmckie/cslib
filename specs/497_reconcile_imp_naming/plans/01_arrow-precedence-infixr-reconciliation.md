@@ -1,7 +1,7 @@
 # Implementation Plan: Reconcile `→` Notation Precedence and Associativity with Upstream
 
 - **Task**: 497 - reconcile_imp_naming (retargeted to notation-only)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1.25 hours
 - **Dependencies**: None (sole dependency 400 is completed)
 - **Research Inputs**: specs/497_reconcile_imp_naming/reports/01_arrow-notation-precedence-reconciliation.md
@@ -211,26 +211,37 @@ lower than 4, record a Reasoned Exclusions entry rather than silently closing.
 
 ---
 
-### Phase 3: Verify the dependency cone and the new parse [NOT STARTED]
+### Phase 3: Verify the dependency cone and the new parse [COMPLETED WITH EXCLUSIONS]
 
 **Goal**: The full 372-module dependency cone of the four in-scope files builds clean with an
 unchanged warning count, and the new associativity and precedence are confirmed by `rfl`.
 
 **Tasks**:
-- [ ] Regenerate the target list mechanically:
+- [x] Regenerate the target list mechanically:
       `grep -oE "Cslib\.Logics\.(Bimodal|LTL|Modal|Temporal)[A-Za-z0-9_.]*" Cslib.lean | sort -u > /tmp/targets.txt`
-- [ ] Run `lake build $(cat /tmp/targets.txt)` and record exit code, job count, error count, and
-      warning count.
-- [ ] Gate on: exit 0, 0 errors, warning count exactly 32 (research baseline, held across both
+      -> 372 modules, matching the research baseline exactly; `Scheme.lean` confirmed absent
+      (`grep -c 'Scheme' /tmp/targets.txt` = 0).
+- [x] Run `lake build $(cat /tmp/targets.txt)` and record exit code, job count, error count, and
+      warning count. -> "Build completed successfully (2013 jobs)", 0 `^error:` lines,
+      32 `^warning:` lines.
+- [x] Gate on: exit 0, 0 errors, warning count exactly 32 (research baseline, held across both
       experimental variants). A rise blocks phase closure and must be investigated as
-      `unusedSectionVars`/`simpNF` fallout, not waved through.
-- [ ] Run the capability regression checks in a scratch file inside each relevant namespace:
+      `unusedSectionVars`/`simpNF` fallout, not waved through. -> Gate passed: 32/32, exact match.
+- [x] Run the capability regression checks in a scratch file inside each relevant namespace:
       - `example (a b c : Formula Nat) : Formula Nat := a → b → c` (Bimodal, LTL, Temporal)
       - `example (a b c : Proposition Nat) : Proposition Nat := a → b → c` (Modal)
       - `example (a b c : Formula Nat) : (a → b → c) = (a → (b → c)) := rfl`
       - `example (a b c : Formula Nat) : (a → b ↔ c) = ((a → b) ↔ c) := rfl`
-- [ ] Confirm `git status --short -- Cslib/` lists only the four in-scope files.
-- [ ] Delete the scratch file; it is a check, not a deliverable.
+      -> All 8 examples (arrow-chain + both `rfl` per applicable namespace) built via
+      `lake build Cslib.Scratch497Check`: "Build completed successfully (734 jobs)", 0 errors.
+- [x] Confirm `git status --short -- Cslib/` lists only the four in-scope files.
+      *(deviation: altered -- after Phases 1/2 committed, the four in-scope files no longer
+      appear as dirty; the only remaining entry is a pre-existing, unrelated modification to
+      `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` that predates this task's work and
+      was never touched by it. `Cslib/Logics/Propositional/Defs.lean` itself is confirmed
+      untouched.)*
+- [x] Delete the scratch file; it is a check, not a deliverable. -> `Cslib/Scratch497Check.lean`
+      removed after the build confirmed all examples elaborate.
 
 **Timing**: 40 minutes (dominated by the cone rebuild)
 
@@ -264,8 +275,8 @@ otherwise mark `[COMPLETED]` and delete this table.
 
 | Item | Reason | Evidence |
 |------|--------|----------|
-| Whole-repository `lake build` | Pre-existing, separately-tracked stall: `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (9,884 lines) never completes — 92 minutes of pegged CPU at 1.3 GB RSS with no cached `.olean`, i.e. it has never built in this checkout. Not caused by this change and not in this task's dependency cone. | Confirm the module is absent from `/tmp/targets.txt` (`grep -c 'Scheme' /tmp/targets.txt` returns 0), and cite the targeted 372-module build's exit 0 as the substituted gate. |
-| `Cslib/Logics/Propositional/Defs.lean` and its dependents | Explicitly out of scope; owned by a sibling task with a standing-approval dependency chain. Research separately established that PL can move independently of these four files — the `scoped` notations resolve by type, so the two precedences never collide. | `git status --short -- Cslib/` lists only the four in-scope files. |
+| Whole-repository `lake build` | Pre-existing, separately-tracked stall: `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (9,884 lines) never completes — 92 minutes of pegged CPU at 1.3 GB RSS with no cached `.olean`, i.e. it has never built in this checkout. Not caused by this change and not in this task's dependency cone. | Confirmed: `grep -c 'Scheme' /tmp/targets.txt` returned 0 (module absent from the 372-module target list); the targeted build substituted as the gate and returned `Build completed successfully (2013 jobs)`, 0 `^error:` lines, 32 `^warning:` lines -- exact match to the research baseline. |
+| `Cslib/Logics/Propositional/Defs.lean` and its dependents | Explicitly out of scope; owned by a sibling task with a standing-approval dependency chain. Research separately established that PL can move independently of these four files — the `scoped` notations resolve by type, so the two precedences never collide. | Confirmed: `git status --short -- Cslib/Logics/Propositional/Defs.lean` returned empty (untouched). The four in-scope files are already committed as of Phases 1-2, so `git status --short -- Cslib/` at Phase 3 close shows only a pre-existing, unrelated modification to `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` that predates and is untouched by this task. |
 
 ---
 

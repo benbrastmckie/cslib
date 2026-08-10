@@ -1,27 +1,54 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "task_number": 497,
-  "session_id": "sess_1786397542_991316_497",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
+  "status": "implemented",
+  "started_at": "2026-08-10T21:55:38Z",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/497_reconcile_imp_naming/plans/01_arrow-precedence-infixr-reconciliation.md",
-      "summary": "Three-phase plan moving the 7 arrow/iff notation declarations to upstream's infixr:25/infixr:20 across the four in-scope files, syncing 2 docstring precedence tables, and verifying via the 372-module targeted build recipe that avoids the known Scheme.lean stall."
-    }
+    "specs/497_reconcile_imp_naming/plans/01_arrow-precedence-infixr-reconciliation.md",
+    "specs/497_reconcile_imp_naming/summaries/01_arrow-precedence-infixr-summary.md"
   ],
-  "phase_count": 3,
-  "estimated_hours": 1.25,
-  "dependency_waves": [[1], [2], [3]],
-  "next_steps": "Run /implement 497 to execute the plan",
-  "memory_candidates": [
-    {
-      "content": "When reconciling a single infix notation's precedence with an upstream reference, check every SIBLING connective declared at the SAME precedence level in the same file, not just the target token. In the cslib fork, moving the arrow from infix:30 to infixr:25 in Modal/LTL/Temporal would have left the co-declared biconditional at infix:30 binding TIGHTER than the arrow -- an inversion that does not exist today only because both being non-associative at the same level makes the mixed shape unparseable. The trap is that the pre-change tree expresses NO ordering between two same-level non-associative operators, so a lone move silently CREATES an ordering, and it is the wrong one. Detection is cheap and decisive: assert the intended binding with `rfl` (e.g. `(a -> b <-> c) = ((a -> b) <-> c) := rfl`) rather than reasoning about precedence numbers. Corollary for scoping: a notation-precedence change's blast radius is bounded by notations whose ARGUMENTS carry annotated precedence in the vacated band; unannotated `notation:N` arguments accept a full term and are precedence-immune.",
-      "category": "PATTERN",
-      "source_artifact": "specs/497_reconcile_imp_naming/plans/01_arrow-precedence-infixr-reconciliation.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["notation-precedence", "infixr", "associativity", "lean4", "sibling-connectives", "rfl-verification"]
-    }
-  ]
+  "modified_files": [
+    "Cslib/Logics/Bimodal/Syntax/Formula.lean",
+    "Cslib/Logics/LTL/Syntax/Formula.lean",
+    "Cslib/Logics/Modal/Basic.lean",
+    "Cslib/Logics/Temporal/Syntax/Formula.lean"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All 3 phases complete and committed (3cd87c03, 63e91332). Full CI pipeline green.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 3,
+    "last_completed_phase": "Verify the dependency cone and the new parse"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "targeted_build": {
+      "module_count": 372,
+      "job_count": 2013,
+      "errors": 0,
+      "warnings": 32,
+      "warning_gate": "32 (research baseline) -- exact match, gate passed"
+    },
+    "full_ci_pipeline": {
+      "cache_get": "no-op, already warm",
+      "checkInitImports": "pass",
+      "lake_lint": "373 repo-wide warnings, 0 in modified files",
+      "lint_style": "pass",
+      "lake_shake": "pass on retry after lake test warmed full-project oleans; 0 suggestions for modified files",
+      "mk_all": "pass, no update necessary",
+      "lake_test": "pass, 9397/9397 jobs, exit 0"
+    },
+    "capability_regression_checks": "all 8 examples elaborated (arrow-chain in 4 namespaces + 2 rfl associativity/precedence checks per iff-bearing namespace)"
+  },
+  "metadata": {
+    "session_id": "sess_1786397542_991316_497",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

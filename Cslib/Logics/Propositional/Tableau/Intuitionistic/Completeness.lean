@@ -85,8 +85,9 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 /-- The truth lemma for the intuitionistic tableau.
 
 Delegates to `truthLemma intScheme`, which is sorry-free (DP-5 discharged via the `hpers`
-positive-persistence hypothesis taken above and threaded through). The single deferred
-completeness obligation now lives in `openBranch_countermodel` (`Scheme.lean`), not here.
+positive-persistence hypothesis taken above and threaded through). This module and
+`openBranch_countermodel` (`Scheme.lean`) are both sorry-free; no completeness obligation is
+deferred anywhere in this dependency chain.
 
 **Route (a) frame**: takes `edges`/`hfimp` and installs
 `intAccessPreorder edges` as the countermodel frame via `letI` (Postmortem-5 revision — this

@@ -737,15 +737,27 @@ def IFimpAccess (edges : IEdges) (b : IBranch Atom) : Prop :=
       b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w') = true ∧
       b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
 
-/-! ### `intExtractValuation` monotonicity — STOP-gate finding
+/-! ### `intExtractValuation` monotonicity — STOP-gate finding, CLOSED
 
-**Blocker (documented, not a `sorry`; no lemma is stated below).** The remaining monotonicity
-task —
-"prove `intExtractValuation` monotone along `intAccessPreorder edges`" (needed both for a
+**CLOSED (annotation-and-docstring close-out): monotonicity is now supplied by `hpersAug`.**
+The two `sorry`s this note used to cite (`Completeness.lean:113`/`Minimal/Completeness.lean:110`)
+no longer exist — both line references are stale, and both files are sorry-free. `hpersAug`
+(`Scheme.lean:9645-9665`, the 11th conjunct of `intExpandBranches_openBranch_sat`, supplied by
+the `intFImpReuseWitnessAnc?` loop-back re-validation in `Expansion.lean`) is exactly the
+`χ`-general positive-persistence fact this note was looking for: instantiated at `χ := .atom p`,
+it gives `intExtractValuation` upward-closure along `intAccessPreorder edges` directly (see
+`openBranch_countermodel`'s conjunct 1), discharging both consumers this note names — the
+`KripkeModel.v_upward_closed` field and `IValid`'s valuation-monotonicity hypothesis. The
+"entangled with B2 fuel-sufficiency" analysis below is retained as the historical record of why
+this was thought hard before `hpersAug` landed; do not re-derive its "not completable" conclusion
+as current.
+
+**Blocker, PRE-REPAIR (historical; not a `sorry`; no lemma was stated below).** The monotonicity
+task — "prove `intExtractValuation` monotone along `intAccessPreorder edges`" (needed both for a
 genuine `KripkeModel.v_upward_closed` field AND for instantiating `IValid`'s
-`∀{w w'} p, w≤w' → val w p → val w' p` hypothesis, `Kripke.lean:145-148`, which is exactly the
-`sorry` at `Completeness.lean:113`/`Minimal/Completeness.lean:110`) is **entangled with the B2
-fuel-sufficiency argument, not completable from completeness-side machinery alone**.
+`∀{w w'} p, w≤w' → val w p → val w' p` hypothesis, `Kripke.lean:145-148`) — was, at the time this
+note was written, **entangled with the B2 fuel-sufficiency argument, not completable from
+completeness-side machinery alone**.
 
 Evidence (verified against source, not assumed):
 - `intApplyRuleFull` (`Rules.lean:245-268`) maps EVERY `.pos, .imp` signed formula (i.e. every
@@ -775,12 +787,17 @@ zero new sorries): `intAccessPreorder` (a genuine `Preorder Nat` from edge-reach
 relation in Phase 4") — deferred to the edge-relation restatement, not a monotonicity-task
 blocker.
 
-**Recommendation for continuation**: either (a) reorder so Phase 2's monotonicity discharge is
-FOLDED INTO Phase 10 (mirroring R3's own anticipated fold for `sat_timp`'s succ-case, generalized
-to Phase 2's atom-monotonicity too — i.e. state monotonicity as a NEW field/hypothesis threaded
-alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or (b) have the
-orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
-dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
+**Recommendation for continuation, PRE-REPAIR (historical, now moot).** The note recommended
+either (a) reordering so Phase 2's monotonicity discharge is FOLDED INTO Phase 10 (mirroring
+R3's own anticipated fold for `sat_timp`'s succ-case, generalized to Phase 2's
+atom-monotonicity too — i.e. state monotonicity as a NEW field/hypothesis threaded alongside
+`sat_timp`, discharged only once `measure ≤ fuel` is available), or (b) having the orchestrator
+re-plan Phase 2/4/10's dependency edges to reflect this inversion before further dispatch. As the
+CLOSED note above records, neither route was needed in the end: `hpersAug` supplied monotonicity
+directly, via the `intFImpReuseWitnessAnc?` loop-back repair, without a Phase 2/10 reordering.
+Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry` — moot advice
+now that the obligation is discharged, retained because the prohibition itself remains sound
+guidance for any future STOP-gate finding of this shape. -/
 
 /-! ### `sat_timp` discharge — STOP-gate finding, CLOSED (DP-5 discharged via `hpers`)
 
@@ -820,7 +837,12 @@ plus `IExpandedConsistent b e`, **with no determinacy/bivalence argument needed 
 exactly the "restate as a branching rule" move Finding 6c / Decision D2 of the calculus-repair
 task recommend, and it is now landed.
 
-**Gap 1 (fuel entanglement) is UNCHANGED and remains the sole blocker.** The disjunction above
+**Gap 1 (fuel entanglement), PRE-REPAIR (historical): at the time this note was written, it was
+UNCHANGED and remained the sole blocker.** *(This heading was itself stale until this
+annotation-and-docstring close-out: the CORRECTION note below already closes Gap 1's
+fuel-sufficiency side and, per the Phase-3 update further above, its dependent DP-5 discharge —
+both are closed, not merely "not yet built". Nothing below this heading is current; it is kept
+as the historical record of the fuel-entanglement analysis.)* The disjunction above
 only holds for a world `w'` that actually carries its OWN `⟨.pos, φ → ψ, w'⟩` copy on the
 branch. `applyAllTImpRules` (`Expansion.lean:118-…`) now ALSO copies `T(φ→ψ)` itself to every
 world accessible from its source that lacks a copy — but this copying, like the original
@@ -873,9 +895,13 @@ correction.
 label of the specific signed-formula copy it is given. No converse of the induction hypothesis
 is needed to use it: in `truthLemma`'s T-imp case, the `F(φ')@w'` arm of the disjunction
 contradicts `IForces val w' φ'` via `ih_φ'.2`, and the `T(ψ')@w'` arm yields the goal directly
-via `ih_ψ'.1`. The case nonetheless stays `sorry`, not because `sat_timp` is missing or because
-a converse is needed, but because the disjunction is only available at `w'` once `w'` carries
-its own `T(φ'→ψ')` copy — Gap 1 above, which is not yet established. `intRule_preserves_sat`'s
+via `ih_ψ'.1`. **Historical (PRE-REPAIR): the case nonetheless used to stay `sorry`** here, not
+because `sat_timp` was missing or because a converse was needed, but because the disjunction was
+only available at `w'` once `w'` carried its own `T(φ'→ψ')` copy — Gap 1 above, which was not
+yet established at that point. As the DISCHARGED note at the top of this section records,
+`truthLemma` is sorry-free now: DP-5 is discharged via the `hpers` route instead, which
+sidesteps this entire self-copy-channel investigation rather than completing it.
+`intRule_preserves_sat`'s
 `.pos, .imp` case (`Soundness.lean`) is already landed and sorry-free — that lemma reasons about
 a real Kripke model's forcing relation directly (classical excluded middle on `IForces`), not
 about branch-syntactic saturation, so it does not depend on Gap 1 at all.
@@ -957,7 +983,7 @@ site of that existential. -/
 
 /-! ## Parametric Truth Lemma -/
 
-/-- Parametric truth lemma (the single deferred completeness obligation).
+/-- Parametric truth lemma. Sorry-free; defers nothing.
 Generalizes `intTruthLemma` over an `IntMinScheme`'s `closurePred`/`modelBot`.
 
 **Infrastructure cross-reference**: The FMP routes in `Metalogic/IntDecidability.lean`
@@ -3253,20 +3279,17 @@ lemmas Phase 6's functional induction over `intExpandBranches.go` consumes at ea
 case, mirroring `intStepBranch_linear_preserves`/`intStepBranch_branch_preserves`'s
 existing shape.
 
-Three of the four recursion arms (ALPHA, BETA, and the ancestor-reuse world-creating
-arm) preserve both invariants by direct, complete proofs below. The fourth (the
-fresh-mint world-creating arm, when `intFImpReuseWitnessAnc?` finds no reusable
-ancestor) preserves `hUniv` unconditionally (`intApplyRuleFull_outputs_subset_ext`
-already supplies this, GIVEN `hNW` holds at the point of creation) but carries the
-DP-2 strategic sorry for `hNW`'s OWN forward preservation (`nw + 1 ≤ WBound φ0`): the
-"labels minted so far ≤ tree size ≤ WBound φ0" creation-count invariant tied to
-`intCreatedChain_le`'s pigeonhole bound (Phase 2), including the runtime-check-to-
-final-branch transfer that lemma's docstring flags as owned by this very development.
-Per plan v14 Phase 5's STOPPING CONDITION, this lemma's proof is deferred; the
-statement is NOT weakened to dodge the gap -- the sorry comment records exactly which
-premise (`nw < WBound φ0`, strict) is missing from the bare `hnwB : nw ≤ WBound φ0`
-threaded by `IAllNW`. Follow-up: DP-2, see the plan's Planned Strategic Sorries
-table. -/
+All four recursion arms (ALPHA, BETA, the ancestor-reuse world-creating arm, and the
+fresh-mint world-creating arm) preserve both invariants by direct, complete, sorry-free proofs
+below. **DP-2, CLOSED.** The fourth arm (fresh-mint world creation, when
+`intFImpReuseWitnessAnc?` finds no reusable ancestor) preserves `hUniv` unconditionally
+(`intApplyRuleFull_outputs_subset_ext` supplies this, GIVEN `hNW` holds at the point of
+creation); it used to carry a strategic `sorry` for `hNW`'s OWN forward preservation
+(`nw + 1 ≤ WBound φ0`) — the "labels minted so far ≤ tree size ≤ WBound φ0" creation-count
+invariant tied to `intCreatedChain_le`'s pigeonhole bound (Phase 2), including the
+runtime-check-to-final-branch transfer that lemma's docstring flags as owned by this very
+development — but that `sorry` is discharged: no `sorry` remains in this dependency chain, and
+the file is sorry-free. -/
 
 /-- Branch-universe containment threaded across the pending/done worklists: every
 formula on every branch stays inside `intUniverseExt φ0`. Unlike `IAllConsistent`,
@@ -8195,8 +8218,9 @@ private lemma IReuseFrozenOrigin_widen {φ0 : Proposition Atom} {lbH : IEdges}
 /-- List companion of `IReuseFrozenOrigin`, a 5-list zip over `(bs, expSets, edgeSets, nws,
 lbSets)` -- mirroring `IAllReuseFrozen`'s 3-list zip, extended with the per-branch-position
 `edges`/`nw` context `IReuseFrozenOrigin` itself needs to state its origin-monotonicity
-conjuncts against. Not yet threaded through `intExpandBranches_openBranch_sat`'s `key`
-statement (plan Phase 6 task-list item (d), still open). -/
+conjuncts against. Threaded through `intExpandBranches_openBranch_sat`'s `key` statement (plan
+Phase 6 task-list item (d), closed; see the `hPendingARFO`/`hDoneARFO` hypotheses further
+below). -/
 private def IAllReuseFrozenOrigin (φ0 : Proposition Atom) (bs : List (IBranch Atom))
     (expSets : List (List (ISF Atom))) (edgeSets : List IEdges) (nws : List Nat)
     (lbSets : List IEdges) : Prop :=
@@ -9597,9 +9621,10 @@ None of those five constructions was a uniform witness; the actual fix was calcu
 construction over the unrepaired algorithm.
 
 **Root cause, now repaired.** `intFImpReuseWitnessAnc?` (`Expansion.lean`) used to record a
-loop-back edge on a containment check it never re-validated as the branch grows. Re-validating
-it is what lets the augmented frame carry positive persistence, giving one frame with both
-predicates and closing this lemma's `sorry`.
+loop-back edge on a containment check it never re-validated as the branch grows. The
+`intStepBranchPrio` beta-priority repair plus the `IReuseFrozenOrigin` freeze machinery close
+that gap, letting the augmented frame carry positive persistence, giving one frame with both
+predicates. This lemma is sorry-free.
 
 ## References
 
@@ -9830,9 +9855,9 @@ upward-closure premises `openBranch_countermodel` supplies:
   hypothesis and `hbuc` for its `bot_forces` upward-closure hypothesis -- both supplied together
   by `openBranch_countermodel`, not established separately.
 
-This theorem is sorry-free given `openBranch_countermodel S`; the deferred obligation (proving
-`huc`/`hbuc` themselves) now lives entirely inside `openBranch_countermodel`, not in `hvalid`'s
-callers.
+This theorem is sorry-free outright: `openBranch_countermodel S` is itself sorry-free and
+supplies `huc`/`hbuc` unconditionally, so no obligation is deferred to `hvalid`'s callers. The
+proof of `huc`/`hbuc` lives entirely inside `openBranch_countermodel`, via `hpersAug`.
 
 ## References
 

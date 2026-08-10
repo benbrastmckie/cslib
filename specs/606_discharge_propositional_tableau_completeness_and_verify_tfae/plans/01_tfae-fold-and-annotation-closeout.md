@@ -308,37 +308,48 @@ handled in this phase, and any absent site recorded as such.
 
 ---
 
-### Phase 4: Clear the "still open / still sorry" claims [NOT STARTED]
+### Phase 4: Clear the "still open / still sorry" claims [COMPLETED]
 
 **Goal**: Bring the ten stale open-obligation claims catalogued in report section 3.3 into
 agreement with the sorry-free landed state.
 
 **Tasks**:
-- [ ] `Scheme.lean` "Blocker (documented, not a `sorry`...)" block plus its "Recommendation for
+- [x] `Scheme.lean` "Blocker (documented, not a `sorry`...)" block plus its "Recommendation for
       continuation": both cited sorries no longer exist and both line refs are stale; rewrite to
       record that monotonicity is now supplied by `hpersAug`.
-- [ ] `Scheme.lean` "Gap 1 (fuel entanglement) is UNCHANGED and remains the sole blocker." — the
+- [x] `Scheme.lean` "Gap 1 (fuel entanglement) is UNCHANGED and remains the sole blocker." — the
       heading still reads as current even though a later line already says the claim is STALE.
       Fold the correction into the heading rather than leaving a self-contradicting pair.
-- [ ] `Scheme.lean` "The case nonetheless **stays `sorry`**" — DP-5 is discharged; rewrite.
-- [ ] `Scheme.lean` "Recommendation for continuation" + "still open ... `openBranch_countermodel`'s
-      own surviving existential" — that existential is discharged; rewrite.
-- [ ] `Scheme.lean` `truthLemma` docstring opening "the single deferred completeness obligation" —
+- [x] `Scheme.lean` "The case nonetheless **stays `sorry`**" — DP-5 is discharged; rewrite.
+- [x] `Scheme.lean` "Recommendation for continuation" + "still open ... `openBranch_countermodel`'s
+      own surviving existential" — that existential is discharged; rewrite. *(deviation: this
+      exact sentence was already re-tensed in Phase 3, since its REFUTED clause and its
+      still-open clause were one inseparable sentence; verified here as already correct, not
+      re-edited — see Phase 3's deviation note.)*
+- [x] `Scheme.lean` `truthLemma` docstring opening "the single deferred completeness obligation" —
       it defers nothing; rewrite.
-- [ ] `Scheme.lean` "DP-2 strategic sorry ... this lemma's proof is deferred ... Follow-up: DP-2,
+- [x] `Scheme.lean` "DP-2 strategic sorry ... this lemma's proof is deferred ... Follow-up: DP-2,
       see the plan's Planned Strategic Sorries table" — no DP-2 sorry exists and the file is
       sorry-free; rewrite.
-- [ ] `Scheme.lean` "Re-validating it is what lets the augmented frame carry positive persistence
+- [x] `Scheme.lean` "Re-validating it is what lets the augmented frame carry positive persistence
       ... and closing this lemma's `sorry`" — present-tense residue; make it past-tense ("closed").
-- [ ] `Scheme.lean` "This theorem is sorry-free **given** `openBranch_countermodel S`; the deferred
+- [x] `Scheme.lean` "This theorem is sorry-free **given** `openBranch_countermodel S`; the deferred
       obligation ... now lives entirely inside `openBranch_countermodel`" — drop the conditional
       framing; the obligation is discharged, so the theorem is sorry-free outright.
-- [ ] `Tableau/Intuitionistic/Completeness.lean` "The single deferred completeness obligation now
+- [x] `Tableau/Intuitionistic/Completeness.lean` "The single deferred completeness obligation now
       lives in `openBranch_countermodel`" — same phrase, same staleness; rewrite.
-- [ ] `Tableau/Minimal/Completeness.lean` — identical phrase; rewrite identically.
-- [ ] While in `Completeness.lean`, confirm (do not edit) that the DP-3 docstring's existing
+- [x] `Tableau/Minimal/Completeness.lean` — identical phrase; rewrite identically.
+- [x] While in `Completeness.lean`, confirm (do not edit) that the DP-3 docstring's existing
       explanation of why the in-source prohibition no longer applies is accurate and retained.
-- [ ] Scoped `lake build` of each of the three modules.
+      Confirmed at `Completeness.lean:52-60` ("DP-3, historical record") and `:170-176` ("DP-3,
+      now sorry-free") — both accurate, not edited.
+- [x] Scoped `lake build` of each of the three modules.
+- [x] *(deviation: additional in-scope fix found during the Phase 4 sweep, not pre-declared)*
+      `Scheme.lean`'s `IAllReuseFrozenOrigin` docstring claimed "plan Phase 6 task-list item (d),
+      still open" — directly contradicted by task 609 phase 6.5's commit message ("thread
+      IAllReuseFrozenOrigin through the key induction (item d)") and by the `hPendingARFO`/
+      `hDoneARFO` hypotheses now present in `intExpandBranches_openBranch_sat`'s own statement.
+      Rewritten to "closed".
 
 **Timing**: 1 hour
 

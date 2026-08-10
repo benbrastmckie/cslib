@@ -47,6 +47,8 @@
       "cslib-research-agent"
     ],
     "task_number": 622,
-    "head_commit": "b83ae232"
+    "head_commit": "b83ae232",
+    "cycles_used": 1,
+    "final_state": "completed"
   }
 }

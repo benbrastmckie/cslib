@@ -1,5 +1,5 @@
 ---
-next_project_number: 623
+next_project_number: 625
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 623
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,497,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620,622 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,497,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620,623,624 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -32,7 +32,7 @@ next_project_number: 623
 619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
-622 [RESEARCHED] — A full `lake build` on `main` does not complete. It stalls indefi
+623 [NOT STARTED] — The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional
 
 ### Modal Logic
 
@@ -86,10 +86,96 @@ next_project_number: 623
 
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
+### Documentation
+
+624 [NOT STARTED] — Document that `lake env lean <file>` is unsafe for module-system 
+
 ## Tasks
 
+### 624. Document that lake env lean skips --setup and is unsafe for module-system files
+- **Status**: [NOT STARTED]
+- **Task Type**: markdown
+- **Topic**: Documentation
+- **Dependencies**: None
+
+**Description**: Document that `lake env lean <file>` is unsafe for module-system files in this repository, and
+that `lake build <Module.Name>` is the correct way to build a single module.
+
+=== OBSERVED ===
+
+A bare `lake env lean Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` DIVERGES —
+it was killed after 19 minutes at ~101-128% CPU with RSS pinned at 1,340,544 KB and no diagnostic.
+The identical invocation WITH Lake's `--setup` argument
+(`lake env lean --setup Scheme.setup.json Scheme.lean`) exits 0 in 23.78 s. `lake build` always
+passes `--setup`; `lake env lean` never does. Without it, Lean 4.33's module system lacks the
+`module`/`public import` exposure configuration and elaboration blows up.
+
+Two further hazards of the same command: it bypasses dependency resolution, so it happily
+consumes stale `.olean` files from earlier builds; and without `-o` it never writes an `.olean`,
+so the absence of one after a run is a property of the command line and NOT evidence that the
+module has never built.
+
+=== WHY IT MATTERS ===
+
+Every one of those symptoms reads exactly like a pathological or non-terminating file. The
+missing-`.olean` detail in particular inverts cleanly into a false conclusion. A contributor
+reaching for the obvious single-file build command gets a convincing false positive with no
+diagnostic pointing at the command itself.
+
+=== SUGGESTED APPROACH ===
+
+Add a short subsection to the contributor-facing build documentation (check `CONTRIBUTING.md`
+first for the right home) stating the rule, the failure signature, and the correct alternative.
+Keep it symptom-first so a contributor mid-hang can match what they are seeing.
+
+=== PROVENANCE ===
+
+Surfaced during the Scheme.lean build investigation (task 622), which established this as the
+actual root cause of a reported 92-minute stall. The research explicitly recommended NOT bundling
+this into that task's closure.
+
+---
+
+### 623. Reconcile Intuitionistic.lean sub-barrel omitting Scheme while Cslib.lean imports it directly
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` omits the `Scheme` module, even though `Cslib.lean:636` imports it directly with `public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`.
+
+=== OBSERVED ===
+
+`Intuitionistic.lean` currently carries five `public import` lines — Rules, Expansion, Soundness,
+Completeness, DecisionProcedure — and no `Scheme`. The root barrel `Cslib.lean` imports `Scheme`
+directly instead, so the module IS reachable and the tree builds green; this is a consistency
+gap, not a build break.
+
+=== WHY IT MATTERS ===
+
+A reader importing the sub-barrel `Cslib.Logics.Propositional.Tableau.Intuitionistic` gets four
+of the five siblings plus `Completeness` — which itself carries `public import ...Scheme` — so
+`Scheme` arrives transitively and invisibly rather than by declaration. Anyone pruning
+`Completeness`'s imports would silently drop `Scheme` from the sub-barrel's surface.
+
+=== SUGGESTED APPROACH ===
+
+Decide which is intended and make it explicit: either add `public import
+Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` to the sub-barrel (and consider
+dropping the direct line from `Cslib.lean` if sub-barrels are the convention), or record why
+`Scheme` is deliberately excluded. Check sibling barrels under `Cslib/Logics/` for the prevailing
+convention before choosing.
+
+=== PROVENANCE ===
+
+Surfaced incidentally during the Scheme.lean build investigation (task 622), which the research
+explicitly recommended NOT bundling into that task's closure. Independent of that task's
+NOT-A-BUG verdict.
+
+---
+
 ### 622. Investigate why Tableau/Intuitionistic/Scheme.lean never completes a build, blocking full lake build
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

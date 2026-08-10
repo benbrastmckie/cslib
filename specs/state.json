@@ -1,5 +1,5 @@
 {
-  "next_project_number": 623,
+  "next_project_number": 625,
   "active_projects": [
     {
       "project_number": 613,
@@ -1103,7 +1103,7 @@
     {
       "project_number": 622,
       "project_name": "investigate_scheme_build_stall",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
@@ -1122,7 +1122,38 @@
           "type": "report",
           "summary": "Root-cause report: full lake build is green in 222 s; the hang reproduces only when lean is invoked without Lake's --setup, and disappears with it (23.78 s)"
         }
-      ]
+      ],
+      "completion_summary": "Premise falsified — NOT-A-BUG. Measured at HEAD b83ae232: full `lake build` completes green in 222.31 s (3325 jobs, 0 errors); the Scheme module builds in 18 s producing a 1.8 MB .olean. The reported 92-minute stall was real but belonged to the reproduction command, not the file: `lean` invoked without Lake's `--setup` argument diverges (>19 min, killed), while the identical invocation with `--setup` exits 0 in 23.78 s, and `lake build` always passes it. The absent .olean was likewise a property of the command line (`lake env lean` without `-o` never writes one), not evidence the module had never built — Completeness.olean/DecisionProcedure.olean and Scheme.trace's recorded output hash prove it had. Anomalous cost under the malformed invocation localises entirely to intExpandBranches_openBranch_sat (Scheme.lean:8311-9631); kernel type-checking and heartbeat bounding were both ruled out, and the file carries zero set_option lines. CI step 1 is not blocked. No change made to Cslib/. Closed without a plan or implementation phase per the research recommendation."
+    },
+    {
+      "project_number": 623,
+      "project_name": "intuitionistic_barrel_omits_scheme",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "priority": "low",
+      "title": "Reconcile Intuitionistic.lean sub-barrel omitting Scheme while Cslib.lean imports it directly",
+      "description": "The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` omits the `Scheme` module, even though `Cslib.lean:636` imports it directly with `public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`.\n\n=== OBSERVED ===\n\n`Intuitionistic.lean` currently carries five `public import` lines — Rules, Expansion, Soundness,\nCompleteness, DecisionProcedure — and no `Scheme`. The root barrel `Cslib.lean` imports `Scheme`\ndirectly instead, so the module IS reachable and the tree builds green; this is a consistency\ngap, not a build break.\n\n=== WHY IT MATTERS ===\n\nA reader importing the sub-barrel `Cslib.Logics.Propositional.Tableau.Intuitionistic` gets four\nof the five siblings plus `Completeness` — which itself carries `public import ...Scheme` — so\n`Scheme` arrives transitively and invisibly rather than by declaration. Anyone pruning\n`Completeness`'s imports would silently drop `Scheme` from the sub-barrel's surface.\n\n=== SUGGESTED APPROACH ===\n\nDecide which is intended and make it explicit: either add `public import\nCslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` to the sub-barrel (and consider\ndropping the direct line from `Cslib.lean` if sub-barrels are the convention), or record why\n`Scheme` is deliberately excluded. Check sibling barrels under `Cslib/Logics/` for the prevailing\nconvention before choosing.\n\n=== PROVENANCE ===\n\nSurfaced incidentally during the Scheme.lean build investigation (task 622), which the research\nexplicitly recommended NOT bundling into that task's closure. Independent of that task's\nNOT-A-BUG verdict.",
+      "dependencies": [],
+      "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic.lean"
+      ],
+      "created": "2026-08-10T21:30:00Z"
+    },
+    {
+      "project_number": 624,
+      "project_name": "document_lake_env_lean_hazard",
+      "status": "not_started",
+      "task_type": "markdown",
+      "topic": "Documentation",
+      "priority": "medium",
+      "title": "Document that lake env lean skips --setup and is unsafe for module-system files",
+      "description": "Document that `lake env lean <file>` is unsafe for module-system files in this repository, and\nthat `lake build <Module.Name>` is the correct way to build a single module.\n\n=== OBSERVED ===\n\nA bare `lake env lean Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` DIVERGES —\nit was killed after 19 minutes at ~101-128% CPU with RSS pinned at 1,340,544 KB and no diagnostic.\nThe identical invocation WITH Lake's `--setup` argument\n(`lake env lean --setup Scheme.setup.json Scheme.lean`) exits 0 in 23.78 s. `lake build` always\npasses `--setup`; `lake env lean` never does. Without it, Lean 4.33's module system lacks the\n`module`/`public import` exposure configuration and elaboration blows up.\n\nTwo further hazards of the same command: it bypasses dependency resolution, so it happily\nconsumes stale `.olean` files from earlier builds; and without `-o` it never writes an `.olean`,\nso the absence of one after a run is a property of the command line and NOT evidence that the\nmodule has never built.\n\n=== WHY IT MATTERS ===\n\nEvery one of those symptoms reads exactly like a pathological or non-terminating file. The\nmissing-`.olean` detail in particular inverts cleanly into a false conclusion. A contributor\nreaching for the obvious single-file build command gets a convincing false positive with no\ndiagnostic pointing at the command itself.\n\n=== SUGGESTED APPROACH ===\n\nAdd a short subsection to the contributor-facing build documentation (check `CONTRIBUTING.md`\nfirst for the right home) stating the rule, the failure signature, and the correct alternative.\nKeep it symptom-first so a contributor mid-hang can match what they are seeing.\n\n=== PROVENANCE ===\n\nSurfaced during the Scheme.lean build investigation (task 622), which established this as the\nactual root cause of a reported 92-minute stall. The research explicitly recommended NOT bundling\nthis into that task's closure.",
+      "dependencies": [],
+      "file_scope": [
+        "CONTRIBUTING.md"
+      ],
+      "created": "2026-08-10T21:30:00Z"
     }
   ],
   "repository_health": {

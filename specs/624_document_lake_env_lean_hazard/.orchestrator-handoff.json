@@ -1,0 +1,19 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Confirmed CONTRIBUTING.md's Continuous Integration section (new subsection after Imports) as the doc home for the lake env lean hazard; matched house style from Testing/Imports subsections. Verified all technical claims against task 622's direct-measurement report without re-running the diverging command. Flagged the ToC companion edit as required.",
+  "artifacts": [
+    {"type": "report", "path": "specs/624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md"}
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [],
+  "decisions_made": [
+    "New subsection heading: '## Building a single file', placed as the last subsection under '# Continuous Integration', immediately after '## Imports'",
+    "Table of Contents (lines 3-41) must gain a matching entry — hand-maintained, not auto-generated",
+    "Do not include the specific hanging reproduction command as a copy-pasteable example; describe the general unsafe pattern (lake env lean <file>) instead",
+    "scripts/README.md's AxiomCensus.lean entry (lake env lean --run ... after a full lake build) is a distinct, safe usage pattern and must not be conflated with the hazard"
+  ],
+  "dead_ends": []
+}

@@ -638,6 +638,55 @@ private lemma isAccessible_one_hop_ext {edges : IEdges} {x p c : Nat}
         List.mem_append_right _ (List.mem_singleton_self _)
       exact isAccessible_go_one_hop_ext (edges ++ [(c, p)]) hmem x edges.length h1
 
+/-- **Structural decomposition of `isAccessible.go`** (plan Phase 7): a successful `go`-search
+from `current` to `target` within `fuel` steps is witnessed by a chain of DIRECT edges from
+`edges`, exactly as `Relation.ReflTransGen`'s reflexive-transitive closure of raw edge membership
+`fun a c => (c, a) ∈ edges` would predict. This does NOT reprove `isAccessible` itself is
+transitive (composing two SEPARATE `isAccessible` facts, the thing `Scheme.lean:250-257`
+deliberately avoided) -- `go`'s own recursion already IS a chain of single edges, one per
+recursive unfold, so this is a direct structural induction on `fuel`, mirroring
+`isAccessible_go_direct`/`isAccessible_go_one_hop_ext`'s existing style. -/
+private lemma isAccessible_go_decompose (edges : IEdges) (target : Nat) :
+    ∀ (current fuel : Nat), isAccessible.go edges target current fuel = true →
+      Relation.ReflTransGen (fun a c => (c, a) ∈ edges) current target := by
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro h
+    rw [List.any_eq_true] at h
+    obtain ⟨d, hd, hcond⟩ := h
+    simp only [List.mem_filterMap] at hd
+    obtain ⟨⟨d', parent⟩, hedges, hfilt⟩ := hd
+    by_cases hpar : parent == current
+    · simp only [hpar, ite_true, Option.some.injEq] at hfilt
+      have hpar' : parent = current := by simpa using hpar
+      have hmemE : (d', current) ∈ edges := hpar' ▸ hedges
+      by_cases hdt : d == target
+      · have hdeq : d = target := by simpa using hdt
+        have hd'eq : d' = target := hfilt.trans hdeq
+        exact Relation.ReflTransGen.single (hd'eq ▸ hmemE)
+      · simp only [hdt, Bool.false_eq_true, ite_false] at hcond
+        have hstep : (d, current) ∈ edges := hfilt ▸ hmemE
+        exact Relation.ReflTransGen.head hstep (ih d hcond)
+    · simp only [Bool.not_eq_true] at hpar
+      simp [hpar] at hfilt
+
+/-- `isAccessible edges w w' = true` decomposes into either `w = w'` (the reflexive base case,
+never touching `go`) or a genuine chain of direct `edges`-membership hops from `w` to `w'`. This
+is the bridge Phase 7 needs to decompose reachability over an edge list mixing raw parent-child
+edges and recorded loop-back edges (e.g. the augmented frame `augH`) into a `ReflTransGen` chain
+that a per-edge-kind persistence argument can walk one hop at a time. -/
+private lemma isAccessible_decompose {edges : IEdges} {w w' : Nat}
+    (h : isAccessible edges w w' = true) :
+    w = w' ∨ Relation.ReflTransGen (fun a c => (c, a) ∈ edges) w w' := by
+  simp only [isAccessible] at h
+  by_cases heq : w == w'
+  · exact Or.inl (by simpa using heq)
+  · simp only [heq, Bool.false_eq_true, ite_false] at h
+    exact Or.inr (isAccessible_go_decompose edges w' w edges.length h)
+
 /-- The final edge-accessibility payoff: every `F(φ→ψ)@w` on the
 saturated branch `b` has a genuinely edge-accessible witness under `edges`, upgrading
 `sat_fimp`'s numeric proxy to the real `intAccessPreorder` frame. Declared early (ahead of
@@ -7698,6 +7747,108 @@ private lemma IAllReuseContain_map_const {branches' : List (IBranch Atom)}
     simp only [List.map_cons, IAllReuseContain]
     exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
 
+/-- **Augmented-frame edge provenance** (plan Phase 7): every edge recorded in the augmented
+edge list `augH` is either a raw parent-child edge (already in `edgesH`, from world creation) or
+a recorded loop-back edge (already in `lbH`, from the reuse site) -- `augH` only ever grows by
+ONE of these two append operations, in lockstep with `edgesH`/`lbH`'s own growth, never
+independently (`IExpandedAccessConsistent`'s docstring, Scheme.lean:1078-1089, records both
+append sites). This is the bridge that lets augmented-frame reachability decompose into a chain
+of raw-edge hops (`IPosPersistRaw`) and loop-back hops (`IReuseContain`), per report §5.3. -/
+private def IAugMembers (augH edgesH lbH : IEdges) : Prop :=
+  ∀ e ∈ augH, e ∈ edgesH ∨ e ∈ lbH
+
+/-- `IAugMembers` is monotone under appending the SAME new edge to both `augH` and `edgesH`
+(the world-creation/mint site). -/
+private lemma IAugMembers_edges_snoc {augH edgesH lbH : IEdges} {newE : Nat × Nat}
+    (h : IAugMembers augH edgesH lbH) :
+    IAugMembers (augH ++ [newE]) (edgesH ++ [newE]) lbH := by
+  intro e he
+  rcases List.mem_append.mp he with he' | he'
+  · rcases h e he' with h1 | h1
+    · exact Or.inl (List.mem_append_left _ h1)
+    · exact Or.inr h1
+  · exact Or.inl (List.mem_append_right _ he')
+
+/-- `IAugMembers` is monotone under appending the SAME new edge to both `augH` and `lbH`
+(the reuse site). -/
+private lemma IAugMembers_lb_snoc {augH edgesH lbH : IEdges} {newE : Nat × Nat}
+    (h : IAugMembers augH edgesH lbH) :
+    IAugMembers (augH ++ [newE]) edgesH (lbH ++ [newE]) := by
+  intro e he
+  rcases List.mem_append.mp he with he' | he'
+  · rcases h e he' with h1 | h1
+    · exact Or.inl h1
+    · exact Or.inr (List.mem_append_left _ h1)
+  · exact Or.inr (List.mem_append_right _ he')
+
+/-- List companion of `IAugMembers`, a 3-list zip over `(augSets, edgeSets, lbSets)` -- pure
+edge-list bookkeeping, no branch content needed (mirrors `IAllWorldHistCounter`'s shape). -/
+private def IAllAugMembers : List IEdges → List IEdges → List IEdges → Prop
+  | [], [], [] => True
+  | augH :: augT, edgesH :: edgesT, lbH :: lbT =>
+      IAugMembers augH edgesH lbH ∧ IAllAugMembers augT edgesT lbT
+  | _, _, _ => False
+
+/-- `IAllAugMembers` combines under list append (mirrors `IAllWorldHistCounter_append`). -/
+private lemma IAllAugMembers_append {aug1 aug2 edges1 edges2 lb1 lb2 : List IEdges}
+    (h1 : IAllAugMembers aug1 edges1 lb1) (h2 : IAllAugMembers aug2 edges2 lb2) :
+    IAllAugMembers (aug1 ++ aug2) (edges1 ++ edges2) (lb1 ++ lb2) := by
+  induction aug1 generalizing edges1 lb1 with
+  | nil =>
+    cases edges1 with
+    | nil =>
+      cases lb1 with
+      | nil => simpa using h2
+      | cons _ _ => simp [IAllAugMembers] at h1
+    | cons _ _ => simp [IAllAugMembers] at h1
+  | cons augh augt ih =>
+    cases edges1 with
+    | nil => simp [IAllAugMembers] at h1
+    | cons edgesh edgest =>
+      cases lb1 with
+      | nil => simp [IAllAugMembers] at h1
+      | cons lbh lbt =>
+        simp only [IAllAugMembers] at h1
+        obtain ⟨hAM, hrest⟩ := h1
+        simp only [List.cons_append]
+        exact ⟨hAM, ih hrest⟩
+
+/-- `IAllAugMembers` holds along constant-valued `map`s over the same list length (mirrors
+`IAllWorldHistCounter_map_const`; used for the BETA arm, where every child inherits the SAME
+augmented/raw/loop-back edge lists since branching never records a new edge). -/
+private lemma IAllAugMembers_map_const {α : Type*} {l : List α} {augH' edgesH' lbH' : IEdges}
+    (h : IAugMembers augH' edgesH' lbH') :
+    IAllAugMembers (l.map (fun _ => augH')) (l.map (fun _ => edgesH')) (l.map (fun _ => lbH')) := by
+  induction l with
+  | nil => simp [IAllAugMembers]
+  | cons _ t ih => simp only [List.map_cons, IAllAugMembers]; exact ⟨h, ih⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Augmented-frame positive persistence** (plan Phase 7, the phase's main payoff): decomposing
+a single `isAccessible augH x y = true` fact via `isAccessible_decompose` into a chain of raw-edge
+and loop-back hops, then chaining `IPosPersistRaw`/`IReuseContain` along that chain exactly as
+`openBranch_rawEdges_upward_closed` tail-peels `Relation.ReflTransGen`. This is the fact that lets
+the augmented frame -- the ONE frame `IFimpAccess` already holds over -- ALSO carry positive
+persistence, closing the gap `openBranch_countermodel`'s frame-adequacy table records (raw frame:
+`hpers` holds, `IFimpAccess` refuted; augmented frame: `IFimpAccess` holds, `hpers` was refuted
+under the OLD snapshot-based `IReuseContain` -- the bare form Phase 6 landed removes that
+refutation). -/
+private lemma IAugMembers_persist {augH edgesH lbH : IEdges} {b : IBranch Atom}
+    (hmem : IAugMembers augH edgesH lbH) (hpp : IPosPersistRaw edgesH b)
+    (hrc : IReuseContain lbH b) (hwp : IWorldsPlanted edgesH b) :
+    ∀ (χ : Proposition Atom) (x y : Nat), isAccessible augH x y = true →
+      (⟨.pos, χ, x⟩ : ISF Atom) ∈ b → (⟨.pos, χ, y⟩ : ISF Atom) ∈ b := by
+  intro χ x y hacc hmemx
+  rcases isAccessible_decompose hacc with heq | hchain
+  · exact heq ▸ hmemx
+  · clear hacc
+    induction hchain with
+    | refl => exact hmemx
+    | @tail y' target _hchain hstep ih =>
+      rcases hmem _ hstep with hraw | hlb
+      · exact hpp χ y' target (isAccessible_one_step hraw) ih (hwp target y' hraw)
+      · exact hrc target y' hlb χ ih
+
 /-- **Reuse-time freeze witness, per recorded loop-back edge** (plan Phase 6, Investigation
 note point 2): every recorded loop-back edge `(x, l)` also carries a freeze checkpoint at
 `l + 1` -- `IFrozenBelow (l + 1) e b`, i.e. no rule application at or below `l` can ever again
@@ -8092,6 +8243,7 @@ private lemma intExpandBranches_openBranch_sat
     (hACC : IAllAccessConsistent branches expandedSets augSets)
     (hARC : IAllReuseContain branches lbSets)
     (hARFO : IAllReuseFrozenOrigin φ0 branches expandedSets edgeSets nextWorlds lbSets)
+    (hAAM : IAllAugMembers augSets edgeSets lbSets)
     (hUniv : IAllUniv φ0 branches)
     (hNW : IAllNW φ0 nextWorlds)
     (hFuel : IAllFuel φ0 branches expandedSets fuels)
@@ -8105,7 +8257,9 @@ private lemma intExpandBranches_openBranch_sat
         = .openBranch b) :
     ∃ (edges rawEdges lbEdges : IEdges) (nwF : Nat), IBranchSaturation Atom b ∧
       IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧
-      ForestComparable nwF rawEdges ∧ IWorldsPlanted rawEdges b := by
+      ForestComparable nwF rawEdges ∧ IWorldsPlanted rawEdges b ∧
+      (∀ (χ : Proposition Atom) (x y : Nat), isAccessible edges x y = true →
+        (⟨.pos, χ, x⟩ : ISF Atom) ∈ b → (⟨.pos, χ, y⟩ : ISF Atom) ∈ b) := by
   rw [intExpandBranches] at h
   suffices key : ∀ (pending : List (IBranch Atom))
       (pendingExp : List (List (ISF Atom)))
@@ -8130,6 +8284,8 @@ private lemma intExpandBranches_openBranch_sat
       IAllReuseContain done doneLB →
       IAllReuseFrozenOrigin φ0 pending pendingExp pendingEdges pendingNW pendingLB →
       IAllReuseFrozenOrigin φ0 done doneExp doneEdges doneNW doneLB →
+      IAllAugMembers pendingAug pendingEdges pendingLB →
+      IAllAugMembers doneAug doneEdges doneLB →
       IAllUniv φ0 pending →
       IAllNW φ0 pendingNW →
       IAllFuel φ0 pending pendingExp pendingFuels →
@@ -8146,9 +8302,11 @@ private lemma intExpandBranches_openBranch_sat
           pendingFuels done doneExp doneNW doneEdges doneFuels = .openBranch b →
       ∃ (edges rawEdges lbEdges : IEdges) (nwF : Nat), IBranchSaturation Atom b ∧
         IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧
-        ForestComparable nwF rawEdges ∧ IWorldsPlanted rawEdges b from
+        ForestComparable nwF rawEdges ∧ IWorldsPlanted rawEdges b ∧
+        (∀ (χ : Proposition Atom) (x y : Nat), isAccessible edges x y = true →
+          (⟨.pos, χ, x⟩ : ISF Atom) ∈ b → (⟨.pos, χ, y⟩ : ISF Atom) ∈ b) from
     key branches expandedSets nextWorlds edgeSets fuels [] [] [] [] [] augSets [] lbSets []
-      hAC hLen0 hLenF0 trivial rfl rfl hACC trivial hARC trivial hARFO trivial
+      hAC hLen0 hLenF0 trivial rfl rfl hACC trivial hARC trivial hARFO trivial hAAM trivial
       hUniv hNW hFuel (by simp [IAllUniv]) (by simp [IAllNW]) trivial
       hLBS (by simp [IAllLabelBoundStrict]) hWH trivial hWHC trivial h
   intro pending pendingExp pendingNW pendingEdges pendingFuels done doneExp doneNW
@@ -8157,13 +8315,14 @@ private lemma intExpandBranches_openBranch_sat
       doneNW, doneEdges, doneFuels
       using intExpandBranches.go.induct (closurePred := closurePred) with
   | case1 =>
-    intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
+    intro _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ hgo
     simp only [intExpandBranches.go] at hgo
     exact absurd hgo (by simp)
   | case2 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT f fT
       bPers hcl ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hUnivP hNWP hFuelP
+        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hPendingAAM hDoneAAM
+        hUnivP hNWP hFuelP
         hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP hWHCD hgo
     rw [intExpandBranches.go.eq_def] at hgo
     simp only [] at hgo
@@ -8203,6 +8362,9 @@ private lemma intExpandBranches_openBranch_sat
         rw [hpLB] at hPendingARFO
         simp only [IAllReuseFrozenOrigin] at hPendingARFO
         obtain ⟨hARFO_bh_head, hARFOTail⟩ := hPendingARFO
+        rw [hpAug, hpLB] at hPendingAAM
+        simp only [IAllAugMembers] at hPendingAAM
+        obtain ⟨hAAM_bh_head, hAAMTail⟩ := hPendingAAM
         have hmemP : ∀ x ∈ bh, x ∈ bPers :=
           fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH f x hx
         have hIC_bPers : IExpandedConsistent bPers eH :=
@@ -8231,6 +8393,8 @@ private lemma intExpandBranches_openBranch_sat
             (IAllReuseContain_append hDoneARC ⟨hARC_bPers, trivial⟩)
             hARFOTail
             (IAllReuseFrozenOrigin_append hDoneARFO ⟨hARFO_bPers, trivial⟩)
+            hAAMTail
+            (IAllAugMembers_append hDoneAAM ⟨hAAM_bh_head, trivial⟩)
             hUnivP_tail hNWP_tail hFuelP_tail
             (IAllUniv_append hUnivD
               (fun b' hb' => by
@@ -8248,6 +8412,7 @@ private lemma intExpandBranches_openBranch_sat
       bPers hcl =>
     intro _pendingAug _doneAug _pendingLB _doneLB _hPending _hLenP _hLenPF _hDone _hLenD
         _hLenDF _hPendingACC _hDoneACC _hPendingARC _hDoneARC _hPendingARFO _hDoneARFO
+        _hPendingAAM _hDoneAAM
         _hUnivP _hNWP hFuelP _hUnivD
         _hNWD _hFuelD _hLBSP _hLBSD _hWHP _hWHD _hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
@@ -8278,7 +8443,8 @@ private lemma intExpandBranches_openBranch_sat
   | case4 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       bPers hcl hstep =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO _hDoneARFO hUnivP _hNWP hFuelP
+        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO _hDoneARFO hPendingAAM _hDoneAAM
+        hUnivP _hNWP hFuelP
         _hUnivD _hNWD _hFuelD _hLBSP _hLBSD hWHP _hWHD hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
@@ -8310,6 +8476,9 @@ private lemma intExpandBranches_openBranch_sat
           rw [hpLB] at hPendingARFO
           simp only [IAllReuseFrozenOrigin] at hPendingARFO
           obtain ⟨hARFO_bh_head, -⟩ := hPendingARFO
+          rw [hpAug, hpLB] at hPendingAAM
+          simp only [IAllAugMembers] at hPendingAAM
+          obtain ⟨hAAM_bh_head, -⟩ := hPendingAAM
           have hmemP : ∀ x ∈ bh, x ∈ bPers :=
             fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) x hx
           have hIC_bPers : IExpandedConsistent bPers eH :=
@@ -8343,7 +8512,8 @@ private lemma intExpandBranches_openBranch_sat
           exact ⟨augH, edgesH, lbH, nwH,
             IExpandedConsistent_sat (intStepBranchPrio_none_iff.mp hstep) hIC_bPers,
             IExpandedAccessConsistent_sat (intStepBranchPrio_none_iff.mp hstep) hACC_bPers,
-            hpp, hARC_bPers, hfc, hwp⟩
+            hpp, hARC_bPers, hfc, hwp,
+            IAugMembers_persist hAAM_bh_head hpp hARC_bPers hwp⟩
     · rename_i heq
       exact absurd (hstep.symm.trans heq) (by simp)
     · rename_i heq
@@ -8353,7 +8523,8 @@ private lemma intExpandBranches_openBranch_sat
   | case5 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp bPers hcl hstep hstep2 ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hUnivP hNWP hFuelP
+        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hPendingAAM hDoneAAM
+        hUnivP hNWP hFuelP
         hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
@@ -8406,6 +8577,9 @@ private lemma intExpandBranches_openBranch_sat
           rw [hpLB] at hPendingARFO
           simp only [IAllReuseFrozenOrigin] at hPendingARFO
           obtain ⟨hARFO_bh_head, hARFOTail⟩ := hPendingARFO
+          rw [hpAug, hpLB] at hPendingAAM
+          simp only [IAllAugMembers] at hPendingAAM
+          obtain ⟨hAAM_bh_head, hAAMTail⟩ := hPendingAAM
           simp only [List.length_cons] at hLenP hLenPF
           have hLenPt : bt.length = edgesT.length := by omega
           have hLenPFt : fT.length = bt.length := by omega
@@ -8485,6 +8659,9 @@ private lemma intExpandBranches_openBranch_sat
               (IAllReuseFrozenOrigin_append
                 (IAllReuseFrozenOrigin_append hDoneARFO ⟨hARFO_ext, trivial⟩) hARFOTail)
               trivial
+              (IAllAugMembers_append
+                (IAllAugMembers_append hDoneAAM ⟨hAAM_bh_head, trivial⟩) hAAMTail)
+              trivial
               (IAllUniv_append
                 (IAllUniv_append hUnivD
                   (fun b' hb' => by
@@ -8515,7 +8692,8 @@ private lemma intExpandBranches_openBranch_sat
   | case6 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp newE x bPers hcl hstep hwit hstep2 ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hUnivP hNWP hFuelP
+        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hPendingAAM hDoneAAM
+        hUnivP hNWP hFuelP
         hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
@@ -8578,6 +8756,9 @@ private lemma intExpandBranches_openBranch_sat
               rw [hpLB] at hPendingARFO
               simp only [IAllReuseFrozenOrigin] at hPendingARFO
               obtain ⟨hARFO_bh_head, hARFOTail⟩ := hPendingARFO
+              rw [hpAug, hpLB] at hPendingAAM
+              simp only [IAllAugMembers] at hPendingAAM
+              obtain ⟨hAAM_bh_head, hAAMTail⟩ := hPendingAAM
               simp only [List.length_cons] at hLenP hLenPF
               have hLenPt : bt.length = edgesT.length := by omega
               have hLenPFt : fT.length = bt.length := by omega
@@ -8733,6 +8914,8 @@ private lemma intExpandBranches_openBranch_sat
                       hfrz hpp hreuse_sat.1 hcons hWH_ext hWHC_head hle_l hcontGen
                   have hARC_new : IReuseContain (lbH ++ [(x, l)]) bPers :=
                     IReuseFrozenOrigin_reuseContain hARFO_new
+                  have hAAM_new : IAugMembers (augH ++ [(x, l)]) edgesH (lbH ++ [(x, l)]) :=
+                    IAugMembers_lb_snoc hAAM_bh_head
                   refine ih (doneAug ++ [augH ++ [(x, l)]] ++ augT) []
                       (doneLB ++ [lbH ++ [(x, l)]] ++ lbT) []
                       (IAllConsistent_append
@@ -8754,6 +8937,9 @@ private lemma intExpandBranches_openBranch_sat
                       trivial
                       (IAllReuseFrozenOrigin_append
                         (IAllReuseFrozenOrigin_append hDoneARFO ⟨hARFO_new, trivial⟩) hARFOTail)
+                      trivial
+                      (IAllAugMembers_append
+                        (IAllAugMembers_append hDoneAAM ⟨hAAM_new, trivial⟩) hAAMTail)
                       trivial
                       (IAllUniv_append
                         (IAllUniv_append hUnivD
@@ -8789,7 +8975,8 @@ private lemma intExpandBranches_openBranch_sat
   | case7 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       newForms nw' newExp newE bPers hcl hstep hwit hstep2 ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hUnivP hNWP hFuelP
+        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hPendingAAM hDoneAAM
+        hUnivP hNWP hFuelP
         hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
@@ -8854,6 +9041,9 @@ private lemma intExpandBranches_openBranch_sat
               rw [hpLB] at hPendingARFO
               simp only [IAllReuseFrozenOrigin] at hPendingARFO
               obtain ⟨hARFO_bh_head, hARFOTail⟩ := hPendingARFO
+              rw [hpAug, hpLB] at hPendingAAM
+              simp only [IAllAugMembers] at hPendingAAM
+              obtain ⟨hAAM_bh_head, hAAMTail⟩ := hPendingAAM
               simp only [List.length_cons] at hLenP hLenPF
               have hLenPt : bt.length = edgesT.length := by omega
               have hLenPFt : fT.length = bt.length := by omega
@@ -8929,6 +9119,8 @@ private lemma intExpandBranches_openBranch_sat
                   (IReuseFrozenOrigin_extendMany hbound hARFO_bPers)
               have hARC_ext : IReuseContain lbH (Branch.extendMany bPers newForms) :=
                 IReuseFrozenOrigin_reuseContain hARFO_ext
+              have hAAM_ext : IAugMembers (augH ++ [newE]) (edgesH ++ [newE]) lbH :=
+                IAugMembers_edges_snoc hAAM_bh_head
               -- DP-2 (RESOLVED, Phase 11): `hNW_ext` is now discharged from the just-established
               -- structural invariant `hWH_ext` via `intFreshMint_preserves_nw`/`intWorldHist_nw_le`
               -- (Phase 10), not from the bare `hnwB : nw ≤ WBound φ0` the false numeric restatement
@@ -8956,6 +9148,9 @@ private lemma intExpandBranches_openBranch_sat
                   trivial
                   (IAllReuseFrozenOrigin_append
                     (IAllReuseFrozenOrigin_append hDoneARFO ⟨hARFO_ext, trivial⟩) hARFOTail)
+                  trivial
+                  (IAllAugMembers_append
+                    (IAllAugMembers_append hDoneAAM ⟨hAAM_ext, trivial⟩) hAAMTail)
                   trivial
                   (IAllUniv_append
                     (IAllUniv_append hUnivD
@@ -8987,7 +9182,8 @@ private lemma intExpandBranches_openBranch_sat
   | case8 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       branches' nw' newExp bPers hcl hstep ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hUnivP hNWP hFuelP
+        hPendingACC hDoneACC hPendingARC hDoneARC hPendingARFO hDoneARFO hPendingAAM hDoneAAM
+        hUnivP hNWP hFuelP
         hUnivD hNWD hFuelD hLBSP hLBSD hWHP hWHD hWHCP hWHCD hgo
     simp only [intExpandBranches.go] at hgo
     rw [if_neg hcl] at hgo
@@ -9045,6 +9241,9 @@ private lemma intExpandBranches_openBranch_sat
           rw [hpLB] at hPendingARFO
           simp only [IAllReuseFrozenOrigin] at hPendingARFO
           obtain ⟨hARFO_bh_head, hARFOTail⟩ := hPendingARFO
+          rw [hpAug, hpLB] at hPendingAAM
+          simp only [IAllAugMembers] at hPendingAAM
+          obtain ⟨hAAM_bh_head, hAAMTail⟩ := hPendingAAM
           simp only [List.length_cons] at hLenP hLenPF
           have hLenPt : bt.length = edgesT.length := by omega
           have hLenPFt : fT.length = bt.length := by omega
@@ -9139,6 +9338,11 @@ private lemma intExpandBranches_openBranch_sat
                   (IAllReuseFrozenOrigin_map_const (Branch.extendMany bPers ·) hARFO_branch))
                 hARFOTail)
               trivial
+              (IAllAugMembers_append
+                (IAllAugMembers_append hDoneAAM
+                  (IAllAugMembers_map_const (l := branches') hAAM_bh_head))
+                hAAMTail)
+              trivial
               (IAllUniv_append
                 (IAllUniv_append hUnivD (IAllUniv_map (Branch.extendMany bPers ·) hUniv_branch))
                 hUnivP_tail)
@@ -9172,7 +9376,8 @@ private lemma intExpandBranches_openBranch_sat
   | case9 done doneExp doneNW doneEdges doneFuels bh bt eH eT nwH nwT edgesH edgesT fT f'
       snd bPers hcl hstep =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC _hPendingARFO _hDoneARFO _hUnivP _hNWP
+        hPendingACC hDoneACC hPendingARC hDoneARC _hPendingARFO _hDoneARFO
+        _hPendingAAM _hDoneAAM _hUnivP _hNWP
         _hFuelP _hUnivD _hNWD
         _hFuelD _hLBSP _hLBSD _hWHP _hWHD _hWHCP _hWHCD hgo
     simp only [intExpandBranches.go] at hgo
@@ -9190,7 +9395,8 @@ private lemma intExpandBranches_openBranch_sat
   | case10 done doneExp doneNW doneEdges doneFuels head restBs pExp pNW pEdges pFuels
       hmismatch ih =>
     intro pendingAug doneAug pendingLB doneLB hPending hLenP hLenPF hDone hLenD hLenDF
-        hPendingACC hDoneACC hPendingARC hDoneARC _hPendingARFO _hDoneARFO _hUnivP _hNWP
+        hPendingACC hDoneACC hPendingARC hDoneARC _hPendingARFO _hDoneARFO
+        _hPendingAAM _hDoneAAM _hUnivP _hNWP
         _hFuelP _hUnivD _hNWD
         _hFuelD _hLBSP _hLBSD _hWHP _hWHD _hWHCP _hWHCD hgo
     cases hpE : pExp with
@@ -9218,6 +9424,40 @@ private lemma intExpandBranches_openBranch_sat
             exact absurd
               (hmismatch eH eT nwH nwT edgesH edgesT f restFs hpE hpN hpEd hpF)
               id
+
+/-- **Augmented-frame persistence shape-check**: `intExpandBranches_openBranch_sat`'s new
+conjunct unifies with `truthLemma`'s `hpers` parameter by direct `exact`, no coercion needed --
+mechanically confirming the shape match rather than only checking it by inspection. -/
+example (S : IntMinScheme Atom) (φ0 : Proposition Atom) (branches : List (IBranch Atom))
+    (expandedSets : List (List (ISF Atom))) (nextWorlds : List Nat) (edgeSets : List IEdges)
+    (fuels : List Nat) (augSets lbSets : List IEdges) (b : IBranch Atom)
+    (hAC : IAllConsistent branches expandedSets nextWorlds)
+    (hLen0 : branches.length = edgeSets.length) (hLenF0 : fuels.length = branches.length)
+    (hACC : IAllAccessConsistent branches expandedSets augSets)
+    (hARC : IAllReuseContain branches lbSets)
+    (hARFO : IAllReuseFrozenOrigin φ0 branches expandedSets edgeSets nextWorlds lbSets)
+    (hAAM : IAllAugMembers augSets edgeSets lbSets)
+    (hUniv : IAllUniv φ0 branches) (hNW : IAllNW φ0 nextWorlds)
+    (hFuel : IAllFuel φ0 branches expandedSets fuels)
+    (hLBS : IAllLabelBoundStrict branches nextWorlds)
+    (hWH : IAllWorldHist φ0 branches expandedSets nextWorlds edgeSets)
+    (hWHC : IAllWorldHistCounter nextWorlds edgeSets)
+    (hNC : ∀ (b' : IBranch Atom), S.closurePred b' = false →
+        ∀ (ψ : Proposition Atom) (w : Nat), (⟨.neg, ψ, w⟩ : ISF Atom) ∈ b' →
+          ψ ∉ posFormulasAt b' w)
+    (h : intExpandBranches branches expandedSets nextWorlds edgeSets fuels S.closurePred
+        = .openBranch b)
+    (hopen : S.closurePred b = false) (φ : Proposition Atom) (w : Nat) :
+    ∃ edges : IEdges, letI : Preorder Nat := intAccessPreorder edges
+      (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
+        IForces (intExtractValuation b) (S.modelBot b) w φ) ∧
+      (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
+        ¬ IForces (intExtractValuation b) (S.modelBot b) w φ) := by
+  obtain ⟨edges, _rawEdges, _lbEdges, _nwF, hsat, hfimp, _hpp, _hrc, _hfc, _hwp, hpersAug⟩ :=
+    intExpandBranches_openBranch_sat φ0 branches expandedSets nextWorlds edgeSets fuels
+      augSets lbSets S.closurePred b hAC hLen0 hLenF0 hACC hARC hARFO hAAM hUniv hNW hFuel
+      hLBS hWH hWHC hNC h
+  exact ⟨edges, truthLemma S b edges hopen hsat hfimp hpersAug φ w⟩
 
 /-! ## Parametric Open Branch Countermodel -/
 
@@ -9385,13 +9625,14 @@ lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Propositio
       ∀ (χ : Proposition Atom) {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
         b.any (fun sf => sf.sign == .pos && sf.formula == χ && sf.label == w) = true →
         b.any (fun sf => sf.sign == .pos && sf.formula == χ && sf.label == w') = true := by
-  obtain ⟨_edges, rawEdges, _lbEdges, _nwF, _hsat, _hfimp, hpp, _hrc, _hfc, hwp⟩ :=
+  obtain ⟨_edges, rawEdges, _lbEdges, _nwF, _hsat, _hfimp, hpp, _hrc, _hfc, hwp, _hpersAug⟩ :=
     intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
       [[]] [[]] _ _
       (by simp [IAllConsistent, IExpandedConsistent, ILabelBound]) rfl rfl
       (by simp [IAllAccessConsistent, IExpandedAccessConsistent])
       (by simp [IAllReuseContain, IReuseContain])
       (by simp [IAllReuseFrozenOrigin, IReuseFrozenOrigin])
+      (by simp [IAllAugMembers, IAugMembers])
       (fun b hb x hx => by
         simp only [List.mem_singleton] at hb
         subst hb

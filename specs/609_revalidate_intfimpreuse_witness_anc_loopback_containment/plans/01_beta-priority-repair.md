@@ -1085,25 +1085,56 @@ file's baseline; `intExpandBranches_openBranch_sat` itself verified via `lean_ve
 
 ---
 
-### Phase 7: Export augmented-frame positive persistence [NOT STARTED]
+### Phase 7: Export augmented-frame positive persistence [COMPLETED]
 
 **Goal**: Give `intExpandBranches_openBranch_sat` a conclusion that carries positive persistence
 over the augmented frame, which is the missing ingredient the report identified.
 
 **Tasks**:
-- [ ] Decompose augmented-frame persistence into raw-edge persistence (`IPosPersistRaw`, already
+- [x] Decompose augmented-frame persistence into raw-edge persistence (`IPosPersistRaw`, already
       sorry-free) plus the loop-back edges (the strengthened `IReuseContain` from Phase 6), per
-      report §5.3.
-- [ ] Chain them along `ReflTransGen`. The report names the model to follow: this is the same
-      tail-peeling move as `openBranch_rawEdges_upward_closed`.
-- [ ] Extend `intExpandBranches_openBranch_sat`'s conclusion (currently
+      report §5.3. *(landed as `IAugMembers`/`IAllAugMembers` -- a new per-edge provenance
+      invariant proving every `augH` edge is either a raw edge, already in `edgesH`, or a
+      loop-back edge, already in `lbH` -- threaded through all ten `key`-induction cases, plus
+      `IAugMembers_persist`, the combinator that walks a decomposed chain applying
+      `IPosPersistRaw`/`IReuseContain` per hop.)*
+- [x] Chain them along `ReflTransGen`. The report names the model to follow: this is the same
+      tail-peeling move as `openBranch_rawEdges_upward_closed`. *(landed as two new generic,
+      `Atom`-independent lemmas, `isAccessible_go_decompose`/`isAccessible_decompose`, which
+      decompose a single `isAccessible edges w w' = true` fact into a
+      `Relation.ReflTransGen (fun a c => (c, a) ∈ edges)` chain by structural induction on
+      `isAccessible.go`'s own fuel-bounded recursion -- distinct from, and cheaper than, proving
+      `isAccessible` itself transitive, which `Scheme.lean:250-257`'s docstring explains the
+      codebase deliberately avoids. `IAugMembers_persist` then tail-peels this chain exactly as
+      `openBranch_rawEdges_upward_closed` does.)*
+- [x] Extend `intExpandBranches_openBranch_sat`'s conclusion (currently
       `IFimpAccess edges b ∧ IPosPersistRaw rawEdges b ∧ IReuseContain lbEdges b ∧ ...`, `:6940`)
       with the derived persistence fact, or expose it as a separate corollary if that keeps the
       induction's invariant set smaller. Prefer the corollary if the induction does not need the
-      new fact threaded through it.
-- [ ] Check the shape matches `truthLemma`'s `hpers` parameter exactly:
+      new fact threaded through it. *(deviation: extended the conclusion directly with a 7th
+      conjunct, rather than a separate corollary -- the underlying `IAugMembers` bookkeeping
+      invariant unavoidably needed threading through the induction regardless (it is edge-list
+      provenance, not derivable post-hoc), so once that threading existed the derived persistence
+      fact was a one-line corollary at the sole `.openBranch` leaf case; exposing it as the 7th
+      conjunct keeps `openBranch_countermodel`'s eventual `truthLemma` call a single
+      destructuring, matching the existing `hpp`/`hARC_bPers`/`hfc`/`hwp` conjuncts' shape.)*
+- [x] Check the shape matches `truthLemma`'s `hpers` parameter exactly:
       `∀ (χ) (x y), isAccessible edges x y = true → (⟨.pos, χ, x⟩ : ISF Atom) ∈ b →
-      (⟨.pos, χ, y⟩ : ISF Atom) ∈ b`.
+      (⟨.pos, χ, y⟩ : ISF Atom) ∈ b`. *(confirmed both by direct textual match against
+      `truthLemma`'s declared `hpers` parameter and by a new type-checking `example` right after
+      `intExpandBranches_openBranch_sat` that destructures the new conjunct and feeds it to
+      `truthLemma` via a bare `exact`, no coercion.)*
+
+**Completion note**: All four tasks landed in one green checkpoint (`lake build` 3325 jobs,
+`checkInitImports` clean, `lake lint` zero Scheme.lean findings, `lint-style` clean, `shake` no
+suggestion for Scheme.lean, `mk_all` no update necessary, `lake test` 9397 jobs green). Sorry
+count 196->196, axiom count 26->26, vacuous-definition grep 1->1 (unchanged, pre-existing
+`Computability/URM/Basic.lean` false positive), all unchanged.
+`intExpandBranches_openBranch_sat`/`openBranch_rawEdges_upward_closed` re-verified via
+`lean_verify`: axioms `{propext, Classical.choice, Quot.sound}`, no `sorryAx`. Territory held: no
+edits to the `isAccessible`-monotonicity/`openBranch_countermodel`/`tableau_complete` region at
+the end of `Scheme.lean` (task 605's territory); its pre-existing `sorry` is untouched. Phase 8
+can now instantiate `truthLemma` at the augmented frame using this conjunct directly for `hpers`.
 
 **Timing**: 1.5 hours
 

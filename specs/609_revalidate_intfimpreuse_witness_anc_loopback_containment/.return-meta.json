@@ -1,25 +1,33 @@
 {
-  "status": "partial",
-  "started_at": "2026-08-09T00:00:00Z",
-  "completed_at": "2026-08-10T06:00:00Z",
+  "status": "implemented",
+  "started_at": "2026-08-10T00:00:00Z",
+  "completed_at": "2026-08-10T00:00:00Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 6 marked [COMPLETED], full task list checked off with deviation annotations and a completion note."
+      "summary": "Phase 7 marked [COMPLETED]. All four task-list items checked off with deviation annotation (conclusion extended directly rather than a separate corollary, since the underlying IAugMembers invariant needed threading regardless)."
     },
     {
       "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/10_phase6-complete.md",
-      "summary": "Full record of this dispatch's two commits closing Phase 6."
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/11_phase7-complete.md",
+      "summary": "Full record of Phase 7: isAccessible_decompose (generic graph decomposition), IAugMembers/IAllAugMembers (new provenance invariant threaded through all ten key-induction cases), IAugMembers_persist (the payoff lemma), the 7th conjunct on intExpandBranches_openBranch_sat, and a type-checking shape-check example against truthLemma's hpers parameter."
     }
   ],
+  "blockers": [],
   "partial_progress": {
-    "stage": "phase_6_completed",
-    "details": "Phase 6 ('Snapshot-free IReuseContain, re-threaded through the key induction') is fully closed and verified. Phase 7 ('Export augmented-frame positive persistence') is NOT STARTED and was not attempted this dispatch -- it requires fresh context budget as its own dispatch.",
+    "stage": "complete",
+    "details": "Phase 7 fully implemented and verified in one dispatch.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 6
+    "phases_completed": 7
+  },
+  "metadata": {
+    "session_id": "sess_1786368658_52fe41",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   },
   "verification": {
     "verification_passed": true,
@@ -27,29 +35,12 @@
     "vacuous_count": 1,
     "axiom_count": 26,
     "build_passed": true,
-    "ci_pipeline_passed": true,
-    "notes": "intExpandBranches_openBranch_sat re-verified via lean_verify after both commits: axioms {propext, Classical.choice, Quot.sound}, no sorryAx. lake test run in the foreground (9397 jobs, exit 0) after each commit, not backgrounded."
+    "ci_pipeline_passed": true
   },
   "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/10_phase6-complete.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json"
-  ],
-  "metadata": {
-    "session_id": "sess_1786336315_39f0e4",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "implement",
-      "skill-cslib-implementation"
-    ],
-    "compliance_check": "passed",
-    "requires_user_review": false,
-    "review_reason": "Phase 6 of the plan's 9 phases is now fully complete and verified. status is 'partial' at the task level only because Phases 7-9 remain -- not because anything in this dispatch is incomplete, blocked, or unverified. Two commits (237cfcc4..21a2e460..97796a79) landed, each independently full-CI-verified.",
-    "cycles_used": 5,
-    "final_state": "implementing"
-  }
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/11_phase7-complete.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.return-meta.json"
+  ]
 }

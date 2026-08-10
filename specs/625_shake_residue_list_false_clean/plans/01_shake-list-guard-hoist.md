@@ -176,22 +176,26 @@ new functions. Confirm at implementation time by re-reading the file after the e
 
 ---
 
-### Phase 2: Route `--list` through the shared validator [NOT STARTED]
+### Phase 2: Route `--list` through the shared validator [COMPLETED]
 
 **Goal**: Close the actual defect — `--list` must exit 2, not 0, when shake exits 1 with an
 unparseable/empty flagged set.
 
 **Tasks**:
-- [ ] Replace the `--list` branch body (lines 96-104) with:
+- [x] Replace the `--list` branch body (lines 96-104) with:
       `if ! run_and_validate_shake; then exit 2; fi` followed by the guarded print and `exit 0`.
-- [ ] Print with `[ -n "$live" ] && printf '%s\n' "$live"` — **not** the research report's
+      *(completed)*
+- [x] Print with `[ -n "$live" ] && printf '%s\n' "$live"` — **not** the research report's
       unconditional `printf`, which would emit a stray blank line on a genuinely clean run. Note
       that under `set -uo pipefail` without `set -e`, a false `[ -n ... ]` test is harmless as
-      the branch's last-but-one statement because `exit 0` follows explicitly.
-- [ ] Confirm `parse_flagged_set` is no longer called bare-for-its-stdout in `--list` (that call
+      the branch's last-but-one statement because `exit 0` follows explicitly. *(completed)*
+- [x] Confirm `parse_flagged_set` is no longer called bare-for-its-stdout in `--list` (that call
       shape is exactly what made the emptiness uninspectable); its output now flows through
-      `$live` only.
-- [ ] Confirm all three modes now share one and only one implementation of both conditions.
+      `$live` only. *(completed: verified via `grep -n 'parse_flagged_set'`, only two hits — the
+      definition and the single call site inside `run_and_validate_shake`)*
+- [x] Confirm all three modes now share one and only one implementation of both conditions.
+      *(completed: `grep -c 'expected 0 or 1'` returns 1, confirmed after this phase per the
+      Phase 1 deviation note)*
 
 **Timing**: 0.5 hours
 

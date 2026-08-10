@@ -129,12 +129,14 @@ run_and_validate_shake() {
 
 case "${1:-}" in
   --list)
-    run_shake
-    parse_flagged_set
-    if [ "$shake_exit" -ne 0 ] && [ "$shake_exit" -ne 1 ]; then
-      echo "ERROR: lake shake exited $shake_exit (expected 0 or 1)." >&2
+    if ! run_and_validate_shake; then
       exit 2
     fi
+    # Guarded print: an unconditional printf here would emit a spurious blank line when $live is
+    # empty (the genuine shake-exit-0 clean case), silently changing the "zero bytes on clean"
+    # contract to "one newline on clean". Under set -uo pipefail without set -e, a false
+    # [ -n ... ] test here is harmless -- the explicit `exit 0` below always runs regardless.
+    [ -n "$live" ] && printf '%s\n' "$live"
     exit 0
     ;;
   --update)

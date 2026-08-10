@@ -1,0 +1,18 @@
+{
+  "phase": 2,
+  "phase_name": "Route --list through the shared validator",
+  "started_at": "2026-08-10T23:25:00Z",
+  "last_updated": "2026-08-10T23:35:00Z",
+  "objectives": [
+    {"id": 1, "description": "Replace --list branch body with run_and_validate_shake + guarded print", "status": "done", "files_touched": ["scripts/check-shake-residue.sh"]}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "verification_notes": [
+    "grep -c 'expected 0 or 1' scripts/check-shake-residue.sh returns 1 (confirms Phase 1's deferred verification bullet, now satisfied).",
+    "Live bash scripts/check-shake-residue.sh --list against fully-built repo: exit 0, output byte-for-byte equal (after sort) to scripts/shake-residue-baseline.txt's 23-line/12-entry set.",
+    "bash scripts/check-shake-residue.sh --list | wc -c reported 541 bytes, confirming guarded print did not suppress real output."
+  ]
+}

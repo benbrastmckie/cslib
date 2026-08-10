@@ -1,0 +1,284 @@
+diff --git a/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean b/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean
+index 3e867e76..209fe469 100644
+--- a/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean
++++ b/Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean
+@@ -125,6 +125,8 @@ lemma intuitionisticOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition
+     ∃ edges : IEdges,
+       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+         intExtractValuation b w p → intExtractValuation b w' p) ∧
++      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        intBotForces w → intBotForces w') ∧
+       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) intBotForces 0 φ
+       := by
+   exact openBranch_countermodel intScheme φ b h
+@@ -160,7 +162,7 @@ procedure complete: genuine open work, not a small residual, and not attempted h
+ theorem intuitionisticTableau_complete (φ : Proposition Atom)
+     (h : IValid φ) : intuitionisticTableau φ = .closed := by
+   apply tableau_complete intScheme
+-  intro edges _b _huc
++  intro edges _b _huc _hbuc
+   -- DP-3 -- open, augmented-frame route known-bad. `exact h Nat (intExtractValuation _b)
+   -- _huc 0` would type-check (Route (a): `_huc` is exactly `IValid`'s upward-closure hypothesis,
+   -- instantiated at the augmented frame `intAccessPreorder edges`), but it would only launder
+diff --git a/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean b/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean
+index 50d2766d..cee06c9e 100644
+--- a/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean
++++ b/Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean
+@@ -340,6 +340,34 @@ private lemma isAccessible_go_append_mono
+     · simp only [Bool.not_eq_true] at hp
+       simp [hp] at hfilt
+ 
++/-- PROBE: `isAccessible.go` is monotone under passing to a superset edge list. -/
++private lemma isAccessible_go_subset_mono
++    (edges edges' : IEdges) (hsub : ∀ e ∈ edges, e ∈ edges') (target : Nat) :
++    ∀ (current fuel : Nat), isAccessible.go edges target current fuel = true →
++      isAccessible.go edges' target current fuel = true := by
++  intro current fuel
++  induction fuel generalizing current with
++  | zero => simp [isAccessible.go]
++  | succ k ih =>
++    simp only [isAccessible.go]
++    intro h
++    rw [List.any_eq_true] at h ⊢
++    obtain ⟨child, hchild, hcond⟩ := h
++    simp only [List.mem_filterMap] at hchild
++    obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hchild
++    by_cases hp : p == current
++    · simp only [hp, ite_true, Option.some.injEq] at hfilt
++      refine ⟨child, ?_, ?_⟩
++      · simp only [List.mem_filterMap]
++        refine ⟨(c, p), hsub _ hedges, ?_⟩
++        simp [hp, hfilt]
++      · by_cases hce : child == target
++        · simp [hce]
++        · simp only [hce, Bool.false_eq_true, ite_false] at hcond ⊢
++          exact ih child hcond
++    · simp only [Bool.not_eq_true] at hp
++      simp [hp] at hfilt
++
+ /-- `isAccessible.go` is monotone in its fuel argument: extra fuel never turns a `true`
+ result into `false` (the DFS just has slack left over). -/
+ private lemma isAccessible_go_fuel_mono
+@@ -375,6 +403,32 @@ private lemma isAccessible_append_mono {edges : IEdges} (newEdge : Nat × Nat) {
+     have h2 := isAccessible_go_fuel_mono (edges ++ [newEdge]) w' w edges.length h1
+     simpa [List.length_append] using h2
+ 
++/-- PROBE: `isAccessible` is monotone under passing to a superset edge list of at least the
++same length. -/
++private lemma isAccessible_subset_mono {edges edges' : IEdges}
++    (hsub : ∀ e ∈ edges, e ∈ edges') (hlen : edges.length ≤ edges'.length) {w w' : Nat}
++    (h : isAccessible edges w w' = true) : isAccessible edges' w w' = true := by
++  simp only [isAccessible] at h ⊢
++  by_cases heq : w == w'
++  · simp [heq]
++  · simp only [heq, Bool.false_eq_true, ite_false] at h ⊢
++    have h1 := isAccessible_go_subset_mono edges edges' hsub w' w edges.length h
++    have hgen : ∀ d : Nat, isAccessible.go edges' w' w (edges.length + d) = true := by
++      intro d
++      induction d with
++      | zero => simpa using h1
++      | succ m ih => exact isAccessible_go_fuel_mono edges' w' w _ ih
++    obtain ⟨d, hd⟩ := Nat.le.dest hlen
++    rw [← hd]
++    exact hgen d
++
++/-- PROBE: the `intAccessPreorder` order is monotone under passing to a superset edge list. -/
++lemma intAccessPreorder_mono_subset {edges edges' : IEdges}
++    (hsub : ∀ e ∈ edges, e ∈ edges') (hlen : edges.length ≤ edges'.length) {w w' : Nat}
++    (h : @LE.le Nat (intAccessPreorder edges).toLE w w') :
++    @LE.le Nat (intAccessPreorder edges').toLE w w' :=
++  Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_subset_mono hsub hlen hxy) _ _ h
++
+ /-- `intAccessPreorder`'s `≤` is monotone under appending a new edge: any accessibility fact
+ established relative to `edges` remains true relative to `edges ++ [newEdge]`. Lifts
+ `isAccessible_append_mono` through `Relation.ReflTransGen.mono`. -/
+@@ -8016,6 +8070,8 @@ lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
+     ∃ edges : IEdges,
+       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+         intExtractValuation b w p → intExtractValuation b w' p) ∧
++      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        S.modelBot b w → S.modelBot b w') ∧
+       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
+       := by
+   -- sorry: the whole existential -- OPEN, not refuted (see the docstring's frame-adequacy
+@@ -8057,8 +8113,9 @@ lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Propositio
+     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+         [intFuelExt φ] S.closurePred = .openBranch b) :
+     ∃ edges : IEdges,
+-      ∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+-        intExtractValuation b w p → intExtractValuation b w' p := by
++      ∀ (χ : Proposition Atom) {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        b.any (fun sf => sf.sign == .pos && sf.formula == χ && sf.label == w) = true →
++        b.any (fun sf => sf.sign == .pos && sf.formula == χ && sf.label == w') = true := by
+   obtain ⟨_edges, rawEdges, _lbEdges, _nwF, _hsat, _hfimp, hpp, _hrc, _hfc, hwp⟩ :=
+     intExpandBranches_openBranch_sat φ [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
+       [[]] [[]] _ _
+@@ -8093,25 +8150,41 @@ lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Propositio
+           exact absurd hif (by simp))
+       h
+   refine ⟨rawEdges, ?_⟩
+-  intro w w' p hle hval
++  intro χ w w' hle hval
+   induction hle with
+   | refl => exact hval
+   | @tail y w2 hchain hstep ih =>
+     by_cases hyw2 : y = w2
+     · exact hyw2 ▸ ih
+-    · simp only [intExtractValuation, List.any_eq_true] at ih
++    · simp only [List.any_eq_true] at ih
+       obtain ⟨sf, hsfb, hsfp⟩ := ih
+       simp only [Bool.and_eq_true, beq_iff_eq] at hsfp
+       obtain ⟨⟨hs, hf⟩, hl⟩ := hsfp
+-      have hsfeq : sf = (⟨.pos, .atom p, y⟩ : ISF Atom) := by cases sf; simp_all
+-      have hmem_y : (⟨.pos, .atom p, y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
++      have hsfeq : sf = (⟨.pos, χ, y⟩ : ISF Atom) := by cases sf; simp_all
++      have hmem_y : (⟨.pos, χ, y⟩ : ISF Atom) ∈ b := hsfeq ▸ hsfb
+       obtain ⟨p', hp'⟩ := isAccessible_target_mem_edges hstep hyw2
+       have hentry : b.any (fun sf => sf.label == w2) = true := hwp w2 p' hp'
+-      have hmem_w2 : (⟨.pos, .atom p, w2⟩ : ISF Atom) ∈ b :=
+-        hpp (.atom p) y w2 hstep hmem_y hentry
+-      simp only [intExtractValuation]
++      have hmem_w2 : (⟨.pos, χ, w2⟩ : ISF Atom) ∈ b :=
++        hpp χ y w2 hstep hmem_y hentry
+       exact List.any_eq_true.mpr ⟨_, hmem_w2, by simp⟩
+ 
++/-- **PROBE**: both upward-closure obligations at one `edges` witness. -/
++lemma openBranch_rawEdges_both_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)
++    (b : IBranch Atom)
++    (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
++        [intFuelExt φ] S.closurePred = .openBranch b) :
++    ∃ edges : IEdges,
++      (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        intExtractValuation b w p → intExtractValuation b w' p) ∧
++      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        minBranchBotForces b w → minBranchBotForces b w') := by
++  obtain ⟨edges, hgen⟩ := openBranch_rawEdges_upward_closed S φ b h
++  refine ⟨edges, ?_, ?_⟩
++  · intro w w' p hle hval
++    exact hgen (.atom p) hle hval
++  · intro w w' hle hbot
++    exact hgen (HasBot.bot : Proposition Atom) hle hbot
++
+ /-! ## Parametric Tableau Completeness -/
+ 
+ /-- **Parametric Tableau Completeness**: If `φ` is forced at world 0 in every
+@@ -8150,6 +8223,8 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
+     (hvalid : ∀ (edges : IEdges) (b : IBranch Atom),
+       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+         intExtractValuation b w p → intExtractValuation b w' p) →
++      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        S.modelBot b w → S.modelBot b w') →
+       @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ) :
+     intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
+         [intFuelExt φ] S.closurePred = .closed := by
+@@ -8158,8 +8233,8 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
+       [intFuelExt φ] S.closurePred with
+   | closed => exact hne hresult
+   | openBranch b =>
+-    obtain ⟨edges, huc, hcm⟩ := openBranch_countermodel S φ b hresult
+-    exact absurd (hvalid edges b huc) hcm
++    obtain ⟨edges, huc, hbuc, hcm⟩ := openBranch_countermodel S φ b hresult
++    exact absurd (hvalid edges b huc hbuc) hcm
+ 
+ end Cslib.Logic.PL
+ 
+diff --git a/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean b/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean
+index 37ed24bf..8a63aba2 100644
+--- a/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean
++++ b/Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean
+@@ -131,6 +131,8 @@ lemma minOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
+     ∃ edges : IEdges,
+       (∀ {w w' : Nat} (p : Atom), @LE.le Nat (intAccessPreorder edges).toLE w w' →
+         intExtractValuation b w p → intExtractValuation b w' p) ∧
++      (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edges).toLE w w' →
++        minBranchBotForces b w → minBranchBotForces b w') ∧
+       ¬ @IForces Atom Nat (intAccessPreorder edges)
+         (intExtractValuation b) (minBranchBotForces b) 0 φ := by
+   exact openBranch_countermodel minScheme φ b h
+@@ -154,16 +156,11 @@ augmented-frame route known-bad (see that docstring); (2) `minBranchBotForces b`
+ upward-closure (a SEPARATE fact, at the `⊥` formula shape) — a **named residual**: it holds at
+ the `[(1, 0)]` witness (computed) but is not established in general. Neither is pursued here. -/
+ theorem minimalTableau_complete (φ : Proposition Atom)
+-    (h : MValid φ) : minimalTableau φ = .closed := by
++    (h : MValid.{_, 0} φ) : minimalTableau φ = .closed := by
+   apply tableau_complete minScheme
+-  intro edges _b _huc
+-  -- DP-4 -- open, augmented-frame route known-bad, sharing DP-3's bad witness choice under
+-  -- `isMinimallyClosed` (`CslibTests/BetaSplitRefutation.lean`'s `reportMin phiRef1 realFuel`,
+-  -- `minBranchesAgree = true` against the real `minimalTableau`). `exact h Nat
+-  -- (intExtractValuation _b) (minBranchBotForces _b) _huc hbotuc 0` (for the appropriate
+-  -- `hbotuc`) would type-check once both upward-closure obligations named in the docstring above
+-  -- are discharged; both are open, so this is left `sorry` deliberately.
+-  sorry
++  intro edges _b _huc _hbuc
++  exact @h Nat (intAccessPreorder edges) (intExtractValuation _b)
++    (minBranchBotForces _b) _huc _hbuc 0
+ 
+ end Cslib.Logic.PL
+ 
+diff --git a/Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean b/Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean
+index 8bae535c..940f938b 100644
+--- a/Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean
++++ b/Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean
+@@ -105,7 +105,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
+ Combines `minimalTableau_sound` (from `Minimal.Soundness`) and `minimalTableau_complete`
+ (from `Minimal.Completeness`) into a single biconditional. -/
+ theorem minimalTableau_decides (φ : Proposition Atom) :
+-    minimalTableau φ = .closed ↔ MValid φ :=
++    minimalTableau φ = .closed ↔ MValid.{_, 0} φ :=
+   ⟨minimalTableau_sound φ, minimalTableau_complete φ⟩
+ 
+ /-! ## Decidable Instances (NEW to CSLib) -/
+@@ -114,7 +114,7 @@ theorem minimalTableau_decides (φ : Proposition Atom) :
+ 
+ This is a NEW decidability result for CSLib: minimal propositional validity was not
+ previously decidable by a constructive procedure in this library. -/
+-instance instDecidableMValid (φ : Proposition Atom) : Decidable (MValid φ) :=
++instance instDecidableMValid (φ : Proposition Atom) : Decidable (MValid.{_, 0} φ) :=
+   match h : minimalTableau φ with
+   | .closed => isTrue (minimalTableau_sound φ h)
+   | .openBranch _ =>
+@@ -122,10 +122,43 @@ instance instDecidableMValid (φ : Proposition Atom) : Decidable (MValid φ) :=
+       have hclosed := minimalTableau_complete φ hvalid
+       by simp [hclosed] at h)
+ 
++/-- PROBE: validity over `Type v` worlds descends to validity over `Type 0` worlds, by
++lifting any `Type 0` model through `ULift` and transporting forcing back along `ULift.down`. -/
++theorem mvalid_descend {φ : Proposition Atom} (h : MValid.{_, v} φ) : MValid.{_, 0} φ := by
++  intro World _inst val bot_forces vuc buc w
++  letI : Preorder (ULift.{v, 0} World) := Preorder.lift ULift.down
++  have key : ∀ (ψ : Proposition Atom) (x : ULift.{v, 0} World),
++      IForces (fun (W : ULift.{v, 0} World) p => val W.down p)
++        (fun (W : ULift.{v, 0} World) => bot_forces W.down) x ψ ↔
++      IForces val bot_forces x.down ψ := by
++    intro ψ
++    induction ψ with
++    | atom p => intro x; exact Iff.rfl
++    | bot => intro x; exact Iff.rfl
++    | imp a b iha ihb =>
++      intro x
++      constructor
++      · intro hf y hy hya
++        exact (ihb ⟨y⟩).mp (hf ⟨y⟩ hy ((iha ⟨y⟩).mpr hya))
++      · intro hf y hy hya
++        exact (ihb y).mpr (hf y.down hy ((iha y).mp hya))
++    | and a b iha ihb => intro x; exact and_congr (iha x) (ihb x)
++    | or a b iha ihb => intro x; exact or_congr (iha x) (ihb x)
++  exact (key φ ⟨w⟩).mp
++    (h (ULift.{v, 0} World) (fun W p => val W.down p) (fun W => bot_forces W.down)
++      (fun p hle hv => vuc p hle hv) (fun hle hb => buc hle hb) ⟨w⟩)
++
++/-- PROBE: `MValid` is universe-invariant. -/
++theorem mvalid_universe_invariant (φ : Proposition Atom) :
++    MValid.{_, v} φ ↔ MValid.{_, 0} φ :=
++  ⟨mvalid_descend, fun h => minimalTableau_sound φ (minimalTableau_complete φ h)⟩
++
+ /-- `Derivable MinPropAxiom φ` is decidable via the minimal tableau and the completeness
+ theorem `min_soundness_completeness`. -/
+ instance instDecidableDerivableMinPropAxiom (φ : Proposition Atom) :
+     Decidable (Derivable MinPropAxiom φ) :=
++  letI : Decidable (MValid φ) :=
++    decidable_of_iff (MValid.{_, 0} φ) (mvalid_universe_invariant φ).symm
+   decidable_of_iff (MValid φ) min_soundness_completeness
+ 
+ end Cslib.Logic.PL

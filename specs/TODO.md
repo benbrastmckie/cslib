@@ -28,9 +28,9 @@ next_project_number: 613
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-605 [NOT STARTED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
+605 [RESEARCHED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
   └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
-609 [NOT STARTED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
+609 [RESEARCHING] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
   └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece (see above)
 
 ### Modal Logic
@@ -154,7 +154,7 @@ SOURCE: specs/reviews/review-2026-08-09.md finding C1.
 ---
 
 ### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 604
@@ -228,10 +228,11 @@ Zero new sorries, zero new axioms. If the predecessor tasks landed a negative or
 ---
 
 ### 605. Establish upward-closure of minBranchBotForces at the bot formula shape
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603, Task 604
+- **Research**: [605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md]
 
 **Description**: Establish upward-closure of `minBranchBotForces b` at the `bot` formula shape -- the second, genuinely separate obligation at the DP-4 site (minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160).
 

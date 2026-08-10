@@ -1,0 +1,68 @@
+module
+
+import Cslib.Logics.Propositional.Tableau.Minimal.Completeness
+public meta import Cslib.Logics.Propositional.Tableau.Minimal.Completeness
+
+set_option autoImplicit false
+
+open Cslib.Logic.PL Relation
+
+namespace CslibTests.MvalidBotShapeProbe
+
+abbrev A := Nat
+
+/-- `HasBot.bot` is the `Proposition.bot` constructor. -/
+lemma bot_eq : (Cslib.Logic.HasBot.bot : Proposition A) = Proposition.bot := rfl
+
+/-- `⊥ → ((⊥ → ⊥) → ⊥)`. -/
+def phiBotK : Proposition A :=
+  Proposition.bot.imp ((Proposition.bot.imp Proposition.bot).imp Proposition.bot)
+
+/-- Edge list with a single edge, child `1` and parent `0`, so `0 ≤ 1`. -/
+def edgesCE : IEdges := [(1, 0)]
+
+/-- Branch with only T(⊥)@0 — no atoms at all. -/
+def bCE : IBranch A := [⟨.pos, Proposition.bot, 0⟩]
+
+lemma le_zero_one : @LE.le Nat (intAccessPreorder edgesCE).toLE 0 1 := by
+  apply intAccessPreorder_le_of_isAccessible
+  decide
+
+/-- The extracted valuation is empty, hence vacuously upward closed. -/
+theorem val_upward_closed :
+    ∀ {w w' : Nat} (p : A),
+      @LE.le Nat (intAccessPreorder edgesCE).toLE w w' →
+      intExtractValuation bCE w p → intExtractValuation bCE w' p := by
+  intro w w' p _hle hval
+  simp [intExtractValuation, bCE] at hval
+
+/-- `minBranchBotForces bCE` is NOT upward closed along this frame. -/
+theorem bot_not_upward_closed :
+    ¬ (∀ {w w' : Nat}, @LE.le Nat (intAccessPreorder edgesCE).toLE w w' →
+        minBranchBotForces bCE w → minBranchBotForces bCE w') := by
+  intro h
+  have h0 : minBranchBotForces bCE 0 := by simp [minBranchBotForces, bCE, bot_eq]
+  have h1 : minBranchBotForces bCE 1 := h le_zero_one h0
+  simp [minBranchBotForces, bCE, bot_eq] at h1
+
+/-- `phiBotK` is minimally valid. -/
+theorem phiBotK_valid : MValid.{0, 0} phiBotK := by
+  intro World _inst val bot_forces _vuc buc w w1 hw1 hbot1 w2 hw2 _htop
+  exact buc hw2 hbot1
+
+/-- The `hvalid` body as `tableau_complete` currently states it — with ONLY the valuation
+upward-closure premise available — is FALSE at this witness, even though `phiBotK` is `MValid`
+and the valuation IS upward closed. -/
+theorem hvalid_body_false :
+    ¬ @IForces A Nat (intAccessPreorder edgesCE)
+        (intExtractValuation bCE) (minBranchBotForces bCE) 0 phiBotK := by
+  intro hf
+  have h0 : minBranchBotForces bCE 0 := by simp [minBranchBotForces, bCE, bot_eq]
+  have hstep := hf 0 Relation.ReflTransGen.refl h0
+  have htop : @IForces A Nat (intAccessPreorder edgesCE)
+      (intExtractValuation bCE) (minBranchBotForces bCE) 1
+      (Proposition.bot.imp Proposition.bot) := fun _ _ hb => hb
+  have hbot1 : minBranchBotForces bCE 1 := hstep 1 le_zero_one htop
+  simp [minBranchBotForces, bCE, bot_eq] at hbot1
+
+end CslibTests.MvalidBotShapeProbe

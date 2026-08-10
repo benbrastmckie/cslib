@@ -1,0 +1,37 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "The minBranchBotForces upward-closure obligation is retired as a separate obligation, and a new negative result reframes the DP-4 site. Three machine-checked findings. (1) The obligation is the chi := bot instance of a fact already proved for chi := .atom p: IPosPersistRaw (Scheme.lean:6798) is ALREADY quantified over arbitrary chi; only its consumer openBranch_rawEdges_upward_closed narrows it to atoms. Generalizing that consumer yields BOTH upward-closure facts at one shared edges witness, sorry-free (14s build). Two new anti-monotonicity lemmas (isAccessible_subset_mono, intAccessPreorder_mono_subset, modelled on the existing append/fuel mono pair) extend this to any sub-frame of rawEdges. (2) NEW NEGATIVE RESULT: tableau_complete's hvalid premise shape is REFUTED for minScheme even WITH the valuation premise _huc supplied -- witness phi = bot -> ((bot->bot)->bot), edges = [(1,0)], b = [T(bot)@0] (deliberately atom-free, so the valuation premise holds vacuously). MValid phi holds; the hvalid body is false. So DP-4's sorry is unclosable AS STATED, not merely open -- exactly the HvalidShapeRefutation defect one conjunct later. Five theorems, lake env lean clean, zero sorries. This does NOT contradict the prior retraction: that concerned the real phiRef1 branch, this concerns hvalid's arbitrary b. (3) The statement-shape fix closes DP-4 END TO END: add the modelBot upward-closure conjunct to openBranch_countermodel (behind its EXISTING sorry -- no new sorry) plus the matching hvalid premise, repair 4 call sites, and the DP-4 sorry disappears. Full project build green (3325 jobs); chain sorry count 3 -> 2. Working tree reverted to pristine; the complete verified diff is saved as verified-shape-fix.patch. DISCOVERED BLOCKER: the existing DP-3 docstring's claim that 'exact h Nat ... 0 would type-check' is FALSE -- MValid.{u,v} quantifies World : Type v while the frame is Nat : Type 0, so the statement must pin MValid.{_, 0}. That pin ripples to minimalTableau_decides, instDecidableMValid, and instDecidableDerivableMinPropAxiom, resolved by a universe-invariance bridge whose hard direction is a ~20-line ULift transport (proved, building). The same pin will be needed at DP-3.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md",
+      "summary": "Full findings: refutation witness, chi-generalization recipe, end-to-end fix, universe-pin blocker, verification record, 5-phase suggested plan"
+    },
+    {
+      "type": "patch",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/verified-shape-fix.patch",
+      "summary": "Complete verified diff across 4 Lean files (130 insertions); full project builds green with this applied"
+    },
+    {
+      "type": "source",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/MvalidBotShapeRefutation.lean.verified",
+      "summary": "Machine-checked hvalid-shape refutation for minScheme; ready to land as CslibTests/MvalidBotShapeRefutation.lean"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [],
+  "decisions_made": [
+    "Did NOT leave the verified fix in the working tree: several other implementation agents are active in this session and Scheme.lean is a shared 8000-line file. The tree was reverted to pristine and the verified diff saved as a patch artifact instead.",
+    "Reframed the task's premise rather than answering it literally. The task asked to prove minBranchBotForces upward closure 'in general' or document the precondition it needs. The precondition is that the frame be tied to an actual expansion run (a sub-frame of rawEdges) -- exactly the R1 precedent. But the more consequential finding is that the DP-4 goal is refuted as stated, so the precondition must be threaded through the statement shape, not merely documented.",
+    "Recommended CLOSING the DP-4 sorry (option A) rather than preserving strict parity with the DP-3 site's deliberate-sorry discipline (option B), on the ground that after the fix nothing is hidden -- the single real obligation (openBranch_countermodel's existential) is visible at one place instead of redundantly re-marked at three. Both options are laid out in the report; option B costs only the last two lines of the patch."
+  ],
+  "dead_ends": [
+    "Do not look for a frame-independent proof of minBranchBotForces upward closure. It is false at an arbitrary (edges, b) pair -- machine-refuted with an atom-free witness. Any route must tie b to a real expansion run.",
+    "Do not trust the DP-3 docstring's 'would type-check' claim for the analogous IValid instantiation. It fails on a universe mismatch (Nat : Type 0 vs World : Type v) until the statement pins the universe."
+  ],
+  "sorry_inventory": [],
+  "plan_markers_verified": false
+}

@@ -1,0 +1,36 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-09T17:36:10-07:00",
+  "completed_at": "2026-08-09T18:34:00-07:00",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md"
+    },
+    {
+      "type": "patch",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/verified-shape-fix.patch"
+    },
+    {
+      "type": "source",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/MvalidBotShapeRefutation.lean.verified"
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_written",
+    "details": "Research complete. Three machine-checked results: (1) the bot-instance upward closure is free from the already-chi-general IPosPersistRaw, sorry-free at rawEdges and any sub-frame; (2) tableau_complete's hvalid shape is REFUTED for minScheme even with the valuation premise, so DP-4 is unclosable as stated; (3) the statement-shape fix closes DP-4 end to end with the full project building green (3325 jobs), chain sorry count 3 -> 2. Working tree reverted to pristine; verified diff saved as a patch artifact. Discovered blocker: a MValid universe pin is required, rippling to three DecisionProcedure declarations, resolved by a proved ULift universe-invariance bridge."
+  },
+  "verification": {
+    "full_project_build": "green (3325 jobs) with fix applied",
+    "sorry_delta": "3 -> 2 in the propositional tableau completeness chain",
+    "new_sorries": 0,
+    "new_axioms": 0,
+    "working_tree_state": "reverted to pristine; no Cslib/ changes left in place"
+  },
+  "metadata": {
+    "session_id": "sess_1786321994_b49e26_605",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

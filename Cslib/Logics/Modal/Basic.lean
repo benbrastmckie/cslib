@@ -231,10 +231,10 @@ theorem Proposition.map_map (f : Atom → Atom') (g : Atom' → Atom'') (φ : Pr
 @[inherit_doc] scoped prefix:40 "¬" => Proposition.neg
 @[inherit_doc] scoped infix:36 " ∧ " => Proposition.and
 @[inherit_doc] scoped infix:35 " ∨ " => Proposition.or
-@[inherit_doc] scoped infix:30 " → " => Proposition.imp
+@[inherit_doc] scoped infixr:25 " → " => Proposition.imp
 @[inherit_doc] scoped prefix:40 "□" => Proposition.box
 @[inherit_doc] scoped prefix:40 "◇" => Proposition.diamond
-@[inherit_doc] scoped infix:30 " ↔ " => Proposition.iff
+@[inherit_doc] scoped infixr:20 " ↔ " => Proposition.iff
 
 /-- Satisfaction relation. `Satisfies m w φ` means that, in the model `m`, the world `w` satisfies
 the proposition `φ`. -/

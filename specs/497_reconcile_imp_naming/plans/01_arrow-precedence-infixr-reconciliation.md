@@ -1,7 +1,7 @@
 # Implementation Plan: Reconcile `→` Notation Precedence and Associativity with Upstream
 
 - **Task**: 497 - reconcile_imp_naming (retargeted to notation-only)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.25 hours
 - **Dependencies**: None (sole dependency 400 is completed)
 - **Research Inputs**: specs/497_reconcile_imp_naming/reports/01_arrow-notation-precedence-reconciliation.md
@@ -109,24 +109,24 @@ concurrent edits to the same file rather than because of a logical dependency.
 
 ---
 
-### Phase 1: Move `→` to `infixr:25` and `↔` to `infixr:20` [NOT STARTED]
+### Phase 1: Move `→` to `infixr:25` and `↔` to `infixr:20` [COMPLETED]
 
 **Goal**: All 7 notation declarations in the four in-scope files match upstream's precedence and
 associativity.
 
 **Tasks**:
-- [ ] Confirm the 7 target lines still read `@[inherit_doc] scoped infix:30` before editing
+- [x] Confirm the 7 target lines still read `@[inherit_doc] scoped infix:30` before editing
       (`grep -n 'infix.*" → "\|infix.*" ↔ "'` over the four files).
-- [ ] `Cslib/Logics/Bimodal/Syntax/Formula.lean:101` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
-- [ ] `Cslib/Logics/LTL/Syntax/Formula.lean:209` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
-- [ ] `Cslib/Logics/LTL/Syntax/Formula.lean:210` — `scoped infix:30 " ↔ "` -> `scoped infixr:20 " ↔ "`
-- [ ] `Cslib/Logics/Modal/Basic.lean:234` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
-- [ ] `Cslib/Logics/Modal/Basic.lean:237` — `scoped infix:30 " ↔ "` -> `scoped infixr:20 " ↔ "`
-- [ ] `Cslib/Logics/Temporal/Syntax/Formula.lean:169` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
-- [ ] `Cslib/Logics/Temporal/Syntax/Formula.lean:170` — `scoped infix:30 " ↔ "` -> `scoped infixr:20 " ↔ "`
-- [ ] Preserve each line's `@[inherit_doc]` attribute, `scoped` modifier, the spaces inside the
+- [x] `Cslib/Logics/Bimodal/Syntax/Formula.lean:101` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
+- [x] `Cslib/Logics/LTL/Syntax/Formula.lean:209` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
+- [x] `Cslib/Logics/LTL/Syntax/Formula.lean:210` — `scoped infix:30 " ↔ "` -> `scoped infixr:20 " ↔ "`
+- [x] `Cslib/Logics/Modal/Basic.lean:234` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
+- [x] `Cslib/Logics/Modal/Basic.lean:237` — `scoped infix:30 " ↔ "` -> `scoped infixr:20 " ↔ "`
+- [x] `Cslib/Logics/Temporal/Syntax/Formula.lean:169` — `scoped infix:30 " → "` -> `scoped infixr:25 " → "`
+- [x] `Cslib/Logics/Temporal/Syntax/Formula.lean:170` — `scoped infix:30 " ↔ "` -> `scoped infixr:20 " ↔ "`
+- [x] Preserve each line's `@[inherit_doc]` attribute, `scoped` modifier, the spaces inside the
       token string, and the right-hand side verbatim. Only the `infix:NN` token changes.
-- [ ] Confirm no eighth `infix:30` connective declaration was missed in these four files.
+- [x] Confirm no eighth `infix:30` connective declaration was missed in these four files.
 
 **Timing**: 20 minutes
 

@@ -3,18 +3,16 @@
   "started_at": "2026-08-09T00:00:00Z",
   "requires_user_review": false,
   "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "CslibTests/BetaSplitRefutation.lean",
-    "CslibTests/MinProbe.lean",
-    "CslibTests/WitnessProbe.lean",
-    "CslibTests/WitnessSearch3.lean",
     "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md"
   ],
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phases 3 and 4 marked COMPLETED with full task-level deviation/confirmation notes; Phase 5 carries a new investigation note (freeze lemma confirmed true but requires a global whole-induction invariant, not a quick lemma)."
+      "summary": "Phase 5 remains [IN PROGRESS]; its Investigation note is followed by a new Progress note recording six landed, verified, additive declarations (the freeze-lemma checkpoint and single-step invariant) plus a concrete two-item continuation sketch (persistence-fixpoint preservation, multi-step induction composition) for the next dispatch."
     }
   ],
   "completion_data": {
@@ -26,11 +24,11 @@
       "Phase 3: Swap the call site and reconcile the test corpus",
       "Phase 4: Promote phiRef4 and re-point the refutation narrative"
     ],
-    "continuation_path": "Resume at Phase 5 (The freeze lemma), specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md. Read the 'Investigation note' block immediately under the Phase 5 heading before starting -- it records a confirmed mathematical path (the freeze lemma is TRUE under beta-priority; persistence propagation is proven blind to loop-back edges by direct inspection of Expansion.lean:157-192 and Rules.lean:179-191) but explains why it needs a NEW global invariant threaded through intExpandBranches_openBranch_sat's induction (comparable in shape to the existing R1 invariant set), not a single local lemma, and why V2 would not avoid this work. Budget Phase 5 at Phase-1+2 combined scale, not the plan's original 2-hour estimate. Phases 6-9 (snapshot-free IReuseContain, persistence export, openBranch_countermodel discharge, downstream Completeness.lean sorries) all depend on Phase 5 landing first."
+    "continuation_path": "Resume at Phase 5 (The freeze lemma, still [IN PROGRESS]), specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md. Read the Phase 5 section's 'Progress note (this dispatch...)' block first -- it names the six new sorry-free declarations already landed (isRuleShape/intApplyRuleFull_notApplicable_iff in Rules.lean; IFrozenBelow/intStepBranchPrioFirstPass_none_frozen in Expansion.lean; IWorldHist_isAccessible_lt and the IFrozenBelow_intStepBranchPrio_ge step-lemma family in Scheme.lean) and gives a concrete two-item continuation sketch: (1) prove persistence-fixpoint preservation of IFrozenBelow using the already-landed applyAllTImpRules_copy_complete_of_fixpoint plus the new IWorldHist_isAccessible_lt (genCopies channel) and IExpandedConsistent plus a branch-consistency fact (intTImpRule's direct channel); (2) thread IFrozenBelow through intExpandBranches_openBranch_sat's four go.induct blocks (Phase 6's original mandate) to replace IReuseContain_mono at each use site. Budget at Phase 1+2 combined scale, not the plan's original 2-hour estimate for Phase 5."
   },
   "partial_progress": {
-    "stage": "phase_4_complete_phase_5_investigated_not_started",
-    "details": "Phases 3-4 landed, fully verified, and committed as separate green-phase commits (97a497fd, f6051ceb). Phase 3 is the actual calculus repair: intExpandBranches.go's match target swapped from intStepBranch to intStepBranchPrio (beta-priority scheduling), 11 intStepBranch_* lemmas generalized to accept the shared IStepShape predicate so they serve both steppers, every call site inside the four intExpandBranches.go.induct blocks re-pointed accordingly, and CslibTests/BetaSplitRefutation.lean's goRaw recreation updated to match with all #guard_msgs assertions reconciled across four test files (BetaSplitRefutation.lean, MinProbe.lean, WitnessProbe.lean, WitnessSearch3.lean) -- TableauConformance.lean needed zero changes, confirming 20/20 conformance rows including the complexity-9 divergence witness are verdict-unchanged. Phase 4 promoted phiRef4 to a second regression-guard assertion and rewrote the file's module narrative to distinguish the pre-repair defect record (preserved as history) from the post-repair status (every assertion now holds). Phase 5 (the freeze lemma) was investigated in depth but not attempted in code: confirmed the underlying mathematical claim is TRUE and V1/beta-priority is not a dead end, but the formalization needs a genuinely new global invariant (not a quick lemma), recorded as a Scope Correction-style note in the plan for the next dispatch. Stopped at this natural boundary rather than rushing a deep new invariant under time pressure.",
+    "stage": "phase_5_checkpoint_and_step_lemma_landed",
+    "details": "Phases 1-4 remain landed and committed from prior dispatches (through cd421ee8). This dispatch re-derived the Phase 5 freeze mechanism from first principles, confirmed the prior dispatch's Investigation note is correct, and landed six new sorry-free, axiom-clean, purely additive declarations across three files (commit 4ffd1821): isRuleShape and intApplyRuleFull_notApplicable_iff in Rules.lean (a bare, nw/b-independent shape characterization of intApplyRuleFull's .notApplicable result); IFrozenBelow and intStepBranchPrioFirstPass_none_frozen in Expansion.lean (the checkpoint precondition and its derivation from intStepBranchPrioFirstPass returning none, i.e. exactly the moment intStepBranchPrio falls through to world-creation); and in Scheme.lean, IWorldHist_isAccessible_lt (a new label-order corollary of the already-landed IWorldHist/IWorldHistCounter invariants -- raw-edge accessibility only flows from smaller to larger labels, needing no new invariant threading) plus the freeze single-step conclusion family (IResultLabelsGe, IResultLabelsEq, IResultLabelsEq_imp_Ge, intApplyRuleFull_labels_eq_of_not_worldCreating, IFrozenBelow_intStepBranchPrio_ge) proving that one intStepBranchPrio step, given IFrozenBelow w0 e b and w0 <= nw, can only write new content at labels >= w0. This is mechanism 3(a) from the Investigation note, proved in full. Mechanism 3(b) (persistence-fixpoint preservation) is sketched but not yet formalized, and the multi-step composition into intExpandBranches_openBranch_sat's induction (needed for the actual IReuseContain_mono replacement Phase 6 wants) remains open -- both are recorded precisely in the plan's new Progress note. Full lake build green at 3325 jobs (unchanged job count), lake test green at 9397 jobs, TableauConformance's 20 rows unchanged, checkInitImports/lake lint/lint-style/shake/mk_all all clean on touched files. Stopped at this green boundary per explicit delegation-context instruction rather than rushing the remaining, substantially larger composition work.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 4
@@ -44,13 +42,22 @@
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 2,
-    "sorry_count_baseline": 2,
+    "sorry_count_scoped": 2,
+    "sorry_count_scoped_baseline": 2,
+    "sorry_count_scoped_note": "Scoped to this task's territory: Scheme.lean:8327 (openBranch_countermodel, Phase 8) and Completeness.lean:181 (intuitionisticTableau_complete, Phase 9); both pre-existing and unchanged. Repository-wide grep -rn sorry Cslib/ returns 196, an unrelated library-wide baseline covering many other in-progress tasks, not scoped to task 609.",
     "vacuous_count": 0,
     "axiom_count": 26,
     "axiom_count_baseline": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "Full lake build green at 3325 jobs (unchanged job count from the Phase 1/2 baseline). lake test green at 9398 jobs (includes the full CslibTests suite and the 20-row TableauConformance corpus, unchanged verdicts). checkInitImports clean, lake lint zero findings in touched files across all 7 prevention categories, lake exe lint-style clean, lake shake clean for touched files, lake exe mk_all --module reports no update necessary. Sorry count and axiom count both unchanged from baseline -- the two pre-existing sorries (Scheme.lean:8203 openBranch_countermodel, Completeness.lean:181 intuitionisticTableau_complete) are Phase 8/9's territory, not touched this dispatch."
+    "new_declarations_verified_sorry_free": [
+      "Cslib.Logic.PL.isRuleShape",
+      "Cslib.Logic.PL.intApplyRuleFull_notApplicable_iff",
+      "Cslib.Logic.PL.IFrozenBelow",
+      "Cslib.Logic.PL.intStepBranchPrioFirstPass_none_frozen",
+      "Cslib.Logic.PL.IWorldHist_isAccessible_lt",
+      "Cslib.Logic.PL.IFrozenBelow_intStepBranchPrio_ge"
+    ],
+    "note": "lake exe cache get warm; scoped builds of Rules.lean/Expansion.lean/Scheme.lean all green; full lake build green at 3325 jobs (identical job count to the Phase 3/4 baseline); lake test green at 9397 jobs with TableauConformance's 20 rows verdict-unchanged; checkInitImports clean; lake lint zero findings in touched files; lake exe lint-style clean; lake shake clean for touched files; lake exe mk_all --module reports no update necessary. Every new declaration verified individually via both the lean-lsp lean_verify tool and a direct `lake env lean #print axioms` invocation (used as a cross-check after lean_verify returned a spurious sorryAx on one declaration immediately after a large edit, before a fresh lake build/LSP restart -- the direct #print axioms call and a subsequent lean_verify after lean_build both confirmed no sorryAx, matching every other declaration's clean result)."
   }
 }

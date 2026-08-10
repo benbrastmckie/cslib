@@ -1208,28 +1208,71 @@ private lemma ILabelBoundStrict_extendMany {b : IBranch Atom} {nw nw' : Nat}
   · exact hnew sf hsf
   · exact lt_of_lt_of_le (h sf hsf) hle
 
+/-- The shape a `some` result of either stepper (`intStepBranch` or `intStepBranchPrio`)
+extracts from the branch: some `sf ∈ b`, not already in the `expanded` set `e`, whose rule
+application is exactly `result`, with `newExp` the `expanded` set extended by `sf`.
+
+Naming this once (Phase 2 of the beta-priority repair, report §5.1) lets every downstream
+`intStepBranch_*` lemma that currently unfolds `intStepBranch` directly instead take a single
+`IStepShape` hypothesis that a `some` result of *either* stepper satisfies -- the abstraction
+the Phase 3 call-site swap needs to be a small, local edit: `go`'s proof obligations move from
+"derived from `intStepBranch b e nw = some (...)`" to "derived from `IStepShape b e nw ...`",
+supplied by `intStepBranch_some_shape` today and by `intStepBranchPrio_some_exists` after the
+swap, with no change to the obligation lemmas themselves. -/
+def IStepShape (b : IBranch Atom) (e : List (ISF Atom)) (nw : Nat)
+    (result : IntRuleResult Atom) (newExp : List (ISF Atom)) : Prop :=
+  ∃ sf, sf ∈ b ∧ sf ∉ e ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf]
+
 omit [Hashable Atom] in
-/-- Extracts the processed formula from a `some` result of `intStepBranch`: some
-`sf ∈ b` had `intApplyRuleFull sf nw b = result` and `newExp = e ++ [sf]`. -/
-private lemma intStepBranch_some_exists
+/-- `intStepBranch`'s `some` result satisfies `IStepShape`. Strengthens the un-named extraction
+this file previously performed inline (and which `intStepBranch_some_exists_fuel` below used to
+duplicate under a different name) with the `sf ∉ e` conjunct in one place. -/
+lemma intStepBranch_some_shape
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
     (hstep : intStepBranch b e nw = some (result, newExp)) :
-    ∃ sf, sf ∈ b ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf] := by
+    IStepShape b e nw result newExp := by
   simp only [intStepBranch] at hstep
   obtain ⟨sf, hsfb, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   by_cases hexp : (e.any (· == sf)) = true
   · simp [hexp] at hsf
   · simp only [Bool.not_eq_true] at hexp
     simp only [hexp, Bool.false_eq_true, if_false] at hsf
+    have hsfne : sf ∉ e := fun hmem => by
+      have hcontra : e.any (· == sf) = true := List.any_eq_true.mpr ⟨sf, hmem, by simp⟩
+      simp [hexp] at hcontra
     cases hint : intApplyRuleFull sf nw b with
     | notApplicable => simp [hint] at hsf
     | linearResult fs nw' ed =>
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-      exact ⟨sf, hsfb, hint.trans hsf.1, hsf.2.symm⟩
+      exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
     | branchingResult bs nw' =>
       simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-      exact ⟨sf, hsfb, hint.trans hsf.1, hsf.2.symm⟩
+      exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
+
+omit [Hashable Atom] in
+/-- Converts `IStepShape`'s `sf ∉ e` (Prop) negation to the `List.any`-Bool-false form that
+`intWork_drop` and (below) `intStepBranch_some_exists_fuel` expect. -/
+private lemma any_beq_eq_false_of_not_mem {e : List (ISF Atom)} {sf : ISF Atom}
+    (hne : sf ∉ e) : e.any (· == sf) = false := by
+  cases hcase : e.any (· == sf) with
+  | false => rfl
+  | true =>
+    obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hcase
+    exact absurd ((beq_iff_eq.mp hxeq) ▸ hx) hne
+
+omit [Hashable Atom] in
+/-- Extracts the processed formula from a `some` result of `intStepBranch`: some
+`sf ∈ b` had `intApplyRuleFull sf nw b = result` and `newExp = e ++ [sf]`. Now a thin
+weakening of `intStepBranch_some_shape` (drops the `sf ∉ e` conjunct), rather than its own
+direct unfold, per Phase 2's re-basing. -/
+private lemma intStepBranch_some_exists
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
+    (hstep : intStepBranch b e nw = some (result, newExp)) :
+    ∃ sf, sf ∈ b ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf] := by
+  obtain ⟨sf, hsfb, -, hint, hnewExp⟩ := intStepBranch_some_shape hstep
+  exact ⟨sf, hsfb, hint, hnewExp⟩
 
 omit [Hashable Atom] in
 /-- `intStepBranchPrio` returns `none` in exactly the same circumstances as `intStepBranch`
@@ -1273,40 +1316,21 @@ lemma intStepBranchPrio_none_iff
     exact h
 
 omit [Hashable Atom] in
-/-- Extraction bridge for `intStepBranchPrio`, strengthened relative to
-`intStepBranch_some_exists` with the extra conjunct `sf ∉ e`: the processed formula was not
-already in the `expanded` set. This is exactly the fact the two `intExpMeasure` termination
-lemmas (`intExpMeasure_step_lt` and its branching companion, below) currently obtain by
-unfolding `intStepBranch` directly; exporting it here lets Phase 2 re-base those proofs onto a
-shared extraction shape without unfolding either stepper. -/
+/-- Extraction bridge for `intStepBranchPrio`: its `some` result also satisfies `IStepShape`
+(Phase 2 re-point of the Phase 1 bridge onto the shared predicate). The `none`-first-pass case
+reduces directly to `intStepBranch_some_shape`; the `some`-first-pass case repeats the same
+`findSome?`/`if`-unfold shape one level up, over `intStepBranchPrioFirstPass`'s extra
+`isWorldCreating` guard disjunct. -/
 lemma intStepBranchPrio_some_exists
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
     (hstep : intStepBranchPrio b e nw = some (result, newExp)) :
-    ∃ sf, sf ∈ b ∧ sf ∉ e ∧ intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf] := by
+    IStepShape b e nw result newExp := by
   simp only [intStepBranchPrio] at hstep
   cases hfp : intStepBranchPrioFirstPass b e nw with
   | none =>
     simp only [hfp] at hstep
-    -- `hstep : intStepBranch b e nw = some (result, newExp)`; re-derive directly (mirroring
-    -- `intStepBranch_some_exists`) to additionally recover `sf ∉ e` from the same witness.
-    simp only [intStepBranch] at hstep
-    obtain ⟨sf, hsfb, hsf⟩ := List.exists_of_findSome?_eq_some hstep
-    by_cases hexp : (e.any (· == sf)) = true
-    · simp [hexp] at hsf
-    · simp only [Bool.not_eq_true] at hexp
-      simp only [hexp, Bool.false_eq_true, if_false] at hsf
-      have hsfne : sf ∉ e := fun hmem => by
-        have hcontra : e.any (· == sf) = true := List.any_eq_true.mpr ⟨sf, hmem, by simp⟩
-        simp [hexp] at hcontra
-      cases hint : intApplyRuleFull sf nw b with
-      | notApplicable => simp [hint] at hsf
-      | linearResult fs nw' ed =>
-        simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-        exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
-      | branchingResult bs nw' =>
-        simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-        exact ⟨sf, hsfb, hsfne, hint.trans hsf.1, hsf.2.symm⟩
+    exact intStepBranch_some_shape hstep
   | some rp =>
     obtain ⟨result', newExp'⟩ := rp
     simp only [hfp, Option.some.injEq, Prod.mk.injEq] at hstep
@@ -4758,7 +4782,7 @@ lemma intExpMeasure_step_lt
     (hdlen : done.length = doneExp.length)
     (hb : ∀ x ∈ bh, x ∈ intUniverseExt φ0)
     (hsub : ∀ z ∈ bh, z ∈ b')
-    (hstep : intStepBranch bh e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    (hshape : IStepShape bh e nw (.linearResult newForms nw' newEdge) newExp) :
     intExpMeasure (intUniverseExt φ0) (done ++ [b'] ++ bt) (doneExp ++ [newExp] ++ es) + 1
       ≤ intExpMeasure (intUniverseExt φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
   set U := intUniverseExt φ0 with hUdef
@@ -4771,26 +4795,15 @@ lemma intExpMeasure_step_lt
     simp [intExpMeasure]
   rw [hrhs, hlhs]
   suffices h : 3 ^ intWork U b' newExp + 1 ≤ 3 ^ intWork U bh e by omega
-  simp only [intStepBranch] at hstep
-  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
-  split_ifs at hfound with hany
-  simp only [Bool.not_eq_true] at hany
+  obtain ⟨sf, hsfmem, hsfne, -, hnewExp⟩ := hshape
+  rw [hnewExp]
+  have hany : e.any (· == sf) = false := any_beq_eq_false_of_not_mem hsfne
   have hsfU : sf ∈ U := hb sf hsfmem
-  cases hint : intApplyRuleFull sf nw bh with
-  | notApplicable => simp [hint] at hfound
-  | linearResult fs nw2 ne =>
-    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
-    obtain ⟨hfs, hexp⟩ := hfound
-    injection hfs with hfseq hnweq hneeq
-    subst hfseq; subst hexp
-    have hdrop : intWork U b' (e ++ [sf]) + 1 ≤ intWork U bh e :=
-      intWork_drop U bh b' e sf hsfU hany hsub
-    have hC : 1 ≤ intWork U bh e := by omega
-    have h0 : intWork U b' (e ++ [sf]) ≤ intWork U bh e - 1 := by omega
-    exact pow3_add_one_le hC h0
-  | branchingResult bs nw2 =>
-    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
-    exact absurd hfound.1 (by simp)
+  have hdrop : intWork U b' (e ++ [sf]) + 1 ≤ intWork U bh e :=
+    intWork_drop U bh b' e sf hsfU hany hsub
+  have hC : 1 ≤ intWork U bh e := by omega
+  have h0 : intWork U b' (e ++ [sf]) ≤ intWork U bh e - 1 := by omega
+  exact pow3_add_one_le hC h0
 
 omit [Hashable Atom] in
 /-- `intExpMeasure` over a worklist of the form `newBs` zipped with a CONSTANT expanded set
@@ -4829,7 +4842,7 @@ lemma intExpMeasure_step_lt_branch
     (branches' : List (List (ISF Atom)))
     (hdlen : done.length = doneExp.length)
     (hb : ∀ x ∈ bh, x ∈ intUniverseExt φ0)
-    (hstep : intStepBranch bh e nw = some (.branchingResult branches' nw', newExp)) :
+    (hshape : IStepShape bh e nw (.branchingResult branches' nw') newExp) :
     intExpMeasure (intUniverseExt φ0)
         (done ++ branches'.map (Branch.extendMany bh ·) ++ bt)
         (doneExp ++ branches'.map (fun _ => newExp) ++ es) + 1
@@ -4856,23 +4869,12 @@ lemma intExpMeasure_step_lt_branch
   rw [hrhs, hlhs]
   suffices h : (branches'.map (fun br => 3 ^ intWork U (Branch.extendMany bh br) newExp)).sum + 1 ≤
       3 ^ intWork U bh e by omega
-  simp only [intStepBranch] at hstep
-  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
-  split_ifs at hfound with hany
-  simp only [Bool.not_eq_true] at hany
+  obtain ⟨sf, hsfmem, hsfne, hint, hnewExp⟩ := hshape
+  rw [hnewExp]
+  have hany : e.any (· == sf) = false := any_beq_eq_false_of_not_mem hsfne
   have hsfU : sf ∈ U := hb sf hsfmem
-  cases hint : intApplyRuleFull sf nw bh with
-  | notApplicable => simp [hint] at hfound
-  | linearResult fs nw2 ne =>
-    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
-    exact absurd hfound.1 (by simp)
-  | branchingResult bs nw2 =>
-    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
-    obtain ⟨hbs, hexp⟩ := hfound
-    injection hbs with hbseq hnweq
-    subst hbseq; subst hexp
-    obtain ⟨s, ff, l⟩ := sf
-    cases s with
+  obtain ⟨s, ff, l⟩ := sf
+  cases s with
     | pos =>
       cases ff with
       | atom x => simp [intApplyRuleFull] at hint
@@ -4972,26 +4974,19 @@ lemma intApplyRuleFull_branchingResult_length {sf : ISF Atom} {nextWorld : Nat}
 
 omit [Hashable Atom] in
 /-- `intStepBranch` lift of `intApplyRuleFull_branchingResult_length`: a branching step
-always produces exactly two sub-branch extension lists. -/
+always produces exactly two sub-branch extension lists. Re-based (Phase 2 of the
+beta-priority repair) to consume `intStepBranch_some_shape` instead of unfolding `intStepBranch`
+directly; the hypothesis itself stays `intStepBranch`-specific here (rather than generalized to
+`IStepShape`) because this lemma's one live call site, `CslibTests/BetaSplitRefutation.lean:203`,
+is explicitly Phase 3's to re-point (`goRaw`'s termination measure, alongside the call-site
+swap), not Phase 2's. -/
 lemma intStepBranch_branchingResult_length {b : IBranch Atom}
     {expanded : List (ISF Atom)} {nextWorld : Nat}
     {brs : List (List (ISF Atom))} {nw' : Nat} {exp' : List (ISF Atom)}
     (h : intStepBranch b expanded nextWorld = some (.branchingResult brs nw', exp')) :
     brs.length = 2 := by
-  simp only [intStepBranch] at h
-  obtain ⟨sf, _, hsf⟩ := List.exists_of_findSome?_eq_some h
-  by_cases hexp : (expanded.any (· == sf)) = true
-  · simp [hexp] at hsf
-  · simp only [Bool.not_eq_true] at hexp
-    simp only [hexp, Bool.false_eq_true, ↓reduceIte] at hsf
-    cases hint : intApplyRuleFull sf nextWorld b with
-    | notApplicable => simp [hint] at hsf
-    | linearResult fs nw2 e => simp [hint] at hsf
-    | branchingResult bs nw2 =>
-      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-      obtain ⟨h1, -⟩ := hsf
-      injection h1 with hbrs hnw
-      exact hbrs ▸ intApplyRuleFull_branchingResult_length hint
+  obtain ⟨sf, -, -, hint, -⟩ := intStepBranch_some_shape h
+  exact intApplyRuleFull_branchingResult_length hint
 
 /-- Sum of `3 ^ ·` over a constant-fuel list is `length * 3 ^ c` (beta-arm bookkeeping
 for `intExpandBranches.go`'s termination proof). -/
@@ -5098,30 +5093,20 @@ private lemma intWork_persistence_le (U : List (ISF Atom)) (b : IBranch Atom)
 omit [Hashable Atom] in
 /-- `intStepBranch_some_exists`, additionally exposing the "not already expanded"
 witness (`e.any (· == sf) = false`) that `intWork_drop` needs and the original lemma
-consumes internally without surfacing. Both are derived from the same underlying
-`findSome?`/`if`-unfold; kept as a separate lemma rather than widening
-`intStepBranch_some_exists` itself, to avoid touching that already-consumed lemma's
-call sites elsewhere in the file. -/
+consumes internally without surfacing. Re-based (Phase 2 of the beta-priority repair) to
+consume `intStepBranch_some_shape` (which already carries the same fact as `sf ∉ e`) instead
+of its own direct unfold, converted to the `List.any`-Bool-false form via
+`any_beq_eq_false_of_not_mem`. The hypothesis stays `intStepBranch`-specific rather than
+generalized to `IStepShape`: this lemma's four live call sites sit inside the `go` induction
+that Phase 3 re-points to `intStepBranchPrio`, not Phase 2's. -/
 private lemma intStepBranch_some_exists_fuel
     {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
     {result : IntRuleResult Atom} {newExp : List (ISF Atom)}
     (hstep : intStepBranch b e nw = some (result, newExp)) :
     ∃ sf, sf ∈ b ∧ e.any (· == sf) = false ∧ intApplyRuleFull sf nw b = result ∧
       newExp = e ++ [sf] := by
-  simp only [intStepBranch] at hstep
-  obtain ⟨sf, hsfb, hsf⟩ := List.exists_of_findSome?_eq_some hstep
-  by_cases hexp : (e.any (· == sf)) = true
-  · simp [hexp] at hsf
-  · simp only [Bool.not_eq_true] at hexp
-    simp only [hexp, Bool.false_eq_true, if_false] at hsf
-    cases hint : intApplyRuleFull sf nw b with
-    | notApplicable => simp [hint] at hsf
-    | linearResult fs nw' ed =>
-      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-      exact ⟨sf, hsfb, hexp, hint.trans hsf.1, hsf.2.symm⟩
-    | branchingResult bs nw' =>
-      simp only [hint, Option.some.injEq, Prod.mk.injEq] at hsf
-      exact ⟨sf, hsfb, hexp, hint.trans hsf.1, hsf.2.symm⟩
+  obtain ⟨sf, hsfb, hsfne, hint, hnewExp⟩ := intStepBranch_some_shape hstep
+  exact ⟨sf, hsfb, any_beq_eq_false_of_not_mem hsfne, hint, hnewExp⟩
 
 omit [Hashable Atom] in
 /-- Inner worklist loop of `intExpandBranches`, lifted to a top-level definition so

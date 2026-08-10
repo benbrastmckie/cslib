@@ -231,29 +231,44 @@ green trivially.
 
 ---
 
-### Phase 2: Re-base the six unfolding proofs onto a shared extraction shape [NOT STARTED]
+### Phase 2: Re-base the six unfolding proofs onto a shared extraction shape [COMPLETED]
 
 **Goal**: Make the call-site swap a small, local edit by removing every direct
 `simp only [intStepBranch]` from the proofs that carry `go`'s obligations. Behavior is unchanged;
 this is a pure refactor over the *existing* stepper.
 
 **Tasks**:
-- [ ] Introduce a shared predicate capturing the shape both steppers return, e.g.
+- [x] Introduce a shared predicate capturing the shape both steppers return, e.g.
       `IStepShape b e nw result newExp : Prop := ∃ sf, sf ∈ b ∧ sf ∉ e ∧
       intApplyRuleFull sf nw b = result ∧ newExp = e ++ [sf]`.
-- [ ] Prove `intStepBranch_some_shape` (strengthening `intStepBranch_some_exists` with `sf ∉ e`)
+- [x] Prove `intStepBranch_some_shape` (strengthening `intStepBranch_some_exists` with `sf ∉ e`)
       and re-point `intStepBranchPrio_some_exists` from Phase 1 at the same predicate.
-- [ ] Re-base each of the six unfolding proofs to consume the shape lemma instead of unfolding.
-      Confirmed sites, by symbol (re-locate by name; line numbers approximate):
-      `intStepBranch_none_compound_mem` (:992, uses `List.findSome?_eq_none_iff` — needs the
-      `none` side, not the shape), `intStepBranch_some_exists` (:1146), the two `intExpMeasure`
-      decrease lemmas (:4601 linear, :4686 branching),
-      `intStepBranch_branchingResult_length` (:4808), `intStepBranch_some_exists_fuel` (:4938).
-- [ ] Where a lemma in the `intStepBranch_*` family takes the definitional hypothesis
+- [x] Re-base each of the six unfolding proofs to consume the shape lemma instead of unfolding.
+      Confirmed sites by re-running `grep -nE "simp only \[intStepBranch"` at implementation
+      time: 6 direct-unfold sites (matching the plan's Scope Hypothesis exactly), by symbol:
+      `intStepBranch_none_compound_mem` (needs the `none` side only, confirmed no change
+      required -- Phase 3 covers `none`-keyed results entirely via `intStepBranchPrio_none_iff`),
+      `intStepBranch_some_exists` (now a thin weakening of `intStepBranch_some_shape`), the two
+      `intExpMeasure` decrease lemmas (`intExpMeasure_step_lt`, `intExpMeasure_step_lt_branch`),
+      `intStepBranch_branchingResult_length`, `intStepBranch_some_exists_fuel`.
+- [x] Where a lemma in the `intStepBranch_*` family takes the definitional hypothesis
       `intStepBranch b e nw = some (...)` purely to extract the shape, generalize its hypothesis to
       `IStepShape ...` so it serves both steppers without duplication. Prefer generalization over
       cloning a `Prio` variant — the report's reuse-first constraint applies.
-- [ ] Leave the `go` call site still on `intStepBranch`, feeding the lemmas through
+      *(deviation: altered -- generalized to `IStepShape` only for `intExpMeasure_step_lt` and
+      `intExpMeasure_step_lt_branch`, which are confirmed UNCONSUMED (grep: zero call sites) and
+      so cost nothing to generalize now. `intStepBranch_branchingResult_length` and
+      `intStepBranch_some_exists_fuel` keep their `intStepBranch`-specific hypothesis: their live
+      call sites are `CslibTests/BetaSplitRefutation.lean:203` and the `go`-induction sites this
+      plan's own Phase 3 explicitly owns re-pointing ("its termination measure at :203
+      (intStepBranch_branchingResult_length) to the corresponding shape lemma" is a named Phase 3
+      task). Generalizing their signatures now would force touching `CslibTests` ahead of Phase
+      3's declared atomic-batch boundary, which is out of Phase 2's scope ("Files to modify:
+      Scheme.lean" only). Both lemmas were still re-based -- their proof BODIES now consume
+      `intStepBranch_some_shape` instead of unfolding -- satisfying the phase's stated goal without
+      the premature signature change. Phase 3 will generalize these two signatures itself when it
+      re-points their call sites, per its own task list.)*
+- [x] Leave the `go` call site still on `intStepBranch`, feeding the lemmas through
       `intStepBranch_some_shape`.
 
 **Timing**: 2 hours

@@ -3,11 +3,11 @@
   "started_at": "2026-08-09T00:00:00Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 (intStepBranchPrio and its bridges, additive) landed and verified: isWorldCreating, intStepBranchPrioFirstPass, intStepBranchPrio, intStepBranchPrio_result_ne_notApplicable in Expansion.lean; intStepBranchPrio_none_iff, intStepBranchPrio_some_exists in Scheme.lean. Pure-addition diff (189 insertions, 0 deletions), lake build Scheme + Expansion green, zero new sorries/axioms confirmed via lean_verify scan_source=false.",
+    "stage": "phase_2_complete",
+    "details": "Phase 2 (re-base the six unfolding proofs onto IStepShape) landed and verified. IStepShape + intStepBranch_some_shape + any_beq_eq_false_of_not_mem added; intStepBranch_some_exists, intStepBranchPrio_some_exists, intExpMeasure_step_lt(+_branch), intStepBranch_branchingResult_length, intStepBranch_some_exists_fuel all re-based to consume the shape lemma instead of unfolding intStepBranch directly. Full lake build (3325 jobs) green. Zero new sorries/axioms confirmed via lean_verify scan_source=false on all touched declarations. No change to intExpandBranches.go.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1
+    "phases_completed": 2
   },
   "metadata": {
     "session_id": "sess_1786321994_b49e26_609",

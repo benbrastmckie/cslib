@@ -1,36 +1,55 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-09T17:36:10-07:00",
-  "completed_at": "2026-08-09T18:34:00-07:00",
+  "status": "planned",
+  "started_at": "2026-08-09T18:50:00-07:00",
+  "completed_at": "2026-08-09T19:10:00-07:00",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md"
-    },
-    {
-      "type": "patch",
-      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/verified-shape-fix.patch"
-    },
-    {
-      "type": "source",
-      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/MvalidBotShapeRefutation.lean.verified"
+      "type": "plan",
+      "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md",
+      "summary": "Six-phase plan sequencing the verified statement-shape fix: baseline plus refutation-test landing, chi-generalization and sub-frame monotonicity, additive ULift universe bridge, the atomic-batch shape fix with DP-4 closure and universe pin, annotation rewrite, and the full CSLib CI gate."
     }
   ],
-  "partial_progress": {
-    "stage": "research_written",
-    "details": "Research complete. Three machine-checked results: (1) the bot-instance upward closure is free from the already-chi-general IPosPersistRaw, sorry-free at rawEdges and any sub-frame; (2) tableau_complete's hvalid shape is REFUTED for minScheme even with the valuation premise, so DP-4 is unclosable as stated; (3) the statement-shape fix closes DP-4 end to end with the full project building green (3325 jobs), chain sorry count 3 -> 2. Working tree reverted to pristine; verified diff saved as a patch artifact. Discovered blocker: a MValid universe pin is required, rippling to three DecisionProcedure declarations, resolved by a proved ULift universe-invariance bridge."
-  },
-  "verification": {
-    "full_project_build": "green (3325 jobs) with fix applied",
-    "sorry_delta": "3 -> 2 in the propositional tableau completeness chain",
-    "new_sorries": 0,
-    "new_axioms": 0,
-    "working_tree_state": "reverted to pristine; no Cslib/ changes left in place"
-  },
+  "next_steps": "Run /implement 605 to execute the plan",
   "metadata": {
     "session_id": "sess_1786321994_b49e26_605",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 6,
+    "estimated_hours": 7,
+    "dependency_waves": [[1], [2, 3], [4], [5], [6]]
+  },
+  "plan_metadata": {
+    "phases": 6,
+    "total_effort_hours": 7,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1], [2, 3], [4], [5], [6]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_minbranchbotforces-upward-closure.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-08-09"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
+  },
+  "verification": {
+    "plan_validator": "validate-artifact.sh plan --strict: PASS, 0 warnings",
+    "required_fields_present": true,
+    "phase_count_matches_wave_table": true,
+    "all_phases_have_verification_tier": true,
+    "patch_currency_checked_at_plan_time": "git apply --check on verified-shape-fix.patch exited 0 against the current tree (2026-08-09)"
+  },
+  "memory_candidates": [
+    {
+      "content": "In a Lean development where a downstream theorem instantiates a universe-polymorphic validity predicate at a concrete Type 0 frame (e.g. Nat), pinning the statement to the concrete universe (MValid.{_, 0}) breaks every consumer that needs the polymorphic form. The additive fix is a universe-invariance bridge landed BEFORE the pin: the descend direction (Type v to Type 0) is a ULift transport plus an induction showing forcing commutes with ULift.down; the ascend direction is free via soundness composed with completeness at the concrete universe. Both bridge lemmas type-check against the UNPINNED signature, so they land green on their own and the pin plus its consumer updates then form one atomic batch. Planning this as two phases instead of one is what keeps every phase boundary green -- pinning and consumer-updating cannot be separated, but the bridge can be separated from both.",
+      "category": "PATTERN",
+      "source_artifact": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["lean4", "universe-polymorphism", "ULift", "phase-sequencing", "atomic-batch", "green-phase-boundary"]
+    }
+  ]
 }

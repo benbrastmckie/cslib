@@ -793,14 +793,18 @@ lift `T(φ'→ψ')@w ∈ b` to membership, chain `hpers` along `Relation.ReflTra
 anticipated). This sidesteps Gap 1 rather than closing it via the originally-anticipated
 self-copy channel: `hpers` transfers the SOURCE world's `T(φ'→ψ')` membership to `w'` directly,
 so `w'` ends up carrying its own copy without any `Expansion.lean` self-copy machinery. The
-obstruction the note below diagnoses is real only at the AUGMENTED frame, where `hpers` is
-itself REFUTED (`CslibTests/BetaSplitRefutation.lean`) — it is an artefact of that frame
-CHOICE, not of the T-imp goal: `truthLemma`'s frame is a parameter, and over the raw frame or
-any sub-raw frame carrying `hpers` (`IPosPersistRaw`/`IWorldsPlanted`, `:6782`/`:3568`, both
-sorry-free) the case is unconditionally provable, which is exactly the DISCHARGED state
-`truthLemma` is in now. The remainder of this note (the self-copy-channel investigation
-below) is retained as the historical record of the route this file no longer takes; do not
-re-derive its "open"/"blocked" conclusions about Gap 1 as current.
+obstruction the note below diagnoses was real only at the PRE-REPAIR AUGMENTED frame, where
+`hpers` used to be REFUTED (`CslibTests/BetaSplitRefutation.lean` — its `#guard_msgs`
+assertions refute the pre-repair calculus and pass against the repaired one, per that file's own
+module header) — it was an artefact of that frame CHOICE, not of the T-imp goal:
+`truthLemma`'s frame is a parameter, and the case is unconditionally provable both over the raw
+frame or any sub-raw frame carrying `hpers` (`IPosPersistRaw`/`IWorldsPlanted`, both sorry-free)
+AND, post-repair, over the augmented frame itself, via `hpersAug`
+(`Scheme.lean:9645-9665`, supplied by the `intFImpReuseWitnessAnc?` loop-back re-validation in
+`Expansion.lean`). This is exactly the DISCHARGED state `truthLemma` is in now. The remainder of
+this note (the self-copy-channel investigation below) is retained as the historical record of
+the route this file no longer takes; do not re-derive its "open"/"blocked" conclusions about
+Gap 1 as current.
 
 **Gap 2 (determinacy) is RESOLVED as of the `.pos, .imp` branching arm added to
 `intApplyRuleFull` (`Rules.lean:245-268`).** The STOP-gate below was written
@@ -845,16 +849,24 @@ length-equality exit of `applyPersistenceFixpoint` genuinely IS fixpoint-ness
 `fuel = 0` — and `applyPersistenceFixpoint_genuine_of_count_le_fuel` (`Scheme.lean:5386`)
 discharges exactly that remaining case, stated for arbitrary `b` and `fuel`, with both its
 hypotheses already in scope at every arm of the `key` induction below, including the reuse arm
-(`case6`). Gap 1's fuel-sufficiency side is therefore closed. This does **not** discharge the
-`sorry` immediately below (DP-5's augmented-frame instantiation), which genuinely depends on the
-AUGMENTED-frame positive-formula persistence invariant and is refuted at `phiRef1` (see that
-`sorry`'s own annotation, and `CslibTests/BetaSplitRefutation.lean`). **Correction**: it does
-NOT, however, bear on DP-3/DP-4 the way an earlier note here claimed. Those consume
+(`case6`). Gap 1's fuel-sufficiency side is therefore closed. At the time of this correction,
+this did **not** by itself discharge the `sorry` that then sat immediately below (DP-5's
+augmented-frame instantiation), which genuinely depended on the AUGMENTED-frame
+positive-formula persistence invariant and was refuted at `phiRef1` pre-repair (see
+`CslibTests/BetaSplitRefutation.lean`, whose `#guard_msgs` assertions refute the pre-repair
+calculus and pass against the repaired one). **Post-repair update**: the
+`intFImpReuseWitnessAnc?` loop-back re-validation (`Expansion.lean`) has since made that
+persistence invariant hold at the augmented frame too (`hpersAug`, `Scheme.lean:9645-9665`), so
+DP-5's augmented-frame instantiation is discharged and no `sorry` remains in this dependency
+chain. **Correction**: it does NOT, however, bear on DP-3/DP-4 the way an earlier note here
+claimed. Those consume
 `openBranch_countermodel`'s conjunct 1, which — per that lemma's docstring — needs no algorithm
 invariant at all, so the claim that all three depended on this refuted invariant was itself
-wrong for DP-3/DP-4; only DP-5's augmented-frame instantiation genuinely does. Retained here,
-uncorrected in place except for that one dependency claim, as a historical record of the earlier
-(mistaken) blocker analysis; do not re-derive the "not been built" claim or its correction.
+wrong for DP-3/DP-4; only DP-5's augmented-frame instantiation genuinely did, and — per the
+post-repair update above — that dependency is now discharged rather than refuted. Retained
+here, uncorrected in place except for that one dependency claim, as a historical record of the
+earlier (mistaken) blocker analysis; do not re-derive the "not been built" claim or its
+correction.
 
 **`sat_timp` IS an `IBranchSaturation` field** (`:105-108`), realized by `intApplyRuleFull`'s
 `.pos, .imp` branching arm (`Rules.lean:245-268`, `:274-275`), which fires reflexively at the
@@ -935,10 +947,13 @@ first for either a bounded self-copy variant (a) or the quotient/blocking-frame 
 (b) to actually discharge this case. This whole self-copy-channel analysis (i)-(ii) is now
 historical: DP-5 was discharged via the `hpers` route at the top of this note instead, which
 needs neither a self-copy channel nor a loop-back transfer lemma — it takes persistence as an
-explicit hypothesis and lets the CALLER supply it (refuted at the augmented frame, provable at
-the raw/sub-raw frame). The augmented-frame gap this paragraph names is real and still open, but
-it now blocks a DIFFERENT goal: `openBranch_countermodel`'s own surviving existential
-(`Scheme.lean`, further below), not this lemma's T-imp case. -/
+explicit hypothesis and lets the CALLER supply it (refuted at the augmented frame PRE-REPAIR,
+always provable at the raw/sub-raw frame). The augmented-frame gap this paragraph names was
+real historically, but has SINCE CLOSED: the `intFImpReuseWitnessAnc?` loop-back re-validation
+(`Expansion.lean`) makes persistence hold at the augmented frame too (`hpersAug`,
+`Scheme.lean:9645-9665`), which is exactly what `openBranch_countermodel` uses to discharge its
+own conjunct 1 (`Scheme.lean`, further below) — not this lemma's T-imp case, which was never the
+site of that existential. -/
 
 /-! ## Parametric Truth Lemma -/
 
@@ -997,16 +1012,19 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- "`sat_timp` discharge" STOP-gate note above this lemma for the full history (the
       -- originally-anticipated self-copy-channel route was superseded by this `hpers` route).
       --
-      -- `hpers` is REFUTED at the AUGMENTED frame (`CslibTests/BetaSplitRefutation.lean`, zero
-      -- errors, zero sorries: `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` has
+      -- `hpers` used to be REFUTED at the AUGMENTED frame, PRE-REPAIR
+      -- (`CslibTests/BetaSplitRefutation.lean`, whose `#guard_msgs` assertions refute the
+      -- pre-repair calculus and pass against the repaired one, per that file's own module
+      -- header): `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr` had
       -- augmented-preorder-equivalent worlds `1`/`2` -- joined by a loop-back edge
-      -- `intFImpReuseWitnessAnc?` never re-validates once recorded, see that declaration's
-      -- docstring in `Expansion.lean` -- that disagree on `pr`), so this case is
-      -- unconditionally true only when the CALLER supplies `hpers` -- provable over the raw
-      -- frame (`IPosPersistRaw`/`IWorldsPlanted`, sorry-free) or any sub-raw frame, refuted over
-      -- the augmented frame. That caller-side obligation is `openBranch_countermodel`'s concern
-      -- (further below in this file), not this lemma's: `truthLemma` itself is now
-      -- unconditionally true over any frame carrying `hpers`.
+      -- `intFImpReuseWitnessAnc?` used not to re-validate once recorded -- that disagreed on
+      -- `pr`. This case is unconditionally true whenever the CALLER supplies `hpers` -- always
+      -- provable over the raw frame (`IPosPersistRaw`/`IWorldsPlanted`, sorry-free) or any
+      -- sub-raw frame, and, POST-REPAIR, provable over the augmented frame too: the
+      -- `intFImpReuseWitnessAnc?` loop-back re-validation (`Expansion.lean`) now closes exactly
+      -- the gap `phiRef1` exposed, giving `hpersAug` (`Scheme.lean:9645-9665`). That caller-side
+      -- obligation is `openBranch_countermodel`'s concern (further below in this file), not this
+      -- lemma's: `truthLemma` itself is unconditionally true over any frame carrying `hpers`.
       intro hT w' hle
       have hmem : (⟨.pos, .imp φ' ψ', w⟩ : ISF Atom) ∈ b := by
         obtain ⟨sf, hsfb, hsfp⟩ := List.any_eq_true.mp hT
@@ -7223,14 +7241,17 @@ frame is a PARAMETER, not tied to the AUGMENTED `augSets` witness, and DP-5's T-
 proved directly from `hpers` (see `truthLemma`'s T-imp case and the `sat_timp` discharge
 STOP-gate note above it). The "NOT sufficient alone" framing this docstring originally carried
 was accurate only for the (now-superseded) assumption that `truthLemma` would always be
-instantiated at the augmented frame; it remains accurate for the AUGMENTED-edge version of
-persistence specifically, which is REFUTED at that frame
-(`CslibTests/BetaSplitRefutation.lean`) rather than merely unbuilt. Originally recorded so
-`intExpandBranches_openBranch_sat`'s conclusion carries at least the raw-edge half of the
-persistence invariant, with the augmented-edge version (`IPosPersist`, Phase 11) intended to
-export once the reuse-time containment (Phase 8) and post-reuse closure lemma (Phase 9/10)
-land -- that augmented-edge route is now known-refuted rather than pending, per
-`openBranch_countermodel`'s frame-adequacy table.
+instantiated at the augmented frame; at the time this docstring was last updated it remained
+accurate for the AUGMENTED-edge version of persistence specifically, which was then REFUTED at
+that frame (`CslibTests/BetaSplitRefutation.lean`, refuting the pre-repair calculus) rather than
+merely unbuilt. Originally recorded so `intExpandBranches_openBranch_sat`'s conclusion carries
+at least the raw-edge half of the persistence invariant, with the augmented-edge version
+(`IPosPersist`, Phase 11) intended to export once the reuse-time containment (Phase 8) and
+post-reuse closure lemma (Phase 9/10) land -- that augmented-edge route was refuted rather than
+merely pending at that point, but has SINCE been closed: the `intFImpReuseWitnessAnc?`
+loop-back re-validation (`Expansion.lean`) makes the augmented-edge version hold as `hpersAug`
+(`Scheme.lean:9645-9665`), recorded in `openBranch_countermodel`'s frame-adequacy table as
+"augmented, post-repair | holds | holds".
 
 The `hw'` side condition (some entry already present at `w'`) matches
 `applyPersistenceFixpoint_copy_complete`'s own hypothesis exactly (Phase 4, landed

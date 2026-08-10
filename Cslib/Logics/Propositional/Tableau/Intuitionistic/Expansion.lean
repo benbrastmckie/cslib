@@ -522,26 +522,37 @@ search direction differs.
 was Phase 4's explicit acceptance gate); the superseded descendant-directed
 `intFImpReuseWitness?` and its `_spec` lemma were deleted in that same phase.
 
-**Recorded limitation: a FRAME-CONSTRUCTION defect, not a proof-route gap.** This check verifies
-`Sfor`-containment (the `sfor.all (forcedAtX.contains ·)` conjunct above) **at reuse time only**,
-and the loop-back edge `(x, w)` it records is **never re-validated** afterwards. If either `x` or
-`w` later receives an independent positive-disjunction (beta) split, the containment the edge
-asserted can break while the edge itself remains on the branch, unconditionally: `x` and `w`
-stay preorder-equivalent under `intAccessPreorder`'s reflexive-transitive closure even though
-their forced atoms have since diverged. This is machine-verified, not hypothetical:
-`CslibTests/BetaSplitRefutation.lean` exhibits `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) →
-pr`, where reuse fires with `(x, l) = (1, 2)` (containment genuinely holds at that moment), the
-`genCopies` channel then copies the unexpanded `T(pr ∨ ps)` to world `2` as a distinct `ISF`
-entry, and that copy's later, independent beta-split leaves worlds `1` and `2`
-augmented-preorder-equivalent yet disagreeing on `pr`. **This is calculus-level, in the frame
-construction, not a gap in any proof**: termination (the ancestor-directed search this repairs)
-is entirely unaffected, and `intExpandBranches_closed_unsat`/`Soundness.lean` remain sorry-free
-and axiom-clean — what is affected is the *soundness of the countermodel* an open branch yields
+**Recorded limitation, PRE-REPAIR (historical): a FRAME-CONSTRUCTION defect, not a proof-route
+gap.** This check verifies `Sfor`-containment (the `sfor.all (forcedAtX.contains ·)` conjunct
+above) **at reuse time only**. At the time this note was written, the loop-back edge `(x, w)` it
+records was **never re-validated** afterwards: if either `x` or `w` later received an independent
+positive-disjunction (beta) split, the containment the edge asserted could break while the edge
+itself remained on the branch, unconditionally — `x` and `w` stay preorder-equivalent under
+`intAccessPreorder`'s reflexive-transitive closure even though their forced atoms have since
+diverged. This was machine-verified, not hypothetical: `CslibTests/BetaSplitRefutation.lean`
+exhibits `phiRef1 := ((pr ∨ ps) ∧ ((ps → (ps → pr)) → pb)) → pr`, where reuse fires with
+`(x, l) = (1, 2)` (containment genuinely holds at that moment), the `genCopies` channel then
+copies the unexpanded `T(pr ∨ ps)` to world `2` as a distinct `ISF` entry, and that copy's later,
+independent beta-split used to leave worlds `1` and `2` augmented-preorder-equivalent yet
+disagreeing on `pr`. This was calculus-level, in the frame construction, not a gap in any proof:
+termination (the ancestor-directed search this repairs) was entirely unaffected throughout, and
+`intExpandBranches_closed_unsat`/`Soundness.lean` remained sorry-free and axiom-clean even before
+this repair — what was affected was the *soundness of the countermodel* an open branch yields
 under the augmented accessibility relation (see `Scheme.lean`'s `openBranch_countermodel` and its
-upward-closure conjunct). A future calculus-level repair could go one of two ways, both
-**out of scope here** and recorded only as directions, not proposals: make the loop-check
-re-validatable against later beta-splits, or refuse reuse outright whenever either world carries
-an unexpanded positive disjunction (expanding a disjunction at most once per equivalence class).
+upward-closure conjunct).
+
+**POST-REPAIR: this gap is now closed.** `intStepBranchPrio` (beta-priority scheduling, this
+file) defers every world-creating step — including the world creation that triggers a loop-back
+reuse decision here — until no other rule applies anywhere on the branch, so no independent
+beta-split of the kind `phiRef1` exhibits can occur *after* a loop-back edge is recorded and
+still be pending when persistence is needed. Combined with the freeze/provenance machinery
+`IReuseFrozenOrigin` (`Scheme.lean`, plan Phase 6) — which the bare, current-branch form of
+`IReuseContain` derives from directly — this gives `hpersAug` (`Scheme.lean:9645-9665`),
+positive persistence over the augmented frame, still `#guard_msgs`-refuted only for the
+pre-repair calculus by `CslibTests/BetaSplitRefutation.lean` and holding for the repaired one.
+`CslibTests/WitnessProbe.lean`'s `phiRef1`/`phiRef2`/`phiRef3` witnesses are retained as the
+durable counter-instance record explaining why `intStepBranchPrio` and `IReuseFrozenOrigin`
+exist, not deleted now that the gap they exposed is closed.
 
 **Secondary finding: a reuse event can record a self-loop.** For `phiRef1` the loop-back list is
 `[(1,2), (2,2)]` — the `(2,2)` entry has `x = l = 2`. The guard `x.ble w` above is non-strict and

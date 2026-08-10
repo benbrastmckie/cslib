@@ -248,14 +248,14 @@ same impossibility claim.
 
 ---
 
-### Phase 3: Re-tense the augmented-frame refutation claims as historical [NOT STARTED]
+### Phase 3: Re-tense the augmented-frame refutation claims as historical [COMPLETED]
 
 **Goal**: Convert every present-tense "REFUTED at the augmented frame" assertion into an
 explicitly pre-repair, historical record — **preserving the content**, because the `phiRef1`
 counterexample is precisely why `hpersAug` and the loop-back re-validation exist.
 
 **Tasks**:
-- [ ] Re-locate each site by content search rather than by line number; the report catalogues six:
+- [x] Re-locate each site by content search rather than by line number; the report catalogues six:
       `Scheme.lean:796-800` (obstruction "real only at the AUGMENTED frame"),
       `Scheme.lean:849-851` ("does not discharge the `sorry` immediately below ... refuted at
       `phiRef1`"), `Scheme.lean:1000-1008` (in-proof comment, "`hpers` is REFUTED at the AUGMENTED
@@ -263,18 +263,25 @@ counterexample is precisely why `hpersAug` and the loop-back re-validation exist
       pending"), and `Expansion.lean:525-545` ("Recorded limitation: a FRAME-CONSTRUCTION defect
       ... never re-validated afterwards"). The sixth, `Scheme.lean:9682-9688`, is already handled
       by Phase 2 — verify it, do not re-edit it.
-- [ ] For each site, re-tense to a pre-repair frame: name what was refuted, at which witness
+- [x] For each site, re-tense to a pre-repair frame: name what was refuted, at which witness
       (`phiRef1`), against which pre-repair calculus, and state that the repair
       (`intStepBranchPrio` beta-priority, plus the `intFImpReuseWitnessAnc?` loop-back
       re-validation) closed it. Keep the counterexample itself intact.
-- [ ] Where a site cites `CslibTests/BetaSplitRefutation.lean` as a current refutation, re-tense to
+- [x] Where a site cites `CslibTests/BetaSplitRefutation.lean` as a current refutation, re-tense to
       match that file's own module header: it refutes the PRE-repair calculus, and every
       `#guard_msgs` assertion in it now passes against the REPAIRED calculus.
-- [ ] MUST NOT delete any counter-instance record, witness formula, or refutation narrative. The
+- [x] MUST NOT delete any counter-instance record, witness formula, or refutation narrative. The
       precedent is `intExpandBranches_openBranch_sat`'s surviving counter-instance record, which
       remains the durable explanation of why the R1 hypotheses exist.
-- [ ] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` and
+- [x] `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` and
       `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion`.
+
+**Deviation note**: while re-tensing the `Scheme.lean:908-941`-area paragraph (self-copy-channel
+analysis note), its REFUTED clause was inextricable from its adjoining "still open ... surviving
+existential" clause (one sentence covers both) — that is one of the ten sites Phase 4's task list
+also names (`Scheme.lean:908-941`, "Recommendation for continuation" / "surviving existential").
+Both clauses were re-tensed together here rather than leaving the sentence half-stale; Phase 4
+verifies this site rather than re-editing it.
 
 **Timing**: 1 hour
 

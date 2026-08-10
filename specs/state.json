@@ -1019,7 +1019,7 @@
       "project_number": 609,
       "project_name": "revalidate_intfimpreuse_witness_anc_loopback_containment",
       "task_type": "cslib",
-      "status": "planned",
+      "status": "implementing",
       "topic": "Propositional Logic",
       "title": "Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows",
       "description": "`intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean`) records a loop-back edge on a `Sfor`-containment check at the moment the branch reuses an ancestor world -- but it never re-validates that containment as the branch continues to grow afterward. This is the root cause both the intuitionistic tableau completeness `truthLemma` restructure and the frame-adequacy analysis that preceded it converged on: it is why the AUGMENTED frame (`augSets`, threaded by `intExpandBranches_openBranch_sat`) carries `IFimpAccess` but REFUTES positive persistence (`CslibTests/BetaSplitRefutation.lean`, `firstViolation = some (2,1,2)`), and why the RAW frame (`rawEdges`) carries positive persistence (`IPosPersistRaw`, sorry-free) but REFUTES `IFimpAccess` at the blocked worlds pruning strands.\n\nWHY IT MATTERS: re-validating the loop-back containment as the branch grows is what would let the augmented frame carry positive persistence too, giving ONE frame with BOTH `IFimpAccess` and persistence simultaneously. That would collapse `openBranch_countermodel`'s remaining existential (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`, the sole live sorry in that file) into a direct `truthLemma` instantiation, since `truthLemma` itself is already sorry-free and parametric over any frame carrying both facts.\n\nEXCLUDED CONSTRUCTIONS (established by machine evidence, do not re-attempt without new evidence): rawEdges itself (fails IFimpAccess and is refuted as a conjunct-2 witness for phiRef1/phiRef3 -- CslibTests/WitnessProbe.lean, CslibTests/BetaSplitRefutation.lean); pruning at blocked worlds (fails dblNeg/peirce, where the loop-back is a self-reuse and cutting the world destroys the falsifying world); pruning at strictly-blocked worlds (fails phiRef3, which needs the self-reuse world cut -- the two pruning rules contradict each other on the same syntactic signal); and the greatest IFimpAccess-supported fixpoint (collapses to K = empty for phiRef1/phiRef2/phiRef3, since the unsupported blocked world strands its parent up to world 0). The maximal atom-inclusion frame was excluded even earlier.\n\nSCOPE: this is calculus-level work in Expansion.lean, explicitly OUT OF SCOPE for Scheme.lean-only dispatches. Do not attempt this inside a Scheme.lean-scoped task.\n\nSOURCE: specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md (sections 3, 4, 6) and specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/plans/01_dp5-discharge-honest-restructure.md.\n",
@@ -1035,7 +1035,7 @@
         "CslibTests/TableauConformance.lean"
       ],
       "created": "2026-08-09T22:54:00Z",
-      "last_updated": "2026-08-10T02:00:12Z",
+      "last_updated": "2026-08-10T02:21:06Z",
       "session_id": "sess_1786321994_b49e26_609",
       "artifacts": [
         {

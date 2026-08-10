@@ -1,10 +1,31 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-08-09T00:00:00Z",
-  "artifacts": [],
+  "requires_user_review": false,
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md"
+  ],
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+      "summary": "Phases 1-2 marked COMPLETED with deviation notes; Phase 3 carries a new Scope Correction section recording the induction-order discovery."
+    }
+  ],
+  "completion_data": {
+    "phases_completed": 2,
+    "phases_total": 9,
+    "phases_completed_names": [
+      "Phase 1: intStepBranchPrio and its bridges (additive)",
+      "Phase 2: Re-base the six unfolding proofs onto a shared extraction shape"
+    ],
+    "continuation_path": "Resume at Phase 3 (Swap the call site and reconcile the test corpus), which is IN PROGRESS with a Scope Correction note already recorded in the plan. Before editing: re-run grep -n \"using intExpandBranches.go.induct\" (four call sites, ~:5767/:5991/:6734/:7147) and grep -nE \"intStepBranch_(linear|branch)_preserves|some_exists_fuel|branchingResult_length\" over the :5700-:8000 range to get current line numbers/counts. Generalize each intStepBranch_*_preserves* lemma's hypothesis to IStepShape (mechanical: swap the hypothesis type, replace the body's first `obtain ... := intStepBranch_some_exists hstep`-style extraction with `obtain ⟨sf, hsfb, -, hint, hnewExp⟩ := hshape`, leave the rest of each proof unchanged), then swap go's match target from intStepBranch to intStepBranchPrio, update the ~dozens of call sites inside the four induction blocks to wrap their hstep argument in intStepBranchPrio_some_exists, update CslibTests/BetaSplitRefutation.lean's goRaw + its :203 termination measure, then run the full conformance corpus (lake test) and reconcile #guard_msgs. Phase 3 is declared Commit Mode: atomic-batch -- do not commit until the whole set is green."
+  },
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Phase 2 (re-base the six unfolding proofs onto IStepShape) landed and verified. IStepShape + intStepBranch_some_shape + any_beq_eq_false_of_not_mem added; intStepBranch_some_exists, intStepBranchPrio_some_exists, intExpMeasure_step_lt(+_branch), intStepBranch_branchingResult_length, intStepBranch_some_exists_fuel all re-based to consume the shape lemma instead of unfolding intStepBranch directly. Full lake build (3325 jobs) green. Zero new sorries/axioms confirmed via lean_verify scan_source=false on all touched declarations. No change to intExpandBranches.go.",
+    "stage": "phase_2_complete_phase_3_scoped_not_started",
+    "details": "Phases 1-2 landed, verified (lake build 3325 jobs green, zero new sorries/axioms via lean_verify scan_source=false, no change to intExpandBranches.go), and committed as separate green phase commits. Phase 3's true scope was investigated and found substantially larger than its own Scope Hypothesis (a Lean auto-generated functional-induction principle, intExpandBranches.go.induct, is used at 4 separate call sites spanning roughly Scheme.lean:5767-8000+, so the call-site swap changes the induction's bound hypothesis type throughout, requiring generalization of ~8-10 more intStepBranch_* lemmas across dozens of call sites, not just the six sites Phase 2 covered). This finding was recorded in-plan (Scope Correction note under Phase 3) and committed separately, rather than silently absorbed. No Phase 3 code edits were attempted, since the phase is declared Commit Mode: atomic-batch and its true size could not be completed and verified (including a conformance-corpus lake test run) within this dispatch's remaining budget; starting it without finishing risked leaving uncommitted, correctness-critical changes to a termination-critical function.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 2
@@ -13,6 +34,18 @@
     "session_id": "sess_1786321994_b49e26_609",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 2,
+    "sorry_count_baseline": 2,
+    "vacuous_count": 0,
+    "axiom_count": 26,
+    "axiom_count_baseline": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial_not_all_steps_run_since_phases_3_9_incomplete",
+    "note": "Full lake build (3325 jobs) green after phases 1-2. sorry_count and axiom_count are repo-wide totals, unchanged from the baseline recorded by sibling task 605's completion summary (2 sorries in this chain, 26 axioms repo-wide). Full CI pipeline (lake lint, lint-style, shake, mk_all, lake test) was not re-run as a final gate since the task is not complete; lake build was run in both scoped and full-project form after every phase edit."
   }
 }

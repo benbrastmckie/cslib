@@ -28,7 +28,7 @@ next_project_number: 613
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-609 [PLANNED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
+609 [IMPLEMENTING] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
   └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
 ### Modal Logic
@@ -152,7 +152,7 @@ SOURCE: specs/reviews/review-2026-08-09.md finding C1.
 ---
 
 ### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 604

@@ -1,0 +1,35 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T21:34:00Z",
+  "completed_at": "2026-08-10T21:52:00Z",
+  "artifacts": [
+    "specs/497_reconcile_imp_naming/reports/01_arrow-notation-precedence-reconciliation.md"
+  ],
+  "partial_progress": {
+    "stage": "research_written",
+    "details": "All four research questions answered with empirical build evidence; working tree reverted clean"
+  },
+  "findings": {
+    "transitive_parse_impact": "ZERO - full build of all 372 modules in the dependency cone passed with the change applied (exit 0, 2013 jobs, 0 errors, 32 warnings unchanged, 364/434 oleans genuinely recompiled)",
+    "framing_correction": "Task framing claims fork ordering is 36>35>30>20 and that moving the arrow alone inverts no relationship. That holds only for Propositional/Defs.lean (out of scope). In Modal/Basic.lean:237, LTL/Syntax/Formula.lean:210 and Temporal/Syntax/Formula.lean:170, iff is declared at infix:30 - the SAME level as the arrow. Moving the arrow alone to 25 leaves iff binding tighter than the arrow, which does invert the standard relationship and diverges from upstream. Confirmed by rfl.",
+    "recommended_edit_set": "7 declaration lines + 2 docstring precedence tables: arrow infix:30 -> infixr:25 in all four files (Bimodal:101, LTL:209, Modal:234, Temporal:169); iff infix:30 -> infixr:20 in three files (LTL:210, Modal:237, Temporal:170). Bimodal declares no iff. Also LTL/Syntax/Formula.lean:37-38 and Temporal/Syntax/Formula.lean:37-38 prose tables.",
+    "siblings_and_or": "Do NOT move and/or. Order preserved at either arrow precedence; both already require parens as arrow arguments; build confirms zero impact. Defer or-at-35-vs-30 and infix-to-infixr for and/or to the notation-wide reconciliation.",
+    "upstream_state": "git fetch upstream done. b8ad3923 IS an ancestor of upstream/main, NOT of fork HEAD (confirms prior verification). upstream/main tip 3951377e (toolchain bump v4.33.0, 2026-08-10). Fork/upstream merge-base f36649cf (2026-07-25). Fork has no Foundations/Logic/Operators.lean.",
+    "only_precedence_hazard_class": "Notations with argument precedence in [26,30]: the infix:29 equivalence operator at Foundations/Logic/LogicalEquivalence.lean:33 (plus CLL/Basic.lean:255,263 and Propositional/NaturalDeduction/Basic.lean:279). Real in a minimal model, but inert in the four in-scope subtrees - every co-occurrence there is a comment. Turnstile/derivation notations use unannotated notation:50 args and are precedence-immune. Validity notations with annotated :50 args already require parens today.",
+    "zero_debt": "No sorry involved; pure notation-declaration edit with green build. No axiom needed. No BLOCKED recommendation."
+  },
+  "verification": {
+    "baseline_build": "exit 0, 2013 jobs, 0 errors, 32 warnings",
+    "arrow_only_build": "exit 0, 2013 jobs, 0 errors, 32 warnings",
+    "arrow_plus_iff_build": "exit 0, 2013 jobs, 0 errors, 32 warnings",
+    "working_tree": "reverted clean via git checkout on the four files; git status -- Cslib/ empty",
+    "build_recipe": "grep -oE 'Cslib\\.Logics\\.(Bimodal|LTL|Modal|Temporal)[A-Za-z0-9_.]*' Cslib.lean | sort -u > targets.txt; lake build $(cat targets.txt)"
+  },
+  "metadata": {
+    "session_id": "sess_1786397542_991316_497",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "blocked_tools_avoided": ["lean_diagnostic_messages", "lean_file_outline"]
+  }
+}

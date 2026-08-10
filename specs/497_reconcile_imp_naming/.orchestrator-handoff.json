@@ -1,0 +1,34 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "task_number": 497,
+  "phase": "research",
+  "session_id": "sess_1786397542_991316_497",
+  "status": "researched",
+  "timestamp": "2026-08-10T21:52:00Z",
+  "summary": "Research complete with empirical build evidence. The arrow-only change (infix:30 -> infixr:25) has ZERO transitive parse impact: all 372 modules in the dependency cone built green (2013 jobs, 0 errors, warnings unchanged). One framing correction is load-bearing: iff sits at infix:30 (same level as the arrow) in Modal, LTL and Temporal, so moving the arrow alone inverts the arrow/iff binding; iff must move to infixr:20 in those three files. That combined variant also builds green. Working tree reverted clean.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/497_reconcile_imp_naming/reports/01_arrow-notation-precedence-reconciliation.md"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [],
+  "decisions_made": [
+    "Recommended edit set is 7 declaration lines plus 2 docstring precedence tables, not 4 lines: arrow infix:30 -> infixr:25 at Bimodal/Syntax/Formula.lean:101, LTL/Syntax/Formula.lean:209, Modal/Basic.lean:234, Temporal/Syntax/Formula.lean:169; PLUS iff infix:30 -> infixr:20 at LTL/Syntax/Formula.lean:210, Modal/Basic.lean:237, Temporal/Syntax/Formula.lean:170.",
+    "Task framing's premise that fork ordering is 36>35>30>20 holds only for the out-of-scope Propositional/Defs.lean; in three of the four in-scope files iff is at 30, not 20. Verified by rfl that leaving iff at 30 makes 'a -> b <-> c' parse as 'a -> (b <-> c)', inverting the standard binding and diverging from upstream.",
+    "Bimodal declares no iff notation at all, so it needs only the arrow edit.",
+    "Do NOT move and (36) or or (35). Their order relative to the arrow is preserved at either precedence and both already require parentheses as arrow arguments; build confirms zero impact. Defer or-at-35-vs-30 and the infix-to-infixr conversion for and/or to the notation-wide reconciliation.",
+    "Verification must use the targeted module list derived from Cslib.lean (372 modules), never a bare full lake build, which stalls on Propositional/Tableau/Intuitionistic/Scheme.lean. Expected signature: exit 0, 2013 jobs, 0 errors, 32 warnings.",
+    "Zero-debt: no sorry, no axiom, no BLOCKED recommendation needed. Pure notation-declaration edit with a green build already demonstrated."
+  ],
+  "dead_ends": [
+    "Reasoning about parse impact from precedence arithmetic alone was insufficient: the infix:29 equivalence operator at Foundations/Logic/LogicalEquivalence.lean:33 looked like a genuine regression source (its args require prec >= 30, which an infixr:25 arrow fails), but every co-occurrence of it with an arrow in the four in-scope subtrees turned out to be a comment. Do not re-open this as a blocker.",
+    "Turnstile/derivation notations (Bimodal/ProofSystem/Derivation.lean:108, Temporal/ProofSystem/Derivation.lean:86) were suspected at-risk but use unannotated notation:50 arguments and are precedence-immune. Validity notations with annotated :50 args reject an arrow at 25, but already reject one at 30, so they are already parenthesized today. Neither is a regression.",
+    "The hypothesis that any existing site relies on the current non-associative parse is refuted by a full green build of the dependency cone; do not budget plan phases for fixing call sites."
+  ],
+  "phases_completed": 1,
+  "phases_total": 1,
+  "plan_markers_verified": false
+}

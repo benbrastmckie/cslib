@@ -496,6 +496,53 @@ at 2, axiom count unchanged at 26.
 of `go` adds a positive entry at a world that already carries a recorded loop-back. Additive; the
 snapshot-free `IReuseContain` that consumes it lands in Phase 6.
 
+**Investigation note (discovered at implementation time, not pre-declared in Phase 1-4 planning)**:
+The freeze lemma is TRUE (V1/beta-priority is NOT a dead end here), but it is substantially harder
+than "check whether an existing lemma already supplies it" — it needs a genuinely NEW invariant,
+not a single local lemma. Recorded here so the next dispatch does not have to re-derive this from
+scratch.
+
+Direct inspection confirms the mechanism report §5.4 describes, and pins down exactly why it is
+global rather than local:
+1. `applyAllTImpRules`/`applyPersistenceFixpoint`/`intTImpRule` (`Expansion.lean:157-192`,
+   `Rules.lean:179-191`) all take the RAW parent-child `edges` parameter -- the same `edges` `go`
+   threads as `pendingEdges`/`doneEdges` -- never the ghost augmented/loop-back edge list
+   (`lbEdges`/`doneAug`, proof-side only, no runtime counterpart). Persistence propagation is
+   therefore completely blind to loop-back edges and only ever pushes content along the fixed,
+   append-only RAW TREE structure (ancestor to descendant in creation order).
+2. At the exact moment a loop-back edge `(x, l)` is recorded (a reuse event, itself only reachable
+   through `intStepBranchPrio`'s SECOND pass, i.e. only when `intStepBranchPrioFirstPass` returned
+   `none`), EVERY world on the branch -- not just `l` -- has zero pending alpha/beta obligations
+   (that is what "first pass returned `none` everywhere" means). In particular every RAW ANCESTOR
+   of `l` is *also* exhausted at that moment.
+3. Going forward, `l` (and every one of its raw ancestors) can only ever gain new content via (a)
+   alpha/beta processing directly at that label -- impossible, since it has zero pending compound
+   formulas and nothing new can ever add one (raw edges only grow by appending parent-child pairs
+   for brand-new worlds; a world created LATER cannot be a raw ancestor of `l`, so `intTImpRule`
+   fired from a later world can never target `l` or any of `l`'s ancestors), or (b) persistence
+   copy from a raw ancestor gaining new content -- ruled out by the same freeze argument applied
+   recursively up the (finite) ancestor chain.
+4. This is therefore a GLOBAL, whole-induction invariant ("every label that was fully exhausted at
+   some point stays exhausted forever, and its raw ancestors do too"), not a per-step transport
+   fact like the `IReuseContain_mono` it replaces. It needs to be threaded through
+   `intExpandBranches_openBranch_sat`'s induction as a NEW invariant alongside the existing R1 set
+   (`IExpandedConsistent`/`ILabelBound`/`IPosPersistRaw`/etc.), most likely stated as something
+   like "every raw-tree world with zero pending compound formulas keeps exactly the same
+   `ISF` set at that label forever" (a per-label formula-set-pinning fact), proved by induction on
+   the SAME `go.induct` skeleton the other R1 invariants already use, with the mint arm being
+   where a NEW instance of the invariant gets established (for `l`, freshly exhausted, and
+   transitively for its ancestors) and every arm needing to show it PRESERVES all previously
+   established instances.
+5. This is real, substantial new infrastructure -- comparable in shape (though narrower in scope)
+   to the R1 invariant-threading work that spans Phases 1-11 of this plan's own lineage -- not a
+   single lemma. A future dispatch resuming this phase should budget accordingly (likely closer to
+   the plan's Phase 1+2 combined scale than the stated 2-hour estimate, mirroring Phase 3's own
+   Scope Correction precedent) rather than attempting it inside a tight remaining-budget window.
+   **This is not a reason to pivot to V2**: V2's retract-on-violation approach faces the identical
+   "does this stay frozen" question in a different guise (a retracted/re-tried arm still needs to
+   know its retraction doesn't disturb already-recorded containment elsewhere), so escalating to V2
+   would not avoid this work, only relocate it.
+
 **Tasks**:
 - [ ] State the freeze lemma. Informally (report §5.4): when the world-creating arm is reached, the
       first pass returned `none`, so nothing on the branch is pending; afterwards formulas are only

@@ -11,8 +11,8 @@ next_project_number: 613
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,607,608,609,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,606,611 | 36,37,181,375,400,425,534,554,568,594,609,610 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,606,607,608,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,375,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,8 +28,7 @@ next_project_number: 613
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-609 [IMPLEMENTING] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
-  └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
+606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
 ### Modal Logic
 
@@ -152,7 +151,7 @@ SOURCE: specs/reviews/review-2026-08-09.md finding C1.
 ---
 
 ### 609. Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 604

@@ -3,16 +3,33 @@
 - **Task**: 609 - Re-validate `intFImpReuseWitnessAnc?` loop-back containment as the branch grows
 - **Plan**: `plans/01_beta-priority-repair.md`
 - **Status**: COMPLETED (all 9 phases)
+- **Started**: 2026-08-09
+- **Completed**: 2026-08-10
+- **Artifacts**: `reports/01_loopback-revalidation-repair.md`, `plans/01_beta-priority-repair.md`, `handoffs/01`-`13`
+- **Standards**: CONTRIBUTING.md, NOTATION.md, ORGANISATION.md
 
-## Outcome
+## Overview
 
 Landed repair V1 (beta-priority) from the research report and closed every downstream proof
-obligation it unblocked. The intuitionistic propositional tableau's completeness development is
-now **fully sorry-free**: the repo-wide declaration-level sorry count (the authoritative
-`lake build` "declaration uses 'sorry'" signal) went from a starting baseline of several open
-sites down to **zero**.
+obligation it unblocked.
 
-## What changed, phase by phase
+The root problem: `intFImpReuseWitnessAnc?` recorded a loop-back edge on a `Sfor`-containment
+check at the moment the branch reused an ancestor world, then never re-validated that containment
+as the branch kept growing. That forced a false choice between two frames — the AUGMENTED frame
+carried `IFimpAccess` but refuted positive persistence, while the RAW frame carried persistence
+but refuted `IFimpAccess`. Neither could instantiate `truthLemma`, which needs both.
+
+`intStepBranchPrio` now defers world-creating rules and re-validates loop-back containment as the
+branch grows, so the augmented frame carries **both** facts simultaneously. That collapsed
+`openBranch_countermodel`'s remaining existential into a direct `truthLemma` instantiation, and
+the discharge cascaded downstream to `intuitionisticTableau_complete` (DP-3).
+
+The intuitionistic and minimal propositional tableau completeness development is now fully
+sorry-free. See **Impacts** below for the precise scope of that claim.
+
+## What Changed
+
+Phase by phase:
 
 1. **`intStepBranchPrio`** (Expansion.lean) -- additive beta-priority stepper: first pass skips
    world-creating formulas, falls through to the original `intStepBranch` on `none`. Bridges
@@ -38,16 +55,40 @@ sites down to **zero**.
    Added the new additive `IntMinScheme.modelBot_uc` structure field (both `intScheme` and
    `minScheme` instances discharge it) since `S.modelBot` upward-closure cannot be recovered
    generically from `bot_truth`/`no_contradiction` alone for an abstract scheme.
-9. Discharged `intuitionisticTableau_complete` (DP-3), the last declaration-level sorry in the
-   repo, by pinning its hypothesis to `IValid.{_, 0} φ` (mirroring `minimalTableau_complete`'s
-   existing `MValid.{_, 0}` pin) and adding the `IValid` analogue of the `ULift`-based
-   universe-descent bridge (`ivalid_descend` / `ivalid_universe_invariant`) so downstream
-   `Decidable`/biconditional consumers keep their original, unpinned public statements. Fixed
-   two further downstream breaks this pin exposed (`Intuitionistic/DecisionProcedure.lean`,
-   `SequentCalculus/LJ/Decidability.lean`) and brought four files' stale "carries a deferred
-   sorryAx" documentation up to date.
+9. Discharged `intuitionisticTableau_complete` (DP-3) by pinning its hypothesis to
+   `IValid.{_, 0} φ` (mirroring `minimalTableau_complete`'s existing `MValid.{_, 0}` pin) and
+   adding the `IValid` analogue of the `ULift`-based universe-descent bridge (`ivalid_descend` /
+   `ivalid_universe_invariant`) so downstream `Decidable`/biconditional consumers keep their
+   original, unpinned public statements. Fixed two further downstream breaks this pin exposed
+   (`Intuitionistic/DecisionProcedure.lean`, `SequentCalculus/LJ/Decidability.lean`) and brought
+   four files' stale "carries a deferred sorryAx" documentation up to date.
 
-## Verification (final state)
+## Decisions
+
+- **Committed to the augmented frame, not the raw one**, for `openBranch_countermodel`'s witness.
+  This is the whole point of the repair: pre-repair, the augmented frame was refuted for positive
+  persistence (`CslibTests/BetaSplitRefutation.lean`, `firstViolation = some (2,1,2)`), which is
+  why the choice was previously unavailable.
+- **`IReuseContain` restated in bare, snapshot-free form** rather than weakening it to keep
+  `IReuseContain_mono` provable. `IReuseContain_mono` and `IReuseContain_snoc` were removed
+  outright rather than retained as dead-but-compiling wrappers.
+- **Phase 7's conclusion extended in place** with a 7th conjunct rather than adding a separate
+  corollary, with a type-checking `example` feeding it straight into `truthLemma` via `exact` to
+  confirm the shape match mechanically.
+- **Phase 6's six anticipated bespoke case-split proofs collapsed to one uniform substitution**
+  by adding an origin-containment conjunct to `IReuseFrozenOrigin` plus one corollary — a
+  simplification found only by attempting the wiring rather than surveying for it.
+
+### Excluded constructions (per task description, never attempted)
+
+`rawEdges` as the conjunct-2 witness for `openBranch_countermodel`, pruning at blocked worlds,
+pruning at strictly-blocked worlds, the greatest `IFimpAccess`-supported fixpoint, the maximal
+atom-inclusion frame, V2 (retract-on-violation), and V3 (cyclic edges). All are recorded as
+history in the relevant docstrings, not re-derived.
+
+## Impacts
+
+Verification at final state:
 
 - `lake build` (full, 3325 jobs): green.
 - `lake exe checkInitImports`: clean.
@@ -56,7 +97,6 @@ sites down to **zero**.
 - `lake shake --add-public --keep-implied --keep-prefix`: no suggestion for any touched file.
 - `lake exe mk_all --module`: no update necessary.
 - `lake test`: green, 9397 jobs, zero `✖` marks.
-- Declaration-level sorry count: **0** (repo-wide).
 - Axiom count: 26 (unchanged from pre-task baseline).
 - Vacuous-definition grep: 1 (unchanged, pre-existing `Computability/URM/Basic.lean` false
   positive).
@@ -65,12 +105,28 @@ sites down to **zero**.
   `instDecidableLJDerivable`, `ivalid_descend`): standard axioms only
   (`{propext, Classical.choice, Quot.sound}` or a strict subset), no `sorryAx`.
 
-## Excluded constructions (per task description, never attempted)
+### Sorry-count claim: precise scope
 
-`rawEdges` as the conjunct-2 witness for `openBranch_countermodel`, pruning at blocked worlds,
-pruning at strictly-blocked worlds, the greatest `IFimpAccess`-supported fixpoint, the maximal
-atom-inclusion frame, V2 (retract-on-violation), and V3 (cyclic edges). All are recorded as
-history in the relevant docstrings, not re-derived.
+**`Cslib/Logics/Propositional/` is sorry-free.** Verified by direct source inspection, not by
+build warnings: every remaining `sorry` occurrence under that tree is a prose mention inside a
+docstring or a `## Notes on sorry` section, not a proof obligation.
+
+**This is NOT repo-wide sorry-freeness, and the `lake build` signal alone cannot establish that
+it is.** Unsuppressed `declaration uses 'sorry'` warnings are now 0, but roughly 19 real
+tactic-position sorries remain in `Cslib/Logics/Bimodal/`, each wrapped in
+`set_option warn.sorry false in` and therefore structurally invisible to that metric (18
+suppression sites across 5 files). Those are tracked against the separate upstream
+`port_continuous_completeness_bimodal` work and were never in this task's scope.
+
+## Follow-ups
+
+- **Task 606 is superseded.** "Discharge or restate the four propositional tableau completeness
+  theorems and verify the TFAE fold" names four sites (DP-3 through DP-6); all four are now
+  sorry-free (DP-3 by this task's Phase 9, DP-4 by task 605, DP-5/DP-6 by this task's earlier
+  phases). Re-scope or close it rather than dispatching it as originally written.
+- **The `lake build` sorry metric undercounts and should not be quoted as repo-wide.** Any future
+  claim of repo-wide sorry-freeness must inspect sources directly, since
+  `set_option warn.sorry false in` silences the warning the metric counts.
 
 ## Plan Deviations
 
@@ -91,8 +147,14 @@ history in the relevant docstrings, not re-derived.
   rather than any build requirement. See `handoffs/13_phase9-complete-plan-done.md` for the full
   record, including the task 606 reconciliation.
 
-## Roadmap / follow-up
+## References
 
-Task 606 ("Discharge or restate the four propositional tableau completeness theorems") is now
-superseded: all four sites it names (DP-3 through DP-6) are sorry-free as of this task's
-completion. It should be re-scoped or closed rather than dispatched as originally written.
+- Plan: `plans/01_beta-priority-repair.md`
+- Research: `reports/01_loopback-revalidation-repair.md`
+- Phase handoffs: `handoffs/10_phase6-complete.md`, `handoffs/11_phase7-complete.md`,
+  `handoffs/12_phase8-complete.md`, `handoffs/13_phase9-complete-plan-done.md`
+- Frame-adequacy analysis and DP-5 restructure source:
+  `specs/604_prove_countermodel_forcing_conjunct_over_constructed_frame/reports/01_conjunct2-frame-adequacy.md`
+  (sections 3, 4, 6)
+- Machine evidence for excluded constructions: `CslibTests/BetaSplitRefutation.lean`,
+  `CslibTests/WitnessProbe.lean`, `CslibTests/TableauConformance.lean`

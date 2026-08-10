@@ -48,7 +48,7 @@
     "ci_pipeline_passed": true
   },
   "completion_data": {
-    "completion_summary": "Landed beta-priority repair (V1) of intFImpReuseWitnessAnc? loop-back containment and discharged every downstream proof obligation it unblocked. intStepBranchPrio defers world-creating rules and re-validates loop-back containment as the branch grows, closing the gap that previously forced a choice between IFimpAccess and positive persistence. openBranch_countermodel and intuitionisticTableau_complete (DP-3), the last declaration-level sorry in the repo, are now both discharged. The intuitionistic propositional tableau's completeness development is fully sorry-free (repo-wide declaration-level sorry count: 0), with axiom count unchanged (26) and the conformance/adequacy test corpora verdict-preserving throughout.",
+    "completion_summary": "Landed beta-priority repair (V1) of intFImpReuseWitnessAnc? loop-back containment and discharged every downstream proof obligation it unblocked. intStepBranchPrio defers world-creating rules and re-validates loop-back containment as the branch grows, closing the gap that previously forced a choice between IFimpAccess and positive persistence: the augmented frame now carries both simultaneously. openBranch_countermodel (Scheme.lean) and intuitionisticTableau_complete (DP-3, Intuitionistic/Completeness.lean) are both discharged. The intuitionistic and minimal propositional tableau completeness development is now fully sorry-free, verified by direct source inspection (all remaining 'sorry' occurrences under Cslib/Logics/Propositional/ are prose mentions in docstrings, not proof obligations). Axiom count unchanged (26); conformance/adequacy test corpora verdict-preserving throughout; full CI pipeline green (lake build 3325 jobs, lake test 9397 jobs). SCOPE CORRECTION: unsuppressed lake-build sorry warnings are now 0, but this is NOT repo-wide sorry-freeness -- roughly 19 real tactic-position sorries remain in Cslib/Logics/Bimodal/, each wrapped in 'set_option warn.sorry false in' and therefore invisible to that metric; they are tracked against the separate upstream port_continuous_completeness_bimodal work and were never in this task's scope.",
     "roadmap_items": [
       "Task 606 ('Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold') is superseded: all four sites it names (DP-3 through DP-6) are now sorry-free. Re-scope or close task 606 rather than dispatching it as originally written."
     ]
@@ -57,7 +57,13 @@
     "session_id": "sess_1786368658_52fe41",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "skill-cslib-implementation"
+    ],
+    "compliance_check": "passed",
+    "cycles_used": 3,
+    "final_state": "completed"
   }
 }

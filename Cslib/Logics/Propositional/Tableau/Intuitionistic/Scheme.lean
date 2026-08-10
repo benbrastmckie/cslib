@@ -7637,51 +7637,22 @@ private lemma IFrozenBelow_applyPersistenceFixpoint
     (applyPersistenceFixpoint_agrees hw0 hfrz hpp hic hcons hWH hWHC fuel b (fun _ h => h)
       (fun _ h _ => h) sf hsf hlt) hlt
 
-/-- **Reuse-time containment, per recorded loop-back edge** (plan Phase 8): for every
-loop-back edge `(x, l)` recorded so far (NOT the raw parent-child edges, which
-`IPosPersistRaw` already covers more strongly), there EXISTS a branch snapshot `bSnap`,
-contained in the CURRENT branch `b`, at which containment of `l`'s positive content in
-`x`'s already held. This existential-snapshot shape -- rather than a bare
-`posFormulasAt b l ⊆ posFormulasAt b x` claim about the CURRENT branch -- is what makes the
-invariant preserved automatically under branch growth: the SAME witness `bSnap`, planted
-once at reuse time, transfers to any later, larger branch, since `∀ y ∈ bSnap, y ∈ b` only
-needs `b` to grow (a bare current-branch claim would instead require EVERYTHING that later
-arrives at `l` to also arrive at `x`, which is the genuinely large post-reuse closure lemma,
-not this export -- see `handoffs/05_phase7-complete-phase8-handoff.md`). -/
+/-- **Reuse-time containment, per recorded loop-back edge** (plan Phase 8, restated Phase 6
+item (f)): for every loop-back edge `(x, l)` recorded so far (NOT the raw parent-child edges,
+which `IPosPersistRaw` already covers more strongly), the CURRENT branch `b`'s positive content
+at `l` is already contained in its positive content at `x`. This bare, current-branch form
+REPLACES the earlier existential-snapshot form (`∃ bSnap ⊆ b, ...`), which the mint-time defect
+repair forced as a weakening -- see `handoffs/05_phase7-complete-phase8-handoff.md` for that
+history. The bare form is provable to survive branch growth ONLY because of the companion
+freeze machinery (`IReuseFrozenOrigin`, Phase 6): nothing NEW ever arrives at label `l` again
+once `(x, l)` is recorded, so `IReuseFrozenOrigin_reuseContain` derives this fact directly,
+uniformly, at every point a witness is available -- no per-site case split on "already present
+vs. newly arrived" is needed at the CALL site, since `IReuseFrozenOrigin`'s own existential
+already carries that split internally (`hagree`/`hcont_o`/`hmono`). -/
 private def IReuseContain (lbH : IEdges) (b : IBranch Atom) : Prop :=
   ∀ x l : Nat, (x, l) ∈ lbH →
-    ∃ bSnap : IBranch Atom, (∀ y ∈ bSnap, y ∈ b) ∧
-      ∀ χ : Proposition Atom, (⟨.pos, χ, l⟩ : ISF Atom) ∈ bSnap →
-        (⟨.pos, χ, x⟩ : ISF Atom) ∈ bSnap
-
-omit [Hashable Atom] [DecidableEq Atom] in
-/-- `IReuseContain` is monotone in the branch: every recorded loop-back edge's witness
-`bSnap` is contained in `b`, hence in any superset `b'` -- the containment fact about
-`bSnap` itself is untouched. -/
-private lemma IReuseContain_mono {lbH : IEdges} {b b' : IBranch Atom}
-    (hmem : ∀ y ∈ b, y ∈ b') (h : IReuseContain lbH b) : IReuseContain lbH b' := by
-  intro x l hxl
-  obtain ⟨bSnap, hsub, hcont⟩ := h x l hxl
-  exact ⟨bSnap, fun y hy => hmem _ (hsub y hy), hcont⟩
-
-omit [Hashable Atom] [DecidableEq Atom] in
-/-- Extending `IReuseContain` by a newly recorded loop-back edge `(x, l)`, planted using
-the CURRENT branch `b` itself as the snapshot witness (reflexively contained in itself),
-given the containment fact directly -- at the reuse arm this is exactly
-`intFImpReuseWitnessAnc?_spec`'s `hcont` conjunct, since `sfor` there is
-`{φ} ∪ posFormulasAt bPers l`, so `hcont` already ranges over every `χ` with
-`T(χ)@l ∈ bPers`, not merely the single formula `φ`. -/
-private lemma IReuseContain_snoc {lbH : IEdges} {b : IBranch Atom} {x l : Nat}
-    (h : IReuseContain lbH b)
-    (hcont : ∀ χ : Proposition Atom, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b →
-      (⟨.pos, χ, x⟩ : ISF Atom) ∈ b) :
-    IReuseContain (lbH ++ [(x, l)]) b := by
-  intro x' l' hx'l'
-  rcases List.mem_append.mp hx'l' with h' | h'
-  · exact h x' l' h'
-  · simp only [List.mem_singleton, Prod.mk.injEq] at h'
-    obtain ⟨rfl, rfl⟩ := h'
-    exact ⟨b, fun y hy => hy, hcont⟩
+    ∀ χ : Proposition Atom, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b →
+      (⟨.pos, χ, x⟩ : ISF Atom) ∈ b
 
 /-- List companion of `IReuseContain`, a 2-list zip over `(bs, lbSets)` mirroring
 `IAllAccessConsistent`'s shape (companion, not merged, threaded ALONGSIDE it through a
@@ -7832,11 +7803,17 @@ the origin). The content conjunct is what gets re-derived round by round, via
 `IReuseFrozenOrigin_persist`/`IReuseFrozenOrigin_extendMany` below, using
 `applyPersistenceFixpoint_agrees_grow` (already landed, plan Phase 6 item (b)) and
 `IFrozenBelow_intStepBranchPrio_ge` (already landed, plan Phase 5) rather than needing fresh
-`IPosPersistRaw` about each round's own pre-persistence branch. **Not yet threaded through `key`
-or wired into the six `IReuseContain_mono` use sites** -- this section lands the single-branch
-machinery only; the `IAllReuseFrozenOrigin` list companion (mirroring `IAllReuseFrozen`'s 3-list
-zip, extended with the per-position `edges`/`nw` context this origin-tracked version needs to
-check monotonicity against) and the six-site wiring remain for a future dispatch. -/
+`IPosPersistRaw` about each round's own pre-persistence branch. **Now threaded through `key`
+and wired at every site that needed transport**: `IAllReuseFrozenOrigin`, the 5-list list
+companion (mirroring `IAllReuseFrozen`'s 3-list zip, extended with the per-position
+`edges`/`nw` context this origin-tracked version needs to check monotonicity against), is a
+parameter of `intExpandBranches_openBranch_sat` and `key`'s own induction; every case that
+transports content forward derives its advanced `IReuseFrozenOrigin` witness via
+`IReuseFrozenOrigin_persist`/`_extendMany`/`_widen`, and `IReuseFrozenOrigin_snoc` records each
+freshly-minted loop-back edge. `IReuseFrozenOrigin_reuseContain` (below) then derives bare
+`IReuseContain` directly from any such witness -- the mechanism that let the six former
+`IReuseContain_mono`/`_snoc` call sites collapse to one uniform substitution each, rather than
+needing bespoke per-site transport proofs. -/
 
 private def IReuseFrozenOrigin (φ0 : Proposition Atom) (lbH : IEdges) (e : List (ISF Atom))
     (edges : IEdges) (nw : Nat) (b : IBranch Atom) : Prop :=
@@ -7854,7 +7831,9 @@ private def IReuseFrozenOrigin (φ0 : Proposition Atom) (lbH : IEdges) (e : List
       (∀ p ∈ edges_o, p ∈ edges) ∧
       nw_o ≤ nw ∧
       (∀ y ∈ b_o, y ∈ b) ∧
-      (∀ sf ∈ b, sf.label < l + 1 → sf ∈ b_o)
+      (∀ sf ∈ b, sf.label < l + 1 → sf ∈ b_o) ∧
+      (∀ χ : Proposition Atom, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b_o →
+        (⟨.pos, χ, x⟩ : ISF Atom) ∈ b_o)
 
 omit [Hashable Atom] in
 /-- Every `IReuseFrozenOrigin`-tracked edge's threshold is a genuine `IFrozenBelow` fact about
@@ -7868,7 +7847,7 @@ private lemma IReuseFrozenOrigin_frozenBelow {φ0 : Proposition Atom} {lbH : IEd
     (hxl : (x, l) ∈ lbH) (h : IReuseFrozenOrigin φ0 lbH e edges nw b) :
     IFrozenBelow (l + 1) e b := by
   obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
-    hnwle, hmono, hagree⟩ := h x l hxl
+    hnwle, hmono, hagree, hcont_o⟩ := h x l hxl
   intro sf hsfb hlt
   rcases hfrz sf (hagree sf hsfb hlt) hlt with hwc | hexp | hns
   · exact Or.inl hwc
@@ -7886,8 +7865,28 @@ private lemma IReuseFrozenOrigin_labelBound {φ0 : Proposition Atom} {lbH : IEdg
     {e : List (ISF Atom)} {edges : IEdges} {nw : Nat} {b : IBranch Atom} {x l : Nat}
     (hxl : (x, l) ∈ lbH) (h : IReuseFrozenOrigin φ0 lbH e edges nw b) :
     l + 1 ≤ nw := by
-  obtain ⟨b_o, e_o, edges_o, nw_o, -, -, -, -, -, -, hw0, -, -, hnwle, -, -⟩ := h x l hxl
+  obtain ⟨b_o, e_o, edges_o, nw_o, -, -, -, -, -, -, hw0, -, -, hnwle, -, -, -⟩ := h x l hxl
   exact le_trans hw0 hnwle
+
+omit [Hashable Atom] in
+/-- **Item (e)/(f)'s actual unlock**: bare `IReuseContain` is a DIRECT corollary of
+`IReuseFrozenOrigin`, requiring no case split at the use site and no separate `IAllReuseContain`
+threading at all. For `(x, l) ∈ lbH` and `T(χ)@l ∈ b` (the CURRENT branch), `hagree` transports
+membership down to the origin (`T(χ)@l ∈ b_o`, since `l < l + 1`), the origin's OWN containment
+conjunct (`hcont_o`, planted once at record time by `IReuseFrozenOrigin_snoc` and carried
+unchanged by `_persist`/`_extendMany`/`_widen` ever since) gives `T(χ)@x ∈ b_o`, and `hmono`
+lifts that back up to the CURRENT `b`. This replaces the six `IReuseContain_mono`/`_snoc` call
+sites' bespoke per-site transport with one uniform substitution: wherever an `IReuseFrozenOrigin`
+witness is already available (every one of the six sites builds one, per the `key` threading
+above), `IReuseContain` for the SAME `(lbH, b)` follows for free. -/
+private lemma IReuseFrozenOrigin_reuseContain {φ0 : Proposition Atom} {lbH : IEdges}
+    {e : List (ISF Atom)} {edges : IEdges} {nw : Nat} {b : IBranch Atom}
+    (h : IReuseFrozenOrigin φ0 lbH e edges nw b) : IReuseContain lbH b := by
+  intro x l hxl
+  obtain ⟨b_o, e_o, edges_o, nw_o, -, -, -, -, -, -, -, -, -, -, hmono, hagree, hcont_o⟩ :=
+    h x l hxl
+  intro χ hχ
+  exact hmono _ (hcont_o χ (hagree _ hχ (by simp)))
 
 omit [Hashable Atom] in
 /-- Extending `IReuseFrozenOrigin` by a newly recorded loop-back edge `(x, l)`, planted using
@@ -7903,7 +7902,9 @@ private lemma IReuseFrozenOrigin_snoc {φ0 : Proposition Atom} {lbH : IEdges}
     (hcons : ∀ w' : Nat, w' < l + 1 → ∀ χ : Proposition Atom,
       ¬ ((⟨.pos, χ, w'⟩ : ISF Atom) ∈ b ∧ (⟨.neg, χ, w'⟩ : ISF Atom) ∈ b))
     (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges)
-    (hw0 : l + 1 ≤ nw) :
+    (hw0 : l + 1 ≤ nw)
+    (hcontGen : ∀ χ : Proposition Atom, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b →
+      (⟨.pos, χ, x⟩ : ISF Atom) ∈ b) :
     IReuseFrozenOrigin φ0 (lbH ++ [(x, l)]) e edges nw b := by
   intro x' l' hx'l'
   rcases List.mem_append.mp hx'l' with h' | h'
@@ -7912,7 +7913,7 @@ private lemma IReuseFrozenOrigin_snoc {φ0 : Proposition Atom} {lbH : IEdges}
     obtain ⟨rfl, rfl⟩ := h'
     exact ⟨b, e, edges, nw, hfrz, hpp, hic, hcons, hWH, hWHC, hw0,
       (fun y hy => hy), (fun p hp => hp), le_refl nw, (fun y hy => hy),
-      (fun sf hsfb _ => hsfb)⟩
+      (fun sf hsfb _ => hsfb), hcontGen⟩
 
 omit [Hashable Atom] in
 /-- **Advance across a single-round persistence fixpoint**: `IReuseFrozenOrigin` survives
@@ -7927,9 +7928,10 @@ private lemma IReuseFrozenOrigin_persist {φ0 : Proposition Atom} {lbH : IEdges}
     IReuseFrozenOrigin φ0 lbH e edges nw (applyPersistenceFixpoint bh edges fuel) := by
   intro x l hxl
   obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
-    hnwle, hmono, hagree⟩ := h x l hxl
+    hnwle, hmono, hagree, hcont_o⟩ := h x l hxl
   refine ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
-    hnwle, fun y hy => applyPersistenceFixpoint_mem_preserved bh edges fuel y (hmono y hy), ?_⟩
+    hnwle, fun y hy => applyPersistenceFixpoint_mem_preserved bh edges fuel y (hmono y hy), ?_,
+    hcont_o⟩
   exact applyPersistenceFixpoint_agrees_grow hw0 hnwle hedgesub hfrz hpp hic hcons hWH_o hWH hWHC
     fuel bh hmono hagree
 
@@ -7947,10 +7949,10 @@ private lemma IReuseFrozenOrigin_extendMany {φ0 : Proposition Atom} {lbH : IEdg
     IReuseFrozenOrigin φ0 lbH e edges nw (Branch.extendMany bPers newForms) := by
   intro x l hxl
   obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
-    hnwle, hmono, hagree⟩ := h x l hxl
+    hnwle, hmono, hagree, hcont_o⟩ := h x l hxl
   refine ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
     hnwle, fun y hy => by
-      simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hmono y hy), ?_⟩
+      simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hmono y hy), ?_, hcont_o⟩
   intro sf hsf hlt
   simp only [Branch.extendMany, List.mem_append] at hsf
   rcases hsf with hsf | hsf
@@ -7976,10 +7978,10 @@ private lemma IReuseFrozenOrigin_widen {φ0 : Proposition Atom} {lbH : IEdges}
     IReuseFrozenOrigin φ0 lbH e' edges' nw' b := by
   intro x l hxl
   obtain ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0, hesub, hedgesub,
-    hnwle, hmono, hagree⟩ := h x l hxl
+    hnwle, hmono, hagree, hcont_o⟩ := h x l hxl
   exact ⟨b_o, e_o, edges_o, nw_o, hfrz, hpp, hic, hcons, hWH_o, hWHC_o, hw0,
     fun y hy => hsube _ (hesub y hy), fun p hp => hsubedges _ (hedgesub p hp),
-    le_trans hnwle hlenw, hmono, hagree⟩
+    le_trans hnwle hlenw, hmono, hagree, hcont_o⟩
 
 /-- List companion of `IReuseFrozenOrigin`, a 5-list zip over `(bs, expSets, edgeSets, nws,
 lbSets)` -- mirroring `IAllReuseFrozen`'s 3-list zip, extended with the per-branch-position
@@ -8209,9 +8211,9 @@ private lemma intExpandBranches_openBranch_sat
           ILabelBound_applyPersistenceFixpoint f hLB_bh_nwH
         have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
           IExpandedAccessConsistent_mono hmemP hACC_bh_eH
-        have hARC_bPers : IReuseContain lbH bPers := IReuseContain_mono hmemP hARC_bh_head
         have hARFO_bPers : IReuseFrozenOrigin φ0 lbH eH edgesH nwH bPers :=
           IReuseFrozenOrigin_persist hWH_head hWHC_head hARFO_bh_head
+        have hARC_bPers : IReuseContain lbH bPers := IReuseFrozenOrigin_reuseContain hARFO_bPers
         have hUniv_bPers : ∀ x ∈ bPers, x ∈ intUniverseExt φ0 :=
           applyPersistenceFixpoint_subset_ext bh edgesH f hUnivP_head
         have hFuel_bPers : intWork (intUniverseExt φ0) bPers eH < f :=
@@ -8305,13 +8307,18 @@ private lemma intExpandBranches_openBranch_sat
           rw [hpLB] at hPendingARC
           simp only [IAllReuseContain] at hPendingARC
           obtain ⟨hARC_bh_head, -⟩ := hPendingARC
+          rw [hpLB] at hPendingARFO
+          simp only [IAllReuseFrozenOrigin] at hPendingARFO
+          obtain ⟨hARFO_bh_head, -⟩ := hPendingARFO
           have hmemP : ∀ x ∈ bh, x ∈ bPers :=
             fun x hx => applyPersistenceFixpoint_mem_preserved bh edgesH (f' + 1) x hx
           have hIC_bPers : IExpandedConsistent bPers eH :=
             IExpandedConsistent_mono hmemP hIC_bh_eH
           have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
             IExpandedAccessConsistent_mono hmemP hACC_bh_eH
-          have hARC_bPers : IReuseContain lbH bPers := IReuseContain_mono hmemP hARC_bh_head
+          have hARFO_bPers : IReuseFrozenOrigin φ0 lbH eH edgesH nwH bPers :=
+            IReuseFrozenOrigin_persist hWH_head hWHC_head hARFO_bh_head
+          have hARC_bPers : IReuseContain lbH bPers := IReuseFrozenOrigin_reuseContain hARFO_bPers
           -- Phase 7: the raw-edge persistence conjunct, composed from `IAllUniv`/`IAllFuel`
           -- (already threaded through this induction) plus Phase 4's landed
           -- `applyPersistenceFixpoint_copy_complete` -- see `IPosPersistRaw`'s docstring.
@@ -8433,8 +8440,6 @@ private lemma intExpandBranches_openBranch_sat
           have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
           have hsub : ∀ z ∈ bPers, z ∈ Branch.extendMany bPers newForms :=
             fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz
-          have hARC_ext : IReuseContain lbH (Branch.extendMany bPers newForms) :=
-            IReuseContain_mono (fun x hx => hsub _ (hmemP x hx)) hARC_bh_head
           have hbound : ∀ x' l : Nat, (x', l) ∈ lbH → ∀ sf' ∈ newForms, l + 1 ≤ sf'.label := by
             intro x' l hx'l
             have hfrz : IFrozenBelow (l + 1) eH bPers :=
@@ -8457,6 +8462,8 @@ private lemma intExpandBranches_openBranch_sat
               (Branch.extendMany bPers newForms) :=
             hnw'_eq ▸ IReuseFrozenOrigin_widen hexp_ext (fun p hp => hp) le_rfl
               (IReuseFrozenOrigin_extendMany hbound hARFO_bPers)
+          have hARC_ext : IReuseContain lbH (Branch.extendMany bPers newForms) :=
+            IReuseFrozenOrigin_reuseContain hARFO_ext
           have hWH_ext : IWorldHist φ0 (Branch.extendMany bPers newForms) newExp nw' edgesH := by
             rw [hnw'_eq]
             exact IWorldHist_mono (fun x hx => hsub _ (hmemP x hx)) hexp_ext hWH_head
@@ -8582,7 +8589,6 @@ private lemma intExpandBranches_openBranch_sat
                 ILabelBound_applyPersistenceFixpoint (f' + 1) hLB_bh_nwH
               have hACC_bPers : IExpandedAccessConsistent augH bPers eH :=
                 IExpandedAccessConsistent_mono hmemP hACC_bh_eH
-              have hARC_bPers : IReuseContain lbH bPers := IReuseContain_mono hmemP hARC_bh_head
               have hARFO_bPers : IReuseFrozenOrigin φ0 lbH eH edgesH nwH bPers :=
                 IReuseFrozenOrigin_persist hWH_head hWHC_head hARFO_bh_head
               obtain ⟨sf, hsfb, hsfe, hint, hnewExp⟩ :=
@@ -8664,8 +8670,6 @@ private lemma intExpandBranches_openBranch_sat
                       rw [hyeq] at hy_mem
                       exact hy_mem
                     · simp [hs] at hy_cond
-                  have hARC_new : IReuseContain (lbH ++ [(x, l)]) bPers :=
-                    IReuseContain_snoc hARC_bPers hcontGen
                   have hreuse_sat : IExpandedConsistent bPers newExp ∧
                       IExpandedAccessConsistent (augH ++ [(x, l)]) bPers newExp := by
                     subst hnewExp
@@ -8726,7 +8730,9 @@ private lemma intExpandBranches_openBranch_sat
                       bPers :=
                     IReuseFrozenOrigin_snoc
                       (IReuseFrozenOrigin_widen hexp_ext (fun p hp => hp) le_rfl hARFO_bPers)
-                      hfrz hpp hreuse_sat.1 hcons hWH_ext hWHC_head hle_l
+                      hfrz hpp hreuse_sat.1 hcons hWH_ext hWHC_head hle_l hcontGen
+                  have hARC_new : IReuseContain (lbH ++ [(x, l)]) bPers :=
+                    IReuseFrozenOrigin_reuseContain hARFO_new
                   refine ih (doneAug ++ [augH ++ [(x, l)]] ++ augT) []
                       (doneLB ++ [lbH ++ [(x, l)]] ++ lbT) []
                       (IAllConsistent_append
@@ -8882,8 +8888,6 @@ private lemma intExpandBranches_openBranch_sat
               have hsfU : sf ∈ intUniverseExt φ0 := hUniv_bPers sf hsfb
               have hsub : ∀ z ∈ bPers, z ∈ Branch.extendMany bPers newForms :=
                 fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz
-              have hARC_ext : IReuseContain lbH (Branch.extendMany bPers newForms) :=
-                IReuseContain_mono (fun x hx => hsub _ (hmemP x hx)) hARC_bh_head
               have hbound : ∀ x' l : Nat, (x', l) ∈ lbH → ∀ sf' ∈ newForms, l + 1 ≤ sf'.label := by
                 intro x' l hx'l
                 have hfrz : IFrozenBelow (l + 1) eH bPers :=
@@ -8923,6 +8927,8 @@ private lemma intExpandBranches_openBranch_sat
                   (Branch.extendMany bPers newForms) :=
                 IReuseFrozenOrigin_widen hexp_ext hedges_ext (by omega)
                   (IReuseFrozenOrigin_extendMany hbound hARFO_bPers)
+              have hARC_ext : IReuseContain lbH (Branch.extendMany bPers newForms) :=
+                IReuseFrozenOrigin_reuseContain hARFO_ext
               -- DP-2 (RESOLVED, Phase 11): `hNW_ext` is now discharged from the just-established
               -- structural invariant `hWH_ext` via `intFreshMint_preserves_nw`/`intWorldHist_nw_le`
               -- (Phase 10), not from the bare `hnwB : nw ≤ WBound φ0` the false numeric restatement
@@ -9075,12 +9081,6 @@ private lemma intExpandBranches_openBranch_sat
               (Branch.extendMany bPers br) eH sf hsfU hsfe hsub
             rw [← hnewExp] at hdrop
             omega
-          have hARC_branch : ∀ br ∈ branches', IReuseContain lbH (Branch.extendMany bPers br) := by
-            intro br _hbr
-            exact IReuseContain_mono
-              (fun x hx => by
-                simp only [Branch.extendMany, List.mem_append]; exact Or.inr (hmemP x hx))
-              hARC_bh_head
           have hbound : ∀ x' l : Nat, (x', l) ∈ lbH →
               ∀ br ∈ branches', ∀ sf' ∈ br, l + 1 ≤ sf'.label := by
             intro x' l hx'l
@@ -9100,6 +9100,8 @@ private lemma intExpandBranches_openBranch_sat
             exact hnw'_eq ▸ IReuseFrozenOrigin_widen hexp_ext (fun p hp => hp) le_rfl
               (IReuseFrozenOrigin_extendMany (fun x' l hx'l => hbound x' l hx'l br hbr')
                 hARFO_bPers)
+          have hARC_branch : ∀ br ∈ branches', IReuseContain lbH (Branch.extendMany bPers br) :=
+            fun br hbr' => IReuseFrozenOrigin_reuseContain (hARFO_branch br hbr')
           have hWH_branch : ∀ br ∈ branches',
               IWorldHist φ0 (Branch.extendMany bPers br) newExp nw' edgesH := by
             intro br _hbr

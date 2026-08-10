@@ -690,7 +690,7 @@ anticipated)
 
 ---
 
-### Phase 6: Snapshot-free `IReuseContain`, re-threaded through the `key` induction [IN PROGRESS]
+### Phase 6: Snapshot-free `IReuseContain`, re-threaded through the `key` induction [COMPLETED]
 
 **Goal**: Drop the snapshot existential. This is the mint-time weakening the defect forced, and the
 repair is what makes dropping it possible.
@@ -995,19 +995,29 @@ results recorded in the handoff. Sorry count 196 -> 196 (unchanged), axiom count
 (unchanged).
 
 **Tasks**:
-- [ ] Restate `IReuseContain` (`Scheme.lean:6814`) with `bSnap := b`:
+- [x] Restate `IReuseContain` with `bSnap := b`:
       `∀ x l, (x, l) ∈ lbEdges → ∀ χ, (⟨.pos, χ, l⟩ : ISF Atom) ∈ b → (⟨.pos, χ, x⟩ : ISF Atom) ∈ b`.
-- [ ] `IReuseContain_snoc` (`:6837`) already establishes the snoc case from
-      `intFImpReuseWitnessAnc?_spec`'s `hcont` conjunct with `bSnap := b` — confirm it survives the
-      restatement essentially unchanged.
-- [ ] Replace `IReuseContain_mono` (`:6824`) with the Phase 5 freeze lemma at each of its use sites
-      in `intExpandBranches_openBranch_sat`'s induction. `IReuseContain_mono` is only provable
-      *because* of the snapshot, so it does not survive; every site must move to the freeze lemma.
-- [ ] Update the `IReuseContain` docstring, which currently explains at length why the bare
-      current-branch claim was avoided ("the genuinely large post-reuse closure lemma, not this
-      export"). That reasoning is now superseded — say what changed and why, rather than deleting
-      the note.
-- [ ] Confirm `IAllReuseContain` (`:6856`) and the list-companion lemmas follow through.
+      Landed exactly as specified.
+- [x] `IReuseContain_snoc` *(deviation: removed rather than kept)* -- under the bare restatement
+      its content became literally the `hcontGen` hypothesis with no wrapping needed, so rather
+      than keep a one-line pass-through wrapper, `IReuseContain` is derived at every site as a
+      corollary of `IReuseFrozenOrigin` (`IReuseFrozenOrigin_reuseContain`, new), which subsumes
+      what `_snoc` would have done. `intFImpReuseWitnessAnc?_spec`'s `hcont`/`hcontGen` conjunct
+      is still exactly what feeds the freshly-recorded edge's containment, now via
+      `IReuseFrozenOrigin_snoc`'s new `hcontGen`-shaped parameter instead.
+- [x] Replace `IReuseContain_mono` with the freeze machinery at each of its (six, confirmed) use
+      sites. *(deviation: uniform substitution, not six bespoke case-split proofs)* -- rather than
+      writing a bespoke "already-present vs. newly-arrived" case split at each site as originally
+      envisioned, `IReuseFrozenOrigin` gained one more existential conjunct (the origin's own
+      containment fact) and a single corollary `IReuseFrozenOrigin_reuseContain` derives bare
+      `IReuseContain` uniformly from any `IReuseFrozenOrigin` witness. All six sites now read
+      `IReuseFrozenOrigin_reuseContain hARFO_*` in place of the old `_mono`/`_snoc` calls.
+      `IReuseContain_mono` itself is removed (unprovable in general under the bare restatement).
+- [x] Update the `IReuseContain` docstring -- rewritten to explain the bare form and point to
+      `IReuseFrozenOrigin_reuseContain` as the mechanism that makes it survive branch growth.
+- [x] Confirm `IAllReuseContain` and the list-companion lemmas follow through -- unchanged in
+      shape (still the 2-list zip); every use compiles unmodified since `IReuseContain`'s bare
+      restatement is transparent to code that only threads it abstractly.
 
 **Timing**: 2 hours
 
@@ -1025,9 +1035,53 @@ the induction is described elsewhere in the file as 10-case, so the true number 
   `IReuseContain_snoc`, removal of `IReuseContain_mono`, and the induction sites
 
 **Verification**:
-- Full `lake build` succeeds.
-- `grep -c IReuseContain_mono` returns 0.
-- Zero new sorries, zero new axioms.
+- Full `lake build` succeeds. **CONFIRMED**: 3325 jobs green.
+- `grep -c IReuseContain_mono` returns 0 for the declaration/call sites (the lemma is fully
+  removed and no code references it). Two docstring mentions remain, both explaining the
+  historical replacement (mirrors this file's own convention of naming retired constructs in
+  docstrings, e.g. "the retired global-fuel lemma") -- not a live reference.
+- Zero new sorries, zero new axioms. **CONFIRMED**: sorry count 196 -> 196, axiom count 26 -> 26,
+  vacuous-definition count 1 -> 1 (all unchanged from baseline).
+
+**Completion note (this dispatch)**: Phase 6 closes in full. Four prior dispatches built and
+landed the supporting machinery (`isAccessible` reverse-direction lemmas, growing-edges
+composition, `IReuseFrozen`/`IAllReuseFrozen`, then `IReuseFrozenOrigin`/`IAllReuseFrozenOrigin`
+after discovering `IReuseFrozen`'s round-to-round propagation gap) but had not attempted the
+six-site wiring itself, each instead finding a new prerequisite and stopping. This dispatch
+was directed to attempt the wiring first rather than survey for a fifth round of scaffolding,
+and did so in three concrete steps:
+
+1. **Closed a genuine fourth gap** (`intStepBranchPrio_newEdge_frozen`, `Expansion.lean`): the
+   "record-time checkpoint" `IReuseFrozenOrigin_snoc`'s own docstring named
+   (`IFrozenBelow nextWorld expanded b`, available whenever `intStepBranchPrio` actually plants
+   a new edge) had never been landed as an actual lemma by any prior dispatch -- it only existed
+   as a docstring claim. Proved via a small three-lemma chain: `intApplyRuleFull`'s new-edge
+   component is `some _` only for the world-creating `.neg, .imp` case; therefore
+   `intStepBranchPrioFirstPass` (which explicitly skips world-creating formulas) never plants an
+   edge; therefore whenever `intStepBranchPrio` DOES plant an edge, it reached its fallback pass,
+   which is exactly `intStepBranchPrioFirstPass`'s own `none` precondition.
+2. **Threaded `IAllReuseFrozenOrigin` through `key`'s full 10-case induction** (item (d)), adding
+   two genuinely new small lemmas discovered while attempting the wiring rather than by
+   pre-dispatch analysis: `IReuseFrozenOrigin_labelBound` (extracts `l+1 ≤ nw` from the
+   existential's own conjuncts) and `IReuseFrozenOrigin_widen` (monotonicity of
+   `IReuseFrozenOrigin` in its own `e`/`edges`/`nw` parameters, needed because the induction's
+   parallel `pendingExp`/`pendingEdges`/`pendingNW` lists grow at every step). Landed and
+   committed as its own green checkpoint before attempting item (e).
+3. **Discovered and closed a fifth gap while attempting item (e)**: `IReuseFrozenOrigin` as
+   landed by the third dispatch did not carry the origin's own containment fact, so it could
+   not actually DERIVE bare `IReuseContain` -- only propagate a freeze bound. Adding one more
+   existential conjunct (the origin's own `∀χ, T(χ)@l∈b_o → T(χ)@x∈b_o`, planted once at
+   `IReuseFrozenOrigin_snoc`'s record time and carried unchanged by `_persist`/`_extendMany`/
+   `_widen` since it never depends on `e`/`edges`/`nw`/`b`) unlocked a single new corollary,
+   `IReuseFrozenOrigin_reuseContain`, which derives `IReuseContain` uniformly from any
+   `IReuseFrozenOrigin` witness -- collapsing what the plan anticipated as six bespoke
+   "already-present vs. newly-arrived" case-split proofs into one substitution per site. This
+   is a genuine, favorable simplification over the original decomposition, discovered only by
+   attempting the wiring as instructed.
+
+Sorry-free, axiom-clean throughout (`propext`/`Classical.choice`/`Quot.sound` only, matching the
+file's baseline; `intExpandBranches_openBranch_sat` itself verified via `lean_verify` with no
+`sorryAx`).
 
 ---
 

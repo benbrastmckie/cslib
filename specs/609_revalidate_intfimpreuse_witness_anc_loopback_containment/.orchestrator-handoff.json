@@ -3,38 +3,40 @@
   "phase": "implement",
   "status": "partial",
   "continuation_path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-  "summary": "Resumed from Phase 5, COMPLETED at commit ab3f283e (mechanism 3(a) and 3(b) of the freeze lemma both landed, sorry-free). This dispatch worked Phase 6 (snapshot-free IReuseContain, re-threaded through intExpandBranches_openBranch_sat's induction) end-to-end at the design level but landed ZERO code: confirmed the six IReuseContain_mono use sites (all inside the sat lemma's induction, cases 2/4/5/6/7/8, current line numbers recorded in the plan), designed the IReuseFrozen/IAllReuseFrozen companion invariant needed to replace them, and traced the composition argument through to a second, previously-unforeseen gap discovered mid-derivation: Phase 5's landed IFrozenBelow_applyPersistenceFixpoint/applyAllTImpRules_agrees require IPosPersistRaw about the PRE-fixpoint branch, which forces an origin-pinned (not per-go-call-fresh) instantiation, which in turn needs a not-yet-proved 'isAccessible is unaffected by appending a fresh edge, for old targets' lemma (the reverse direction of the already-landed isAccessible_append_mono). Both gaps, and a concrete dependency-ordered task list for the next dispatch, are recorded in full in the plan's Phase 6 Investigation note and in handoffs/06_phase6-investigation.md. An initial attempt at the new isAccessible lemma produced an unresolved sub-case; rather than force it through or risk a sorry, this dispatch stopped and handed off precisely instead.",
+  "summary": "Resumed from the prior investigation-only dispatch (zero code landed, tree at Phase 5 closing commit ab3f283e plus a plan/handoff-only commit 20f2751b). This dispatch landed real, compiling, sorry-free Lean: task-list item (a) of Phase 6's dependency-ordered plan, the isAccessible reverse-direction go-level lemma (isAccessible_go_append_eq_of_fresh) plus its supporting dead-end lemma (isAccessible_go_fresh_dead_end), both private, both sorry-free and axiom-clean, added at Scheme.lean:386-461 right after isAccessible_append_mono. Full CI pipeline run and green: lake build (3325 jobs), checkInitImports, lake test, lake lint (149 pre-existing library-wide findings, zero in Scheme.lean), lint-style, shake, mk_all. Sorry count 196->196 and axiom count 26->26, both unchanged. Deliberately did NOT attempt the wrapper-level (non-.go) isAccessible form this dispatch: it surfaces a genuine, newly-identified third gap -- a fuel mismatch between the extended list's own fuel bound (edges.length+1) and the unextended list's (edges.length), which needs a fuel-downward saturation argument requiring context (IWorldHistCounter/par/nw, already landed elsewhere in the file) not available to a standalone isAccessible lemma. This is deferred to task-list item (b), which has that context at its own call site -- recorded in full in the plan's new Progress note and in handoffs/07. Also corrected a stray, factually-incorrect uncommitted edit found at dispatch start (Phase 7 marked [IN PROGRESS] with no corresponding body changes, despite depending on the not-yet-complete Phase 6) back to [NOT STARTED].",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 6 Investigation note added, documenting the target invariant shape, the two composition gaps, and a dependency-ordered next-steps list. Phase 6 heading remains [IN PROGRESS] (unchanged from entry state)."
+      "summary": "Phase 6: added a Progress note (item (a) landed, the new wrapper-level fuel-mismatch gap and its recommended resolution route), updated the six IReuseContain_mono use-site line numbers and the key-statement line number to reflect this dispatch's +90-line insertion, and reverted the stray Phase 7 heading marker. Phase 6 heading remains [IN PROGRESS]."
     },
     {
       "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/06_phase6-investigation.md",
-      "summary": "Condensed pointer to the plan's Investigation note plus the reasoning for stopping without landing code."
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/07_phase6-isaccessible-reverse-lemma.md",
+      "summary": "Condensed record of what landed this dispatch, the newly-found wrapper-level fuel-mismatch gap and recommended resolution route, current line numbers for remaining task-list items (b)-(f), and the stray Phase 7 marker correction."
     }
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/06_phase6-investigation.md"
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/07_phase6-isaccessible-reverse-lemma.md",
+    "specs/state.json"
   ],
   "phases_completed": 5,
   "phases_total": 9,
   "decisions_made": [
-    "Chose to record a precise, actionable Investigation note (mirroring Phase 5's own successful precedent of a multi-dispatch, investigation-first phase) rather than force either the new isAccessible lemma or the full IReuseFrozen threading through under this dispatch's remaining time budget, after a first attempt at the isAccessible lemma surfaced a genuinely unresolved sub-case rather than a clean proof.",
-    "Confirmed via direct inspection that IPosPersistRaw does not hold for bh (a go-call's pre-persistence branch) in general -- it is what applyPersistenceFixpoint exists to establish -- so the origin-pinned composition strategy (mirroring the OLD bSnap witness's fixed-once-forever shape) is the only correct route, not a per-go-call-fresh re-derivation.",
-    "Did not touch any .lean file this dispatch -- the tree is byte-identical to the Phase 5 closing commit ab3f283e for all Cslib/ sources."
+    "Landed the go-level reverse-direction isAccessible lemma from scratch, per the prior dispatch's explicit instruction, rather than resuming its half-finished attempt -- the case split closed cleanly this time via a dedicated dead-end helper lemma (isAccessible_go_fresh_dead_end) isolating the 'routed through the fresh edge' sub-case as a standalone contradiction.",
+    "Deliberately stopped short of the wrapper-level (non-.go) isAccessible form after confirming, by direct fuel-arithmetic analysis, that it needs a fuel-downward saturation fact not derivable from a bare IEdges-only lemma -- rather than force a workaround or introduce a weaker/incorrect statement, documented the exact gap and the concrete existing infrastructure (IWorldHistCounter, edges_shape_of_worldHist, parAncestor_of_isAccessible) the next dispatch should use to close it inside task-list item (b), where that context is actually available.",
+    "Corrected a stray uncommitted Phase 7 [IN PROGRESS] marker (present at dispatch start, no corresponding task-body work) back to [NOT STARTED], since it was factually incorrect (Phase 7 depends on the still-incomplete Phase 6) and sat in the same file this dispatch was already editing."
   ],
   "dead_ends": [
-    "A first attempt at 'isAccessible unaffected by a fresh edge, for old targets' hit an unresolved sub-case when written under time pressure. Not committed. The plan's Investigation note point 4 records a validated proof sketch (freshly-minted node has no outgoing edges, so any DFS path through the new edge dead-ends there) -- the next attempt should start fresh from that sketch rather than resume the abandoned attempt."
+    "Did not attempt a generic 'extra fuel beyond edges.length does not change isAccessible.go's truth value' lemma for arbitrary IEdges lists -- this is very plausibly needed for the wrapper-level equality, but proving it in general (without the par/nw tree-structure context) would require its own walk-to-simple-path reduction argument, out of scope for a single dispatch and better closed using the file's own existing tree-structure lemmas (IWorldHistCounter/edges_shape_of_worldHist/parAncestor_of_isAccessible) at item (b)'s call site instead."
   ],
   "coordination_notes": [
-    "Territory disjointness with task 605 held (trivially -- no code was edited this dispatch).",
-    "Phase 6 line-number references in the plan (six IReuseContain_mono use sites, IReuseContain_snoc's call site, the key suffices statement) will drift again once code is actually landed -- re-grep before editing, per the plan's own delta-recording convention."
+    "Territory disjointness with task 605 held: all edits confined to Scheme.lean:386-461 (a purely additive insertion in the shared isAccessible append-monotonicity section near the top of the file), well clear of task 605's isAccessible-monotonicity/openBranch_countermodel/tableau_complete region at the end of the file.",
+    "Phase 6 line-number references in the plan (six IReuseContain_mono use sites, IReuseContain_snoc's call site, the key suffices statement) were updated this dispatch to reflect the +90-line shift from this dispatch's own insertion -- they will drift again once the next dispatch lands more code; re-grep before editing, per the plan's own delta-recording convention."
   ],
   "sorry_inventory": [],
   "plan_markers_verified": true

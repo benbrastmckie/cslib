@@ -1,28 +1,48 @@
 {
   "status": "partial",
-  "started_at": "2026-08-09T00:00:00Z",
+  "started_at": "2026-08-10T04:49:04Z",
+  "completed_at": "2026-08-10T05:40:00Z",
   "requires_user_review": false,
-  "modified_files": [
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/06_phase6-investigation.md"
-  ],
   "artifacts": [
     {
+      "type": "plan",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+      "summary": "Phase 6: added a Progress note recording task-list item (a) landed (isAccessible reverse-direction go-level lemma), a newly-identified third gap (wrapper-level fuel mismatch, deferred to item (b)), and updated the six IReuseContain_mono use-site line numbers plus the key-statement line number after this dispatch's +90-line insertion. Reverted a stray, factually-incorrect uncommitted Phase 7 [IN PROGRESS] marker back to [NOT STARTED]. Phase 6 heading remains [IN PROGRESS]."
+    },
+    {
       "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/06_phase6-investigation.md"
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/07_phase6-isaccessible-reverse-lemma.md",
+      "summary": "Condensed record of what landed, the newly-found wrapper-level fuel-mismatch gap (with recommended resolution route via IWorldHistCounter/edges_shape_of_worldHist/parAncestor_of_isAccessible), current line numbers for remaining task-list items (b)-(f), and the stray Phase 7 marker correction."
     }
   ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/07_phase6-isaccessible-reverse-lemma.md",
+    "specs/state.json"
+  ],
   "partial_progress": {
-    "stage": "phase_6_investigation_only",
-    "details": "Resumed from Phase 5 COMPLETED (commit 9c8ac440). Investigated Phase 6 (snapshot-free IReuseContain) in full: confirmed the six IReuseContain_mono use sites (all inside intExpandBranches_openBranch_sat's induction, cases 2/4/5/6/7/8), designed the needed IReuseFrozen/IAllReuseFrozen companion invariant, and worked the composition mechanism through to a second, previously-unforeseen gap -- Phase 5's landed freeze-persistence lemmas need an origin-pinned branch/edges pair, which in turn needs a not-yet-proved 'isAccessible reverse-monotonicity under a fresh edge' lemma (isAccessible_append_mono only gives the forward direction). Recorded the full mechanism, both gaps, and a concrete dependency-ordered task list for the next dispatch in the plan's Phase 6 Investigation note and in handoffs/06_phase6-investigation.md. Deliberately did NOT force the new isAccessible lemma through under time pressure after an initial attempt produced an unresolved sub-case -- chose a precise handoff over a rushed or sorry-risking proof. Zero .lean files touched; zero code changes this dispatch.",
+    "stage": "phase6_item_a_landed",
+    "details": "Landed isAccessible_go_fresh_dead_end and isAccessible_go_append_eq_of_fresh (private, Scheme.lean:386-461), matching task-list item (a) of the Phase 6 Investigation note's dependency-ordered plan. Both sorry-free, axiom-clean (propext/Quot.sound only). Full CI pipeline green: lake build (3325 jobs), checkInitImports, lake test, lake lint (zero new findings in Scheme.lean; 149 pre-existing library-wide), lint-style (clean), shake (clean), mk_all (no update needed). Sorry count 196->196, axiom count 26->26 (both unchanged). Deliberately did NOT attempt the wrapper-level (non-.go) isAccessible form: it hits a genuine fuel-mismatch (extended list's fuel bound is edges.length+1, unextended list's own bound is edges.length; the reverse direction needs a fuel-DOWNWARD argument the go-level lemma does not supply) which requires context (IWorldHistCounter/par/nw) not available to a standalone isAccessible lemma -- deferred to task-list item (b), which has that context at its call site. Phase 6 remains [IN PROGRESS]; items (b)-(f) of the task list are not yet started.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 5
   },
   "metadata": {
-    "session_id": "sess_1786336315_39f0e4_609",
+    "session_id": "sess_1786336315_39f0e4",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 196,
+    "sorry_count_baseline": 196,
+    "vacuous_count": 1,
+    "vacuous_count_note": "Pre-existing false positive (Computability/URM/Basic.lean:92, theorem J_IsJump ... := trivial -- a real, non-vacuous theorem the grep heuristic cannot distinguish), unrelated to this dispatch.",
+    "axiom_count": 26,
+    "axiom_count_baseline": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   }
 }

@@ -383,6 +383,96 @@ lemma intAccessPreorder_mono_append {edges : IEdges} (newEdge : Nat × Nat) {w w
     @LE.le Nat (intAccessPreorder (edges ++ [newEdge])).toLE w w' :=
   Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) _ _ h
 
+/-! ### Reverse-direction append monotonicity (fresh-target case)
+
+`isAccessible_append_mono` gives only ONE direction: appending an edge never LOSES an existing
+accessibility witness. The converse -- appending a FRESH edge `(nw, l)` (where `nw` is a brand
+new node, never previously a parent-slot member of `edges`) never GAINS a witness for any target
+OTHER than `nw` itself -- is not implied by `isAccessible_append_mono` and needs its own
+induction. Intuition: any DFS path that ever routes through the new edge `(nw, l)` must, to make
+further progress, treat `nw` as an intermediate `current` node and look for `nw`'s own outgoing
+edges; since `nw` is fresh, it has none (the only edge mentioning `nw` at all, `(nw, l)`, has
+`nw` in the CHILD slot, not the parent slot), so any such path is a dead end. Consequently every
+genuine reachability witness for a target `≠ nw` in the extended list avoids the new edge
+entirely and is already a witness in the original list. -/
+
+/-- Dead end: from `nw` itself, the extended edge list `edges ++ [(nw, l)]` has NO outgoing
+candidates at all (regardless of fuel), given `nw` is fresh (never a parent-slot member of
+`edges`) and `l ≠ nw` (the freshly-appended edge's own parent slot is not `nw`, which holds
+since `l` is an existing label and `nw` is a brand new one). This is the key dead-end fact
+`isAccessible_go_append_eq_of_fresh` uses to rule out the "routed through the new edge" case. -/
+private lemma isAccessible_go_fresh_dead_end
+    (edges : IEdges) (nw l : Nat) (hfresh : ∀ c, (c, nw) ∉ edges) (hne : l ≠ nw)
+    (target fuel : Nat) :
+    isAccessible.go (edges ++ [(nw, l)]) target nw fuel = false := by
+  match fuel with
+  | 0 => simp [isAccessible.go]
+  | fuel' + 1 =>
+    simp only [isAccessible.go, List.any_eq_false]
+    intro child hchild
+    simp only [List.mem_filterMap] at hchild
+    obtain ⟨⟨c, p⟩, hmem, hfilt⟩ := hchild
+    by_cases hp : p == nw
+    · exfalso
+      have hp' : p = nw := by simpa using hp
+      subst hp'
+      rw [List.mem_append, List.mem_singleton] at hmem
+      rcases hmem with hold | hnewedge
+      · exact hfresh c hold
+      · exact hne (congrArg Prod.snd hnewedge).symm
+    · simp [hp] at hfilt
+
+/-- `isAccessible.go` reverse-direction append monotonicity: given `nw` is fresh (never a
+parent-slot member of `edges`, `l ≠ nw`), any reachability witness for a target `≠ nw` found
+using the extended list `edges ++ [(nw, l)]` already existed using the original `edges` list, at
+the SAME fuel. Proved by induction on fuel, splitting on whether the candidate child at each step
+came from an old edge (immediate transfer) or is the new edge itself (only possible when
+`current = l`, giving candidate `child = nw`; since `target ≠ nw` this forces the recursive call
+`go (edges ++ [(nw, l)]) target nw fuel' = true`, which `isAccessible_go_fresh_dead_end` refutes
+outright, so this branch never occurs). Counterpart to `isAccessible_go_append_mono` (`:316`). -/
+private lemma isAccessible_go_append_eq_of_fresh
+    (edges : IEdges) (nw l : Nat) (hfresh : ∀ c, (c, nw) ∉ edges) (hne : l ≠ nw)
+    (target : Nat) (htarget : target ≠ nw) :
+    ∀ (current fuel : Nat), isAccessible.go (edges ++ [(nw, l)]) target current fuel = true →
+      isAccessible.go edges target current fuel = true := by
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro h
+    rw [List.any_eq_true] at h ⊢
+    obtain ⟨child, hchild, hcond⟩ := h
+    simp only [List.mem_filterMap] at hchild
+    obtain ⟨⟨c, p⟩, hmem, hfilt⟩ := hchild
+    by_cases hp : p == current
+    · simp only [hp, ite_true, Option.some.injEq] at hfilt
+      rw [List.mem_append, List.mem_singleton] at hmem
+      rcases hmem with hold | hnewedge
+      · -- (c, p) ∈ edges: a genuine candidate in the un-extended list too.
+        refine ⟨child, ?_, ?_⟩
+        · simp only [List.mem_filterMap]
+          exact ⟨(c, p), hold, by simp [hp, hfilt]⟩
+        · by_cases hce : child == target
+          · simp [hce]
+          · simp only [hce, Bool.false_eq_true, ite_false] at hcond ⊢
+            exact ih child hcond
+      · -- (c, p) = (nw, l): child = nw, so this branch is a dead end.
+        have hcnw : child = nw := by
+          simp only [Prod.mk.injEq] at hnewedge
+          rw [← hfilt]
+          exact hnewedge.1
+        exfalso
+        by_cases hce : child == target
+        · have hchildtarget : child = target := by simpa using hce
+          exact htarget (hcnw.symm.trans hchildtarget).symm
+        · simp only [hce, Bool.false_eq_true, ite_false] at hcond
+          rw [hcnw] at hcond
+          have hdead := isAccessible_go_fresh_dead_end edges nw l hfresh hne target k
+          rw [hdead] at hcond
+          exact absurd hcond (by simp)
+    · simp [hp] at hfilt
+
 /-! ### Sub-frame monotonicity
 
 Upward closure is *anti-monotone* in the edge set: growing `edges` to any superset `edges'`

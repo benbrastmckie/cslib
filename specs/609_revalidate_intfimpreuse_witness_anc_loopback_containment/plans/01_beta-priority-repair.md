@@ -775,16 +775,64 @@ dispatch** (no edits to any `.lean` file); the tree is exactly as left by the Ph
    final step once (a)-(e) are in place, since the containment claim itself does not change shape —
    only what justifies its preservation does).
 
+**Progress note (this dispatch, item (a) landed)**: task-list item (a), the go-level reverse-
+direction `isAccessible` lemma, is now landed sorry-free and axiom-clean, right after
+`isAccessible_append_mono`/`intAccessPreorder_mono_append` (`Scheme.lean:386-461` as of this
+dispatch, under a new `### Reverse-direction append monotonicity (fresh-target case)` section):
+
+- `isAccessible_go_fresh_dead_end` (private): from a fresh node `nw` (never a parent-slot member
+  of `edges`, and `l ≠ nw`), the extended list `edges ++ [(nw, l)]` has no outgoing candidates at
+  all from `nw`, at ANY fuel -- the standalone "dead end" fact the main lemma's new-edge case
+  needs.
+- `isAccessible_go_append_eq_of_fresh` (private): `isAccessible.go (edges ++ [(nw, l)]) target
+  current fuel = true → target ≠ nw → isAccessible.go edges target current fuel = true`, at
+  MATCHING fuel on both sides (i.e. it is fuel-preserving, not fuel-adjusting). Proved by
+  induction on fuel exactly per point 4's sketch: the "candidate came from an old edge" case
+  transfers directly; the "candidate is the new edge itself" case is ruled out via the dead-end
+  lemma above (target ≠ nw forces the recursive call into `go ... nw fuel'`, which the dead-end
+  lemma shows is always `false`, contradicting the hypothesis).
+
+**Deliberately NOT attempted this dispatch: a wrapper-level `isAccessible` (non-`.go`) form of
+the same fact.** This surfaces a THIRD gap, not previously identified, and is recorded here rather
+than forced: `isAccessible (edges ++ [(nw, l)]) w w' = true` unfolds (via `edges ++ [(nw,
+l)]).length = edges.length + 1`) to `go (edges++[(nw,l)]) w' w (edges.length + 1) = true` --
+i.e. the go-level lemma above, invoked at fuel `edges.length + 1`, gives `go edges w' w
+(edges.length + 1) = true`, ONE MORE than `isAccessible edges w w'`'s own fuel bound
+(`edges.length`). Unlike the FORWARD direction (`isAccessible_append_mono`, which goes from a
+SMALLER fuel bound up to a LARGER one and closes via the already-landed, upward-only
+`isAccessible_go_fuel_mono`), the reverse direction needs to go DOWN by one unit of fuel on the
+UNEXTENDED list -- and downward fuel reduction is NOT, in general, valid for a fuel-bounded DFS
+with `List.any` search (more fuel can only ever preserve or extend what is reachable, never the
+converse) without an extra "fuel `edges.length` already suffices, extra fuel changes nothing"
+saturation fact. That saturation fact is very plausibly TRUE here specifically because `edges`
+is provably a genuine forest under this file's own invariants (every child has exactly one parent,
+established once at mint time and never revisited -- see `IWorldHistCounter`
+(`nw = edges.length + 1`, `:3527`) and the already-landed `edges_shape_of_worldHist` /
+`parAncestor_of_isAccessible` pigeonhole argument, `:3563-3599`, which already derives the
+`parAncestor`-vs-`isAccessible` coincidence needed to make this rigorous) -- but proving it
+requires threading that `par`/`nw` context through a bare `edges`-only lemma, which is
+out of scope for a standalone `isAccessible` fact. Task-list item (b) ("generalize
+`applyAllTImpRules_agrees`/`applyPersistenceFixpoint_agrees`... to compose across a GROWING
+`edges ⊇ edges₀`") already has exactly this context available (`nw`, `par`, `IWorldHistCounter`)
+at its call site, so the natural place to close this gap is inside item (b)'s own composition
+proof, not as a preliminary, contextless wrapper lemma. Recorded here so the next dispatch does
+not have to re-derive the diagnosis: reach for `IWorldHistCounter`/`edges_shape_of_worldHist`/
+`parAncestor_of_isAccessible` first, rather than attempting a generic fuel-saturation lemma about
+arbitrary `IEdges` lists.
+
 **Scope Hypothesis, resolved this dispatch**: `grep -n IReuseContain_mono` finds exactly six use
-sites, all inside `intExpandBranches_openBranch_sat`'s induction (`Scheme.lean:7403-8595` as of this
-dispatch) and nowhere else in the file: `:7533` (case2, bh→bPers persistence transport), `:7630`
-(case4, same), `:7747-7748` (case5, bPers→extendMany step transport), `:7878` (case6, bh→bPers
-persistence transport, alongside the `IReuseContain_snoc` call at `:7958-7959` for the NEW edge),
-`:8135-8136` (case7, bPers→extendMany mint-arm step transport), `:8304-8309` (case8, bPers→branch
+sites, all inside `intExpandBranches_openBranch_sat`'s induction (`Scheme.lean:7493-8685` as of this
+dispatch) and nowhere else in the file: `:7623` (case2, bh→bPers persistence transport), `:7720`
+(case4, same), `:7838` (case5, bPers→extendMany step transport), `:7968` (case6, bh→bPers
+persistence transport, alongside the `IReuseContain_snoc` call at `:8049` for the NEW edge),
+`:8226` (case7, bPers→extendMany mint-arm step transport), `:8396` (case8, bPers→branch
 step transport, once per BETA child). The induction has 10 cases total (`case1`-`case10`); only
-cases 2, 4, 5, 6, 7, 8 touch `IAllReuseContain` at all (case1/3/9/10 are dead-end/absurd arms). Line
-numbers will drift again on the next dispatch's own insertions — re-run the grep before editing, per
-this plan's own delta-recording convention.
+cases 2, 4, 5, 6, 7, 8 touch `IAllReuseContain` at all (case1/3/9/10 are dead-end/absurd arms).
+**Updated this dispatch** (`+90` line offset from this dispatch's own insertion of the new
+`isAccessible_go_append_eq_of_fresh` lemma family ahead of line 386 — see the Progress note
+above); the `key` suffices statement of `intExpandBranches_openBranch_sat` referenced in task-list
+item (d) above is at `Scheme.lean:7524`. Line numbers will drift again on the next dispatch's own
+insertions — re-run the grep before editing, per this plan's own delta-recording convention.
 
 **Tasks**:
 - [ ] Restate `IReuseContain` (`Scheme.lean:6814`) with `bSnap := b`:

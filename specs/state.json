@@ -1035,8 +1035,8 @@
         "CslibTests/TableauConformance.lean"
       ],
       "created": "2026-08-09T22:54:00Z",
-      "last_updated": "2026-08-10T02:21:06Z",
-      "session_id": "sess_1786321994_b49e26_609",
+      "last_updated": "2026-08-10T04:49:04Z",
+      "session_id": "sess_1786336315_39f0e4",
       "artifacts": [
         {
           "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md",
@@ -1046,7 +1046,7 @@
         {
           "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
           "type": "plan",
-          "summary": "Nine phases, ~15 hours, waves [[1],[2],[3],[4,5],[6],[7],[8],[9]]. Verification tiers: interface, full, full, local, local, full, interface, full, interface. Phase 3 is the only atomic-batch phase. Five phases carry Scope Hypothesis lines."
+          "summary": "Phase 6 carries an Investigation Note (mechanism, two gaps, dependency-ordered task list, resolved Scope Hypothesis) plus a Progress note: task-list item (a) (`isAccessible_go_append_eq_of_fresh` + dead-end helper) is landed sorry-free; heading remains [IN PROGRESS] pending items (b)-(f)."
         }
       ]
     },

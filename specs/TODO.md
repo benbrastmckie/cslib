@@ -814,8 +814,15 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**:
+  - [400_reconcile_connectives_pr607/reports/01_pr607-engagement.md]
+  - [400_reconcile_connectives_pr607/reports/02_engagement-strategy.md]
+  - [400_reconcile_connectives_pr607/review-scaffolding/01_comparison-tables.md]
+  - [400_reconcile_connectives_pr607/review-scaffolding/02_falsum-bridge-sketch.md]
+  - [400_reconcile_connectives_pr607/review-scaffolding/03_grind-direction-finding.md]
+  - [400_reconcile_connectives_pr607/review-scaffolding/04_review-packet.md]
+  - [400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md]
 - **Plan**: [400_reconcile_connectives_pr607/plans/02_pr607-engagement.md]
-- **Research**: [400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md]
 
 **Description**: [REVISED 2026-08-10 — SECOND revision. The first revision's load-bearing premises were verified FALSE against the live record; corrected below. Decision landed: OPTION B.]
 

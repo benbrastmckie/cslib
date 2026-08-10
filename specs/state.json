@@ -276,14 +276,44 @@
       "next_artifact_number": 3,
       "artifacts": [
         {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/reports/01_pr607-engagement.md",
+          "summary": "Initial PR #607 engagement: HasBot/derived-neg point + naming/precedence/bundling nits"
+        },
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/reports/02_engagement-strategy.md",
+          "summary": "Live-PR-grounded engagement strategy: incremental (not alternative); reuse Mathlib Bot/Top, derived-neg bridge; human-authorable review skeleton"
+        },
+        {
           "path": "specs/400_reconcile_connectives_pr607/plans/02_pr607-engagement.md",
           "type": "plan",
           "summary": "[SUPERSEDED 2026-08-10] PR #607 engagement plan — written while #607 was OPEN; its review deliverable became unreachable when #607 merged 2026-08-03, and its falsum premise was verified false. Phases 1-4 output (review-scaffolding/) remains valid and reusable; Phases 5-8 are moot. Superseded by reports/03_falsum-representation-decision.md."
         },
         {
-          "path": "specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md",
           "type": "report",
-          "summary": "Falsum representation decision: recommends Option B (primitive bot); #607 shown orthogonal to falsum; PR #648 rework-and-rebase"
+          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/01_comparison-tables.md",
+          "summary": "Phase 1: #607 class inventory, notation divergences, naming options, precedence ladder, file-org consensus, prior-comment anchor"
+        },
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/02_falsum-bridge-sketch.md",
+          "summary": "Phase 2: verified derived-neg bridge reusing Mathlib Bot/Top (no new HasBot); HasNot instance + rfl bridges; diamond hazard noted"
+        },
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/03_grind-direction-finding.md",
+          "summary": "Phase 3: empirical grind finding - abbrev transparent (grind works); upstream primitive+wrapper needs simp[_def]; notation->constructor is the helpful direction"
+        },
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/review-scaffolding/04_review-packet.md",
+          "summary": "Phase 4: consolidated human-review scaffolding packet (priority-ordered, AI-policy header, verified Lean exhibits) - material for human to adapt, not prose to paste"
+        },
+        {
+          "type": "report",
+          "path": "specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md",
+          "summary": "Falsum representation decision: recommends Option B (keep primitive bot); #607 verified orthogonal to falsum; PR #648 rework-and-rebase; measured Option A cost (512/1614 decls gain [Bot Atom]); section 9 standalone action checklist"
         }
       ],
       "session_id": "sess_1786383117_557518",

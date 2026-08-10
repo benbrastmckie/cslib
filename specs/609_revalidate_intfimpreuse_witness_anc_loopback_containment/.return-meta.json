@@ -1,0 +1,33 @@
+{
+  "status": "research_finished",
+  "started_at": "2026-08-09T17:36:02-07:00",
+  "finished_at": "2026-08-09T18:55:00-07:00",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md"
+    },
+    {
+      "type": "probe",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/scratch/ReuseRevalidateProbe.lean"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json"
+    }
+  ],
+  "partial_progress": {
+    "stage": "report_written",
+    "details": "Report, probe and orchestrator handoff written. Recommendation: beta-priority rule ordering in intStepBranch (V1), machine-measured adequate on 15 formulas and verdict-equivalent on the 20-row conformance corpus. Fallback V2 (retract-on-violation) measured equally adequate. V3 (cyclic edges) excluded on termination grounds."
+  },
+  "metadata": {
+    "session_id": "sess_1786321994_b49e26_609",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "next_action_hint": "plan",
+    "new_sorries": 0,
+    "new_axioms": 0,
+    "source_files_modified": []
+  }
+}

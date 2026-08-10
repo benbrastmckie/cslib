@@ -1,0 +1,52 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "success",
+  "summary": "A repair for the never-re-validated loop-back containment is identified and machine-measured green on every adequacy and conformance metric. The winning change is NOT to intFImpReuseWitnessAnc? but to intStepBranch's rule-selection order: defer the world-creating F(phi -> psi) rule until no other rule is applicable anywhere on the branch ('beta-priority', V1). Rationale: the containment is only ever invalidated by beta rules that were still PENDING at reuse time (twin ISF copies of a positive disjunction at x and w split independently); deferring world creation past every beta rule moves that divergence BEFORE the check, where the check can see it and simply decline to reuse. Measured under V1 at the real entry-point fuel: the AUGMENTED frame carries IFimpAccess AND full positive-formula persistence AND refutes phi at world 0, on all 9 adequacy-corpus formulas and all 6 open rows of the 20-row propositional conformance corpus (including the complexity-9 divergence witness); 0 verdict differences across all 20 conformance rows; terminates (hence saturates) at intFuelExt; creates no more worlds than the baseline (phiRef3 uses 3 instead of 4). That is exactly the frame openBranch_countermodel needs, and truthLemma is already sorry-free and parametric over any frame carrying both facts. A second repair (V2, provisional reuse with retract-on-violation) is equally adequate but adds a recursion arm to go, hence a new case in every invariant lemma threaded through the key induction; kept as fallback. A third (V3, put the loop-back edge into the algorithm's own edge list) is adequate on the 9-formula corpus but did NOT terminate within ~27 minutes on the conformance corpus where the baseline and both other variants each finished under ~10 minutes; it also destroys the forest property ForestComparable/IWorldsPlanted/IPosPersistRaw are stated against, and propagating positives across the loop-back has the same soundness shape as the already-recorded UNSOUND 'Option B'. Two new facts about the existing defect: phiRef4 is a THIRD refuting formula (currently only a non-asserted robustness variant in BetaSplitRefutation.lean), and in the baseline the augmented frame is ONE predicate short, not two -- IFimpAccess and conjunct 2 both already hold over it, only hpers fails.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md"
+    },
+    {
+      "type": "probe",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/scratch/ReuseRevalidateProbe.lean"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/reports/01_loopback-revalidation-repair.md",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/scratch/ReuseRevalidateProbe.lean",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.orchestrator-handoff.json",
+    "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/.return-meta.json"
+  ],
+  "decisions_made": [
+    "Recommend V1 (beta-priority in intStepBranch) over V2 and V3. V1 leaves go's recursion structure, its termination measure, and the sorry-free axiom-clean intExpandBranches_closed_unsat completely untouched; V2 does not.",
+    "All probe work was done in an isolated git worktree pinned to HEAD because a concurrent session had Scheme.lean mid-edit and red in the main tree. Cslib/ in the main working tree was not modified. The worktree was removed after use.",
+    "The probe baseline (Cfg all-false) was fidelity-gated two ways before any variant was trusted: its returned branch equals the real intuitionisticTableau's for all 9 formulas, and its phiRef1 raw/loop-back edge lists reproduce the CI assertion at BetaSplitRefutation.lean:304 exactly.",
+    "Saturation is evidenced by termination of the conformance corpus's row 20 (the divergence witness) at intFuelExt -- a ~13-million-digit fuel numeral, so a non-saturating branch could not have returned. A small-fuel growth table was also run and deliberately NOT relied on: under per-branch fuel it measures the fuel-0 cutoff, not saturation.",
+    "Reuse-first satisfied with no new abstraction: the target invariant is the EXISTING IReuseContain (Scheme.lean:6798ff) with its snapshot existential dropped (bSnap := b); Foundations' Branch.posTypeAt/containmentBlocked and the existing posFormulasAt bridge lemma (Scheme.lean:2040) cover the containment vocabulary."
+  ],
+  "dead_ends": [
+    "V3 (loop-back edge appended to the algorithm's own edges so the copy channel maintains containment): adequate but fails the termination gate and destroys the forest property. Do not retry without a new termination argument.",
+    "Small-fuel maxLabel growth tables on the divergence witness are uninformative under the per-branch-fuel engine (they measure the fuel-0 cutoff). Use conformance-row-20 termination at intFuelExt instead.",
+    "The five previously-excluded constructions (rawEdges, prune-at-blocked, prune-at-strictly-blocked, greatest IFimpAccess-supported fixpoint, maximal atom-inclusion frame) were NOT re-attempted; all five are post-hoc frame constructions over unchanged algorithm output, which is why the three algorithm-level variants here are not in tension with those exclusions."
+  ],
+  "key_findings": [
+    "Mechanism: the recorded loop-back (x, w) makes x and w preorder-equivalent, so persistence needs pos(w) subseteq pos(x) as well as pos(x) subseteq pos(w). At reuse time both hold, so every positive at w has a TWIN ISF entry at x -- including unexpanded T(theta or rho) -- and the twins beta-split independently.",
+    "The positive-implication beta arm (.pos, .imp, whose T(psi)@l child adds a positive) is a SECOND invalidation channel of identical shape, not recorded in the current docstring. No witness formula was found for it in this corpus (phiRef2, built around that shape, does not exhibit the defect), so it is a structural observation rather than a measured refutation -- but any fix must close it. V1 closes both channels uniformly.",
+    "Three live sorries collapse if this lands: Scheme.lean:8012 openBranch_countermodel, Completeness.lean:170 intuitionisticTableau_complete (the file already records the replacement one-liner), and Minimal/Completeness.lean:166 minimalTableau_complete.",
+    "The 102 intStepBranch references in Scheme.lean route through only three spec lemmas, and the none-case transfers verbatim because intStepBranchPrio b e nw = none iff intStepBranch b e nw = none holds by construction (the second pass IS intStepBranch). Every none-keyed result -- saturation, IBranchSaturation, intExpandBranches_openBranch_sat's open-branch leaf -- needs no reproof.",
+    "V2's retraction counter independently confirms the mechanism: retractions fire only on phiRef1 (1), phiRef3 (2), phiRef4 (1) and nowhere else.",
+    "CslibTests/BetaSplitRefutation.lean's #guard_msgs values are a regression guard on the defect and WILL change when the defect is removed; phiRef4 should be promoted to an asserted row first."
+  ],
+  "recommended_phases": [
+    "1. intStepBranchPrio + its three spec lemmas + the none-iff bridge; swap the single call site (Scheme.lean:5005). Verify: full lake build, conformance corpus unchanged, zero new sorries. Worth landing standalone.",
+    "2. Freeze lemma (no arm of go adds a positive at a world carrying a recorded loop-back, given the first-pass-empty hypothesis available at the world-creating arm) + snapshot-free IReuseContain; re-thread through key.",
+    "3. Export augmented-frame positive persistence from intExpandBranches_openBranch_sat (raw half is IPosPersistRaw, already sorry-free; loop-back half is the strengthened IReuseContain; chain along ReflTransGen as in openBranch_rawEdges_upward_closed).",
+    "4. Discharge openBranch_countermodel, then the two Completeness.lean one-liners.",
+    "5. Promote phiRef4 in BetaSplitRefutation.lean and re-point that file's narrative at the repaired calculus."
+  ],
+  "sorry_inventory": []
+}

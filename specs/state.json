@@ -29,7 +29,7 @@
       "project_number": 605,
       "project_name": "establish_minbranchbotforces_upward_closure_at_bot",
       "title": "Establish upward-closure of minBranchBotForces at the bot formula shape",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Establish upward-closure of `minBranchBotForces b` at the `bot` formula shape -- the second, genuinely separate obligation at the DP-4 site (minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160).\n\nWHY THIS IS SEPARATE: DP-4 needs TWO upward-closure premises -- the valuation's AND minBranchBotForces b's, which is a distinct fact at the bot formula shape -- where only one is supplied. This is not a restatement of the openBranch_countermodel conjunct; it is an independent obligation that must be discharged before DP-4 can close.\n\nCURRENT STATUS (machine-checked): the property HOLDS at the [(1,0)] witness under minScheme, where that edge set discharges BOTH upward-closure obligations and still falsifies phiRef1 at world 0. It is NOT established in general. The former claim that DP-4 was refuted independently of the DP-3 site has been retracted; the site is open, not refuted.\n\nSCOPE: prove upward-closure of minBranchBotForces b in general over the frame the frame-construction task produces, or determine and document precisely what additional precondition it needs -- following the R1 precedent (find the precondition that makes the statement true, add it, repair call sites, discharge) established by intExpandBranches_openBranch_sat, now sorry-free at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:6815.\n\nA documented negative or narrowing result is a legitimate outcome, recorded in-source with the same honesty discipline as the current annotations. Zero new sorries, zero new axioms.",
@@ -38,12 +38,15 @@
         604
       ],
       "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
         "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+        "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+        "CslibTests/MvalidBotShapeRefutation.lean"
       ],
       "parent_task": 593,
       "created": "2026-08-09T20:41:11Z",
-      "last_updated": "2026-08-10T01:57:32Z",
+      "last_updated": "2026-08-10T02:20:41Z",
       "session_id": "sess_1786321994_b49e26_605",
       "artifacts": [
         {
@@ -55,8 +58,14 @@
           "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md",
           "type": "plan",
           "summary": "Six phases, ~7 hours, waves [[1],[2,3],[4],[5],[6]]. Verification tiers: local, interface, local, full, local, full. Phase 4 declared Commit Mode: atomic-batch."
+        },
+        {
+          "path": "specs/605_establish_minbranchbotforces_upward_closure_at_bot/summaries/01_statement-shape-fix-summary.md",
+          "type": "summary",
+          "summary": "DP-4 closed via verified statement-shape fix; sorries 3->2; full CI gate green"
         }
-      ]
+      ],
+      "completion_summary": "Landed the verified statement-shape fix: openBranch_countermodel gained a third upward-closure conjunct (S.modelBot), tableau_complete's hvalid gained the matching premise, and DP-4 (minimalTableau_complete) closed entirely via a universe-invariance bridge (mvalid_descend/mvalid_universe_invariant) that resolved the required MValid.{_,0} pin at zero cost to instDecidableDerivableMinPropAxiom's public statement. Sorry census in the propositional tableau completeness chain reduced from 3 to 2. Landed CslibTests/MvalidBotShapeRefutation.lean as a permanent regression guard. Full lake build (3325 jobs) and lake test (9397 jobs) green; zero new axioms; zero new vacuous definitions."
     },
     {
       "project_number": 590,
@@ -1018,7 +1027,12 @@
         604
       ],
       "file_scope": [
-        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean"
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+        "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+        "CslibTests/BetaSplitRefutation.lean",
+        "CslibTests/TableauConformance.lean"
       ],
       "created": "2026-08-09T22:54:00Z",
       "last_updated": "2026-08-10T02:00:12Z",

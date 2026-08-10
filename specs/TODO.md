@@ -11,8 +11,8 @@ next_project_number: 613
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,605,607,608,609,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,606,611 | 36,37,181,375,400,425,534,554,568,594,605,609,610 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,375,400,409,425,534,554,568,569,590,594,599,600,607,608,609,610,612 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,606,611 | 36,37,181,375,400,425,534,554,568,594,609,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -28,10 +28,8 @@ next_project_number: 613
 400 [NOT STARTED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
   └─ 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P (see above)
 409 [BLOCKED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-605 [PLANNED] — Establish upward-closure of `minBranchBotForces b` at the `bot` f
-  └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 609 [PLANNED] — `intFImpReuseWitnessAnc?` (`Cslib/Logics/Propositional/Tableau/In
-  └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece (see above)
+  └─ 606 [NOT STARTED] — Consume the frame construction and forcing proof from the predece
 
 ### Modal Logic
 
@@ -230,12 +228,13 @@ Zero new sorries, zero new axioms. If the predecessor tasks landed a negative or
 ---
 
 ### 605. Establish upward-closure of minBranchBotForces at the bot formula shape
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 603, Task 604
 - **Research**: [605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md]
 - **Plan**: [605_establish_minbranchbotforces_upward_closure_at_bot/plans/01_statement-shape-fix.md]
+- **Summary**: [605_establish_minbranchbotforces_upward_closure_at_bot/summaries/01_statement-shape-fix-summary.md]
 
 **Description**: Establish upward-closure of `minBranchBotForces b` at the `bot` formula shape -- the second, genuinely separate obligation at the DP-4 site (minimalTableau_complete, Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:150, sorry at :160).
 

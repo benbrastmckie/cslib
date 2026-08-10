@@ -1,5 +1,5 @@
 ---
-next_project_number: 617
+next_project_number: 619
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 617
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,400,409,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,497,537,551,571,576,588,589,595,611 | 36,37,181,400,425,534,554,568,594,610 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -29,6 +29,8 @@ next_project_number: 617
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
 616 [NOT STARTED] — Repair the stale and self-contradictory documentation layer in th
+617 [NOT STARTED] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
+618 [NOT STARTED] — Close the remaining coverage gaps in the propositional metatheory
 
 ### Modal Logic
 
@@ -83,6 +85,95 @@ next_project_number: 617
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
 ## Tasks
+
+### 618. Propositional coverage gaps and ordering overclaim
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Close the remaining coverage gaps in the propositional metatheory, and correct the one docstring that overclaims a result the tree does not prove.
+
+SURFACED BY: the 2026-08-10 propositional review (specs/reviews/review-2026-08-10.md, findings H3 and M4), from a full coverage matrix over {CPL, IPL, MPL} x {Hilbert, ND, sequent, tableau, algebraic, fragments}. Every item below is a MISSING theorem, not a broken one -- the subsystem is sorry-free and axiom-clean (1827 declarations scanned, 0 tainted).
+
+=== PART A (DO FIRST -- correctness of the record, not new mathematics) ===
+
+A1. `Semantics/Algebra/ConservativeChain.lean:140` claims the five Hilbert systems are "**strictly ordered**" by derivability. FALSE AS STATED: `derivability_subsumption_chain` proves ONE-WAY SUBSUMPTION over three displayed nodes. Strictness is never proved, and an exhaustive search found NO properness or separation result anywhere in the tree -- nothing establishes MPL != IPL != CPL. Correct the docstring to say "ordered". Do this regardless of whether Part D is ever undertaken; do not leave the overclaim standing pending future work.
+
+A2. `Tableau/Classical/DecisionProcedure.lean:23` lists `instDecidableDerivable` under "Main Results". NO SUCH INSTANCE EXISTS -- the same file explicitly declines it at :92-94. Remove the stale entry from the Main Results list.
+
+A3. `Tableau/Intuitionistic/DecisionProcedure.lean:62` claims the instance "feeds the modal/temporal/bimodal extensions". It has ZERO consumers outside Cslib/Logics/Propositional/ (verified by grep; `IValid` hits under Modal/ are a DIFFERENT `IValid` from Birelational.lean). Correct or drop the claim.
+
+A4. `CslibTests/TableauConformance.lean:34-35` states in the present tense that "the completeness theorems the driver would need do not exist yet for either calculus". They exist and are sorry-free (`intuitionisticTableau_complete`, `intuitionisticTableau_decides`). Re-tense.
+
+A5. `Tableau/Minimal/DecisionProcedure.lean:119` says "`MValid φ` is decidable" where the statement is `MValid.{_, 0} φ`. Add the pin.
+
+=== PART B (CHEAP WINS -- ingredients already exist) ===
+
+B1. G10 -- LJ cut-free completeness. LK has `lkCutFreeCompleteness`/`lkCutFreeIffTautology` (LK/CutFreeCompleteness.lean:35,45); LJ has no counterpart. Both ingredients exist: `lj_iff_ivalid` (LJ/Completeness.lean:288) and `LJProof.cutElim` (LJ/CutElimination.lean:678). Essentially a composition. Target: `SequentCalculus/LJ/CutFreeCompleteness.lean`.
+
+B2. G5 -- the GENERAL split-interpolation lemma over arbitrary cover partitions is already PROVED but `private`: `maeharaCore` (LK/Interpolation.lean:62) and `ljMaeharaCore` (LJ/Interpolation.lean:68). Only the empty-context implication form is public (`LKProof.interpolation` :863, `LJProof.interpolation` :560). Making the general form public requires NO NEW PROOF -- only a decision about the public API shape and a docstring.
+
+B3. G4 -- LM decidability. Missing `Decidable (Nonempty (SeqProofMinimal (Γ ⊢ A)))` and `instDecidableDerivableInMPL`. LOW difficulty: `instDecidableMValid` already exists (Minimal/DecisionProcedure.lean:123), `listToImp`/`ctxToImp` are reusable (LJ/Decidability.lean:72,82), and `instDecidableLJDerivable` (:197) is a direct template. NOTE: coordinate with the computable-ctxToImp task -- if that lands first, build this on the computable route rather than inheriting the `noncomputable` taint.
+
+=== PART C (LM PARITY -- the real remaining work) ===
+
+STRUCTURAL FINDING: LM has only Basic/Soundness/Completeness (3 modules) against LJs 6 and LKs 8. `LM.lean` imports only those three. Note LMs soundness is strictly MORE general than LJs (arbitrary upward-closed `bot_forces`, LM/Soundness.lean:61), so this is a genuine gap in coverage, not a deliberate descoping.
+
+C1. G1 -- LM cut elimination. Target `SequentCalculus/LM/CutElimination.lean`. PROMISING ROUTE: LJs proof (LJ/CutElimination.lean, 715 lines, `ljCutAdmissibility`:659) is already written over `SeqProof T` GENERICALLY, and `SeqProofMinimal = SeqProof MPL` is that same inductive at a different theory -- so much of it may generalize by abstracting `T` rather than being rewritten. Measure this before committing to a bespoke proof.
+C2. G2 -- LM subformula property. Target `SequentCalculus/LM/SubformulaProperty.lean`. `SeqProof.formulas` (LJ/SubformulaProperty.lean:50) is ALREADY generic over `T`, so the collection function needs no work. Depends on C1.
+C3. G3 -- LM Craig interpolation. Target `SequentCalculus/LM/Interpolation.lean`. Depends on C1.
+
+=== PART D (DECIDE, DO NOT ASSUME) ===
+
+D1. G7 -- the or-imp fragment IPL<or,imp,top> is the ONLY one of the eight fragment axiom systems without a completeness theorem. `OrImpAxiom` is declared (ProofSystem/FragmentAxioms.lean:257) and conservativity exists (`hilbertIplConservativeOverOrImp`, Algebra/OrImpConservative.lean:200), but no `orImp_*_completeness` exists anywhere. DIFFICULTY WARNING: its conservativity is proof-theoretic via cut-free LJ, NOT algebraic; the other four IPL fragments use Brouwerian/Hilbert-algebra Lindenbaum routes that do not obviously accommodate disjunction. Research the route before planning implementation.
+
+D2. SEPARATION THEOREMS (the substance behind A1). Establishing MPL != IPL != CPL is REAL NEW MATHEMATICS, not cleanup. Report a recommendation on whether it belongs in scope; do not undertake it unilaterally under this task. INTERACTION TO ACCOUNT FOR: the natural route is exhibiting a separating formula via `decide` on the tableau -- which does not reduce in the kernel (see the instance-priority task and CslibTests/TableauConformance.lean:30, "`decide`, `native_decide`, and `rfl` stall on `WellFounded.fix`"). A separation proof will likely need `#eval`-level evidence promoted to a proof term, or a semantic argument instead.
+
+=== ALSO RECORDED (no action unless you disagree) ===
+
+G6 -- CPL Hilbert derivability is decidable only under `[Fintype Atom]` (Metalogic/StrongCompleteness.lean:566), while IPL and MPL are decidable for any `[DecidableEq Atom] [Hashable Atom]`. Tableau/Classical/DecisionProcedure.lean:79-80 notes the tableau route would lift the `Fintype` requirement. Whether to build that instance is a judgment call; A2 above only fixes the docstring that wrongly claims it already exists.
+G9 -- no direct ND soundness/completeness for any system; both directions are reachable only by composing the `hilbert_iff_nd_*` bridges (NaturalDeduction/Equivalence.lean:448,456,464) with Hilbert-side results. Architectural and probably fine, but currently undocumented as a deliberate choice -- consider a module-docstring note.
+
+=== DO NOT TOUCH ===
+
+The intuitionistic engines internal "not proved"/"refuted" notes (Expansion.lean:151-155 saturation; Scheme.lean:596-597 isAccessible transitivity; Scheme.lean:4897-4899 intExpMeasure_step_lt) concern internal lemmas of a SUPERSEDED route. The headline theorems are sorry-free via a per-branch fuel-sufficiency argument, and the file records both "Gap 1" and "Gap 2" as closed at :804, :826, :5988. These are NOT live gaps. (Scheme.lean:4897-4899 is separately wrong on its own terms and is owned by the docstring-repair task -- do not also fix it here.)
+
+---
+
+### 617. Fix tautology decidable instance priority
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: CRITICAL. Library consumers importing `Cslib` receive a `Decidable (Tautology φ)` instance that cannot run in the kernel, shadowing the one that can. Seven existing tests pass only by accident of import order.
+
+SURFACED AND REPRODUCED BY: the 2026-08-10 propositional review (specs/reviews/review-2026-08-10.md, finding C1). Both the defect and the fix were verified by direct experiment during that review -- this is not a hypothesis.
+
+THE DEFECT: two instances target `Decidable (Tautology φ)`:
+  - `instDecidableTautology` (Cslib/Logics/Propositional/Semantics/Bool.lean:185) -- Boolean enumeration over `BoolValuation`, requires `[Fintype Atom]`, REDUCES IN THE KERNEL.
+  - `instDecidableTautologyTableau` (Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean:81) -- tableau-based, requires no `Fintype`, DOES NOT REDUCE IN THE KERNEL (stalls on `WellFounded.fix`).
+
+Both carry default priority, so the later-declared tableau instance wins resolution wherever both are in scope. `Cslib.lean` imports both (`Semantics.Bool` at :597, `Tableau.Classical.DecisionProcedure` at :627), so every consumer of the barrel gets the inert one.
+
+REPRODUCTION (verified): a file importing both `Cslib.Logics.Propositional.Semantics.Bool` and `Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure`, then:
+  `#synth Decidable (Tautology (Atom := Bool) (.imp (.atom false) (.atom false)))`
+resolves to `instDecidableTautologyTableau`, and
+  `example : decide (Tautology (Atom := Bool) (.imp (.atom false) (.atom false))) = true := by decide`
+fails with: "Tactic `decide` failed [...] After unfolding the instances `instDecidableEqBool`, `Bool.decEq`, and `instDecidableTautologyTableau`, reduction got stuck at the `Decidable` instance".
+
+BLAST RADIUS: `CslibTests/Propositional.lean:64-90` holds 7 `by decide` tautology tests that currently pass ONLY because that file does not transitively import the tableau module. Adding a single import breaks all 7. Downstream users importing `Cslib` cannot use `decide` on `Tautology` at all.
+
+THE FIX (verified working): lower the tableau instances priority so the computable Boolean decider wins when both apply:
+  `attribute [instance 100] instDecidableTautologyTableau`
+With this in place, `#synth` resolves to `instDecidableTautology` and the `decide` examples compile clean. The tableau instance remains available for the `Fintype`-free case where it is the only candidate. Apply it at the declaration site in Tableau/Classical/DecisionProcedure.lean rather than in a consumer file.
+
+VERIFY: (1) reproduce the failure first, so the fix is demonstrated against a known-red baseline -- do not skip this; (2) apply the priority change; (3) confirm `#synth` flips back; (4) add an import of the tableau module to `CslibTests/Propositional.lean` (or a new test file importing both) so the 7 `decide` tests actually EXERCISE the both-in-scope configuration and this regression cannot silently return; (5) full `lake build` + `lake test` green.
+
+BACKGROUND (not a defect, do not "fix"): the `#eval`-vs-`decide` split is expected and documented at `CslibTests/TableauConformance.lean:30` -- "`decide`, `native_decide`, and `rfl` stall on `WellFounded.fix`". The tableau algorithms genuinely compute under `#eval` (20 `#guard_msgs` conformance rows green; `minimalTableau (⊥ → p)` correctly returns open, rejecting ex falso). This task is ONLY about instance priority, not about making the tableau kernel-reducible.
+
+---
 
 ### 616. Repair stale contradictory tableau docstrings
 - **Status**: [NOT STARTED]
@@ -257,6 +348,20 @@ APPROACH (not prescriptive): give `ctxToImp` a deterministic computable fold —
 VERIFY: `lake build` green; the four instances build without `noncomputable`; add a `#guard_msgs`-protected computation in CslibTests/ demonstrating a non-empty-context decision actually evaluates. Watch for the two known `unusedDecidableInType` lint warnings (task 613) which are pre-existing in the same subtree and NOT this task's to fix.
 
 FOLLOW-ON: if this lands, the closed-context restriction on the tableau TFAE folds (ProofSystemEquivalence.lean:176-186) becomes revisitable; that is explicitly out of scope here.
+
+--- APPENDED 2026-08-10 (review finding M5: deeper root-cause analysis) ---
+
+THE ROOT CAUSE IS DEEPER THAN "uses Finset.toList", AND THE FIX IS NOT FREE. `Multiset.toList` is itself `noncomputable def toList (s : Multiset a) := s.out` (.lake/packages/mathlib/Mathlib/Data/Multiset/Basic.lean:33, docstring: "Produces a list of the elements in the multiset using choice"). Picking a list order for a `Finset` is a GENUINE CHOICE -- distinct orders give distinct (though interderivable) formulas. `Finset.fold` does NOT apply: it requires commutativity and associativity, and `imp` is neither. `Hashable` supplies no total order.
+
+TWO HONEST ROUTES, different costs -- pick deliberately and record the reasoning:
+  (1) Add `[LinearOrder Atom]` and use `Finset.sort`. Computable, but imposes a NEW HYPOTHESIS on the four public instances. Weigh against the fact that `instDecidableIValid`/`instDecidableMValid` currently need only `[DecidableEq Atom] [Hashable Atom]`.
+  (2) CHEAPEST REAL FIX: restate over `List` contexts. `listToImp` (LJ/Decidability.lean:72) and the list-level lemmas `ljListDeductionFwd`:91 / `ljListDeductionBwd`:130 (LK counterparts :65/:110) are ALREADY plain computable defs. Only the `ctxToImp`-wrapped :112/:170 and the four instances inherit the taint. This route adds no typeclass hypothesis.
+
+SEPARATELY VERIFIED AS HARMLESS -- DO NOT "FIX": `decidableDerivableIntPropAxiomFMP` (Metalogic/IntDecidability.lean:489) and `decidableDerivableMinPropAxiomFMP` (MinDecidability.lean:445) are noncomputable for a DIFFERENT and deeper reason -- they depend on `instFintypeIntFinWorld`:153 / `instFintypeMinFinWorld`:155, built via `Fintype.ofInjective`, itself a `noncomputable def` (Mathlib/Data/Fintype/OfMap.lean:67; inverting an injection needs choice). Not a toList artifact and not removable by reordering. They are deliberately plain `def`s and NOT registered instances -- IntDecidability.lean:484-487 and MinDecidability.lean:441 both state the canonical registered instance is the computable tableau one. Leave them alone.
+
+CONCLUSION: every REGISTERED `Decidable` instance in the subsystem is computable except the four LK/LJ context-based ones. That is exactly this task's scope and the only set worth acting on.
+
+COORDINATE: the LM-decidability item (G4) in the coverage-gaps task will want to build on whatever route lands here. If this task lands first, that one should inherit the computable route rather than the taint.
 
 ---
 

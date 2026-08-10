@@ -371,15 +371,17 @@
       "report_path": "specs/reviews/review-2026-08-10.md",
       "summary": {
         "files_reviewed": 115,
-        "critical_issues": 0,
-        "high_issues": 2,
-        "medium_issues": 3,
-        "low_issues": 2
+        "critical_issues": 1,
+        "high_issues": 3,
+        "medium_issues": 5,
+        "low_issues": 3
       },
       "tasks_created": [
         614,
         615,
-        616
+        616,
+        617,
+        618
       ],
       "registries_updated": []
     }
@@ -387,7 +389,7 @@
   "statistics": {
     "total_reviews": 21,
     "last_review": "2026-08-10",
-    "total_issues_found": 166,
-    "total_tasks_created": 37
+    "total_issues_found": 171,
+    "total_tasks_created": 39
   }
 }

@@ -10,6 +10,7 @@ import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Rules
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness
+public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Completeness
 public import Cslib.Logics.Propositional.Tableau.Intuitionistic.DecisionProcedure
 

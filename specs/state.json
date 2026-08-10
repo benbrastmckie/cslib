@@ -455,12 +455,12 @@
     {
       "project_number": 497,
       "project_name": "reconcile_imp_naming",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "[RETARGETED 2026-08-10 — this task is NO LONGER an identifier rename. The rename is already done. What remains is the `→` NOTATION gap. All claims below were verified directly against fork `main` and `upstream/main` @ `3951377e` (fetched 2026-08-10); re-verify before acting, the commands are cheap.]\n\nReconcile the fork's `→` notation for the implication connective with upstream. Originally raised in review of PR #648 by thomaskwaring as an `imp` vs `impl` naming question; that naming question has since resolved itself, and the notation divergence underneath it has not.\n\n=== THE IDENTIFIER RENAME IS ALREADY COMPLETE — DO NOT RE-LITIGATE ===\n\nFork `main` already uses `imp` for every connective identifier. All five `→` notation declarations bind to a `.imp` field:\n\n  Cslib/Logics/Bimodal/Syntax/Formula.lean:101   => Formula.imp\n  Cslib/Logics/LTL/Syntax/Formula.lean:209       => Formula.imp\n  Cslib/Logics/Modal/Basic.lean:234              => Proposition.imp\n  Cslib/Logics/Propositional/Defs.lean:109       => Proposition.imp\n  Cslib/Logics/Temporal/Syntax/Formula.lean:169  => Formula.imp\n\nOnly 4 `impl` tokens survive anywhere in `Cslib/` on `main`, all in\n`Cslib/Foundations/Logic/Theorems/Propositional/Connectives.lean` lines 469, 471, 502, 504 — and\nall four are a LOCAL TACTIC HYPOTHESIS NAME (`have impl := ModusPonens.mp bc dne_ψ`), not a\nconnective identifier. Renaming them is cosmetic and optional, not part of the reconciliation.\n\nCORRECTION TO THE PRIOR (2026-08-10) REVISION: that revision claimed \"MODAL'S `impl` IS THE\nOUTLIER\" and told a future reader to expect a rename in `Modal`. That claim is FALSE for `main`\n— `Modal/Basic.lean:234` already reads `Proposition.imp`. It is corrected here rather than\ndeleted because it is the reason this task has looked far larger than it is.\n\nThe rename did NOT arrive from upstream. It landed independently in commit `c308d028`\n(\"refactor modal formula, satisfies, and cube\"), which IS an ancestor of `main`, well before\nPR #607. `impl` appears ZERO times in any upstream `.lean` file. `impl` now survives only on\nthree unmerged feature branches (`feat/propositional-v2`, `feat/modal-formula-primitives`,\n`feat/temporal-formula-propositional`); those are stale snapshots and whether they are rebased\nor abandoned is OUT OF SCOPE here.\n\n=== THE ACTUAL REMAINING GAP: NOTATION, IN THREE PARTS ===\n\nUpstream, in `Cslib/Foundations/Logic/Operators.lean` (added by PR #607, commit `b8ad3923`,\nmerged 2026-08-03), declares:\n\n  class HasImp (α : Type*) where\n    imp (a b : α) : α\n\n  @[inherit_doc] scoped infixr:25 \" → \" => HasImp.imp\n\nAgainst that, the fork diverges in three ways:\n\n(a) PRECEDENCE — fork `infix:30` vs upstream `infixr:25`.\n\n(b) ASSOCIATIVITY — fork uses non-associative `infix`; upstream uses right-associative `infixr`.\n    This is the higher-severity half: `a → b → c` parses upstream and FAILS in the fork. Worse,\n    because the fork's notation is non-associative, Lean's own `Prop`-level arrow wins the\n    overload, so a chained expression surfaces as a TYPE MISMATCH rather than a notation error —\n    materially harder to diagnose.\n\n(c) STRUCTURE — upstream binds `→` ONCE, at the typeclass. The fork binds it FIVE times, once per\n    concrete formula type, at the five sites listed above.\n\nREFINEMENT TO (c), NOT PREVIOUSLY RECORDED AND MATERIAL TO COST: the fork ALREADY HAS `HasImp`.\nIt is declared at `Cslib/Foundations/Logic/Connectives.lean:85`, in the SAME namespace\n`Cslib.Logic` as upstream's, with the SAME field name `imp` (`imp : F → F → F`, definitionally\nupstream's `imp (a b : α) : α`), and it has 1039 usage sites across the fork. What the fork lacks\nis any NOTATION bound to it: `git grep -E '(infix|infixr|infixl|notation).*HasImp' main` returns\nZERO. So part (c) is \"rebind the arrow to an existing class field\", not \"introduce a typeclass\".\nThat is much cheaper than the earlier framing implied — but see the sequencing section, because it\nis also the part most likely to be done by someone else first.\n\n=== SEQUENCING — READ THIS BEFORE PLANNING; MOST OF THIS TASK MAY ALREADY BE SPOKEN FOR ===\n\nThe dependency graph does NOT gate this task: its sole dependency (400, the\n`reconcile_connectives_pr607` falsum-representation decision) is `status=completed`. But that\ntask's completion carved out three follow-ups whose scopes OVERLAP this one, and the plan phase\nMUST resolve the overlap explicitly rather than assume it away:\n\n  - 621 `propositional_notation_infixr` — changes all five connective notations in\n    `Cslib/Logics/Propositional/Defs.lean` from `infix` to `infixr` at upstream's precedences.\n    Its `file_scope` is exactly `[\"Cslib/Logics/Propositional/Defs.lean\"]`. It therefore ALREADY\n    OWNS parts (a) and (b) for `Defs.lean:109`. Do not duplicate that edit here.\n  - 619 `reconcile_connectives_operators` — reconciles the fork's `Connectives.lean` against\n    upstream's `Operators.lean`, where `HasAnd`/`HasOr`/`HasImp`/`HasBox` are duplicated in\n    namespace `Cslib.Logic`. Part (c) lives inside that reconciliation's blast radius: where `→`\n    should bind is a consequence of which `HasImp` survives.\n  - 620 `rebase_pr648_clear_review` — also touches `Propositional/Defs.lean` and carries a\n    STANDING APPROVAL against a specific approved scope; widening that diff forfeits the approval.\n    (621 already declares a dependency on 620 for exactly this reason.)\n\nWHAT IS LEFT THAT IS UNIQUELY THIS TASK'S: the `→` notation in the FOUR files 621's scope does not\nreach — `Bimodal/Syntax/Formula.lean:101`, `LTL/Syntax/Formula.lean:209`, `Modal/Basic.lean:234`,\n`Temporal/Syntax/Formula.lean:169`. All four declare `@[inherit_doc] scoped infix:30 \" → \"`, and\nall four carry the same non-associativity hazard, alongside equally non-associative sibling\nconnectives. None is covered elsewhere today. Planning should either (i) narrow this task to those\nfour files and defer (c) to 619, or (ii) argue for folding it into one of the siblings — but it\nmust CHOOSE, and record the choice.\n\nSecond sequencing axis: adopting `infixr:25` standalone and adopting `HasImp` as part of merging\n#607 are DIFFERENT JOBS, and doing the first can make the second redundant. Fork `main` is 21\ncommits behind `upstream/main` and has NO `Cslib/Foundations/Logic/Operators.lean`; `b8ad3923` is\nNOT an ancestor of `main`. So the upstream sync is genuinely still pending despite the falsum\ndecision having completed. Decide sequencing against that sync explicitly rather than assuming.\n\n=== SCOPE — THE OLD ESTIMATE IS DEAD ===\n\nThe previous \"~271 files\" figure is WITHDRAWN. It was never verified, and it is meaningless now\nthat the rename it estimated is already done. Do NOT substitute a grep for `→` as a proxy: that\nmatches 547 files under `Cslib/` but overwhelmingly hits Lean's own function arrow rather than the\nconnective, so it is not a usable figure. True scope must be derived at planning time from the\nfive notation declaration sites plus the TRANSITIVE PARSE IMPACT of the associativity change —\ni.e. the sites that currently rely on the non-associative parse and will need fixing once `→`\nbecomes right-associative. Verify with `lake build` that the tree stays green.\n\nNote on relative precedence, so planning does not over-worry: the fork's ordering\n(∧ 36 > ∨ 35 > → 30 > ↔ 20) and upstream's (∧ 36 > ∨ 30 > → 25 > ↔ 20) agree on ORDER, so moving\n`→` from 30 to 25 alone does not invert any relationship. The sibling connectives' absolute levels\nstill differ from upstream (notably `∨` at 35 vs 30); that is a real remaining divergence but it\nbelongs to the notation-wide reconciliation, not to this arrow-scoped task, unless planning\ndeliberately widens.\n\nRECORD DEFECT, STILL OPEN: `file_scope` is ABSENT from this task's record and must be backfilled.\nOnce planning narrows the scope per the sequencing section above, set it — the four\nnon-Propositional formula files are the likely value.\n\nDEPENDENCY CLEANUP (applied 2026-08-10, still accurate): the previous dependency list was\n[375, 393, 400, 425, 449, 535, 542]. Of those, 375, 393, 449, 535 and 542 are archived/completed.\nThe edge to 425 (temporal tableau decision procedure) was spurious — nothing about a temporal\ntableau gates a propositional connective notation change. Dependencies are now [400] alone, and\n400 is completed.\n\n=== NARROW-VS-FOLD DECISION: RESOLVED 2026-08-10 — NARROW, WITH BUILD EVIDENCE ===\n\nThe sequencing section above asks planning to choose between (i) narrowing to the four\nnon-Propositional files and (ii) folding into a sibling. THAT CHOICE IS NOW MADE: NARROW.\n`file_scope` is set accordingly and no longer needs backfilling.\n\nIt was decided empirically, not by argument. The hypothesis under test was that splitting PL\nfrom the other four logics is unsafe: 19 files open two of the five scoped logic namespaces at\nonce (18 of them pair `PL` with another) — essentially the whole `ConservativeExtension` family,\nbecause conservative-extension proofs are exactly where a propositional formula is related to\nits modal/temporal embedding. The worry was that PL at `infixr:25` alongside Modal/Bimodal/\nTemporal at `infix:30` would put the same `→` token in scope at two precedences AND two\nassociativities simultaneously.\n\nTHE HYPOTHESIS IS REFUTED. The PL-only change (all four `infix` declarations moved to `infixr`\nat upstream precedences) was applied to `Cslib/Logics/Propositional/Defs.lean` and all 19\nmixed-namespace modules were built against it — `lake build`, 928 jobs, exit 0, zero errors.\nVerified by `.olean` mtimes postdating the source edit, so these are genuine rebuilds, not stale\ncache. The `scoped` notations resolve by type (`Proposition` vs `Formula`), so the elaborator\ndisambiguates and the precedence difference never becomes a parse conflict. The experimental\nedit was reverted; the tree is clean.\n\nCONSEQUENCE: the four sites in this task's `file_scope` can move independently of\n`Propositional/Defs.lean`. Task 621 may land before, after, or concurrently with this task\nwithout a coordinated build.\n\nSECOND REASON NARROW WON, INDEPENDENT OF THE BUILD: 621 depends on 620, which carries a standing\napproval scoped to `Propositional/Defs.lean`. Folding these four files into 621 would couple\nBimodal/LTL/Modal/Temporal to that approval gate for no technical reason.\n\nSTILL TRUE AND UNCHANGED: part (c) — rebinding `→` to the existing `HasImp` (declared at\n`Cslib/Foundations/Logic/Connectives.lean:85`, 1039 usage sites, currently with NO notation bound\nto it) — remains 619's, not this task's.\n\nPRE-EXISTING BLOCKER FOUND WHILE TESTING, NOT CAUSED BY IT: a full `lake build` on `main` does\nnot complete. It stalls indefinitely on `Cslib/Logics/Propositional/Tableau/Intuitionistic/\nScheme.lean` (9,884 lines) — 92 minutes of pegged CPU at 1.3 GB RSS with no completion, and no\ncached `.olean` for that module at all, i.e. it has never built in this checkout. That is tracked\nseparately. It gates FINAL verification of this task (and of 619/620/621), though not the\ntargeted per-module builds used above.",
       "created": "2026-07-13T15:55:03Z",
-      "last_updated": "2026-08-10T21:54:16Z",
+      "last_updated": "2026-08-10T22:07:08Z",
       "dependencies": [
         400
       ],
@@ -482,7 +482,8 @@
           "type": "plan",
           "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Reconciled the fork's implication notation with upstream across the four non-Propositional logic files: moved 4 arrow declarations from `infix:30` to `infixr:25` and 3 co-declared iff declarations to `infixr:20` (atomic batch, since the arrow-only intermediate state inverts iff binding), and synced the LTL/Temporal docstring precedence tables. Verified against the 372-module dependency cone: exit 0, 2013 jobs, 0 errors, warning count unchanged at 32, plus 8 rfl associativity regression checks and the full CI pipeline (9397/9397 tests)."
     },
     {
       "project_number": 537,
@@ -1141,7 +1142,7 @@
     {
       "project_number": 623,
       "project_name": "intuitionistic_barrel_omits_scheme",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "low",
@@ -1152,7 +1153,7 @@
         "Cslib/Logics/Propositional/Tableau/Intuitionistic.lean"
       ],
       "created": "2026-08-10T21:30:00Z",
-      "last_updated": "2026-08-10T21:54:02Z",
+      "last_updated": "2026-08-10T22:06:58Z",
       "session_id": "sess_1786397542_991316_623",
       "artifacts": [
         {
@@ -1165,12 +1166,13 @@
           "type": "plan",
           "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Added the missing `public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` line to the intuitionistic tableau sub-barrel, between Soundness and Completeness, making the module's membership explicit rather than transitive. Change is inert (transitive closure unchanged); targeted build, mk_all no-diff, checkInitImports, lint-style, and scoped lake shake all pass."
     },
     {
       "project_number": 624,
       "project_name": "document_lake_env_lean_hazard",
-      "status": "planned",
+      "status": "completed",
       "task_type": "markdown",
       "topic": "Documentation",
       "priority": "medium",
@@ -1181,7 +1183,7 @@
         "CONTRIBUTING.md"
       ],
       "created": "2026-08-10T21:30:00Z",
-      "last_updated": "2026-08-10T21:54:09Z",
+      "last_updated": "2026-08-10T22:07:01Z",
       "session_id": "sess_1786397542_991316_624",
       "artifacts": [
         {
@@ -1193,8 +1195,14 @@
           "path": "specs/624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md",
           "type": "plan",
           "summary": ""
+        },
+        {
+          "path": "specs/624_document_lake_env_lean_hazard/summaries/01_lake-env-lean-hazard-doc-summary.md",
+          "type": "summary",
+          "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Added a `## Building a single file` subsection and matching Table of Contents entry to CONTRIBUTING.md, documenting the `lake env lean <file>` hang hazard and the correct `lake build <Module.Name>` alternative."
     }
   ],
   "repository_health": {

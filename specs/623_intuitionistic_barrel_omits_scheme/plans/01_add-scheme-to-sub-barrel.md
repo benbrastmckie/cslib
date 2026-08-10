@@ -1,7 +1,7 @@
 # Implementation Plan: Make Intuitionistic Tableau Sub-Barrel Membership Explicit
 
 - **Task**: 623 - Reconcile Intuitionistic.lean sub-barrel omitting Scheme while Cslib.lean imports it directly
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 0.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/623_intuitionistic_barrel_omits_scheme/reports/01_barrel-scheme-omission.md
@@ -82,24 +82,41 @@ No ROADMAP.md consulted for this task.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Declare Scheme in the Intuitionistic Sub-Barrel [NOT STARTED]
+### Phase 1: Declare Scheme in the Intuitionistic Sub-Barrel [COMPLETED]
 
 **Goal**: Add the single missing `public import` line and confirm the tree is unaffected.
 
 **Tasks**:
-- [ ] Read `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` and confirm it still carries
+- [x] Read `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` and confirm it still carries
       exactly five `public import` lines in the order Rules, Expansion, Soundness, Completeness,
       DecisionProcedure.
-- [ ] Insert `public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` on its own
+- [x] Insert `public import Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` on its own
       line, immediately after the `Soundness` line and immediately before the `Completeness` line.
       No other edit to the file -- header, `import Cslib.Init`, and module docstring unchanged.
-- [ ] Run `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic` and confirm success.
-- [ ] Run `lake exe mk_all --module` and confirm `git diff --stat Cslib.lean` is empty.
-- [ ] Run `lake exe checkInitImports` and confirm it passes.
-- [ ] Run `lake exe lint-style` and confirm the changed file is clean.
-- [ ] Run `bash scripts/check-shake-residue.sh --list` and confirm
+- [x] Run `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic` and confirm success.
+- [x] Run `lake exe mk_all --module` and confirm `git diff --stat Cslib.lean` is empty.
+- [x] Run `lake exe checkInitImports` and confirm it passes.
+- [x] Run `lake exe lint-style` and confirm the changed file is clean.
+- [x] Run `bash scripts/check-shake-residue.sh --list` and confirm
       `Cslib/Logics/Propositional/Tableau/Intuitionistic.lean` is not in the flagged set. Do NOT
       run `--update`; if the file is genuinely newly flagged, stop and report it.
+      *(deviation: the wrapper script's `--list` invocation requires the entire top-level `Cslib`
+      facade target to have fresh oleans; reaching that state crosses into the explicitly
+      prohibited full-`lake build` territory (confirmed live: `lake shake` errored with "target
+      is out-of-date and needs to be rebuilt" while attempting to rebuild the `Cslib` facade,
+      after progressing through 3324/3325 build jobs). In this failure mode the wrapper's
+      `--list` output is a **false clean**: shake's "out-of-date" error text does not match the
+      script's flagged-file regex (`^/.*\.lean:$`), so it is silently swallowed and the script
+      exits 0 with zero lines of output, which is indistinguishable from a genuine
+      zero-flagged-files result. This is a real bug in `check-shake-residue.sh`, out of scope to
+      fix here. Substituted a build-safe equivalent: `lake shake --add-public --keep-implied
+      --keep-prefix --force Cslib.Logics.Propositional.Tableau.Intuitionistic` (the `--force`
+      flag is shake's own documented option to skip its internal `lake build --no-build`
+      freshness gate, scoped to just the changed module's transitive closure, which was already
+      confirmed freshly and correctly built in the step above). This ran to completion in ~6s
+      with exit 0 and zero output -- shake's own semantics (0 = no suggestions, 1 = has
+      suggestions) confirm no import-minimization issues, including for the new `Scheme` import,
+      anywhere in the changed file's transitive closure.)*
 
 **Timing**: 0.5 hours (dominated by the targeted build and the repo hygiene checks, not the edit)
 
@@ -137,12 +154,17 @@ than proceeding.
 
 ## Testing & Validation
 
-- [ ] Targeted module build green: `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic`
-- [ ] No `Cslib.lean` diff after `lake exe mk_all --module`
-- [ ] `lake exe checkInitImports` passes
-- [ ] `lake exe lint-style` passes on the changed file
-- [ ] `bash scripts/check-shake-residue.sh --list` shows no new entry for the changed file
-- [ ] `git diff --stat` reports exactly `1 file changed, 1 insertion(+)`
+- [x] Targeted module build green: `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic`
+- [x] No `Cslib.lean` diff after `lake exe mk_all --module`
+- [x] `lake exe checkInitImports` passes
+- [x] `lake exe lint-style` passes on the changed file
+- [x] `bash scripts/check-shake-residue.sh --list` shows no new entry for the changed file
+      *(deviation: wrapper script's `--list` result is a false clean due to a full-build
+      precondition it cannot meet without violating the build-hazard prohibition; substituted
+      `lake shake ... --force <scoped module>`, exit 0/no output, see Phase 1 task note)*
+- [x] `git diff --stat` reports exactly `1 file changed, 1 insertion(+)`
+      (scoped to the target file; the working tree also carries unrelated pre-existing changes
+      from other in-flight tasks, confirmed via `git diff --stat -- Cslib/Logics/Propositional/Tableau/Intuitionistic.lean`)
 
 **Explicitly prohibited during validation**: bare `lake build` (stalls on
 `Intuitionistic/Scheme.lean`), and `lake env lean <file>` without `--setup`.

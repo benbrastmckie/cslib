@@ -11,7 +11,7 @@ next_project_number: 625
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,497,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620,623,624 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -23,7 +23,6 @@ next_project_number: 625
 
 ### Propositional Logic
 
-497 [PLANNED] — [RETARGETED 2026-08-10 — this task is NO LONGER an identifier ren
 614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
 615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
 616 [NOT STARTED] — Repair the stale and self-contradictory documentation layer in th
@@ -32,7 +31,6 @@ next_project_number: 625
 619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
-623 [PLANNED] — The intuitionistic tableau sub-barrel `Cslib/Logics/Propositional
 
 ### Modal Logic
 
@@ -86,19 +84,16 @@ next_project_number: 625
 
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
-### Documentation
-
-624 [PLANNED] — Document that `lake env lean <file>` is unsafe for module-system 
-
 ## Tasks
 
 ### 624. Document that lake env lean skips --setup and is unsafe for module-system files
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: markdown
 - **Topic**: Documentation
 - **Dependencies**: None
 - **Research**: [624_document_lake_env_lean_hazard/reports/01_lake-env-lean-hazard-doc-home.md]
 - **Plan**: [624_document_lake_env_lean_hazard/plans/01_lake-env-lean-hazard-doc.md]
+- **Summary**: [624_document_lake_env_lean_hazard/summaries/01_lake-env-lean-hazard-doc-summary.md]
 
 **Description**: Document that `lake env lean <file>` is unsafe for module-system files in this repository, and
 that `lake build <Module.Name>` is the correct way to build a single module.
@@ -139,7 +134,7 @@ this into that task's closure.
 ---
 
 ### 623. Reconcile Intuitionistic.lean sub-barrel omitting Scheme while Cslib.lean imports it directly
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -991,7 +986,7 @@ TWO CONSUMERS: the native-Hilbert pair-Lindenbaum completeness task needs to kno
 ---
 
 ### 497. Reconcile imp naming
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 400

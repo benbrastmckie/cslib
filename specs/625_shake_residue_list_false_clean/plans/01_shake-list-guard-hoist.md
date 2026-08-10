@@ -348,28 +348,45 @@ paths agree — the drift between header and implementation is what allowed this
 
 ---
 
-### Phase 5: Full-gate verification against the live repo [NOT STARTED]
+### Phase 5: Full-gate verification against the live repo [COMPLETED]
 
 **Goal**: Confirm the three real modes still behave correctly against an actual built workspace,
 and that nothing outside the intended file changed.
 
 **Tasks**:
-- [ ] Confirm the workspace is fully built (`lake build` completed) — the script requires built
+- [x] Confirm the workspace is fully built (`lake build` completed) — the script requires built
       `.olean` files per the header at lines 37-44. If the build is stale, build first; do **not**
       interpret a stale-state failure as a defect in this change (it is now, correctly, exit 2).
-- [ ] Run `bash scripts/check-shake-residue.sh --list`; assert exit 0 and output identical to the
-      pre-change baseline set.
-- [ ] Run `bash scripts/check-shake-residue.sh` (bare verify gate); assert the same exit code and
-      summary line as before the change.
-- [ ] Run `bash scripts/check-shake-residue.sh --self-test`; assert exit 0.
-- [ ] Run `bash scripts/check-shake-residue.sh --bogus`; assert exit 2 and the usage message
-      (confirms the new `--self-test` arm did not disturb the `*` fallthrough).
-- [ ] Assert `git status --porcelain` shows only `scripts/check-shake-residue.sh` modified within
+      *(completed: `.lake/build` present and already fully built from a prior session; the live
+      `--list`/bare runs below both succeeded against it with no staleness error)*
+- [x] Run `bash scripts/check-shake-residue.sh --list`; assert exit 0 and output identical to the
+      pre-change baseline set. *(completed: exit 0, sorted output byte-identical to
+      `scripts/shake-residue-baseline.txt`'s 12-entry set)*
+- [x] Run `bash scripts/check-shake-residue.sh` (bare verify gate); assert the same exit code and
+      summary line as before the change. *(completed: exit 0, "shake-flagged files: 12 (baseline:
+      12)" / "OK: shake-flagged set matches the baseline exactly.")*
+- [x] Run `bash scripts/check-shake-residue.sh --self-test`; assert exit 0. *(completed: 18
+      passed, 0 failed, exit 0)*
+- [x] Run `bash scripts/check-shake-residue.sh --bogus`; assert exit 2 and the usage message
+      (confirms the new `--self-test` arm did not disturb the `*` fallthrough). *(completed: exit
+      2, `Usage: scripts/check-shake-residue.sh [--update|--list|--self-test]`)*
+- [x] Assert `git status --porcelain` shows only `scripts/check-shake-residue.sh` modified within
       the repo's source tree (plus `specs/**` task artifacts). In particular
-      `scripts/shake-residue-baseline.txt` must be unmodified.
-- [ ] Optionally run `bash scripts/pre-pr-check.sh` if a full build is already warm, to confirm
+      `scripts/shake-residue-baseline.txt` must be unmodified. *(completed with a noted caveat:
+      `scripts/check-shake-residue.sh` is already committed via this task's own phase 1-4
+      commits, so it does not appear as a pending modification in `git status --porcelain` at
+      this point — confirmed instead via `git diff --stat` across this task's own commit range
+      (see next item). `scripts/shake-residue-baseline.txt` is confirmed byte-unchanged via
+      `git diff --exit-code`. Two unrelated files, `.claude/scripts/literature-fidelity-audit.sh`
+      and `.claude/scripts/literature-search.sh`, were already modified in the working tree
+      before this task began (present in the session's initial `git status` snapshot) — this
+      task did not touch them and they are out of this task's declared file scope*)*
+- [x] Optionally run `bash scripts/pre-pr-check.sh` if a full build is already warm, to confirm
       step 7 (which invokes the bare path) still passes. Skip and say so if the build cost is
-      prohibitive — do not report it as run if it was not.
+      prohibitive — do not report it as run if it was not. *(deliberately skipped: not run —
+      `pre-pr-check.sh` runs a full build-and-verify pipeline, judged too costly for this
+      verification pass; the bare path it would exercise was already run and verified directly,
+      above)*
 
 **Timing**: 0.5 hours
 
@@ -391,16 +408,16 @@ and that nothing outside the intended file changed.
 
 ## Testing & Validation
 
-- [ ] `bash -n scripts/check-shake-residue.sh` parses clean after every phase.
-- [ ] `bash scripts/check-shake-residue.sh --self-test` exits 0 with all assertions PASS.
-- [ ] The self-test demonstrably **fails** against a scratch copy with the Phase 2 fix reverted.
-- [ ] `--list` exits 2 (not 0) on the stale-target fixture — the defect this task closes.
-- [ ] `--list` prints zero bytes and exits 0 on the genuinely-clean fixture (no stray newline).
-- [ ] `--update` and the bare path retain their pre-change exit codes on all four fixtures.
-- [ ] `scripts/shake-residue-baseline.txt` is byte-unchanged throughout, including after running
+- [x] `bash -n scripts/check-shake-residue.sh` parses clean after every phase.
+- [x] `bash scripts/check-shake-residue.sh --self-test` exits 0 with all assertions PASS.
+- [x] The self-test demonstrably **fails** against a scratch copy with the Phase 2 fix reverted.
+- [x] `--list` exits 2 (not 0) on the stale-target fixture — the defect this task closes.
+- [x] `--list` prints zero bytes and exits 0 on the genuinely-clean fixture (no stray newline).
+- [x] `--update` and the bare path retain their pre-change exit codes on all four fixtures.
+- [x] `scripts/shake-residue-baseline.txt` is byte-unchanged throughout, including after running
       `--self-test`.
-- [ ] The no-`set -e` design and the 0/1/2 exit-code contract are intact.
-- [ ] EXIT-CODE CONTRACT header, the named helper, and all three implemented paths agree.
+- [x] The no-`set -e` design and the 0/1/2 exit-code contract are intact.
+- [x] EXIT-CODE CONTRACT header, the named helper, and all three implemented paths agree.
 
 ## Artifacts & Outputs
 

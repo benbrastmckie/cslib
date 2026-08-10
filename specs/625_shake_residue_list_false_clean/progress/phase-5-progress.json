@@ -1,0 +1,30 @@
+{
+  "phase": 5,
+  "phase_name": "Full-gate verification against the live repo",
+  "started_at": "2026-08-11T00:06:00Z",
+  "last_updated": "2026-08-11T00:15:00Z",
+  "objectives": [
+    {"id": 1, "description": "Run all four live invocations, confirm baseline byte-unchanged, confirm outside-specs diff scope", "status": "done", "files_touched": []}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "5.pre-pr-check",
+      "description": "Optionally run bash scripts/pre-pr-check.sh if a full build is already warm.",
+      "type": "skipped",
+      "reason": "pre-pr-check.sh runs a full build-and-verify pipeline; judged too costly for this verification pass. The plan explicitly names this optional and instructs 'skip and say so if the build cost is prohibitive -- do not report it as run if it was not.' The bare verify path pre-pr-check.sh's step 7 would exercise was already run directly against the live repo and verified in this same phase.",
+      "annotation": "*(deviation: skipped — pre-pr-check.sh full pipeline judged too costly, plan explicitly permits skipping with disclosure)*"
+    }
+  ],
+  "verification_notes": [
+    "bash scripts/check-shake-residue.sh --list: exit 0, output sorted matches scripts/shake-residue-baseline.txt's 12-entry set exactly.",
+    "bash scripts/check-shake-residue.sh (bare): exit 0, 'shake-flagged files: 12 (baseline: 12)' / 'OK: shake-flagged set matches the baseline exactly.'",
+    "bash scripts/check-shake-residue.sh --self-test: 18 passed, 0 failed, exit 0.",
+    "bash scripts/check-shake-residue.sh --bogus: exit 2, 'Usage: scripts/check-shake-residue.sh [--update|--list|--self-test]'.",
+    "git diff --exit-code scripts/shake-residue-baseline.txt: clean (no output, exit 0).",
+    "git diff --stat 7e2e04f6 HEAD -- . ':!specs/**' (this task's own commit range, since scripts/check-shake-residue.sh is already committed via phases 1-4 and so does not show in a plain git status --porcelain at this point): exactly one file, scripts/check-shake-residue.sh (295 insertions, 28 deletions).",
+    "Two unrelated pre-existing dirty files noted and left untouched: .claude/scripts/literature-fidelity-audit.sh and .claude/scripts/literature-search.sh -- both were already modified in the working tree before this task began (visible in the session's initial git status snapshot), out of this task's declared file scope (scripts/check-shake-residue.sh plus self-test fixtures)."
+  ]
+}

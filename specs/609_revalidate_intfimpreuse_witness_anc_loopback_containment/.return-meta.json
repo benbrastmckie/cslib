@@ -1,39 +1,57 @@
 {
   "status": "implemented",
-  "started_at": "2026-08-10T14:10:30Z",
-  "completed_at": "2026-08-10T14:31:26Z",
+  "started_at": "2026-08-10T14:35:00Z",
+  "completed_at": "2026-08-10T14:54:28Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/plans/01_beta-priority-repair.md",
-      "summary": "Phase 8 marked [COMPLETED], task list checked off with a deviation annotation on the hbuc-sourcing item (new IntMinScheme.modelBot_uc field, since openBranch_rawEdges_both_upward_closed only covers minBranchBotForces, not an abstract S.modelBot)."
+      "summary": "All 9 phases [COMPLETED]. Plan-level Status set to [COMPLETED]. Phase 9 discharged intuitionisticTableau_complete (DP-3) via an IValid.{_, 0} universe pin plus a new ivalid_descend/ivalid_universe_invariant bridge."
     },
     {
       "type": "handoff",
-      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/12_phase8-complete.md",
-      "summary": "Full record of the openBranch_countermodel discharge, the new modelBot_uc structure field and its rationale, the docstring rewrite, and full verification detail."
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/handoffs/13_phase9-complete-plan-done.md",
+      "summary": "Full record of Phase 9's DP-3 discharge, the two downstream breaks it exposed and their fixes, the docstring rewrites across 7 files, and the task 606 reconciliation."
+    },
+    {
+      "type": "summary",
+      "path": "specs/609_revalidate_intfimpreuse_witness_anc_loopback_containment/summaries/01_beta-priority-repair-summary.md",
+      "summary": "Full task summary covering all 9 phases, final verification (0 declaration-level sorries repo-wide), plan deviations, and task 606 reconciliation."
     }
   ],
   "modified_files": [
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Decidability.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean"
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Phase 8 fully discharged in one green checkpoint: openBranch_countermodel sorry-free, new IntMinScheme.modelBot_uc field added and both instances updated, docstring rewritten.",
+    "details": "Phase 9 (final phase) fully discharged: intuitionisticTableau_complete (DP-3) is sorry-free, the IValid universe-descent bridge is landed, two downstream breaks are fixed, and stale sorry documentation across 7 files is corrected. All 9 plan phases are [COMPLETED]; plan-level Status is [COMPLETED].",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 8,
-    "last_completed_phase": "Phase 8: Discharge openBranch_countermodel"
+    "phases_completed": 9,
+    "phases_total": 9,
+    "last_completed_phase": "Phase 9: The downstream Completeness.lean sorries and the 606 handoff"
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 1,
-    "sorry_count_before": 2,
-    "sorry_count_note": "Declaration-level sorry count across the whole repo (lake build's 'declaration uses sorry' warnings), which is the authoritative signal -- went from 2 to 1. The remaining one is Intuitionistic/Completeness.lean:181, explicitly Phase 9's territory. (A raw grep -rn sorry word-count on Cslib/ also dropped, from 196 to 187, but that delta is dominated by prose 'sorry' mentions removed from openBranch_countermodel's rewritten docstring, not proof content -- the declaration-level count is the meaningful metric.)",
+    "sorry_count": 0,
+    "sorry_count_before": 1,
+    "sorry_count_note": "Declaration-level sorry count across the whole repo (lake build's 'declaration uses sorry' warnings), the authoritative signal used throughout this task -- went from 1 to 0. The repo now has zero declaration-level sorries. Pre-existing bare sorries remain only in unrelated Cslib/Logics/Bimodal/** files, all wrapped in 'set_option warn.sorry false in', which is why they never surfaced in this metric.",
     "vacuous_count": 1,
     "axiom_count": 26,
     "build_passed": true,
     "ci_pipeline_passed": true
+  },
+  "completion_data": {
+    "completion_summary": "Landed beta-priority repair (V1) of intFImpReuseWitnessAnc? loop-back containment and discharged every downstream proof obligation it unblocked. intStepBranchPrio defers world-creating rules and re-validates loop-back containment as the branch grows, closing the gap that previously forced a choice between IFimpAccess and positive persistence. openBranch_countermodel and intuitionisticTableau_complete (DP-3), the last declaration-level sorry in the repo, are now both discharged. The intuitionistic propositional tableau's completeness development is fully sorry-free (repo-wide declaration-level sorry count: 0), with axiom count unchanged (26) and the conformance/adequacy test corpora verdict-preserving throughout.",
+    "roadmap_items": [
+      "Task 606 ('Discharge or restate the four propositional tableau completeness theorems and verify the TFAE fold') is superseded: all four sites it names (DP-3 through DP-6) are now sorry-free. Re-scope or close task 606 rather than dispatching it as originally written."
+    ]
   },
   "metadata": {
     "session_id": "sess_1786368658_52fe41",

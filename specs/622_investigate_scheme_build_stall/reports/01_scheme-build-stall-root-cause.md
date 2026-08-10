@@ -1,6 +1,16 @@
 # Scheme.lean Build Stall — Root Cause
 
 **Task**: 622 — Investigate why `Tableau/Intuitionistic/Scheme.lean` never completes a build
+- **Started**: 2026-08-10
+- **Completed**: 2026-08-10
+- **Effort**: One research dispatch (~30 min wall clock, dominated by a full `lake build` and a
+  prefix-bisection sweep)
+- **Dependencies**: None
+- **Sources/Inputs**: Direct measurement at HEAD `b83ae232` — full `lake build`; per-module
+  `lake build`; paired `lake env lean` runs with and without `--setup`; prefix bisection of
+  `Scheme.lean`; `.lake/build` olean/trace mtimes and hashes; `git log --follow` on `Scheme.lean`
+- **Artifacts**: This report
+- **Standards**: CSLib CI verification order (step 1 = `lake build`)
 **Date**: 2026-08-10
 **Status**: Resolved — premise falsified, no code defect
 **HEAD**: `b83ae232`

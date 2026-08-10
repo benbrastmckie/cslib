@@ -1,7 +1,7 @@
 # Implementation Plan: Statement-Shape Fix for `minBranchBotForces` Upward Closure
 
 - **Task**: 605 - establish_minbranchbotforces_upward_closure_at_bot
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 7 hours
 - **Dependencies**: None (blocks nothing; interacts with 609 — see Coordination below)
 - **Research Inputs**: `specs/605_establish_minbranchbotforces_upward_closure_at_bot/reports/01_minbranchbotforces-upward-closure.md`
@@ -140,30 +140,37 @@ concurrently with explicit file ownership.
 
 ---
 
-### Phase 1: Baseline capture, patch-currency check, and refutation test landing [NOT STARTED]
+### Phase 1: Baseline capture, patch-currency check, and refutation test landing [COMPLETED]
 
 - **Goal:** Establish the pre-change baseline, confirm the saved patch still applies against the
   current tree, and land the refutation file as a permanent regression guard. Nothing in this
   phase depends on the shape fix.
 
 - **Tasks:**
-  - [ ] Record the pre-change sorry census for the propositional tableau completeness chain
+  - [x] Record the pre-change sorry census for the propositional tableau completeness chain
     (expected: 3 — `Scheme.lean` `openBranch_countermodel`, `Intuitionistic/Completeness.lean`
     DP-3, `Minimal/Completeness.lean` DP-4). Capture exact file:line for each.
-  - [ ] Run `git apply --check specs/605_establish_minbranchbotforces_upward_closure_at_bot/verified-shape-fix.patch`
+    *(confirmed 3: `Scheme.lean:8034` `openBranch_countermodel`,
+    `Intuitionistic/Completeness.lean:170` DP-3 `intuitionisticTableau_complete`,
+    `Minimal/Completeness.lean:166` DP-4 `minimalTableau_complete`)*
+  - [x] Run `git apply --check specs/605_establish_minbranchbotforces_upward_closure_at_bot/verified-shape-fix.patch`
     and record the result. If it fails, record which hunks conflict and note that later phases
     rebase against the report's §4 change table instead of applying the patch verbatim.
-  - [ ] Check whether sibling work has landed in `Intuitionistic/Scheme.lean` since the patch was
+    *(patch applies cleanly against current HEAD — `git apply --check` exited 0)*
+  - [x] Check whether sibling work has landed in `Intuitionistic/Scheme.lean` since the patch was
     verified (`git log --oneline -- Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean`).
-  - [ ] Copy `MvalidBotShapeRefutation.lean.verified` to
+    *(no task 609 commits present; latest touching commit is task 604 phase 2, pre-dating this
+    plan — 609 has not landed)*
+  - [x] Copy `MvalidBotShapeRefutation.lean.verified` to
     `CslibTests/MvalidBotShapeRefutation.lean`, prepending the CSLib copyright header block used
     by `CslibTests/HvalidShapeRefutation.lean` and a `/-! # ... -/` module docstring that states
     what the file refutes: that `tableau_complete`'s `hvalid` body, with only the valuation
     upward-closure premise available, is false at an atom-free witness even though the formula is
     `MValid`. Do not cite task numbers in the file.
-  - [ ] Add `public import CslibTests.MvalidBotShapeRefutation` to `CslibTests.lean`, in
+  - [x] Add `public import CslibTests.MvalidBotShapeRefutation` to `CslibTests.lean`, in
     alphabetical position among the existing imports.
-  - [ ] Build and test: `lake build CslibTests.MvalidBotShapeRefutation` then `lake test`.
+  - [x] Build and test: `lake build CslibTests.MvalidBotShapeRefutation` then `lake test`.
+    *(both green; only pre-existing sorry warnings emitted)*
 
 - **Timing:** 1 hour
 

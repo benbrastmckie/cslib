@@ -256,7 +256,7 @@ editing. Confirm no `Formula.imp_def` already exists in this namespace
 
 ---
 
-### Phase 4: Pre-land Temporal bridge lemma [NOT STARTED]
+### Phase 4: Pre-land Temporal bridge lemma [COMPLETED]
 
 **Goal**: Same as Phase 3, for the Temporal module.
 

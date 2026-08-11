@@ -74,7 +74,7 @@ theorem truth_lemma_imp (A : Set (Formula Atom)) (h_mcs : Temporal.SetMaximalCon
     Satisfies (chronicleModel A h_mcs) t (φ → ψ) ↔
       (φ → ψ) ∈ limitF A h_mcs t.val := by
   have h_mcs_t := limit_c0 A h_mcs t.val t.property
-  simp only [Satisfies]
+  simp only [← Formula.imp_def, Satisfies]
   constructor
   · -- Forward: if (Sat φ → Sat ψ) then (φ → ψ) ∈ f(t)
     intro h_imp

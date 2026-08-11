@@ -48,9 +48,9 @@ theorem LKProof.sound {seq : LKSequent Atom} (d : LKProof seq) : seq.valid := by
   | andL A B hAB _ ih =>
       intro v hant
       have hAval : Evaluate v A := by
-        have := hant _ hAB; simp only [Evaluate_and] at this; exact this.1
+        have := hant _ hAB; simp only [← Proposition.and_def, Evaluate_and] at this; exact this.1
       have hBval : Evaluate v B := by
-        have := hant _ hAB; simp only [Evaluate_and] at this; exact this.2
+        have := hant _ hAB; simp only [← Proposition.and_def, Evaluate_and] at this; exact this.2
       apply ih v
       intro C hC
       simp only [Finset.mem_insert] at hC
@@ -76,7 +76,7 @@ theorem LKProof.sound {seq : LKSequent Atom} (d : LKProof seq) : seq.valid := by
   | orL A B hAB _ _ ih₁ ih₂ =>
       intro v hant
       have hABval : Evaluate v A ∨ Evaluate v B := by
-        have := hant _ hAB; simp only [Evaluate_or] at this; exact this
+        have := hant _ hAB; simp only [← Proposition.or_def, Evaluate_or] at this; exact this
       rcases hABval with hA | hB
       · apply ih₁ v
         intro C hC
@@ -105,7 +105,7 @@ theorem LKProof.sound {seq : LKSequent Atom} (d : LKProof seq) : seq.valid := by
   | impL A B hAB _ _ ih₁ ih₂ =>
       intro v hant
       have hABval : Evaluate v A → Evaluate v B := by
-        have := hant _ hAB; simp only [Evaluate_imp] at this; exact this
+        have := hant _ hAB; simp only [← Proposition.imp_def, Evaluate_imp] at this; exact this
       obtain ⟨C, hC, hCval⟩ := ih₁ v hant
       simp only [Finset.mem_insert] at hC
       rcases hC with hCA | hC

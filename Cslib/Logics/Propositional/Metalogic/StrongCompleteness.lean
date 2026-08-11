@@ -272,7 +272,7 @@ theorem prop_truth_lemma_imp
             Proposition.bot :=
           .modusPonens _ (φ.imp ψ) .bot
             (.assumption _ _
-              (by simp [List.mem_cons]))
+              (by simp [List.mem_cons, Proposition.imp_def]))
             (.assumption _ _
               (by simp [List.mem_cons]))
         -- [(φ→ψ), (φ→ψ)→⊥] ⊢ φ (via EFQ)
@@ -335,7 +335,7 @@ theorem prop_truth_lemma_imp
             Proposition.bot :=
           .modusPonens _ (φ.imp ψ) .bot
             (.assumption _ _
-              (by simp [List.mem_cons]))
+              (by simp [List.mem_cons, Proposition.imp_def]))
             d_imp
         -- deduction: [(φ→ψ)→⊥] ⊢ ψ → ⊥
         exact ⟨deductionTheorem

@@ -675,27 +675,27 @@ private lemma Theory.Derivation.snAndE2Form_head {G : Ctx Atom} {A B : Propositi
 
 omit [DecidableEq Atom] in
 private lemma cx_imp_left {A B : Proposition Atom} : A.complexity < (A → B).complexity := by
-  simp only [Proposition.complexity]; omega
+  simp only [← Proposition.imp_def, Proposition.complexity]; omega
 
 omit [DecidableEq Atom] in
 private lemma cx_imp_right {A B : Proposition Atom} : B.complexity < (A → B).complexity := by
-  simp only [Proposition.complexity]; omega
+  simp only [← Proposition.imp_def, Proposition.complexity]; omega
 
 omit [DecidableEq Atom] in
 private lemma cx_or_left {A B : Proposition Atom} : A.complexity < (A ∨ B).complexity := by
-  simp only [Proposition.complexity]; omega
+  simp only [← Proposition.or_def, Proposition.complexity]; omega
 
 omit [DecidableEq Atom] in
 private lemma cx_or_right {A B : Proposition Atom} : B.complexity < (A ∨ B).complexity := by
-  simp only [Proposition.complexity]; omega
+  simp only [← Proposition.or_def, Proposition.complexity]; omega
 
 omit [DecidableEq Atom] in
 private lemma cx_and_left {A B : Proposition Atom} : A.complexity < (A ∧ B).complexity := by
-  simp only [Proposition.complexity]; omega
+  simp only [← Proposition.and_def, Proposition.complexity]; omega
 
 omit [DecidableEq Atom] in
 private lemma cx_and_right {A B : Proposition Atom} : B.complexity < (A ∧ B).complexity := by
-  simp only [Proposition.complexity]; omega
+  simp only [← Proposition.and_def, Proposition.complexity]; omega
 
 /-! ### Mutual block: termination measure for L3/L4/L5
 
@@ -822,7 +822,9 @@ private def Theory.Derivation.snImpEForm {G : Ctx Atom} {A B : Proposition Atom}
       ⟨@Derivation.efq _ _ _ _ _ i D', by simpa only [isStronglyNormal] using hf⟩
   termination_by ((A → B).complexity, 0, f.nodeCount)
   decreasing_by
-    all_goals (simp_wf; try simp only [Theory.Derivation.nodeCount]
+    all_goals (simp_wf; try simp only [Theory.Derivation.nodeCount,
+                 ← Proposition.imp_def, ← Proposition.and_def, ← Proposition.or_def,
+                 Proposition.complexity]
                first | (left; omega) | (right; omega))
 
 /-- L4: smart disjunction eliminator. Measure: ((A∨B).complexity, 0, D.nodeCount). -/
@@ -872,7 +874,9 @@ private def Theory.Derivation.snOrEForm {G : Ctx Atom} {A B C : Proposition Atom
       ⟨@Derivation.efq _ _ _ _ _ i D', by simpa only [isStronglyNormal] using hD⟩
   termination_by ((A ∨ B).complexity, 0, D.nodeCount)
   decreasing_by
-    all_goals (simp_wf; try simp only [Theory.Derivation.nodeCount]
+    all_goals (simp_wf; try simp only [Theory.Derivation.nodeCount,
+                 ← Proposition.imp_def, ← Proposition.and_def, ← Proposition.or_def,
+                 Proposition.complexity]
                first | (left; omega) | (right; omega))
 
 /-- L5: substitution-normalization. Measure: `(P.complexity, 1, body.nodeCount)`.

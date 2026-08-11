@@ -66,7 +66,7 @@ theorem LJProof.sound {seq : @Sequent Atom} (d : LJProof seq) :
   | andL A B hAB _ ih =>
       intro _ _ v v_uc w hant
       have hAB_forces : IForces v (fun _ => False) w (A ∧ B) := hant _ hAB
-      simp only [IForces_and] at hAB_forces
+      simp only [← Proposition.and_def, IForces_and] at hAB_forces
       apply ih v v_uc w
       intro C hC
       simp only [Finset.mem_insert] at hC
@@ -81,7 +81,7 @@ theorem LJProof.sound {seq : @Sequent Atom} (d : LJProof seq) :
   | orL A B hAB _ _ ih₁ ih₂ =>
       intro _ _ v v_uc w hant
       have hAB_forces : IForces v (fun _ => False) w (A ∨ B) := hant _ hAB
-      simp only [IForces_or] at hAB_forces
+      simp only [← Proposition.or_def, IForces_or] at hAB_forces
       rcases hAB_forces with hA | hB
       · apply ih₁ v v_uc w
         intro C hC
@@ -106,7 +106,7 @@ theorem LJProof.sound {seq : @Sequent Atom} (d : LJProof seq) :
   | impL A B hAB _ _ ih₁ ih₂ =>
       intro _ _ v v_uc w hant
       have hAB_forces : IForces v (fun _ => False) w (A → B) := hant _ hAB
-      simp only [IForces_imp] at hAB_forces
+      simp only [← Proposition.imp_def, IForces_imp] at hAB_forces
       have hA : IForces v (fun _ => False) w A := ih₁ v v_uc w hant
       have hB : IForces v (fun _ => False) w B := hAB_forces w (le_refl w) hA
       apply ih₂ v v_uc w

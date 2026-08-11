@@ -104,9 +104,6 @@ abbrev Proposition.iff (A B : Proposition Atom) : Proposition Atom :=
 instance : Bot (Proposition Atom) := ⟨.bot⟩
 instance : Top (Proposition Atom) := ⟨.top⟩
 
-@[inherit_doc] scoped infix:36 " ∧ " => Proposition.and
-@[inherit_doc] scoped infix:35 " ∨ " => Proposition.or
-@[inherit_doc] scoped infix:30 " → " => Proposition.imp
 @[inherit_doc] scoped infix:20 " ↔ " => Proposition.iff
 @[inherit_doc] scoped prefix:40 " ¬ " => Proposition.neg
 
@@ -190,7 +187,13 @@ class IsIntuitionistic (T : Theory Atom) where
 
 omit [DecidableEq Atom] in
 @[scoped grind =]
-theorem isIntuitionisticIff (T : Theory Atom) : IsIntuitionistic T ↔ IPL ⊆ T := by grind
+theorem isIntuitionisticIff (T : Theory Atom) : IsIntuitionistic T ↔ IPL ⊆ T := by
+  constructor
+  · rintro h x ⟨y, rfl⟩
+    simp only [Proposition.imp_def]
+    exact h.efq y
+  · intro h
+    exact ⟨fun A => h ⟨A, (Proposition.imp_def ⊥ A).symm⟩⟩
 
 /-- A theory is classical if it validates double-negation elimination. -/
 @[scoped grind]

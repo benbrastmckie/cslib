@@ -191,7 +191,7 @@ private theorem extract_box_list (u : CanonicalPrimeWorld Axioms) :
       obtain ⟨l'', heq, hl''⟩ :=
         extract_box_list u xs (fun y hy => hl y (List.mem_cons.mpr (Or.inr hy)))
       refine ⟨B :: l'', ?_, ?_⟩
-      · rw [hxeq, heq, List.map_cons]
+      · rw [hxeq, heq, List.map_cons, Proposition.box_def]
       · intro C hC
         rcases List.mem_cons.mp hC with rfl | hC'
         · exact hBnu

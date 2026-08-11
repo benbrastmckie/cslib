@@ -151,7 +151,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
       -- Reflexively at `label`: either φ fails at `label` (pick the F(φ) branch), or φ holds
       -- at `label` and `hpos` (applied reflexively via `le_rfl`) forces ψ at `label` too
       -- (pick the T(ψ) branch). Either way some branch stays satisfied.
-      simp only [show intApplyRuleFull (⟨.pos, φ → ψ, label⟩ : ISF Atom) nw b =
+      simp only [show intApplyRuleFull (⟨.pos, φ.imp ψ, label⟩ : ISF Atom) nw b =
         .branchingResult [[⟨.neg, φ, label⟩], [⟨.pos, ψ, label⟩]] nw from rfl]
       rw [IForces_imp] at hpos
       by_cases hφ : IForces val botForces (worldOf label) φ
@@ -172,7 +172,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
             hsat⟩
     | and φ ψ =>
       -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw none; worldOf unchanged
-      simp only [show intApplyRuleFull (⟨.pos, φ ∧ ψ, label⟩ : ISF Atom) nw b =
+      simp only [show intApplyRuleFull (⟨.pos, φ.and ψ, label⟩ : ISF Atom) nw b =
         .linearResult [⟨.pos, φ, label⟩, ⟨.pos, ψ, label⟩] nw none from rfl]
       refine ⟨worldOf, fun _ _ => rfl, ?_, trivial⟩
       rw [IForces_and] at hpos
@@ -185,7 +185,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
       · exact hsat
     | or φ ψ =>
       -- T(φ ∨ ψ): .branchingResult [[T(φ)], [T(ψ)]] nw
-      simp only [show intApplyRuleFull (⟨.pos, φ ∨ ψ, label⟩ : ISF Atom) nw b =
+      simp only [show intApplyRuleFull (⟨.pos, φ.or ψ, label⟩ : ISF Atom) nw b =
         .branchingResult [[⟨.pos, φ, label⟩], [⟨.pos, ψ, label⟩]] nw from rfl]
       rw [IForces_or] at hpos
       rcases hpos with hφ | hψ
@@ -267,7 +267,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
         exact hw'_ge
     | and φ ψ =>
       -- F(φ ∧ ψ): .branchingResult [[F(φ)], [F(ψ)]] nw
-      simp only [show intApplyRuleFull (⟨.neg, φ ∧ ψ, label⟩ : ISF Atom) nw b =
+      simp only [show intApplyRuleFull (⟨.neg, φ.and ψ, label⟩ : ISF Atom) nw b =
         .branchingResult [[⟨.neg, φ, label⟩], [⟨.neg, ψ, label⟩]] nw from rfl]
       rw [IForces_and, not_and_or] at hneg
       rcases hneg with hφ | hψ
@@ -287,7 +287,7 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
             hsat⟩
     | or φ ψ =>
       -- F(φ ∨ ψ): .linearResult [F(φ), F(ψ)] nw none; worldOf unchanged
-      simp only [show intApplyRuleFull (⟨.neg, φ ∨ ψ, label⟩ : ISF Atom) nw b =
+      simp only [show intApplyRuleFull (⟨.neg, φ.or ψ, label⟩ : ISF Atom) nw b =
         .linearResult [⟨.neg, φ, label⟩, ⟨.neg, ψ, label⟩] nw none from rfl]
       refine ⟨worldOf, fun _ _ => rfl, ?_, trivial⟩
       rw [IForces_or, not_or] at hneg

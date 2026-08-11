@@ -122,7 +122,7 @@ lemma classicalRule_preserves_sat (b : Branch (Proposition Atom) Unit)
       change True; trivial
     | and a b_form =>
       -- classicalApplyOne ⟨.pos, .and a b, l⟩ = .linear [T(a), T(b)] (pos_and: rfl)
-      simp only [show classicalApplyOne (⟨Sign.pos, a ∧ b_form, label⟩ :
+      simp only [show classicalApplyOne (⟨Sign.pos, a.and b_form, label⟩ :
         SignedFormula (Proposition Atom) Unit) =
         .linear [SignedFormula.pos a label, SignedFormula.pos b_form label] from rfl]
       rw [BoolEvaluate_and, Bool.and_eq_true] at htrue
@@ -134,7 +134,7 @@ lemma classicalRule_preserves_sat (b : Branch (Proposition Atom) Unit)
       · exact ⟨fun _ => htrue.2, fun h => absurd h (by simp [SignedFormula.pos])⟩
     | or a b_form =>
       -- classicalApplyOne ⟨.pos, .or a b, l⟩ = .branching [[T(a)], [T(b)]]
-      simp only [show classicalApplyOne (⟨Sign.pos, a ∨ b_form, label⟩ :
+      simp only [show classicalApplyOne (⟨Sign.pos, a.or b_form, label⟩ :
         SignedFormula (Proposition Atom) Unit) =
         .branching [[SignedFormula.pos a label], [SignedFormula.pos b_form label]] from rfl]
       rw [BoolEvaluate_or, Bool.or_eq_true] at htrue

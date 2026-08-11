@@ -22,6 +22,7 @@ public import CslibTests.MLL
 public import CslibTests.MinProbe
 public import CslibTests.ModalFrameSeparation
 public import CslibTests.MvalidBotShapeRefutation
+public import CslibTests.OperatorPrecedenceRegression
 public import CslibTests.Propositional
 public import CslibTests.Reduction
 public import CslibTests.S4LoopGuardRegression

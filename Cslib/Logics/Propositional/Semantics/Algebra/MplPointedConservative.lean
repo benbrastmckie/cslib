@@ -101,7 +101,7 @@ theorem conjImpBotMin_brouwerianBot_soundness
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := conjImpBotMin_brouwerianBot_soundness d₁ v bot_val h_ctx
     have h2 := conjImpBotMin_brouwerianBot_soundness d₂ v bot_val h_ctx
-    simp only [BrouwerianBotEvaluate_imp] at h1
+    simp only [← Proposition.imp_def, BrouwerianBotEvaluate_imp] at h1
     rw [BrouwerianSemilattice.himp_eq_top_iff] at h1
     rw [h2, top_le_iff] at h1
     exact h1

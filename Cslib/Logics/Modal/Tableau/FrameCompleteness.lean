@@ -1249,7 +1249,7 @@ theorem modalApplyOneT_diaNeg_soundIn
   obtain ⟨hsndeqK, hRRSK⟩ := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
   have hselfSat : ¬ Satisfies m (f lbl) φ := by
     have hdia : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
-    rw [Satisfies.diamond_iff] at hdia
+    rw [Proposition.diamond_def, Satisfies.diamond_iff] at hdia
     push Not at hdia
     exact hdia (f lbl) (hFC.refl (f lbl))
   refine ⟨?_, ?_⟩
@@ -2598,7 +2598,7 @@ theorem modalApplyOneTB_diaNeg_soundIn
     modalApplyOneB_diaNeg_soundIn m f φ lbl b acc (tbFC_imp_symmFC hFC) hacc hb hmem
   have hselfSat : ¬ Satisfies m (f lbl) φ := by
     have hdia : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
-    rw [Satisfies.diamond_iff] at hdia
+    rw [Proposition.diamond_def, Satisfies.diamond_iff] at hdia
     push Not at hdia
     exact hdia (f lbl) ((tbFC_imp_reflFC hFC).refl (f lbl))
   refine ⟨?_, ?_⟩
@@ -8050,7 +8050,7 @@ theorem S4RedirectSoundInv_diaNeg_step (φ₀ : Proposition Atom)
     · simp only [List.mem_singleton] at hsf'
       subst hsf'
       have hdia : ¬ Satisfies m (f lbl) (.diamond φ) := (hbsat _ hmemb).2 rfl
-      rw [Satisfies.diamond_iff] at hdia
+      rw [Proposition.diamond_def, Satisfies.diamond_iff] at hdia
       push Not at hdia
       exact sfSat_neg m f φ lbl (hdia (f lbl) (hFC.1.refl (f lbl)))
   refine ⟨modalTDiaNegSelf b φ lbl, by rw [hres], hEr, ⟨W, m, f, hFC, hacc, ?_⟩, ?_, ?_⟩

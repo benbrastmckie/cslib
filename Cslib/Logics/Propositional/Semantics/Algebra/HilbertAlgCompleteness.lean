@@ -97,7 +97,7 @@ theorem imp_hilbert_soundness
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := imp_hilbert_soundness d₁ v h_ctx
     have h2 := imp_hilbert_soundness d₂ v h_ctx
-    simp only [HilbertEvaluate] at h1
+    simp only [← Proposition.imp_def, HilbertEvaluate] at h1
     exact HilbertAlgebra.himp_mp h1 h2
   | .weakening _ _ ψ d' h_sub =>
     exact imp_hilbert_soundness d' v

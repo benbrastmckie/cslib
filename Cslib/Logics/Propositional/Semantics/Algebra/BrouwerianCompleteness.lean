@@ -118,7 +118,7 @@ theorem conjImp_brouwerian_soundness
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := conjImp_brouwerian_soundness d₁ v h_ctx
     have h2 := conjImp_brouwerian_soundness d₂ v h_ctx
-    simp only [BrouwerianEvaluate] at h1
+    simp only [← Proposition.imp_def, BrouwerianEvaluate] at h1
     rw [BrouwerianSemilattice.himp_eq_top_iff] at h1
     rw [h2, top_le_iff] at h1
     exact h1

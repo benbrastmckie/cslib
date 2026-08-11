@@ -1,0 +1,6 @@
+TIMESTAMP=1786410439
+HEAD_SHA=292a291e2126b9ebc42c1ec82e80acddb941c2f5
+PATCH_PATH=specs/619_reconcile_connectives_operators/working-progress-1786410439.patch
+STASH_REF=stash@{0}
+BRANCH_NAME=NONE
+UNTRACKED_BACKUP=specs/619_reconcile_connectives_operators/untracked-backup-1786410439

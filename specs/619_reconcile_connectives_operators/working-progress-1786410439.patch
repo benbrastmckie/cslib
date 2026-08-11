@@ -1,0 +1,1488 @@
+diff --git a/.claude/scripts/literature-fidelity-audit.sh b/.claude/scripts/literature-fidelity-audit.sh
+index 61bde5a6..6b256b78 100755
+--- a/.claude/scripts/literature-fidelity-audit.sh
++++ b/.claude/scripts/literature-fidelity-audit.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ # literature-fidelity-audit.sh - Re-runnable provenance/fidelity detector and stamper
+-# for the ~/Projects/Literature corpus (task #835).
++# for the ~/Projects/Literature corpus.
+ #
+ # Usage:
+ #   literature-fidelity-audit.sh [--dry-run]   # report-only (default): classify every
+@@ -11,13 +11,6 @@
+ #                                               # stamp .provenance_fidelity and
+ #                                               # .word_ratio onto every parent entry
+ #                                               # (see "Target entry resolution" below).
+-#   literature-fidelity-audit.sh --legacy-schema [--dry-run|--write]
+-#                                               # Classify the legacy doc_id/chunks_dir-
+-#                                               # schema entries instead of the sources/
+-#                                               # schema. --dry-run/--write remain
+-#                                               # orthogonal (same report-vs-write
+-#                                               # semantics as above). See "Legacy schema
+-#                                               # mode" below.
+ #
+ # What this computes (see report 01_provenance-fidelity-audit.md for full rationale):
+ #   For each sources/<dir>/ directory, classify into one of five provenance_fidelity
+@@ -69,39 +62,7 @@
+ #       error.
+ #   Only entries under sources/<dir>/ are ever touched. Entries using the unrelated
+ #   legacy `doc_id`/`chunks_dir` schema (no `path`/`id` fields, from a different
+-#   ingestion pipeline, live outside sources/) are never matched or written -- UNLESS
+-#   --legacy-schema is passed, in which case ONLY those entries are matched/written
+-#   (see "Legacy schema mode" below); the two schemas' write paths never interleave.
+-#
+-# Legacy schema mode (--legacy-schema):
+-#   Some index.json entries come from an unrelated ingestion pipeline: they carry
+-#   `doc_id` + `chunks_dir` (an absolute path to a directory of chunk_NNNN.md files)
+-#   and no `path`/`id` fields at all. --legacy-schema enumerates exactly those entries
+-#   (doc_id and chunks_dir both present, path and id both absent-or-null -- this gate
+-#   is the entire safety boundary between the two schemas) and classifies each by:
+-#     - Resolving its source as $LITERATURE_DIR/sources/<doc_id>/source.pdf (or
+-#       source.djvu), falling back to the legacy
+-#       $LITERATURE_DIR/.sources-recovered/<doc_id>.pdf (or .djvu) location only if the
+-#       sources/ path is absent. Recovered sources were migrated into sources/<doc_id>/
+-#       by the Literature repo; .sources-recovered/ is expected to be empty going
+-#       forward and its absence or emptiness is not an error. No source present at
+-#       either location -> no_source_pdf.
+-#     - Summing word_count_text() over ALL chunk_*.md in chunks_dir as md_words (the
+-#       chunk-exclusion filter used for the sources/ schema is deliberately NOT
+-#       applied here -- for this schema the chunks ARE the document, there is no
+-#       separate whole-document .md).
+-#     - Reusing the same word-ratio / disclosure_check / proof_completeness_fraction
+-#       pipeline as the sources/ schema, unchanged, against that chunk text.
+-#     - A .djvu (or any source producing 0 extracted words, e.g. no djvu text
+-#       extractor installed) is classified unadjudicated with an explicit
+-#       "[blocked]" stderr note -- never unverified_no_baseline, since a baseline
+-#       (the .djvu file) does exist; only the extractor is missing.
+-#   --write stamps provenance_fidelity/word_ratio directly onto the matched entry by
+-#   doc_id equality (resolve_legacy_targets(), never resolve_targets() -- the latter's
+-#   path-prefix/id-presence logic is for the other schema). no_source_pdf and the
+-#   djvu-blocked unadjudicated case are deliberately left unstamped (reported
+-#   explicitly in the write summary, not silently skipped) -- their disposition is a
+-#   separate, explicit decision outside this script's scope.
++#   ingestion pipeline, live outside sources/) are never matched or written.
+ #
+ # Idempotency: re-running --write on an already-stamped corpus is a no-op relative to
+ # the first --write's output (same values, stable key order, no diff). The FIRST
+@@ -129,23 +90,16 @@ set -euo pipefail
+ 
+ LITERATURE_DIR="${LITERATURE_DIR:-$HOME/Projects/Literature}"
+ MODE="report"
+-LEGACY_SCHEMA="false"
+ 
+ usage() {
+   cat <<'EOF'
+-Usage: literature-fidelity-audit.sh [--dry-run|--write] [--legacy-schema] [-h|--help]
+-
+-  --dry-run       Report-only (default). Classify every sources/<dir>/ and print a
+-                  per-directory report to stdout. index.json is never modified.
+-  --write         Backup index.json, then idempotently stamp provenance_fidelity and
+-                  word_ratio onto the resolved target entries for every directory.
+-  --legacy-schema Classify the legacy doc_id/chunks_dir-schema entries instead of the
+-                  sources/ schema. Orthogonal to --dry-run/--write. Resolves each
+-                  entry's source from sources/<doc_id>/source.{pdf,djvu}, falling back
+-                  to the legacy .sources-recovered/<doc_id>.{pdf,djvu} location only if
+-                  present under LITERATURE_DIR; an absent or empty
+-                  .sources-recovered/ is expected and not an error.
+-  -h, --help      Show this help.
++Usage: literature-fidelity-audit.sh [--dry-run|--write] [-h|--help]
++
++  --dry-run   Report-only (default). Classify every sources/<dir>/ and print a
++              per-directory report to stdout. index.json is never modified.
++  --write     Backup index.json, then idempotently stamp provenance_fidelity and
++              word_ratio onto the resolved target entries for every directory.
++  -h, --help  Show this help.
+ EOF
+ }
+ 
+@@ -157,9 +111,6 @@ for arg in "$@"; do
+     --dry-run | --report)
+       MODE="report"
+       ;;
+-    --legacy-schema)
+-      LEGACY_SCHEMA="true"
+-      ;;
+     -h | --help)
+       usage
+       exit 0
+@@ -183,14 +134,6 @@ if [ ! -d "$SOURCES_DIR" ]; then
+   exit 1
+ fi
+ 
+-# Legacy sources were migrated into sources/<doc_id>/source.{pdf,djvu}; the former
+-# .sources-recovered/<doc_id>.{pdf,djvu} location is a fallback only and is expected to
+-# be absent or empty post-migration. This is not an error -- do not hard-fail on it.
+-RECOVERED_DIR="$LITERATURE_DIR/.sources-recovered"
+-if [ "$LEGACY_SCHEMA" = "true" ] && [ ! -d "$RECOVERED_DIR" ]; then
+-  echo "[fidelity-audit] Note: .sources-recovered/ not found under LITERATURE_DIR ($RECOVERED_DIR); this is expected post-migration -- legacy sources are resolved from sources/<doc_id>/ instead." >&2
+-fi
+-
+ INDEX_FILE="$LITERATURE_DIR/index.json"
+ if [ ! -f "$INDEX_FILE" ]; then
+   echo "Error: index.json not found: $INDEX_FILE" >&2
+@@ -214,12 +157,13 @@ if [ "$MODE" = "write" ]; then
+   echo "[fidelity-audit] Backup created and verified: $BACKUP_FILE" >&2
+ fi
+ 
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++
+ LITERATURE_DIR="$LITERATURE_DIR" \
+ SOURCES_DIR="$SOURCES_DIR" \
+-RECOVERED_DIR="$RECOVERED_DIR" \
+ INDEX_FILE="$INDEX_FILE" \
+ MODE="$MODE" \
+-LEGACY_SCHEMA="$LEGACY_SCHEMA" \
++LITERATURE_SCRIPT_DIR="$SCRIPT_DIR" \
+ python3 <<'PYEOF'
+ import json
+ import os
+@@ -230,25 +174,47 @@ from collections import Counter
+ 
+ LITERATURE_DIR = os.environ["LITERATURE_DIR"]
+ SOURCES_DIR = os.environ["SOURCES_DIR"]
+-RECOVERED_DIR = os.environ["RECOVERED_DIR"]
+ INDEX_FILE = os.environ["INDEX_FILE"]
+ MODE = os.environ["MODE"]
+-LEGACY_SCHEMA = os.environ.get("LEGACY_SCHEMA", "false") == "true"
++
++# Additive combining-mark (U+0338) signal (kept DISTINCT from pdf_word_count()'s
++# pdftotext -layout call below -- pdftotext itself substitutes a literal digit
++# "6" for the overlay mark and cannot serve as ground truth for this check; see
++# literature-combining-audit.sh's header for the full rationale). Reuses the
++# same PyMuPDF-based detection/anchoring module the standalone detector and
++# repair engine use, so this script's combining-mark numbers are never a
++# second, independently-drifting implementation.
++sys.path.insert(0, os.environ["LITERATURE_SCRIPT_DIR"])
++try:
++    from literature_combining_detect import scan_directory as _combining_scan_directory
++    _COMBINING_CHECK_AVAILABLE = True
++except ImportError as e:
++    print(f"[warn] literature_combining_detect not importable, combining-mark "
++          f"check disabled for this run: {e}", file=sys.stderr)
++    _COMBINING_CHECK_AVAILABLE = False
++
++
++def combining_mark_check(dirpath, dirname):
++    """Returns (checked: bool, dropped: bool|None, missing: int|None). Only
++    meaningful when the directory has both a PDF and non-chunk markdown (the
++    same precondition the standalone detector requires); otherwise
++    checked=False and the other two fields are None (not 0 -- "not checked" is
++    a distinct, undisclosed state from "checked, zero dropped")."""
++    if not _COMBINING_CHECK_AVAILABLE:
++        return False, None, None
++    try:
++        result = _combining_scan_directory(dirpath, dirname, on_no_markdown=None)
++    except Exception as e:
++        print(f"[warn] combining-mark check failed for {dirname}: {e}", file=sys.stderr)
++        return False, None, None
++    if result is None:
++        return False, None, None
++    missing = result["corrupted_count"]
++    return True, missing > 0, missing
+ 
+ RATIO_THRESHOLD = 0.75
+ PROOF_ADEQUACY_THRESHOLD = 0.6
+ 
+-# The six values this script's own detector computes. A legacy entry whose CURRENT
+-# provenance_fidelity is already set to something outside this set (e.g. the
+-# out-of-band "ocr_rescanned_reflowed_partial_symbol_loss" some legacy entries carry
+-# from an earlier, more specific manual/OCR-provenance assessment) is an
+-# already-honestly-stamped entry this detector must never clobber with its own
+-# coarser six-value classification -- see main_legacy()'s write loop.
+-SIX_VALUE_ENUM = {
+-    "verified_conversion", "unverified_summary", "no_source_pdf",
+-    "not_yet_converted", "unverified_no_baseline", "unadjudicated",
+-}
+-
+ DISCLOSURE_RE = re.compile(
+     r"selective conversion|extracted:?\s*chapter|truncated|excerpt|chapters?\s+\d+\s+and\s+\d+",
+     re.IGNORECASE,
+@@ -376,6 +342,11 @@ def classify_dir(dirname, idx):
+     has_pdf = len(pdfs) > 0
+     has_md = len(mds) > 0
+ 
++    # Additive signal, computed once regardless of which provenance_fidelity
++    # branch below fires -- reported ALONGSIDE provenance_fidelity, never
++    # folded into the ratio>=RATIO_THRESHOLD gate or the six-value enum.
++    combining_checked, combining_dropped, combining_missing = combining_mark_check(dirpath, dirname)
++
+     result = {
+         "dir": dirname,
+         "has_pdf": has_pdf,
+@@ -386,6 +357,9 @@ def classify_dir(dirname, idx):
+         "proof_fraction": None,
+         "disclosed": None,
+         "provenance_fidelity": None,
++        "combining_mark_checked": combining_checked,
++        "combining_mark_dropped": combining_dropped,
++        "combining_marks_missing": combining_missing,
+     }
+ 
+     if not has_pdf and has_md:
+@@ -472,184 +446,41 @@ def resolve_targets(idx, dirname):
+     return matched, "phantom_parent_fallback"
+ 
+ 
+-def enumerate_legacy_entries(idx):
+-    """Return every index.json entry using the legacy doc_id/chunks_dir schema. This
+-    gate is the entire safety boundary between the two schemas -- it must never match
+-    a sources/-schema entry: doc_id and chunks_dir both present, AND path is
+-    absent-or-null, AND id is absent-or-null."""
+-    out = []
+-    for e in idx.get("entries", []) or []:
+-        if not e.get("doc_id") or not e.get("chunks_dir"):
+-            continue
+-        if e.get("path") is not None:
+-            continue
+-        if e.get("id") is not None:
+-            continue
+-        out.append(e)
+-    return out
+-
+-
+-def classify_legacy(entry):
+-    """Classify one legacy doc_id/chunks_dir-schema entry. Mirrors classify_dir()'s
+-    ratio/disclosure/proof-completeness pipeline exactly, but resolves the source PDF
+-    by doc_id -- preferring sources/<doc_id>/source.{pdf,djvu} and falling back to the
+-    legacy RECOVERED_DIR/<doc_id>.{pdf,djvu} location only if the sources/ path is
+-    absent -- and sums word_count_text() over ALL chunk_*.md in chunks_dir (no
+-    chunk-exclusion filter -- for this schema the chunks ARE the document)."""
+-    doc_id = entry["doc_id"]
+-    chunks_dir = entry["chunks_dir"]
+-
+-    result = {
+-        "dir": doc_id,
+-        "doc_id": doc_id,
+-        "has_pdf": False,
+-        "has_md": False,
+-        "pdf_words": None,
+-        "md_words": None,
+-        "word_ratio": None,
+-        "proof_fraction": None,
+-        "disclosed": None,
+-        "provenance_fidelity": None,
+-        "djvu_blocked": False,
+-    }
+-
+-    # Prefer the canonical sources/<doc_id>/ layout that recovered sources were
+-    # migrated into; fall back to the legacy RECOVERED_DIR flat layout only if the
+-    # sources/ path is absent (RECOVERED_DIR is expected to be empty post-migration).
+-    migrated_pdf = os.path.join(SOURCES_DIR, doc_id, "source.pdf")
+-    migrated_djvu = os.path.join(SOURCES_DIR, doc_id, "source.djvu")
+-    src_pdf = os.path.join(RECOVERED_DIR, f"{doc_id}.pdf")
+-    src_djvu = os.path.join(RECOVERED_DIR, f"{doc_id}.djvu")
+-    if os.path.isfile(migrated_pdf):
+-        src = migrated_pdf
+-    elif os.path.isfile(migrated_djvu):
+-        src = migrated_djvu
+-    elif os.path.isfile(src_pdf):
+-        src = src_pdf
+-    elif os.path.isfile(src_djvu):
+-        src = src_djvu
+-    else:
+-        result["provenance_fidelity"] = "no_source_pdf"
+-        return result
+-    result["has_pdf"] = True
+-
+-    try:
+-        chunk_files = sorted(
+-            e for e in os.listdir(chunks_dir)
+-            if re.match(r"^chunk_\d+\.md$", e, re.IGNORECASE)
+-        )
+-    except OSError as e:
+-        print(f"[warn] cannot list {chunks_dir}: {e}", file=sys.stderr)
+-        chunk_files = []
+-
+-    md_texts = []
+-    md_words_total = 0
+-    for cf in chunk_files:
+-        p = os.path.join(chunks_dir, cf)
+-        t = ""
+-        try:
+-            with open(p, encoding="utf-8", errors="replace") as f:
+-                t = f.read()
+-        except OSError as e:
+-            print(f"[warn] read failed for {p}: {e}", file=sys.stderr)
+-        md_texts.append(t)
+-        md_words_total += word_count_text(t)
+-
+-    result["has_md"] = len(chunk_files) > 0
+-    result["md_words"] = md_words_total
+-
+-    pdf_words_total = pdf_word_count(src)
+-    result["pdf_words"] = pdf_words_total
+-
+-    if pdf_words_total == 0:
+-        # A baseline (the recovered PDF/DJVU) exists but the extractor produced zero
+-        # words -- e.g. a .djvu with no djvutxt/djvups/working PyMuPDF codec on this
+-        # machine. This is NOT the same as no_source_pdf/unverified_no_baseline
+-        # (which mean "no baseline exists at all"): fail closed with an explicit
+-        # blocked-reason note rather than silently picking either quarantined value.
+-        print(
+-            f"[blocked] {doc_id}: source {src} produced 0 extracted words "
+-            "(no working text extractor for this source format) -- classified "
+-            "unadjudicated, NOT unverified_no_baseline; a baseline exists, the "
+-            "extractor does not",
+-            file=sys.stderr,
+-        )
+-        result["djvu_blocked"] = True
+-        result["provenance_fidelity"] = "unadjudicated"
+-        return result
+-
+-    ratio = md_words_total / pdf_words_total
+-    result["word_ratio"] = round(ratio, 4)
+-
+-    if ratio >= RATIO_THRESHOLD:
+-        result["provenance_fidelity"] = "verified_conversion"
+-        return result
+-
+-    index_summaries = [entry["summary"]] if entry.get("summary") else []
+-    disclosed = disclosure_check(md_texts, index_summaries)
+-    result["disclosed"] = disclosed
+-    if disclosed:
+-        result["provenance_fidelity"] = "verified_conversion"
+-        return result
+-
+-    frac, adequate, total = proof_completeness_fraction(md_texts)
+-    result["proof_fraction"] = frac
+-    if frac is None:
+-        result["provenance_fidelity"] = "unadjudicated"
+-        return result
+-
+-    if frac < PROOF_ADEQUACY_THRESHOLD:
+-        result["provenance_fidelity"] = "unverified_summary"
+-    else:
+-        result["provenance_fidelity"] = "verified_conversion"
+-    return result
++def main():
++    idx = load_index_entries()
+ 
++    dirs = sorted(
++        d for d in os.listdir(SOURCES_DIR)
++        if os.path.isdir(os.path.join(SOURCES_DIR, d))
++    )
+ 
+-def resolve_legacy_targets(idx, doc_id):
+-    """Return the single legacy-schema entry whose doc_id equals the classified
+-    doc_id AND which passes the enumerate_legacy_entries() gate, or None. Never call
+-    resolve_targets() in legacy mode -- its path-prefix/id-presence logic is for the
+-    other schema."""
+-    for e in idx.get("entries", []) or []:
+-        if e.get("doc_id") != doc_id:
+-            continue
+-        if not e.get("chunks_dir"):
+-            continue
+-        if e.get("path") is not None:
+-            continue
+-        if e.get("id") is not None:
+-            continue
+-        return e
+-    return None
++    results = []
++    for d in dirs:
++        r = classify_dir(d, idx)
++        results.append(r)
+ 
++    counts = Counter(r["provenance_fidelity"] for r in results)
+ 
+-def print_report(results):
+-    print("dir\tprovenance_fidelity\tword_ratio\tmd_words\tpdf_words\tdisclosed\tproof_fraction")
++    print("dir\tprovenance_fidelity\tword_ratio\tmd_words\tpdf_words\tdisclosed\tproof_fraction"
++          "\tcombining_mark_checked\tcombining_mark_dropped\tcombining_marks_missing")
+     for r in results:
+         print(
+             f"{r['dir']}\t{r['provenance_fidelity']}\t{r['word_ratio']}\t"
+-            f"{r['md_words']}\t{r['pdf_words']}\t{r['disclosed']}\t{r['proof_fraction']}"
++            f"{r['md_words']}\t{r['pdf_words']}\t{r['disclosed']}\t{r['proof_fraction']}\t"
++            f"{r['combining_mark_checked']}\t{r['combining_mark_dropped']}\t{r['combining_marks_missing']}"
+         )
+ 
+-    counts = Counter(r["provenance_fidelity"] for r in results)
+     print("\n--- Population summary ---", file=sys.stderr)
+     for k in ("verified_conversion", "unverified_summary", "no_source_pdf",
+               "not_yet_converted", "unverified_no_baseline", "unadjudicated"):
+         print(f"{k}: {counts.get(k, 0)}", file=sys.stderr)
+     print(f"Total directories: {len(results)}", file=sys.stderr)
+ 
+-
+-def main_default():
+-    """sources/-schema mode: unchanged behavior, routed through resolve_targets()."""
+-    idx = load_index_entries()
+-
+-    dirs = sorted(
+-        d for d in os.listdir(SOURCES_DIR)
+-        if os.path.isdir(os.path.join(SOURCES_DIR, d))
+-    )
+-
+-    results = [classify_dir(d, idx) for d in dirs]
+-    print_report(results)
++    combining_checked_n = sum(1 for r in results if r["combining_mark_checked"])
++    combining_dropped_n = sum(1 for r in results if r["combining_mark_dropped"])
++    print(f"\n--- Combining-mark signal (additive, informational) ---", file=sys.stderr)
++    print(f"directories checked: {combining_checked_n}", file=sys.stderr)
++    print(f"directories with dropped marks: {combining_dropped_n}", file=sys.stderr)
+ 
+     if MODE != "write":
+         return
+@@ -670,14 +501,26 @@ def main_default():
+         for e in targets:
+             prev_fidelity = e.get("provenance_fidelity")
+             prev_ratio = e.get("word_ratio")
++            prev_combining_checked = e.get("combining_mark_checked")
++            prev_combining_dropped = e.get("combining_mark_dropped")
++            prev_combining_missing = e.get("combining_marks_missing")
+             new_fidelity = r["provenance_fidelity"]
+             new_ratio = r["word_ratio"]
+-            if prev_fidelity == new_fidelity and prev_ratio == new_ratio:
++            new_combining_checked = r["combining_mark_checked"]
++            new_combining_dropped = r["combining_mark_dropped"]
++            new_combining_missing = r["combining_marks_missing"]
++            if (prev_fidelity == new_fidelity and prev_ratio == new_ratio
++                    and prev_combining_checked == new_combining_checked
++                    and prev_combining_dropped == new_combining_dropped
++                    and prev_combining_missing == new_combining_missing):
+                 unchanged += 1
+             else:
+                 changed += 1
+             e["provenance_fidelity"] = new_fidelity
+             e["word_ratio"] = new_ratio
++            e["combining_mark_checked"] = new_combining_checked
++            e["combining_mark_dropped"] = new_combining_dropped
++            e["combining_marks_missing"] = new_combining_missing
+             stamped += 1
+ 
+     tmp_path = INDEX_FILE + ".tmp"
+@@ -698,92 +541,6 @@ def main_default():
+         print(f"  {d} ({n} entries)", file=sys.stderr)
+ 
+ 
+-def main_legacy():
+-    """--legacy-schema mode: doc_id/chunks_dir entries only, routed through
+-    resolve_legacy_targets(). Never touches a sources/-schema entry -- see
+-    enumerate_legacy_entries()'s gate."""
+-    idx = load_index_entries()
+-
+-    entries = enumerate_legacy_entries(idx)
+-    results = [classify_legacy(e) for e in entries]
+-    print_report(results)
+-
+-    if MODE != "write":
+-        return
+-
+-    stamped = 0
+-    changed = 0
+-    unchanged = 0
+-    no_match_doc_ids = []
+-    skipped = []  # (doc_id, fidelity) deliberately left unstamped
+-    already_honest = []  # (doc_id, existing_value) -- pre-existing out-of-band value, never clobbered
+-
+-    for r in results:
+-        doc_id = r["doc_id"]
+-        fidelity = r["provenance_fidelity"]
+-        # no_source_pdf (no recovered source at all) and the djvu-blocked
+-        # unadjudicated case (a baseline exists but the extractor does not) are
+-        # deliberately left unstamped -- reported explicitly below, not silently
+-        # skipped. Their disposition is out of this script's scope.
+-        if fidelity == "no_source_pdf" or r.get("djvu_blocked"):
+-            skipped.append((doc_id, fidelity))
+-            continue
+-
+-        target = resolve_legacy_targets(idx, doc_id)
+-        if target is None:
+-            no_match_doc_ids.append(doc_id)
+-            continue
+-
+-        prev_fidelity = target.get("provenance_fidelity")
+-        # An entry already carrying a value OUTSIDE this script's own six-value enum
+-        # (e.g. the Group A pair's out-of-band "ocr_rescanned_reflowed_partial_
+-        # symbol_loss", a more specific manual/OCR-provenance assessment made
+-        # elsewhere) is already-honestly-stamped and must never be clobbered by this
+-        # detector's coarser classification. Re-running this script's own six-value
+-        # classifications (Group B, once stamped) remains fully idempotent since
+-        # those values ARE in SIX_VALUE_ENUM.
+-        if prev_fidelity is not None and prev_fidelity not in SIX_VALUE_ENUM:
+-            already_honest.append((doc_id, prev_fidelity))
+-            continue
+-
+-        prev_ratio = target.get("word_ratio")
+-        new_ratio = r["word_ratio"]
+-        if prev_fidelity == fidelity and prev_ratio == new_ratio:
+-            unchanged += 1
+-        else:
+-            changed += 1
+-        target["provenance_fidelity"] = fidelity
+-        target["word_ratio"] = new_ratio
+-        stamped += 1
+-
+-    tmp_path = INDEX_FILE + ".tmp"
+-    with open(tmp_path, "w", encoding="utf-8") as f:
+-        json.dump(idx, f, indent=2, ensure_ascii=False)
+-        f.write("\n")
+-    os.replace(tmp_path, INDEX_FILE)
+-
+-    print("\n--- Legacy write summary ---", file=sys.stderr)
+-    print(f"Entries stamped (total writes): {stamped}", file=sys.stderr)
+-    print(f"  changed:   {changed}", file=sys.stderr)
+-    print(f"  unchanged: {unchanged}", file=sys.stderr)
+-    print(f"doc_ids with no matching legacy entry (skipped, nothing to stamp): {len(no_match_doc_ids)}", file=sys.stderr)
+-    for d in no_match_doc_ids:
+-        print(f"  {d}", file=sys.stderr)
+-    print(f"doc_ids deliberately left unstamped (no_source_pdf or djvu-blocked): {len(skipped)}", file=sys.stderr)
+-    for d, fidelity in skipped:
+-        print(f"  {d}\t{fidelity}", file=sys.stderr)
+-    print(f"doc_ids already honestly stamped (pre-existing out-of-band value, never clobbered): {len(already_honest)}", file=sys.stderr)
+-    for d, fidelity in already_honest:
+-        print(f"  {d}\t{fidelity}", file=sys.stderr)
+-
+-
+-def main():
+-    if LEGACY_SCHEMA:
+-        main_legacy()
+-    else:
+-        main_default()
+-
+-
+ if __name__ == "__main__":
+     main()
+ PYEOF
+diff --git a/.claude/scripts/literature-search.sh b/.claude/scripts/literature-search.sh
+index 5b07d106..421d072b 100755
+--- a/.claude/scripts/literature-search.sh
++++ b/.claude/scripts/literature-search.sh
+@@ -20,7 +20,7 @@
+ # Query sanitization: strips FTS5 operators (AND/OR/NOT at word boundaries,
+ # unbalanced quotes/parens). Allows "quoted phrases". Escapes apostrophes.
+ #
+-# Provenance/fidelity flagging (task #835): every search/read/toc result carries a
++# Provenance/fidelity flagging: every search/read/toc result carries a
+ # `provenance_fidelity` field looked up from $LITERATURE_DIR/index.json (fail-open —
+ # a doc missing the field is treated as unverified, never as verified_conversion; see
+ # .claude/scripts/literature-fidelity-audit.sh for how the field is computed and
+@@ -43,11 +43,11 @@ LITERATURE_LIMIT="${LITERATURE_LIMIT:-20}"
+ PROJECT_FILTER=""
+ INCLUDE_UNVERIFIED="false"
+ 
+-# --- provenance_fidelity values excluded from default search ranking (task #835) ---
++# --- provenance_fidelity values excluded from default search ranking ---
+ # Docs whose fidelity is one of these are quarantined from default do_search output:
+ # still fully retrievable (via --include-unverified, or directly via --read/--toc/
+ # --doc), never deleted, never edited. See literature-fidelity-audit.sh for how the
+-# field is computed and stamped. "unadjudicated" (task #839) covers low-ratio,
++# field is computed and stamped. "unadjudicated" covers low-ratio,
+ # undisclosed docs where the proof-completeness signal could not fire at all --
+ # fail closed, quarantine it like the other unverified values.
+ QUARANTINED_FIDELITY_VALUES="unverified_summary unverified_no_baseline unadjudicated"
+@@ -107,7 +107,7 @@ query = "$query"
+ import os
+ query = os.environ.get('_SEARCH_QUERY', query)
+ 
+-# --- Ligature fold (task #833) ---
++# --- Ligature fold ---
+ # Mirrors literature-convert.sh's LIGATURE_MAP (U+FB00-FB06) verbatim. Applied
+ # FIRST, before any other transform, so a query containing a raw ligature
+ # glyph matches the corpus's already-folded text (#831 folds ligatures at
+@@ -144,7 +144,7 @@ quote_count = query.count('"')
+ if quote_count % 2 != 0:
+     query = query.replace('"', ' ')
+ 
+-# --- Punctuation normalization (task #833) ---
++# --- Punctuation normalization ---
+ # FTS5's query grammar treats mid-word hyphens (column-exclusion/NOT-prefix),
+ # colons (column-filter), slashes, and parens (grouping -- even word-attached
+ # and balanced) as syntax, not as word characters. This tool's only caller
+@@ -225,12 +225,10 @@ allowed_doc_ids = [d.strip() for d in allowed_doc_ids_raw.strip().splitlines() i
+ 
+ 
+ def load_fidelity_map(lit_dir):
+-    """directory-name (or doc_id) -> provenance_fidelity (task #835). Fail-open:
+-    callers must default a missing map entry to an unverified value, never to
+-    verified_conversion.
++    """directory-name -> provenance_fidelity. Fail-open: callers must
++    default a missing map entry to an unverified value, never to verified_conversion.
+ 
+-    DUAL-KEYED: for sources/-schema entries (path starts with "sources/"), the key
+-    is the DIRECTORY NAME, NOT index.json's id/parent_doc fields -- those are a
++    KEYED BY DIRECTORY NAME, NOT index.json's id/parent_doc fields -- those are a
+     separate namespace from chunks_data.doc_id (e.g. index.json's top-level id for
+     the blackburn_2002 directory is "blackburn_2002_book", but every chunks.json /
+     chunks_data row for that same directory carries doc_id="blackburn_2002", the bare
+@@ -240,14 +238,7 @@ def load_fidelity_map(lit_dir):
+     "sources/<dir>/" regardless of which id/parent_doc scheme it uses. Deriving the
+     key from that path prefix (the same directory-name key chunks_data.doc_id
+     actually uses) is what makes this lookup correct for both naming schemes at once,
+-    including the phantom-parent-fallback and multi-root cases.
+-
+-    For legacy doc_id/chunks_dir-schema entries (no sources/-prefixed path at
+-    all -- a different ingestion pipeline entirely), the key is the entry's own
+-    doc_id field directly: there is no sources/<dir>/ path to derive a directory
+-    name from, and chunks_data.doc_id for these entries already IS that same doc_id.
+-    This branch only fires when the sources/-path branch above does not match, and
+-    setdefault means it can never overwrite a sources/-schema key."""
++    including the phantom-parent-fallback and multi-root cases."""
+     index_file = os.path.join(lit_dir, "index.json")
+     fmap = {}
+     if not os.path.isfile(index_file):
+@@ -263,14 +254,11 @@ def load_fidelity_map(lit_dir):
+         if pf is None:
+             continue
+         path = e.get("path")
+-        if isinstance(path, str) and path.startswith(prefix):
+-            dirname = path[len(prefix):].split("/", 1)[0]
+-            if dirname:
+-                fmap.setdefault(dirname, pf)
++        if not isinstance(path, str) or not path.startswith(prefix):
+             continue
+-        doc_id = e.get("doc_id")
+-        if isinstance(doc_id, str) and doc_id:
+-            fmap.setdefault(doc_id, pf)
++        dirname = path[len(prefix):].split("/", 1)[0]
++        if dirname:
++            fmap.setdefault(dirname, pf)
+     return fmap
+ 
+ 
+@@ -282,7 +270,7 @@ def get_fidelity(fmap, doc_id):
+ 
+ fidelity_map = load_fidelity_map(literature_dir)
+ 
+-# --- Fallback ladder tiers (task #833) ---
++# --- Fallback ladder tiers ---
+ # Internal tier names match the envelope's "fallback_tier" vocabulary exactly
+ # ("bm25" | "phrase_retry" | "trigram" | "none"); row-level "match_tier" uses
+ # "trigram_fallback" instead of "trigram" -- ROW_TIER_LABEL maps between them.
+@@ -291,7 +279,7 @@ ROW_TIER_LABEL = {'bm25': 'bm25', 'phrase_retry': 'phrase_retry', 'trigram': 'tr
+ 
+ 
+ def ensure_trigram(conn):
+-    """Idempotently ensure chunks_trigram exists and is populated (task #833). This is the
++    """Idempotently ensure chunks_trigram exists and is populated. This is the
+     ONLY place chunks_trigram is populated -- literature-build-index.sh rebuilds chunks_fts
+     only, so the trigram table starts (or goes back to) empty after any full reindex until a
+     search next needs this rung. Returns True if the table is usable for a query, False if
+@@ -326,7 +314,7 @@ def ensure_trigram(conn):
+                     conn.execute("INSERT INTO chunks_trigram(chunks_trigram) VALUES('rebuild')")
+                     # Without an explicit commit, this write lives only in the connection's
+                     # implicit transaction and is silently rolled back the moment conn.close()
+-                    # runs below (do_search()'s connections were read-only before task #833, so
++                    # runs below (do_search()'s connections were read-only historically, so
+                     # this was never an issue until ensure_trigram() added the first write path)
+                     # -- verified empirically: the rebuild was visible within the same
+                     # connection but vanished from the on-disk shadow tables after close()
+@@ -468,7 +456,7 @@ global_results = global_out['results']
+ local_doc_ids = {r['doc_id'] for r in local_results}
+ merged = local_results + [r for r in global_results if r['doc_id'] not in local_doc_ids]
+ 
+-# Quarantine (task #835): exclude unverified/no-baseline docs from default ranking.
++# Quarantine: exclude unverified/no-baseline docs from default ranking.
+ # Not a deletion -- always retrievable via --include-unverified, or directly via
+ # --read/--toc/--doc regardless of this flag.
+ if not include_unverified:
+@@ -478,7 +466,7 @@ if not include_unverified:
+ merged.sort(key=lambda r: r['rank'])
+ merged = merged[:limit]
+ 
+-# --- Envelope construction (task #833) ---
++# --- Envelope construction ---
+ # fallback_tier/degraded reflect the rows actually surviving quarantine (a tier whose rows
+ # were all quarantined does not count as having "answered"). "degraded" is true whenever the
+ # primary bm25 tier is not what answered -- this is the honest, never-silent signal that
+@@ -537,11 +525,9 @@ quarantined_fidelity = set("$QUARANTINED_FIDELITY_VALUES".split())
+ 
+ 
+ def load_fidelity_map(lit_dir):
+-    # Directory-name-keyed (matches chunks_data.doc_id exactly), with a doc_id
+-    # fallback branch for legacy doc_id/chunks_dir-schema entries. See the primary
++    # Directory-name-keyed (matches chunks_data.doc_id exactly). See the primary
+     # do_search heredoc above for the full docstring/rationale on why this must be
+-    # keyed by directory name (or doc_id) rather than index.json's id/parent_doc
+-    # fields.
++    # keyed by directory name rather than index.json's id/parent_doc fields.
+     index_file = os.path.join(lit_dir, "index.json")
+     fmap = {}
+     if not os.path.isfile(index_file):
+@@ -557,14 +543,11 @@ def load_fidelity_map(lit_dir):
+         if pf is None:
+             continue
+         path = e.get("path")
+-        if isinstance(path, str) and path.startswith(prefix):
+-            dirname = path[len(prefix):].split("/", 1)[0]
+-            if dirname:
+-                fmap.setdefault(dirname, pf)
++        if not isinstance(path, str) or not path.startswith(prefix):
+             continue
+-        doc_id = e.get("doc_id")
+-        if isinstance(doc_id, str) and doc_id:
+-            fmap.setdefault(doc_id, pf)
++        dirname = path[len(prefix):].split("/", 1)[0]
++        if dirname:
++            fmap.setdefault(dirname, pf)
+     return fmap
+ 
+ 
+@@ -575,7 +558,7 @@ def get_fidelity(fmap, doc_id):
+ fidelity_map = load_fidelity_map(literature_dir)
+ 
+ # See the primary do_search heredoc above for the full docstring/rationale on the fallback
+-# ladder (task #833); this unscoped-retry block mirrors it without the allowed_doc_ids branch.
++# ladder above; this unscoped-retry block mirrors it without the allowed_doc_ids branch.
+ TIER_RANK = {'bm25': 0, 'phrase_retry': 1, 'trigram': 2, 'none': 3}
+ ROW_TIER_LABEL = {'bm25': 'bm25', 'phrase_retry': 'phrase_retry', 'trigram': 'trigram_fallback'}
+ 
+@@ -610,7 +593,7 @@ def ensure_trigram(conn):
+                     conn.execute("INSERT INTO chunks_trigram(chunks_trigram) VALUES('rebuild')")
+                     # Without an explicit commit, this write lives only in the connection's
+                     # implicit transaction and is silently rolled back the moment conn.close()
+-                    # runs below (do_search()'s connections were read-only before task #833, so
++                    # runs below (do_search()'s connections were read-only historically, so
+                     # this was never an issue until ensure_trigram() added the first write path)
+                     # -- verified empirically: the rebuild was visible within the same
+                     # connection but vanished from the on-disk shadow tables after close()
+@@ -779,10 +762,9 @@ literature_dir = "$LITERATURE_DIR"
+ 
+ 
+ def load_fidelity_map(lit_dir):
+-    # Directory-name -> provenance_fidelity (task #835), keyed to match
++    # Directory-name -> provenance_fidelity, keyed to match
+     # chunks_data.doc_id exactly (NOT index.json's id/parent_doc fields -- a separate
+-    # namespace; see the primary do_search heredoc for the full rationale). Also
+-    # includes a doc_id fallback branch for legacy doc_id/chunks_dir-schema entries.
++    # namespace; see the primary do_search heredoc for the full rationale).
+     # Fail-open: an absent map entry must be treated as unverified, never as
+     # verified_conversion.
+     index_file = os.path.join(lit_dir, "index.json")
+@@ -800,14 +782,11 @@ def load_fidelity_map(lit_dir):
+         if pf is None:
+             continue
+         path = e.get("path")
+-        if isinstance(path, str) and path.startswith(prefix):
+-            dirname = path[len(prefix):].split("/", 1)[0]
+-            if dirname:
+-                fmap.setdefault(dirname, pf)
++        if not isinstance(path, str) or not path.startswith(prefix):
+             continue
+-        doc_id = e.get("doc_id")
+-        if isinstance(doc_id, str) and doc_id:
+-            fmap.setdefault(doc_id, pf)
++        dirname = path[len(prefix):].split("/", 1)[0]
++        if dirname:
++            fmap.setdefault(dirname, pf)
+     return fmap
+ 
+ 
+@@ -877,7 +856,7 @@ except Exception:
+ doc_id = chunk_row.get('doc_id', '')
+ provenance_fidelity = get_fidelity(fidelity_map, doc_id)
+ 
+-# Loud content banner (task #835): never silently hand an agent unverified text as
++# Loud content banner: never silently hand an agent unverified text as
+ # if it were an authoritative conversion. verified_conversion docs are unchanged.
+ if provenance_fidelity != 'verified_conversion':
+     banner = (
+@@ -927,9 +906,8 @@ literature_dir = "$LITERATURE_DIR"
+ 
+ 
+ def load_fidelity_map(lit_dir):
+-    # Directory-name -> provenance_fidelity (task #835), keyed to match
+-    # chunks_data.doc_id exactly; see do_search above for the full rationale. Also
+-    # includes a doc_id fallback branch for legacy doc_id/chunks_dir-schema entries.
++    # Directory-name -> provenance_fidelity, keyed to match
++    # chunks_data.doc_id exactly; see do_search above for the full rationale.
+     # Fail-open on absent entries.
+     index_file = os.path.join(lit_dir, "index.json")
+     fmap = {}
+@@ -946,14 +924,11 @@ def load_fidelity_map(lit_dir):
+         if pf is None:
+             continue
+         path = e.get("path")
+-        if isinstance(path, str) and path.startswith(prefix):
+-            dirname = path[len(prefix):].split("/", 1)[0]
+-            if dirname:
+-                fmap.setdefault(dirname, pf)
++        if not isinstance(path, str) or not path.startswith(prefix):
+             continue
+-        doc_id = e.get("doc_id")
+-        if isinstance(doc_id, str) and doc_id:
+-            fmap.setdefault(doc_id, pf)
++        dirname = path[len(prefix):].split("/", 1)[0]
++        if dirname:
++            fmap.setdefault(dirname, pf)
+     return fmap
+ 
+ 
+@@ -1145,7 +1120,7 @@ for ((i = 0; i < ${#args[@]}; i++)); do
+     PROJECT_FILTER="${args[$((i+1))]}"
+     i=$((i+1))
+   elif [ "${args[$i]}" = "--include-unverified" ]; then
+-    # task #835: opt back into unverified_summary/unverified_no_baseline results in
++    # Opt back into unverified_summary/unverified_no_baseline results in
+     # do_search's default ranking (they remain always retrievable via --read/--toc
+     # regardless of this flag; this only affects do_search's exclusion filter).
+     INCLUDE_UNVERIFIED="true"
+diff --git a/Cslib.lean b/Cslib.lean
+index cd105e6d..e2fa2be7 100644
+--- a/Cslib.lean
++++ b/Cslib.lean
+@@ -109,6 +109,7 @@ public import Cslib.Foundations.Logic.Metalogic.MCSProperties
+ public import Cslib.Foundations.Logic.Metalogic.PrimeExclusion
+ public import Cslib.Foundations.Logic.Metalogic.ProofSystemMorphism
+ public import Cslib.Foundations.Logic.Metalogic.SetDeduction
++public import Cslib.Foundations.Logic.Operators
+ public import Cslib.Foundations.Logic.ProofSystem
+ public import Cslib.Foundations.Logic.Tableau
+ public import Cslib.Foundations.Logic.Tableau.Blocking
+diff --git a/Cslib/Foundations/Logic/Connectives.lean b/Cslib/Foundations/Logic/Connectives.lean
+index 56d9fcc9..0bc1221d 100644
+--- a/Cslib/Foundations/Logic/Connectives.lean
++++ b/Cslib/Foundations/Logic/Connectives.lean
+@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
+ module
+ 
+ import Cslib.Init
++public import Cslib.Foundations.Logic.Operators
+ 
+ /-! # Connective Typeclasses for Composable Logics
+ 
+@@ -19,7 +20,9 @@ and notation.
+ 
+ The hierarchy adopts a hybrid five constructors `{atom, bot, imp, and, or}`,
+ following the operator-typeclass direction of fmontesi's PR #607 (one class per operator):
+-- **Atomic classes**: `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `HasBox`, `HasUntil`, `HasSince`
++- **Atomic classes from `Operators.lean`** (upstream, adopted wholesale): `HasImp`, `HasAnd`,
++  `HasOr`, `HasBox`, `HasDiamond`
++- **Atomic classes local to this module**: `HasBot`, `HasUntil`, `HasSince`, `HasNext`
+ - **Bundled classes**: `PropositionalConnectives`, `ModalConnectives`,
+   `TemporalConnectives`, `BimodalConnectives`
+ 
+@@ -40,6 +43,48 @@ a single canonical source for the Lukasiewicz encodings. Each concrete formula t
+ its local `abbrev`s (`Proposition.neg`, `Formula.neg`, etc.) to these defaults.
+ Biconditional (`iff`) is deferred until `HasAnd` is instantiated on all the formula types.
+ 
++## Box and Diamond Primitivity
++
++Box is primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are
++pure proof rules on a single connective; with diamond primitive, necessitation becomes the
++interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative).
++See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box corresponds
++to universal quantification over accessible worlds, preserves conjunction, distributes over
++implication (axiom K), and is the subject of the necessitation rule. In classical systems,
++diamond (possibility) is derived as `¬□¬φ`. Non-classical modal logics (intuitionistic,
++minimal) require a separate `HasDiamond` typeclass, since `□` and `◇` become independent
++operators.
++
++In classical modal logic, diamond is derived from box via `◇φ := ¬□¬φ`. However, in
++non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become independent
++operators that do not satisfy the classical duality. `HasDiamond` provides a primitive
++diamond for systems where this duality fails or where diamond is taken as a separate
++primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
++connecting `HasBox` and `HasDiamond` instances.
++
++## Standing Invariant: Notation Collision Risk
++
++`HasImp`, `HasAnd`, `HasOr`, `HasBox`, and `HasDiamond` (from `Operators.lean`) declare scoped
++notation (`→`, `∧`, `∨`, `□`, `◇`) in the enclosing `Cslib.Logic` namespace. Every concrete
++formula type in `Cslib.Logics.{Propositional, Modal, Bimodal, Temporal, LTL}` is a child
++namespace of `Cslib.Logic`, so that scoped notation is visible there too. Each formula type
++also binds its own local notation for the *same* symbols to its concrete constructors
++(`Proposition.imp`, `Formula.box`, etc.); this is safe today **only because** the formula type
++currently lacks the corresponding `HasImp`/`HasAnd`/`HasOr`/`HasBox`/`HasDiamond` instance for
++that symbol pairing where a local notation binding exists. The moment a formula type registers
++one of these instances, Lean's notation resolution sees both the scoped `Operators.lean`
++notation and the local concrete-constructor notation as candidates and raises an `Ambiguous
++term` error at every use site of that symbol for that type — as already happened for
++`HasImp`/`HasBox`/`HasAnd`/`HasOr`/`HasDiamond` prior to the compensating bridge lemmas and
++notation deletions in this module's history. In particular: registering `HasNot` or `HasIff` for
++*any* formula type in this hierarchy would immediately reopen `¬` (5 sites) and `↔` (4 sites)
++collisions, since every formula type still binds local `¬`/`↔` notation to its own derived
++`neg`/`iff`; and giving `LTL.Formula` a `HasBox`/`HasDiamond` instance would additionally
++conflate `□`-as-necessity with `LTL.Formula`'s existing `□`-as-`allFuture` notation, a semantic
++conflation rather than a mere elaboration ambiguity. Registering `HasTensor` for any formula
++type is similarly unguarded. Before adding any such instance, audit this invariant against the
++target formula type's existing notation.
++
+ ## Module Routing
+ 
+ The bundled connective classes serve different logic modules:
+@@ -81,38 +126,6 @@ class HasBot (F : Type*) where
+   /-- The falsum/bottom connective. -/
+   bot : F
+ 
+-/-- A type has an implication connective. -/
+-class HasImp (F : Type*) where
+-  /-- The implication connective. -/
+-  imp : F → F → F
+-
+-/-- A type has a necessity (box) modality.
+-
+-Box is primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are
+-pure proof rules on a single connective; with diamond primitive, necessitation becomes the
+-interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative).
+-See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box corresponds
+-to universal quantification over accessible worlds, preserves conjunction, distributes over
+-implication (axiom K), and is the subject of the necessitation rule. In classical systems,
+-diamond (possibility) is derived as `¬□¬φ`. Non-classical modal logics (intuitionistic,
+-minimal) require a separate `HasDiamond` typeclass, since `□` and `◇` become independent
+-operators. -/
+-class HasBox (F : Type*) where
+-  /-- The necessity/box modality. -/
+-  box : F → F
+-
+-/-- A type has a diamond (possibility) modality.
+-
+-In classical modal logic, diamond is derived from box via `◇φ := ¬□¬φ`. However, in
+-non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become independent
+-operators that do not satisfy the classical duality. This typeclass provides a primitive
+-diamond for systems where this duality fails or where diamond is taken as a separate
+-primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
+-connecting `HasBox` and `HasDiamond` instances. -/
+-class HasDiamond (F : Type*) where
+-  /-- The possibility/diamond modality. -/
+-  diamond : F → F
+-
+ /-- A type has an until temporal operator. -/
+ class HasUntil (F : Type*) where
+   /-- The until temporal operator. -/
+@@ -128,16 +141,6 @@ class HasNext (F : Type*) where
+   /-- The next-step temporal operator. -/
+   next : F → F
+ 
+-/-- A type has a conjunction connective. -/
+-class HasAnd (F : Type*) where
+-  /-- The conjunction connective. -/
+-  and : F → F → F
+-
+-/-- A type has a disjunction connective. -/
+-class HasOr (F : Type*) where
+-  /-- The disjunction connective. -/
+-  or : F → F → F
+-
+ /-- Propositional connectives: falsum and implication, with derived negation and verum.
+ 
+ `HasAnd` and `HasOr` are defined as standalone atomic classes in this module rather than
+diff --git a/Cslib/Logics/Bimodal/Syntax/Formula.lean b/Cslib/Logics/Bimodal/Syntax/Formula.lean
+index 6917f9b2..97af1800 100644
+--- a/Cslib/Logics/Bimodal/Syntax/Formula.lean
++++ b/Cslib/Logics/Bimodal/Syntax/Formula.lean
+@@ -108,8 +108,6 @@ abbrev Formula.allPast (φ : Formula Atom) : Formula Atom :=
+ @[inherit_doc] scoped prefix:40 "¬" => Formula.neg
+ @[inherit_doc] scoped infix:36 " ∧ " => Formula.and
+ @[inherit_doc] scoped infix:35 " ∨ " => Formula.or
+-@[inherit_doc] scoped infixr:25 " → " => Formula.imp
+-@[inherit_doc] scoped prefix:40 "□" => Formula.box
+ @[inherit_doc] scoped prefix:40 "◇" => Formula.diamond
+ @[inherit_doc] scoped infix:40 " U " => Formula.untl
+ @[inherit_doc] scoped infix:40 " S " => Formula.snce
+diff --git a/Cslib/Logics/LTL/Syntax/Formula.lean b/Cslib/Logics/LTL/Syntax/Formula.lean
+index 7e3e8816..2f4f6105 100644
+--- a/Cslib/Logics/LTL/Syntax/Formula.lean
++++ b/Cslib/Logics/LTL/Syntax/Formula.lean
+@@ -211,7 +211,6 @@ abbrev Formula.leadsto (p q : Formula Atom) : Formula Atom :=
+ @[inherit_doc] scoped prefix:40 "¬" => Formula.neg
+ @[inherit_doc] scoped infix:36 " ∧ " => Formula.and
+ @[inherit_doc] scoped infix:35 " ∨ " => Formula.or
+-@[inherit_doc] scoped infixr:25 " → " => Formula.imp
+ @[inherit_doc] scoped infixr:20 " ↔ " => Formula.iff
+ @[inherit_doc] scoped infix:40 " 𝓤 " => Formula.untl
+ @[inherit_doc] scoped prefix:40 "◯" => Formula.next
+diff --git a/Cslib/Logics/Modal/Basic.lean b/Cslib/Logics/Modal/Basic.lean
+index f80e902b..dffb5320 100644
+--- a/Cslib/Logics/Modal/Basic.lean
++++ b/Cslib/Logics/Modal/Basic.lean
+@@ -262,11 +262,6 @@ theorem Proposition.map_map (f : Atom → Atom') (g : Atom' → Atom'') (φ : Pr
+   | diamond _ ih => simp [ih]
+ 
+ @[inherit_doc] scoped prefix:40 "¬" => Proposition.neg
+-@[inherit_doc] scoped infix:36 " ∧ " => Proposition.and
+-@[inherit_doc] scoped infix:35 " ∨ " => Proposition.or
+-@[inherit_doc] scoped infixr:25 " → " => Proposition.imp
+-@[inherit_doc] scoped prefix:40 "□" => Proposition.box
+-@[inherit_doc] scoped prefix:40 "◇" => Proposition.diamond
+ @[inherit_doc] scoped infixr:20 " ↔ " => Proposition.iff
+ 
+ /-- Satisfaction relation. `Satisfies m w φ` means that, in the model `m`, the world `w` satisfies
+diff --git a/Cslib/Logics/Propositional/Defs.lean b/Cslib/Logics/Propositional/Defs.lean
+index 72546d90..2fc00be9 100644
+--- a/Cslib/Logics/Propositional/Defs.lean
++++ b/Cslib/Logics/Propositional/Defs.lean
+@@ -104,9 +104,6 @@ abbrev Proposition.iff (A B : Proposition Atom) : Proposition Atom :=
+ instance : Bot (Proposition Atom) := ⟨.bot⟩
+ instance : Top (Proposition Atom) := ⟨.top⟩
+ 
+-@[inherit_doc] scoped infix:36 " ∧ " => Proposition.and
+-@[inherit_doc] scoped infix:35 " ∨ " => Proposition.or
+-@[inherit_doc] scoped infix:30 " → " => Proposition.imp
+ @[inherit_doc] scoped infix:20 " ↔ " => Proposition.iff
+ @[inherit_doc] scoped prefix:40 " ¬ " => Proposition.neg
+ 
+@@ -190,7 +187,13 @@ class IsIntuitionistic (T : Theory Atom) where
+ 
+ omit [DecidableEq Atom] in
+ @[scoped grind =]
+-theorem isIntuitionisticIff (T : Theory Atom) : IsIntuitionistic T ↔ IPL ⊆ T := by grind
++theorem isIntuitionisticIff (T : Theory Atom) : IsIntuitionistic T ↔ IPL ⊆ T := by
++  constructor
++  · rintro h x ⟨y, rfl⟩
++    simp only [Proposition.imp_def]
++    exact h.efq y
++  · intro h
++    exact ⟨fun A => h ⟨A, (Proposition.imp_def ⊥ A).symm⟩⟩
+ 
+ /-- A theory is classical if it validates double-negation elimination. -/
+ @[scoped grind]
+diff --git a/Cslib/Logics/Temporal/Syntax/Formula.lean b/Cslib/Logics/Temporal/Syntax/Formula.lean
+index fe5fa2bb..1e8424d6 100644
+--- a/Cslib/Logics/Temporal/Syntax/Formula.lean
++++ b/Cslib/Logics/Temporal/Syntax/Formula.lean
+@@ -171,7 +171,6 @@ abbrev Formula.somePast (φ : Formula Atom) : Formula Atom :=
+ @[inherit_doc] scoped prefix:40 "¬" => Formula.neg
+ @[inherit_doc] scoped infix:36 " ∧ " => Formula.and
+ @[inherit_doc] scoped infix:35 " ∨ " => Formula.or
+-@[inherit_doc] scoped infixr:25 " → " => Formula.imp
+ @[inherit_doc] scoped infixr:20 " ↔ " => Formula.iff
+ @[inherit_doc] scoped infix:40 " U " => Formula.untl
+ @[inherit_doc] scoped infix:40 " S " => Formula.snce
+diff --git a/specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json b/specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json
+index 1862136c..68363ad0 100644
+--- a/specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json
++++ b/specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json
+@@ -1,42 +1,19 @@
+ {
+-  "$schema": "orchestrator-handoff-v1",
+   "task_number": 617,
+-  "session_id": "sess_1786405794_f0204e_617",
+-  "agent_type": "planner-agent",
+-  "phase": "plan",
+-  "status": "planned",
+-  "trigger": "phase_dispatch",
+-  "target": "Fix the Decidable (Tautology φ) instance-priority collision: the kernel-inert tableau instance shadows the kernel-reducible Boolean one for every consumer of the Cslib barrel",
+-  "phases_completed": 0,
++  "status": "implemented",
++  "phases_completed": 4,
+   "phases_total": 4,
+-  "skeleton": false,
+-  "summary": "4-phase plan written from a fully-verified research report (defect reproduced red, fix verified green at HEAD 212318f2). Phase 1 (interface tier, Commit Mode: atomic-batch) adds `public meta import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure` to CslibTests/Propositional.lean, builds RED first to reproduce the failure (hypothesized exactly 7 `Tactic `decide` failed` errors, to be confirmed by counting, not assumed), then inserts `(priority := 100)` on instDecidableTautologyTableau at DecisionProcedure.lean:81 and rebuilds green together with the three enumerated direct dependents (ProofSystemEquivalence, Tableau.Classical, SequentCalculus.LK.Decidability). The red intermediate state is expected and explicitly must NOT be committed -- one commit covers the whole batch at the green end, which is why the two edits are one phase rather than two. Phase 2 (local tier) adds a `#guard_msgs in #synth` pin locking resolution to instDecidableTautology plus a module-docstring note. Phase 3 (prose tier) records the rationale in three docstring sites so the annotation is not later 'cleaned up' back into the defect. Phases 2 and 3 are wave 2 and touch disjoint file sets, so they may run in parallel. Phase 4 (full tier) runs the CSLib CI order: cache get, lake build, checkInitImports, lake lint, lake exe lint-style, lake test, plus a new-warning diff against HEAD. SCOPE DECISION SETTLED: the plan explicitly EXTENDS scope to Cslib/Logics/Propositional/Semantics/Bool.lean for a prose-only preferred-instance docstring note -- research flagged it as outside the declared file_scope and required the plan to either adopt or drop it. Adopted, with rationale recorded in the plan Overview. Non-goals fixed explicitly: no attempt to make the tableau kernel-reducible, no Intuitionistic/Minimal changes (verified non-colliding), no new test file, and no touching of the two pre-existing linter.unusedDecidableInType warnings. Two Scope Hypothesis lines carry the counts-are-hypotheses obligation: the 7-error red baseline and the three-site docstring/line-number list, both with stated confirmation procedures. Zero-debt: no sorry, axiom, or vacuous definition is structurally possible in this change.",
+-  "sorry_inventory": [],
+-  "blockers": [],
+-  "artifacts": [
+-    {
+-      "type": "plan",
+-      "path": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+-      "summary": "4-phase plan: red baseline + (priority := 100) declaration-site fix as one atomic batch, #guard_msgs in #synth instance pin, docstring rationale, full CSLib CI gate."
+-    }
+-  ],
+-  "next_action_hint": "implement",
+-  "requires_user_review": false,
+-  "continuation_path": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+   "modified_files": [
+-    "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+-    "specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json",
+-    "specs/617_fix_tautology_decidable_instance_priority/.return-meta.json"
++    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean",
++    "CslibTests/Propositional.lean"
+   ],
+-  "decisions_made": [
+-    "Merged the red-baseline reproduction and the priority fix into ONE phase declared `Commit Mode: atomic-batch`. Splitting them would require either committing a knowingly-red tree (forbidden by git-workflow.md) or leaving green work uncommitted; the atomic-batch carve-out is exactly the pre-declared multi-file case this is for.",
+-    "Adopted the declaration-site form `instance (priority := 100) instDecidableTautologyTableau` over the consumer-side `attribute [instance 100]` the task description quoted, per the research report's verified build. Recorded in Rollback/Contingency that a consumer-side annotation is NOT an acceptable fallback, since it leaves the barrel defect intact.",
+-    "SETTLED the open scope question research raised: Cslib/Logics/Propositional/Semantics/Bool.lean is ADDED to scope for a prose-only docstring note. Rationale recorded in the plan Overview -- the priority annotation is only half-legible if the other instance says nothing, the edit has zero elaboration surface, and Phase 4's full build already absorbs the wider recompile.",
+-    "Chose the `interface` verification tier for Phase 1 with the three importers enumerated, rather than `full`, because the change is a resolution-order change confined to one declaration; the full gate still runs unconditionally at Phase 4, so nothing is deferred past the task's final gate.",
+-    "Placed the `#guard_msgs in #synth` pin in its own phase (2) rather than folding it into Phase 1, so the pin's own sanity check (temporarily reverting the priority token to confirm the pin fails by name) happens against an already-committed green baseline.",
+-    "Made Phases 2 and 3 a parallel wave, justified by disjoint file ownership: Phase 2 owns CslibTests/Propositional.lean, Phase 3 owns DecisionProcedure.lean and Semantics/Bool.lean.",
+-    "Wrote the 7-error red baseline as a Scope Hypothesis with an explicit confirmation procedure and an explicit instruction not to silently accept a divergent count, rather than asserting 7 as fact -- research measured it on a copy of the file, not on the edited file itself.",
+-    "Recorded `lake exe mk_all --module` as NOT needed (no new file) and `lake shake` as not a risk (disabled in CI; local invocation scoped to the Cslib target, excluding CslibTests/), so the implementer does not run or worry about either.",
+-    "Carried research's non-goals into the plan verbatim as Non-Goals: no kernel-reducibility work on the tableau, no Intuitionistic/Minimal bundling, no new test file, and no fixing of the two pre-existing linter.unusedDecidableInType warnings."
+-  ]
++  "commits": [
++    "44bdabf3 task 617 phase 1: red baseline then priority fix",
++    "97bead71 task 617 phase 2: instance-selection regression pin",
++    "3b5611e4 task 617 phase 3: docstring rationale for lowered instance priority",
++    "8a81c52f task 617 phase 4: full CI gate verification"
++  ],
++  "notes": "All 4 phases completed. Phase 1: reproduced the red baseline (exactly 7 `Tactic decide failed` errors) with the tableau module imported into CslibTests/Propositional.lean, then applied `(priority := 100)` to instDecidableTautologyTableau at DecisionProcedure.lean:81; both the test file and its three enumerated dependents (ProofSystemEquivalence, Tableau.Classical, SequentCalculus.LK.Decidability) build green. Phase 2: added a `#guard_msgs in #synth` pin locking Decidable (Tautology _) resolution to instDecidableTautology, plus a module-docstring note. Phase 3 (COMPLETED WITH EXCLUSIONS): extended the instance docstring and softened the module header in DecisionProcedure.lean explaining the lowered priority; the third planned edit (Cslib/Logics/Propositional/Semantics/Bool.lean:181-187 preferred-instance note) was explicitly skipped per this dispatch's two-file territory contract (parallel sibling agents own other files including Bool.lean) -- recorded as a Reasoned Exclusion in the plan, Bool.lean is unmodified. Phase 4 (COMPLETED WITH EXCLUSIONS): lake build, checkInitImports, and lint-style all exit 0 with zero new findings in the two modified files; lake lint's repo-wide output (381 lines, exit 1) has zero hits on this task's files and is not part of PR CI; lake test's full-suite run fails only in CslibTests/GrindLint.lean, a whole-library #grind_lint pin sensitive to concurrent sibling-task edits to Cslib.Logic.Bimodal.Axiom/Cslib.Logic.Temporal.Axiom (git log shows task 619's bridge-lemma commits landing mid-run; task 615's own commit in this same parallel run independently documents the identical out-of-territory GrindLint blocker). CslibTests.Propositional and the DecisionProcedure module both independently build green with zero warnings. Zero sorries, zero new axioms, zero vacuous definitions in the two modified files. Task 617's own declared scope is fully implemented and verified green; the one open item (GrindLint) belongs to a concurrent sibling task's file scope, not this one.",
++  "requires_user_review": false,
++  "blocked_phase": null
+ }
+diff --git a/specs/617_fix_tautology_decidable_instance_priority/.return-meta.json b/specs/617_fix_tautology_decidable_instance_priority/.return-meta.json
+index eed19b64..f2c6f557 100644
+--- a/specs/617_fix_tautology_decidable_instance_priority/.return-meta.json
++++ b/specs/617_fix_tautology_decidable_instance_priority/.return-meta.json
+@@ -1,44 +1,42 @@
+ {
+-  "status": "planned",
+-  "agent_type": "planner-agent",
+-  "task_number": 617,
+-  "session_id": "sess_1786405794_f0204e_617",
+-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
++  "status": "implemented",
++  "started_at": "2026-08-11T00:37:14Z",
+   "artifacts": [
+-    {
+-      "type": "plan",
+-      "path": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+-      "summary": "4-phase plan: red baseline + (priority := 100) declaration-site fix as one atomic batch, #guard_msgs in #synth instance pin, docstring rationale at both declaration sites, full CSLib CI gate."
+-    }
++    "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md"
+   ],
+-  "phase_count": 4,
+-  "estimated_hours": 2,
+-  "dependency_waves": [[1], [2, 3], [4]],
+-  "plan_metadata": {
+-    "phases": 4,
+-    "total_effort_hours": 2,
+-    "complexity": "simple",
+-    "research_integrated": true,
+-    "plan_version": 1,
+-    "dependency_waves": [[1], [2, 3], [4]],
+-    "reports_integrated": [
+-      {
+-        "path": "reports/01_tautology-decidable-instance-priority.md",
+-        "integrated_in_plan_version": 1,
+-        "integrated_date": "2026-08-10"
+-      }
+-    ],
+-    "skeleton": false,
+-    "follow_up_tasks": []
++  "modified_files": [
++    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean",
++    "CslibTests/Propositional.lean"
++  ],
++  "partial_progress": {
++    "stage": "all_phases_complete",
++    "details": "Phases 1-2 fully completed; Phase 3 completed with one reasoned exclusion (Semantics/Bool.lean docstring skipped, outside territory contract); Phase 4 completed with one reasoned exclusion (lake test full-suite blocked only by an out-of-territory CslibTests/GrindLint whole-library pin, driven by concurrent sibling-task edits to Bimodal/Temporal Axiom files -- independently corroborated by task 615's own commit in this same parallel run). This task's own two-file scope is fully green.",
++    "lint_count_start": null,
++    "lint_count_current": null,
++    "phases_completed": 4
++  },
++  "verification": {
++    "verification_passed": true,
++    "sorry_count": 0,
++    "vacuous_count": 0,
++    "axiom_count": 0,
++    "build_passed": true,
++    "check_init_imports_passed": true,
++    "lint_style_passed": true,
++    "lake_lint_note": "exit 1 repo-wide (381 lines), zero hits on this task's two files; lake lint is not PR CI (weekly cron only)",
++    "lake_test_note": "full suite fails only in CslibTests/GrindLint.lean, an out-of-territory whole-library #grind_lint pin affected by concurrent sibling-task edits to Bimodal/Temporal Axiom files, not by this task's changes; CslibTests.Propositional and the DecisionProcedure module both independently build green",
++    "ci_pipeline_passed": true,
++    "ci_pipeline_scope_note": "true for this task's declared file scope; the shared-repo lake test full-suite run has one out-of-territory failure documented above and in the plan's Phase 4 Reasoned Exclusions"
+   },
+-  "memory_candidates": [
+-    {
+-      "content": "Lean 4 instance-priority collision pattern in a barrel-imported library: when two instances target the same `Decidable P` goal and both carry default priority (1000), Lean prefers the LATER-DECLARED one. If one decider is kernel-reducible (e.g. Fintype enumeration) and the other is not (e.g. WellFounded.fix-based tableau), whichever module the barrel imports last silently wins, and `decide` breaks for every downstream consumer while in-repo tests keep passing purely because they do not transitively import both modules. Diagnosis: `#synth Decidable (P ...)` with both modules in scope names the selected instance. Fix: `instance (priority := 100) instName ...` at the DECLARATION site of the non-reducible one (not a consumer-side `attribute [instance 100]`, which leaves the barrel defect intact). Priority only breaks ties among APPLICABLE instances, so the lowered instance stays the sole candidate where the other's hypotheses (e.g. `Fintype`) are unavailable. Regression guard: a `#guard_msgs in #synth` pin fails with a message naming the wrong instance, whereas the downstream `decide` failures only report stuck reduction. Generalizes to any repo where a barrel module re-exports competing instances.",
+-      "category": "PATTERN",
+-      "source_artifact": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+-      "confidence": 0.8,
+-      "suggested_keywords": ["lean4", "instance-priority", "decidable", "barrel-import", "guard_msgs", "typeclass-resolution"]
+-    }
++  "deviations": [
++    "Phase 3: Cslib/Logics/Propositional/Semantics/Bool.lean:181-187 preferred-instance docstring note skipped -- outside the two-file territory contract for this dispatch",
++    "Phase 4: full lake test run has one out-of-territory failure in CslibTests/GrindLint.lean unrelated to this task's file scope; documented as a Reasoned Exclusion"
+   ],
+-  "next_steps": "Run /implement 617 to execute the plan"
++  "metadata": {
++    "session_id": "sess_1786405794_f0204e_617",
++    "agent_type": "cslib-implementation-agent",
++    "delegation_depth": 1,
++    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
++    "compliance_check": "passed"
++  }
+ }
+diff --git a/specs/619_reconcile_connectives_operators/.return-meta.json b/specs/619_reconcile_connectives_operators/.return-meta.json
+index 61ce05f5..b99a7197 100644
+--- a/specs/619_reconcile_connectives_operators/.return-meta.json
++++ b/specs/619_reconcile_connectives_operators/.return-meta.json
+@@ -1,37 +1,20 @@
+ {
+-  "status": "planned",
+-  "started_at": "2026-08-10T17:10:00Z",
+-  "completed_at": "2026-08-10T17:45:00Z",
+-  "artifacts": [
+-    {
+-      "type": "plan",
+-      "path": "specs/619_reconcile_connectives_operators/plans/01_reconcile-connectives-operators.md",
+-      "summary": "Ten-phase implementation plan with dependency waves, per-phase verification tiers, scope hypotheses, and a corrected AxiomDia rename census"
+-    },
+-    {
+-      "type": "handoff",
+-      "path": "specs/619_reconcile_connectives_operators/.orchestrator-handoff.json",
+-      "summary": "Orchestrator handoff with sequencing decisions, dead ends to avoid, territory map, and the zero-debt constraint"
+-    }
+-  ],
+-  "next_steps": "Run /implement 619 to execute the plan",
+-  "memory_candidates": [
+-    {
+-      "content": "When adopting an upstream module that declares scoped notation on typeclass projections in a parent namespace, a fork that binds the same symbols to concrete constructors in child namespaces hits Lean 'Ambiguous term' errors -- scoped notation from an enclosing namespace is active inside its children. The staging trap: the tree is red from the moment the upstream module enters the import closure until every collision is resolved, so a naive 'vendor first, then fix' plan has an unbounded red window. The fix is a three-move sequence: (1) vendor the upstream file ORPHANED, outside the barrel, so nothing imports it yet; (2) pre-land the compensating `X_def : Concrete.x .. = Projection.x .. := rfl` bridge lemmas in green, one module per phase, while the local notation is still present -- both sides of the rfl already exist, so this is legal before the switch; (3) confine the import, the duplicate-class deletions, the notation deletions, and the barrel regeneration to one declared atomic-batch phase. This shrinks the red window from the whole task to a single phase and leaves every other phase independently committable.",
+-      "category": "PATTERN",
+-      "source_artifact": "specs/619_reconcile_connectives_operators/plans/01_reconcile-connectives-operators.md",
+-      "confidence": 0.8,
+-      "suggested_keywords": ["lean4", "scoped-notation", "ambiguous-term", "upstream-adoption", "atomic-batch", "bridge-lemma"]
+-    }
+-  ],
+-  "next_action_hint": "implement",
++  "status": "in_progress",
++  "started_at": "2026-08-11T00:36:30Z",
++  "artifacts": [],
++  "partial_progress": {
++    "phases_completed": 7,
++    "last_completed_phase": "Phase 7: Pre-land Modal bridge lemmas",
++    "note": "Territory conflict on ProofSystem.lean resolved by team-lead grant; Phase 2 and Phase 7 complete. Proceeding to Phase 8 (atomic-batch switch)."
++  },
+   "metadata": {
+     "session_id": "sess_1786405794_f0204e_619",
+-    "agent_type": "planner-agent",
++    "agent_type": "cslib-implementation-agent",
+     "delegation_depth": 1,
+-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+-    "phase_count": 10,
+-    "estimated_hours": 11,
+-    "dependency_waves": [[1, 2, 3, 4, 5, 6], [7], [8], [9], [10]]
++    "delegation_path": [
++      "orchestrator",
++      "implement",
++      "skill-cslib-implementation"
++    ]
+   }
+ }
+diff --git a/specs/TODO.md b/specs/TODO.md
+index 318c9cc9..df3d4248 100644
+--- a/specs/TODO.md
++++ b/specs/TODO.md
+@@ -24,11 +24,11 @@ next_project_number: 626
+ ### Propositional Logic
+ 
+ 614 [PLANNED] — Give `ctxToImp` a computable definition so the four context-based
+-615 [PLANNED] — Add algebraic semantic validity as a further equivalent node in t
++615 [IMPLEMENTING] — Add algebraic semantic validity as a further equivalent node in t
+ 616 [IMPLEMENTING] — Repair the stale and self-contradictory documentation layer in th
+-617 [PLANNED] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
++617 [IMPLEMENTING] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
+ 618 [PLANNED] — Close the remaining coverage gaps in the propositional metatheory
+-619 [PLANNED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
++619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
+ 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
+   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
+ 
+@@ -414,7 +414,7 @@ Re-request review from ctchou, itemising the four dispositions.
+ ---
+ 
+ ### 619. Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean
+-- **Status**: [PLANNED]
++- **Status**: [IMPLEMENTING]
+ - **Task Type**: cslib
+ - **Topic**: Propositional Logic
+ - **Dependencies**: None
+@@ -507,7 +507,7 @@ The intuitionistic engines internal "not proved"/"refuted" notes (Expansion.lean
+ ---
+ 
+ ### 617. Fix tautology decidable instance priority
+-- **Status**: [PLANNED]
++- **Status**: [IMPLEMENTING]
+ - **Task Type**: cslib
+ - **Topic**: Propositional Logic
+ - **Dependencies**: None
+@@ -666,7 +666,7 @@ that as a convention; do not perform a repo-wide citation-style migration under
+ ---
+ 
+ ### 615. Algebraic node proof system tfae
+-- **Status**: [PLANNED]
++- **Status**: [IMPLEMENTING]
+ - **Task Type**: cslib
+ - **Topic**: Propositional Logic
+ - **Dependencies**: None
+diff --git a/specs/events.jsonl b/specs/events.jsonl
+index cd3152ef..4f1ed0a9 100644
+--- a/specs/events.jsonl
++++ b/specs/events.jsonl
+@@ -949,3 +949,137 @@
+ {"event_id":"evt_1786378810332_M0bhdd","event_type":"artifact_write","category":"deviation","timestamp":"2026-08-10T16:20:10.336Z","duration_seconds":null,"session_id":"sess_1786378622_28837b","task":375,"checkpoint":null,"message":"Artifact metadata written with status 'partial'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"1bf2156b-9dd9-4ac2-ab00-83fd72d2a7c8"}
+ {"event_id":"evt_1786378899226_6hgS6Z","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T16:21:39.231Z","duration_seconds":2.276,"session_id":"sess_1786378622_28837b","task":375,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
+ {"event_id":"evt_1786379035938_BImwdA","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T16:23:55.942Z","duration_seconds":null,"session_id":"sess_1786378622_28837b","task":375,"checkpoint":null,"message":"Session stop observed for task 375","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"1bf2156b-9dd9-4ac2-ab00-83fd72d2a7c8"}
++{"event_id":"evt_1786382875938_4YpR0O","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T17:27:55.942Z","duration_seconds":null,"session_id":"sess_1782759395_5a8840","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"f9dd3ff8-f7f7-49bf-b09d-9484dce38532"}
++{"event_id":"evt_1786383148175_JMEGAx","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T17:32:28.178Z","duration_seconds":2.449,"session_id":"sess_1786383117_557518","task":400,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786383202733_GUegeE","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T17:33:22.738Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786383207007_HHisNg","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T17:33:27.011Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786383605750_fe0GOV","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T17:40:05.756Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786383767136_jqUZPR","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T17:42:47.140Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786383939560_tSakMe","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T17:45:39.564Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786384030577_mwdtWK","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T17:47:10.580Z","duration_seconds":3.481,"session_id":"sess_1786383117_557518","task":400,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786384062417_5SWVNZ","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T17:47:42.421Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786384578909_MtzUN6","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T17:56:18.913Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786384901637_toXDEl","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T18:01:41.641Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786385142128_TfGsP9","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T18:05:42.133Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786385772276_MbYumI","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T18:16:12.280Z","duration_seconds":null,"session_id":"sess_1786383117_557518","task":400,"checkpoint":null,"message":"Session stop observed for task 400","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"42296e58-587b-44ee-bb90-d31eaf0cd452"}
++{"event_id":"evt_1786386557246_9BEIcw","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T18:29:17.250Z","duration_seconds":null,"session_id":"sess_1786386474_db6f23","task":497,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"f565ced6-3186-40db-8194-8b0eef7d31a1"}
++{"event_id":"evt_1786386580655_vjdwHq","event_type":"subagent_stop","category":"milestone","timestamp":"2026-08-10T18:29:40.659Z","duration_seconds":null,"session_id":"sess_1786386474_db6f23","task":497,"checkpoint":"postflight","message":"Subagent stop for skill-reviser (revise)","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"f565ced6-3186-40db-8194-8b0eef7d31a1"}
++{"event_id":"evt_1786386614451_iOkj7K","event_type":"subagent_stop","category":"milestone","timestamp":"2026-08-10T18:30:14.455Z","duration_seconds":null,"session_id":"sess_1786386474_db6f23","task":497,"checkpoint":"postflight","message":"Subagent stop for skill-reviser (revise)","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"f565ced6-3186-40db-8194-8b0eef7d31a1"}
++{"event_id":"evt_1786386648518_JcGeoo","event_type":"subagent_stop","category":"milestone","timestamp":"2026-08-10T18:30:48.523Z","duration_seconds":null,"session_id":"sess_1786386474_db6f23","task":497,"checkpoint":"postflight","message":"Subagent stop for skill-reviser (revise)","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"f565ced6-3186-40db-8194-8b0eef7d31a1"}
++{"event_id":"evt_1786394631058_RUQjFf","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T20:43:51.062Z","duration_seconds":3.075,"session_id":"sess_1786394597_5be929","task":622,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786394649946_Caaapi","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T20:44:09.950Z","duration_seconds":null,"session_id":"sess_1786394597_5be929","task":622,"checkpoint":null,"message":"Session stop observed for task 622","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"8a133fd7-6f64-4590-a674-4bc6ba263317"}
++{"event_id":"evt_1786396408493_ynOtOF","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T21:13:28.498Z","duration_seconds":null,"session_id":"sess_1786394597_5be929","task":622,"checkpoint":null,"message":"Artifact metadata written with status 'research_complete'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"8a133fd7-6f64-4590-a674-4bc6ba263317"}
++{"event_id":"evt_1786396545684_89L3oi","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T21:15:45.689Z","duration_seconds":3.136,"session_id":"sess_1786394597_5be929","task":622,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786396830248_V2gMak","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:20:30.252Z","duration_seconds":null,"session_id":"sess_1786394597_5be929","task":622,"checkpoint":null,"message":"Session stop observed for task 622","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"8a133fd7-6f64-4590-a674-4bc6ba263317"}
++{"event_id":"evt_1786397661919_vGLRBL","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:34:21.923Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786397684434_VX66XS","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T21:34:44.438Z","duration_seconds":null,"session_id":"sess_1786397542_991316_624","task":624,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786397753454_Gg2pqJ","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T21:35:53.458Z","duration_seconds":null,"session_id":"sess_1786397542_991316_624","task":624,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786397785697_VgRquM","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:36:25.701Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786397840115_I8FseI","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T21:37:20.119Z","duration_seconds":null,"session_id":"sess_1786397542_991316_623","task":623,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786397892130_YmZm7x","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:38:12.134Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398659311_0hlcUt","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:50:59.316Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398730631_8Zvjuz","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:52:10.634Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398758537_ZTUdPl","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:52:38.542Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398919620_w89M93","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T21:55:19.625Z","duration_seconds":null,"session_id":"sess_1786397542_991316_623","task":623,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398929319_IYXtfv","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T21:55:29.323Z","duration_seconds":null,"session_id":"sess_1786397542_991316_624","task":624,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398937318_LfozjH","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:55:37.326Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398941763_N6EiNo","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T21:55:41.767Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786398996528_n69GHJ","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T21:56:36.533Z","duration_seconds":null,"session_id":"sess_1786397542_991316_624","task":624,"checkpoint":null,"message":"Artifact metadata written with status 'implemented'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786399050912_Dc728F","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T21:57:30.918Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786399311872_D30DMP","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T22:01:51.881Z","duration_seconds":null,"session_id":"sess_1786397542_991316_623","task":623,"checkpoint":null,"message":"Artifact metadata written with status 'implemented'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786399342606_fYsAS8","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T22:02:22.610Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786399709192_u766f1","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T22:08:29.196Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786400684510_MCZJvD","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T22:24:44.516Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786401804386_FmoyzT","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T22:43:24.390Z","duration_seconds":null,"session_id":"sess_1786397542_991316_497","task":497,"checkpoint":null,"message":"Session stop observed for task 497","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"9b7c7c5c-f616-4368-8242-ae0837e7cfc2"}
++{"event_id":"evt_1786402799756_GyKHSF","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T22:59:59.760Z","duration_seconds":3.433,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786402830822_UhPZPW","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:00:30.827Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Session stop observed for task 625","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786403229150_cuNqQA","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:07:09.154Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786403260813_pbSNLo","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:07:40.817Z","duration_seconds":3.513,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786403277854_jsIj3p","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:07:57.859Z","duration_seconds":3.361,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786403299870_D1zNAp","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:08:19.875Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Session stop observed for task 625","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786403531880_Ye511g","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:12:11.883Z","duration_seconds":3.598,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786403550219_P7IEor","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:12:30.223Z","duration_seconds":3.673,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":"preflight","message":"Preflight stage completed for implement","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786403574347_rzSESH","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:12:54.351Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Session stop observed for task 625","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786403594020_yBZXrW","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:13:14.024Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786404287827_0Nudp2","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:24:47.831Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Artifact metadata written with status 'implemented'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786404344480_rMLEUW","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:25:44.484Z","duration_seconds":2.629,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":"postflight","message":"Postflight stage completed for implement (status: implemented)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786404448543_M8vYMo","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:27:28.547Z","duration_seconds":null,"session_id":"sess_1786402759_26b020","task":625,"checkpoint":null,"message":"Session stop observed for task 625","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"4f1e8cf6-cf95-4cfb-8a65-9c8bd3c42e49"}
++{"event_id":"evt_1786405838980_ZSzpMC","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:38.984Z","duration_seconds":2.751,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405841802_islIpT","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:41.805Z","duration_seconds":2.763,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405844709_BbgY4g","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:44.712Z","duration_seconds":2.750,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405847615_oDjuAw","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:47.619Z","duration_seconds":2.740,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405850223_PXm2OS","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:50.226Z","duration_seconds":2.547,"session_id":"sess_1786405794_f0204e_618","task":618,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405853115_Q10hsi","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:53.118Z","duration_seconds":2.699,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405855967_rlCkMy","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-10T23:50:55.970Z","duration_seconds":2.643,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":"preflight","message":"Preflight stage completed for research","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786405879059_4s3zaV","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:51:19.063Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786405888563_BpHWda","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:51:28.569Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786405893582_MaRToH","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:51:33.587Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_618","task":618,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786405895821_sGkO6I","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:51:35.826Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786405899221_qsVdgL","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:51:39.225Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786405902234_9iKdQ6","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:51:42.239Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406190735_6OigRY","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:56:30.739Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406207173_xqNCMA","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:56:47.176Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406211845_Cgcuw7","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:56:51.849Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406212927_zmhbrd","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-10T23:56:52.930Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406224238_oky87Z","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:57:04.242Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406232807_uhJqhq","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:57:12.811Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406309157_0GegWO","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:58:29.160Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406335954_egWclf","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:58:55.958Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406364475_0IbNQH","event_type":"artifact_write","category":"deviation","timestamp":"2026-08-10T23:59:24.478Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Artifact metadata written with status 'partial'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406369170_mzzUPF","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:59:29.174Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_618","task":618,"checkpoint":null,"message":"Artifact metadata written with status 'research_finished'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406384958_P5SDiB","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:59:44.962Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406391386_m6z9bM","event_type":"artifact_write","category":"success","timestamp":"2026-08-10T23:59:51.390Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406396536_ys1yNj","event_type":"session_stop","category":"milestone","timestamp":"2026-08-10T23:59:56.539Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406423552_jO1EcW","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:00:23.556Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406441412_n27B2O","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:00:41.416Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":null,"message":"Session stop observed for task 620","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406507720_Bk2CD3","event_type":"artifact_write","category":"success","timestamp":"2026-08-11T00:01:47.724Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":null,"message":"Artifact metadata written with status 'researched'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406589003_ScHI09","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:03:09.006Z","duration_seconds":2.558,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406594258_vOyYa5","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:03:14.261Z","duration_seconds":2.591,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406599690_75pMkd","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:03:19.694Z","duration_seconds":2.670,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406605421_vsD41o","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:03:25.424Z","duration_seconds":2.827,"session_id":"sess_1786405794_f0204e_618","task":618,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406612110_JQCzep","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:03:32.114Z","duration_seconds":3.186,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406617680_udPBB7","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:03:37.684Z","duration_seconds":2.745,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":"postflight","message":"Postflight stage completed for research (status: researched)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406683773_7QyFRK","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:04:43.776Z","duration_seconds":2.757,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406686375_NcW2BQ","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:04:46.378Z","duration_seconds":2.543,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406689294_7ExMlq","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:04:49.299Z","duration_seconds":2.773,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406692551_EQuQzS","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:04:52.555Z","duration_seconds":3.187,"session_id":"sess_1786405794_f0204e_618","task":618,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406695596_tnQs72","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:04:55.600Z","duration_seconds":2.831,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406699106_R3FkZg","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:04:59.109Z","duration_seconds":3.097,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":"preflight","message":"Preflight stage completed for plan","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406702006_z1FfoM","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:05:02.009Z","duration_seconds":2.698,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":"preflight","message":"Preflight stage completed for implement","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786406732687_v6ma2a","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:05:32.691Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406742287_Xd1m0U","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-11T00:05:42.291Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406747219_RNHxjJ","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-11T00:05:47.223Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406834036_IXcQru","event_type":"artifact_write","category":"success","timestamp":"2026-08-11T00:07:14.043Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":null,"message":"Artifact metadata written with status 'planned'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406860506_aXMTMt","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:07:40.512Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406934261_4wWnSo","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:08:54.266Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406975034_X01822","event_type":"artifact_write","category":"success","timestamp":"2026-08-11T00:09:35.038Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":null,"message":"Artifact metadata written with status 'planned'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786406994947_DarbVW","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:09:54.952Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786407051620_McN1lR","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:10:51.625Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786407069105_6nXQTq","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:11:09.109Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786407133532_YtIsZX","event_type":"artifact_write","category":"success","timestamp":"2026-08-11T00:12:13.536Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Artifact metadata written with status 'planned'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786407158096_MQ8LDA","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:12:38.100Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Session stop observed for task 616","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408235475_z7k6Jm","event_type":"artifact_write","category":"success","timestamp":"2026-08-11T00:30:35.480Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":null,"message":"Artifact metadata written with status 'implemented'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408295839_RkPXcf","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:31:35.843Z","duration_seconds":3.325,"session_id":"sess_1786405794_f0204e_614","task":614,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408302560_DrqWNN","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:31:42.564Z","duration_seconds":3.277,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408309100_HFymTF","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:31:49.104Z","duration_seconds":3.204,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408315579_xSdt6o","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:31:55.583Z","duration_seconds":3.191,"session_id":"sess_1786405794_f0204e_618","task":618,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408322112_JWqtLG","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:32:02.116Z","duration_seconds":3.215,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408328601_iKHKhw","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:32:08.605Z","duration_seconds":3.219,"session_id":"sess_1786405794_f0204e_620","task":620,"checkpoint":"postflight","message":"Postflight stage completed for plan (status: planned)","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408540884_4Xlsan","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:35:40.889Z","duration_seconds":3.350,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":"preflight","message":"Preflight stage completed for implement","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408544312_3OJaCq","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:35:44.316Z","duration_seconds":3.259,"session_id":"sess_1786405794_f0204e_616","task":616,"checkpoint":"preflight","message":"Preflight stage completed for implement","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408547813_ZhOEFc","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:35:47.817Z","duration_seconds":3.320,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":"preflight","message":"Preflight stage completed for implement","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408551230_mofuju","event_type":"lifecycle_stage","category":"milestone","timestamp":"2026-08-11T00:35:51.234Z","duration_seconds":3.216,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":"preflight","message":"Preflight stage completed for implement","detail":{},"error_ref":null,"cwd":null,"cc_session_id":null}
++{"event_id":"evt_1786408572620_rcbBpv","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-11T00:36:12.624Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_615","task":615,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408584631_8LGDoZ","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:36:24.636Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408586847_Hj8OHy","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:36:26.851Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408599276_SOB6s1","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-11T00:36:39.280Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408632190_ZKYSco","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:37:12.195Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408642144_I8cEp7","event_type":"artifact_write","category":"milestone","timestamp":"2026-08-11T00:37:22.147Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":null,"message":"Artifact metadata written with status 'in_progress'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408673065_7SXc4d","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:37:53.077Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408729276_Z0EO1Q","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:38:49.286Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786408742372_Rc6jJI","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:39:02.377Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786409509439_mwpjqT","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:51:49.443Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786409622530_QXr3yF","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:53:42.534Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786409624552_8qehBD","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:53:44.556Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786409675161_0FDjy2","event_type":"artifact_write","category":"success","timestamp":"2026-08-11T00:54:35.168Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_617","task":617,"checkpoint":null,"message":"Artifact metadata written with status 'implemented'","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
++{"event_id":"evt_1786409714295_Aq1hry","event_type":"session_stop","category":"milestone","timestamp":"2026-08-11T00:55:14.299Z","duration_seconds":null,"session_id":"sess_1786405794_f0204e_619","task":619,"checkpoint":null,"message":"Session stop observed for task 619","detail":{},"error_ref":null,"cwd":"/home/benjamin/Projects/cslib","cc_session_id":"7be0706e-d85a-4ac6-b4a2-554700f78a67"}
+diff --git a/specs/state.json b/specs/state.json
+index f30d114d..4779878f 100644
+--- a/specs/state.json
++++ b/specs/state.json
+@@ -1029,13 +1029,13 @@
+     {
+       "project_number": 615,
+       "project_name": "algebraic_node_proof_system_tfae",
+-      "status": "planned",
++      "status": "implementing",
+       "task_type": "cslib",
+       "topic": "Propositional Logic",
+       "priority": "low",
+       "description": "Add algebraic semantic validity as a further equivalent node in the propositional proof-system TFAE families.\n\nSURFACED BY: the 2026-08-10 propositional review (specs/reviews/review-2026-08-10.md, finding L1). Discoverability only — no mathematical content is missing; the required completeness results already exist.\n\nCURRENT STATE: `Cslib/Logics/Propositional/ProofSystemEquivalence.lean` ties together Hilbert, natural deduction, sequent calculus and tableau:\n- 3-way, context-based: `cplProofSystemsTfae` (:76), `iplProofSystemsTfae` (:108), `mplProofSystemsTfae` (:141)\n- 3-way, closed: `cplProofSystemsTfaeClosed` (:90), `iplProofSystemsTfaeClosed` (:122), `mplProofSystemsTfaeClosed` (:155)\n- 4-way with tableau, closed only: `cplProofSystemsWithTableauTfae` (:203), `iplProofSystemsWithTableauTfae` (:229), `mplProofSystemsWithTableauTfae` (:252)\n\nTHE GAP: the substantial algebraic-semantics development under `Cslib/Logics/Propositional/Semantics/Algebra/` (Brouwerian algebras, Hilbert algebras, the Lindenbaum construction, algebraic completeness) is NOT wired in as a further node, even though `HilbertAlgCompleteness.lean` and `BrouwerianCompleteness.lean` prove what is needed. A reader cannot see from one place that algebraic validity is equivalent to the syntactic notions.\n\nWORK: add the algebraic node to the appropriate TFAE families, composing the existing algebraic completeness/soundness results. Follow the pattern the tableau folds already established — including the `Iff.trans`-not-`rw` gotcha documented at :229-243 for any step that crosses a universe-invariance bridge.\n\nSCOPE DISCIPLINE: mirror the existing typeclass hygiene. The tableau section deliberately scopes `[Hashable Atom]` to its own section (see the module docstring at :176-186) so the six pure proof-theoretic equivalences are not forced to carry it; do the same for whatever algebraic typeclass requirements the new node introduces, rather than widening the existing six.\n\nDECIDE AND RECORD: whether the algebraic node belongs on the context-based families, the closed families, or both — and say why in the module docstring, so the shape reads as a decision rather than an omission.\n\nVERIFY: `lake build` green; zero new sorries; zero new axioms beyond [propext, Classical.choice, Quot.sound]; no change to the statements of the nine existing TFAE theorems.",
+       "created": "2026-08-10T17:03:32Z",
+-      "last_updated": "2026-08-11T00:31:39Z",
++      "last_updated": "2026-08-11T00:35:37Z",
+       "session_id": "sess_1786405794_f0204e_615",
+       "artifacts": [
+         {
+@@ -1085,7 +1085,7 @@
+     {
+       "project_number": 617,
+       "project_name": "fix_tautology_decidable_instance_priority",
+-      "status": "planned",
++      "status": "implementing",
+       "task_type": "cslib",
+       "topic": "Propositional Logic",
+       "priority": "critical",
+@@ -1095,7 +1095,7 @@
+         "CslibTests/Propositional.lean"
+       ],
+       "created": "2026-08-10T17:12:10Z",
+-      "last_updated": "2026-08-11T00:31:45Z",
++      "last_updated": "2026-08-11T00:35:44Z",
+       "session_id": "sess_1786405794_f0204e_617",
+       "artifacts": [
+         {
+@@ -1137,7 +1137,7 @@
+     {
+       "project_number": 619,
+       "project_name": "reconcile_connectives_operators",
+-      "status": "planned",
++      "status": "implementing",
+       "task_type": "cslib",
+       "topic": "Propositional Logic",
+       "priority": "high",
+@@ -1148,7 +1148,7 @@
+         "Cslib/Foundations/Logic/Connectives.lean"
+       ],
+       "created": "2026-08-10T18:20:00Z",
+-      "last_updated": "2026-08-11T00:31:58Z",
++      "last_updated": "2026-08-11T00:35:48Z",
+       "session_id": "sess_1786405794_f0204e_619",
+       "artifacts": [
+         {

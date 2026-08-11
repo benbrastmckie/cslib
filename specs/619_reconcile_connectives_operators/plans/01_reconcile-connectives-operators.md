@@ -389,7 +389,26 @@ confirm no existing `_def` lemmas of these names in `Cslib/Logics/Modal/`.
 
 ---
 
-### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [BLOCKED]
+### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [DEFERRED]
+
+**Deferral (not failure, not exclusion)**: per team-lead decision, this phase is serialized
+behind tasks 614 and 618 (which will land in `Propositional/SequentCalculus/**` and
+`Propositional/Tableau/**` respectively). Once those land, this task is re-dispatched **solo,
+with whole-tree write access**, to complete Phase 8 and fix all 17 downstream files identified
+below. The full attempted Phase 8 diff is preserved and ready to reapply:
+- **Patch**: `specs/619_reconcile_connectives_operators/working-progress-1786410439.patch`
+- **Stash**: `stash@{0}` as of the snapshot (message `git-snapshot-1786410439`) — note stash
+  indices shift as new stashes are pushed/popped elsewhere in the shared repo; match by message,
+  not index, if `stash@{0}` no longer resolves to it at re-dispatch time.
+- **Marker**: `specs/619_reconcile_connectives_operators/.git-snapshot-marker`
+- **Untracked backup**: `specs/619_reconcile_connectives_operators/untracked-backup-1786410439/`
+
+The re-dispatch should re-apply the patch (or re-derive the same 6-file edit, which is small and
+mechanical — see Tasks below, unchanged), then work through the 17 newly-discovered downstream
+files (see BLOCKER detail below) with the fix pattern demonstrated on
+`Propositional/Defs.lean`'s `isIntuitionisticIff`: a hand-written proof using
+`Proposition.imp_def`/`Formula.box_def`/etc. rather than relying on `grind`/`simp` alone to
+bridge the notation change automatically.
 
 **Goal**: Make `Connectives.lean` a delta over `Operators.lean` and remove all 12 notation
 collisions in one atomic step. This is the only phase whose intermediate states are red.

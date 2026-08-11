@@ -11,7 +11,7 @@ next_project_number: 626
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -23,7 +23,6 @@ next_project_number: 626
 
 ### Propositional Logic
 
-614 [IMPLEMENTING] — Give `ctxToImp` a computable definition so the four context-based
 618 [PLANNED] — Close the remaining coverage gaps in the propositional metatheory
 619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
@@ -692,12 +691,13 @@ VERIFY: `lake build` green; zero new sorries; zero new axioms beyond [propext, C
 ---
 
 ### 614. Computable ctxtoimp context decidability
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md]
 - **Plan**: [614_computable_ctxtoimp_context_decidability/plans/01_computable-context-decidability.md]
+- **Summary**: [614_computable_ctxtoimp_context_decidability/summaries/01_computable-context-decidability-summary.md]
 
 **Description**: Give `ctxToImp` a computable definition so the four context-based `Decidable` instances for the propositional sequent calculi stop being `noncomputable`.
 

@@ -2,7 +2,7 @@
 
 - **Task**: 614 - Give `ctxToImp` a computable definition so the four context-based `Decidable`
   instances for the propositional sequent calculi stop being `noncomputable`
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md`

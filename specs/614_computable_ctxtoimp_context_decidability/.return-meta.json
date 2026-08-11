@@ -1,18 +1,45 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-11T01:20:08Z",
-  "artifacts": [],
+  "completed_at": "2026-08-11T02:05:00Z",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/614_computable_ctxtoimp_context_decidability/plans/01_computable-context-decidability.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/614_computable_ctxtoimp_context_decidability/summaries/01_computable-context-decidability-summary.md"
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Decidability.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LK/Decidability.lean",
+    "CslibTests/ContextDecidability.lean",
+    "CslibTests.lean",
+    "scripts/axiom-census-baseline.txt",
+    "Cslib.lean"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
+    "stage": "complete",
+    "details": "All four phases completed and committed",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 4
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   },
   "metadata": {
     "session_id": "sess_1786405794_f0204e_614",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

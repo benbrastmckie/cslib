@@ -441,7 +441,7 @@ and still land.
 
 ---
 
-### Phase 7: C1b -- LM cut elimination [NOT STARTED]
+### Phase 7: C1b -- LM cut elimination [COMPLETED]
 
 **Goal**: `SequentCalculus/LM/CutElimination.lean` exists, instantiating Phase 6's generic
 machinery at `MPL`.

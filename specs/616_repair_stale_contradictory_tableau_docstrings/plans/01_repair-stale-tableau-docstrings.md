@@ -35,7 +35,7 @@ Phases 1-6; Phase 7 explicitly optional, deferred).
 - [ ] **Task 3.3**: Narrow `Expansion.lean:698-700` directive: keep world-bound/`hnw`
   prohibition; strike `hUniv`/`IAllUniv` (now threaded/discharged at `Scheme.lean:9658-9663`).
 
-### Phase 4: Part 2 (f)(g) [NOT STARTED]
+### Phase 4: Part 2 (f)(g) [COMPLETED]
 
 - [ ] **Task 4.1**: Drop the `sorryAx` parenthetical at `Minimal/DecisionProcedure.lean:22-23`.
 - [ ] **Task 4.2**: Replace the dangling task-number reference at `IntDecidability.lean:71-72`

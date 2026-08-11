@@ -69,8 +69,10 @@ CSLib contains **two independent decision procedures** for `Derivable IntPropAxi
 
 The two routes have **disjoint carrier types** (`IntFinWorld` vs signed-branch world machinery)
 and independent proof lineages. Factoring a common truth-lemma abstraction is explicitly
-deferred (high risk, low payoff while 317 is open). See `int_fin_truth_lemma` vs the
-parametric `truthLemma` in `Tableau/Intuitionistic/Scheme.lean` for the parallel statements.
+deferred: the carriers remain structurally incompatible regardless of either lemma's sorry
+status, and the payoff is low (see the `int_fin_truth_lemma` docstring below for the full
+disposition). See `int_fin_truth_lemma` vs the parametric `truthLemma` in
+`Tableau/Intuitionistic/Scheme.lean` for the parallel statements.
 
 ## References
 

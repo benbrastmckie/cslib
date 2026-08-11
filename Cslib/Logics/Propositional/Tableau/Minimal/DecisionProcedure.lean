@@ -20,8 +20,7 @@ tableau and connects it to derivability via `min_soundness_completeness`.
 - `minimalTableau_sound`: Proved (sorry-free) in `Minimal.Soundness`. If
   `minimalTableau φ = closed`, then `MValid φ`.
 - `minimalTableau_complete`: In `Minimal.Completeness`; `MValid.{_, 0} φ` implies
-  `minimalTableau φ = closed`. Sorry-free (see "Notes on sorry" below for what still carries
-  `sorryAx` one level down).
+  `minimalTableau φ = closed`. Sorry-free (see "Notes on sorry" below for the full disposition).
 - `minimalTableau_decides`: Biconditional combining soundness and completeness, at `MValid.{_,0}`.
 - `instDecidableMValid`: A `Decidable (MValid.{_, 0} φ)` instance via tableau (NEW to CSLib).
 - `instDecidableDerivableMinPropAxiom`: `Decidable (Derivable MinPropAxiom φ)` via tableau, at

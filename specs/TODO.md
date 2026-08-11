@@ -81,16 +81,17 @@ next_project_number: 627
 
 ### Propositional Tableau
 
-626 [RESEARCHED] — Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean fai
+626 [PLANNED] — Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean fai
 
 ## Tasks
 
 ### 626. Root-cause the Scheme.lean kernel-defeq non-termination introduced by the Connectives/Operators migration
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: propositional-tableau
 - **Dependencies**: None
 - **Research**: [626_scheme_lean_kernel_defeq_regression/reports/02_defeq-mechanism-and-fix.md]
+- **Plan**: [626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md]
 
 **Description**: Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean fails to compile once the Connectives/Operators reconciliation phase 8 is applied (branch task-619-phase8-wip, commit 1e88ad3e). The private lemma intExpandBranches_openBranch_sat (Scheme.lean:8327, 1321 lines, 22 hypotheses, 187 simp calls) does not terminate. Measured: the module builds in 14s against pre-change dependencies and does not complete in >34 minutes with them. The runaway work is kernel-level defeq/whnf reduction, NOT a heartbeat-checked tactic loop -- a maxHeartbeats 40000 budget yields no deterministic timeout after 400s, with flat 455MB RSS and one core pegged, so a maxHeartbeats bump cannot fix it. Determine the exact mechanism and land a fix that lets phase 8 (which also repairs the currently-broken Cslib.lean barrel) merge to main. See reports/01_scheme-defeq-regression-findings.md for full evidence and refuted hypotheses.
 

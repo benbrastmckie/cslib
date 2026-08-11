@@ -1,0 +1,31 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Hard-mode plan written: 4 sequential phases landing the research-verified precedence fix (HasOr 30->31, HasImp 25->26 in Operators.lean) as commits on branch task-619-phase8-wip via the existing scratchpad worktree, which already holds the verified fix uncommitted. Includes LoopChecking maxHeartbeats band-aid deletion, a cheap regression guard (Connectives docstring sentence + CslibTests notation test), and the full lake build gate (~3331 jobs, ~7 min, incl. Cslib barrel). Merge-to-main deliberately deferred to the phase-8 task.",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md",
+    "specs/626_scheme_lean_kernel_defeq_regression/.return-meta.json"
+  ],
+  "decisions_made": [
+    "Fix lands as commits on task-619-phase8-wip (where the phase-8 detonator lives); no rebase/merge/cherry-pick to main in this task",
+    "Execution site is the existing branch worktree at the session scratchpad (verified live, warm .lake, fix already applied uncommitted); contingency recipe included if it vanishes",
+    "Band-aid deletion is its own phase with default-budget build verification; misattributing comment deleted, not rewritten",
+    "Regression guard kept deliberately cheap: one docstring sentence + one ~60-line test file with the E9 rfl grouping pins and 24-token chain probes",
+    "Waves fully sequential: shared worktree/.lake/branch head makes parallel dispatch a commit race"
+  ],
+  "dead_ends": [
+    "Do not retry: kernel-defeq/instance-projection diagnosis (refuted by report 02), maxHeartbeats bumps (observing swallows per-alternative timeouts), restoring Defs.lean notations (Ambiguous term), reducibility/priority/simp changes, editing Scheme.lean"
+  ],
+  "phases_completed": 0,
+  "phases_total": 4,
+  "plan_markers_verified": true
+}

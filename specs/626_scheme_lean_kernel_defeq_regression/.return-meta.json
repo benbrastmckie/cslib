@@ -1,37 +1,20 @@
 {
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
-  "task_number": 626,
-  "session_id": "sess_1786462543_b0741b",
+  "status": "planned",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/626_scheme_lean_kernel_defeq_regression/reports/02_defeq-mechanism-and-fix.md"
+      "type": "plan",
+      "path": "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md",
+      "summary": "4-phase hard-mode plan: commit verified 2-line precedence fix on task-619-phase8-wip, delete LoopChecking maxHeartbeats band-aid, add cheap regression guard (docstring + notation test), full-library gate incl. Cslib barrel"
     }
   ],
-  "findings_count": 11,
-  "adversarial_verification_triggered": true,
-  "adversarial_verification_result": "prior report's kernel-defeq mechanism claim refuted with measured counter-evidence; root cause re-established as exponential choice-node backtracking from exact token+precedence notation collision; fix verified end-to-end",
-  "reference_grounding_tier": 3,
-  "bibkey_verification_status": "not_applicable_no_literature_claims",
-  "root_cause": "Operators.lean scoped notations 'infixr:25 \" → \" => HasImp.imp' and 'infixr:30 \" ∨ \" => HasOr.or' exactly collide (token+precedence+associativity) with core function arrow and Or notation; phase 8's 'public import Operators' in Connectives.lean activates them in all Cslib.Logic.* namespaces, making every Prop-level nested arrow/or chain cost Theta(2^n) elaborator backtracking; Scheme.lean:8410 'suffices key' has 29 arrows (2^29 alternatives = the 'hang'); heartbeat timeouts are swallowed per-alternative by 'observing' in choice elaboration so maxHeartbeats cannot bound the walk",
-  "fix": "In Cslib/Foundations/Logic/Operators.lean change line 38 to 'scoped infixr:31 \" ∨ \" => HasOr.or' and line 45 to 'scoped infixr:26 \" → \" => HasImp.imp' (mirrors HasAnd's existing collision-free infixr:36 vs core 35). Optionally delete the now-unnecessary 5-line 'set_option maxHeartbeats 1000000' band-aid block at Cslib/Logics/Modal/Tableau/LoopChecking.lean:1206. Verified: Scheme.lean builds in 29s; probe chains 46s -> 1.6s; formula grouping/defeq unchanged (rfl tests); FULL LIBRARY lake build green 3331/3331 in 6m55s including the Cslib barrel; LoopChecking green without band-aid at default heartbeats",
-  "memory_candidates": [
-    {
-      "content": "Lean 4: a scoped notation whose token, precedence, AND associativity exactly match a core notation (e.g. 'infixr:25 \" → \"' vs the function arrow, 'infixr:30 \" ∨ \"' vs Or) makes every use site a parser choice node; nested chains then cost Theta(2^n) elaborator backtracking. Fix: offset the precedence by one (Cslib's HasAnd 'infixr:36' vs core 35 is the collision-free pattern). Diagnostic signature: deterministic-timeout that maxHeartbeats cannot bound (per-alternative timeouts are swallowed by 'observing' in choice elaboration, src/lean/Lean/Elab/App.lean), flat RSS, one pegged core, and uniform counters across ~40 Coe* instances under 'set_option diagnostics true'.",
-      "keywords": ["lean4", "notation", "ambiguity", "precedence", "choice-node", "exponential-elaboration", "maxHeartbeats", "scoped-notation"],
-      "type": "discovery"
-    },
-    {
-      "content": "Lake only flushes a module's diagnostics when the whole module finishes elaborating. A file that hangs at declaration N therefore hides real, already-raised errors from earlier declarations in the same file ('no diagnostics' is NOT evidence of no errors). To surface them, truncate the file after the suspect region and lake-build the truncated module.",
-      "keywords": ["lake", "lean4", "diagnostics", "log-buffering", "hang-debugging", "truncation-bisection"],
-      "type": "discovery"
-    },
-    {
-      "content": "To discriminate where a heartbeat-immune Lean 'hang' lives: pin 'set_option maxHeartbeats 1000' and measure wall time vs input size. If runtime still scales (e.g. 2^n) and the deterministic-timeout error only surfaces at the end, the cost is a backtracking walk over alternatives (each alternative's timeout is caught and treated as failure), not a single monitored computation - and no heartbeat bump can fix it. Kernel defeq is NOT the only heartbeat-immune suspect.",
-      "keywords": ["lean4", "maxHeartbeats", "debugging", "backtracking", "deterministic-timeout", "performance"],
-      "type": "pattern"
-    }
-  ],
-  "next_steps": "Run /plan 626 to create implementation plan"
+  "next_steps": "Run /implement 626 --hard; all Lean phases execute in the existing branch worktree (scratchpad/wt), which already holds the verified fix uncommitted",
+  "metadata": {
+    "session_id": "sess_1786462543_b0741b",
+    "agent_type": "planner-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+    "phase_count": 4,
+    "estimated_hours": 2,
+    "postmortem_rules_count": 11
+  }
 }

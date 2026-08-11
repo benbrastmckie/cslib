@@ -1365,7 +1365,7 @@
       "project_number": 626,
       "project_name": "scheme_lean_kernel_defeq_regression",
       "title": "Root-cause the Scheme.lean kernel-defeq non-termination introduced by the Connectives/Operators migration",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "priority": "high",
       "topic": "propositional-tableau",
@@ -1381,10 +1381,15 @@
           "path": "specs/626_scheme_lean_kernel_defeq_regression/reports/02_defeq-mechanism-and-fix.md",
           "type": "report",
           "summary": "Root-cause mechanism (parser choice-node exponential backtracking) and verified two-character precedence fix"
+        },
+        {
+          "path": "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md",
+          "type": "plan",
+          "summary": "Four-phase plan landing the precedence fix on task-619-phase8-wip"
         }
       ],
       "created": "2026-08-11T15:23:13Z",
-      "last_updated": "2026-08-11T16:09:08Z",
+      "last_updated": "2026-08-11T16:16:24Z",
       "session_id": "sess_1786462543_b0741b"
     }
   ],

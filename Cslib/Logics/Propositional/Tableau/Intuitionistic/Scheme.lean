@@ -906,42 +906,50 @@ sidesteps this entire self-copy-channel investigation rather than completing it.
 a real Kripke model's forcing relation directly (classical excluded middle on `IForces`), not
 about branch-syntactic saturation, so it does not depend on Gap 1 at all.
 
-**GAP 1 UPDATE (post-ancestor-blocking calculus repair): the anticipated closure route no
-longer exists in this codebase; this is a confirmed structural blocker, not an unattempted
-proof.** A later dispatch's task list proposed closing Gap 1 by threading
+**GAP 1 UPDATE (PRE-REPAIR, historical: post-ancestor-blocking calculus repair, but before the
+copy-channel reinstatement recorded below). At that point the anticipated closure route no
+longer existed in the codebase; this was recorded as a confirmed structural blocker, not an
+unattempted proof.** A later dispatch's task list proposed closing Gap 1 by threading
 `applyPersistenceFixpoint_genuine_of_count_le_fuel` (below, `:3444` at time of writing) so the
 returned branch is a genuine fixpoint of `applyAllTImpRules`, on the premise that "every world
 accessible from a `T(φ'→ψ')` source carries its own copy (the `applyAllTImpRules` copy channel
-at a fixpoint)". **That copy channel ("Deliverable 6") was deliberately removed**, commit
-`a70187dd` ("bound the T-implication self-copy channel (STEP 1)"), which deleted exactly the
-`copies`/`combined` block of `applyAllTImpRules` that used to copy `T(φ → ψ)` itself to every
-accessible world lacking one — verified by direct diff inspection, not inference. That commit's
-own docstring on `applyAllTImpRules` (`Expansion.lean`, "STEP 1" note) states explicitly:
+at a fixpoint)". **That copy channel ("Deliverable 6") had, at that point, been deliberately
+removed**, commit `a70187dd` ("bound the T-implication self-copy channel (STEP 1)"), which
+deleted exactly the `copies`/`combined` block of `applyAllTImpRules` that used to copy
+`T(φ → ψ)` itself to every accessible world lacking one — verified by direct diff inspection,
+not inference. That commit's own docstring on `applyAllTImpRules` (`Expansion.lean`, "STEP 1"
+note) states explicitly:
 *"Whether `sat_timp` can additionally be established at accessible worlds (not just reflexively)
 is Gap 1 and remains out of scope for this task; `truthLemma`'s T-imp `sorry` … is untouched by
 this change."* The removal happened because a companion divergence probe (variant V3) measured
 the channel as termination-irrelevant hygiene once ancestor-directed blocking is active — a
-correct and well-evidenced call for that repair's own goal — but it leaves the `sat_timp`
-discharge below without the mechanism the later task list named.
+correct and well-evidenced call for that repair's own goal — but at that point it left the
+`sat_timp` discharge below without the mechanism the later task list named. **Since superseded:**
+the copy channel was later reinstated and generalized to every positive-signed formula
+(`applyAllTImpRules` in `Expansion.lean`, variant "V4"), which subsumes the original self-copy
+channel as the special case `χ = φ → ψ`; see the "Recommendation for continuation" note below
+for how the T-imp case was ultimately discharged (via the `hpers` route, independently of this
+channel).
 
-**What survives, and where the remaining gap actually sits (partial progress, recorded for the
-next attempt).** `applyAllTImpRules`'s ψ-CONSEQUENCE propagation (`intTImpRule`, unaffected by
-the self-copy removal) still fires FROM the source world, not needing any copy AT `w'`: at a
+**What survived at that point, and where the remaining gap then sat (PRE-REPAIR, historical;
+`truthLemma`'s T-imp case is sorry-free now — see the "Recommendation for continuation" note
+below).** `applyAllTImpRules`'s ψ-CONSEQUENCE propagation (`intTImpRule`, unaffected by the
+self-copy removal) still fired FROM the source world, not needing any copy AT `w'`: at a
 genuine fixpoint, for `T(φ→ψ)@w ∈ b` and `w'` accessible from `w`, `T(φ)@w' ∈ b → T(ψ)@w' ∈ b`
 (else `intTImpRule φ ψ w edges b` would be non-empty, contradicting fixpoint-ness — a
 straightforward `filterMap`/`countP` argument mirroring `applyAllTImpRules_count_drop` above).
-This is *stronger* than what a copy-then-reflexive-branch route gives, in that it needs no copy
-of `T(φ→ψ)` at `w'` at all. But it is not sufficient to close the `sorry` below: the goal after
-`intro w' hacc hforce_φ'` needs `IForces … w' ψ'` from `IForces … w' φ'` (semantic forcing), and
-the ψ-consequence fact above only fires from *branch membership* `T(φ)@w' ∈ b`, not from
-semantic `IForces`. `truthLemma`'s own induction hypotheses (`ih_φ'`/`ih_ψ'`) give
-`T(_)@w'∈b → Force` and `F(_)@w'∈b → ¬Force`, never the converse `Force → T(_)@w'∈b` — so there
-is no way to recover membership from `hforce_φ'` alone without an independent
-bivalence/totality fact (`T(φ')@w'∈b ∨ F(φ')@w'∈b`) that nothing in this file currently
-establishes. This is the same totality gap the original copy-then-branch route existed to
-sidestep (a copy at `w'` lets `intApplyRuleFull`'s `.pos,.imp` arm supply the disjunction
-directly, without needing prior membership of `φ'` itself) — removing the copy channel removed
-that sidestep, not the underlying need for it.
+This was *stronger* than what a copy-then-reflexive-branch route gives, in that it needed no
+copy of `T(φ→ψ)` at `w'` at all. But at that point it was not sufficient to close the `sorry`
+that then sat in this case: the goal after `intro w' hacc hforce_φ'` needs `IForces … w' ψ'`
+from `IForces … w' φ'` (semantic forcing), and the ψ-consequence fact above only fires from
+*branch membership* `T(φ)@w' ∈ b`, not from semantic `IForces`. `truthLemma`'s own induction
+hypotheses (`ih_φ'`/`ih_ψ'`) give `T(_)@w'∈b → Force` and `F(_)@w'∈b → ¬Force`, never the
+converse `Force → T(_)@w'∈b` — so there was no way to recover membership from `hforce_φ'` alone
+without an independent bivalence/totality fact (`T(φ')@w'∈b ∨ F(φ')@w'∈b`) that nothing in this
+file established at that point. This was the same totality gap the original copy-then-branch
+route existed to sidestep (a copy at `w'` lets `intApplyRuleFull`'s `.pos,.imp` arm supply the
+disjunction directly, without needing prior membership of `φ'` itself) — removing the copy
+channel removed that sidestep, not the underlying need for it.
 
 **Recommendation for continuation (revised after dedicated continuation-options research).**
 Do not re-add the self-copy channel in this file — doing so is calculus-level work outside a
@@ -9601,14 +9609,15 @@ frame carry positive persistence WITHOUT losing `IFimpAccess`, so one frame now 
 | raw (`rawEdges`) | REFUTED (`phiRef1`/`phiRef2` @2, `phiRef3` @3,4) | holds (`IPosPersistRaw`) |
 
 `rawEdges` was, and remains, REFUTED as a witness for `IFimpAccess` (unaffected by this
-repair): `CslibTests/WitnessProbe.lean:174-176` (`#eval check [(1,0),(2,1)]` reports
-`some (true, true)` — upward-closed but FORCES `phiRef1` at world 0) together with
-`CslibTests/BetaSplitRefutation.lean:304` (the algorithm's real raw edge list for `phiRef1` at
-the real fuel `intFuelExt phiRef1` is exactly `[(1,0),(2,1)]`) and `:387`
-(`branchesAgree = true`, confirming that recreated list matches the REAL `intuitionisticTableau`
-run) together pin the algorithm's actual `rawEdges` output to a frame that satisfies positive
-persistence but FAILS `IFimpAccess` — which is exactly why the AUGMENTED frame, not `rawEdges`,
-is this proof's witness.
+repair): `CslibTests/BetaSplitRefutation.lean:318-320` (`#eval report phiRef1 40` reports the
+algorithm's real raw edge list for `phiRef1` is exactly `[(1,0),(2,1)]`) together with
+`:411-413` (`fimpWitnesses = [1]`: world `1` is the ONLY world on the branch carrying `T(ps)`
+and `F(pr)`, hence the sole admissible `IFimpAccess` witness for `F(ps → pr)@2` -- and world `1`
+is not raw-reachable from world `2`, since raw reachability runs only `0 → 1 → 2`, so the
+obligation fails) and `:407-409` (`branchesAgree = true`, confirming that the recreated list
+matches the REAL `intuitionisticTableau` run) together pin the algorithm's actual `rawEdges`
+output to a frame that satisfies positive persistence but FAILS `IFimpAccess` — which is exactly
+why the AUGMENTED frame, not `rawEdges`, is this proof's witness.
 
 **Three candidate sub-frame constructions were EXCLUDED during the search that preceded this
 repair**, not merely untried: pruning at blocked worlds and pruning at strictly-blocked worlds
@@ -9730,7 +9739,7 @@ conjunct-2 gap -- reconciling raw-frame upward-closure with `IFimpAccess` over o
 `hpersAug` (`Scheme.lean:9645-9665`, fed by the `intFImpReuseWitnessAnc?` loop-back
 re-validation in `Expansion.lean`). That reconciliation is NOT impossible; it is simply not
 performed over `rawEdges`, because the raw frame is REFUTED for `IFimpAccess`
-(`CslibTests/BetaSplitRefutation.lean`, `CslibTests/WitnessProbe.lean:174-176`) even though it
+(`CslibTests/BetaSplitRefutation.lean:411-413`, `fimpWitnesses = [1]`) even though it
 supports positive persistence. This lemma is kept as the durable record of that raw-frame route,
 superseded by -- but not deprecated in favor of -- the augmented-frame route. -/
 lemma openBranch_rawEdges_upward_closed (S : IntMinScheme Atom) (φ : Proposition Atom)

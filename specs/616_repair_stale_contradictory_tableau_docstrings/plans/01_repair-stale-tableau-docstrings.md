@@ -41,7 +41,7 @@ Phases 1-6; Phase 7 explicitly optional, deferred).
 - [ ] **Task 4.2**: Replace the dangling task-number reference at `IntDecidability.lean:71-72`
   and `MinDecidability.lean:74-75` with a durable anchor (no task-number citation).
 
-### Phase 5: Part 3 (h)(i) plus sibling S1 [NOT STARTED]
+### Phase 5: Part 3 (h)(i) plus sibling S1 [COMPLETED]
 
 - [ ] **Task 5.1**: Fix `Minimal/Completeness.lean:58-61` attribution (live route is `hpersAug`
   over augmented frame per `Scheme.lean:9725-9727`; correct the false "zero references" framing

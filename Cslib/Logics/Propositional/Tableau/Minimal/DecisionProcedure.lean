@@ -46,9 +46,11 @@ Soundness and completeness proofs are in the dedicated `Soundness.lean` and
 This module is sorry-free, and so is everything it depends on. `minimalTableau_sound` is
 sorry-free. The completeness direction (`minimalTableau_complete` in `Minimal/Completeness.lean`)
 is sorry-free: the old `MValid → forcing` bridge sorry is discharged, since
-`minOpenBranch_countermodel` now supplies both of `MValid`'s upward-closure conjuncts together
-(see `Minimal/Completeness.lean`'s "Notes on sorry" for the full disposition and the
-statement-shape defect this closure depended on fixing). The parametric `truthLemma` in
+`openBranch_countermodel`'s existential now supplies both of `MValid`'s upward-closure conjuncts
+together, routed through `tableau_complete minScheme` directly rather than through
+`minOpenBranch_countermodel` (an internal corollary with no live consumer beyond docstrings; see
+`Minimal/Completeness.lean`'s "Notes on sorry" for the full disposition and the statement-shape
+defect this closure depended on fixing). The parametric `truthLemma` in
 `Intuitionistic/Scheme.lean` (which the minimal tableau reuses as `truthLemma minScheme`) is
 likewise sorry-free — it gained an explicit `hpers` (positive-persistence) hypothesis and is
 unconditionally true over any frame carrying it. The open-branch countermodel structural property

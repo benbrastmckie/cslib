@@ -56,9 +56,12 @@ retired: `openBranch_countermodel`'s existential now supplies BOTH conjuncts dir
 instantiates `MValid.{_, 0} φ` with everything it needs in one call. Mirrors DP-3
 (`intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`), which discharges the
 same way via `openBranch_countermodel intScheme`. The `⊥`-shape conjunct costs nothing beyond the
-valuation one: both are the SAME `χ`-general raw-edge persistence fact
-(`openBranch_rawEdges_upward_closed`/`openBranch_rawEdges_both_upward_closed` in `Scheme.lean`),
-instantiated at `χ := .atom p` and `χ := HasBot.bot` respectively.
+valuation one: both come from the SAME `χ`-general AUGMENTED-frame persistence fact (`hpersAug`,
+in `openBranch_countermodel`'s proof, `Scheme.lean`), instantiated at `χ := .atom p` and
+`χ := HasBot.bot` respectively. (`openBranch_rawEdges_upward_closed`/
+`openBranch_rawEdges_both_upward_closed` in `Scheme.lean` construct the analogous pair over the
+raw frame instead; that route is retained but not on the live path -- see those lemmas'
+docstrings, and `openBranch_countermodel`'s own docstring, for the full disposition.)
 
 **Why the old, two-premise `hvalid` shape could not have closed DP-4 as previously stated.**
 `CslibTests/MvalidBotShapeRefutation.lean` machine-checks that `tableau_complete`'s `hvalid`
@@ -134,8 +137,11 @@ docstring for the AUGMENTED-frame proof this lemma inherits).
 
 **Statement-shape fix**: the conclusion carries BOTH of `MValid`'s upward-closure conjuncts --
 `intExtractValuation b`'s and `minBranchBotForces b`'s -- along `intAccessPreorder edges` (see
-`Scheme.lean`'s `openBranch_countermodel` docstring). `minimalTableau_complete` below needs
-nothing further from this lemma: both conjuncts arrive here together.
+`Scheme.lean`'s `openBranch_countermodel` docstring). This internal corollary has no live
+consumer beyond docstrings: `minimalTableau_complete` below routes through
+`tableau_complete minScheme` directly rather than through this lemma, so exposing `edges` here
+does not touch the stable public contract (mirrors
+`Intuitionistic.Completeness.intuitionisticOpenBranch_countermodel`'s Postmortem-5 framing).
 
 If `minimalTableau φ = openBranch b`, then `intExtractValuation b` and `minBranchBotForces b`
 define a minimal Kripke model that falsifies `φ` at world 0 (over edge-accessibility). -/
@@ -162,8 +168,10 @@ Delegates to `tableau_complete minScheme`. **Statement-shape fix**: `tableau_com
 shape).
 
 This site now rests on exactly one obligation, the same one DP-3 rests on:
-`openBranch_countermodel`'s own existential in `Scheme.lean` (`minOpenBranch_countermodel`'s
-delegate above), which supplies `edges`, `_huc`, and `_hbuc` together. With both conjuncts in
+`openBranch_countermodel`'s own existential in `Scheme.lean` (routed through
+`tableau_complete minScheme` directly, not through `minOpenBranch_countermodel` above, which has
+no live consumer beyond docstrings), which supplies `edges`, `_huc`, and `_hbuc` together. With
+both conjuncts in
 hand, `MValid.{_, 0} φ` instantiates directly at `World := Nat`,
 `[Preorder Nat] := intAccessPreorder edges`, `val := intExtractValuation _b`,
 `bot_forces := minBranchBotForces _b` -- no separate `⊥`-shape residual remains. -/

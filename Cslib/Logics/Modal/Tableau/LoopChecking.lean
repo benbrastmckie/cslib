@@ -1206,11 +1206,6 @@ lemma modalStepBranchS4KeyedOrdered_newExps_eq_map (φ₀ : Proposition Atom)
         exact ⟨e, rfl⟩
       · simp at hsf
 
-set_option maxHeartbeats 1000000 in
--- `maxHeartbeats` raised: Phase 8's move to upstream `HasBox`/`HasImp`/`HasDiamond` notation
--- (`Cslib.Foundations.Logic.Operators`) adds a typeclass-projection layer that `isDefEq` must
--- unfold at every occurrence of `□`/`→`/`◇` inside this large nested-induction motive, which
--- pushed elaboration past the default 200000-heartbeat budget. The proof itself is unchanged.
 /-- **The keyed top-loop Hintikka lemma**: an open branch produced by
 `modalExpandBranchesS4Keyed` is a Hintikka set for the LIVE S4 rule `modalApplyOneS4 φ₀`
 (bridged from the keyed rule via `hintikka_congr_S4`/`modalHintikkaSetS4_eq` at the very end).

@@ -12,6 +12,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LM.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LM.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LM.SubformulaProperty
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Interpolation
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Decidability
 
 /-! # LM Minimal Propositional Sequent Calculus

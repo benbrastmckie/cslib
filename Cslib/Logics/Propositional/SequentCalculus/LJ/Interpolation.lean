@@ -9,28 +9,36 @@ module
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.Subformula
 
-/-! # Craig Interpolation for LJ via Maehara's Method
+/-! # Craig Interpolation via Maehara's Method, Generic over the Theory `T`
 
-We prove Craig interpolation for the intuitionistic propositional sequent calculus LJ via
-Maehara's method: a structural induction over a cut-free proof.
+We prove Craig interpolation, generic over the theory `T`, via Maehara's method: a structural
+induction over a cut-free `SeqProof T` proof. `LJProof.interpolation` (at `IPL`) and
+`LM/Interpolation.lean`'s instantiation (at `MPL`) specialise the generic results here.
 
 ## Main Results
 
-- `ljMaeharaCore`: For any cut-free LJ proof of `Γ ⊢ C` and any cover partition
+- `seqProofMaeharaCore`: For any cut-free `SeqProof T` proof of `Γ ⊢ C` and any cover partition
   `Γ = Γ₁ ∪ Γ₂`, there exists an interpolant `I` such that
   `Γ₁ ⊢ I`, `insert I Γ₂ ⊢ C`, and
   `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {C}).vars`.
 
 ## Design Notes
 
-- LJ uses single-conclusion sequents `Γ ⊢ C`; only the antecedent is partitioned.
+- `SeqProof` uses single-conclusion sequents `Γ ⊢ C`; only the antecedent is partitioned.
 - The right rules `orR1`, `orR2`, `andR`, `impR` act on the unsplit succedent; the
   interpolant is threaded (possibly combined for `andR`) without a side-split.
-- The `cut` case is vacuous since `LJCutFree` is `False` for cut steps.
+- The `cut` case is vacuous since `SeqProof.CutFree` is `False` for cut steps.
 - The `orL` two-premise case is proved by side-splitting `A∨B ∈ Γ₁` or `Γ₂`, combining
   interpolants `I₁∨I₂` resp. `I₁∧I₂`. The `impL` case uses `J→K` (resp. `J∧K`) when
   `A→B ∈ Γ₁` (resp. `A→B ∈ Γ₂`), carrying the implication into the interpolant.
 - Follows the `(d, hcf) + induction d with` pattern from `SubformulaProperty.lean`.
+- The `ax` case's "`A ∈ Γ₂`" branch and the `botL` case's "`⊥ ∈ Γ₂`" branch both need a proof of
+  `Γ₁ ⊢ ⊤` (i.e. `Γ₁ ⊢ ⊥ → ⊥`). This is derivable by `impR` then `ax` alone -- `⊥` is literally
+  in `insert ⊥ Γ₁` -- so it needs no `[IsIntuitionistic T]` instance, unlike the IPL-specific
+  precedent this generalises, which used `botL` for the same fact. The `botL` case's own
+  reconstruction (producing the original conclusion `C` from `⊥ ∈ Γ`) genuinely needs the gated
+  rule; it extracts the locally-bound instance carried by the matched `botL` constructor via
+  `letI`, following `SeqProof.mono`'s idiom (`LJ/Basic.lean:184-186`).
 
 ## References
 
@@ -56,8 +64,9 @@ set_option maxHeartbeats 800000 in
 -- `LJCutFree`/`mono` are re-exports of the generic `SeqProof T` operations (after the MPL/IPL
 -- unification), whnf/unfolding overhead accumulates across the full induction; 800k covers it
 -- with margin.
-/-- **Maehara core for LJ**: For any cut-free LJ proof `d` of `seq` and any cover partition
-`Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant `I` satisfying:
+/-- **Maehara core**, generic over the theory `T`: for any cut-free `SeqProof T` proof `d` of
+`seq` and any cover partition `Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant
+`I` satisfying:
 1. `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars` (variable constraint),
 2. `Γ₁ ⊢ I` (left half-derivation), and
 3. `insert I Γ₂ ⊢ seq.2` (right half-derivation).
@@ -65,16 +74,17 @@ set_option maxHeartbeats 800000 in
 Unlike the LK version, only the antecedent is partitioned (single-conclusion sequents).
 The right rules `orR1`, `orR2`, `andR`, `impR` thread the interpolant through unchanged
 (or combine for `andR`). The `cut` case is vacuous. -/
-private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCutFree d) :
+private lemma seqProofMaeharaCore {T : Theory Atom} {seq : @Sequent Atom}
+    (d : SeqProof T seq) (hcf : SeqProof.CutFree d) :
     ∀ Γ₁ Γ₂ : Finset (Proposition Atom),
       seq.1 = Γ₁ ∪ Γ₂ →
       ∃ I : Proposition Atom,
         I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars ∧
-        Nonempty (LJProof (Γ₁ ⊢ I)) ∧
-        Nonempty (LJProof (insert I Γ₂ ⊢ seq.2)) := by
+        Nonempty (SeqProof T (Γ₁ ⊢ I)) ∧
+        Nonempty (SeqProof T (insert I Γ₂ ⊢ seq.2)) := by
   induction d with
   | cut A _ _ =>
-    -- The cut case is vacuous: LJCutFree is False for cut steps.
+    -- The cut case is vacuous: SeqProof.CutFree is False for cut steps.
     exact absurd hcf id
   | ax A Γ hA =>
     -- Conclusion: Γ ⊢ A where A ∈ Γ = Γ₁ ∪ Γ₂.
@@ -88,27 +98,30 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
       refine Finset.subset_inter (Finset.vars_subset_of_mem hA₁) ?_
       simp only [Finset.vars_union, Finset.vars_singleton]
       exact Finset.subset_union_right
-    · -- A ∈ Γ₂: choose I = ⊤; left by impR∘botL; right by ax.
+    · -- A ∈ Γ₂: choose I = ⊤; left by impR∘ax (⊥ → ⊥ needs no ex falso); right by ax.
       refine ⟨⊤, ?_,
         ⟨SeqProof.impR ⊥ ⊥
-          (SeqProof.botL (insert ⊥ Γ₁) ⊥ (Finset.mem_insert_self ⊥ Γ₁))⟩,
+          (SeqProof.ax ⊥ (insert ⊥ Γ₁) (Finset.mem_insert_self ⊥ Γ₁))⟩,
         ⟨SeqProof.ax A (insert ⊤ Γ₂) (Finset.mem_insert_of_mem hA₂)⟩⟩
       simp only [vars_top, Finset.empty_subset]
-  | botL Γ C hbot =>
-    -- Conclusion: Γ ⊢ C where ⊥ ∈ Γ = Γ₁ ∪ Γ₂.
+  | @botL Γ C inst hbot =>
+    -- Conclusion: Γ ⊢ C where ⊥ ∈ Γ = Γ₁ ∪ Γ₂. `inst : IsIntuitionistic T` is the instance
+    -- carried by this node of `d` itself; `letI` exposes it for the genuine ex falso
+    -- reconstruction below (producing the arbitrary conclusion `C`).
+    letI := inst
     intro Γ₁ Γ₂ hant
     have hant' : Γ = Γ₁ ∪ Γ₂ := hant
     rw [hant'] at hbot
     rcases Finset.mem_union.mp hbot with hbot₁ | hbot₂
-    · -- ⊥ ∈ Γ₁: choose I = ⊥; left by botL; right by botL with self-insert.
+    · -- ⊥ ∈ Γ₁: choose I = ⊥; left by ax; right by botL with self-insert (arbitrary conclusion C).
       refine ⟨⊥, ?_,
-        ⟨SeqProof.botL Γ₁ ⊥ hbot₁⟩,
+        ⟨SeqProof.ax ⊥ Γ₁ hbot₁⟩,
         ⟨SeqProof.botL (insert ⊥ Γ₂) C (Finset.mem_insert_self ⊥ Γ₂)⟩⟩
       simp only [vars_bot, Finset.empty_subset]
-    · -- ⊥ ∈ Γ₂: choose I = ⊤; left by impR∘botL; right by weakL∘botL.
+    · -- ⊥ ∈ Γ₂: choose I = ⊤; left by impR∘ax; right by weakL∘botL (arbitrary conclusion C).
       refine ⟨⊤, ?_,
         ⟨SeqProof.impR ⊥ ⊥
-          (SeqProof.botL (insert ⊥ Γ₁) ⊥ (Finset.mem_insert_self ⊥ Γ₁))⟩,
+          (SeqProof.ax ⊥ (insert ⊥ Γ₁) (Finset.mem_insert_self ⊥ Γ₁))⟩,
         ⟨SeqProof.weakL ⊤ (SeqProof.botL Γ₂ C hbot₂)⟩⟩
       simp only [vars_top, Finset.empty_subset]
   | @weakL Γ C A d' ih =>
@@ -122,8 +135,8 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
       ih hcf (Γ ∩ Γ₁) (Γ ∩ Γ₂) hcover.symm
     have hΓ₁_sub : Γ ∩ Γ₁ ⊆ Γ₁ := Finset.inter_subset_right
     have hΓ₂_sub : Γ ∩ Γ₂ ⊆ Γ₂ := Finset.inter_subset_right
-    have h_left' : LJProof (Γ₁ ⊢ I) := d_left.mono hΓ₁_sub
-    have h_right' : LJProof (insert I Γ₂ ⊢ C) :=
+    have h_left' : SeqProof T (Γ₁ ⊢ I) := d_left.mono hΓ₁_sub
+    have h_right' : SeqProof T (insert I Γ₂ ⊢ C) :=
       d_right.mono (Finset.insert_subset_insert I hΓ₂_sub)
     refine ⟨I, ?_, ⟨h_left'⟩, ⟨h_right'⟩⟩
     refine Finset.subset_inter ?_ ?_
@@ -194,10 +207,10 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
     obtain ⟨I₂, h_I₂, ⟨d_left2⟩, ⟨d_right2⟩⟩ := ih₂ hcf.2 Γ₁ Γ₂ hant
     -- Left: Γ₁ ⊢ I₁ ∧ I₂ by andR.
     -- Right: insert (I₁ ∧ I₂) Γ₂ ⊢ A ∧ B via andL to extract I₁ (resp. I₂) then andR.
-    have h_A : LJProof (insert (I₁ ∧ I₂) Γ₂ ⊢ A) :=
+    have h_A : SeqProof T (insert (I₁ ∧ I₂) Γ₂ ⊢ A) :=
       SeqProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
         (d_right1.mono (by intro x; simp only [Finset.mem_insert]; tauto))
-    have h_B : LJProof (insert (I₁ ∧ I₂) Γ₂ ⊢ B) :=
+    have h_B : SeqProof T (insert (I₁ ∧ I₂) Γ₂ ⊢ B) :=
       SeqProof.andL I₁ I₂ (Finset.mem_insert_self _ _)
         (d_right2.mono (by intro x; simp only [Finset.mem_insert]; tauto))
     refine ⟨I₁ ∧ I₂, ?_, ⟨SeqProof.andR I₁ I₂ d_left1 d_left2⟩,
@@ -508,48 +521,110 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
 
 /-! ## General Split Interpolation (Public) -/
 
-/-- **LJ split interpolation**: the general-partition form of Craig interpolation, publicly
-exposed. For any cut-free LJ proof (bundled as `CutFreeLJProof seq`) and any cover partition
-`Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant `I` satisfying:
+/-- **Split interpolation**, generic over the theory `T`: the general-partition form of Craig
+interpolation, publicly exposed. For any cut-free `SeqProof T` proof (bundled as
+`CutFreeSeqProof T seq`) and any cover partition `Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there
+exists an interpolant `I` satisfying:
 1. `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars` (variable constraint),
 2. `Γ₁ ⊢ I` (left half-derivation), and
 3. `insert I Γ₂ ⊢ seq.2` (right half-derivation).
 
-Unlike the LK version, only the antecedent is partitioned (single-conclusion sequents); the LJ
+Unlike the LK version, only the antecedent is partitioned (single-conclusion sequents); the
 core takes `Γ₁ Γ₂` only, not the four-way LK split, so this wrapper's signature does not mirror
 `LKProof.splitInterpolation`'s uniformly.
 
-This is a thin public wrapper around `ljMaeharaCore` (which stays `private`, since
-un-privatising it would expose an internal induction shape as API). `LJProof.interpolation`
-below remains the empty-context implication specialisation of this general-partition form. -/
+This is a thin public wrapper around `seqProofMaeharaCore` (which stays `private`, since
+un-privatising it would expose an internal induction shape as API). `LJProof.splitInterpolation`
+below (at `IPL`) and `LM/Interpolation.lean`'s instantiation (at `MPL`) specialise this. -/
+theorem CutFreeSeqProof.splitInterpolation {T : Theory Atom} {seq : @Sequent Atom}
+    (d : CutFreeSeqProof T seq)
+    (Γ₁ Γ₂ : Finset (Proposition Atom)) (hant : seq.1 = Γ₁ ∪ Γ₂) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars ∧
+      Nonempty (SeqProof T (Γ₁ ⊢ I)) ∧
+      Nonempty (SeqProof T (insert I Γ₂ ⊢ seq.2)) :=
+  seqProofMaeharaCore d.1 d.2 Γ₁ Γ₂ hant
+
+/-- Split interpolation for LJ. Re-export of `CutFreeSeqProof.splitInterpolation` at `IPL`,
+preserving the exact current signature. -/
 theorem LJProof.splitInterpolation {seq : @Sequent Atom} (d : CutFreeLJProof seq)
     (Γ₁ Γ₂ : Finset (Proposition Atom)) (hant : seq.1 = Γ₁ ∪ Γ₂) :
     ∃ I : Proposition Atom,
       I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars ∧
       Nonempty (LJProof (Γ₁ ⊢ I)) ∧
       Nonempty (LJProof (insert I Γ₂ ⊢ seq.2)) :=
-  ljMaeharaCore d.1 d.2 Γ₁ Γ₂ hant
+  CutFreeSeqProof.splitInterpolation d Γ₁ Γ₂ hant
 
-/-! ## LJ Craig Interpolation Corollary -/
+/-! ## Cut Elimination, Local to This File (Generic over `T`) -/
 
-/-- **LJ Craig Interpolation** (corollary): From any LJ proof of `∅ ⊢ A → B`, there exists
-an interpolant `I` such that:
+/-- Cut-free provability, generic over the theory `T`, local to this file. `LJProof.cutElim`
+(`LJ/CutElimination.lean`) proves the same fact directly at `IPL`; this generic copy mirrors
+`SeqProof.cutElim` (`LM/CutElimination.lean`) and `seqProofCutElim`
+(`LJ/SubformulaProperty.lean`) so that `seqProofCraigInterpolation` below does not need to
+depend on the `IPL`-specific proof. The `botL` case extracts the locally-bound instance carried
+by the matched `botL` constructor via `letI`, following `SeqProof.mono`'s idiom
+(`LJ/Basic.lean:184-186`). -/
+private lemma seqProofCutElim {T : Theory Atom} {seq : @Sequent Atom} (d : SeqProof T seq) :
+    Nonempty (CutFreeSeqProof T seq) := by
+  induction d with
+  | ax A Γ hA => exact ⟨⟨.ax A Γ hA, trivial⟩⟩
+  | @botL Γ C inst hbot =>
+      letI := inst
+      exact ⟨⟨.botL Γ C hbot, trivial⟩⟩
+  | andL A B hAB _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.andL A B hAB d', hd'⟩⟩
+  | andR A B _ _ ih₁ ih₂ =>
+      obtain ⟨⟨d₁', hd₁'⟩⟩ := ih₁
+      obtain ⟨⟨d₂', hd₂'⟩⟩ := ih₂
+      exact ⟨⟨.andR A B d₁' d₂', ⟨hd₁', hd₂'⟩⟩⟩
+  | orL A B hAB _ _ ih₁ ih₂ =>
+      obtain ⟨⟨d₁', hd₁'⟩⟩ := ih₁
+      obtain ⟨⟨d₂', hd₂'⟩⟩ := ih₂
+      exact ⟨⟨.orL A B hAB d₁' d₂', ⟨hd₁', hd₂'⟩⟩⟩
+  | orR1 A B _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.orR1 A B d', hd'⟩⟩
+  | orR2 A B _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.orR2 A B d', hd'⟩⟩
+  | impL A B hAB _ _ ih₁ ih₂ =>
+      obtain ⟨⟨d₁', hd₁'⟩⟩ := ih₁
+      obtain ⟨⟨d₂', hd₂'⟩⟩ := ih₂
+      exact ⟨⟨.impL A B hAB d₁' d₂', ⟨hd₁', hd₂'⟩⟩⟩
+  | impR A B _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.impR A B d', hd'⟩⟩
+  | weakL A _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.weakL A d', hd'⟩⟩
+  | cut A _ _ ih₁ ih₂ =>
+      obtain ⟨d₁'⟩ := ih₁
+      obtain ⟨d₂'⟩ := ih₂
+      exact ⟨ljCutAdmissibility A _ _ d₁' d₂'⟩
+
+/-! ## Craig Interpolation Corollary, Generic over `T` -/
+
+/-- **Craig Interpolation** (corollary), generic over the theory `T`: from any `SeqProof T`
+proof of `∅ ⊢ A → B`, there exists an interpolant `I` such that:
 1. `I.vars ⊆ A.vars ∩ B.vars` (variable constraint),
 2. `∅ ⊢ A → I` (left half-implication), and
 3. `∅ ⊢ I → B` (right half-implication).
 
-Uses `ljMaeharaCore` with the cover partition `Γ₁ = {A}`, `Γ₂ = ∅`,
-applied to a cut-free proof of `{A} ⊢ B` extracted from `d` via `cutElim`.
+Uses `seqProofMaeharaCore` with the cover partition `Γ₁ = {A}`, `Γ₂ = ∅`,
+applied to a cut-free proof of `{A} ⊢ B` extracted from `d` via the file-local `seqProofCutElim`.
+Public (unlike the file-local helpers above) so that `LM/Interpolation.lean` can instantiate it
+at `MPL`, mirroring `SeqProof.subformula_property` (`LJ/SubformulaProperty.lean`).
 
 Reference: [TroelstraSchwichtenberg2000] §4; [NegriVonPlato2001] §3.3. -/
-private lemma ljCraigInterpolation {A B : Proposition Atom}
-    (d : LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → B)) :
+theorem SeqProof.interpolation {T : Theory Atom} {A B : Proposition Atom}
+    (d : SeqProof T ((∅ : Finset (Proposition Atom)) ⊢ A → B)) :
     ∃ I : Proposition Atom,
       I.vars ⊆ A.vars ∩ B.vars ∧
-      Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → I)) ∧
-      Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ I → B)) := by
+      Nonempty (SeqProof T ((∅ : Finset (Proposition Atom)) ⊢ A → I)) ∧
+      Nonempty (SeqProof T ((∅ : Finset (Proposition Atom)) ⊢ I → B)) := by
   -- Build a (cut-using) proof of {A} ⊢ B from d via cut on A → B and impL.
-  have d_AB : LJProof (insert A (∅ : Finset (Proposition Atom)) ⊢ B) :=
+  have d_AB : SeqProof T (insert A (∅ : Finset (Proposition Atom)) ⊢ B) :=
     SeqProof.cut (A → B)
       -- left prem: {A} ⊢ A → B via mono (∅ ⊆ {A})
       (d.mono (Finset.empty_subset _))
@@ -560,10 +635,10 @@ private lemma ljCraigInterpolation {A B : Proposition Atom}
         -- {B, A → B, A} ⊢ B via ax B
         (SeqProof.ax B _ (Finset.mem_insert_self _ _)))
   -- Apply cut elimination to get a cut-free proof of {A} ⊢ B.
-  obtain ⟨cfp⟩ := d_AB.cutElim
-  -- Apply ljMaeharaCore with Γ₁ = {A}, Γ₂ = ∅.
+  obtain ⟨cfp⟩ := seqProofCutElim d_AB
+  -- Apply seqProofMaeharaCore with Γ₁ = {A}, Γ₂ = ∅.
   obtain ⟨I, h_vars, ⟨d_left⟩, ⟨d_right⟩⟩ :=
-    ljMaeharaCore cfp.1 cfp.2 (insert A ∅) ∅
+    seqProofMaeharaCore cfp.1 cfp.2 (insert A ∅) ∅
       (Finset.union_empty _).symm
   -- Simplify the variable bound: (insert A ∅).vars ∩ (∅ ∪ {B}).vars = A.vars ∩ B.vars.
   simp only [Finset.vars_insert, Finset.vars_empty, Finset.vars_singleton,
@@ -577,8 +652,9 @@ private lemma ljCraigInterpolation {A B : Proposition Atom}
 /-- **LJ Craig Interpolation**: For any LJ proof of `∅ ⊢ A → B`, there exists an
 interpolant `I` with `I.vars ⊆ A.vars ∩ B.vars`, `∅ ⊢ A → I`, and `∅ ⊢ I → B`.
 
-Follows from `ljMaeharaCore` (Maehara's method) applied via `LJProof.cutElim`
-(Gentzen's Hauptsatz for LJ).
+Follows from `seqProofMaeharaCore` (Maehara's method) applied via the generic
+`seqProofCutElim` (Gentzen's Hauptsatz). Re-export of `SeqProof.interpolation` at `IPL`,
+preserving the exact current signature.
 
 Reference: [TroelstraSchwichtenberg2000] Theorem 4.1.6; [NegriVonPlato2001] Theorem 3.3.3. -/
 theorem LJProof.interpolation {A B : Proposition Atom}
@@ -587,7 +663,7 @@ theorem LJProof.interpolation {A B : Proposition Atom}
       I.vars ⊆ A.vars ∩ B.vars ∧
       Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ A → I)) ∧
       Nonempty (LJProof ((∅ : Finset (Proposition Atom)) ⊢ I → B)) :=
-  ljCraigInterpolation d
+  SeqProof.interpolation d
 
 end Cslib.Logic.PL
 

@@ -507,7 +507,7 @@ are generic over `T` and instantiated at `MPL`.
 
 ---
 
-### Phase 9: C3 -- LM Craig interpolation [NOT STARTED]
+### Phase 9: C3 -- LM Craig interpolation [COMPLETED]
 
 **Goal**: `SequentCalculus/LM/Interpolation.lean` exists, reusing the Phase 3 public wrapper shape
 rather than introducing a second one.

@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional Coverage Gaps and the Ordering Overclaim
 
 - **Task**: 618 - Close remaining coverage gaps in the propositional metatheory; correct the docstring that overclaims a result the tree does not prove
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 11 hours
 - **Dependencies**: None blocking. Task 614 (`computable_ctxtoimp_context_decidability`, status `planning`) is *coordinated with* but explicitly NOT blocking -- see Phase 4.
 - **Research Inputs**: `specs/618_propositional_coverage_gaps_and_ordering_overclaim/reports/01_propositional-coverage-gaps.md`
@@ -132,7 +132,7 @@ territories (verified: no file appears in two of them).
 
 ---
 
-### Phase 1: Correct the record (A1-A6 + G9 note) [NOT STARTED]
+### Phase 1: Correct the record (A1-A6 + G9 note) [COMPLETED]
 
 **Goal**: Every docstring in the propositional tree that asserts an unproved or non-existent
 result is corrected, and the one deliberate architectural absence is documented.

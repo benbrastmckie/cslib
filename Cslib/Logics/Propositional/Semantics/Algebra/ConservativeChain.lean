@@ -137,14 +137,16 @@ theorem derivableIntOfDerivableProp {Atom : Type u} {φ : PL.Proposition Atom}
     Derivable (@PropositionalAxiom Atom) φ :=
   derivable_mono (fun _ hψ => hψ.toPropAxiom) h
 
-/-- **Derivability subsumption chain**: the five Hilbert systems are strictly ordered
-by derivability. For any formula `φ`:
+/-- **Derivability subsumption chain**: derivability in `ImpAxiom` implies derivability in
+`PropositionalAxiom`, via `IntPropAxiom`. For any formula `φ`:
 ```
 Derivable ImpAxiom φ
   → Derivable IntPropAxiom φ
   → Derivable PropositionalAxiom φ
 ```
-This is the proof-theoretic manifestation of the logical hierarchy. -/
+This is the proof-theoretic manifestation of the Imp → Int → Prop portion of the logical
+hierarchy (the separate Min → Int → Prop chain above, at `derivableMinOfDerivableInt` /
+`derivableIntOfDerivableProp`, is not what this theorem establishes). -/
 theorem derivability_subsumption_chain {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@ImpAxiom Atom) φ) :
     Derivable (@PropositionalAxiom Atom) φ :=

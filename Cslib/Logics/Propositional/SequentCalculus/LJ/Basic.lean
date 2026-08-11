@@ -75,8 +75,10 @@ The ten connective/structural rules (`ax`, `andL`, `andR`, `orL`, `orR1`, `orR2`
 `[IsIntuitionistic T]`, the exact analogue of the gated `efq` in `Theory.Derivation`: it is
 constructible only when the theory `T` validates ex falso quodlibet. Hence `SeqProof MPL`
 (`MPL = ∅` admits no `IsIntuitionistic` instance) is the `botL`-free minimal calculus, while
-`SeqProof IPL` (= `LJProof`) recovers full intuitionistic LJ. Structural metatheory (`height`,
-`mono`, `CutFree`, cut elimination, subformula property) is proved once generically over `T`.
+`SeqProof IPL` (= `LJProof`) recovers full intuitionistic LJ. Structural metatheory that is
+already generic over `T`: `height`, `mono`, `CutFree`, `IsBotRuleFree`, `SeqProof.formulas`. Cut
+elimination and the subformula property, by contrast, are currently proved concretely at `IPL`
+only (`LJProof.cutElim`, `LJProof.subformula_property`), not generically over `T`.
 
 Constructors:
 - `ax`: identity axiom — `A` appears in the antecedent.

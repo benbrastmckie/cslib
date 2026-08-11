@@ -59,7 +59,8 @@ CSLib contains **two independent decision procedures** for `Derivable IntPropAxi
   sorry" above).
 - **Exposed as**: `instDecidableDerivableIntPropAxiom` — the **sole registered `Decidable`
   instance** for `Derivable IntPropAxiom φ`.
-- **Role**: Canonical extension-facing instance; feeds the modal/temporal/bimodal extensions.
+- **Role**: Canonical registered instance; intended as the entry point for downstream
+  extensions, though no external consumers exist at present.
 
 ### Route 2 (FMP — sorry-free, named def, not a registered instance)
 - **Module**: `Metalogic/IntDecidability.lean`

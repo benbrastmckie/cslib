@@ -31,8 +31,13 @@ the type checker.
   `temporalExpandBranches` and `intExpandBranches` compile through nested `let rec`s that do
   not reduce in the kernel (see `CslibTests/ModalFrameSeparation.lean`'s header for the
   identical failure mode on the modal tableau driver). Proof-term assertions (the
-  `ModalFrameSeparation.lean` idiom) are unavailable here because the completeness theorems
-  the driver would need do not exist yet for either calculus.
+  `ModalFrameSeparation.lean` idiom) are unavailable for the temporal driver because the
+  completeness theorem it would need (`temporalTableau_complete`) does not exist yet — it
+  remains a blocked obligation (`Temporal/Tableau/Completeness.lean:122`). For the
+  intuitionistic driver the completeness theorem now exists and is sorry-free
+  (`intuitionisticTableau_complete`, `intuitionisticTableau_decides`), but the kernel-reduction
+  stall above is independent of theorem availability and applies to both rows regardless, so
+  `#eval` remains the mechanism here too.
 - `#eval` **does** reduce (it uses the compiler, not the kernel), but only works from
   `CslibTests/`, not from inside `Cslib/Logics/.../Tableau/` itself.
 - The header above needs **both** `import X` and `public meta import X` for the same module:

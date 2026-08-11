@@ -14,14 +14,12 @@ public import Cslib.Init
 /-! # Classical Tableau Decision Procedure
 
 This module delivers a `Decidable (Tautology φ)` instance via the classical tableau, registered
-at lowered priority, and connects it to derivability via the `prop_completeness_iff_tautology`
-bridge.
+at lowered priority.
 
 ## Main Results
 
 - `classicalTableau_decides`: The tableau correctly decides tautologyhood.
 - `instDecidableTautologyTableau`: A `Decidable (Tautology φ)` instance via tableau.
-- `instDecidableDerivable`: A `Decidable (Derivable PropositionalAxiom φ)` instance.
 
 ## Design
 
@@ -30,9 +28,6 @@ The `Decidable (Tautology φ)` instance works as follows:
 2. If it returns `closed`, conclude `Tautology φ` (by `classicalTableau_sound`).
 3. If it returns `openBranch b`, conclude `¬ Tautology φ`
    (by `classicalOpenBranch_countermodel` + `BoolEvaluate_eq_iff`).
-
-The `Derivable PropositionalAxiom φ` instance uses `prop_completeness_iff_tautology`
-to reduce to `Tautology φ`.
 
 ## Implementation Status
 

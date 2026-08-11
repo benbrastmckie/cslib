@@ -60,6 +60,15 @@ The `h_EFQ` parameter was removed from `ndToHilbert` and all downstream signatur
 because `bot` elimination does not appear as a ND constructor; EFQ in the Hilbert sense
 is an axiom schema instance (`ax` constructor), handled uniformly without a special witness.
 
+## No Direct ND Soundness/Completeness
+
+This module deliberately does not state ND-side soundness or completeness theorems against
+semantic validity. Both directions are reached instead by composing the Hilbert/ND
+equivalence proved here (`hilbert_iff_nd_ctx_min`, `hilbert_iff_nd_ctx_int`,
+`hilbert_iff_nd_ctx_cl`) with the corresponding Hilbert-side soundness/completeness results —
+there is no gap, only a routing choice: ND soundness/completeness for a given axiom set is
+`hilbert_iff_nd_ctx_*` chained with that axiom set's Hilbert soundness/completeness theorem.
+
 ## References
 
 * [D. Prawitz, *Natural Deduction: A Proof-Theoretical Study*][Prawitz1965], Ch. I, §1.2

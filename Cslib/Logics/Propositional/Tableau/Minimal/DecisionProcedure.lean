@@ -117,7 +117,9 @@ theorem minimalTableau_decides (φ : Proposition Atom) :
 
 /-! ## Decidable Instances (NEW to CSLib) -/
 
-/-- `MValid φ` is decidable via the minimal tableau.
+/-- `MValid.{_, 0} φ` is decidable via the minimal tableau (the universe pin matches
+`minimalTableau_complete`'s `Type 0` countermodel; see the "Universe Invariance of `MValid`"
+section below for why the pin costs nothing).
 
 This is a NEW decidability result for CSLib: minimal propositional validity was not
 previously decidable by a constructive procedure in this library. -/

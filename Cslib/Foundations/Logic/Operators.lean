@@ -35,14 +35,14 @@ class HasOr (α : Type*) where
   /-- `a ∨ b` is the disjunction of `a` and `b`. -/
   or (a b : α) : α
 
-@[inherit_doc] scoped infixr:30 " ∨ " => HasOr.or
+@[inherit_doc] scoped infixr:31 " ∨ " => HasOr.or
 
 /-- The type `α` has an implication connective (`→`). -/
 class HasImp (α : Type*) where
   /-- `a → b` denotes `a` implies `b`. -/
   imp (a b : α) : α
 
-@[inherit_doc] scoped infixr:25 " → " => HasImp.imp
+@[inherit_doc] scoped infixr:26 " → " => HasImp.imp
 
 /-- The type `α` has a bi-implication connective (`↔`). -/
 class HasIff (α : Type*) where

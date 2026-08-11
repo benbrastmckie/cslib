@@ -18,6 +18,13 @@ This file tests core propositional infrastructure:
 - `Tautology` decidability via `instDecidableTautology`
 - Soundness round-trip: `Tautology φ` implies `BoolEvaluate v φ = true` for all `v`
 
+This file deliberately imports the classical tableau decision procedure
+(`Tableau.Classical.DecisionProcedure`) alongside `Semantics.Bool`, so both
+`Decidable (Tautology φ)` instances (`instDecidableTautology` and
+`instDecidableTautologyTableau`) are simultaneously in scope. The `Decidable Tautology Tests`
+section below exercises this both-instances-in-scope configuration and pins which instance
+`decide`/`#synth` selects.
+
 ## Atom Type
 
 We use `Bool` as a two-atom type. This gives `2^2 = 4` Boolean valuations
@@ -60,6 +67,14 @@ theorem boolEvaluate_imp_pTrue_qFalse :
       (.imp (.atom false) (.atom true)) = false := by decide
 
 /-! ## Decidable Tautology Tests -/
+
+-- With both `instDecidableTautology` (Boolean enumeration) and `instDecidableTautologyTableau`
+-- (tableau) in scope, instance resolution must select the kernel-reducible Boolean enumeration
+-- (the tableau instance carries a lowered priority precisely so `decide` remains usable here).
+-- This pin fails naming the wrong instance if that selection ever regresses.
+/-- info: instDecidableTautology (Proposition.atom false → Proposition.atom false) -/
+#guard_msgs in
+#synth Decidable (Tautology (Atom := Bool) (.imp (.atom false) (.atom false)))
 
 /-- `p ∨ ¬p` is a tautology: the Decidable instance confirms it. -/
 example : decide (Tautology (Atom := Bool)

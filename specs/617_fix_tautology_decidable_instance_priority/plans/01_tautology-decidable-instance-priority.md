@@ -188,7 +188,7 @@ larger, build the larger set.
 
 ---
 
-### Phase 2: Instance-Selection Regression Pin [NOT STARTED]
+### Phase 2: Instance-Selection Regression Pin [COMPLETED]
 
 **Goal**: Add a `#guard_msgs in #synth` pin so a future regression fails with a message that
 names the wrong instance directly, rather than only reporting stuck reduction.
@@ -202,11 +202,15 @@ names the wrong instance directly, rather than only reporting stuck reduction.
       #guard_msgs in
       #synth Decidable (Tautology (Atom := Bool) (.imp (.atom false) (.atom false)))
       ```
-- [ ] Update the file's module docstring (`:13-25`) to mention that the file deliberately imports
+- [x] Update the file's module docstring (`:13-25`) to mention that the file deliberately imports
       the tableau decision procedure so the `Decidable (Tautology _)` tests exercise the
       both-instances-in-scope configuration.
-- [ ] Build the module and confirm the pin passes.
-- [ ] Commit.
+- [x] Build the module and confirm the pin passes.
+- [x] Commit.
+
+**Phase Notes**: Used a plain `--` block comment (not a second `/-- -/` docstring) above the
+`#guard_msgs` pin's own info-docstring, since a second consecutive doc comment would not attach
+to any declaration. `lake build CslibTests.Propositional` exits 0 with the pin in place.
 
 **Timing**: 0.25 hours
 

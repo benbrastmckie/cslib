@@ -1,27 +1,23 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-10T00:00:00Z",
+  "status": "planned",
+  "started_at": "2026-08-10T17:05:00Z",
+  "completed_at": "2026-08-10T17:12:00Z",
   "artifacts": [
     {
-      "path": "specs/615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md",
-      "type": "report",
-      "summary": "Compile-verified research: algebraic node folds onto the closed TFAE families with zero new lemmas; context-based folds rejected on tier-mismatch grounds"
+      "type": "plan",
+      "path": "specs/615_algebraic_node_proof_system_tfae/plans/01_algebraic-node-tfae-folds.md",
+      "summary": "Three-phase plan: (1) add the HilbertCompleteness import, universe pin, and three documented four-way closed TFAE folds; (2) record the closed-only decision in the module docstring; (3) full CSLib CI gate with zero-debt and unchanged-statement verification"
     }
   ],
-  "partial_progress": {
-    "stage": "research_finished",
-    "details": "Reuse check complete; three closed folds and the context-based alternative both compiled against the live build; decision recorded; full implementation code drafted in report section 5.2"
-  },
-  "verification": {
-    "compiled": true,
-    "method": "lake env lean on a scratch file importing ProofSystemEquivalence + Algebra.HilbertCompleteness + Algebra.HilbertStrongCompleteness (scratch file deleted; working tree unchanged)",
-    "sorries": 0,
-    "axioms": ["propext", "Classical.choice", "Quot.sound"]
-  },
   "metadata": {
     "session_id": "sess_1786405794_f0204e_615",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 1.5,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": [],
+  "next_steps": "Run /implement 615 to execute the plan"
 }

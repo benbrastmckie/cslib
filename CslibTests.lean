@@ -5,6 +5,7 @@ public import CslibTests.BetaSplitRefutation
 public import CslibTests.Bisimulation
 public import CslibTests.CCS
 public import CslibTests.CLL
+public import CslibTests.ContextDecidability
 public import CslibTests.DFA
 public import CslibTests.FreeMonad
 public import CslibTests.GrindLint

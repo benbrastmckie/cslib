@@ -252,7 +252,7 @@ exactly 2 hits. If the count differs, stop and reconcile.
 
 ---
 
-### Phase 3: Executable conformance tests for non-empty-context decisions [NOT STARTED]
+### Phase 3: Executable conformance tests for non-empty-context decisions [COMPLETED]
 
 **Goal**: A `CslibTests/` module proves by execution that a **non-empty-context** decision now
 evaluates, for both LJ and LK, in both the positive and negative direction — the concrete deliverable

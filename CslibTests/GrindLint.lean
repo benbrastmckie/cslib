@@ -83,6 +83,17 @@ open_scoped_all Cslib
 #grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.C5BackwardWalkResult.mk.sizeOf_spec
 #grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.C5ForwardWalkResult.mk.sizeOf_spec
 #grind_lint skip Cslib.Logic.Temporal.Metalogic.Chronicle.EliminationResult.mk.sizeOf_spec
+
+-- sizeOf_spec auto-generated theorems for the `linear_until`/`linear_since` axiom
+-- constructors (Bimodal BX7/BX7', Temporal counterparts) -- these are the two most deeply
+-- nested formulas in each `Axiom` GADT (three-way `and`/`or`/`untl`/`snce` disjunction), so
+-- their derived `sizeOf_spec` equations trigger more instantiations (22) than the `min := 20`
+-- threshold once `HasImp`/`HasBox` bridge lemmas for the surrounding formula modules are in
+-- the default `grind` set. Boilerplate from `deriving`, not user-authored logic.
+#grind_lint skip Cslib.Logic.Bimodal.Axiom.linear_since.sizeOf_spec
+#grind_lint skip Cslib.Logic.Bimodal.Axiom.linear_until.sizeOf_spec
+#grind_lint skip Cslib.Logic.Temporal.Axiom.linear_since.sizeOf_spec
+#grind_lint skip Cslib.Logic.Temporal.Axiom.linear_until.sizeOf_spec
 -- Identifiers below exceed 100 chars; `#grind_lint skip` does not allow line breaks.
 -- noqa linter.style.longLine
 #grind_lint skip Cslib.Logic.Bimodal.Metalogic.Algebraic.UltrafilterMCS.BoolAlgUltrafilter.mk.sizeOf_spec

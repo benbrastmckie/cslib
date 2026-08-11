@@ -1,0 +1,28 @@
+{
+  "status": "research_finished",
+  "started_at": "2026-08-10T00:00:00Z",
+  "finished_at": "2026-08-10T00:00:00Z",
+  "artifacts": [
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/reports/01_propositional-coverage-gaps.md",
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/.orchestrator-handoff.json"
+  ],
+  "partial_progress": {
+    "stage": "research_report_written",
+    "details": "All Part A citations verified at source; Parts B/C/D measured against the tree. Four premise corrections recorded (A4 split, A1 three defects, new A6 overclaim, C1 genericity). Handoff written."
+  },
+  "metadata": {
+    "session_id": "sess_1786405794_f0204e_618",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "task_number": 618,
+    "task_type": "cslib",
+    "lit_flag": false,
+    "next_phase": "plan"
+  },
+  "verification": {
+    "lean_verify_run": ["Cslib.Logic.PL.intuitionisticTableau_decides"],
+    "sorry_free": true,
+    "blocked_tools_avoided": ["lean_diagnostic_messages", "lean_file_outline"]
+  }
+}

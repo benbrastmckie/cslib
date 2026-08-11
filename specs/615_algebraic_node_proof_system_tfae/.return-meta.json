@@ -1,0 +1,27 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T00:00:00Z",
+  "artifacts": [
+    {
+      "path": "specs/615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md",
+      "type": "report",
+      "summary": "Compile-verified research: algebraic node folds onto the closed TFAE families with zero new lemmas; context-based folds rejected on tier-mismatch grounds"
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_finished",
+    "details": "Reuse check complete; three closed folds and the context-based alternative both compiled against the live build; decision recorded; full implementation code drafted in report section 5.2"
+  },
+  "verification": {
+    "compiled": true,
+    "method": "lake env lean on a scratch file importing ProofSystemEquivalence + Algebra.HilbertCompleteness + Algebra.HilbertStrongCompleteness (scratch file deleted; working tree unchanged)",
+    "sorries": 0,
+    "axioms": ["propext", "Classical.choice", "Quot.sound"]
+  },
+  "metadata": {
+    "session_id": "sess_1786405794_f0204e_615",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

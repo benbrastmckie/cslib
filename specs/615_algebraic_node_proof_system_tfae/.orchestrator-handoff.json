@@ -1,0 +1,14 @@
+{
+  "status": "researched",
+  "summary": "The algebraic node folds onto the three CLOSED TFAE families by pure composition with zero new lemmas: MPL/IPL/CPL.hilbert_alg_completeness are already stated as 'node 1 of the closed TFAE ↔ GHAValid/HAValid/BAValid', so each fold is a single `tfae_have 1 ↔ 4 := <completeness theorem>`. All three folds were compiled verbatim against the live build with no errors, no warnings, no sorries, and axioms [propext, Classical.choice, Quot.sound]. Context-based folds are technically feasible (also compiled) but rejected: strong algebraic completeness is theory-generic over generalized Heyting algebras for all three logics, so a CPL context node would say 'true in every GHA modelling the classical axiom theory' rather than 'valid in every Boolean algebra'; making it tier-matched needs HeytingAlgebra/BooleanAlgebra instances on RelLindenbaumAlgebra, which carries only a GHA instance. Recommendation: closed families only, three new theorems in their own section, with the closed-only decision recorded in the module docstring.",
+  "artifacts": [
+    {
+      "path": "specs/615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md",
+      "type": "report",
+      "summary": "Reuse check, exact completeness signatures, closed-vs-context decision with evidence, complete compile-verified implementation (import, section, three theorems, docstring text), lint/zero-debt notes"
+    }
+  ],
+  "blockers": [],
+  "continuation_context": "Implementation is three one-line folds plus docstrings. Add `public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness` to ProofSystemEquivalence.lean (no cycle risk: only Cslib.lean imports that file). Add `universe u`. New `section WithAlgebra` after `end WithTableau`; each theorem carries its own `{Atom : Type u} [DecidableEq Atom]` binder, shadowing the file-level `variable {Atom : Type*}` — this is required because GHAValid/HAValid/BAValid must be written `.{u, u}` and an auto-bound `Type*` universe cannot be named. Shadowing was verified to compile cleanly. The `Iff.trans`-not-`rw` gotcha at ProofSystemEquivalence.lean:229-243 does NOT apply here: no universe-invariance bridge is in the chain, so the completeness term is supplied directly. Do NOT build a five-way tableau+algebra fold as the primary shape — it would force [Hashable Atom] onto the algebraic equivalence, violating the scope-discipline instruction. Report section 5.2 contains the full literal code to write. Post-implementation: run lake build, lake lint, lake exe lint-style, and lake shake --add-public --keep-implied --keep-prefix.",
+  "next_action_hint": "plan"
+}

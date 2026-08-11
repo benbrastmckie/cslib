@@ -1,7 +1,7 @@
 # Implementation Plan: Fix `Decidable (Tautology φ)` Instance Priority Collision
 
 - **Task**: 617 - fix_tautology_decidable_instance_priority
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md`

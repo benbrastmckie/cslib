@@ -1,42 +1,19 @@
 {
-  "$schema": "orchestrator-handoff-v1",
   "task_number": 617,
-  "session_id": "sess_1786405794_f0204e_617",
-  "agent_type": "planner-agent",
-  "phase": "plan",
-  "status": "planned",
-  "trigger": "phase_dispatch",
-  "target": "Fix the Decidable (Tautology φ) instance-priority collision: the kernel-inert tableau instance shadows the kernel-reducible Boolean one for every consumer of the Cslib barrel",
-  "phases_completed": 0,
+  "status": "implemented",
+  "phases_completed": 4,
   "phases_total": 4,
-  "skeleton": false,
-  "summary": "4-phase plan written from a fully-verified research report (defect reproduced red, fix verified green at HEAD 212318f2). Phase 1 (interface tier, Commit Mode: atomic-batch) adds `public meta import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure` to CslibTests/Propositional.lean, builds RED first to reproduce the failure (hypothesized exactly 7 `Tactic `decide` failed` errors, to be confirmed by counting, not assumed), then inserts `(priority := 100)` on instDecidableTautologyTableau at DecisionProcedure.lean:81 and rebuilds green together with the three enumerated direct dependents (ProofSystemEquivalence, Tableau.Classical, SequentCalculus.LK.Decidability). The red intermediate state is expected and explicitly must NOT be committed -- one commit covers the whole batch at the green end, which is why the two edits are one phase rather than two. Phase 2 (local tier) adds a `#guard_msgs in #synth` pin locking resolution to instDecidableTautology plus a module-docstring note. Phase 3 (prose tier) records the rationale in three docstring sites so the annotation is not later 'cleaned up' back into the defect. Phases 2 and 3 are wave 2 and touch disjoint file sets, so they may run in parallel. Phase 4 (full tier) runs the CSLib CI order: cache get, lake build, checkInitImports, lake lint, lake exe lint-style, lake test, plus a new-warning diff against HEAD. SCOPE DECISION SETTLED: the plan explicitly EXTENDS scope to Cslib/Logics/Propositional/Semantics/Bool.lean for a prose-only preferred-instance docstring note -- research flagged it as outside the declared file_scope and required the plan to either adopt or drop it. Adopted, with rationale recorded in the plan Overview. Non-goals fixed explicitly: no attempt to make the tableau kernel-reducible, no Intuitionistic/Minimal changes (verified non-colliding), no new test file, and no touching of the two pre-existing linter.unusedDecidableInType warnings. Two Scope Hypothesis lines carry the counts-are-hypotheses obligation: the 7-error red baseline and the three-site docstring/line-number list, both with stated confirmation procedures. Zero-debt: no sorry, axiom, or vacuous definition is structurally possible in this change.",
-  "sorry_inventory": [],
-  "blockers": [],
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
-      "summary": "4-phase plan: red baseline + (priority := 100) declaration-site fix as one atomic batch, #guard_msgs in #synth instance pin, docstring rationale, full CSLib CI gate."
-    }
-  ],
-  "next_action_hint": "implement",
-  "requires_user_review": false,
-  "continuation_path": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
   "modified_files": [
-    "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
-    "specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json",
-    "specs/617_fix_tautology_decidable_instance_priority/.return-meta.json"
+    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean",
+    "CslibTests/Propositional.lean"
   ],
-  "decisions_made": [
-    "Merged the red-baseline reproduction and the priority fix into ONE phase declared `Commit Mode: atomic-batch`. Splitting them would require either committing a knowingly-red tree (forbidden by git-workflow.md) or leaving green work uncommitted; the atomic-batch carve-out is exactly the pre-declared multi-file case this is for.",
-    "Adopted the declaration-site form `instance (priority := 100) instDecidableTautologyTableau` over the consumer-side `attribute [instance 100]` the task description quoted, per the research report's verified build. Recorded in Rollback/Contingency that a consumer-side annotation is NOT an acceptable fallback, since it leaves the barrel defect intact.",
-    "SETTLED the open scope question research raised: Cslib/Logics/Propositional/Semantics/Bool.lean is ADDED to scope for a prose-only docstring note. Rationale recorded in the plan Overview -- the priority annotation is only half-legible if the other instance says nothing, the edit has zero elaboration surface, and Phase 4's full build already absorbs the wider recompile.",
-    "Chose the `interface` verification tier for Phase 1 with the three importers enumerated, rather than `full`, because the change is a resolution-order change confined to one declaration; the full gate still runs unconditionally at Phase 4, so nothing is deferred past the task's final gate.",
-    "Placed the `#guard_msgs in #synth` pin in its own phase (2) rather than folding it into Phase 1, so the pin's own sanity check (temporarily reverting the priority token to confirm the pin fails by name) happens against an already-committed green baseline.",
-    "Made Phases 2 and 3 a parallel wave, justified by disjoint file ownership: Phase 2 owns CslibTests/Propositional.lean, Phase 3 owns DecisionProcedure.lean and Semantics/Bool.lean.",
-    "Wrote the 7-error red baseline as a Scope Hypothesis with an explicit confirmation procedure and an explicit instruction not to silently accept a divergent count, rather than asserting 7 as fact -- research measured it on a copy of the file, not on the edited file itself.",
-    "Recorded `lake exe mk_all --module` as NOT needed (no new file) and `lake shake` as not a risk (disabled in CI; local invocation scoped to the Cslib target, excluding CslibTests/), so the implementer does not run or worry about either.",
-    "Carried research's non-goals into the plan verbatim as Non-Goals: no kernel-reducibility work on the tableau, no Intuitionistic/Minimal bundling, no new test file, and no fixing of the two pre-existing linter.unusedDecidableInType warnings."
-  ]
+  "commits": [
+    "44bdabf3 task 617 phase 1: red baseline then priority fix",
+    "97bead71 task 617 phase 2: instance-selection regression pin",
+    "3b5611e4 task 617 phase 3: docstring rationale for lowered instance priority",
+    "8a81c52f task 617 phase 4: full CI gate verification"
+  ],
+  "notes": "All 4 phases completed. Phase 1: reproduced the red baseline (exactly 7 `Tactic decide failed` errors) with the tableau module imported into CslibTests/Propositional.lean, then applied `(priority := 100)` to instDecidableTautologyTableau at DecisionProcedure.lean:81; both the test file and its three enumerated dependents (ProofSystemEquivalence, Tableau.Classical, SequentCalculus.LK.Decidability) build green. Phase 2: added a `#guard_msgs in #synth` pin locking Decidable (Tautology _) resolution to instDecidableTautology, plus a module-docstring note. Phase 3 (COMPLETED WITH EXCLUSIONS): extended the instance docstring and softened the module header in DecisionProcedure.lean explaining the lowered priority; the third planned edit (Cslib/Logics/Propositional/Semantics/Bool.lean:181-187 preferred-instance note) was explicitly skipped per this dispatch's two-file territory contract (parallel sibling agents own other files including Bool.lean) -- recorded as a Reasoned Exclusion in the plan, Bool.lean is unmodified. Phase 4 (COMPLETED WITH EXCLUSIONS): lake build, checkInitImports, and lint-style all exit 0 with zero new findings in the two modified files; lake lint's repo-wide output (381 lines, exit 1) has zero hits on this task's files and is not part of PR CI; lake test's full-suite run fails only in CslibTests/GrindLint.lean, a whole-library #grind_lint pin sensitive to concurrent sibling-task edits to Cslib.Logic.Bimodal.Axiom/Cslib.Logic.Temporal.Axiom (git log shows task 619's bridge-lemma commits landing mid-run; task 615's own commit in this same parallel run independently documents the identical out-of-territory GrindLint blocker). CslibTests.Propositional and the DecisionProcedure module both independently build green with zero warnings. Zero sorries, zero new axioms, zero vacuous definitions in the two modified files. Task 617's own declared scope is fully implemented and verified green; the one open item (GrindLint) belongs to a concurrent sibling task's file scope, not this one.",
+  "requires_user_review": false,
+  "blocked_phase": null
 }

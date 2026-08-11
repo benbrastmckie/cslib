@@ -318,7 +318,7 @@ at `:53`). Confirm by reading lines 96-112 before editing, and confirm no existi
 
 ---
 
-### Phase 6: Pre-land Propositional bridge lemmas [NOT STARTED]
+### Phase 6: Pre-land Propositional bridge lemmas [COMPLETED]
 
 **Goal**: Same as Phase 3, for the Propositional module's three collision sites.
 

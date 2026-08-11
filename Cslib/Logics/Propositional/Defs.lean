@@ -123,6 +123,28 @@ instance : HasAnd (Proposition Atom) where
 instance : HasOr (Proposition Atom) where
   or := .or
 
+omit [DecidableEq Atom] in
+/-- Bridge lemma: the concrete constructor `Proposition.and` agrees with the `HasAnd` projection
+supplied by the `HasAnd` instance above. Compensates for the local `∧` notation bound to
+`Proposition.and`, which shadows the scoped `HasAnd.and` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.and_def (A B : Proposition Atom) :
+    A.and B = HasAnd.and A B := rfl
+
+omit [DecidableEq Atom] in
+/-- Bridge lemma: the concrete constructor `Proposition.or` agrees with the `HasOr` projection
+supplied by the `HasOr` instance above. Compensates for the local `∨` notation bound to
+`Proposition.or`, which shadows the scoped `HasOr.or` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.or_def (A B : Proposition Atom) :
+    A.or B = HasOr.or A B := rfl
+
+omit [DecidableEq Atom] in
+/-- Bridge lemma: the concrete constructor `Proposition.imp` agrees with the `HasImp` projection
+supplied by the `PropositionalConnectives` instance above. Compensates for the local `→`
+notation bound to `Proposition.imp`, which shadows the scoped `HasImp.imp` notation from
+`Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.imp_def (A B : Proposition Atom) :
+    A.imp B = HasImp.imp A B := rfl
+
 /-- Substitute each atom in a proposition for a proposition, possibly changing the atomic
 language. -/
 def Proposition.subst {Atom Atom' : Type u} (f : Atom → Proposition Atom') :

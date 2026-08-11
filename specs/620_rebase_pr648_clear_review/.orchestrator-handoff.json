@@ -1,36 +1,46 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Seven-phase, 7.5-hour plan across six dependency waves. Phase 1 verifies live topology and creates an isolated worktree from origin/feat/propositional-v2; Phases 2 and 3 run in parallel (rebase + conflict resolution, toolchain/Mathlib warm-up); Phase 4 reconciles Defs.lean to the research 4.3 target on upstream's Operators.lean typeclasses; Phase 5 verifies the two NaturalDeduction files; Phase 6 greens the five upstream CI gates and re-gates the four-file scope; Phase 7 emits factual PR scaffolding and stops at a local commit. No push, no gh write, no Zulip post at any phase.",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Rebased PR #648 (origin/feat/propositional-v2) onto upstream/main in an isolated worktree at /home/benjamin/Projects/cslib-pr648, branch rebase/pr648-upstream. Resolved references.bib and Defs.lean conflicts, fully reconciled Defs.lean to the approved PR-semantics-on-upstream-mechanism target, fixed one unpredicted grind-automation fallout in NaturalDeduction/Theory.lean, and greened all five of upstream's PR CI gates locally (build --wfail --iofail, test --wfail --iofail, mk_all --check, checkInitImports, lint-style). Diff against the new merge base names exactly the four approved files. Wrote pr-scaffolding.md with verified factual dispositions for ctchou's four review bullets, the IPL/API-removal itemization, and the standing-approval record -- explicitly not prose to paste. No push, no gh write, no Zulip post performed. Task transitioned to [COMPLETED] (task_type=cslib terminus; [PR READY] is type=pr only).",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/620_rebase_pr648_clear_review/plans/01_rebase-pr648-clear-review.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/620_rebase_pr648_clear_review/summaries/01_rebase-pr648-clear-review-summary.md"
+    },
+    {
+      "type": "pr-scaffolding",
+      "path": "specs/620_rebase_pr648_clear_review/pr-scaffolding.md"
     }
   ],
   "blockers": [],
-  "next_action_hint": "implement",
+  "next_action_hint": "user: push rebase/pr648-upstream and update the PR description/re-review request using pr-scaffolding.md as raw material (human-authored prose required)",
   "files_modified": [
+    "Cslib/Logics/Propositional/Defs.lean",
+    "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean",
+    "Cslib/Logics/Propositional/NaturalDeduction/Theory.lean",
+    "references.bib",
     "specs/620_rebase_pr648_clear_review/plans/01_rebase-pr648-clear-review.md",
-    "specs/620_rebase_pr648_clear_review/.return-meta.json",
-    "specs/620_rebase_pr648_clear_review/.orchestrator-handoff.json"
+    "specs/620_rebase_pr648_clear_review/summaries/01_rebase-pr648-clear-review-summary.md",
+    "specs/620_rebase_pr648_clear_review/pr-scaffolding.md",
+    "specs/620_rebase_pr648_clear_review/.return-meta.json"
   ],
   "decisions_made": [
-    "Work happens in a dedicated git worktree created from origin/feat/propositional-v2, never by checking that branch out in the main tree: specs/ and .claude/ are fork-only and an in-place checkout would delete them. This also makes the 'fork main is never a merge/cherry-pick/resolution source' constraint structural.",
-    "Toolchain and Mathlib cache warm-up (Phase 3) is a separate phase running parallel to the rebase (Phase 2), since the rebase inherits upstream's v4.33.0 / db584cd6 pins with zero conflict and v4.33.0 is not currently installed locally.",
-    "Verified against upstream/main's lean_action_ci.yml: the PR CI is exactly five gates (build --wfail --iofail, test --wfail --iofail, mk_all --check, checkInitImports, lint-style). lake shake is commented out. This fork's sorry-suppression and axiom-census ratchet steps are fork-local and are NOT PR gates.",
-    "Phase 6 carries a hard scope gate: git diff --stat against the new merge base must name exactly the four approved files; a fifth file halts the phase rather than being absorbed.",
-    "Phase 7 produces specs/620_rebase_pr648_clear_review/pr-scaffolding.md as verified fact tables with an explicit 'not prose to paste' header; the PR description update and re-review request stay user actions per pr-prohibition.md.",
-    "task_type is cslib, so [PR READY] is unavailable (type=pr only); the plan terminates at [COMPLETED] with a completion summary stating the branch is local and unpushed."
+    "Toolchain/Mathlib target revised from v4.33.0/db584cd6 to v4.34.0-rc1/de5ce8a9 after re-verifying live topology at implementation start (upstream advanced one toolchain-bump commit since research; confirmed it does not touch Propositional or Foundations/Logic).",
+    "Defs.lean conflicts resolved first-pass via checkout --theirs during the rebase (Phase 2), with full reconciliation against research section 4.3 deferred to Phase 4 as planned.",
+    "Fixed an unpredicted grind-automation regression in NaturalDeduction/Theory.lean (not the plan's predicted Basic.lean Equiv region) by splitting a combinator tactic into two goals with an explicit exact for the finset-membership subgoal that grind alone could not close after the notation-to-typeclass switch.",
+    "Did not run lake shake, lake lint, or fork-local sorry-suppression/axiom-census ratchet steps as CI gates -- confirmed none are part of upstream/main's actual PR CI workflow.",
+    "Task terminates at [COMPLETED], not [PR READY], since task_type is cslib (not pr)."
   ],
   "dead_ends": [
-    "In-place git checkout of feat/propositional-v2 in the main working tree: upstream has no specs/ or .claude/, so the checkout would delete the task-management artifacts or refuse on local modifications.",
-    "Introducing HasBot/HasTop typeclasses: neither exists upstream (Operators.lean provides HasAnd/HasOr/HasImp/HasIff/HasNot/HasBox/HasDiamond/HasDynamicBox/HasDynamicDiamond/HasTensor); Mathlib Bot/Top cover bottom/top. The agent context file listing HasBot/HasTop/HasDia is wrong.",
-    "Re-declaring local scoped notation in Defs.lean: the PR's five declarations must be deleted, not kept alongside upstream's Cslib.Logic scoped notation, which would create genuine ambiguity.",
-    "Reordering the Proposition constructors to reduce diff noise: churns match arms in subst/weak/subs/substAtom across two files that otherwise apply untouched."
+    "grind [not_eq] (explicit lemma argument) did not fix the Theory.lean:55 failure -- same error, redundant-parameter warning confirmed the lemma was already globally registered via @[grind =] and still didn't fire on the raw-constructor Finset element.",
+    "simp only [not_eq] before grind made no progress on the same goal."
   ],
-  "phases_completed": 0,
+  "phases_completed": 7,
   "phases_total": 7,
-  "plan_markers_verified": false
+  "plan_markers_verified": true
 }

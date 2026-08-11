@@ -11,8 +11,8 @@ next_project_number: 627
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,619,621 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611 | 36,37,181,425,534,554,568,594,610 | modal logic, temporal logic, bimodal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -24,8 +24,7 @@ next_project_number: 627
 ### Propositional Logic
 
 619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
-620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
-  └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
+621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
 
 ### Modal Logic
 
@@ -115,12 +114,14 @@ This task edits `Propositional/Defs.lean`, which is also in the #648 rebase's fi
 ---
 
 ### 620. Rebase PR #648 onto current upstream and clear the stale blocking review
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md]
 - **Plan**: [620_rebase_pr648_clear_review/plans/01_rebase-pr648-clear-review.md]
+- **Summary**: [620_rebase_pr648_clear_review/summaries/01_rebase-pr648-clear-review-summary.md]
+- **Pr-scaffolding**: [620_rebase_pr648_clear_review/pr-scaffolding.md]
 
 **Description**: Rebase the open PR #648 ("feat(Logics/Propositional): five-primitive formula type with primitive bot") onto current `upstream/main` and clear ctchou's stale blocking review.
 

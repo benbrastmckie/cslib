@@ -1,7 +1,7 @@
 # Implementation Plan: Rebase PR #648 onto upstream/main and clear the stale blocking review
 
 - **Task**: 620 - Rebase PR #648 onto current upstream and clear the stale blocking review
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 7.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md`
@@ -539,7 +539,7 @@ steps added. All five ran green:
 
 ---
 
-### Phase 7: Emit PR scaffolding, commit locally, and stop [NOT STARTED]
+### Phase 7: Emit PR scaffolding, commit locally, and stop [COMPLETED]
 
 **Goal**: Produce the factual raw material a human needs to update the PR description and write
 the re-review request, then terminate without any remote-facing action.

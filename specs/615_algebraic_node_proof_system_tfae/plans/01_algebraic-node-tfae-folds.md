@@ -2,7 +2,7 @@
 
 - **Task**: 615 - Add algebraic semantic validity as a further equivalent node in the
   propositional proof-system TFAE families
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md`
@@ -102,7 +102,7 @@ No `roadmap_path` was supplied in the delegation context; no ROADMAP.md consulte
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Add the import and the three algebraic folds [NOT STARTED]
+### Phase 1: Add the import and the three algebraic folds [COMPLETED]
 
 - **Goal:** `Cslib/Logics/Propositional/ProofSystemEquivalence.lean` contains a new
   `section WithAlgebra` with three documented four-way TFAE theorems, and the module compiles.

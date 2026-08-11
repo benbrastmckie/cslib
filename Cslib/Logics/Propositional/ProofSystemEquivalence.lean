@@ -14,6 +14,7 @@ public import Cslib.Logics.Propositional.Tableau.Intuitionistic.DecisionProcedur
 public import Cslib.Logics.Propositional.Tableau.Minimal.DecisionProcedure
 public import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure
 public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
+public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 import Mathlib.Tactic.TFAE
 
 /-! # Proof System Equivalences for Propositional Logic
@@ -63,6 +64,8 @@ namespace Cslib.Logic.PL
 open InferenceSystem Cslib.Logic.Tableau
 
 variable {Atom : Type*} [DecidableEq Atom]
+
+universe u
 
 /-! ## Classical Propositional Logic (CPL) -/
 
@@ -263,6 +266,93 @@ theorem mplProofSystemsWithTableauTfae (φ : PL.Proposition Atom) :
   tfae_finish
 
 end WithTableau
+
+/-! ## Algebraic Semantics Folds (closed formulas only)
+
+The algebraic validity predicates `GHAValid`, `HAValid`, and `BAValid`
+(`Semantics/Algebra.lean`) are weak — empty-context — notions of validity, so each fold below
+extends the corresponding `...Closed` three-way equivalence rather than the context-based one.
+
+A context-based algebraic node was considered and deliberately not added. Strong algebraic
+completeness exists (`hilbert_alg_strong_complete_theory`), but it quantifies over
+*generalized* Heyting algebras for all three logics, distinguishing them only by the axiom
+theory the valuation models; the tier-matched form (Boolean algebras for CPL, Heyting algebras
+for IPL) would need `HeytingAlgebra`/`BooleanAlgebra` instances on `RelLindenbaumAlgebra`,
+which carries only a `GeneralizedHeytingAlgebra` instance. A non-tier-matched context node
+would break the parallel with the closed nodes below, so the algebraic node lives on the closed
+families alone.
+
+Unlike `section WithTableau`, these theorems need no extra typeclass; the constraint is a
+universe pin. `GHAValid`/`HAValid`/`BAValid` carry a second universe for the algebra carrier,
+and the Hilbert Lindenbaum construction pins it to `Atom`'s universe, so each theorem binds
+`{Atom : Type u}` explicitly instead of using the file-level `Type*` variable. There is no
+universe-invariance lemma for algebraic validity (contrast `ivalid_universe_invariant`), so the
+`.{u, u}` pin is part of the statement. -/
+
+section WithAlgebra
+
+/-- **CPL Four-Way Equivalence** (closed, with algebraic semantics): At the empty context, the
+following are equivalent:
+1. Hilbert derivability: `Derivable PropositionalAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory PropositionalAxiom) (∅ ⊢ φ)`
+3. LK provability: `Nonempty (LKProof (∅ ⊢ₛ {φ}))`
+4. Boolean-algebra validity: `BAValid.{u, u} φ`
+
+Nodes 1-3 are `cplProofSystemsTfaeClosed`. Node 1 ↔ 4 is `CPL.hilbert_alg_completeness`. -/
+theorem cplProofSystemsWithAlgebraTfae {Atom : Type u} [DecidableEq Atom]
+    (φ : PL.Proposition Atom) :
+    [Derivable PropositionalAxiom φ,
+     DerivableIn (AxiomTheory (@PropositionalAxiom Atom) : Theory Atom)
+       ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (LKProof ((∅ : Ctx Atom) ⊢ₛ ({φ} : Finset _))),
+     BAValid.{u, u} φ].TFAE := by
+  have h := cplProofSystemsTfaeClosed (Atom := Atom) φ
+  tfae_have 1 ↔ 2 := h.out 0 1
+  tfae_have 2 ↔ 3 := h.out 1 2
+  tfae_have 1 ↔ 4 := CPL.hilbert_alg_completeness
+  tfae_finish
+
+/-- **IPL Four-Way Equivalence** (closed, with algebraic semantics): At the empty context, the
+following are equivalent:
+1. Hilbert derivability: `Derivable IntPropAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory IntPropAxiom) (∅ ⊢ φ)`
+3. LJ provability: `Nonempty (LJProof (∅ ⊢ φ))`
+4. Heyting-algebra validity: `HAValid.{u, u} φ`
+
+Nodes 1-3 are `iplProofSystemsTfaeClosed`. Node 1 ↔ 4 is `IPL.hilbert_alg_completeness`. -/
+theorem iplProofSystemsWithAlgebraTfae {Atom : Type u} [DecidableEq Atom]
+    (φ : PL.Proposition Atom) :
+    [Derivable IntPropAxiom φ,
+     DerivableIn (AxiomTheory (@IntPropAxiom Atom) : Theory Atom) ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (LJProof ((∅ : Ctx Atom) ⊢ φ)),
+     HAValid.{u, u} φ].TFAE := by
+  have h := iplProofSystemsTfaeClosed (Atom := Atom) φ
+  tfae_have 1 ↔ 2 := h.out 0 1
+  tfae_have 2 ↔ 3 := h.out 1 2
+  tfae_have 1 ↔ 4 := IPL.hilbert_alg_completeness
+  tfae_finish
+
+/-- **MPL Four-Way Equivalence** (closed, with algebraic semantics): At the empty context, the
+following are equivalent:
+1. Hilbert derivability: `Derivable MinPropAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory MinPropAxiom) (∅ ⊢ φ)`
+3. LM provability: `Nonempty (SeqProofMinimal (∅ ⊢ φ))`
+4. Generalized-Heyting-algebra validity: `GHAValid.{u, u} φ`
+
+Nodes 1-3 are `mplProofSystemsTfaeClosed`. Node 1 ↔ 4 is `MPL.hilbert_alg_completeness`. -/
+theorem mplProofSystemsWithAlgebraTfae {Atom : Type u} [DecidableEq Atom]
+    (φ : PL.Proposition Atom) :
+    [Derivable MinPropAxiom φ,
+     DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom) ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (SeqProofMinimal ((∅ : Ctx Atom) ⊢ φ)),
+     GHAValid.{u, u} φ].TFAE := by
+  have h := mplProofSystemsTfaeClosed (Atom := Atom) φ
+  tfae_have 1 ↔ 2 := h.out 0 1
+  tfae_have 2 ↔ 3 := h.out 1 2
+  tfae_have 1 ↔ 4 := MPL.hilbert_alg_completeness
+  tfae_finish
+
+end WithAlgebra
 
 end Cslib.Logic.PL
 

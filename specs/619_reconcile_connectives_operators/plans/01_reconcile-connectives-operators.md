@@ -354,7 +354,7 @@ instance at `:123`, `:109` `→` via `PropositionalConnectives` at `:114`). Conf
 
 ---
 
-### Phase 7: Pre-land Modal bridge lemmas [NOT STARTED]
+### Phase 7: Pre-land Modal bridge lemmas [COMPLETED]
 
 **Goal**: Same as Phase 3, for the Modal module's five collision sites — the largest subtree, run
 last among the bridge-lemma phases.

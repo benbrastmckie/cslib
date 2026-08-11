@@ -109,6 +109,39 @@ instance : HasOr (Proposition Atom) where
 instance : HasDiamond (Proposition Atom) where
   diamond := .diamond
 
+/-- Bridge lemma: the concrete constructor `Proposition.and` agrees with the `HasAnd` projection
+supplied by the `HasAnd` instance above. Compensates for the local `∧` notation bound to
+`Proposition.and`, which shadows the scoped `HasAnd.and` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.and_def (φ ψ : Proposition Atom) :
+    φ.and ψ = HasAnd.and φ ψ := rfl
+
+/-- Bridge lemma: the concrete constructor `Proposition.or` agrees with the `HasOr` projection
+supplied by the `HasOr` instance above. Compensates for the local `∨` notation bound to
+`Proposition.or`, which shadows the scoped `HasOr.or` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.or_def (φ ψ : Proposition Atom) :
+    φ.or ψ = HasOr.or φ ψ := rfl
+
+/-- Bridge lemma: the concrete constructor `Proposition.imp` agrees with the `HasImp` projection
+supplied by the `ModalConnectives` instance above. Compensates for the local `→` notation
+bound to `Proposition.imp`, which shadows the scoped `HasImp.imp` notation from
+`Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.imp_def (φ ψ : Proposition Atom) :
+    φ.imp ψ = HasImp.imp φ ψ := rfl
+
+/-- Bridge lemma: the concrete constructor `Proposition.box` agrees with the `HasBox` projection
+supplied by the `ModalConnectives` instance above. Compensates for the local `□` notation
+bound to `Proposition.box`, which shadows the scoped `HasBox.box` notation from
+`Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.box_def (φ : Proposition Atom) :
+    φ.box = HasBox.box φ := rfl
+
+/-- Bridge lemma: the concrete constructor `Proposition.diamond` agrees with the `HasDiamond`
+projection supplied by the `HasDiamond` instance above. Compensates for the local `◇` notation
+bound to `Proposition.diamond`, which shadows the scoped `HasDiamond.diamond` notation from
+`Cslib.Logic`. -/
+@[scoped grind =] lemma Proposition.diamond_def (φ : Proposition Atom) :
+    φ.diamond = HasDiamond.diamond φ := rfl
+
 /-- Negation as derived connective: ¬φ := φ → ⊥.
 
 Delegates to the canonical `PropositionalConnectives.neg` default. -/

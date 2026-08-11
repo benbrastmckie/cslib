@@ -459,7 +459,7 @@ References section). `git diff --stat` against the new merge base confirms no `S
 
 ---
 
-### Phase 6: Green the five upstream CI gates locally and re-gate scope [NOT STARTED]
+### Phase 6: Green the five upstream CI gates locally and re-gate scope [COMPLETED]
 
 **Goal**: Reproduce the entire upstream PR CI locally and prove the diff has not widened beyond
 the approved four files.
@@ -512,6 +512,30 @@ phase, not be absorbed.
 - The diff names exactly the four approved files.
 - Zero `sorry` under `Cslib/Logics/Propositional/`.
 - The blast-radius grep returns only the three expected paths.
+
+**Phase 6 Notes (actual)**: `.github/workflows/lean_action_ci.yml` re-read on the rebased tree —
+still exactly the five gates the research predicted (build, test, `mk_all --check`,
+`checkInitImports`, `lint-style-action` in `check` mode); `lake shake` still commented out; no new
+steps added. All five ran green:
+- `lake build --wfail --iofail`: `Build completed successfully (2801 jobs)`, zero warnings.
+- `lake test --wfail --iofail`: `Build completed successfully` (8905 jobs, includes `CslibTests`).
+- `lake exe mk_all --check`: `No update necessary`.
+- `lake exe checkInitImports`: exit 0, no output.
+- `lake exe lint-style Cslib` (the local equivalent of `lint-style-action`'s `check` mode; ran
+  `lake exe lint-style --help` first to confirm invocation shape): exit 0, only a pre-existing
+  harmless warning (`nolints file could not be read; treating as empty: scripts/nolints-style.txt`
+  — this file's absence predates the rebase and is not part of this task's scope).
+- Scope gate: `git diff --stat` against the new merge base names exactly the four approved files
+  (`Defs.lean`, `NaturalDeduction/Basic.lean`, `NaturalDeduction/Theory.lean`, `references.bib`)
+  and nothing else.
+- Zero-debt gate: `grep -rn sorry Cslib/Logics/Propositional/` returns nothing.
+- Blast-radius gate: `git grep -l "Cslib.Logics.Propositional" -- '*.lean'` returns exactly
+  `Cslib.lean` and the two `NaturalDeduction/` files — confirming every deleted symbol
+  (`IsIntuitionistic`, `intuitionisticCompletion`, `MPL`, `efq_mem_ipl`, `instInhabitedOfBot`) was
+  used only inside files the PR already rewrites.
+- This fork's `sorry-suppression ratchet` and `axiom-census ratchet` workflow steps, and `lake
+  lint`/`lake shake`, were deliberately not run as gates here, per the plan's explicit scope
+  (they are fork-local, not part of `upstream/main`'s PR CI).
 
 ---
 

@@ -513,7 +513,8 @@ returns the first label satisfying all four conditions, or `none` if no label do
 
 **Reuse contract.** `some x` means the ancestor `x` discharges the obligation: do NOT create
 `w'`, recurse `intExpandBranches` on `bPers` **unmodified** (never Option B — appending a fresh
-`F(ψ)@x` entry on reuse was tried and found UNSOUND, `Expansion.lean:256-264`), with `edges`
+`F(ψ)@x` entry on reuse was tried and found UNSOUND; the finding predates this file's current
+line numbering and is not otherwise recorded in-tree), with `edges`
 **unchanged** and the world counter **unconsumed**. `none` means proceed exactly as today
 (create `w'` as normal). This mirrors `intFImpReuseWitness?`'s own contract exactly; only the
 search direction differs.

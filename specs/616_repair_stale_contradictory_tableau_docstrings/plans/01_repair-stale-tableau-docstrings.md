@@ -52,7 +52,7 @@ Phases 1-6; Phase 7 explicitly optional, deferred).
 - [ ] **Task 5.3**: Fix sibling S1 at `Minimal/DecisionProcedure.lean:49-51` (same false
   dependency on `minOpenBranch_countermodel`).
 
-### Phase 6: Part 4 stale line numbers plus siblings S2-S4 [NOT STARTED]
+### Phase 6: Part 4 stale line numbers plus siblings S2-S4 [COMPLETED]
 
 - [ ] **Task 6.1**: Fix `Scheme.lean` self-reference citations per report Section 5.1 and S2/S3.
 - [ ] **Task 6.2**: Fix `Rules.lean` cross-reference citations per report Section 5.2 (including

@@ -123,7 +123,7 @@ structure IBranchSaturation (Atom : Type*) [DecidableEq Atom] [Hashable Atom]
         b.any (fun sf => sf.sign == .neg && sf.formula == ψ && sf.label == w') = true
   /-- T(φ→ψ)@w ∈ b → F(φ)@w ∈ b ∨ T(ψ)@w ∈ b (Fitting Ch. 4 split, beta-rule, reflexive at the
   same world `w` this copy of T(φ→ψ) is labeled at — realized by `intApplyRuleFull`'s `.pos, .imp`
-  branching arm, `Rules.lean:274-275`). -/
+  branching arm, `Rules.lean:279-280`). -/
   sat_timp : ∀ (φ ψ : Proposition Atom) (w : Nat),
       b.any (fun sf => sf.sign == .pos && sf.formula == .imp φ ψ && sf.label == w) = true →
       b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) = true ∨
@@ -466,7 +466,7 @@ the SAME fuel. Proved by induction on fuel, splitting on whether the candidate c
 came from an old edge (immediate transfer) or is the new edge itself (only possible when
 `current = l`, giving candidate `child = nw`; since `target ≠ nw` this forces the recursive call
 `go (edges ++ [(nw, l)]) target nw fuel' = true`, which `isAccessible_go_fresh_dead_end` refutes
-outright, so this branch never occurs). Counterpart to `isAccessible_go_append_mono` (`:316`). -/
+outright, so this branch never occurs). Counterpart to `isAccessible_go_append_mono` (`:353`). -/
 private lemma isAccessible_go_append_eq_of_fresh
     (edges : IEdges) (nw l : Nat) (hfresh : ∀ c, (c, nw) ∉ edges) (hne : l ≠ nw)
     (target : Nat) (htarget : target ≠ nw) :
@@ -586,15 +586,16 @@ lemma intAccessPreorder_mono_subset {edges edges' : IEdges}
 /-! ### One-hop ancestry extension (DP-2 support)
 
 `isAccessible edges · ·` does not need full transitivity for the mint-time argument used by
-`IWorldHist` (see the docstring above at line 250): only a ONE-HOP extension is needed, converting
-`par`-ancestry (a direct parent-child edge freshly appended) plus an existing accessibility fact
-into a new accessibility fact for the freshly-minted world. `isAccessible_go_one_hop_ext` is the
+`IWorldHist` (see that structure's own docstring below): only a ONE-HOP extension is needed,
+converting `par`-ancestry (a direct parent-child edge freshly appended) plus an existing
+accessibility fact into a new accessibility fact for the freshly-minted world.
+`isAccessible_go_one_hop_ext` is the
 raw fuel-indexed statement (any direct edge `(c, p)` extends a `go`-reachability witness to `p` by
 exactly one hop, using one more unit of fuel); `isAccessible_one_hop_ext` specializes it to the
 EXACT shape needed at a mint site, where `c` is fresh and `(c, p)` is the edge being appended: the
 fuel arithmetic then closes exactly, since `(edges ++ [(c, p)]).length = edges.length + 1` matches
-the one extra hop precisely. Full transitivity of `isAccessible` is deliberately NOT proved here
-(`Scheme.lean:250` explains why the weaker one-hop form suffices and is sound). -/
+the one extra hop precisely. Full transitivity of `isAccessible` is deliberately NOT proved
+here: the weaker one-hop form above is exactly what the mint-time argument needs and no more. -/
 
 /-- A direct edge `(c, p) ∈ edges` gives `go`-reachability of `c` from `p` at ANY positive fuel
 (the DFS finds `c` as an immediate child of `p` in a single unfold, regardless of how much fuel
@@ -649,8 +650,9 @@ private lemma isAccessible_go_one_hop_ext (edges : IEdges) {p c : Nat} (hmem : (
       simp [hpar] at hfilt
 
 /-- The specialized one-hop extension used at every mint site: if `x` accesses `p` under the
-CURRENT edge list, then after appending the fresh edge `(c, p)` (as the mint arm always does,
-`Scheme.lean:3272`), `x` accesses the newly-minted `c` under the extended edge list. This is the
+CURRENT edge list, then after appending the fresh edge `(c, p)` (as the world-creation mint arm
+of `intStepBranch`/`intStepBranchPrio` always does), `x` accesses the newly-minted `c` under the
+extended edge list. This is the
 exact shape needed to discharge (H1)'s accessibility half of `IWorldHist` at a mint: the fuel
 arithmetic closes precisely because `(edges ++ [(c, p)]).length = edges.length + 1`, i.e. the one
 extra hop uses exactly the one unit of fuel gained by the append. -/
@@ -679,8 +681,9 @@ private lemma isAccessible_one_hop_ext {edges : IEdges} {x p c : Nat}
 from `current` to `target` within `fuel` steps is witnessed by a chain of DIRECT edges from
 `edges`, exactly as `Relation.ReflTransGen`'s reflexive-transitive closure of raw edge membership
 `fun a c => (c, a) ∈ edges` would predict. This does NOT reprove `isAccessible` itself is
-transitive (composing two SEPARATE `isAccessible` facts, the thing `Scheme.lean:250-257`
-deliberately avoided) -- `go`'s own recursion already IS a chain of single edges, one per
+transitive (composing two SEPARATE `isAccessible` facts, the thing the "One-hop ancestry
+extension" section above deliberately avoided) -- `go`'s own recursion already IS a chain of
+single edges, one per
 recursive unfold, so this is a direct structural induction on `fuel`, mirroring
 `isAccessible_go_direct`/`isAccessible_go_one_hop_ext`'s existing style. -/
 private lemma isAccessible_go_decompose (edges : IEdges) (target : Nat) :
@@ -742,7 +745,7 @@ def IFimpAccess (edges : IEdges) (b : IBranch Atom) : Prop :=
 **CLOSED (annotation-and-docstring close-out): monotonicity is now supplied by `hpersAug`.**
 The two `sorry`s this note used to cite (`Completeness.lean:113`/`Minimal/Completeness.lean:110`)
 no longer exist — both line references are stale, and both files are sorry-free. `hpersAug`
-(`Scheme.lean:9645-9665`, the 11th conjunct of `intExpandBranches_openBranch_sat`, supplied by
+(`Scheme.lean:9645-9665`, the 7th conjunct of `intExpandBranches_openBranch_sat`, supplied by
 the `intFImpReuseWitnessAnc?` loop-back re-validation in `Expansion.lean`) is exactly the
 `χ`-general positive-persistence fact this note was looking for: instantiated at `χ := .atom p`,
 it gives `intExtractValuation` upward-closure along `intAccessPreorder edges` directly (see
@@ -760,7 +763,7 @@ note was written, **entangled with the B2 fuel-sufficiency argument, not complet
 completeness-side machinery alone**.
 
 Evidence (verified against source, not assumed):
-- `intApplyRuleFull` (`Rules.lean:245-268`) maps EVERY `.pos, .imp` signed formula (i.e. every
+- `intApplyRuleFull` (`Rules.lean:250`) maps EVERY `.pos, .imp` signed formula (i.e. every
   `T(φ→ψ)`) to `.notApplicable` — `T(φ→ψ)` is NEVER processed by `intStepBranch`. It is handled
   EXCLUSIVELY by `applyPersistenceFixpoint`/`applyAllTImpRules` (`Expansion.lean:118-139`), run
   BEFORE each `intStepBranch` check, bounded by a fuel parameter (`fuel'+1`, the OUTER
@@ -824,14 +827,14 @@ the route this file no longer takes; do not re-derive its "open"/"blocked" concl
 Gap 1 as current.
 
 **Gap 2 (determinacy) is RESOLVED as of the `.pos, .imp` branching arm added to
-`intApplyRuleFull` (`Rules.lean:245-268`).** The STOP-gate below was written
+`intApplyRuleFull` (`Rules.lean:279-280`).** The STOP-gate below was written
 against the OLD design, where `intTImpRule` was the ONLY `T(φ→ψ)` rule and only ever ADDED
 `T(ψ)@w'` under `T(φ)@w' ∈ b` — never planting `F(φ)@w'`, so the needed disjunction
 `F(φ)@w' ∈ b ∨ T(ψ)@w' ∈ b` was unreachable without an independent determinacy/bivalence fact
 (Gap 2, below). The new design instead adds a genuine branching rule, `T(φ→ψ)@w' →
 [F(φ)@w'] | [T(ψ)@w']`, firing reflexively at whatever label its own signed-formula copy
 carries; `sfSatisfied`'s new `.pos, .imp` case (above `IExpandedConsistent`) states exactly this
-disjunction, and `IExpandedConsistent_sat` (`:897-967`) discharges it the same mechanical way as
+disjunction, and `IExpandedConsistent_sat` (`:1311`) discharges it the same mechanical way as
 every other field (`sat_tand`/`sat_fand`/`sat_tor`/`sat_for_`) — via `intStepBranch b e nw = none`
 plus `IExpandedConsistent b e`, **with no determinacy/bivalence argument needed at all**. This is
 exactly the "restate as a branching rule" move Finding 6c / Decision D2 of the calculus-repair
@@ -867,8 +870,8 @@ lean on `intUniverse`'s linear world range as a genuine invariant of produced br
 above is STALE.** The measure has been built, sorry-free: `applyAllTImpRules b edges =
 b ++ newForms.flatten ++ genCopies.flatten` (`Expansion.lean`) is purely additive, so the
 length-equality exit of `applyPersistenceFixpoint` genuinely IS fixpoint-ness
-(`applyAllTImpRules_eq_self_of_length_eq`, `Scheme.lean:5335`) — the only non-genuine exit is
-`fuel = 0` — and `applyPersistenceFixpoint_genuine_of_count_le_fuel` (`Scheme.lean:5386`)
+(`applyAllTImpRules_eq_self_of_length_eq`, `Scheme.lean:5952`) — the only non-genuine exit is
+`fuel = 0` — and `applyPersistenceFixpoint_genuine_of_count_le_fuel` (`Scheme.lean:6003`)
 discharges exactly that remaining case, stated for arbitrary `b` and `fuel`, with both its
 hypotheses already in scope at every arm of the `key` induction below, including the reuse arm
 (`case6`). Gap 1's fuel-sufficiency side is therefore closed. At the time of this correction,
@@ -890,8 +893,8 @@ here, uncorrected in place except for that one dependency claim, as a historical
 earlier (mistaken) blocker analysis; do not re-derive the "not been built" claim or its
 correction.
 
-**`sat_timp` IS an `IBranchSaturation` field** (`:105-108`), realized by `intApplyRuleFull`'s
-`.pos, .imp` branching arm (`Rules.lean:245-268`, `:274-275`), which fires reflexively at the
+**`sat_timp` IS an `IBranchSaturation` field** (`:127`), realized by `intApplyRuleFull`'s
+`.pos, .imp` branching arm (`Rules.lean:250`, `:279-280`), which fires reflexively at the
 label of the specific signed-formula copy it is given. No converse of the induction hypothesis
 is needed to use it: in `truthLemma`'s T-imp case, the `F(φ')@w'` arm of the disjunction
 contradicts `IForces val w' φ'` via `ih_φ'.2`, and the `T(ψ')@w'` arm yields the goal directly
@@ -910,7 +913,7 @@ about branch-syntactic saturation, so it does not depend on Gap 1 at all.
 copy-channel reinstatement recorded below). At that point the anticipated closure route no
 longer existed in the codebase; this was recorded as a confirmed structural blocker, not an
 unattempted proof.** A later dispatch's task list proposed closing Gap 1 by threading
-`applyPersistenceFixpoint_genuine_of_count_le_fuel` (below, `:3444` at time of writing) so the
+`applyPersistenceFixpoint_genuine_of_count_le_fuel` (below, `:6003`) so the
 returned branch is a genuine fixpoint of `applyAllTImpRules`, on the premise that "every world
 accessible from a `T(φ'→ψ')` source carries its own copy (the `applyAllTImpRules` copy channel
 at a fixpoint)". **That copy channel ("Deliverable 6") had, at that point, been deliberately
@@ -1040,7 +1043,7 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
       -- DISCHARGED (DP-5). `hpers` transfers `T(φ'→ψ')`'s membership from the source world `w`
       -- to the accessible world `w'` directly (chained along `Relation.ReflTransGen` by
       -- `induction hle`), so `w'` carries its own `T(φ'→ψ')` copy without any self-copy channel
-      -- in `Expansion.lean`. `sat_timp` (a live `IBranchSaturation` field, `:105-108`) then
+      -- in `Expansion.lean`. `sat_timp` (a live `IBranchSaturation` field, `:127`) then
       -- supplies `F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b`: the `F(φ')@w'` arm contradicts `IForces val w'
       -- φ'` via `ih_φ'.2`, and the `T(ψ')@w'` arm yields the goal via `ih_ψ'.1`. See the
       -- "`sat_timp` discharge" STOP-gate note above this lemma for the full history (the
@@ -2293,9 +2296,10 @@ The intuitionistic/minimal calculus differs from Modal K in its connective set (
 definitions (mirroring `modalSubfmls`/`modalUniverse`'s *shape*, not literal reuse) rather
 than reusing `Proposition.subformulas` (`Subformula.lean`), which is `Finset`-valued and
 the wrong shape for the counting-measure machinery below. `intUniverse`'s size bound
-(`intUniverse_length_le`) is exactly the quantity `intFuel φ := 3 ^ (2 * (2 * φ.complexity
-+ 1) * (φ.complexity + 2))` (`Expansion.lean:462-463`) was pre-sized
-against.
+(`intUniverse_length_le`) is exactly the quantity a historical exponential fuel formula,
+`intFuel φ := 3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))`, was pre-sized against;
+that name no longer exists in the codebase, superseded by the linear closed form `intFuelExt`
+below.
 
 ## References
 
@@ -2346,12 +2350,12 @@ omit [DecidableEq Atom] [Hashable Atom] in
 (mirrors `intSubfmls_length_le`'s induction shape, tracking a per-connective `imp`-count
 instead of total length). This is the key combinatorial fact underlying the linear world
 bound `intExpandBranches_world_bound`: world-creation
-fires *only* on a `.neg`-signed `.imp` formula (`Rules.lean:262-264`), and (per the
+fires *only* on a `.neg`-signed `.imp` formula (`Rules.lean:266-269`), and (per the
 occurrence-tracking argument recorded in the Branch-Universe Containment section below) each
 world created
 during expansion can be injected into a DISTINCT `.imp`-node position of `φ0`'s own parse
 tree -- since F-signed formulas never propagate via persistence (`posFormulasAt`/
-`propagatePersistence`/`intTImpRule` are `.pos`-only, `Rules.lean:126,139-141,174-186`), a
+`propagatePersistence`/`intTImpRule` are `.pos`-only, `Rules.lean:131,144,179`), a
 given `.imp` position's negative instance can only ever exist in the ONE world where its own
 decomposition lineage placed it. Combined with this bound, that injection gives
 `(number of worlds created) ≤ φ0.complexity`, hence `(distinct labels).length ≤
@@ -2400,9 +2404,10 @@ def intUniverse (φ : Proposition Atom) : List (ISF Atom) :=
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The universe has length at most `2 * (2 * φ.complexity + 1) * (φ.complexity + 2)` --
-exactly the exponent `intFuel φ := 3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))`
-(`Expansion.lean:462-463`) was pre-sized against (mirrors
-`modalUniverse_length_le`, `FmpMeasure.lean:154-186`). -/
+exactly the exponent a historical exponential fuel formula,
+`intFuel φ := 3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))`, was pre-sized against;
+that name no longer exists in the codebase, superseded by the linear closed form `intFuelExt`
+(mirrors `modalUniverse_length_le`, `FmpMeasure.lean:154-186`). -/
 lemma intUniverse_length_le (φ : Proposition Atom) :
     (intUniverse φ).length ≤
       2 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by
@@ -4092,7 +4097,7 @@ private lemma isAccessible_reconcile_of_worldHist
 
 /-! ### `IWorldsPlanted`: the provenance half of `IPosPersistRaw`'s side-condition gap
 
-`IPosPersistRaw`'s (Scheme.lean:6701-6704) third hypothesis needs "the target world already has
+`IPosPersistRaw`'s (Scheme.lean:7293) third hypothesis needs "the target world already has
 *some* entry on `b`", `b.any (fun sf => sf.label == w') = true`, at every raw edge-list child.
 This is the provenance half of the gap (§3 item 2 of the supporting research report), the
 counterpart to `isAccessible_target_mem_edges`'s structural half above: it is a pure corollary
@@ -4116,7 +4121,7 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- **`IWorldsPlanted` export**: derived entirely from `IWorldHist` (supplying (H1)'s membership
 shape and (H3)'s planted-entry fact) plus `IWorldHistCounter` (supplying the length fact
 `edges_shape_of_worldHist` needs), mirroring `IWorldHist_forestComparable` exactly -- same two
-hypotheses, computable at the same exit site (Scheme.lean:7058). -/
+hypotheses, computable at the same exit site as `IWorldHist_forestComparable`. -/
 private lemma IWorldHist_worldsPlanted {φ0 : Proposition Atom} {b : IBranch Atom}
     {e : List (ISF Atom)} {nw : Nat} {edges : IEdges}
     (hWH : IWorldHist φ0 b e nw edges) (hWHC : IWorldHistCounter nw edges) :
@@ -5152,8 +5157,9 @@ omit [Hashable Atom] in
 /-- **The BETA-arm strict-decrease lemma** (mirrors
 `modalExpMeasure_step_lt`'s branching case, `FmpMeasure.lean:2921-2937`): completes
 `intExpMeasure_step_lt`'s coverage of `intStepBranch`'s `.branchingResult` arm -- the two
-branching rules, `.pos, .or` (F-or) and `.neg, .and` (T-and), both producing a literal
-2-element list of singleton sub-branches directly in `intApplyRuleFull` (`Rules.lean:254,260`),
+branching rules, `.pos, .or` (T-or) and `.neg, .and` (F-and), both producing a literal
+2-element list of singleton sub-branches directly in `intApplyRuleFull`
+(`Rules.lean:261-262,257-258`),
 with the next-world counter unchanged (`nw' = nw`, since branching never creates a world).
 Applies `intWork_drop` twice (once per sub-branch, each `hsub` trivial since every sub-branch is
 `bh` extended by exactly one new formula) and combines via `pow3_two_add_one_le`
@@ -5350,7 +5356,7 @@ arm of `intExpandBranches.go`'s functional induction. -/
 /-- Per-branch fuel sufficiency threaded across the pending/done worklists: every
 branch's remaining work (`intWork`, over the enlarged universe `intUniverseExt φ0`)
 strictly undercuts its own fuel budget. Defined by simultaneous recursion over the three
-parallel lists (mirrors `IAllConsistent`, `Scheme.lean:1211`), so a length mismatch is
+parallel lists (mirrors `IAllConsistent`, `Scheme.lean:2113`), so a length mismatch is
 automatically `False`. -/
 private def IAllFuel (φ0 : Proposition Atom) (bs : List (IBranch Atom))
     (es : List (List (ISF Atom))) (fuels : List Nat) : Prop :=
@@ -5706,8 +5712,9 @@ def minimalTableau (φ : Proposition Atom) : IntTableauResult Atom :=
   intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]] [intFuelExt φ]
     isMinimallyClosed
 
-/-! ## Persistence-loop fuel-sufficiency (`sat_timp` STOP-gate gap 1 continuation,
-`Scheme.lean:485-533`)
+/-! ## Persistence-loop fuel-sufficiency (`sat_timp` STOP-gate gap 1 continuation) -/
+
+/-!
 
 Closes GAP 1 of the `sat_timp` STOP-gate above: a genuine termination bound for
 `applyPersistenceFixpoint`'s OWN recursion, distinct from `intExpMeasure_step_lt` (which bounds
@@ -7841,7 +7848,7 @@ private lemma IAllReuseContain_map_const {branches' : List (IBranch Atom)}
 edge list `augH` is either a raw parent-child edge (already in `edgesH`, from world creation) or
 a recorded loop-back edge (already in `lbH`, from the reuse site) -- `augH` only ever grows by
 ONE of these two append operations, in lockstep with `edgesH`/`lbH`'s own growth, never
-independently (`IExpandedAccessConsistent`'s docstring, Scheme.lean:1078-1089, records both
+independently (`IExpandedAccessConsistent`'s docstring, Scheme.lean:1242, records both
 append sites). This is the bridge that lets augmented-frame reachability decompose into a chain
 of raw-edge hops (`IPosPersistRaw`) and loop-back hops (`IReuseContain`), per report §5.3. -/
 private def IAugMembers (augH edgesH lbH : IEdges) : Prop :=
@@ -9726,7 +9733,7 @@ raw-frame witness.** Constructs `edges` as `rawEdges` -- the tree-only parent-ch
 `_rawEdges` -- and proves upward-closure of positive `χ`-membership in `b` along
 `intAccessPreorder rawEdges`, for ANY `χ : Proposition Atom`, not just `χ := .atom p`. Needs no
 fact about the tableau algorithm beyond `IPosPersistRaw` (already sorry-free, `χ`-general at
-`Scheme.lean:6701-6704`) plus `IWorldsPlanted` (the branch-entry-existence corollary of
+`Scheme.lean:7293`) plus `IWorldsPlanted` (the branch-entry-existence corollary of
 `IWorldHist`'s (H3) clause, derived above) chained over one `Relation.ReflTransGen` step at a
 time. Instantiating `χ` at `.atom p` recovers `intExtractValuation` upward-closure; instantiating
 it at `HasBot.bot` gives `minBranchBotForces` upward-closure at the SAME `edges` witness -- see

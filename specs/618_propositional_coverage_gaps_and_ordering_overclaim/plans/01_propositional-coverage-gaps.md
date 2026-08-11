@@ -375,7 +375,7 @@ the phase into a proof effort.
 
 ---
 
-### Phase 6: C1a -- generalise cut elimination from IPL to arbitrary T [NOT STARTED]
+### Phase 6: C1a -- generalise cut elimination from IPL to arbitrary T [COMPLETED]
 
 **Goal**: `LJ/CutElimination.lean`'s seven `ljCutAdm*` declarations plus `LJCutIH` carry a
 `{T : Theory Atom}` binder, with `LJProof.cutElim`'s current signature preserved by an `IPL`

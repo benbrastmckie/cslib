@@ -76,9 +76,11 @@ The ten connective/structural rules (`ax`, `andL`, `andR`, `orL`, `orR1`, `orR2`
 constructible only when the theory `T` validates ex falso quodlibet. Hence `SeqProof MPL`
 (`MPL = ∅` admits no `IsIntuitionistic` instance) is the `botL`-free minimal calculus, while
 `SeqProof IPL` (= `LJProof`) recovers full intuitionistic LJ. Structural metatheory that is
-already generic over `T`: `height`, `mono`, `CutFree`, `IsBotRuleFree`, `SeqProof.formulas`. Cut
-elimination and the subformula property, by contrast, are currently proved concretely at `IPL`
-only (`LJProof.cutElim`, `LJProof.subformula_property`), not generically over `T`.
+already generic over `T`: `height`, `mono`, `CutFree`, `CutFreeSeqProof`, `IsBotRuleFree`,
+`SeqProof.formulas`, and now also cut elimination (`ljCutAdmissibility`, re-exported at `IPL`
+with `LJProof.cutElim`'s signature unchanged, per `SequentCalculus/LJ/CutElimination.lean`). The
+subformula property, by contrast, is currently proved concretely at `IPL` only
+(`LJProof.subformula_property`), not yet generically over `T`.
 
 Constructors:
 - `ax`: identity axiom — `A` appears in the antecedent.
@@ -254,9 +256,13 @@ def SeqProof.IsBotRuleFree {T : Theory Atom} : ∀ {seq : @Sequent Atom}, SeqPro
 @[reducible] def LJCutFree {seq : @Sequent Atom} (d : LJProof seq) : Prop :=
   SeqProof.CutFree d
 
-/-- An `LJProof` that is cut-free. -/
-def CutFreeLJProof (seq : @Sequent Atom) : Type u :=
-  { d : LJProof seq // LJCutFree d }
+/-- A `SeqProof T` that is cut-free, generic over the theory `T`. -/
+def CutFreeSeqProof (T : Theory Atom) (seq : @Sequent Atom) : Type u :=
+  { d : SeqProof T seq // SeqProof.CutFree d }
+
+/-- An `LJProof` that is cut-free. Re-export of `CutFreeSeqProof` at `IPL`. -/
+@[reducible] def CutFreeLJProof (seq : @Sequent Atom) : Type u :=
+  CutFreeSeqProof IPL seq
 
 /-- LJ inference system instance for `@Sequent Atom`. -/
 instance : InferenceSystem InferenceSystem.Default (@Sequent (Atom := Atom)) where

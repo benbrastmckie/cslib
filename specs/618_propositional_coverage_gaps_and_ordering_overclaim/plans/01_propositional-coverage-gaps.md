@@ -208,7 +208,7 @@ longer reads as reported, record the discrepancy rather than editing blind.
 
 ---
 
-### Phase 2: B1 -- LJ cut-free completeness [NOT STARTED]
+### Phase 2: B1 -- LJ cut-free completeness [COMPLETED]
 
 **Goal**: `SequentCalculus/LJ/CutFreeCompleteness.lean` exists with the LJ counterparts of
 `lkCutFreeCompleteness` / `lkCutFreeIffTautology`, closing the LK/LJ asymmetry.

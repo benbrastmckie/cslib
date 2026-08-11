@@ -11,7 +11,7 @@ next_project_number: 626
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -23,8 +23,7 @@ next_project_number: 626
 
 ### Propositional Logic
 
-614 [PLANNED] — Give `ctxToImp` a computable definition so the four context-based
-615 [IMPLEMENTING] — Add algebraic semantic validity as a further equivalent node in t
+614 [IMPLEMENTING] — Give `ctxToImp` a computable definition so the four context-based
 618 [PLANNED] — Close the remaining coverage gaps in the propositional metatheory
 619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
@@ -664,7 +663,7 @@ that as a convention; do not perform a repo-wide citation-style migration under 
 ---
 
 ### 615. Algebraic node proof system tfae
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -693,7 +692,7 @@ VERIFY: `lake build` green; zero new sorries; zero new axioms beyond [propext, C
 ---
 
 ### 614. Computable ctxtoimp context decidability
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

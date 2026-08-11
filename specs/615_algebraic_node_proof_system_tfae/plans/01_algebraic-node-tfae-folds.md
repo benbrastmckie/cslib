@@ -2,7 +2,7 @@
 
 - **Task**: 615 - Add algebraic semantic validity as a further equivalent node in the
   propositional proof-system TFAE families
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md`
@@ -193,7 +193,7 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Full CSLib CI gate and zero-debt verification [PARTIAL]
+### Phase 3: Full CSLib CI gate and zero-debt verification [COMPLETED]
 
 - **Goal:** The whole repository is green under the CSLib CI sequence, with no new sorries, no
   new axioms, and no change to the existing TFAE statements.
@@ -205,7 +205,11 @@ Phases within the same wave can execute in parallel.
   - [x] `lake lint` — zero warnings on `ProofSystemEquivalence.lean`; no `docBlame`, `defLemma`,
         `defsWithUnderscore`, or `unusedSectionVars` fired. No `omit` needed, as predicted.
   - [x] `lake exe lint-style` — exit 0.
-  - [ ] `lake test` *(deviation: blocked — see below)*.
+  - [x] `lake test` — exits 0. The prior blocker (missing `#grind_lint skip` entries for
+        `linear_since`/`linear_until` `sizeOf_spec` lemmas in `CslibTests/GrindLint.lean`,
+        introduced by concurrently-landed sibling-task commits) was resolved out-of-territory by
+        the owning task; re-run confirms `lake test` and
+        `lake build CslibTests.GrindLint` (3325/3325 jobs) both pass green with no failures.
   - [x] `lake shake --add-public --keep-implied --keep-prefix` — no suggestion touching
         `ProofSystemEquivalence.lean` or the new `HilbertCompleteness` import.
   - [x] Confirm zero sorries: `grep -rn 'sorry' .../ProofSystemEquivalence.lean` returns nothing.
@@ -218,26 +222,17 @@ Phases within the same wave can execute in parallel.
   - [x] `lake exe mk_all --module` — confirmed not required; `Cslib.lean:566` already lists
         `ProofSystemEquivalence`.
 
-**BLOCKER (Phase 3, `lake test` step only)**: `lake test` fails on `CslibTests.GrindLint`, with
-a `#guard_msgs` mismatch reporting new `grind` instantiations from
+**BLOCKER RESOLVED (Phase 3, `lake test` step)**: `lake test` previously failed on
+`CslibTests.GrindLint`, with a `#guard_msgs` mismatch reporting new `grind` instantiations from
 `Cslib.Logic.Bimodal.Axiom.linear_since.sizeOf_spec`, `Cslib.Logic.Bimodal.Axiom.linear_until.sizeOf_spec`,
 `Cslib.Logic.Temporal.Axiom.linear_since.sizeOf_spec`, and
-`Cslib.Logic.Temporal.Axiom.linear_until.sizeOf_spec`. These four declarations live in
-`Cslib/Logics/Bimodal/**` and `Cslib/Logics/Temporal/**`, which this task's territory contract
-does not authorize editing (this implementer is scoped to
-`Cslib/Foundations/Logic/ProofSystem.lean` and
-`Cslib/Logics/Propositional/ProofSystemEquivalence.lean` only). Root-caused by `git log`: the
-axioms were introduced by concurrently-landed sibling-task commits ("pre-land Bimodal bridge
-lemmas", "pre-land Temporal bridge lemma") that added new `grind`-eligible declarations without
-a corresponding `#grind_lint skip` entry in `CslibTests/GrindLint.lean` — unrelated to this
-task's Propositional file. Re-ran `lake test` a second time after further sibling commits landed
-(`f086905d`) and the failure persisted identically, confirming it is not transient.
-**What is needed to unblock**: a `#grind_lint skip` entry added for the four flagged
-declarations (or their fix) in `CslibTests/GrindLint.lean`, which belongs to the sibling
-Bimodal/Temporal task's territory, not this one.
-**Prohibited workarounds**: not applicable — no `sorry`/vacuous placeholder was considered; this
-is a full-repo test-suite gate failure outside this task's edit scope, not a gap in this task's
-own proof content.
+`Cslib.Logic.Temporal.Axiom.linear_until.sizeOf_spec` — an out-of-territory regression introduced
+by concurrently-landed sibling-task commits ("pre-land Bimodal bridge lemmas", "pre-land Temporal
+bridge lemma") that added new `grind`-eligible declarations without a corresponding
+`#grind_lint skip` entry in `CslibTests/GrindLint.lean`. The owning sibling task has since added
+the four missing `#grind_lint skip` entries to `CslibTests/GrindLint.lean:93-96`. Re-verified:
+`lake build CslibTests.GrindLint` succeeds (3325/3325 jobs) and `lake test` exits 0 with no
+failures. All seven CSLib CI steps are now green.
 - **Timing:** 30 minutes (dominated by full build and test)
 - **Depends on:** 2
 - **Verification Tier:** full
@@ -250,8 +245,8 @@ own proof content.
   - None expected; only lint-driven touch-ups to
     `Cslib/Logics/Propositional/ProofSystemEquivalence.lean` if a linter fires
 - **Verification:**
-  - Six of seven CI steps exit zero; `lake test` fails on `CslibTests.GrindLint`, root-caused to
-    concurrently-landed sibling-task commits outside this task's territory (see BLOCKER above).
+  - All seven CI steps exit zero, including `lake test` (re-verified after the sibling task
+    added the missing `#grind_lint skip` entries — see BLOCKER RESOLVED above).
   - Zero sorries, axioms exactly `[propext, Classical.choice, Quot.sound]`.
   - `git diff` confined to the new import, `universe u`, `section WithAlgebra`, and docstrings.
 
@@ -264,8 +259,8 @@ own proof content.
 - [x] `lake lint` green — no new `docBlame`, `defLemma`, `defsWithUnderscore`, or
       `unusedSectionVars` warnings.
 - [x] `lake exe lint-style` green.
-- [ ] `lake test` green *(blocked by `CslibTests.GrindLint` failure outside this task's territory
-      — see Phase 3 BLOCKER)*.
+- [x] `lake test` green (re-verified after the sibling task added the missing `#grind_lint skip`
+      entries — see Phase 3 BLOCKER RESOLVED).
 - [x] `lake shake --add-public --keep-implied --keep-prefix` reports no removal of the new import.
 - [x] Zero new sorries.
 - [x] `#print axioms` on the three new theorems yields `[propext, Classical.choice, Quot.sound]`.

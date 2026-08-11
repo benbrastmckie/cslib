@@ -1005,13 +1005,13 @@
     {
       "project_number": 614,
       "project_name": "computable_ctxtoimp_context_decidability",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "medium",
       "description": "Give `ctxToImp` a computable definition so the four context-based `Decidable` instances for the propositional sequent calculi stop being `noncomputable`.\n\nSURFACED BY: the 2026-08-10 propositional review (specs/reviews/review-2026-08-10.md, finding M2). User decision recorded in that review: computable context-based decision procedures ARE in scope for \"propositional logic complete in full\", so this is a genuine remaining gate, not an accepted limitation.\n\nTHE DEFECT: `ctxToImp` (Cslib/Logics/Propositional/SequentCalculus/LJ/Decidability.lean:82) is declared `noncomputable` solely because it uses `Finset.toList`. There is NO mathematical obstacle. That single incidental noncomputability propagates to all four context-based instances:\n- `instDecidableLJDerivable` (LJ/Decidability.lean:197)\n- `instDecidableDerivableInIPL` (LJ/Decidability.lean:218)\n- `instDecidableLKDerivable` (LK/Decidability.lean:174)\n- `instDecidableDerivableInCPL` (LK/Decidability.lean:190)\n\nThe docstring at LJ/Decidability.lean:190 states the cause outright: \"The instance is `noncomputable` because `ctxToImp` uses `Finset.toList`.\"\n\nIMPACT: the library can COMPUTE whether a closed formula is a theorem (the tableau procedures `intuitionisticTableau`/`minimalTableau`/`classicalTableau` are genuinely computational and sorry-free), but cannot compute whether a non-empty context proves a formula.\n\nAPPROACH (not prescriptive): give `ctxToImp` a deterministic computable fold — e.g. over a `List`/`Multiset` with a canonical order, or by requiring `[LinearOrder Atom]` for a canonical sort — then drop `noncomputable` from `ctxToImp` and all four instances. Preserve the existing universe-bridging via `ivalid_universe_invariant`/`mvalid_universe_invariant`; those are load-bearing and unrelated to this fix.\n\nVERIFY: `lake build` green; the four instances build without `noncomputable`; add a `#guard_msgs`-protected computation in CslibTests/ demonstrating a non-empty-context decision actually evaluates. Watch for the two known `unusedDecidableInType` lint warnings (task 613) which are pre-existing in the same subtree and NOT this task's to fix.\n\nFOLLOW-ON: if this lands, the closed-context restriction on the tableau TFAE folds (ProofSystemEquivalence.lean:176-186) becomes revisitable; that is explicitly out of scope here.\n\n--- APPENDED 2026-08-10 (review finding M5: deeper root-cause analysis) ---\n\nTHE ROOT CAUSE IS DEEPER THAN \"uses Finset.toList\", AND THE FIX IS NOT FREE. `Multiset.toList` is itself `noncomputable def toList (s : Multiset a) := s.out` (.lake/packages/mathlib/Mathlib/Data/Multiset/Basic.lean:33, docstring: \"Produces a list of the elements in the multiset using choice\"). Picking a list order for a `Finset` is a GENUINE CHOICE -- distinct orders give distinct (though interderivable) formulas. `Finset.fold` does NOT apply: it requires commutativity and associativity, and `imp` is neither. `Hashable` supplies no total order.\n\nTWO HONEST ROUTES, different costs -- pick deliberately and record the reasoning:\n  (1) Add `[LinearOrder Atom]` and use `Finset.sort`. Computable, but imposes a NEW HYPOTHESIS on the four public instances. Weigh against the fact that `instDecidableIValid`/`instDecidableMValid` currently need only `[DecidableEq Atom] [Hashable Atom]`.\n  (2) CHEAPEST REAL FIX: restate over `List` contexts. `listToImp` (LJ/Decidability.lean:72) and the list-level lemmas `ljListDeductionFwd`:91 / `ljListDeductionBwd`:130 (LK counterparts :65/:110) are ALREADY plain computable defs. Only the `ctxToImp`-wrapped :112/:170 and the four instances inherit the taint. This route adds no typeclass hypothesis.\n\nSEPARATELY VERIFIED AS HARMLESS -- DO NOT \"FIX\": `decidableDerivableIntPropAxiomFMP` (Metalogic/IntDecidability.lean:489) and `decidableDerivableMinPropAxiomFMP` (MinDecidability.lean:445) are noncomputable for a DIFFERENT and deeper reason -- they depend on `instFintypeIntFinWorld`:153 / `instFintypeMinFinWorld`:155, built via `Fintype.ofInjective`, itself a `noncomputable def` (Mathlib/Data/Fintype/OfMap.lean:67; inverting an injection needs choice). Not a toList artifact and not removable by reordering. They are deliberately plain `def`s and NOT registered instances -- IntDecidability.lean:484-487 and MinDecidability.lean:441 both state the canonical registered instance is the computable tableau one. Leave them alone.\n\nCONCLUSION: every REGISTERED `Decidable` instance in the subsystem is computable except the four LK/LJ context-based ones. That is exactly this task's scope and the only set worth acting on.\n\nCOORDINATE: the LM-decidability item (G4) in the coverage-gaps task will want to build on whatever route lands here. If this task lands first, that one should inherit the computable route rather than the taint.",
       "created": "2026-08-10T17:03:05Z",
-      "last_updated": "2026-08-11T00:31:32Z",
+      "last_updated": "2026-08-11T01:19:44Z",
       "session_id": "sess_1786405794_f0204e_614",
       "artifacts": [
         {
@@ -1029,13 +1029,13 @@
     {
       "project_number": 615,
       "project_name": "algebraic_node_proof_system_tfae",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "low",
       "description": "Add algebraic semantic validity as a further equivalent node in the propositional proof-system TFAE families.\n\nSURFACED BY: the 2026-08-10 propositional review (specs/reviews/review-2026-08-10.md, finding L1). Discoverability only — no mathematical content is missing; the required completeness results already exist.\n\nCURRENT STATE: `Cslib/Logics/Propositional/ProofSystemEquivalence.lean` ties together Hilbert, natural deduction, sequent calculus and tableau:\n- 3-way, context-based: `cplProofSystemsTfae` (:76), `iplProofSystemsTfae` (:108), `mplProofSystemsTfae` (:141)\n- 3-way, closed: `cplProofSystemsTfaeClosed` (:90), `iplProofSystemsTfaeClosed` (:122), `mplProofSystemsTfaeClosed` (:155)\n- 4-way with tableau, closed only: `cplProofSystemsWithTableauTfae` (:203), `iplProofSystemsWithTableauTfae` (:229), `mplProofSystemsWithTableauTfae` (:252)\n\nTHE GAP: the substantial algebraic-semantics development under `Cslib/Logics/Propositional/Semantics/Algebra/` (Brouwerian algebras, Hilbert algebras, the Lindenbaum construction, algebraic completeness) is NOT wired in as a further node, even though `HilbertAlgCompleteness.lean` and `BrouwerianCompleteness.lean` prove what is needed. A reader cannot see from one place that algebraic validity is equivalent to the syntactic notions.\n\nWORK: add the algebraic node to the appropriate TFAE families, composing the existing algebraic completeness/soundness results. Follow the pattern the tableau folds already established — including the `Iff.trans`-not-`rw` gotcha documented at :229-243 for any step that crosses a universe-invariance bridge.\n\nSCOPE DISCIPLINE: mirror the existing typeclass hygiene. The tableau section deliberately scopes `[Hashable Atom]` to its own section (see the module docstring at :176-186) so the six pure proof-theoretic equivalences are not forced to carry it; do the same for whatever algebraic typeclass requirements the new node introduces, rather than widening the existing six.\n\nDECIDE AND RECORD: whether the algebraic node belongs on the context-based families, the closed families, or both — and say why in the module docstring, so the shape reads as a decision rather than an omission.\n\nVERIFY: `lake build` green; zero new sorries; zero new axioms beyond [propext, Classical.choice, Quot.sound]; no change to the statements of the nine existing TFAE theorems.",
       "created": "2026-08-10T17:03:32Z",
-      "last_updated": "2026-08-11T00:35:37Z",
+      "last_updated": "2026-08-11T01:22:11Z",
       "session_id": "sess_1786405794_f0204e_615",
       "artifacts": [
         {
@@ -1048,7 +1048,8 @@
           "type": "plan",
           "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Added three new four-way closed TFAE theorems (cplProofSystemsWithAlgebraTfae, iplProofSystemsWithAlgebraTfae, mplProofSystemsWithAlgebraTfae) to Cslib/Logics/Propositional/ProofSystemEquivalence.lean, folding algebraic semantic validity (BAValid, HAValid, GHAValid) onto the existing closed three-way TFAE families for CPL, IPL, and MPL, via a single new public import and one new section. The full CSLib CI pipeline is green end-to-end: lake build (3325/3325), checkInitImports, lake lint, lint-style, lake test, shake, and mk_all all pass. Zero new sorries, axioms unchanged at [propext, Classical.choice, Quot.sound], and the nine pre-existing TFAE theorem statements are byte-identical to their pre-change form. The one blocker from the prior dispatch (lake test failing on CslibTests.GrindLint due to an out-of-territory sibling-task regression in Cslib/Logics/Bimodal and Cslib/Logics/Temporal) was resolved by the owning sibling task adding four missing #grind_lint skip entries; re-verified green."
     },
     {
       "project_number": 616,
@@ -1080,7 +1081,8 @@
           "type": "summary",
           "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Repaired the stale and self-contradictory documentation layer across the six in-scope propositional tableau/metalogic files (Tableau/Intuitionistic/Scheme.lean, Expansion.lean, Tableau/Minimal/Completeness.lean, Minimal/DecisionProcedure.lean, Metalogic/IntDecidability.lean, MinDecidability.lean). Retargeted the Part 1 IFimpAccess-refutation witness citation to BetaSplitRefutation.lean while preserving the machine-verified frame-adequacy table and REFUTED verdict; re-tensed stale present-tense claims as pre-repair historical; corrected false dead-declaration attributions; fixed roughly 30 stale line-number citations plus four siblings found beyond the task description; fixed an 11th-to-7th conjunct numbering contradiction and a T-or/F-and label swap; removed a dangling task-number citation per the no-task-references rule. Phase 7 (FmpMeasure.lean citations) closed as a reasoned exclusion, documented in the plan. Documentation-only: git diff contains zero declaration-keyword lines, full lake build green (3325 jobs), lake test passes, CslibTests/ untouched, zero sorries and no new axioms."
     },
     {
       "project_number": 617,
@@ -1108,7 +1110,8 @@
           "type": "plan",
           "summary": ""
         }
-      ]
+      ],
+      "completion_summary": "Fixed a critical instance-priority collision where library consumers importing Cslib received a Decidable (Tautology φ) instance that cannot run in the kernel, shadowing the one that can, with seven existing tests passing only by accident of import order. Applied priority := 100 to instDecidableTautologyTableau in Tableau/Classical/DecisionProcedure.lean so the kernel-reducible instDecidableTautology wins resolution, and added a #guard_msgs in #synth pin in CslibTests/Propositional.lean locking that resolution so the collision cannot silently regress. Extended the instance docstring and softened the module header to document the deliberate both-instances-in-scope configuration. One planned docstring edit in Semantics/Bool.lean was skipped and recorded as a reasoned exclusion. lake build, checkInitImports, and lint-style all exit 0 with zero new findings; zero sorries, no new axioms."
     },
     {
       "project_number": 618,

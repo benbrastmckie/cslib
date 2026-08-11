@@ -196,7 +196,7 @@ proceeding.
 
 ---
 
-### Phase 2: Make the LK instances computable [NOT STARTED]
+### Phase 2: Make the LK instances computable [COMPLETED]
 
 **Goal**: `Cslib/Logics/Propositional/SequentCalculus/LK/Decidability.lean` builds with
 `instDecidableLKDerivable` and `instDecidableDerivableInCPL` carrying no `noncomputable` marker,

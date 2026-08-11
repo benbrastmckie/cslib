@@ -21,7 +21,9 @@ The proof mirrors `LJ/Decidability.lean`, using the deduction theorem for LK tog
 with the existing classical tautology decision procedure. Concretely:
 
 1. Reuse `listToImp` and `ctxToImp` from `LJ.Decidability` to encode a context as a
-   prefix of implications: `ctxToImp Γ A = A₁ → A₂ → ... → Aₙ → A`.
+   prefix of implications: `ctxToImp Γ A = A₁ → A₂ → ... → Aₙ → A`. As in `LJ.Decidability`,
+   `ctxToImp` is used only in the *statements* of the deduction-theorem lemmas
+   (`lkProofDeductionFwd`/`lkProofDeductionBwd`) and stays `noncomputable`, inherently so.
 
 2. Prove the **deduction equivalence**:
    `Nonempty (LKProof (Γ ⊢ₛ {A})) ↔ Nonempty (LKProof (∅ ⊢ₛ {ctxToImp Γ A}))`
@@ -30,12 +32,20 @@ with the existing classical tautology decision procedure. Concretely:
 3. Combine with `lk_iff_tautology` to reduce to `Tautology (ctxToImp Γ A)`, which is
    decidable via `instDecidableTautologyTableau`.
 
+4. Make the resulting `Decidable` **instance** computable the same way as `LJ.Decidability`:
+   `lkListDerivableDecidable` proves the equivalence at the list level (computable), and
+   `instDecidableLKDerivable` eliminates `Γ`'s underlying `Multiset` into it via
+   `Quotient.recOnSubsingleton`. Unlike LJ, no universe bridge is needed here --
+   `instDecidableTautologyTableau` is not universe-pinned.
+
 ## Main Results
 
 - `lkListDeductionFwd`: Forward deduction lemma for lists.
 - `lkListDeductionBwd`: Backward deduction lemma for lists.
 - `lkProofDeductionFwd`: Forward direction of the LK deduction theorem.
 - `lkProofDeductionBwd`: Backward direction of the LK deduction theorem.
+- `lkListDerivableDecidable`: List-level decidability helper, computable, used to build
+  `instDecidableLKDerivable` via `Quotient.recOnSubsingleton`.
 - `instDecidableLKDerivable`: `Decidable (Nonempty (LKProof (Γ ⊢ₛ {A})))`.
 - `instDecidableDerivableInCPL`:
   `Decidable (DerivableIn (AxiomTheory PropositionalAxiom) (Γ ⊢ A))`.
@@ -88,7 +98,9 @@ def lkListDeductionFwd :
 A proof of `Γ ⊢ₛ {A}` gives a proof of `∅ ⊢ₛ {ctxToImp Γ A}` by repeatedly introducing
 implications via `impR` to discharge all context assumptions.
 
-This is `noncomputable` because `ctxToImp` uses `Finset.toList`. -/
+This is `noncomputable` because it is stated in terms of `ctxToImp`, whose noncomputability
+is inherent (see `ctxToImp`'s docstring in `LJ.Decidability`) rather than a defect. No decision
+procedure depends on this declaration. -/
 noncomputable def lkProofDeductionFwd {Γ : Ctx Atom} {A : Proposition Atom}
     (d : LKProof (Γ ⊢ₛ {A})) : LKProof (∅ ⊢ₛ {ctxToImp Γ A}) := by
   unfold ctxToImp
@@ -149,7 +161,9 @@ def lkListDeductionBwd :
 A proof of `∅ ⊢ₛ {ctxToImp Γ A}` gives a proof of `Γ ⊢ₛ {A}` by repeatedly eliminating
 implications from the antecedent using `impL` steps.
 
-This is `noncomputable` because `ctxToImp` uses `Finset.toList`. -/
+This is `noncomputable` because it is stated in terms of `ctxToImp`, whose noncomputability
+is inherent (see `ctxToImp`'s docstring in `LJ.Decidability`) rather than a defect. No decision
+procedure depends on this declaration. -/
 noncomputable def lkProofDeductionBwd {Γ : Ctx Atom} {A : Proposition Atom}
     (d : LKProof (∅ ⊢ₛ {ctxToImp Γ A})) : LKProof (Γ ⊢ₛ {A}) := by
   unfold ctxToImp at d
@@ -159,35 +173,59 @@ noncomputable def lkProofDeductionBwd {Γ : Ctx Atom} {A : Proposition Atom}
 
 /-! ## Decidability Instances -/
 
+/-- List-level decidability of LK derivability from a `Nodup` list context.
+
+Given a `Nodup` list `l` and the proof `h` that its coercion to a `Multiset` is `Nodup`, decides
+`Nonempty (LKProof ((⟨↑l, h⟩ : Finset (Proposition Atom)) ⊢ₛ {A}))` by routing through
+`Tautology (listToImp l A)`, exactly as `instDecidableLKDerivable` used to route through
+`Tautology (ctxToImp Γ A)` -- but `listToImp` applied to a concrete list needs no choice of
+representative, so this helper is computable. `instDecidableLKDerivable` builds on this helper
+via `Quotient.recOnSubsingleton`, applying it to an arbitrary representative of `Γ`'s underlying
+`Multiset`; the resulting *decision* is representative-independent because `Decidable p` is a
+`Subsingleton`, even though `listToImp l A` itself is not invariant under permuting `l`.
+
+Unlike the LJ helper, no universe bridge is needed: `instDecidableTautologyTableau` is not
+universe-pinned, matching this construction. -/
+def lkListDerivableDecidable (l : List (Proposition Atom))
+    (h : (↑l : Multiset (Proposition Atom)).Nodup) (A : Proposition Atom) :
+    Decidable (Nonempty (LKProof ((⟨↑l, h⟩ : Finset (Proposition Atom)) ⊢ₛ {A}))) :=
+  decidable_of_iff (Tautology (listToImp l A)) <| by
+    have hset : (⟨(↑l : Multiset (Proposition Atom)), h⟩ : Finset (Proposition Atom))
+        = l.toFinset := List.toFinset_eq h
+    rw [hset]
+    constructor
+    · -- Tautology (listToImp l A) → Nonempty (LKProof (l.toFinset ⊢ₛ {A}))
+      intro hv
+      obtain ⟨d⟩ := lk_iff_tautology.mp hv
+      have hd := lkListDeductionBwd l ∅ A d
+      rw [Finset.union_empty] at hd
+      exact ⟨hd⟩
+    · -- Nonempty (LKProof (l.toFinset ⊢ₛ {A})) → Tautology (listToImp l A)
+      rintro ⟨d⟩
+      refine lk_iff_tautology.mpr ⟨lkListDeductionFwd l ∅ A ?_⟩
+      rw [Finset.union_empty]
+      exact d
+
 /-- `Nonempty (LKProof (Γ ⊢ₛ {A}))` is decidable for finite contexts over decidable,
 hashable atoms.
 
-The proof reduces LK derivability to classical tautology via the deduction theorem and
-`lk_iff_tautology`:
-1. `Nonempty (LKProof (Γ ⊢ₛ {A})) ↔ Nonempty (LKProof (∅ ⊢ₛ {ctxToImp Γ A}))` by the
-   deduction theorem.
-2. `Nonempty (LKProof (∅ ⊢ₛ {ctxToImp Γ A})) ↔ Tautology (ctxToImp Γ A)` by
-   `lk_iff_tautology`.
-3. `Tautology (ctxToImp Γ A)` is decidable by `instDecidableTautologyTableau`.
-
-The instance is `noncomputable` because `ctxToImp` uses `Finset.toList`. -/
-noncomputable instance instDecidableLKDerivable {Γ : Ctx Atom} {A : Proposition Atom} :
+The instance eliminates `Γ`'s underlying `Multiset` via `Quotient.recOnSubsingleton` into
+`lkListDerivableDecidable`, applied to an arbitrary list representative `l` of `Γ.val` with
+`Γ.nodup` as the `Nodup` witness. Since `Decidable p` is a `Subsingleton`, the elimination is
+sound, and because `lkListDerivableDecidable` is itself computable, so is this instance. The
+reconstruction `⟨Γ.val, Γ.nodup⟩` is definitionally `Γ` by structure eta, so no cast is needed
+at this level. -/
+instance instDecidableLKDerivable {Γ : Ctx Atom} {A : Proposition Atom} :
     Decidable (Nonempty (LKProof (Γ ⊢ₛ {A}))) :=
-  decidable_of_iff (Tautology (ctxToImp Γ A)) <| by
-    constructor
-    · -- Tautology (ctxToImp Γ A) → Nonempty (LKProof (Γ ⊢ₛ {A}))
-      intro hv
-      obtain ⟨d⟩ := lk_iff_tautology.mp hv
-      exact ⟨lkProofDeductionBwd d⟩
-    · -- Nonempty (LKProof (Γ ⊢ₛ {A})) → Tautology (ctxToImp Γ A)
-      intro ⟨d⟩
-      exact lk_iff_tautology.mpr ⟨lkProofDeductionFwd d⟩
+  Quotient.recOnSubsingleton (motive := fun (s : Multiset (Proposition Atom)) =>
+      (h : s.Nodup) → Decidable (Nonempty (LKProof ((⟨s, h⟩ : Finset (Proposition Atom)) ⊢ₛ {A}))))
+    Γ.val (fun l h => lkListDerivableDecidable l h A) Γ.nodup
 
 /-- `DerivableIn (AxiomTheory PropositionalAxiom) (Γ ⊢ A)` is decidable for finite contexts
 over decidable, hashable atoms.
 
 Obtained by combining `instDecidableLKDerivable` with the ND–LK bridge `nd_iff_lk`. -/
-noncomputable instance instDecidableDerivableInCPL {Γ : Ctx Atom} {A : Proposition Atom} :
+instance instDecidableDerivableInCPL {Γ : Ctx Atom} {A : Proposition Atom} :
     Decidable (DerivableIn (AxiomTheory (@PropositionalAxiom Atom) : Theory Atom) (Γ ⊢ A)) :=
   decidable_of_iff (Nonempty (LKProof (Γ ⊢ₛ {A}))) nd_iff_lk.symm
 

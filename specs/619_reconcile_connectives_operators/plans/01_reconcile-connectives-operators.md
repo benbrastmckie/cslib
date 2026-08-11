@@ -532,7 +532,7 @@ number, after the first edit in each file.
 
 ---
 
-### Phase 9: Rename AxiomDia identifiers to AxiomDiamond [NOT STARTED]
+### Phase 9: Rename AxiomDia identifiers to AxiomDiamond [IN PROGRESS]
 
 **Goal**: Remove the remaining `Dia`-flavoured fork-local naming so it does not contradict the
 adopted `HasDiamond` name. Mechanical, semantics-free, and deliberately isolated so it can be

@@ -1,7 +1,7 @@
 # Implementation Plan: Rebase PR #648 onto upstream/main and clear the stale blocking review
 
 - **Task**: 620 - Rebase PR #648 onto current upstream and clear the stale blocking review
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 7.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md`
@@ -130,7 +130,7 @@ critical path.
 
 ---
 
-### Phase 1: Pre-flight verification and isolated workspace [NOT STARTED]
+### Phase 1: Pre-flight verification and isolated workspace [IN PROGRESS]
 
 **Goal**: Confirm the research topology still holds against live remotes, and create a rebase
 workspace that structurally cannot involve this fork's `main`.

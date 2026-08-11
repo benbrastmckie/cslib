@@ -877,7 +877,7 @@
     {
       "project_number": 619,
       "project_name": "reconcile_connectives_operators",
-      "status": "blocked",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
@@ -890,7 +890,7 @@
         "Cslib/Foundations/Logic/Connectives.lean"
       ],
       "created": "2026-08-10T18:20:00Z",
-      "last_updated": "2026-08-11T15:27:59Z",
+      "last_updated": "2026-08-11T20:45:34Z",
       "session_id": "sess_1786415417_7d8088_619",
       "artifacts": [
         {
@@ -904,12 +904,12 @@
           "summary": ""
         }
       ],
-      "blockers": "Phase 8 introduces a kernel-defeq non-termination in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean (lemma intExpandBranches_openBranch_sat, Scheme.lean:8327). Work is preserved on branch task-619-phase8-wip (commit 1e88ad3e), NOT merged to main. Blocked pending task 626."
+      "blockers": ""
     },
     {
       "project_number": 620,
       "project_name": "rebase_pr648_clear_review",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
@@ -923,8 +923,8 @@
         "lake-manifest.json"
       ],
       "created": "2026-08-10T18:20:00Z",
-      "last_updated": "2026-08-11T00:32:05Z",
-      "session_id": "sess_1786405794_f0204e_620",
+      "last_updated": "2026-08-11T20:45:57Z",
+      "session_id": "sess_1786481046_ef9c64",
       "artifacts": [
         {
           "path": "specs/620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md",

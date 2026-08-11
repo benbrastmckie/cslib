@@ -1,0 +1,35 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Verified the rebase surface for PR #648 empirically: git merge-tree shows exactly two conflicted files (Propositional/Defs.lean semantic, references.bib trivial); both NaturalDeduction files merge clean and toolchain/manifest are inherited with no conflict. Three task-description claims were corrected, most importantly that the PR branch has ALREADY reconciled IsClassical to the inference-system shape (the theory-membership drift is on this fork's main, a separate 117-file line that must not touch the rebase). Blast radius is provably nil outside the three Propositional files. Requires zero new typeclasses: upstream Operators.lean plus Mathlib Bot/Top cover everything.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [
+    "specs/620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md",
+    "specs/620_rebase_pr648_clear_review/.orchestrator-handoff.json",
+    "specs/620_rebase_pr648_clear_review/.return-meta.json"
+  ],
+  "decisions_made": [
+    "Rebase source MUST be origin/feat/propositional-v2 against upstream/main; this fork's main must never be a merge, cherry-pick, or conflict-resolution source (highest-risk failure mode: it would forfeit thomaskwaring's standing approval).",
+    "Defs.lean reconciliation registers HasAnd/HasOr/HasImp/HasIff/HasNot from upstream Operators.lean, ungated, plus an ungated not_eq @[grind =] bridge; Mathlib Bot/Top serve for bottom/top. No new typeclasses (HasBot/HasTop do not exist upstream).",
+    "Delete all five local scoped notation declarations in the PR's Defs.lean; keeping them alongside upstream's Cslib.Logic scoped notation would create genuine ambiguity, and upstream's infixr forms also fix the existing non-associativity defect.",
+    "Keep the PR's constructor order (atom, bot, imp, and, or) rather than reordering to minimize diff against upstream: reordering churns match arms across two files that otherwise apply untouched.",
+    "references.bib conflict resolves mechanically (both sides append at EOF, no duplicate keys verified).",
+    "Task file_scope is inaccurate: references.bib is a real conflict and is missing; lean-toolchain and lake-manifest.json are inherited, not edited."
+  ],
+  "dead_ends": [
+    "PR #753 (commit 3491c629) needs no absorption work: its InferenceSystem change is purely additive (docstring plus an app_delab delaborator); the class signature and the S-down-arrow notation are unchanged.",
+    "ctchou's 'coordinate with #587' is stale: #587 is a draft untouched since 2026-06-17 whose Connectives.lean was superseded by merged #607's Operators.lean.",
+    "ctchou's Semantics/Basic.lean vs Semantics/Bool.lean objection is moot against the current head: the PR ships no Semantics file at all."
+  ],
+  "phases_completed": 1,
+  "phases_total": 1,
+  "plan_markers_verified": false
+}

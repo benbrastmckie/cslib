@@ -9,22 +9,26 @@ module
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.Subformula
 
-/-! # Subformula Property for LJ (Corollary of Cut Elimination)
+/-! # Subformula Property (Corollary of Cut Elimination), Generic over `T`
 
-We prove the *subformula property* for intuitionistic propositional sequent calculus LJ:
-every formula appearing in a cut-free LJ proof is a subformula of some formula in the
-conclusion sequent. The general case follows from Gentzen's *Hauptsatz* (`LJProof.cutElim`).
+We prove the *subformula property*, generic over the theory `T`: every formula appearing in a
+cut-free `SeqProof T` proof is a subformula of some formula in the conclusion sequent. The
+general case follows from Gentzen's *Hauptsatz*. Both `LJProof.subformula_property` (at `IPL`)
+and `LM/SubformulaProperty.lean`'s instantiation (at `MPL`) specialise the generic results here.
 
 ## Main Definitions
 
-- `SeqProof.formulas`: The set of all formulas appearing in any sequent of an LJ proof tree.
+- `SeqProof.formulas`: The set of all formulas appearing in any sequent of a proof tree, generic
+  over `T`.
 
 ## Main Results
 
-- `CutFreeLJProof.subformula_property`: Every formula in a cut-free LJ proof of `Γ ⊢ C`
-  is a subformula of some formula in `insert C Γ`.
-- `LJProof.subformula_property`: Every LJ proof has a cut-free variant satisfying the
-  subformula property.
+- `CutFreeSeqProof.subformula_property`: Every formula in a cut-free `SeqProof T` proof of
+  `Γ ⊢ C` is a subformula of some formula in `insert C Γ`, generic over `T`.
+- `SeqProof.subformula_property`: Every `SeqProof T`-provable sequent has a cut-free variant
+  satisfying the subformula property, generic over `T`.
+- `CutFreeLJProof.subformula_property`, `LJProof.subformula_property`: re-exports of the above
+  at `IPL`, preserving their exact current signatures.
 
 ## References
 
@@ -73,14 +77,15 @@ private lemma ljLiftSub
 
 /-! ## Subformula Property for Cut-Free Proofs (Core) -/
 
-/-- Core subformula property: in any cut-free LJ proof, every formula in `d.formulas` is
-a subformula of some formula in the conclusion sequent `insert seq.2 seq.1`.
+/-- Core subformula property, generic over the theory `T`: in any cut-free `SeqProof T` proof,
+every formula in `d.formulas` is a subformula of some formula in the conclusion sequent
+`insert seq.2 seq.1`.
 
-This helper takes `(d : LJProof seq)` and `(hcf : LJCutFree d)` separately so that
+This helper takes `(d : SeqProof T seq)` and `(hcf : SeqProof.CutFree d)` separately so that
 `induction d with` can proceed without the Finset-quotient index problem.
-The `cut` case is vacuous since `LJCutFree` is `False` for `cut` steps. -/
-private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
-    (d : LJProof seq) (hcf : LJCutFree d) :
+The `cut` case is vacuous since `SeqProof.CutFree` is `False` for `cut` steps. -/
+private lemma seqProofCutFreeSubformulaProp {T : Theory Atom} {seq : @Sequent Atom}
+    (d : SeqProof T seq) (hcf : SeqProof.CutFree d) :
     ∀ B ∈ d.formulas, ∃ C ∈ insert seq.2 seq.1, B.IsSubformula C := by
   induction d with
   | ax A Γ hA =>
@@ -243,41 +248,107 @@ private lemma ljCutFreeSubformulaProp {seq : @Sequent Atom}
     · -- C' ∈ Γ ⊆ insert A Γ ⊆ insert C (insert A Γ).
       exact ljLiftSub (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hC')) hCS
   | cut _ _ _ =>
-    -- The cut case is vacuous: LJCutFree is False for cut steps.
+    -- The cut case is vacuous: SeqProof.CutFree is False for cut steps.
     exact absurd hcf id
 
 /-! ## Subformula Property for Cut-Free Proofs -/
 
-/-- The subformula property for cut-free LJ proofs: every formula appearing in any
-sequent of a cut-free proof of `Γ ⊢ C` is a subformula of some formula in `insert C Γ`.
+/-- The subformula property for cut-free proofs, generic over the theory `T`: every formula
+appearing in any sequent of a cut-free proof of `Γ ⊢ C` is a subformula of some formula in
+`insert C Γ`.
 
-Proved by structural induction on the proof tree using `ljCutFreeSubformulaProp`.
-The `cut` case is vacuous since `LJCutFree` is `False` for `cut` steps.
+Proved by structural induction on the proof tree using `seqProofCutFreeSubformulaProp`.
+The `cut` case is vacuous since `SeqProof.CutFree` is `False` for `cut` steps.
 
 This is the intuitionistic analogue of `CutFreeLKProof.subformula_property` and follows
 from Gentzen's *Hauptsatz* for LJ (Theorem 4.1.6 of [TroelstraSchwichtenberg2000]). -/
+theorem CutFreeSeqProof.subformula_property {T : Theory Atom}
+    {Γ : Ctx Atom} {C : Proposition Atom}
+    (d : CutFreeSeqProof T (Γ ⊢ C)) :
+    ∀ B ∈ d.val.formulas,
+      ∃ D ∈ insert C Γ, B.IsSubformula D :=
+  seqProofCutFreeSubformulaProp d.val d.property
+
+/-- The subformula property for cut-free LJ proofs. Re-export of
+`CutFreeSeqProof.subformula_property` at `IPL`, preserving the exact current signature. -/
 lemma CutFreeLJProof.subformula_property
     {Γ : Ctx Atom} {C : Proposition Atom}
     (d : CutFreeLJProof (Γ ⊢ C)) :
     ∀ B ∈ d.val.formulas,
       ∃ D ∈ insert C Γ, B.IsSubformula D :=
-  ljCutFreeSubformulaProp d.val d.property
+  CutFreeSeqProof.subformula_property d
 
-/-! ## Subformula Property for General LJ Proofs -/
+/-! ## Cut Elimination, Local to This File (Generic over `T`) -/
 
-/-- Subformula property for LJ: every sequent provable in LJ has a cut-free proof
-satisfying the subformula property. Every formula in the cut-free proof is a subformula
-of some formula in the conclusion sequent `insert seq.2 seq.1`.
+/-- Cut-free provability, generic over the theory `T`, local to this file. `LJProof.cutElim`
+(`LJ/CutElimination.lean`) proves the same fact directly at `IPL`; this generic copy mirrors
+`SeqProof.cutElim` (`LM/CutElimination.lean`) so that `SeqProof.subformula_property` below does
+not need to depend on the `IPL`-specific proof. The `botL` case extracts the locally-bound
+instance carried by the matched `botL` constructor via `letI`, following `SeqProof.mono`'s idiom
+(`LJ/Basic.lean:184-186`). -/
+private lemma seqProofCutElim {T : Theory Atom} {seq : @Sequent Atom} (d : SeqProof T seq) :
+    Nonempty (CutFreeSeqProof T seq) := by
+  induction d with
+  | ax A Γ hA => exact ⟨⟨.ax A Γ hA, trivial⟩⟩
+  | @botL Γ C inst hbot =>
+      letI := inst
+      exact ⟨⟨.botL Γ C hbot, trivial⟩⟩
+  | andL A B hAB _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.andL A B hAB d', hd'⟩⟩
+  | andR A B _ _ ih₁ ih₂ =>
+      obtain ⟨⟨d₁', hd₁'⟩⟩ := ih₁
+      obtain ⟨⟨d₂', hd₂'⟩⟩ := ih₂
+      exact ⟨⟨.andR A B d₁' d₂', ⟨hd₁', hd₂'⟩⟩⟩
+  | orL A B hAB _ _ ih₁ ih₂ =>
+      obtain ⟨⟨d₁', hd₁'⟩⟩ := ih₁
+      obtain ⟨⟨d₂', hd₂'⟩⟩ := ih₂
+      exact ⟨⟨.orL A B hAB d₁' d₂', ⟨hd₁', hd₂'⟩⟩⟩
+  | orR1 A B _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.orR1 A B d', hd'⟩⟩
+  | orR2 A B _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.orR2 A B d', hd'⟩⟩
+  | impL A B hAB _ _ ih₁ ih₂ =>
+      obtain ⟨⟨d₁', hd₁'⟩⟩ := ih₁
+      obtain ⟨⟨d₂', hd₂'⟩⟩ := ih₂
+      exact ⟨⟨.impL A B hAB d₁' d₂', ⟨hd₁', hd₂'⟩⟩⟩
+  | impR A B _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.impR A B d', hd'⟩⟩
+  | weakL A _ ih =>
+      obtain ⟨⟨d', hd'⟩⟩ := ih
+      exact ⟨⟨.weakL A d', hd'⟩⟩
+  | cut A _ _ ih₁ ih₂ =>
+      obtain ⟨d₁'⟩ := ih₁
+      obtain ⟨d₂'⟩ := ih₂
+      exact ⟨ljCutAdmissibility A _ _ d₁' d₂'⟩
 
-This is an immediate corollary of `LJProof.cutElim` (Gentzen's *Hauptsatz*) and
-`CutFreeLJProof.subformula_property`. -/
+/-! ## Subformula Property for General Proofs -/
+
+/-- Subformula property, generic over the theory `T`: every `SeqProof T`-provable sequent has a
+cut-free proof satisfying the subformula property. Every formula in the cut-free proof is a
+subformula of some formula in the conclusion sequent `insert seq.2 seq.1`.
+
+This is an immediate corollary of `seqProofCutElim` (Gentzen's *Hauptsatz*, generic over `T`) and
+`CutFreeSeqProof.subformula_property`. -/
+theorem SeqProof.subformula_property
+    {T : Theory Atom} {seq : @Sequent Atom} (d : SeqProof T seq) :
+    ∃ d' : CutFreeSeqProof T seq,
+      ∀ B ∈ d'.val.formulas,
+        ∃ C ∈ insert seq.2 seq.1, B.IsSubformula C := by
+  obtain ⟨d'⟩ := seqProofCutElim d
+  exact ⟨d', seqProofCutFreeSubformulaProp d'.val d'.property⟩
+
+/-- Subformula property for LJ. Re-export of `SeqProof.subformula_property` at `IPL`, preserving
+the exact current signature. -/
 theorem LJProof.subformula_property
     {seq : @Sequent Atom} (d : LJProof seq) :
     ∃ d' : CutFreeLJProof seq,
       ∀ B ∈ d'.val.formulas,
-        ∃ C ∈ insert seq.2 seq.1, B.IsSubformula C := by
-  obtain ⟨d'⟩ := d.cutElim
-  exact ⟨d', ljCutFreeSubformulaProp d'.val d'.property⟩
+        ∃ C ∈ insert seq.2 seq.1, B.IsSubformula C :=
+  SeqProof.subformula_property d
 
 end Cslib.Logic.PL
 

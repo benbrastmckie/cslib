@@ -77,10 +77,11 @@ constructible only when the theory `T` validates ex falso quodlibet. Hence `SeqP
 (`MPL = ∅` admits no `IsIntuitionistic` instance) is the `botL`-free minimal calculus, while
 `SeqProof IPL` (= `LJProof`) recovers full intuitionistic LJ. Structural metatheory that is
 already generic over `T`: `height`, `mono`, `CutFree`, `CutFreeSeqProof`, `IsBotRuleFree`,
-`SeqProof.formulas`, and now also cut elimination (`ljCutAdmissibility`, re-exported at `IPL`
-with `LJProof.cutElim`'s signature unchanged, per `SequentCalculus/LJ/CutElimination.lean`). The
-subformula property, by contrast, is currently proved concretely at `IPL` only
-(`LJProof.subformula_property`), not yet generically over `T`.
+`SeqProof.formulas`, cut elimination (`ljCutAdmissibility`, re-exported at `IPL` with
+`LJProof.cutElim`'s signature unchanged, per `SequentCalculus/LJ/CutElimination.lean`), and now
+also the subformula property (`SeqProof.subformula_property`, re-exported at `IPL` with
+`LJProof.subformula_property`'s signature unchanged, per
+`SequentCalculus/LJ/SubformulaProperty.lean`).
 
 Constructors:
 - `ax`: identity axiom — `A` appears in the antecedent.

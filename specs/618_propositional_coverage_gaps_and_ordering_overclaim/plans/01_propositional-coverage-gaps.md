@@ -471,7 +471,7 @@ machinery at `MPL`.
 
 ---
 
-### Phase 8: C2 -- LM subformula property [NOT STARTED]
+### Phase 8: C2 -- LM subformula property [COMPLETED]
 
 **Goal**: `SequentCalculus/LM/SubformulaProperty.lean` exists; the subformula PROPERTY theorems
 are generic over `T` and instantiated at `MPL`.

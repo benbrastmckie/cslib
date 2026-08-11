@@ -13,8 +13,9 @@ public import Cslib.Init
 
 /-! # Classical Tableau Decision Procedure
 
-This module delivers the `Decidable (Tautology φ)` instance via the classical tableau,
-and connects it to derivability via the `prop_completeness_iff_tautology` bridge.
+This module delivers a `Decidable (Tautology φ)` instance via the classical tableau, registered
+at lowered priority, and connects it to derivability via the `prop_completeness_iff_tautology`
+bridge.
 
 ## Main Results
 
@@ -77,7 +78,15 @@ This is an alternative to the Boolean enumeration `instDecidableTautology` in `B
 The two instances are extensionally equivalent but use different algorithms.
 
 Note: Unlike the Boolean enumeration, this decision procedure does not require `Fintype Atom`;
-the tableau algorithm works for any `DecidableEq Atom` and `Hashable Atom`. -/
+the tableau algorithm works for any `DecidableEq Atom` and `Hashable Atom`.
+
+Priority: deliberately lowered to `100` (below the default `1000`). This instance does not
+reduce in the kernel — evaluating it via `decide`/`whnf` stalls on the underlying
+`WellFounded.fix` recursion used by `classicalTableau`, so `decide (Tautology φ)` gets stuck
+rather than closing. Lowering the priority means `Decidable (Tautology φ)` resolution falls
+through to the kernel-reducible `instDecidableTautology` whenever `Fintype Atom` is available,
+so `decide` remains usable on tautology goals. In the `Fintype`-free case this instance remains
+the sole candidate, where priority never comes into play. -/
 instance (priority := 100) instDecidableTautologyTableau (φ : Proposition Atom) :
     Decidable (Tautology φ) :=
   match h : classicalTableau φ with

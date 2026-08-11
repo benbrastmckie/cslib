@@ -228,25 +228,32 @@ to any declaration. `lake build CslibTests.Propositional` exits 0 with the pin i
 
 ---
 
-### Phase 3: Docstring Rationale [NOT STARTED]
+### Phase 3: Docstring Rationale [COMPLETED WITH EXCLUSIONS]
 
 **Goal**: Record at both declaration sites why the tableau instance carries a lowered priority,
 so the annotation is not removed by a future contributor as apparent noise.
 
 **Tasks**:
-- [ ] `DecisionProcedure.lean:74-80` — extend the `instDecidableTautologyTableau` docstring: the
+- [x] `DecisionProcedure.lean:74-80` — extend the `instDecidableTautologyTableau` docstring: the
       priority is deliberately lowered because this instance does not reduce in the kernel
       (it stalls on `WellFounded.fix`), so `decide` must fall through to the Boolean enumeration
       whenever `Fintype Atom` is available; it remains the sole candidate in the `Fintype`-free
       case, where priority never comes into play.
-- [ ] `DecisionProcedure.lean:16` — soften the module header from "delivers the `Decidable
+- [x] `DecisionProcedure.lean:16` — soften the module header from "delivers the `Decidable
       (Tautology φ)` instance" to "a `Decidable (Tautology φ)` instance ... at lowered priority",
       which no longer overstates the module's role.
 - [ ] `Cslib/Logics/Propositional/Semantics/Bool.lean:181-187` — note that
       `instDecidableTautology` is the preferred instance when `Fintype Atom` is available and is
-      the one `decide` uses.
-- [ ] Confirm every edited hunk lies inside a docstring/comment region (diff read-through).
-- [ ] Commit.
+      the one `decide` uses. *(deviation: skipped -- outside territory contract, file not in
+      allowed edit set)*
+- [x] Confirm every edited hunk lies inside a docstring/comment region (diff read-through).
+- [x] Commit.
+
+**Phase Notes**: The `Semantics/Bool.lean` edit was scoped out by the dispatching orchestrator's
+territory contract for this run (parallel sibling agents own other files in the same checkout,
+including `Semantics/Bool.lean`). Both `DecisionProcedure.lean` edits (instance docstring
+extension and module-header softening) were completed and verified diff-clean (docstring/comment
+region only). `Cslib/Logics/Propositional/Semantics/Bool.lean` is unmodified by this task.
 
 **Timing**: 0.25 hours
 
@@ -272,6 +279,12 @@ drifted.
   token is touched
 - Line widths stay within the surrounding file's convention (checked properly by `lake exe
   lint-style` in Phase 4)
+
+#### Reasoned Exclusions
+
+| Item | Reason | Evidence |
+|------|--------|----------|
+| `Cslib/Logics/Propositional/Semantics/Bool.lean:181-187` preferred-instance docstring note | The dispatching orchestrator scoped this implementation run to a two-file territory contract (`DecisionProcedure.lean` and `CslibTests/Propositional.lean`) because sibling agents were concurrently editing other files in the same checkout, including `Semantics/Bool.lean`; editing it here would violate that contract. | Delegation-context territory contract in this task's dispatch instructions, explicitly directing the Bool.lean edit be skipped with an inline deviation annotation rather than blocking the phase. `git status --short Cslib/Logics/Propositional/Semantics/Bool.lean` shows no local modification. |
 
 ---
 

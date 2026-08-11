@@ -1,57 +1,40 @@
 {
   "task_number": 618,
   "session_id": "sess_1786405794_f0204e_618",
-  "phase": "research",
-  "status": "researched",
+  "phase": "plan",
+  "status": "planned",
   "orchestrator_mode": true,
+  "summary": "10-phase plan, ~11 hours. Wave 1 holds five independent phases (Part A docstring corrections extended to A6 plus a G9 note; B1 LJ cut-free completeness; B2 public split interpolation; B3 LM decidability; D1-relative orImp completeness). Waves 2-5 are the LM parity chain, gated on generalising LJ cut elimination from IPL to an arbitrary Theory T. Phase 6 is the only real-risk phase; its failure mode and containment are pre-declared.",
   "artifacts": [
-    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/reports/01_propositional-coverage-gaps.md"
+    {
+      "type": "plan",
+      "path": "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md"
+    }
   ],
-  "summary": "Verified all five Part A docstring defects at their cited lines; measured Parts B/C/D against source. Four premise corrections found: A4 is only half-true (temporalTableau_complete genuinely does not exist), A1 has three defects not one, a sixth unlisted overclaim exists at LJ/Basic.lean:78-79, and Part C's genericity premise is false as stated though its conclusion survives via an in-tree letI precedent.",
-  "key_findings": [
-    "A1 (ConservativeChain.lean:140): 'strictly' unproved (sole strictness hit in tree is the overclaim itself); ALSO 'five' contradicted by its own three-node display block; ALSO chain identity conflates Imp/Int/Prop with the neighbouring Min/Int/Prop theorems.",
-    "A2 (Tableau/Classical/DecisionProcedure.lean:23): reproduced. Lines 33-34 of the same header ALSO describe the non-existent instance and must be fixed together, or a dangling description remains.",
-    "A3 (Tableau/Intuitionistic/DecisionProcedure.lean:62): confirmed zero consumers outside Cslib/Logics/Propositional/ across Cslib/ and CslibTests/.",
-    "A4 PREMISE CORRECTION: 'do not exist yet for either calculus' is FALSE for intuitionistic but STILL TRUE for temporal. temporalTableau_complete does not exist as a declaration; it appears only in Temporal/Tableau/Completeness.lean:122 as a blocked obligation. Re-tensing must be SPLIT, not blanket.",
-    "A5 (Tableau/Minimal/DecisionProcedure.lean:119): reproduced, one-token universe pin.",
-    "A6 NEW (not in task): LJ/Basic.lean:78-79 claims cut elimination and the subformula property are 'proved once generically over T'. Both are at IPL only. Same defect class as A1-A5, and it is the exact claim Part C would rely on.",
-    "B1 confirmed near-exact LK template; only difference is lj_iff_ivalid's explicit IValid.{u,u} universe pin.",
-    "B2 confirmed no new proof needed; the one real decision is public API shape (recommend bundled CutFreeXProof wrapper over un-privatising the core).",
-    "B3 estimate corrected: listToImp/ctxToImp reusable as claimed, but the four lj*Deduction* helpers are LJ-specific. They touch no gated constructor, so generalising them is mechanical and should be shared with C1 rather than duplicated. Task 614 (computable ctxToImp) is live and [researching].",
-    "C1 PREMISE CORRECTION: ljCutAdmissibility is NOT generic over T -- no {T : Theory Atom} binder anywhere in LJ/CutElimination.lean (56 LJProof mentions vs 15 mostly-projection SeqProof mentions). BUT the conclusion survives: SeqProof.mono (Basic.lean:184-186) already solves the only hard part (reconstructing the [IsIntuitionistic T]-gated botL via letI instance rebind), and Basic.lean:178-179 documents that idiom. Five .botL reconstruction sites need it. Highest-risk spot is the decreasing_by at LJ/CutElimination.lean:650 referencing the IPL-only LJProof.height re-export.",
-    "C2 task claim confirmed: SeqProof.formulas IS generic; the subformula PROPERTY theorems are not.",
-    "D1 confirmed orImp is the only one of eight fragments with zero completeness theorem. Splits into D1-relative (under 10 lines, composing the existing hilbertIplConservativeOverOrImp_iff biconditional with IPL completeness -- recommend IN scope) and D1-absolute (needs a new algebra class for the meet-free imp-disjunction signature -- recommend OUT of scope, own research task).",
-    "D2 DIFFICULTY OVERSTATED: the decide/WellFounded.fix concern is a red herring. CslibTests/ModalFrameSeparation.lean already establishes an analogous separation by hand-built semantic countermodels ported as named theorems, explicitly routing around the same kernel stall. MPL != IPL is nearly free (~15-25 lines) via a Unit model with bf := True, cheap precisely because LM/Soundness.lean:61 quantifies over arbitrary upward-closed bot_forces. IPL != CPL is ~30-50 lines via the two-point Kripke chain. Recommend as a separate follow-up task, scoped at roughly one phase, NOT as an open research problem.",
-    "D2 CAVEAT: both separations would establish MPL < IPL < CPL, which is NOT the Imp -> Int -> Prop chain A1's docstring displays. A1's 'strictly' must be corrected now and must not be reinstated on the strength of D2 alone.",
-    "G6: agree it is a judgment call, but note it is coupled to A2 -- A2 deletes the docstring entry for exactly the instance G6 would create. Recommend deciding both as one question.",
-    "G9: agree architectural and fine; recommend a module-docstring note in NaturalDeduction/Equivalence.lean, since undocumented deliberate absences generate future false coverage findings."
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md"
   ],
-  "recommended_phases": [
-    {"phase": 1, "content": "A1-A5 + A6 (new) + G9 note", "difficulty": "trivial", "depends_on": []},
-    {"phase": 2, "content": "B1 LJ cut-free completeness", "difficulty": "very low", "depends_on": []},
-    {"phase": 3, "content": "B2 public split interpolation (bundled shape)", "difficulty": "very low", "depends_on": []},
-    {"phase": 4, "content": "C1 generalise cut elimination to T; instantiate at MPL", "difficulty": "medium-high", "depends_on": []},
-    {"phase": 5, "content": "C2 LM subformula property", "difficulty": "low", "depends_on": [4]},
-    {"phase": 6, "content": "C3 LM Craig interpolation", "difficulty": "low-medium", "depends_on": [3, 4]},
-    {"phase": 7, "content": "B3 LM decidability", "difficulty": "low", "depends_on": [4]},
-    {"phase": 8, "content": "D1-relative orImp completeness vs IPL semantics", "difficulty": "very low", "depends_on": []}
-  ],
-  "out_of_scope_recommend_spawn": [
-    "D1-absolute: fragment-matched algebraic completeness for the imp-disjunction fragment; needs its own research pass on the algebra class.",
-    "D2: the two separation theorems (MPL != IPL, IPL != CPL); tractable at roughly one phase but is new mathematical content and should not be mixed into a cleanup diff."
-  ],
-  "open_decisions_for_planner": [
-    "B2 public API shape: bundled CutFreeXProof wrapper (recommended) vs un-privatising maeharaCore/ljMaeharaCore.",
-    "Whether A2 is a plain deletion or is paired with building the G6 Fintype-free tableau instance.",
-    "Whether B3 waits on task 614's computable ctxToImp (recommend not blocking; accept the noncomputable taint with an explicit note if 614 has not landed)."
+  "phases_completed": 0,
+  "phases_total": 10,
+  "decisions_made": [
+    "B2 public API shape: bundled CutFreeLKProof/CutFreeLJProof wrapper; maeharaCore and ljMaeharaCore stay private. Un-privatising would expose an internal induction shape as public API.",
+    "A2 is a plain deletion of BOTH line 23 and the dangling description at lines 33-34. G6 (a Fintype-free tableau-route Decidable instance) is explicitly NOT taken; the coupling is recorded in the plan's Non-Goals and re-recorded in Phase 10.",
+    "B3 does not block on task 614 (status: planning, not landed). Phase 4 checks 614 at implementation time and takes the computable ctxToImp route only if it landed; otherwise it accepts the noncomputable taint with a mandatory docstring note naming the Finset.toList cause.",
+    "A6 (the sixth overclaim found by research at LJ/Basic.lean:78-79, not in the task description) is folded into Phase 1 and then made TRUE by Phases 6 and 8.",
+    "D1-absolute and D2 are Non-Goals. Phase 10 records both as follow-up recommendations with the research's measurements attached so they can be scheduled without re-research.",
+    "Phase 6 declares Commit Mode atomic-batch over exactly two files (LJ/Basic.lean, LJ/CutElimination.lean); the tree is expected red between them and the batch must not be widened at implementation time."
   ],
   "risks": [
-    "Phase 4 (C1) is the only phase with real risk of not completing as written. The risk is mechanical, not mathematical: termination checking under a new {T} binder, specifically LJ/CutElimination.lean:650's decreasing_by referencing LJProof.height. If it stalls, mark that phase [BLOCKED] with the goal state recorded; phases 5-7 depend on it, but phases 1-3 and 8 are independent and can still land."
+    "Phase 6 (generalising LJ/CutElimination.lean's seven ljCutAdm* declarations plus LJCutIH to {T : Theory Atom}) is the only phase with real risk. The risk is mechanical, not mathematical: termination checking on nested well-founded recursions under a new binder, with the named hot spot being the decreasing_by at LJ/CutElimination.lean:650 referencing the IPL-only LJProof.height re-export. Containment is pre-declared: mark Phase 6 [BLOCKED] with the goal state recorded, revert only its two-file batch, and leave Phases 7-9 unattempted. Phases 1-5 are independent and still land.",
+    "A4 must be a SPLIT re-tensing. temporalTableau_complete genuinely does not exist; a blanket past-tense rewrite replaces one false statement with another and is a verification failure, not a pass.",
+    "A1 must not be reinstated as 'strictly' on the strength of anything landed here. Even the D2 separations would establish MPL < IPL < CPL, which is not the Imp -> Int -> Prop chain the docstring displays."
   ],
+  "dependency_waves": [[1, 2, 3, 4, 5], [6], [7], [8], [9], [10]],
   "zero_debt": {
     "sorry_required": false,
     "new_axiom_required": false,
-    "notes": "No sorry occurs anywhere under Cslib/Logics/Propositional/ (all grep hits are docstring prose). intuitionisticTableau_decides verifies with axioms {propext, Classical.choice, Quot.sound}."
+    "notes": "No phase requires a sorry or a new axiom. If any phase appears to need one, that signals the route was mismeasured -- stop and record rather than introducing debt. Phase 10 verifies this by command output rather than assertion."
   },
-  "next_phase": "plan"
+  "next_phase": "implement"
 }

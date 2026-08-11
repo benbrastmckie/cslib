@@ -209,6 +209,40 @@ theorem hilbertIplConservativeOverOrImp {Atom : Type u} {φ : PL.Proposition Ato
   -- Convert cut-free LJ proof to OrImp Hilbert derivation
   exact cutFreeLJ_toOrImp (by simp) hABF dcf (by simp)
 
+/-! ## Completeness Relative to IPL Semantics -/
+
+/-- **OrImp completeness relative to IPL semantics, on the and-bot-free sublanguage.**
+For and-bot-free formulas, `IValid` (intuitionistic Kripke validity, the semantic notion IPL
+itself is complete for) implies `OrImpAxiom` derivability.
+
+**This is explicitly NOT fragment-matched algebraic completeness.** The other three
+intuitionistic fragments with a completeness theorem (`ConjImp`, `Imp`, `ConjImpBot`) are
+complete against an algebra class matched to their own signature. `OrImpAxiom`'s meet-free
+`⟨∨, →, ⊤⟩` signature gives `→` nothing to residuate against, so no such fragment-matched
+algebra has been defined for it (this is the D1-absolute gap, recorded as a follow-up
+recommendation rather than attempted here — it needs a new algebra class chosen and defined,
+which is definitional infrastructure, not just a proof). What this theorem gives instead is
+completeness **relative to full IPL semantics**, restricted to the and-bot-free sublanguage:
+any and-bot-free formula valid in every intuitionistic Kripke model has an OrImp Hilbert
+derivation. An unqualified "orImp completeness" reading of this theorem would overclaim exactly
+the class of defect Phase 1 of this task corrects elsewhere in the tree.
+
+Composes `IValid φ → Derivable IntPropAxiom φ` (via `lj_iff_ivalid` and `hilbert_iff_lj`, the
+Kripke-to-LJ-to-Hilbert completeness route already used by `hilbertIplConservativeOverOrImp`'s
+own proof) with `hilbertIplConservativeOverOrImp` itself (the hard direction of the
+conservative-extension biconditional — `hilbertIplConservativeOverOrImp_iff.mp` in
+`FragmentConservativityInstances.lean` reduces to this same function, but that module is not
+imported here to avoid a dependency cycle, since it in turn imports this file). -/
+theorem orImpCompletenessRelativeToIPL {Atom : Type u} {φ : PL.Proposition Atom}
+    (hABF : φ.IsAndBotFree = true) (h : IValid.{u, u} φ) :
+    Derivable (@OrImpAxiom Atom) φ := by
+  letI : DecidableEq Atom := Classical.decEq Atom
+  obtain ⟨d⟩ := lj_iff_ivalid.mp h
+  have hderiv : Derivable (@IntPropAxiom Atom) φ := by
+    rw [Derivable, ← Finset.toList_empty (α := Proposition Atom)]
+    exact hilbert_iff_lj.mpr ⟨d⟩
+  exact hilbertIplConservativeOverOrImp hABF hderiv
+
 /-! ## Subsumption / Biconditional / ND Corollary (re-homed)
 
 The generic subsumption, biconditional, and ND-corollary boilerplate for this fragment

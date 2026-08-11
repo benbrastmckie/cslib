@@ -334,7 +334,7 @@ count is corrected in the summary rather than the extras being skipped.
 
 ---
 
-### Phase 5: D1-relative -- orImp completeness against IPL semantics [NOT STARTED]
+### Phase 5: D1-relative -- orImp completeness against IPL semantics [COMPLETED]
 
 **Goal**: `OrImpAxiom` stops being the only one of the eight fragment axiom systems with zero
 completeness theorem, via a short composition -- and its docstring states exactly which kind of

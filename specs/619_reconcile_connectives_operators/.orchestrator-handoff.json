@@ -1,47 +1,46 @@
 {
-  "status": "researched",
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
   "task_number": 619,
   "session_id": "sess_1786405794_f0204e_619",
-  "summary": "Reconciliation is well-defined and sorry-free but larger than the four named duplicates. HasAnd/HasOr/HasImp/HasBox are field-for-field identical between the fork's Connectives.lean and upstream's Operators.lean (same class name, namespace, field name, projection type), so adopting upstream's and deleting the fork's requires ZERO call-site edits across all 1,802 references. HasDia -> HasDiamond is a 6-code-site rename (17 lines counting docs). The fork-only classes (HasBot, HasUntil, HasSince, HasNext) and all six bundles collide with nothing and are kept as the upstreamable delta. The load-bearing finding, measured empirically for the first time here, is a SECOND-ORDER notation collision: upstream's Operators.lean attaches scoped notation for the same symbols to the typeclass projections in namespace Cslib.Logic, which is an ENCLOSING namespace of the fork's Cslib.Logic.{PL,Modal,Bimodal,Temporal,LTL}, so both interpretations go live and Lean raises a hard 'Ambiguous term' error. Exactly 12 collision sites across 5 files were enumerated by simulating the full upstream notation set against all five formula types; everything else in the fork's notation is provably safe because the corresponding instance is absent (sole surviving interpretation resolves silently). Separately: upstream commit b8ad3923 is NOT an ancestor of local HEAD and Operators.lean does not exist locally, so the task's 'verify with lake build' criterion forces phase 1 to be a verbatim vendoring of upstream's Operators.lean (unchanged since #607 merged; git merge-tree confirms it is a conflict-free add).",
+  "summary": "Ten-phase plan written. Phase 1 vendors upstream Operators.lean verbatim but ORPHANED (not in the Cslib.lean barrel) so the tree stays green; Phase 2 renames HasDia to HasDiamond, converting a divergence into an exact fifth duplicate; Phases 3-7 pre-land all 12 rfl _def bridge lemmas per-module smallest-first (LTL, Temporal, Bimodal, Propositional, Modal), each independently green and committable; Phase 8 is the sole red-window atomic-batch step (import Operators, delete 5 duplicate classes, delete the 12 colliding notation declarations, relocate cited design prose, record the latent-trap invariant, run mk_all); Phase 9 renames the AxiomDia identifiers; Phase 10 runs the full 7-step CSLib CI gate. Caveat: the research report's estimate of 4 sites for the AxiomDia rename is wrong -- the measured census is 198 identifier occurrences across 25 files, which is why that rename is isolated into its own late, droppable phase.",
   "artifacts": [
     {
-      "path": "specs/619_reconcile_connectives_operators/reports/01_connectives-operators-reconciliation.md",
-      "type": "report",
-      "summary": "Per-class disposition table, the 12-site notation collision matrix with file/line/symbol/cause, the confirmed-clean notation set and why it is clean, defeq verification of all five affected typeclass/constructor pairings, recommended 5-phase implementation shape, lint-prevention notes, and explicit scope boundaries"
+      "type": "plan",
+      "path": "specs/619_reconcile_connectives_operators/plans/01_reconcile-connectives-operators.md"
     }
   ],
-  "key_findings": [
-    "HasAnd/HasOr/HasImp/HasBox: identical modulo binder style and docstring. Drop the fork's, adopt upstream's. Occurrence census (Cslib/ + CslibTests/): HasImp 1514, HasBox 204, HasOr 56, HasAnd 28 -- none needs editing.",
-    "HasDia -> HasDiamond (field dia -> diamond): 6 code sites (Connectives.lean:112, Axioms.lean:197/206/217, ProofSystem.lean:210, Modal/Basic.lean:109) plus 11 doc mentions. Recommend renaming fork-local AxiomDiaDuality -> AxiomDiamondDuality in the same pass.",
-    "HasBot, HasUntil, HasSince, HasNext and the six bundles (PropositionalConnectives, ModalConnectives, FutureTemporalConnectives, LTLConnectives, TemporalConnectives, BimodalConnectives + the priority-100 bridge) collide with nothing. Keep unchanged. The neg/top Lukasiewicz defaulted fields on PropositionalConnectives are delegated to by all four concrete formula types, so dismantling the bundles is not a safe unilateral move.",
-    "NOTATION COLLISION (12 sites, 5 files), measured: Propositional/Defs.lean:107 (and) 108 (or) 109 (imp); Modal/Basic.lean:232 (and) 233 (or) 234 (imp) 235 (box) 236 (diamond); Bimodal/Syntax/Formula.lean:101 (imp) 102 (box); Temporal/Syntax/Formula.lean:169 (imp); LTL/Syntax/Formula.lean:209 (imp).",
-    "CONFIRMED CLEAN and must be left alone: the negation and biconditional notations in all five namespaces (no HasNot/HasIff instances anywhere in the fork), Bimodal/Temporal/LTL conjunction and disjunction, Bimodal and LTL diamond, LTL box (LTL binds box/diamond to allFuture/someFuture -- a different meaning that must be preserved), CLL tensor, and all temporal operator notations. Verified: when only one interpretation elaborates, Lean resolves silently with no error.",
-    "LATENT TRAP: those rows are clean only because an instance is missing. Registering HasNot, HasIff, HasAnd, HasOr, HasDiamond, or HasTensor for those types in any later task silently reopens the collision. Record as a standing invariant in the Connectives.lean module docstring.",
-    "Deleting a local notation changes elaboration from the concrete constructor to the typeclass projection. All five affected pairings were verified rfl-equal by lean_run_code, and constructor pattern-matching is untouched, so exposure is confined to syntactic simp/grind/rw matching -- fixed by upstream-style @[scoped grind =] _def bridge lemmas landing in the SAME edit as each deletion.",
-    "Repo topology: merge-base(HEAD, b8ad3923) = f36649cf; 21 behind / 4635 ahead. Operators.lean unchanged since b8ad3923 (empty diff vs upstream/main), so the vendoring target is stable. git merge-tree HEAD upstream/main shows content conflicts in Cslib.lean, InferenceSystem.lean, Modal/Basic.lean, Modal/LogicalEquivalence.lean, Propositional/Defs.lean, CslibTests.lean, references.bib -- Operators.lean is NOT among them.",
-    "Baseline: lake build Cslib.Foundations.Logic.Connectives Cslib.Logics.Modal.Basic is green (484 jobs) at HEAD 212318f2."
+  "blockers": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/619_reconcile_connectives_operators/plans/01_reconcile-connectives-operators.md"
   ],
-  "recommended_phase_shape": [
-    "Phase 1: vendor Operators.lean verbatim via `git show b8ad3923:Cslib/Foundations/Logic/Operators.lean`, add to Cslib.lean via `lake exe mk_all --module`. Never hand-edit the vendored file.",
-    "Phase 2: reduce Connectives.lean to a delta -- delete the four duplicates, add `public import Cslib.Foundations.Logic.Operators`, rename HasDia -> HasDiamond, relocate the HasBox design docstring (cited ChagrovZakharyaschev1997/Blackburn2001 material) into the module docstring, keep everything else.",
-    "Phase 3: propagate the rename across Axioms.lean, ProofSystem.lean, Modal/Basic.lean, Modal/Semantics/Birelational.lean docs, plus AxiomDiaDuality -> AxiomDiamondDuality.",
-    "Phases 4-8: notation de-duplication, ONE module per phase, smallest-first by build cost -- LTL (1 collision, 2746 lines) -> Temporal (1, 20310) -> Bimodal (2, 52462) -> Propositional (3, 42561) -> Modal (5, 83504). Each phase deletes the listed declaration, adds the _def bridge lemma(s), and gates on `lake build <Module>` before proceeding.",
-    "Phase 9: full CI gate -- lake build, checkInitImports, lake lint, lint-style, lake test, mk_all --module, shake."
+  "decisions_made": [
+    "Vendor Operators.lean ORPHANED in Phase 1 rather than adding it to the Cslib.lean barrel immediately. Adding it to the barrel puts both declaration sets in one import closure and turns the whole tree red; mk_all is deferred to Phase 8.",
+    "Pre-land all 12 _def bridge lemmas in green, per-module, committable phases BEFORE any notation is deleted. Both sides of each rfl already exist today, so this is legal now and it shrinks the unavoidable red window to deletions plus one import.",
+    "The HasDia -> HasDiamond rename (Phase 2) deliberately turns the divergence into an exact FIFTH duplicate of upstream's HasDiamond. Phase 8 then deletes five duplicates uniformly. The report framed this as rename-only and did not note the resulting duplicate.",
+    "MEASUREMENT CORRECTION: the report's 'AxiomDiaDuality rename, 4 sites, Low impact' is wrong. Measured against the live tree: AxiomDiaDuality 1, AxiomDiaDualityFwd 36, AxiomDiaDualityBack 37, diaDuality 2, diaDualityFwd 61, diaDualityBack 61 = 198 occurrences across 25 files, concentrated in Modal/Metalogic (the largest subtree). Isolated into Phase 9 so it can be excluded without invalidating anything else.",
+    "Verification tiers assigned by edit class: local for the orphaned vendor, interface for the rename and the five bridge-lemma phases, full for Phase 8 (the switch), Phase 9 (the rename batch), and Phase 10 (the CI gate). The full gate still runs before task completion regardless.",
+    "Phases 8 and 9 are the only phases declared Commit Mode: atomic-batch. All others are per-substep and independently green.",
+    "The docstrings on the deleted HasBox and HasDiamond classes carry cited material (ChagrovZakharyaschev1997 section 3.1, Blackburn2001 chapter 1) and are relocated into the Connectives.lean module docstring, not dropped. The latent instance-registration trap is recorded there as a standing invariant."
   ],
-  "sorry_inventory": [],
-  "zero_debt_assessment": "No step requires sorry, an axiom, or a vacuous definition. Every change is a deletion, a rename, or an rfl bridge lemma. If a _def bridge lemma fails to close by rfl, that indicates the instance and constructor have drifted -- escalate as [BLOCKED] rather than working around it.",
-  "out_of_scope": [
-    "Merging upstream/main (the 7 conflicting files are the PR #648 rebase, a separate task).",
-    "The falsum representation question -- settled, primitive HasBot retained.",
-    "Registering HasNot/HasIff instances -- would create new collisions; separate task, paired with deleting the corresponding local notation.",
-    "Notation associativity for the RETAINED fork notations. Partially overtaken: the three Propositional/Defs.lean declarations at 107-109 are deleted here (fixing chaining for those symbols in PL as a side effect); the biconditional and negation declarations at 110-111 survive and still need infixr treatment, as do the counterparts in Modal/Bimodal/Temporal/LTL.",
-    "Any GitHub or Zulip prose. CSLib AI policy; Chris Henson formally challenged an LLM-drafted message on the Propositional Logic topic (near/605827029). Produce a factual scaffolding file for a human if #649's description needs updating."
+  "dead_ends": [
+    "Do not follow the research report's literal five-step shape, which vendors Operators.lean AND adds it to the barrel in step 1. That combination is red on arrival: duplicate declarations fire as soon as both modules share an import closure, and the 12 notation ambiguities fire as soon as Connectives.lean imports Operators.lean.",
+    "Do not attempt to pre-emptively declare upstream-shaped projection notation in the fork's own Cslib.Logic namespace as a staging trick. It creates exactly the same 12 ambiguities and buys nothing.",
+    "Do not delete a local notation declaration without its _def bridge lemma already present. Deleting notation with no replacement breaks every use site in that subtree."
   ],
+  "phases_completed": 0,
+  "phases_total": 10,
   "continuation_context": {
-    "plan_path": null,
-    "prerequisite_for": "PR #649 (LTL), which is stacked on #648 and whose changed files include Foundations/Logic/Connectives.lean",
-    "source_report": "specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md (section 4 and section 9 Item 2)",
-    "note_for_planner": "Do not size this task on edit count. The edit is roughly 12 deleted notation lines, 4 deleted class declarations, a 6-site rename, and about 12 bridge lemmas. The cost is verification across 201,583 lines in 488 files, which is why the notation phases must be one-module-per-phase and ordered smallest-first."
+    "plan_path": "specs/619_reconcile_connectives_operators/plans/01_reconcile-connectives-operators.md",
+    "orchestrator_mode": true,
+    "estimated_hours": 11,
+    "dependency_waves": [[1, 2, 3, 4, 5, 6], [7], [8], [9], [10]],
+    "complexity": "complex",
+    "zero_debt": "No phase requires sorry, an axiom, or a vacuous definition. If a _def bridge lemma stops closing by rfl, that signals instance/constructor drift -- escalate the phase as [BLOCKED] with the goal state rather than weakening the lemma.",
+    "constraint": "No GitHub or Zulip prose may be authored by an agent. If PR 649's description needs updating, produce a factual scaffolding file under the task directory for a human to adapt.",
+    "territory": "Wave 1 is parallel-safe by file territory: Phase 1 owns the new Operators.lean; Phase 2 owns Connectives.lean, Axioms.lean, ProofSystem.lean, Modal/Basic.lean, Modal/Semantics/Birelational.lean; Phases 3-6 each own exactly one syntax module. Phase 7 also touches Modal/Basic.lean and is therefore serialised after Phase 2."
   },
-  "next_action_hint": "plan"
+  "plan_markers_verified": true
 }

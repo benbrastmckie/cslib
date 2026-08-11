@@ -1,6 +1,6 @@
 # Implementation Plan: Repair Stale and Self-Contradictory Tableau Docstrings
 
-- **Status**: IMPLEMENTING
+- **Status**: COMPLETED
 - **Task**: 616
 - **Source**: specs/616_repair_stale_contradictory_tableau_docstrings/reports/01_repair-stale-tableau-docstrings.md
 
@@ -65,8 +65,8 @@ Phases 1-6; Phase 7 explicitly optional, deferred).
 
 ### Phase 7: Optional -- FmpMeasure.lean citations (Section 5.5) [NOT STARTED]
 
-Explicitly optional and low value per report. Deferred unless time permits after Phases 1-6 are
-verified green.
+Explicitly optional and low value per report; matches the delegation's committed scope
+("Phases 1-6; Phase 7 explicitly optional"). Deliberately deferred, not attempted this pass.
 
 ## Verification Protocol
 

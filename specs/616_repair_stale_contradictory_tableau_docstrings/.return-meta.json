@@ -1,18 +1,40 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-08-11T00:05:36Z",
-  "artifacts": [],
+  "artifacts": [
+    "specs/616_repair_stale_contradictory_tableau_docstrings/plans/01_repair-stale-tableau-docstrings.md",
+    "specs/616_repair_stale_contradictory_tableau_docstrings/summaries/01_repair-stale-tableau-docstrings-summary.md"
+  ],
+  "modified_files": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntDecidability.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
+    "stage": "complete",
+    "details": "All 6 committed phases (1-6) implemented and verified; Phase 7 explicitly optional and deferred per delegation scope",
+    "phases_completed": 6,
+    "phases_deferred": ["Phase 7: FmpMeasure.lean citations (optional, low value)"]
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_delta": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "statement_invariance_confirmed": true,
+    "cslib_tests_untouched": true,
+    "mode": "documentation_only"
   },
   "metadata": {
     "session_id": "sess_1786405794_f0204e_616",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

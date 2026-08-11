@@ -23,7 +23,10 @@ decidability of `IValid`. Concretely:
    `listToImp [A₁, ..., Aₙ] C` is the proposition `A₁ → A₂ → ... → Aₙ → C`.
 
 2. Define `ctxToImp` to encode a finite context as nested implications by converting
-   to a list: `ctxToImp Γ A = listToImp Γ.toList A`.
+   to a list: `ctxToImp Γ A = listToImp Γ.toList A`. This is used only in the *statements* of
+   the deduction-theorem lemmas (`ljProofDeductionFwd`/`ljProofDeductionBwd`); it stays
+   `noncomputable`, inherently so, since no computable choice of list representative for a
+   `Finset` exists in general.
 
 3. Prove the **deduction equivalence**:
    `Nonempty (LJProof (Γ ⊢ A)) ↔ Nonempty (LJProof (∅ ⊢ ctxToImp Γ A))`
@@ -34,14 +37,24 @@ decidability of `IValid`. Concretely:
    `ivalid_universe_invariant` to bridge `instDecidableIValid`'s `Type 0` pin to the unpinned
    universe `lj_iff_ivalid` needs).
 
+5. Make the resulting `Decidable` **instance** computable by sidestepping `ctxToImp` at the
+   instance level: `ljListDerivableDecidable` proves the same equivalence at the *list* level
+   (computable, since `listToImp` needs no representative choice), and
+   `instDecidableLJDerivable` eliminates `Γ`'s underlying `Multiset` into it via
+   `Quotient.recOnSubsingleton`, choosing an arbitrary list representative. Since `Decidable p`
+   is a `Subsingleton`, the resulting *decision* is representative-independent even though the
+   intermediate `listToImp` formula is not.
+
 ## Main Results
 
 - `listToImp`: List-to-implication encoding.
-- `ctxToImp`: Context-to-implication encoding.
+- `ctxToImp`: Context-to-implication encoding (statement-level only; inherently noncomputable).
 - `ljListDeductionFwd`: Forward deduction lemma for lists (list → implication chain).
 - `ljListDeductionBwd`: Backward deduction lemma for lists (implication chain → context proof).
 - `ljProofDeductionFwd`: Forward direction of the LJ deduction theorem.
 - `ljProofDeductionBwd`: Backward direction of the LJ deduction theorem.
+- `ljListDerivableDecidable`: List-level decidability helper, computable, used to build
+  `instDecidableLJDerivable` via `Quotient.recOnSubsingleton`.
 - `instDecidableLJDerivable`: `Decidable (Nonempty (LJProof (Γ ⊢ A)))`.
 - `instDecidableDerivableInIPL`:
   `Decidable (DerivableIn (AxiomTheory IntPropAxiom) (Γ ⊢ A))`.
@@ -78,7 +91,12 @@ def listToImp : List (Proposition Atom) → Proposition Atom → Proposition Ato
 `ctxToImp Γ A` is the proposition `A₁ → A₂ → ... → Aₙ → A` where `[A₁, ..., Aₙ] = Γ.toList`.
 Used in the deduction theorem reduction for the decidability proof.
 
-This is `noncomputable` because `Finset.toList` is `noncomputable`. -/
+This is `noncomputable` **inherently**, not incidentally: a computable function out of
+`Finset` must be invariant under permutation of the underlying list, but `listToImp` is not
+(`A → B → C` and `B → A → C` are distinct `Proposition Atom` values), so no computable
+`Ctx Atom → Proposition Atom → Proposition Atom` extending `listToImp` exists. This no longer
+affects any decision procedure: `instDecidableLJDerivable` below sidesteps `ctxToImp` entirely
+via `ljListDerivableDecidable` and `Quotient.recOnSubsingleton`. -/
 noncomputable def ctxToImp (Γ : Ctx Atom) (A : Proposition Atom) : Proposition Atom :=
   listToImp Γ.toList A
 
@@ -108,7 +126,9 @@ def ljListDeductionFwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : 
 A proof of `Γ ⊢ A` gives a proof of `∅ ⊢ ctxToImp Γ A` by repeatedly introducing
 implications via `impR` to discharge all context assumptions.
 
-This is `noncomputable` because `ctxToImp` uses `Finset.toList`. -/
+This is `noncomputable` because it is stated in terms of `ctxToImp`, whose noncomputability
+is inherent (see `ctxToImp`'s docstring) rather than a defect. No decision procedure depends on
+this declaration. -/
 noncomputable def ljProofDeductionFwd {Γ : Ctx Atom} {A : Proposition Atom}
     (d : LJProof (Γ ⊢ A)) : LJProof (∅ ⊢ ctxToImp Γ A) := by
   unfold ctxToImp
@@ -166,7 +186,9 @@ def ljListDeductionBwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : 
 A proof of `∅ ⊢ ctxToImp Γ A` gives a proof of `Γ ⊢ A` by repeatedly eliminating
 implications from the antecedent using `impL` steps.
 
-This is `noncomputable` because `ctxToImp` uses `Finset.toList`. -/
+This is `noncomputable` because it is stated in terms of `ctxToImp`, whose noncomputability
+is inherent (see `ctxToImp`'s docstring) rather than a defect. No decision procedure depends on
+this declaration. -/
 noncomputable def ljProofDeductionBwd {Γ : Ctx Atom} {A : Proposition Atom}
     (d : LJProof (∅ ⊢ ctxToImp Γ A)) : LJProof (Γ ⊢ A) := by
   unfold ctxToImp at d
@@ -176,17 +198,16 @@ noncomputable def ljProofDeductionBwd {Γ : Ctx Atom} {A : Proposition Atom}
 
 /-! ## Decidability Instances -/
 
-/-- `Nonempty (LJProof (Γ ⊢ A))` is decidable for finite contexts over decidable, hashable atoms.
+/-- List-level decidability of LJ derivability from a `Nodup` list context.
 
-The proof reduces LJ derivability to intuitionistic validity via the deduction theorem
-and `lj_iff_ivalid`:
-1. `Nonempty (LJProof (Γ ⊢ A)) ↔ Nonempty (LJProof (∅ ⊢ ctxToImp Γ A))` by the
-   deduction theorem (`ljProofDeductionFwd` and `ljProofDeductionBwd`).
-2. `Nonempty (LJProof (∅ ⊢ ctxToImp Γ A)) ↔ IValid (ctxToImp Γ A)` by `lj_iff_ivalid`.
-3. `IValid (ctxToImp Γ A)` is decidable by `instDecidableIValid` (from the intuitionistic
-   tableau decision procedure).
-
-The instance is `noncomputable` because `ctxToImp` uses `Finset.toList`.
+Given a `Nodup` list `l` and the proof `h` that its coercion to a `Multiset` is `Nodup`, decides
+`Nonempty (LJProof ((⟨↑l, h⟩ : Finset (Proposition Atom)) ⊢ A))` by routing through
+`IValid (listToImp l A)`, exactly as `instDecidableLJDerivable` used to route through
+`IValid (ctxToImp Γ A)` -- but `listToImp` applied to a concrete list needs no choice of
+representative, so this helper is computable. `instDecidableLJDerivable` builds on this helper
+via `Quotient.recOnSubsingleton`, applying it to an arbitrary representative of `Γ`'s underlying
+`Multiset`; the resulting *decision* is representative-independent because `Decidable p` is a
+`Subsingleton`, even though `listToImp l A` itself is not invariant under permuting `l`.
 
 **Universe note.** `instDecidableIValid` (from `Intuitionistic/DecisionProcedure.lean`) is pinned
 to `IValid.{_, 0}`, while `lj_iff_ivalid` needs `IValid.{u, u}` (`u` = `Atom`'s own universe). The
@@ -194,28 +215,47 @@ local `letI` below routes through `ivalid_universe_invariant` -- the same bridge
 `instDecidableDerivableIntPropAxiom` uses -- to recover an unpinned `Decidable (IValid _)`
 instance before `decidable_of_iff` is applied, exactly mirroring
 `Minimal/DecisionProcedure.lean`'s `mvalid_universe_invariant` pattern. -/
-noncomputable instance instDecidableLJDerivable {Γ : Ctx Atom} {A : Proposition Atom} :
-    Decidable (Nonempty (LJProof (Γ ⊢ A))) :=
-  letI : Decidable (IValid (ctxToImp Γ A)) :=
-    decidable_of_iff (IValid.{_, 0} (ctxToImp Γ A))
-      (ivalid_universe_invariant (ctxToImp Γ A)).symm
-  decidable_of_iff (IValid (ctxToImp Γ A)) <| by
+def ljListDerivableDecidable (l : List (Proposition Atom))
+    (h : (↑l : Multiset (Proposition Atom)).Nodup) (A : Proposition Atom) :
+    Decidable (Nonempty (LJProof ((⟨↑l, h⟩ : Finset (Proposition Atom)) ⊢ A))) :=
+  letI : Decidable (IValid (listToImp l A)) :=
+    decidable_of_iff (IValid.{_, 0} (listToImp l A)) (ivalid_universe_invariant _).symm
+  decidable_of_iff (IValid (listToImp l A)) <| by
+    have hset : (⟨(↑l : Multiset (Proposition Atom)), h⟩ : Finset (Proposition Atom))
+        = l.toFinset := List.toFinset_eq h
+    rw [hset]
     constructor
-    · -- IValid (ctxToImp Γ A) → Nonempty (LJProof (Γ ⊢ A))
+    · -- IValid (listToImp l A) → Nonempty (LJProof (l.toFinset ⊢ A))
       intro hv
-      -- lj_iff_ivalid.mp : IValid φ → Nonempty (LJProof (∅ ⊢ φ))
       obtain ⟨d⟩ := lj_iff_ivalid.mp hv
-      exact ⟨ljProofDeductionBwd d⟩
-    · -- Nonempty (LJProof (Γ ⊢ A)) → IValid (ctxToImp Γ A)
-      intro ⟨d⟩
-      -- lj_iff_ivalid.mpr : Nonempty (LJProof (∅ ⊢ φ)) → IValid φ
-      exact lj_iff_ivalid.mpr ⟨ljProofDeductionFwd d⟩
+      have hd := ljListDeductionBwd l ∅ A d
+      rw [Finset.union_empty] at hd
+      exact ⟨hd⟩
+    · -- Nonempty (LJProof (l.toFinset ⊢ A)) → IValid (listToImp l A)
+      rintro ⟨d⟩
+      refine lj_iff_ivalid.mpr ⟨ljListDeductionFwd l ∅ A ?_⟩
+      rw [Finset.union_empty]
+      exact d
+
+/-- `Nonempty (LJProof (Γ ⊢ A))` is decidable for finite contexts over decidable, hashable atoms.
+
+The instance eliminates `Γ`'s underlying `Multiset` via `Quotient.recOnSubsingleton` into
+`ljListDerivableDecidable`, applied to an arbitrary list representative `l` of `Γ.val` with
+`Γ.nodup` as the `Nodup` witness. Since `Decidable p` is a `Subsingleton`, the elimination is
+sound -- the resulting decision does not depend on which representative is chosen -- and, because
+`ljListDerivableDecidable` is itself computable, so is this instance. The reconstruction
+`⟨Γ.val, Γ.nodup⟩` is definitionally `Γ` by structure eta, so no cast is needed at this level. -/
+instance instDecidableLJDerivable {Γ : Ctx Atom} {A : Proposition Atom} :
+    Decidable (Nonempty (LJProof (Γ ⊢ A))) :=
+  Quotient.recOnSubsingleton (motive := fun (s : Multiset (Proposition Atom)) =>
+      (h : s.Nodup) → Decidable (Nonempty (LJProof ((⟨s, h⟩ : Finset (Proposition Atom)) ⊢ A))))
+    Γ.val (fun l h => ljListDerivableDecidable l h A) Γ.nodup
 
 /-- `DerivableIn (AxiomTheory IntPropAxiom) (Γ ⊢ A)` is decidable for finite contexts
 over decidable, hashable atoms.
 
 Obtained by combining `instDecidableLJDerivable` with the ND–LJ bridge `nd_iff_lj`. -/
-noncomputable instance instDecidableDerivableInIPL {Γ : Ctx Atom} {A : Proposition Atom} :
+instance instDecidableDerivableInIPL {Γ : Ctx Atom} {A : Proposition Atom} :
     Decidable (DerivableIn (AxiomTheory (@IntPropAxiom Atom) : Theory Atom) (Γ ⊢ A)) :=
   decidable_of_iff (Nonempty (LJProof (Γ ⊢ A))) nd_iff_lj.symm
 

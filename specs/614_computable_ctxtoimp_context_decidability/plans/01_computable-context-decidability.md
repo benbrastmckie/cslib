@@ -2,7 +2,7 @@
 
 - **Task**: 614 - Give `ctxToImp` a computable definition so the four context-based `Decidable`
   instances for the propositional sequent calculi stop being `noncomputable`
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 3.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md`
@@ -124,7 +124,7 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 
 ---
 
-### Phase 1: Make the LJ instances computable [NOT STARTED]
+### Phase 1: Make the LJ instances computable [COMPLETED]
 
 **Goal**: `Cslib/Logics/Propositional/SequentCalculus/LJ/Decidability.lean` builds with
 `instDecidableLJDerivable` and `instDecidableDerivableInIPL` carrying no `noncomputable` marker,

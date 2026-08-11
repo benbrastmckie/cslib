@@ -1,6 +1,6 @@
 # Implementation Plan: Precedence-Collision Fix for Scheme.lean Non-Termination
 - **Task**: 626 - Root-cause and fix the Scheme.lean build non-termination introduced by the Connectives/Operators migration
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 2 hours (dominated by build wall time; edit surface is ~10 lines)
 - **Dependencies**: None (task 619 phase 8 is blocked ON this task, not the reverse)
 - **Research Inputs**:
@@ -178,20 +178,20 @@ phases share one worktree, one `.lake` build directory, and one branch head — 
 would race builds and commits, so execution is deliberately fully sequential. There are no
 parallel opportunities in this plan.
 
-### Phase 1: Commit the precedence fix on the wip branch [NOT STARTED]
+### Phase 1: Commit the precedence fix on the wip branch [COMPLETED]
 
 - **Goal:** The 2-line `Operators.lean` precedence fix is committed on `task-619-phase8-wip`,
   with the Scheme.lean sentinel build proving the non-termination is gone.
 - **Territory (H7):** `Cslib/Foundations/Logic/Operators.lean` in the worktree ONLY. (The
   LoopChecking working-tree change stays uncommitted until phase 2 — stage the single file.)
 - **Tasks:**
-  - [ ] Verify worktree exists and its `Operators.lean` diff is exactly the report 02 §5
+  - [x] Verify worktree exists and its `Operators.lean` diff is exactly the report 02 §5
         recipe: `scoped infixr:31 " ∨ " => HasOr.or` and `scoped infixr:26 " → " => HasImp.imp`
         (content-anchored; expected at lines 38/45). If the worktree is gone, run the
         contingency recipe (Overview) first.
-  - [ ] Sentinel build in the worktree:
+  - [x] Sentinel build in the worktree:
         `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme`.
-  - [ ] Commit ONLY `Cslib/Foundations/Logic/Operators.lean` on the branch
+  - [x] Commit ONLY `Cslib/Foundations/Logic/Operators.lean` on the branch
         (`git -C <wt> add Cslib/Foundations/Logic/Operators.lean && git -C <wt> commit`),
         message per git-workflow.md (`task 626 phase 1: ...` + Session line).
 - **Timing:** sentinel build ~29s warm (report 02 E10); tolerate up to 10 min; beyond 10 min =

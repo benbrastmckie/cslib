@@ -1,6 +1,6 @@
 # Implementation Plan: Precedence-Collision Fix for Scheme.lean Non-Termination
 - **Task**: 626 - Root-cause and fix the Scheme.lean build non-termination introduced by the Connectives/Operators migration
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours (dominated by build wall time; edit surface is ~10 lines)
 - **Dependencies**: None (task 619 phase 8 is blocked ON this task, not the reverse)
 - **Research Inputs**:
@@ -287,27 +287,41 @@ parallel opportunities in this plan.
 - **Depends on:** 2
 - **Verification Tier:** local
 
-### Phase 4: Full-library gate and wrap-up [NOT STARTED]
+### Phase 4: Full-library gate and wrap-up [COMPLETED WITH EXCLUSIONS]
 
 - **Goal:** The branch (now = `1e88ad3e` + 3 fix commits) is proven fully green, and task
   artifacts are written on `main`.
 - **Territory (H7):** no Lean edits. Writes only under `specs/626_scheme_lean_kernel_defeq_regression/` on the `main` checkout.
 - **Tasks:**
-  - [ ] In the worktree: `lake build` (full default target). Expected: green, ~3331 jobs,
-        ~7 min wall (report 02 §8: 6m55s), INCLUDING the `Cslib` barrel as one of the final
-        jobs. Tolerate up to 20 min; capture the final job count and wall time.
-  - [ ] In the worktree: build the test driver (`lake test` or `lake build CslibTests` per the
-        phase-3 confirmed invocation) — green including the new regression file.
-  - [ ] Confirm `git -C <wt> status` clean and `git -C <wt> log --oneline main..task-619-phase8-wip`
-        shows `1e88ad3e` + the three fix commits.
-  - [ ] On the `main` checkout: write
+  - [x] In the worktree: `lake build` (full default target). RESULT: green, exit 0, exactly
+        **3331 jobs** (matching the predicted count), wall 1.76s — a warm-cache full replay
+        (the cold compile happened during phase 1-3 verification; `.lake` was fully warm).
+        The `Cslib` barrel built: `.lake/build/lib/lean/Cslib.olean` present and
+        `lake build Cslib` exits 0 at 3331 jobs.
+  - [x] In the worktree: build the test driver (`lake test`, per phase-3 confirmed
+        invocation). RESULT: the NEW regression file is green (`lake build
+        CslibTests.OperatorPrecedenceRegression` exit 0, 519 jobs; olean present), and 9
+        further test modules built green, BUT `lake test` overall exits 1: six modules fail
+        (`BetaSplitRefutation`, `Propositional`, `MinProbe`, `TableauConformance`,
+        `WitnessProbe`, `WitnessSearch3`) — all PRE-EXISTING base breakage, see Reasoned
+        Exclusions below.
+  - [x] Confirm `git -C <wt> status` clean and `git -C <wt> log --oneline main..task-619-phase8-wip`
+        shows `1e88ad3e` + the three fix commits. RESULT: clean at `3b0caf3b`; log shows
+        exactly `1e88ad3e`, `128c42ee`, `c331c9e5`, `3b0caf3b`.
+  - [x] On the `main` checkout: write
         `specs/626_scheme_lean_kernel_defeq_regression/summaries/01_precedence-collision-fix-summary.md`
         (include: measured build time/job count, the three branch commit SHAs, explicit note
         that merge-to-main is deferred to the phase-8 task).
-  - [ ] Update `.return-meta.json` (status `implemented`, `completion_data`, `modified_files`
+  - [x] Update `.return-meta.json` (status `implemented`, `completion_data`, `modified_files`
         listing ONLY the specs/** files — the Lean files were committed on the branch in
         phases 1-3 and are NOT in the main checkout's working tree) and
         `.orchestrator-handoff.json` (phase `implement`, status `implemented`).
+
+#### Reasoned Exclusions
+
+| Item | Reason | Evidence |
+|------|--------|----------|
+| `lake test` overall exit 0 ("green including the new regression file" — the regression file IS green; the six failing modules are excluded) | The six failing modules (`BetaSplitRefutation`, `Propositional`, `MinProbe`, `TableauConformance`, `WitnessProbe`, `WitnessSearch3`) were already red at branch base `1e88ad3e`, before any fix commit: the base commit deleted the PL-local scoped notations (`∧`:36 / `∨`:35 / `→`:30 bound to `Proposition` constructors) from `Cslib/Logics/Propositional/Defs.lean` as part of the preserved-WIP notation migration, and these six files — all byte-identical between base and HEAD — rely on exactly those notations via `open Cslib.Logic.PL` (which does NOT activate the parent-namespace `Cslib.Logic` scoped notations; probe-verified). Repairing them is the phase-8 follow-up task's declared "downstream repairs" work and is Lean-file territory, prohibited in this phase. | (1) `git show 1e88ad3e:Cslib/Logics/Propositional/Defs.lean` lacks the three notation lines that `git show main:...Defs.lean` has (lines 107-109 on main); (2) `git diff 1e88ad3e..HEAD -- CslibTests/` touches only `OperatorPrecedenceRegression.lean` — the six failing files are unchanged; (3) minimal probe with only `open Cslib.Logic.PL` reproduces the identical `Or pr` / "type expected" errors at HEAD independent of the fix commits; (4) adding `open Cslib.Logic` makes the same probe fully elaborate with `rfl`-verified grouping — a verified repair path recorded in the summary for the phase-8 task. |
 - **Timing:** ~10-25 min total, dominated by `lake build`. A 7-minute silent stretch is normal.
 - **Done when:** full `lake build` and the test driver both exit 0 in the worktree; summary,
   metadata, and handoff written on `main`.
@@ -320,18 +334,24 @@ parallel opportunities in this plan.
 
 ## Testing & Validation
 
-- [ ] Sentinel: `Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` builds in bounded
-      time (~29s warm; hard regression signal at >10 min).
-- [ ] `Cslib.Logics.Modal.Tableau.LoopChecking` builds at the DEFAULT heartbeat budget with the
-      band-aid deleted.
-- [ ] Semantics-unchanged gates (named): the two E9 rfl grouping pins
+- [x] Sentinel: `Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` builds in bounded
+      time (~29s warm; hard regression signal at >10 min). (Verified in phases 1-2; replayed
+      green inside the phase-4 full build.)
+- [x] `Cslib.Logics.Modal.Tableau.LoopChecking` builds at the DEFAULT heartbeat budget with the
+      band-aid deleted. (Phase 2; replayed green in the phase-4 full build; `grep maxHeartbeats`
+      in the file → 0 matches.)
+- [x] Semantics-unchanged gates (named): the two E9 rfl grouping pins
       (`a ∧ b ∨ c → a` structure equation; `a → b → c` right-nesting equation) — now durable in
-      `CslibTests/OperatorPrecedenceRegression.lean`.
-- [ ] Performance gates (named): 24-arrow and 24-`∨` Prop-chain examples elaborate flat
-      (seconds, not 46s+).
-- [ ] Full gate: `lake build` green on the branch, ~3331 jobs incl. `Cslib` barrel, ~7 min.
-- [ ] Zero `sorry`, zero new `maxHeartbeats`, zero task-number citations in Lean files
-      (`grep -n "task [0-9]" <touched lean files>` → empty).
+      `CslibTests/OperatorPrecedenceRegression.lean`. (Module builds green: 519 jobs, exit 0.)
+- [x] Performance gates (named): 24-arrow and 24-`∨` Prop-chain examples elaborate flat
+      (seconds, not 46s+). (In `OperatorPrecedenceRegression.lean`; whole module compiles in
+      seconds within the scoped build.)
+- [x] Full gate: `lake build` green on the branch, exactly 3331 jobs incl. `Cslib` barrel
+      (1.76s warm-cache replay in phase 4; cold compile occurred during phases 1-3).
+- [x] Zero `sorry`, zero new `maxHeartbeats`, zero task-number citations in Lean files
+      (`grep -n "task [0-9]" <touched lean files>` → empty; repo-wide sorry count identical
+      between base `1e88ad3e` and HEAD: 312 raw grep matches both, delta 0; the single match in
+      touched files is the word "sorry" in a `LoopChecking.lean` docstring about census counts).
 
 ## Artifacts & Outputs
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Reconcile Connectives.lean against merged Operators.lean
 
 - **Task**: 619 - Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 11 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/619_reconcile_connectives_operators/reports/01_connectives-operators-reconciliation.md`
@@ -143,7 +143,7 @@ Phase 2.
 
 ---
 
-### Phase 1: Vendor Operators.lean verbatim (orphaned) [NOT STARTED]
+### Phase 1: Vendor Operators.lean verbatim (orphaned) [COMPLETED]
 
 **Goal**: Bring upstream's `Operators.lean` into the tree byte-identically, without entering the
 `Cslib.lean` barrel, so nothing downstream changes yet.

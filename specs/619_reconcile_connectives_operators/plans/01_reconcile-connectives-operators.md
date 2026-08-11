@@ -221,7 +221,7 @@ stop and re-derive the site list rather than proceeding on the recorded figure.
 
 ---
 
-### Phase 3: Pre-land LTL bridge lemma [NOT STARTED]
+### Phase 3: Pre-land LTL bridge lemma [COMPLETED]
 
 **Goal**: Add the `_def` bridge lemma that will compensate for the local `→` notation deleted in
 Phase 8, while that notation is still present, so the phase is green and committable on its own.

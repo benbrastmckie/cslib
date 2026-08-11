@@ -165,6 +165,11 @@ instance : LTLConnectives (Formula Atom) where
   untl := .untl
   next := .next
 
+/-- Bridge lemma: the concrete constructor `Formula.imp` agrees with the `HasImp` projection
+supplied by the `LTLConnectives` instance above. Compensates for the local `→` notation bound
+to `Formula.imp`, which shadows the scoped `HasImp.imp` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Formula.imp_def (φ ψ : Formula Atom) : φ.imp ψ = HasImp.imp φ ψ := rfl
+
 /-- Negation: ¬φ := φ → ⊥.
 
 Delegates to the canonical `PropositionalConnectives.neg` default (the repo-wide

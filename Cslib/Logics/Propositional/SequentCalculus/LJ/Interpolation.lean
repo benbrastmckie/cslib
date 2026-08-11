@@ -506,6 +506,30 @@ private lemma ljMaeharaCore {seq : @Sequent Atom} (d : LJProof seq) (hcf : LJCut
                  Finset.subset_union_left)
                (Finset.subset_union_right.trans Finset.subset_union_right)
 
+/-! ## General Split Interpolation (Public) -/
+
+/-- **LJ split interpolation**: the general-partition form of Craig interpolation, publicly
+exposed. For any cut-free LJ proof (bundled as `CutFreeLJProof seq`) and any cover partition
+`Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant `I` satisfying:
+1. `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars` (variable constraint),
+2. `Γ₁ ⊢ I` (left half-derivation), and
+3. `insert I Γ₂ ⊢ seq.2` (right half-derivation).
+
+Unlike the LK version, only the antecedent is partitioned (single-conclusion sequents); the LJ
+core takes `Γ₁ Γ₂` only, not the four-way LK split, so this wrapper's signature does not mirror
+`LKProof.splitInterpolation`'s uniformly.
+
+This is a thin public wrapper around `ljMaeharaCore` (which stays `private`, since
+un-privatising it would expose an internal induction shape as API). `LJProof.interpolation`
+below remains the empty-context implication specialisation of this general-partition form. -/
+theorem LJProof.splitInterpolation {seq : @Sequent Atom} (d : CutFreeLJProof seq)
+    (Γ₁ Γ₂ : Finset (Proposition Atom)) (hant : seq.1 = Γ₁ ∪ Γ₂) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars ∧
+      Nonempty (LJProof (Γ₁ ⊢ I)) ∧
+      Nonempty (LJProof (insert I Γ₂ ⊢ seq.2)) :=
+  ljMaeharaCore d.1 d.2 Γ₁ Γ₂ hant
+
 /-! ## LJ Craig Interpolation Corollary -/
 
 /-- **LJ Craig Interpolation** (corollary): From any LJ proof of `∅ ⊢ A → B`, there exists

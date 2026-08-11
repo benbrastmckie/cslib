@@ -797,6 +797,27 @@ private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFre
         -- Permute ant to insert A (insert I Γ₂); apply impR (A→B ∈ Δ₂) to get insert I Γ₂ ⊢ₛ Δ₂.
         exact ⟨LKProof.impR A B hAB₂ (d_right.mono hperm (Finset.Subset.refl _))⟩
 
+/-! ## General Split Interpolation (Public) -/
+
+/-- **LK split interpolation**: the general-partition form of Craig interpolation, publicly
+exposed. For any cut-free LK proof (bundled as `CutFreeLKProof seq`) and any cover partition
+`Γ₁ ∪ Γ₂ = seq.ant`, `Δ₁ ∪ Δ₂ = seq.suc`, there exists an interpolant `I` satisfying:
+1. `I.vars ⊆ (Γ₁ ∪ Δ₁).vars ∩ (Γ₂ ∪ Δ₂).vars` (variable constraint),
+2. `Γ₁ ⊢ₛ insert I Δ₁` (left half-derivation), and
+3. `insert I Γ₂ ⊢ₛ Δ₂` (right half-derivation).
+
+This is a thin public wrapper around `maeharaCore` (which stays `private`, since un-privatising
+it would expose an internal induction shape as API). `LKProof.interpolation` below remains the
+empty-context implication specialisation of this general-partition form. -/
+theorem LKProof.splitInterpolation {seq : LKSequent Atom} (d : CutFreeLKProof seq)
+    (Γ₁ Γ₂ Δ₁ Δ₂ : Finset (Proposition Atom))
+    (hant : seq.ant = Γ₁ ∪ Γ₂) (hsuc : seq.suc = Δ₁ ∪ Δ₂) :
+    ∃ I : Proposition Atom,
+      I.vars ⊆ (Γ₁ ∪ Δ₁).vars ∩ (Γ₂ ∪ Δ₂).vars ∧
+      Nonempty (LKProof (Γ₁ ⊢ₛ insert I Δ₁)) ∧
+      Nonempty (LKProof (insert I Γ₂ ⊢ₛ Δ₂)) :=
+  maeharaCore d.1 d.2 Γ₁ Γ₂ Δ₁ Δ₂ hant hsuc
+
 /-! ## LK Craig Interpolation Corollary -/
 
 /-- **LK Craig Interpolation** (corollary): From any LK proof of `∅ ⊢ₛ {A → B}`, there exists

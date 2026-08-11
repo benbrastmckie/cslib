@@ -247,7 +247,7 @@ as measured and should be re-examined before proceeding.
 
 ---
 
-### Phase 3: B2 -- public general split interpolation [NOT STARTED]
+### Phase 3: B2 -- public general split interpolation [COMPLETED]
 
 **Goal**: The already-proved general split-interpolation lemma over arbitrary cover partitions is
 publicly reachable for both LK and LJ, in the bundled `CutFreeXProof` shape, with no new proof.

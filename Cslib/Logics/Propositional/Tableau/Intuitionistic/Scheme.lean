@@ -4904,7 +4904,7 @@ omit [Hashable Atom] in
 /-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
 `FmpMeasure.lean:190-193`): the number of universe elements not yet on the branch, plus
 the number not yet expanded. Strictly decreases per expansion step despite persistence
-(`intExpMeasure_step_lt`, not yet proved). -/
+(`intExpMeasure_step_lt`, proved below, sorry-free). -/
 def intWork (U b e : List (ISF Atom)) : Nat :=
   U.countP (fun sf => !(b.any (· == sf))) + U.countP (fun sf => !(e.any (· == sf)))
 
@@ -7302,9 +7302,10 @@ This section supplies the STEP-level half of the freeze argument report §5.4 ca
 the invariant is stable, see `IFrozenBelow`'s docstring), a single `intStepBranchPrio` step can
 only write new content at labels `≥ w0`. This is the "alpha/beta processing at that label is
 impossible" half of the report's mechanism (Phase 5's investigation note, point 3(a)); it does
-NOT yet cover the persistence-copy half (point 3(b), which additionally needs `IPosPersistRaw`
-and is deferred to Phase 6, where it composes with the main induction's already-threaded
-invariants rather than needing a second bespoke induction here). -/
+NOT cover the persistence-copy half (point 3(b), which additionally needs `IPosPersistRaw`);
+that half has since landed as `IAugMembers_persist` below, composing with the main induction's
+already-threaded invariants rather than needing a second bespoke induction, and is consumed at
+its use site further below. -/
 
 /-- The labels an intuitionistic rule-application result can newly write are all `≥ w0`:
 `.linearResult`'s `newForms` for the alpha/world-creating case, every branch's formulas for the

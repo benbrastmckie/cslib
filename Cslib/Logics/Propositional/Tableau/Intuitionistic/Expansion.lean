@@ -695,11 +695,17 @@ invariant of branches actually produced by `intExpandBranches`.
 (c) NO numeric world bound of any size exists for the current calculus: the world count is
 unbounded in fuel on this input, so no `f(φ0)` satisfies `nextWorld ≤ f(φ0)`.
 
-**Directive.** Do not attempt to prove `intExpandBranches_world_bound`, the `hnw` hypothesis, or
-the `intUniverse` containment invariant (`hUniv`) as currently stated — they are refuted, not
-merely hard. Any future progress on world-boundedness requires a calculus-level change (an
-ancestor-directed loop-check/blocking rule that actually cuts the ping-pong above), not a proof
-effort against the present statements.
+**Directive.** Do not attempt to prove `intExpandBranches_world_bound` or the `hnw` hypothesis
+as currently stated — they are refuted, not merely hard. Any future progress on
+world-boundedness requires a calculus-level change (an ancestor-directed loop-check/blocking
+rule that actually cuts the ping-pong above), not a proof effort against the present statements.
+
+**This directive does NOT extend to `hUniv`.** What this note originally called the
+`intUniverse` containment invariant now names `IAllUniv` (`Scheme.lean`), stated over the
+EXTENDED universe `intUniverseExt` rather than the plain `intUniverse` consequence (b) above
+refutes. Unlike `intExpandBranches_world_bound`/`hnw`, `IAllUniv` IS threaded and discharged:
+it is `intExpandBranches_openBranch_sat`'s `hUniv` hypothesis, and `openBranch_countermodel`
+(`Scheme.lean`) supplies it via `mem_intUniverseExt_of` at a live, sorry-free use site.
 
 **Method.** Obtained by evaluating `intExpandBranches` on `φ0` at increasing fuel and comparing
 branch contents across worlds; re-verified directly in Lean on the unmodified library, not only

@@ -28,7 +28,7 @@ Phases 1-6; Phase 7 explicitly optional, deferred).
 - [ ] **Task 2.2**: Re-tense `Scheme.lean:930-944` (sorry claim) as PRE-REPAIR; `truthLemma` is
   proved at `:1005`. Leave the verbatim quotation at `:921` untouched.
 
-### Phase 3: Part 2 (c)(d)(e) [NOT STARTED]
+### Phase 3: Part 2 (c)(d)(e) [COMPLETED]
 
 - [ ] **Task 3.1**: Fix `Scheme.lean:4899` (`intExpMeasure_step_lt` proved at `:5097`).
 - [ ] **Task 3.2**: Fix `Scheme.lean:7296-7299` (`IAugMembers_persist` landed at `:7917`).

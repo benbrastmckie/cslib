@@ -130,7 +130,7 @@ critical path.
 
 ---
 
-### Phase 1: Pre-flight verification and isolated workspace [IN PROGRESS]
+### Phase 1: Pre-flight verification and isolated workspace [COMPLETED]
 
 **Goal**: Confirm the research topology still holds against live remotes, and create a rebase
 workspace that structurally cannot involve this fork's `main`.
@@ -176,9 +176,31 @@ and 5 against it before proceeding.
 - The worktree exists, is on `rebase/pr648-upstream`, and shows exactly 3 Propositional files.
 - `/home/benjamin/Projects/cslib` is still on `main` with its working tree untouched.
 
+**Phase 1 Notes (actual, re-verified 2026-08-11)**:
+- Topology: merge base `056cf937`, PR head `origin/feat/propositional-v2` = `4834be23`,
+  `upstream/main` = `4bec19fc` (advanced from the plan-time `3951377e` by one commit), fork
+  `main` = `f568febe` (untouched by this task).
+- Upstream delta since research: `4bec19fc` "chore: bump toolchain to v4.34.0-rc1 (#792)" — touches
+  `lean-toolchain` (now `leanprover/lean4:v4.34.0-rc1`), `lake-manifest.json` (Mathlib now
+  `de5ce8a9`), `lakefile.toml`, and four unrelated `.lean` files under `Machines/`,
+  `Foundations/Data/`, `LocallyNameless/`, `MachineLearning/`. **Does not touch**
+  `Cslib/Logics/Propositional/` or `Cslib/Foundations/Logic/`. No re-derivation of the research
+  §4.3 reconciliation table is required. The rebase's expected inherited toolchain/Mathlib pins
+  are therefore revised from the plan's `v4.33.0`/`db584cd6` to `v4.34.0-rc1`/`de5ce8a9` — tracked
+  as a deviation in Phases 2, 3, and 6.
+- Merge-tree probe (`git merge-tree --write-tree --name-only --merge-base=056cf937 upstream/main
+  origin/feat/propositional-v2`) confirms exactly 2 conflicted files, matching the research
+  prediction: `Cslib/Logics/Propositional/Defs.lean`, `references.bib` (both `CONFLICT (content)`).
+- Worktree created: `git worktree add -b rebase/pr648-upstream
+  /home/benjamin/Projects/cslib-pr648 origin/feat/propositional-v2`. Gate passed: exactly 3 files
+  under `Cslib/Logics/Propositional/` (`Defs.lean`,
+  `NaturalDeduction/Basic.lean`, `NaturalDeduction/Theory.lean`). Gate passed: no `specs/` or
+  `.claude/` tree in the worktree. Main repo confirmed still on `main` with a clean-relative
+  (pre-existing, unrelated) working-tree diff.
+
 ---
 
-### Phase 2: Execute the rebase and resolve the mechanical conflict [NOT STARTED]
+### Phase 2: Execute the rebase and resolve the mechanical conflict [COMPLETED]
 
 **Goal**: Land the PR's six commits on top of `upstream/main` with a linear history, resolving
 `references.bib` mechanically and taking a first-pass `Defs.lean` resolution sufficient to
@@ -224,12 +246,37 @@ it lists `lean-toolchain` and `lake-manifest.json` (inherited, not edited) and o
 - `git status` in the worktree is clean and no rebase is in progress.
 - `git log --oneline upstream/main..HEAD` shows only the PR's commits.
 - `git diff --stat $(git merge-base upstream/main HEAD)..HEAD` names exactly four files.
-- `lean-toolchain` = `leanprover/lean4:v4.33.0`; Mathlib rev = `db584cd6`.
+- `lean-toolchain` = `leanprover/lean4:v4.34.0-rc1`; Mathlib rev = `de5ce8a9` (revised target per the
+  Phase 1 topology deviation — upstream advanced past the plan-time `v4.33.0`/`db584cd6`).
 - No duplicate BibTeX keys.
+
+**Phase 2 Notes (actual)**:
+- All 6 PR commits rebased cleanly onto `upstream/main` (`4bec19fc`):
+  `c007ac73, efcf8d78, 8d204744, 2f790a10, c06d7623, 829b24eb`.
+- `references.bib` conflicts arose across three of the six commits (not just the first), because
+  upstream had independently converged on a near-identical five-primitive-bot design (via #607),
+  producing genuine textual overlap at each point the PR's own history touched the file. Resolved
+  mechanically per research §5 in each case: kept both sides' entries, no key ever dropped.
+  Caught and corrected one initial duplicate (`Avigad2022` momentarily kept at two locations after
+  the first conflict); final state has exactly one `Avigad2022` entry, matching the PR's own
+  pre-rebase head. Final duplicate-key check: none. Trailing newline confirmed present.
+- `Cslib/Logics/Propositional/Defs.lean` conflicted on the first commit (5 hunks, matching the
+  research prediction exactly) and was resolved by taking the PR's side wholesale
+  (`git checkout --theirs`) per the "first-pass only" instruction — full reconciliation deferred to
+  Phase 4 as planned. Subsequent commits' diffs against `Defs.lean` applied without further
+  conflict.
+- `NaturalDeduction/Basic.lean` and `NaturalDeduction/Theory.lean` applied without conflict, as
+  research predicted.
+- `lean-toolchain` and `lake-manifest.json` inherited from upstream verbatim, no manual edit —
+  now `v4.34.0-rc1` / Mathlib `de5ce8a9` per the Phase 1 deviation note (not the plan's original
+  `v4.33.0`/`db584cd6`, which was accurate at research time but superseded by upstream's
+  `4bec19fc` toolchain-bump commit).
+- Final diff against the new merge base names exactly the four approved files: `Defs.lean`,
+  `NaturalDeduction/Basic.lean`, `NaturalDeduction/Theory.lean`, `references.bib`.
 
 ---
 
-### Phase 3: Toolchain and Mathlib cache warm-up [NOT STARTED]
+### Phase 3: Toolchain and Mathlib cache warm-up [COMPLETED]
 
 **Goal**: Make the worktree buildable before any verification phase needs it, so that build time
 is not misread as a hang mid-reconciliation.
@@ -258,6 +305,16 @@ is not misread as a hang mid-reconciliation.
 - `lake env lean --version` reports `4.33.0`.
 - A Mathlib-dependent target builds from cache rather than from source.
 - Disk headroom is recorded and non-critical.
+
+**Phase 3 Notes (actual)**: target revised to `v4.34.0-rc1` / Mathlib `de5ce8a9` per the Phase 1
+deviation. `elan toolchain install leanprover/lean4:v4.34.0-rc1` succeeded (not previously
+installed; prior max was `v4.33.0-rc1`). `lake update` fetched all dependencies pinned to the
+rebased `lake-manifest.json` and ran Mathlib's post-update hook, which itself performed the cache
+decompression (`lake exe cache get` afterwards reported "No files to download, already
+decompressed 8691 file(s)"). Gate: `lake env lean --version` reports
+`4.34.0-rc1`; `lake build Cslib.Init` completed 468 jobs in 3.1s (cache-backed, not a
+from-source Mathlib compile). Disk: 56G free before, 45G free after (11G consumed by toolchain +
+cache), non-critical relative to the 74G recorded at plan time.
 
 ---
 

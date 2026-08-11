@@ -85,6 +85,16 @@ conflation rather than a mere elaboration ambiguity. Registering `HasTensor` for
 type is similarly unguarded. Before adding any such instance, audit this invariant against the
 target formula type's existing notation.
 
+A distinct, silent variant of this risk: an *exact* collision of a scoped notation with a
+**core** notation in token + precedence + associativity raises no error at all — every use of
+the token becomes a parser `choice` node, and on right-nested chains the elaborator backtracks
+through Θ(2^n) alternative parses, effectively unbounded by the heartbeat budget since each
+alternative's timeout is swallowed before the next is tried. Every scoped notation here must
+therefore stay offset by one from the corresponding core precedence (`∧` 36 vs 35, `∨` 31 vs
+30, `→` 26 vs 25); the latent `↔` (20 vs 20) and `¬` (identical-shape) collisions are
+acceptable only while no instance activates them on chain-prone types (guarded by
+`CslibTests/OperatorPrecedenceRegression.lean`).
+
 ## Module Routing
 
 The bundled connective classes serve different logic modules:

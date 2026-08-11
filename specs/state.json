@@ -1365,7 +1365,7 @@
       "project_number": 626,
       "project_name": "scheme_lean_kernel_defeq_regression",
       "title": "Root-cause the Scheme.lean kernel-defeq non-termination introduced by the Connectives/Operators migration",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "priority": "high",
       "topic": "propositional-tableau",
@@ -1386,11 +1386,21 @@
           "path": "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md",
           "type": "plan",
           "summary": "Four-phase plan landing the precedence fix on task-619-phase8-wip"
+        },
+        {
+          "path": "specs/626_scheme_lean_kernel_defeq_regression/summaries/01_precedence-collision-fix-summary.md",
+          "type": "summary",
+          "summary": "Precedence-collision root cause, fix, gates, and task 619 phase 8 consumption handoff"
         }
       ],
       "created": "2026-08-11T15:23:13Z",
-      "last_updated": "2026-08-11T16:16:24Z",
-      "session_id": "sess_1786462543_b0741b"
+      "last_updated": "2026-08-11T16:41:01Z",
+      "session_id": "sess_1786462543_b0741b",
+      "completion_summary": "Root-caused and fixed the Scheme.lean build non-termination: the scoped PL notations in Operators.lean (`∨` infixr:30, `→` infixr:25) collided exactly with core Or/arrow, making every Prop-level `→`/`∨` parse as a two-way choice node with exponential, heartbeat-unbounded elaborator backtracking (Scheme.lean's 29-arrow chain went >34 min DNF, breaking the Cslib barrel). Fix: offset the scoped precedences to `∨` infixr:31 and `→` infixr:26 (mirroring HasAnd's collision-free 36-vs-35 pattern), delete the now-unneeded maxHeartbeats 1000000 band-aid in LoopChecking.lean, and add a durable regression guard (CslibTests/OperatorPrecedenceRegression.lean: rfl grouping pins + 24-operator flat-elaboration performance gates). Verified on branch task-619-phase8-wip at 3b0caf3b: full lake build green at exactly 3331 jobs INCLUDING the Cslib barrel that is broken on main; Scheme.lean sentinel ~29s; zero sorry delta; checkInitImports and lint-style green. lake test exits 1 only in six modules proven red at the branch base itself (the base's WIP deleted PL-local notations from Defs.lean; verified repair path documented). Unblocked: task 619 phase 8 can now finish its downstream test-corpus repairs and merge the migration with the barrel green.",
+      "roadmap_items": [
+        "Operator-precedence collision regression guard now durable in CslibTests (rfl grouping pins + flat-elaboration performance gates)",
+        "Cslib barrel repaired on the migration branch; merge pending the follow-up phase's remaining test-corpus repairs"
+      ]
     }
   ],
   "repository_health": {

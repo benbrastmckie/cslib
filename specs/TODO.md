@@ -11,8 +11,8 @@ next_project_number: 627
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,620,626 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,619,621 | 36,37,181,425,534,554,568,594,610,620,626 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -23,9 +23,9 @@ next_project_number: 627
 
 ### Propositional Logic
 
+619 [BLOCKED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
-619 [BLOCKED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 
 ### Modal Logic
 
@@ -79,19 +79,16 @@ next_project_number: 627
 
 607 [NOT STARTED] — Tracked decision (created by task 596's ROADMAP realignment, per 
 
-### Propositional Tableau
-
-626 [PLANNED] — Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean fai
-
 ## Tasks
 
 ### 626. Root-cause the Scheme.lean kernel-defeq non-termination introduced by the Connectives/Operators migration
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: propositional-tableau
 - **Dependencies**: None
 - **Research**: [626_scheme_lean_kernel_defeq_regression/reports/02_defeq-mechanism-and-fix.md]
 - **Plan**: [626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md]
+- **Summary**: [626_scheme_lean_kernel_defeq_regression/summaries/01_precedence-collision-fix-summary.md]
 
 **Description**: Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean fails to compile once the Connectives/Operators reconciliation phase 8 is applied (branch task-619-phase8-wip, commit 1e88ad3e). The private lemma intExpandBranches_openBranch_sat (Scheme.lean:8327, 1321 lines, 22 hypotheses, 187 simp calls) does not terminate. Measured: the module builds in 14s against pre-change dependencies and does not complete in >34 minutes with them. The runaway work is kernel-level defeq/whnf reduction, NOT a heartbeat-checked tactic loop -- a maxHeartbeats 40000 budget yields no deterministic timeout after 400s, with flat 455MB RSS and one core pegged, so a maxHeartbeats bump cannot fix it. Determine the exact mechanism and land a fix that lets phase 8 (which also repairs the currently-broken Cslib.lean barrel) merge to main. See reports/01_scheme-defeq-regression-findings.md for full evidence and refuted hypotheses.
 

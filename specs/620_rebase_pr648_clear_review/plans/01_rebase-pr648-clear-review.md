@@ -318,7 +318,7 @@ cache), non-critical relative to the 74G recorded at plan time.
 
 ---
 
-### Phase 4: Reconcile `Defs.lean` to the target shape [NOT STARTED]
+### Phase 4: Reconcile `Defs.lean` to the target shape [COMPLETED]
 
 **Goal**: Resolve `Defs.lean` to the research §4.3 target: the PR's approved semantics on
 upstream's mechanism. This is the only step in the task requiring judgment.
@@ -383,9 +383,22 @@ rather than absorbing it silently.
 - `MPL`, `efq_mem_ipl`, `intuitionisticCompletion`, `IsIntuitionistic`, `instInhabitedOfBot` are
   absent; `instBotProposition` and `instTopProposition` retain their names.
 
+**Phase 4 Notes (actual)**: `Cslib.Logics.Propositional.Defs` builds clean in isolation and as
+part of the full 2801-job library build. All gates confirmed by direct grep/read on the resolved
+file: zero residual `scoped infix`/`prefix`/`notation`; `instBotProposition`/`instTopProposition`
+retain their names; `MPL`, `efq_mem_ipl`, `intuitionisticCompletion`, `IsIntuitionistic`,
+`instInhabitedOfBot` all absent (they were already absent post-rebase, since the "first-pass"
+`checkout --theirs` resolution in Phase 2 happened to land the PR's own already-correct target
+state for these items). Chained-connective smoke check (`a → b → c`, `a ∧ b ∧ c`) confirmed
+right-associative and well-typed at `Proposition Atom` via a standalone `lake env lean` snippet
+(required `open Cslib.Logic Cslib.Logic.PL`, not just `Cslib.Logic.PL`, for scoped notation
+visibility outside the declaring file). `not_eq` added as specified, `omit [DecidableEq Atom] in`,
+`@[grind =]`. `checkInitImports` passes (Phase 6 gate), confirming the dropped `import Cslib.Init`
+was safe.
+
 ---
 
-### Phase 5: Verify the NaturalDeduction files and absorb any fallout [NOT STARTED]
+### Phase 5: Verify the NaturalDeduction files and absorb any fallout [COMPLETED]
 
 **Goal**: Confirm the two `NaturalDeduction/` files still elaborate against the reconciled
 `Defs.lean`, and make only the adjustments Phase 4 forces.
@@ -393,10 +406,21 @@ rather than absorbing it silently.
 **Tasks**:
 - [ ] Build `Cslib.Logics.Propositional.NaturalDeduction.Basic` and
       `Cslib.Logics.Propositional.NaturalDeduction.Theory`.
-- [ ] If Phase 4's resolution forces a change, make the minimal one. The known candidate from
+- [x] If Phase 4's resolution forces a change, make the minimal one. The known candidate from
       research is the `Equiv := IPL.Equiv` region of `Basic.lean` (around line 159 pre-rebase).
-- [ ] Confirm no other change is needed. If a change beyond the `Equiv` region is required,
-      record it explicitly as a deviation from the research prediction.
+      *(deviation: the `Equiv` region itself needed no change; the actual fallout was in
+      `Theory.lean`, not predicted by research — see below)*
+- [x] Confirm no other change is needed. If a change beyond the `Equiv` region is required,
+      record it explicitly as a deviation from the research prediction. *(deviation: recorded —
+      `NaturalDeduction/Theory.lean:55`, `IsClassical.pierce`'s `apply contra A B <;> grind`
+      failed to close the `hΓ' : (¬A) ∈ Γ` subgoal after the typeclass-notation switch. `grind`
+      does not unfold the `HasNot.not` instance projection to match the raw-constructor Finset
+      element the old direct-`scoped notation` design exposed transparently; adding `not_eq` to
+      grind's explicit argument list did not help (tested via `lean_multi_attempt`, confirmed
+      redundant-parameter warning — the lemma was already registered globally via `@[grind =]`
+      and still didn't fire on this occurrence). Fixed by splitting into two goals and discharging
+      `hΓ'` with a direct `exact Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)`; `hΓ` still
+      closes via `grind`.*
 - [ ] Confirm the `Avigad2022` citation is present as the lead reference in both `Defs.lean` and
       `NaturalDeduction/Basic.lean` (this is the discharge of ctchou's references bullet and must
       survive the rebase).
@@ -417,12 +441,21 @@ alone — verification is the deliverable, not an edit.
 
 **Files to modify** (in the worktree, only if forced):
 - `Cslib/Logics/Propositional/NaturalDeduction/Basic.lean` - `Equiv := IPL.Equiv` region if forced
-- `Cslib/Logics/Propositional/NaturalDeduction/Theory.lean` - only if forced
+  *(deviation: not touched — built clean unmodified)*
+- `Cslib/Logics/Propositional/NaturalDeduction/Theory.lean` - only if forced *(deviation: touched
+  at line 55, not the predicted region — see task notes above)*
 
 **Verification**:
 - Both `NaturalDeduction` modules build clean against the reconciled `Defs.lean`.
 - `Avigad2022` is cited as lead reference in `Defs.lean` and `NaturalDeduction/Basic.lean`.
 - No `Semantics/` path appears in the diff.
+
+**Phase 5 Notes (actual)**: `NaturalDeduction/Basic.lean` built unmodified (the `Equiv :=
+IPL.Equiv` region needed no change). `NaturalDeduction/Theory.lean` needed the one-line-to-three
+fix documented in the task checklist above. Full `lake build` confirms both modules green as part
+of the 2801-job build. `Avigad2022` confirmed present as lead reference in both `Defs.lean`
+(module docstring + References section) and `NaturalDeduction/Basic.lean` (Implementation notes +
+References section). `git diff --stat` against the new merge base confirms no `Semantics/` path.
 
 ---
 

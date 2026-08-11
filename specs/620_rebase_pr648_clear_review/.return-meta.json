@@ -9,9 +9,9 @@
     }
   ],
   "partial_progress": {
-    "stage": "phase-1-complete",
-    "details": "Worktree created at /home/benjamin/Projects/cslib-pr648 on branch rebase/pr648-upstream from origin/feat/propositional-v2 (4834be23). Topology re-verified: upstream/main advanced by one commit (4bec19fc, toolchain bump to v4.34.0-rc1 / Mathlib de5ce8a9) since research; does not touch Propositional or Foundations/Logic paths, so no reconciliation table re-derivation needed. Merge-tree probe confirms exactly 2 conflicted files (Defs.lean, references.bib) matching research prediction. Worktree gates passed: exactly 3 Propositional files, no specs/ or .claude/ trees.",
-    "phases_completed": 1
+    "stage": "phase-5-complete",
+    "details": "Phases 1-5 complete. Worktree at /home/benjamin/Projects/cslib-pr648, branch rebase/pr648-upstream, 3 commits so far (rebase, toolchain/cache warm-up notes committed in main repo only -- Phase 3 has no worktree commit since it's untracked build artifacts, rebase itself IS the phase-2 commit set, Phase 4-5 reconciliation is one worktree commit 49a17094). Toolchain/Mathlib target revised to v4.34.0-rc1/de5ce8a9 (upstream advanced past plan-time v4.33.0/db584cd6). Defs.lean fully reconciled per research section 4.3. One unpredicted fallout in NaturalDeduction/Theory.lean:55 (IsClassical.pierce) fixed and documented as a deviation. Full lake build green (2801 jobs). checkInitImports passes.",
+    "phases_completed": 5
   },
   "metadata": {
     "session_id": "sess_1786481046_ef9c64",

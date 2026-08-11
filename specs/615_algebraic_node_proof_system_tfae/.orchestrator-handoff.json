@@ -1,14 +1,31 @@
 {
-  "status": "planned",
-  "summary": "Three-phase, 1.5-hour plan for a single-file, purely additive change to Cslib/Logics/Propositional/ProofSystemEquivalence.lean. Phase 1 adds `public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness`, a `universe u` declaration, and a new `section WithAlgebra` (introducing no `variable` line) holding three documented four-way closed TFAE theorems — cplProofSystemsWithAlgebraTfae (node 4 `BAValid.{u, u}`), iplProofSystemsWithAlgebraTfae (`HAValid.{u, u}`), mplProofSystemsWithAlgebraTfae (`GHAValid.{u, u}`) — each proved by reusing the corresponding `...TfaeClosed` for nodes 1-3 plus a single `tfae_have 1 ↔ 4 := <logic>.hilbert_alg_completeness`. Phase 2 records the closed-only decision and its reason in the module and section docstrings. Phase 3 runs the full CSLib CI sequence plus zero-debt and unchanged-statement checks. Verification tiers: local, prose, full. All code was already compile-verified during research, so implementation is transcription from report section 5.2, not derivation.",
+  "status": "partial",
+  "phases_completed": 3,
+  "phases_total": 3,
+  "summary": "All three plan phases were executed on Cslib/Logics/Propositional/ProofSystemEquivalence.lean: (1) added the HilbertCompleteness import, `universe u`, and the new `section WithAlgebra` with three four-way closed TFAE theorems (cplProofSystemsWithAlgebraTfae, iplProofSystemsWithAlgebraTfae, mplProofSystemsWithAlgebraTfae); (2) recorded the closed-only decision in the module and section docstrings; (3) ran the full CSLib CI gate. Six of seven CI steps are green (lake build full project 3325/3325, checkInitImports, lake lint zero warnings on this file, lint-style, shake with no import removal, plus zero sorries and axioms exactly [propext, Classical.choice, Quot.sound] on all three new theorems, and the nine pre-existing TFAE theorem statements confirmed untouched). `lake test` fails on CslibTests.GrindLint, root-caused via git log to concurrently-landed sibling-task commits touching Cslib/Logics/Bimodal and Cslib/Logics/Temporal (new grind-eligible declarations lacking a #grind_lint skip entry) — outside this task's territory contract (Cslib/Foundations/Logic/ProofSystem.lean and Cslib/Logics/Propositional/ProofSystemEquivalence.lean only). Re-ran lake test after further sibling commits landed; failure persisted identically, confirming it is not transient. Status is PARTIAL solely because of this out-of-territory lake test failure, not because of any gap in this task's own proof content.",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/615_algebraic_node_proof_system_tfae/plans/01_algebraic-node-tfae-folds.md",
-      "summary": "Three-phase plan with dependency waves [[1],[2],[3]], per-phase verification tiers, scope hypotheses for Phases 1 and 3, and rollback/contingency guidance"
+      "summary": "All three phases marked in the heading: Phase 1 [COMPLETED], Phase 2 [COMPLETED], Phase 3 [PARTIAL] with a documented BLOCKER for the lake test step"
+    },
+    {
+      "type": "summary",
+      "path": "specs/615_algebraic_node_proof_system_tfae/summaries/01_algebraic-node-tfae-folds-summary.md",
+      "summary": "Full implementation summary: what changed, decisions, plan deviations, verification results per CI step, the out-of-territory lake test blocker, impacts, and follow-ups"
     }
   ],
-  "blockers": [],
-  "continuation_context": "Report section 5.2 holds the literal code to transcribe; do not re-derive it. Key constraints carried into the plan: (a) each new theorem binds its own `{Atom : Type u} [DecidableEq Atom]`, shadowing the file-level `variable {Atom : Type*}`, because `GHAValid`/`HAValid`/`BAValid` need explicit `.{u, u}` universes and an auto-bound `Type*` universe cannot be named — verified to compile; (b) the `Iff.trans`-not-`rw` gotcha at ProofSystemEquivalence.lean:229-243 does NOT apply, since no universe-invariance bridge is in the chain; (c) do NOT build a five-way tableau+algebra fold — it would force `[Hashable Atom]` onto the algebraic equivalence; (d) do NOT add a context-based algebraic node — rejected on tier-mismatch grounds; (e) `lake exe mk_all --module` is unnecessary (no new file); (f) if `lake shake` proposes removing the new import, keep the import and record the suggestion as a false positive; (g) `.claude/rules/no-task-references-in-deliverables.md` applies to Cslib/** — the docstring must cite theorem names and file paths, never a task number. Run `lake exe cache get` before the first build.",
-  "next_action_hint": "implement"
+  "modified_files": [
+    "Cslib/Logics/Propositional/ProofSystemEquivalence.lean"
+  ],
+  "blockers": [
+    {
+      "phase": 3,
+      "step": "lake test",
+      "description": "CslibTests.GrindLint fails on new grind instantiations from Cslib.Logic.Bimodal.Axiom.linear_since/linear_until.sizeOf_spec and Cslib.Logic.Temporal.Axiom.linear_since/linear_until.sizeOf_spec, introduced by concurrently-landed sibling-task commits ('pre-land Bimodal bridge lemmas', 'pre-land Temporal bridge lemma') outside this task's edit territory.",
+      "needed": "A #grind_lint skip entry (or underlying fix) for the four flagged declarations in CslibTests/GrindLint.lean, applied by whichever task owns Cslib/Logics/Bimodal and Cslib/Logics/Temporal."
+    }
+  ],
+  "continuation_context": "This task's own file (ProofSystemEquivalence.lean) is fully implemented, documented, sorry-free, axiom-clean, and diff-scoped to only the new import/universe/section/docstrings — verified against the pre-Phase-1 commit. No further work is needed on this file. The only remaining item before this task can report a fully green CI gate is unblocking lake test, which requires a fix in CslibTests/GrindLint.lean and/or Cslib/Logics/Bimodal /Cslib/Logics/Temporal, owned by a sibling task outside this implementer's territory contract.",
+  "next_action_hint": "resolve_blocker_then_reverify"
 }

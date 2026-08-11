@@ -2,7 +2,7 @@
 
 - **Task**: 615 - Add algebraic semantic validity as a further equivalent node in the
   propositional proof-system TFAE families
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Effort**: 1.5 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md`

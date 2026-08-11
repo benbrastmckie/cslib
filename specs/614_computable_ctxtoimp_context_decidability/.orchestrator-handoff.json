@@ -1,42 +1,43 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "task_number": 614,
-  "phase": "research",
-  "status": "researched",
+  "phase": "plan",
+  "status": "planned",
   "trigger": "phase_dispatch",
   "session_id": "sess_1786405794_f0204e_614",
-  "agent_type": "cslib-research-agent",
+  "agent_type": "planner-agent",
   "target": "Give ctxToImp a computable definition so the four context-based Decidable instances for the propositional sequent calculi stop being noncomputable",
-  "phases_completed": 1,
-  "phases_total": 1,
+  "phases_completed": 0,
+  "phases_total": 4,
   "skeleton": false,
-  "summary": "A zero-cost route exists and was EMPIRICALLY VERIFIED: a complete prototype of all four instances was compiled against the live tree (lake env lean, Lean v4.33.0-rc1) with no `noncomputable` marker, and evaluated to correct verdicts on 11 test expressions including the task's target case (LJ {p, p->q} |- q evaluates to true; {q} |- p to false; LJ excluded-middle false while LK excluded-middle true). The task splits in two. Its TITLE ask is impossible: a computable ctxToImp : Ctx Atom -> Proposition Atom -> Proposition Atom cannot exist, because a computable function out of Finset must be permutation-invariant and `A -> B -> C` differs from `B -> A -> C` as a value; Finset.fold needs Std.Commutative/Std.Associative (Mathlib/Data/Finset/Fold.lean:32) which imp lacks, and Hashable gives no total order. Its STATED GOAL (the four instances stop being noncomputable) is fully achievable at no cost by a THIRD route neither of the description's options covers: Decidable p is a Subsingleton, so one may eliminate from the Multiset quotient into it computably via Quotient.recOnSubsingleton, picking an arbitrary list representative -- legitimate precisely because the decision, unlike the intermediate formula, is representative-independent. Direct Mathlib precedents: Multiset.decidableMem (Data/Multiset/Defs.lean:129) and, structurally identical to our case, Finset.Nontrivial.instDecidablePred (Data/Finset/Insert.lean:216), whose motive carries the Nodup hypothesis and is applied to s.nodup; structure eta makes the reconstruction defeq to the original Finset so no cast is needed. Route 1 (LinearOrder Atom + Finset.sort) works but imposes a new hypothesis on four public instances -- rejected. Route 2 (restate over List contexts) does NOT solve the problem: the instances are stated over Finset contexts because Sequent/LKSequent/DerivableIn are, so a list restatement would either change the sequent type or only cover Gamma = l.toFinset for a given l -- rejected as stated, though its already-computable list-level lemmas are reused verbatim by Route 3. Blast radius is nil: a repo-wide grep found ZERO references to ctxToImp, the four instances, or the Fwd/Bwd deduction defs outside the two Decidability files. ctxToImp and the four Finset-level deduction defs stay noncomputable, which is harmless and should be documented as inherent rather than incidental.",
+  "summary": "Four-phase sequential plan implementing Route 3 (Quotient.recOnSubsingleton) from the verified-prototype research report. Phase 1 edits LJ/Decidability.lean: adds the named public helper ljListDerivableDecidable, rewrites instDecidableLJDerivable's body to eliminate from the Multiset quotient underlying Gamma.val into the Subsingleton Decidable, drops noncomputable from both LJ instances, and corrects five docstring sites that misattribute the cause to Finset.toList. Phase 2 does the structurally identical LK edit, minus the letI universe bridge (instDecidableTautologyTableau is not universe-pinned). Phase 3 creates CslibTests/ContextDecidability.lean with #guard_msgs in #eval assertions covering the task's target case ({p, p->q} |- q) plus negative cases and the LJ/LK excluded-middle contrast, and registers it alphabetically in the CslibTests.lean barrel. Phase 4 re-baselines the axiom-census exact-set ratchet (expected diff: exactly one added line for the LJ helper; the LK helper must NOT appear) and runs the full six-step CSLib CI order. The plan explicitly does NOT attempt the task title's literal ask: a computable ctxToImp at its current type is mathematically impossible, so ctxToImp and the four Finset-level deduction defs stay noncomputable with corrected docstrings stating the reason is inherent rather than incidental. Verification tiers: interface for phases 1-3 (each builds its changed module plus its enumerated direct dependent), full for phase 4. Every phase carries a Scope Hypothesis with a mechanical confirmation command.",
   "sorry_inventory": [],
   "blockers": [],
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
-      "summary": "Verified-prototype research report: Route 3 (Quotient.recOnSubsingleton) with full working Lean code for all four instances, measured evaluation results, the decide-vs-#eval finding, and the axiom-census ratchet consequence"
+      "type": "plan",
+      "path": "specs/614_computable_ctxtoimp_context_decidability/plans/01_computable-context-decidability.md",
+      "summary": "Four-phase sequential implementation plan: LJ instances, LK instances, executable #eval conformance tests, axiom-census re-baseline plus full CI sweep"
     }
   ],
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
   "requires_user_review": false,
-  "continuation_path": "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
+  "continuation_path": "specs/614_computable_ctxtoimp_context_decidability/plans/01_computable-context-decidability.md",
   "modified_files": [
-    "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
+    "specs/614_computable_ctxtoimp_context_decidability/plans/01_computable-context-decidability.md",
     "specs/614_computable_ctxtoimp_context_decidability/.orchestrator-handoff.json",
     "specs/614_computable_ctxtoimp_context_decidability/.return-meta.json"
   ],
   "decisions_made": [
-    "RECOMMENDED Route 3 (Quotient.recOnSubsingleton on Gamma.val + a list-level Decidable helper). Zero new typeclass hypotheses, zero public statement changes, verified compiling and evaluating.",
-    "REJECTED Route 1 ([LinearOrder Atom] + Finset.sort): would add a hypothesis to four public instances that the mathematics does not require, while instDecidableIValid/instDecidableTautologyTableau need only [DecidableEq Atom] [Hashable Atom].",
-    "REJECTED Route 2 (restate over List contexts) as a solution to the stated problem: the four instances are stated over Finset contexts by construction, so a List restatement leaves arbitrary Gamma : Finset undecided. Its list-level lemmas are nonetheless the ingredient Route 3 consumes.",
-    "STATED PLAINLY that the task title's ask (a computable ctxToImp at its current type) is mathematically impossible, and recommended keeping ctxToImp/ljProofDeductionFwd/Bwd/lkProofDeductionFwd/Bwd noncomputable with corrected docstrings, rather than contorting the API to satisfy the literal wording.",
-    "REQUIRED a named list-level helper rather than an inlined lambda: the fully-inlined variant was tried and FAILS to elaborate (the representative appears as the quotient form, so the toFinset rewrite finds no occurrence). Recorded the exact error so the implementer does not repeat it.",
-    "IDENTIFIED an infrastructure consequence the task description does not mention: the axiom-census exact-set ratchet (scripts/check-axiom-census.sh, wired into lean_action_ci.yml) will FAIL because the new public LJ helper enters the sorryAx-tainted set via the pre-existing intuitionistic-tableau taint. Plan must run check-axiom-census.sh --update and verify the diff is exactly one added line. The LK helper is sorry-free and adds no line.",
-    "VERIFIED that tests must use `#guard_msgs in #eval`, never `decide`: `by decide` fails, but the recorded kernel error shows it unfolded straight through the new instance and helper and stuck only at the pre-existing WellFounded.fix in the tableau driver -- the construction adds no new kernel obstruction.",
-    "CONFIRMED the task's out-of-scope calls without re-litigating them: the two FMP decidability defs (Fintype.ofInjective) stay untouched, the ProofSystemEquivalence closed-context restriction stays untouched, and the two pre-existing lint warnings in the subtree are not this task's to fix."
+    "ADOPTED Route 3 verbatim from the research report rather than re-deriving it: the report is a verified prototype (compiled with lake env lean against the live tree, evaluated correctly on 11 expressions), so the phases transcribe known-good code instead of exploring.",
+    "SPLIT the work by file (LJ, then LK) rather than by concern (all code, then all docstrings). Each Decidability file is one agent run, and docstring corrections in a file ride along with that file's code edit so a single module build covers both.",
+    "MADE Phase 2 depend on Phase 1 even though the two files are edited independently: LK/Decidability.lean imports LJ/Decidability.lean, so Phase 1's interface-tier verification already builds LK, and running them in parallel would create a territory conflict for no gain.",
+    "ASSIGNED interface tier (not local) to Phases 1-3: each changes a module with at least one enumerated direct dependent (LJ -> LK; the test module -> the CslibTests barrel), and the tie-break rule says take the stricter tier when uncertain. Phase 4 is full.",
+    "GAVE every phase a Scope Hypothesis with a mechanical confirmation command, because every phase asserts a count: 3 retained noncomputable markers in LJ, 2 in LK, exactly 2 files touched in Phase 3, and exactly 1 added baseline line in Phase 4.",
+    "PROMOTED the axiom-census re-baseline to its own phase rather than a task inside the CI sweep. It is the plan's highest-value scope hypothesis: an unexpectedly large diff is the primary signal that the change perturbed something beyond its verified-nil blast radius, and it needs an explicit inspect-before-commit gate.",
+    "CARRIED the three recorded implementation traps into phase task text as MUST NOTs rather than leaving them in the report: the named helper (the inlined variant provably does not elaborate), the List.toFinset_eq orientation (the .symm form fails with a type mismatch), and the LJ-only letI universe bridge (must not be added to LK by analogy).",
+    "MANDATED #guard_msgs in #eval and forbade decide in Phase 3, with the reason recorded inline so an implementer hitting the decide failure does not conclude the construction is broken -- the kernel error shows it unfolds through the new instance and helper and stalls only at the pre-existing WellFounded.fix.",
+    "STATED as an explicit Non-Goal that ctxToImp itself is not made computable, so the plan is not later read as having silently dropped the task title's literal ask."
   ],
-  "notes": "Prototype scratch files were created at the repo root during verification and have been deleted; git status shows no residue from this research beyond the specs/ artifacts. The pre-existing dirty files (.claude/scripts/literature-*.sh) were present before this task and were not touched. The report also records a transferable finding for the LM-decidability follow-on (coverage-gaps item G4): the Route 3 shape carries over verbatim given mvalid_universe_invariant/instDecidableMValid, so that item should inherit the computable route rather than the Finset.toList taint."
+  "notes": "The plan passes scripts/validate-artifact.sh in --strict mode with 0 warnings. Blast radius is verified nil (zero references to the affected declarations outside the two Decidability files), so each phase is independently revertable to a green build. Two out-of-scope items are named explicitly so the implementer does not drift into them: the two FMP decidability defs (noncomputable via Fintype.ofInjective, an unrelated irreducible cause) and the two pre-existing unusedDecidableInType lint warnings in this subtree. The Route 3 shape is recorded as transferable to the LM/minimal-logic decidability follow-on, which should inherit the computable route rather than the Finset.toList taint."
 }

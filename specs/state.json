@@ -1029,13 +1029,13 @@
     {
       "project_number": 615,
       "project_name": "algebraic_node_proof_system_tfae",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "low",
       "description": "Add algebraic semantic validity as a further equivalent node in the propositional proof-system TFAE families.\n\nSURFACED BY: the 2026-08-10 propositional review (specs/reviews/review-2026-08-10.md, finding L1). Discoverability only — no mathematical content is missing; the required completeness results already exist.\n\nCURRENT STATE: `Cslib/Logics/Propositional/ProofSystemEquivalence.lean` ties together Hilbert, natural deduction, sequent calculus and tableau:\n- 3-way, context-based: `cplProofSystemsTfae` (:76), `iplProofSystemsTfae` (:108), `mplProofSystemsTfae` (:141)\n- 3-way, closed: `cplProofSystemsTfaeClosed` (:90), `iplProofSystemsTfaeClosed` (:122), `mplProofSystemsTfaeClosed` (:155)\n- 4-way with tableau, closed only: `cplProofSystemsWithTableauTfae` (:203), `iplProofSystemsWithTableauTfae` (:229), `mplProofSystemsWithTableauTfae` (:252)\n\nTHE GAP: the substantial algebraic-semantics development under `Cslib/Logics/Propositional/Semantics/Algebra/` (Brouwerian algebras, Hilbert algebras, the Lindenbaum construction, algebraic completeness) is NOT wired in as a further node, even though `HilbertAlgCompleteness.lean` and `BrouwerianCompleteness.lean` prove what is needed. A reader cannot see from one place that algebraic validity is equivalent to the syntactic notions.\n\nWORK: add the algebraic node to the appropriate TFAE families, composing the existing algebraic completeness/soundness results. Follow the pattern the tableau folds already established — including the `Iff.trans`-not-`rw` gotcha documented at :229-243 for any step that crosses a universe-invariance bridge.\n\nSCOPE DISCIPLINE: mirror the existing typeclass hygiene. The tableau section deliberately scopes `[Hashable Atom]` to its own section (see the module docstring at :176-186) so the six pure proof-theoretic equivalences are not forced to carry it; do the same for whatever algebraic typeclass requirements the new node introduces, rather than widening the existing six.\n\nDECIDE AND RECORD: whether the algebraic node belongs on the context-based families, the closed families, or both — and say why in the module docstring, so the shape reads as a decision rather than an omission.\n\nVERIFY: `lake build` green; zero new sorries; zero new axioms beyond [propext, Classical.choice, Quot.sound]; no change to the statements of the nine existing TFAE theorems.",
       "created": "2026-08-10T17:03:32Z",
-      "last_updated": "2026-08-11T00:31:39Z",
+      "last_updated": "2026-08-11T00:35:37Z",
       "session_id": "sess_1786405794_f0204e_615",
       "artifacts": [
         {
@@ -1053,7 +1053,7 @@
     {
       "project_number": 616,
       "project_name": "repair_stale_contradictory_tableau_docstrings",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
@@ -1067,7 +1067,7 @@
         "Cslib/Logics/Propositional/Metalogic/MinDecidability.lean"
       ],
       "created": "2026-08-10T17:07:45Z",
-      "last_updated": "2026-08-11T00:04:59Z",
+      "last_updated": "2026-08-11T01:18:57Z",
       "session_id": "sess_1786405794_f0204e_616",
       "artifacts": [
         {
@@ -1085,7 +1085,7 @@
     {
       "project_number": 617,
       "project_name": "fix_tautology_decidable_instance_priority",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "critical",
@@ -1095,7 +1095,7 @@
         "CslibTests/Propositional.lean"
       ],
       "created": "2026-08-10T17:12:10Z",
-      "last_updated": "2026-08-11T00:31:45Z",
+      "last_updated": "2026-08-11T01:19:00Z",
       "session_id": "sess_1786405794_f0204e_617",
       "artifacts": [
         {
@@ -1137,7 +1137,7 @@
     {
       "project_number": 619,
       "project_name": "reconcile_connectives_operators",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
@@ -1148,7 +1148,7 @@
         "Cslib/Foundations/Logic/Connectives.lean"
       ],
       "created": "2026-08-10T18:20:00Z",
-      "last_updated": "2026-08-11T00:31:58Z",
+      "last_updated": "2026-08-11T00:35:48Z",
       "session_id": "sess_1786405794_f0204e_619",
       "artifacts": [
         {

@@ -11,7 +11,7 @@ next_project_number: 626
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,616,617,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,614,615,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -24,11 +24,9 @@ next_project_number: 626
 ### Propositional Logic
 
 614 [PLANNED] — Give `ctxToImp` a computable definition so the four context-based
-615 [PLANNED] — Add algebraic semantic validity as a further equivalent node in t
-616 [IMPLEMENTING] — Repair the stale and self-contradictory documentation layer in th
-617 [PLANNED] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
+615 [IMPLEMENTING] — Add algebraic semantic validity as a further equivalent node in t
 618 [PLANNED] — Close the remaining coverage gaps in the propositional metatheory
-619 [PLANNED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
+619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
 
@@ -414,7 +412,7 @@ Re-request review from ctchou, itemising the four dispositions.
 ---
 
 ### 619. Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -507,7 +505,7 @@ The intuitionistic engines internal "not proved"/"refuted" notes (Expansion.lean
 ---
 
 ### 617. Fix tautology decidable instance priority
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -543,7 +541,7 @@ BACKGROUND (not a defect, do not "fix"): the `#eval`-vs-`decide` split is expect
 ---
 
 ### 616. Repair stale contradictory tableau docstrings
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -666,7 +664,7 @@ that as a convention; do not perform a repo-wide citation-style migration under 
 ---
 
 ### 615. Algebraic node proof system tfae
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

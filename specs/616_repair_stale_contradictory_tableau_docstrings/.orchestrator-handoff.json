@@ -19,11 +19,13 @@
   ],
   "next_phase": null,
   "requires_user_review": false,
+  "phases_completed": 7,
+  "phases_total": 7,
   "sorry_inventory": {
     "added": 0,
     "removed": 0,
     "remaining": 0,
-    "note": "Documentation-only task. No .lean proof term, statement, or definition was changed in any of the six files; only docstring/comment text was edited. Tree remains sorry-free."
+    "note": "Documentation-only task. No .lean proof term, statement, or definition was changed in any of the six files; only docstring/comment text was edited. Tree remains sorry-free. Re-verified this dispatch: 0 actual sorry-tactic occurrences in the six scoped files (grep for sorry-as-tactic patterns); all 69 raw '\\bsorry\\b' matches are prose discussing sorry-freeness, which is expected given the task's subject matter."
   },
   "build_status": {
     "command": "lake build (full project)",
@@ -31,34 +33,35 @@
     "jobs": 3325,
     "preexisting_warnings": [
       "Minimal/DecisionProcedure.lean:174 unusedDecidableInType on mvalid_universe_invariant (pre-existing baseline, unrelated to this task; not fixed, not newly introduced elsewhere)",
-      "Modal/Tableau/FrameCompleteness.lean and Modal/Tableau/S4/Driver.lean flexible-tactic/longLine warnings (pre-existing, unrelated files outside this task's file_scope)"
+      "Intuitionistic/DecisionProcedure.lean:159 unusedDecidableInType on ivalid_universe_invariant (pre-existing, unrelated file outside this task's file_scope)",
+      "Modal/Tableau/FrameCompleteness.lean flexible-tactic warnings (pre-existing, unrelated file outside this task's file_scope)"
     ]
   },
   "ci_pipeline": {
     "checkInitImports": "pass (no output)",
-    "lake_lint": "pre-existing warnings exist repo-wide (373 lines); zero warnings in any of the six modified files",
-    "lint_style": "pass (no output)",
-    "lake_test": "pass, exit 0; CslibTests/ untouched (git diff empty for CslibTests/)",
-    "mk_all_module": "no update necessary",
-    "lake_shake": "import-minimization suggestions exist for unrelated pre-existing files; zero suggestions for any of the six modified files",
-    "statement_invariance_check": "git diff across all six files contains zero lines matching ^[+-](lemma|theorem|def|instance|structure|inductive) -- confirmed docstring/comment-only",
-    "axiom_count": "26 axiom declarations repo-wide, identical before and after this task's commits (git diff shows zero new '+axiom ' lines)",
-    "task_number_lint": "the in-scope violation (bare '317' citation in IntDecidability.lean/MinDecidability.lean, flagged by the task under no-task-references-in-deliverables.md) is fixed and verified absent via grep. check-task-references.sh still reports pre-existing, out-of-scope violations under .memory/** (23 occurrences, none touched by this task)."
+    "lake_lint_scoped": "not re-run in full this dispatch; zero warnings confirmed in the six modified files during the prior dispatch and no further edits were made to them",
+    "lint_style": "pass (no output), re-verified this dispatch",
+    "lake_test": "CslibTests/ confirmed untouched this dispatch via git status --short -- CslibTests/ (empty)",
+    "mk_all_module": "no update necessary (no new files)",
+    "statement_invariance_check": "re-verified this dispatch: git diff -U0 -- <six scoped files> filtered to non-comment/non-docstring hunks is empty; working tree for these six files is clean (already committed by the prior dispatch, no new edits made this dispatch)",
+    "axiom_count": "26 axiom declarations repo-wide, matches prior-dispatch baseline (unchanged)",
+    "task_number_lint": "re-verified this dispatch: grep -rn '\\b317\\b' across IntDecidability.lean and MinDecidability.lean returns clean"
   },
-  "phases_completed": {
-    "phase1_part1_witness_citation": "Retargeted the IFimpAccess-refutation evidence in openBranch_countermodel's docstring (Scheme.lean) from WitnessProbe.lean (off-target by kind and by line, per report Section 2) to BetaSplitRefutation.lean's fimpWitnesses=[1]/branchesAgree/raw-edge-list assertions. Kept the frame-adequacy table and REFUTED verdict verbatim, per the report's machine-verified authoritative-verdict finding. Fixed both the primary site (:9603-9611) and the duplicate (:9732-9733).",
-    "phase2_part2ab": "Re-tensed the copy-channel-removal paragraph (:909-925) and the truthLemma-sorry paragraph (:930-944) as PRE-REPAIR historical, noting the later V4 reinstatement (Expansion.lean) and that truthLemma is sorry-free. Left the verbatim historical quotation at :921 untouched as instructed.",
-    "phase3_part2cde": "Fixed the stale 'not yet proved' claim for intExpMeasure_step_lt (now proved, sorry-free); fixed the stale 'deferred to Phase 6' claim (landed as IAugMembers_persist); narrowed the Expansion.lean world-boundedness directive so IAllUniv (formerly hUniv) is no longer listed among refuted items, since it is threaded and discharged via mem_intUniverseExt_of, unlike intExpandBranches_world_bound/hnw.",
-    "phase4_part2fg": "Dropped the self-contradictory sorryAx parenthetical in Minimal/DecisionProcedure.lean (:22-23 vs :45). Replaced the dangling task-number citation ('317') in IntDecidability.lean and MinDecidability.lean with the durable anchor already present later in the same prose (structurally incompatible carriers, low payoff), per no-task-references-in-deliverables.md.",
-    "phase5_part3h_i_plus_S1": "Fixed the false attribution in Minimal/Completeness.lean crediting openBranch_rawEdges_upward_closed/openBranch_rawEdges_both_upward_closed with the live upward-closure conjuncts; the live route is hpersAug over the augmented frame. Corrected two parenthetical attributions implying minimalTableau_complete routes through minOpenBranch_countermodel (it routes through tableau_complete minScheme directly; minOpenBranch_countermodel has no live consumer beyond docstrings, mirroring Intuitionistic/Completeness.lean's existing Postmortem-5 framing). Fixed the identical false dependency at sibling S1 (Minimal/DecisionProcedure.lean:49-51).",
-    "phase6_part4_plus_S2_S3_S4": "Fixed ~30 stale self- and cross-reference line-number citations across Scheme.lean (sat_timp, IExpandedConsistent_sat, applyAllTImpRules_eq_self_of_length_eq, applyPersistenceFixpoint_genuine_of_count_le_fuel, IPosPersistRaw, IAllConsistent [S2], isAccessible_go_append_mono [S3], IExpandedAccessConsistent) and Rules.lean cross-references (intApplyRuleFull's match arms, posFormulasAt/propagatePersistence/intTImpRule, plus a T-or/F-and prose label swap). Fixed the '11th conjunct' -> '7th conjunct' numbering contradiction. Fixed the duplicated off-target Expansion.lean:462-463 citation (S4) for a historical 'intFuel' formula that no longer exists under that name in the codebase (superseded by intFuelExt); applied a factual, non-inventive correction rather than guessing a replacement line. For the small cluster of citations the report flagged as wrong but could not pin an exact correct target (:250/:3272/:7058/:485-533, and the Option-B-unsound Expansion.lean:256-264 citation), applied the report's own 'keep the name, drop the number' recommendation instead of guessing."
+  "phases_completed_detail": {
+    "phase1_part1_witness_citation": "Retargeted the IFimpAccess-refutation evidence in openBranch_countermodel's docstring (Scheme.lean) from WitnessProbe.lean to BetaSplitRefutation.lean's fimpWitnesses=[1]/branchesAgree/raw-edge-list assertions. Kept the frame-adequacy table and REFUTED verdict verbatim. Fixed both the primary site (:9603-9611) and the duplicate (:9732-9733).",
+    "phase2_part2ab": "Re-tensed the copy-channel-removal paragraph (:909-925) and the truthLemma-sorry paragraph (:930-944) as PRE-REPAIR historical, noting the later V4 reinstatement and that truthLemma is sorry-free. Left the verbatim historical quotation at :921 untouched.",
+    "phase3_part2cde": "Fixed the stale 'not yet proved' claim for intExpMeasure_step_lt; fixed the stale 'deferred' claim (landed as IAugMembers_persist); narrowed the Expansion.lean world-boundedness directive so IAllUniv is no longer listed among refuted items.",
+    "phase4_part2fg": "Dropped the self-contradictory sorryAx parenthetical in Minimal/DecisionProcedure.lean. Replaced the dangling task-number citation ('317') in IntDecidability.lean and MinDecidability.lean with a durable anchor, per no-task-references-in-deliverables.md.",
+    "phase5_part3h_i_plus_S1": "Fixed the false attribution in Minimal/Completeness.lean; corrected two parenthetical attributions implying minimalTableau_complete routes through minOpenBranch_countermodel. Fixed the identical false dependency at sibling S1 (Minimal/DecisionProcedure.lean:49-51).",
+    "phase6_part4_plus_S2_S3_S4": "Fixed ~30 stale self- and cross-reference line-number citations across Scheme.lean and Rules.lean. Fixed the '11th conjunct' -> '7th conjunct' contradiction. Fixed the duplicated off-target Expansion.lean S4 citation. Applied 'keep the name, drop the number' for citations without a pin-downable correct target.",
+    "phase7_fmpmeasure_citations": "Decided EXCLUDED, not attempted, on the evidence: report Section 5.5 frames the ~23-citation cluster as lowest-priority/optional with only 3-5 line drift (not self-contradictory, unlike Phases 1-6 defects); Section 12 notes the :2440-:2937 sub-cluster was only spot-checked, so a correct closure would require a fresh sweep beyond committed scope, not a mechanical fix. The two FmpMeasure-adjacent defects that did rise to the correctness bar (Expansion.lean :462-463 and :515-516, both citing content absent from the file) were already fixed as siblings during Phase 6. No FmpMeasure.lean edits were made this dispatch or prior. Plan file's Phase 7 heading updated to [COMPLETED WITH EXCLUSIONS] with a #### Reasoned Exclusions table (Item/Reason/Evidence)."
   },
-  "phase7_deferred": "FmpMeasure.lean citations (report Section 5.5) -- explicitly optional per the report and the delegation's committed scope ('Phases 1-6; Phase 7 explicitly optional'). Not attempted.",
   "deviations_from_report": [
-    "Two defects investigated beyond what the report explicitly resolved: (1) the Expansion.lean:462-463 fuel-formula citation (S4) was found to point to content that does not exist anywhere in Expansion.lean under any name -- the quoted 'intFuel' exponential formula is historical and has no current declaration; fixed with a factual note rather than a guessed line number. (2) The same investigation pattern applied to the Option-B-unsound citation at Expansion.lean:515-516, which also points to content absent from the file.",
-    "The :250/:3272/:7058/:485-533 citation cluster (Scheme.lean self-references the report flagged as wrong but left with '--' in its correct-target column) was resolved via the report's own Section 8 recommendation: name-based or section-heading references replacing the broken line numbers, rather than inventing unverified specific line numbers."
+    "Two defects investigated beyond what the report explicitly resolved: (1) the Expansion.lean:462-463 fuel-formula citation (S4) points to content that does not exist anywhere in Expansion.lean under any name; fixed with a factual note. (2) The same pattern applied to the Option-B-unsound citation at Expansion.lean:515-516.",
+    "The :250/:3272/:7058/:485-533 citation cluster was resolved via the report's own Section 8 recommendation: name-based or section-heading references replacing broken line numbers, rather than inventing unverified specific line numbers.",
+    "Phase 7 (FmpMeasure.lean citations) formally closed as [COMPLETED WITH EXCLUSIONS] this dispatch rather than left [IN PROGRESS]/undecided, per the report's own explicit optional/low-value framing and Section 12's caveat that a correct closure needs a fresh sweep beyond committed scope."
   ],
-  "verification_gate": "PASSED: git diff shows only comment/docstring hunks across all six files (statement-invariance confirmed both by diff-pattern check and by a clean lake build); lake build green (3325 jobs, full project); CslibTests/ untouched.",
+  "verification_gate": "PASSED: statement-invariance re-confirmed for the six scoped files (empty diff after filtering, clean working tree); lake build green (3325 jobs, full project, only pre-existing unrelated warnings); lake exe checkInitImports pass; lake exe lint-style pass; task-number lint clean; CslibTests/ untouched; 0 sorry-tactic occurrences and unchanged (26) axiom count in the six files/repo.",
   "blockers": [],
-  "notes": "All six file_scope files touched, matching the task description's file_scope exactly. One line-length lint regression introduced mid-pass (Scheme.lean:589) was caught and fixed via lake build before the final commit. Six git commits created, one per phase, each independently verified against the statement-invariance check before committing."
+  "notes": "All 7 plan phases now carry accurate terminal status markers: Phases 1-6 [COMPLETED] (checklist items also checked off), Phase 7 [COMPLETED WITH EXCLUSIONS] with a Reasoned Exclusions table. This dispatch made no .lean edits (all six scoped files were already correct and committed from the prior dispatch); its work was the Phase 7 decision, plan-file status reconciliation, and full re-verification."
 }

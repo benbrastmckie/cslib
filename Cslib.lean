@@ -604,6 +604,7 @@ public import Cslib.Logics.Propositional.SequentCalculus.LJ
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
+public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutFreeCompleteness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Decidability
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Interpolation
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Soundness
@@ -620,7 +621,11 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
 public import Cslib.Logics.Propositional.SequentCalculus.LM
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Basic
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Completeness
+public import Cslib.Logics.Propositional.SequentCalculus.LM.CutElimination
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Decidability
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Interpolation
 public import Cslib.Logics.Propositional.SequentCalculus.LM.Soundness
+public import Cslib.Logics.Propositional.SequentCalculus.LM.SubformulaProperty
 public import Cslib.Logics.Propositional.Subformula
 public import Cslib.Logics.Propositional.Tableau
 public import Cslib.Logics.Propositional.Tableau.Classical

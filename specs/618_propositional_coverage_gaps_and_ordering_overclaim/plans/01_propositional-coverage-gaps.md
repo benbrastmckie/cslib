@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional Coverage Gaps and the Ordering Overclaim
 
 - **Task**: 618 - Close remaining coverage gaps in the propositional metatheory; correct the docstring that overclaims a result the tree does not prove
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 11 hours
 - **Dependencies**: None blocking. Task 614 (`computable_ctxtoimp_context_decidability`, status `planning`) is *coordinated with* but explicitly NOT blocking -- see Phase 4.
 - **Research Inputs**: `specs/618_propositional_coverage_gaps_and_ordering_overclaim/reports/01_propositional-coverage-gaps.md`
@@ -546,24 +546,30 @@ list, and serialising them avoids a conflicting edit.
 
 ---
 
-### Phase 10: Full-gate verification and follow-up recommendations [NOT STARTED]
+### Phase 10: Full-gate verification and follow-up recommendations [COMPLETED WITH EXCLUSIONS]
 
 **Goal**: The whole tree is green under the complete gate set, the zero-debt claim is verified
 rather than asserted, and the two out-of-scope items are recorded as recommendations with the
 research's measurements attached.
 
 **Tasks**:
-- [ ] Run the full build across `Cslib/Logics/Propositional/` and `CslibTests/`.
-- [ ] Verify zero `sorry` was introduced: scan `Cslib/Logics/Propositional/` and confirm every hit
+- [x] Run the full build across `Cslib/Logics/Propositional/` and `CslibTests/`. *(deviation:
+      the whole-repo `lake build`/`lake lint`/`lake exe checkInitImports`/`lake shake`/
+      `lake test` gate cannot complete -- see Reasoned Exclusions below. Every module in the
+      entire project, including every file this task touched, built successfully; only the
+      final top-level `Cslib.lean` barrel target failed, for a pre-existing, unrelated reason.
+      `Cslib.Logics.Propositional.SequentCalculus` (the whole subtree) and the specific test
+      file Phase 1 edited, `CslibTests.TableauConformance`, both build scoped.)*
+- [x] Verify zero `sorry` was introduced: scan `Cslib/Logics/Propositional/` and confirm every hit
       is docstring prose, matching the pre-change baseline the research established.
-- [ ] Verify no new axioms: `lean_verify` each new headline theorem and confirm the axiom set does
+- [x] Verify no new axioms: `lean_verify` each new headline theorem and confirm the axiom set does
       not exceed `{propext, Classical.choice, Quot.sound}`.
-- [ ] Re-read every Phase 1 docstring correction against what the tree now proves -- Phases 6 and
+- [x] Re-read every Phase 1 docstring correction against what the tree now proves -- Phases 6 and
       8 changed what is true about `LJ/Basic.lean:78-79`, and A1's correction must NOT have been
       reinstated as "strictly" on the strength of anything landed here (nothing here proves
       strictness; even the D2 separations would establish MPL ⊊ IPL ⊊ CPL, which is not the
       Imp -> Int -> Prop chain A1's docstring displays).
-- [ ] Record in the implementation summary the two recommended follow-up tasks, with the
+- [x] Record in the implementation summary the two recommended follow-up tasks, with the
       research's measurements so they can be scheduled rather than re-researched:
       (a) **D1-absolute** -- fragment-matched algebraic completeness for the ⟨∨,→,⊤⟩ signature;
       needs an algebra class chosen and defined first, because the meet-free signature gives `→`
@@ -576,7 +582,7 @@ research's measurements attached.
       `WellFounded.fix` kernel-stall concern is a red herring:
       `CslibTests/ModalFrameSeparation.lean` already routes around the same stall with hand-built
       semantic countermodels ported as named theorems.
-- [ ] Record G6 as a considered-and-not-taken decision, noting its coupling to A2.
+- [x] Record G6 as a considered-and-not-taken decision, noting its coupling to A2.
 
 **Timing**: 1 hour
 
@@ -588,9 +594,17 @@ research's measurements attached.
 - `specs/618_propositional_coverage_gaps_and_ordering_overclaim/summaries/01_propositional-coverage-gaps-summary.md` - NEW
 
 **Verification**:
-- Full CI gate passes.
+- Full CI gate passes. *(deviation: see Reasoned Exclusions -- blocked by an unrelated,
+  pre-existing, out-of-territory conflict, not by anything this task changed.)*
 - Zero `sorry`, zero new axioms, confirmed by command output quoted in the summary.
 - The summary names both follow-up recommendations with their measured scope.
+
+#### Reasoned Exclusions
+
+| Item | Reason | Evidence |
+|---|---|---|
+| Whole-repo `lake build` (and everything gated on it: `lake exe checkInitImports`, `lake lint`, `lake shake --add-public --keep-implied --keep-prefix`, `lake test`) | Fails at the single remaining target, the top-level `Cslib.lean` barrel, on a pre-existing conflict between two files both defining `HasDiamond` (`Cslib/Foundations/Logic/Operators.lean` vs `Cslib/Foundations/Logic/Connectives.lean`) from task 619's in-flight, already-committed migration (`b81f7e48`, `8d13fdba`), which per this dispatch's delegation instructions is explicitly out of territory ("task 619 has preserved (stashed) work targeting `Cslib/Foundations/Logic/Connectives.lean` and ~17 downstream files"). Not caused by, and not fixable within, this task's scope. | `lake build` output: `error: Cslib.lean:1:0: import Cslib.Foundations.Logic.Operators failed, environment already contains 'Cslib.Logic.HasDiamond.casesOn' from Cslib.Foundations.Logic.Connectives`. The build otherwise reaches `[3330/3331]` -- every module in the project, including every file this task touched -- before failing only on `Cslib.lean` itself. `git diff Cslib.lean` (before this task's own `mk_all` run) shows zero changes to `Cslib.lean` from this task's phases 1-9, confirming the conflict predates and is independent of this task's edits. |
+| `lake exe lint-style` and `lake exe mk_all --module` | Not excluded -- both ran to completion successfully, since neither depends on the broken `Cslib.olean`. `mk_all` correctly added this task's six new modules (`LJ.CutFreeCompleteness`, `LM.CutElimination`, `LM.Decidability`, `LM.Interpolation`, `LM.SubformulaProperty`, plus the pre-existing `LM.CutElimination`/`Decidability` entries) to `Cslib.lean`'s import list, touching no line outside this task's own new files. | `lake exe lint-style` exit code `0`; `git diff Cslib.lean` after `mk_all` shows only additions, all naming this task's own new files, no deletions. |
 
 ---
 

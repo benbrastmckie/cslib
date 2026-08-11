@@ -1158,19 +1158,21 @@
     {
       "project_number": 619,
       "project_name": "reconcile_connectives_operators",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "high",
       "title": "Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean",
       "description": "Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` against the `Cslib/Foundations/Logic/Operators.lean` that merged upstream in PR #607 (commit b8ad3923).\n\nSOURCE: the falsum representation decision report, `specs/400_reconcile_connectives_pr607/reports/03_falsum-representation-decision.md`, which identified this as required under EVERY option considered there (adapt, re-argue, or diverge) and INDEPENDENT of the falsum question. It is not contingent on the Option B decision.\n\n=== THE COLLISION ===\n\nFour classes are duplicated in namespace `Cslib.Logic` between the fork's Connectives.lean and merged Operators.lean:\n  HasAnd, HasOr, HasImp, HasBox\n\nUpstream additionally defines: HasIff, HasNot, HasDiamond.\nThe fork names its own `HasDia` where upstream says `HasDiamond` — a naming divergence, not merely a duplicate.\n\n=== WHY THIS MATTERS NOW ===\n\nPrerequisite for PR #649 (LTL), which is stacked on #648 and whose changed files include `Foundations/Logic/Connectives.lean`. #649 cannot land cleanly while the duplication stands.\n\n=== SCOPE ===\n\nDecide, per class, whether to drop the fork's definition in favour of upstream's, keep the fork's under a distinct name, or upstream a delta. Resolve `HasDia` vs `HasDiamond` explicitly. Verify with `lake build` that the tree stays green.\n\nDo NOT fold the falsum representation question into this task — it is settled (keep primitive bot) and orthogonal.\n\n=== CONSTRAINT ===\n\nNo GitHub or Zulip post may be authored by an agent (CSLib AI policy; Chris Henson formally challenged an LLM-drafted message on the Propositional Logic topic, near/605827029). If outward communication is needed, produce a factual scaffolding file for a human to adapt.",
-      "dependencies": [],
+      "dependencies": [
+        626
+      ],
       "file_scope": [
         "Cslib/Foundations/Logic/Connectives.lean"
       ],
       "created": "2026-08-10T18:20:00Z",
-      "last_updated": "2026-08-11T00:35:48Z",
-      "session_id": "sess_1786405794_f0204e_619",
+      "last_updated": "2026-08-11T15:27:59Z",
+      "session_id": "sess_1786415417_7d8088_619",
       "artifacts": [
         {
           "path": "specs/619_reconcile_connectives_operators/reports/01_connectives-operators-reconciliation.md",
@@ -1182,7 +1184,8 @@
           "type": "plan",
           "summary": ""
         }
-      ]
+      ],
+      "blockers": "Phase 8 introduces a kernel-defeq non-termination in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean (lemma intExpandBranches_openBranch_sat, Scheme.lean:8327). Work is preserved on branch task-619-phase8-wip (commit 1e88ad3e), NOT merged to main. Blocked pending task 626."
     },
     {
       "project_number": 620,

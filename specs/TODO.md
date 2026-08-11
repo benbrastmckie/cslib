@@ -11,8 +11,8 @@ next_project_number: 627
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,619,620,626 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,620,626 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,619,621 | 36,37,181,425,534,554,568,594,610,620,626 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -23,9 +23,9 @@ next_project_number: 627
 
 ### Propositional Logic
 
-619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
+619 [BLOCKED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 
 ### Modal Logic
 
@@ -424,10 +424,10 @@ Re-request review from ctchou, itemising the four dispositions.
 ---
 
 ### 619. Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 626
 - **Research**: [619_reconcile_connectives_operators/reports/01_connectives-operators-reconciliation.md]
 - **Plan**: [619_reconcile_connectives_operators/plans/01_reconcile-connectives-operators.md]
 

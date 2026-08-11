@@ -206,7 +206,7 @@ parallel opportunities in this plan.
 - **Depends on:** none
 - **Verification Tier:** local
 
-### Phase 2: Remove the LoopChecking heartbeat band-aid [NOT STARTED]
+### Phase 2: Remove the LoopChecking heartbeat band-aid [COMPLETED]
 
 - **Goal:** The `set_option maxHeartbeats 1000000 in` block and its misattributing 4-line
   comment (which blames "a typeclass-projection layer that `isDefEq` must unfold" — the exact
@@ -214,15 +214,19 @@ parallel opportunities in this plan.
   200000-heartbeat budget.
 - **Territory (H7):** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` in the worktree ONLY.
 - **Tasks:**
-  - [ ] Verify the worktree working-tree change is exactly the 5-line deletion of the block at
+  - [x] Verify the worktree working-tree change is exactly the 5-line deletion of the block at
         branch lines 1209-1213 (`set_option maxHeartbeats 1000000 in` + the 4 comment lines
         beginning "`maxHeartbeats` raised: Phase 8's move to upstream ..."). Nothing replaces
         it — the comment is deleted, not rewritten, because its claim is false and the default
-        budget suffices (report 02 E12).
-  - [ ] Build the module at default budget in the worktree:
-        `lake build Cslib.Logics.Modal.Tableau.LoopChecking`.
-  - [ ] Commit ONLY `LoopChecking.lean` on the branch, message
-        `task 626 phase 2: ...` + Session line.
+        budget suffices (report 02 E12). Confirmed: diff is exactly 5 deletions at hunk
+        @@ -1206,11 +1206,6 @@; `grep -c maxHeartbeats` on the file returns 0.
+  - [x] Build the module at default budget in the worktree:
+        `lake build Cslib.Logics.Modal.Tableau.LoopChecking`. Green (0.87s trace replay);
+        additionally proven by fresh full elaboration `lake env lean` on the file at default
+        options: green in 6.2s wall / 13.6s CPU, matching report 02 E12's 13.5s.
+  - [x] Commit ONLY `LoopChecking.lean` on the branch, message
+        `task 626 phase 2: ...` + Session line. Commit c331c9e5 on task-619-phase8-wip;
+        worktree clean after commit.
 - **Timing:** module build ~15s-1 min warm (report 02 E12: 13.5s); tolerate up to 10 min.
 - **Done when:** module builds green with NO `maxHeartbeats` occurrence remaining in the file
   (`grep -c maxHeartbeats` on the file returns 0) AND the commit exists AND worktree is clean.

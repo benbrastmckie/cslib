@@ -20,12 +20,13 @@ import Mathlib.Tactic.TFAE
 /-! # Proof System Equivalences for Propositional Logic
 
 This module collects equivalences between the Hilbert-style proof system, natural deduction
-(ND), sequent calculus, and (at the empty context) the tableau decision procedure, for
-classical (CPL), intuitionistic (IPL), and minimal (MPL) propositional logic, stated as
-`List.TFAE` theorems. All three logic strengths have a three-way equivalence at both the
-context-based and closed-formula levels, and the closed-formula equivalences additionally
-fold in the tableau decision procedure as a fourth node, making the proof-system × logic
-matrix structurally symmetric.
+(ND), sequent calculus, and (at the empty context) the tableau decision procedure and
+algebraic semantics, for classical (CPL), intuitionistic (IPL), and minimal (MPL)
+propositional logic, stated as `List.TFAE` theorems. All three logic strengths have a
+three-way equivalence at both the context-based and closed-formula levels, and the
+closed-formula equivalences additionally carry two independent fourth nodes — the tableau
+decision procedure and algebraic (Boolean/Heyting/generalized-Heyting-algebra) validity —
+making the proof-system × logic matrix structurally symmetric.
 
 ## Main Results
 
@@ -43,6 +44,12 @@ matrix structurally symmetric.
   empty context.
 - `mplProofSystemsWithTableauTfae`: MPL four-way equivalence (Hilbert, ND, LM, tableau) at the
   empty context.
+- `cplProofSystemsWithAlgebraTfae`: CPL four-way equivalence (Hilbert, ND, LK, Boolean-algebra
+  validity) at the empty context.
+- `iplProofSystemsWithAlgebraTfae`: IPL four-way equivalence (Hilbert, ND, LJ, Heyting-algebra
+  validity) at the empty context.
+- `mplProofSystemsWithAlgebraTfae`: MPL four-way equivalence (Hilbert, ND, LM,
+  generalized-Heyting-algebra validity) at the empty context.
 
 ## Dependencies
 
@@ -55,6 +62,8 @@ The proofs are purely compositional, relying on existing bridge theorems:
   (IPL tableau fold)
 - `min_soundness_completeness`, `mvalid_universe_invariant`, `minimalTableau_decides`
   (MPL tableau fold)
+- `CPL.hilbert_alg_completeness`, `IPL.hilbert_alg_completeness`, `MPL.hilbert_alg_completeness`
+  (algebraic folds)
 -/
 
 @[expose] public section

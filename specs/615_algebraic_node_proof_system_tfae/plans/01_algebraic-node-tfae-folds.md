@@ -150,18 +150,18 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 2: Record the closed-only decision in the module docstring [NOT STARTED]
+### Phase 2: Record the closed-only decision in the module docstring [COMPLETED]
 
 - **Goal:** The module docstring documents the new theorems and states, with reasons, why the
   algebraic node lives on the closed families alone.
 - **Tasks:**
-  - [ ] Extend the opening paragraph (currently at `ProofSystemEquivalence.lean:21-27`) to
+  - [x] Extend the opening paragraph (currently at `ProofSystemEquivalence.lean:21-27`) to
         mention algebraic semantics alongside the tableau decision procedure, and note that the
         closed families now carry two independent fourth nodes (tableau, algebra).
-  - [ ] Add the three `...WithAlgebraTfae` entries to `## Main Results`.
-  - [ ] Add `MPL.hilbert_alg_completeness`, `IPL.hilbert_alg_completeness`, and
+  - [x] Add the three `...WithAlgebraTfae` entries to `## Main Results`.
+  - [x] Add `MPL.hilbert_alg_completeness`, `IPL.hilbert_alg_completeness`, and
         `CPL.hilbert_alg_completeness` to `## Dependencies`, labelled as the algebraic folds.
-  - [ ] Add the section-level `/-! ## Algebraic Semantics Folds (closed formulas only) ... -/`
+  - [x] Add the section-level `/-! ## Algebraic Semantics Folds (closed formulas only) ... -/`
         docstring immediately before `section WithAlgebra`, transcribing the prose drafted in
         report §5.2: (a) the tier-matched predicates are empty-context notions, so the folds
         extend the `...Closed` families; (b) a context-based node was considered and deliberately
@@ -170,8 +170,12 @@ Phases within the same wave can execute in parallel.
         `HeytingAlgebra`/`BooleanAlgebra` instances on `RelLindenbaumAlgebra`, which carries only
         a `GeneralizedHeytingAlgebra` instance; (c) the constraint here is a universe pin rather
         than an extra typeclass, contrasting with `section WithTableau`.
-  - [ ] Confirm no task number appears anywhere in the added prose.
-  - [ ] Verify: `lake build Cslib.Logics.Propositional.ProofSystemEquivalence`.
+        *(deviation: this section docstring was already transcribed verbatim from report §5.2 as
+        part of the Phase 1 `section WithAlgebra` edit, since report §5.2 bundles the section
+        docstring together with the section body; re-verified present and correct here rather
+        than re-authored)*
+  - [x] Confirm no task number appears anywhere in the added prose.
+  - [x] Verify: `lake build Cslib.Logics.Propositional.ProofSystemEquivalence`.
 - **Timing:** 20 minutes
 - **Depends on:** 1
 - **Verification Tier:** prose

@@ -44,7 +44,7 @@ It is the semantic base layer for intuitionistic and minimal modal logic.
 - Both `F1` (up-confluence) and `F2` (down-confluence) are included in `BFrame` now. `F2` is
   unused by the lemmas in this file but is the correct IK frame class for downstream
   intuitionistic and minimal completeness work.
-- Reuses `Cslib.Logic.Modal.Proposition` and its `HasBox`/`HasDia`/`HasAnd`/`HasOr`/`Bot`
+- Reuses `Cslib.Logic.Modal.Proposition` and its `HasBox`/`HasDiamond`/`HasAnd`/`HasOr`/`Bot`
   connective instances from `Modal/Basic.lean`; no new formula datatype or connective typeclass
   is introduced.
 

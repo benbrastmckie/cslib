@@ -177,7 +177,7 @@ written file, and confirm the empty upstream diff before copying.
 
 ---
 
-### Phase 2: Migrate HasDia to the upstream HasDiamond name [NOT STARTED]
+### Phase 2: Migrate HasDia to the upstream HasDiamond name [COMPLETED]
 
 **Goal**: Rename the fork's `HasDia` class and its `dia` field to upstream's `HasDiamond` /
 `diamond`, converting a naming divergence into an exact duplicate that Phase 8 can delete

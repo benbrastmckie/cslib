@@ -95,7 +95,7 @@ See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box c
 to universal quantification over accessible worlds, preserves conjunction, distributes over
 implication (axiom K), and is the subject of the necessitation rule. In classical systems,
 diamond (possibility) is derived as `¬□¬φ`. Non-classical modal logics (intuitionistic,
-minimal) require a separate `HasDia` typeclass, since `□` and `◇` become independent
+minimal) require a separate `HasDiamond` typeclass, since `□` and `◇` become independent
 operators. -/
 class HasBox (F : Type*) where
   /-- The necessity/box modality. -/
@@ -108,10 +108,10 @@ non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become i
 operators that do not satisfy the classical duality. This typeclass provides a primitive
 diamond for systems where this duality fails or where diamond is taken as a separate
 primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
-connecting `HasBox` and `HasDia` instances. -/
-class HasDia (F : Type*) where
+connecting `HasBox` and `HasDiamond` instances. -/
+class HasDiamond (F : Type*) where
   /-- The possibility/diamond modality. -/
-  dia : F → F
+  diamond : F → F
 
 /-- A type has an until temporal operator. -/
 class HasUntil (F : Type*) where
@@ -165,7 +165,7 @@ rules on box; with diamond primitive, necessitation becomes the interaction law 
 ([Blackburn2001] Chapter 1 takes the diamond-first alternative). See
 [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Diamond is derived via
 classical negation (`◇φ := ¬□¬φ`) and need not appear in the typeclass. Non-classical modal
-logics (intuitionistic, minimal) require extending this class with a primitive `HasDia` once
+logics (intuitionistic, minimal) require extending this class with a primitive `HasDiamond` once
 such systems are formalized in CSLib. -/
 class ModalConnectives (F : Type*) extends PropositionalConnectives F, HasBox F
 

@@ -207,7 +207,7 @@ end ModalAxiomClasses
 
 section DiaDualityAxiomClasses
 
-variable (S : Type*) [HasBot F] [HasImp F] [HasBox F] [HasDia F] [InferenceSystem S F]
+variable (S : Type*) [HasBot F] [HasImp F] [HasBox F] [HasDiamond F] [InferenceSystem S F]
 
 /-- The proof system proves diamond duality, forward direction: `◇φ → ¬□¬φ`. -/
 class HasAxiomDiaDualityFwd where

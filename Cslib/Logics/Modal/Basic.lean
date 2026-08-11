@@ -36,7 +36,7 @@ the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) s
 (1) the tableau and truth-lemma machinery get one decomposition rule per connective (structural
 induction, no Lukasiewicz-bridge lemmas), and (2) future non-classical modal logics
 (intuitionistic, minimal — see [Simpson1994]) can reuse this same datatype, since `□` and `◇`
-become independent operators in those settings. `HasDia` (`Foundations/Logic/Connectives.lean`)
+become independent operators in those settings. `HasDiamond` (`Foundations/Logic/Connectives.lean`)
 is instantiated below alongside `HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is
 recovered as a genuine *theorem* (`Satisfies.dual`, proved semantically) rather than holding
 definitionally; at the Hilbert proof-system level, the duality is recovered via the
@@ -45,7 +45,7 @@ definitionally; at the Hilbert proof-system level, the duality is recovered via 
 
 Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors
 with `HasAnd`/`HasOr` instances; `Modal.Proposition` now mirrors this directly, additionally
-providing `HasDia`. The embedding `PL.Proposition.toModal` (in `FromPropositional`) still
+providing `HasDiamond`. The embedding `PL.Proposition.toModal` (in `FromPropositional`) still
 produces the raw nested-`imp`/`bot` shape for `and`/`or` on its RHS (a conservativity artifact
 of the shared `PL.Proposition.embed` skeleton), documented at its declaration site.
 
@@ -105,9 +105,9 @@ instance : HasAnd (Proposition Atom) where
 instance : HasOr (Proposition Atom) where
   or := .or
 
-/-- Register `HasDia` instance for `Proposition`. -/
-instance : HasDia (Proposition Atom) where
-  dia := .diamond
+/-- Register `HasDiamond` instance for `Proposition`. -/
+instance : HasDiamond (Proposition Atom) where
+  diamond := .diamond
 
 /-- Negation as derived connective: ¬φ := φ → ⊥.
 

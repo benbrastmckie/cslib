@@ -24,7 +24,7 @@ next_project_number: 627
 ### Propositional Logic
 
 619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
-620 [IMPLEMENTING] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
+620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
 
 ### Modal Logic
@@ -115,7 +115,7 @@ This task edits `Propositional/Defs.lean`, which is also in the #648 rebase's fi
 ---
 
 ### 620. Rebase PR #648 onto current upstream and clear the stale blocking review
-- **Status**: [IMPLEMENTING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None

@@ -1,31 +1,38 @@
 {
-  "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Hard-mode plan written: 4 sequential phases landing the research-verified precedence fix (HasOr 30->31, HasImp 25->26 in Operators.lean) as commits on branch task-619-phase8-wip via the existing scratchpad worktree, which already holds the verified fix uncommitted. Includes LoopChecking maxHeartbeats band-aid deletion, a cheap regression guard (Connectives docstring sentence + CslibTests notation test), and the full lake build gate (~3331 jobs, ~7 min, incl. Cslib barrel). Merge-to-main deliberately deferred to the phase-8 task.",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md"
-    }
-  ],
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Phase 4 (final) complete. Full-library gate GREEN on task-619-phase8-wip at 3b0caf3b: lake build exit 0, exactly 3331 jobs INCLUDING the Cslib barrel (broken on main, green on the branch); warm-cache replay 1.76s, cold compile occurred during phase 1-3 gates. Regression guard module green (519 jobs). checkInitImports and lint-style green. Test driver (lake test) exits 1: six modules (BetaSplitRefutation, Propositional, MinProbe, TableauConformance, WitnessProbe, WitnessSearch3) fail, ALL proven pre-existing at branch base 1e88ad3e (the base deleted PL-local scoped notations from Defs.lean; the six files are byte-identical base..HEAD and open Cslib.Logic.PL, which does not activate Cslib.Logic scoped notations - probe-verified). Recorded as [COMPLETED WITH EXCLUSIONS] with a full Reasoned Exclusions record in the plan. Verified repair path for the follow-up task: add `open Cslib.Logic` to each file (probe with rfl grouping checks passed). Worktree clean; nothing merged/rebased/pushed - merge deferred to task 619 phase 8 per settled plan decision.",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "sorry_inventory": [],
   "blockers": [],
-  "next_action_hint": "implement",
-  "files_modified": [
+  "continuation_context": null,
+  "modified_files": [
     "specs/626_scheme_lean_kernel_defeq_regression/plans/01_precedence-collision-fix.md",
+    "specs/626_scheme_lean_kernel_defeq_regression/summaries/01_precedence-collision-fix-summary.md",
+    "specs/626_scheme_lean_kernel_defeq_regression/.orchestrator-handoff.json",
     "specs/626_scheme_lean_kernel_defeq_regression/.return-meta.json"
   ],
-  "decisions_made": [
-    "Fix lands as commits on task-619-phase8-wip (where the phase-8 detonator lives); no rebase/merge/cherry-pick to main in this task",
-    "Execution site is the existing branch worktree at the session scratchpad (verified live, warm .lake, fix already applied uncommitted); contingency recipe included if it vanishes",
-    "Band-aid deletion is its own phase with default-budget build verification; misattributing comment deleted, not rewritten",
-    "Regression guard kept deliberately cheap: one docstring sentence + one ~60-line test file with the E9 rfl grouping pins and 24-token chain probes",
-    "Waves fully sequential: shared worktree/.lake/branch head makes parallel dispatch a commit race"
-  ],
-  "dead_ends": [
-    "Do not retry: kernel-defeq/instance-projection diagnosis (refuted by report 02), maxHeartbeats bumps (observing swallows per-alternative timeouts), restoring Defs.lean notations (Ambiguous term), reducibility/priority/simp changes, editing Scheme.lean"
-  ],
-  "phases_completed": 0,
-  "phases_total": 4,
-  "plan_markers_verified": true
+  "branch_state": {
+    "branch": "task-619-phase8-wip",
+    "tip": "3b0caf3b",
+    "base": "1e88ad3e",
+    "fix_commits": ["128c42ee", "c331c9e5", "3b0caf3b"],
+    "worktree": "/tmp/claude-1000/-home-benjamin-Projects-cslib/622a4407-4dc9-4cb5-b6f8-f7c190e5bbfe/scratchpad/wt",
+    "worktree_clean": true
+  },
+  "verification": {
+    "full_build": {"exit": 0, "jobs": 3331, "wall": "1.76s warm-cache replay", "barrel_built": true},
+    "regression_module": {"exit": 0, "jobs": 519},
+    "checkInitImports": {"exit": 0},
+    "lint_style": {"exit": 0},
+    "lake_test": {"exit": 1, "failing_modules": ["CslibTests.BetaSplitRefutation", "CslibTests.Propositional", "CslibTests.MinProbe", "CslibTests.TableauConformance", "CslibTests.WitnessProbe", "CslibTests.WitnessSearch3"], "failures_preexisting_at_base": true},
+    "sorry_delta_vs_base": 0,
+    "new_maxHeartbeats": 0,
+    "new_axioms": 0
+  },
+  "notes_for_task_619_phase_8": "Consume the fix from branch task-619-phase8-wip tip 3b0caf3b. Already verified: full build incl. barrel, Scheme sentinel ~29s, LoopChecking at default heartbeats, regression guard, checkInitImports, lint-style. Remaining before merge: repair the six pre-existing red test modules (verified minimal fix: add `open Cslib.Logic` alongside `open Cslib.Logic.PL`), re-run lake test to green, then merge to main.",
+  "artifacts": [
+    {"path": "specs/626_scheme_lean_kernel_defeq_regression/summaries/01_precedence-collision-fix-summary.md", "type": "summary", "summary": "Final task summary: root cause, three fix commits, measured phase-4 gate results, pre-existing-failure evidence chain, and the 619 phase 8 consumption handoff."}
+  ]
 }

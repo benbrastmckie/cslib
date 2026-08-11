@@ -193,29 +193,51 @@ Phases within the same wave can execute in parallel.
 
 ---
 
-### Phase 3: Full CSLib CI gate and zero-debt verification [NOT STARTED]
+### Phase 3: Full CSLib CI gate and zero-debt verification [PARTIAL]
 
 - **Goal:** The whole repository is green under the CSLib CI sequence, with no new sorries, no
   new axioms, and no change to the existing TFAE statements.
 - **Tasks:**
-  - [ ] `lake build` (full project).
-  - [ ] `lake exe checkInitImports`.
-  - [ ] `lake lint` — in particular check `docBlame`, `defLemma`, `defsWithUnderscore`, and
-        `unusedSectionVars` on the three new theorems. Add `omit` only if `unusedSectionVars`
-        actually fires.
-  - [ ] `lake exe lint-style`.
-  - [ ] `lake test`.
-  - [ ] `lake shake --add-public --keep-implied --keep-prefix` — inspect output; do **not** apply
-        a suggestion that removes the new `HilbertCompleteness` import.
-  - [ ] Confirm zero sorries: `grep -rn 'sorry' Cslib/Logics/Propositional/ProofSystemEquivalence.lean`
-        returns nothing.
-  - [ ] Confirm axioms via `lean_verify` (or `#print axioms`) on all three new theorems: expect
-        exactly `[propext, Classical.choice, Quot.sound]`.
-  - [ ] Confirm the nine existing TFAE theorem statements are untouched by reading
-        `git diff Cslib/Logics/Propositional/ProofSystemEquivalence.lean` and checking that every
-        hunk falls inside the new import line, the `universe u` line, the new section, or a
-        docstring.
-  - [ ] `lake exe mk_all --module` is **not** required — no new file is added.
+  - [x] `lake build` (full project) — succeeds, 3325/3325 jobs, only pre-existing warnings in
+        unrelated files (`Tableau/Intuitionistic/DecisionProcedure.lean`,
+        `Tableau/Minimal/DecisionProcedure.lean`, `Modal/Tableau/FrameCompleteness.lean`).
+  - [x] `lake exe checkInitImports` — exit 0.
+  - [x] `lake lint` — zero warnings on `ProofSystemEquivalence.lean`; no `docBlame`, `defLemma`,
+        `defsWithUnderscore`, or `unusedSectionVars` fired. No `omit` needed, as predicted.
+  - [x] `lake exe lint-style` — exit 0.
+  - [ ] `lake test` *(deviation: blocked — see below)*.
+  - [x] `lake shake --add-public --keep-implied --keep-prefix` — no suggestion touching
+        `ProofSystemEquivalence.lean` or the new `HilbertCompleteness` import.
+  - [x] Confirm zero sorries: `grep -rn 'sorry' .../ProofSystemEquivalence.lean` returns nothing.
+  - [x] Confirm axioms via `#print axioms` on all three new theorems: exactly
+        `[propext, Classical.choice, Quot.sound]` for each.
+  - [x] Confirm the nine existing TFAE theorem statements are untouched: diffed against the
+        pre-Phase-1 commit and confirmed every removed/changed line falls inside the module
+        docstring opening paragraph, `## Main Results`, or `## Dependencies` — no theorem
+        signature or proof line touched.
+  - [x] `lake exe mk_all --module` — confirmed not required; `Cslib.lean:566` already lists
+        `ProofSystemEquivalence`.
+
+**BLOCKER (Phase 3, `lake test` step only)**: `lake test` fails on `CslibTests.GrindLint`, with
+a `#guard_msgs` mismatch reporting new `grind` instantiations from
+`Cslib.Logic.Bimodal.Axiom.linear_since.sizeOf_spec`, `Cslib.Logic.Bimodal.Axiom.linear_until.sizeOf_spec`,
+`Cslib.Logic.Temporal.Axiom.linear_since.sizeOf_spec`, and
+`Cslib.Logic.Temporal.Axiom.linear_until.sizeOf_spec`. These four declarations live in
+`Cslib/Logics/Bimodal/**` and `Cslib/Logics/Temporal/**`, which this task's territory contract
+does not authorize editing (this implementer is scoped to
+`Cslib/Foundations/Logic/ProofSystem.lean` and
+`Cslib/Logics/Propositional/ProofSystemEquivalence.lean` only). Root-caused by `git log`: the
+axioms were introduced by concurrently-landed sibling-task commits ("pre-land Bimodal bridge
+lemmas", "pre-land Temporal bridge lemma") that added new `grind`-eligible declarations without
+a corresponding `#grind_lint skip` entry in `CslibTests/GrindLint.lean` — unrelated to this
+task's Propositional file. Re-ran `lake test` a second time after further sibling commits landed
+(`f086905d`) and the failure persisted identically, confirming it is not transient.
+**What is needed to unblock**: a `#grind_lint skip` entry added for the four flagged
+declarations (or their fix) in `CslibTests/GrindLint.lean`, which belongs to the sibling
+Bimodal/Temporal task's territory, not this one.
+**Prohibited workarounds**: not applicable — no `sorry`/vacuous placeholder was considered; this
+is a full-repo test-suite gate failure outside this task's edit scope, not a gap in this task's
+own proof content.
 - **Timing:** 30 minutes (dominated by full build and test)
 - **Depends on:** 2
 - **Verification Tier:** full
@@ -228,7 +250,8 @@ Phases within the same wave can execute in parallel.
   - None expected; only lint-driven touch-ups to
     `Cslib/Logics/Propositional/ProofSystemEquivalence.lean` if a linter fires
 - **Verification:**
-  - All seven CI steps exit zero.
+  - Six of seven CI steps exit zero; `lake test` fails on `CslibTests.GrindLint`, root-caused to
+    concurrently-landed sibling-task commits outside this task's territory (see BLOCKER above).
   - Zero sorries, axioms exactly `[propext, Classical.choice, Quot.sound]`.
   - `git diff` confined to the new import, `universe u`, `section WithAlgebra`, and docstrings.
 
@@ -236,18 +259,19 @@ Phases within the same wave can execute in parallel.
 
 ## Testing & Validation
 
-- [ ] `lake build` green (full project).
-- [ ] `lake exe checkInitImports` green.
-- [ ] `lake lint` green — no new `docBlame`, `defLemma`, `defsWithUnderscore`, or
+- [x] `lake build` green (full project).
+- [x] `lake exe checkInitImports` green.
+- [x] `lake lint` green — no new `docBlame`, `defLemma`, `defsWithUnderscore`, or
       `unusedSectionVars` warnings.
-- [ ] `lake exe lint-style` green.
-- [ ] `lake test` green.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` reports no removal of the new import.
-- [ ] Zero new sorries.
-- [ ] `#print axioms` on the three new theorems yields `[propext, Classical.choice, Quot.sound]`.
-- [ ] The nine existing TFAE theorem statements are byte-identical to their pre-change form.
-- [ ] The module docstring states the closed-vs-context decision and its reason.
-- [ ] No task number appears in the Lean file.
+- [x] `lake exe lint-style` green.
+- [ ] `lake test` green *(blocked by `CslibTests.GrindLint` failure outside this task's territory
+      — see Phase 3 BLOCKER)*.
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reports no removal of the new import.
+- [x] Zero new sorries.
+- [x] `#print axioms` on the three new theorems yields `[propext, Classical.choice, Quot.sound]`.
+- [x] The nine existing TFAE theorem statements are byte-identical to their pre-change form.
+- [x] The module docstring states the closed-vs-context decision and its reason.
+- [x] No task number appears in the Lean file.
 
 ## Artifacts & Outputs
 

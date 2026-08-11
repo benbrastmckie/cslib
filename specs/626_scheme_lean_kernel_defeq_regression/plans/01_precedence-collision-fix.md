@@ -236,7 +236,7 @@ parallel opportunities in this plan.
 - **Depends on:** 1
 - **Verification Tier:** local
 
-### Phase 3: Regression guard — docstring sentence and notation test [NOT STARTED]
+### Phase 3: Regression guard — docstring sentence and notation test [COMPLETED]
 
 - **Goal:** A silent-catastrophic recurrence of this bug class (a `scoped` notation exactly
   colliding with core notation in token+precedence+associativity) is guarded by (a) one
@@ -247,7 +247,7 @@ parallel opportunities in this plan.
   new file `CslibTests/OperatorPrecedenceRegression.lean`, and the import list in
   `CslibTests.lean`.
 - **Tasks:**
-  - [ ] Append 1-2 sentences to the END of the existing
+  - [x] Append 1-2 sentences to the END of the existing
         `## Standing Invariant: Notation Collision Risk` section of `Connectives.lean` (section
         exists on the branch at ~line 65): an *exact* token+precedence+associativity collision
         with a core notation turns every use into a parser `choice` node with Θ(2^n) elaborator
@@ -256,7 +256,7 @@ parallel opportunities in this plan.
         precedence (`∧` 36 vs 35, `∨` 31 vs 30, `→` 26 vs 25), and the latent `↔` (20 vs 20) /
         `¬` (identical shape) collisions are acceptable only while no instance activates them on
         chain-prone types. NO task numbers in the text.
-  - [ ] Create `CslibTests/OperatorPrecedenceRegression.lean` (naming precedent:
+  - [x] Create `CslibTests/OperatorPrecedenceRegression.lean` (naming precedent:
         `S4LoopGuardRegression.lean`) containing, inside a namespace where the scoped
         `Cslib.Logic` notation is active (the research probes used
         `import Cslib.Logics.Propositional.Defs` + `namespace Cslib.Logic.PL`):
@@ -271,9 +271,9 @@ parallel opportunities in this plan.
           — these are the named semantics-unchanged gates.
         - File docstring explains the guard mechanically (collision → choice nodes → 2^n), no
           task numbers.
-  - [ ] Register the new module in `CslibTests.lean`'s import list.
-  - [ ] Build the test module in the worktree; run the four examples green.
-  - [ ] Commit the three files on the branch, message `task 626 phase 3: ...` + Session line.
+  - [x] Register the new module in `CslibTests.lean`'s import list.
+  - [x] Build the test module in the worktree; run the four examples green.
+  - [x] Commit the three files on the branch, message `task 626 phase 3: ...` + Session line.
 - **Timing:** test-module build seconds-to-~2 min warm.
 - **Done when:** the new test module builds green in the worktree, `CslibTests.lean` imports
   it, the docstring sentence is present, and the commit exists with exactly these three files.

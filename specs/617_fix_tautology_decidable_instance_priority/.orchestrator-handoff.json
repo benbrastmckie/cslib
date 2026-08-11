@@ -1,0 +1,42 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "task_number": 617,
+  "session_id": "sess_1786405794_f0204e_617",
+  "agent_type": "cslib-research-agent",
+  "phase": "research",
+  "status": "researched",
+  "trigger": "phase_dispatch",
+  "target": "Fix the Decidable (Tautology φ) instance-priority collision: the kernel-inert tableau instance shadows the kernel-reducible Boolean one for every consumer of the Cslib barrel",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "skeleton": false,
+  "summary": "PREMISE FULLY CONFIRMED — every claim in the task description was independently reproduced against HEAD 212318f2, and the fix was verified green. Red baseline: a probe importing both Semantics.Bool and Tableau.Classical.DecisionProcedure resolves `#synth Decidable (Tautology (Atom := Bool) (.imp (.atom false) (.atom false)))` to instDecidableTautologyTableau and fails `by decide` with the verbatim error quoted in the description. Blast radius measured exactly: a copy of CslibTests/Propositional.lean with one added tableau import produces EXACTLY 7 `Tactic `decide` failed` errors and no others; with the fix applied it compiles clean, exit 0. Three findings beyond re-confirmation. (1) The DECLARATION-SITE form of the fix — `instance (priority := 100) instDecidableTautologyTableau` at DecisionProcedure.lean:81 — compiles and every downstream module stays green: DecisionProcedure, ProofSystemEquivalence, and SequentCalculus.LK.Decidability all built successfully (988 jobs, exit 0). The task described the fix only in consumer-side `attribute [instance 100]` form; the declaration-site form is now verified, and (priority := 100) is the established in-repo idiom (4 existing numeric uses in Cslib/, zero uses of `priority := low`). (2) `#guard_msgs in #synth` WORKS and pins instance selection exactly — verified exit 0 — giving a regression guard whose failure message names instDecidableTautologyTableau directly rather than only reporting stuck reduction. (3) NEGATIVE FINDING: this is the only double-registration of its kind in the propositional tree. The Intuitionistic/Minimal analogues do NOT collide because their finite-model-property routes (decidableDerivableIntPropAxiomFMP, decidableDerivableMinPropAxiomFMP) are deliberately `noncomputable def`s, not registered instances, and say so in their own docstrings. So there is no sibling defect to bundle; the fix really is one line in one file. NO COLLATERAL DAMAGE: LK/Decidability.lean:175 elaborates Decidable (Tautology (ctxToImp Γ A)) with no Fintype Atom in scope, so the tableau instance was and remains the only candidate there — selection unchanged; Metalogic/StrongCompleteness.lean:566 does not import the tableau module at all, so instDecidableDerivablePropositionalAxiom already resolved to the Boolean decider. The Fintype-free fallback was explicitly verified to still resolve after the priority drop. Recommendation for the regression guard: add the import to the EXISTING CslibTests/Propositional.lean (converting 7 accidentally-passing tests into deliberately-passing ones) rather than creating a new test file, using `public meta import` to mirror the file's own style — the meta-only form is sufficient here and was verified. Plus the #guard_msgs #synth pin. Also recommend three small docstring updates so the priority annotation's intent is legible and cannot be 'cleaned up' back into the defect. lake shake is NOT a risk (disabled in CI, and the local invocation is scoped to the Cslib target, which excludes CslibTests/). Zero-debt: no sorry, no axiom, no vacuous definition possible in this change. The experimental edit was reverted and the module rebuilt; the working tree is clean.",
+  "sorry_inventory": [],
+  "blockers": [],
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md",
+      "summary": "Research report: defect reproduced red (exactly 7 decide failures), declaration-site fix verified green across all downstream modules, consumer audit, regression-guard recommendation, and ordered verification plan."
+    }
+  ],
+  "next_action_hint": "create_plan",
+  "requires_user_review": false,
+  "continuation_path": "specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md",
+  "modified_files": [
+    "specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md",
+    "specs/617_fix_tautology_decidable_instance_priority/.orchestrator-handoff.json",
+    "specs/617_fix_tautology_decidable_instance_priority/.return-meta.json"
+  ],
+  "decisions_made": [
+    "Recommended the DECLARATION-SITE form `instance (priority := 100) instDecidableTautologyTableau` over the consumer-side `attribute [instance 100]` form the task quoted, and verified it builds. The task itself asked for the declaration site; this confirms the syntax and the downstream build.",
+    "Recommended numeric `priority := 100` over the synonym `priority := low`: all four existing priority annotations in Cslib/ use the numeric form, so this matches in-repo convention.",
+    "Recommended adding the tableau import to the EXISTING CslibTests/Propositional.lean rather than creating a new test file. A new file would either duplicate the 7 tests or leave the originals still not exercising the both-in-scope configuration, which defeats the purpose of the verification step.",
+    "Recommended `public meta import` (meta-only) for the test import, verified sufficient. Deliberately did NOT recommend the dual `import X` + `public meta import X` idiom documented at CslibTests/TableauConformance.lean:36-40, because that is needed only when the test body references constructors/definitions directly — these tests only need the instance visible to typeclass resolution.",
+    "Recommended adding a `#guard_msgs in #synth` instance pin on top of the 7 decide tests (verified working), because its failure message names the wrong instance directly whereas the decide failures only report stuck reduction.",
+    "Recommended three small docstring updates (DecisionProcedure.lean:76-80 and :16, optionally Semantics/Bool.lean:181-187) so the priority annotation's rationale is recorded at the declaration site. Without this a future contributor can reasonably remove the annotation and silently reinstate the defect.",
+    "Explicitly did NOT recommend bundling any Intuitionistic/Minimal change: their FMP decision procedures are noncomputable defs rather than registered instances, so no analogous collision exists. Verified rather than assumed.",
+    "Explicitly did NOT recommend touching the two pre-existing linter.unusedDecidableInType warnings on ivalid_universe_invariant and mvalid_universe_invariant that appear in the build output — they are present at HEAD and unrelated to this task.",
+    "Flagged that Cslib/Logics/Propositional/Semantics/Bool.lean is outside the task's declared file_scope; its recommended change is optional prose only, so the plan must either add it to scope explicitly or drop it."
+  ]
+}

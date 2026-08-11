@@ -1,0 +1,24 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T00:00:00Z",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md",
+      "summary": "Defect reproduced red (exactly 7 decide failures), declaration-site (priority := 100) fix verified green across all downstream modules, consumer audit, regression-guard recommendation, ordered verification plan."
+    }
+  ],
+  "partial_progress": {
+    "stage": "research_complete",
+    "details": "Premise fully confirmed by direct experiment. Fix verified at the declaration site with all downstream modules green. Working tree left clean (experimental edit reverted and module rebuilt)."
+  },
+  "blockers": [],
+  "requires_user_review": false,
+  "next_action_hint": "create_plan",
+  "metadata": {
+    "session_id": "sess_1786405794_f0204e_617",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

@@ -1,24 +1,44 @@
 {
-  "status": "researched",
-  "started_at": "2026-08-10T00:00:00Z",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 617,
+  "session_id": "sess_1786405794_f0204e_617",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md",
-      "summary": "Defect reproduced red (exactly 7 decide failures), declaration-site (priority := 100) fix verified green across all downstream modules, consumer audit, regression-guard recommendation, ordered verification plan."
+      "type": "plan",
+      "path": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+      "summary": "4-phase plan: red baseline + (priority := 100) declaration-site fix as one atomic batch, #guard_msgs in #synth instance pin, docstring rationale at both declaration sites, full CSLib CI gate."
     }
   ],
-  "partial_progress": {
-    "stage": "research_complete",
-    "details": "Premise fully confirmed by direct experiment. Fix verified at the declaration site with all downstream modules green. Working tree left clean (experimental edit reverted and module rebuilt)."
+  "phase_count": 4,
+  "estimated_hours": 2,
+  "dependency_waves": [[1], [2, 3], [4]],
+  "plan_metadata": {
+    "phases": 4,
+    "total_effort_hours": 2,
+    "complexity": "simple",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1], [2, 3], [4]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_tautology-decidable-instance-priority.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-08-10"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
   },
-  "blockers": [],
-  "requires_user_review": false,
-  "next_action_hint": "create_plan",
-  "metadata": {
-    "session_id": "sess_1786405794_f0204e_617",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+  "memory_candidates": [
+    {
+      "content": "Lean 4 instance-priority collision pattern in a barrel-imported library: when two instances target the same `Decidable P` goal and both carry default priority (1000), Lean prefers the LATER-DECLARED one. If one decider is kernel-reducible (e.g. Fintype enumeration) and the other is not (e.g. WellFounded.fix-based tableau), whichever module the barrel imports last silently wins, and `decide` breaks for every downstream consumer while in-repo tests keep passing purely because they do not transitively import both modules. Diagnosis: `#synth Decidable (P ...)` with both modules in scope names the selected instance. Fix: `instance (priority := 100) instName ...` at the DECLARATION site of the non-reducible one (not a consumer-side `attribute [instance 100]`, which leaves the barrel defect intact). Priority only breaks ties among APPLICABLE instances, so the lowered instance stays the sole candidate where the other's hypotheses (e.g. `Fintype`) are unavailable. Regression guard: a `#guard_msgs in #synth` pin fails with a message naming the wrong instance, whereas the downstream `decide` failures only report stuck reduction. Generalizes to any repo where a barrel module re-exports competing instances.",
+      "category": "PATTERN",
+      "source_artifact": "specs/617_fix_tautology_decidable_instance_priority/plans/01_tautology-decidable-instance-priority.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["lean4", "instance-priority", "decidable", "barrel-import", "guard_msgs", "typeclass-resolution"]
+    }
+  ],
+  "next_steps": "Run /implement 617 to execute the plan"
 }

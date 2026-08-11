@@ -1,5 +1,5 @@
 {
-  "next_project_number": 626,
+  "next_project_number": 627,
   "active_projects": [
     {
       "project_number": 613,
@@ -1357,6 +1357,33 @@
       ],
       "session_id": "sess_1786402759_26b020",
       "completion_summary": "Fixed scripts/check-shake-residue.sh --list's false-clean defect by consolidating both fatal shake-result conditions into a shared validate_shake_result()/run_and_validate_shake() helper (mirroring check-axiom-census.sh), rewiring all three usage modes onto it, adding a --self-test subcommand with four fixtures (including the literal reproduced stale-target regression), and reconciling the EXIT-CODE CONTRACT header."
+    },
+    {
+      "project_number": 626,
+      "project_name": "scheme_lean_kernel_defeq_regression",
+      "title": "Root-cause the Scheme.lean kernel-defeq non-termination introduced by the Connectives/Operators migration",
+      "status": "not_started",
+      "task_type": "cslib",
+      "priority": "high",
+      "topic": "propositional-tableau",
+      "description": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean fails to compile once the Connectives/Operators reconciliation phase 8 is applied (branch task-619-phase8-wip, commit 1e88ad3e). The private lemma intExpandBranches_openBranch_sat (Scheme.lean:8327, 1321 lines, 22 hypotheses, 187 simp calls) does not terminate. Measured: the module builds in 14s against pre-change dependencies and does not complete in >34 minutes with them. The runaway work is kernel-level defeq/whnf reduction, NOT a heartbeat-checked tactic loop -- a maxHeartbeats 40000 budget yields no deterministic timeout after 400s, with flat 455MB RSS and one core pegged, so a maxHeartbeats bump cannot fix it. Determine the exact mechanism and land a fix that lets phase 8 (which also repairs the currently-broken Cslib.lean barrel) merge to main. See reports/01_scheme-defeq-regression-findings.md for full evidence and refuted hypotheses.",
+      "dependencies": [],
+      "file_scope": [
+        "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+        "Cslib/Foundations/Logic/Connectives.lean",
+        "Cslib/Logics/Propositional/Defs.lean"
+      ],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/626_scheme_lean_kernel_defeq_regression/reports/01_scheme-defeq-regression-findings.md",
+          "summary": "Localization, kernel-defeq evidence, refuted hypotheses, and suggested next steps",
+          "created": "2026-08-11T15:27:33Z"
+        }
+      ],
+      "created": "2026-08-11T15:23:13Z",
+      "last_updated": "2026-08-11T15:23:13Z",
+      "session_id": "sess_1786415417_7d8088"
     }
   ],
   "repository_health": {

@@ -24,7 +24,7 @@ public import Cslib.Foundations.Logic.Theorems.Combinators
 This module proves the one genuinely hard direction of the same-language-base modal lattice:
 intuitionistic `IK` uses a **primitive** diamond with Fischer-Servi axiom schemata (`kdia`,
 `cd`, `idb`, `dbot`), while classical `K` uses the **dual** diamond (`◇φ := ¬□¬φ`, witnessed by
-the `diaDualityFwd`/`diaDualityBack` axiom schemata). This is not a syntactic rename — each
+the `diamondDualityFwd`/`diamondDualityBack` axiom schemata). This is not a syntactic rename — each
 `IKModalAxiom` instance must be shown *derivable* (not literally an axiom instance) in
 `KAxiom`, using the generalized lift `Derivable_of_axiom_derivable`
 (`InterSystem/Lifting.lean`).
@@ -36,10 +36,10 @@ the `diaDualityFwd`/`diaDualityBack` axiom schemata). This is not a syntactic re
   instance under the same name.
 - `kdia` (`□(φ → ψ) → (◇φ → ◇ψ)`): derived via the generic raw-encoding K-diamond
   distribution theorem `k_dist_diamond` (`Theorems/Modal/Basic.lean`) composed with the
-  `diaDualityFwd`/`diaDualityBack` axiom instances, using only the `flip`/`b_combinator`/
+  `diamondDualityFwd`/`diamondDualityBack` axiom instances, using only the `flip`/`b_combinator`/
   `imp_trans` propositional combinators (`Theorems/Combinators.lean`).
 - `dbot` (`◇⊥ → ⊥`): derived from `⊢ □¬⊥` (necessitation of the tautology `⊢ ¬⊥`, i.e.
-  `identity ⊥ : ⊢ ⊥ → ⊥`), `app1` (`φ → ((φ → ψ) → ψ)`), and `diaDualityFwd`.
+  `identity ⊥ : ⊢ ⊥ → ⊥`), `app1` (`φ → ((φ → ψ) → ψ)`), and `diamondDualityFwd`.
 - `cd` (`◇(φ ∨ ψ) → (◇φ ∨ ◇ψ)`) and `idb` (`(◇φ → □ψ) → □(φ → ψ)`), the two fiddliest
   Fischer-Servi schemata, are each derived via their contrapositive plus `rcp` (see
   `k_derivable_of_ik_cd`/`k_derivable_of_ik_idb` for the step-by-step derivations).
@@ -126,14 +126,14 @@ theorem k_derivable_of_ik_k {φ ψ : Proposition Atom} :
 
 /-- `IK`'s `kdia` (`k2`/Kd: `□(φ → ψ) → (◇φ → ◇ψ)`) is **derivable**, not a literal axiom,
 in classical `K`: `K` axiomatizes diamond distribution via the raw `¬□¬`-encoded
-`k_dist_diamond` plus the `diaDualityFwd`/`diaDualityBack` bridge axioms, not via a
+`k_dist_diamond` plus the `diamondDualityFwd`/`diamondDualityBack` bridge axioms, not via a
 primitive-diamond schema.
 
 Proof (all steps generic combinators from `Theorems/Modal/Basic.lean` /
 `Theorems/Combinators.lean`, instantiated at `S := Modal.HilbertK`):
 with `A := □(φ → ψ)`, `B := ¬□¬φ`, `C := ¬□¬ψ`, `D := ◇φ`, `E := ◇ψ`:
 1. `k1 : A → (B → C)` (`k_dist_diamond`).
-2. `fwd : D → B` (`diaDualityFwd`), `back : C → E` (`diaDualityBack`).
+2. `fwd : D → B` (`diamondDualityFwd`), `back : C → E` (`diamondDualityBack`).
 3. `ModusPonens.mp flip k1 : B → (A → C)`; `imp_trans fwd this : D → (A → C)`;
    `ModusPonens.mp flip this : A → (D → C)`.
 4. `ModusPonens.mp b_combinator back : (D → C) → (D → E)`.
@@ -146,8 +146,8 @@ theorem k_derivable_of_ik_kdia {φ ψ : Proposition Atom} :
       ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))) := by
   have k1 := @Cslib.Logic.Theorems.Modal.Basic.k_dist_diamond
     (Proposition Atom) _ _ _ Modal.HilbertK _ _ φ ψ
-  have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertK) (φ := φ)
-  have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertK) (φ := ψ)
+  have fwd := HasAxiomDiamondDualityFwd.diamondDualityFwd (S := Modal.HilbertK) (φ := φ)
+  have back := HasAxiomDiamondDualityBack.diamondDualityBack (S := Modal.HilbertK) (φ := ψ)
   have step1 := ModusPonens.mp (Cslib.Logic.Theorems.Combinators.flip (S := Modal.HilbertK)) k1
   have step2 := Cslib.Logic.Theorems.Combinators.imp_trans fwd step1
   have step3 := ModusPonens.mp (Cslib.Logic.Theorems.Combinators.flip (S := Modal.HilbertK)) step2
@@ -159,7 +159,7 @@ theorem k_derivable_of_ik_kdia {φ ψ : Proposition Atom} :
 
 /-- `IK`'s `dbot` (`k5`/Nd: `◇⊥ → ⊥`) is **derivable** in classical `K` from the tautology
 `⊢ ⊥ → ⊥` (`identity`), necessitated to `⊢ □(⊥ → ⊥)` (i.e. `⊢ □¬⊥`), then `app1` and
-`diaDualityFwd` compose it into `◇⊥ → ⊥`. -/
+`diamondDualityFwd` compose it into `◇⊥ → ⊥`. -/
 theorem k_derivable_of_ik_dbot :
     Derivable (@KAxiom Atom) ((◇(Proposition.bot : Proposition Atom)).imp Proposition.bot) := by
   have hid := Cslib.Logic.Theorems.Combinators.identity (S := Modal.HilbertK)
@@ -172,7 +172,7 @@ theorem k_derivable_of_ik_dbot :
     (Proposition Atom) _ _ Modal.HilbertK _ _
     (Proposition.box (Proposition.bot.imp Proposition.bot)) Proposition.bot
   have hnegneg := ModusPonens.mp happ1 ⟨dBoxNegBot⟩
-  have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertK)
+  have fwd := HasAxiomDiamondDualityFwd.diamondDualityFwd (S := Modal.HilbertK)
     (φ := (Proposition.bot : Proposition Atom))
   have goal := Cslib.Logic.Theorems.Combinators.imp_trans fwd hnegneg
   obtain ⟨d⟩ := goal
@@ -197,12 +197,12 @@ theorem k_boxDistrib2 {A B C : Proposition Atom}
   obtain ⟨dg⟩ := goal
   exact ⟨dg⟩
 
-/-- Dual negation: `⊢ ¬◇φ → □¬φ`. Derived from `diaDualityBack` (contraposed) composed
+/-- Dual negation: `⊢ ¬◇φ → □¬φ`. Derived from `diamondDualityBack` (contraposed) composed
 with `double_negation`. -/
 theorem k_dualNeg {φ : Proposition Atom} :
     Derivable (@KAxiom Atom)
       (((◇φ).imp Proposition.bot).imp (Proposition.box (φ.imp Proposition.bot))) := by
-  have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertK) (φ := φ)
+  have back := HasAxiomDiamondDualityBack.diamondDualityBack (S := Modal.HilbertK) (φ := φ)
   have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
     (S := Modal.HilbertK) back
   have dne := @Cslib.Logic.Theorems.Propositional.Core.double_negation
@@ -295,7 +295,7 @@ theorem k_andToNotImp {A B : Proposition Atom} :
   exact ⟨d⟩
 
 /-- `¬□X → ◇¬X` for any formula `X` (needed with `X := φ → ψ` for `idb`). Derived from
-`box_mono` of `double_negation` (contraposed) composed with `diaDualityBack` at `¬X`. -/
+`box_mono` of `double_negation` (contraposed) composed with `diamondDualityBack` at `¬X`. -/
 theorem k_notBoxToDiaNeg {X : Proposition Atom} :
     Derivable (@KAxiom Atom)
       (((Proposition.box X).imp Proposition.bot).imp
@@ -312,13 +312,13 @@ theorem k_notBoxToDiaNeg {X : Proposition Atom} :
         (Proposition.box X)) := ⟨dbd⟩
   have contraBoxDne := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
     (S := Modal.HilbertK) boxDneIS
-  have dualBack := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertK)
+  have dualBack := HasAxiomDiamondDualityBack.diamondDualityBack (S := Modal.HilbertK)
     (φ := X.imp Proposition.bot)
   have goal := Cslib.Logic.Theorems.Combinators.imp_trans contraBoxDne dualBack
   obtain ⟨d⟩ := goal
   exact ⟨d⟩
 
-/-- `◇¬X → ¬□X` for any formula `X`. Derived from `diaDualityFwd` at `¬X` composed with the
+/-- `◇¬X → ¬□X` for any formula `X`. Derived from `diamondDualityFwd` at `¬X` composed with the
 contraposition of `box_mono` of `dni`. -/
 theorem k_diaNegToNotBox {X : Proposition Atom} :
     Derivable (@KAxiom Atom)
@@ -334,7 +334,7 @@ theorem k_diaNegToNotBox {X : Proposition Atom} :
         (Proposition.box ((X.imp Proposition.bot).imp Proposition.bot))) := ⟨dbd⟩
   have contraBoxDni := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
     (S := Modal.HilbertK) boxDniIS
-  have dualFwdNegX := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertK)
+  have dualFwdNegX := HasAxiomDiamondDualityFwd.diamondDualityFwd (S := Modal.HilbertK)
     (φ := X.imp Proposition.bot)
   have goal := Cslib.Logic.Theorems.Combinators.imp_trans dualFwdNegX contraBoxDni
   obtain ⟨d⟩ := goal
@@ -356,7 +356,7 @@ With `A₀ := ◇(φ ∨ ψ)`, `B₀ := ◇φ ∨ ◇ψ`, `P := ¬B₀`:
 5. `step7a := imp_trans toBoxNotPhi T2 : P → (□¬ψ → □¬(φ ∨ ψ))`.
 6. `step8 := MP (MP implyS step7a) toBoxNotPsi : P → □¬(φ ∨ ψ)` (`implyS`-combinator
    discharges the shared antecedent `P`).
-7. `dualFwdOr := diaDualityFwd (φ ∨ ψ) : A₀ → ¬□¬(φ ∨ ψ)`; via `flip` and `imp_trans` with
+7. `dualFwdOr := diamondDualityFwd (φ ∨ ψ) : A₀ → ¬□¬(φ ∨ ψ)`; via `flip` and `imp_trans` with
    step 6: `contrapositive := P → ¬A₀`.
 8. `rcp contrapositive : A₀ → B₀`, i.e. the goal. -/
 theorem k_derivable_of_ik_cd {φ ψ : Proposition Atom} :
@@ -393,7 +393,7 @@ theorem k_derivable_of_ik_cd {φ ψ : Proposition Atom} :
         (ψ := Proposition.box (ψ.imp Proposition.bot))
         (χ := Proposition.box ((φ.or ψ).imp Proposition.bot)))
       step7a) toBoxNotPsi
-  have dualFwdOr := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertK) (φ := φ.or ψ)
+  have dualFwdOr := HasAxiomDiamondDualityFwd.diamondDualityFwd (S := Modal.HilbertK) (φ := φ.or ψ)
   have flipped := ModusPonens.mp (Cslib.Logic.Theorems.Combinators.flip (S := Modal.HilbertK))
     dualFwdOr
   have contrapositive := Cslib.Logic.Theorems.Combinators.imp_trans step8 flipped
@@ -504,7 +504,7 @@ generalized axiom→derivation lift `Derivable_of_axiom_derivable`
 (`InterSystem/Lifting.lean`) applied to `ikAxiom_derivable_in_K`. This is the "honest"
 Intuitionistic-to-Classical bridge: adding `peirce` (DNE) to `IK`'s Fischer-Servi
 primitive-diamond axioms collapses them to classical `K`'s dual-diamond axiomatization
-(`diaDualityFwd`/`diaDualityBack`); the two axiomatizations characterize the same classical
+(`diamondDualityFwd`/`diamondDualityBack`); the two axiomatizations characterize the same classical
 diamond, but only propositionally, not syntactically. -/
 theorem ikDerivable_implies_kDerivable {φ : Proposition Atom} (h : Derivable IKModalAxiom φ) :
     Derivable (@KAxiom Atom) φ :=
@@ -513,13 +513,13 @@ theorem ikDerivable_implies_kDerivable {φ : Proposition Atom} (h : Derivable IK
 /-! ## Rung Bridge: `IT → T` -/
 
 /-- `IT`'s `tDia` (`φ → ◇φ`) is **derivable** in classical `T`: `modalT` at `¬φ` gives
-`□¬φ → ¬φ`; `flip` gives `φ → ¬□¬φ`; compose with `diaDualityBack` to reach `φ → ◇φ`. -/
+`□¬φ → ¬φ`; `flip` gives `φ → ¬□¬φ`; compose with `diamondDualityBack` to reach `φ → ◇φ`. -/
 theorem t_derivable_of_it_tDia {φ : Proposition Atom} :
     Derivable (@TAxiom Atom) (φ.imp (◇φ)) := by
   have modalTNeg := HasAxiomT.T (S := Modal.HilbertT) (φ := φ.imp Proposition.bot)
   have flipped := ModusPonens.mp
     (Cslib.Logic.Theorems.Combinators.flip (S := Modal.HilbertT)) modalTNeg
-  have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertT) (φ := φ)
+  have back := HasAxiomDiamondDualityBack.diamondDualityBack (S := Modal.HilbertT) (φ := φ)
   have goal := Cslib.Logic.Theorems.Combinators.imp_trans flipped back
   obtain ⟨d⟩ := goal
   exact ⟨d⟩
@@ -560,7 +560,7 @@ theorem itDerivable_implies_tDerivable {φ : Proposition Atom} (h : Derivable IT
 theorem s4_dualNeg {X : Proposition Atom} :
     Derivable (@S4Axiom Atom)
       (((◇X).imp Proposition.bot).imp (Proposition.box (X.imp Proposition.bot))) := by
-  have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertS4) (φ := X)
+  have back := HasAxiomDiamondDualityBack.diamondDualityBack (S := Modal.HilbertS4) (φ := X)
   have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
     (S := Modal.HilbertS4) back
   have dne := @Cslib.Logic.Theorems.Propositional.Core.double_negation
@@ -570,11 +570,11 @@ theorem s4_dualNeg {X : Proposition Atom} :
   exact ⟨d⟩
 
 /-- `□¬X → ¬◇X` in classical `S4` (converse of `s4_dualNeg`): from `dni` composed with
-the contraposition of `diaDualityFwd`. -/
+the contraposition of `diamondDualityFwd`. -/
 theorem s4_boxNegToNotDia {X : Proposition Atom} :
     Derivable (@S4Axiom Atom)
       ((Proposition.box (X.imp Proposition.bot)).imp ((◇X).imp Proposition.bot)) := by
-  have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertS4) (φ := X)
+  have fwd := HasAxiomDiamondDualityFwd.diamondDualityFwd (S := Modal.HilbertS4) (φ := X)
   have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
     (S := Modal.HilbertS4) fwd
   have dni := Cslib.Logic.Theorems.Combinators.dni (S := Modal.HilbertS4) (F := Proposition Atom)
@@ -671,7 +671,7 @@ theorem is4Derivable_implies_s4Derivable {φ : Proposition Atom} (h : Derivable 
 theorem s5_boxNegToNotDia {X : Proposition Atom} :
     Derivable (@S5Axiom Atom)
       ((Proposition.box (X.imp Proposition.bot)).imp ((◇X).imp Proposition.bot)) := by
-  have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertS5) (φ := X)
+  have fwd := HasAxiomDiamondDualityFwd.diamondDualityFwd (S := Modal.HilbertS5) (φ := X)
   have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
     (S := Modal.HilbertS5) fwd
   have dni := Cslib.Logic.Theorems.Combinators.dni (S := Modal.HilbertS5) (F := Proposition Atom)
@@ -722,7 +722,7 @@ theorem s5_derivable_of_is5_bDia {φ : Proposition Atom} :
 
 /-- Every `IS5ModalAxiom` instance is `Derivable` in classical `S5` (`S5Axiom`): the 18
 `IS4`-inherited constructors lift via `Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)`
-composed with `is4Axiom_derivable_in_S4`; `bBox` is `box_mono (diaDualityBack φ)` composed
+composed with `is4Axiom_derivable_in_S4`; `bBox` is `box_mono (diamondDualityBack φ)` composed
 with the literal `modalB` axiom; `bDia` is `s5_derivable_of_is5_bDia`. -/
 theorem is5Axiom_derivable_in_S5 {φ : Proposition Atom} (h : IS5ModalAxiom φ) :
     Derivable (@S5Axiom Atom) φ :=
@@ -764,7 +764,7 @@ theorem is5Axiom_derivable_in_S5 {φ : Proposition Atom} (h : IS5ModalAxiom φ) 
   | .fourDia φ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
       (is4Axiom_derivable_in_S4 (.fourDia φ))
   | .bBox φ => by
-      have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertS5) (φ := φ)
+      have back := HasAxiomDiamondDualityBack.diamondDualityBack (S := Modal.HilbertS5) (φ := φ)
       have necBack := Necessitation.nec back
       have kBack := HasAxiomK.K (S := Modal.HilbertS5)
         (φ := (Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot) (ψ := ◇φ)

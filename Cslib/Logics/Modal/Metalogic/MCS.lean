@@ -194,27 +194,27 @@ theorem mcs_box_diamond
 `diamond` is a native constructor, so canonical-model reasoning about `◇φ` cannot rely on
 `◇φ` unifying syntactically with the raw encoded shape `(□(φ → ⊥)) → ⊥`. These two
 lemmas bridge membership in an MCS between the native and raw shapes, using the
-`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` characterization schemata. -/
+`AxiomDiamondDualityFwd`/`AxiomDiamondDualityBack` characterization schemata. -/
 
-/-- Bridge native `◇φ` membership to the raw encoded shape, via `AxiomDiaDualityFwd`. -/
+/-- Bridge native `◇φ` membership to the raw encoded shape, via `AxiomDiamondDualityFwd`. -/
 theorem mcs_dia_to_raw
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_dualFwd : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiaDualityFwd φ))
+    (h_dualFwd : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiamondDualityFwd φ))
     {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
     {φ : Proposition Atom} (h_dia : (◇φ) ∈ S) :
     ((Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot) ∈ S :=
   mcs_mp_axiom h_implyK h_implyS h_mcs h_dia (h_dualFwd φ)
 
-/-- Bridge the raw encoded shape to native `◇φ` membership, via `AxiomDiaDualityBack`. -/
+/-- Bridge the raw encoded shape to native `◇φ` membership, via `AxiomDiamondDualityBack`. -/
 theorem mcs_raw_to_dia
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_dualBack : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiaDualityBack φ))
+    (h_dualBack : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiamondDualityBack φ))
     {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
     {φ : Proposition Atom}
     (h_raw : ((Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot) ∈ S) :

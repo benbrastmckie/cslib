@@ -64,8 +64,8 @@ variable {Atom : Type u}
 /-- The 18 shared modal axiom schema tags. Every one of the 15 classical normal modal systems
 (`K`, `T`, `D`, `KB`, `K4`, `K5`, `K45`, `S4`, `S5`, `TB`, `KB5`, `D4`, `D5`, `D45`, `DB`) is the
 union of the 13-tag propositional + K + and/or + diamond-duality core (`implyK`, `implyS`,
-`efq`, `peirce`, `modalK`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`, `diaDualityFwd`,
-`diaDualityBack`) with a subset of the 5 modal-strength differentiator tags (`modalT`, `modalD`,
+`efq`, `peirce`, `modalK`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`, `diamondDualityFwd`,
+`diamondDualityBack`) with a subset of the 5 modal-strength differentiator tags (`modalT`, `modalD`,
 `modalB`, `modalFour`, `modalFive`). -/
 inductive ModalSchemaTag
   /-- Weakening: `φ → (ψ → φ)`. -/
@@ -101,9 +101,9 @@ inductive ModalSchemaTag
   /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`. -/
   | orE
   /-- Diamond duality, forward direction: `◇φ → ¬□¬φ`. -/
-  | diaDualityFwd
+  | diamondDualityFwd
   /-- Diamond duality, backward direction: `¬□¬φ → ◇φ`. -/
-  | diaDualityBack
+  | diamondDualityBack
   deriving DecidableEq
 
 /-! ## Formula-Level Meaning -/
@@ -137,8 +137,8 @@ def ModalSchemaTag.Holds : ModalSchemaTag → Proposition Atom → Prop
   | .orI1, χ => ∃ φ ψ : Proposition Atom, χ = Axioms.OrI1 φ ψ
   | .orI2, χ => ∃ φ ψ : Proposition Atom, χ = Axioms.OrI2 φ ψ
   | .orE, χ => ∃ φ ψ ρ : Proposition Atom, χ = Axioms.OrE φ ψ ρ
-  | .diaDualityFwd, χ => ∃ φ : Proposition Atom, χ = Axioms.AxiomDiaDualityFwd φ
-  | .diaDualityBack, χ => ∃ φ : Proposition Atom, χ = Axioms.AxiomDiaDualityBack φ
+  | .diamondDualityFwd, χ => ∃ φ : Proposition Atom, χ = Axioms.AxiomDiamondDualityFwd φ
+  | .diamondDualityBack, χ => ∃ φ : Proposition Atom, χ = Axioms.AxiomDiamondDualityBack φ
 
 /-! ## Schema-Union Combinator -/
 

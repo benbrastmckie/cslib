@@ -60,7 +60,7 @@ S5 = T + 4 + B, carrying `modalB` and NOT `modalFive`):
 - **Modal** (4): `modalK` (K distribution), `modalT` (reflexivity), `modalFour` (transitivity),
   `modalB` (symmetry)
 - **And/Or/Diamond-duality characterization** (8): `andI`, `andE1`, `andE2`, `orI1`,
-  `orI2`, `orE`, `diaDualityFwd`, `diaDualityBack` -- these characterize the native `and`/`or`/
+  `orI2`, `orE`, `diamondDualityFwd`, `diamondDualityBack` -- these characterize the native `and`/`or`/
   `diamond` constructors introduced when `Modal.Proposition` moved off the Łukasiewicz encoding
   (see `Modal/Basic.lean` module docstring and the plan's "Justification for New Axiom Schemata"
   section).

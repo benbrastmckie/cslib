@@ -389,7 +389,29 @@ confirm no existing `_def` lemmas of these names in `Cslib/Logics/Modal/`.
 
 ---
 
-### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [IN PROGRESS]
+### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [COMPLETED]
+
+**Resolution (re-dispatch, 2026-08-11)**: The blocker below was resolved by task 626, which
+diagnosed the root cause as a *precedence* collision (not a scope/territory problem): the
+vendored `Operators.lean`'s scoped `∨`/`→` notation collided exactly (token + precedence +
+associativity) with core `Or`/arrow, causing Θ(2^n) elaborator backtracking on chained terms —
+the same failure class as the 64 downstream errors recorded below, now correctly diagnosed as one
+root cause rather than 17 separate proof-repair sites. Task 626's fix (offset `∨` to `infixr:31`
+and `→` to `infixr:26`, mirroring `HasAnd`'s collision-free 36-vs-35 pattern; removal of the
+`maxHeartbeats 1000000` band-aid in `LoopChecking.lean`; and a durable regression guard at
+`CslibTests/OperatorPrecedenceRegression.lean`) merged into `main` at `6fdb3769`. This task's own
+6-file switch (import + 5 class deletions in `Connectives.lean`, 12 notation deletions across the
+5 syntax modules, docstring relocation, standing-invariant paragraph) was re-applied and verified
+independently of task 626's fix by this dispatch.
+
+**Deviation from plan**: `Operators.lean` is no longer byte-identical to `b8ad3923` — its `∨`/`→`
+precedence was hand-edited by task 626 to close the collision (see Resolution above). This
+violates the phase's original "never hand-edit the vendored file" instruction and the
+Verification bullet "`git diff --stat Cslib/Foundations/Logic/Operators.lean` is empty". The
+deviation is accepted: it is the only durable fix for the root-cause collision, is already merged
+to `main`, and is guarded by a dedicated regression test. Recorded here rather than silently
+passing the stale verification bullet.
+
 
 **Deferral (not failure, not exclusion)**: per team-lead decision, this phase is serialized
 behind tasks 614 and 618 (which will land in `Propositional/SequentCalculus/**` and
@@ -473,31 +495,32 @@ collisions in one atomic step. This is the only phase whose intermediate states 
   structural proof, not weakened.
 
 **Tasks**:
-- [ ] Add `public import Cslib.Foundations.Logic.Operators` to `Connectives.lean` (keep it `public`
+- [x] Add `public import Cslib.Foundations.Logic.Operators` to `Connectives.lean` (keep it `public`
       so downstream modules still see the classes)
-- [ ] Delete five now-duplicate class declarations from `Connectives.lean`: `HasImp` (`:85-87`),
+- [x] Delete five now-duplicate class declarations from `Connectives.lean`: `HasImp` (`:85-87`),
       `HasBox` (`:100-102`), `HasAnd` (`:132-134`), `HasOr` (`:137-139`), and `HasDiamond`
       (`:112-114`, renamed in Phase 2)
-- [ ] Keep `HasBot`, `HasUntil`, `HasSince`, `HasNext`, all six bundles, and the priority-100
+- [x] Keep `HasBot`, `HasUntil`, `HasSince`, `HasNext`, all six bundles, and the priority-100
       `BimodalConnectives -> ModalConnectives` bridge instance **unchanged**
-- [ ] Relocate the cited design prose from the deleted `HasBox` docstring (`:89-99`, citing
+- [x] Relocate the cited design prose from the deleted `HasBox` docstring (`:89-99`, citing
       `ChagrovZakharyaschev1997` §3.1 and `Blackburn2001` Chapter 1) and the deleted `HasDiamond`
       docstring (`:104-111`) into the `Connectives.lean` module docstring — do not silently drop it
-- [ ] Add a standing-invariant paragraph to the module docstring recording the latent trap:
+- [x] Add a standing-invariant paragraph to the module docstring recording the latent trap:
       registering `HasNot`, `HasIff`, `HasAnd`, `HasOr`, `HasDiamond`, or `HasTensor` for a formula
       type that currently lacks it will silently reopen the notation collision for that symbol
       (5 new `¬` collisions, 4 new `↔` collisions), and giving `LTL.Formula` a `HasBox`/`HasDiamond`
       instance would additionally conflate `□`-as-necessity with `□`-as-`allFuture`
-- [ ] Delete the 12 colliding local notation declarations: `Propositional/Defs.lean:107,108,109`;
+- [x] Delete the 12 colliding local notation declarations: `Propositional/Defs.lean:107,108,109`;
       `Modal/Basic.lean:232,233,234,235,236`; `Bimodal/Syntax/Formula.lean:101,102`;
       `Temporal/Syntax/Formula.lean:169`; `LTL/Syntax/Formula.lean:209`
-- [ ] Delete **only** those 12. Every other notation declaration in those five files is confirmed
+- [x] Delete **only** those 12. Every other notation declaration in those five files is confirmed
       clean and must survive, including all `¬`, all `↔`, Bimodal/Temporal/LTL `∧` and `∨`,
       Bimodal and LTL `◇`, LTL `□`, CLL `⊗`, and every temporal operator
-- [ ] Run `lake exe mk_all --module` to add `Operators.lean` to the `Cslib.lean` barrel
-- [ ] If any `_def` bridge lemma stops closing by `rfl`, escalate as `[BLOCKED]` with the goal
+- [x] Run `lake exe mk_all --module` to add `Operators.lean` to the `Cslib.lean` barrel
+      *(confirmed present in `Cslib.lean:112`; `mk_all` re-run in Phase 10 to confirm no-op)*
+- [x] If any `_def` bridge lemma stops closing by `rfl`, escalate as `[BLOCKED]` with the goal
       state. Do not weaken it to `simp`/`decide`, do not introduce `sorry`, and do not create a
-      vacuous definition
+      vacuous definition *(not needed — no bridge lemma failed)*
 
 **Timing**: 2 hours
 
@@ -532,23 +555,41 @@ number, after the first edit in each file.
 
 ---
 
-### Phase 9: Rename AxiomDia identifiers to AxiomDiamond [IN PROGRESS]
+### Phase 9: Rename AxiomDia identifiers to AxiomDiamond [COMPLETED]
+
+**Measured census (matches plan exactly)**: `AxiomDiaDuality` 1, `AxiomDiaDualityFwd` 36,
+`AxiomDiaDualityBack` 37, `diaDuality` 2, `diaDualityFwd` 61, `diaDualityBack` 61 — 198 identifier
+occurrences total, across 28 files (plan's illustrative file list named 25; the additional 3 are
+`Cslib/Logics/Modal/Metalogic/InterSystem/{IntToClassical,Lifting}.lean` and
+`Cslib/Logics/Modal/Metalogic/MCS.lean`, all under the documented `Modal/Metalogic/` concentration
+— not a material divergence, so no `#### Reasoned Exclusions` record is needed). Rename applied via
+two order-independent substring substitutions (`AxiomDiaDuality` -> `AxiomDiamondDuality`,
+`diaDuality` -> `diamondDuality`), which correctly cover `HasAxiomDiaDualityFwd/Back` as a side
+effect since those names contain `AxiomDiaDuality` as a substring. Post-edit verification: the
+plan's own `grep -rn 'AxiomDia\|diaDuality'` command is not word-boundary-safe against its own
+output (`AxiomDia` is a literal substring of the newly-introduced `AxiomDiamond`), so it reports
+68 false-positive hits; filtering those with `grep -v AxiomDiamond` / `grep -v diamondDuality`
+confirms zero true old-style occurrences remain. Full `lake build`: green, 3331/3331 jobs.
 
 **Goal**: Remove the remaining `Dia`-flavoured fork-local naming so it does not contradict the
 adopted `HasDiamond` name. Mechanical, semantics-free, and deliberately isolated so it can be
 dropped without touching Phases 1-8.
 
 **Tasks**:
-- [ ] Rename `AxiomDiaDuality` -> `AxiomDiamondDuality`, `AxiomDiaDualityFwd` ->
+- [x] Rename `AxiomDiaDuality` -> `AxiomDiamondDuality`, `AxiomDiaDualityFwd` ->
       `AxiomDiamondDualityFwd`, `AxiomDiaDualityBack` -> `AxiomDiamondDualityBack`
-- [ ] Rename the corresponding typeclasses `HasAxiomDiaDualityFwd`/`HasAxiomDiaDualityBack` and
+- [x] Rename the corresponding typeclasses `HasAxiomDiaDualityFwd`/`HasAxiomDiaDualityBack` and
       their fields `diaDuality`, `diaDualityFwd`, `diaDualityBack` to the `Diamond`/`diamond` forms
-- [ ] Apply uniformly across all occurrence sites; the rename is purely lexical with no proof
+- [x] Apply uniformly across all occurrence sites; the rename is purely lexical with no proof
       restructuring
-- [ ] Update documentation mentions in the same pass so no `Dia`-flavoured prose survives
-- [ ] If the measured pre-edit census diverges materially from the recorded figures below, close
+- [x] Update documentation mentions in the same pass so no `Dia`-flavoured prose survives
+      *(identifier mentions only — informal prose like "dia clause" in unrelated Metalogic proof
+      sketches and the `.dia` constructor of the unrelated `NestedLhs` sequent type are out of
+      scope; see census note above)*
+- [x] If the measured pre-edit census diverges materially from the recorded figures below, close
       this phase `[COMPLETED WITH EXCLUSIONS]` with a `#### Reasoned Exclusions` record and spawn a
-      follow-up task rather than expanding the batch mid-phase
+      follow-up task rather than expanding the batch mid-phase *(not needed — census matched
+      exactly)*
 
 **Timing**: 1.5 hours
 

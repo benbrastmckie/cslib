@@ -146,16 +146,16 @@ instance :
     (⟨.orE, by decide, _, _, _, rfl⟩)⟩
 
 instance :
-    HasAxiomDiaDualityFwd Modal.HilbertT
+    HasAxiomDiamondDualityFwd Modal.HilbertT
       (F := Modal.Proposition Atom) where
-  diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
-    (⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
+  diamondDualityFwd := ⟨Modal.DerivationTree.ax [] _
+    (⟨.diamondDualityFwd, by decide, _, rfl⟩)⟩
 
 instance :
-    HasAxiomDiaDualityBack Modal.HilbertT
+    HasAxiomDiamondDualityBack Modal.HilbertT
       (F := Modal.Proposition Atom) where
-  diaDualityBack := ⟨Modal.DerivationTree.ax [] _
-    (⟨.diaDualityBack, by decide, _, rfl⟩)⟩
+  diamondDualityBack := ⟨Modal.DerivationTree.ax [] _
+    (⟨.diamondDualityBack, by decide, _, rfl⟩)⟩
 
 end ModalInstances
 

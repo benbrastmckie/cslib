@@ -210,12 +210,12 @@ section DiaDualityAxiomClasses
 variable (S : Type*) [HasBot F] [HasImp F] [HasBox F] [HasDiamond F] [InferenceSystem S F]
 
 /-- The proof system proves diamond duality, forward direction: `◇φ → ¬□¬φ`. -/
-class HasAxiomDiaDualityFwd where
-  diaDualityFwd {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomDiaDualityFwd φ)
+class HasAxiomDiamondDualityFwd where
+  diamondDualityFwd {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomDiamondDualityFwd φ)
 
 /-- The proof system proves diamond duality, backward direction: `¬□¬φ → ◇φ`. -/
-class HasAxiomDiaDualityBack where
-  diaDualityBack {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomDiaDualityBack φ)
+class HasAxiomDiamondDualityBack where
+  diamondDualityBack {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomDiamondDualityBack φ)
 
 end DiaDualityAxiomClasses
 

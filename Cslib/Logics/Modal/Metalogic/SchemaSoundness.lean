@@ -37,7 +37,7 @@ case-split.
 ## Design
 
 The 13 frame-unconditional entries reuse the existing atoms in `Metalogic/Soundness.lean`
-(`Satisfies.implyK_axiom`, …, `Satisfies.diaDualityBack_axiom`) verbatim (read-only reuse). The
+(`Satisfies.implyK_axiom`, …, `Satisfies.diamondDualityBack_axiom`) verbatim (read-only reuse). The
 5 frame-conditioned entries delegate to the library lemmas in
 `Metalogic/FrameCorrespondence.lean` (`Satisfies.modalT_axiom`, `modalFour_axiom`, `modalB_axiom`,
 `modalD_axiom`, `modalFive_axiom`) rather than re-proving the frame arguments inline — this
@@ -75,7 +75,7 @@ def FrameValidatesTag {World : Type*} (m : Model World Atom) : ModalSchemaTag �
   | .modalFive => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃
   | .implyK | .implyS | .efq | .peirce | .modalK
   | .andI | .andE1 | .andE2 | .orI1 | .orI2 | .orE
-  | .diaDualityFwd | .diaDualityBack => True
+  | .diamondDualityFwd | .diamondDualityBack => True
 
 /-! ## Master Soundness Combinator -/
 
@@ -139,11 +139,11 @@ theorem unionSound {World : Type*} (S : Finset ModalSchemaTag) (m : Model World 
   | orE =>
     obtain ⟨φ', ψ', χ', rfl⟩ := hφ
     exact Satisfies.orE_axiom m w φ' ψ' χ'
-  | diaDualityFwd =>
+  | diamondDualityFwd =>
     obtain ⟨φ', rfl⟩ := hφ
-    exact Satisfies.diaDualityFwd_axiom m w φ'
-  | diaDualityBack =>
+    exact Satisfies.diamondDualityFwd_axiom m w φ'
+  | diamondDualityBack =>
     obtain ⟨φ', rfl⟩ := hφ
-    exact Satisfies.diaDualityBack_axiom m w φ'
+    exact Satisfies.diamondDualityBack_axiom m w φ'
 
 end Cslib.Logic.Modal

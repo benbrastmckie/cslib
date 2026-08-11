@@ -31,7 +31,7 @@ it admits), not scaffolding built on top of the system.
 ## Main Definitions
 
 - `kCore`: the 13 shared tags (`implyK, implyS, efq, peirce, modalK, andI, andE1, andE2, orI1,
-  orI2, orE, diaDualityFwd, diaDualityBack`).
+  orI2, orE, diamondDualityFwd, diamondDualityBack`).
 - `kTags, tTags, dTags, bTags, k4Tags, k5Tags, k45Tags, s4Tags, s5Tags, tbTags, kb5Tags, d4Tags,
   d5Tags, d45Tags, dbTags`: the 15 per-system tag sets, each `kCore` unioned with that system's
   modal-strength differentiator tag(s) (`K` has none beyond `modalK`, already in `kCore`).
@@ -51,13 +51,13 @@ namespace Cslib.Logic.Modal
 
 /-- The 13 shared tags: propositional (`implyK`, `implyS`, `efq`, `peirce`), K distribution
 (`modalK`), and the and/or/diamond-duality characterization tags (`andI`, `andE1`, `andE2`,
-`orI1`, `orI2`, `orE`, `diaDualityFwd`, `diaDualityBack`). Every one of the 15 classical normal
+`orI1`, `orI2`, `orE`, `diamondDualityFwd`, `diamondDualityBack`). Every one of the 15 classical normal
 modal systems is `kCore` unioned with a subset of the 5 modal-strength differentiator tags
 (`modalT`, `modalD`, `modalB`, `modalFour`, `modalFive`). -/
 def kCore : Finset ModalSchemaTag :=
   insert .implyK <| insert .implyS <| insert .efq <| insert .peirce <| insert .modalK <|
     insert .andI <| insert .andE1 <| insert .andE2 <| insert .orI1 <| insert .orI2 <|
-      insert .orE <| insert .diaDualityFwd <| insert .diaDualityBack ∅
+      insert .orE <| insert .diamondDualityFwd <| insert .diamondDualityBack ∅
 
 /-! ## Per-System Tag Sets -/
 
@@ -182,14 +182,14 @@ theorem holdsOrE {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
     (φ ψ χ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.OrE φ ψ χ) :=
   SchemaUnion.subsumption h ⟨.orE, by decide, φ, ψ, χ, rfl⟩
 
-/-- `SchemaUnion S` holds the `diaDualityFwd` witness whenever `kCore ⊆ S`. -/
+/-- `SchemaUnion S` holds the `diamondDualityFwd` witness whenever `kCore ⊆ S`. -/
 theorem holdsDiaDualityFwd {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
-    (φ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AxiomDiaDualityFwd φ) :=
-  SchemaUnion.subsumption h ⟨.diaDualityFwd, by decide, φ, rfl⟩
+    (φ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AxiomDiamondDualityFwd φ) :=
+  SchemaUnion.subsumption h ⟨.diamondDualityFwd, by decide, φ, rfl⟩
 
-/-- `SchemaUnion S` holds the `diaDualityBack` witness whenever `kCore ⊆ S`. -/
+/-- `SchemaUnion S` holds the `diamondDualityBack` witness whenever `kCore ⊆ S`. -/
 theorem holdsDiaDualityBack {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
-    (φ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AxiomDiaDualityBack φ) :=
-  SchemaUnion.subsumption h ⟨.diaDualityBack, by decide, φ, rfl⟩
+    (φ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AxiomDiamondDualityBack φ) :=
+  SchemaUnion.subsumption h ⟨.diamondDualityBack, by decide, φ, rfl⟩
 
 end Cslib.Logic.Modal

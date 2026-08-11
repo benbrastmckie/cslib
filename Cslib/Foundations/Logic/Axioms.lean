@@ -156,7 +156,7 @@ protected abbrev Axiom4 (φ : F) : F :=
 
 Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `ModalConnectives`
 does not include `HasDiamond`. For proof systems with a primitive `HasDiamond`, the conjunction of
-`AxiomDiaDualityFwd` and `AxiomDiaDualityBack` establishes the duality. The encoding here
+`AxiomDiamondDualityFwd` and `AxiomDiamondDualityBack` establishes the duality. The encoding here
 relies on excluded middle and is equivalent to the standard `φ → □◇φ` only in classical logic.
 Corresponds to symmetry of the accessibility relation: `r w v → r v w`. See [Blackburn2001]
 Section 1.4, [ChagrovZakharyaschev1997] Section 3.2. -/
@@ -168,7 +168,7 @@ protected abbrev AxiomB (φ : F) : F :=
 
 Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `ModalConnectives`
 does not include `HasDiamond`. For proof systems with a primitive `HasDiamond`, the conjunction of
-`AxiomDiaDualityFwd` and `AxiomDiaDualityBack` establishes the duality. The encoding here
+`AxiomDiamondDualityFwd` and `AxiomDiamondDualityBack` establishes the duality. The encoding here
 relies on excluded middle and is equivalent to the standard `◇φ → □◇φ` only in classical logic.
 Corresponds to right-Euclideanness of the accessibility relation: `r w v → r w u → r v u`.
 See [Blackburn2001] Section 1.4, [ChagrovZakharyaschev1997] Section 3.2. -/
@@ -181,7 +181,7 @@ protected abbrev Axiom5 (φ : F) : F :=
 
 Diamond is encoded classically as `◇φ = ¬□¬φ = (□(φ → ⊥)) → ⊥`, since `ModalConnectives`
 does not include `HasDiamond`. For proof systems with a primitive `HasDiamond`, the conjunction of
-`AxiomDiaDualityFwd` and `AxiomDiaDualityBack` establishes the duality. The encoding here
+`AxiomDiamondDualityFwd` and `AxiomDiamondDualityBack` establishes the duality. The encoding here
 relies on excluded middle and is equivalent to the standard `□φ → ◇φ` only in classical logic.
 Corresponds to seriality of the accessibility relation: `∀ w, ∃ v, r w v`. See [Blackburn2001]
 Section 1.4, [ChagrovZakharyaschev1997] Section 3.2. -/
@@ -200,18 +200,18 @@ variable [HasBot F] [HasImp F] [HasBox F] [HasDiamond F]
 
 In classical modal logic, possibility is defined as `◇φ := ¬□¬φ`. When `HasDiamond` is a
 separate primitive, this axiom asserts that `◇φ` implies the classical encoding.
-Together with `AxiomDiaDualityBack`, it establishes full duality. See `AxiomDiaDualityBack`
+Together with `AxiomDiamondDualityBack`, it establishes full duality. See `AxiomDiamondDualityBack`
 for the converse. -/
-protected abbrev AxiomDiaDualityFwd (φ : F) : F :=
+protected abbrev AxiomDiamondDualityFwd (φ : F) : F :=
   HasImp.imp (HasDiamond.diamond φ)
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
 
 /-- Diamond duality, backward direction: `¬□¬φ → ◇φ`.
 
-Together with `AxiomDiaDualityFwd`, establishes that `◇φ ↔ ¬□¬φ`. In classical systems
+Together with `AxiomDiamondDualityFwd`, establishes that `◇φ ↔ ¬□¬φ`. In classical systems
 the two axioms are needed to reduce a primitive diamond to the derived classical encoding.
 See [Blackburn2001] Section 1.1 for discussion of diamond-first vs box-first presentations. -/
-protected abbrev AxiomDiaDualityBack (φ : F) : F :=
+protected abbrev AxiomDiamondDualityBack (φ : F) : F :=
   HasImp.imp
     (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot)
     (HasDiamond.diamond φ)

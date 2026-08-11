@@ -123,18 +123,18 @@ lemma Satisfies.orE_axiom {World : Type*} (m : Model World Atom) (w : World)
   | inl h => exact h1 h
   | inr h => exact h2 h
 
-/-- Diamond duality, forward direction (`Axioms.AxiomDiaDualityFwd`): `◇φ → ¬□¬φ`, valid on all
+/-- Diamond duality, forward direction (`Axioms.AxiomDiamondDualityFwd`): `◇φ → ¬□¬φ`, valid on all
 frames. -/
-lemma Satisfies.diaDualityFwd_axiom {World : Type*} (m : Model World Atom) (w : World)
+lemma Satisfies.diamondDualityFwd_axiom {World : Type*} (m : Model World Atom) (w : World)
     (φ : Proposition Atom) :
     Satisfies m w (Proposition.imp (Proposition.diamond φ)
       (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot)) Proposition.bot)) := by
   intro ⟨w', hr, hs⟩ hbox
   exact hbox w' hr hs
 
-/-- Diamond duality, backward direction (`Axioms.AxiomDiaDualityBack`): `¬□¬φ → ◇φ`, valid on
+/-- Diamond duality, backward direction (`Axioms.AxiomDiamondDualityBack`): `¬□¬φ → ◇φ`, valid on
 all frames (uses excluded middle, as diamond is classically the dual of box). -/
-lemma Satisfies.diaDualityBack_axiom {World : Type*} (m : Model World Atom) (w : World)
+lemma Satisfies.diamondDualityBack_axiom {World : Type*} (m : Model World Atom) (w : World)
     (φ : Proposition Atom) :
     Satisfies m w (Proposition.imp
       (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot)) Proposition.bot)

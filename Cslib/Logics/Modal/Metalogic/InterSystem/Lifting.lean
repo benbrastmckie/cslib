@@ -18,7 +18,7 @@ the stronger system's axiom predicate subsumes the weaker one.
 This module also provides the more general `Derivable_of_axiom_derivable` lift, used when
 `Axioms1`-axiom instances are not literal `Axioms2`-axiom instances (no syntactic rename),
 but each is nonetheless *derivable* in `Axioms2` (e.g. the intuitionistic Fischer-Servi
-diamond schemata vs. classical `K`'s dual-diamond `diaDuality` schemata). This is
+diamond schemata vs. classical `K`'s dual-diamond `diamondDuality` schemata). This is
 strictly more general than `Derivable_mono`: an axiom→axiom callback is a special case of an
 axiom→derivation callback (`Axioms1 φ → Axioms2 φ → Derivable Axioms2 φ` via `⟨.ax _ _ h⟩`).
 
@@ -127,7 +127,7 @@ axiom instance is *derivable* (not necessarily a literal axiom instance) in `Axi
 Strictly more general than `Derivable_mono`, which is the special case where `h_sub` produces
 a literal `Axioms2` axiom instance rather than an arbitrary derivation. Used for bridges where
 the two systems' axioms are not syntactic renames of each other (`IntToClassical.lean`:
-intuitionistic Fischer-Servi diamond schemata vs. classical `K`'s dual-diamond `diaDuality`
+intuitionistic Fischer-Servi diamond schemata vs. classical `K`'s dual-diamond `diamondDuality`
 schemata). -/
 theorem Derivable_of_axiom_derivable
     {Axioms1 Axioms2 : Proposition Atom → Prop}

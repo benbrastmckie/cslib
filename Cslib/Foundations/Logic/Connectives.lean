@@ -59,7 +59,7 @@ In classical modal logic, diamond is derived from box via `◇φ := ¬□¬φ`. 
 non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become independent
 operators that do not satisfy the classical duality. `HasDiamond` provides a primitive
 diamond for systems where this duality fails or where diamond is taken as a separate
-primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
+primitive alongside box. See `Axioms.AxiomDiamondDuality` for the optional duality axiom
 connecting `HasBox` and `HasDiamond` instances.
 
 ## Standing Invariant: Notation Collision Risk

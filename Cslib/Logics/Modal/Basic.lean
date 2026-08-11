@@ -40,7 +40,7 @@ become independent operators in those settings. `HasDiamond` (`Foundations/Logic
 is instantiated below alongside `HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is
 recovered as a genuine *theorem* (`Satisfies.dual`, proved semantically) rather than holding
 definitionally; at the Hilbert proof-system level, the duality is recovered via the
-`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` characterization schemata (see
+`AxiomDiamondDualityFwd`/`AxiomDiamondDualityBack` characterization schemata (see
 `Foundations/Logic/Axioms.lean`), instantiated for all systems in `ProofSystem/Instances/*.lean`.
 
 Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors

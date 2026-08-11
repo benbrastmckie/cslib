@@ -35,7 +35,7 @@ The 5 axiom-schema families covered by `kTags`:
   `peirce` (double negation elimination / Peirce's law)
 - **Modal** (1): `modalK` (K distribution)
 - plus the and/or/diamond-duality characterization tags (`andI, andE1, andE2, orI1, orI2, orE,
-  diaDualityFwd, diaDualityBack`), all part of `kCore`. -/
+  diamondDualityFwd, diamondDualityBack`), all part of `kCore`. -/
 abbrev KAxiom : Proposition Atom → Prop := SchemaUnion kTags
 
 end Cslib.Logic.Modal
@@ -138,16 +138,16 @@ instance :
     (⟨.orE, by decide, _, _, _, rfl⟩)⟩
 
 instance :
-    HasAxiomDiaDualityFwd Modal.HilbertK
+    HasAxiomDiamondDualityFwd Modal.HilbertK
       (F := Modal.Proposition Atom) where
-  diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
-    (⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
+  diamondDualityFwd := ⟨Modal.DerivationTree.ax [] _
+    (⟨.diamondDualityFwd, by decide, _, rfl⟩)⟩
 
 instance :
-    HasAxiomDiaDualityBack Modal.HilbertK
+    HasAxiomDiamondDualityBack Modal.HilbertK
       (F := Modal.Proposition Atom) where
-  diaDualityBack := ⟨Modal.DerivationTree.ax [] _
-    (⟨.diaDualityBack, by decide, _, rfl⟩)⟩
+  diamondDualityBack := ⟨Modal.DerivationTree.ax [] _
+    (⟨.diamondDualityBack, by decide, _, rfl⟩)⟩
 
 end ModalInstances
 

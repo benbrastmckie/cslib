@@ -283,7 +283,7 @@ publicly reachable for both LK and LJ, in the bundled `CutFreeXProof` shape, wit
 
 ---
 
-### Phase 4: B3 -- LM decidability [NOT STARTED]
+### Phase 4: B3 -- LM decidability [COMPLETED]
 
 **Goal**: `Decidable (Nonempty (SeqProofMinimal (Γ ⊢ A)))` and `instDecidableDerivableInMPL`
 exist, matching the LJ decidability surface.

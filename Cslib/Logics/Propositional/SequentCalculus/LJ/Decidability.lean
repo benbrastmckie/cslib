@@ -102,26 +102,30 @@ noncomputable def ctxToImp (Γ : Ctx Atom) (A : Proposition Atom) : Proposition 
 
 /-! ## Deduction Theorem: Forward Direction -/
 
-/-- Forward deduction lemma for lists.
+/-- Forward deduction lemma for lists, generic over the theory `T`.
 
 Given a proof of `(L.toFinset ∪ Γ) ⊢ C`, produce a proof of `Γ ⊢ listToImp L C`
-by repeatedly discharging context elements as implications via `impR`. -/
-def ljListDeductionFwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : Proposition Atom),
-    LJProof ((L.toFinset ∪ Γ) ⊢ C) → LJProof (Γ ⊢ listToImp L C)
+by repeatedly discharging context elements as implications via `impR`. Every rule used here
+(`impR`, `mono`) is in the ungated ten-rule minimal base of `SeqProof`; none touches the gated
+`botL`, so this generalises from `LJProof` (`= SeqProof IPL`) to `SeqProof T` for an arbitrary
+`T` with no proof change beyond the binder. -/
+def seqListDeductionFwd {T : Theory Atom} :
+    ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : Proposition Atom),
+    SeqProof T ((L.toFinset ∪ Γ) ⊢ C) → SeqProof T (Γ ⊢ listToImp L C)
   | [], Γ, C, d => by
     simp only [listToImp]
     simpa using d
   | A :: As, Γ, C, d => by
     simp only [listToImp]
     apply SeqProof.impR A (listToImp As C)
-    apply ljListDeductionFwd As (insert A Γ) C
-    apply LJProof.mono _ d
+    apply seqListDeductionFwd As (insert A Γ) C
+    apply SeqProof.mono d
     intro x hx
     simp only [List.toFinset_cons, Finset.mem_union, Finset.mem_insert,
       List.mem_toFinset] at hx ⊢
     tauto
 
-/-- Forward direction of the deduction theorem for LJ.
+/-- Forward direction of the deduction theorem, generic over the theory `T`.
 
 A proof of `Γ ⊢ A` gives a proof of `∅ ⊢ ctxToImp Γ A` by repeatedly introducing
 implications via `impR` to discharge all context assumptions.
@@ -129,51 +133,55 @@ implications via `impR` to discharge all context assumptions.
 This is `noncomputable` because it is stated in terms of `ctxToImp`, whose noncomputability
 is inherent (see `ctxToImp`'s docstring) rather than a defect. No decision procedure depends on
 this declaration. -/
-noncomputable def ljProofDeductionFwd {Γ : Ctx Atom} {A : Proposition Atom}
-    (d : LJProof (Γ ⊢ A)) : LJProof (∅ ⊢ ctxToImp Γ A) := by
+noncomputable def seqProofDeductionFwd {T : Theory Atom} {Γ : Ctx Atom} {A : Proposition Atom}
+    (d : SeqProof T (Γ ⊢ A)) : SeqProof T (∅ ⊢ ctxToImp Γ A) := by
   unfold ctxToImp
-  apply ljListDeductionFwd Γ.toList ∅ A
+  apply seqListDeductionFwd Γ.toList ∅ A
   simp only [Finset.toList_toFinset, Finset.union_empty]
   exact d
 
 /-! ## Deduction Theorem: Backward Direction -/
 
-/-- Backward deduction lemma for lists.
+/-- Backward deduction lemma for lists, generic over the theory `T`.
 
 Given a proof of `Γ ⊢ listToImp L C`, produce a proof of `(L.toFinset ∪ Γ) ⊢ C`.
 
 The proof works by induction on `L`. For each head `A`:
-- Weaken the proof `d : LJProof (Γ ⊢ A → listToImp As C)` to the larger context `Γ'`.
+- Weaken the proof `d : SeqProof T (Γ ⊢ A → listToImp As C)` to the larger context `Γ'`.
 - Use `cut` (via `impL` after weakening) to derive `Γ' ⊢ listToImp As C`.
 - Apply the induction hypothesis to continue peeling off implications.
-- Conclude by `mono` (since `Γ' ⊆ As.toFinset ∪ Γ'`). -/
-def ljListDeductionBwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : Proposition Atom),
-    LJProof (Γ ⊢ listToImp L C) → LJProof ((L.toFinset ∪ Γ) ⊢ C)
+- Conclude by `mono` (since `Γ' ⊆ As.toFinset ∪ Γ'`).
+
+Every rule used here (`ax`, `impL`, `cut`, `mono`) is in the ungated ten-rule minimal base of
+`SeqProof`; none touches the gated `botL`. -/
+def seqListDeductionBwd {T : Theory Atom} :
+    ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : Proposition Atom),
+    SeqProof T (Γ ⊢ listToImp L C) → SeqProof T ((L.toFinset ∪ Γ) ⊢ C)
   | [], Γ, C, d => by
     simp only [List.toFinset_nil, Finset.empty_union]
     exact d
   | A :: As, Γ, C, d => by
     simp only [listToImp] at d
-    -- d : LJProof (Γ ⊢ A.imp (listToImp As C))
-    -- Goal: LJProof ((insert A As.toFinset ∪ Γ) ⊢ C)
+    -- d : SeqProof T (Γ ⊢ A.imp (listToImp As C))
+    -- Goal: SeqProof T ((insert A As.toFinset ∪ Γ) ⊢ C)
     -- Context we're working in: Γ' = insert A As.toFinset ∪ Γ
     -- (1) Weaken d to Γ': Γ' ⊢ A → listToImp As C
-    have d' : LJProof ((List.toFinset (A :: As) ∪ Γ) ⊢ A.imp (listToImp As C)) :=
-      LJProof.mono (Finset.subset_union_right) d
+    have d' : SeqProof T ((List.toFinset (A :: As) ∪ Γ) ⊢ A.imp (listToImp As C)) :=
+      SeqProof.mono d Finset.subset_union_right
     -- (2) A is in Γ'
     have hA : A ∈ (List.toFinset (A :: As) ∪ Γ) := by
       simp [List.toFinset_cons]
     -- (3) Use cut on (A → listToImp As C): get Γ' ⊢ listToImp As C
     --     cut (A → rest) d' (impL A rest mem_imp ax_A ax_rest)
     --     where mem_imp comes from the cut inserting (A → rest) into context
-    have dRest : LJProof ((List.toFinset (A :: As) ∪ Γ) ⊢ listToImp As C) :=
+    have dRest : SeqProof T ((List.toFinset (A :: As) ∪ Γ) ⊢ listToImp As C) :=
       SeqProof.cut (A.imp (listToImp As C)) d' (
         SeqProof.impL A (listToImp As C)
           (Finset.mem_insert_self _ _)
           (SeqProof.ax A _ (Finset.mem_insert_of_mem hA))
           (SeqProof.ax _ _ (Finset.mem_insert_self _ _)))
     -- (4) Apply IH to dRest to get (As.toFinset ∪ Γ' ⊢ C)
-    have dIH := ljListDeductionBwd As (List.toFinset (A :: As) ∪ Γ) C dRest
+    have dIH := seqListDeductionBwd As (List.toFinset (A :: As) ∪ Γ) C dRest
     -- (5) The two contexts are equal by set arithmetic:
     --     As.toFinset ∪ ((A :: As).toFinset ∪ Γ) = (A :: As).toFinset ∪ Γ
     have heq : As.toFinset ∪ ((A :: As).toFinset ∪ Γ) = (A :: As).toFinset ∪ Γ := by
@@ -181,7 +189,7 @@ def ljListDeductionBwd : ∀ (L : List (Proposition Atom)) (Γ : Ctx Atom) (C : 
     rw [heq] at dIH
     exact dIH
 
-/-- Backward direction of the deduction theorem for LJ.
+/-- Backward direction of the deduction theorem, generic over the theory `T`.
 
 A proof of `∅ ⊢ ctxToImp Γ A` gives a proof of `Γ ⊢ A` by repeatedly eliminating
 implications from the antecedent using `impL` steps.
@@ -189,12 +197,40 @@ implications from the antecedent using `impL` steps.
 This is `noncomputable` because it is stated in terms of `ctxToImp`, whose noncomputability
 is inherent (see `ctxToImp`'s docstring) rather than a defect. No decision procedure depends on
 this declaration. -/
-noncomputable def ljProofDeductionBwd {Γ : Ctx Atom} {A : Proposition Atom}
-    (d : LJProof (∅ ⊢ ctxToImp Γ A)) : LJProof (Γ ⊢ A) := by
+noncomputable def seqProofDeductionBwd {T : Theory Atom} {Γ : Ctx Atom} {A : Proposition Atom}
+    (d : SeqProof T (∅ ⊢ ctxToImp Γ A)) : SeqProof T (Γ ⊢ A) := by
   unfold ctxToImp at d
-  have h := ljListDeductionBwd Γ.toList ∅ A d
+  have h := seqListDeductionBwd Γ.toList ∅ A d
   simp only [Finset.toList_toFinset, Finset.union_empty] at h
   exact h
+
+/-! ## Deduction Theorem: IPL Re-Exports -/
+
+/-- Forward deduction lemma for lists, re-exported at `IPL` from `seqListDeductionFwd`.
+Preserves the pre-generalisation name and signature for `LJProof` call sites. -/
+@[reducible] def ljListDeductionFwd (L : List (Proposition Atom)) (Γ : Ctx Atom)
+    (C : Proposition Atom) (d : LJProof ((L.toFinset ∪ Γ) ⊢ C)) :
+    LJProof (Γ ⊢ listToImp L C) :=
+  seqListDeductionFwd L Γ C d
+
+/-- Forward direction of the deduction theorem for LJ, re-exported at `IPL` from
+`seqProofDeductionFwd`. Preserves the pre-generalisation name and signature. -/
+noncomputable def ljProofDeductionFwd {Γ : Ctx Atom} {A : Proposition Atom}
+    (d : LJProof (Γ ⊢ A)) : LJProof (∅ ⊢ ctxToImp Γ A) :=
+  seqProofDeductionFwd d
+
+/-- Backward deduction lemma for lists, re-exported at `IPL` from `seqListDeductionBwd`.
+Preserves the pre-generalisation name and signature for `LJProof` call sites. -/
+@[reducible] def ljListDeductionBwd (L : List (Proposition Atom)) (Γ : Ctx Atom)
+    (C : Proposition Atom) (d : LJProof (Γ ⊢ listToImp L C)) :
+    LJProof ((L.toFinset ∪ Γ) ⊢ C) :=
+  seqListDeductionBwd L Γ C d
+
+/-- Backward direction of the deduction theorem for LJ, re-exported at `IPL` from
+`seqProofDeductionBwd`. Preserves the pre-generalisation name and signature. -/
+noncomputable def ljProofDeductionBwd {Γ : Ctx Atom} {A : Proposition Atom}
+    (d : LJProof (∅ ⊢ ctxToImp Γ A)) : LJProof (Γ ⊢ A) :=
+  seqProofDeductionBwd d
 
 /-! ## Decidability Instances -/
 

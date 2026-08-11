@@ -286,7 +286,7 @@ confirm no existing `imp_def` in `Cslib/Logics/Temporal/`.
 
 ---
 
-### Phase 5: Pre-land Bimodal bridge lemmas [NOT STARTED]
+### Phase 5: Pre-land Bimodal bridge lemmas [COMPLETED]
 
 **Goal**: Same as Phase 3, for the Bimodal module's two collision sites.
 

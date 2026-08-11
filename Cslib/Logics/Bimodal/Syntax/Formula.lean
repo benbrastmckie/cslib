@@ -57,6 +57,16 @@ instance : BimodalConnectives (Formula Atom) where
   untl := .untl
   snce := .snce
 
+/-- Bridge lemma: the concrete constructor `Formula.imp` agrees with the `HasImp` projection
+supplied by the `BimodalConnectives` instance above. Compensates for the local `→` notation
+bound to `Formula.imp`, which shadows the scoped `HasImp.imp` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Formula.imp_def (φ ψ : Formula Atom) : φ.imp ψ = HasImp.imp φ ψ := rfl
+
+/-- Bridge lemma: the concrete constructor `Formula.box` agrees with the `HasBox` projection
+supplied by the `BimodalConnectives` instance above. Compensates for the local `□` notation
+bound to `Formula.box`, which shadows the scoped `HasBox.box` notation from `Cslib.Logic`. -/
+@[scoped grind =] lemma Formula.box_def (φ : Formula Atom) : φ.box = HasBox.box φ := rfl
+
 /-- Negation: ¬φ := φ → ⊥.
 
 Delegates to the canonical `PropositionalConnectives.neg` default. -/

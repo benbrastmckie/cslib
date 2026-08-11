@@ -389,7 +389,7 @@ confirm no existing `_def` lemmas of these names in `Cslib/Logics/Modal/`.
 
 ---
 
-### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [BLOCKED]
+### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [IN PROGRESS]
 
 **Deferral (not failure, not exclusion)**: per team-lead decision, this phase is serialized
 behind tasks 614 and 618 (which will land in `Propositional/SequentCalculus/**` and

@@ -111,13 +111,14 @@ theorem Proposition.equiv_iff (S : Set (Model World Atom)) (φ₁ φ₂ : Propos
   constructor
   · intro h m hm w
     have hh := h m hm w
-    rw [Proposition.iff, Satisfies.and_iff_and, Satisfies.impl_iff_impl,
-      Satisfies.impl_iff_impl] at hh
+    simp only [Proposition.iff, Proposition.and_def, Proposition.imp_def,
+      Satisfies.and_iff_and, Satisfies.impl_iff_impl] at hh
     rw [derivation_def, derivation_def]
     exact ⟨hh.1, hh.2⟩
   · intro h m hm w
     have hh := h m hm w
-    rw [Proposition.iff, Satisfies.and_iff_and, Satisfies.impl_iff_impl, Satisfies.impl_iff_impl]
+    simp only [Proposition.iff, Proposition.and_def, Proposition.imp_def,
+      Satisfies.and_iff_and, Satisfies.impl_iff_impl]
     rw [derivation_def, derivation_def] at hh
     exact ⟨hh.1, hh.2⟩
 

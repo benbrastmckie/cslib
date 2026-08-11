@@ -74,17 +74,17 @@ private lemma cutFreeLJ_toOrImp_aux {Atom : Type u} [DecidableEq Atom]
     exact absurd (hΓ _ hbot) (by simp [Proposition.IsAndBotFree])
   | andL A B hAB _ _ =>
     intro _ hΓ _ _ _
-    exact absurd (hΓ _ hAB) (by simp [Proposition.IsAndBotFree])
+    exact absurd (hΓ _ hAB) (by simp [← Proposition.and_def, Proposition.IsAndBotFree])
   | andR _ _ _ _ _ _ =>
     intro _ _ hC _ _
-    exact absurd hC (by simp [Proposition.IsAndBotFree])
+    exact absurd hC (by simp [← Proposition.and_def, Proposition.IsAndBotFree])
   | orR1 A B _ ih =>
     intro hcf hΓ hC L hL
-    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hC
+    simp only [← Proposition.or_def, Proposition.IsAndBotFree, Bool.and_eq_true] at hC
     exact hilbertOrI1Deriv (fun φ ψ => .orI1 φ ψ) (ih hcf hΓ hC.1 L hL)
   | orR2 A B _ ih =>
     intro hcf hΓ hC L hL
-    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hC
+    simp only [← Proposition.or_def, Proposition.IsAndBotFree, Bool.and_eq_true] at hC
     exact hilbertOrI2Deriv (fun φ ψ => .orI2 φ ψ) (ih hcf hΓ hC.2 L hL)
   | orL A B hAB _ _ ih₁ ih₂ =>
     intro ⟨hcf₁, hcf₂⟩ hΓ hC L hL
@@ -138,7 +138,7 @@ private lemma cutFreeLJ_toOrImp_aux {Atom : Type u} [DecidableEq Atom]
     exact hilbertImpEDeriv dBiC dB
   | impR A B _ ih =>
     intro hcf hΓ hC L hL
-    simp only [Proposition.IsAndBotFree, Bool.and_eq_true] at hC
+    simp only [← Proposition.imp_def, Proposition.IsAndBotFree, Bool.and_eq_true] at hC
     exact hilbertImpIDeriv (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
       (ih hcf
         (fun x hx => by

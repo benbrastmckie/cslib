@@ -148,7 +148,7 @@ private theorem brouwerianBot_soundness_tree
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := brouwerianBot_soundness_tree h_ax_sound d₁ h_ctx
     have h2 := brouwerianBot_soundness_tree h_ax_sound d₂ h_ctx
-    simp only [BrouwerianBotEvaluate_imp] at h1
+    simp only [← Proposition.imp_def, BrouwerianBotEvaluate_imp] at h1
     rw [BrouwerianSemilattice.himp_eq_top_iff] at h1
     rw [h2, top_le_iff] at h1
     exact h1

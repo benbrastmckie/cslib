@@ -301,7 +301,7 @@ noncomputable def cutAdmRightOrR
   match d₂, hcf₂ with
   | .ax phi _ _ hphiL hphiD, _ =>
     if heq : phi = Proposition.or A B then
-      have hmem : (A ∨ B) ∈ Δ₀ := heq ▸ (hsuc hphiD)
+      have hmem : A.or B ∈ Δ₀ := heq ▸ (hsuc hphiD)
       if h : phi ∈ Γ₀ then
         ⟨.ax phi Γ₀ Δ₀ h (hsuc hphiD), trivial⟩
       else
@@ -741,7 +741,7 @@ noncomputable def cutAdmLeft
       cutAdmRightAndR A B Γ₀ Δ₀ d₁a_clean d₁b_clean
         (heq ▸ ih)
         d₂.1 d₂.2
-        (fun x hx => heq ▸ hx)
+        (fun x hx => (Proposition.and_def A B).symm.trans heq ▸ hx)
         (Finset.Subset.refl _)
     else
       -- Non-principal: A∧B ≠ C so A∧B ∈ Δ₀.
@@ -774,7 +774,7 @@ noncomputable def cutAdmLeft
       cutAdmRightOrR A B Γ₀ Δ₀ d₁'_clean
         (heq ▸ ih)
         d₂.1 d₂.2
-        (fun x hx => heq ▸ hx)
+        (fun x hx => (Proposition.or_def A B).symm.trans heq ▸ hx)
         (Finset.Subset.refl _)
     else
       -- Non-principal: A∨B ≠ C so A∨B ∈ Δ₀.
@@ -800,7 +800,7 @@ noncomputable def cutAdmLeft
       cutAdmRightImpR A B Γ₀ Δ₀ d₁'_clean
         (heq ▸ ih)
         d₂.1 d₂.2
-        (fun x hx => heq ▸ hx)
+        (fun x hx => (Proposition.imp_def A B).symm.trans heq ▸ hx)
         (Finset.Subset.refl _)
     else
       -- Non-principal: A→B ≠ C so A→B ∈ Δ₀.

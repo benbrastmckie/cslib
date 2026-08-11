@@ -180,7 +180,7 @@ theorem min_alg_soundness
     have h2 := min_alg_soundness d₂ v bot_val h_ctx
     -- h1 : AlgEvaluate v bot_val (ψ → χ) = ⊤, i.e., ψ_h ⇨ χ_h = ⊤
     -- h2 : AlgEvaluate v bot_val ψ = ⊤, i.e., ψ_h = ⊤
-    simp only [AlgEvaluate] at h1
+    simp only [← Proposition.imp_def, AlgEvaluate] at h1
     rw [himp_eq_top_iff] at h1
     -- h1 : ψ_h ≤ χ_h; rw h2 gives ⊤ ≤ χ_h
     rw [h2, top_le_iff] at h1
@@ -211,7 +211,7 @@ theorem alg_theory_soundness
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := alg_theory_soundness d₁ v bot_val hT h_ctx
     have h2 := alg_theory_soundness d₂ v bot_val hT h_ctx
-    simp only [AlgEvaluate] at h1
+    simp only [← Proposition.imp_def, AlgEvaluate] at h1
     rw [himp_eq_top_iff] at h1
     rw [h2, top_le_iff] at h1
     exact h1
@@ -243,7 +243,7 @@ theorem int_alg_soundness
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := int_alg_soundness d₁ v h_ctx
     have h2 := int_alg_soundness d₂ v h_ctx
-    simp only [AlgEvaluate] at h1
+    simp only [← Proposition.imp_def, AlgEvaluate] at h1
     rw [himp_eq_top_iff] at h1
     rw [h2, top_le_iff] at h1
     exact h1
@@ -275,7 +275,7 @@ theorem prop_alg_soundness
   | .modusPonens _ ψ χ d₁ d₂ =>
     have h1 := prop_alg_soundness d₁ v h_ctx
     have h2 := prop_alg_soundness d₂ v h_ctx
-    simp only [AlgEvaluate] at h1
+    simp only [← Proposition.imp_def, AlgEvaluate] at h1
     rw [himp_eq_top_iff] at h1
     rw [h2, top_le_iff] at h1
     exact h1

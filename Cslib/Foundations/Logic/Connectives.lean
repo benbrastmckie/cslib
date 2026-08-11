@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+public import Cslib.Foundations.Logic.Operators
 
 /-! # Connective Typeclasses for Composable Logics
 
@@ -19,7 +20,9 @@ and notation.
 
 The hierarchy adopts a hybrid five constructors `{atom, bot, imp, and, or}`,
 following the operator-typeclass direction of fmontesi's PR #607 (one class per operator):
-- **Atomic classes**: `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `HasBox`, `HasUntil`, `HasSince`
+- **Atomic classes from `Operators.lean`** (upstream, adopted wholesale): `HasImp`, `HasAnd`,
+  `HasOr`, `HasBox`, `HasDiamond`
+- **Atomic classes local to this module**: `HasBot`, `HasUntil`, `HasSince`, `HasNext`
 - **Bundled classes**: `PropositionalConnectives`, `ModalConnectives`,
   `TemporalConnectives`, `BimodalConnectives`
 
@@ -39,6 +42,48 @@ These are provided as **defaulted fields** on `PropositionalConnectives`, giving
 a single canonical source for the Lukasiewicz encodings. Each concrete formula type delegates
 its local `abbrev`s (`Proposition.neg`, `Formula.neg`, etc.) to these defaults.
 Biconditional (`iff`) is deferred until `HasAnd` is instantiated on all the formula types.
+
+## Box and Diamond Primitivity
+
+Box is primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are
+pure proof rules on a single connective; with diamond primitive, necessitation becomes the
+interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative).
+See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box corresponds
+to universal quantification over accessible worlds, preserves conjunction, distributes over
+implication (axiom K), and is the subject of the necessitation rule. In classical systems,
+diamond (possibility) is derived as `¬□¬φ`. Non-classical modal logics (intuitionistic,
+minimal) require a separate `HasDiamond` typeclass, since `□` and `◇` become independent
+operators.
+
+In classical modal logic, diamond is derived from box via `◇φ := ¬□¬φ`. However, in
+non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become independent
+operators that do not satisfy the classical duality. `HasDiamond` provides a primitive
+diamond for systems where this duality fails or where diamond is taken as a separate
+primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
+connecting `HasBox` and `HasDiamond` instances.
+
+## Standing Invariant: Notation Collision Risk
+
+`HasImp`, `HasAnd`, `HasOr`, `HasBox`, and `HasDiamond` (from `Operators.lean`) declare scoped
+notation (`→`, `∧`, `∨`, `□`, `◇`) in the enclosing `Cslib.Logic` namespace. Every concrete
+formula type in `Cslib.Logics.{Propositional, Modal, Bimodal, Temporal, LTL}` is a child
+namespace of `Cslib.Logic`, so that scoped notation is visible there too. Each formula type
+also binds its own local notation for the *same* symbols to its concrete constructors
+(`Proposition.imp`, `Formula.box`, etc.); this is safe today **only because** the formula type
+currently lacks the corresponding `HasImp`/`HasAnd`/`HasOr`/`HasBox`/`HasDiamond` instance for
+that symbol pairing where a local notation binding exists. The moment a formula type registers
+one of these instances, Lean's notation resolution sees both the scoped `Operators.lean`
+notation and the local concrete-constructor notation as candidates and raises an `Ambiguous
+term` error at every use site of that symbol for that type — as already happened for
+`HasImp`/`HasBox`/`HasAnd`/`HasOr`/`HasDiamond` prior to the compensating bridge lemmas and
+notation deletions in this module's history. In particular: registering `HasNot` or `HasIff` for
+*any* formula type in this hierarchy would immediately reopen `¬` (5 sites) and `↔` (4 sites)
+collisions, since every formula type still binds local `¬`/`↔` notation to its own derived
+`neg`/`iff`; and giving `LTL.Formula` a `HasBox`/`HasDiamond` instance would additionally
+conflate `□`-as-necessity with `LTL.Formula`'s existing `□`-as-`allFuture` notation, a semantic
+conflation rather than a mere elaboration ambiguity. Registering `HasTensor` for any formula
+type is similarly unguarded. Before adding any such instance, audit this invariant against the
+target formula type's existing notation.
 
 ## Module Routing
 
@@ -81,38 +126,6 @@ class HasBot (F : Type*) where
   /-- The falsum/bottom connective. -/
   bot : F
 
-/-- A type has an implication connective. -/
-class HasImp (F : Type*) where
-  /-- The implication connective. -/
-  imp : F → F → F
-
-/-- A type has a necessity (box) modality.
-
-Box is primitive because the necessitation rule (`if ⊢ φ then ⊢ □φ`) and the K axiom are
-pure proof rules on a single connective; with diamond primitive, necessitation becomes the
-interaction law `¬◇¬` ([Blackburn2001] Chapter 1 takes the diamond-first alternative).
-See [ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box corresponds
-to universal quantification over accessible worlds, preserves conjunction, distributes over
-implication (axiom K), and is the subject of the necessitation rule. In classical systems,
-diamond (possibility) is derived as `¬□¬φ`. Non-classical modal logics (intuitionistic,
-minimal) require a separate `HasDiamond` typeclass, since `□` and `◇` become independent
-operators. -/
-class HasBox (F : Type*) where
-  /-- The necessity/box modality. -/
-  box : F → F
-
-/-- A type has a diamond (possibility) modality.
-
-In classical modal logic, diamond is derived from box via `◇φ := ¬□¬φ`. However, in
-non-classical (intuitionistic or minimal) modal logics, `□` and `◇` become independent
-operators that do not satisfy the classical duality. This typeclass provides a primitive
-diamond for systems where this duality fails or where diamond is taken as a separate
-primitive alongside box. See `Axioms.AxiomDiaDuality` for the optional duality axiom
-connecting `HasBox` and `HasDiamond` instances. -/
-class HasDiamond (F : Type*) where
-  /-- The possibility/diamond modality. -/
-  diamond : F → F
-
 /-- A type has an until temporal operator. -/
 class HasUntil (F : Type*) where
   /-- The until temporal operator. -/
@@ -127,16 +140,6 @@ class HasSince (F : Type*) where
 class HasNext (F : Type*) where
   /-- The next-step temporal operator. -/
   next : F → F
-
-/-- A type has a conjunction connective. -/
-class HasAnd (F : Type*) where
-  /-- The conjunction connective. -/
-  and : F → F → F
-
-/-- A type has a disjunction connective. -/
-class HasOr (F : Type*) where
-  /-- The disjunction connective. -/
-  or : F → F → F
 
 /-- Propositional connectives: falsum and implication, with derived negation and verum.
 

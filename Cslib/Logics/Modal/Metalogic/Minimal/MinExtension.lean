@@ -677,7 +677,7 @@ private theorem extract_box_list1 (u : MinCanonicalPrimeWorld Axioms) :
       obtain ⟨bs, heq, hbs⟩ :=
         extract_box_list1 u xs (fun y hy => hl y (List.mem_cons.mpr (Or.inr hy)))
       refine ⟨B :: bs, ?_, ?_⟩
-      · rw [hxeq, heq, List.map_cons]
+      · rw [hxeq, heq, List.map_cons, Proposition.box_def]
       · intro C hC
         rcases List.mem_cons.mp hC with rfl | hC'
         · exact hBnu

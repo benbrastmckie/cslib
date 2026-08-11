@@ -279,7 +279,7 @@ theorem d_canonical_serial
     have d_box_top : DerivationTree Axioms []
         (Proposition.box (Proposition.imp .bot .bot)) :=
       .necessitation _ d_top
-    have h_box_top : (□(⊥ → ⊥)) ∈ S.val :=
+    have h_box_top : (Proposition.box (Proposition.bot.imp Proposition.bot)) ∈ S.val :=
       modal_closed_under_derivation h_implyK h_implyS S.property
         (L := []) (fun _ h => nomatch h) ⟨d_box_top⟩
     have h_bot : ⊥ ∈ S.val :=

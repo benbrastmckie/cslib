@@ -211,7 +211,6 @@ abbrev Formula.leadsto (p q : Formula Atom) : Formula Atom :=
 @[inherit_doc] scoped prefix:40 "¬" => Formula.neg
 @[inherit_doc] scoped infix:36 " ∧ " => Formula.and
 @[inherit_doc] scoped infix:35 " ∨ " => Formula.or
-@[inherit_doc] scoped infixr:25 " → " => Formula.imp
 @[inherit_doc] scoped infixr:20 " ↔ " => Formula.iff
 @[inherit_doc] scoped infix:40 " 𝓤 " => Formula.untl
 @[inherit_doc] scoped prefix:40 "◯" => Formula.next

@@ -1,0 +1,36 @@
+{
+  "status": "researched",
+  "started_at": "2026-08-10T23:55:00Z",
+  "completed_at": "2026-08-11T00:40:00Z",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
+      "summary": "Verified-prototype research report recommending Route 3 (Quotient.recOnSubsingleton) for computable context decidability in LJ/LK"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/614_computable_ctxtoimp_context_decidability/.orchestrator-handoff.json",
+      "summary": "Orchestrator handoff JSON with decisions, blast radius, and CI-ratchet consequence"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Route analysis done, prototype compiled and evaluated against live tree, report and handoff written"
+  },
+  "requires_user_review": false,
+  "next_action_hint": "plan",
+  "metadata": {
+    "session_id": "sess_1786405794_f0204e_614",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "verification": {
+      "prototype_compiled": true,
+      "prototype_evaluated": true,
+      "expressions_evaluated": 11,
+      "all_verdicts_correct": true,
+      "noncomputable_needed": false
+    }
+  }
+}

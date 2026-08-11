@@ -1,0 +1,42 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "task_number": 614,
+  "phase": "research",
+  "status": "researched",
+  "trigger": "phase_dispatch",
+  "session_id": "sess_1786405794_f0204e_614",
+  "agent_type": "cslib-research-agent",
+  "target": "Give ctxToImp a computable definition so the four context-based Decidable instances for the propositional sequent calculi stop being noncomputable",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "skeleton": false,
+  "summary": "A zero-cost route exists and was EMPIRICALLY VERIFIED: a complete prototype of all four instances was compiled against the live tree (lake env lean, Lean v4.33.0-rc1) with no `noncomputable` marker, and evaluated to correct verdicts on 11 test expressions including the task's target case (LJ {p, p->q} |- q evaluates to true; {q} |- p to false; LJ excluded-middle false while LK excluded-middle true). The task splits in two. Its TITLE ask is impossible: a computable ctxToImp : Ctx Atom -> Proposition Atom -> Proposition Atom cannot exist, because a computable function out of Finset must be permutation-invariant and `A -> B -> C` differs from `B -> A -> C` as a value; Finset.fold needs Std.Commutative/Std.Associative (Mathlib/Data/Finset/Fold.lean:32) which imp lacks, and Hashable gives no total order. Its STATED GOAL (the four instances stop being noncomputable) is fully achievable at no cost by a THIRD route neither of the description's options covers: Decidable p is a Subsingleton, so one may eliminate from the Multiset quotient into it computably via Quotient.recOnSubsingleton, picking an arbitrary list representative -- legitimate precisely because the decision, unlike the intermediate formula, is representative-independent. Direct Mathlib precedents: Multiset.decidableMem (Data/Multiset/Defs.lean:129) and, structurally identical to our case, Finset.Nontrivial.instDecidablePred (Data/Finset/Insert.lean:216), whose motive carries the Nodup hypothesis and is applied to s.nodup; structure eta makes the reconstruction defeq to the original Finset so no cast is needed. Route 1 (LinearOrder Atom + Finset.sort) works but imposes a new hypothesis on four public instances -- rejected. Route 2 (restate over List contexts) does NOT solve the problem: the instances are stated over Finset contexts because Sequent/LKSequent/DerivableIn are, so a list restatement would either change the sequent type or only cover Gamma = l.toFinset for a given l -- rejected as stated, though its already-computable list-level lemmas are reused verbatim by Route 3. Blast radius is nil: a repo-wide grep found ZERO references to ctxToImp, the four instances, or the Fwd/Bwd deduction defs outside the two Decidability files. ctxToImp and the four Finset-level deduction defs stay noncomputable, which is harmless and should be documented as inherent rather than incidental.",
+  "sorry_inventory": [],
+  "blockers": [],
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
+      "summary": "Verified-prototype research report: Route 3 (Quotient.recOnSubsingleton) with full working Lean code for all four instances, measured evaluation results, the decide-vs-#eval finding, and the axiom-census ratchet consequence"
+    }
+  ],
+  "next_action_hint": "plan",
+  "requires_user_review": false,
+  "continuation_path": "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
+  "modified_files": [
+    "specs/614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md",
+    "specs/614_computable_ctxtoimp_context_decidability/.orchestrator-handoff.json",
+    "specs/614_computable_ctxtoimp_context_decidability/.return-meta.json"
+  ],
+  "decisions_made": [
+    "RECOMMENDED Route 3 (Quotient.recOnSubsingleton on Gamma.val + a list-level Decidable helper). Zero new typeclass hypotheses, zero public statement changes, verified compiling and evaluating.",
+    "REJECTED Route 1 ([LinearOrder Atom] + Finset.sort): would add a hypothesis to four public instances that the mathematics does not require, while instDecidableIValid/instDecidableTautologyTableau need only [DecidableEq Atom] [Hashable Atom].",
+    "REJECTED Route 2 (restate over List contexts) as a solution to the stated problem: the four instances are stated over Finset contexts by construction, so a List restatement leaves arbitrary Gamma : Finset undecided. Its list-level lemmas are nonetheless the ingredient Route 3 consumes.",
+    "STATED PLAINLY that the task title's ask (a computable ctxToImp at its current type) is mathematically impossible, and recommended keeping ctxToImp/ljProofDeductionFwd/Bwd/lkProofDeductionFwd/Bwd noncomputable with corrected docstrings, rather than contorting the API to satisfy the literal wording.",
+    "REQUIRED a named list-level helper rather than an inlined lambda: the fully-inlined variant was tried and FAILS to elaborate (the representative appears as the quotient form, so the toFinset rewrite finds no occurrence). Recorded the exact error so the implementer does not repeat it.",
+    "IDENTIFIED an infrastructure consequence the task description does not mention: the axiom-census exact-set ratchet (scripts/check-axiom-census.sh, wired into lean_action_ci.yml) will FAIL because the new public LJ helper enters the sorryAx-tainted set via the pre-existing intuitionistic-tableau taint. Plan must run check-axiom-census.sh --update and verify the diff is exactly one added line. The LK helper is sorry-free and adds no line.",
+    "VERIFIED that tests must use `#guard_msgs in #eval`, never `decide`: `by decide` fails, but the recorded kernel error shows it unfolded straight through the new instance and helper and stuck only at the pre-existing WellFounded.fix in the tableau driver -- the construction adds no new kernel obstruction.",
+    "CONFIRMED the task's out-of-scope calls without re-litigating them: the two FMP decidability defs (Fintype.ofInjective) stay untouched, the ProofSystemEquivalence closed-context restriction stays untouched, and the two pre-existing lint warnings in the subtree are not this task's to fix."
+  ],
+  "notes": "Prototype scratch files were created at the repo root during verification and have been deleted; git status shows no residue from this research beyond the specs/ artifacts. The pre-existing dirty files (.claude/scripts/literature-*.sh) were present before this task and were not touched. The report also records a transferable finding for the LM-decidability follow-on (coverage-gaps item G4): the Route 3 shape carries over verbatim given mvalid_universe_invariant/instDecidableMValid, so that item should inherit the computable route rather than the Finset.toList taint."
+}

@@ -6,7 +6,7 @@ next_project_number: 626
 
 ## Task Order
 
-*Updated 2026-08-10. Generated from state.json dependency graph.*
+*Updated 2026-08-11. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
@@ -23,13 +23,13 @@ next_project_number: 626
 
 ### Propositional Logic
 
-614 [NOT STARTED] — Give `ctxToImp` a computable definition so the four context-based
-615 [NOT STARTED] — Add algebraic semantic validity as a further equivalent node in t
-616 [NOT STARTED] — Repair the stale and self-contradictory documentation layer in th
-617 [NOT STARTED] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
-618 [NOT STARTED] — Close the remaining coverage gaps in the propositional metatheory
-619 [NOT STARTED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
-620 [NOT STARTED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
+614 [RESEARCHED] — Give `ctxToImp` a computable definition so the four context-based
+615 [RESEARCHED] — Add algebraic semantic validity as a further equivalent node in t
+616 [PARTIAL] — Repair the stale and self-contradictory documentation layer in th
+617 [RESEARCHED] — CRITICAL. Library consumers importing `Cslib` receive a `Decidabl
+618 [RESEARCHED] — Close the remaining coverage gaps in the propositional metatheory
+619 [RESEARCHED] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
+620 [RESEARCHED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
 
 ### Modal Logic
@@ -366,10 +366,11 @@ This task edits `Propositional/Defs.lean`, which is also in the #648 rebase's fi
 ---
 
 ### 620. Rebase PR #648 onto current upstream and clear the stale blocking review
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [620_rebase_pr648_clear_review/reports/01_rebase-pr648-clear-review.md]
 
 **Description**: Rebase the open PR #648 ("feat(Logics/Propositional): five-primitive formula type with primitive bot") onto current `upstream/main` and clear ctchou's stale blocking review.
 
@@ -412,10 +413,11 @@ Re-request review from ctchou, itemising the four dispositions.
 ---
 
 ### 619. Reconcile Foundations/Logic/Connectives.lean against merged upstream Operators.lean
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [619_reconcile_connectives_operators/reports/01_connectives-operators-reconciliation.md]
 
 **Description**: Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` against the `Cslib/Foundations/Logic/Operators.lean` that merged upstream in PR #607 (commit b8ad3923).
 
@@ -446,10 +448,11 @@ No GitHub or Zulip post may be authored by an agent (CSLib AI policy; Chris Hens
 ---
 
 ### 618. Propositional coverage gaps and ordering overclaim
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [618_propositional_coverage_gaps_and_ordering_overclaim/reports/01_propositional-coverage-gaps.md]
 
 **Description**: Close the remaining coverage gaps in the propositional metatheory, and correct the one docstring that overclaims a result the tree does not prove.
 
@@ -501,10 +504,11 @@ The intuitionistic engines internal "not proved"/"refuted" notes (Expansion.lean
 ---
 
 ### 617. Fix tautology decidable instance priority
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md]
 
 **Description**: CRITICAL. Library consumers importing `Cslib` receive a `Decidable (Tautology φ)` instance that cannot run in the kernel, shadowing the one that can. Seven existing tests pass only by accident of import order.
 
@@ -535,10 +539,11 @@ BACKGROUND (not a defect, do not "fix"): the `#eval`-vs-`decide` split is expect
 ---
 
 ### 616. Repair stale contradictory tableau docstrings
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [616_repair_stale_contradictory_tableau_docstrings/reports/01_repair-stale-tableau-docstrings.md]
 
 **Description**: Repair the stale and self-contradictory documentation layer in the propositional intuitionistic tableau tree. DOCUMENTATION ONLY -- no .lean proof term, statement, or definition may change. Verify with `lake build` that the tree stays green and that no declaration statement is touched.
 
@@ -656,10 +661,11 @@ that as a convention; do not perform a repo-wide citation-style migration under 
 ---
 
 ### 615. Algebraic node proof system tfae
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [615_algebraic_node_proof_system_tfae/reports/01_algebraic-node-tfae.md]
 
 **Description**: Add algebraic semantic validity as a further equivalent node in the propositional proof-system TFAE families.
 
@@ -683,10 +689,11 @@ VERIFY: `lake build` green; zero new sorries; zero new axioms beyond [propext, C
 ---
 
 ### 614. Computable ctxtoimp context decidability
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [614_computable_ctxtoimp_context_decidability/reports/01_computable-context-decidability.md]
 
 **Description**: Give `ctxToImp` a computable definition so the four context-based `Decidable` instances for the propositional sequent calculi stop being `noncomputable`.
 

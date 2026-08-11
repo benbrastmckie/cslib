@@ -1,40 +1,21 @@
 {
-  "task_number": 618,
-  "session_id": "sess_1786405794_f0204e_618",
-  "phase": "plan",
-  "status": "planned",
-  "orchestrator_mode": true,
-  "summary": "10-phase plan, ~11 hours. Wave 1 holds five independent phases (Part A docstring corrections extended to A6 plus a G9 note; B1 LJ cut-free completeness; B2 public split interpolation; B3 LM decidability; D1-relative orImp completeness). Waves 2-5 are the LM parity chain, gated on generalising LJ cut elimination from IPL to an arbitrary Theory T. Phase 6 is the only real-risk phase; its failure mode and containment are pre-declared.",
+  "status": "implemented",
+  "summary": "All 10 phases of task 618 complete. Phases 1-6 landed in prior sessions; this dispatch completed Phases 7-10: LM cut elimination (fixed a missing `open Theory` that let the bare MPL identifier silently auto-bind as a fresh implicit instead of resolving to Theory.MPL), LM subformula property, LM Craig interpolation (generalizing LJ's Maehara core to an arbitrary Theory T and fixing two botL-based derivations of top that were spuriously ex-falso-dependent), and full-gate verification. Zero sorry, zero new axioms, all headline theorems carry only {propext, Classical.choice, Quot.sound}. Every scoped build within this task's territory (all touched modules, the whole SequentCalculus subtree, CslibTests.TableauConformance) passes. The whole-repo `lake build` (and everything gated on it) fails only at the final top-level Cslib.lean barrel target, on a pre-existing, already-committed conflict from task 619's in-flight HasDiamond migration -- explicitly out of this task's territory. Phase 10 is marked [COMPLETED WITH EXCLUSIONS] with a full Reasoned Exclusions record in the plan file; all 9 proof phases are unconditionally complete.",
+  "blockers": [
+    "Whole-repo CI gate (lake build / checkInitImports / lint / shake / test) blocked by task 619's pre-existing, already-committed Cslib.lean barrel conflict (Operators.lean vs Connectives.lean both defining HasDiamond) -- not caused by, and not fixable within, task 618's territory. Re-run once task 619 lands."
+  ],
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md"
-    }
+    "Cslib/Logics/Propositional/SequentCalculus/LM/CutElimination.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/SubformulaProperty.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/Interpolation.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/SubformulaProperty.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Interpolation.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Basic.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM.lean",
+    "Cslib.lean",
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md",
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/summaries/01_propositional-coverage-gaps-summary.md"
   ],
-  "next_action_hint": "implement",
-  "files_modified": [
-    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md"
-  ],
-  "phases_completed": 0,
-  "phases_total": 10,
-  "decisions_made": [
-    "B2 public API shape: bundled CutFreeLKProof/CutFreeLJProof wrapper; maeharaCore and ljMaeharaCore stay private. Un-privatising would expose an internal induction shape as public API.",
-    "A2 is a plain deletion of BOTH line 23 and the dangling description at lines 33-34. G6 (a Fintype-free tableau-route Decidable instance) is explicitly NOT taken; the coupling is recorded in the plan's Non-Goals and re-recorded in Phase 10.",
-    "B3 does not block on task 614 (status: planning, not landed). Phase 4 checks 614 at implementation time and takes the computable ctxToImp route only if it landed; otherwise it accepts the noncomputable taint with a mandatory docstring note naming the Finset.toList cause.",
-    "A6 (the sixth overclaim found by research at LJ/Basic.lean:78-79, not in the task description) is folded into Phase 1 and then made TRUE by Phases 6 and 8.",
-    "D1-absolute and D2 are Non-Goals. Phase 10 records both as follow-up recommendations with the research's measurements attached so they can be scheduled without re-research.",
-    "Phase 6 declares Commit Mode atomic-batch over exactly two files (LJ/Basic.lean, LJ/CutElimination.lean); the tree is expected red between them and the batch must not be widened at implementation time."
-  ],
-  "risks": [
-    "Phase 6 (generalising LJ/CutElimination.lean's seven ljCutAdm* declarations plus LJCutIH to {T : Theory Atom}) is the only phase with real risk. The risk is mechanical, not mathematical: termination checking on nested well-founded recursions under a new binder, with the named hot spot being the decreasing_by at LJ/CutElimination.lean:650 referencing the IPL-only LJProof.height re-export. Containment is pre-declared: mark Phase 6 [BLOCKED] with the goal state recorded, revert only its two-file batch, and leave Phases 7-9 unattempted. Phases 1-5 are independent and still land.",
-    "A4 must be a SPLIT re-tensing. temporalTableau_complete genuinely does not exist; a blanket past-tense rewrite replaces one false statement with another and is a verification failure, not a pass.",
-    "A1 must not be reinstated as 'strictly' on the strength of anything landed here. Even the D2 separations would establish MPL < IPL < CPL, which is not the Imp -> Int -> Prop chain the docstring displays."
-  ],
-  "dependency_waves": [[1, 2, 3, 4, 5], [6], [7], [8], [9], [10]],
-  "zero_debt": {
-    "sorry_required": false,
-    "new_axiom_required": false,
-    "notes": "No phase requires a sorry or a new axiom. If any phase appears to need one, that signals the route was mismeasured -- stop and record rather than introducing debt. Phase 10 verifies this by command output rather than assertion."
-  },
-  "next_phase": "implement"
+  "phases_completed": 10,
+  "phases_total": 10
 }

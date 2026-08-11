@@ -1,38 +1,41 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-08-10T00:00:00Z",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md",
-      "summary": "10-phase implementation plan (~11 hours) covering Part A record corrections (A1-A6 + G9), cheap wins B1/B2/B3, LM parity C1-C3, and D1-relative, with 6 dependency waves."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/618_propositional_coverage_gaps_and_ordering_overclaim/.orchestrator-handoff.json",
-      "summary": "Orchestrator handoff recording six resolved decisions, three risks, and the wave map."
-    }
-  ],
-  "next_steps": "Run /implement 618 to execute the plan",
-  "metadata": {
-    "session_id": "sess_1786405794_f0204e_618",
-    "agent_type": "planner-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 10,
-    "estimated_hours": 11,
-    "dependency_waves": [[1, 2, 3, 4, 5], [6], [7], [8], [9], [10]]
-  },
-  "memory_candidates": [
-    {
-      "content": "Lean 4 pattern for generalising a concretely-instantiated proof over an inductive family to an arbitrary type-parameter: when the family has a typeclass-GATED constructor (e.g. SeqProof's `botL ... [IsIntuitionistic T]`), the only real obstacle to adding a `{T : Theory Atom}` binder is that gated arms must be RECONSTRUCTED, not merely matched. The idiom is `| _, @SeqProof.botL _ _ _ _ _ inst hbot, ... => letI := inst; botL ...` -- bind the stored instance via an `@`-pattern and rebind it with `letI` before reconstruction. Before assuming such a generalisation is a rewrite, look for an already-generic function over the SAME family in the same file (here `SeqProof.mono`): if one exists, it has already solved the gated-constructor problem and the port is mechanical rather than mathematical. The residual risk is not the binder but termination checking: a `decreasing_by` referencing an instance-specific re-export (`LJProof.height` for the generic `SeqProof.height`) is the most likely break point, so gate the generalisation with a scoped single-module build before touching anything downstream.",
-      "category": "PATTERN",
-      "source_artifact": "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md",
-      "confidence": 0.75,
-      "suggested_keywords": ["lean4", "generalise-over-theory", "gated-constructor", "letI-instance-rebind", "decreasing_by", "sequent-calculus"]
-    }
-  ],
-  "modified_files": [
     "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md",
-    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/.orchestrator-handoff.json"
-  ]
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/summaries/01_propositional-coverage-gaps-summary.md"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "phases_completed": 10,
+    "last_completed_phase": "Phase 10: Full-gate verification and follow-up recommendations [COMPLETED WITH EXCLUSIONS]"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial -- see note",
+    "note": "All 10 plan phases complete; phases 1-9 fully verified with no exclusions. Every scoped build within this task's territory passes: all touched modules individually, the entire Cslib.Logics.Propositional.SequentCalculus subtree, and CslibTests.TableauConformance. lake exe lint-style (exit 0) and lake exe mk_all --module (added this task's 6 new modules to Cslib.lean, no other lines touched) both completed successfully. The whole-repo lake build -- and everything gated on it (checkInitImports, lint, shake, test) -- fails only at the final target, the top-level Cslib.lean barrel aggregation, on a pre-existing conflict between Operators.lean and Connectives.lean (both define HasDiamond) from task 619's already-committed, in-flight migration (commits b81f7e48, 8d13fdba), explicitly named as out-of-territory in this dispatch's delegation instructions. The build reaches 3330/3331 targets (every module in the project, including every file this task touched) before failing only on that one unrelated target. Phase 10 recorded as [COMPLETED WITH EXCLUSIONS] with a full Reasoned Exclusions table in the plan file."
+  },
+  "modified_files": [
+    "Cslib.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Basic.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/SubformulaProperty.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LJ/Interpolation.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/CutElimination.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/SubformulaProperty.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/Interpolation.lean",
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md",
+    "specs/618_propositional_coverage_gaps_and_ordering_overclaim/summaries/01_propositional-coverage-gaps-summary.md"
+  ],
+  "metadata": {
+    "session_id": "sess_1786415417_7d8088_618",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

@@ -11,7 +11,7 @@ next_project_number: 626
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,618,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,300,425,534,554,568,569,590,594,599,600,607,608,610,612,613,619,620 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,450,537,551,571,576,588,589,595,611,621 | 36,37,181,425,534,554,568,594,610,620 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41 | 39,40 | foundations |
 
@@ -23,7 +23,6 @@ next_project_number: 626
 
 ### Propositional Logic
 
-618 [PLANNED] — Close the remaining coverage gaps in the propositional metatheory
 619 [IMPLEMENTING] — Reconcile this fork's `Cslib/Foundations/Logic/Connectives.lean` 
 620 [PLANNED] — Rebase the open PR #648 ("feat(Logics/Propositional): five-primit
   └─ 621 [NOT STARTED] — Change this fork's five `Cslib/Logics/Propositional/Defs.lean` co
@@ -446,12 +445,13 @@ No GitHub or Zulip post may be authored by an agent (CSLib AI policy; Chris Hens
 ---
 
 ### 618. Propositional coverage gaps and ordering overclaim
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [618_propositional_coverage_gaps_and_ordering_overclaim/reports/01_propositional-coverage-gaps.md]
 - **Plan**: [618_propositional_coverage_gaps_and_ordering_overclaim/plans/01_propositional-coverage-gaps.md]
+- **Summary**: [618_propositional_coverage_gaps_and_ordering_overclaim/summaries/01_propositional-coverage-gaps-summary.md]
 
 **Description**: Close the remaining coverage gaps in the propositional metatheory, and correct the one docstring that overclaims a result the tree does not prove.
 

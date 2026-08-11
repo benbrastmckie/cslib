@@ -389,10 +389,69 @@ confirm no existing `_def` lemmas of these names in `Cslib/Logics/Modal/`.
 
 ---
 
-### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [NOT STARTED]
+### Phase 8: The switch — adopt upstream, delete duplicates and colliding notation [BLOCKED]
 
 **Goal**: Make `Connectives.lean` a delta over `Operators.lean` and remove all 12 notation
 collisions in one atomic step. This is the only phase whose intermediate states are red.
+
+**BLOCKER** (Phase 8):
+- **What failed**: The 6-file edit set (import + 5 class deletions + 12 notation deletions,
+  exactly as specified below) was applied and built green for the 6 declared files plus their
+  declared dependent subtrees (Phases 1-7's scope). A full `lake build` afterward surfaced 64
+  errors across 17 additional files that the plan's Scope Hypothesis did not enumerate:
+  `Modal/LogicalEquivalence.lean`, `Propositional/SequentCalculus/{LJ,LK,LM}/Soundness.lean`,
+  `Propositional/SequentCalculus/LK/CutElimination.lean`,
+  `Propositional/Tableau/{Intuitionistic,Classical}/Soundness.lean`,
+  `Modal/Metalogic/{Intuitionistic/CanonicalModel,Completeness,Minimal/MinExtension}.lean`,
+  `Propositional/Semantics/Algebra/{Soundness,HilbertAlgCompleteness,
+  BrouwerianCompletenessGeneric}.lean`, `Propositional/Metalogic/StrongCompleteness.lean`,
+  `Modal/Tableau/LoopChecking.lean` (heartbeat timeout), `Temporal/Metalogic/Chronicle/
+  TruthLemma.lean`, `Propositional/NaturalDeduction/Normalization/Termination.lean`. Failure
+  modes: `simp made no progress`, `rewrite` pattern-miss, `grind` case-split failure, one
+  `isDefEq` heartbeat timeout, one instance-synthesis failure, one malformed `▸` cast — all
+  consistent with proof scripts elsewhere in the tree matching against the concrete-constructor
+  notation forms (`Proposition.imp`, `Formula.box`, etc.) that Phase 8 deletes, the same failure
+  class Phases 3-7's bridge lemmas were pre-landed to prevent, but in files outside the 5
+  formula-definition modules those bridge lemmas were scoped to.
+- **What was tried**: The one failure fully diagnosed (`Propositional/Defs.lean`'s
+  `isIntuitionisticIff`) needed a hand-written replacement proof beyond `grind [bridge_lemma]` —
+  `grind` did not automatically chain the equation through a `Set.range`/existential-witness
+  step even with the relevant `@[scoped grind =]` lemma supplied explicitly; a manual
+  `constructor`/`rintro ⟨y, rfl⟩`/`simp only [Proposition.imp_def]` proof closed it. That one
+  fix worked, but it is a single data point against 64 errors in 17 files; no attempt was made
+  to fix the rest before stopping, per the territory and scale concerns below.
+- **Why it's stuck**: Most of the 17 files are outside this agent's territory. Explicitly
+  forbidden: `Propositional/SequentCalculus/**`, `Propositional/Tableau/**`,
+  `Propositional/Metalogic/**` (13 of the 17 files). The remaining 4
+  (`Modal/LogicalEquivalence.lean`, `Modal/Metalogic/**`, `Modal/Tableau/LoopChecking.lean`,
+  `Temporal/Metalogic/Chronicle/TruthLemma.lean`, `Propositional/NaturalDeduction/**`,
+  `Propositional/Semantics/Algebra/**`) were never explicitly granted or forbidden, but the
+  fix-pattern demonstrated on `Defs.lean` is proof-specific hand work, not mechanical — each of
+  the 64 sites needs its own diagnosis, and several sit in Metalogic/completeness proofs this
+  agent has no prior context on. The working tree is also shared (not per-agent worktrees) with
+  three concurrently-running sibling implementation agents (tasks 615-617) actively editing
+  `Propositional/Tableau/**`, `Propositional/Metalogic/**`, and
+  `Propositional/ProofSystemEquivalence.lean` — leaving Phase 8's edits uncommitted mid-fix would
+  have left every sibling's `lake build` red too, so the edit set was reverted (`git checkout --`
+  on the 7 Phase-8 files, restoring HEAD = the Phase 7 commit) to unblock the shared tree.
+  Nothing was lost: the full Phase 8 diff plus a stash are preserved via
+  `bash .claude/scripts/git-snapshot.sh 619 --no-revert`, at
+  `specs/619_reconcile_connectives_operators/working-progress-1786410439.patch` and
+  `stash@{0}` (message `git-snapshot-1786410439`) as of this writing.
+- **What is needed**: Either (a) expand this phase's declared file territory to cover the 17
+  newly-discovered files (all under `Cslib/Logics/`, none touching `CslibTests/`) and re-run with
+  that grant, accepting that ~13 of them cross into siblings' explicitly forbidden Propositional
+  subtrees and need their coordination or a merge-after-their-completion sequencing; or (b) a
+  plan revision that pre-lands additional bridge-lemma coverage (or `simp`/`grind` hint sets) in
+  those 17 files as new pre-Phase-8 phases, mirroring Phases 3-7's pattern, before re-attempting
+  the switch; or (c) descope Phase 8 to a smaller file set that excludes the Propositional
+  subtree entirely (Modal/Bimodal/Temporal/LTL only) and treat Propositional's reconciliation as
+  a follow-up task once tasks 615-617 land. Recommend (b) or (c) over (a), since (a) requires
+  simultaneous write access this agent does not have and should not request mid-flight from three
+  actively-committing siblings.
+- **Prohibited workarounds honored**: no `sorry`, no `def X := True`, no vacuous placeholder was
+  introduced; the one proof that was fixed (`isIntuitionisticIff`) was fixed with a genuine
+  structural proof, not weakened.
 
 **Tasks**:
 - [ ] Add `public import Cslib.Foundations.Logic.Operators` to `Connectives.lean` (keep it `public`

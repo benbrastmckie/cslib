@@ -1,7 +1,7 @@
 # Implementation Plan: Fix `Decidable (Tautology φ)` Instance Priority Collision
 
 - **Task**: 617 - fix_tautology_decidable_instance_priority
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/617_fix_tautology_decidable_instance_priority/reports/01_tautology-decidable-instance-priority.md`
@@ -117,26 +117,34 @@ Phases within the same wave can execute in parallel. Phases 2 and 3 touch disjoi
 
 ---
 
-### Phase 1: Red Baseline, Then Priority Fix [NOT STARTED]
+### Phase 1: Red Baseline, Then Priority Fix [COMPLETED]
 
 **Goal**: Reproduce the defect against a known-red baseline, then apply the one-token
 declaration-site fix and confirm the tree returns to green.
 
 **Tasks**:
-- [ ] Add to `CslibTests/Propositional.lean`, alongside the existing imports at `:9-11`:
+- [x] Add to `CslibTests/Propositional.lean`, alongside the existing imports at `:9-11`:
       `public meta import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure`
-- [ ] Run `lake build CslibTests.Propositional` **before** editing `DecisionProcedure.lean`.
+- [x] Run `lake build CslibTests.Propositional` **before** editing `DecisionProcedure.lean`.
       Record the failure count and the verbatim first error message in the phase notes. Do not
       commit this state.
-- [ ] Confirm the failures are ``Tactic `decide` failed`` on the tautology `example`s at
+- [x] Confirm the failures are ``Tactic `decide` failed`` on the tautology `example`s at
       `:64-90` and that no other error class appears.
-- [ ] Edit `Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean:81`, changing
+- [x] Edit `Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean:81`, changing
       `instance instDecidableTautologyTableau (φ : Proposition Atom) :` to
       `instance (priority := 100) instDecidableTautologyTableau (φ : Proposition Atom) :`.
       Use the numeric `100`, not `low` — matches the four existing annotations in `Cslib/`.
-- [ ] Rebuild `CslibTests.Propositional`: expect 0 errors.
-- [ ] Build the changed module and its enumerated direct dependents (below): expect 0 errors.
-- [ ] Commit the batch once green.
+- [x] Rebuild `CslibTests.Propositional`: expect 0 errors.
+- [x] Build the changed module and its enumerated direct dependents (below): expect 0 errors.
+- [x] Commit the batch once green.
+
+**Phase Notes**: Red baseline confirmed exactly 7 `` Tactic `decide` failed `` errors at lines
+64, 70, 74, 77, 81, 85, 91 (no other error class); first error verbatim:
+`` CslibTests/Propositional.lean:66:64: Tactic `decide` failed for proposition
+decide (Tautology (Proposition.atom false ∨ (Proposition.atom false → Proposition.bot))) = true ``
+(reduction stalls unfolding `instDecidableTautologyTableau`). After the `(priority := 100)` edit,
+`lake build CslibTests.Propositional` and the four-target dependent build both exited 0. Direct
+importer grep confirmed the enumerated three-file set exactly (no larger set found).
 
 **Timing**: 0.5 hours
 

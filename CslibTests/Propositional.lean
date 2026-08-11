@@ -8,6 +8,7 @@ module
 
 public meta import Cslib.Logics.Propositional.Semantics.Bool
 public meta import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
+public meta import Cslib.Logics.Propositional.Tableau.Classical.DecisionProcedure
 public meta import Mathlib.Data.Fintype.Pi
 
 /-! # Propositional Logic Tests

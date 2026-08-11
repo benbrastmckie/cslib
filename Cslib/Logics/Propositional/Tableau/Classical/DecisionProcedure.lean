@@ -78,7 +78,7 @@ The two instances are extensionally equivalent but use different algorithms.
 
 Note: Unlike the Boolean enumeration, this decision procedure does not require `Fintype Atom`;
 the tableau algorithm works for any `DecidableEq Atom` and `Hashable Atom`. -/
-instance instDecidableTautologyTableau (φ : Proposition Atom) :
+instance (priority := 100) instDecidableTautologyTableau (φ : Proposition Atom) :
     Decidable (Tautology φ) :=
   match h : classicalTableau φ with
   | .closed => isTrue (classicalTableau_sound φ h)
